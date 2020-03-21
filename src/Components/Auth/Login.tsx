@@ -26,6 +26,12 @@ const useStyles = makeStyles(theme => ({
     display: "flex",
     justifyContent: "center",
     alignItems: "center"
+  },
+  loginCard: {
+    padding: "1rem 2rem"
+  },
+  cardActions: {
+    justifyContent: "center"
   }
 }));
 
@@ -101,7 +107,7 @@ export const Login = () => {
 
   return (
     <div className={classes.container}>
-      <Card>
+      <Card className={classes.loginCard}>
         <CardHeader title="Login" />
         <form onSubmit={e => handleSubmit(e)}>
           <CardContent>
@@ -126,12 +132,11 @@ export const Login = () => {
             />
           </CardContent>
 
-          <CardActions className="padding16">
+          <CardActions className={classes.cardActions}>
             <Button
               color="primary"
               variant="contained"
               type="submit"
-              style={{ marginLeft: "auto" }}
               onClick={e => handleSubmit(e)}
             >
               Login
