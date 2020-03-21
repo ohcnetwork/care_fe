@@ -86,6 +86,7 @@
     "sass-loader": "7.2.0",
     "save": "^2.4.0",
     "semver": "6.3.0",
+    "styled-components": "^5.0.1",
     "terser-webpack-plugin": "1.4.1",
     "ts-pnp": "1.1.4",
     "typescript": "^3.8.3",
@@ -114,6 +115,7 @@
   },
   "devDependencies": {
     "@types/mocha": "^5.2.7",
+    "babel-plugin-styled-components": "^1.10.7",
     "eslint": "^6.4.0",
     "eslint-config-airbnb": "^18.0.1",
     "eslint-config-react-app": "^5.0.2",
@@ -125,7 +127,14 @@
     "eslint-plugin-react-hooks": "^1.6.1",
     "redux-devtools-extension": "^2.13.8",
     "source-map-loader": "^0.2.4",
-    "ts-loader": "^6.2.0"
+    "ts-loader": "^6.2.0",
+    "webpack": "^4.41.1",
+    "webpack-cli": "^3.3.9",
+    "webpack-dev-middleware": "^3.7.1",
+    "webpack-dev-server": "3.10.1",
+    "webpack-hot-middleware": "^2.25.0",
+    "webpack-manifest-plugin": "2.0.4",
+    "workbox-webpack-plugin": "4.3.1"
   },
   "jest": {
     "roots": [
