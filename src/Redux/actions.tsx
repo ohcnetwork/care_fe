@@ -79,3 +79,15 @@ export const fireRequest = (
             });
     };
 };
+
+export const postLogin = (form: object) => {
+    return fireRequest('login', [], form);
+};
+
+export const postSignUp = (form: object) => {
+    return fireRequest('signUp', [], form);
+};
+
+export const getCurrentUser = () => {
+    return fireRequest('currentUser');
+};
