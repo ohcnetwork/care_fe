@@ -9,7 +9,6 @@ import { Provider } from "react-redux";
 import { MuiThemeProvider } from "@material-ui/core/styles";
 import { CssBaseline } from "@material-ui/core";
 import { StylesProvider } from "@material-ui/styles";
-import styled, { ThemeProvider } from "styled-components";
 import theme from "./theme";
 
 const store = createStore(reducer, applyMiddleware(thunk));
@@ -18,10 +17,8 @@ ReactDOM.render(
   <Provider store={store}>
     <StylesProvider injectFirst>
       <MuiThemeProvider theme={theme}>
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
-          <App />
-        </ThemeProvider>
+        <CssBaseline />
+        <App />
       </MuiThemeProvider>
     </StylesProvider>
   </Provider>,

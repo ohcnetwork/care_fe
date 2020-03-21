@@ -12,7 +12,6 @@ import {
   Grid
 } from "@material-ui/core";
 import { TextInputField } from "../Common/HelperInputFields";
-import styled from "styled-components";
 
 const useStyles = makeStyles(theme => ({
   formTop: {
@@ -21,6 +20,12 @@ const useStyles = makeStyles(theme => ({
   pdLogo: {
     height: "345px",
     border: "solid 3px white"
+  },
+  container: {
+    height: "100vh",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center"
   }
 }));
 
@@ -95,7 +100,7 @@ export const Login = () => {
   };
 
   return (
-    <Container>
+    <div className={classes.container}>
       <Card>
         <CardHeader title="Login" />
         <form onSubmit={e => handleSubmit(e)}>
@@ -134,12 +139,12 @@ export const Login = () => {
           </CardActions>
         </form>
       </Card>
-    </Container>
+    </div>
   );
 };
 
-const Container = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-`;
+// const Container = styled.div`
+//   display: flex;
+//   justify-content: center;
+//   align-items: center;
+// `;
