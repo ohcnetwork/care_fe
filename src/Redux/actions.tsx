@@ -59,7 +59,7 @@ export const fireRequest = (
             request.path += '/' + path.join('/');
         }
 
-        if (request.method === undefined || request.method == 'GET') {
+        if (request.method === undefined || request.method === 'GET') {
             request.method = 'GET';
             const qs = $.param(params);
             if (qs !== '') {
