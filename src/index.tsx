@@ -1,6 +1,5 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './main.css'
 import reducer from '../src/Redux/Reducer';
 import App from './App';
 import * as serviceWorker from './serviceWorker';

@@ -2,8 +2,23 @@ import {useDispatch} from "react-redux";
 import React, {useState} from "react";
 import {postLogin} from "../../Redux/actions";
 import { navigate} from 'hookrouter';
+import {makeStyles} from "@material-ui/styles";
+import {Button, Card, CardActions, CardContent, CardHeader, Grid} from '@material-ui/core';
+import {TextInputField} from '../Common/HelperInputFields';
+
+const useStyles = makeStyles(theme => ({
+    formTop: {
+        marginTop: '100px',
+    },
+    pdLogo: {
+        height: '345px',
+        border: 'solid 3px white'
+    }
+}));
+
 
 export const Login = () => {
+    const classes = useStyles();
     const dispatch: any = useDispatch();
     const initForm: any = {
         username: '',
@@ -69,46 +84,54 @@ export const Login = () => {
     };
 
     return (
-        <div className="w-full max-w-xs">
-            <form className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" onSubmit={handleSubmit}>
-                <div className="mb-4">
-                    <label className="block text-gray-700 text-sm font-bold mb-2"
-                           htmlFor="username">
-                        Username
-                    </label>
-                    <input
-                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                        id="username"
-                        name="username"
-                        value={form.username}
-                        onChange={handleChange}  type="text" placeholder="Username"/>
-                </div>
-                <div className="mb-6">
-                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
-                        Password
-                    </label>
-                    <input
-                        className="shadow appearance-none border border-red-500 rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
-                        id="password"
-                        name="password"
-                        type="password"
-                        value={form.password}
-                        onChange={handleChange} placeholder="Enter your password"/>
-                        <p className="text-red-500 text-xs italic">Please choose a password.</p>
-                </div>
-                <div className="flex items-center justify-between">
-                    <button
-                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                        onClick={handleSubmit}
-                        type="button">
-                        Sign In
-                    </button>
-                    <a className="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800"
-                       href="#">
-                        Forgot Password?
-                    </a>
-                </div>
-            </form>
+        <div>
+            <Grid container className={classes.formTop} spacing={2}>
+                <Grid item className="w3-hide-small" xs={12} sm={7} md={8} lg={9}>
+
+                </Grid>
+                <Grid item xs={12} sm={5} md={4} lg={3}>
+                    <Card>
+                        <CardHeader title="Login"/>
+                        <form onSubmit={(e) => handleSubmit(e)}>
+                            <CardContent>
+                                <TextInputField
+                                    name="username"
+                                    placeholder="User Name"
+                                    variant="outlined"
+                                    margin="dense"
+                                    value={form.username}
+                                    onChange={handleChange}
+                                    errors={errors.username}
+                                />
+                                <TextInputField
+                                    type="password"
+                                    name="password"
+                                    placeholder="Password"
+                                    variant="outlined"
+                                    margin="dense"
+                                    value={form.password}
+                                    onChange={handleChange}
+                                    errors={errors.password}
+                                />
+                            </CardContent>
+
+                            <CardActions className="padding16">
+
+                                <Button
+                                    color="primary"
+                                    variant="contained"
+                                    type="submit"
+                                    style={{marginLeft: 'auto'}}
+                                    onClick={(e) => handleSubmit(e)}
+                                >Login
+                                </Button>
+                            </CardActions>
+                        </form>
+                    </Card>
+                </Grid>
+            </Grid>
         </div>
+
+
     );
 };
