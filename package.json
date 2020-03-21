@@ -31,6 +31,7 @@
     "@types/react-redux": "^7.1.2",
     "@types/react-select": "3.0.8",
     "@types/react-slick": "^0.23.4",
+    "@types/styled-components": "^5.0.1",
     "@typescript-eslint/eslint-plugin": "^2.2.0",
     "@typescript-eslint/parser": "^2.2.0",
     "acorn": "^7.1.1",
