@@ -1,6 +1,6 @@
 export default {
     login: {
-        path: '/api/v1/auth/login',
+        path: '/api/v1/login/',
         method: 'POST',
     },
 
@@ -10,7 +10,7 @@ export default {
     },
 
     currentUser: {
-        path: '/api/v1/auth/user',
+        path: '/api/v1/user/getcurrentuser',
     },
 
 }
