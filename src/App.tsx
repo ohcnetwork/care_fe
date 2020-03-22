@@ -14,7 +14,7 @@ const App: React.FC = () => {
   useEffect(() => {
     dispatch(getCurrentUser()).then((resp: any) => {
       const res = resp ;
-      if (res && res && res) {
+      if (res && res.statusCode === 200) {
         setUser(res);
       }
     });

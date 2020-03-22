@@ -1,7 +1,7 @@
 import {useDispatch} from "react-redux";
 import React, {useState} from "react";
 import {postLogin} from "../../Redux/actions";
-import { navigate} from 'hookrouter';
+import { A, navigate} from 'hookrouter';
 import {makeStyles} from "@material-ui/styles";
 import {Button, Card, CardActions, CardContent, CardHeader, Grid} from '@material-ui/core';
 import {TextInputField} from '../Common/HelperInputFields';
@@ -116,7 +116,7 @@ export const Login = () => {
                             </CardContent>
 
                             <CardActions className="padding16">
-
+                                <A href="/forgot-password">Forgot password ?</A>
                                 <Button
                                     color="primary"
                                     variant="contained"
@@ -127,6 +127,9 @@ export const Login = () => {
                                 </Button>
                             </CardActions>
                         </form>
+                        <CardContent className="alignCenter">
+                            You don't have an account? <A href="/register">Register</A>
+                        </CardContent>
                     </Card>
                 </Grid>
             </Grid>
