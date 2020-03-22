@@ -19,7 +19,7 @@ interface Props {
     title: string;
     value: string | number;
 }
-export const StatsCard: React.FC<Props> = (props) => {
+export const DashboardStatsCard: React.FC<Props> = (props) => {
     const classes = useStyles();
     return (
         <Card className={classes.card}>
