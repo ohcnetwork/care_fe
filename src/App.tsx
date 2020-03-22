@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
+import SessionRouter from './Router/SessionRouter';
+import AppRouter from './Router/AppRouter';
 import { useDispatch, useSelector } from 'react-redux';
 import { getCurrentUser } from './Redux/actions';
-import AppRouter from "./Router/AppRouter";
-import SessionRouter from "./Router/SessionRouter";
+import { CircularProgress } from '@material-ui/core';
+
 
 const App: React.FC = () => {
   const dispatch: any = useDispatch();
@@ -21,7 +23,7 @@ const App: React.FC = () => {
   if (!currentUser || currentUser.isFetching) {
     return (
         <div>
-
+          <CircularProgress/>
         </div>
     );
   }
