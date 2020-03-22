@@ -80,6 +80,36 @@ export const fireRequest = (
     };
 };
 
+export const postRequest = (
+    key: string, path: any = [], params: object = {},
+) => {
+    return (dispatch: any) => {
+        const request = Object.assign({}, requestMap[key]);
+        if (path.length > 0) {
+            request.path += '/' + path.join('/');
+        }
+
+        if (request.method === undefined || request.method === 'POST') {
+            request.method = 'POST';
+            const qs = $.param(params);
+            if (qs !== '') {
+                request.path += `?${qs}`;
+            }
+        }
+
+        dispatch(fetchDataRequest(key));
+        return axiosApiCall[request.method.toLowerCase()](request.path, params)
+            .then((response: any) => {
+                dispatch(fetchResponseSuccess(key, response.data));
+                return response;
+            })
+            .catch((error: any) => {
+                dispatch(fetchDataRequestError(key, error));
+                return error.response;
+            });
+    };
+};
+
 export const postLogin = (form: object) => {
     return fireRequest('login', [], form);
 };
@@ -90,4 +120,9 @@ export const postSignUp = (form: object) => {
 
 export const getCurrentUser = () => {
     return fireRequest('currentUser');
+};
+
+// Ambulance
+export const postDriver = (form: object) => {
+    return postRequest('driver', [], form);
 };
