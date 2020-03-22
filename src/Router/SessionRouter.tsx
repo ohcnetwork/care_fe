@@ -19,9 +19,7 @@ const SessionRouter = () => {
         <div className="app-footer">
             <div className="copy-right">
                 Corona Care Network
-
             </div>
-
         </div>
     </div>
 

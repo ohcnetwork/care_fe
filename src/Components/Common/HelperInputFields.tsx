@@ -24,7 +24,7 @@ export const TextInputField = (props: any) => {
 };
 
 export const MultilineInputField = (props: any) => {
-    const { placeholder, onChange, value, name, variant } = props;
+    const { placeholder, onChange, value, name, variant, errors } = props;
     return (
         <div>
         <TextField
