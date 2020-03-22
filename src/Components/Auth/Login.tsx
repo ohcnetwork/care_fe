@@ -1,7 +1,7 @@
 import { useDispatch } from "react-redux";
 import React, { useState } from "react";
 import { postLogin } from "../../Redux/actions";
-import { navigate } from "hookrouter";
+import { A, navigate } from "hookrouter";
 import { makeStyles } from "@material-ui/styles";
 import {
   Button,
@@ -85,19 +85,20 @@ export const Login = () => {
     }
     return form;
   };
+  
   const handleSubmit = (e: any) => {
     e.preventDefault();
     const valid = validateData();
     if (valid) {
       dispatch(postLogin(valid)).then((resp: any) => {
-        const res = resp && resp.data;
+        const res = resp;
         if (res && res.statusCode && res.statusCode === 401) {
           const err = {
             password: "Username or Password incorrect"
           };
           setErrors(err);
-        } else if (res.success) {
-          localStorage.setItem("care_access_token", res.access_token);
+        } else if (res && res.statusCode === 200) {
+          localStorage.setItem("care_access_token", res.access);
           navigate("/dashboard");
           window.location.reload();
         }
@@ -132,24 +133,23 @@ export const Login = () => {
             />
           </CardContent>
 
-          <CardActions className={classes.cardActions}>
+          <CardActions className="padding16">
+            <A href="/forgot-password">Forgot password ?</A>
             <Button
               color="primary"
               variant="contained"
               type="submit"
+              style={{ marginLeft: "auto" }}
               onClick={e => handleSubmit(e)}
             >
               Login
             </Button>
           </CardActions>
         </form>
+        <CardContent className="alignCenter">
+          You don't have an account? <A href="/register">Register</A>
+        </CardContent>
       </Card>
     </div>
   );
 };
-
-// const Container = styled.div`
-//   display: flex;
-//   justify-content: center;
-//   align-items: center;
-// `;

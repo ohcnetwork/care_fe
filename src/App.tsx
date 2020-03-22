@@ -6,7 +6,8 @@ import SessionRouter from "./Router/SessionRouter";
 import { Theme } from "@material-ui/core";
 import { makeStyles, createStyles } from "@material-ui/styles";
 import coronasafeLogo from "./assets/images/coronasafeLogo.png";
-
+import { CircularProgress } from "@material-ui/core";
+import "./App.scss";
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     header: {
@@ -31,21 +32,21 @@ const App: React.FC = () => {
   const [user, setUser] = useState(null);
   useEffect(() => {
     dispatch(getCurrentUser()).then((resp: any) => {
-      const res = resp && resp.data;
-      if (res && res.success && res.data) {
-        setUser(res.data);
+      const res = resp;
+      if (res && res.statusCode === 200) {
+        setUser(res);
       }
     });
   }, [dispatch]);
 
-  if (!currentUser || currentUser.isFetching) {
-    return <div></div>;
-  }
   return (
     <div>
-      <div className={classes.header}>
-        <img className={classes.logo} alt="logo" src={coronasafeLogo} />
-      </div>
+      {!currentUser ||
+        (currentUser.isFetching && (
+          <div className="textMarginCenter">
+            <CircularProgress />
+          </div>
+        ))}
       {user ? <AppRouter /> : <SessionRouter />}
     </div>
   );
