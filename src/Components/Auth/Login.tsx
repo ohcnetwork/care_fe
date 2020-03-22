@@ -89,7 +89,6 @@ export const Login = () => {
         <div>
             <Grid container className={classes.formTop} spacing={2}>
                 <Grid item className="w3-hide-small" xs={12} sm={7} md={8} lg={9}>
-
                 </Grid>
                 <Grid item xs={12} sm={5} md={4} lg={3}>
                     <Card>
