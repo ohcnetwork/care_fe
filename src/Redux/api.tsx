@@ -40,7 +40,7 @@ export default {
         path: '/api/v1/users',
         method: 'POST'
     },
-    
+
     updateUser: {
         path: '/api/v1/users',
         method: 'PUT'

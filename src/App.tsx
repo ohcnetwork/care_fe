@@ -4,7 +4,7 @@ import AppRouter from './Router/AppRouter';
 import { useDispatch, useSelector } from 'react-redux';
 import { getCurrentUser } from './Redux/actions';
 import { CircularProgress } from '@material-ui/core';
-
+import './App.scss';
 
 const App: React.FC = () => {
   const dispatch: any = useDispatch();
@@ -22,8 +22,8 @@ const App: React.FC = () => {
 
   if (!currentUser || currentUser.isFetching) {
     return (
-        <div>
-          <CircularProgress/>
+        <div className="textMarginCenter">
+          <CircularProgress />
         </div>
     );
   }
