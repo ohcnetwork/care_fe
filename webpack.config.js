@@ -3,10 +3,16 @@ const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
+
+const app =['./src/index.tsx'];
+if (process.env.NODE_ENV !== 'production') {
+    app.push('webpack-dev-server/client');
+
+}
 module.exports = {
     entry: {
         vendor: ['react', 'react-dom'],
-        app: ['./src/index.tsx', 'webpack-dev-server/client']
+        app
     },
     output: {
         path: path.resolve(__dirname, 'dist'),
@@ -21,7 +27,7 @@ module.exports = {
         contentBase: path.join(__dirname, 'dist'),
         compress: true,
         host: "0.0.0.0",
-        port: 5000,
+        port: 4000,
         proxy: {
             '/api': {
                 target: 'https://dev.care.coronasafe.in',
