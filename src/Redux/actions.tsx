@@ -14,7 +14,7 @@ const config: any = {
 };
 
 if (localStorage.getItem('care_access_token')) {
-    config.headers['Authorization'] = 'bearer ' + localStorage.getItem('care_access_token');
+    config.headers['Authorization'] = 'Bearer ' + localStorage.getItem('care_access_token');
 }
 
 const axiosApiCall: any = axios.create(config);

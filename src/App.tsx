@@ -13,9 +13,9 @@ const App: React.FC = () => {
   const [user, setUser] = useState(null);
   useEffect(() => {
     dispatch(getCurrentUser()).then((resp: any) => {
-      const res = resp && resp.data;
-      if (res && res.success && res.data) {
-        setUser(res.data);
+      const res = resp ;
+      if (res && res && res) {
+        setUser(res);
       }
     });
   }, [dispatch]);

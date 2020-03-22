@@ -75,7 +75,7 @@ export const Login = () => {
                     };
                     setErrors(err);
                 } else if (res.success) {
-                    localStorage.setItem('care_access_token', res.access_token);
+                    localStorage.setItem('care_access_token', res.access);
                     navigate('/dashboard');
                     window.location.reload();
                 }
