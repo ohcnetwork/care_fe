@@ -14,7 +14,7 @@ const config: any = {
 };
 
 if (localStorage.getItem('care_access_token')) {
-    config.headers['Authorization'] = 'bearer ' + localStorage.getItem('care_access_token');
+    config.headers['Authorization'] = 'Bearer ' + localStorage.getItem('care_access_token');
 }
 
 const axiosApiCall: any = axios.create(config);
@@ -91,3 +91,9 @@ export const postSignUp = (form: object) => {
 export const getCurrentUser = () => {
     return fireRequest('currentUser');
 };
+
+
+// Facility
+export const createFacility = (form:object) => {
+    return fireRequest("createFacility", [], form)
+}
