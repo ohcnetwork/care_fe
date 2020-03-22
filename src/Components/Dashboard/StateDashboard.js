@@ -25,7 +25,7 @@ export default function StateDashboard() {
           </TableRow>
         </TableHead>
         <TableBody>
-          {data.map(row => (
+          {data.map((row) => (
             <TableRow key={row.name}>
               <TableCell component="th" scope="row">
                 {row.name}
