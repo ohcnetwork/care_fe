@@ -68,13 +68,13 @@ export const Login = () => {
         const valid = validateData();
         if (valid) {
             dispatch(postLogin(valid)).then((resp: any) => {
-                const res = resp && resp.data;
+                const res = resp;
                 if (res && res.statusCode && res.statusCode === 401) {
                     const err = {
                         password: 'Username or Password incorrect',
                     };
                     setErrors(err);
-                } else if (res.success) {
+                } else if (res && res.statusCode === 200 ) {
                     localStorage.setItem('care_access_token', res.access);
                     navigate('/dashboard');
                     window.location.reload();
