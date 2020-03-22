@@ -62,7 +62,6 @@ export const VehicleDetailsForm = (props: any) => {
     };
 
     const validateData = () => {
-        let hasError = false;
         const err = Object.assign({}, errors);
         Object.keys(form).forEach(key => {
             const value = form[key];
@@ -108,7 +107,7 @@ export const VehicleDetailsForm = (props: any) => {
         e.preventDefault();
         const valid = validateData();
         if (valid) {
-            props.onSubmit(form);
+            console.log(form);
         }
     };
     return (
@@ -169,7 +168,9 @@ export const VehicleDetailsForm = (props: any) => {
                                 />{" "}
                                 Is smart phone
                                 <NativeSelectField
-                                    name="primaryDistrict"
+									inputProps={{
+										name: "primaryDistrict"
+									}}
                                     placeholder="Primary district served"
                                     variant="outlined"
                                     margin="dense"
@@ -181,7 +182,9 @@ export const VehicleDetailsForm = (props: any) => {
                                     error={errors.primaryDistrict}
                                 />
                                 <NativeSelectField
-                                    name="secondaryDistrict"
+                                    inputProps={{
+										name: "secondaryDistrict"
+									}}
                                     placeholder="Secondary district served"
                                     variant="outlined"
                                     margin="dense"
@@ -193,7 +196,9 @@ export const VehicleDetailsForm = (props: any) => {
                                     error={errors.secondaryDistrict}
                                 />
                                 <NativeSelectField
-                                    name="thirdDistrict"
+                                    inputProps={{
+										name: "thirdDistrict"
+									}}
                                     placeholder="Third district served"
                                     variant="outlined"
                                     margin="dense"
