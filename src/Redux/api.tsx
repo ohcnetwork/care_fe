@@ -5,7 +5,7 @@ export default {
     },
 
     signUp: {
-        path: '/api/v1/auth/login',
+        path: '/api/v1/auth/signup',
         method: 'POST'
     },
 
