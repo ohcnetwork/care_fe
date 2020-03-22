@@ -1,5 +1,5 @@
 import React from 'react';
-import { Checkbox, Grid, IconButton, Radio, TextField } from '@material-ui/core';
+import { Checkbox, Grid, IconButton, Radio, TextField, NativeSelect } from '@material-ui/core';
 import { KeyboardDatePicker, KeyboardTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import DateFnsUtils from '@date-io/date-fns';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -144,13 +144,13 @@ export const CheckboxInputField = (props: any) => {
 };
 
 export const DateInputField = (props: any) => {
-    const { value, onChange } = props;
+    const { value, onChange, label } = props;
     return (
         <MuiPickersUtilsProvider utils={DateFnsUtils}>
             <KeyboardDatePicker
                 margin="normal"
                 id="date-picker-dialog"
-                label="Date picker dialog"
+                label={label || "Date picker dialog"}
                 format="MM/dd/yyyy"
                 value={value}
                 onChange={onChange}
@@ -227,3 +227,16 @@ export const ShowCheckboxOptions = (props: any) => {
         </div>
     );
 };
+
+export const NativeSelectField = (props: any) => {
+    const { options, inputProps, onChange } = props;
+    return (
+        <div>
+            <NativeSelect inputProps={inputProps} onChange={onChange}>
+                {options.map((opt: any) => {
+                    return <option value={opt.id} key={opt.id}>{opt.text}</option>
+                })}
+            </NativeSelect>
+        </div>
+    );
+}
