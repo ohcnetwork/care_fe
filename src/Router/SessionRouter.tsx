@@ -1,12 +1,12 @@
 import React from 'react';
 import { Login } from '../Components/Auth';
 import { useRoutes } from 'hookrouter';
-import Header from "../Components/Common/Header";
 import TopBar from "../Components/Common/TopBar";
-
+import {PublicDashboard} from '../Components/Dashboard/PublicDashboard';
 const routes = {
     '/': () => <Login/>,
     '/login': () => <Login/>,
+    '/dashboard' : () => <PublicDashboard/>
 };
 
 const SessionRouter = () => {
