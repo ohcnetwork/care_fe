@@ -10,7 +10,9 @@ const App: React.FC = () => {
   const dispatch: any = useDispatch();
   const state: any = useSelector(state => state);
   const { currentUser } = state;
+  console.log("currentUser", currentUser)
   const [user, setUser] = useState(null);
+  console.log("user", user)
   useEffect(() => {
     dispatch(getCurrentUser()).then((resp: any) => {
       const res = resp ;
@@ -27,7 +29,7 @@ const App: React.FC = () => {
         </div>
     );
   }
-  if (user) {
+  if (currentUser && currentUser.data) {
     return <AppRouter/>;
   } else {
     return <SessionRouter/>;

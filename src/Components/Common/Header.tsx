@@ -20,7 +20,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import DonutLargeIcon from '@material-ui/icons/DonutLarge';
 import DashboardIcon from '@material-ui/icons/Dashboard';
-
+import { get } from 'lodash';
 import PersonIcon from '@material-ui/icons/Person';
 import InboxIcon from '@material-ui/icons/Inbox';
 import ListAltIcon from '@material-ui/icons/ListAlt';
@@ -89,11 +89,7 @@ const Header = () => {
       icon: <SettingsIcon style={{ color: '#666', marginRight: '4px' }}/>
     }
   ];
-
-  let loginUser = '';
-  if (currentUser && currentUser.data) {
-    loginUser = currentUser.data.data.name;
-  }
+  const loginUser = `${get(currentUser, 'data.first_name', '')} ${get(currentUser, 'data.last_name', '')}`;
   const sideBar = (
       <div className="toolbar" style={{position:'relative'}}>
         <List>

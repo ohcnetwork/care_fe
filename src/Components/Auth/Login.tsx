@@ -79,7 +79,7 @@ export const Login = () => {
                 } else if (res && statusCode === 200) {
                     localStorage.setItem('care_access_token', res.access);
                     navigate('/privatedashboard');
-                    // window.location.reload();
+                    window.location.reload();
                 }
             });
         }
