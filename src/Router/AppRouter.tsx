@@ -1,6 +1,5 @@
 import React from 'react';
 import {useRedirect, useRoutes} from 'hookrouter';
-import {PublicDashboard} from "../Components/Dashboard/PublicDashboard";
 import Header from '../Components/Common/Header';
 import {PrivateDashboard} from "../Components/Dashboard/PrivateDashboard";
 
