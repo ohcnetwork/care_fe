@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Button, Card, CardHeader, Grid, CardContent, CardActions } from "@material-ui/core";
-import { TextInputField, RadioButtonField } from '../Common/HelperInputFields';
+import { Button, Card, CardHeader, Grid, CardContent, CardActions, Checkbox } from "@material-ui/core";
+import { TextInputField } from '../Common/HelperInputFields';
 import { useDispatch } from "react-redux"; import { A } from "hookrouter";
 import { postDriver } from "../../Redux/actions";
 import { isEmpty } from "lodash";
@@ -45,15 +45,14 @@ export const DriverDetailsForm = () => {
   }
 
   const validateData = () => {
-    const err = Object.assign({}, errors);
+    const err = Object.assign({});
     Object.keys(form).forEach((key) => {
-
-      console.log('||||', form.driverName1.value);
-
-
+      const value = form[key];
       switch (key) {
         case 'driverName1':
-          form.driverName1.value === '' || form.driverName1.value === undefined
+          if (!value) {
+            err.key = "This field is required"
+          }
           break;
         case 'cellNumber1':
           !/^(?:(?:\+?1\s*(?:[.-]\s*)?)?(?:\(\s*([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9])\s*\)|([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9]))\s*(?:[.-]\s*)?)?([2-9]1[02-9]|[2-9][02-9]1|[2-9][02-9]{2})\s*(?:[.-]\s*)?([0-9]{4})(?:\s*(?:#|x\.?|ext\.?|extension)\s*(\d+))?$/g.test(
@@ -61,7 +60,8 @@ export const DriverDetailsForm = () => {
           ) && (err.cellNumber1 = "Invalid phone number");
           break;
         case 'driverName2':
-          form.driverName2.value === '' || form.driverName2.value === undefined
+          (form.driverName2.value === '' || form.driverName2.value === undefined) &&
+            (err.driverName2 = "Field is required")
           break;
         case 'cellNumber2':
           !/^(?:(?:\+?1\s*(?:[.-]\s*)?)?(?:\(\s*([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9])\s*\)|([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9]))\s*(?:[.-]\s*)?)?([2-9]1[02-9]|[2-9][02-9]1|[2-9][02-9]{2})\s*(?:[.-]\s*)?([0-9]{4})(?:\s*(?:#|x\.?|ext\.?|extension)\s*(\d+))?$/g.test(
@@ -70,12 +70,17 @@ export const DriverDetailsForm = () => {
         default: break;
       }
     });
-    console.log('>>>', err)
     if (!isEmpty(err)) {
       setErrors(err);
-      return false;
     }
     return form;
+  };
+
+  const handleCheckboxFieldChange = (e: any) => {
+    const { checked, name } = e.target;
+    const fieldValue = Object.assign({}, form);
+    fieldValue.name = checked;
+    setForm(fieldValue);
   };
 
   const handleSubmit = (e: any) => {
@@ -134,6 +139,13 @@ export const DriverDetailsForm = () => {
                   errors={errors.cellNumber1}
                 />
 
+                <Checkbox
+                  checked={form.isSmartPhone1}
+                  onChange={handleCheckboxFieldChange}
+                  name="isSmartPhone1"
+                />{" "}
+                Is smart phone
+
                 <h4>Driver 2</h4>
                 <TextInputField
                   name="driverName2"
@@ -156,6 +168,12 @@ export const DriverDetailsForm = () => {
                   errors={errors.cellNumber2}
                 />
 
+                <Checkbox
+                  checked={form.isSmartPhone2}
+                  onChange={handleCheckboxFieldChange}
+                  name="isSmartPhone2"
+                />{" "}
+                Is smart phone
               </CardContent>
 
               <CardActions className="padding16">

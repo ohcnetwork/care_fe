@@ -2,21 +2,23 @@ import React from 'react';
 import { Login } from '../Components/Auth';
 import { useRoutes } from 'hookrouter';
 import TopBar from "../Components/Common/TopBar";
-import {PublicDashboard} from '../Components/Dashboard/PublicDashboard';
-import {VehicleDetailsForm} from '../Components/Ambulance/VehicleDetailsForm';
+import { PublicDashboard } from '../Components/Dashboard/PublicDashboard';
+import { VehicleDetailsForm } from '../Components/Ambulance/VehicleDetailsForm';
+import { DriverDetailsForm } from '../Components/Ambulance/DriverDetailsForm';
 
 const routes = {
-    '/': () => <Login/>,
-    '/login': () => <Login/>,
-    '/dashboard' : () => <PublicDashboard/>,
+    '/': () => <Login />,
+    '/login': () => <Login />,
+    '/dashboard': () => <PublicDashboard />,
     '/onboard-ambulance': () => <VehicleDetailsForm />,
+    '/driver-details': () => <DriverDetailsForm />
 };
 
 const SessionRouter = () => {
-    const content = useRoutes(routes) || <Login/>;
+    const content = useRoutes(routes) || <Login />;
     return (
         <div>
-            <TopBar/>
+            <TopBar />
             <div className="w3-padding">
                 {content}
             </div>
