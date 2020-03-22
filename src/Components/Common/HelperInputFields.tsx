@@ -144,7 +144,7 @@ export const CheckboxInputField = (props: any) => {
 };
 
 export const DateInputField = (props: any) => {
-    const { value, onChange, label } = props;
+    const { value, onChange, label, errors } = props;
     return (
         <MuiPickersUtilsProvider utils={DateFnsUtils}>
             <KeyboardDatePicker
@@ -158,6 +158,7 @@ export const DateInputField = (props: any) => {
                     'aria-label': 'change date',
                 }}
             />
+            <ErrorHelperText error={errors}/>
         </MuiPickersUtilsProvider>
     );
 };

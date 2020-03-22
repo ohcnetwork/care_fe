@@ -6,19 +6,19 @@ import {
     CardContent,
     CardHeader,
     Grid,
-	Checkbox
+    Checkbox
 } from "@material-ui/core";
 import {
     TextInputField,
-	DateInputField,
-	ErrorHelperText,
-	NativeSelectField
+    DateInputField,
+    ErrorHelperText,
+    NativeSelectField
 } from "../Common/HelperInputFields";
-import { A } from "hookrouter";
-import { DISTRICT_CHOICES } from './constants'
+import { DISTRICT_CHOICES } from "./constants";
+import { isEmpty } from "lodash";
 
 //add empty option to districts
-const districtOptions = [{ id: "", text: "--select--" }, ...DISTRICT_CHOICES]
+const districtOptions = [{ id: "", text: "--select--" }, ...DISTRICT_CHOICES];
 
 export const VehicleDetailsForm = (props: any) => {
     const initForm: any = {
@@ -38,6 +38,7 @@ export const VehicleDetailsForm = (props: any) => {
     const initErr: any = {};
     const [form, setForm] = useState(initForm);
     const [errors, setErrors] = useState(initErr);
+
     const handleChange = (e: any) => {
         const { value, name } = e.target;
         const fieldValue = Object.assign({}, form);
@@ -52,31 +53,51 @@ export const VehicleDetailsForm = (props: any) => {
         }
         setForm(fieldValue);
     };
+
+    const handleCheckboxFieldChange = (e: any) => {
+        const { checked, name } = e.target;
+        const fieldValue = Object.assign({}, form);
+        fieldValue[name] = checked;
+        setForm(fieldValue);
+    };
+
     const validateData = () => {
-        let hasError = false;
         const err = Object.assign({}, errors);
         Object.keys(form).forEach(key => {
+            const value = form[key];
             switch (key) {
                 case "registrationNumber":
-                    !/^[a-z0-9]+$/i.test(form.registrationNumber) &&
-                        (err.registrationNumber =
-                            "Invalid registration number");
+                    if (!value) {
+                        err[key] = "This field is required";
+                    } else if (!/^[a-z0-9]+$/i.test(value)) {
+                        err[key] = "Invalid registration number";
+                    }
                     break;
                 case "insuranceValidTill":
+                    !value && (err[key] = "This field is required");
                     break;
                 case "nameOfOwner":
-                    !form.nameOfOwner &&
-                        (err.nameOfOwner = "Name of owner is required.");
+                    !value && (err[key] = "This field is required");
                     break;
                 case "ownerPhoneNumber":
-                    !/^(?:(?:\+?1\s*(?:[.-]\s*)?)?(?:\(\s*([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9])\s*\)|([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9]))\s*(?:[.-]\s*)?)?([2-9]1[02-9]|[2-9][02-9]1|[2-9][02-9]{2})\s*(?:[.-]\s*)?([0-9]{4})(?:\s*(?:#|x\.?|ext\.?|extension)\s*(\d+))?$/g.test(
-                        form.ownerPhoneNumber
-					) && (err.ownerPhoneNumber = "Invalid phone number");
-				default:
-					break;
+                    if (!value) {
+                        err[key] = "This field is required";
+                    } else if (
+                        !/^(?:(?:\+?1\s*(?:[.-]\s*)?)?(?:\(\s*([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9])\s*\)|([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9]))\s*(?:[.-]\s*)?)?([2-9]1[02-9]|[2-9][02-9]1|[2-9][02-9]{2})\s*(?:[.-]\s*)?([0-9]{4})(?:\s*(?:#|x\.?|ext\.?|extension)\s*(\d+))?$/g.test(
+                            value
+                        )
+                    ) {
+                        err[key] = "Invalid phone number";
+                    }
+                case "primaryDistrict":
+                case "secondaryDistrict":
+                case "thirdDistrict":
+                    !value && (err[key] = "This field is required");
+                default:
+                    break;
             }
         });
-        if (hasError) {
+        if (!isEmpty(err)) {
             setErrors(err);
             return false;
         }
@@ -86,7 +107,7 @@ export const VehicleDetailsForm = (props: any) => {
         e.preventDefault();
         const valid = validateData();
         if (valid) {
-            props.onSubmit(form);
+            console.log(form);
         }
     };
     return (
@@ -102,9 +123,9 @@ export const VehicleDetailsForm = (props: any) => {
                                     placeholder="Vehicle registration number"
                                     variant="outlined"
                                     margin="dense"
-                                    value={form.username}
+                                    value={form.registrationNumber}
                                     onChange={handleChange}
-                                    errors={errors.username}
+                                    errors={errors.registrationNumber}
                                 />
                                 <DateInputField
                                     type="insuranceValidTill"
@@ -112,8 +133,15 @@ export const VehicleDetailsForm = (props: any) => {
                                     variant="outlined"
                                     margin="dense"
                                     value={form.insuranceValidTill}
-                                    onChange={handleChange}
-                                    errors={errors.password}
+                                    onChange={(date: any) =>
+                                        handleChange({
+                                            target: {
+                                                name: "insuranceValidTill",
+                                                value: date
+                                            }
+                                        })
+                                    }
+                                    errors={errors.insuranceValidTill}
                                 />
                                 <TextInputField
                                     name="nameOfOwner"
@@ -131,78 +159,83 @@ export const VehicleDetailsForm = (props: any) => {
                                     margin="dense"
                                     value={form.ownerPhoneNumber}
                                     onChange={handleChange}
-                                    errors={errors.password}
+                                    errors={errors.ownerPhoneNumber}
                                 />
                                 <Checkbox
                                     checked={form.isSmartPhone}
-                                    onChange={handleChange}
+                                    onChange={handleCheckboxFieldChange}
                                     name="isSmartPhone"
-                                    value
                                 />{" "}
                                 Is smart phone
-								<NativeSelectField
-									name="primaryDistrict"
-									placeholder="Primary district served"
-									variant="outlined"
-									margin="dense"
-									options={districtOptions}
-									value={form.primaryDistrict}
-									onChange={handleChange}
-								/>
-								<ErrorHelperText error={errors.primaryDistrict}/>
-								<NativeSelectField
-									name="secondaryDistrict"
-									placeholder="Secondary district served"
-									variant="outlined"
-									margin="dense"
-									options={districtOptions}
-									value={form.secondaryDistrict}
-									onChange={handleChange}
-								/>
-								<ErrorHelperText error={errors.secondaryDistrict}/>
                                 <NativeSelectField
-                                    name="thirdDistrict"
+									inputProps={{
+										name: "primaryDistrict"
+									}}
+                                    placeholder="Primary district served"
+                                    variant="outlined"
+                                    margin="dense"
+                                    options={districtOptions}
+                                    value={form.primaryDistrict}
+                                    onChange={handleChange}
+                                />
+                                <ErrorHelperText
+                                    error={errors.primaryDistrict}
+                                />
+                                <NativeSelectField
+                                    inputProps={{
+										name: "secondaryDistrict"
+									}}
+                                    placeholder="Secondary district served"
+                                    variant="outlined"
+                                    margin="dense"
+                                    options={districtOptions}
+                                    value={form.secondaryDistrict}
+                                    onChange={handleChange}
+                                />
+                                <ErrorHelperText
+                                    error={errors.secondaryDistrict}
+                                />
+                                <NativeSelectField
+                                    inputProps={{
+										name: "thirdDistrict"
+									}}
                                     placeholder="Third district served"
                                     variant="outlined"
-									margin="dense"
-									options={districtOptions}
+                                    margin="dense"
+                                    options={districtOptions}
                                     value={form.thirdDistrict}
                                     onChange={handleChange}
                                 />
-								<ErrorHelperText error={errors.thirdDistrict}/>
+                                <ErrorHelperText error={errors.thirdDistrict} />
                                 <Grid>
                                     <Checkbox
-                                        checked={form.isSmartPhone}
-                                        onChange={handleChange}
-                                        name="isSmartPhone"
-                                        value
+                                        checked={form.hasOxygenSupply}
+                                        onChange={handleCheckboxFieldChange}
+                                        name="hasOxygenSupply"
                                     />{" "}
                                     Has Oxygen supply
                                 </Grid>
                                 <Grid>
                                     <Checkbox
-                                        checked={form.isSmartPhone}
-                                        onChange={handleChange}
-                                        name="isSmartPhone"
-                                        value
+                                        checked={form.hasVentilator}
+                                        onChange={handleCheckboxFieldChange}
+                                        name="hasVentilator"
                                     />{" "}
                                     Has ventilator
                                 </Grid>
                                 <Grid>
                                     <Checkbox
-                                        checked={form.isSmartPhone}
-                                        onChange={handleChange}
-                                        name="isSmartPhone"
-                                        value
+                                        checked={form.hasSuctionMachine}
+                                        onChange={handleCheckboxFieldChange}
+                                        name="hasSuctionMachine"
                                     />{" "}
                                     Has suction machine
                                 </Grid>
                                 <Grid>
                                     <Checkbox
-                                        checked={form.isSmartPhone}
-                                        onChange={handleChange}
-                                        name="isSmartPhone"
-                                        value
+                                        checked={form.hasDefibrillator}
+                                        onChange={handleCheckboxFieldChange}
+                                        name="hasDefibrillator"
                                     />{" "}
                                     Has defibrilator
                                 </Grid>

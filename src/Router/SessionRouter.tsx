@@ -3,11 +3,13 @@ import { Login } from '../Components/Auth';
 import { useRoutes } from 'hookrouter';
 import TopBar from "../Components/Common/TopBar";
 import {PublicDashboard} from '../Components/Dashboard/PublicDashboard';
+import {VehicleDetailsForm} from '../Components/Ambulance/VehicleDetailsForm';
 
 const routes = {
     '/': () => <Login/>,
     '/login': () => <Login/>,
-    '/dashboard' : () => <PublicDashboard/>
+    '/dashboard' : () => <PublicDashboard/>,
+    '/onboard-ambulance': () => <VehicleDetailsForm />,
 };
 
 const SessionRouter = () => {
