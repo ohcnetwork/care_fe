@@ -24,4 +24,9 @@ workflows:
   care:
     jobs:
       - install
-      - build
+      - build :
+          requires:
+            - install
+          filters :
+            branches:
+              only: master
