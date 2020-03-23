@@ -5,6 +5,7 @@ jobs:
   install:
     executor:
       name: node/default
+    working_directory: ~/care
     steps:
       - checkout
       - run: echo "Installing Node Modules"
@@ -14,6 +15,7 @@ jobs:
   build:
     executor:
       name: node/default
+    working_directory: ~/care
     steps:
       - checkout
       - run: echo "Running Build"
@@ -24,12 +26,14 @@ jobs:
   deploy:
     machine:
       enabled: true
+    working_directory: ~/care
     steps:
       - checkout
       - run:
           name: Deploy Over SSH
           command: |
             pwd
+            ls
             tar -czf build.tar.gz dist/
             scp build.tar.gz netlify@34.93.26.100:/home/netlify/releases/
             ssh netlify@34.93.26.100 "cd /home/netlify/releases/; tar xf build.tar.gz; cp -rf /opt/care_fe/dist /opt/care_fe/dist.old; mv dist /opt/care_fe/dist"
