@@ -31,7 +31,19 @@ jobs: # a collection of steps
             
             ssh-keyscan -H 34.93.26.100 >> ~/.ssh/known_hosts
             sudo apt-get update && sudo apt-get install rsync -y
-            rsync -avz --delete dist/ netlify@34.93.26.100:/opt/care_fe/dist/
+
+            echo "The branch is: $CIRCLE_BRANCH"
+            if [[ $CIRCLE_BRANCH = "master" ]]
+            then
+              echo "Syncing to production"
+              rsync -avz --delete dist/ netlify@34.93.26.100:/opt/care_prod/
+            elif [[ $CIRCLE_BRANCH = "develop" ]]
+            then
+              echo "Syncing to dev"
+              rsync -avz --delete dist/ netlify@34.93.26.100:/opt/care/
+            else
+              echo "Not Syncing the branch $CIRCLE_BRANCH"
+            fi
 
             # tar -czf build.tar.gz dist/
             # scp build.tar.gz netlify@34.93.26.100:/home/netlify/releases/
