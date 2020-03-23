@@ -83,7 +83,7 @@ const useStyles = makeStyles(theme => ({
     }
 }));
 
-export default function FarmerDetailStepper(props: any) {
+export default function Stepper (props: any) {
     const classes = useStyles();
     const { labels, activeStateCount } = props;
     let stepCount = 0;

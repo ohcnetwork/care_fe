@@ -7,7 +7,7 @@ import AppMessage from "../Common/AppMessage"
 import { makeStyles } from "@material-ui/styles";
 
 import districts from "../../Constants/Static_data/districts.json"
-import { phone_preg, validateLocationCoordinates } from "../../Constants/common";
+import { validateLocationCoordinates, phonePreg } from "../../Constants/common";
 import { createFacility } from "../../Redux/actions";
 
 const initForm: any = {
@@ -94,7 +94,7 @@ export const FacilityCreate = () => {
                 errors[field] = "Field is required"
                 invalidForm = true
             }
-            if (field == "phone_number" && !phone_preg(state.form.phone_number)) {
+            if (field == "phone_number" && !phonePreg(state.form.phone_number)) {
                 errors[field] = "Please Enter 10/11 digit mobile number or landline as 0<std code><phone number>"
                 invalidForm = true
             }
@@ -254,36 +254,5 @@ export const FacilityCreate = () => {
                 </Grid>
             </form>
         </div>
-        {/* <Grid container className={classes.formTop} spacing={2}>
-            <Grid item className="w3-hide-small" xs={12} sm={7} md={8} lg={9}>
-
-            </Grid>
-
-            <Grid item xs={12} sm={5} md={4} lg={3}>
-
-                <Card>
-                    <CardHeader title="Create Facility" />
-
-                    <form onSubmit={(e) => handleSubmit(e)}>
-                        <CardContent>
-
-
-
-                        </CardContent>
-
-                        <CardActions className="padding16">
-
-                            <Button
-                                color="primary"
-                                variant="contained"
-                                type="submit"
-                                style={{ marginLeft: 'auto' }}
-                                onClick={(e) => handleSubmit(e)}
-                            >Add</Button>
-                        </CardActions>
-                    </form>
-                </Card>
-            </Grid>
-        </Grid> */}
     </div >
 }
