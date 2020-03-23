@@ -3,8 +3,8 @@ import Grid from '@material-ui/core/Grid';
 import { HospitalView } from '../Common/HospitalView';
 export const HospitalOnboarding = () => {
     return (
-        
         <div>
+            Hospital Onboarding .
         <Grid item xs={12} style={{marginTop: '75px'}}>
             <Grid container justify="flex-start" spacing={5}>
                 <Grid item>
