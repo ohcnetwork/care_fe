@@ -100,19 +100,17 @@ export const DriverDetailsForm = () => {
     } else {
       console.log('Not Valid', form)
     }
-    // if (valid) {
-    //   dispatch(postAmbulance(valid)).then((resp: any) => {
-    //     const res = get(resp, 'data', null);
-    //     const statusCode = get(resp, 'status', '');
-    //     if (res && statusCode === 401) {
-    //       const err = {
-    //       alert('Error Adding Ambulance');
-    //       }
-    //     } else if (res && statusCode === 200) {
-    //       alert('Ambulance Added Successfully');
-    //     }
-    //   })
-    // }
+    if (valid) {
+      dispatch(postAmbulance(valid)).then((resp: any) => {
+        const res = get(resp, 'data', null);
+        const statusCode = get(resp, 'status', '');
+        if (res && statusCode === 401) {
+
+        } else if (res && statusCode === 200) {
+          alert('Ambulance Added Successfully');
+        }
+      })
+    }
   };
 
   return (
@@ -137,7 +135,6 @@ export const DriverDetailsForm = () => {
                   type="number"
                   name="cellNumber1"
                   placeholder="Cellphone Number"
-                  pattern="^((\+91|91|0)[\- ]{0,1})?[456789]\d{9}$"
                   variant="outlined"
                   margin="dense"
                   value={form.cellNumber1}
@@ -166,7 +163,6 @@ export const DriverDetailsForm = () => {
                   type="number"
                   name="cellNumber2"
                   placeholder="Cellphone Number"
-                  pattern="^((\+91|91|0)[\- ]{0,1})?[456789]\d{9}$"
                   variant="outlined"
                   margin="dense"
                   value={form.cellNumber2}
