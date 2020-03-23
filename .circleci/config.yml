@@ -55,16 +55,17 @@ jobs:
             # ssh netlify@34.93.26.100 "cd /home/netlify/releases/; tar xf build.tar.gz; cp -rf /opt/care_fe/dist /opt/care_fe/dist.old; mv dist /opt/care_fe/dist"
 
 workflows:
+  version: 2
   care:
     jobs:
       - install
-      - build :
+      - build:
           requires:
             - install
       - hold:
           type: approval
-            requires:
-              - build
+          requires:
+            - build
       - deploy:
           requires:
             - hold
