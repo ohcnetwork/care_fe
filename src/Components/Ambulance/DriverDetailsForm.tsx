@@ -117,8 +117,8 @@ export const DriverDetailsForm = () => {
 
   return (
     <div>
-      <Grid container spacing={2}>
-        <Grid item xs={12} sm={5} md={8} lg={8}>
+      <Grid container alignContent="center" justify="center">
+        <Grid item xs={12} >
           <Card>
             <CardHeader title="Driver Details" />
             <form onSubmit={(e) => handleSubmit(e)}>

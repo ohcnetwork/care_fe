@@ -105,6 +105,7 @@ export const Login = () => {
                                     placeholder="User Name"
                                     variant="outlined"
                                     margin="dense"
+                                    InputLabelProps={{ shrink: !!form.username }}
                                     value={form.username}
                                     onChange={handleChange}
                                     errors={errors.username}
@@ -115,6 +116,7 @@ export const Login = () => {
                                     placeholder="Password"
                                     variant="outlined"
                                     margin="dense"
+                                    InputLabelProps={{ shrink: !!form.password }}
                                     value={form.password}
                                     onChange={handleChange}
                                     errors={errors.password}

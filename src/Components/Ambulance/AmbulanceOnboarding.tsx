@@ -7,6 +7,7 @@ import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
 import {VehicleDetailsForm} from "./VehicleDetailsForm";
 import {DriverDetailsForm} from "./DriverDetailsForm";
+import {Grid} from "@material-ui/core";
 
 interface TabPanelProps {
     children?: React.ReactNode;
@@ -21,6 +22,7 @@ function TabPanel(props: TabPanelProps) {
         <Typography
             component="div"
             role="tabpanel"
+            style={{color: 'white'}}
             hidden={value !== index}
             id={`simple-tabpanel-${index}`}
             aria-labelledby={`simple-tab-${index}`}
@@ -54,9 +56,12 @@ export default function AmbulanceOnboarding() {
     };
 
     return (
+
         <div className={classes.root} style={{marginTop: '60px'}}>
-            <AppBar position="static">
-                <Tabs value={value} onChange={handleChange} aria-label="simple tabs example">
+            <Grid container spacing={2} alignContent="center" justify="center">
+                <Grid item xs={12} sm={5} md={4} lg={3}>
+            <AppBar position="relative">
+                <Tabs value={value} style={{color: 'black'}} onChange={handleChange} >
                     <Tab label="Vehicle Details" {...a11yProps(0)} />
                     <Tab label="Driver Details" {...a11yProps(1)} />
                 </Tabs>
@@ -65,8 +70,11 @@ export default function AmbulanceOnboarding() {
                 <VehicleDetailsForm/>
             </TabPanel>
             <TabPanel value={value} index={1}>
-               <DriverDetailsForm/>z
+               <DriverDetailsForm/>
             </TabPanel>
+                </Grid></Grid>
         </div>
+
+
     );
 }
