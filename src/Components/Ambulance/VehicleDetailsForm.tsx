@@ -32,6 +32,14 @@ export const VehicleDetailsForm = (props: any) => {
     const initErr: any = {};
     const [form, setForm] = useState<any>(Object.assign(initForm, vehicleDetails));
     const [errors, setErrors] = useState(initErr);
+    const validTill = [];
+    for(let i=0;i<=10;i++){
+        let text = `202${i}`
+        if(i==10){
+            text=`2030`
+        }
+        validTill.push({id:text,text})
+    }
 
     const handleChange = (e: any) => {
         const {value, name} = e.target;
@@ -122,24 +130,25 @@ export const VehicleDetailsForm = (props: any) => {
                                         onChange={handleChange}
                                         errors={errors.registrationNumber}
                                     />
-                                    <DateInputField
-                                        type="insuranceValidTill"
-                                        label="Insurance valid till"
-                                        variant="outlined"
-                                        margin="dense"
-                                        value={form.insuranceValidTill}
-                                        InputLabelProps={{shrink: !!form.insuranceValidTill}}
-                                        onChange={(date: any) =>
-                                            handleChange({
-                                                target: {
-                                                    name: "insuranceValidTill",
-                                                    value: date
-                                                }
-                                            })
-                                        }
-                                        errors={errors.insuranceValidTill}
-                                        className={classes.dateField}
-                                    />
+
+                                    <div className={`nativeSelectMod ${classes.selectField}`}>
+                                        <NativeSelectField
+                                            inputProps={{
+                                                name: "insuranceValidTill"
+                                            }}
+                                            placeholder="Insurance valid till"
+                                            variant="outlined"
+                                            margin="dense"
+                                            InputLabelProps={{shrink: !!form.insuranceValidTill}}
+                                            options={validTill}
+                                            value={form.insuranceValidTill}
+                                            onChange={handleChange}
+
+                                        />
+                                        <ErrorHelperText
+                                            error={errors.insuranceValidTill}
+                                        />
+                                    </div>
                                     <TextInputField
                                         name="nameOfOwner"
                                         placeholder="Name of owner"

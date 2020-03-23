@@ -3,7 +3,7 @@ import React, {useState} from "react";
 import {postLogin} from "../../Redux/actions";
 import { A, navigate} from 'hookrouter';
 import {makeStyles} from "@material-ui/styles";
-import {Button, Card, CardActions, CardContent, CardHeader, Grid} from '@material-ui/core';
+import { Box, Button, Card, CardActions, CardContent, CardHeader, Grid} from '@material-ui/core';
 import {TextInputField} from '../Common/HelperInputFields';
 import { get } from 'lodash';
 import {PublicDashboard} from "../Dashboard/PublicDashboard";
@@ -15,6 +15,16 @@ const useStyles = makeStyles(theme => ({
     pdLogo: {
         height: '345px',
         border: 'solid 3px white'
+    },
+    logoImg:{
+        objectFit:'contain',
+        height:'150px',
+    },
+    imgSection:{
+        marginTop:'100px',
+        justifySelf:'flex-end', 
+        alignSelf:'center',
+        paddingBottom:'45px'
     }
 }));
 
@@ -87,7 +97,7 @@ export const Login = () => {
     };
 
     return (
-        <div>
+        <Box display="flex" flexDirection="column" justifyItems="space-between">
             <Grid container className={classes.formTop} spacing={2}>
                 <Grid item className="w3-hide-small" xs={12} sm={7} md={8} lg={9}>
                     <Grid item>
@@ -144,7 +154,10 @@ export const Login = () => {
                     </Card>
                 </Grid>
             </Grid>
-        </div>
+            <div className={classes.imgSection}>
+                <img src="https://care-coronasafe.s3.amazonaws.com/static/images/logos/ksdma_logo.png" alt="Care Logo" className={classes.logoImg}/>
+            </div>
+        </Box>
 
 
     );
