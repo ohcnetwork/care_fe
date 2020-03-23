@@ -2,10 +2,12 @@ import React from 'react';
 import {useRedirect, useRoutes} from 'hookrouter';
 import Header from '../Components/Common/Header';
 import {PrivateDashboard} from "../Components/Dashboard/PrivateDashboard";
+import { FacilityCreate } from '../Components/Facility/FacilityCreate';
 
 const routes = {
     '/': () => <PrivateDashboard/>,
     '/privatedashboard': () => <PrivateDashboard/>,
+    '/facility/create': () => <FacilityCreate/>,
 };
 
 const AppRouter = () => {
