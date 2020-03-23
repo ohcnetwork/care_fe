@@ -27,6 +27,3 @@ workflows:
       - build :
           requires:
             - install
-          filters :
-            branches:
-              only: master
