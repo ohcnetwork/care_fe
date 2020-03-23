@@ -15,22 +15,23 @@ const useStyles = makeStyles(theme => ({
         fontWeight:'bold'
     }
 }));
-interface Props {
-    title: string;
-    value: string | number;
-}
-export const DashboardStatsCard: React.FC<Props> = (props) => {
+
+export const DashboardStatsCard = (props: any)  =>  {
+    const { title , value } = props;
     const classes = useStyles();
     return (
         <Card className={classes.card}>
             <CardContent>
-                <Typography variant="h5" gutterBottom>
-                    {props.title}
+                <Typography variant="h6" gutterBottom align={"center"}>
+                    {title}
                 </Typography>
-                <Typography className={classes.valueField} variant="h6" gutterBottom>
-                    {props.value}
+
+                {' '}
+
+                <Typography className={classes.valueField} variant="h6" gutterBottom align={"center"}>
+                    {value}
                 </Typography>
             </CardContent>
         </Card>
     );
-}
+};

@@ -86,5 +86,12 @@ export default {
         method: 'DELETE'
     },
 
+    // Ambulance
+    
+    createAmbulance: {
+        path: '/api/v1/ambulance',
+        method: 'POST'
+    }
+
 
 }
