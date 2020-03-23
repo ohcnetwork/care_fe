@@ -1,6 +1,6 @@
 version: 2.1 # use CircleCI 2.1
 jobs: # a collection of steps
-  build: # runs not using Workflows must have a `build` job as entry point
+  install: # runs not using Workflows must have a `build` job as entry point
     working_directory: ~/care # directory where steps will run
     docker: # run the steps with Docker
       - image: circleci/node:10.16.3 # ...with this image as the primary container; this is where all `steps` will run
@@ -22,19 +22,29 @@ jobs: # a collection of steps
           key: dependency-cache-{{ checksum "package-lock.json" }}
           paths:
             - ./node_modules
+
+  build:
+    working_directory: ~/care
+    docker:
+      - image: circleci/node:10.16.3
+    steps:
+      - run: echo "Building"
       - run: 
           name: build
           command: npm run build
 
-      - hold:
-          type: approval
-             requires:
-                - build
-                 
+  hold:
+    type: approval
+      requires:
+        - build
+
+  deploy:
+    steps:
+      - run: echo "Building"
       - run:
           name: Deploy
-             requires:
-                - hold
+            requires:
+              - hold
           command: |
             
             ssh-keyscan -H 34.93.26.100 >> ~/.ssh/known_hosts
