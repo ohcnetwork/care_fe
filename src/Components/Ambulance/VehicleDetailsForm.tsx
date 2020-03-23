@@ -1,29 +1,20 @@
-import React, { useState } from "react";
-import {
-    Box,
-    Button,
-    Card,
-    CardActions,
-    CardContent,
-    CardHeader,
-    Grid,
-    Checkbox, Typography
-} from "@material-ui/core";
-import {
-    TextInputField,
-    DateInputField,
-    ErrorHelperText,
-    NativeSelectField
-} from "../Common/HelperInputFields";
-import { DISTRICT_CHOICES } from "./constants";
-import { isEmpty } from "lodash";
+import React, {useState} from "react";
+import {Box, Button, Card, CardActions, CardContent, CardHeader, Checkbox, Grid, Typography} from "@material-ui/core";
+import {DateInputField, ErrorHelperText, NativeSelectField, TextInputField} from "../Common/HelperInputFields";
+import {DISTRICT_CHOICES} from "./constants";
+import {isEmpty} from "lodash";
 
 
 //add empty option to districts
-const districtOptions = [{ id: "", text: "--select--" }, ...DISTRICT_CHOICES];
+const districtOptions = [
+    {
+        id: "",
+        text: "District Choice Priority"
+    },
+    ...DISTRICT_CHOICES];
 
 export const VehicleDetailsForm = (props: any) => {
-    const { classes, setVehicleObj, vehicleDetails } = props;
+    const {classes, setVehicleObj, vehicleDetails} = props;
     const initForm: any = {
         registrationNumber: "",
         insuranceValidTill: null,
@@ -39,11 +30,11 @@ export const VehicleDetailsForm = (props: any) => {
         hasDefibrillator: false
     };
     const initErr: any = {};
-    const [form, setForm] = useState<any>(Object.assign(initForm,vehicleDetails));
+    const [form, setForm] = useState<any>(Object.assign(initForm, vehicleDetails));
     const [errors, setErrors] = useState(initErr);
 
     const handleChange = (e: any) => {
-        const { value, name } = e.target;
+        const {value, name} = e.target;
         const fieldValue = Object.assign({}, form);
         const errorField = Object.assign({}, errors);
         if (errorField[name]) {
@@ -55,7 +46,7 @@ export const VehicleDetailsForm = (props: any) => {
     };
 
     const handleCheckboxFieldChange = (e: any) => {
-        const { checked, name } = e.target;
+        const {checked, name} = e.target;
         const fieldValue = Object.assign({}, form);
         fieldValue[name] = checked;
         setForm(fieldValue);
@@ -81,7 +72,7 @@ export const VehicleDetailsForm = (props: any) => {
                     if (!value) {
                         err[key] = "This field is required";
                     } else if (
-                        !/^[0-9]{10}$/.test( value
+                        !/^[0-9]{10}$/.test(value
                         )
                     ) {
                         err[key] = "Invalid phone number";
@@ -114,9 +105,11 @@ export const VehicleDetailsForm = (props: any) => {
         <div>
             <Grid container alignContent="center" justify="center">
                 <Grid item xs={12}>
-                    <Card style={{marginBottom:'20px'}}>
+                    <Card style={{marginBottom: '20px'}}>
                         <CardHeader title="Vehicle Details"/>
-                        <form onSubmit={e => { handleSubmit(e) }} className={`${classes.formBottomPadding}`}>
+                        <form onSubmit={e => {
+                            handleSubmit(e)
+                        }} className={`${classes.formBottomPadding}`}>
                             <CardContent className={classes.cardContent}>
                                 <Box display="flex" flexDirection="column">
                                     <TextInputField
@@ -124,7 +117,7 @@ export const VehicleDetailsForm = (props: any) => {
                                         placeholder="Vehicle registration number"
                                         variant="outlined"
                                         margin="dense"
-                                        InputLabelProps={{ shrink: !!form.registrationNumber }}
+                                        InputLabelProps={{shrink: !!form.registrationNumber}}
                                         value={form.registrationNumber}
                                         onChange={handleChange}
                                         errors={errors.registrationNumber}
@@ -135,7 +128,7 @@ export const VehicleDetailsForm = (props: any) => {
                                         variant="outlined"
                                         margin="dense"
                                         value={form.insuranceValidTill}
-                                        InputLabelProps={{ shrink: !!form.insuranceValidTill }}
+                                        InputLabelProps={{shrink: !!form.insuranceValidTill}}
                                         onChange={(date: any) =>
                                             handleChange({
                                                 target: {
@@ -153,7 +146,7 @@ export const VehicleDetailsForm = (props: any) => {
                                         variant="outlined"
                                         margin="dense"
                                         value={form.nameOfOwner}
-                                        InputLabelProps={{ shrink: !!form.nameOfOwner }}
+                                        InputLabelProps={{shrink: !!form.nameOfOwner}}
                                         onChange={handleChange}
                                         errors={errors.nameOfOwner}
                                     />
@@ -163,17 +156,19 @@ export const VehicleDetailsForm = (props: any) => {
                                         variant="outlined"
                                         margin="dense"
                                         value={form.ownerPhoneNumber}
-                                        InputLabelProps={{ shrink: !!form.ownerPhoneNumber }}
+                                        InputLabelProps={{shrink: !!form.ownerPhoneNumber}}
                                         onChange={handleChange}
                                         errors={errors.ownerPhoneNumber}
                                     />
-                                    <Box display="flex" flexDirection="row" justifyItems="flex-start" alignItems="center">
+                                    <Box display="flex" flexDirection="row" justifyItems="flex-start"
+                                         alignItems="center">
                                         <Checkbox
                                             checked={form.isSmartPhone}
                                             onChange={handleCheckboxFieldChange}
                                             name="isSmartPhone"
                                         />
-                                        <Typography className={classes.checkBoxLabel}>Is smart phone?</Typography>
+                                        <Typography className={classes.checkBoxLabel}> Do you have a smart phone
+                                            ?</Typography>
                                     </Box>
                                     <Box>
                                         <Typography>
@@ -188,11 +183,11 @@ export const VehicleDetailsForm = (props: any) => {
                                             placeholder="Primary district served"
                                             variant="outlined"
                                             margin="dense"
-                                            InputLabelProps={{ shrink: !!form.primaryDistrict }}
+                                            InputLabelProps={{shrink: !!form.primaryDistrict}}
                                             options={districtOptions}
                                             value={form.primaryDistrict}
                                             onChange={handleChange}
-                                            
+
                                         />
                                         <ErrorHelperText
                                             error={errors.primaryDistrict}
@@ -206,6 +201,7 @@ export const VehicleDetailsForm = (props: any) => {
                                             placeholder="Secondary district served"
                                             variant="outlined"
                                             margin="dense"
+
                                             options={districtOptions}
                                             value={form.secondaryDistrict}
                                             onChange={handleChange}
@@ -226,19 +222,26 @@ export const VehicleDetailsForm = (props: any) => {
                                             value={form.thirdDistrict}
                                             onChange={handleChange}
                                         />
-                                        <ErrorHelperText error={errors.thirdDistrict} />
+                                        <ErrorHelperText error={errors.thirdDistrict}/>
                                     </div>
-                                    <Box display="flex" flexDirection="row" justifyItems="flex-start" alignItems="center">
+                                    <Box>
+                                        <Typography>
+                                            Select Your Ambulance Features
+                                        </Typography>
+                                    </Box>
+                                    <Box display="flex" flexDirection="row" justifyItems="flex-start"
+                                         alignItems="center">
                                         <Checkbox
                                             checked={form.hasOxygenSupply}
                                             onChange={handleCheckboxFieldChange}
                                             name="hasOxygenSupply"
                                         />
                                         <Typography className={classes.checkBoxLabel}>
-                                            Has Oxygen supply
+                                            Has Oxygen Supply
                                         </Typography>
                                     </Box>
-                                    <Box display="flex" flexDirection="row" justifyItems="flex-start" alignItems="center">
+                                    <Box display="flex" flexDirection="row" justifyItems="flex-start"
+                                         alignItems="center">
                                         <Checkbox
                                             checked={form.hasVentilator}
                                             onChange={handleCheckboxFieldChange}
@@ -248,7 +251,8 @@ export const VehicleDetailsForm = (props: any) => {
                                             Has ventilator
                                         </Typography>
                                     </Box>
-                                    <Box display="flex" flexDirection="row" justifyItems="flex-start" alignItems="center">
+                                    <Box display="flex" flexDirection="row" justifyItems="flex-start"
+                                         alignItems="center">
                                         <Checkbox
                                             checked={form.hasSuctionMachine}
                                             onChange={handleCheckboxFieldChange}
@@ -258,7 +262,8 @@ export const VehicleDetailsForm = (props: any) => {
                                             Has suction machine
                                         </Typography>
                                     </Box>
-                                    <Box display="flex" flexDirection="row" justifyItems="flex-start" alignItems="center">
+                                    <Box display="flex" flexDirection="row" justifyItems="flex-start"
+                                         alignItems="center">
                                         <Checkbox
                                             checked={form.hasDefibrillator}
                                             onChange={handleCheckboxFieldChange}
@@ -276,7 +281,7 @@ export const VehicleDetailsForm = (props: any) => {
                                     color="primary"
                                     variant="contained"
                                     type="submit"
-                                    style={{ marginLeft: "auto" }}
+                                    style={{marginLeft: "auto"}}
                                     onClick={e => handleSubmit(e)}
                                 >
                                     Next
