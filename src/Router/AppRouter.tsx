@@ -9,7 +9,7 @@ const routes = {
     '/': () => <PrivateDashboard/>,
     '/privatedashboard': () => <PrivateDashboard/>,
     '/facility/create': () => <FacilityCreate/>,
-    '/facilities': () => <HospitalOnboarding />
+    '/facilities': () => <HospitalOnboarding />,
 };
 
 const AppRouter = () => {
