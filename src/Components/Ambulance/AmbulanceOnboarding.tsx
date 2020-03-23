@@ -1,7 +1,9 @@
-// Sample File
 
-import React from "react";
-
+import React from 'react';
 export const AmbulanceOnboarding = () => {
- return null;
-}
+    return (
+        <div>
+            Ambulance Onboarding .
+        </div>
+    )
+};

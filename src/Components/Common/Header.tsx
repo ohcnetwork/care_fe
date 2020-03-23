@@ -79,8 +79,8 @@ const Header = () => {
     },
 
     {
-      title: 'Users',
-      link: '/users',
+      title: 'Ambulance',
+      link: '/ambulance',
       icon: <PersonIcon style={{ color: '#666', marginRight: '4px' }}/>
     },
     {

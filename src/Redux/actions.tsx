@@ -92,7 +92,13 @@ export const getCurrentUser = () => {
     return fireRequest('currentUser');
 };
 
+
 // Ambulance
 export const postAmbulance = (form: object) => {
     return fireRequest('createAmbulance', [], form);
 };
+
+// Facility
+export const createFacility = (form:object) => {
+    return fireRequest("createFacility", [], form)
+}
