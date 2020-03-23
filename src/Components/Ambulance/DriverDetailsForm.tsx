@@ -4,7 +4,8 @@ import { TextInputField } from '../Common/HelperInputFields';
 import { useDispatch } from "react-redux"; import { A } from "hookrouter";
 import { postAmbulance } from "../../Redux/actions";
 import { isEmpty, get } from "lodash";
-export const DriverDetailsForm = () => {
+export const DriverDetailsForm = (props:any) => {
+  const { vehicleInfo } = props;
   const dispatch: any = useDispatch();
   const initForm: any = {
 

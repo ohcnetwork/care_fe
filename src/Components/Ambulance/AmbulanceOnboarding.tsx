@@ -45,15 +45,43 @@ const useStyles = makeStyles((theme: Theme) => ({
         flexGrow: 1,
         backgroundColor: theme.palette.background.paper,
     },
+    marginBottom10:{
+        marginBottom:'10px'
+    },
+    formBottomPadding:{
+        paddingBottom:'10px'
+    },
+    tabSection:{
+        color: 'black',
+        background:'white'
+    },
+    cardContent:{
+        marginTop:'-20px'
+    },
+    checkBoxLabel:{
+        marginLeft: '8px'
+    },
+    dateField:{
+        marginTop:'8px'
+    },
+    selectField:{
+        marginBottom:'10px',
+    }
 }));
 
 export default function AmbulanceOnboarding() {
     const classes = useStyles();
     const [value, setValue] = React.useState(0);
+    const [vehicleObj, setVehicleObj] = React.useState();
 
     const handleChange = (event: React.ChangeEvent<{}>, newValue: number) => {
         setValue(newValue);
     };
+
+    const updateVehicleObj = (val: any)=>{
+        setVehicleObj(val)
+        setValue(1);
+    }
 
     return (
 
@@ -61,18 +89,19 @@ export default function AmbulanceOnboarding() {
             <Grid container spacing={2} alignContent="center" justify="center">
                 <Grid item xs={12} sm={5} md={4} lg={3}>
             <AppBar position="relative">
-                <Tabs value={value} style={{color: 'black'}} onChange={handleChange} >
+                <Tabs value={value} className={classes.tabSection} style={{color: 'black'}} onChange={handleChange} >
                     <Tab label="Vehicle Details" {...a11yProps(0)} />
                     <Tab label="Driver Details" {...a11yProps(1)} />
                 </Tabs>
             </AppBar>
             <TabPanel value={value} index={0}>
-                <VehicleDetailsForm/>
+                <VehicleDetailsForm classes={classes} vehicleDetails={vehicleObj} setVehicleObj={updateVehicleObj}/>
             </TabPanel>
             <TabPanel value={value} index={1}>
-               <DriverDetailsForm/>
+               <DriverDetailsForm vehicleInfo={vehicleObj} />
             </TabPanel>
-                </Grid></Grid>
+                </Grid>
+            </Grid>
         </div>
 
 

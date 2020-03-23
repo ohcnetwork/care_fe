@@ -132,3 +132,9 @@
   text-align: center;
   padding-top: 5px;
 }
+
+.nativeSelectMod{
+  .MuiInputBase-root{
+    width:100%
+  }
+}
