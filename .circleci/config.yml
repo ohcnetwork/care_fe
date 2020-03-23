@@ -1,0 +1,47 @@
+version: 2
+
+jobs:
+  install:
+    executor:
+      name: node/default
+    steps:
+      - checkout
+      - run: echo "Installing Node Modules"
+      - node/with-cache:
+          steps:
+            - run: npm install
+  build:
+    executor:
+      name: node/default
+    steps:
+      - checkout
+      - run: echo "Running Build"
+      - node/with-cache:
+          steps:
+            - run: npm run build
+  deploy:
+    machine:
+      enabled: true
+    steps:
+       - run:
+           name: Deploy Over SSH
+           command: |
+						 tar -czf build.tar.gz dist/
+						 scp build.tar.gz netlify@34.93.26.100:/home/netlify/releases/
+             ssh netlify@34.93.26.100 "cd /home/netlify/releases/; tar xf build.tar.gz; cp -rf /opt/care_fe/dist /opt/care_fe/dist.old; mv dist /opt/care_fe/dist"
+
+ workflows:
+   version: 2
+   care:
+     jobs:
+       - install
+       - build:
+            requires: 
+              - install
+       - deploy:
+            requires:
+              - build # only deploy once build job has completed
+            filters:
+              branches:
+                only: mansoor-develop # only deploy on the master branch
+
