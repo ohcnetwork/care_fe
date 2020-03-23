@@ -7,7 +7,7 @@ const TopBar = () => {
         <AppBar position="fixed" className="appBar">
         <Toolbar>
             <Typography variant="h5">
-                <img src={img} style={{height:"25px"}} />
+                <img src= {img} style={{height:"25px"}}  alt="care logo"/>
             </Typography>
         </Toolbar>
         </AppBar>
