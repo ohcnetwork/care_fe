@@ -25,8 +25,16 @@ jobs: # a collection of steps
       - run: 
           name: build
           command: npm run build
+
+      - hold:
+          type: approval
+             requires:
+                - build
+                 
       - run:
           name: Deploy
+             requires:
+                - hold
           command: |
             
             ssh-keyscan -H 34.93.26.100 >> ~/.ssh/known_hosts
