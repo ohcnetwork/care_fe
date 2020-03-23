@@ -8,8 +8,8 @@ import { HospitalOnboarding } from '../Components/Facility/HospitalOnboarding';
 const routes = {
     '/': () => <PrivateDashboard/>,
     '/privatedashboard': () => <PrivateDashboard/>,
-    '/facilities/create': () => <FacilityCreate/>,
     '/facilities': () => <HospitalOnboarding />,
+    '/facilities/create': () => <FacilityCreate/>,
 };
 
 const AppRouter = () => {
