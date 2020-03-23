@@ -64,7 +64,7 @@ const Header = () => {
   let menus = [
     {
       title: 'Dashboard',
-      link: '/dashboard',
+      link: '/privatedashboard',
       icon: <DashboardIcon style={{ color: '#666', marginRight: '4px' }}/>
     },
     {
@@ -79,8 +79,8 @@ const Header = () => {
     },
 
     {
-      title: 'Users',
-      link: '/users',
+      title: 'Ambulance',
+      link: '/ambulance',
       icon: <PersonIcon style={{ color: '#666', marginRight: '4px' }}/>
     },
     {
