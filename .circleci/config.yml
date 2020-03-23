@@ -1,6 +1,6 @@
 version: 2.1
 jobs:
-  install:
+  install-build:
     working_directory: ~/care
     docker:
       - image: circleci/node:10.16.3
@@ -21,11 +21,6 @@ jobs:
           key: dependency-cache-{{ checksum "package-lock.json" }}
           paths:
             - ./node_modules
-  build:
-    working_directory: ~/care
-    docker:
-      - image: circleci/node:10.16.3
-    steps:
       - run: echo "Building"
       - run: 
           name: build
@@ -64,14 +59,11 @@ workflows:
   version: 2
   care:
     jobs:
-      - install
-      - build:
-          requires:
-            - install
+      - install-build
       - hold:
           type: approval
           requires:
-            - build
+            - install-build
       - deploy:
           requires:
             - hold
