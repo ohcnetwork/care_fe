@@ -136,6 +136,9 @@ export const Login = () => {
                         <CardContent className="alignCenter">
                             You don't have an account? <A href="/register">Register</A>
                         </CardContent>
+                        <CardContent className="alignCenter">
+                            Or onboard ambulance <A href="/onboard-ambulance">here</A>
+                        </CardContent>
                     </Card>
                 </Grid>
             </Grid>

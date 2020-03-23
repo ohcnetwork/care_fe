@@ -1,0 +1,29 @@
+version: 2.1
+orbs:
+  node: circleci/node@1.1.6
+jobs:
+  install:
+    executor:
+      name: node/default
+    steps:
+      - checkout
+      - run: echo "Installing Node Modules"
+      - node/with-cache:
+          steps:
+            - run: npm install
+  build:
+    executor:
+      name: node/default
+    steps:
+      - checkout
+      - run: echo "Running Build"
+      - node/with-cache:
+          steps:
+            - run: npm run build
+workflows:
+  care:
+    jobs:
+      - install
+      - build :
+          requires:
+            - install
