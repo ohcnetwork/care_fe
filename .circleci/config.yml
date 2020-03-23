@@ -1,49 +1,31 @@
-version: 2.1
-orbs:
-  node: circleci/node@1.1.6
-jobs:
-  install:
-    executor:
-      name: node/default
-    working_directory: ~/care
-    steps:
-      - checkout
-      - run: echo "Installing Node Modules"
-      - node/with-cache:
-          steps:
-            - run: npm install
-  build:
-    executor:
-      name: node/default
-    working_directory: ~/care
-    steps:
-      - checkout
-      - run: echo "Running Build"
-      - node/with-cache:
-          steps:
-            - run: npm run build && pwd
-
-  deploy:
-    machine:
-      enabled: true
-    working_directory: ~/care
-    steps:
-      - checkout
+version: 2.1 # use CircleCI 2.1
+jobs: # a collection of steps
+  build: # runs not using Workflows must have a `build` job as entry point
+    working_directory: ~/care # directory where steps will run
+    docker: # run the steps with Docker
+      - image: circleci/node:10.16.3 # ...with this image as the primary container; this is where all `steps` will run
+    steps: # a collection of executable commands
+      - checkout # special step to check out source code to working directory
       - run:
-          name: Deploy Over SSH
+          name: update-npm
+          command: 'sudo npm install -g npm@latest'
+      - restore_cache: # special step to restore the dependency cache
+          # Read about caching dependencies: https://circleci.com/docs/2.0/caching/
+          key: dependency-cache-{{ checksum "package-lock.json" }}
+      - run:
+          name: install-npm-wee
+          command: npm install
+      - save_cache: # special step to save the dependency cache
+          key: dependency-cache-{{ checksum "package-lock.json" }}
+          paths:
+            - ./node_modules
+      - run: 
+          name: build
+          command: npm run build
+      - run:
+          name: Deploy
           command: |
-            pwd
-            ls
             tar -czf build.tar.gz dist/
             scp build.tar.gz netlify@34.93.26.100:/home/netlify/releases/
             ssh netlify@34.93.26.100 "cd /home/netlify/releases/; tar xf build.tar.gz; cp -rf /opt/care_fe/dist /opt/care_fe/dist.old; mv dist /opt/care_fe/dist"
-workflows:
-  care:
-    jobs:
-      - install
-      - build :
-          requires:
-            - install
-      - deploy:
-          requires:
-            - build
+
