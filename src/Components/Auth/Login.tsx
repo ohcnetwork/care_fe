@@ -6,6 +6,7 @@ import {makeStyles} from "@material-ui/styles";
 import {Button, Card, CardActions, CardContent, CardHeader, Grid} from '@material-ui/core';
 import {TextInputField} from '../Common/HelperInputFields';
 import { get } from 'lodash';
+import {PublicDashboard} from "../Dashboard/PublicDashboard";
 
 const useStyles = makeStyles(theme => ({
     formTop: {
@@ -89,10 +90,14 @@ export const Login = () => {
         <div>
             <Grid container className={classes.formTop} spacing={2}>
                 <Grid item className="w3-hide-small" xs={12} sm={7} md={8} lg={9}>
+                    <Grid item>
+                        <PublicDashboard/>
+                    </Grid>
+
                 </Grid>
                 <Grid item xs={12} sm={5} md={4} lg={3}>
                     <Card>
-                        <CardHeader title="Login"/>
+                        <CardHeader title="Authorized Login"/>
                         <form onSubmit={(e) => handleSubmit(e)}>
                             <CardContent>
                                 <TextInputField
