@@ -1,13 +1,15 @@
 import React from 'react';
-import {useRedirect, useRoutes} from 'hookrouter';
+import { useRedirect, useRoutes } from 'hookrouter';
 import Header from '../Components/Common/Header';
 import {PrivateDashboard} from "../Components/Dashboard/PrivateDashboard";
 import { FacilityCreate } from '../Components/Facility/FacilityCreate';
 
 const routes = {
     '/': () => <PrivateDashboard/>,
+    '/privatedashboard': () => <PrivateDashboard/>
     '/privatedashboard': () => <PrivateDashboard/>,
     '/facility/create': () => <FacilityCreate/>,
+
 };
 
 const AppRouter = () => {
@@ -15,7 +17,7 @@ const AppRouter = () => {
     const pages = useRoutes(routes);
     return (
         <div>
-      <Header/>
+            <Header />
             <div className="main-content w3-padding">
                 {pages}
             </div>
