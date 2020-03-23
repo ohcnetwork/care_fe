@@ -17,10 +17,10 @@ return (
                     <DashboardStatsCard title="Patient count" value={91} />
                 </Grid>
                 <Grid item>
-                    <DashboardStatsCard title="People in observation (Home " value={64320} />
+                    <DashboardStatsCard title="People in Hoome observation " value={64320} />
                 </Grid>
                 <Grid item>
-                    <DashboardStatsCard title="People in observation (Home) " value={383} />
+                    <DashboardStatsCard title="People in Hospital observation " value={383} />
                 </Grid>
                 <Grid item>
                     <DashboardStatsCard title="Negative Cases" value={2987} />
