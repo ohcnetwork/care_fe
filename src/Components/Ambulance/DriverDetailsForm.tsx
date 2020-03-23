@@ -2,11 +2,20 @@ import React, { useState } from "react";
 import { Button, Card, CardHeader, Grid, CardContent, CardActions, Checkbox } from "@material-ui/core";
 import { TextInputField } from '../Common/HelperInputFields';
 import { useDispatch } from "react-redux"; import { A } from "hookrouter";
-import { postDriver } from "../../Redux/actions";
-import { isEmpty } from "lodash";
+import { postAmbulance } from "../../Redux/actions";
+import { isEmpty, get } from "lodash";
 export const DriverDetailsForm = () => {
   const dispatch: any = useDispatch();
   const initForm: any = {
+
+    drivers: [
+      {
+        name: '',
+        phone_number: '',
+        is_smart_phone: ''
+      }
+    ],
+
     driverName1: '',
     cellNumber1: '',
     smartPhone1: '',
@@ -80,7 +89,8 @@ export const DriverDetailsForm = () => {
     const { checked, name } = e.target;
     const fieldValue = Object.assign({}, form);
     fieldValue.name = checked;
-    setForm(fieldValue);
+    if (name === '')
+      setForm(fieldValue);
   };
 
   const handleSubmit = (e: any) => {
@@ -92,15 +102,15 @@ export const DriverDetailsForm = () => {
       console.log('Not Valid', form)
     }
     // if (valid) {
-    //   dispatch(postAmb(valid)).then((resp: any) => {
-    //     const res = POST(resp, 'data', null);
+    //   dispatch(postAmbulance(valid)).then((resp: any) => {
+    //     const res = get(resp, 'data', null);
     //     const statusCode = get(resp, 'status', '');
     //     if (res && statusCode === 401) {
     //       const err = {
-
+    //       alert('Error Adding Ambulance');
     //       }
-    //     } else {
-
+    //     } else if (res && statusCode === 200) {
+    //       alert('Ambulance Added Successfully');
     //     }
     //   })
     // }
