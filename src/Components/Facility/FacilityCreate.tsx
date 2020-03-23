@@ -17,12 +17,12 @@ const initForm: any = {
     phone_number: "",
     latitude: "",
     longitude: "",
-}
+};
 
 const initialState = {
     form: { ...initForm },
     errors: { ...initForm }
-}
+};
 
 const useStyles = makeStyles(theme => ({
     formTop: {
