@@ -30,6 +30,9 @@ jobs:
     docker:
       - image: circleci/node:10.16.3
     steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "7b:31:e5:d0:a8:97:2a:e1:b5:09:07:6f:77:6f:e5:72"
       - run: echo "Deploying"
       - run:
           name: Deploy
