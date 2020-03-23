@@ -22,18 +22,12 @@ jobs:
           paths:
             - ./node_modules
   build:
-    working_directory: ~/care
-    docker:
-      - image: circleci/node:10.16.3
     steps:
       - run: echo "Building"
       - run: 
           name: build
           command: npm run build
   deploy:
-    working_directory: ~/care
-      docker:
-          - image: circleci/node:10.16.3
     steps:
       - run: echo "Deploying"
       - run:
