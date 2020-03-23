@@ -6,7 +6,6 @@ import { FacilityCreate } from '../Components/Facility/FacilityCreate';
 
 const routes = {
     '/': () => <PrivateDashboard/>,
-    '/privatedashboard': () => <PrivateDashboard/>
     '/privatedashboard': () => <PrivateDashboard/>,
     '/facility/create': () => <FacilityCreate/>,
 
