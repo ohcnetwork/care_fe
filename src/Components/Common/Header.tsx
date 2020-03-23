@@ -77,12 +77,6 @@ const Header = () => {
       link: '/patients',
       icon: <DonutLargeIcon style={{ color: '#666', marginRight: '4px' }}/>
     },
-
-    {
-      title: 'Ambulance',
-      link: '/ambulance',
-      icon: <PersonIcon style={{ color: '#666', marginRight: '4px' }}/>
-    },
     {
       title: 'Settings',
       link: '/settings',
@@ -132,7 +126,7 @@ const Header = () => {
               <MenuIcon/>
             </IconButton>
             <Typography variant="h6">
-              <img src={img} style={{ height: '25px' }}/>
+              <img src={img} alt="care logo"style={{ height: '25px' }}/>
             </Typography>
             <div className={classes.flexGrow}>
 

@@ -1,26 +1,20 @@
-import React, { useState } from "react";
-import {
-    Button,
-    Card,
-    CardActions,
-    CardContent,
-    CardHeader,
-    Grid,
-    Checkbox
-} from "@material-ui/core";
-import {
-    TextInputField,
-    DateInputField,
-    ErrorHelperText,
-    NativeSelectField
-} from "../Common/HelperInputFields";
-import { DISTRICT_CHOICES } from "./constants";
-import { isEmpty } from "lodash";
+import React, {useState} from "react";
+import {Box, Button, Card, CardActions, CardContent, CardHeader, Checkbox, Grid, Typography} from "@material-ui/core";
+import {DateInputField, ErrorHelperText, NativeSelectField, TextInputField} from "../Common/HelperInputFields";
+import {DISTRICT_CHOICES} from "./constants";
+import {isEmpty} from "lodash";
+
 
 //add empty option to districts
-const districtOptions = [{ id: "", text: "--select--" }, ...DISTRICT_CHOICES];
+const districtOptions = [
+    {
+        id: "",
+        text: "District Choice Priority"
+    },
+    ...DISTRICT_CHOICES];
 
 export const VehicleDetailsForm = (props: any) => {
+    const {classes, setVehicleObj, vehicleDetails} = props;
     const initForm: any = {
         registrationNumber: "",
         insuranceValidTill: null,
@@ -30,17 +24,17 @@ export const VehicleDetailsForm = (props: any) => {
         primaryDistrict: "",
         secondaryDistrict: "",
         thirdDistrict: "",
-        hasOxygenSupply: true,
-        hasVentilator: true,
-        hasSuctionMachine: true,
-        hasDefibrillator: true
+        hasOxygenSupply: false,
+        hasVentilator: false,
+        hasSuctionMachine: false,
+        hasDefibrillator: false
     };
     const initErr: any = {};
-    const [form, setForm] = useState(initForm);
+    const [form, setForm] = useState<any>(Object.assign(initForm, vehicleDetails));
     const [errors, setErrors] = useState(initErr);
 
     const handleChange = (e: any) => {
-        const { value, name } = e.target;
+        const {value, name} = e.target;
         const fieldValue = Object.assign({}, form);
         const errorField = Object.assign({}, errors);
         if (errorField[name]) {
@@ -48,14 +42,11 @@ export const VehicleDetailsForm = (props: any) => {
             setErrors(errorField);
         }
         fieldValue[name] = value;
-        if (name === "username") {
-            fieldValue[name] = value.toLowerCase();
-        }
         setForm(fieldValue);
     };
 
     const handleCheckboxFieldChange = (e: any) => {
-        const { checked, name } = e.target;
+        const {checked, name} = e.target;
         const fieldValue = Object.assign({}, form);
         fieldValue[name] = checked;
         setForm(fieldValue);
@@ -69,8 +60,6 @@ export const VehicleDetailsForm = (props: any) => {
                 case "registrationNumber":
                     if (!value) {
                         err[key] = "This field is required";
-                    } else if (!/^[a-z0-9]+$/i.test(value)) {
-                        err[key] = "Invalid registration number";
                     }
                     break;
                 case "insuranceValidTill":
@@ -83,16 +72,17 @@ export const VehicleDetailsForm = (props: any) => {
                     if (!value) {
                         err[key] = "This field is required";
                     } else if (
-                        !/^(?:(?:\+?1\s*(?:[.-]\s*)?)?(?:\(\s*([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9])\s*\)|([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9]))\s*(?:[.-]\s*)?)?([2-9]1[02-9]|[2-9][02-9]1|[2-9][02-9]{2})\s*(?:[.-]\s*)?([0-9]{4})(?:\s*(?:#|x\.?|ext\.?|extension)\s*(\d+))?$/g.test(
-                            value
+                        !/^[0-9]{10}$/.test(value
                         )
                     ) {
                         err[key] = "Invalid phone number";
                     }
+                    break;
                 case "primaryDistrict":
                 case "secondaryDistrict":
                 case "thirdDistrict":
                     !value && (err[key] = "This field is required");
+                    break;
                 default:
                     break;
             }
@@ -103,150 +93,195 @@ export const VehicleDetailsForm = (props: any) => {
         }
         return form;
     };
+
     const handleSubmit = (e: any) => {
         e.preventDefault();
         const valid = validateData();
         if (valid) {
-            console.log(form);
+            setVehicleObj(form);
         }
     };
     return (
         <div>
-            <Grid container spacing={2} alignContent="center" justify="center">
-                <Grid item xs={12} sm={5} md={4} lg={3}>
-                    <Card>
-                        <CardHeader title="Vehicle Details" />
-                        <form onSubmit={e => {}}>
-                            <CardContent>
-                                <TextInputField
-                                    name="registrationNumber"
-                                    placeholder="Vehicle registration number"
-                                    variant="outlined"
-                                    margin="dense"
-                                    value={form.registrationNumber}
-                                    onChange={handleChange}
-                                    errors={errors.registrationNumber}
-                                />
-                                <DateInputField
-                                    type="insuranceValidTill"
-                                    label="Insurance valid till"
-                                    variant="outlined"
-                                    margin="dense"
-                                    value={form.insuranceValidTill}
-                                    onChange={(date: any) =>
-                                        handleChange({
-                                            target: {
-                                                name: "insuranceValidTill",
-                                                value: date
-                                            }
-                                        })
-                                    }
-                                    errors={errors.insuranceValidTill}
-                                />
-                                <TextInputField
-                                    name="nameOfOwner"
-                                    placeholder="Name of owner"
-                                    variant="outlined"
-                                    margin="dense"
-                                    value={form.nameOfOwner}
-                                    onChange={handleChange}
-                                    errors={errors.nameOfOwner}
-                                />
-                                <TextInputField
-                                    name="ownerPhoneNumber"
-                                    placeholder="Owner phone number"
-                                    variant="outlined"
-                                    margin="dense"
-                                    value={form.ownerPhoneNumber}
-                                    onChange={handleChange}
-                                    errors={errors.ownerPhoneNumber}
-                                />
-                                <Checkbox
-                                    checked={form.isSmartPhone}
-                                    onChange={handleCheckboxFieldChange}
-                                    name="isSmartPhone"
-                                />{" "}
-                                Is smart phone
-                                <NativeSelectField
-									inputProps={{
-										name: "primaryDistrict"
-									}}
-                                    placeholder="Primary district served"
-                                    variant="outlined"
-                                    margin="dense"
-                                    options={districtOptions}
-                                    value={form.primaryDistrict}
-                                    onChange={handleChange}
-                                />
-                                <ErrorHelperText
-                                    error={errors.primaryDistrict}
-                                />
-                                <NativeSelectField
-                                    inputProps={{
-										name: "secondaryDistrict"
-									}}
-                                    placeholder="Secondary district served"
-                                    variant="outlined"
-                                    margin="dense"
-                                    options={districtOptions}
-                                    value={form.secondaryDistrict}
-                                    onChange={handleChange}
-                                />
-                                <ErrorHelperText
-                                    error={errors.secondaryDistrict}
-                                />
-                                <NativeSelectField
-                                    inputProps={{
-										name: "thirdDistrict"
-									}}
-                                    placeholder="Third district served"
-                                    variant="outlined"
-                                    margin="dense"
-                                    options={districtOptions}
-                                    value={form.thirdDistrict}
-                                    onChange={handleChange}
-                                />
-                                <ErrorHelperText error={errors.thirdDistrict} />
-                                <Grid>
-                                    <Checkbox
-                                        checked={form.hasOxygenSupply}
-                                        onChange={handleCheckboxFieldChange}
-                                        name="hasOxygenSupply"
-                                    />{" "}
-                                    Has Oxygen supply
-                                </Grid>
-                                <Grid>
-                                    <Checkbox
-                                        checked={form.hasVentilator}
-                                        onChange={handleCheckboxFieldChange}
-                                        name="hasVentilator"
-                                    />{" "}
-                                    Has ventilator
-                                </Grid>
-                                <Grid>
-                                    <Checkbox
-                                        checked={form.hasSuctionMachine}
-                                        onChange={handleCheckboxFieldChange}
-                                        name="hasSuctionMachine"
-                                    />{" "}
-                                    Has suction machine
-                                </Grid>
-                                <Grid>
-                                    <Checkbox
-                                        checked={form.hasDefibrillator}
-                                        onChange={handleCheckboxFieldChange}
-                                        name="hasDefibrillator"
-                                    />{" "}
-                                    Has defibrilator
-                                </Grid>
+            <Grid container alignContent="center" justify="center">
+                <Grid item xs={12}>
+                    <Card style={{marginBottom: '20px'}}>
+                        <CardHeader title="Vehicle Details"/>
+                        <form onSubmit={e => {
+                            handleSubmit(e)
+                        }} className={`${classes.formBottomPadding}`}>
+                            <CardContent className={classes.cardContent}>
+                                <Box display="flex" flexDirection="column">
+                                    <TextInputField
+                                        name="registrationNumber"
+                                        placeholder="Vehicle registration number"
+                                        variant="outlined"
+                                        margin="dense"
+                                        InputLabelProps={{shrink: !!form.registrationNumber}}
+                                        value={form.registrationNumber}
+                                        onChange={handleChange}
+                                        errors={errors.registrationNumber}
+                                    />
+                                    <DateInputField
+                                        type="insuranceValidTill"
+                                        label="Insurance valid till"
+                                        variant="outlined"
+                                        margin="dense"
+                                        value={form.insuranceValidTill}
+                                        InputLabelProps={{shrink: !!form.insuranceValidTill}}
+                                        onChange={(date: any) =>
+                                            handleChange({
+                                                target: {
+                                                    name: "insuranceValidTill",
+                                                    value: date
+                                                }
+                                            })
+                                        }
+                                        errors={errors.insuranceValidTill}
+                                        className={classes.dateField}
+                                    />
+                                    <TextInputField
+                                        name="nameOfOwner"
+                                        placeholder="Name of owner"
+                                        variant="outlined"
+                                        margin="dense"
+                                        value={form.nameOfOwner}
+                                        InputLabelProps={{shrink: !!form.nameOfOwner}}
+                                        onChange={handleChange}
+                                        errors={errors.nameOfOwner}
+                                    />
+                                    <TextInputField
+                                        name="ownerPhoneNumber"
+                                        placeholder="Owner phone number"
+                                        variant="outlined"
+                                        margin="dense"
+                                        value={form.ownerPhoneNumber}
+                                        InputLabelProps={{shrink: !!form.ownerPhoneNumber}}
+                                        onChange={handleChange}
+                                        errors={errors.ownerPhoneNumber}
+                                    />
+                                    <Box display="flex" flexDirection="row" justifyItems="flex-start"
+                                         alignItems="center">
+                                        <Checkbox
+                                            checked={form.isSmartPhone}
+                                            onChange={handleCheckboxFieldChange}
+                                            name="isSmartPhone"
+                                        />
+                                        <Typography className={classes.checkBoxLabel}> Do you have a smart phone
+                                            ?</Typography>
+                                    </Box>
+                                    <Box>
+                                        <Typography>
+                                            Select Serviceable Districts
+                                        </Typography>
+                                    </Box>
+                                    <div className={`nativeSelectMod ${classes.selectField}`}>
+                                        <NativeSelectField
+                                            inputProps={{
+                                                name: "primaryDistrict"
+                                            }}
+                                            placeholder="Primary district served"
+                                            variant="outlined"
+                                            margin="dense"
+                                            InputLabelProps={{shrink: !!form.primaryDistrict}}
+                                            options={districtOptions}
+                                            value={form.primaryDistrict}
+                                            onChange={handleChange}
+
+                                        />
+                                        <ErrorHelperText
+                                            error={errors.primaryDistrict}
+                                        />
+                                    </div>
+                                    <div className={`nativeSelectMod ${classes.selectField}`}>
+                                        <NativeSelectField
+                                            inputProps={{
+                                                name: "secondaryDistrict"
+                                            }}
+                                            placeholder="Secondary district served"
+                                            variant="outlined"
+                                            margin="dense"
+
+                                            options={districtOptions}
+                                            value={form.secondaryDistrict}
+                                            onChange={handleChange}
+                                        />
+                                        <ErrorHelperText
+                                            error={errors.secondaryDistrict}
+                                        />
+                                    </div>
+                                    <div className={`nativeSelectMod ${classes.selectField}`}>
+                                        <NativeSelectField
+                                            inputProps={{
+                                                name: "thirdDistrict"
+                                            }}
+                                            placeholder="Third district served"
+                                            variant="outlined"
+                                            margin="dense"
+                                            options={districtOptions}
+                                            value={form.thirdDistrict}
+                                            onChange={handleChange}
+                                        />
+                                        <ErrorHelperText error={errors.thirdDistrict}/>
+                                    </div>
+                                    <Box>
+                                        <Typography>
+                                            Select Your Ambulance Features
+                                        </Typography>
+                                    </Box>
+                                    <Box display="flex" flexDirection="row" justifyItems="flex-start"
+                                         alignItems="center">
+                                        <Checkbox
+                                            checked={form.hasOxygenSupply}
+                                            onChange={handleCheckboxFieldChange}
+                                            name="hasOxygenSupply"
+                                        />
+                                        <Typography className={classes.checkBoxLabel}>
+                                            Has Oxygen Supply
+                                        </Typography>
+                                    </Box>
+                                    <Box display="flex" flexDirection="row" justifyItems="flex-start"
+                                         alignItems="center">
+                                        <Checkbox
+                                            checked={form.hasVentilator}
+                                            onChange={handleCheckboxFieldChange}
+                                            name="hasVentilator"
+                                        />
+                                        <Typography className={classes.checkBoxLabel}>
+                                            Has ventilator
+                                        </Typography>
+                                    </Box>
+                                    <Box display="flex" flexDirection="row" justifyItems="flex-start"
+                                         alignItems="center">
+                                        <Checkbox
+                                            checked={form.hasSuctionMachine}
+                                            onChange={handleCheckboxFieldChange}
+                                            name="hasSuctionMachine"
+                                        />
+                                        <Typography className={classes.checkBoxLabel}>
+                                            Has suction machine
+                                        </Typography>
+                                    </Box>
+                                    <Box display="flex" flexDirection="row" justifyItems="flex-start"
+                                         alignItems="center">
+                                        <Checkbox
+                                            checked={form.hasDefibrillator}
+                                            onChange={handleCheckboxFieldChange}
+                                            name="hasDefibrillator"
+                                        />
+                                        <Typography className={classes.checkBoxLabel}>
+                                            Has defibrilator
+                                        </Typography>
+                                    </Box>
+                                </Box>
                             </CardContent>
 
-                            <CardActions className="padding16">
+                            <CardActions>
                                 <Button
                                     color="primary"
                                     variant="contained"
                                     type="submit"
-                                    style={{ marginLeft: "auto" }}
+                                    style={{marginLeft: "auto"}}
                                     onClick={e => handleSubmit(e)}
                                 >
                                     Next
