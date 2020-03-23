@@ -5,6 +5,9 @@ jobs: # a collection of steps
     docker: # run the steps with Docker
       - image: circleci/node:10.16.3 # ...with this image as the primary container; this is where all `steps` will run
     steps: # a collection of executable commands
+      - add_ssh_keys:
+          fingerprints:
+            - "7b:31:e5:d0:a8:97:2a:e1:b5:09:07:6f:77:6f:e5:72"
       - checkout # special step to check out source code to working directory
       - run:
           name: update-npm
