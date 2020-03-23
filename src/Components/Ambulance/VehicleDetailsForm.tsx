@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import {Box, Button, Card, CardActions, CardContent, CardHeader, Checkbox, Grid, Typography} from "@material-ui/core";
+import {Box, Button, Card, CardActions, CardContent, CardHeader, Checkbox, Grid, Typography, InputLabel, FormControl} from "@material-ui/core";
 import {DateInputField, ErrorHelperText, NativeSelectField, TextInputField} from "../Common/HelperInputFields";
 import {DISTRICT_CHOICES} from "./constants";
 import {isEmpty} from "lodash";
@@ -32,7 +32,11 @@ export const VehicleDetailsForm = (props: any) => {
     const initErr: any = {};
     const [form, setForm] = useState<any>(Object.assign(initForm, vehicleDetails));
     const [errors, setErrors] = useState(initErr);
-    const validTill = [];
+    const inputLabel = React.useRef<HTMLLabelElement>(null);
+    const validTill = [{
+        id: "",
+        text: "Select"
+    }];
     for(let i=0;i<=10;i++){
         let text = `202${i}`
         if(i==10){
@@ -68,6 +72,8 @@ export const VehicleDetailsForm = (props: any) => {
                 case "registrationNumber":
                     if (!value) {
                         err[key] = "This field is required";
+                    }else if(value && !(/^[A-Z]{2}[0-9]{1,2}[A-Z]{1,2}[0-9]{1,4}$/.test(value))){
+                        err[key] = "Invalid vehicle number";
                     }
                     break;
                 case "insuranceValidTill":
@@ -79,10 +85,7 @@ export const VehicleDetailsForm = (props: any) => {
                 case "ownerPhoneNumber":
                     if (!value) {
                         err[key] = "This field is required";
-                    } else if (
-                        !/^[0-9]{10}$/.test(value
-                        )
-                    ) {
+                    } else if(!/^[0-9]{10}$/.test(value)) {
                         err[key] = "Invalid phone number";
                     }
                     break;
@@ -132,6 +135,9 @@ export const VehicleDetailsForm = (props: any) => {
                                     />
 
                                     <div className={`nativeSelectMod ${classes.selectField}`}>
+                                        <InputLabel className={classes.selectLabel} ref={inputLabel} id="insuranceValidTill">
+                                            Insurance valid till
+                                        </InputLabel>
                                         <NativeSelectField
                                             inputProps={{
                                                 name: "insuranceValidTill"
