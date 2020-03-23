@@ -1,19 +1,28 @@
 import React from 'react';
 import {useRedirect, useRoutes} from 'hookrouter';
-import {PublicDashboard} from "../Components/Dashboard/PublicDashboard";
+import Header from '../Components/Common/Header';
+import {PrivateDashboard} from "../Components/Dashboard/PrivateDashboard";
+import { FacilityCreate } from '../Components/Facility/FacilityCreate';
 
 const routes = {
-    '/': () => <PublicDashboard/>,
-    '/dashboard': () => <PublicDashboard/>,
+    '/': () => <PrivateDashboard/>,
+    '/privatedashboard': () => <PrivateDashboard/>,
+    '/facility/create': () => <FacilityCreate/>,
 };
 
 const AppRouter = () => {
-    useRedirect('/', '/dashboard');
+    useRedirect('/', '/privatedashboard');
     const pages = useRoutes(routes);
     return (
         <div>
-            <div className="w3-padding">
+      <Header/>
+            <div className="main-content w3-padding">
                 {pages}
+            </div>
+            <div className="app-footer">
+                <div className="copy-right">
+                    Corona Care Network
+                </div>
             </div>
         </div>
     );

@@ -1,9 +1,9 @@
 import React from 'react';
 import Grid from '@material-ui/core/Grid';
 import { DashboardStatsCard } from '../Common/DashboardStatsCard';
-
-export const PublicDashboard = () => {
-    return (
+export const PrivateDashboard = () => {
+return (
+    <div>
         <Grid item xs={12} style={{marginTop: '75px'}}>
             <Grid container justify="flex-start" spacing={5}>
                 <Grid item>
@@ -23,5 +23,6 @@ export const PublicDashboard = () => {
                 </Grid>
             </Grid>
         </Grid>
-    );
+    </div>
+)
 };

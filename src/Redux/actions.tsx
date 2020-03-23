@@ -91,3 +91,9 @@ export const postSignUp = (form: object) => {
 export const getCurrentUser = () => {
     return fireRequest('currentUser');
 };
+
+
+// Facility
+export const createFacility = (form:object) => {
+    return fireRequest("createFacility", [], form)
+}

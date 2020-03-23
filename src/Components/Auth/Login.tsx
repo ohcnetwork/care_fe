@@ -1,10 +1,12 @@
 import {useDispatch} from "react-redux";
 import React, {useState} from "react";
 import {postLogin} from "../../Redux/actions";
-import { navigate} from 'hookrouter';
+import { A, navigate} from 'hookrouter';
 import {makeStyles} from "@material-ui/styles";
 import {Button, Card, CardActions, CardContent, CardHeader, Grid} from '@material-ui/core';
 import {TextInputField} from '../Common/HelperInputFields';
+import { get } from 'lodash';
+import {PublicDashboard} from "../Dashboard/PublicDashboard";
 
 const useStyles = makeStyles(theme => ({
     formTop: {
@@ -68,15 +70,16 @@ export const Login = () => {
         const valid = validateData();
         if (valid) {
             dispatch(postLogin(valid)).then((resp: any) => {
-                const res = resp && resp.data;
-                if (res && res.statusCode && res.statusCode === 401) {
+                const res = get(resp, 'data', null);
+                const statusCode = get(resp, 'status', '');
+                if (res && statusCode === 401) {
                     const err = {
                         password: 'Username or Password incorrect',
                     };
                     setErrors(err);
-                } else if (res.success) {
+                } else if (res && statusCode === 200) {
                     localStorage.setItem('care_access_token', res.access);
-                    navigate('/dashboard');
+                    navigate('/privatedashboard');
                     window.location.reload();
                 }
             });
@@ -87,11 +90,14 @@ export const Login = () => {
         <div>
             <Grid container className={classes.formTop} spacing={2}>
                 <Grid item className="w3-hide-small" xs={12} sm={7} md={8} lg={9}>
+                    <Grid item>
+                        <PublicDashboard/>
+                    </Grid>
 
                 </Grid>
                 <Grid item xs={12} sm={5} md={4} lg={3}>
                     <Card>
-                        <CardHeader title="Login"/>
+                        <CardHeader title="Authorized Login"/>
                         <form onSubmit={(e) => handleSubmit(e)}>
                             <CardContent>
                                 <TextInputField
@@ -116,7 +122,7 @@ export const Login = () => {
                             </CardContent>
 
                             <CardActions className="padding16">
-
+                                <A href="/forgot-password">Forgot password ?</A>
                                 <Button
                                     color="primary"
                                     variant="contained"
@@ -127,6 +133,9 @@ export const Login = () => {
                                 </Button>
                             </CardActions>
                         </form>
+                        <CardContent className="alignCenter">
+                            You don't have an account? <A href="/register">Register</A>
+                        </CardContent>
                     </Card>
                 </Grid>
             </Grid>
