@@ -64,8 +64,7 @@ export const DriverDetailsForm = () => {
           }
           break;
         case 'cellNumber1':
-          !/^(?:(?:\+?1\s*(?:[.-]\s*)?)?(?:\(\s*([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9])\s*\)|([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9]))\s*(?:[.-]\s*)?)?([2-9]1[02-9]|[2-9][02-9]1|[2-9][02-9]{2})\s*(?:[.-]\s*)?([0-9]{4})(?:\s*(?:#|x\.?|ext\.?|extension)\s*(\d+))?$/g.test(
-            form.cellNumber1
+          !/^[0-9]{10}$/.test(            form.cellNumber1
           ) && (err.cellNumber1 = "Invalid phone number");
           break;
         case 'driverName2':
@@ -73,7 +72,7 @@ export const DriverDetailsForm = () => {
             (err.driverName2 = "Field is required")
           break;
         case 'cellNumber2':
-          !/^(?:(?:\+?1\s*(?:[.-]\s*)?)?(?:\(\s*([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9])\s*\)|([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9]))\s*(?:[.-]\s*)?)?([2-9]1[02-9]|[2-9][02-9]1|[2-9][02-9]{2})\s*(?:[.-]\s*)?([0-9]{4})(?:\s*(?:#|x\.?|ext\.?|extension)\s*(\d+))?$/g.test(
+          !/^[0-9]{10}$/.test(
             form.cellNumber2
           ) && (err.cellNumber2 = "Invalid phone number");
         default: break;
@@ -118,11 +117,8 @@ export const DriverDetailsForm = () => {
 
   return (
     <div>
-      <Grid container spacing={2}>
-        <Grid item className="w3-hide-small" xs={12} sm={7} md={8} lg={9}>
-
-        </Grid>
-        <Grid item xs={12} sm={5} md={8} lg={8}>
+      <Grid container alignContent="center" justify="center">
+        <Grid item xs={12} >
           <Card>
             <CardHeader title="Driver Details" />
             <form onSubmit={(e) => handleSubmit(e)}>

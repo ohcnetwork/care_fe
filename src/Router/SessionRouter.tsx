@@ -5,13 +5,13 @@ import TopBar from "../Components/Common/TopBar";
 import { PublicDashboard } from '../Components/Dashboard/PublicDashboard';
 import { VehicleDetailsForm } from '../Components/Ambulance/VehicleDetailsForm';
 import { DriverDetailsForm } from '../Components/Ambulance/DriverDetailsForm';
+import AmbulanceOnboarding from "../Components/Ambulance/AmbulanceOnboarding";
 
 const routes = {
     '/': () => <Login />,
     '/login': () => <Login />,
     '/dashboard': () => <PublicDashboard />,
-    '/onboard-ambulance': () => <VehicleDetailsForm />,
-    '/driver-details': () => <DriverDetailsForm />
+    '/ambulance': () => <AmbulanceOnboarding />,
 };
 
 const SessionRouter = () => {
