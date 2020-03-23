@@ -8,7 +8,7 @@ import { HospitalOnboarding } from '../Components/Facility/HospitalOnboarding';
 const routes = {
     '/': () => <PrivateDashboard/>,
     '/privatedashboard': () => <PrivateDashboard/>,
-    '/facility/create': () => <FacilityCreate/>,
+    '/facilities/create': () => <FacilityCreate/>,
     '/facilities': () => <HospitalOnboarding />,
 };
 

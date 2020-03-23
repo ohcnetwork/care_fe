@@ -124,7 +124,7 @@ export const Login = () => {
                             </CardContent>
 
                             <CardActions className="padding16">
-                                <A href="/forgot-password">Forgot password ?</A>
+                                {/*<A href="/forgot-password">Forgot password ?</A>*/}
                                 <Button
                                     color="primary"
                                     variant="contained"
@@ -135,11 +135,11 @@ export const Login = () => {
                                 </Button>
                             </CardActions>
                         </form>
+                        {/*<CardContent className="alignCenter">*/}
+                        {/*    You don't have an account? <A href="/register">Register</A>*/}
+                        {/*</CardContent>*/}
                         <CardContent className="alignCenter">
-                            You don't have an account? <A href="/register">Register</A>
-                        </CardContent>
-                        <CardContent className="alignCenter">
-                            Or onboard ambulance <A href="/ambulance">here</A>
+                            Onboard Ambulances <A href="/ambulance">here</A>
                         </CardContent>
                     </Card>
                 </Grid>

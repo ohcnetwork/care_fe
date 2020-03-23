@@ -6,7 +6,7 @@ import {
     CardContent,
     CardHeader,
     Grid,
-    Checkbox
+    Checkbox, Typography
 } from "@material-ui/core";
 import {
     TextInputField,
@@ -167,6 +167,9 @@ export const VehicleDetailsForm = (props: any) => {
                                     name="isSmartPhone"
                                 />
                                 Is smart phone
+                                <Typography>
+<span>Select Serviceable Districts</span>
+                                </Typography>
                                 <NativeSelectField
 									inputProps={{
 										name: "primaryDistrict"
