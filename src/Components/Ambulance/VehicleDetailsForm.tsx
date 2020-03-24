@@ -39,9 +39,6 @@ export const VehicleDetailsForm = (props: any) => {
     }];
     for(let i=0;i<=2;i++){
         let text = `202${i}`
-        if(i==2){
-            text=`2022`
-        }
         validTill.push({id:text,text})
     }
 
@@ -76,7 +73,7 @@ export const VehicleDetailsForm = (props: any) => {
                 case "registrationNumber":
                     if (!value) {
                         err[key] = "This field is required";
-                    }else if(value && !(/^[A-Z]{2}[0-9]{1,2}[A-Z]{1,2}[0-9]{1,4}$/.test(value))){
+                    }else if(value && !(/^[a-zA-Z]{2}[0-9]{1,2}[a-zA-Z]{1,2}[0-9]{1,4}$/.test(value))){
                         err[key] = "Invalid vehicle number";
                     }
                     break;
