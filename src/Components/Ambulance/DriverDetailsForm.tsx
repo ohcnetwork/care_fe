@@ -4,6 +4,7 @@ import { TextInputField } from '../Common/HelperInputFields';
 import { useDispatch } from "react-redux";
 import { postAmbulance } from "../../Redux/actions";
 import { isEmpty, get } from "lodash";
+import { navigate } from 'hookrouter';
 
 
 export const DriverDetailsForm = (props:any) => {
@@ -43,7 +44,7 @@ export const DriverDetailsForm = (props:any) => {
   };
 
   const validateData = () => {
-    const err = Object.assign({});
+    const err:any = {};
     Object.keys(form).forEach((key) => {
       const value = form[key];
       switch (key) {
@@ -76,6 +77,7 @@ export const DriverDetailsForm = (props:any) => {
     });
     if (!isEmpty(err)) {
       setErrors(err);
+      return false;
     }
     return form;
   };
@@ -122,8 +124,9 @@ export const DriverDetailsForm = (props:any) => {
         const statusCode = get(resp, 'status', '');
         if (res && statusCode === 401) {
           alert('Something went wrong..!');
-        } else if (res && statusCode === 200) {
+        } else if (res && statusCode === 201) {
           alert('Ambulance Added Successfully');
+          navigate("/")
         }
       })
     }
@@ -140,7 +143,8 @@ export const DriverDetailsForm = (props:any) => {
                 <h4>Driver 1</h4>
                 <TextInputField
                   name="driverName1"
-                  placeholder="Driver Name"
+                  label="Driver Name"
+                  placeholder=""
                   variant="outlined"
                   margin="dense"
                   value={form.driverName1}
@@ -150,7 +154,8 @@ export const DriverDetailsForm = (props:any) => {
                 <TextInputField
                   type="number"
                   name="cellNumber1"
-                  placeholder="Cellphone Number"
+                  label="Cellphone Number"
+                  placeholder=""
                   variant="outlined"
                   margin="dense"
                   value={form.cellNumber1}
@@ -168,7 +173,8 @@ export const DriverDetailsForm = (props:any) => {
                 <h4>Driver 2</h4>
                 <TextInputField
                   name="driverName2"
-                  placeholder="Driver Name"
+                  label="Driver Name"
+                  placeholder=""
                   variant="outlined"
                   margin="dense"
                   value={form.driverName2}
@@ -178,7 +184,8 @@ export const DriverDetailsForm = (props:any) => {
                 <TextInputField
                   type="number"
                   name="cellNumber2"
-                  placeholder="Cellphone Number"
+                  label="Cellphone Number"
+                  placeholder=""
                   variant="outlined"
                   margin="dense"
                   value={form.cellNumber2}
