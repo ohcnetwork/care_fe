@@ -12,6 +12,7 @@ import {
 import { makeStyles } from '@material-ui/core/styles';
 import Pagination from '../Common/Pagination';
 import TitleHeader from '../Common/TitleHeader';
+import {getUserList} from "../../Redux/actions";
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -19,7 +20,7 @@ const useStyles = makeStyles(theme => ({
         padding: '8px'
     },
     card: {
-        height: 120,
+        height: 160,
         width: '100%',
         backgroundColor: '#FFFFFF',
     },
@@ -101,11 +102,14 @@ export default function ManageUsers(props: any) {
 
     const fetchData = (paginateData: any) => {
         setIsLoading(true);
-        dispatch(userList)
+        dispatch(getUserList())
             .then((resp:any)=> {
-                console.log(resp.results);
-                setData(resp.results);
-                setTotalCount(resp.results.length);
+                const res = resp && resp.data;
+                console.log(res);
+                setData(res.results);
+                console.log('data', res.results);
+                setTotalCount(res.count);
+                setIsLoading(false);
             });
     };
     useEffect(() => {
@@ -131,12 +135,22 @@ export default function ManageUsers(props: any) {
                       className={classes.root}>
                     <Card className={classes.card}>
                         <CardHeader className={classes.cardHeader}
-                                    title={<span className={classes.title}><Tooltip title={<span className={classes.toolTip}>{user.name}</span>}
-                                                                                    interactive={true}><span>{user.name}</span></Tooltip></span>}
+                                    title={<span className={classes.title}><Tooltip title={<span className={classes.toolTip}>{user.username}</span>}
+                                                                                    interactive={true}><span>{user.username}</span></Tooltip></span>}
                         />
                         <CardContent className={classes.content}>
                             <Typography>
-                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>District - </span>{user.district}
+                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Full Name - </span>{`${user.first_name} ${user.last_name}`}
+                            </Typography>
+                        </CardContent>
+                        <CardContent className={classes.content}>
+                            <Typography>
+                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Role - </span>{user.user_type}
+                            </Typography>
+                        </CardContent>
+                        <CardContent className={classes.content}>
+                            <Typography>
+                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Contact - </span>{user.phone_number}
                             </Typography>
                         </CardContent>
                     </Card>
@@ -155,6 +169,7 @@ export default function ManageUsers(props: any) {
         );
     } else if (data && data.length) {
         manageUsers = userList;
+        console.log(manageUsers);
     } else if (data && data.length === 0) {
         manageUsers = (
             <Grid item xs={12} md={12} className="textMarginCenter">
