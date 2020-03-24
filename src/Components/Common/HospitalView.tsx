@@ -13,7 +13,7 @@ const useStyles = makeStyles({
     root: {
       minWidth: 200,
       width: 350,
-      backgroundImage: "linear-gradient(to right top, #0a3ded, #0053f5, #0066fa, #0078fd, #0088ff, #0099ff, #00a9ff, #00b8ff, #00cbff, #00dcff, #25ecf9, #5ffbf1)",
+      backgroundImage: "linear-gradient(to right top, #0a98ed, #00abf6, #00bdfb, #00cefe, #00dfff, #38e7fe, #53effe, #6af6fd, #83f7fc, #98f8fb, #abf8fa, #bcf9fa)",
       margin: "auto",
       border: "5px",
       transition: "0.3s",
