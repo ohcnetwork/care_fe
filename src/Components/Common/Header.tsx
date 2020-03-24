@@ -73,6 +73,11 @@ const Header = () => {
       icon: <WorkIcon style={{ color: '#666', marginRight: '4px' }}/>
     },
     {
+      title: 'Analytics',
+      link: '/analytics',
+      icon: <InboxIcon style={{ color: '#666', marginRight: '4px' }}/>
+    },
+    {
       title: 'Patients',
       link: '/patients',
       icon: <DonutLargeIcon style={{ color: '#666', marginRight: '4px' }}/>
