@@ -1,46 +1,68 @@
 import React, {useState} from "react";
-import {Box, Button, Card, CardActions, CardContent, CardHeader, Checkbox, Grid, Typography, InputLabel, FormControl} from "@material-ui/core";
-import {DateInputField, ErrorHelperText, NativeSelectField, TextInputField} from "../Common/HelperInputFields";
+import {Box, Button, Card, CardActions, CardContent, CardHeader, Checkbox, Grid, Typography, InputLabel} from "@material-ui/core";
+import {ErrorHelperText, NativeSelectField, TextInputField} from "../Common/HelperInputFields";
 import {DISTRICT_CHOICES} from "./constants";
 import {isEmpty} from "lodash";
 
+interface formFields {
+    registrationNumber: string;
+    insuranceValidTill: number;
+    nameOfOwner: string;
+    ownerPhoneNumber: string;
+    isSmartPhone: boolean;
+    primaryDistrict: number;
+    secondaryDistrict: number;
+    thirdDistrict: number;
+    hasOxygenSupply: boolean;
+    hasVentilator: boolean;
+    hasSuctionMachine: boolean;
+    hasDefibrillator: boolean
+}
+
+const initFormData: formFields = {
+    registrationNumber: '',
+    insuranceValidTill: 0,
+    nameOfOwner: '',
+    ownerPhoneNumber: '',
+    isSmartPhone: false,
+    primaryDistrict: 0,
+    secondaryDistrict: 0,
+    thirdDistrict: 0,
+    hasOxygenSupply: false,
+    hasVentilator: false,
+    hasSuctionMachine: false,
+    hasDefibrillator: false
+};
 
 //add empty option to districts
-const districtOptions = [
+const allDistrictOptions: Array<{ id: number; text: string }> = [
     {
-        id: "",
-        text: "District Choice Priority"
+        id: 0,
+        text: 'District Choice Priority',
     },
     ...DISTRICT_CHOICES];
 
 export const VehicleDetailsForm = (props: any) => {
     const {classes, setVehicleObj, vehicleDetails} = props;
-    const initForm: any = {
-        registrationNumber: "",
-        insuranceValidTill: null,
-        nameOfOwner: "",
-        ownerPhoneNumber: "",
-        isSmartPhone: false,
-        primaryDistrict: null,
-        secondaryDistrict: null,
-        thirdDistrict: null,
-        hasOxygenSupply: false,
-        hasVentilator: false,
-        hasSuctionMachine: false,
-        hasDefibrillator: false
-    };
+    const initForm: formFields = { ...initFormData };
     const initErr: any = {};
     const [form, setForm] = useState<any>(Object.assign(initForm, vehicleDetails));
     const [errors, setErrors] = useState(initErr);
     const inputLabel = React.useRef<HTMLLabelElement>(null);
     const validTill = [{
-        id: "",
-        text: "Select"
+        id: 0,
+        text: 'Select',
     }];
     for(let i=0;i<=2;i++){
         let text = `202${i}`
-        validTill.push({id:text,text})
+        validTill.push({id:parseInt(text),text})
     }
+
+    const [districtOptions, setDistrictOptions] = useState<any>({
+        primaryDistrict: [...allDistrictOptions],
+        secondaryDistrict: [...allDistrictOptions],
+        thirdDistrict: [...allDistrictOptions],
+    });
 
     const handleChange = (e: any) => {
         const {value, name} = e.target;
@@ -56,6 +78,14 @@ export const VehicleDetailsForm = (props: any) => {
         }
         fieldValue[name] = fValue;
         setForm(fieldValue);
+        // remove selected districts from the other district options
+        if (name === 'primaryDistrict' || name === 'secondaryDistrict' || name === 'thirdDistrict') {
+            setDistrictOptions({
+                primaryDistrict: allDistrictOptions.filter(i => !(i.id === fieldValue.secondaryDistrict || i.id === fieldValue.thirdDistrict)),
+                secondaryDistrict: allDistrictOptions.filter(i => !(i.id === fieldValue.primaryDistrict || i.id === fieldValue.thirdDistrict)),
+                thirdDistrict: allDistrictOptions.filter(i => !(i.id === fieldValue.primaryDistrict || i.id === fieldValue.secondaryDistrict)),
+            });
+        }
     };
 
     const handleCheckboxFieldChange = (e: any) => {
@@ -113,6 +143,17 @@ export const VehicleDetailsForm = (props: any) => {
             setVehicleObj(form);
         }
     };
+
+    const handleClear = (e: any) => {
+        e.preventDefault();
+        setDistrictOptions({
+            primaryDistrict: [ ...allDistrictOptions ],
+            secondaryDistrict: [ ...allDistrictOptions ],
+            thirdDistrict: [ ...allDistrictOptions ],
+        });
+        setErrors(initErr);
+        setForm(initFormData);
+    }
     
     return (
         <div>
@@ -135,6 +176,7 @@ export const VehicleDetailsForm = (props: any) => {
                                         value={form.registrationNumber}
                                         onChange={handleChange}
                                         errors={errors.registrationNumber}
+                                        inputProps={{ maxLength: 10 }}
                                     />
 
                                     <div className={`nativeSelectMod ${classes.selectField}`}>
@@ -143,7 +185,7 @@ export const VehicleDetailsForm = (props: any) => {
                                         </InputLabel>
                                         <NativeSelectField
                                             inputProps={{
-                                                name: "insuranceValidTill"
+                                                name: "insuranceValidTill",
                                             }}
                                             placeholder="Insurance valid till"
                                             variant="outlined"
@@ -179,6 +221,7 @@ export const VehicleDetailsForm = (props: any) => {
                                         InputLabelProps={{shrink: !!form.ownerPhoneNumber}}
                                         onChange={handleChange}
                                         errors={errors.ownerPhoneNumber}
+                                        inputProps={{ maxLength: 10 }}
                                     />
                                     <Box display="flex" flexDirection="row" justifyItems="flex-start"
                                          alignItems="center">
@@ -204,7 +247,7 @@ export const VehicleDetailsForm = (props: any) => {
                                             variant="outlined"
                                             margin="dense"
                                             InputLabelProps={{shrink: !!form.primaryDistrict}}
-                                            options={districtOptions}
+                                            options={districtOptions.primaryDistrict}
                                             value={form.primaryDistrict}
                                             onChange={handleChange}
 
@@ -221,8 +264,7 @@ export const VehicleDetailsForm = (props: any) => {
                                             placeholder="Secondary district served"
                                             variant="outlined"
                                             margin="dense"
-
-                                            options={districtOptions}
+                                            options={districtOptions.secondaryDistrict}
                                             value={form.secondaryDistrict}
                                             onChange={handleChange}
                                         />
@@ -238,7 +280,7 @@ export const VehicleDetailsForm = (props: any) => {
                                             placeholder="Third district served"
                                             variant="outlined"
                                             margin="dense"
-                                            options={districtOptions}
+                                            options={districtOptions.thirdDistrict}
                                             value={form.thirdDistrict}
                                             onChange={handleChange}
                                         />
@@ -296,12 +338,19 @@ export const VehicleDetailsForm = (props: any) => {
                                 </Box>
                             </CardContent>
 
-                            <CardActions>
+                            <CardActions style={{justifyContent: "flex-end"}}>
+                                <Button
+                                    color="default"
+                                    variant="contained"
+                                    type="button"
+                                    onClick={e => handleClear(e)}
+                                >
+                                    Clear
+                                </Button>
                                 <Button
                                     color="primary"
                                     variant="contained"
                                     type="submit"
-                                    style={{marginLeft: "auto"}}
                                     onClick={e => handleSubmit(e)}
                                 >
                                     Next

@@ -6,21 +6,32 @@ import { postAmbulance } from "../../Redux/actions";
 import { isEmpty, get } from "lodash";
 import { navigate } from 'hookrouter';
 
+interface formFields {
+  driverName1: string;
+  cellNumber1: string;
+  isSmartPhone1: boolean;
+  driverName2: string;
+  cellNumber2: string;
+  isSmartPhone2: boolean;
+}
+
+const initFormData: formFields = {
+  driverName1: '',
+  cellNumber1: '',
+  isSmartPhone1: false,
+  driverName2: '',
+  cellNumber2: '',
+  isSmartPhone2: false
+};
 
 export const DriverDetailsForm = (props:any) => {
   const { vehicleInfo } = props;
   const dispatch: any = useDispatch();
-  const initForm: any = {
-    driverName1: '',
-    cellNumber1: '',
-    isSmartPhone1: false,
-    driverName2: '',
-    cellNumber2: '',
-    isSmartPhone2: false
-  };
+  const initForm: formFields = { ...initFormData };
   const initErr: any = {};
-  const [form, setForm] = useState(initForm);
-  const [errors, setErrors] = useState(initErr);
+  const [form, setForm] = useState<any>(initForm);
+  const [errors, setErrors] = useState<any>(initErr);
+
   const handleChange = (e: any) => {
 
     const { value, name } = e.target;
@@ -45,7 +56,7 @@ export const DriverDetailsForm = (props:any) => {
 
   const validateData = () => {
     const err:any = {};
-    Object.keys(form).forEach((key) => {
+    Object.keys(form).forEach(key => {
       const value = form[key];
       switch (key) {
         case 'driverName1':
@@ -132,6 +143,12 @@ export const DriverDetailsForm = (props:any) => {
     }
   };
 
+  const handleClear = (e: any) => {
+    e.preventDefault();
+    setErrors(initErr);
+    setForm(initFormData);
+  }
+
   return (
     <div>
       <Grid container alignContent="center" justify="center">
@@ -152,7 +169,6 @@ export const DriverDetailsForm = (props:any) => {
                   errors={errors.driverName1}
                 />
                 <TextInputField
-                  type="number"
                   name="cellNumber1"
                   label="Cellphone Number"
                   placeholder=""
@@ -161,6 +177,7 @@ export const DriverDetailsForm = (props:any) => {
                   value={form.cellNumber1}
                   onChange={handleChange}
                   errors={errors.cellNumber1}
+                  inputProps={{ maxLength: 10 }}
                 />
 
                 <Checkbox
@@ -182,7 +199,6 @@ export const DriverDetailsForm = (props:any) => {
                   errors={errors.driverName2}
                 />
                 <TextInputField
-                  type="number"
                   name="cellNumber2"
                   label="Cellphone Number"
                   placeholder=""
@@ -191,6 +207,7 @@ export const DriverDetailsForm = (props:any) => {
                   value={form.cellNumber2}
                   onChange={handleChange}
                   errors={errors.cellNumber2}
+                  inputProps={{ maxLength: 10 }}
                 />
 
                 <Checkbox
@@ -201,12 +218,19 @@ export const DriverDetailsForm = (props:any) => {
                 Is smart phone
               </CardContent>
 
-              <CardActions className="padding16">
+              <CardActions className="padding16" style={{justifyContent: "flex-end"}}>
+                <Button
+                    color="default"
+                    variant="contained"
+                    type="button"
+                    onClick={e => handleClear(e)}
+                >
+                    Clear
+                </Button>
                 <Button
                   color="primary"
                   variant="contained"
                   type="submit"
-                  style={{ marginLeft: 'auto' }}
                   onClick={(e) => handleSubmit(e)}
                 >Save Details</Button>
               </CardActions>
