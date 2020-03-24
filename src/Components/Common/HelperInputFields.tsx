@@ -5,10 +5,11 @@ import DateFnsUtils from '@date-io/date-fns';
 import DeleteIcon from '@material-ui/icons/Delete';
 
 export const TextInputField = (props: any) => {
-    const { placeholder, onChange, value, name, variant, type, margin, errors } = props;
+    const { placeholder, onChange, value, name, variant, type, margin, errors, label } = props;
     return (
         <div>
             <TextField
+                label={label}
                 type={type}
                 fullWidth
                 variant={variant}

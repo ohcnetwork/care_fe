@@ -1,5 +1,6 @@
 import React from 'react';
 import { AppBar, Toolbar, Typography, } from '@material-ui/core';
+import {A} from "hookrouter";
 
 const img = 'https://care-staging-coronasafe.s3.amazonaws.com/static/images/logos/black-logo.svg';
 const TopBar = () => {
@@ -7,7 +8,7 @@ const TopBar = () => {
         <AppBar position="fixed" className="appBar">
         <Toolbar>
             <Typography variant="h5">
-                <img src= {img} style={{height:"25px"}}  alt="care logo"/>
+                <A href={'/'} ><img src= {img} style={{height:"25px"}}  alt="care logo"/> </A>
             </Typography>
         </Toolbar>
         </AppBar>

@@ -126,7 +126,7 @@ const Header = () => {
               <MenuIcon/>
             </IconButton>
             <Typography variant="h6">
-              <img src={img} alt="care logo"style={{ height: '25px' }}/>
+            <A href='/'> <img src={img} alt="care logo"style={{ height: '25px' }}/></A>
             </Typography>
             <div className={classes.flexGrow}>
 

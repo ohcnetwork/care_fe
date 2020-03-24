@@ -86,7 +86,6 @@ export default function AmbulanceOnboarding() {
         setVehicleObj(val);
         setValue(1);
     };
-    console.log('vehicleObj: ', vehicleObj);
 
     return (
 

@@ -66,7 +66,7 @@ export const VehicleDetailsForm = (props: any) => {
     };
 
     const validateData = () => {
-        const err = Object.assign({}, errors);
+        const err:any = {};
         Object.keys(form).forEach(key => {
             const value = form[key];
             switch (key) {
@@ -126,8 +126,9 @@ export const VehicleDetailsForm = (props: any) => {
                             <CardContent className={classes.cardContent}>
                                 <Box display="flex" flexDirection="column">
                                     <TextInputField
+                                        label="Vehicle registration number"
                                         name="registrationNumber"
-                                        placeholder="Vehicle registration number"
+                                        placeholder=""
                                         variant="outlined"
                                         margin="dense"
                                         InputLabelProps={{shrink: !!form.registrationNumber}}
@@ -158,8 +159,9 @@ export const VehicleDetailsForm = (props: any) => {
                                         />
                                     </div>
                                     <TextInputField
+                                        label="Name of owner"
                                         name="nameOfOwner"
-                                        placeholder="Name of owner"
+                                        placeholder=""
                                         variant="outlined"
                                         margin="dense"
                                         value={form.nameOfOwner}
@@ -168,8 +170,9 @@ export const VehicleDetailsForm = (props: any) => {
                                         errors={errors.nameOfOwner}
                                     />
                                     <TextInputField
+                                        label="Owner phone number"
                                         name="ownerPhoneNumber"
-                                        placeholder="Owner phone number"
+                                        placeholder=""
                                         variant="outlined"
                                         margin="dense"
                                         value={form.ownerPhoneNumber}
