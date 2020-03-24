@@ -37,10 +37,10 @@ export const VehicleDetailsForm = (props: any) => {
         id: "",
         text: "Select"
     }];
-    for(let i=0;i<=10;i++){
+    for(let i=0;i<=2;i++){
         let text = `202${i}`
-        if(i==10){
-            text=`2030`
+        if(i==2){
+            text=`2022`
         }
         validTill.push({id:text,text})
     }
