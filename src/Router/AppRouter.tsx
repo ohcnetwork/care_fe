@@ -7,6 +7,7 @@ import { HospitalOnboarding } from '../Components/Facility/HospitalOnboarding';
 import {Analytics} from "../Components/Dashboard/Analytics";
 import {Stats} from "../Components/Dashboard/Stats";
 import {PatientRegister} from "../Components/Patient/PatientRegister";
+import ManageUsers from "../Components/Users/ManageUsers";
 
 const routes = {
     '/': () => <PrivateDashboard/>,
@@ -15,6 +16,7 @@ const routes = {
     '/facilities': () => <HospitalOnboarding />,
     '/stats' : () => <Stats/>,
     '/patient/register':()=> <PatientRegister />,
+    '/users': () => <ManageUsers/>,
     '/facilities/create': () => <FacilityCreate/>,
 };
 
