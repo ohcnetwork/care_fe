@@ -5,7 +5,7 @@ import DateFnsUtils from '@date-io/date-fns';
 import DeleteIcon from '@material-ui/icons/Delete';
 
 export const TextInputField = (props: any) => {
-    const { placeholder, onChange, value, name, variant, type, margin, errors, label } = props;
+    const { placeholder, onChange, value, name, variant, type, margin, errors, label, inputProps } = props;
     return (
         <div>
             <TextField
@@ -18,6 +18,7 @@ export const TextInputField = (props: any) => {
                 onChange={onChange}
                 value={value}
                 name={name}
+                inputProps={inputProps}
             />
             <ErrorHelperText error={errors}/>
         </div>
@@ -231,10 +232,10 @@ export const ShowCheckboxOptions = (props: any) => {
 };
 
 export const NativeSelectField = (props: any) => {
-    const { options, inputProps, onChange } = props;
+    const { options, inputProps, onChange, value } = props;
     return (
         <div>
-            <NativeSelect inputProps={inputProps} onChange={onChange}>
+            <NativeSelect inputProps={inputProps} onChange={onChange} value={value}>
                 {options.map((opt: any) => {
                     return <option value={opt.id} key={opt.id}>{opt.text}</option>
                 })}
