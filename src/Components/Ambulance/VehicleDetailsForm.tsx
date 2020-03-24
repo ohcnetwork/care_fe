@@ -1,12 +1,13 @@
 import React, {useState} from "react";
 import {Box, Button, Card, CardActions, CardContent, CardHeader, Checkbox, Grid, Typography, InputLabel} from "@material-ui/core";
 import {ErrorHelperText, NativeSelectField, TextInputField} from "../Common/HelperInputFields";
-import {DISTRICT_CHOICES} from "./constants";
+import {DISTRICT_CHOICES, VEHICLE_TYPES} from "./constants";
 import {isEmpty} from "lodash";
 import NavigateNextIcon from '@material-ui/icons/NavigateNext';
 
 export interface vehicleForm {
     registrationNumber: string;
+    vehicleType: string;
     insuranceValidTill: number;
     nameOfOwner: string;
     ownerPhoneNumber: string;
@@ -23,6 +24,7 @@ export interface vehicleForm {
 
 export const initVehicleData: vehicleForm = {
     registrationNumber: '',
+    vehicleType: '',
     insuranceValidTill: 0,
     nameOfOwner: '',
     ownerPhoneNumber: '',
@@ -60,6 +62,11 @@ export const VehicleDetailsForm = (props: any) => {
         let text = `202${i}`
         validTill.push({id:parseInt(text),text})
     }
+
+    const vehicleTypes = [{
+        id: 0,
+        text: 'Select',
+    }, ...VEHICLE_TYPES]
 
     const [districtOptions, setDistrictOptions] = useState<any>({
         primaryDistrict: [...allDistrictOptions],
@@ -111,6 +118,9 @@ export const VehicleDetailsForm = (props: any) => {
                     }
                     break;
                 case "insuranceValidTill":
+                    !value && (err[key] = "This field is required");
+                    break;
+                case "vehicleType":
                     !value && (err[key] = "This field is required");
                     break;
                 case "nameOfOwner":
@@ -186,23 +196,28 @@ export const VehicleDetailsForm = (props: any) => {
                                         errors={errors.registrationNumber}
                                         inputProps={{ maxLength: 10 }}
                                     />
+                                    <div className={`nativeSelectMod ${classes.selectField}`}>
+                                        <NativeSelectField
+                                            name= "vehicleType"
+                                            variant="outlined"
+                                            options={vehicleTypes}
+                                            value={form.vehicleType}
+                                            onChange={handleChange}
+                                            label="Vehicle Type"
+                                        />
+                                        <ErrorHelperText
+                                            error={errors.vehicleType}
+                                        />
+                                    </div>
 
                                     <div className={`nativeSelectMod ${classes.selectField}`}>
-                                        <InputLabel className={classes.selectLabel} ref={inputLabel} id="insuranceValidTill">
-                                            Insurance valid till
-                                        </InputLabel>
                                         <NativeSelectField
-                                            inputProps={{
-                                                name: "insuranceValidTill",
-                                            }}
-                                            placeholder="Insurance valid till"
+                                            name= "insuranceValidTill"
                                             variant="outlined"
-                                            margin="dense"
-                                            InputLabelProps={{shrink: !!form.insuranceValidTill}}
                                             options={validTill}
                                             value={form.insuranceValidTill}
                                             onChange={handleChange}
-
+                                            label="Insurance valid till"
                                         />
                                         <ErrorHelperText
                                             error={errors.insuranceValidTill}
@@ -242,19 +257,15 @@ export const VehicleDetailsForm = (props: any) => {
                                             ?</Typography>
                                     </Box>
                                     <Box>
-                                        <Typography>
+                                        <Typography variant="h6">
                                             Select Serviceable Districts
                                         </Typography>
                                     </Box>
                                     <div className={`nativeSelectMod ${classes.selectField}`}>
                                         <NativeSelectField
-                                            inputProps={{
-                                                name: "primaryDistrict"
-                                            }}
-                                            placeholder="Primary district served"
+                                            name= "primaryDistrict"
+                                            label="Primary district served"
                                             variant="outlined"
-                                            margin="dense"
-                                            InputLabelProps={{shrink: !!form.primaryDistrict}}
                                             options={districtOptions.primaryDistrict}
                                             value={form.primaryDistrict}
                                             onChange={handleChange}
@@ -266,12 +277,9 @@ export const VehicleDetailsForm = (props: any) => {
                                     </div>
                                     <div className={`nativeSelectMod ${classes.selectField}`}>
                                         <NativeSelectField
-                                            inputProps={{
-                                                name: "secondaryDistrict"
-                                            }}
-                                            placeholder="Secondary district served"
+                                            name= "secondaryDistrict"
+                                            label="Secondary district served"
                                             variant="outlined"
-                                            margin="dense"
                                             options={districtOptions.secondaryDistrict}
                                             value={form.secondaryDistrict}
                                             onChange={handleChange}
@@ -282,12 +290,9 @@ export const VehicleDetailsForm = (props: any) => {
                                     </div>
                                     <div className={`nativeSelectMod ${classes.selectField}`}>
                                         <NativeSelectField
-                                            inputProps={{
-                                                name: "thirdDistrict"
-                                            }}
-                                            placeholder="Third district served"
+                                            name= "thirdDistrict"
+                                            label="Third district served"
                                             variant="outlined"
-                                            margin="dense"
                                             options={districtOptions.thirdDistrict}
                                             value={form.thirdDistrict}
                                             onChange={handleChange}
