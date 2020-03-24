@@ -1,5 +1,5 @@
 import React from 'react';
-import { Login } from '../Components/Auth';
+import { Login, Register } from '../Components/Auth';
 import { useRoutes } from 'hookrouter';
 import TopBar from "../Components/Common/TopBar";
 import { PublicDashboard } from '../Components/Dashboard/PublicDashboard';
@@ -12,6 +12,7 @@ const routes = {
     '/login': () => <Login />,
     '/dashboard': () => <PublicDashboard />,
     '/ambulance': () => <AmbulanceOnboarding />,
+    '/register': () => <Register />,
 };
 
 const SessionRouter = () => {
