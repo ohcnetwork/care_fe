@@ -6,6 +6,7 @@ import { FacilityCreate } from '../Components/Facility/FacilityCreate';
 import { HospitalOnboarding } from '../Components/Facility/HospitalOnboarding';
 import {Analytics} from "../Components/Dashboard/Analytics";
 import {Stats} from "../Components/Dashboard/Stats";
+import ManageUsers from "../Components/Users/ManageUsers";
 
 const routes = {
     '/': () => <PrivateDashboard/>,
@@ -13,6 +14,7 @@ const routes = {
     '/analytics': () => <Analytics/>,
     '/facilities': () => <HospitalOnboarding />,
     '/stats' : () => <Stats/>,
+    '/users': () => <ManageUsers/>,
     '/facilities/create': () => <FacilityCreate/>,
 };
 

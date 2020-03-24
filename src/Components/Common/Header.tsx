@@ -82,6 +82,12 @@ const Header = () => {
       link: '/stats',
       icon: <ListAltIcon style={{color: '#666', marginRight: '4px'}}/>
     },
+
+    {
+      title: 'users',
+      link: '/users',
+      icon: <PersonIcon style={{color: '#666', marginRight: '4px'}}/>
+    },
     {
       title: 'Settings',
       link: '/settings',
