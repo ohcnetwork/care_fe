@@ -74,7 +74,7 @@ export const VehicleDetailsForm = (props: any) => {
                     if (!value) {
                         err[key] = "This field is required";
                     }else if(value && !(/^[a-zA-Z]{2}[0-9]{1,2}[a-zA-Z]{1,2}[0-9]{1,4}$/.test(value))){
-                        err[key] = "Invalid vehicle number";
+                        err[key] = "Please Enter the vehicle number in all uppercase without spaces, eg: KL13AB1234";
                     }
                     break;
                 case "insuranceValidTill":
@@ -128,7 +128,7 @@ export const VehicleDetailsForm = (props: any) => {
                                     <TextInputField
                                         label="Vehicle registration number"
                                         name="registrationNumber"
-                                        placeholder=""
+                                        placeholder="eg: KL13AB1234"
                                         variant="outlined"
                                         margin="dense"
                                         InputLabelProps={{shrink: !!form.registrationNumber}}
