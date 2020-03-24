@@ -4,10 +4,12 @@ import Header from '../Components/Common/Header';
 import {PrivateDashboard} from "../Components/Dashboard/PrivateDashboard";
 import { FacilityCreate } from '../Components/Facility/FacilityCreate';
 import { HospitalOnboarding } from '../Components/Facility/HospitalOnboarding';
+import {Analytics} from "../Components/Dashboard/Analytics";
 
 const routes = {
     '/': () => <PrivateDashboard/>,
     '/privatedashboard': () => <PrivateDashboard/>,
+    '/analytics': () => <Analytics/>,
     '/facilities': () => <HospitalOnboarding />,
     '/facilities/create': () => <FacilityCreate/>,
 };
