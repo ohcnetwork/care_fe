@@ -66,29 +66,34 @@ const useStyles = makeStyles((theme: Theme) => ({
     },
     selectField:{
         marginBottom:'10px',
-    }
+    },
+    selectLabel: {
+        color: 'black',
+        padding: '10px 0px'
+    },
 }));
 
 export default function AmbulanceOnboarding() {
     const classes = useStyles();
     const [value, setValue] = React.useState(0);
     const [vehicleObj, setVehicleObj] = React.useState();
-
+    
     const handleChange = (event: React.ChangeEvent<{}>, newValue: number) => {
         setValue(newValue);
     };
-
+    
     const updateVehicleObj = (val: any)=>{
         setVehicleObj(val)
         setValue(1);
     }
+    console.log('vehicleObj: ', vehicleObj);
 
     return (
 
         <div className={classes.root} style={{marginTop: '60px'}}>
             <Grid container spacing={2} alignContent="center" justify="center">
                 <Grid item xs={12} sm={5} md={4} lg={3}>
-            <AppBar position="relative">
+            <AppBar position="static">
                 <Tabs value={value} className={classes.tabSection} style={{color: 'black'}} onChange={handleChange} >
                     <Tab label="Vehicle Details" {...a11yProps(0)} />
                     <Tab label="Driver Details" {...a11yProps(1)} />
