@@ -24,12 +24,12 @@ const doctorCapacityEditReducer = (state = initialState, action: any) => {
                 errors: action.errors
             }
         }
-        case "set_reset":{
+        case "set_reset": {
             return {
                 ...state,
-                form:action.form
+                form: action.form
             }
-        }    
+        }
         default:
             return state
     }
@@ -48,22 +48,22 @@ export const DoctorCapacityEditForm = (props: any) => {
         let errors = { ...initForm }
         let invalidForm = false
         Object.keys(state.form).map((field) => {
-            if(field === "totalDoctors" && state.form.totalDoctors == "" ){
+            if (field === "totalDoctors" && state.form.totalDoctors == "") {
                 errors[field] = "Field is required"
                 invalidForm = true;
-            } else if(field === "totalDoctors" && isNaN(state.form.totalDoctors)){
+            } else if (field === "totalDoctors" && isNaN(state.form.totalDoctors)) {
                 errors[field] = "Please enter a valid number"
                 invalidForm = true;
             }
-            if(field === "currentAvailability" && state.form.currentAvailability == ""){
+            if (field === "currentAvailability" && state.form.currentAvailability == "") {
                 errors[field] = "Field is required"
                 invalidForm = true;
-            }else if(field === "currentAvailability" && isNaN(state.form.currentAvailability)){
+            } else if (field === "currentAvailability" && isNaN(state.form.currentAvailability)) {
                 errors[field] = "Please enter a valid number"
                 invalidForm = true;
             }
-            if(field === "currentAvailability" && state.form.currentAvailability!=""
-                && state.form.currentAvailability>state.form.totalDoctors){
+            if (field === "currentAvailability" && state.form.currentAvailability != ""
+                && state.form.currentAvailability > state.form.totalDoctors) {
                 errors[field] = "Current availability cannot be greater than Total"
                 invalidForm = true;
             }
@@ -72,18 +72,20 @@ export const DoctorCapacityEditForm = (props: any) => {
             dispatch({ type: "set_error", errors })
             return false
         }
-        dispatch({ type: "set_error", errors})
+        dispatch({ type: "set_error", errors })
         return true
     }
 
-    const handleSubmit = (e: any) => { 
+    const handleSubmit = (e: any) => {
         e.preventDefault();
-        if(validateData()) {
+        if (validateData()) {
             //api-call
-        }}
-    const handleCancel = (e: any) => {    
-        const form={ ...initForm };
-        dispatch({ type: "set_reset", form })};
+        }
+    }
+    const handleCancel = (e: any) => {
+        const form = { ...initForm };
+        dispatch({ type: "set_reset", form })
+    };
     return <div>
         <Grid container alignContent="center" justify="center">
             <Grid item xs={12}>
@@ -113,29 +115,29 @@ export const DoctorCapacityEditForm = (props: any) => {
                                 // InputLabelProps={{ shrink: !!form.registrationNumber }}
                                 value={state.form.currentAvailability}
                                 onChange={handleChange}
-                            errors={state.errors.currentAvailability}
+                                errors={state.errors.currentAvailability}
                             />
                         </CardContent>
                         <CardContent>
-                        <Grid container justify="center" spacing={5} >
-                            <Grid item>
-                                <Button
-                                    color="primary"
-                                    variant="contained"
-                                    type="submit"
-                                    style={{ marginLeft: 'auto' }}
-                                    onClick={(e) => handleSubmit(e)}
-                                >Update</Button>
+                            <Grid container justify="center" spacing={5} >
+                                <Grid item>
+                                    <Button
+                                        color="primary"
+                                        variant="contained"
+                                        type="submit"
+                                        style={{ marginLeft: 'auto' }}
+                                        onClick={(e) => handleSubmit(e)}
+                                    >Update</Button>
+                                </Grid>
+                                <Grid item>
+                                    <Button
+                                        color="primary"
+                                        variant="contained"
+                                        style={{ marginLeft: 'auto' }}
+                                        onClick={handleCancel}
+                                    >Cancel</Button>
+                                </Grid>
                             </Grid>
-                            <Grid item>
-                                <Button
-                                    color="primary"
-                                    variant="contained"
-                                    style={{ marginLeft: 'auto' }}
-                                    onClick={handleCancel}
-                                >Cancel</Button>
-                            </Grid>
-                        </Grid>
                         </CardContent>
                     </form>
                 </Card>
