@@ -1,9 +1,6 @@
-/* eslint-disable array-callback-return */
-/* eslint-disable eqeqeq */
 import React, { useReducer } from 'react'
 import { Grid, InputLabel, Card, CardHeader, CardContent, Button } from '@material-ui/core'
 import { TextInputField } from '../Common/HelperInputFields';
-import { isEmpty } from 'lodash';
 
 const initForm: any = {
     totalDoctors: "",
@@ -13,7 +10,7 @@ const initialState = {
     form: { ...initForm },
     errors: { ...initForm }
 };
-const doctor_capacity_editreducer = (state = initialState, action: any) => {
+const doctorCapacityEditReducer = (state = initialState, action: any) => {
     switch (action.type) {
         case "set_form": {
             return {
@@ -39,7 +36,7 @@ const doctor_capacity_editreducer = (state = initialState, action: any) => {
 }
 
 export const DoctorCapacityEditForm = (props: any) => {
-    const [state, dispatch] = useReducer(doctor_capacity_editreducer, initialState)
+    const [state, dispatch] = useReducer(doctorCapacityEditReducer, initialState)
 
     const handleChange = (e: any) => {
         let form = { ...state.form }
@@ -47,25 +44,25 @@ export const DoctorCapacityEditForm = (props: any) => {
         dispatch({ type: "set_form", form })
     }
 
-    const validateForm = () => {
+    const validateData = () => {
         let errors = { ...initForm }
         let invalidForm = false
         Object.keys(state.form).map((field) => {
-            if(field == "totalDoctors" && state.form.totalDoctors =="" ){
+            if(field === "totalDoctors" && state.form.totalDoctors == "" ){
                 errors[field] = "Field is required"
                 invalidForm = true;
-            } else if(field == "totalDoctors" && isNaN(state.form.totalDoctors)){
+            } else if(field === "totalDoctors" && isNaN(state.form.totalDoctors)){
                 errors[field] = "Please enter a valid number"
                 invalidForm = true;
             }
-            if(field == "currentAvailability" && state.form.currentAvailability ==""){
+            if(field === "currentAvailability" && state.form.currentAvailability == ""){
                 errors[field] = "Field is required"
                 invalidForm = true;
-            }else if(field == "currentAvailability" && isNaN(state.form.currentAvailability)){
+            }else if(field === "currentAvailability" && isNaN(state.form.currentAvailability)){
                 errors[field] = "Please enter a valid number"
                 invalidForm = true;
             }
-            if(field == "currentAvailability" && !isEmpty(state.form.currentAvailability) 
+            if(field === "currentAvailability" && state.form.currentAvailability!=""
                 && state.form.currentAvailability>state.form.totalDoctors){
                 errors[field] = "Current availability cannot be greater than Total"
                 invalidForm = true;
@@ -79,7 +76,11 @@ export const DoctorCapacityEditForm = (props: any) => {
         return true
     }
 
-    const handleSubmit = (e: any) => { e.preventDefault()}
+    const handleSubmit = (e: any) => { 
+        e.preventDefault();
+        if(validateData()) {
+            //api-call
+        }}
     const handleCancel = (e: any) => {    
         const form={ ...initForm };
         dispatch({ type: "set_reset", form })};
