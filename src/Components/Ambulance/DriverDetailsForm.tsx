@@ -1,11 +1,12 @@
 import React, { useState } from "react";
-import { Button, Card, CardHeader, Grid, CardContent, CardActions, Checkbox } from "@material-ui/core";
+import { Box, Button, Card, CardHeader, Grid, CardContent, CardActions, Checkbox } from "@material-ui/core";
 import { TextInputField } from '../Common/HelperInputFields';
 import { useDispatch } from "react-redux";
 import { postAmbulance } from "../../Redux/actions";
 import { isEmpty, get } from "lodash";
 import { navigate } from 'hookrouter';
 import SaveIcon from '@material-ui/icons/Save';
+import { AGREE_CONSENT } from "./constants";
 
 interface formFields {
   driverName1: string;
@@ -14,6 +15,7 @@ interface formFields {
   driverName2: string;
   cellNumber2: string;
   isSmartPhone2: boolean;
+  agreeConsent: boolean;
 }
 
 const initFormData: formFields = {
@@ -22,7 +24,8 @@ const initFormData: formFields = {
   isSmartPhone1: false,
   driverName2: '',
   cellNumber2: '',
-  isSmartPhone2: false
+  isSmartPhone2: false,
+  agreeConsent: false,
 };
 
 export const DriverDetailsForm = (props:any) => {
@@ -211,12 +214,27 @@ export const DriverDetailsForm = (props:any) => {
                   inputProps={{ maxLength: 10 }}
                 />
 
-                <Checkbox
-                  checked={form.isSmartPhone2}
-                  onChange={handleCheckboxFieldChange}
-                  name="isSmartPhone2"
-                />{" "}
-                Is smart phone
+                <Box>
+                  <Checkbox
+                    checked={form.isSmartPhone2}
+                    onChange={handleCheckboxFieldChange}
+                    name="isSmartPhone2"
+                  />{" "}
+                  Is smart phone
+                </Box>
+
+                <h4>Declaration</h4>
+                <Box display="flex">
+                  <Box>
+                    <Checkbox
+                      checked={form.agreeConsent}
+                      onChange={handleCheckboxFieldChange}
+                      name="agreeConsent"
+                      style={{padding: 0}}
+                    />{" "}
+                  </Box>
+                  <Box fontSize={12} textAlign="justify" ml={1}>{AGREE_CONSENT}</Box>
+                </Box>
               </CardContent>
 
               <CardActions className="padding16" style={{justifyContent: "space-between"}}>
@@ -233,6 +251,7 @@ export const DriverDetailsForm = (props:any) => {
                   type="submit"
                   onClick={(e) => handleSubmit(e)}
                   startIcon={<SaveIcon>save</SaveIcon>}
+                  disabled={!form.agreeConsent}
                 >
                   Save Details
                 </Button>
