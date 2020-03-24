@@ -73,7 +73,7 @@ export const VehicleDetailsForm = (props: any) => {
                 case "registrationNumber":
                     if (!value) {
                         err[key] = "This field is required";
-                    }else if(value && !(/^[a-zA-Z]{2}[0-9]{1,2}[a-zA-Z]{1,2}[0-9]{1,4}$/.test(value))){
+                    }else if(value && !(/^[A-Z]{2}[0-9]{1,2}[A-Z]{1,2}[0-9]{1,4}$/.test(value))){
                         err[key] = "Please Enter the vehicle number in all uppercase without spaces, eg: KL13AB1234";
                     }
                     break;
