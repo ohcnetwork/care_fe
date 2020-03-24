@@ -14,7 +14,7 @@ export interface DefaultNativeSelectInputProps  extends NativeSelectInputProps {
 }
 
 export const TextInputField = (props: any) => {
-    const { placeholder, onChange, value, name, variant, type, margin, errors, label, inputProps } = props;
+    const { placeholder, onChange, value, name, variant, type, margin, errors, label, inputProps, multiline, rows } = props;
     return (
         <div>
             <TextField
@@ -28,6 +28,8 @@ export const TextInputField = (props: any) => {
                 value={value}
                 name={name}
                 inputProps={inputProps}
+                multiline={multiline}
+                rows={rows}
             />
             <ErrorHelperText error={errors}/>
         </div>
