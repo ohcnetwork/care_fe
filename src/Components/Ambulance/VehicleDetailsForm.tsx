@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import {Box, Button, Card, CardActions, CardContent, CardHeader, Checkbox, Grid, Typography} from "@material-ui/core";
+import {Box, Button, Card, CardActions, CardContent, CardHeader, Checkbox, Grid, Typography, InputLabel, FormControl} from "@material-ui/core";
 import {DateInputField, ErrorHelperText, NativeSelectField, TextInputField} from "../Common/HelperInputFields";
 import {DISTRICT_CHOICES} from "./constants";
 import {isEmpty} from "lodash";
@@ -21,9 +21,9 @@ export const VehicleDetailsForm = (props: any) => {
         nameOfOwner: "",
         ownerPhoneNumber: "",
         isSmartPhone: false,
-        primaryDistrict: "",
-        secondaryDistrict: "",
-        thirdDistrict: "",
+        primaryDistrict: null,
+        secondaryDistrict: null,
+        thirdDistrict: null,
         hasOxygenSupply: false,
         hasVentilator: false,
         hasSuctionMachine: false,
@@ -32,6 +32,15 @@ export const VehicleDetailsForm = (props: any) => {
     const initErr: any = {};
     const [form, setForm] = useState<any>(Object.assign(initForm, vehicleDetails));
     const [errors, setErrors] = useState(initErr);
+    const inputLabel = React.useRef<HTMLLabelElement>(null);
+    const validTill = [{
+        id: "",
+        text: "Select"
+    }];
+    for(let i=0;i<=2;i++){
+        let text = `202${i}`
+        validTill.push({id:text,text})
+    }
 
     const handleChange = (e: any) => {
         const {value, name} = e.target;
@@ -41,7 +50,11 @@ export const VehicleDetailsForm = (props: any) => {
             errorField[name] = null;
             setErrors(errorField);
         }
-        fieldValue[name] = value;
+        let fValue = value;
+        if(name === 'primaryDistrict' ||  name === 'secondaryDistrict' || name === 'thirdDistrict' || name === 'insuranceValidTill'){
+            fValue = parseInt(fValue)
+        }
+        fieldValue[name] = fValue;
         setForm(fieldValue);
     };
 
@@ -60,6 +73,8 @@ export const VehicleDetailsForm = (props: any) => {
                 case "registrationNumber":
                     if (!value) {
                         err[key] = "This field is required";
+                    }else if(value && !(/^[a-zA-Z]{2}[0-9]{1,2}[a-zA-Z]{1,2}[0-9]{1,4}$/.test(value))){
+                        err[key] = "Invalid vehicle number";
                     }
                     break;
                 case "insuranceValidTill":
@@ -71,10 +86,7 @@ export const VehicleDetailsForm = (props: any) => {
                 case "ownerPhoneNumber":
                     if (!value) {
                         err[key] = "This field is required";
-                    } else if (
-                        !/^[0-9]{10}$/.test(value
-                        )
-                    ) {
+                    } else if(value &&!(/^[0-9]{10}$/.test(value))) {
                         err[key] = "Invalid phone number";
                     }
                     break;
@@ -101,6 +113,7 @@ export const VehicleDetailsForm = (props: any) => {
             setVehicleObj(form);
         }
     };
+    
     return (
         <div>
             <Grid container alignContent="center" justify="center">
@@ -122,24 +135,28 @@ export const VehicleDetailsForm = (props: any) => {
                                         onChange={handleChange}
                                         errors={errors.registrationNumber}
                                     />
-                                    <DateInputField
-                                        type="insuranceValidTill"
-                                        label="Insurance valid till"
-                                        variant="outlined"
-                                        margin="dense"
-                                        value={form.insuranceValidTill}
-                                        InputLabelProps={{shrink: !!form.insuranceValidTill}}
-                                        onChange={(date: any) =>
-                                            handleChange({
-                                                target: {
-                                                    name: "insuranceValidTill",
-                                                    value: date
-                                                }
-                                            })
-                                        }
-                                        errors={errors.insuranceValidTill}
-                                        className={classes.dateField}
-                                    />
+
+                                    <div className={`nativeSelectMod ${classes.selectField}`}>
+                                        <InputLabel className={classes.selectLabel} ref={inputLabel} id="insuranceValidTill">
+                                            Insurance valid till
+                                        </InputLabel>
+                                        <NativeSelectField
+                                            inputProps={{
+                                                name: "insuranceValidTill"
+                                            }}
+                                            placeholder="Insurance valid till"
+                                            variant="outlined"
+                                            margin="dense"
+                                            InputLabelProps={{shrink: !!form.insuranceValidTill}}
+                                            options={validTill}
+                                            value={form.insuranceValidTill}
+                                            onChange={handleChange}
+
+                                        />
+                                        <ErrorHelperText
+                                            error={errors.insuranceValidTill}
+                                        />
+                                    </div>
                                     <TextInputField
                                         name="nameOfOwner"
                                         placeholder="Name of owner"

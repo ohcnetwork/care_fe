@@ -1,58 +1,46 @@
 import React, { useState } from "react";
 import { Button, Card, CardHeader, Grid, CardContent, CardActions, Checkbox } from "@material-ui/core";
 import { TextInputField } from '../Common/HelperInputFields';
-import { useDispatch } from "react-redux"; import { A } from "hookrouter";
+import { useDispatch } from "react-redux";
 import { postAmbulance } from "../../Redux/actions";
 import { isEmpty, get } from "lodash";
+
+
 export const DriverDetailsForm = (props:any) => {
   const { vehicleInfo } = props;
   const dispatch: any = useDispatch();
   const initForm: any = {
-
-    drivers: [
-      {
-        name: '',
-        phone_number: '',
-        is_smart_phone: ''
-      }
-    ],
-
     driverName1: '',
     cellNumber1: '',
-    smartPhone1: '',
+    isSmartPhone1: false,
     driverName2: '',
     cellNumber2: '',
-    smartPhone2: ''
+    isSmartPhone2: false
   };
   const initErr: any = {};
   const [form, setForm] = useState(initForm);
   const [errors, setErrors] = useState(initErr);
-
   const handleChange = (e: any) => {
 
     const { value, name } = e.target;
     const fieldValue = Object.assign({}, form);
     const errorField = Object.assign({}, errors);
 
-    if (errorField.name) {
-      errorField.name = null;
+    if (errorField[name]) {
+      errorField[name] = null;
       setErrors(errorField);
     }
     if (name === 'driverName1') {
       fieldValue.driverName1 = value;
     } else if (name === 'cellNumber1') {
       fieldValue.cellNumber1 = value;
-    } else if (name === 'smartPhone1') {
-      fieldValue.smartPhone1 = value.toLowerCase();
     } else if (name === 'driverName2') {
       fieldValue.driverName2 = value;
     } else if (name === 'cellNumber2') {
       fieldValue.cellNumber2 = value;
-    } else {
-      fieldValue.smartPhone2 = value.toLowerCase();
     }
     setForm(fieldValue);
-  }
+  };
 
   const validateData = () => {
     const err = Object.assign({});
@@ -61,21 +49,28 @@ export const DriverDetailsForm = (props:any) => {
       switch (key) {
         case 'driverName1':
           if (!value) {
-            err.key = "This field is required"
+            err[key] = "This field is required"
           }
           break;
         case 'cellNumber1':
-          !/^[0-9]{10}$/.test(            form.cellNumber1
-          ) && (err.cellNumber1 = "Invalid phone number");
+          if (!value) {
+            err[key] = "This field is required"
+          }else if(value && !(/^[0-9]{10}$/.test(form.cellNumber1))){
+            err[key] = "Invalid phone number";
+          }
           break;
         case 'driverName2':
-          (form.driverName2.value === '' || form.driverName2.value === undefined) &&
-            (err.driverName2 = "Field is required")
+          if (!value) {
+            err[key] = "This field is required"
+          }
           break;
         case 'cellNumber2':
-          !/^[0-9]{10}$/.test(
-            form.cellNumber2
-          ) && (err.cellNumber2 = "Invalid phone number");
+          if (!value) {
+            err[key] = "This field is required"
+          }else if(value && !(/^[0-9]{10}$/.test(form.cellNumber2))){
+            err[key] = "Invalid phone number";
+          }
+          break;
         default: break;
       }
     });
@@ -87,26 +82,46 @@ export const DriverDetailsForm = (props:any) => {
 
   const handleCheckboxFieldChange = (e: any) => {
     const { checked, name } = e.target;
-    const fieldValue = Object.assign({}, form);
-    fieldValue.name = checked;
-    if (name === '')
-      setForm(fieldValue);
+    setForm({...form,[name]:checked});
   };
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
     const valid = validateData();
-    if (valid) {
-      console.log('Valid', form)
-    } else {
-      console.log('Not Valid', form)
-    }
-    if (valid) {
-      dispatch(postAmbulance(valid)).then((resp: any) => {
+    if (valid && vehicleInfo) {
+      const ambulanceData = {
+        "drivers": [
+          {
+            "name": form.driverName1,
+            "phone_number": form.cellNumber1,
+            "is_smart_phone": form.isSmartPhone1
+          },
+          {
+            "name": form.driverName2,
+            "phone_number": form.cellNumber2,
+            "is_smart_phone": form.isSmartPhone2
+          }
+        ],
+        "vehicle_number": vehicleInfo.registrationNumber,
+        "owner_name": vehicleInfo.nameOfOwner,
+        "owner_phone_number": vehicleInfo.ownerPhoneNumber,
+        "owner_is_smart_phone": vehicleInfo.isSmartPhone,
+        "primary_district": vehicleInfo.primaryDistrict,
+        "secondary_district": vehicleInfo.secondaryDistrict,
+        "third_district": vehicleInfo.thirdDistrict,
+        "has_oxygen": vehicleInfo.hasOxygenSupply,
+        "has_ventilator": vehicleInfo.hasVentilator,
+        "has_suction_machine": vehicleInfo.hasSuctionMachine,
+        "has_defibrillator": vehicleInfo.hasDefibrillator,
+        "insurance_valid_till_year": vehicleInfo.insuranceValidTill
+      };
+
+      dispatch(postAmbulance(ambulanceData)).then((resp: any) => {
+        console.log('resp: ', resp);
         const res = get(resp, 'data', null);
         const statusCode = get(resp, 'status', '');
         if (res && statusCode === 401) {
-
+          alert('Something went wrong..!');
         } else if (res && statusCode === 200) {
           alert('Ambulance Added Successfully');
         }

@@ -5,6 +5,9 @@ jobs: # a collection of steps
     docker: # run the steps with Docker
       - image: circleci/node:10.16.3 # ...with this image as the primary container; this is where all `steps` will run
     steps: # a collection of executable commands
+      - add_ssh_keys:
+          fingerprints:
+            - "7b:31:e5:d0:a8:97:2a:e1:b5:09:07:6f:77:6f:e5:72"
       - checkout # special step to check out source code to working directory
       - run:
           name: update-npm
@@ -23,14 +26,29 @@ jobs: # a collection of steps
           name: build
           command: npm run build
       - run:
+          name: list
+          command: ls -lah
+      - run:
           name: Deploy
           command: |
             
             ssh-keyscan -H 34.93.26.100 >> ~/.ssh/known_hosts
             sudo apt-get update && sudo apt-get install rsync -y
-            rsync -avz --delete dist/ netlify@34.93.26.100:/opt/care_fe/dist/
+
+            echo "The branch is: $CIRCLE_BRANCH"
+            if [[ $CIRCLE_BRANCH = "master" ]]
+            then
+              echo "Syncing to production"
+              rsync -avz --delete dist/ netlify@34.93.26.100:/opt/care_prod/
+            elif [[ $CIRCLE_BRANCH = "develop" ]]
+            then
+              echo "Syncing to dev"
+              rsync -avz --delete dist/ netlify@34.93.26.100:/opt/care/
+            else
+              echo "Not Syncing the branch $CIRCLE_BRANCH"
+            fi
 
             # tar -czf build.tar.gz dist/
             # scp build.tar.gz netlify@34.93.26.100:/home/netlify/releases/
-            # ssh netlify@34.93.26.100 "cd /home/netlify/releases/; tar xf build.tar.gz; cp -rf /opt/care_fe/dist /opt/care_fe/dist.old; mv dist /opt/care_fe/dist"
+            # ssh netlify@34.93.26.100 "cd /home/netlify/releases/; tar xf build.tar.gz; cp -rf /opt/care_fe/ /opt/care_fe.old; mv dist /opt/care_fe/"
 
