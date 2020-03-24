@@ -78,9 +78,9 @@ const Header = () => {
       icon: <InboxIcon style={{ color: '#666', marginRight: '4px' }}/>
     },
     {
-      title: 'Patients',
-      link: '/patients',
-      icon: <DonutLargeIcon style={{ color: '#666', marginRight: '4px' }}/>
+      title: 'Stats',
+      link: '/stats',
+      icon: <ListAltIcon style={{color: '#666', marginRight: '4px'}}/>
     },
     {
       title: 'Settings',

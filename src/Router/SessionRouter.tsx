@@ -7,6 +7,7 @@ import { VehicleDetailsForm } from '../Components/Ambulance/VehicleDetailsForm';
 import { DriverDetailsForm } from '../Components/Ambulance/DriverDetailsForm';
 import AmbulanceOnboarding from "../Components/Ambulance/AmbulanceOnboarding";
 import { PatientRegister } from '../Components/Patient/PatientRegister';
+import {Stats} from "../Components/Dashboard/Stats";
 
 const routes = {
     '/': () => <Login />,
@@ -14,7 +15,8 @@ const routes = {
     '/dashboard': () => <PublicDashboard />,
     '/ambulance': () => <AmbulanceOnboarding />,
     '/register': () => <Register />,
-    '/patient/register':()=> <PatientRegister />
+    '/patient/register':()=> <PatientRegister />,
+    '/stats' : () => <Stats/>
 };
 
 const SessionRouter = () => {

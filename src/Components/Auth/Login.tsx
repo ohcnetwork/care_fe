@@ -145,10 +145,12 @@ export const Login = () => {
                         </form>
                         <CardContent className="alignCenter">
                             You don't have an account? <A href="/register">Register</A>
-                            <label style={{color: "red"}}> Unauthorized Registrations are deemed Immoral to society</label>
                         </CardContent>
                         <CardContent className="alignCenter">
                             Onboard Ambulances <A href="/ambulance">here</A>
+                        </CardContent>
+                        <CardContent className="alignCenter">
+                            Public Stats <A href="/stats">status</A>
                         </CardContent>
                     </Card>
                 </Grid>

@@ -5,7 +5,7 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
-import {VehicleDetailsForm} from "./VehicleDetailsForm";
+import {VehicleDetailsForm, vehicleForm, initVehicleData} from "./VehicleDetailsForm";
 import {DriverDetailsForm} from "./DriverDetailsForm";
 import {Grid} from "@material-ui/core";
 
@@ -76,24 +76,30 @@ const useStyles = makeStyles((theme: Theme) => ({
 export default function AmbulanceOnboarding() {
     const classes = useStyles();
     const [value, setValue] = React.useState(0);
-    const [vehicleObj, setVehicleObj] = React.useState();
+    const [vehicleObj, setVehicleObj] = React.useState<vehicleForm>(initVehicleData);
     
     const handleChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+        // prevent navigating to driver details without entering vehicle details
+        if (newValue === 1 && !vehicleObj.isValid) {
+          return;
+        }
         setValue(newValue);
     };
     
-    const updateVehicleObj = (val: any)=>{
-        setVehicleObj(val);
-        setValue(1);
+    const updateVehicleObj = (form: vehicleForm)=>{
+        setVehicleObj(form);
+        if (form.isValid) {
+          setValue(1);
+        }
     };
 
     return (
 
         <div className={classes.root} style={{marginTop: '60px'}}>
             <Grid container spacing={2} alignContent="center" justify="center">
-                <Grid item xs={12} sm={5} md={4} lg={3}>
+                <Grid item xs={12} sm={8} md={6} lg={4}>
             <AppBar position="static">
-                <Tabs value={value} className={classes.tabSection} style={{color: 'black'}} onChange={handleChange} >
+                <Tabs value={value} className={classes.tabSection} style={{color: 'black'}} variant="fullWidth" onChange={handleChange} >
                     <Tab label="Vehicle Details" {...a11yProps(0)} />
                     <Tab label="Driver Details" {...a11yProps(1)} />
                 </Tabs>
@@ -107,7 +113,6 @@ export default function AmbulanceOnboarding() {
                 </Grid>
             </Grid>
         </div>
-
 
     );
 }
