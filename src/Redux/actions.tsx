@@ -95,7 +95,7 @@ export const getCurrentUser = () => {
 
 export const signupUser = (form: object) => {
     return fireRequest("createUser", [], form)
-}
+};
 
 
 // Ambulance
@@ -106,4 +106,7 @@ export const postAmbulance = (form: object) => {
 // Facility
 export const createFacility = (form:object) => {
     return fireRequest("createFacility", [], form)
-}
+};
+export const getUserList = () => {
+    return fireRequest('userList', [], {});
+};
