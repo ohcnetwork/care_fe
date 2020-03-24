@@ -120,6 +120,7 @@ export const DriverDetailsForm = (props:any) => {
           }
         ],
         "vehicle_number": vehicleInfo.registrationNumber ? String(vehicleInfo.registrationNumber).toUpperCase() : "",
+        "vehicle_type": vehicleInfo.vehicleType ? vehicleInfo.vehicleType : null,
         "owner_name": vehicleInfo.nameOfOwner,
         "owner_phone_number": vehicleInfo.ownerPhoneNumber,
         "owner_is_smart_phone": vehicleInfo.isSmartPhone,

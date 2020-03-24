@@ -53,7 +53,6 @@ export const VehicleDetailsForm = (props: any) => {
     const initErr: any = {};
     const [form, setForm] = useState<any>(Object.assign(initForm, vehicleDetails));
     const [errors, setErrors] = useState(initErr);
-    const inputLabel = React.useRef<HTMLLabelElement>(null);
     const validTill = [{
         id: 0,
         text: 'Select',
