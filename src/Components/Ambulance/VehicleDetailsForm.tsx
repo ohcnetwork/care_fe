@@ -81,9 +81,9 @@ export const VehicleDetailsForm = (props: any) => {
         // remove selected districts from the other district options
         if (name === 'primaryDistrict' || name === 'secondaryDistrict' || name === 'thirdDistrict') {
             setDistrictOptions({
-                primaryDistrict: allDistrictOptions.filter(i => !(i.id === fieldValue.secondaryDistrict || i.id === fieldValue.thirdDistrict)),
-                secondaryDistrict: allDistrictOptions.filter(i => !(i.id === fieldValue.primaryDistrict || i.id === fieldValue.thirdDistrict)),
-                thirdDistrict: allDistrictOptions.filter(i => !(i.id === fieldValue.primaryDistrict || i.id === fieldValue.secondaryDistrict)),
+                primaryDistrict: allDistrictOptions.filter(i => !i.id || !(i.id === fieldValue.secondaryDistrict || i.id === fieldValue.thirdDistrict)),
+                secondaryDistrict: allDistrictOptions.filter(i => !i.id || !(i.id === fieldValue.primaryDistrict || i.id === fieldValue.thirdDistrict)),
+                thirdDistrict: allDistrictOptions.filter(i => !i.id || !(i.id === fieldValue.primaryDistrict || i.id === fieldValue.secondaryDistrict)),
             });
         }
     };
