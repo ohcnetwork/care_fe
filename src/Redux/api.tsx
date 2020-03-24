@@ -89,7 +89,7 @@ export default {
     // Ambulance
     
     createAmbulance: {
-        path: '/api/v1/ambulance',
+        path: '/api/v1/ambulance/',
         method: 'POST'
     }
 

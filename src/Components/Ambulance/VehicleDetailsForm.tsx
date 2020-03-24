@@ -21,9 +21,9 @@ export const VehicleDetailsForm = (props: any) => {
         nameOfOwner: "",
         ownerPhoneNumber: "",
         isSmartPhone: false,
-        primaryDistrict: "",
-        secondaryDistrict: "",
-        thirdDistrict: "",
+        primaryDistrict: null,
+        secondaryDistrict: null,
+        thirdDistrict: null,
         hasOxygenSupply: false,
         hasVentilator: false,
         hasSuctionMachine: false,
@@ -53,7 +53,11 @@ export const VehicleDetailsForm = (props: any) => {
             errorField[name] = null;
             setErrors(errorField);
         }
-        fieldValue[name] = value;
+        let fValue = value;
+        if(name === 'primaryDistrict' ||  name === 'secondaryDistrict' || name === 'thirdDistrict' || name === 'insuranceValidTill'){
+            fValue = parseInt(fValue)
+        }
+        fieldValue[name] = fValue;
         setForm(fieldValue);
     };
 
@@ -85,7 +89,7 @@ export const VehicleDetailsForm = (props: any) => {
                 case "ownerPhoneNumber":
                     if (!value) {
                         err[key] = "This field is required";
-                    } else if(!/^[0-9]{10}$/.test(value)) {
+                    } else if(value &&!(/^[0-9]{10}$/.test(value))) {
                         err[key] = "Invalid phone number";
                     }
                     break;
@@ -112,6 +116,7 @@ export const VehicleDetailsForm = (props: any) => {
             setVehicleObj(form);
         }
     };
+    
     return (
         <div>
             <Grid container alignContent="center" justify="center">

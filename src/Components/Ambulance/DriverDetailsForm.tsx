@@ -25,8 +25,8 @@ export const DriverDetailsForm = (props:any) => {
     const fieldValue = Object.assign({}, form);
     const errorField = Object.assign({}, errors);
 
-    if (errorField.name) {
-      errorField.name = null;
+    if (errorField[name]) {
+      errorField[name] = null;
       setErrors(errorField);
     }
     if (name === 'driverName1') {

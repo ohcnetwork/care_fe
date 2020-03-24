@@ -18,13 +18,10 @@ const useStyles = makeStyles(theme => ({
     },
     logoImg:{
         objectFit:'contain',
-        height:'150px',
+        height:'8rem',
     },
     imgSection:{
-        marginTop:'100px',
-        justifySelf:'flex-end', 
-        alignSelf:'center',
-        paddingBottom:'45px'
+        paddingBottom:'45px',
     }
 }));
 
@@ -97,8 +94,9 @@ export const Login = () => {
     };
 
     return (
-        <Box display="flex" flexDirection="column" justifyItems="space-between">
-            <Grid container className={classes.formTop} spacing={2}>
+        <Box display="flex" flexDirection="column" className={`${classes.formTop}`}>
+            <Box className={classes.imgSection} display="flex" flexDirection="column" justifyContent="flex-start">
+            <Grid container spacing={2}>
                 <Grid item className="w3-hide-small" xs={12} sm={7} md={8} lg={9}>
                     <Grid item>
                         <PublicDashboard/>
@@ -154,9 +152,10 @@ export const Login = () => {
                     </Card>
                 </Grid>
             </Grid>
-            <div className={classes.imgSection}>
+            </Box>
+            <Box className={classes.imgSection} display="flex" flexDirection="column" justifyContent="center" alignContent="center">
                 <img src="https://care-coronasafe.s3.amazonaws.com/static/images/logos/ksdma_logo.png" alt="Care Logo" className={classes.logoImg}/>
-            </div>
+            </Box>
         </Box>
 
 
