@@ -3,8 +3,9 @@ import {Box, Button, Card, CardActions, CardContent, CardHeader, Checkbox, Grid,
 import {ErrorHelperText, NativeSelectField, TextInputField} from "../Common/HelperInputFields";
 import {DISTRICT_CHOICES} from "./constants";
 import {isEmpty} from "lodash";
+import NavigateNextIcon from '@material-ui/icons/NavigateNext';
 
-interface formFields {
+export interface vehicleForm {
     registrationNumber: string;
     insuranceValidTill: number;
     nameOfOwner: string;
@@ -16,10 +17,11 @@ interface formFields {
     hasOxygenSupply: boolean;
     hasVentilator: boolean;
     hasSuctionMachine: boolean;
-    hasDefibrillator: boolean
+    hasDefibrillator: boolean;
+    isValid: boolean;
 }
 
-const initFormData: formFields = {
+export const initVehicleData: vehicleForm = {
     registrationNumber: '',
     insuranceValidTill: 0,
     nameOfOwner: '',
@@ -31,7 +33,8 @@ const initFormData: formFields = {
     hasOxygenSupply: false,
     hasVentilator: false,
     hasSuctionMachine: false,
-    hasDefibrillator: false
+    hasDefibrillator: false,
+    isValid: false,
 };
 
 //add empty option to districts
@@ -44,7 +47,7 @@ const allDistrictOptions: Array<{ id: number; text: string }> = [
 
 export const VehicleDetailsForm = (props: any) => {
     const {classes, setVehicleObj, vehicleDetails} = props;
-    const initForm: formFields = { ...initFormData };
+    const initForm: vehicleForm = { ...initVehicleData };
     const initErr: any = {};
     const [form, setForm] = useState<any>(Object.assign(initForm, vehicleDetails));
     const [errors, setErrors] = useState(initErr);
@@ -131,17 +134,21 @@ export const VehicleDetailsForm = (props: any) => {
         });
         if (!isEmpty(err)) {
             setErrors(err);
-            return false;
+            setVehicleObj({
+                ...initForm,
+                isValid: false,
+            });
+            return;
         }
-        return form;
+        setVehicleObj({
+            ...form,
+            isValid: true,
+        });
     };
 
     const handleSubmit = (e: any) => {
         e.preventDefault();
-        const valid = validateData();
-        if (valid) {
-            setVehicleObj(form);
-        }
+        validateData();
     };
 
     const handleClear = (e: any) => {
@@ -152,7 +159,8 @@ export const VehicleDetailsForm = (props: any) => {
             thirdDistrict: [ ...allDistrictOptions ],
         });
         setErrors(initErr);
-        setForm(initFormData);
+        setForm(initVehicleData);
+        setVehicleObj(initVehicleData);
     }
     
     return (
@@ -338,10 +346,9 @@ export const VehicleDetailsForm = (props: any) => {
                                 </Box>
                             </CardContent>
 
-                            <CardActions style={{justifyContent: "flex-end"}}>
+                            <CardActions style={{justifyContent: "space-between"}}>
                                 <Button
                                     color="default"
-                                    variant="contained"
                                     type="button"
                                     onClick={e => handleClear(e)}
                                 >
@@ -352,8 +359,9 @@ export const VehicleDetailsForm = (props: any) => {
                                     variant="contained"
                                     type="submit"
                                     onClick={e => handleSubmit(e)}
+                                    endIcon={<NavigateNextIcon>next</NavigateNextIcon>}
                                 >
-                                    Next
+                                    Save & Continue
                                 </Button>
                             </CardActions>
                         </form>

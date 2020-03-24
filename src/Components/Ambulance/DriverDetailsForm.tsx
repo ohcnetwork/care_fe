@@ -5,6 +5,7 @@ import { useDispatch } from "react-redux";
 import { postAmbulance } from "../../Redux/actions";
 import { isEmpty, get } from "lodash";
 import { navigate } from 'hookrouter';
+import SaveIcon from '@material-ui/icons/Save';
 
 interface formFields {
   driverName1: string;
@@ -218,10 +219,9 @@ export const DriverDetailsForm = (props:any) => {
                 Is smart phone
               </CardContent>
 
-              <CardActions className="padding16" style={{justifyContent: "flex-end"}}>
+              <CardActions className="padding16" style={{justifyContent: "space-between"}}>
                 <Button
                     color="default"
-                    variant="contained"
                     type="button"
                     onClick={e => handleClear(e)}
                 >
@@ -232,7 +232,10 @@ export const DriverDetailsForm = (props:any) => {
                   variant="contained"
                   type="submit"
                   onClick={(e) => handleSubmit(e)}
-                >Save Details</Button>
+                  startIcon={<SaveIcon>save</SaveIcon>}
+                >
+                  Save Details
+                </Button>
               </CardActions>
             </form>
           </Card>
