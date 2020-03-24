@@ -83,9 +83,9 @@ export default function AmbulanceOnboarding() {
     };
     
     const updateVehicleObj = (val: any)=>{
-        setVehicleObj(val)
+        setVehicleObj(val);
         setValue(1);
-    }
+    };
     console.log('vehicleObj: ', vehicleObj);
 
     return (

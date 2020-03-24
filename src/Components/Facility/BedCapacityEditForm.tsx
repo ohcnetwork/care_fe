@@ -12,7 +12,7 @@ const initialState = {
     form: { ...initForm },
     errors: { ...initForm }
 };
-const bed_count_editreducer = (state = initialState, action: any) => {
+const bedCountEditReducer = (state = initialState, action: any) => {
     switch (action.type) {
         case "set_form": {
             return {
@@ -30,53 +30,59 @@ const bed_count_editreducer = (state = initialState, action: any) => {
         default:
             return state
     }
-}
+};
 
 export const BedCapacityEditForm = (props: any) => {
-    const [state, dispatch] = useReducer(bed_count_editreducer, initialState)
+    const [state, dispatch] = useReducer(bedCountEditReducer, initialState);
 
     const handleChange = (e: any) => {
-        let form = { ...state.form }
-        form[e.target.name] = e.target.value
+        let form = { ...state.form };
+        form[e.target.name] = e.target.value;
         dispatch({ type: "set_form", form })
-    }
+    };
 
-    const validateForm = () => {
-        let errors = { ...initForm }
-        let invalidForm = false
+    const validateData = () => {
+        let errors = { ...initForm };
+        let invalidForm = false;
         Object.keys(state.form).map((field, i) => {
             if (!state.form[field].length && field !== "bedType") {
-                errors[field] = "Field is required"
+                errors[field] = "Field is required";
                 invalidForm = true
             } else if (field == "bedType" && state.form[field] == "") {
-                errors[field] = "Field is required"
+                errors[field] = "Field is required";
                 invalidForm = true
             }
             if(field == "totalCapacity" && state.form.totalCapacity =="" ){
-                errors[field] = "Field is required"
+                errors[field] = "Field is required";
                 invalidForm = true;
             } else if(field == "totalCapacity" && isNaN(state.form.totalCapacity)){
-                errors[field] = "Please enter a valid number"
+                errors[field] = "Please enter a valid number";
                 invalidForm = true;
             }
             if(field == "currentOccupancy" && state.form.currentOccupancy ==""){
-                errors[field] = "Field is required"
+                errors[field] = "Field is required";
                 invalidForm = true;
             }else if(field == "currentOccupancy" && isNaN(state.form.currentOccupancy)){
-                errors[field] = "Please enter a valid number"
+                errors[field] = "Please enter a valid number";
                 invalidForm = true;
             }
-        })
+        });
         if (invalidForm) {
-            dispatch({ type: "set_error", errors })
+            dispatch({ type: "set_error", errors });
             return false
         }
-        dispatch({ type: "set_error", errors})
+        dispatch({ type: "set_error", errors});
         return true
-    }
+    };
 
-    const handleSubmit = (e: any) => { e.preventDefault()}
-    const handleCancel = () => {}
+    const handleSubmit = (e: any) => {
+        e.preventDefault();
+        const valid = validateData();
+        if(valid) {
+            // write api call
+        }
+    };
+    const handleCancel = () => {};
     return <div>
         <Grid container alignContent="center" justify="center">
             <Grid item xs={12}>
@@ -155,4 +161,4 @@ export const BedCapacityEditForm = (props: any) => {
             </Grid>
         </Grid>
     </div>
-}
+};

@@ -39,7 +39,7 @@ export const DriverDetailsForm = (props:any) => {
       fieldValue.cellNumber2 = value;
     }
     setForm(fieldValue);
-  }
+  };
 
   const validateData = () => {
     const err = Object.assign({});
@@ -113,7 +113,7 @@ export const DriverDetailsForm = (props:any) => {
         "has_suction_machine": vehicleInfo.hasSuctionMachine,
         "has_defibrillator": vehicleInfo.hasDefibrillator,
         "insurance_valid_till_year": vehicleInfo.insuranceValidTill
-      }
+      };
 
       dispatch(postAmbulance(ambulanceData)).then((resp: any) => {
         console.log('resp: ', resp);
