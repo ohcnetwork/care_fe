@@ -107,6 +107,6 @@ export const postAmbulance = (form: object) => {
 export const createFacility = (form:object) => {
     return fireRequest("createFacility", [], form)
 };
-export const userList = () => {
+export const getUserList = () => {
     return fireRequest('userList', [], {});
 };
