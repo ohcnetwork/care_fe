@@ -12,7 +12,8 @@ const optionalFields = ["first_name", "last_name", "email", "skill", "district",
 
 const useStyles = makeStyles(theme => ({
     formTop: {
-        marginTop: '100px',
+        marginTop: '80px',
+        marginBottom: "70px"
     },
     pdLogo: {
         height: '345px',
