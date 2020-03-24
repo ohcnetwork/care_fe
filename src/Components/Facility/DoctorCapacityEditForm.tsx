@@ -1,6 +1,9 @@
+/* eslint-disable array-callback-return */
+/* eslint-disable eqeqeq */
 import React, { useReducer } from 'react'
 import { Grid, InputLabel, Card, CardHeader, CardContent, Button } from '@material-ui/core'
 import { TextInputField } from '../Common/HelperInputFields';
+import { isEmpty } from 'lodash';
 
 const initForm: any = {
     totalDoctors: "",
@@ -47,26 +50,24 @@ export const DoctorCapacityEditForm = (props: any) => {
     const validateForm = () => {
         let errors = { ...initForm }
         let invalidForm = false
-        Object.keys(state.form).map((field, i) => {
-            if (!state.form[field].length && field !== "bedType") {
-                errors[field] = "Field is required"
-                invalidForm = true
-            } else if (field == "bedType" && state.form[field] == "") {
-                errors[field] = "Field is required"
-                invalidForm = true
-            }
-            if(field == "totalCapacity" && state.form.totalCapacity =="" ){
+        Object.keys(state.form).map((field) => {
+            if(field == "totalDoctors" && state.form.totalDoctors =="" ){
                 errors[field] = "Field is required"
                 invalidForm = true;
-            } else if(field == "totalCapacity" && isNaN(state.form.totalCapacity)){
+            } else if(field == "totalDoctors" && isNaN(state.form.totalDoctors)){
                 errors[field] = "Please enter a valid number"
                 invalidForm = true;
             }
-            if(field == "currentOccupancy" && state.form.currentOccupancy ==""){
+            if(field == "currentAvailability" && state.form.currentAvailability ==""){
                 errors[field] = "Field is required"
                 invalidForm = true;
-            }else if(field == "currentOccupancy" && isNaN(state.form.currentOccupancy)){
+            }else if(field == "currentAvailability" && isNaN(state.form.currentAvailability)){
                 errors[field] = "Please enter a valid number"
+                invalidForm = true;
+            }
+            if(field == "currentAvailability" && !isEmpty(state.form.currentAvailability) 
+                && state.form.currentAvailability>state.form.totalDoctors){
+                errors[field] = "Current availability cannot be greater than Total"
                 invalidForm = true;
             }
         })
