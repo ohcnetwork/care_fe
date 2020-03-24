@@ -111,12 +111,12 @@ export const PatientRegister = () => {
     };
 
     const handleSubmit = (e: any) => {
-        e.preventDefault()
+        e.preventDefault();
         const validForm = validateForm();
         if (validForm) {
             console.log('form', form);
         }
-    }
+    };
 
     const handleChange = (e: any) => {
         const { name, value } = e.target;
@@ -128,7 +128,7 @@ export const PatientRegister = () => {
         }
         formValues[name] = value;
         setForm(formValues)
-    }
+    };
     const handleCheckboxFieldChange = (e: any) => {
         const { checked, name } = e.target;
         const fieldValue = Object.assign({}, form);
@@ -366,4 +366,4 @@ export const PatientRegister = () => {
             </Grid>
         </Grid>
     </div>
-}
+};

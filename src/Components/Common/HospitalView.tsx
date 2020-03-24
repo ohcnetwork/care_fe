@@ -30,6 +30,8 @@ const useStyles = makeStyles({
     },
   });
 
+
+
 export const HospitalView = (props:any) => {
     const classes = useStyles();
     return (

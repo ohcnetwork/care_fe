@@ -102,12 +102,10 @@ export default function ManageUsers(props: any) {
 
     const fetchData = (paginateData: any) => {
         setIsLoading(true);
-        dispatch(getUserList())
+        dispatch(getUserList(paginateData))
             .then((resp:any)=> {
                 const res = resp && resp.data;
-                console.log(res);
                 setData(res.results);
-                console.log('data', res.results);
                 setTotalCount(res.count);
                 setIsLoading(false);
             });
@@ -169,7 +167,6 @@ export default function ManageUsers(props: any) {
         );
     } else if (data && data.length) {
         manageUsers = userList;
-        console.log(manageUsers);
     } else if (data && data.length === 0) {
         manageUsers = (
             <Grid item xs={12} md={12} className="textMarginCenter">
@@ -180,7 +177,7 @@ export default function ManageUsers(props: any) {
 
     return (
         <div>
-            <TitleHeader title="Users" showSearch={false}>
+            <TitleHeader title="Facilities" showSearch={false}>
 
             </TitleHeader>
             <Grid container>
