@@ -80,6 +80,7 @@ export const fireRequest = (
     };
 };
 
+// User
 export const postLogin = (form: object) => {
     return fireRequest('login', [], form);
 };
@@ -91,6 +92,10 @@ export const postSignUp = (form: object) => {
 export const getCurrentUser = () => {
     return fireRequest('currentUser');
 };
+
+export const signupUser = (form: object) => {
+    return fireRequest("createUser", [], form)
+}
 
 
 // Ambulance
