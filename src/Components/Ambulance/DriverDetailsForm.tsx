@@ -115,18 +115,18 @@ export const DriverDetailsForm = (props:any) => {
             "is_smart_phone": form.isSmartPhone2
           }
         ],
-        "vehicle_number": vehicleInfo.registrationNumber,
+        "vehicle_number": vehicleInfo.registrationNumber ? String(vehicleInfo.registrationNumber).toLowerCase() : "",
         "owner_name": vehicleInfo.nameOfOwner,
         "owner_phone_number": vehicleInfo.ownerPhoneNumber,
         "owner_is_smart_phone": vehicleInfo.isSmartPhone,
-        "primary_district": vehicleInfo.primaryDistrict,
-        "secondary_district": vehicleInfo.secondaryDistrict,
-        "third_district": vehicleInfo.thirdDistrict,
+        "primary_district": vehicleInfo.primaryDistrict ? vehicleInfo.primaryDistrict : null,
+        "secondary_district": vehicleInfo.secondaryDistrict ? vehicleInfo.secondaryDistrict : null,
+        "third_district": vehicleInfo.thirdDistrict ? vehicleInfo.thirdDistrict : null,
         "has_oxygen": vehicleInfo.hasOxygenSupply,
         "has_ventilator": vehicleInfo.hasVentilator,
         "has_suction_machine": vehicleInfo.hasSuctionMachine,
         "has_defibrillator": vehicleInfo.hasDefibrillator,
-        "insurance_valid_till_year": vehicleInfo.insuranceValidTill
+        "insurance_valid_till_year": vehicleInfo.insuranceValidTill ? vehicleInfo.insuranceValidTill : null,
       };
 
       dispatch(postAmbulance(ambulanceData)).then((resp: any) => {
