@@ -37,7 +37,6 @@ jobs:
       - run:
           name: list
           command: ls -lah
-            
       - run:
           name: Deploy
           command: |
