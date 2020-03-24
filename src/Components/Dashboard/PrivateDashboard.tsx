@@ -26,12 +26,10 @@ export const PrivateDashboard = () => {
                     <label  style={{color: "red"}}>Increase by 183</label>
                 </Grid>
                 <Grid item>
-                    <DashboardStatsCard title="Negative Cases" value={2987} />
-                    <label> updated on 23 marach</label>
+                    <DashboardStatsCard title="Negative Cases" value={3331} />
                 </Grid>
                 <Grid item>
-                    <DashboardStatsCard title="Number of tests done" value={4291} />
-                    <label> updated on 23 marach</label>
+                    <DashboardStatsCard title="Number of tests done" value={4516} />
                 </Grid>
             </Grid>
         </Grid>
