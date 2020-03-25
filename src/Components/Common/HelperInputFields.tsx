@@ -6,15 +6,14 @@ import {
     Radio,
     TextField,
     NativeSelect,
-    TextFieldProps,
-    NativeSelectProps
+    TextFieldProps
 } from '@material-ui/core';
 import {
     KeyboardDatePicker,
     KeyboardTimePicker,
     MuiPickersUtilsProvider
 } from '@material-ui/pickers';
-import { MaterialUiPickersDate } from '@material-ui/pickers/typings'
+import { MaterialUiPickersDate } from '@material-ui/pickers/typings/date'
 import DateFnsUtils from '@date-io/date-fns';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FormControl from '@material-ui/core/FormControl';

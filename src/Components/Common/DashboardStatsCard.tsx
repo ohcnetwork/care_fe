@@ -17,7 +17,7 @@ const useStyles = makeStyles(theme => ({
 }));
 interface DashboardStatsCardProps {
     title: string;
-    value: string;
+    value: number;
 }
 export const DashboardStatsCard = (props: DashboardStatsCardProps)  =>  {
     const { title , value } = props;
