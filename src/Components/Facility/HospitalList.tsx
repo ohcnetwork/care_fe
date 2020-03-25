@@ -190,10 +190,12 @@ export const HospitalList = () => {
             <TitleHeader title="Facilities" showSearch={false}>
             </TitleHeader>
             <Grid container className={classes.minHeight}>
-                <AddCard 
-                    title={'+ Add New Hospital'} 
-                    onClick={()=>navigate('/facilities/create')}
-                />
+                { !isLoading  &&
+                    <AddCard
+                        title={'+ Add New Hospital'}
+                        onClick={() => navigate('/facilities/create')}
+                    />
+                }
                 {manageFacilities}
             </Grid>
             <Grid container>
