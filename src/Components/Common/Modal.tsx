@@ -14,8 +14,13 @@ const useStyles = makeStyles({
         marginBottom: '50px'
     }
 });
-
-const ModalComponent = (props: any) => {
+interface ModalProps {
+    children: JSX.Element[] | JSX.Element;
+    open: boolean;
+    handleClose: () => void;
+    style: Object;
+};
+const ModalComponent = (props: ModalProps) => {
     const { children, open, handleClose, style } = props;
     const classes = useStyles();
     return (

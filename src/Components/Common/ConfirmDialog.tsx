@@ -1,7 +1,21 @@
 import React from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button } from '@material-ui/core';
+import {
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogContentText,
+    DialogActions,
+    Button
+} from '@material-ui/core';
 
-const ConfirmDialog = (props: any) => {
+interface ConfirmDialogProps {
+    title: string;
+    message: string;
+    handleCancel: () => void;
+    handleOk: () => void;
+}
+
+const ConfirmDialog = (props: ConfirmDialogProps) => {
     const { title, message, handleCancel, handleOk  } = props;
     return (
         <Dialog

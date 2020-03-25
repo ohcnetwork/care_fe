@@ -1,7 +1,11 @@
 import React from 'react';
 import { Grid } from '@material-ui/core';
 
-const StatsCard = (props: any) => {
+interface StatsCardProps {
+    title: string;
+    children: JSX.Element[] | JSX.Element
+}
+const StatsCard = (props: StatsCardProps) => {
     const { title } = props;
     return (
         <Grid xs={12} md={4} item className="card-padding">
