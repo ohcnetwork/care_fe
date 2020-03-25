@@ -3,73 +3,80 @@ const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
+module.exports = (env, argv) => {
+    const mode = argv.mode || 'development';
+    const isDev = mode !== 'production';
+    const app =['./src/index.tsx'];
+    if (isDev) {
+        app.push('webpack-dev-server/client');
+    }
 
-const app =['./src/index.tsx'];
-if (process.env.NODE_ENV !== 'production') {
-    app.push('webpack-dev-server/client');
-
-}
-module.exports = {
-    entry: {
-        vendor: ['react', 'react-dom'],
-        app
-    },
-    output: {
-        path: path.resolve(__dirname, 'dist'),
-        filename: 'js/[name].bundle.js',
-        publicPath: '/',
-    },
-    devtool: 'source-map',
-    resolve: {
-        extensions: ['.js', '.jsx', '.json', '.ts', '.tsx'],
-    },
-    devServer: {
-        contentBase: path.join(__dirname, 'dist'),
-        compress: true,
-        host: "0.0.0.0",
-        port: 4000,
-        proxy: {
-            '/api': {
-                target: 'https://dev.care.coronasafe.in/',
-                changeOrigin: true,
-            }
+    console.log('isDev', isDev);
+    return ({
+        entry: {
+            vendor: ['react', 'react-dom'],
+            app
         },
-        historyApiFallback: true
-    },
-    module: {
-        rules: [{
-            test: /\.(ts|tsx)$/,
-            loader: 'ts-loader',
+        output: {
+            path: path.resolve(__dirname, 'dist'),
+            filename: isDev ? 'js/bundle.[hash].js' : 'js/bundle.prod.[hash].js',
+            chunkFilename: '[name].[chunkhash].chunk.js',
+            publicPath: '/',
         },
-            {
-                enforce: 'pre',
-                test: /\.js$/,
-                loader: 'source-map-loader'
+        devtool: isDev ? 'source-map' : 'none',
+        mode,
+        resolve: {
+            extensions: ['.js', '.jsx', '.json', '.ts', '.tsx'],
+        },
+        devServer: {
+            contentBase: path.join(__dirname, 'dist'),
+            compress: true,
+            host: "0.0.0.0",
+            port: 4000,
+            proxy: {
+                '/api': {
+                    target: 'https://dev.care.coronasafe.in/',
+                    changeOrigin: true,
+                }
             },
-            {
-                test: /\.(sa|sc|c)ss$/,
-                use: [MiniCssExtractPlugin.loader,
-                    'css-loader',
-                    'sass-loader',
-                ]
+            historyApiFallback: true
+        },
+        module: {
+            rules: [{
+                test: /\.(ts|tsx)$/,
+                loader: 'ts-loader',
             },
-            {
-                test: /\.(png|jpe?g|gif)$/i,
-                use: [{
-                    loader: 'file-loader'
-                }]
-            }
+                {
+                    enforce: 'pre',
+                    test: /\.js$/,
+                    loader: 'source-map-loader'
+                },
+                {
+                    test: /\.(sa|sc|c)ss$/,
+                    use: [MiniCssExtractPlugin.loader,
+                        'css-loader',
+                        'sass-loader',
+                    ]
+                },
+                {
+                    test: /\.(png|jpe?g|gif)$/i,
+                    use: [{
+                        loader: 'file-loader'
+                    }]
+                }
+            ],
+        },
+        plugins: [
+            new HtmlWebpackPlugin({
+                template: path.resolve(__dirname, 'src', 'index.html')
+            }),
+            new webpack.HotModuleReplacementPlugin(),
+            new MiniCssExtractPlugin({
+                filename: isDev ? 'css/[name][hash].bundle.css' : 'css/[name][hash].prod.bundle.css',
+            }),
         ],
-    },
-    plugins: [
-        new HtmlWebpackPlugin({
-            template: path.resolve(__dirname, 'src', 'index.html')
-        }),
-        new webpack.HotModuleReplacementPlugin(),
-        new MiniCssExtractPlugin({
-            filename: 'css/[name].bundle.css',
-        }),
-    ],
+    })
+   
 
 };
 
