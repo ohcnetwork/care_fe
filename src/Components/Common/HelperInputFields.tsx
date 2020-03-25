@@ -1,11 +1,64 @@
 import React from 'react';
-import { Checkbox, Grid, IconButton, Radio, TextField, NativeSelect } from '@material-ui/core';
-import { KeyboardDatePicker, KeyboardTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import {
+    Checkbox,
+    Grid,
+    IconButton,
+    Radio,
+    TextField,
+    NativeSelect,
+    TextFieldProps
+} from '@material-ui/core';
+import {
+    KeyboardDatePicker,
+    KeyboardTimePicker,
+    MuiPickersUtilsProvider
+} from '@material-ui/pickers';
+import { MaterialUiPickersDate } from '@material-ui/pickers/typings/date'
 import DateFnsUtils from '@date-io/date-fns';
 import DeleteIcon from '@material-ui/icons/Delete';
+import FormControl from '@material-ui/core/FormControl';
+import Box from '@material-ui/core/Box';
+import { NativeSelectInputProps } from '@material-ui/core/NativeSelect/NativeSelectInput';
 
-export const TextInputField = (props: any) => {
-    const { placeholder, onChange, value, name, variant, type, margin, errors, label, inputProps } = props;
+export interface DefaultNativeSelectInputProps  extends NativeSelectInputProps {
+    options: Array<{id: string | number, text: string}>,
+    placeholder?: string;
+    label?: string;
+}
+
+// Type Declarations
+type TextFieldPropsExtended = TextFieldProps&{errors: string}
+type Option = {text: string; score: number;}
+interface InputProps {
+    options: Array<Option>;
+    onChange: (
+        e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>, index: number
+    ) => void;
+    handleDeleteOption: (index: number) => void;
+    errors: Array<Option>;
+}
+interface DateInputFieldProps {
+    value: string;
+    onChange: (date: MaterialUiPickersDate, value?: string | null | undefined) => void;
+    label: string;
+    errors: string;
+};
+interface TimeInputFieldProps {
+    value: string;
+    onChange: (date: MaterialUiPickersDate, value?: string | null | undefined) => void;
+};
+
+interface OptionsProps {
+    options: Array<{id: number | string; text: string;}>,
+    onChange: (
+        e: React.ChangeEvent<HTMLInputElement>, checked: boolean
+    ) => void;
+    values: Array<{answerId: number}>
+};
+
+
+export const TextInputField = (props: TextFieldPropsExtended) => {
+    const { placeholder, onChange, value, name, variant, type, margin, errors, label, inputProps, multiline, rows } = props;
     return (
         <div>
             <TextField
@@ -19,13 +72,15 @@ export const TextInputField = (props: any) => {
                 value={value}
                 name={name}
                 inputProps={inputProps}
+                multiline={multiline}
+                rows={rows}
             />
             <ErrorHelperText error={errors}/>
         </div>
     );
 };
 
-export const MultilineInputField = (props: any) => {
+export const MultilineInputField = (props: TextFieldPropsExtended) => {
     const { placeholder, onChange, value, name, variant, errors } = props;
     return (
         <div>
@@ -45,11 +100,11 @@ export const MultilineInputField = (props: any) => {
     );
 };
 
-export const RadioButtonField = (props: any) => {
+export const RadioButtonField = (props: InputProps) => {
     const { options, onChange, handleDeleteOption, errors } = props;
     return (
         <div>
-            {options.map((opt: any, idx: number) => {
+            {options.map((opt: Option, idx: number) => {
                 return (
                     <Grid container key={idx}>
                         <Grid item>
@@ -95,11 +150,11 @@ export const RadioButtonField = (props: any) => {
     );
 };
 
-export const CheckboxInputField = (props: any) => {
+export const CheckboxInputField = (props: InputProps) => {
     const { options, onChange, handleDeleteOption, errors } = props;
     return (
         <div>
-            {options.map((opt: any, idx: number) => {
+            {options.map((opt: Option, idx: number) => {
                 return (
                     <Grid container key={idx}>
                         <Grid item>
@@ -145,7 +200,7 @@ export const CheckboxInputField = (props: any) => {
     );
 };
 
-export const DateInputField = (props: any) => {
+export const DateInputField = (props: DateInputFieldProps) => {
     const { value, onChange, label, errors } = props;
     return (
         <MuiPickersUtilsProvider utils={DateFnsUtils}>
@@ -166,13 +221,13 @@ export const DateInputField = (props: any) => {
 };
 
 export const TimeInputField = (props: any) => {
-    const { value, onChange } = props;
+    const { value, onChange, label } = props;
     return (
         <MuiPickersUtilsProvider utils={DateFnsUtils}>
             <KeyboardTimePicker
                 margin="normal"
                 id="time-picker"
-                label="Time picker"
+                label={label}
                 value={value}
                 onChange={onChange}
                 KeyboardButtonProps={{
@@ -183,14 +238,14 @@ export const TimeInputField = (props: any) => {
     );
 };
 
-export const ErrorHelperText = (props: any) => {
+export const ErrorHelperText = (props: {error: string | number}) => {
     const { error } = props;
     return (
         <div className="error-text">{error}</div>
     );
 };
 
-export const ShowRadioOptions = (props: any) => {
+export const ShowRadioOptions = (props: OptionsProps) => {
     const { options, onChange, values } = props;
     return (
         <div>
@@ -211,7 +266,7 @@ export const ShowRadioOptions = (props: any) => {
     );
 };
 
-export const ShowCheckboxOptions = (props: any) => {
+export const ShowCheckboxOptions = (props: OptionsProps) => {
     const { options, onChange, values } = props;
     return (
         <div>
@@ -231,15 +286,16 @@ export const ShowCheckboxOptions = (props: any) => {
     );
 };
 
-export const NativeSelectField = (props: any) => {
-    const { options, inputProps, onChange, value } = props;
+export const NativeSelectField = (props: DefaultNativeSelectInputProps) => {
+    const { options, variant, placeholder, label } = props;
     return (
-        <div>
-            <NativeSelect inputProps={inputProps} onChange={onChange} value={value}>
+        <FormControl style={{width: "100%"}} variant={variant}>
+            {label && (<Box>{label}</Box>)}
+            <NativeSelect {...props}>
                 {options.map((opt: any) => {
                     return <option value={opt.id} key={opt.id}>{opt.text}</option>
                 })}
             </NativeSelect>
-        </div>
+        </FormControl>
     );
 };

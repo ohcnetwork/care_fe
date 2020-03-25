@@ -1,7 +1,12 @@
 import React from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button } from '@material-ui/core';
 
-const AlertDialog = (props: any) => {
+interface Props {
+    title: string;
+    message: string;
+    handleClose: () => void;
+}
+const AlertDialog = (props: Props) => {
     const { title, message, handleClose } = props;
     return (
         <Dialog

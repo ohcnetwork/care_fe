@@ -80,6 +80,7 @@ export const fireRequest = (
     };
 };
 
+// User
 export const postLogin = (form: object) => {
     return fireRequest('login', [], form);
 };
@@ -92,6 +93,10 @@ export const getCurrentUser = () => {
     return fireRequest('currentUser');
 };
 
+export const signupUser = (form: object) => {
+    return fireRequest("createUser", [], form)
+};
+
 
 // Ambulance
 export const postAmbulance = (form: object) => {
@@ -101,4 +106,14 @@ export const postAmbulance = (form: object) => {
 // Facility
 export const createFacility = (form:object) => {
     return fireRequest("createFacility", [], form)
-}
+};
+export const getUserList = (paginate: object) => {
+    return fireRequest('userList', [], paginate);
+};
+export const getFacilities = (paginate: object) => {
+    return fireRequest('listFacility', [], paginate);
+};
+export const readUser = (username: any) => {
+    return fireRequest('readUser', [username], {});
+};
+

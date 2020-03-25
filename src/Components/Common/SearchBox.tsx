@@ -1,6 +1,6 @@
-import React from 'react';
-import { Grid, Typography, Theme, InputBase, Box, Card, CardHeader, CardContent, Fade, CircularProgress } from '@material-ui/core';
-import { makeStyles, withStyles, createStyles, fade } from '@material-ui/core/styles';
+import React, { ChangeEvent } from 'react';
+import { Theme, InputBase } from '@material-ui/core';
+import { makeStyles, withStyles, createStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -45,8 +45,14 @@ const BootstrapInput = withStyles((theme: Theme) =>
     }),
 )(InputBase);
 
-
-const SearchBox = (props: any) => {
+interface SearchBoxProps {
+    placeholder: string;
+    value: string;
+    handleSearch: (
+        e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    ) => void
+}
+const SearchBox = (props: SearchBoxProps) => {
 
     const classes = useStyles();
     const { placeholder, handleSearch, value } = props;
