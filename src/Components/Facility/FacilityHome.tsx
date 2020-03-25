@@ -7,6 +7,7 @@ import { getFacility } from "../../Redux/actions";
 import TitleHeader from "../Common/TitleHeader";
 import BedTypeCard from "./BedTypeCard";
 import { Loading } from '../Common/Loading';
+import DoctorsCountCard from './DoctorsCountCard';
 
 
 
@@ -98,6 +99,13 @@ export const FacilityHome = (props: any) => {
                     <Divider />
                 </Grid>
                 <BedTypeCard />
+            </Grid>
+            <Grid container style={{ padding: "10px", marginBottom: '15px' }} spacing={1}>
+                <Grid item xs={12} md={12}>
+                    <h5>Doctors Count</h5>
+                    <Divider />
+                </Grid>
+                <DoctorsCountCard />
             </Grid>
 
         </div>
