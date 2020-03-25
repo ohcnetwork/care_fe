@@ -1,12 +1,15 @@
 import React, {useEffect, useState} from 'react';
 import Grid from '@material-ui/core/Grid';
-import {Card, CardContent, CardHeader, CircularProgress, Tooltip, Typography} from "@material-ui/core";
+import {Card, CardContent, CardHeader, CircularProgress, Tooltip, Typography, IconButton, Menu, MenuItem} from "@material-ui/core";
 import {makeStyles} from "@material-ui/core/styles";
 import {useDispatch} from "react-redux";
 import {getFacilities} from "../../Redux/actions";
 import TitleHeader from "../Common/TitleHeader";
 import Pagination from "../Common/Pagination";
-
+import AddCard from '../Common/AddCard';
+import { navigate } from 'hookrouter';
+import MoreVertIcon from '@material-ui/icons/MoreVert';
+const img = 'https://coronasafe.network/break-chain.png';
 const useStyles = makeStyles(theme => ({
     root: {
         flexGrow: 1,
@@ -82,7 +85,7 @@ const useStyles = makeStyles(theme => ({
     }
 }));
 
-export const HospitalOnboarding = () => {
+export const HospitalList = () => {
     const classes = useStyles();
     const dispatch: any = useDispatch();
     const initialData: any[] = [];
@@ -161,13 +164,14 @@ export const HospitalOnboarding = () => {
             );
         });
     }
+
     if (isLoading || !data) {
         manageFacilities = (
-            <Grid item md={12} className={classes.displayFlex}>
-                <Grid container justify="center" alignItems="center">
-                    <CircularProgress/>
-                </Grid>
-            </Grid>
+            <div className="App">
+                <header className="App-header">
+                    <img src={img} className="App-logo" alt="logo" />
+                </header>
+            </div>
         );
     } else if (data && data.length) {
         manageFacilities = facilityList;
@@ -186,6 +190,12 @@ export const HospitalOnboarding = () => {
             <TitleHeader title="Facilities" showSearch={false}>
             </TitleHeader>
             <Grid container className={classes.minHeight}>
+                { !isLoading  &&
+                    <AddCard
+                        title={'+ Add New Hospital'}
+                        onClick={() => navigate('/facilities/create')}
+                    />
+                }
                 {manageFacilities}
             </Grid>
             <Grid container>

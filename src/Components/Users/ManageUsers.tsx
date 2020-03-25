@@ -20,7 +20,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Paper, { PaperProps } from '@material-ui/core/Paper';
-
+const img = 'https://coronasafe.network/break-chain.png';
 const useStyles = makeStyles(theme => ({
     root: {
         flexGrow: 1,
@@ -166,11 +166,11 @@ export default function ManageUsers(props: any) {
 
     if (isLoading || !data) {
         manageUsers = (
-            <Grid item xs={12} md={12}>
-                <div className="textMarginCenter">
-                    <CircularProgress/>
-                </div>
-            </Grid>
+            <div className="App">
+                <header className="App-header">
+                    <img src={img} className="App-logo" alt="logo" />
+                </header>
+            </div>
         );
     } else if (data && data.length) {
         manageUsers = userList;
