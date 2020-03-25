@@ -7,7 +7,6 @@ import { isEmpty, get } from "lodash";
 import { navigate } from 'hookrouter';
 import SaveIcon from '@material-ui/icons/Save';
 import { AGREE_CONSENT } from "./constants";
-import * as Notifications from '../../Utils/Notifications.js';
 
 interface formFields {
   driverName1: string;
@@ -140,13 +139,9 @@ export const DriverDetailsForm = (props:any) => {
         const res = get(resp, 'data', null);
         const statusCode = get(resp, 'status', '');
         if (res && statusCode === 401) {
-          Notifications.Error({
-            msg: 'Something went wrong..!'
-          });
+          alert('Something went wrong..!');
         } else if (res && statusCode === 201) {
-          Notifications.Success({
-            msg: 'Ambulance Added Successfully'
-          });
+          alert('Ambulance Added Successfully');
           navigate("/")
         }
       })
