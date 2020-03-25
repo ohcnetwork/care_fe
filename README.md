@@ -1,3 +1,12 @@
+# Coronasafe Care React Front end . 
+Auto Deployed to https://care.coronasafe.in for Develop Branch.
+
+Please comment on the issue if you are taking it up and tag pull requests with issues.
+tag @coronasafe/code-reviewers for faster resolution. 
+attach. a screenshot for all Prs
+
+
+
 ## Available Scripts
 
 In the project directory, you can run:

@@ -1,11 +1,25 @@
-import React, {useEffect, useState} from 'react';
-import Grid from '@material-ui/core/Grid';
-import {Card, CardContent, CardHeader, CircularProgress, Tooltip, Typography} from "@material-ui/core";
-import {makeStyles} from "@material-ui/core/styles";
-import {useDispatch} from "react-redux";
-import {getFacilities} from "../../Redux/actions";
-import TitleHeader from "../Common/TitleHeader";
-import Pagination from "../Common/Pagination";
+import React, { useState, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import {
+    Grid,
+    Typography,
+    Card,
+    CardHeader,
+    CardContent,
+    CircularProgress,
+    Tooltip
+} from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
+import Pagination from '../Common/Pagination';
+import TitleHeader from '../Common/TitleHeader';
+import {getUserList, readUser} from "../../Redux/actions";
+import Button from '@material-ui/core/Button';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import Paper, { PaperProps } from '@material-ui/core/Paper';
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -76,13 +90,12 @@ const useStyles = makeStyles(theme => ({
     }
 }));
 
-export const HospitalOnboarding = () => {
+export default function ManageUsers(props: any) {
     const classes = useStyles();
     const dispatch: any = useDispatch();
     const initialData: any[] = [];
+    let manageUsers: any = null;
     const [data, setData] = useState(initialData);
-
-    let manageFacilities: any = null;
     const [isLoading, setIsLoading] = useState(false);
     const [totalCount, setTotalCount] = useState(0);
 
@@ -96,7 +109,7 @@ export const HospitalOnboarding = () => {
 
     const fetchData = (paginateData: any) => {
         setIsLoading(true);
-        dispatch(getFacilities(paginateData))
+        dispatch(getUserList(paginateData))
             .then((resp:any)=> {
                 const res = resp && resp.data;
                 setData(res.results);
@@ -115,33 +128,34 @@ export const HospitalOnboarding = () => {
             offset: perPage,
             limit
         };
-        fetchData(paginateData);
+            fetchData(paginateData);
     };
-    let facilityList: any[] = [];
+
+
+    let userList: any[] = [];
     if (data && data.length) {
-        facilityList = data.map((facility: any, idx: number) => {
+        userList = data.map((user: any, idx: number) => {
             return (
-                <Grid item xs={12} md={3}  key={`usr_${facility.id}`}
+                <Grid item xs={12} md={3}  key={`usr_${user.id}`}
                       className={classes.root}>
                     <Card className={classes.card}>
                         <CardHeader className={classes.cardHeader}
-                                    title={<span className={classes.title}>
-                                        <Tooltip title={<span className={classes.toolTip}>{facility.name}</span>}
-                                                                                    interactive={true}><span>{facility.name}</span></Tooltip></span>}
+                                    title={<span className={classes.title}><Tooltip title={<span className={classes.toolTip}>{user.username}</span>}
+                                                                                    interactive={true}><span>{user.username}</span></Tooltip></span>}
                         />
                         <CardContent className={classes.content}>
                             <Typography>
-                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>District - </span>{facility.district}
+                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Full Name - </span>{`${user.first_name} ${user.last_name}`}
                             </Typography>
                         </CardContent>
                         <CardContent className={classes.content}>
                             <Typography>
-                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Oxygen Capacity - </span>{facility.oxygen_capacity}
+                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Role - </span>{user.user_type}
                             </Typography>
                         </CardContent>
                         <CardContent className={classes.content}>
                             <Typography>
-                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Contact - </span>{facility.phone_number}
+                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Contact - </span>{user.phone_number}
                             </Typography>
                         </CardContent>
                     </Card>
@@ -149,8 +163,9 @@ export const HospitalOnboarding = () => {
             );
         });
     }
+
     if (isLoading || !data) {
-        manageFacilities = (
+        manageUsers = (
             <Grid item xs={12} md={12}>
                 <div className="textMarginCenter">
                     <CircularProgress/>
@@ -158,9 +173,9 @@ export const HospitalOnboarding = () => {
             </Grid>
         );
     } else if (data && data.length) {
-        manageFacilities = facilityList;
+        manageUsers = userList;
     } else if (data && data.length === 0) {
-        manageFacilities = (
+        manageUsers = (
             <Grid item xs={12} md={12} className="textMarginCenter">
                 <h5> No Users Found</h5>
             </Grid>
@@ -169,11 +184,11 @@ export const HospitalOnboarding = () => {
 
     return (
         <div>
-            <TitleHeader title="Facilities" showSearch={false}>
+            <TitleHeader title="Users" showSearch={false}>
 
             </TitleHeader>
             <Grid container>
-                {manageFacilities}
+                {manageUsers}
                 {(data && data.length > 0 && totalCount > limit) && (
                     <Grid container className={`w3-center ${classes.paginateTopPadding}`}>
                         <Pagination

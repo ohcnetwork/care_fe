@@ -1,7 +1,7 @@
 import React, { useState } from "react"
 import { makeStyles } from "@material-ui/styles";
 import { useDispatch } from "react-redux";
-import { Grid, Card, CardHeader, CardContent, CardActions, Button, FormControl, InputLabel, Select, MenuItem } from "@material-ui/core";
+import { Box, Grid, Card, CardHeader, CardContent, CardActions, Button, FormControl, InputLabel, Select, MenuItem } from "@material-ui/core";
 import { TextInputField } from "../Common/HelperInputFields";
 import { validateEmailAddress, phonePreg } from "../../Constants/common";
 import districts from "../../Constants/Static_data/districts.json"
@@ -12,15 +12,16 @@ const optionalFields = ["first_name", "last_name", "email", "skill", "district",
 
 const useStyles = makeStyles(theme => ({
     formTop: {
-        marginTop: '100px',
+        marginTop: '80px',
+        marginBottom: "70px"
     },
     pdLogo: {
         height: '345px',
         border: 'solid 3px white'
     },
     formControl: {
-        margin: "10px",
-        minWidth: 120,
+        margin: "10px 0px",
+        minWidth: 145,
     },
 }));
 
@@ -120,7 +121,8 @@ export const Register = () => {
                         <CardContent>
                             <TextInputField
                                 name="username"
-                                placeholder="User Name*"
+                                label="User Name*"
+                                placeholder=""
                                 variant="outlined"
                                 margin="dense"
                                 InputLabelProps={{ shrink: !!form.username }}
@@ -131,7 +133,8 @@ export const Register = () => {
 
                             <TextInputField
                                 name="first_name"
-                                placeholder="First Name"
+                                label="First Name"
+                                placeholder=""
                                 variant="outlined"
                                 margin="dense"
                                 value={form.first_name}
@@ -141,7 +144,8 @@ export const Register = () => {
 
                             <TextInputField
                                 name="last_name"
-                                placeholder="Last Name"
+                                label="Last Name"
+                                placeholder=""
                                 variant="outlined"
                                 margin="dense"
                                 value={form.last_name}
@@ -152,7 +156,8 @@ export const Register = () => {
                             <TextInputField
                                 type="email"
                                 name="email"
-                                placeholder="Email Address"
+                                label="Email Address"
+                                placeholder=""
                                 variant="outlined"
                                 margin="dense"
                                 value={form.email}
@@ -163,14 +168,15 @@ export const Register = () => {
                             <TextInputField
                                 type="tel"
                                 name="phone_number"
-                                placeholder="Phone Number*"
+                                label="Phone Number*"
+                                placeholder=""
                                 variant="outlined"
                                 margin="dense"
                                 value={form.phone_number}
                                 onChange={handleChange}
                                 errors={errors.phone_number}
                             />
-
+                        <Box display="flex" flexDirection="row" justifyContent="space-between" alignItems="center">
                             <FormControl variant="outlined" className={classes.formControl}>
                                 <InputLabel id="demo-simple-select-outlined-label">District*</InputLabel>
                                 <Select
@@ -212,11 +218,12 @@ export const Register = () => {
                                 </Select>
                                 <span>{errors.gender}</span>
                             </FormControl>
-
+                        </Box>
                             <TextInputField
                                 type="tel"
                                 name="age"
-                                placeholder="Age*"
+                                label="Age*"
+                                placeholder=""
                                 variant="outlined"
                                 margin="dense"
                                 value={form.age}
@@ -226,7 +233,8 @@ export const Register = () => {
 
                             <TextInputField
                                 name="skill"
-                                placeholder="Skill"
+                                label="Skill"
+                                placeholder=""
                                 variant="outlined"
                                 margin="dense"
                                 InputLabelProps={{ shrink: !!form.skill }}
@@ -238,7 +246,8 @@ export const Register = () => {
                             <TextInputField
                                 type="password"
                                 name="password"
-                                placeholder="Password*"
+                                label="Password*"
+                                placeholder=""
                                 variant="outlined"
                                 margin="dense"
                                 value={form.password}
@@ -249,7 +258,8 @@ export const Register = () => {
                             <TextInputField
                                 type="password"
                                 name="c_password"
-                                placeholder="Confirm Password*"
+                                label="Confirm Password*"
+                                placeholder=""
                                 variant="outlined"
                                 margin="dense"
                                 value={form.c_password}

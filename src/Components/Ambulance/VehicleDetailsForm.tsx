@@ -1,11 +1,13 @@
 import React, {useState} from "react";
 import {Box, Button, Card, CardActions, CardContent, CardHeader, Checkbox, Grid, Typography, InputLabel} from "@material-ui/core";
 import {ErrorHelperText, NativeSelectField, TextInputField} from "../Common/HelperInputFields";
-import {DISTRICT_CHOICES} from "./constants";
+import {DISTRICT_CHOICES, VEHICLE_TYPES} from "./constants";
 import {isEmpty} from "lodash";
+import NavigateNextIcon from '@material-ui/icons/NavigateNext';
 
-interface formFields {
+export interface vehicleForm {
     registrationNumber: string;
+    vehicleType: string;
     insuranceValidTill: number;
     nameOfOwner: string;
     ownerPhoneNumber: string;
@@ -16,11 +18,13 @@ interface formFields {
     hasOxygenSupply: boolean;
     hasVentilator: boolean;
     hasSuctionMachine: boolean;
-    hasDefibrillator: boolean
+    hasDefibrillator: boolean;
+    isValid: boolean;
 }
 
-const initFormData: formFields = {
+export const initVehicleData: vehicleForm = {
     registrationNumber: '',
+    vehicleType: '',
     insuranceValidTill: 0,
     nameOfOwner: '',
     ownerPhoneNumber: '',
@@ -31,7 +35,8 @@ const initFormData: formFields = {
     hasOxygenSupply: false,
     hasVentilator: false,
     hasSuctionMachine: false,
-    hasDefibrillator: false
+    hasDefibrillator: false,
+    isValid: false,
 };
 
 //add empty option to districts
@@ -44,11 +49,10 @@ const allDistrictOptions: Array<{ id: number; text: string }> = [
 
 export const VehicleDetailsForm = (props: any) => {
     const {classes, setVehicleObj, vehicleDetails} = props;
-    const initForm: formFields = { ...initFormData };
+    const initForm: vehicleForm = { ...initVehicleData };
     const initErr: any = {};
     const [form, setForm] = useState<any>(Object.assign(initForm, vehicleDetails));
     const [errors, setErrors] = useState(initErr);
-    const inputLabel = React.useRef<HTMLLabelElement>(null);
     const validTill = [{
         id: 0,
         text: 'Select',
@@ -57,6 +61,11 @@ export const VehicleDetailsForm = (props: any) => {
         let text = `202${i}`
         validTill.push({id:parseInt(text),text})
     }
+
+    const vehicleTypes = [{
+        id: 0,
+        text: 'Select',
+    }, ...VEHICLE_TYPES]
 
     const [districtOptions, setDistrictOptions] = useState<any>({
         primaryDistrict: [...allDistrictOptions],
@@ -110,6 +119,9 @@ export const VehicleDetailsForm = (props: any) => {
                 case "insuranceValidTill":
                     !value && (err[key] = "This field is required");
                     break;
+                case "vehicleType":
+                    !value && (err[key] = "This field is required");
+                    break;
                 case "nameOfOwner":
                     !value && (err[key] = "This field is required");
                     break;
@@ -131,17 +143,21 @@ export const VehicleDetailsForm = (props: any) => {
         });
         if (!isEmpty(err)) {
             setErrors(err);
-            return false;
+            setVehicleObj({
+                ...initForm,
+                isValid: false,
+            });
+            return;
         }
-        return form;
+        setVehicleObj({
+            ...form,
+            isValid: true,
+        });
     };
 
     const handleSubmit = (e: any) => {
         e.preventDefault();
-        const valid = validateData();
-        if (valid) {
-            setVehicleObj(form);
-        }
+        validateData();
     };
 
     const handleClear = (e: any) => {
@@ -152,7 +168,8 @@ export const VehicleDetailsForm = (props: any) => {
             thirdDistrict: [ ...allDistrictOptions ],
         });
         setErrors(initErr);
-        setForm(initFormData);
+        setForm(initVehicleData);
+        setVehicleObj(initVehicleData);
     }
     
     return (
@@ -178,23 +195,28 @@ export const VehicleDetailsForm = (props: any) => {
                                         errors={errors.registrationNumber}
                                         inputProps={{ maxLength: 10 }}
                                     />
+                                    <div className={`nativeSelectMod ${classes.selectField}`}>
+                                        <NativeSelectField
+                                            name= "vehicleType"
+                                            variant="outlined"
+                                            options={vehicleTypes}
+                                            value={form.vehicleType}
+                                            onChange={handleChange}
+                                            label="Vehicle Type"
+                                        />
+                                        <ErrorHelperText
+                                            error={errors.vehicleType}
+                                        />
+                                    </div>
 
                                     <div className={`nativeSelectMod ${classes.selectField}`}>
-                                        <InputLabel className={classes.selectLabel} ref={inputLabel} id="insuranceValidTill">
-                                            Insurance valid till
-                                        </InputLabel>
                                         <NativeSelectField
-                                            inputProps={{
-                                                name: "insuranceValidTill",
-                                            }}
-                                            placeholder="Insurance valid till"
+                                            name= "insuranceValidTill"
                                             variant="outlined"
-                                            margin="dense"
-                                            InputLabelProps={{shrink: !!form.insuranceValidTill}}
                                             options={validTill}
                                             value={form.insuranceValidTill}
                                             onChange={handleChange}
-
+                                            label="Insurance valid till"
                                         />
                                         <ErrorHelperText
                                             error={errors.insuranceValidTill}
@@ -234,19 +256,15 @@ export const VehicleDetailsForm = (props: any) => {
                                             ?</Typography>
                                     </Box>
                                     <Box>
-                                        <Typography>
+                                        <Typography variant="h6">
                                             Select Serviceable Districts
                                         </Typography>
                                     </Box>
                                     <div className={`nativeSelectMod ${classes.selectField}`}>
                                         <NativeSelectField
-                                            inputProps={{
-                                                name: "primaryDistrict"
-                                            }}
-                                            placeholder="Primary district served"
+                                            name= "primaryDistrict"
+                                            label="Primary district served"
                                             variant="outlined"
-                                            margin="dense"
-                                            InputLabelProps={{shrink: !!form.primaryDistrict}}
                                             options={districtOptions.primaryDistrict}
                                             value={form.primaryDistrict}
                                             onChange={handleChange}
@@ -258,12 +276,9 @@ export const VehicleDetailsForm = (props: any) => {
                                     </div>
                                     <div className={`nativeSelectMod ${classes.selectField}`}>
                                         <NativeSelectField
-                                            inputProps={{
-                                                name: "secondaryDistrict"
-                                            }}
-                                            placeholder="Secondary district served"
+                                            name= "secondaryDistrict"
+                                            label="Secondary district served"
                                             variant="outlined"
-                                            margin="dense"
                                             options={districtOptions.secondaryDistrict}
                                             value={form.secondaryDistrict}
                                             onChange={handleChange}
@@ -274,12 +289,9 @@ export const VehicleDetailsForm = (props: any) => {
                                     </div>
                                     <div className={`nativeSelectMod ${classes.selectField}`}>
                                         <NativeSelectField
-                                            inputProps={{
-                                                name: "thirdDistrict"
-                                            }}
-                                            placeholder="Third district served"
+                                            name= "thirdDistrict"
+                                            label="Third district served"
                                             variant="outlined"
-                                            margin="dense"
                                             options={districtOptions.thirdDistrict}
                                             value={form.thirdDistrict}
                                             onChange={handleChange}
@@ -338,10 +350,9 @@ export const VehicleDetailsForm = (props: any) => {
                                 </Box>
                             </CardContent>
 
-                            <CardActions style={{justifyContent: "flex-end"}}>
+                            <CardActions style={{justifyContent: "space-between"}}>
                                 <Button
                                     color="default"
-                                    variant="contained"
                                     type="button"
                                     onClick={e => handleClear(e)}
                                 >
@@ -352,8 +363,9 @@ export const VehicleDetailsForm = (props: any) => {
                                     variant="contained"
                                     type="submit"
                                     onClick={e => handleSubmit(e)}
+                                    endIcon={<NavigateNextIcon>next</NavigateNextIcon>}
                                 >
-                                    Next
+                                    Save & Continue
                                 </Button>
                             </CardActions>
                         </form>

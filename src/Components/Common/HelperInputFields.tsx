@@ -17,6 +17,15 @@ import {
 import { MaterialUiPickersDate } from '@material-ui/pickers/typings'
 import DateFnsUtils from '@date-io/date-fns';
 import DeleteIcon from '@material-ui/icons/Delete';
+import FormControl from '@material-ui/core/FormControl';
+import Box from '@material-ui/core/Box';
+import { NativeSelectInputProps } from '@material-ui/core/NativeSelect/NativeSelectInput';
+
+export interface DefaultNativeSelectInputProps  extends NativeSelectInputProps {
+    options: Array<{id: string | number, text: string}>,
+    placeholder?: string;
+    label?: string;
+}
 
 // Type Declarations
 type TextFieldPropsExtended = TextFieldProps&{errors: string}
@@ -48,10 +57,9 @@ interface OptionsProps {
     values: Array<{answerId: number}>
 };
 
-type NativeSelectExtended = NativeSelectProps&{options:Array<{id: number | string; text: string;}>};
 
 export const TextInputField = (props: TextFieldPropsExtended) => {
-    const { placeholder, onChange, value, name, variant, type, margin, errors, label, inputProps } = props;
+    const { placeholder, onChange, value, name, variant, type, margin, errors, label, inputProps, multiline, rows } = props;
     return (
         <div>
             <TextField
@@ -65,6 +73,8 @@ export const TextInputField = (props: TextFieldPropsExtended) => {
                 value={value}
                 name={name}
                 inputProps={inputProps}
+                multiline={multiline}
+                rows={rows}
             />
             <ErrorHelperText error={errors}/>
         </div>
@@ -277,15 +287,16 @@ export const ShowCheckboxOptions = (props: OptionsProps) => {
     );
 };
 
-export const NativeSelectField = (props: NativeSelectExtended) => {
-    const { options, inputProps, onChange, value } = props;
+export const NativeSelectField = (props: DefaultNativeSelectInputProps) => {
+    const { options, variant, placeholder, label } = props;
     return (
-        <div>
-            <NativeSelect inputProps={inputProps} onChange={onChange} value={value}>
-                {options.map((opt: {id: number | string; text: string;}) => {
+        <FormControl style={{width: "100%"}} variant={variant}>
+            {label && (<Box>{label}</Box>)}
+            <NativeSelect {...props}>
+                {options.map((opt: any) => {
                     return <option value={opt.id} key={opt.id}>{opt.text}</option>
                 })}
             </NativeSelect>
-        </div>
+        </FormControl>
     );
 };
