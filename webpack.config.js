@@ -2,7 +2,7 @@ const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const CleanWebpackPlugin = require('clean-webpack-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
 module.exports = (env, argv) => {
     const mode = argv.mode || 'development';
@@ -12,7 +12,6 @@ module.exports = (env, argv) => {
         app.push('webpack-dev-server/client');
     }
 
-    console.log('isDev', isDev);
     return ({
         entry: {
             vendor: ['react', 'react-dom'],
@@ -68,7 +67,7 @@ module.exports = (env, argv) => {
             ],
         },
         plugins: [
-            new CleanWebpackPlugin(['dist']),
+            new CleanWebpackPlugin(),
             new HtmlWebpackPlugin({
                 template: path.resolve(__dirname, 'src', 'index.html')
             }),
