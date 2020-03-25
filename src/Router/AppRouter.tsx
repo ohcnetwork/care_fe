@@ -37,7 +37,7 @@ const AppRouter = () => {
             </div>
             <div className="app-footer">
                 <div className="copy-right">
-                    Corona Care Network
+                 <a href="https://coronasafe.network">   Corona Care Network </a>
                 </div>
             </div>
         </div>
