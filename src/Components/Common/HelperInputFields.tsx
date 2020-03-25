@@ -220,14 +220,14 @@ export const DateInputField = (props: DateInputFieldProps) => {
     );
 };
 
-export const TimeInputField = (props: TimeInputFieldProps) => {
-    const { value, onChange } = props;
+export const TimeInputField = (props: any) => {
+    const { value, onChange, label } = props;
     return (
         <MuiPickersUtilsProvider utils={DateFnsUtils}>
             <KeyboardTimePicker
                 margin="normal"
                 id="time-picker"
-                label="Time picker"
+                label={label}
                 value={value}
                 onChange={onChange}
                 KeyboardButtonProps={{
