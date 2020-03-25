@@ -82,15 +82,20 @@ const useStyles = makeStyles(theme => ({
         position: 'relative'
     }
 }));
-
-export default function Stepper (props: any) {
+// Type definitions
+type Label = {link: string; name: string;}
+interface StepperProps {
+    labels: Array<Label>;
+    activeStateCount: number;
+}
+export default function Stepper (props: StepperProps) {
     const classes = useStyles();
     const { labels, activeStateCount } = props;
     let stepCount = 0;
     return (
       <Grid container justify="center">
         <List className={classes.root}>
-            {labels.map((item: any, index: any) => {
+            {labels.map((item: Label, index: number) => {
                 stepCount++;
                 const isActiveIcon = index < activeStateCount;
                 const isActiveBorder = index < (activeStateCount -1);

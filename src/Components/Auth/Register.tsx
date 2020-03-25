@@ -1,16 +1,16 @@
 import React, { useState } from "react"
-import { makeStyles } from "@material-ui/styles";
+import { makeStyles, Theme } from '@material-ui/core/styles';
 import { useDispatch } from "react-redux";
-import { Grid, Card, CardHeader, CardContent, CardActions, Button, FormControl, InputLabel, Select, MenuItem } from "@material-ui/core";
+import { Box, Grid, Card, CardHeader, CardContent, CardActions, Button, FormControl, InputLabel, Select, MenuItem } from "@material-ui/core";
 import { TextInputField } from "../Common/HelperInputFields";
 import { validateEmailAddress, phonePreg } from "../../Constants/common";
 import districts from "../../Constants/Static_data/districts.json"
 import gendorList from "../../Constants/Static_data/gender.json"
 import { signupUser } from "../../Redux/actions";
 
-const optionalFields = ["first_name", "last_name", "email", "skill", "district", "gender", "user_type"]
+const optionalFields = ["first_name", "last_name", "email", "skill", "district", "gender", "user_type"];
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme: Theme) => ({
     formTop: {
         marginTop: '80px',
         marginBottom: "70px"
@@ -18,10 +18,6 @@ const useStyles = makeStyles(theme => ({
     pdLogo: {
         height: '345px',
         border: 'solid 3px white'
-    },
-    formControl: {
-        margin: "10px",
-        minWidth: 120,
     },
 }));
 
@@ -40,7 +36,7 @@ export const Register = () => {
         phone_number: "",
         gender: "",
         age: "",
-        skill: "",
+        skill: 2,
         password: '',
         c_password: '',
     };
@@ -49,65 +45,65 @@ export const Register = () => {
     const [errors, setErrors] = useState(initErr);
 
     const validateForm = () => {
-        const oldError: any = {}
-        let hasError: boolean = false
+        const oldError: any = {};
+        let hasError: boolean = false;
         Object.keys(form).map((field: string) => {
             if ((optionalFields.indexOf(field) === -1) && !form[field].length) {
-                oldError[field] = "Field is required"
+                oldError[field] = "Field is required";
                 hasError = true
             } else if (field === "username" && !form[field].match(/^[\w.@+-]+$/)) {
-                oldError[field] = "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only."
+                oldError[field] = "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.";
                 hasError = true
             } else if (field === "email" && (form[field].length && !validateEmailAddress(form[field]))) {
-                oldError[field] = "Please Enter a Valid Email Address"
+                oldError[field] = "Please Enter a Valid Email Address";
                 hasError = true
             } else if (field === "phone_number" && !phonePreg(form[field])) {
-                oldError[field] = "Please Enter 10/11 digit mobile number or landline as 0<std code><phone number>"
+                oldError[field] = "Please Enter 10/11 digit mobile number or landline as 0<std code><phone number>";
                 hasError = true
             } else if ((field === "district" || field === "gender") && form[field] === "") {
-                oldError[field] = "Field is required"
+                oldError[field] = "Field is required";
                 hasError = true
             } else if (field === "age" && isNaN(form[field])) {
-                oldError[field] = "Please Enter Valid Age"
+                oldError[field] = "Please Enter Valid Age";
                 hasError = true
             } else if ((field === "password" || field === "c_password") && form["password"] !== form["c_password"]) {
-                oldError["c_password"] = "Password Mismatch"
+                oldError["c_password"] = "Password Mismatch";
                 hasError = true
             }
-        })
+        });
 
         if (hasError) {
-            setErrors(oldError)
+            setErrors(oldError);
             return false
         }
-        setErrors({})
+        setErrors({});
         return true
-    }
+    };
 
     const handleSubmit = (e: any) => {
-        e.preventDefault()
-        const validForm = validateForm()
+        e.preventDefault();
+        const validForm = validateForm();
         if (validForm) {
             dispatch(signupUser(form)).then((res: any) => {
                 if(res.status === 201) {
                     window.location.href = "/login"
                 } else {
-                    const error = { ...errors }
+                    const error = { ...errors };
                     Object.keys(res.data).map((field: string) => {
-                        error[field] = res.data[field][0]
+                        error[field] = res.data[field][0];
                         setErrors(error)
                     })
                 }
             })
         }
-    }
+    };
 
     const handleChange = (e: any) => {
-        const { name, value } = e.target
-        const formOld = { ...form }
-        formOld[name] = value
+        const { name, value } = e.target;
+        const formOld = { ...form };
+        formOld[name] = value;
         setForm(formOld)
-    }
+    };
 
     return <div className={classes.formTop} >
 
@@ -121,7 +117,8 @@ export const Register = () => {
                         <CardContent>
                             <TextInputField
                                 name="username"
-                                placeholder="User Name*"
+                                label="User Name*"
+                                placeholder=""
                                 variant="outlined"
                                 margin="dense"
                                 InputLabelProps={{ shrink: !!form.username }}
@@ -132,7 +129,8 @@ export const Register = () => {
 
                             <TextInputField
                                 name="first_name"
-                                placeholder="First Name"
+                                label="First Name"
+                                placeholder=""
                                 variant="outlined"
                                 margin="dense"
                                 value={form.first_name}
@@ -142,7 +140,8 @@ export const Register = () => {
 
                             <TextInputField
                                 name="last_name"
-                                placeholder="Last Name"
+                                label="Last Name"
+                                placeholder=""
                                 variant="outlined"
                                 margin="dense"
                                 value={form.last_name}
@@ -153,7 +152,8 @@ export const Register = () => {
                             <TextInputField
                                 type="email"
                                 name="email"
-                                placeholder="Email Address"
+                                label="Email Address"
+                                placeholder=""
                                 variant="outlined"
                                 margin="dense"
                                 value={form.email}
@@ -164,15 +164,17 @@ export const Register = () => {
                             <TextInputField
                                 type="tel"
                                 name="phone_number"
-                                placeholder="Phone Number*"
+                                label="Phone Number*"
+                                placeholder=""
                                 variant="outlined"
                                 margin="dense"
                                 value={form.phone_number}
                                 onChange={handleChange}
                                 errors={errors.phone_number}
                             />
-
-                            <FormControl variant="outlined" className={classes.formControl}>
+                        <Grid container justify="space-between" alignItems="center" spacing={1} style={{marginTop:'5px'}}>
+                            <Grid item xs={6}>
+                            <FormControl fullWidth variant="outlined">
                                 <InputLabel id="demo-simple-select-outlined-label">District*</InputLabel>
                                 <Select
                                     fullWidth
@@ -192,8 +194,9 @@ export const Register = () => {
                                 </Select>
                                 <span>{errors.district}</span>
                             </FormControl>
-
-                            <FormControl variant="outlined" className={classes.formControl}>
+                            </Grid>
+                            <Grid item xs={6}>
+                            <FormControl fullWidth variant="outlined">
                                 <InputLabel id="demo-simple-select-outlined-label">Gender*</InputLabel>
                                 <Select
                                     fullWidth
@@ -213,11 +216,13 @@ export const Register = () => {
                                 </Select>
                                 <span>{errors.gender}</span>
                             </FormControl>
-
+                            </Grid>
+                        </Grid>
                             <TextInputField
                                 type="tel"
                                 name="age"
-                                placeholder="Age*"
+                                label="Age*"
+                                placeholder=""
                                 variant="outlined"
                                 margin="dense"
                                 value={form.age}
@@ -226,20 +231,10 @@ export const Register = () => {
                             />
 
                             <TextInputField
-                                name="skill"
-                                placeholder="Skill"
-                                variant="outlined"
-                                margin="dense"
-                                InputLabelProps={{ shrink: !!form.skill }}
-                                value={form.skill}
-                                onChange={handleChange}
-                                errors={errors.skill}
-                            />
-
-                            <TextInputField
                                 type="password"
                                 name="password"
-                                placeholder="Password*"
+                                label="Password*"
+                                placeholder=""
                                 variant="outlined"
                                 margin="dense"
                                 value={form.password}
@@ -250,7 +245,8 @@ export const Register = () => {
                             <TextInputField
                                 type="password"
                                 name="c_password"
-                                placeholder="Confirm Password*"
+                                label="Confirm Password*"
+                                placeholder=""
                                 variant="outlined"
                                 margin="dense"
                                 value={form.c_password}
@@ -276,4 +272,4 @@ export const Register = () => {
             </Grid>
         </Grid>
     </div>
-}
+};

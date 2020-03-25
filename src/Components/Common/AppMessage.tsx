@@ -14,7 +14,15 @@ const useStyles = makeStyles(theme => ({
     }
 ));
 
-const AppMessage = (props: any) => {
+interface AppMessageProps {
+    open: boolean;
+    type: string;
+    message: string;
+    handleClose: () => void;
+    handleDialogClose: () => void;
+}
+
+const AppMessage = (props: AppMessageProps) => {
     const { open, type, message, handleClose, handleDialogClose } = props;
     const classes = useStyles();
 
