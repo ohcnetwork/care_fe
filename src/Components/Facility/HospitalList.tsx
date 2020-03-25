@@ -9,7 +9,7 @@ import Pagination from "../Common/Pagination";
 import AddCard from '../Common/AddCard';
 import { navigate } from 'hookrouter';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
-const img = 'https://coronasafe.network/break-chain.png';
+import {Loading} from "../Common/Loading";
 const useStyles = makeStyles(theme => ({
     root: {
         flexGrow: 1,
@@ -167,11 +167,7 @@ export const HospitalList = () => {
 
     if (isLoading || !data) {
         manageFacilities = (
-            <div className="App">
-                <header className="App-header">
-                    <img src={img} className="App-logo" alt="logo" />
-                </header>
-            </div>
+            <Loading/>
         );
     } else if (data && data.length) {
         manageFacilities = facilityList;

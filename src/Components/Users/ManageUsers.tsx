@@ -6,21 +6,13 @@ import {
     Card,
     CardHeader,
     CardContent,
-    CircularProgress,
     Tooltip
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import Pagination from '../Common/Pagination';
 import TitleHeader from '../Common/TitleHeader';
 import {getUserList, readUser} from "../../Redux/actions";
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import Paper, { PaperProps } from '@material-ui/core/Paper';
-const img = 'https://coronasafe.network/break-chain.png';
+import { Loading } from '../Common/Loading';
 const useStyles = makeStyles(theme => ({
     root: {
         flexGrow: 1,
@@ -166,11 +158,7 @@ export default function ManageUsers(props: any) {
 
     if (isLoading || !data) {
         manageUsers = (
-            <div className="App">
-                <header className="App-header">
-                    <img src={img} className="App-logo" alt="logo" />
-                </header>
-            </div>
+            <Loading/>
         );
     } else if (data && data.length) {
         manageUsers = userList;
