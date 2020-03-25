@@ -5,6 +5,10 @@ import { useDispatch } from "react-redux";
 import { navigate } from 'hookrouter';
 import { getFacility } from "../../Redux/actions";
 import TitleHeader from "../Common/TitleHeader";
+import BedTypeCard from "./BedTypeCard";
+import { Loading } from '../Common/Loading';
+
+
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -50,7 +54,7 @@ export const FacilityHome = (props: any) => {
             <Grid container>
                 <Grid item md={12} className={classes.displayFlex}>
                     <Grid container justify="center" alignItems="center">
-                        <CircularProgress />
+                        <Loading />
                     </Grid>
                 </Grid>
             </Grid>)
@@ -73,21 +77,29 @@ export const FacilityHome = (props: any) => {
                         <Grid item xs={12} className="w3-center">
                             <Button fullWidth variant="contained" color="primary" size="small">
                                 Update Hospital Info
-                                </Button>
+                            </Button>
                         </Grid>
                         <Grid item xs={12} className="w3-center">
                             <Button fullWidth variant="contained" color="primary" size="small">
                                 Add More Bed Types
-                                </Button>
+                            </Button>
                         </Grid>
                         <Grid item xs={12} className="w3-center">
                             <Button fullWidth variant="contained" color="primary" size="small">
                                 Add More Doctor Types
-                                </Button>
+                            </Button>
                         </Grid>
                     </Grid>
                 </Grid>
             </Grid>
+            <Grid container style={{ padding: "10px", marginBottom: '15px' }} spacing={1}>
+                <Grid item xs={12} md={12}>
+                    <h5>Bed Types</h5>
+                    <Divider />
+                </Grid>
+                <BedTypeCard />
+            </Grid>
+
         </div>
     );
 
