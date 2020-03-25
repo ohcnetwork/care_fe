@@ -1,6 +1,6 @@
 import React, { useState, useReducer } from "react"
 import { useDispatch } from "react-redux"
-import { FormControl, Grid, Card, CardHeader, Button, InputLabel, Select, MenuItem } from "@material-ui/core"
+import { FormControl, Grid, Card, CardHeader, CardContent, Button, InputLabel, Select, MenuItem } from "@material-ui/core"
 import { TextInputField, MultilineInputField } from "../Common/HelperInputFields"
 import Loader from "../Common/Loader"
 import { makeStyles } from "@material-ui/styles";
@@ -31,10 +31,6 @@ const useStyles = makeStyles(theme => ({
     pdLogo: {
         height: '345px',
         border: 'solid 3px white'
-    },
-    formControl: {
-        margin: "10px",
-        minWidth: "120px",
     },
     selectEmpty: {
         marginTop: "10px",
@@ -107,7 +103,7 @@ export const FacilityCreate = () => {
             dispatch({ type: "set_error", errors })
             return false
         }
-        dispatch({ type: "set_error", errors})
+        dispatch({ type: "set_error", errors })
         return true
     }
 
@@ -135,123 +131,124 @@ export const FacilityCreate = () => {
         }
     }
 
-    return <div>
+    return <div className="w3-content" style={{ maxWidth: '400px' }}>
         <div>
+            <Loader open={loading} />
             <form onSubmit={(e) => handleSubmit(e)}>
 
-                <Loader open={loading} />
-                <Grid item xs={12} style={{ marginTop: '75px' }}>
-                    <Card>
-                        <CardHeader title="Create Facility" />
-                        <Grid container justify="center" >
-                            <Grid item>
-                                <TextInputField
-                                    name="name"
-                                    placeholder="Hospital Name*"
-                                    variant="outlined"
-                                    margin="dense"
-                                    value={state.form.name}
-                                    onChange={handleChange}
-                                    errors={state.errors.name}
-                                />
-                            </Grid>
-                        </Grid>
-
-                        <Grid container justify="center" >
-                            <Grid item>
-                                <FormControl variant="outlined" className={classes.formControl}>
-                                    <InputLabel id="demo-simple-select-outlined-label">Pick Your District*</InputLabel>
-                                    <Select
-                                        fullWidth
-                                        labelId="demo-simple-select-outlined-label"
-                                        id="demo-simple-select-outlined"
-                                        name="district"
-                                        value={state.form.district}
+                <Card>
+                    <CardHeader title="Create Facility" />
+                    <CardContent>
+                        <Grid item xs={12}>
+                            <Grid container justify="center" style={{ marginBottom: '10px' }}>
+                                <Grid item xs={12}>
+                                    <TextInputField
+                                        name="name"
+                                        placeholder="Hospital Name*"
+                                        variant="outlined"
+                                        margin="dense"
+                                        value={state.form.name}
                                         onChange={handleChange}
-                                        label="District"
-                                    >
-                                        <MenuItem value="">
-                                            <em>None</em>
-                                        </MenuItem>
-                                        {districts.map((district) => {
-                                            return <MenuItem key={district.id.toString()} value={district.id}>{district.name}</MenuItem>
-                                        })}
-                                    </Select>
-                                    <span>{state.errors.district}</span>
-                                </FormControl>
+                                        errors={state.errors.name}
+                                    />
+                                </Grid>
+                            </Grid>
+
+                            <Grid container justify="center" >
+                                <Grid item xs={12}>
+                                    <FormControl fullWidth variant="outlined">
+                                        <InputLabel id="demo-simple-select-outlined-label">Pick Your District*</InputLabel>
+                                        <Select
+                                            fullWidth
+                                            labelId="demo-simple-select-outlined-label"
+                                            id="demo-simple-select-outlined"
+                                            name="district"
+                                            value={state.form.district}
+                                            onChange={handleChange}
+                                            label="District"
+                                        >
+                                            <MenuItem value="">
+                                                <em>None</em>
+                                            </MenuItem>
+                                            {districts.map((district) => {
+                                                return <MenuItem key={district.id.toString()} value={district.id}>{district.name}</MenuItem>
+                                            })}
+                                        </Select>
+                                        <span className="error-text">{state.errors.district}</span>
+                                    </FormControl>
+                                </Grid>
+                            </Grid>
+
+                            <Grid container justify="center" >
+                                <Grid item xs={12}>
+                                    <MultilineInputField
+                                        name="address"
+                                        placeholder="Hospital Address*"
+                                        variant="outlined"
+                                        margin="dense"
+                                        value={state.form.address}
+                                        onChange={handleChange}
+                                        errors={state.errors.address}
+                                    />
+                                </Grid>
+                            </Grid>
+
+                            <Grid container justify="center" >
+                                <Grid item xs={12}>
+                                    <TextInputField
+                                        name="phone_number"
+                                        placeholder="Emergency Contact Number*"
+                                        variant="outlined"
+                                        margin="dense"
+                                        value={state.form.phone_number}
+                                        onChange={handleChange}
+                                        errors={state.errors.phone_number}
+                                    />
+                                </Grid>
+                            </Grid>
+
+                            <Grid container justify="center" >
+                                <Grid item xs={12}>
+                                    <TextInputField
+                                        name="latitude"
+                                        placeholder="Latitude*"
+                                        variant="outlined"
+                                        margin="dense"
+                                        value={state.form.latitude}
+                                        onChange={handleChange}
+                                        errors={state.errors.latitude}
+                                    />
+                                </Grid>
+                            </Grid>
+
+                            <Grid container justify="center" >
+                                <Grid item xs={12}>
+                                    <TextInputField
+                                        name="longitude"
+                                        placeholder="Longitude*"
+                                        variant="outlined"
+                                        margin="dense"
+                                        value={state.form.longitude}
+                                        onChange={handleChange}
+                                        errors={state.errors.longitude}
+                                    />
+                                </Grid>
+                            </Grid>
+
+                            <Grid container justify="center" spacing={5} style={{ marginTop: '10px' }}>
+                                <Grid item>
+                                    <Button
+                                        color="primary"
+                                        variant="contained"
+                                        type="submit"
+                                        style={{ marginLeft: 'auto' }}
+                                        onClick={(e) => handleSubmit(e)}
+                                    >Add</Button>
+                                </Grid>
                             </Grid>
                         </Grid>
-
-                        <Grid container justify="center" >
-                            <Grid item>
-                                <MultilineInputField
-                                    name="address"
-                                    placeholder="Hospital Address*"
-                                    variant="outlined"
-                                    margin="dense"
-                                    value={state.form.address}
-                                    onChange={handleChange}
-                                    errors={state.errors.address}
-                                />
-                            </Grid>
-                        </Grid>
-
-                        <Grid container justify="center" >
-                            <Grid item>
-                                <TextInputField
-                                    name="phone_number"
-                                    placeholder="Emergency Contact Number*"
-                                    variant="outlined"
-                                    margin="dense"
-                                    value={state.form.phone_number}
-                                    onChange={handleChange}
-                                    errors={state.errors.phone_number}
-                                />
-                            </Grid>
-                        </Grid>
-
-                        <Grid container justify="center" >
-                            <Grid item>
-                                <TextInputField
-                                    name="latitude"
-                                    placeholder="Latitude*"
-                                    variant="outlined"
-                                    margin="dense"
-                                    value={state.form.latitude}
-                                    onChange={handleChange}
-                                    errors={state.errors.latitude}
-                                />
-                            </Grid>
-                        </Grid>
-
-                        <Grid container justify="center" >
-                            <Grid item>
-                                <TextInputField
-                                    name="longitude"
-                                    placeholder="Longitude*"
-                                    variant="outlined"
-                                    margin="dense"
-                                    value={state.form.longitude}
-                                    onChange={handleChange}
-                                    errors={state.errors.longitude}
-                                />
-                            </Grid>
-                        </Grid>
-
-                        <Grid container justify="center" spacing={5} >
-                            <Grid item>
-                                <Button
-                                    color="primary"
-                                    variant="contained"
-                                    type="submit"
-                                    style={{ marginLeft: 'auto' }}
-                                    onClick={(e) => handleSubmit(e)}
-                                >Add</Button>
-                            </Grid>
-                        </Grid>
-
-                    </Card>
-                </Grid>
+                    </CardContent>
+                </Card>
             </form>
         </div>
     </div >
