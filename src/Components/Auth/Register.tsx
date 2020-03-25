@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { makeStyles } from "@material-ui/styles";
+import { makeStyles, Theme } from '@material-ui/core/styles';
 import { useDispatch } from "react-redux";
 import { Box, Grid, Card, CardHeader, CardContent, CardActions, Button, FormControl, InputLabel, Select, MenuItem } from "@material-ui/core";
 import { TextInputField } from "../Common/HelperInputFields";
@@ -10,7 +10,7 @@ import { signupUser } from "../../Redux/actions";
 
 const optionalFields = ["first_name", "last_name", "email", "skill", "district", "gender", "user_type"];
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme: Theme) => ({
     formTop: {
         marginTop: '80px',
         marginBottom: "70px"
@@ -18,10 +18,6 @@ const useStyles = makeStyles(theme => ({
     pdLogo: {
         height: '345px',
         border: 'solid 3px white'
-    },
-    formControl: {
-        margin: "10px 0px",
-        minWidth: 145,
     },
 }));
 
@@ -176,8 +172,9 @@ export const Register = () => {
                                 onChange={handleChange}
                                 errors={errors.phone_number}
                             />
-                        <Box display="flex" flexDirection="row" justifyContent="space-between" alignItems="center">
-                            <FormControl variant="outlined" className={classes.formControl}>
+                        <Grid container justify="space-between" alignItems="center" spacing={1} style={{marginTop:'5px'}}>
+                            <Grid item xs={6}>
+                            <FormControl fullWidth variant="outlined">
                                 <InputLabel id="demo-simple-select-outlined-label">District*</InputLabel>
                                 <Select
                                     fullWidth
@@ -197,8 +194,9 @@ export const Register = () => {
                                 </Select>
                                 <span>{errors.district}</span>
                             </FormControl>
-
-                            <FormControl variant="outlined" className={classes.formControl}>
+                            </Grid>
+                            <Grid item xs={6}>
+                            <FormControl fullWidth variant="outlined">
                                 <InputLabel id="demo-simple-select-outlined-label">Gender*</InputLabel>
                                 <Select
                                     fullWidth
@@ -218,7 +216,8 @@ export const Register = () => {
                                 </Select>
                                 <span>{errors.gender}</span>
                             </FormControl>
-                        </Box>
+                            </Grid>
+                        </Grid>
                             <TextInputField
                                 type="tel"
                                 name="age"
