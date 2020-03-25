@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import Grid from '@material-ui/core/Grid';
-import {Card, CardContent, CardHeader, CircularProgress, Tooltip, Typography, IconButton, Menu, MenuItem} from "@material-ui/core";
+import {Card, CardContent, CardHeader, Tooltip, Typography } from "@material-ui/core";
 import {makeStyles} from "@material-ui/core/styles";
 import {useDispatch} from "react-redux";
 import {getFacilities} from "../../Redux/actions";
@@ -8,7 +8,6 @@ import TitleHeader from "../Common/TitleHeader";
 import Pagination from "../Common/Pagination";
 import AddCard from '../Common/AddCard';
 import { navigate } from 'hookrouter';
-import MoreVertIcon from '@material-ui/icons/MoreVert';
 import {Loading} from "../Common/Loading";
 const useStyles = makeStyles(theme => ({
     root: {
@@ -19,6 +18,7 @@ const useStyles = makeStyles(theme => ({
         height: 160,
         width: '100%',
         backgroundColor: '#FFFFFF',
+        cursor:'pointer'
     },
     title: {
         whiteSpace: 'nowrap',
@@ -131,7 +131,7 @@ export const HospitalList = () => {
         facilityList = data.map((facility: any, idx: number) => {
             return (
                 <Grid item xs={12} md={3}  key={`usr_${facility.id}`} className={classes.root}>
-                    <Card className={classes.card}>
+                    <Card className={classes.card} onClick={()=>navigate(`/facility/${facility.id}`)}>
                         <CardHeader
                             className={classes.cardHeader}
                             title={

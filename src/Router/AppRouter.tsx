@@ -11,6 +11,7 @@ import {PatientRegister} from "../Components/Patient/PatientRegister";
 import { TeleConsultation } from '../Components/Patient/TeleConsultation';
 import { PatientDischarge } from '../Components/Patient/PatientDischarge';
 import { TreatmentForm } from '../Components/Patient/TreatmentForm';
+import { FacilityHome } from '../Components/Facility/FacilityHome';
 
 const routes = {
     '/': () => <PrivateDashboard/>,
@@ -24,6 +25,7 @@ const routes = {
     '/patient/discharge':()=> <PatientDischarge />,
     '/patient/treatment':()=> <TreatmentForm />,
     '/users': () => <ManageUsers/>,
+    '/facility/:id':({id}:any) => <FacilityHome facilityId={id} />,
 };
 
 const AppRouter = () => {
