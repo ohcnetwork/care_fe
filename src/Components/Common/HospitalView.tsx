@@ -24,8 +24,13 @@ const useStyles = makeStyles({
       marginBottom: 12,
     },
   });
-
-export const HospitalView = (props:any) => {
+interface HospitalViewProps {
+    name: string;
+    addr: string;
+    phone: string;
+    district: string;
+}
+export const HospitalView = (props: HospitalViewProps) => {
     const classes = useStyles();
     return (
         <Card className={classes.root} variant="outlined">

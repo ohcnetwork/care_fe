@@ -19,7 +19,7 @@ const useStyles = makeStyles({
     }
 });
 
-const Loader = (props: any) => {
+const Loader = (props: { open: boolean; }) => {
     const { open } = props;
     const classes = useStyles();
     return (

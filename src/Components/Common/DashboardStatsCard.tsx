@@ -15,8 +15,11 @@ const useStyles = makeStyles(theme => ({
         fontWeight:'bold'
     }
 }));
-
-export const DashboardStatsCard = (props: any)  =>  {
+interface DashboardStatsCardProps {
+    title: string;
+    value: string;
+}
+export const DashboardStatsCard = (props: DashboardStatsCardProps)  =>  {
     const { title , value } = props;
     const classes = useStyles();
     return (

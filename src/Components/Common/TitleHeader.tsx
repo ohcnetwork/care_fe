@@ -8,8 +8,12 @@ const useStyles = makeStyles({
     }
 });
 
-
-const TitleHeader = (props: any) => {
+interface TitleHeaderProps {
+    title: string;
+    showSearch: boolean;
+    children: JSX.Element[] | JSX.Element;
+};
+const TitleHeader = (props: TitleHeaderProps) => {
     const { title, showSearch } = props;
     const classes = useStyles();
 
