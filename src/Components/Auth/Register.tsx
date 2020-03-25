@@ -8,7 +8,7 @@ import districts from "../../Constants/Static_data/districts.json"
 import gendorList from "../../Constants/Static_data/gender.json"
 import { signupUser } from "../../Redux/actions";
 
-const optionalFields = ["first_name", "last_name", "email", "skill", "district", "gender", "user_type"]
+const optionalFields = ["first_name", "last_name", "email", "skill", "district", "gender", "user_type"];
 
 const useStyles = makeStyles((theme: Theme) => ({
     formTop: {
@@ -36,7 +36,7 @@ export const Register = () => {
         phone_number: "",
         gender: "",
         age: "",
-        skill: "",
+        skill: 2,
         password: '',
         c_password: '',
     };
@@ -45,65 +45,65 @@ export const Register = () => {
     const [errors, setErrors] = useState(initErr);
 
     const validateForm = () => {
-        const oldError: any = {}
-        let hasError: boolean = false
+        const oldError: any = {};
+        let hasError: boolean = false;
         Object.keys(form).map((field: string) => {
             if ((optionalFields.indexOf(field) === -1) && !form[field].length) {
-                oldError[field] = "Field is required"
+                oldError[field] = "Field is required";
                 hasError = true
             } else if (field === "username" && !form[field].match(/^[\w.@+-]+$/)) {
-                oldError[field] = "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only."
+                oldError[field] = "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.";
                 hasError = true
             } else if (field === "email" && (form[field].length && !validateEmailAddress(form[field]))) {
-                oldError[field] = "Please Enter a Valid Email Address"
+                oldError[field] = "Please Enter a Valid Email Address";
                 hasError = true
             } else if (field === "phone_number" && !phonePreg(form[field])) {
-                oldError[field] = "Please Enter 10/11 digit mobile number or landline as 0<std code><phone number>"
+                oldError[field] = "Please Enter 10/11 digit mobile number or landline as 0<std code><phone number>";
                 hasError = true
             } else if ((field === "district" || field === "gender") && form[field] === "") {
-                oldError[field] = "Field is required"
+                oldError[field] = "Field is required";
                 hasError = true
             } else if (field === "age" && isNaN(form[field])) {
-                oldError[field] = "Please Enter Valid Age"
+                oldError[field] = "Please Enter Valid Age";
                 hasError = true
             } else if ((field === "password" || field === "c_password") && form["password"] !== form["c_password"]) {
-                oldError["c_password"] = "Password Mismatch"
+                oldError["c_password"] = "Password Mismatch";
                 hasError = true
             }
-        })
+        });
 
         if (hasError) {
-            setErrors(oldError)
+            setErrors(oldError);
             return false
         }
-        setErrors({})
+        setErrors({});
         return true
-    }
+    };
 
     const handleSubmit = (e: any) => {
-        e.preventDefault()
-        const validForm = validateForm()
+        e.preventDefault();
+        const validForm = validateForm();
         if (validForm) {
             dispatch(signupUser(form)).then((res: any) => {
                 if(res.status === 201) {
                     window.location.href = "/login"
                 } else {
-                    const error = { ...errors }
+                    const error = { ...errors };
                     Object.keys(res.data).map((field: string) => {
-                        error[field] = res.data[field][0]
+                        error[field] = res.data[field][0];
                         setErrors(error)
                     })
                 }
             })
         }
-    }
+    };
 
     const handleChange = (e: any) => {
-        const { name, value } = e.target
-        const formOld = { ...form }
-        formOld[name] = value
+        const { name, value } = e.target;
+        const formOld = { ...form };
+        formOld[name] = value;
         setForm(formOld)
-    }
+    };
 
     return <div className={classes.formTop} >
 
@@ -231,18 +231,6 @@ export const Register = () => {
                             />
 
                             <TextInputField
-                                name="skill"
-                                label="Skill"
-                                placeholder=""
-                                variant="outlined"
-                                margin="dense"
-                                InputLabelProps={{ shrink: !!form.skill }}
-                                value={form.skill}
-                                onChange={handleChange}
-                                errors={errors.skill}
-                            />
-
-                            <TextInputField
                                 type="password"
                                 name="password"
                                 label="Password*"
@@ -284,4 +272,4 @@ export const Register = () => {
             </Grid>
         </Grid>
     </div>
-}
+};
