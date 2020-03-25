@@ -73,6 +73,12 @@ const useStyles = makeStyles(theme => ({
     },
     toolTip:{
         fontSize:'13px'
+    },
+    displayFlex: {
+        display: 'flex'
+    },
+    minHeight: {
+        minHeight: '65vh'
     }
 }));
 
@@ -121,13 +127,19 @@ export const HospitalOnboarding = () => {
     if (data && data.length) {
         facilityList = data.map((facility: any, idx: number) => {
             return (
-                <Grid item xs={12} md={3}  key={`usr_${facility.id}`}
-                      className={classes.root}>
+                <Grid item xs={12} md={3}  key={`usr_${facility.id}`} className={classes.root}>
                     <Card className={classes.card}>
-                        <CardHeader className={classes.cardHeader}
-                                    title={<span className={classes.title}>
-                                        <Tooltip title={<span className={classes.toolTip}>{facility.name}</span>}
-                                                                                    interactive={true}><span>{facility.name}</span></Tooltip></span>}
+                        <CardHeader
+                            className={classes.cardHeader}
+                            title={
+                                <span className={classes.title}>
+                                    <Tooltip
+                                        title={<span className={classes.toolTip}>{facility.name}</span>}
+                                        interactive={true}>
+                                        <span>{facility.name}</span>
+                                    </Tooltip>
+                                </span>
+                            }
                         />
                         <CardContent className={classes.content}>
                             <Typography>
@@ -151,18 +163,20 @@ export const HospitalOnboarding = () => {
     }
     if (isLoading || !data) {
         manageFacilities = (
-            <Grid item xs={12} md={12}>
-                <div className="textMarginCenter">
+            <Grid item md={12} className={classes.displayFlex}>
+                <Grid container justify="center" alignItems="center">
                     <CircularProgress/>
-                </div>
+                </Grid>
             </Grid>
         );
     } else if (data && data.length) {
         manageFacilities = facilityList;
     } else if (data && data.length === 0) {
         manageFacilities = (
-            <Grid item xs={12} md={12} className="textMarginCenter">
-                <h5> No Users Found</h5>
+            <Grid item xs={12} md={12} className={classes.displayFlex}>
+                <Grid container justify="center" alignItems="center">
+                    <h5> No Users Found</h5>
+                </Grid>
             </Grid>
         );
     }
@@ -170,10 +184,11 @@ export const HospitalOnboarding = () => {
     return (
         <div>
             <TitleHeader title="Facilities" showSearch={false}>
-
             </TitleHeader>
-            <Grid container>
+            <Grid container className={classes.minHeight}>
                 {manageFacilities}
+            </Grid>
+            <Grid container>
                 {(data && data.length > 0 && totalCount > limit) && (
                     <Grid container className={`w3-center ${classes.paginateTopPadding}`}>
                         <Pagination
@@ -182,7 +197,8 @@ export const HospitalOnboarding = () => {
                             data={{ totalCount }}
                             onChange={handlePagination}
                         />
-                    </Grid>)}
+                    </Grid>
+                )}
             </Grid>
         </div>
     );
