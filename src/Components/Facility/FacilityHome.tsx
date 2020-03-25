@@ -51,14 +51,7 @@ export const FacilityHome = (props: any) => {
     }, [dispatch]);
 
     if (isLoading) {
-        return (
-            <Grid container>
-                <Grid item md={12} className={classes.displayFlex}>
-                    <Grid container justify="center" alignItems="center">
-                        <Loading />
-                    </Grid>
-                </Grid>
-            </Grid>)
+        return <Loading />
     }
 
     return (
