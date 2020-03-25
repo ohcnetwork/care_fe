@@ -113,6 +113,9 @@ export const getUserList = (paginate: object) => {
 export const getFacilities = (paginate: object) => {
     return fireRequest('listFacility', [], paginate);
 };
+export const getFacility = (id: number) => {
+    return fireRequest('getFacility',[id],{});
+};
 export const readUser = (username: any) => {
     return fireRequest('readUser', [username], {});
 };
