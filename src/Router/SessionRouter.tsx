@@ -5,10 +5,6 @@ import TopBar from "../Components/Common/TopBar";
 import { PublicDashboard } from '../Components/Dashboard/PublicDashboard';
 
 import AmbulanceOnboarding from "../Components/Ambulance/AmbulanceOnboarding";
-import { PatientRegister } from '../Components/Patient/PatientRegister';
-import { TeleConsultation } from '../Components/Patient/TeleConsultation';
-import { PatientDischarge } from '../Components/Patient/PatientDischarge';
-import { TreatmentForm } from '../Components/Patient/TreatmentForm';
 import {Stats} from "../Components/Dashboard/Stats";
 
 const routes = {
@@ -17,10 +13,6 @@ const routes = {
     '/dashboard': () => <PublicDashboard />,
     '/ambulance': () => <AmbulanceOnboarding />,
     '/register': () => <Register />,
-    '/patient/register':()=> <PatientRegister />,
-    '/patient/tele-consult':()=> <TeleConsultation />,
-    '/patient/discharge':()=> <PatientDischarge />,
-    '/patient/treatment':()=> <TreatmentForm />,
     '/stats' : () => <Stats/>
 };
 
