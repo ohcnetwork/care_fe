@@ -12,3 +12,10 @@ export const Success = ({msg}) => {
         text: msg
     });
 }
+
+/** Error message handler */
+export const Error = ({msg}) => {
+    PNotify.error({
+        text: msg
+    });
+}
