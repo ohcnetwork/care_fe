@@ -7,7 +7,6 @@ import { validateEmailAddress, phonePreg } from "../../Constants/common";
 // import {  } from "../../Redux/actions";
 import genderList from "../../Constants/Static_data/gender.json";
 import { isEmpty } from "lodash";
-import * as Notifications from '../../Utils/Notifications.js';
 
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -116,11 +115,7 @@ export const PatientRegister = () => {
         const validForm = validateForm();
         if (validForm) {
             console.log('form', form);
-            Notifications.Success({
-                msg: "Patient Details Added"
-            })
         }
-
     };
 
     const handleChange = (e: any) => {
