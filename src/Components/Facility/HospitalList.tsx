@@ -94,8 +94,6 @@ export const HospitalList = () => {
     let manageFacilities: any = null;
     const [isLoading, setIsLoading] = useState(false);
     const [totalCount, setTotalCount] = useState(0);
-    const [anchorEl, setAnchorEl] = React.useState(null);
-    const openMenu = Boolean(anchorEl);
 
     const limit = 15;
     const initialPaginateData = {
@@ -118,15 +116,6 @@ export const HospitalList = () => {
     useEffect(() => {
         fetchData(initialPaginateData);
     }, [dispatch]);
-
-    const handleClick = (e: any, id: any) => {
-        e.stopPropagation();
-        setAnchorEl(e.currentTarget);
-    };
-
-    const handleCloseMenu = () => {
-        setAnchorEl(null);
-      };
 
     const handlePagination = (page: any, perPage: any) => {
         setCurrentPage(page);
@@ -154,39 +143,6 @@ export const HospitalList = () => {
                                     </Tooltip>
                                 </span>
                             }
-                            action={
-                                <>
-                                <IconButton
-                                    aria-label="more"
-                                    aria-controls="long-menu"
-                                    aria-haspopup="true"
-                                    onClick={(e) => {
-                                        handleClick(e, idx);
-                                    }}>
-                                    <MoreVertIcon />
-                                </IconButton>
-                                    <Menu
-                                        key={idx}
-                                        anchorEl={anchorEl}
-                                        keepMounted
-                                        open={openMenu}
-                                        onClose={handleCloseMenu}
-                                        PaperProps={{
-                                            style: {
-                                                maxHeight: 190,
-                                                minWidth: 110,
-                                            },
-                                        }}
-                                    >
-                                        <MenuItem onClick={(e) => {
-                                            e.stopPropagation();
-                                            // navigate(`/project-report/${value.id}`);
-                                        }}>
-                                            Add Bed
-                                        </MenuItem>
-                                    </Menu>
-                                </>
-                              }
                         />
                         <CardContent className={classes.content}>
                             <Typography>
