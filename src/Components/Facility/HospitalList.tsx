@@ -9,7 +9,7 @@ import Pagination from "../Common/Pagination";
 import AddCard from '../Common/AddCard';
 import { navigate } from 'hookrouter';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
-
+const img = 'https://coronasafe.network/break-chain.png';
 const useStyles = makeStyles(theme => ({
     root: {
         flexGrow: 1,
@@ -164,13 +164,14 @@ export const HospitalList = () => {
             );
         });
     }
+
     if (isLoading || !data) {
         manageFacilities = (
-            <Grid item md={12} className={classes.displayFlex}>
-                <Grid container justify="center" alignItems="center">
-                    <CircularProgress/>
-                </Grid>
-            </Grid>
+            <div className="App">
+                <header className="App-header">
+                    <img src={img} className="App-logo" alt="logo" />
+                </header>
+            </div>
         );
     } else if (data && data.length) {
         manageFacilities = facilityList;
