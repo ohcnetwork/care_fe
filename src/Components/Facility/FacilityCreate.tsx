@@ -3,12 +3,12 @@ import { useDispatch } from "react-redux"
 import { FormControl, Grid, Card, CardHeader, Button, InputLabel, Select, MenuItem } from "@material-ui/core"
 import { TextInputField, MultilineInputField } from "../Common/HelperInputFields"
 import Loader from "../Common/Loader"
-import AppMessage from "../Common/AppMessage"
 import { makeStyles } from "@material-ui/styles";
 
 import districts from "../../Constants/Static_data/districts.json"
 import { validateLocationCoordinates, phonePreg } from "../../Constants/common";
 import { createFacility } from "../../Redux/actions";
+import * as Notifications from '../../Utils/Notifications.js';
 
 const initForm: any = {
     name: "",
@@ -34,7 +34,7 @@ const useStyles = makeStyles(theme => ({
     },
     formControl: {
         margin: "10px",
-        minWidth: 120,
+        minWidth: "120px",
     },
     selectEmpty: {
         marginTop: "10px",
@@ -72,7 +72,6 @@ export const FacilityCreate = () => {
     const classes = useStyles();
 
     const [state, dispatch] = useReducer(facility_create_reducer, initialState)
-    const [showAppMessage, setAppMessage] = useState({ show: false, message: "", type: ""})
     const [loading, setLoading] = useState(false)
 
     const handleChange = (e: any) => {
@@ -90,15 +89,15 @@ export const FacilityCreate = () => {
             if (!state.form[field].length && field !== "district") {
                 errors[field] = "Field is required"
                 invalidForm = true
-            } else if (field == "district" && state.form[field] == "") {
+            } else if (field === "district" && state.form[field] === "") {
                 errors[field] = "Field is required"
                 invalidForm = true
             }
-            if (field == "phone_number" && !phonePreg(state.form.phone_number)) {
+            if (field === "phone_number" && !phonePreg(state.form.phone_number)) {
                 errors[field] = "Please Enter 10/11 digit mobile number or landline as 0<std code><phone number>"
                 invalidForm = true
             }
-            if ((field == "latitude" || field == "longitude") && !validateLocationCoordinates(state.form[field])) {
+            if ((field === "latitude" || field === "longitude") && !validateLocationCoordinates(state.form[field])) {
                 errors[field] = "Please enter valid coordinates"
                 invalidForm = true
             }
@@ -128,7 +127,9 @@ export const FacilityCreate = () => {
                 if (res.data) {
                     setLoading(false)
                     dispatch({ type: "set_form", form: initForm })
-                    setAppMessage({ show: true, message: "Facility Added Successfully", type: "success"})
+                    Notifications.Success({
+                        msg: "Facility Added Successfully"
+                    });
                 }
             })
         }
@@ -141,7 +142,6 @@ export const FacilityCreate = () => {
                 <Loader open={loading} />
                 <Grid item xs={12} style={{ marginTop: '75px' }}>
                     <Card>
-                        <AppMessage open={showAppMessage.show} type={showAppMessage.type} message={showAppMessage.message} handleClose={() => setAppMessage({ show: false, message: "", type: ""})} handleDialogClose={() => null} />
                         <CardHeader title="Create Facility" />
                         <Grid container justify="center" >
                             <Grid item>

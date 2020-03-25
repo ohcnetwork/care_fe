@@ -1,8 +1,14 @@
-import PNotify from 'pnotify/dist/es/PNotify';
-import PNotifyButtons from 'pnotify/dist/es/PNotifyButtons';
+import PNotify from 'pnotify/dist/es/PNotify'
+import 'pnotify/dist/es/PNotifyStyleMaterial';
 
-const Notifications = ({msg, type}) => {
-    
+// Set default styling.
+PNotify.defaults.styling = 'material';
+// This icon setting requires the Material Icons font. (See below.)
+PNotify.defaults.icons = 'material';
+
+/** Success message handler */
+export const Success = ({msg}) => {
+    PNotify.success({
+        text: msg
+    });
 }
-
-export default Notifications;
