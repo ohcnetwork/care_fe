@@ -3,7 +3,7 @@ import { useRedirect, useRoutes } from 'hookrouter';
 import Header from '../Components/Common/Header';
 import {PrivateDashboard} from "../Components/Dashboard/PrivateDashboard";
 import { FacilityCreate } from '../Components/Facility/FacilityCreate';
-import { HospitalOnboarding } from '../Components/Facility/HospitalOnboarding';
+import { HospitalList } from '../Components/Facility/HospitalList';
 import {Analytics} from "../Components/Dashboard/Analytics";
 import {Stats} from "../Components/Dashboard/Stats";
 import {PatientRegister} from "../Components/Patient/PatientRegister";
@@ -13,11 +13,11 @@ const routes = {
     '/': () => <PrivateDashboard/>,
     '/privatedashboard': () => <PrivateDashboard/>,
     '/analytics': () => <Analytics/>,
-    '/facilities': () => <HospitalOnboarding />,
+    '/facilities': () => <HospitalList />,
+    '/facilities/create': () => <FacilityCreate />,
     '/stats' : () => <Stats/>,
     '/patient/register':()=> <PatientRegister />,
     '/users': () => <ManageUsers/>,
-    '/facilities/create': () => <FacilityCreate/>,
 };
 
 const AppRouter = () => {
