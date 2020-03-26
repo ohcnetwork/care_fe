@@ -125,10 +125,10 @@ export const readUser = (username: any) => {
     return fireRequest('readUser', [username], {});
 };
 
-//Care Center
-export const createCenter = (form: object) => {
-    return fireRequest("createCenter", [], form)
-};
+// //Care Center
+// export const createCenter = (form: object) => {
+//     return fireRequest("createCenter", [], form)
+// };
 
 // Hospital Beds
 export const createCapacity = (form:object, urlParam: object) => {
