@@ -59,6 +59,7 @@ interface OptionsProps {
 
 export const TextInputField = (props: TextFieldPropsExtended) => {
     const { placeholder, onChange, value, name, variant, type, margin, errors, label, inputProps, multiline, rows } = props;
+    const inputType = type === 'number' ? 'text' : type;
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (typeof onChange !== 'function') {
             return
@@ -66,13 +67,13 @@ export const TextInputField = (props: TextFieldPropsExtended) => {
         if (type === 'number' && event.target.value) {
             event.target.value = event.target.value.replace(/\D/, '');
         }
-        onChange(event)
+        onChange(event);
     }
     return (
         <div>
             <TextField
                 label={label}
-                type="text"
+                type={inputType}
                 fullWidth
                 variant={variant}
                 margin={margin}
