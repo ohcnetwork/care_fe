@@ -69,7 +69,7 @@ const Header = () => {
     },
     {
       title: 'Facilites',
-      link: '/facilities',
+      link: '/facility',
       icon: <WorkIcon style={{ color: '#666', marginRight: '4px' }}/>
     },
     {

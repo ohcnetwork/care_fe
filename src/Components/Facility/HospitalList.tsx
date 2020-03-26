@@ -189,7 +189,7 @@ export const HospitalList = () => {
                 { !isLoading  &&
                     <AddCard
                         title={'+ Add New Hospital'}
-                        onClick={() => navigate('/facilities/create')}
+                        onClick={() => navigate('/facility/create')}
                     />
                 }
                 {manageFacilities}

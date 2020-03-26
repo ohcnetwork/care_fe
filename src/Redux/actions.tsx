@@ -51,7 +51,7 @@ export const fetchResponseSuccess = (key: string, data: any) => {
 };
 
 export const fireRequest = (
-    key: string, path: any = [], params: object = {},
+    key: string, path: any = [], params: object = {}, urlParam?: any
 ) => {
     return (dispatch: any) => {
         const request = Object.assign({}, requestMap[key]);
@@ -67,6 +67,11 @@ export const fireRequest = (
             }
         }
 
+        if (urlParam) {
+            Object.keys(urlParam).forEach((param: any) => {
+                request.path = request.path.replace(`{${param}}`, urlParam[param])
+            })
+        }
         dispatch(fetchDataRequest(key));
         return axiosApiCall[request.method.toLowerCase()](request.path, params)
             .then((response: any) => {
@@ -123,5 +128,10 @@ export const readUser = (username: any) => {
 //Care Center
 export const createCenter = (form: object) => {
     return fireRequest("createCenter", [], form)
+};
+
+// Hospital Beds
+export const createCapacity = (form:object, urlParam: object) => {
+    return fireRequest("createCapacity", [], form, urlParam)
 };
 
