@@ -35,6 +35,10 @@ const useStyles = makeStyles(theme => ({
     selectEmpty: {
         marginTop: "10px",
     },
+    selectLabel:{
+        background: 'white',
+        padding: '0px 10px'
+    },
 }));
 
 const facility_create_reducer = (state = initialState, action: any) => {
@@ -144,7 +148,8 @@ export const FacilityCreate = () => {
                                 <Grid item xs={12}>
                                     <TextInputField
                                         name="name"
-                                        placeholder="Hospital Name*"
+                                        label="Hospital Name*"
+                                        placeholder=""
                                         variant="outlined"
                                         margin="dense"
                                         value={state.form.name}
@@ -157,7 +162,7 @@ export const FacilityCreate = () => {
                             <Grid container justify="center" >
                                 <Grid item xs={12}>
                                     <FormControl fullWidth variant="outlined">
-                                        <InputLabel id="demo-simple-select-outlined-label">Pick Your District*</InputLabel>
+                                        <InputLabel id="demo-simple-select-outlined-label" className={classes.selectLabel} >Pick Your District*</InputLabel>
                                         <Select
                                             fullWidth
                                             labelId="demo-simple-select-outlined-label"
@@ -183,7 +188,8 @@ export const FacilityCreate = () => {
                                 <Grid item xs={12}>
                                     <MultilineInputField
                                         name="address"
-                                        placeholder="Hospital Address*"
+                                        label="Hospital Address*"
+                                        placeholder=""
                                         variant="outlined"
                                         margin="dense"
                                         value={state.form.address}
@@ -197,7 +203,8 @@ export const FacilityCreate = () => {
                                 <Grid item xs={12}>
                                     <TextInputField
                                         name="phone_number"
-                                        placeholder="Emergency Contact Number*"
+                                        label="Emergency Contact Number*"
+                                        placeholder=""
                                         variant="outlined"
                                         margin="dense"
                                         value={state.form.phone_number}
@@ -211,7 +218,8 @@ export const FacilityCreate = () => {
                                 <Grid item xs={12}>
                                     <TextInputField
                                         name="latitude"
-                                        placeholder="Latitude*"
+                                        label="Latitude*"
+                                        placeholder=""
                                         variant="outlined"
                                         margin="dense"
                                         value={state.form.latitude}
@@ -225,7 +233,8 @@ export const FacilityCreate = () => {
                                 <Grid item xs={12}>
                                     <TextInputField
                                         name="longitude"
-                                        placeholder="Longitude*"
+                                        label="Longitude*"
+                                        placeholder=""
                                         variant="outlined"
                                         margin="dense"
                                         value={state.form.longitude}
