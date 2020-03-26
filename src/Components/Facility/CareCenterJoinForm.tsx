@@ -9,13 +9,14 @@ import { makeStyles } from "@material-ui/styles";
 import care_center_type from "../../Constants/Static_data/care_center_type.json";
 import districts from "../../Constants/Static_data/districts.json"
 import { validateLocationCoordinates, phonePreg } from "../../Constants/common";
-import { createCenter } from "../../Redux/actions";
+import { createFacility } from "../../Redux/actions";
 
 
 const initForm: any = {
     name: "",
     district: "",
     address: "",
+    centertype:"",
     phone_number: "",
     latitude: "",
     longitude: "",
@@ -85,10 +86,10 @@ export const CareCenterJoinForm = () => {
         const errors = { ...initForm }
         let invalidForm = false
         Object.keys(state.form).map((field, i) => {
-            if (!state.form[field].length && field !== "district") {
+            if (!state.form[field].length && (field !== "district" && field !== "centertype")) {
                 errors[field] = "Field is required"
                 invalidForm = true
-            } else if (field == "district" && state.form[field] == "") {
+            } else if ((field == "district" || field == "centertype" ) && state.form[field] == "") {
                 errors[field] = "Field is required"
                 invalidForm = true
             }
@@ -122,12 +123,14 @@ export const CareCenterJoinForm = () => {
             }
             delete data.latitude
             delete data.longitude
-            dispatchAction(createCenter(data)).then((res: any) => {
+            dispatchAction(createFacility(data)).then((res: any) => {
                 if (res.data) {
                     setLoading(false)
                     dispatch({ type: "set_form", form: initForm })
                     setAppMessage({ show: true, message: "Care Center Added Successfully", type: "success" })
                 }
+            }).catch((error: any)=>{
+                console.log(error)
             })
         }
     }
@@ -164,8 +167,8 @@ export const CareCenterJoinForm = () => {
                                             fullWidth
                                             labelId="demo-simple-select-outlined-label"
                                             id="demo-simple-select-outlined"
-                                            name="care_center_type"
-                                            value={state.form.district}
+                                            name="centertype"
+                                            value={state.form.centertype}
                                             onChange={handleChange}
                                             label="Care Center Type"
                                         >
