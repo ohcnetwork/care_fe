@@ -137,18 +137,18 @@ export const FacilityCreate = () => {
     if (isLoading) {
         return <Loading />
     }
-    return <div className="w3-content" style={{ maxWidth: '400px' }}>
-        <div style={{marginTop: '20px'}}>
-            <form onSubmit={(e) => handleSubmit(e)}>
-
-                <Card>
+    return <div className="w3-content">
+        <Grid container alignContent="center" justify="center">
+            <Grid item xs={12} sm={10} md={8} lg={6} xl={4}>
+                <Card style={{ marginTop: '20px' }}>
                     <AppMessage open={showAppMessage.show} type={showAppMessage.type} message={showAppMessage.message} handleClose={() => setAppMessage({ show: false, message: "", type: "" })} handleDialogClose={() => setAppMessage({ show: false, message: "", type: "" })} />
                     <CardHeader title="Create Facility" />
-                    <CardContent>
-                        <Grid item xs={12} sm={10} md={8} lg={6} xl={4}>
+                    <form onSubmit={(e) => handleSubmit(e)}>
+                        <CardContent>
                             <Grid container justify="center" style={{ marginBottom: '10px' }}>
                                 <Grid item xs={12}>
                                     <TextInputField
+                                        fullWidth
                                         name="name"
                                         label="Hospital Name*"
                                         placeholder=""
@@ -246,23 +246,23 @@ export const FacilityCreate = () => {
                                     />
                                 </Grid>
                             </Grid>
-                        </Grid>
-                    </CardContent>
+                        </CardContent>
 
-                    <CardContent>
-                        <CardActions className="padding16" style={{ justifyContent: "space-between" }}>
-                            <Button
-                                color="primary"
-                                variant="contained"
-                                type="submit"
-                                style={{ marginLeft: 'auto' }}
-                                onClick={(e) => handleSubmit(e)}
-                                startIcon={<SaveIcon>save</SaveIcon>}
-                            >Save</Button>
-                        </CardActions>
-                    </CardContent>
+                        <CardContent>
+                            <CardActions className="padding16" style={{ justifyContent: "space-between" }}>
+                                <Button
+                                    color="primary"
+                                    variant="contained"
+                                    type="submit"
+                                    style={{ marginLeft: 'auto' }}
+                                    onClick={(e) => handleSubmit(e)}
+                                    startIcon={<SaveIcon>save</SaveIcon>}
+                                >Save</Button>
+                            </CardActions>
+                        </CardContent>
+                    </form>
                 </Card>
-            </form>
-        </div>
-    </div >
+            </Grid>
+        </Grid>
+    </div>
 }
