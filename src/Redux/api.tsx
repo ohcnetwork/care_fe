@@ -95,7 +95,7 @@ export default {
 
     // Hospital Beds
     createCapacity: {
-        path: "/facility/{facilityId}/capacity/",
+        path: "/api/v1/facility/{facilityId}/capacity/",
         method: 'POST'
     }    
     // //Care Center
