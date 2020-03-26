@@ -95,10 +95,9 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
             const res = await dispatchAction(createCapacity(data, { facilityId }));
             setIsLoading(false)
             if (res.data) {
-                const id = res.data.id;
                 dispatch({ type: "set_form", form: initForm })
                 setAppMessage({ show: true, message: "Bed capacity added successfully", type: "success" })
-                navigate(`/facility/${id}/doctor/add`);
+                navigate(`/facility/${facilityId}/doctor/add`);
             } else {
                 setAppMessage({ show: true, message: "Error", type: "error" })
             }
