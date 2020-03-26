@@ -5,6 +5,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getCurrentUser } from './Redux/actions';
 import { CircularProgress } from '@material-ui/core';
 import './App.scss';
+import Grid from "@material-ui/core/Grid";
+import {Loading} from "./Components/Common/Loading";
+const img = 'https://coronasafe.network/break-chain.png';
 
 const App: React.FC = () => {
   const dispatch: any = useDispatch();
@@ -23,9 +26,7 @@ const App: React.FC = () => {
 
   if (!currentUser || currentUser.isFetching) {
     return (
-        <div className="textMarginCenter">
-          <CircularProgress />
-        </div>
+        <Loading/>
     );
   }
   if (currentUser && currentUser.data) {

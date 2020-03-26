@@ -95,7 +95,7 @@ export const getCurrentUser = () => {
 
 export const signupUser = (form: object) => {
     return fireRequest("createUser", [], form)
-}
+};
 
 
 // Ambulance
@@ -106,4 +106,17 @@ export const postAmbulance = (form: object) => {
 // Facility
 export const createFacility = (form:object) => {
     return fireRequest("createFacility", [], form)
-}
+};
+export const getUserList = (paginate: object) => {
+    return fireRequest('userList', [], paginate);
+};
+export const getFacilities = (paginate: object) => {
+    return fireRequest('listFacility', [], paginate);
+};
+export const getFacility = (id: number) => {
+    return fireRequest('getFacility',[id],{});
+};
+export const readUser = (username: any) => {
+    return fireRequest('readUser', [username], {});
+};
+

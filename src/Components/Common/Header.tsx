@@ -78,14 +78,15 @@ const Header = () => {
       icon: <InboxIcon style={{ color: '#666', marginRight: '4px' }}/>
     },
     {
-      title: 'Patients',
-      link: '/patients',
-      icon: <DonutLargeIcon style={{ color: '#666', marginRight: '4px' }}/>
+      title: 'Stats',
+      link: '/stats',
+      icon: <ListAltIcon style={{color: '#666', marginRight: '4px'}}/>
     },
+
     {
-      title: 'Settings',
-      link: '/settings',
-      icon: <SettingsIcon style={{ color: '#666', marginRight: '4px' }}/>
+      title: 'users',
+      link: '/users',
+      icon: <PersonIcon style={{color: '#666', marginRight: '4px'}}/>
     }
   ];
   const loginUser = `${get(currentUser, 'data.first_name', '')} ${get(currentUser, 'data.last_name', '')}`;

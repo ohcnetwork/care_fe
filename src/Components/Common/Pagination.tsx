@@ -20,8 +20,14 @@ const useStyles = makeStyles({
     }
 });
 
-const Pagination = (props :any) => {
+interface PaginationProps {
+    data: {totalCount: number};
+    onChange: (page: number, rowsPerPage:number) => void;
+    defaultPerPage: number;
+    cPage: number;
 
+};
+const Pagination = (props :PaginationProps) => {
     const classes = useStyles();
     const { data, onChange } = props;
     const [ rowsPerPage, setRowsPerPage ] = useState(3);
