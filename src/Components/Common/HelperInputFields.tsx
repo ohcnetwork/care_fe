@@ -81,7 +81,7 @@ export const TextInputField = (props: TextFieldPropsExtended) => {
 };
 
 export const MultilineInputField = (props: TextFieldPropsExtended) => {
-    const { placeholder, onChange, value, name, variant, errors } = props;
+    const { placeholder, onChange, value, name, variant, errors, label } = props;
     return (
         <div>
         <TextField
@@ -90,6 +90,7 @@ export const MultilineInputField = (props: TextFieldPropsExtended) => {
             fullWidth
             variant={variant}
             margin="normal"
+            label={label}
             placeholder={placeholder}
             onChange={onChange}
             value={value}
