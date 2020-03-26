@@ -91,6 +91,12 @@ export default {
     createAmbulance: {
         path: '/api/v1/ambulance/',
         method: 'POST'
+    },
+
+    //Care Center
+    createCenter: {
+        path: "/api/v1/carecenter/",
+        method: 'POST'
     }
 
 

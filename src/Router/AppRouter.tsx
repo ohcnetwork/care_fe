@@ -12,6 +12,7 @@ import { TeleConsultation } from '../Components/Patient/TeleConsultation';
 import { PatientDischarge } from '../Components/Patient/PatientDischarge';
 import { TreatmentForm } from '../Components/Patient/TreatmentForm';
 import { FacilityHome } from '../Components/Facility/FacilityHome';
+import { CareCenterJoinForm } from "../Components/Facility/CareCenterJoinForm";
 
 const routes = {
     '/': () => <PrivateDashboard/>,
@@ -26,6 +27,7 @@ const routes = {
     '/patient/treatment':()=> <TreatmentForm />,
     '/users': () => <ManageUsers/>,
     '/facility/:id':({id}:any) => <FacilityHome facilityId={id} />,
+    '/join' : () => <CareCenterJoinForm />,
 };
 
 const AppRouter = () => {
