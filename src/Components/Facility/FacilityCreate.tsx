@@ -137,14 +137,14 @@ export const FacilityCreate = () => {
     if (isLoading) {
         return <Loading />
     }
-    return <div className="w3-content">
+    return <div>
         <Grid container alignContent="center" justify="center">
             <Grid item xs={12} sm={10} md={8} lg={6} xl={4}>
                 <Card style={{ marginTop: '20px' }}>
                     <AppMessage open={showAppMessage.show} type={showAppMessage.type} message={showAppMessage.message} handleClose={() => setAppMessage({ show: false, message: "", type: "" })} handleDialogClose={() => setAppMessage({ show: false, message: "", type: "" })} />
                     <CardHeader title="Create Facility" />
                     <form onSubmit={(e) => handleSubmit(e)}>
-                        <CardContent>
+                    <CardContent>
                             <Grid container justify="center" style={{ marginBottom: '10px' }}>
                                 <Grid item xs={12}>
                                     <TextInputField
