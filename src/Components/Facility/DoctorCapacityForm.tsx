@@ -1,10 +1,21 @@
-import React, { useReducer } from 'react'
+import React, { useState, useReducer } from 'react';
+import { useDispatch } from "react-redux";
 import { Grid, InputLabel, Card, CardHeader, CardContent, Button } from '@material-ui/core'
-import { TextInputField } from '../Common/HelperInputFields';
+import { TextInputField, ErrorHelperText, NativeSelectField } from '../Common/HelperInputFields';
+import { navigate } from 'hookrouter';
+import { Loading } from "../../Components/Common/Loading";
+import AppMessage from "../Common/AppMessage";
+import { createDoctor } from "../../Redux/actions";
+import { DOCTOR_SPECIALISATION } from './constants';
+
+interface DoctorCapacityProps {
+    facilityId: string;
+    page: "add" | "edit";
+}
 
 const initForm: any = {
-    totalDoctors: "",
-    currentAvailability: ""
+    area: "",
+    count: ""
 };
 const initialState = {
     form: { ...initForm },
@@ -24,19 +35,24 @@ const doctorCapacityReducer = (state = initialState, action: any) => {
                 errors: action.errors
             }
         }
-        case "set_reset": {
-            return {
-                ...state,
-                form: action.form
-            }
-        }
         default:
             return state
     }
 }
 
-export const DoctorCapacityForm = (props: any) => {
-    const [state, dispatch] = useReducer(doctorCapacityReducer, initialState)
+export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
+    const [state, dispatch] = useReducer(doctorCapacityReducer, initialState);
+    const { facilityId, page } = props;
+    const [showAppMessage, setAppMessage] = useState({ show: false, message: "", type: "" });
+    const [isLoading, setIsLoading] = useState(false);
+    const dispatchAction: any = useDispatch();
+    const doctorTypes = [{
+        id: 0,
+        text: 'Select',
+    }, ...DOCTOR_SPECIALISATION];
+
+    const headerText = page === "add" ? "Add Doctor Capacity" : "Edit Doctor Capacity";
+    const buttonText = page === "add" ? "Save" : "Update";
 
     const handleChange = (e: any) => {
         let form = { ...state.form }
@@ -47,27 +63,12 @@ export const DoctorCapacityForm = (props: any) => {
     const validateData = () => {
         let errors = { ...initForm }
         let invalidForm = false
-        Object.keys(state.form).map((field) => {
-            if (field === "totalDoctors" && state.form.totalDoctors == "") {
-                errors[field] = "Field is required"
-                invalidForm = true;
-            } else if (field === "totalDoctors" && isNaN(state.form.totalDoctors)) {
-                errors[field] = "Please enter a valid number"
+        Object.keys(state.form).forEach((field, i) => {
+            if (!state.form[field]) {
+                errors[field] = "Field is required";
                 invalidForm = true;
             }
-            if (field === "currentAvailability" && state.form.currentAvailability == "") {
-                errors[field] = "Field is required"
-                invalidForm = true;
-            } else if (field === "currentAvailability" && isNaN(state.form.currentAvailability)) {
-                errors[field] = "Please enter a valid number"
-                invalidForm = true;
-            }
-            if (field === "currentAvailability" && state.form.currentAvailability != ""
-                && state.form.currentAvailability > state.form.totalDoctors) {
-                errors[field] = "Current availability cannot be greater than Total"
-                invalidForm = true;
-            }
-        })
+        });
         if (invalidForm) {
             dispatch({ type: "set_error", errors })
             return false
@@ -76,50 +77,79 @@ export const DoctorCapacityForm = (props: any) => {
         return true
     }
 
-    const handleSubmit = (e: any) => {
+    const handleSubmit = async (e: any) => {
         e.preventDefault();
-        if (validateData()) {
+        const valid = validateData();
+        if (valid) {
             //api-call
+            setIsLoading(true);
+            const data = {
+                "area": Number(state.form.area),
+                "count": Number(state.form.count),
+            };
+            const res = await dispatchAction(createDoctor(data, { facilityId }));
+            setIsLoading(false)
+            if (res.data) {
+                dispatch({ type: "set_form", form: initForm })
+                setAppMessage({ show: true, message: "Doctor capacity added successfully", type: "success" })
+                navigate(`/facility/${facilityId}`);
+            } else {
+                setAppMessage({ show: true, message: "Error", type: "error" })
+            }
         }
     }
     const handleCancel = (e: any) => {
         const form = { ...initForm };
-        dispatch({ type: "set_reset", form })
+        dispatch({ type: "set_form", form })
+        navigate(`/facility/${facilityId}`);
     };
+
+    if (isLoading) {
+        return <Loading />
+    }
     return <div>
         <Grid container alignContent="center" justify="center">
             <Grid item xs={12} sm={10} md={8} lg={6} xl={4}>
-                <Card>
-                    <CardHeader title="Edit Doctor Capacity" />
+                <Card style={{ marginTop: '20px' }}>
+                    <AppMessage open={showAppMessage.show} type={showAppMessage.type} message={showAppMessage.message} handleClose={() => setAppMessage({ show: false, message: "", type: "" })} handleDialogClose={() => setAppMessage({ show: false, message: "", type: "" })} />
+                    <CardHeader title={headerText} />
                     <form onSubmit={e => { handleSubmit(e) }}>
                         <CardContent>
-                            <InputLabel id="demo-simple-select-outlined-label">Total Number of Doctors</InputLabel>
-                            <TextInputField
-                                name="totalDoctors"
+                            <InputLabel id="demo-simple-select-outlined-label">Area of specialization*</InputLabel>
+                            <NativeSelectField
+                                name="area"
                                 variant="outlined"
-                                margin="dense"
-                                type="number"
-                                // InputLabelProps={{ shrink: !!form.registrationNumber }}
-                                value={state.form.totalDoctors}
+                                value={state.form.area}
+                                options={doctorTypes}
                                 onChange={handleChange}
-                                errors={state.errors.totalDoctors}
+                            />
+                            <ErrorHelperText
+                                error={state.errors.area}
                             />
                         </CardContent>
                         <CardContent>
-                            <InputLabel id="demo-simple-select-outlined-label">Doctors Available Currently</InputLabel>
+                            <InputLabel id="demo-simple-select-outlined-label">Count*</InputLabel>
                             <TextInputField
-                                name="currentAvailability"
+                                name="count"
                                 variant="outlined"
                                 margin="dense"
                                 type="number"
-                                // InputLabelProps={{ shrink: !!form.registrationNumber }}
-                                value={state.form.currentAvailability}
+                                InputLabelProps={{ shrink: !!state.form.count }}
+                                value={state.form.count}
                                 onChange={handleChange}
-                                errors={state.errors.currentAvailability}
+                                errors={state.errors.count}
                             />
                         </CardContent>
                         <CardContent>
-                            <Grid container justify="center" spacing={5} >
+                            <Grid container justify="space-between" spacing={5} >
+                                <Grid item>
+                                    <Button
+                                        color="default"
+                                        variant="contained"
+                                        style={{ marginLeft: 'auto' }}
+                                        onClick={handleCancel}
+                                    >Cancel</Button>
+                                </Grid>
                                 <Grid item>
                                     <Button
                                         color="primary"
@@ -127,15 +157,7 @@ export const DoctorCapacityForm = (props: any) => {
                                         type="submit"
                                         style={{ marginLeft: 'auto' }}
                                         onClick={(e) => handleSubmit(e)}
-                                    >Update</Button>
-                                </Grid>
-                                <Grid item>
-                                    <Button
-                                        color="primary"
-                                        variant="contained"
-                                        style={{ marginLeft: 'auto' }}
-                                        onClick={handleCancel}
-                                    >Cancel</Button>
+                                    >{buttonText}</Button>
                                 </Grid>
                             </Grid>
                         </CardContent>

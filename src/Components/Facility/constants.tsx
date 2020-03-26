@@ -9,3 +9,11 @@ export const BED_TYPES = [
     { "id": 2, "text": "ICU" },
     { "id": 3, "text": "Ventilator" }
 ];
+
+export const DOCTOR_SPECIALISATION = [
+    {"id":1, "text": "General Medicine"}, 
+    {"id":2, "text": "Pulmonology"},
+    {"id":3, "text": "Critical Care"}, 
+    {"id":4, "text": "Paediatrics"},
+    {"id":5, "text": "Other Speciality"}
+];

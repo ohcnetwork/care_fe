@@ -86,7 +86,6 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
         if (valid) {
             // write api call
             setIsLoading(true);
-            setIsLoading(true)
             const data = {
                 "room_type": Number(state.form.bedType),
                 "total_capacity": Number(state.form.totalCapacity),
@@ -104,7 +103,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
         }
     };
     const handleCancel = () => {
-        navigate(`/facility`);
+        navigate(`/facility/${facilityId}`);
     };
 
     if (isLoading) {
