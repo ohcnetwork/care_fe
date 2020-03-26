@@ -145,7 +145,7 @@ export const FacilityCreate = () => {
                     <AppMessage open={showAppMessage.show} type={showAppMessage.type} message={showAppMessage.message} handleClose={() => setAppMessage({ show: false, message: "", type: "" })} handleDialogClose={() => setAppMessage({ show: false, message: "", type: "" })} />
                     <CardHeader title="Create Facility" />
                     <CardContent>
-                        <Grid item xs={12} sm={10} md={8} lg={6} xl={4}>
+                        <Grid item xs={12}>
                             <Grid container justify="center" style={{ marginBottom: '10px' }}>
                                 <Grid item xs={12}>
                                     <TextInputField
