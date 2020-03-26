@@ -83,7 +83,7 @@ export const CareCenterJoinForm = () => {
 
     const validateForm = () => {
         const errors = { ...initForm }
-        const invalidForm = false
+        let invalidForm = false
         Object.keys(state.form).map((field, i) => {
             if (!state.form[field].length && field !== "district") {
                 errors[field] = "Field is required"
