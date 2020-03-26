@@ -236,6 +236,7 @@ export const VehicleDetailsForm = (props: any) => {
                                     <TextInputField
                                         label="Owner phone number"
                                         name="ownerPhoneNumber"
+                                        type="number"
                                         placeholder=""
                                         variant="outlined"
                                         margin="dense"
