@@ -121,7 +121,7 @@ export const readUser = (username: any) => {
 };
 
 //Care Center
-export const createCenter = (form:object) => {
+export const createCenter = (form: object) => {
     return fireRequest("createCenter", [], form)
 };
 

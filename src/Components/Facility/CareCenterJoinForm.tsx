@@ -23,7 +23,7 @@ const initForm: any = {
 
 const initialState = {
     form: { ...initForm },
-    errors: { ...initForm }
+    errors: { ...initForm },
 };
 
 const useStyles = makeStyles(theme => ({
@@ -32,7 +32,7 @@ const useStyles = makeStyles(theme => ({
     },
     pdLogo: {
         height: '345px',
-        border: 'solid 3px white'
+        border: 'solid 3px white',
     },
     selectEmpty: {
         marginTop: "10px",
@@ -46,14 +46,14 @@ const CareCenterCreateReducer = (state = initialState, action: any) => {
 
             return {
                 ...state,
-                form: action.form
+                form: action.form,
             }
         }
 
         case "set_error": {
             return {
                 ...state,
-                errors: action.errors
+                errors: action.errors,
             }
 
         }
@@ -82,8 +82,8 @@ export const CareCenterJoinForm = () => {
     }
 
     const validateForm = () => {
-        let errors = { ...initForm }
-        let invalidForm = false
+        const errors = { ...initForm }
+        const invalidForm = false
         Object.keys(state.form).map((field, i) => {
             if (!state.form[field].length && field !== "district") {
                 errors[field] = "Field is required"
@@ -115,7 +115,7 @@ export const CareCenterJoinForm = () => {
         const validated = validateForm()
         if (validated) {
             setLoading(true)
-            let data = { ...state.form }
+            const data = { ...state.form }
             data.location = {
                 "latitude": data.latitude,
                 "longitude": data.longitude,

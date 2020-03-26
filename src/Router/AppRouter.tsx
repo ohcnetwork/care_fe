@@ -27,7 +27,7 @@ const routes = {
     '/patient/treatment':()=> <TreatmentForm />,
     '/users': () => <ManageUsers/>,
     '/facility/:id':({id}:any) => <FacilityHome facilityId={id} />,
-    '/join' : () => <CareCenterJoinForm />
+    '/join' : () => <CareCenterJoinForm />,
 };
 
 const AppRouter = () => {

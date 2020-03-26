@@ -95,7 +95,7 @@ export default {
 
     //Care Center
     createCenter: {
-        path: '/api/v1/carecenter/',
+        path: "/api/v1/carecenter/",
         method: 'POST'
     }
 
