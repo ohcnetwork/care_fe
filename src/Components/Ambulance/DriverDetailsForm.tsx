@@ -179,6 +179,7 @@ export const DriverDetailsForm = (props:any) => {
                   placeholder=""
                   variant="outlined"
                   margin="dense"
+                  type="number"
                   value={form.cellNumber1}
                   onChange={handleChange}
                   errors={errors.cellNumber1}
@@ -209,6 +210,7 @@ export const DriverDetailsForm = (props:any) => {
                   placeholder=""
                   variant="outlined"
                   margin="dense"
+                  type="number"
                   value={form.cellNumber2}
                   onChange={handleChange}
                   errors={errors.cellNumber2}

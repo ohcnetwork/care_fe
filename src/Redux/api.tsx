@@ -63,7 +63,7 @@ export default {
     },
 
     createFacility: {
-        path: '/api/v1/facility',
+        path: '/api/v1/facility/',
         method: 'POST'
     },
 
@@ -93,6 +93,11 @@ export default {
         method: 'POST'
     },
 
+    // Hospital Beds
+    createCapacity: {
+        path: "/api/v1/facility/{facilityId}/capacity/",
+        method: 'POST'
+    }    
     // //Care Center
     // createCenter: {
     //     path: "/api/v1/carecenter/",

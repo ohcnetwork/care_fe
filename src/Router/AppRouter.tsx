@@ -13,20 +13,24 @@ import { PatientDischarge } from '../Components/Patient/PatientDischarge';
 import { TreatmentForm } from '../Components/Patient/TreatmentForm';
 import { FacilityHome } from '../Components/Facility/FacilityHome';
 import { CareCenterJoinForm } from "../Components/Facility/CareCenterJoinForm";
+import { BedCapacityForm } from '../Components/Facility/BedCapacityForm';
+import { DoctorCapacityForm } from '../Components/Facility/DoctorCapacityForm';
 
 const routes = {
     '/': () => <PrivateDashboard/>,
     '/privatedashboard': () => <PrivateDashboard/>,
     '/analytics': () => <Analytics/>,
-    '/facilities': () => <HospitalList />,
-    '/facilities/create': () => <FacilityCreate />,
+    '/facility': () => <HospitalList />,
+    '/facility/create': () => <FacilityCreate />,
+    '/facility/:id':({id}:any) => <FacilityHome facilityId={id} />,
+    '/facility/:id/bed/:page': ({id, page}:any) => <BedCapacityForm facilityId={id} page={page}/>,
+    '/facility/:id/doctor/:page': ({id, page}:any) => <DoctorCapacityForm facilityId={id} page={page}/>,
     '/stats' : () => <Stats/>,
     '/patient/register':()=> <PatientRegister />,
     '/patient/tele-consult':()=> <TeleConsultation />,
     '/patient/discharge':()=> <PatientDischarge />,
     '/patient/treatment':()=> <TreatmentForm />,
     '/users': () => <ManageUsers/>,
-    '/facility/:id':({id}:any) => <FacilityHome facilityId={id} />,
     '/join' : () => <CareCenterJoinForm />,
 };
 
