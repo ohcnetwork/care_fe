@@ -24,7 +24,10 @@ const useStyles = makeStyles(theme => ({
         display: 'flex'
     },
     content: {
-        maxWidth: 530,
+        marginTop: "10px",
+        maxWidth: "560px",
+        background: "white",
+        padding: "20px 20px 5px",
     }
 }));
 
@@ -90,8 +93,7 @@ export const FacilityHome = (props: any) => {
 
     return (
         <div className={`w3-content ${classes.content}`}>
-            <TitleHeader title="Facility" showSearch={false}>
-            </TitleHeader>
+            <h2>Facility</h2>
             <Grid container style={{ padding: "10px", marginBottom: '15px' }} spacing={1}>
                 <Grid item xs={12} md={7}>
                     <Typography variant="h6" component="h6">{facilityData.name}</Typography>
