@@ -5,7 +5,7 @@ import { TextInputField, MultilineInputField } from "../Common/HelperInputFields
 import AppMessage from "../Common/AppMessage"
 import { makeStyles } from "@material-ui/styles";
 import { navigate } from 'hookrouter';
-import { createFacility, getFacility } from "../../Redux/actions";
+import { createFacility, getFacility, updateFacility } from "../../Redux/actions";
 import { validateLocationCoordinates, phonePreg } from "../../Constants/common";
 import districts from "../../Constants/Static_data/districts.json"
 import SaveIcon from '@material-ui/icons/Save';
@@ -151,7 +151,7 @@ export const FacilityCreate = (props: FacilityProps) => {
         e.preventDefault()
         const validated = validateForm();
         if (validated) {
-            setIsLoading(true)
+            setIsLoading(true);
             const data = {
                 facility_type: FACILITY_TYPES.HOSPITAL.id,
                 name: state.form.name,
@@ -164,7 +164,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                 phone_number: state.form.phone_number,
                 oxygen_capacity: state.form.oxygen_capacity ? Number(state.form.oxygen_capacity) : undefined,
             }
-            const res = await dispatchAction(createFacility(facilityId, data));
+            const res = await dispatchAction(facilityId ? updateFacility(facilityId, data) : createFacility(data));
             if (res.data) {
                 const id = res.data.id;
                 setIsLoading(false);
