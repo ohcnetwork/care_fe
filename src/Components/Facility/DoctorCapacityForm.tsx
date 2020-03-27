@@ -109,7 +109,6 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
         e.preventDefault();
         const valid = validateData();
         if (valid) {
-            //api-call
             setIsLoading(true);
             const data = {
                 "area": Number(state.form.area),
@@ -119,7 +118,11 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
             setIsLoading(false);
             if (res.data) {
                 dispatch({ type: "set_form", form: initForm })
-                setAppMessage({ show: true, message: "Doctor capacity added successfully", type: "success" })
+                if (!id) {
+                    setAppMessage({ show: true, message: "Doctor count added successfully", type: "success" });
+                } else {
+                    setAppMessage({ show: true, message: "Doctor count updated successfully", type: "success" });
+                }
                 navigate(`/facility/${facilityId}`);
             } else {
                 setAppMessage({ show: true, message: "Error", type: "error" })

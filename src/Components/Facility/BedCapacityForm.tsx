@@ -121,10 +121,11 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
             setIsLoading(false);
             if (res.data) {
                 dispatch({ type: "set_form", form: initForm })
-                setAppMessage({ show: true, message: "Bed capacity added successfully", type: "success" })
-                if (id) {
+                if (!id) {
+                    setAppMessage({ show: true, message: "Bed capacity added successfully", type: "success" });
                     navigate(`/facility/${facilityId}/doctor`);
                 } else {
+                    setAppMessage({ show: true, message: "Bed capacity updated successfully", type: "success" });
                     navigate(`/facility/${facilityId}`);
                 }
             } else {
