@@ -155,3 +155,10 @@ export const getDoctor = (id: number, urlParam: object) => {
     return fireRequest('getDoctor', [id], {}, urlParam);
 };
 
+export const getPatients = (paginate: object) => {
+    return fireRequest('getPatients', [], paginate);
+};
+
+export const addPatient = (form: object) => {
+    return fireRequest('addPatient',[], form)
+};

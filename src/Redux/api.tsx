@@ -125,5 +125,16 @@ export default {
     //     method: 'POST'
     // }
 
+// Patient
 
+    getPatients : {
+        path : '/api/v1/facility'
+    },
+    addPatient: {
+        path: '/api/v1/patient/',
+        method: 'POST'
+    },
+    getPatientId: {
+        path: '/api/v1/patient/{id}/'
+    }
 }

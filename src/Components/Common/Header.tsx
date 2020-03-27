@@ -72,6 +72,12 @@ const Header = () => {
       link: '/facility',
       icon: <WorkIcon style={{ color: '#666', marginRight: '4px' }}/>
     },
+
+    {
+      title: 'Patients',
+      link: '/patients',
+      icon: <PersonIcon style={{color: '#666', marginRight: '4px'}}/>
+    },
     {
       title: 'Analytics',
       link: '/analytics',

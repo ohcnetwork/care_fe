@@ -9,6 +9,7 @@ import BedTypeCard from "./BedTypeCard";
 import { Loading } from '../Common/Loading';
 import DoctorsCountCard from './DoctorsCountCard';
 import { CapacityModal, DoctorModal } from './modals';
+import {PatientManager} from "../Patient/ManagePatients";
 
 
 
@@ -138,7 +139,9 @@ export const FacilityHome = (props: any) => {
                 </Grid>
                 {doctorList}
             </Grid>
-
+<Grid>
+    <PatientManager/>
+</Grid>
         </div>
     );
 

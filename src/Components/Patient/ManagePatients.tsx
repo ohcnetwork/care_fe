@@ -3,7 +3,7 @@ import Grid from '@material-ui/core/Grid';
 import {Card, CardContent, CardHeader, Tooltip, Typography } from "@material-ui/core";
 import {makeStyles} from "@material-ui/core/styles";
 import {useDispatch} from "react-redux";
-import {getFacilities} from "../../Redux/actions";
+import {getFacilities, getPatients} from "../../Redux/actions";
 import TitleHeader from "../Common/TitleHeader";
 import Pagination from "../Common/Pagination";
 import AddCard from '../Common/AddCard';
@@ -85,13 +85,13 @@ const useStyles = makeStyles(theme => ({
     }
 }));
 
-export const HospitalList = () => {
+export const PatientManager = () => {
     const classes = useStyles();
     const dispatch: any = useDispatch();
     const initialData: any[] = [];
     const [data, setData] = useState(initialData);
 
-    let manageFacilities: any = null;
+    let managePatients: any = null;
     const [isLoading, setIsLoading] = useState(false);
     const [totalCount, setTotalCount] = useState(0);
 
@@ -105,7 +105,7 @@ export const HospitalList = () => {
 
     const fetchData = (paginateData: any) => {
         setIsLoading(true);
-        dispatch(getFacilities(paginateData))
+        dispatch(getPatients(paginateData))
             .then((resp:any)=> {
                 const res = resp && resp.data;
                 setData(res.results);
@@ -126,37 +126,37 @@ export const HospitalList = () => {
         };
         fetchData(paginateData);
     };
-    let facilityList: any[] = [];
+    let patientList: any[] = [];
     if (data && data.length) {
-        facilityList = data.map((facility: any, idx: number) => {
+        patientList = data.map((patient: any, idx: number) => {
             return (
-                <Grid item xs={12} md={3}  key={`usr_${facility.id}`} className={classes.root}>
-                    <Card className={classes.card} onClick={()=>navigate(`/facility/${facility.id}`)}>
+                <Grid item xs={12} md={3}  key={`usr_${patient.id}`} className={classes.root}>
+                    <Card className={classes.card} onClick={()=>navigate(`/patient/${patient.id}`)}>
                         <CardHeader
                             className={classes.cardHeader}
                             title={
                                 <span className={classes.title}>
                                     <Tooltip
-                                        title={<span className={classes.toolTip}>{facility.name}</span>}
+                                        title={<span className={classes.toolTip}>{patient.name}</span>}
                                         interactive={true}>
-                                        <span>{facility.name}</span>
+                                        <span>{patient.name}</span>
                                     </Tooltip>
                                 </span>
                             }
                         />
                         <CardContent className={classes.content}>
                             <Typography>
-                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>District - </span>{facility.district}
+                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Age - </span>{patient.age}
                             </Typography>
                         </CardContent>
                         <CardContent className={classes.content}>
                             <Typography>
-                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Facility Type - </span>{facility.facility_type}
+                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Contact with carrier - </span>{patient.contact_with_carrier}
                             </Typography>
                         </CardContent>
                         <CardContent className={classes.content}>
                             <Typography>
-                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Contact - </span>{facility.phone_number}
+                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Status - </span>{patient.is_active}
                             </Typography>
                         </CardContent>
                     </Card>
@@ -166,16 +166,16 @@ export const HospitalList = () => {
     }
 
     if (isLoading || !data) {
-        manageFacilities = (
+        managePatients = (
             <Loading/>
         );
     } else if (data && data.length) {
-        manageFacilities = facilityList;
+        managePatients = patientList;
     } else if (data && data.length === 0) {
-        manageFacilities = (
+        managePatients = (
             <Grid item xs={12} md={12} className={classes.displayFlex}>
                 <Grid container justify="center" alignItems="center">
-                    <h5> No Users Found</h5>
+                    <h5> No Patients Found</h5>
                 </Grid>
             </Grid>
         );
@@ -183,16 +183,17 @@ export const HospitalList = () => {
 
     return (
         <div>
-            <TitleHeader title="Facilities" showSearch={false}>
+            <TitleHeader title="Patients" showSearch={false}>
+
             </TitleHeader>
             <Grid container className={classes.minHeight}>
                 { !isLoading  &&
-                    <AddCard
-                        title={'+ Add New Hospital'}
-                        onClick={() => navigate('/facility/create')}
-                    />
+                <AddCard
+                    title={'+ Add New Patient'}
+                    onClick={() => navigate('/patient/register')}
+                />
                 }
-                {manageFacilities}
+                {managePatients}
             </Grid>
             <Grid container>
                 {(data && data.length > 0 && totalCount > limit) && (
@@ -209,4 +210,4 @@ export const HospitalList = () => {
         </div>
     );
 
-}
+};
