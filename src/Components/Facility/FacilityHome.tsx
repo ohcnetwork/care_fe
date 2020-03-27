@@ -77,7 +77,7 @@ export const FacilityHome = (props: any) => {
     }
 
     let doctorList: any = null;
-    if (capacityData && capacityData.length) {
+    if (doctorData && doctorData.length) {
         doctorList = doctorData.map((data: DoctorModal) => {
             return (
                 <DoctorsCountCard {...data} />
