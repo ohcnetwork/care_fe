@@ -84,7 +84,7 @@ export const FacilityHome = (props: any) => {
             )
         });
     } else if (doctorData && doctorData.length === 0) {
-        capacityList = (
+        doctorList = (
             <h5>No Doctors Found</h5>
         );
     }
