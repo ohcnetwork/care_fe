@@ -42,9 +42,9 @@ export const FacilityHome = (props: any) => {
     const [isLoading, setIsLoading] = useState(false);
 
     const fetchData = useCallback(async () => {
-        const facilityRes = await dispatch(getFacility(facilityId))
+        const facilityRes = await dispatch(getFacility(facilityId));
         if (facilityRes && facilityRes.data) {
-            setFacilityData(facilityRes.data)
+            setFacilityData(facilityRes.data);
             const capacityRes = await dispatch(listCapacity({}, { facilityId }));
             if (capacityRes && capacityRes.data) {
                 setCapacityData(capacityRes.data.results)
@@ -140,10 +140,7 @@ export const FacilityHome = (props: any) => {
                 </Grid>
                 {doctorList}
             </Grid>
-            <Grid>
-                <PatientManager />
-            </Grid>
         </div>
     );
 
-}
+};
