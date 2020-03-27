@@ -9,8 +9,8 @@ import { createFacility } from "../../Redux/actions";
 import { validateLocationCoordinates, phonePreg } from "../../Constants/common";
 import districts from "../../Constants/Static_data/districts.json"
 import SaveIcon from '@material-ui/icons/Save';
-import {FACILITY_TYPES} from "./constants";
-import {Loading} from "../../Components/Common/Loading";
+import { FACILITY_TYPES } from "./constants";
+import { Loading } from "../../Components/Common/Loading";
 
 const initForm: any = {
     name: "",
@@ -19,6 +19,7 @@ const initForm: any = {
     phone_number: "",
     latitude: "",
     longitude: "",
+    oxygen_capacity: "",
 };
 
 const initialState = {
@@ -67,7 +68,7 @@ const facility_create_reducer = (state = initialState, action: any) => {
     }
 }
 
-export const FacilityCreate = (props:any) => {
+export const FacilityCreate = (props: any) => {
 
     const dispatchAction: any = useDispatch()
 
@@ -89,15 +90,15 @@ export const FacilityCreate = (props:any) => {
         let errors = { ...initForm }
         let invalidForm = false
         Object.keys(state.form).forEach(field => {
-            if (!state.form[field]) {
+            if (!state.form[field] && (field === "name" || field === "district" || field === "address")) {
                 errors[field] = "Field is required";
                 invalidForm = true;
             } else if (field === "phone_number" && !phonePreg(state.form.phone_number)) {
-                errors[field] = "Please Enter 10/11 digit mobile number or landline as 0<std code><phone number>"
-                invalidForm = true
-            } else if ((field === "latitude" || field === "longitude") && !validateLocationCoordinates(state.form[field])) {
-                errors[field] = "Please enter valid coordinates"
-                invalidForm = true
+                errors[field] = "Please Enter 10/11 digit mobile number or landline as 0<std code><phone number>";
+                invalidForm = true;
+            } else if (state.form[field] && (field === "latitude" || field === "longitude") && !validateLocationCoordinates(state.form[field])) {
+                errors[field] = "Please enter valid coordinates";
+                invalidForm = true;
             }
         });
         if (invalidForm) {
@@ -118,11 +119,12 @@ export const FacilityCreate = (props:any) => {
                 name: state.form.name,
                 district: state.form.district,
                 address: state.form.address,
-                location: {
+                location: state.form.latitude && state.form.latitude ? {
                     latitude: state.form.latitude,
-                    longitude: state.form.longitude,
-                },
+                    longitude: state.form.latitude,
+                } : undefined,
                 phone_number: state.form.phone_number,
+                oxygen_capacity: state.form.oxygen_capacity,
             }
             const res = await dispatchAction(createFacility(data));
             if (res.data) {
@@ -144,7 +146,7 @@ export const FacilityCreate = (props:any) => {
                     <AppMessage open={showAppMessage.show} type={showAppMessage.type} message={showAppMessage.message} handleClose={() => setAppMessage({ show: false, message: "", type: "" })} handleDialogClose={() => setAppMessage({ show: false, message: "", type: "" })} />
                     <CardHeader title="Create Facility" />
                     <form onSubmit={(e) => handleSubmit(e)}>
-                    <CardContent>
+                        <CardContent>
                             <Grid container justify="center" style={{ marginBottom: '10px' }}>
                                 <Grid item xs={12}>
                                     <TextInputField
@@ -206,6 +208,7 @@ export const FacilityCreate = (props:any) => {
                                     <TextInputField
                                         name="phone_number"
                                         label="Emergency Contact Number*"
+                                        type="number"
                                         placeholder=""
                                         variant="outlined"
                                         margin="dense"
@@ -220,8 +223,24 @@ export const FacilityCreate = (props:any) => {
                             <Grid container justify="center" >
                                 <Grid item xs={12}>
                                     <TextInputField
+                                        name="oxygen_capacity"
+                                        label="Oxygen Capacity"
+                                        type="number"
+                                        placeholder=""
+                                        variant="outlined"
+                                        margin="dense"
+                                        value={state.form.oxygen_capacity}
+                                        onChange={handleChange}
+                                        errors={state.errors.oxygen_capacity}
+                                    />
+                                </Grid>
+                            </Grid>
+
+                            <Grid container justify="center" >
+                                <Grid item xs={12}>
+                                    <TextInputField
                                         name="latitude"
-                                        label="Latitude*"
+                                        label="Latitude"
                                         placeholder=""
                                         variant="outlined"
                                         margin="dense"
@@ -236,7 +255,7 @@ export const FacilityCreate = (props:any) => {
                                 <Grid item xs={12}>
                                     <TextInputField
                                         name="longitude"
-                                        label="Longitude*"
+                                        label="Longitude"
                                         placeholder=""
                                         variant="outlined"
                                         margin="dense"
