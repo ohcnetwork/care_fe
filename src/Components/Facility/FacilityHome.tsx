@@ -65,9 +65,9 @@ export const FacilityHome = (props: any) => {
 
     let capacityList: any = null;
     if (capacityData && capacityData.length) {
-        capacityList = capacityData.map((data: CapacityModal) => {
+        capacityList = capacityData.map((data: CapacityModal,idx:number) => {
             return (
-                <BedTypeCard {...data} />
+                <BedTypeCard key={`bed_${idx}`} {...data} />
             )
         });
     } else if (capacityData && capacityData.length === 0) {
@@ -78,9 +78,9 @@ export const FacilityHome = (props: any) => {
 
     let doctorList: any = null;
     if (doctorData && doctorData.length) {
-        doctorList = doctorData.map((data: DoctorModal) => {
+        doctorList = doctorData.map((data: DoctorModal,idx:number) => {
             return (
-                <DoctorsCountCard {...data} />
+                <DoctorsCountCard key={`doc_${idx}`} {...data} />
             )
         });
     } else if (doctorData && doctorData.length === 0) {
@@ -102,19 +102,22 @@ export const FacilityHome = (props: any) => {
                     <Typography>Oxygen Capacity :{` ${facilityData && facilityData.oxygen_capacity} Litres`}</Typography>
                 </Grid>
                 <Grid item xs={12} md={5}>
-                    <Grid container spacing={1} direction="column">
+                <Grid container spacing={1} direction="column">
                         <Grid item xs={12} className="w3-center">
-                            <Button fullWidth variant="contained" color="primary" size="small">
+                            <Button fullWidth variant="contained" color="primary" size="small"
+                                onClick={()=>navigate(`/facility/${facilityId}/update`)}>
                                 Update Hospital Info
                             </Button>
                         </Grid>
                         <Grid item xs={12} className="w3-center">
-                            <Button fullWidth variant="contained" color="primary" size="small">
+                            <Button fullWidth variant="contained" color="primary" size="small"
+                                onClick={()=>navigate(`/facility/${facilityId}/bed`)}>
                                 Add More Bed Types
                             </Button>
                         </Grid>
                         <Grid item xs={12} className="w3-center">
-                            <Button fullWidth variant="contained" color="primary" size="small">
+                            <Button fullWidth variant="contained" color="primary" size="small"
+                                onClick={()=>navigate(`/facility/${facilityId}/doctor`)}>
                                 Add More Doctor Types
                             </Button>
                         </Grid>

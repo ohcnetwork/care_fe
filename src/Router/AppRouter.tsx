@@ -22,6 +22,7 @@ const routes = {
     '/analytics': () => <Analytics/>,
     '/facility': () => <HospitalList />,
     '/facility/create': () => <FacilityCreate />,
+    '/facility/:fId/update': ({fId,id}:any) => <FacilityCreate facilityId={fId} id={id} />,
     '/facility/:fId':({fId}:any) => <FacilityHome facilityId={fId} />,
     '/facility/:fId/bed': ({fId,id}:any) => <BedCapacityForm facilityId={fId}/>,
     '/facility/:fId/doctor': ({fId,id}:any) => <DoctorCapacityForm facilityId={fId}/>,

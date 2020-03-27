@@ -67,7 +67,7 @@ const facility_create_reducer = (state = initialState, action: any) => {
     }
 }
 
-export const FacilityCreate = () => {
+export const FacilityCreate = (props:any) => {
 
     const dispatchAction: any = useDispatch()
 
