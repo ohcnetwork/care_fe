@@ -130,7 +130,7 @@ export const FacilityCreate = () => {
                 setIsLoading(false)
                 dispatch({ type: "set_form", form: initForm })
                 setAppMessage({ show: true, message: "Facility Added Successfully", type: "success" })
-                navigate(`/facility/${id}/bed/add`);
+                navigate(`/facility/${id}/bed`);
             }
         }
     }

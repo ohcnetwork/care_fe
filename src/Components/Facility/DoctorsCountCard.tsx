@@ -1,6 +1,8 @@
 import React from 'react';
 import { Grid, Typography, Button } from "@material-ui/core";
 import { makeStyles } from '@material-ui/styles';
+import { DoctorModal } from './modals';
+import { DOCTOR_SPECIALIZATION } from './constants';
 
 const useStyles = makeStyles({
     countText:{
@@ -8,9 +10,10 @@ const useStyles = makeStyles({
     }
 });
 
-const DoctorsCountCard = (props: any) => {
-    const { data } = props;
+const DoctorsCountCard = (props: DoctorModal) => {
     const classes = useStyles();
+    const specialization = DOCTOR_SPECIALIZATION.find(i=>i.id === props.area);
+    const area = specialization ? specialization.text : "Unknown";
     return (
         <Grid item xs={12} md={6}>
             <div className="w3-card" >
@@ -18,12 +21,12 @@ const DoctorsCountCard = (props: any) => {
                     <Grid container direction="column" justify="center" alignItems="center" spacing={1}>
                         <Grid item>
                             <Typography className={classes.countText}>
-                                11
+                                {props.count}
                             </Typography>
                         </Grid>
                         <Grid item>
                             <Typography className="w3-text-grey">
-                                General Medicine Doctors
+                                {area}
                             </Typography>
                         </Grid>
                         <Grid item>

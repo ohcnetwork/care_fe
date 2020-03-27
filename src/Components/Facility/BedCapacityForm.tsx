@@ -11,7 +11,7 @@ import { createCapacity } from "../../Redux/actions";
 
 interface BedCapacityProps {
     facilityId: string;
-    page: "add" | "edit";
+    id?: string;
 }
 
 const initForm: any = {
@@ -48,14 +48,14 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
     const [showAppMessage, setAppMessage] = useState({ show: false, message: "", type: "" });
     const [isLoading, setIsLoading] = useState(false);
     const dispatchAction: any = useDispatch()
-    const { facilityId, page } = props;
+    const { facilityId, id } = props;
     const bedTypes = [{
         id: 0,
         text: 'Select',
     }, ...BED_TYPES]
 
-    const headerText = page === "add" ? "Add Bed Capacity" : "Edit Bed Capacity";
-    const buttonText = page === "add" ? "Save" : "Update";
+    const headerText = !id ? "Add Bed Capacity" : "Edit Bed Capacity";
+    const buttonText = !id ? "Save" : "Update";
 
     const handleChange = (e: any) => {
         let form = { ...state.form };
@@ -96,7 +96,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
             if (res.data) {
                 dispatch({ type: "set_form", form: initForm })
                 setAppMessage({ show: true, message: "Bed capacity added successfully", type: "success" })
-                navigate(`/facility/${facilityId}/doctor/add`);
+                navigate(`/facility/${facilityId}/doctor`);
             } else {
                 setAppMessage({ show: true, message: "Error", type: "error" })
             }

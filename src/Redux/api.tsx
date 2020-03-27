@@ -12,18 +12,18 @@ export default {
         method: 'POST'
     },
 
-    token_refresh : {
+    token_refresh: {
         path: '/api/v1/auth/token/refresh',
         method: 'POST'
     },
 
-    token_verify : {
+    token_verify: {
         path: '/api/v1/auth/token/verify',
         method: 'POST'
     },
 
 
-// User Endpoints
+    // User Endpoints
     currentUser: {
         path: '/api/v1/users/getcurrentuser',
     },
@@ -87,7 +87,7 @@ export default {
     },
 
     // Ambulance
-    
+
     createAmbulance: {
         path: '/api/v1/ambulance/',
         method: 'POST'
@@ -98,10 +98,27 @@ export default {
         path: "/api/v1/facility/{facilityId}/capacity/",
         method: 'POST'
     },
-    createDoctor:{
-        path:"/api/v1/facility/{facilityId}/hospital_doctor/",
+
+    createDoctor: {
+        path: "/api/v1/facility/{facilityId}/hospital_doctor/",
         method: 'POST'
-    }    
+    },
+
+    listCapacity: {
+        path: '/api/v1/facility/{facilityId}/capacity'
+    },
+
+    listDoctor: {
+        path: '/api/v1/facility/{facilityId}/hospital_doctor'
+    },
+
+    getCapacity: {
+        path: '/api/v1/facility/{facilityId}/capacity'
+    },
+
+    getDoctor: {
+        path: '/api/v1/facility/{facilityId}/hospital_doctor'
+    },
     // //Care Center
     // createCenter: {
     //     path: "/api/v1/carecenter/",
