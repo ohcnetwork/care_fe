@@ -119,7 +119,8 @@ export const DriverDetailsForm = (props: any) => {
         "has_suction_machine": vehicleInfo.hasSuctionMachine,
         "has_defibrillator": vehicleInfo.hasDefibrillator,
         "insurance_valid_till_year": vehicleInfo.insuranceValidTill ? vehicleInfo.insuranceValidTill : null,
-        "service_charge": !form.hasFreeService ? Number(form.pricePerKm) : 0,
+        "has_free_service": form.hasFreeService,
+        "price_per_km": form.pricePerKm ? Number(form.pricePerKm) : null,
       };
 
       dispatch(postAmbulance(ambulanceData)).then((resp: any) => {
