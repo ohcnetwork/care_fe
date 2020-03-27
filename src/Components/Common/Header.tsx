@@ -64,7 +64,7 @@ const Header = () => {
   let menus = [
     {
       title: 'Dashboard',
-      link: '/privatedashboard',
+      link: '/dash',
       icon: <DashboardIcon style={{ color: '#666', marginRight: '4px' }}/>
     },
     {

@@ -128,7 +128,7 @@ export default {
 // Patient
 
     getPatients : {
-        path : '/api/v1/facility'
+        path : '/api/v1/patient'
     },
     addPatient: {
         path: '/api/v1/patient/',
