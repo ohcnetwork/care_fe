@@ -186,8 +186,9 @@ export const PatientManager = () => {
             <TitleHeader title="Patients" showSearch={false}>
 
             </TitleHeader>
-            {managePatients}
+
             <Grid container>
+                {managePatients}
                 {(data && data.length > 0 && totalCount > limit) && (
                     <Grid container className={`w3-center ${classes.paginateTopPadding}`}>
                         <Pagination
