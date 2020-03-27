@@ -97,6 +97,10 @@ export default {
     createCapacity: {
         path: "/api/v1/facility/{facilityId}/capacity/",
         method: 'POST'
+    },
+    createDoctor:{
+        path:"/api/v1/facility/{facilityId}/hospital_doctor/",
+        method: 'POST'
     }    
     // //Care Center
     // createCenter: {
