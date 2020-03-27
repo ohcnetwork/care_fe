@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import {
     Grid,
@@ -11,7 +11,7 @@ import {
 import { makeStyles } from '@material-ui/core/styles';
 import Pagination from '../Common/Pagination';
 import TitleHeader from '../Common/TitleHeader';
-import {getUserList, readUser} from "../../Redux/actions";
+import { getUserList, readUser } from "../../Redux/actions";
 import { Loading } from '../Common/Loading';
 const useStyles = makeStyles(theme => ({
     root: {
@@ -42,10 +42,10 @@ const useStyles = makeStyles(theme => ({
         }
     },
     content: {
-        padding:'5px 10px'
+        padding: '5px 10px'
     },
-    cardHeader:{
-        padding:'10px'
+    cardHeader: {
+        padding: '10px'
     },
     contentText: {
         whiteSpace: 'nowrap',
@@ -74,11 +74,11 @@ const useStyles = makeStyles(theme => ({
     paginateTopPadding: {
         paddingTop: '50px'
     },
-    userCardSideTitle:{
+    userCardSideTitle: {
         fontSize: '13px'
     },
-    toolTip:{
-        fontSize:'13px'
+    toolTip: {
+        fontSize: '13px'
     }
 }));
 
@@ -92,35 +92,26 @@ export default function ManageUsers(props: any) {
     const [totalCount, setTotalCount] = useState(0);
 
     const limit = 15;
-    const initialPaginateData = {
-        page: 1,
-        offset: 0,
-        limit
-    };
-    const [ currentPage, setCurrentPage ] = useState(1);
+    const page = 1;
+    const offset = 0;
+    const [currentPage, setCurrentPage] = useState(1);
 
-    const fetchData = (paginateData: any) => {
-        setIsLoading(true);
-        dispatch(getUserList(paginateData))
-            .then((resp:any)=> {
-                const res = resp && resp.data;
-                setData(res.results);
-                setTotalCount(res.count);
-                setIsLoading(false);
-            });
-    };
-    useEffect(() => {
-        fetchData(initialPaginateData);
+    const fetchData = useCallback(async (page, limit, offset) => {
+        const res = await dispatch(getUserList({ page, limit, offset }));
+        if (res && res.data) {
+            setData(res.results);
+            setTotalCount(res.count);
+        }
+        setIsLoading(false);
     }, [dispatch]);
+    useEffect(() => {
+        setIsLoading(true);
+        fetchData(page, limit, offset);
+    }, [dispatch, fetchData]);
 
     const handlePagination = (page: any, perPage: any) => {
         setCurrentPage(page);
-        const paginateData = {
-            page,
-            offset: perPage,
-            limit
-        };
-            fetchData(paginateData);
+        fetchData(page, limit, perPage);
     };
 
 
@@ -128,12 +119,12 @@ export default function ManageUsers(props: any) {
     if (data && data.length) {
         userList = data.map((user: any, idx: number) => {
             return (
-                <Grid item xs={12} md={3}  key={`usr_${user.id}`}
-                      className={classes.root}>
+                <Grid item xs={12} md={3} key={`usr_${user.id}`}
+                    className={classes.root}>
                     <Card className={classes.card}>
                         <CardHeader className={classes.cardHeader}
-                                    title={<span className={classes.title}><Tooltip title={<span className={classes.toolTip}>{user.username}</span>}
-                                                                                    interactive={true}><span>{user.username}</span></Tooltip></span>}
+                            title={<span className={classes.title}><Tooltip title={<span className={classes.toolTip}>{user.username}</span>}
+                                interactive={true}><span>{user.username}</span></Tooltip></span>}
                         />
                         <CardContent className={classes.content}>
                             <Typography>
@@ -158,7 +149,7 @@ export default function ManageUsers(props: any) {
 
     if (isLoading || !data) {
         manageUsers = (
-            <Loading/>
+            <Loading />
         );
     } else if (data && data.length) {
         manageUsers = userList;
