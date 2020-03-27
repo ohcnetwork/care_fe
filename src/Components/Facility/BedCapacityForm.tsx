@@ -167,7 +167,6 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
                                     color="primary"
                                     variant="contained"
                                     type="submit"
-                                    style={{ marginLeft: 'auto' }}
                                     onClick={(e) => handleSubmit(e)}
                                     startIcon={<SaveIcon>save</SaveIcon>}
                                 >{buttonText}</Button>

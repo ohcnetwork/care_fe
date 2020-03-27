@@ -8,7 +8,7 @@ import TitleHeader from "../Common/TitleHeader";
 import BedTypeCard from "./BedTypeCard";
 import { Loading } from '../Common/Loading';
 import DoctorsCountCard from './DoctorsCountCard';
-import { CapacityModal, DoctorModal } from './modals';
+import { FacilityModal, CapacityModal, DoctorModal } from './modals';
 
 
 
@@ -32,10 +32,9 @@ export const FacilityHome = (props: any) => {
     const { facilityId } = props;
     const classes = useStyles();
     const dispatch: any = useDispatch();
-    const initialData: any = {};
-    const [facilityData, setFacilityData] = useState(initialData);
-    const [capacityData, setCapacityData] = useState(initialData);
-    const [doctorData, setDoctorData] = useState(initialData);
+    const [facilityData, setFacilityData] = useState<FacilityModal>({});
+    const [capacityData, setCapacityData] = useState<Array<CapacityModal>>([]);
+    const [doctorData, setDoctorData] = useState<Array<DoctorModal>>([]);
     const [isLoading, setIsLoading] = useState(false);
 
     const fetchData = useCallback(async () => {
@@ -64,29 +63,29 @@ export const FacilityHome = (props: any) => {
     }
 
     let capacityList: any = null;
-    if (capacityData && capacityData.length) {
-        capacityList = capacityData.map((data: CapacityModal,idx:number) => {
-            return (
-                <BedTypeCard key={`bed_${idx}`} {...data} />
-            )
-        });
-    } else if (capacityData && capacityData.length === 0) {
+    if (!capacityData || !capacityData.length) {
         capacityList = (
             <h5>No Bed Types Found</h5>
         );
+    } else {
+        capacityList = capacityData.map((data: CapacityModal) => {
+            return (
+                <BedTypeCard key={`bed_${data.id}`} {...data} />
+            )
+        });
     }
 
     let doctorList: any = null;
-    if (doctorData && doctorData.length) {
-        doctorList = doctorData.map((data: DoctorModal,idx:number) => {
-            return (
-                <DoctorsCountCard key={`doc_${idx}`} {...data} />
-            )
-        });
-    } else if (doctorData && doctorData.length === 0) {
+    if (!doctorData || !doctorData.length) {
         doctorList = (
             <h5>No Doctors Found</h5>
         );
+    } else {
+        doctorList = doctorData.map((data: DoctorModal) => {
+            return (
+                <DoctorsCountCard key={`bed_${data.id}`} {...data} />
+            )
+        });
     }
 
     return (

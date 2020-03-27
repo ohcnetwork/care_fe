@@ -6,6 +6,7 @@ import { navigate } from 'hookrouter';
 import { Loading } from "../../Components/Common/Loading";
 import AppMessage from "../Common/AppMessage";
 import { createDoctor } from "../../Redux/actions";
+import SaveIcon from '@material-ui/icons/Save';
 import { DOCTOR_SPECIALIZATION } from './constants';
 
 interface DoctorCapacityProps {
@@ -146,7 +147,6 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
                                     <Button
                                         color="default"
                                         variant="contained"
-                                        style={{ marginLeft: 'auto' }}
                                         onClick={handleCancel}
                                     >Cancel</Button>
                                 </Grid>
@@ -155,7 +155,7 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
                                         color="primary"
                                         variant="contained"
                                         type="submit"
-                                        style={{ marginLeft: 'auto' }}
+                                        startIcon={<SaveIcon>save</SaveIcon>}
                                         onClick={(e) => handleSubmit(e)}
                                     >{buttonText}</Button>
                                 </Grid>
