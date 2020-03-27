@@ -6,11 +6,11 @@ import { navigate } from 'hookrouter';
 import { Loading } from "../../Components/Common/Loading";
 import AppMessage from "../Common/AppMessage";
 import { createDoctor } from "../../Redux/actions";
-import { DOCTOR_SPECIALISATION } from './constants';
+import { DOCTOR_SPECIALIZATION } from './constants';
 
 interface DoctorCapacityProps {
     facilityId: string;
-    page: "add" | "edit";
+    id?: string;
 }
 
 const initForm: any = {
@@ -42,17 +42,17 @@ const doctorCapacityReducer = (state = initialState, action: any) => {
 
 export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
     const [state, dispatch] = useReducer(doctorCapacityReducer, initialState);
-    const { facilityId, page } = props;
+    const { facilityId, id } = props;
     const [showAppMessage, setAppMessage] = useState({ show: false, message: "", type: "" });
     const [isLoading, setIsLoading] = useState(false);
     const dispatchAction: any = useDispatch();
     const doctorTypes = [{
         id: 0,
         text: 'Select',
-    }, ...DOCTOR_SPECIALISATION];
+    }, ...DOCTOR_SPECIALIZATION];
 
-    const headerText = page === "add" ? "Add Doctor Capacity" : "Edit Doctor Capacity";
-    const buttonText = page === "add" ? "Save" : "Update";
+    const headerText = !id ? "Add Doctor Capacity" : "Edit Doctor Capacity";
+    const buttonText = !id ? "Save" : "Update";
 
     const handleChange = (e: any) => {
         let form = { ...state.form }

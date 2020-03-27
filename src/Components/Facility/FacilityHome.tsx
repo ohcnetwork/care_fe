@@ -1,13 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Grid, CircularProgress, Paper, Typography, Button, Divider } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { useDispatch } from "react-redux";
 import { navigate } from 'hookrouter';
-import { getFacility } from "../../Redux/actions";
+import { getFacility, listCapacity, listDoctor } from "../../Redux/actions";
 import TitleHeader from "../Common/TitleHeader";
 import BedTypeCard from "./BedTypeCard";
 import { Loading } from '../Common/Loading';
 import DoctorsCountCard from './DoctorsCountCard';
+import { CapacityModal, DoctorModal } from './modals';
 
 
 
@@ -33,25 +34,59 @@ export const FacilityHome = (props: any) => {
     const dispatch: any = useDispatch();
     const initialData: any = {};
     const [facilityData, setFacilityData] = useState(initialData);
+    const [capacityData, setCapacityData] = useState(initialData);
+    const [doctorData, setDoctorData] = useState(initialData);
     const [isLoading, setIsLoading] = useState(false);
 
-    const fetchData = () => {
-        dispatch(getFacility(facilityId))
-            .then((resp: any) => {
-                if (resp && resp.data) {
-                    setFacilityData(resp.data)
-                    setIsLoading(false);
-                }
-            });
-    };
+    const fetchData = useCallback(async () => {
+        const facilityRes = await dispatch(getFacility(facilityId))
+        if (facilityRes && facilityRes.data) {
+            setFacilityData(facilityRes.data)
+            const capacityRes = await dispatch(listCapacity({}, { facilityId }));
+            if (capacityRes && capacityRes.data) {
+                setCapacityData(capacityRes.data.results)
+            }
+            const doctorRes = await dispatch(listDoctor({}, { facilityId }));
+            if (doctorRes && doctorRes.data) {
+                setDoctorData(doctorRes.data.results)
+            }
+        }
+        setIsLoading(false);
+    },[dispatch, facilityId]);
 
     useEffect(() => {
         setIsLoading(true);
         fetchData();
-    }, [dispatch]);
+    }, [dispatch, fetchData]);
 
     if (isLoading) {
         return <Loading />
+    }
+
+    let capacityList: any = null;
+    if (capacityData && capacityData.length) {
+        capacityList = capacityData.map((data: CapacityModal) => {
+            return (
+                <BedTypeCard {...data} />
+            )
+        });
+    } else if (capacityData && capacityData.length === 0) {
+        capacityList = (
+            <h5>No Bed Types Found</h5>
+        );
+    }
+
+    let doctorList: any = null;
+    if (doctorData && doctorData.length) {
+        doctorList = doctorData.map((data: DoctorModal) => {
+            return (
+                <DoctorsCountCard {...data} />
+            )
+        });
+    } else if (doctorData && doctorData.length === 0) {
+        doctorList = (
+            <h5>No Doctors Found</h5>
+        );
     }
 
     return (
@@ -91,14 +126,14 @@ export const FacilityHome = (props: any) => {
                     <h5>Bed Types</h5>
                     <Divider />
                 </Grid>
-                <BedTypeCard />
+                {capacityList}
             </Grid>
             <Grid container style={{ padding: "10px", marginBottom: '15px' }} spacing={1}>
                 <Grid item xs={12} md={12}>
                     <h5>Doctors Count</h5>
                     <Divider />
                 </Grid>
-                <DoctorsCountCard />
+                {doctorList}
             </Grid>
 
         </div>
