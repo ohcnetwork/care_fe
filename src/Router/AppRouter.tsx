@@ -22,7 +22,7 @@ const routes = {
     '/analytics': () => <Analytics />,
     '/facility': () => <HospitalList />,
     '/facility/create': () => <FacilityCreate />,
-    '/facility/:facilityId/update': ({ facilityId, id }: any) => <FacilityCreate facilityId={facilityId} id={id} />,
+    '/facility/:facilityId/update': ({ facilityId }: any) => <FacilityCreate facilityId={facilityId} />,
     '/facility/:facilityId': ({ facilityId }: any) => <FacilityHome facilityId={facilityId} />,
     '/facility/:facilityId/bed': ({ facilityId }: any) => <BedCapacityForm facilityId={facilityId} />,
     '/facility/:facilityId/doctor': ({ facilityId }: any) => <DoctorCapacityForm facilityId={facilityId} />,
