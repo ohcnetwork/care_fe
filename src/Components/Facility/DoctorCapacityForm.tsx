@@ -5,7 +5,7 @@ import { TextInputField, ErrorHelperText, NativeSelectField } from '../Common/He
 import { navigate } from 'hookrouter';
 import { Loading } from "../../Components/Common/Loading";
 import AppMessage from "../Common/AppMessage";
-import { createDoctor, getDoctor, updateDoctor } from "../../Redux/actions";
+import { createDoctor, getDoctor } from "../../Redux/actions";
 import SaveIcon from '@material-ui/icons/Save';
 import { DoctorModal } from './modals';
 import { DOCTOR_SPECIALIZATION } from './constants';
@@ -58,13 +58,12 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
     const headerText = !id ? "Add Doctor Capacity" : "Edit Doctor Capacity";
     const buttonText = !id ? "Save" : "Update";
 
-
     const fetchData = useCallback(async () => {
         if (id && !getRequestCalled) {
             setIsLoading(true);
             const res = await dispatchAction(getDoctor(id, { facilityId }));
             if (res.data) {
-                dispatch({ type: "set_form", form: { area: res.data.area, count: res.data.count } })
+                dispatch({ type: "set_form", form: res.data })
             } else {
                 navigate(`/facility/${facilityId}`);
             }

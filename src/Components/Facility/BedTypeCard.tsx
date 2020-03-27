@@ -42,7 +42,7 @@ const BedTypeCard = (props: BedTypeProps) => {
                         </Grid>
                         <Grid item>
                             <Button variant="outlined"
-                                onClick={() => navigate(`/facility/${props.facilityId}/bed/${props.id}`)}>
+                                onClick={() => navigate(`/facility/${props.facilityId}/bed/${props.room_type}`)}>
                                 Edit
                             </Button>
                         </Grid>

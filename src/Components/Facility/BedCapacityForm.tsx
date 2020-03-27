@@ -1,17 +1,17 @@
-import React, { useState, useReducer } from 'react';
+import React, { useState, useReducer, useCallback, useEffect } from 'react';
 import { useDispatch } from "react-redux";
 import { Grid, InputLabel, Select, Card, CardActions, CardHeader, CardContent, MenuItem, Button } from '@material-ui/core';
 import { ErrorHelperText, NativeSelectField, TextInputField } from "../Common/HelperInputFields";
 import SaveIcon from '@material-ui/icons/Save';
 import { navigate } from 'hookrouter';
 import { BED_TYPES } from "./constants";
+import { CapacityModal } from './modals';
 import AppMessage from "../Common/AppMessage";
 import { Loading } from "../../Components/Common/Loading";
-import { createCapacity } from "../../Redux/actions";
+import { createCapacity, getCapacity } from "../../Redux/actions";
 
-interface BedCapacityProps {
-    facilityId: string;
-    id?: string;
+interface BedCapacityProps extends CapacityModal {
+    facilityId: number;
 }
 
 const initForm: any = {
@@ -43,19 +43,39 @@ const bedCountReducer = (state = initialState, action: any) => {
     }
 };
 
+const bedTypes = [{
+    id: 0,
+    text: 'Select',
+}, ...BED_TYPES]
+
 export const BedCapacityForm = (props: BedCapacityProps) => {
+    const dispatchAction: any = useDispatch();
+    const { facilityId, id } = props;
     const [state, dispatch] = useReducer(bedCountReducer, initialState);
     const [showAppMessage, setAppMessage] = useState({ show: false, message: "", type: "" });
     const [isLoading, setIsLoading] = useState(false);
-    const dispatchAction: any = useDispatch()
-    const { facilityId, id } = props;
-    const bedTypes = [{
-        id: 0,
-        text: 'Select',
-    }, ...BED_TYPES]
+    const [getRequestCalled, setGetRequestCalled] = useState(false);
 
     const headerText = !id ? "Add Bed Capacity" : "Edit Bed Capacity";
     const buttonText = !id ? "Save" : "Update";
+
+    const fetchData = useCallback(async () => {
+        if (id && !getRequestCalled) {
+            setIsLoading(true);
+            const res = await dispatchAction(getCapacity(id, { facilityId }));
+            if (res.data) {
+                dispatch({ type: "set_form", form: res.data })
+            } else {
+                navigate(`/facility/${facilityId}`);
+            }
+            setIsLoading(false);
+        }
+    }, [dispatchAction, facilityId, getRequestCalled, id]);
+
+    useEffect(() => {
+        setGetRequestCalled(true);
+        fetchData();
+    }, [dispatch, fetchData, getRequestCalled, id]);
 
     const handleChange = (e: any) => {
         let form = { ...state.form };
@@ -90,7 +110,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
                 "total_capacity": Number(state.form.totalCapacity),
                 "current_capacity": Number(state.form.currentOccupancy),
             };
-            const res = await dispatchAction(createCapacity(data, { facilityId }));
+            const res = await dispatchAction(createCapacity(id, data, { facilityId }));
             setIsLoading(false);
             if (res.data) {
                 dispatch({ type: "set_form", form: initForm })
