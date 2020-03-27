@@ -9,6 +9,7 @@ import BedTypeCard from "./BedTypeCard";
 import { Loading } from '../Common/Loading';
 import DoctorsCountCard from './DoctorsCountCard';
 import { FacilityModal, CapacityModal, DoctorModal } from './modals';
+import { PatientManager } from "../Patient/ManagePatients";
 
 
 
@@ -54,7 +55,7 @@ export const FacilityHome = (props: any) => {
             }
         }
         setIsLoading(false);
-    },[dispatch, facilityId]);
+    }, [dispatch, facilityId]);
 
     useEffect(() => {
         setIsLoading(true);
@@ -103,22 +104,22 @@ export const FacilityHome = (props: any) => {
                     <Typography>Oxygen Capacity :{` ${facilityData.oxygen_capacity} Litres`}</Typography>
                 </Grid>
                 <Grid item xs={12} md={5}>
-                <Grid container spacing={1} direction="column">
+                    <Grid container spacing={1} direction="column">
                         <Grid item xs={12} className="w3-center">
                             <Button fullWidth variant="contained" color="primary" size="small"
-                                onClick={()=>navigate(`/facility/${facilityId}/update`)}>
+                                onClick={() => navigate(`/facility/${facilityId}/update`)}>
                                 Update Hospital Info
                             </Button>
                         </Grid>
                         <Grid item xs={12} className="w3-center">
                             <Button fullWidth variant="contained" color="primary" size="small"
-                                onClick={()=>navigate(`/facility/${facilityId}/bed`)}>
+                                onClick={() => navigate(`/facility/${facilityId}/bed`)}>
                                 Add More Bed Types
                             </Button>
                         </Grid>
                         <Grid item xs={12} className="w3-center">
                             <Button fullWidth variant="contained" color="primary" size="small"
-                                onClick={()=>navigate(`/facility/${facilityId}/doctor`)}>
+                                onClick={() => navigate(`/facility/${facilityId}/doctor`)}>
                                 Add More Doctor Types
                             </Button>
                         </Grid>
@@ -139,7 +140,9 @@ export const FacilityHome = (props: any) => {
                 </Grid>
                 {doctorList}
             </Grid>
-
+            <Grid>
+                <PatientManager />
+            </Grid>
         </div>
     );
 

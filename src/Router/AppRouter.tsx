@@ -15,10 +15,11 @@ import { FacilityHome } from '../Components/Facility/FacilityHome';
 import { CareCenterJoinForm } from "../Components/Facility/CareCenterJoinForm";
 import { BedCapacityForm } from '../Components/Facility/BedCapacityForm';
 import { DoctorCapacityForm } from '../Components/Facility/DoctorCapacityForm';
+import {PatientManager} from "../Components/Patient/ManagePatients";
 
 const routes = {
     '/': () => <PrivateDashboard />,
-    '/privatedashboard': () => <PrivateDashboard />,
+    '/dash': () => <PrivateDashboard/>,
     '/analytics': () => <Analytics />,
     '/facility': () => <HospitalList />,
     '/facility/create': () => <FacilityCreate />,
@@ -29,6 +30,7 @@ const routes = {
     '/facility/:facilityId/bed/:id': ({ facilityId, id }: any) => <BedCapacityForm facilityId={facilityId} id={id} />,
     '/facility/:facilityId/doctor/:id': ({ facilityId, id }: any) => <DoctorCapacityForm facilityId={facilityId} id={id} />,
     '/stats': () => <Stats />,
+    '/patients': () => <PatientManager/>,
     '/patient/register': () => <PatientRegister />,
     '/patient/tele-consult': () => <TeleConsultation />,
     '/patient/discharge': () => <PatientDischarge />,

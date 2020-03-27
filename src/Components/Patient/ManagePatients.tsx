@@ -1,15 +1,14 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, {useEffect, useState} from 'react';
 import Grid from '@material-ui/core/Grid';
-import { Card, CardContent, CardHeader, Tooltip, Typography } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
-import { useDispatch } from "react-redux";
-import { getFacilities } from "../../Redux/actions";
+import {Card, CardContent, CardHeader, Tooltip, Typography } from "@material-ui/core";
+import {makeStyles} from "@material-ui/core/styles";
+import {useDispatch} from "react-redux";
+import {getFacilities, getPatients} from "../../Redux/actions";
 import TitleHeader from "../Common/TitleHeader";
 import Pagination from "../Common/Pagination";
 import AddCard from '../Common/AddCard';
 import { navigate } from 'hookrouter';
-import { Loading } from "../Common/Loading";
-import { FacilityModal } from './modals';
+import {Loading} from "../Common/Loading";
 const useStyles = makeStyles(theme => ({
     root: {
         flexGrow: 1,
@@ -19,7 +18,7 @@ const useStyles = makeStyles(theme => ({
         height: 160,
         width: '100%',
         backgroundColor: '#FFFFFF',
-        cursor: 'pointer'
+        cursor:'pointer'
     },
     title: {
         whiteSpace: 'nowrap',
@@ -40,10 +39,10 @@ const useStyles = makeStyles(theme => ({
         }
     },
     content: {
-        padding: '5px 10px'
+        padding:'5px 10px'
     },
-    cardHeader: {
-        padding: '10px'
+    cardHeader:{
+        padding:'10px'
     },
     contentText: {
         whiteSpace: 'nowrap',
@@ -72,11 +71,11 @@ const useStyles = makeStyles(theme => ({
     paginateTopPadding: {
         paddingTop: '50px'
     },
-    userCardSideTitle: {
+    userCardSideTitle:{
         fontSize: '13px'
     },
-    toolTip: {
-        fontSize: '13px'
+    toolTip:{
+        fontSize:'13px'
     },
     displayFlex: {
         display: 'flex'
@@ -86,69 +85,78 @@ const useStyles = makeStyles(theme => ({
     }
 }));
 
-export const HospitalList = () => {
+export const PatientManager = () => {
     const classes = useStyles();
-    const dispatchAction: any = useDispatch();
-    const [data, setData] = useState<Array<FacilityModal>>([]);
+    const dispatch: any = useDispatch();
+    const initialData: any[] = [];
+    const [data, setData] = useState(initialData);
 
-    let manageFacilities: any = null;
+    let managePatients: any = null;
     const [isLoading, setIsLoading] = useState(false);
     const [totalCount, setTotalCount] = useState(0);
 
     const limit = 15;
-    const page = 1;
-    const offset = 0;
-    const [currentPage, setCurrentPage] = useState(1);
+    const initialPaginateData = {
+        page: 1,
+        offset: 0,
+        limit
+    };
+    const [ currentPage, setCurrentPage ] = useState(1);
 
-    const fetchData = useCallback(async (page, limit, offset) => {
-        const { data } = await dispatchAction(getFacilities({page, offset, limit}));
-        if (data) {
-            setData(data.results);
-            setTotalCount(data.count);
-        }
-        setIsLoading(false);
-    }, [dispatchAction]);
-
-    useEffect(() => {
+    const fetchData = (paginateData: any) => {
         setIsLoading(true);
-        fetchData(page, limit, offset);
-    }, [dispatchAction, fetchData]);
+        dispatch(getPatients(paginateData))
+            .then((resp:any)=> {
+                const res = resp && resp.data;
+                setData(res.results);
+                setTotalCount(res.count);
+                setIsLoading(false);
+            });
+    };
+    useEffect(() => {
+        fetchData(initialPaginateData);
+    }, [dispatch]);
 
     const handlePagination = (page: any, perPage: any) => {
         setCurrentPage(page);
-        fetchData(page, limit, perPage);
+        const paginateData = {
+            page,
+            offset: perPage,
+            limit
+        };
+        fetchData(paginateData);
     };
-    let facilityList: any[] = [];
+    let patientList: any[] = [];
     if (data && data.length) {
-        facilityList = data.map((facility: any, idx: number) => {
+        patientList = data.map((patient: any, idx: number) => {
             return (
-                <Grid item xs={12} md={6} lg={4} xl={3} key={`usr_${facility.id}`} className={classes.root}>
-                    <Card className={classes.card} onClick={() => navigate(`/facility/${facility.id}`)}>
+                <Grid item xs={12} md={3}  key={`usr_${patient.id}`} className={classes.root}>
+                    <Card className={classes.card} onClick={()=>navigate(`/patient/${patient.id}`)}>
                         <CardHeader
                             className={classes.cardHeader}
                             title={
                                 <span className={classes.title}>
                                     <Tooltip
-                                        title={<span className={classes.toolTip}>{facility.name}</span>}
+                                        title={<span className={classes.toolTip}>{patient.name}</span>}
                                         interactive={true}>
-                                        <span>{facility.name}</span>
+                                        <span>{patient.name}</span>
                                     </Tooltip>
                                 </span>
                             }
                         />
                         <CardContent className={classes.content}>
                             <Typography>
-                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>District - </span>{facility.district}
+                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Age - </span>{patient.age}
                             </Typography>
                         </CardContent>
                         <CardContent className={classes.content}>
                             <Typography>
-                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Facility Type - </span>{facility.facility_type}
+                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Contact with carrier - </span>{patient.contact_with_carrier}
                             </Typography>
                         </CardContent>
                         <CardContent className={classes.content}>
                             <Typography>
-                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Contact - </span>{facility.phone_number}
+                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Status - </span>{patient.is_active}
                             </Typography>
                         </CardContent>
                     </Card>
@@ -158,16 +166,16 @@ export const HospitalList = () => {
     }
 
     if (isLoading || !data) {
-        manageFacilities = (
-            <Loading />
+        managePatients = (
+            <Loading/>
         );
     } else if (data && data.length) {
-        manageFacilities = facilityList;
+        managePatients = patientList;
     } else if (data && data.length === 0) {
-        manageFacilities = (
+        managePatients = (
             <Grid item xs={12} md={12} className={classes.displayFlex}>
                 <Grid container justify="center" alignItems="center">
-                    <h5> No Users Found</h5>
+                    <h5> No Patients Found</h5>
                 </Grid>
             </Grid>
         );
@@ -175,16 +183,17 @@ export const HospitalList = () => {
 
     return (
         <div>
-            <TitleHeader title="Facilities" showSearch={false}>
+            <TitleHeader title="Patients" showSearch={false}>
+
             </TitleHeader>
             <Grid container className={classes.minHeight}>
-                {!isLoading &&
-                    <AddCard
-                        title={'+ Add New Hospital'}
-                        onClick={() => navigate('/facility/create')}
-                    />
+                { !isLoading  &&
+                <AddCard
+                    title={'+ Add New Patient'}
+                    onClick={() => navigate('/patient/register')}
+                />
                 }
-                {manageFacilities}
+                {managePatients}
             </Grid>
             <Grid container>
                 {(data && data.length > 0 && totalCount > limit) && (
@@ -201,4 +210,4 @@ export const HospitalList = () => {
         </div>
     );
 
-}
+};

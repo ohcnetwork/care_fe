@@ -7,7 +7,8 @@ export const FACILITY_TYPES = {
 export const BED_TYPES = [
     { "id": 1, "text": "Normal" },
     { "id": 2, "text": "ICU" },
-    { "id": 3, "text": "Ventilator" }
+    { "id": 3, "text": "Ventilator" },
+    {"id": 4, "text": "Room with attached Bathroom"}
 ];
 
 export const DOCTOR_SPECIALIZATION = [
