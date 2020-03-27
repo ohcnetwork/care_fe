@@ -7,11 +7,6 @@ export default {
         method: 'POST',
     },
 
-    signUp: {
-        path: '/api/v1/auth/signup',
-        method: 'POST'
-    },
-
     token_refresh: {
         path: '/api/v1/auth/token/refresh',
         method: 'POST'

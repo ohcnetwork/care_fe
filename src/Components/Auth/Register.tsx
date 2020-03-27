@@ -51,7 +51,6 @@ export const Register = () => {
         phone_number: "",
         gender: "",
         age: "",
-        skill: 2,
         password: '',
         c_password: '',
     };

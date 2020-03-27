@@ -256,7 +256,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                                         value={state.form.phone_number}
                                         onChange={handleChange}
                                         errors={state.errors.phone_number}
-                                        inputProps={{ maxLength: 13 }}
+                                        inputProps={{ maxLength: 11 }}
                                     />
                                 </Grid>
                             </Grid>
