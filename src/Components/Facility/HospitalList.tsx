@@ -101,10 +101,10 @@ export const HospitalList = () => {
     const [currentPage, setCurrentPage] = useState(1);
 
     const fetchData = useCallback(async (page, limit, offset) => {
-        const { data } = await dispatchAction(getFacilities({page, offset, limit}));
-        if (data) {
-            setData(data.results);
-            setTotalCount(data.count);
+        const res = await dispatchAction(getFacilities({page, offset, limit}));
+        if (res && res.data) {
+            setData(res.data.results);
+            setTotalCount(res.data.count);
         }
         setIsLoading(false);
     }, [dispatchAction]);

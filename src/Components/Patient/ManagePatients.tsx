@@ -1,14 +1,14 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import Grid from '@material-ui/core/Grid';
-import {Card, CardContent, CardHeader, Tooltip, Typography } from "@material-ui/core";
-import {makeStyles} from "@material-ui/core/styles";
-import {useDispatch} from "react-redux";
-import {getFacilities, getPatients} from "../../Redux/actions";
+import { Card, CardContent, CardHeader, Tooltip, Typography } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core/styles";
+import { useDispatch } from "react-redux";
+import { getFacilities, getPatients } from "../../Redux/actions";
 import TitleHeader from "../Common/TitleHeader";
 import Pagination from "../Common/Pagination";
 import AddCard from '../Common/AddCard';
 import { navigate } from 'hookrouter';
-import {Loading} from "../Common/Loading";
+import { Loading } from "../Common/Loading";
 const useStyles = makeStyles(theme => ({
     root: {
         flexGrow: 1,
@@ -18,7 +18,7 @@ const useStyles = makeStyles(theme => ({
         height: 160,
         width: '100%',
         backgroundColor: '#FFFFFF',
-        cursor:'pointer'
+        cursor: 'pointer'
     },
     title: {
         whiteSpace: 'nowrap',
@@ -39,10 +39,10 @@ const useStyles = makeStyles(theme => ({
         }
     },
     content: {
-        padding:'5px 10px'
+        padding: '5px 10px'
     },
-    cardHeader:{
-        padding:'10px'
+    cardHeader: {
+        padding: '10px'
     },
     contentText: {
         whiteSpace: 'nowrap',
@@ -71,11 +71,11 @@ const useStyles = makeStyles(theme => ({
     paginateTopPadding: {
         paddingTop: '50px'
     },
-    userCardSideTitle:{
+    userCardSideTitle: {
         fontSize: '13px'
     },
-    toolTip:{
-        fontSize:'13px'
+    toolTip: {
+        fontSize: '13px'
     },
     displayFlex: {
         display: 'flex'
@@ -96,42 +96,34 @@ export const PatientManager = () => {
     const [totalCount, setTotalCount] = useState(0);
 
     const limit = 15;
-    const initialPaginateData = {
-        page: 1,
-        offset: 0,
-        limit
-    };
-    const [ currentPage, setCurrentPage ] = useState(1);
+    const page = 1;
+    const offset = 0;
+    const [currentPage, setCurrentPage] = useState(1);
 
-    const fetchData = (paginateData: any) => {
-        setIsLoading(true);
-        dispatch(getPatients(paginateData))
-            .then((resp:any)=> {
-                const res = resp && resp.data;
-                setData(res.results);
-                setTotalCount(res.count);
-                setIsLoading(false);
-            });
-    };
+    const fetchData = useCallback(async (page, limit, offset) => {
+        const res = await dispatch(getPatients({page, offset, limit}));
+        if (res && res.data) {
+            setData(res.data.results);
+            setTotalCount(res.data.count);
+        }
+        setIsLoading(false);
+    },[dispatch]);
+
     useEffect(() => {
-        fetchData(initialPaginateData);
-    }, [dispatch]);
+        setIsLoading(true);
+        fetchData(page, limit, offset);
+    }, [dispatch, fetchData]);
 
     const handlePagination = (page: any, perPage: any) => {
         setCurrentPage(page);
-        const paginateData = {
-            page,
-            offset: perPage,
-            limit
-        };
-        fetchData(paginateData);
+        fetchData(page, limit, perPage);
     };
     let patientList: any[] = [];
     if (data && data.length) {
         patientList = data.map((patient: any, idx: number) => {
             return (
-                <Grid item xs={12} md={3}  key={`usr_${patient.id}`} className={classes.root}>
-                    <Card className={classes.card} onClick={()=>navigate(`/patient/${patient.id}`)}>
+                <Grid item xs={12} md={3} key={`usr_${patient.id}`} className={classes.root}>
+                    <Card className={classes.card} onClick={() => navigate(`/patient/${patient.id}`)}>
                         <CardHeader
                             className={classes.cardHeader}
                             title={
@@ -167,7 +159,7 @@ export const PatientManager = () => {
 
     if (isLoading || !data) {
         managePatients = (
-            <Loading/>
+            <Loading />
         );
     } else if (data && data.length) {
         managePatients = patientList;

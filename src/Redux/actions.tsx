@@ -13,6 +13,8 @@ const config: any = {
     headers: {},
 };
 
+const isRunning: any = {}
+
 if (localStorage.getItem('care_access_token')) {
     config.headers['Authorization'] = 'Bearer ' + localStorage.getItem('care_access_token');
 }
@@ -54,6 +56,10 @@ export const fireRequest = (
     key: string, path: any = [], params: object = {}, urlParam?: any
 ) => {
     return (dispatch: any) => {
+        if (isRunning[key]) {
+            isRunning[key].cancel();
+        }
+        isRunning[key] = axios.CancelToken.source();
         const request = Object.assign({}, requestMap[key]);
         if (path.length > 0) {
             request.path += '/' + path.join('/');
@@ -73,15 +79,16 @@ export const fireRequest = (
             })
         }
         dispatch(fetchDataRequest(key));
-        return axiosApiCall[request.method.toLowerCase()](request.path, params)
-            .then((response: any) => {
-                dispatch(fetchResponseSuccess(key, response.data));
-                return response;
-            })
-            .catch((error: any) => {
-                dispatch(fetchDataRequestError(key, error));
-                return error.response;
-            });
+        return axiosApiCall[request.method.toLowerCase()](request.path, {
+            ...params,
+            cancelToken: isRunning[key].token
+        }).then((response: any) => {
+            dispatch(fetchResponseSuccess(key, response.data));
+            return response;
+        }).catch((error: any) => {
+            dispatch(fetchDataRequestError(key, error));
+            return error.response;
+        });
     };
 };
 
@@ -163,5 +170,5 @@ export const getPatients = (paginate: object) => {
 };
 
 export const addPatient = (form: object) => {
-    return fireRequest('addPatient',[], form)
+    return fireRequest('addPatient', [], form)
 };
