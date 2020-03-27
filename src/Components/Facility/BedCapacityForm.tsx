@@ -1,17 +1,17 @@
-import React, { useState, useReducer } from 'react';
+import React, { useState, useReducer, useCallback, useEffect } from 'react';
 import { useDispatch } from "react-redux";
 import { Grid, InputLabel, Select, Card, CardActions, CardHeader, CardContent, MenuItem, Button } from '@material-ui/core';
 import { ErrorHelperText, NativeSelectField, TextInputField } from "../Common/HelperInputFields";
 import SaveIcon from '@material-ui/icons/Save';
 import { navigate } from 'hookrouter';
 import { BED_TYPES } from "./constants";
+import { CapacityModal } from './modals';
 import AppMessage from "../Common/AppMessage";
 import { Loading } from "../../Components/Common/Loading";
-import { createCapacity } from "../../Redux/actions";
+import { createCapacity, getCapacity } from "../../Redux/actions";
 
-interface BedCapacityProps {
-    facilityId: string;
-    id?: string;
+interface BedCapacityProps extends CapacityModal {
+    facilityId: number;
 }
 
 const initForm: any = {
@@ -43,19 +43,44 @@ const bedCountReducer = (state = initialState, action: any) => {
     }
 };
 
+const bedTypes = [{
+    id: 0,
+    text: 'Select',
+}, ...BED_TYPES]
+
 export const BedCapacityForm = (props: BedCapacityProps) => {
+    const dispatchAction: any = useDispatch();
+    const { facilityId, id } = props;
     const [state, dispatch] = useReducer(bedCountReducer, initialState);
     const [showAppMessage, setAppMessage] = useState({ show: false, message: "", type: "" });
     const [isLoading, setIsLoading] = useState(false);
-    const dispatchAction: any = useDispatch()
-    const { facilityId, id } = props;
-    const bedTypes = [{
-        id: 0,
-        text: 'Select',
-    }, ...BED_TYPES]
 
     const headerText = !id ? "Add Bed Capacity" : "Edit Bed Capacity";
     const buttonText = !id ? "Save" : "Update";
+
+    const fetchData = useCallback(async () => {
+        if (id) {
+            setIsLoading(true);
+            const res = await dispatchAction(getCapacity(id, { facilityId }));
+            if (res.data) {
+                dispatch({ 
+                        type: "set_form", 
+                        form: {
+                            bedType: res.data.room_type,
+                            totalCapacity: res.data.total_capacity,
+                            currentOccupancy: res.data.current_capacity,                    
+                        }
+                    })
+            } else {
+                navigate(`/facility/${facilityId}`);
+            }
+            setIsLoading(false);
+        }
+    }, [dispatchAction, facilityId, id]);
+
+    useEffect(() => {
+        fetchData();
+    }, [dispatch, fetchData, id]);
 
     const handleChange = (e: any) => {
         let form = { ...state.form };
@@ -84,19 +109,23 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
         e.preventDefault();
         const valid = validateData();
         if (valid) {
-            // write api call
             setIsLoading(true);
             const data = {
                 "room_type": Number(state.form.bedType),
                 "total_capacity": Number(state.form.totalCapacity),
                 "current_capacity": Number(state.form.currentOccupancy),
             };
-            const res = await dispatchAction(createCapacity(data, { facilityId }));
-            setIsLoading(false)
+            const res = await dispatchAction(createCapacity(id, data, { facilityId }));
+            setIsLoading(false);
             if (res.data) {
                 dispatch({ type: "set_form", form: initForm })
-                setAppMessage({ show: true, message: "Bed capacity added successfully", type: "success" })
-                navigate(`/facility/${facilityId}/doctor`);
+                if (!id) {
+                    setAppMessage({ show: true, message: "Bed capacity added successfully", type: "success" });
+                    navigate(`/facility/${facilityId}/doctor`);
+                } else {
+                    setAppMessage({ show: true, message: "Bed capacity updated successfully", type: "success" });
+                    navigate(`/facility/${facilityId}`);
+                }
             } else {
                 setAppMessage({ show: true, message: "Error", type: "error" })
             }
@@ -167,7 +196,6 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
                                     color="primary"
                                     variant="contained"
                                     type="submit"
-                                    style={{ marginLeft: 'auto' }}
                                     onClick={(e) => handleSubmit(e)}
                                     startIcon={<SaveIcon>save</SaveIcon>}
                                 >{buttonText}</Button>

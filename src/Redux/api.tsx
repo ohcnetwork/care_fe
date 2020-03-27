@@ -104,20 +104,22 @@ export default {
         method: 'POST'
     },
 
-    listCapacity: {
-        path: '/api/v1/facility/{facilityId}/capacity'
-    },
-
-    listDoctor: {
-        path: '/api/v1/facility/{facilityId}/hospital_doctor'
-    },
-
     getCapacity: {
         path: '/api/v1/facility/{facilityId}/capacity'
     },
 
     getDoctor: {
         path: '/api/v1/facility/{facilityId}/hospital_doctor'
+    },
+
+    updateCapacity: {
+        path: '/api/v1/facility/{facilityId}/capacity',
+        method: 'PUT'
+    },
+
+    updateDoctor: {
+        path: '/api/v1/facility/{facilityId}/hospital_doctor',
+        method: 'PUT'
     },
     // //Care Center
     // createCenter: {

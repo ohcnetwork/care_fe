@@ -1,16 +1,17 @@
-import React, { useState, useReducer } from 'react';
+import React, { useState, useReducer, useEffect, useCallback } from 'react';
 import { useDispatch } from "react-redux";
 import { Grid, InputLabel, Card, CardHeader, CardContent, Button } from '@material-ui/core'
 import { TextInputField, ErrorHelperText, NativeSelectField } from '../Common/HelperInputFields';
 import { navigate } from 'hookrouter';
 import { Loading } from "../../Components/Common/Loading";
 import AppMessage from "../Common/AppMessage";
-import { createDoctor } from "../../Redux/actions";
+import { createDoctor, getDoctor } from "../../Redux/actions";
+import SaveIcon from '@material-ui/icons/Save';
+import { DoctorModal } from './modals';
 import { DOCTOR_SPECIALIZATION } from './constants';
 
-interface DoctorCapacityProps {
-    facilityId: string;
-    id?: string;
+interface DoctorCapacityProps extends DoctorModal {
+    facilityId: number;
 }
 
 const initForm: any = {
@@ -40,29 +41,42 @@ const doctorCapacityReducer = (state = initialState, action: any) => {
     }
 }
 
+const doctorTypes = [{
+    id: 0,
+    text: 'Select',
+}, ...DOCTOR_SPECIALIZATION];
+
+
 export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
-    const [state, dispatch] = useReducer(doctorCapacityReducer, initialState);
+    const dispatchAction: any = useDispatch();
     const { facilityId, id } = props;
+    const [state, dispatch] = useReducer(doctorCapacityReducer, initialState);
     const [showAppMessage, setAppMessage] = useState({ show: false, message: "", type: "" });
     const [isLoading, setIsLoading] = useState(false);
-    const dispatchAction: any = useDispatch();
-    const doctorTypes = [{
-        id: 0,
-        text: 'Select',
-    }, ...DOCTOR_SPECIALIZATION];
 
     const headerText = !id ? "Add Doctor Capacity" : "Edit Doctor Capacity";
     const buttonText = !id ? "Save" : "Update";
 
-    const handleChange = (e: any) => {
-        let form = { ...state.form }
-        form[e.target.name] = e.target.value
-        dispatch({ type: "set_form", form })
-    }
+    const fetchData = useCallback(async () => {
+        if (id) {
+            setIsLoading(true);
+            const res = await dispatchAction(getDoctor(id, { facilityId }));
+            if (res.data) {
+                dispatch({ type: "set_form", form: { area: res.data.area, count: res.data.count } })
+            } else {
+                navigate(`/facility/${facilityId}`);
+            }
+            setIsLoading(false);
+        }
+    }, [dispatchAction, facilityId, id]);
+
+    useEffect(() => {
+        fetchData();
+    }, [dispatch, fetchData, id]);
 
     const validateData = () => {
-        let errors = { ...initForm }
-        let invalidForm = false
+        let errors = { ...initForm };
+        let invalidForm = false;
         Object.keys(state.form).forEach((field, i) => {
             if (!state.form[field]) {
                 errors[field] = "Field is required";
@@ -71,38 +85,48 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
         });
         if (invalidForm) {
             dispatch({ type: "set_error", errors })
-            return false
+            return false;
         }
         dispatch({ type: "set_error", errors })
-        return true
+        return true;
     }
+
+    const handleChange = (e: any) => {
+        let form = { ...state.form };
+        form[e.target.name] = e.target.value;
+        dispatch({ type: "set_form", form });
+    }
+
+    const handleCancel = (e: any) => {
+        const form = { ...initForm };
+        dispatch({ type: "set_form", form })
+        navigate(`/facility/${facilityId}`);
+    };
 
     const handleSubmit = async (e: any) => {
         e.preventDefault();
         const valid = validateData();
         if (valid) {
-            //api-call
             setIsLoading(true);
             const data = {
                 "area": Number(state.form.area),
                 "count": Number(state.form.count),
             };
-            const res = await dispatchAction(createDoctor(data, { facilityId }));
-            setIsLoading(false)
+            const res = await dispatchAction(createDoctor(id, data, { facilityId }));
+            setIsLoading(false);
             if (res.data) {
                 dispatch({ type: "set_form", form: initForm })
-                setAppMessage({ show: true, message: "Doctor capacity added successfully", type: "success" })
+                if (!id) {
+                    setAppMessage({ show: true, message: "Doctor count added successfully", type: "success" });
+                } else {
+                    setAppMessage({ show: true, message: "Doctor count updated successfully", type: "success" });
+                }
                 navigate(`/facility/${facilityId}`);
             } else {
                 setAppMessage({ show: true, message: "Error", type: "error" })
             }
         }
     }
-    const handleCancel = (e: any) => {
-        const form = { ...initForm };
-        dispatch({ type: "set_form", form })
-        navigate(`/facility/${facilityId}`);
-    };
 
     if (isLoading) {
         return <Loading />
@@ -146,7 +170,6 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
                                     <Button
                                         color="default"
                                         variant="contained"
-                                        style={{ marginLeft: 'auto' }}
                                         onClick={handleCancel}
                                     >Cancel</Button>
                                 </Grid>
@@ -155,7 +178,7 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
                                         color="primary"
                                         variant="contained"
                                         type="submit"
-                                        style={{ marginLeft: 'auto' }}
+                                        startIcon={<SaveIcon>save</SaveIcon>}
                                         onClick={(e) => handleSubmit(e)}
                                     >{buttonText}</Button>
                                 </Grid>

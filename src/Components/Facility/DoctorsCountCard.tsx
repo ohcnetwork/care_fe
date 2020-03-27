@@ -1,8 +1,13 @@
 import React from 'react';
 import { Grid, Typography, Button } from "@material-ui/core";
 import { makeStyles } from '@material-ui/styles';
+import { navigate } from 'hookrouter'
 import { DoctorModal } from './modals';
 import { DOCTOR_SPECIALIZATION } from './constants';
+
+interface DoctorsCountProps extends DoctorModal {
+    facilityId: number;
+}
 
 const useStyles = makeStyles({
     countText:{
@@ -10,7 +15,7 @@ const useStyles = makeStyles({
     }
 });
 
-const DoctorsCountCard = (props: DoctorModal) => {
+const DoctorsCountCard = (props: DoctorsCountProps) => {
     const classes = useStyles();
     const specialization = DOCTOR_SPECIALIZATION.find(i=>i.id === props.area);
     const area = specialization ? specialization.text : "Unknown";
@@ -30,7 +35,8 @@ const DoctorsCountCard = (props: DoctorModal) => {
                             </Typography>
                         </Grid>
                         <Grid item>
-                            <Button variant="outlined">
+                            <Button variant="outlined"
+                                onClick={() => navigate(`/facility/${props.facilityId}/doctor/${props.area}`)}>
                                 Edit
                             </Button>
                         </Grid>
