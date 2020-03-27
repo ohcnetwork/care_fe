@@ -64,7 +64,14 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
             setIsLoading(true);
             const res = await dispatchAction(getCapacity(id, { facilityId }));
             if (res.data) {
-                dispatch({ type: "set_form", form: res.data })
+                dispatch({ 
+                        type: "set_form", 
+                        form: {
+                            bedType: res.data.room_type,
+                            totalCapacity: res.data.total_capacity,
+                            currentOccupancy: res.data.current_capacity,                    
+                        }
+                    })
             } else {
                 navigate(`/facility/${facilityId}`);
             }
@@ -115,7 +122,11 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
             if (res.data) {
                 dispatch({ type: "set_form", form: initForm })
                 setAppMessage({ show: true, message: "Bed capacity added successfully", type: "success" })
-                navigate(`/facility/${facilityId}/doctor`);
+                if (id) {
+                    navigate(`/facility/${facilityId}/doctor`);
+                } else {
+                    navigate(`/facility/${facilityId}`);
+                }
             } else {
                 setAppMessage({ show: true, message: "Error", type: "error" })
             }
