@@ -30,7 +30,7 @@ const AddCard = (props: AddCardProps) => {
     const { title, onClick } = props;
     const classes = useStyles();
     return (
-        <Grid item xs={12} md={3} style={{ padding: '8px' }}>
+        <Grid item xs={12} md={6} lg={4} xl={3} style={{ padding: '8px' }}>
             <Card className={`${classes.card} ${classes.addPaper}`} onClick={() => onClick()}>
                 <Box className={classes.box} display="flex" justifyContent="center" alignItems="center">
                     <Typography>

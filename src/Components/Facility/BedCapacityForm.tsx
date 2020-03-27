@@ -54,13 +54,12 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
     const [state, dispatch] = useReducer(bedCountReducer, initialState);
     const [showAppMessage, setAppMessage] = useState({ show: false, message: "", type: "" });
     const [isLoading, setIsLoading] = useState(false);
-    const [getRequestCalled, setGetRequestCalled] = useState(false);
 
     const headerText = !id ? "Add Bed Capacity" : "Edit Bed Capacity";
     const buttonText = !id ? "Save" : "Update";
 
     const fetchData = useCallback(async () => {
-        if (id && !getRequestCalled) {
+        if (id) {
             setIsLoading(true);
             const res = await dispatchAction(getCapacity(id, { facilityId }));
             if (res.data) {
@@ -77,12 +76,11 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
             }
             setIsLoading(false);
         }
-    }, [dispatchAction, facilityId, getRequestCalled, id]);
+    }, [dispatchAction, facilityId, id]);
 
     useEffect(() => {
-        setGetRequestCalled(true);
         fetchData();
-    }, [dispatch, fetchData, getRequestCalled, id]);
+    }, [dispatch, fetchData, id]);
 
     const handleChange = (e: any) => {
         let form = { ...state.form };

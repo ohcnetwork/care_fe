@@ -76,13 +76,12 @@ export const FacilityCreate = (props: FacilityProps) => {
     const [state, dispatch] = useReducer(facility_create_reducer, initialState);
     const [showAppMessage, setAppMessage] = useState({ show: false, message: "", type: "" });
     const [isLoading, setIsLoading] = useState(false);
-    const [getRequestCalled, setGetRequestCalled] = useState(false);
 
     const headerText = !facilityId ? "Create Facility" : "Update Facility";
     const buttonText = !facilityId ? "Save" : "Update";
 
     const fetchData = useCallback(async () => {
-        if (facilityId && !getRequestCalled) {
+        if (facilityId) {
             setIsLoading(true);
             const res = await dispatchAction(getFacility(facilityId));
             if (res.data) {
@@ -101,12 +100,11 @@ export const FacilityCreate = (props: FacilityProps) => {
             }
             setIsLoading(false);
         }
-    }, [dispatchAction, facilityId, getRequestCalled]);
+    }, [dispatchAction, facilityId]);
 
     useEffect(() => {
-        setGetRequestCalled(true);
         fetchData();
-    }, [dispatch, fetchData, getRequestCalled]);
+    }, [dispatch, fetchData]);
 
     const handleCancel = (e: any) => {
         const form = { ...initForm };

@@ -115,6 +115,7 @@ export const HospitalList = () => {
     };
     useEffect(() => {
         fetchData(initialPaginateData);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [dispatch]);
 
     const handlePagination = (page: any, perPage: any) => {
@@ -130,7 +131,7 @@ export const HospitalList = () => {
     if (data && data.length) {
         facilityList = data.map((facility: any, idx: number) => {
             return (
-                <Grid item xs={12} md={3}  key={`usr_${facility.id}`} className={classes.root}>
+                <Grid item xs={12} md={6} lg={4} xl={3} key={`usr_${facility.id}`} className={classes.root}>
                     <Card className={classes.card} onClick={()=>navigate(`/facility/${facility.id}`)}>
                         <CardHeader
                             className={classes.cardHeader}

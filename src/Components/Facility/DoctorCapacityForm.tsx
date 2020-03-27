@@ -53,13 +53,12 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
     const [state, dispatch] = useReducer(doctorCapacityReducer, initialState);
     const [showAppMessage, setAppMessage] = useState({ show: false, message: "", type: "" });
     const [isLoading, setIsLoading] = useState(false);
-    const [getRequestCalled, setGetRequestCalled] = useState(false);
 
     const headerText = !id ? "Add Doctor Capacity" : "Edit Doctor Capacity";
     const buttonText = !id ? "Save" : "Update";
 
     const fetchData = useCallback(async () => {
-        if (id && !getRequestCalled) {
+        if (id) {
             setIsLoading(true);
             const res = await dispatchAction(getDoctor(id, { facilityId }));
             if (res.data) {
@@ -69,12 +68,11 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
             }
             setIsLoading(false);
         }
-    }, [dispatchAction, facilityId, getRequestCalled, id]);
+    }, [dispatchAction, facilityId, id]);
 
     useEffect(() => {
-        setGetRequestCalled(true);
         fetchData();
-    }, [dispatch, fetchData, getRequestCalled, id]);
+    }, [dispatch, fetchData, id]);
 
     const validateData = () => {
         let errors = { ...initForm };
