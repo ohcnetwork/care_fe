@@ -34,6 +34,11 @@ jobs: # a collection of steps
             
             sudo apt-get update && sudo apt-get install rsync -y
 
+            echo "Starting ssh agent"
+            eval `ssh-agent`
+            ssh-add ~/.ssh/id_rsa
+            echo "SSH Version: "
+            ssh -V
             echo "The branch is: $CIRCLE_BRANCH"
             if [[ $CIRCLE_BRANCH = "master" ]]
             then
