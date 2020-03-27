@@ -186,15 +186,7 @@ export const PatientManager = () => {
             <TitleHeader title="Patients" showSearch={false}>
 
             </TitleHeader>
-            <Grid container className={classes.minHeight}>
-                { !isLoading  &&
-                <AddCard
-                    title={'+ Add New Patient'}
-                    onClick={() => navigate('/patient/register')}
-                />
-                }
-                {managePatients}
-            </Grid>
+            
             <Grid container>
                 {(data && data.length > 0 && totalCount > limit) && (
                     <Grid container className={`w3-center ${classes.paginateTopPadding}`}>
