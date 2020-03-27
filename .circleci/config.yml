@@ -39,12 +39,14 @@ jobs: # a collection of steps
             then
               echo "Syncing to production"
               ssh-keyscan -H 3.7.60.240 >> ~/.ssh/known_hosts
-              rsync -avz --delete dist/ deploy@3.7.60.240:/opt/care_prod/
-            elif [[ $CIRCLE_BRANCH = "develop" ]]
+              ssh-keyscan -H 3.7.18.69 >> ~/.ssh/known_hosts
+              rsync -avz --delete -e 'ssh -A -J deploy@3.7.18.69' dist/ deploy@3.7.60.240:/opt/care_prod/
+            elif [[ "$CIRCLE_BRANCH" == "develop" || "$CIRCLE_BRANCH" == "migrate-to-aws" ]]
             then
               echo "Syncing to dev"
               ssh-keyscan -H 3.7.60.169 >> ~/.ssh/known_hosts
-              rsync -avz --delete dist/ deploy@3.7.60.169:/opt/care/
+              ssh-keyscan -H 3.7.18.69 >> ~/.ssh/known_hosts
+              rsync -avz --delete -e 'ssh -A -J deploy@3.7.18.69' dist/ deploy@3.7.60.169:/opt/care/
             else
               echo "Not Syncing the branch $CIRCLE_BRANCH"
             fi
