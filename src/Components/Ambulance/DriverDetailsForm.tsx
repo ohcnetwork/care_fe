@@ -1,12 +1,13 @@
 import React, { useState } from "react";
-import { Box, Button, Card, CardHeader, Grid, CardContent, CardActions, Checkbox } from "@material-ui/core";
+import { Box, Button, Card, CardHeader, Grid, CardContent, CardActions, Checkbox, Typography, Switch } from "@material-ui/core";
 import { TextInputField } from '../Common/HelperInputFields';
 import { useDispatch } from "react-redux";
 import { postAmbulance } from "../../Redux/actions";
 import { isEmpty, get } from "lodash";
 import { navigate } from 'hookrouter';
 import SaveIcon from '@material-ui/icons/Save';
-import { AGREE_CONSENT } from "./constants";
+import { AGREE_CONSENT, AMBULANCE_FREE_SERVICE_CONSENT, AMBULANCE_SERVICE_FEE_TEXT } from "./constants";
+import { phonePreg } from "../../Constants/common";
 
 interface formFields {
   driverName1: string;
@@ -15,6 +16,8 @@ interface formFields {
   driverName2: string;
   cellNumber2: string;
   isSmartPhone2: boolean;
+  pricePerKm: number;
+  hasFreeService: boolean;
   agreeConsent: boolean;
 }
 
@@ -25,10 +28,12 @@ const initFormData: formFields = {
   driverName2: '',
   cellNumber2: '',
   isSmartPhone2: false,
+  pricePerKm: 0,
+  hasFreeService: true,
   agreeConsent: false,
 };
 
-export const DriverDetailsForm = (props:any) => {
+export const DriverDetailsForm = (props: any) => {
   const { vehicleInfo } = props;
   const dispatch: any = useDispatch();
   const initForm: formFields = { ...initFormData };
@@ -46,45 +51,27 @@ export const DriverDetailsForm = (props:any) => {
       errorField[name] = null;
       setErrors(errorField);
     }
-    if (name === 'driverName1') {
-      fieldValue.driverName1 = value;
-    } else if (name === 'cellNumber1') {
-      fieldValue.cellNumber1 = value;
-    } else if (name === 'driverName2') {
-      fieldValue.driverName2 = value;
-    } else if (name === 'cellNumber2') {
-      fieldValue.cellNumber2 = value;
-    }
+    fieldValue[name] = value;
     setForm(fieldValue);
   };
 
   const validateData = () => {
-    const err:any = {};
+    const err: any = {};
     Object.keys(form).forEach(key => {
       const value = form[key];
       switch (key) {
         case 'driverName1':
-          if (!value) {
-            err[key] = "This field is required"
-          }
-          break;
-        case 'cellNumber1':
-          if (!value) {
-            err[key] = "This field is required"
-          }else if(value && !(/^[0-9]{10}$/.test(form.cellNumber1))){
-            err[key] = "Invalid phone number";
-          }
-          break;
         case 'driverName2':
           if (!value) {
             err[key] = "This field is required"
           }
           break;
+        case 'cellNumber1':
         case 'cellNumber2':
           if (!value) {
             err[key] = "This field is required"
-          }else if(value && !(/^[0-9]{10}$/.test(form.cellNumber2))){
-            err[key] = "Invalid phone number";
+          } else if (value && !phonePreg(form[key])) {
+            err[key] = "Please Enter 10/11 digit mobile number or landline as 0<std code><phone number>";
           }
           break;
         default: break;
@@ -99,7 +86,7 @@ export const DriverDetailsForm = (props:any) => {
 
   const handleCheckboxFieldChange = (e: any) => {
     const { checked, name } = e.target;
-    setForm({...form,[name]:checked});
+    setForm({ ...form, [name]: checked });
   };
 
   const handleSubmit = (e: any) => {
@@ -132,8 +119,7 @@ export const DriverDetailsForm = (props:any) => {
         "has_suction_machine": vehicleInfo.hasSuctionMachine,
         "has_defibrillator": vehicleInfo.hasDefibrillator,
         "insurance_valid_till_year": vehicleInfo.insuranceValidTill ? vehicleInfo.insuranceValidTill : null,
-        "hasFreeService": vehicleInfo.hasFreeService,
-        "pricePerKm": vehicleInfo.pricePerKm ? vehicleInfo.pricePerKm : null,
+        "service_charge": !form.hasFreeService ? Number(form.pricePerKm) : 0,
       };
 
       dispatch(postAmbulance(ambulanceData)).then((resp: any) => {
@@ -185,7 +171,7 @@ export const DriverDetailsForm = (props:any) => {
                   value={form.cellNumber1}
                   onChange={handleChange}
                   errors={errors.cellNumber1}
-                  inputProps={{ maxLength: 10 }}
+                  inputProps={{ maxLength: 11 }}
                 />
 
                 <Checkbox
@@ -216,7 +202,7 @@ export const DriverDetailsForm = (props:any) => {
                   value={form.cellNumber2}
                   onChange={handleChange}
                   errors={errors.cellNumber2}
-                  inputProps={{ maxLength: 10 }}
+                  inputProps={{ maxLength: 11 }}
                 />
 
                 <Box>
@@ -228,6 +214,36 @@ export const DriverDetailsForm = (props:any) => {
                   Is smart phone
                 </Box>
 
+
+                <Box>
+                  <Typography>
+                    <Switch
+                      checked={form.hasFreeService}
+                      onChange={handleCheckboxFieldChange}
+                      name='hasFreeService'
+                      inputProps={{ 'aria-label': 'secondary checkbox' }}
+                    />
+                    {AMBULANCE_FREE_SERVICE_CONSENT}
+                  </Typography>
+                </Box>
+                {!form.hasFreeService && (
+                  <Box>
+                    <Typography>
+                      {AMBULANCE_SERVICE_FEE_TEXT}
+                    </Typography>
+                    <TextInputField
+                      label='Price / KM'
+                      name='pricePerKm'
+                      placeholder=''
+                      variant='outlined'
+                      margin='dense'
+                      value={form.pricePerKm}
+                      InputLabelProps={{ shrink: !!form.pricePerKm }}
+                      onChange={handleChange}
+                      errors={errors.pricePerKm}
+                    />
+                  </Box>
+                )}
                 <h4>Declaration</h4>
                 <Box display="flex">
                   <Box>
@@ -235,20 +251,20 @@ export const DriverDetailsForm = (props:any) => {
                       checked={form.agreeConsent}
                       onChange={handleCheckboxFieldChange}
                       name="agreeConsent"
-                      style={{padding: 0}}
+                      style={{ padding: 0 }}
                     />{" "}
                   </Box>
                   <Box fontSize={12} textAlign="justify" ml={1}>{AGREE_CONSENT}</Box>
                 </Box>
               </CardContent>
 
-              <CardActions className="padding16" style={{justifyContent: "space-between"}}>
+              <CardActions className="padding16" style={{ justifyContent: "space-between" }}>
                 <Button
-                    color="default"
-                    type="button"
-                    onClick={e => handleClear(e)}
+                  color="default"
+                  type="button"
+                  onClick={e => handleClear(e)}
                 >
-                    Clear
+                  Clear
                 </Button>
                 <Button
                   color="primary"
