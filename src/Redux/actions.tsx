@@ -131,20 +131,20 @@ export const readUser = (username: any) => {
 // };
 
 // Hospital
-export const createCapacity = (form: object, urlParam: object) => {
-    return fireRequest("createCapacity", [], form, urlParam)
+export const createCapacity = (id: number | undefined, form: object, urlParam: object) => {
+    return id ? fireRequest('updateCapacity', [id], form, urlParam) : fireRequest("createCapacity", [], form, urlParam);
 };
 
-export const createDoctor = (form: object, urlParam: object) => {
-    return fireRequest("createDoctor", [], form, urlParam)
+export const createDoctor = (id: number | undefined, form: object, urlParam: object) => {
+    return id ? fireRequest('updateDoctor', [id], form, urlParam) : fireRequest("createDoctor", [], form, urlParam);
 };
 
 export const listCapacity = (paginate: object, urlParam: object) => {
-    return fireRequest('listCapacity', [], paginate, urlParam);
+    return fireRequest('getCapacity', [], paginate, urlParam);
 };
 
 export const listDoctor = (paginate: object, urlParam: object) => {
-    return fireRequest('listDoctor', [], paginate, urlParam);
+    return fireRequest('getDoctor', [], paginate, urlParam);
 };
 
 export const getCapacity = (id: number, urlParam: object) => {
@@ -154,4 +154,3 @@ export const getCapacity = (id: number, urlParam: object) => {
 export const getDoctor = (id: number, urlParam: object) => {
     return fireRequest('getDoctor', [id], {}, urlParam);
 };
-

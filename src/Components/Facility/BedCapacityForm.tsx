@@ -84,7 +84,6 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
         e.preventDefault();
         const valid = validateData();
         if (valid) {
-            // write api call
             setIsLoading(true);
             const data = {
                 "room_type": Number(state.form.bedType),
@@ -92,7 +91,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
                 "current_capacity": Number(state.form.currentOccupancy),
             };
             const res = await dispatchAction(createCapacity(data, { facilityId }));
-            setIsLoading(false)
+            setIsLoading(false);
             if (res.data) {
                 dispatch({ type: "set_form", form: initForm })
                 setAppMessage({ show: true, message: "Bed capacity added successfully", type: "success" })

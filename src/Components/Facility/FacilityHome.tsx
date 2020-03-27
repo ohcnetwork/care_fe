@@ -70,7 +70,7 @@ export const FacilityHome = (props: any) => {
     } else {
         capacityList = capacityData.map((data: CapacityModal) => {
             return (
-                <BedTypeCard key={`bed_${data.id}`} {...data} />
+                <BedTypeCard facilityId={facilityId} key={`bed_${data.id}`} {...data} />
             )
         });
     }
@@ -83,7 +83,7 @@ export const FacilityHome = (props: any) => {
     } else {
         doctorList = doctorData.map((data: DoctorModal) => {
             return (
-                <DoctorsCountCard key={`bed_${data.id}`} {...data} />
+                <DoctorsCountCard facilityId={facilityId} key={`bed_${data.id}`} {...data} />
             )
         });
     }
@@ -94,11 +94,11 @@ export const FacilityHome = (props: any) => {
             </TitleHeader>
             <Grid container style={{ padding: "10px", marginBottom: '15px' }} spacing={1}>
                 <Grid item xs={12} md={7}>
-                    <Typography variant="h6" component="h6">{facilityData && facilityData.name}</Typography>
-                    <Typography>Address : {facilityData && facilityData.address}</Typography>
-                    <Typography>Phone : {facilityData && facilityData.phone_number}</Typography>
-                    <Typography>District : {facilityData && facilityData.district}</Typography>
-                    <Typography>Oxygen Capacity :{` ${facilityData && facilityData.oxygen_capacity} Litres`}</Typography>
+                    <Typography variant="h6" component="h6">{facilityData.name}</Typography>
+                    <Typography>Address : {facilityData.address}</Typography>
+                    <Typography>Phone : {facilityData.phone_number}</Typography>
+                    <Typography>District : {facilityData.district}</Typography>
+                    <Typography>Oxygen Capacity :{` ${facilityData.oxygen_capacity} Litres`}</Typography>
                 </Grid>
                 <Grid item xs={12} md={5}>
                 <Grid container spacing={1} direction="column">
