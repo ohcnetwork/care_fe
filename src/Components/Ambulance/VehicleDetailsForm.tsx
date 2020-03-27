@@ -1,9 +1,10 @@
 import React, {useState} from "react";
-import {Box, Button, Card, CardActions, CardContent, CardHeader, Checkbox, Grid, Typography, InputLabel} from "@material-ui/core";
+import {Box, Button, Card, CardActions, CardContent, CardHeader, Checkbox, Grid, Typography, InputLabel, Switch} from "@material-ui/core";
 import {ErrorHelperText, NativeSelectField, TextInputField} from "../Common/HelperInputFields";
 import {DISTRICT_CHOICES, VEHICLE_TYPES} from "./constants";
 import {isEmpty} from "lodash";
 import NavigateNextIcon from '@material-ui/icons/NavigateNext';
+import { AMBULANCE_FREE_SERVICE_CONSENT, AMBULANCE_SERVICE_FEE_TEXT } from "./constants";
 
 export interface vehicleForm {
     registrationNumber: string;
@@ -19,6 +20,8 @@ export interface vehicleForm {
     hasVentilator: boolean;
     hasSuctionMachine: boolean;
     hasDefibrillator: boolean;
+    hasFreeService: boolean;
+    pricePerKm: number;
     isValid: boolean;
 }
 
@@ -36,6 +39,8 @@ export const initVehicleData: vehicleForm = {
     hasVentilator: false,
     hasSuctionMachine: false,
     hasDefibrillator: false,
+    hasFreeService: true,
+    pricePerKm: 0,
     isValid: false,
 };
 
@@ -104,6 +109,14 @@ export const VehicleDetailsForm = (props: any) => {
         setForm(fieldValue);
     };
 
+    const handleFreeServiceChange = (e: any) => {
+      const { checked, name } = e.target;
+      const fieldValue = Object.assign({}, form);
+      fieldValue[name] = checked;
+      fieldValue['pricePerKm'] = 0;
+      setForm(fieldValue);
+    };
+
     const validateData = () => {
         const err:any = {};
         Object.keys(form).forEach(key => {
@@ -137,6 +150,15 @@ export const VehicleDetailsForm = (props: any) => {
                 case "thirdDistrict":
                     !value && (err[key] = "This field is required");
                     break;
+                case 'pricePerKm':
+                  if (!form['hasFreeService']) {
+                    if (!value) {
+                      err[key] = 'This field is required';
+                    } else if (value && !/^[+]?\d+(\.\d+)?$/.test(value)) {
+                      err[key] = 'Invalid price';
+                    }
+                  }
+                  break;
                 default:
                     break;
             }
@@ -348,9 +370,37 @@ export const VehicleDetailsForm = (props: any) => {
                                             Has defibrilator
                                         </Typography>
                                     </Box>
+                                    <Box>
+                                      <Typography>
+                                        <Switch
+                                          checked={form.hasFreeService}
+                                          onChange={handleFreeServiceChange}
+                                          name='hasFreeService'
+                                          inputProps={{ 'aria-label': 'secondary checkbox' }}
+                                        />
+                                        { AMBULANCE_FREE_SERVICE_CONSENT }
+                                      </Typography>
+                                    </Box>
+                                    {!form.hasFreeService && (
+                                      <Box>
+                                        <Typography>
+                                          { AMBULANCE_SERVICE_FEE_TEXT }
+                                        </Typography>
+                                        <TextInputField
+                                          label='Price / KM'
+                                          name='pricePerKm'
+                                          placeholder=''
+                                          variant='outlined'
+                                          margin='dense'
+                                          value={form.pricePerKm}
+                                          InputLabelProps={{ shrink: !!form.pricePerKm }}
+                                          onChange={handleChange}
+                                          errors={errors.pricePerKm}
+                                        />
+                                      </Box>
+                                    )}
                                 </Box>
                             </CardContent>
-
                             <CardActions style={{justifyContent: "space-between"}}>
                                 <Button
                                     color="default"
