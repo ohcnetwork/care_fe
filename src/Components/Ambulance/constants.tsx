@@ -22,3 +22,7 @@ export const VEHICLE_TYPES = [
 ];
 
 export const AGREE_CONSENT = "I / We confirm and agree that the Ambulances enrolled in the Private Voluntary Online Ambulance Network by filling this online form will work under instruction and direction of the State Mission Director, National Health Mission, Kerala or officers / teams duly authorised by the State Mission Director, National Health Mission, Kerala.";
+
+export const AMBULANCE_FREE_SERVICE_CONSENT = "I / we will provide services free of any charge.";
+
+export const AMBULANCE_SERVICE_FEE_TEXT = "I / we will require fees for providing service @ Rs";

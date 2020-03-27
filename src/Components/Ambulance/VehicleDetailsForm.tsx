@@ -4,6 +4,7 @@ import {ErrorHelperText, NativeSelectField, TextInputField} from "../Common/Help
 import {DISTRICT_CHOICES, VEHICLE_TYPES} from "./constants";
 import {isEmpty} from "lodash";
 import NavigateNextIcon from '@material-ui/icons/NavigateNext';
+import { AMBULANCE_FREE_SERVICE_CONSENT, AMBULANCE_SERVICE_FEE_TEXT } from "./constants";
 
 export interface vehicleForm {
     registrationNumber: string;
@@ -377,13 +378,13 @@ export const VehicleDetailsForm = (props: any) => {
                                           name='hasFreeService'
                                           inputProps={{ 'aria-label': 'secondary checkbox' }}
                                         />
-                                        I / we will provide services free of any charge.
+                                        { AMBULANCE_FREE_SERVICE_CONSENT }
                                       </Typography>
                                     </Box>
                                     {!form.hasFreeService && (
                                       <Box>
                                         <Typography>
-                                          I / we will require fees for providing service @ Rs
+                                          { AMBULANCE_SERVICE_FEE_TEXT }
                                         </Typography>
                                         <TextInputField
                                           label='Price / KM'
