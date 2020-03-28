@@ -2,7 +2,12 @@ import React from 'react';
 import { Grid, Typography, Button } from "@material-ui/core";
 import { makeStyles } from '@material-ui/styles';
 import { CapacityModal } from './modals';
+import { navigate } from 'hookrouter';
 import { BED_TYPES } from './constants';
+
+interface BedTypeProps extends CapacityModal {
+    facilityId: number;
+}
 
 const useStyles = makeStyles({
     marginBottom: {
@@ -13,9 +18,9 @@ const useStyles = makeStyles({
     }
 });
 
-const BedTypeCard = (props: CapacityModal) => {
+const BedTypeCard = (props: BedTypeProps) => {
     const classes = useStyles();
-    const bed = BED_TYPES.find(i=>i.id === props.room_type);
+    const bed = BED_TYPES.find(i => i.id === props.room_type);
     const roomType = bed ? bed.text : "Unknown";
     return (
         <Grid item xs={12} md={6}>
@@ -36,7 +41,8 @@ const BedTypeCard = (props: CapacityModal) => {
                             </Typography>
                         </Grid>
                         <Grid item>
-                            <Button variant="outlined">
+                            <Button variant="outlined"
+                                onClick={() => navigate(`/facility/${props.facilityId}/bed/${props.room_type}`)}>
                                 Edit
                             </Button>
                         </Grid>

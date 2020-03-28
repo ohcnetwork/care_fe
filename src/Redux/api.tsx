@@ -7,11 +7,6 @@ export default {
         method: 'POST',
     },
 
-    signUp: {
-        path: '/api/v1/auth/signup',
-        method: 'POST'
-    },
-
     token_refresh: {
         path: '/api/v1/auth/token/refresh',
         method: 'POST'
@@ -104,14 +99,6 @@ export default {
         method: 'POST'
     },
 
-    listCapacity: {
-        path: '/api/v1/facility/{facilityId}/capacity'
-    },
-
-    listDoctor: {
-        path: '/api/v1/facility/{facilityId}/hospital_doctor'
-    },
-
     getCapacity: {
         path: '/api/v1/facility/{facilityId}/capacity'
     },
@@ -119,11 +106,32 @@ export default {
     getDoctor: {
         path: '/api/v1/facility/{facilityId}/hospital_doctor'
     },
+
+    updateCapacity: {
+        path: '/api/v1/facility/{facilityId}/capacity',
+        method: 'PUT'
+    },
+
+    updateDoctor: {
+        path: '/api/v1/facility/{facilityId}/hospital_doctor',
+        method: 'PUT'
+    },
     // //Care Center
     // createCenter: {
     //     path: "/api/v1/carecenter/",
     //     method: 'POST'
     // }
 
+// Patient
 
+    getPatients : {
+        path : '/api/v1/patient'
+    },
+    addPatient: {
+        path: '/api/v1/patient/',
+        method: 'POST'
+    },
+    getPatientId: {
+        path: '/api/v1/patient/{id}/'
+    }
 }

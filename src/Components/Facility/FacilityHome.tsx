@@ -8,7 +8,8 @@ import TitleHeader from "../Common/TitleHeader";
 import BedTypeCard from "./BedTypeCard";
 import { Loading } from '../Common/Loading';
 import DoctorsCountCard from './DoctorsCountCard';
-import { CapacityModal, DoctorModal } from './modals';
+import { FacilityModal, CapacityModal, DoctorModal } from './modals';
+import { PatientManager } from "../Patient/ManagePatients";
 
 
 
@@ -24,7 +25,10 @@ const useStyles = makeStyles(theme => ({
         display: 'flex'
     },
     content: {
-        maxWidth: 530,
+        marginTop: "10px",
+        maxWidth: "560px",
+        background: "white",
+        padding: "20px 20px 5px",
     }
 }));
 
@@ -32,16 +36,15 @@ export const FacilityHome = (props: any) => {
     const { facilityId } = props;
     const classes = useStyles();
     const dispatch: any = useDispatch();
-    const initialData: any = {};
-    const [facilityData, setFacilityData] = useState(initialData);
-    const [capacityData, setCapacityData] = useState(initialData);
-    const [doctorData, setDoctorData] = useState(initialData);
+    const [facilityData, setFacilityData] = useState<FacilityModal>({});
+    const [capacityData, setCapacityData] = useState<Array<CapacityModal>>([]);
+    const [doctorData, setDoctorData] = useState<Array<DoctorModal>>([]);
     const [isLoading, setIsLoading] = useState(false);
 
     const fetchData = useCallback(async () => {
-        const facilityRes = await dispatch(getFacility(facilityId))
+        const facilityRes = await dispatch(getFacility(facilityId));
         if (facilityRes && facilityRes.data) {
-            setFacilityData(facilityRes.data)
+            setFacilityData(facilityRes.data);
             const capacityRes = await dispatch(listCapacity({}, { facilityId }));
             if (capacityRes && capacityRes.data) {
                 setCapacityData(capacityRes.data.results)
@@ -52,7 +55,7 @@ export const FacilityHome = (props: any) => {
             }
         }
         setIsLoading(false);
-    },[dispatch, facilityId]);
+    }, [dispatch, facilityId]);
 
     useEffect(() => {
         setIsLoading(true);
@@ -64,60 +67,59 @@ export const FacilityHome = (props: any) => {
     }
 
     let capacityList: any = null;
-    if (capacityData && capacityData.length) {
-        capacityList = capacityData.map((data: CapacityModal,idx:number) => {
-            return (
-                <BedTypeCard key={`bed_${idx}`} {...data} />
-            )
-        });
-    } else if (capacityData && capacityData.length === 0) {
+    if (!capacityData || !capacityData.length) {
         capacityList = (
             <h5>No Bed Types Found</h5>
         );
+    } else {
+        capacityList = capacityData.map((data: CapacityModal) => {
+            return (
+                <BedTypeCard facilityId={facilityId} key={`bed_${data.id}`} {...data} />
+            )
+        });
     }
 
     let doctorList: any = null;
-    if (doctorData && doctorData.length) {
-        doctorList = doctorData.map((data: DoctorModal,idx:number) => {
-            return (
-                <DoctorsCountCard key={`doc_${idx}`} {...data} />
-            )
-        });
-    } else if (doctorData && doctorData.length === 0) {
+    if (!doctorData || !doctorData.length) {
         doctorList = (
             <h5>No Doctors Found</h5>
         );
+    } else {
+        doctorList = doctorData.map((data: DoctorModal) => {
+            return (
+                <DoctorsCountCard facilityId={facilityId} key={`bed_${data.id}`} {...data} />
+            )
+        });
     }
 
     return (
         <div className={`w3-content ${classes.content}`}>
-            <TitleHeader title="Facility" showSearch={false}>
-            </TitleHeader>
+            <h2>Facility</h2>
             <Grid container style={{ padding: "10px", marginBottom: '15px' }} spacing={1}>
                 <Grid item xs={12} md={7}>
-                    <Typography variant="h6" component="h6">{facilityData && facilityData.name}</Typography>
-                    <Typography>Address : {facilityData && facilityData.address}</Typography>
-                    <Typography>Phone : {facilityData && facilityData.phone_number}</Typography>
-                    <Typography>District : {facilityData && facilityData.district}</Typography>
-                    <Typography>Oxygen Capacity :{` ${facilityData && facilityData.oxygen_capacity} Litres`}</Typography>
+                    <Typography variant="h6" component="h6">{facilityData.name}</Typography>
+                    <Typography>Address : {facilityData.address}</Typography>
+                    <Typography>Phone : {facilityData.phone_number}</Typography>
+                    <Typography>District : {facilityData.district}</Typography>
+                    <Typography>Oxygen Capacity :{` ${facilityData.oxygen_capacity} Litres`}</Typography>
                 </Grid>
                 <Grid item xs={12} md={5}>
-                <Grid container spacing={1} direction="column">
+                    <Grid container spacing={1} direction="column">
                         <Grid item xs={12} className="w3-center">
                             <Button fullWidth variant="contained" color="primary" size="small"
-                                onClick={()=>navigate(`/facility/${facilityId}/update`)}>
+                                onClick={() => navigate(`/facility/${facilityId}/update`)}>
                                 Update Hospital Info
                             </Button>
                         </Grid>
                         <Grid item xs={12} className="w3-center">
                             <Button fullWidth variant="contained" color="primary" size="small"
-                                onClick={()=>navigate(`/facility/${facilityId}/bed`)}>
+                                onClick={() => navigate(`/facility/${facilityId}/bed`)}>
                                 Add More Bed Types
                             </Button>
                         </Grid>
                         <Grid item xs={12} className="w3-center">
                             <Button fullWidth variant="contained" color="primary" size="small"
-                                onClick={()=>navigate(`/facility/${facilityId}/doctor`)}>
+                                onClick={() => navigate(`/facility/${facilityId}/doctor`)}>
                                 Add More Doctor Types
                             </Button>
                         </Grid>
@@ -138,8 +140,7 @@ export const FacilityHome = (props: any) => {
                 </Grid>
                 {doctorList}
             </Grid>
-
         </div>
     );
 
-}
+};

@@ -1,14 +1,15 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import Grid from '@material-ui/core/Grid';
-import {Card, CardContent, CardHeader, Tooltip, Typography } from "@material-ui/core";
-import {makeStyles} from "@material-ui/core/styles";
-import {useDispatch} from "react-redux";
-import {getFacilities} from "../../Redux/actions";
+import { Card, CardContent, CardHeader, Tooltip, Typography } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core/styles";
+import { useDispatch } from "react-redux";
+import { getFacilities } from "../../Redux/actions";
 import TitleHeader from "../Common/TitleHeader";
 import Pagination from "../Common/Pagination";
 import AddCard from '../Common/AddCard';
 import { navigate } from 'hookrouter';
-import {Loading} from "../Common/Loading";
+import { Loading } from "../Common/Loading";
+import { FacilityModal } from './modals';
 const useStyles = makeStyles(theme => ({
     root: {
         flexGrow: 1,
@@ -18,7 +19,7 @@ const useStyles = makeStyles(theme => ({
         height: 160,
         width: '100%',
         backgroundColor: '#FFFFFF',
-        cursor:'pointer'
+        cursor: 'pointer'
     },
     title: {
         whiteSpace: 'nowrap',
@@ -39,10 +40,10 @@ const useStyles = makeStyles(theme => ({
         }
     },
     content: {
-        padding:'5px 10px'
+        padding: '5px 10px'
     },
-    cardHeader:{
-        padding:'10px'
+    cardHeader: {
+        padding: '10px'
     },
     contentText: {
         whiteSpace: 'nowrap',
@@ -71,11 +72,11 @@ const useStyles = makeStyles(theme => ({
     paginateTopPadding: {
         paddingTop: '50px'
     },
-    userCardSideTitle:{
+    userCardSideTitle: {
         fontSize: '13px'
     },
-    toolTip:{
-        fontSize:'13px'
+    toolTip: {
+        fontSize: '13px'
     },
     displayFlex: {
         display: 'flex'
@@ -87,51 +88,42 @@ const useStyles = makeStyles(theme => ({
 
 export const HospitalList = () => {
     const classes = useStyles();
-    const dispatch: any = useDispatch();
-    const initialData: any[] = [];
-    const [data, setData] = useState(initialData);
+    const dispatchAction: any = useDispatch();
+    const [data, setData] = useState<Array<FacilityModal>>([]);
 
     let manageFacilities: any = null;
     const [isLoading, setIsLoading] = useState(false);
     const [totalCount, setTotalCount] = useState(0);
 
     const limit = 15;
-    const initialPaginateData = {
-        page: 1,
-        offset: 0,
-        limit
-    };
-    const [ currentPage, setCurrentPage ] = useState(1);
+    const page = 1;
+    const offset = 0;
+    const [currentPage, setCurrentPage] = useState(1);
 
-    const fetchData = (paginateData: any) => {
-        setIsLoading(true);
-        dispatch(getFacilities(paginateData))
-            .then((resp:any)=> {
-                const res = resp && resp.data;
-                setData(res.results);
-                setTotalCount(res.count);
-                setIsLoading(false);
-            });
-    };
+    const fetchData = useCallback(async (page, limit, offset) => {
+        const res = await dispatchAction(getFacilities({page, offset, limit}));
+        if (res && res.data) {
+            setData(res.data.results);
+            setTotalCount(res.data.count);
+        }
+        setIsLoading(false);
+    }, [dispatchAction]);
+
     useEffect(() => {
-        fetchData(initialPaginateData);
-    }, [dispatch]);
+        setIsLoading(true);
+        fetchData(page, limit, offset);
+    }, [dispatchAction, fetchData]);
 
     const handlePagination = (page: any, perPage: any) => {
         setCurrentPage(page);
-        const paginateData = {
-            page,
-            offset: perPage,
-            limit
-        };
-        fetchData(paginateData);
+        fetchData(page, limit, perPage);
     };
     let facilityList: any[] = [];
     if (data && data.length) {
         facilityList = data.map((facility: any, idx: number) => {
             return (
-                <Grid item xs={12} md={3}  key={`usr_${facility.id}`} className={classes.root}>
-                    <Card className={classes.card} onClick={()=>navigate(`/facility/${facility.id}`)}>
+                <Grid item xs={12} md={6} lg={4} xl={3} key={`usr_${facility.id}`} className={classes.root}>
+                    <Card className={classes.card} onClick={() => navigate(`/facility/${facility.id}`)}>
                         <CardHeader
                             className={classes.cardHeader}
                             title={
@@ -151,7 +143,7 @@ export const HospitalList = () => {
                         </CardContent>
                         <CardContent className={classes.content}>
                             <Typography>
-                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Oxygen Capacity - </span>{facility.oxygen_capacity}
+                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Facility Type - </span>{facility.facility_type}
                             </Typography>
                         </CardContent>
                         <CardContent className={classes.content}>
@@ -167,7 +159,7 @@ export const HospitalList = () => {
 
     if (isLoading || !data) {
         manageFacilities = (
-            <Loading/>
+            <Loading />
         );
     } else if (data && data.length) {
         manageFacilities = facilityList;
@@ -186,7 +178,7 @@ export const HospitalList = () => {
             <TitleHeader title="Facilities" showSearch={false}>
             </TitleHeader>
             <Grid container className={classes.minHeight}>
-                { !isLoading  &&
+                {!isLoading &&
                     <AddCard
                         title={'+ Add New Hospital'}
                         onClick={() => navigate('/facility/create')}

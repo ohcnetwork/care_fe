@@ -13,6 +13,8 @@ const config: any = {
     headers: {},
 };
 
+const isRunning: any = {}
+
 if (localStorage.getItem('care_access_token')) {
     config.headers['Authorization'] = 'Bearer ' + localStorage.getItem('care_access_token');
 }
@@ -54,6 +56,10 @@ export const fireRequest = (
     key: string, path: any = [], params: object = {}, urlParam?: any
 ) => {
     return (dispatch: any) => {
+        if (isRunning[key]) {
+            isRunning[key].cancel();
+        }
+        isRunning[key] = axios.CancelToken.source();
         const request = Object.assign({}, requestMap[key]);
         if (path.length > 0) {
             request.path += '/' + path.join('/');
@@ -73,25 +79,22 @@ export const fireRequest = (
             })
         }
         dispatch(fetchDataRequest(key));
-        return axiosApiCall[request.method.toLowerCase()](request.path, params)
-            .then((response: any) => {
-                dispatch(fetchResponseSuccess(key, response.data));
-                return response;
-            })
-            .catch((error: any) => {
-                dispatch(fetchDataRequestError(key, error));
-                return error.response;
-            });
+        return axiosApiCall[request.method.toLowerCase()](request.path, {
+            ...params,
+            cancelToken: isRunning[key].token
+        }).then((response: any) => {
+            dispatch(fetchResponseSuccess(key, response.data));
+            return response;
+        }).catch((error: any) => {
+            dispatch(fetchDataRequestError(key, error));
+            return error.response;
+        });
     };
 };
 
 // User
 export const postLogin = (form: object) => {
     return fireRequest('login', [], form);
-};
-
-export const postSignUp = (form: object) => {
-    return fireRequest('signUp', [], form);
 };
 
 export const getCurrentUser = () => {
@@ -110,7 +113,10 @@ export const postAmbulance = (form: object) => {
 
 // Facility
 export const createFacility = (form: object) => {
-    return fireRequest("createFacility", [], form)
+    return fireRequest("createFacility", [], form);
+};
+export const updateFacility = (id: number, form: object) => {
+    return fireRequest('updateFacility', [id], form);
 };
 export const getUserList = (paginate: object) => {
     return fireRequest('userList', [], paginate);
@@ -131,20 +137,20 @@ export const readUser = (username: any) => {
 // };
 
 // Hospital
-export const createCapacity = (form: object, urlParam: object) => {
-    return fireRequest("createCapacity", [], form, urlParam)
+export const createCapacity = (id: number | undefined, form: object, urlParam: object) => {
+    return id ? fireRequest('updateCapacity', [id], form, urlParam) : fireRequest("createCapacity", [], form, urlParam);
 };
 
-export const createDoctor = (form: object, urlParam: object) => {
-    return fireRequest("createDoctor", [], form, urlParam)
+export const createDoctor = (id: number | undefined, form: object, urlParam: object) => {
+    return id ? fireRequest('updateDoctor', [id], form, urlParam) : fireRequest("createDoctor", [], form, urlParam);
 };
 
 export const listCapacity = (paginate: object, urlParam: object) => {
-    return fireRequest('listCapacity', [], paginate, urlParam);
+    return fireRequest('getCapacity', [], paginate, urlParam);
 };
 
 export const listDoctor = (paginate: object, urlParam: object) => {
-    return fireRequest('listDoctor', [], paginate, urlParam);
+    return fireRequest('getDoctor', [], paginate, urlParam);
 };
 
 export const getCapacity = (id: number, urlParam: object) => {
@@ -155,3 +161,10 @@ export const getDoctor = (id: number, urlParam: object) => {
     return fireRequest('getDoctor', [id], {}, urlParam);
 };
 
+export const getPatients = (paginate: object) => {
+    return fireRequest('getPatients', [], paginate);
+};
+
+export const addPatient = (form: object) => {
+    return fireRequest('addPatient', [], form)
+};
