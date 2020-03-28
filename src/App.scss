@@ -67,23 +67,24 @@
   min-height: 100vh;
 }
 #root {
-  height: 100vh;
   background-color: #fbfafc;
+}
+#root > div{
+  display: flex;
+min-height: 100vh;
+flex-direction: column;
 }
 .app-footer {
   width: 100%;
   background: #ffffff no-repeat;
   background-size: 100% 100%;
-  position: fixed;
-  bottom: 0px;
   min-height: 80px;
   z-index: 10000;
   display: flex;
   flex-direction: row;
-  margin: auto;
+  margin-top: auto;
   @media (max-width: 768px){
     flex-direction: column;
-    position: relative;
   }
   img {
     height: 80px;
