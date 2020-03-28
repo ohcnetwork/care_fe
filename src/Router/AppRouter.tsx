@@ -32,7 +32,6 @@ const routes = {
     '/facility/:facilityId/bed/:id': ({ facilityId, id }: any) => <BedCapacityForm facilityId={facilityId} id={id} />,
     '/facility/:facilityId/doctor/:id': ({ facilityId, id }: any) => <DoctorCapacityForm facilityId={facilityId} id={id} />,
     '/patients': () => <PatientManager/>,
-    '/patient/register': () => <PatientRegister />,
     '/patient/tele-consult': () => <TeleConsultation />,
     '/patient/discharge': () => <PatientDischarge />,
     '/patient/treatment': () => <TreatmentForm />,

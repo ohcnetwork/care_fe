@@ -153,7 +153,7 @@ export const PatientRegister = (props:PatientRegisterProps) => {
                 "medical_history": state.form.medical_history,
                 "contact_with_carrier": JSON.parse(state.form.contact_with_carrier),
                 "medical_history_details": state.form.medical_history_details,
-                "is_active": true
+                "is_active": true,
             };
             
             const res = await dispatchAction(id?updatePatient(data,{id}):createPatient(data));
@@ -180,7 +180,7 @@ export const PatientRegister = (props:PatientRegisterProps) => {
 
     const handleCheckboxChange = (e: any) => {
         let form = { ...state.form };
-        let values = state.form.medical_history;
+        const values = state.form.medical_history;
         const chocieId = Number(e.target.value);
         if (e.target.checked) {
             values.push(chocieId);
