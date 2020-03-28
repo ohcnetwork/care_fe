@@ -1,3 +1,16 @@
-[
-    {"id":1, "type": "Normal"},{"id":2, "type": "ICU"},{"id":3, "type": "Ventilator"}
-]
+[{
+	"id": 0,
+	"type": "Total"
+}, {
+	"id": 1,
+	"type": "Normal"
+}, {
+	"id": 2,
+	"type": "Hostel"
+}, {
+	"id": 10,
+	"type": "ICU"
+}, {
+	"id": 20,
+	"type": "Ventilator"
+}]

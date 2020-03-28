@@ -1,17 +1,15 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Grid, CircularProgress, Paper, Typography, Button, Divider } from "@material-ui/core";
+import { Grid, Typography, Button, Divider } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { useDispatch } from "react-redux";
 import { navigate } from 'hookrouter';
 import { getFacility, listCapacity, listDoctor } from "../../Redux/actions";
-import TitleHeader from "../Common/TitleHeader";
 import BedTypeCard from "./BedTypeCard";
 import { Loading } from '../Common/Loading';
 import DoctorsCountCard from './DoctorsCountCard';
+import { BED_TYPES, DOCTOR_SPECIALIZATION } from "./constants";
+import DISTRICTS from "../../Constants/Static_data/districts.json";
 import { FacilityModal, CapacityModal, DoctorModal } from './models';
-import { PatientManager } from "../Patient/ManagePatients";
-
-
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -92,6 +90,8 @@ export const FacilityHome = (props: any) => {
         });
     }
 
+    const districtName = DISTRICTS.find(i => i.id === facilityData.district)?.name;
+
     return (
         <div className={`w3-content ${classes.content}`}>
             <h2>Facility</h2>
@@ -100,7 +100,7 @@ export const FacilityHome = (props: any) => {
                     <Typography variant="h6" component="h6">{facilityData.name}</Typography>
                     <Typography>Address : {facilityData.address}</Typography>
                     <Typography>Phone : {facilityData.phone_number}</Typography>
-                    <Typography>District : {facilityData.district}</Typography>
+                    <Typography>District : {districtName}</Typography>
                     <Typography>Oxygen Capacity :{` ${facilityData.oxygen_capacity} Litres`}</Typography>
                 </Grid>
                 <Grid item xs={12} md={5}>
@@ -113,13 +113,15 @@ export const FacilityHome = (props: any) => {
                         </Grid>
                         <Grid item xs={12} className="w3-center">
                             <Button fullWidth variant="contained" color="primary" size="small"
-                                onClick={() => navigate(`/facility/${facilityId}/bed`)}>
+                                onClick={() => navigate(`/facility/${facilityId}/bed`)}
+                                disabled={capacityList.length === BED_TYPES.length}>
                                 Add More Bed Types
                             </Button>
                         </Grid>
                         <Grid item xs={12} className="w3-center">
                             <Button fullWidth variant="contained" color="primary" size="small"
-                                onClick={() => navigate(`/facility/${facilityId}/doctor`)}>
+                                onClick={() => navigate(`/facility/${facilityId}/doctor`)}
+                                disabled={doctorList.length === DOCTOR_SPECIALIZATION.length}>
                                 Add More Doctor Types
                             </Button>
                         </Grid>

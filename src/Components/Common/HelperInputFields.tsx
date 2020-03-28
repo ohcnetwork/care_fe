@@ -298,13 +298,13 @@ export const ShowCheckboxOptions = (props: OptionsProps) => {
 };
 
 export const NativeSelectField = (props: DefaultNativeSelectInputProps) => {
-    const { options, variant, placeholder, label } = props;
+    const { options, variant, label } = props;
     return (
         <FormControl style={{ width: "100%" }} variant={variant}>
             {label && (<Box>{label}</Box>)}
             <NativeSelect {...props}>
                 {options.map((opt: any) => {
-                    return <option value={opt.id} key={opt.id}>{opt.text}</option>
+                    return <option value={opt.id} key={opt.id} disabled={opt.disabled}>{opt.text}</option>
                 })}
             </NativeSelect>
         </FormControl>
