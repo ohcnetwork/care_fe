@@ -63,14 +63,14 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
             setIsLoading(true);
             const res = await dispatchAction(getCapacity(id, { facilityId }));
             if (res.data) {
-                dispatch({ 
-                        type: "set_form", 
-                        form: {
-                            bedType: res.data.room_type,
-                            totalCapacity: res.data.total_capacity,
-                            currentOccupancy: res.data.current_capacity,                    
-                        }
-                    })
+                dispatch({
+                    type: "set_form",
+                    form: {
+                        bedType: res.data.room_type,
+                        totalCapacity: res.data.total_capacity,
+                        currentOccupancy: res.data.current_capacity,
+                    }
+                })
             } else {
                 navigate(`/facility/${facilityId}`);
             }
@@ -95,6 +95,9 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
             if (!state.form[field]) {
                 errors[field] = "Field is required";
                 invalidForm = true;
+            } else if (field === "currentOccupancy" && state.form[field] > state.form.totalCapacity) {
+                errors[field] = "Occuppied must be less than or equal to total capacity";
+                invalidForm = true;
             }
         });
         if (invalidForm) {
@@ -105,7 +108,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
         return true
     };
 
-    const handleSubmit = async (e: any) => {
+    const handleSubmit = async (e: any, addMore: boolean = false) => {
         e.preventDefault();
         const valid = validateData();
         if (valid) {
@@ -121,7 +124,9 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
                 dispatch({ type: "set_form", form: initForm })
                 if (!id) {
                     setAppMessage({ show: true, message: "Bed capacity added successfully", type: "success" });
-                    navigate(`/facility/${facilityId}/doctor`);
+                    if (!addMore) {
+                        navigate(`/facility/${facilityId}/doctor`);
+                    }
                 } else {
                     setAppMessage({ show: true, message: "Bed capacity updated successfully", type: "success" });
                     navigate(`/facility/${facilityId}`);
@@ -190,8 +195,16 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
                                     color="default"
                                     variant="contained"
                                     type="button"
-                                    onClick={(e) => handleCancel()}
+                                    onClick={(e) => handleCancel}
                                 >Cancel</Button>
+                                {!id && <Button
+                                    id="iii"
+                                    color="primary"
+                                    variant="contained"
+                                    type="submit"
+                                    onClick={(e) => handleSubmit(e, true)}
+                                    startIcon={<SaveIcon >save</SaveIcon>}
+                                >Save && Add More</Button>}
                                 <Button
                                     color="primary"
                                     variant="contained"

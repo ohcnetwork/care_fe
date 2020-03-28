@@ -3,7 +3,7 @@ import Grid from '@material-ui/core/Grid';
 import { Card, CardContent, CardHeader, Tooltip, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { useDispatch } from "react-redux";
-import { getFacilities, getPatients } from "../../Redux/actions";
+import { getFacilities, getAllPatient } from "../../Redux/actions";
 import TitleHeader from "../Common/TitleHeader";
 import Pagination from "../Common/Pagination";
 import AddCard from '../Common/AddCard';
@@ -101,7 +101,7 @@ export const PatientManager = () => {
     const [currentPage, setCurrentPage] = useState(1);
 
     const fetchData = useCallback(async (page, limit, offset) => {
-        const res = await dispatch(getPatients({page, offset, limit}));
+        const res = await dispatch(getAllPatient({page, offset, limit}));
         if (res && res.data) {
             setData(res.data.results);
             setTotalCount(res.data.count);

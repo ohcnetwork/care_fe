@@ -124,14 +124,18 @@ export default {
 
 // Patient
 
-    getPatients : {
+    patientList : {
         path : '/api/v1/patient'
     },
     addPatient: {
         path: '/api/v1/patient/',
         method: 'POST'
     },
-    getPatientId: {
+    getPatient: {
         path: '/api/v1/patient/{id}/'
-    }
+    },
+    updatePatient: {
+        path: '/api/v1/patient/{id}/',
+        method:'PUT'
+    },
 }

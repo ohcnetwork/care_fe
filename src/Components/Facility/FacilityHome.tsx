@@ -95,7 +95,7 @@ export const FacilityHome = (props: any) => {
     return (
         <div className={`w3-content ${classes.content}`}>
             <h2>Facility</h2>
-            <Grid container style={{ padding: "10px", marginBottom: '15px' }} spacing={1}>
+            <Grid container style={{ padding: "10px", marginBottom: '5px' }} spacing={2}>
                 <Grid item xs={12} md={7}>
                     <Typography variant="h6" component="h6">{facilityData.name}</Typography>
                     <Typography>Address : {facilityData.address}</Typography>
@@ -124,6 +124,20 @@ export const FacilityHome = (props: any) => {
                             </Button>
                         </Grid>
                     </Grid>
+                </Grid>
+            </Grid>
+            <Grid container style={{ padding: "10px"}} spacing={1}>
+                <Grid item xs={12} md={6} className="w3-center">
+                    <Button fullWidth variant="contained" color="primary" size="small"
+                        onClick={() => navigate(`/facility/${facilityId}/patient`)}>
+                        Add More Patient
+                    </Button>
+                </Grid>
+                <Grid item xs={12} md={6} className="w3-center">
+                    <Button fullWidth variant="contained" color="primary" size="small"
+                        onClick={() => navigate(`/facility/${facilityId}/patients`)}>
+                        View Patients
+                    </Button>
                 </Grid>
             </Grid>
             <Grid container style={{ padding: "10px", marginBottom: '15px' }} spacing={1}>

@@ -103,7 +103,7 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
         navigate(`/facility/${facilityId}`);
     };
 
-    const handleSubmit = async (e: any) => {
+    const handleSubmit = async (e: any, addMore: boolean = false) => {
         e.preventDefault();
         const valid = validateData();
         if (valid) {
@@ -121,7 +121,8 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
                 } else {
                     setAppMessage({ show: true, message: "Doctor count updated successfully", type: "success" });
                 }
-                navigate(`/facility/${facilityId}`);
+                if (!addMore)
+                    navigate(`/facility/${facilityId}`);
             } else {
                 setAppMessage({ show: true, message: "Something went wrong..!", type: "error" })
             }
@@ -173,6 +174,15 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
                                         onClick={handleCancel}
                                     >Cancel</Button>
                                 </Grid>
+                                {!id && <Grid item>
+                                    <Button
+                                        color="primary"
+                                        variant="contained"
+                                        type="submit"
+                                        startIcon={<SaveIcon>save</SaveIcon>}
+                                        onClick={(e) => handleSubmit(e, true)}
+                                    >Save and Add More</Button>
+                                </Grid>}
                                 <Grid item>
                                     <Button
                                         color="primary"
