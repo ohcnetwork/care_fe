@@ -5,15 +5,13 @@ import TopBar from "../Components/Common/TopBar";
 import { PublicDashboard } from '../Components/Dashboard/PublicDashboard';
 
 import AmbulanceOnboarding from "../Components/Ambulance/AmbulanceOnboarding";
-import {Stats} from "../Components/Dashboard/Stats";
 
 const routes = {
     '/': () => <Login />,
     '/login': () => <Login />,
     '/dashboard': () => <PublicDashboard />,
     '/ambulance': () => <AmbulanceOnboarding />,
-    '/register': () => <Register />,
-    '/stats' : () => <Stats/>
+    '/register': () => <Register />
 };
 
 const SessionRouter = () => {

@@ -5,7 +5,6 @@ import { PrivateDashboard } from "../Components/Dashboard/PrivateDashboard";
 import { FacilityCreate } from '../Components/Facility/FacilityCreate';
 import { HospitalList } from '../Components/Facility/HospitalList';
 import { Analytics } from "../Components/Dashboard/Analytics";
-import { Stats } from "../Components/Dashboard/Stats";
 import ManageUsers from "../Components/Users/ManageUsers";
 import { PatientRegister } from "../Components/Patient/PatientRegister";
 import { TeleConsultation } from '../Components/Patient/TeleConsultation';
@@ -29,7 +28,6 @@ const routes = {
     '/facility/:facilityId/doctor': ({ facilityId }: any) => <DoctorCapacityForm facilityId={facilityId} />,
     '/facility/:facilityId/bed/:id': ({ facilityId, id }: any) => <BedCapacityForm facilityId={facilityId} id={id} />,
     '/facility/:facilityId/doctor/:id': ({ facilityId, id }: any) => <DoctorCapacityForm facilityId={facilityId} id={id} />,
-    '/stats': () => <Stats />,
     '/patients': () => <PatientManager/>,
     '/patient/register': () => <PatientRegister />,
     '/patient/tele-consult': () => <TeleConsultation />,

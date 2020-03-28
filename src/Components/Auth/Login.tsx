@@ -149,9 +149,6 @@ export const Login = () => {
                         <CardContent className="alignCenter">
                             Onboard Ambulances <A href="/ambulance">here</A>
                         </CardContent>
-                        <CardContent className="alignCenter">
-                            Public Stats <A href="/stats">status</A>
-                        </CardContent>
                     </Card>
                 </Grid>
             </Grid>
