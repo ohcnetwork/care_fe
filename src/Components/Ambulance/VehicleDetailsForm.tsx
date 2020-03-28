@@ -5,6 +5,8 @@ import { DISTRICT_CHOICES, VEHICLE_TYPES } from "./constants";
 import { isEmpty } from "lodash";
 import NavigateNextIcon from '@material-ui/icons/NavigateNext';
 import { phonePreg } from "../../Constants/common";
+import FormGroup from '@material-ui/core/FormGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 
 export interface vehicleForm {
     registrationNumber: string;
@@ -252,13 +254,18 @@ export const VehicleDetailsForm = (props: any) => {
                                     />
                                     <Box display="flex" flexDirection="row" justifyItems="flex-start"
                                         alignItems="center">
-                                        <Checkbox
-                                            checked={form.isSmartPhone}
-                                            onChange={handleCheckboxFieldChange}
-                                            name="isSmartPhone"
-                                        />
-                                        <Typography className={classes.checkBoxLabel}> Do you have a smart phone
-                                            ?</Typography>
+                                            
+                                            <FormGroup>
+                                            <FormControlLabel
+                                                control={<Checkbox
+                                                    checked={form.isSmartPhone}
+                                                    onChange={handleCheckboxFieldChange}
+                                                    name="isSmartPhone"
+                                                />} label="Do you have a smart phone
+                                                ?">
+                                            </FormControlLabel>
+                                            </FormGroup>
+                                        
                                     </Box>
                                     <Box>
                                         <Typography variant="h6">
@@ -310,47 +317,54 @@ export const VehicleDetailsForm = (props: any) => {
                                     </Box>
                                     <Box display="flex" flexDirection="row" justifyItems="flex-start"
                                         alignItems="center">
-                                        <Checkbox
+                                            <FormGroup>
+                                            <FormControlLabel
+                                                control={<Checkbox
                                             checked={form.hasOxygenSupply}
                                             onChange={handleCheckboxFieldChange}
-                                            name="hasOxygenSupply"
-                                        />
-                                        <Typography className={classes.checkBoxLabel}>
-                                            Has Oxygen Supply
-                                        </Typography>
+                                            name="hasOxygenSupply"/>} label="Has Oxygen Supply">
+                                            </FormControlLabel>
+                                            </FormGroup>
+                                        
                                     </Box>
                                     <Box display="flex" flexDirection="row" justifyItems="flex-start"
                                         alignItems="center">
-                                        <Checkbox
-                                            checked={form.hasVentilator}
-                                            onChange={handleCheckboxFieldChange}
-                                            name="hasVentilator"
-                                        />
-                                        <Typography className={classes.checkBoxLabel}>
-                                            Has ventilator
-                                        </Typography>
+                                            <FormGroup>
+                                            <FormControlLabel
+                                                control={  <Checkbox
+                                                    checked={form.hasVentilator}
+                                                    onChange={handleCheckboxFieldChange}
+                                                    name="hasVentilator"
+                                                />} label="Has Ventilator">
+                                            </FormControlLabel>
+                                            </FormGroup>
+
                                     </Box>
                                     <Box display="flex" flexDirection="row" justifyItems="flex-start"
                                         alignItems="center">
-                                        <Checkbox
-                                            checked={form.hasSuctionMachine}
-                                            onChange={handleCheckboxFieldChange}
-                                            name="hasSuctionMachine"
-                                        />
-                                        <Typography className={classes.checkBoxLabel}>
-                                            Has suction machine
-                                        </Typography>
+                                             <FormGroup>
+                                            <FormControlLabel
+                                                control={<Checkbox
+                                                    checked={form.hasSuctionMachine}
+                                                    onChange={handleCheckboxFieldChange}
+                                                    name="hasSuctionMachine"
+                                                />} label="Has suction machine">
+                                            </FormControlLabel>
+                                            </FormGroup>
                                     </Box>
                                     <Box display="flex" flexDirection="row" justifyItems="flex-start"
                                         alignItems="center">
-                                        <Checkbox
-                                            checked={form.hasDefibrillator}
-                                            onChange={handleCheckboxFieldChange}
-                                            name="hasDefibrillator"
-                                        />
-                                        <Typography className={classes.checkBoxLabel}>
-                                            Has defibrilator
-                                        </Typography>
+                                            <FormGroup>
+                                            <FormControlLabel
+                                                control={<Checkbox
+                                                    checked={form.hasDefibrillator}
+                                                    onChange={handleCheckboxFieldChange}
+                                                    name="hasDefibrillator"
+                                                />} label="Has Defibrilator">
+                                            </FormControlLabel>
+                                            </FormGroup>
+                                        
+                                        
                                     </Box>
                                 </Box>
                             </CardContent>
