@@ -38,7 +38,7 @@ const routes = {
 };
 
 const AppRouter = () => {
-    useRedirect('/', '/privatedashboard');
+    useRedirect('/', '/dash');
     const pages = useRoutes(routes);
     return (
         <div>
