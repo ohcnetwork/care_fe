@@ -121,13 +121,13 @@ export const Login = () => {
         <Box display="flex" flexDirection="column" className={`${classes.formTop}`}>
             <Box className={classes.imgSection} display="flex" flexDirection="column" justifyContent="flex-start">
             <Grid container spacing={2}>
-                <Grid item className="w3-hide-small" xs={12} sm={7} md={8} lg={9}>
+                <Grid item xs={12} sm={7} md={8} lg={9}>
                     <Grid item>
                         <PublicDashboard/>
                     </Grid>
 
                 </Grid>
-                <Grid item xs={12} sm={5} md={4} lg={3}>
+                <Grid item xs={12} sm={5} md={4} lg={3} style={{marginTop: '15px'}}>
                     <Card>
                         <CardHeader title="Authorized Login"/>
                         <form onSubmit={(e) => handleSubmit(e)}>
@@ -182,12 +182,6 @@ export const Login = () => {
                                 </Grid>
                             </CardActions>
                         </form>
-                        <CardContent className="alignCenter">
-                            You don't have an account? <A href="/register">Register</A>
-                        </CardContent>
-                        <CardContent className="alignCenter">
-                            Onboard Ambulances <A href="/ambulance">here</A>
-                        </CardContent>
                     </Card>
                 </Grid>
             </Grid>

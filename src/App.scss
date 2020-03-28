@@ -68,6 +68,7 @@
 }
 #root {
   height: 100vh;
+  background-color: #fbfafc;
 }
 .app-footer {
   width: 100%;
@@ -80,16 +81,27 @@
   display: flex;
   flex-direction: row;
   margin: auto;
+  @media (max-width: 768px){
+    flex-direction: column;
+    position: relative;
+  }
   img {
     height: 80px;
     margin: 10px 10px auto auto;
     display: block;
+    @media (max-width: 768px){
+      margin: 10px auto auto auto;
+    }
   }
   .copy-right {
     width: 70%;
     text-align: center;
     color: black;
     margin: auto;
+    @media (max-width: 768px){
+      width: 90%;
+      margin: 10px auto;
+    }
     a{
       text-decoration: none;
     }
@@ -97,7 +109,7 @@
 }
 
 .appBar {
-  background-color: #f1f1f1 !important;
+  background-color: white !important;
 }
 
 .vertical-align {
@@ -180,3 +192,27 @@
 .care-secondary-color {
     color: #3f51b5;
 }
+
+
+.hometext{
+  margin: 10px 35px!important;
+  @media (max-width: 768px){
+    margin: 10px 15px!important;
+  }
+}
+
+.MuiCardHeader-title{
+  text-align: center;
+}
+
+.hometitle{
+  @media (min-width: 768px){
+    margin-top: 15px!important;
+  }
+}
+
+.MuiTypography-h6 {
+  @media (max-width: 768px){
+    font-size: 1.10rem!important;
+  }
+  }
