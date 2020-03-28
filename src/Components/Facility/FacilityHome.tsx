@@ -8,7 +8,7 @@ import TitleHeader from "../Common/TitleHeader";
 import BedTypeCard from "./BedTypeCard";
 import { Loading } from '../Common/Loading';
 import DoctorsCountCard from './DoctorsCountCard';
-import { FacilityModal, CapacityModal, DoctorModal } from './modals';
+import { FacilityModal, CapacityModal, DoctorModal } from './models';
 import { PatientManager } from "../Patient/ManagePatients";
 
 

@@ -7,7 +7,7 @@ import { Loading } from "../../Components/Common/Loading";
 import AppMessage from "../Common/AppMessage";
 import { createDoctor, getDoctor } from "../../Redux/actions";
 import SaveIcon from '@material-ui/icons/Save';
-import { DoctorModal } from './modals';
+import { DoctorModal } from './models';
 import { DOCTOR_SPECIALIZATION } from './constants';
 
 interface DoctorCapacityProps extends DoctorModal {

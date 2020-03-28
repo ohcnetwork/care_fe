@@ -2,7 +2,7 @@ import React from 'react';
 import { Grid, Typography, Button } from "@material-ui/core";
 import { makeStyles } from '@material-ui/styles';
 import { navigate } from 'hookrouter'
-import { DoctorModal } from './modals';
+import { DoctorModal } from './models';
 import { DOCTOR_SPECIALIZATION } from './constants';
 
 interface DoctorsCountProps extends DoctorModal {

@@ -9,7 +9,7 @@ import Pagination from "../Common/Pagination";
 import AddCard from '../Common/AddCard';
 import { navigate } from 'hookrouter';
 import { Loading } from "../Common/Loading";
-import { FacilityModal } from './modals';
+import { FacilityModal } from './models';
 const useStyles = makeStyles(theme => ({
     root: {
         flexGrow: 1,

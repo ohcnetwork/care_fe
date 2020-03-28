@@ -7,7 +7,7 @@ import { phonePreg } from "../../Constants/common";
 import { navigate } from 'hookrouter';
 import { Loading } from "../Common/Loading";
 import AppMessage from "../Common/AppMessage";
-import { PatientModal} from './modals';
+import { PatientModal} from './models';
 import { MEDICAL_HISTORY_CHOICES, GENDER_TYPES } from "./constants";
 import { createPatient, getPatient, updatePatient } from "../../Redux/actions";
 
