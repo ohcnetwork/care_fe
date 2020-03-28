@@ -20,7 +20,15 @@ import gendorList from "../../Constants/Static_data/gender.json"
 import { signupUser } from "../../Redux/actions";
 import ReCaptcha from "react-google-recaptcha";
 
-const optionalFields = ["first_name", "last_name", "email", "skill", "district", "gender", "user_type"];
+const optionalFields = [
+    "first_name",
+    "last_name",
+    "email",
+    "skill",
+    "district",
+    "gender",
+    "user_type"
+];
 
 const useStyles = makeStyles((theme: Theme) => ({
     formTop: {
@@ -40,7 +48,6 @@ const useStyles = makeStyles((theme: Theme) => ({
 export const Register = () => {
     const classes = useStyles();
     const dispatch: any = useDispatch();
-
     const initForm: any = {
         username: '',
         first_name: "",
@@ -52,13 +59,15 @@ export const Register = () => {
         gender: "",
         age: "",
         password: '',
-        c_password: '',
+        c_password: ''
     };
     const initErr: any = {};
     const [form, setForm] = useState(initForm);
     const [errors, setErrors] = useState(initErr);
     const [isCaptchaEnabled, setCaptcha] = useState(false);
-    
+
+    const captchaKey = process.env.GOOGLE_KEY ? process.env.GOOGLE_KEY : '';
+
     const validateForm = () => {
         const oldError: any = {};
         let hasError: boolean = false;
@@ -84,9 +93,11 @@ export const Register = () => {
             } else if ((field === "password" || field === "c_password") && form["password"] !== form["c_password"]) {
                 oldError["c_password"] = "Password Mismatch";
                 hasError = true
+            } else if (isCaptchaEnabled && field === 'captcha' && form[field] === "") {
+                oldError[field] = "Field is required";
+                hasError = true
             }
         });
-
         if (hasError) {
             setErrors(oldError);
             return false
@@ -98,17 +109,18 @@ export const Register = () => {
     const handleSubmit = (e: any) => {
         e.preventDefault();
         const validForm = validateForm();
-        if (validForm && isCaptchaEnabled) {
+        if (validForm) {
             dispatch(signupUser(form)).then((res: any) => {
                 if(res.status === 201) {
                     window.location.href = "/login"
+                } if (res.status === 429) {
+                    setCaptcha(true);
                 } else {
                     const error = { ...errors };
                     Object.keys(res.data).map((field: string) => {
                         error[field] = res.data[field][0];
                         setErrors(error)
                     });
-                    setCaptcha(false);
                 }
             });
         }
@@ -122,10 +134,10 @@ export const Register = () => {
     };
 
     const onCaptchaChange = (value: any) => {
-        if (value) {
-            setCaptcha(true);
-        } else {
-            setCaptcha(false);
+        if (value && isCaptchaEnabled) {
+            const formCaptcha = { ...form };
+            formCaptcha['g-recaptcha-response'] = value;
+            setForm(formCaptcha);
         }
     }
 
@@ -271,27 +283,35 @@ export const Register = () => {
                                 />
                                 <CardActions className={classes.cardActions}>
                                     {/*<A href="/forgot-password">Forgot password ?</A>*/}
-                                    <ReCaptcha
-                                        // For production
-                                        sitekey="6Lcwm-QUAAAAAB7RjVwBLGSYt3bXtmjtP_9qplfV"
-                                        // For development
-                                        // sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
-                                        onChange={onCaptchaChange}
-                                    /> 
-                                    <Button
-                                        color="primary"
-                                        variant="contained"
-                                        type="submit"
-                                        style={{ marginLeft: 'auto' }}
-                                        onClick={(e) => handleSubmit(e)}
-                                    >
-                                        Register
-                                    </Button>
+                                    <Grid container justify="center">
+                                        {isCaptchaEnabled &&
+                                            <Grid item>
+                                                <ReCaptcha
+                                                    sitekey={captchaKey}
+                                                    onChange={onCaptchaChange}
+                                                />
+                                                <span className="w3-text-red">{errors.captcha}</span>
+                                            </Grid>
+                                        }
+                                        <Grid item style={{ display: 'flex', padding: 10 }}>
+                                            <Grid container alignItems="center" justify="center">
+                                                <Grid item>
+                                                    <Button
+                                                        color="primary"
+                                                        variant="contained"
+                                                        type="submit"
+                                                        onClick={(e) => handleSubmit(e)}
+                                                    >
+                                                        Register
+                                                    </Button>
+                                                </Grid>
+                                            </Grid>
+                                        </Grid>
+                                    </Grid>
                                 </CardActions>
                             </CardContent>
                         </form>
                     </Card>
-
                 </Grid>
             </Grid>
         </div>
