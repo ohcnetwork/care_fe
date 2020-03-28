@@ -3,9 +3,10 @@ import { Snackbar, IconButton } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 import { makeStyles, Theme } from '@material-ui/core/styles';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme: Theme) => ({
         root: {
-            width: '100%',
+            'width': '100%',
+            'z-index': '100001',
             '& > * + *': {
                 marginTop: theme.spacing(2),
                 backgroundColor: 'ghostwhite'

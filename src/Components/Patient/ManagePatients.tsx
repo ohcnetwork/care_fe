@@ -1,18 +1,14 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useDispatch } from 'react-redux';
-import {
-    Grid,
-    Typography,
-    Card,
-    CardHeader,
-    CardContent,
-    Tooltip
-} from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-import Pagination from '../Common/Pagination';
-import TitleHeader from '../Common/TitleHeader';
-import { getUserList, readUser } from "../../Redux/actions";
-import { Loading } from '../Common/Loading';
+import React, { useEffect, useState, useCallback } from 'react';
+import Grid from '@material-ui/core/Grid';
+import { Card, CardContent, CardHeader, Tooltip, Typography } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core/styles";
+import { useDispatch } from "react-redux";
+import { getFacilities, getAllPatient } from "../../Redux/actions";
+import TitleHeader from "../Common/TitleHeader";
+import Pagination from "../Common/Pagination";
+import AddCard from '../Common/AddCard';
+import { navigate } from 'hookrouter';
+import { Loading } from "../Common/Loading";
 const useStyles = makeStyles(theme => ({
     root: {
         flexGrow: 1,
@@ -22,6 +18,7 @@ const useStyles = makeStyles(theme => ({
         height: 160,
         width: '100%',
         backgroundColor: '#FFFFFF',
+        cursor: 'pointer'
     },
     title: {
         whiteSpace: 'nowrap',
@@ -79,15 +76,22 @@ const useStyles = makeStyles(theme => ({
     },
     toolTip: {
         fontSize: '13px'
+    },
+    displayFlex: {
+        display: 'flex'
+    },
+    minHeight: {
+        minHeight: '65vh'
     }
 }));
 
-export default function ManageUsers(props: any) {
+export const PatientManager = () => {
     const classes = useStyles();
     const dispatch: any = useDispatch();
     const initialData: any[] = [];
-    let manageUsers: any = null;
     const [data, setData] = useState(initialData);
+
+    let managePatients: any = null;
     const [isLoading, setIsLoading] = useState(false);
     const [totalCount, setTotalCount] = useState(0);
 
@@ -97,13 +101,14 @@ export default function ManageUsers(props: any) {
     const [currentPage, setCurrentPage] = useState(1);
 
     const fetchData = useCallback(async (page, limit, offset) => {
-        const res = await dispatch(getUserList({ page, limit, offset }));
+        const res = await dispatch(getAllPatient({page, offset, limit}));
         if (res && res.data) {
-            setData(res.results);
-            setTotalCount(res.count);
+            setData(res.data.results);
+            setTotalCount(res.data.count);
         }
         setIsLoading(false);
-    }, [dispatch]);
+    },[dispatch]);
+
     useEffect(() => {
         setIsLoading(true);
         fetchData(page, limit, offset);
@@ -113,32 +118,37 @@ export default function ManageUsers(props: any) {
         setCurrentPage(page);
         fetchData(page, limit, perPage);
     };
-
-
-    let userList: any[] = [];
+    let patientList: any[] = [];
     if (data && data.length) {
-        userList = data.map((user: any, idx: number) => {
+        patientList = data.map((patient: any, idx: number) => {
             return (
-                <Grid item xs={12} md={3} key={`usr_${user.id}`}
-                    className={classes.root}>
-                    <Card className={classes.card}>
-                        <CardHeader className={classes.cardHeader}
-                            title={<span className={classes.title}><Tooltip title={<span className={classes.toolTip}>{user.username}</span>}
-                                interactive={true}><span>{user.username}</span></Tooltip></span>}
+                <Grid item xs={12} md={3} key={`usr_${patient.id}`} className={classes.root}>
+                    <Card className={classes.card} onClick={() => navigate(`/patient/${patient.id}`)}>
+                        <CardHeader
+                            className={classes.cardHeader}
+                            title={
+                                <span className={classes.title}>
+                                    <Tooltip
+                                        title={<span className={classes.toolTip}>{patient.name}</span>}
+                                        interactive={true}>
+                                        <span>{patient.name}</span>
+                                    </Tooltip>
+                                </span>
+                            }
                         />
                         <CardContent className={classes.content}>
                             <Typography>
-                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Full Name - </span>{`${user.first_name} ${user.last_name}`}
+                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Age - </span>{patient.age}
                             </Typography>
                         </CardContent>
                         <CardContent className={classes.content}>
                             <Typography>
-                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Role - </span>{user.user_type}
+                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Contact with carrier - </span>{patient.contact_with_carrier}
                             </Typography>
                         </CardContent>
                         <CardContent className={classes.content}>
                             <Typography>
-                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Contact - </span>{user.phone_number}
+                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Status - </span>{patient.is_active}
                             </Typography>
                         </CardContent>
                     </Card>
@@ -148,26 +158,29 @@ export default function ManageUsers(props: any) {
     }
 
     if (isLoading || !data) {
-        manageUsers = (
+        managePatients = (
             <Loading />
         );
     } else if (data && data.length) {
-        manageUsers = userList;
+        managePatients = patientList;
     } else if (data && data.length === 0) {
-        manageUsers = (
-            <Grid item xs={12} md={12} className="textMarginCenter">
-                <h5> No Users Found</h5>
+        managePatients = (
+            <Grid item xs={12} md={12} className={classes.displayFlex}>
+                <Grid container justify="center" alignItems="center">
+                    <h5> No Patients Found</h5>
+                </Grid>
             </Grid>
         );
     }
 
     return (
         <div>
-            <TitleHeader title="Users" showSearch={false}>
+            <TitleHeader title="Patients" showSearch={false}>
 
             </TitleHeader>
+
             <Grid container>
-                {manageUsers}
+                {managePatients}
                 {(data && data.length > 0 && totalCount > limit) && (
                     <Grid container className={`w3-center ${classes.paginateTopPadding}`}>
                         <Pagination
@@ -176,9 +189,10 @@ export default function ManageUsers(props: any) {
                             data={{ totalCount }}
                             onChange={handlePagination}
                         />
-                    </Grid>)}
+                    </Grid>
+                )}
             </Grid>
         </div>
     );
 
-}
+};

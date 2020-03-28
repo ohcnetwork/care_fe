@@ -1,12 +1,55 @@
-import React, { useState } from "react"
+import React, { useState, useReducer, useCallback, useEffect} from "react"
 import { makeStyles, Theme } from '@material-ui/core/styles';
 import { useDispatch } from "react-redux";
 import { Box, Grid, Checkbox, Card, CardHeader, CardContent, CardActions, Button, FormControl, InputLabel, Select, MenuItem, Typography, FormLabel, RadioGroup, Radio, FormControlLabel } from "@material-ui/core";
-import { TextInputField } from "../Common/HelperInputFields";
-import { validateEmailAddress, phonePreg } from "../../Constants/common";
-// import {  } from "../../Redux/actions";
-import genderList from "../../Constants/Static_data/gender.json";
-import { isEmpty } from "lodash";
+import { TextInputField, NativeSelectField, ErrorHelperText, MultilineInputField, ShowCheckboxOptions } from "../Common/HelperInputFields";
+import { phonePreg } from "../../Constants/common";
+import { navigate } from 'hookrouter';
+import { Loading } from "../Common/Loading";
+import AppMessage from "../Common/AppMessage";
+import { PatientModal} from './modals';
+import { MEDICAL_HISTORY_CHOICES, GENDER_TYPES } from "./constants";
+import { createPatient, getPatient, updatePatient } from "../../Redux/actions";
+
+interface PatientRegisterProps extends PatientModal {
+    facilityId: number;
+}
+
+const initForm: any = {
+    name: "",
+    age: "",
+    gender:"",
+    phone_number: "",
+    medical_history: [],
+    contact_with_carrier:"",
+    medical_history_details: ""
+};
+const initialState = {
+    form: { ...initForm },
+    errors: { ...initForm }
+};
+
+const optionalFields = ["medical_history_details"];
+
+const patientFormReducer = (state = initialState, action: any) => {
+    switch (action.type) {
+        case "set_form": {
+            return {
+                ...state,
+                form: action.form
+            }
+        }
+        case "set_error": {
+            return {
+                ...state,
+                errors: action.errors
+            }
+        }
+        default:
+            return state
+    }
+};
+
 
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -26,330 +69,249 @@ const useStyles = makeStyles((theme: Theme) => ({
     },
 }));
 
+const genderTypes = [{
+    id: 0,
+    text: 'Select',
+}, ...GENDER_TYPES]
 
-export const PatientRegister = () => {
+
+export const PatientRegister = (props:PatientRegisterProps) => {
     const classes = useStyles();
-    const dispatch: any = useDispatch();
-    const inputLabel = React.useRef<HTMLLabelElement>(null);
+    const dispatchAction: any = useDispatch();
+    const { facilityId, id } = props;
+    const [state, dispatch] = useReducer(patientFormReducer, initialState);
+    const [showAppMessage, setAppMessage] = useState({ show: false, message: "", type: "" });
+    const [isLoading, setIsLoading] = useState(false);
 
-    const initForm: any = {
-        pName: "",
-        age: "",
-        gender: "",
-        mobileNo: "",
-        hadContactCovid: "false",
-        covidDetails: "",
-        diabetes: false,
-        diabetesDetails: "",
-        heartDisease: false,
-        heartDiseaseDetails: "",
-        hyperTension: false,
-        hyperTensionDetails: "",
-        kidneyDiseases: false,
-        kidneyDiseasesDetails: ""
-    };
-    const initErr: any = {};
-    const [form, setForm] = useState(initForm);
-    const [errors, setErrors] = useState(initErr);
+
+    const headerText = !id ? "Add Patient" : "Edit Patient";
+    const buttonText = !id ? "Save" : "Update";
+
+    const fetchData = useCallback(async () => {
+        if (id) {
+            setIsLoading(true);
+            const res = await dispatchAction(getPatient({id}));
+            if (res.data) {
+                dispatch({ 
+                        type: "set_form", 
+                        form: {
+                            name: res.data.name,
+                            age: res.data.age,
+                            gender: res.data.gender,
+                            phone_number: res.data.phone_number,
+                            medical_history: res.data.medical_history,
+                            contact_with_carrier: `${res.data.contact_with_carrier}`,
+                            medical_history_details: res.data.medical_history_details
+                        }
+                    })
+            } else {
+                navigate(`/facility/${facilityId}`);
+            }
+            setIsLoading(false);
+        }
+    }, [dispatchAction, facilityId, id]);
+
+    useEffect(() => {
+        fetchData();
+    }, [dispatch, fetchData, id]);
+
+
 
     const validateForm = () => {
-        const err: any = {};
-        Object.keys(form).forEach(key => {
-            const value = form[key];
-            switch (key) {
-                case "pName":
-                    !value && (err[key] = "This field is required");
-                    break;
-                case "age":
-                    !value && (err[key] = "This field is required");
-                    break;
-                case "gender":
-                    !value && (err[key] = "This field is required");
-                    break;
-                case "mobileNo":
-                    if (!value) {
-                        err[key] = "This field is required";
-                    } else if (value && !(/^[0-9]{10}$/.test(value))) {
-                        err[key] = "Invalid phone number";
-                    }
-                    break;
-                case "covidDetails":
-                    if (form.hadContactCovid === "true" && !value) {
-                        err[key] = "please fill the details";
-                    }
-                    break;
-                case "diabetesDetails":
-                    if (form.diabetes && !value) {
-                        err[key] = "please fill the details";
-                    }
-                    break;
-                case "heartDiseaseDetails":
-                    if (form.heartDisease && !value) {
-                        err[key] = "please fill the details";
-                    }
-                    break;
-                case "hyperTensionDetails":
-                    if (form.hyperTension && !value) {
-                        err[key] = "please fill the details";
-                    }
-                    break;
-                case "kidneyDiseasesDetails":
-                    if (form.kidneyDiseases && !value) {
-                        err[key] = "please fill the details";
-                    }
-                    break;
-                default:
-                    break;
+        let errors = { ...initForm };
+        let invalidForm = false;
+        Object.keys(state.form).forEach((field, i) => {
+            if ((optionalFields.indexOf(field) === -1) && !state.form[field]) {
+                errors[field] = "Field is required";
+                invalidForm = true;
+            }else if(field === 'medical_history' && state.form['medical_history'].length == 0){
+                errors['medical_history'] = "Field is required";
+                invalidForm = true;
+            }else if (field === "phone_number" && !phonePreg(state.form[field])) {
+                errors[field] = "Please Enter 10/11 digit mobile number or landline as 0<std code><phone number>";
+                invalidForm = true;
             }
         });
-        if (!isEmpty(err)) {
-            setErrors(err);
-            return false;
+        if (invalidForm) {
+            dispatch({ type: "set_error", errors });
+            return false
         }
-        setErrors({});
-        return true;
+        dispatch({ type: "set_error", errors });
+        return true
     };
 
-    const handleSubmit = (e: any) => {
+    const handleSubmit = async(e: any) => {
         e.preventDefault();
         const validForm = validateForm();
         if (validForm) {
-            console.log('form', form);
+            setIsLoading(true);
+            const data = {
+                "name": state.form.name,
+                "age": Number(state.form.age),
+                "gender": Number(state.form.gender),
+                "phone_number": state.form.phone_number,
+                "medical_history": state.form.medical_history,
+                "contact_with_carrier": JSON.parse(state.form.contact_with_carrier),
+                "medical_history_details": state.form.medical_history_details,
+                "is_active": true,
+            };
+            
+            const res = await dispatchAction(id?updatePatient(data,{id}):createPatient(data));
+            setIsLoading(false);
+            if (res.data) {
+                dispatch({ type: "set_form", form: initForm })
+                if (!id) {
+                    setAppMessage({ show: true, message: "Patient added successfully", type: "success" });
+                } else {
+                    setAppMessage({ show: true, message: "Patient updated successfully", type: "success" });
+                }
+                navigate(`/facility/${facilityId}`);
+            } else {
+                setAppMessage({ show: true, message: "Error", type: "error" })
+            }
         }
     };
 
     const handleChange = (e: any) => {
-        const { name, value } = e.target;
-        const formValues = { ...form };
-        const errorField = Object.assign({}, errors);
-        if (errorField[name]) {
-            errorField[name] = null;
-            setErrors(errorField);
+        let form = { ...state.form };
+        form[e.target.name] = e.target.value;
+        dispatch({ type: "set_form", form })
+    };
+
+    const handleCheckboxChange = (e: any) => {
+        let form = { ...state.form };
+        const values = state.form.medical_history;
+        const chocieId = Number(e.target.value);
+        if (e.target.checked) {
+            values.push(chocieId);
+        } else {
+            values.splice(values.indexOf(chocieId), 1);
         }
-        formValues[name] = value;
-        setForm(formValues)
-    };
-    const handleCheckboxFieldChange = (e: any) => {
-        const { checked, name } = e.target;
-        const fieldValue = Object.assign({}, form);
-        fieldValue[name] = checked;
-        setForm(fieldValue);
+        form['medical_history'] = values;
+        dispatch({ type: "set_form", form })
+    }
+
+    const handleCancel = () => {
+        navigate(`/facility/${facilityId}`);
     };
 
-    return <div className={classes.formTop} >
 
-        <Grid container justify="center">
-            <Grid item xs={12} sm={5} md={4} lg={3}>
+    if (isLoading) {
+        return <Loading />
+    }
 
+
+console.log("form values", state.form);
+    return <div>
+
+        <Grid container alignContent="center" justify="center">
+            <Grid item xs={12} sm={10} md={8} lg={6} xl={4}>
                 <Card>
-                    <CardHeader title="Patient Register" />
-
+                    <AppMessage open={showAppMessage.show} type={showAppMessage.type} message={showAppMessage.message} handleClose={() => setAppMessage({ show: false, message: "", type: "" })} handleDialogClose={() => setAppMessage({ show: false, message: "", type: "" })} />
+                    <CardHeader title={headerText}/>
                     <form onSubmit={(e) => handleSubmit(e)}>
                         <CardContent>
+                            <InputLabel id="name-label">Name*</InputLabel>
                             <TextInputField
-                                name="pName"
-                                label="Patient Name*"
-                                placeholder=""
+                                name="name"
                                 variant="outlined"
                                 margin="dense"
-                                InputLabelProps={{ shrink: !!form.pName }}
-                                value={form.pName}
+                                type="text"
+                                InputLabelProps={{ shrink: !!state.form.name }}
+                                value={state.form.name}
                                 onChange={handleChange}
-                                errors={errors.pName}
+                                errors={state.errors.name}
                             />
-
+                        </CardContent>
+                        <CardContent>
+                            <InputLabel id="age-label">Age*</InputLabel>
                             <TextInputField
-                                type="tel"
-                                name="mobileNo"
-                                label="Mobile Number*"
-                                placeholder=""
+                                name="age"
                                 variant="outlined"
                                 margin="dense"
-                                value={form.mobileNo}
+                                type="number"
+                                InputLabelProps={{ shrink: !!state.form.age }}
+                                value={state.form.age}
                                 onChange={handleChange}
-                                errors={errors.mobileNo}
+                                errors={state.errors.age}
                             />
-                            <Box display="flex" flexDirection="row" justifyItems="space-between" alignItems="center">
-                                <div>
-                                <TextInputField
-                                    type="number"
-                                    name="age"
-                                    label="Age*"
-                                    placeholder=""
-                                    variant="outlined"
-                                    margin="dense"
-                                    value={form.age}
-                                    onChange={handleChange}
-                                    errors={errors.age}
-                                />
-                                </div>
-                                <FormControl variant="outlined" fullWidth margin="dense"
-                                    className={classes.formControl}>
-                                    <InputLabel className={classes.selectLabel} ref={inputLabel} id="genderLabel">
-                                        Gender
-                                    </InputLabel>
-                                    <Select
-                                        labelId="genderLabel"
-                                        id="gender"
-                                        name="gender"
-                                        value={form.gender}
-                                        onChange={handleChange}
-                                        fullWidth
-                                    >
-                                        <MenuItem value="">
-                                            <em>None</em>
-                                        </MenuItem>
-                                        {genderList.map((gender) => {
-                                            return <MenuItem key={gender.id} value={gender.id}>{gender.name}</MenuItem>
-                                        })}
-                                    </Select>
-                                    <span className="error-text">{errors.gender}</span>
-                                </FormControl>
-                            </Box>
-
-                            <Box display="flex" flexDirection="column">
-                                <Typography>
-                                    Have you had contact with someone who was diagnosed with Covid 19?
-                                </Typography>
-                                <RadioGroup aria-label="covid" name="hadContactCovid" value={form.hadContactCovid} onChange={handleChange} style={{ padding: '0px 5px' }}>
-                                    <Box display="flex" flexDirection="row">
-                                        <FormControlLabel value="true" control={<Radio />} label="Yes" />
-                                        <FormControlLabel value="false" control={<Radio />} label="No" />
-                                    </Box>
-                                </RadioGroup>
-                            </Box>
-
-                            {form.hadContactCovid == "true" && <TextInputField
-                                fullWidth
-                                multiline={true}
-                                rows={4}
-                                name="covidDetails"
-                                label="Details"
-                                placeholder=""
+                        </CardContent>
+                        <CardContent>
+                            <InputLabel id="gender-label">Gender*</InputLabel>
+                            <NativeSelectField
+                                name="gender"
+                                variant="outlined"
+                                value={state.form.gender}
+                                options={genderTypes}
+                                onChange={handleChange}
+                            />
+                            <ErrorHelperText
+                                error={state.errors.gender}
+                            />
+                        </CardContent>
+                        <CardContent>
+                            <InputLabel id="phone-label">Mobile Number*</InputLabel>
+                            <TextInputField
+                                name="phone_number"
                                 variant="outlined"
                                 margin="dense"
-                                InputLabelProps={{ shrink: !!form.covidDetails }}
-                                value={form.covidDetails}
+                                type="number"
+                                InputLabelProps={{ shrink: !!state.form.phone_number }}
+                                value={state.form.phone_number}
                                 onChange={handleChange}
-                                errors={errors.covidDetails}
-                            />}
-
-                            <Box display="flex" flexDirection="column">
-                                <Typography>
-                                    Any medical history?
-                                </Typography>
-                                <Box display="flex" flexDirection="row" justifyItems="flex-start"
-                                    alignItems="center">
-                                    <Checkbox
-                                        checked={form.diabetes}
-                                        onChange={handleCheckboxFieldChange}
-                                        name="diabetes"
-                                    />
-                                    <Typography className={classes.checkBoxLabel}>
-                                        Diabetes
-                                    </Typography>
+                                errors={state.errors.phone_number}
+                            />
+                        </CardContent>
+                        <CardContent>
+                            <InputLabel id="contact-with-carrier-label">
+                                Have you had contact with someone who was diagnosed with Covid 19?
+                            </InputLabel>
+                            <RadioGroup aria-label="covid" name="contact_with_carrier" value={state.form.contact_with_carrier} onChange={handleChange} style={{ padding: '0px 5px' }}>
+                                <Box display="flex" flexDirection="row">
+                                    <FormControlLabel value="true" control={<Radio />} label="Yes" />
+                                    <FormControlLabel value="false" control={<Radio />} label="No" />
                                 </Box>
-
-                                {form.diabetes && <TextInputField
-                                    fullWidth
-                                    multiline={true}
-                                    rows={4}
-                                    name="diabetesDetails"
-                                    label="Details"
-                                    placeholder=""
-                                    variant="outlined"
-                                    margin="dense"
-                                    InputLabelProps={{ shrink: !!form.diabetesDetails }}
-                                    value={form.diabetesDetails}
-                                    onChange={handleChange}
-                                    errors={errors.diabetesDetails}
-                                />}
-                                <Box display="flex" flexDirection="row" justifyItems="flex-start"
-                                    alignItems="center">
-                                    <Checkbox
-                                        checked={form.heartDisease}
-                                        onChange={handleCheckboxFieldChange}
-                                        name="heartDisease"
-                                    />
-                                    <Typography className={classes.checkBoxLabel}>
-                                        Heart Disease
-                                    </Typography>
-                                </Box>
-
-                                {form.heartDisease && <TextInputField
-                                    fullWidth
-                                    multiline={true}
-                                    rows={4}
-                                    name="heartDiseaseDetails"
-                                    label="Details"
-                                    placeholder=""
-                                    variant="outlined"
-                                    margin="dense"
-                                    InputLabelProps={{ shrink: !!form.heartDiseaseDetails }}
-                                    value={form.heartDiseaseDetails}
-                                    onChange={handleChange}
-                                    errors={errors.heartDiseaseDetails}
-                                />}
-
-                                <Box display="flex" flexDirection="row" justifyItems="flex-start"
-                                    alignItems="center">
-                                    <Checkbox
-                                        checked={form.hyperTension}
-                                        onChange={handleCheckboxFieldChange}
-                                        name="hyperTension"
-                                    />
-                                    <Typography className={classes.checkBoxLabel}>
-                                        HyperTension
-                                    </Typography>
-                                </Box>
-
-                                {form.hyperTension && <TextInputField
-                                    fullWidth
-                                    multiline={true}
-                                    rows={4}
-                                    name="hyperTensionDetails"
-                                    label="Details"
-                                    placeholder=""
-                                    variant="outlined"
-                                    margin="dense"
-                                    InputLabelProps={{ shrink: !!form.hyperTensionDetails }}
-                                    value={form.hyperTensionDetails}
-                                    onChange={handleChange}
-                                    errors={errors.hyperTensionDetails}
-                                />}
-
-                                <Box display="flex" flexDirection="row" justifyItems="flex-start"
-                                    alignItems="center">
-                                    <Checkbox
-                                        checked={form.kidneyDiseases}
-                                        onChange={handleCheckboxFieldChange}
-                                        name="kidneyDiseases"
-                                    />
-                                    <Typography className={classes.checkBoxLabel}>
-                                        Kidney Diseases
-                                    </Typography>
-                                </Box>
-
-                                {form.kidneyDiseases && <TextInputField
-                                    fullWidth
-                                    multiline={true}
-                                    rows={4}
-                                    name="kidneyDiseasesDetails"
-                                    label="Details"
-                                    placeholder=""
-                                    variant="outlined"
-                                    margin="dense"
-                                    InputLabelProps={{ shrink: !!form.kidneyDiseasesDetails }}
-                                    value={form.kidneyDiseasesDetails}
-                                    onChange={handleChange}
-                                    errors={errors.kidneyDiseasesDetails}
-                                />}
-
-                            </Box>
-
+                            </RadioGroup>
+                            <ErrorHelperText
+                                error={state.errors.contact_with_carrier}
+                            />
                         </CardContent>
 
-                        <CardActions className="padding16">
+                        <CardContent>
+                            <InputLabel id="med-history-label">Any medical history?*</InputLabel>
+                            <ShowCheckboxOptions
+                                values={state.form.medical_history}
+                                options={MEDICAL_HISTORY_CHOICES}
+                                onChange={(e: any) => handleCheckboxChange(e)}
+                            />
+                            <ErrorHelperText
+                                error={state.errors.medical_history}
+                            />
+                        </CardContent>
+
+                        <CardContent>
+                            <InputLabel id="med-history-details-label">Medical History Details</InputLabel>
+                            <MultilineInputField
+                                rows={5}
+                                name="medical_history_details"
+                                variant="outlined"
+                                margin="dense"
+                                type="text"
+                                InputLabelProps={{ shrink: !!state.form.medical_history_details }}
+                                value={state.form.medical_history_details}
+                                onChange={handleChange}
+                                errors={state.errors.medical_history_details}
+                            />
+                        </CardContent>
+
+
+                        <CardActions className="padding16" style={{ justifyContent: "space-between" }}>
+                            <Button
+                                color="default"
+                                variant="contained"
+                                type="button"
+                                onClick={(e) => handleCancel()}
+                            >Cancel</Button>
                             <Button
                                 color="primary"
                                 variant="contained"
@@ -357,7 +319,7 @@ export const PatientRegister = () => {
                                 style={{ marginLeft: 'auto' }}
                                 onClick={(e) => handleSubmit(e)}
                             >
-                                Register
+                                {buttonText}
                             </Button>
                         </CardActions>
                     </form>

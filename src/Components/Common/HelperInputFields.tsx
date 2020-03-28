@@ -20,15 +20,15 @@ import FormControl from '@material-ui/core/FormControl';
 import Box from '@material-ui/core/Box';
 import { NativeSelectInputProps } from '@material-ui/core/NativeSelect/NativeSelectInput';
 
-export interface DefaultNativeSelectInputProps  extends NativeSelectInputProps {
-    options: Array<{id: string | number, text: string}>,
+export interface DefaultNativeSelectInputProps extends NativeSelectInputProps {
+    options: Array<{ id: string | number, text: string }>,
     placeholder?: string;
     label?: string;
 }
 
 // Type Declarations
-type TextFieldPropsExtended = TextFieldProps&{errors: string}
-type Option = {text: string; score: number;}
+type TextFieldPropsExtended = TextFieldProps & { errors: string }
+type Option = { text: string; score: number; }
 interface InputProps {
     options: Array<Option>;
     onChange: (
@@ -49,53 +49,64 @@ interface TimeInputFieldProps {
 };
 
 interface OptionsProps {
-    options: Array<{id: number | string; text: string;}>,
+    options: Array<{ id: number | string; text: string; }>,
     onChange: (
         e: React.ChangeEvent<HTMLInputElement>, checked: boolean
     ) => void;
-    values: Array<{answerId: number}>
+    values: Array<{ answerId: number }>
 };
 
 
 export const TextInputField = (props: TextFieldPropsExtended) => {
     const { placeholder, onChange, value, name, variant, type, margin, errors, label, inputProps, multiline, rows } = props;
+    const inputType = type === 'number' ? 'text' : type;
+    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (typeof onChange !== 'function') {
+            return
+        }
+        if (type === 'number' && event.target.value) {
+            event.target.value = event.target.value.replace(/\D/, '');
+        }
+        onChange(event);
+    }
     return (
         <div>
             <TextField
                 label={label}
-                type={type}
+                type={inputType}
                 fullWidth
                 variant={variant}
                 margin={margin}
                 placeholder={placeholder}
-                onChange={onChange}
+                onChange={handleChange}
                 value={value}
                 name={name}
                 inputProps={inputProps}
                 multiline={multiline}
                 rows={rows}
             />
-            <ErrorHelperText error={errors}/>
+            <ErrorHelperText error={errors} />
         </div>
     );
 };
 
 export const MultilineInputField = (props: TextFieldPropsExtended) => {
-    const { placeholder, onChange, value, name, variant, errors } = props;
+    const { placeholder, onChange, value, name, variant, errors, label, margin, rows } = props;
     return (
         <div>
-        <TextField
-            multiline
-            rows={5}
-            fullWidth
-            variant={variant}
-            margin="normal"
-            placeholder={placeholder}
-            onChange={onChange}
-            value={value}
-            name={name}
-        />
-            <ErrorHelperText error={errors}/>
+            <TextField
+                multiline
+                rows={rows}
+                fullWidth
+                variant={variant}
+                margin={margin}
+                label={label}
+                placeholder={placeholder}
+                onChange={onChange}
+                value={value}
+                name={name}
+            />
+            <ErrorHelperText error={errors} />
         </div>
     );
 };
@@ -108,7 +119,7 @@ export const RadioButtonField = (props: InputProps) => {
                 return (
                     <Grid container key={idx}>
                         <Grid item>
-                            <Radio disabled style={{ paddingLeft: 0 }}/>
+                            <Radio disabled style={{ paddingLeft: 0 }} />
                         </Grid>
                         <Grid item style={{ flexGrow: 1 }}>
                             <Grid container spacing={2}>
@@ -119,7 +130,7 @@ export const RadioButtonField = (props: InputProps) => {
                                         placeholder={`option ${idx + 1}`}
                                         onChange={e => onChange(e, idx)}
                                     />
-                                    <ErrorHelperText error={errors && errors[idx] && errors[idx].text}/>
+                                    <ErrorHelperText error={errors && errors[idx] && errors[idx].text} />
                                 </Grid>
                                 <Grid xs={4} item>
                                     <TextField
@@ -129,14 +140,14 @@ export const RadioButtonField = (props: InputProps) => {
                                         placeholder="Score"
                                         onChange={e => onChange(e, idx)}
                                     />
-                                    <ErrorHelperText error={errors && errors[idx] && errors[idx].score}/>
+                                    <ErrorHelperText error={errors && errors[idx] && errors[idx].score} />
                                 </Grid>
                                 <Grid xs={4} item>
                                     {options.length > 1
                                         ? (
                                             <Grid item style={{ flexGrow: 1, textAlign: 'right' }}>
                                                 <IconButton onClick={() => handleDeleteOption(idx)}>
-                                                    <DeleteIcon fontSize="small"/>
+                                                    <DeleteIcon fontSize="small" />
                                                 </IconButton>
                                             </Grid>
                                         ) : null}
@@ -158,7 +169,7 @@ export const CheckboxInputField = (props: InputProps) => {
                 return (
                     <Grid container key={idx}>
                         <Grid item>
-                            <Checkbox disabled style={{ paddingLeft: 0 }}/>
+                            <Checkbox disabled style={{ paddingLeft: 0 }} />
                         </Grid>
                         <Grid item style={{ flexGrow: 1 }}>
                             <Grid container spacing={2}>
@@ -169,7 +180,7 @@ export const CheckboxInputField = (props: InputProps) => {
                                         placeholder={`option ${idx + 1}`}
                                         onChange={e => onChange(e, idx)}
                                     />
-                                    <ErrorHelperText error={errors && errors[idx] && errors[idx].text}/>
+                                    <ErrorHelperText error={errors && errors[idx] && errors[idx].text} />
                                 </Grid>
                                 <Grid xs={4} item>
                                     <TextField
@@ -179,14 +190,14 @@ export const CheckboxInputField = (props: InputProps) => {
                                         placeholder="Score"
                                         onChange={e => onChange(e, idx)}
                                     />
-                                    <ErrorHelperText error={errors && errors[idx] && errors[idx].score}/>
+                                    <ErrorHelperText error={errors && errors[idx] && errors[idx].score} />
                                 </Grid>
                                 <Grid xs={4} item>
                                     {options.length > 1
                                         ? (
                                             <Grid item style={{ flexGrow: 1, textAlign: 'right' }}>
                                                 <IconButton onClick={() => handleDeleteOption(idx)}>
-                                                    <DeleteIcon fontSize="small"/>
+                                                    <DeleteIcon fontSize="small" />
                                                 </IconButton>
                                             </Grid>
                                         ) : null}
@@ -215,7 +226,7 @@ export const DateInputField = (props: DateInputFieldProps) => {
                     'aria-label': 'change date',
                 }}
             />
-            <ErrorHelperText error={errors}/>
+            <ErrorHelperText error={errors} />
         </MuiPickersUtilsProvider>
     );
 };
@@ -238,7 +249,7 @@ export const TimeInputField = (props: any) => {
     );
 };
 
-export const ErrorHelperText = (props: {error: string | number}) => {
+export const ErrorHelperText = (props: { error: string | number }) => {
     const { error } = props;
     return (
         <div className="error-text">{error}</div>
@@ -271,11 +282,11 @@ export const ShowCheckboxOptions = (props: OptionsProps) => {
     return (
         <div>
             {options.map((opt: any, i: number) => {
-                const checked = values.findIndex((val: any) => val.answerId == opt.id);
+                const checked = values.indexOf(opt.id) > -1;
                 return (
                     <div key={i}>
                         <Checkbox
-                            checked={checked !== -1}
+                            checked={checked}
                             value={opt.id}
                             onChange={onChange}
                         /> {opt.text}
@@ -289,7 +300,7 @@ export const ShowCheckboxOptions = (props: OptionsProps) => {
 export const NativeSelectField = (props: DefaultNativeSelectInputProps) => {
     const { options, variant, placeholder, label } = props;
     return (
-        <FormControl style={{width: "100%"}} variant={variant}>
+        <FormControl style={{ width: "100%" }} variant={variant}>
             {label && (<Box>{label}</Box>)}
             <NativeSelect {...props}>
                 {options.map((opt: any) => {

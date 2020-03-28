@@ -6,7 +6,9 @@ import { getCurrentUser } from './Redux/actions';
 import { CircularProgress } from '@material-ui/core';
 import './App.scss';
 import Grid from "@material-ui/core/Grid";
+import {Loading} from "./Components/Common/Loading";
 const img = 'https://coronasafe.network/break-chain.png';
+
 const App: React.FC = () => {
   const dispatch: any = useDispatch();
   const state: any = useSelector(state => state);
@@ -24,11 +26,7 @@ const App: React.FC = () => {
 
   if (!currentUser || currentUser.isFetching) {
     return (
-        <div className="App">
-          <header className="App-header">
-            <img src={img} className="App-logo" alt="logo" />
-          </header>
-        </div>
+        <Loading/>
     );
   }
   if (currentUser && currentUser.data) {

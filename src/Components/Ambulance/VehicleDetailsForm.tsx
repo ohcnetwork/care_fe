@@ -1,9 +1,10 @@
-import React, {useState} from "react";
-import {Box, Button, Card, CardActions, CardContent, CardHeader, Checkbox, Grid, Typography, InputLabel} from "@material-ui/core";
-import {ErrorHelperText, NativeSelectField, TextInputField} from "../Common/HelperInputFields";
-import {DISTRICT_CHOICES, VEHICLE_TYPES} from "./constants";
-import {isEmpty} from "lodash";
+import React, { useState } from "react";
+import { Box, Button, Card, CardActions, CardContent, CardHeader, Checkbox, Grid, Typography, InputLabel, Switch } from "@material-ui/core";
+import { ErrorHelperText, NativeSelectField, TextInputField } from "../Common/HelperInputFields";
+import { DISTRICT_CHOICES, VEHICLE_TYPES } from "./constants";
+import { isEmpty } from "lodash";
 import NavigateNextIcon from '@material-ui/icons/NavigateNext';
+import { phonePreg } from "../../Constants/common";
 
 export interface vehicleForm {
     registrationNumber: string;
@@ -48,7 +49,7 @@ const allDistrictOptions: Array<{ id: number; text: string }> = [
     ...DISTRICT_CHOICES];
 
 export const VehicleDetailsForm = (props: any) => {
-    const {classes, setVehicleObj, vehicleDetails} = props;
+    const { classes, setVehicleObj, vehicleDetails } = props;
     const initForm: vehicleForm = { ...initVehicleData };
     const initErr: any = {};
     const [form, setForm] = useState<any>(Object.assign(initForm, vehicleDetails));
@@ -57,9 +58,9 @@ export const VehicleDetailsForm = (props: any) => {
         id: 0,
         text: 'Select',
     }];
-    for(let i=0;i<=2;i++){
+    for (let i = 0; i <= 2; i++) {
         let text = `202${i}`
-        validTill.push({id:parseInt(text),text})
+        validTill.push({ id: parseInt(text), text })
     }
 
     const vehicleTypes = [{
@@ -74,7 +75,7 @@ export const VehicleDetailsForm = (props: any) => {
     });
 
     const handleChange = (e: any) => {
-        const {value, name} = e.target;
+        const { value, name } = e.target;
         const fieldValue = Object.assign({}, form);
         const errorField = Object.assign({}, errors);
         if (errorField[name]) {
@@ -82,7 +83,7 @@ export const VehicleDetailsForm = (props: any) => {
             setErrors(errorField);
         }
         let fValue = value;
-        if(name === 'primaryDistrict' ||  name === 'secondaryDistrict' || name === 'thirdDistrict' || name === 'insuranceValidTill'){
+        if (name === 'primaryDistrict' || name === 'secondaryDistrict' || name === 'thirdDistrict' || name === 'insuranceValidTill') {
             fValue = parseInt(fValue)
         }
         fieldValue[name] = fValue;
@@ -98,44 +99,47 @@ export const VehicleDetailsForm = (props: any) => {
     };
 
     const handleCheckboxFieldChange = (e: any) => {
-        const {checked, name} = e.target;
+        const { checked, name } = e.target;
         const fieldValue = Object.assign({}, form);
         fieldValue[name] = checked;
         setForm(fieldValue);
     };
 
     const validateData = () => {
-        const err:any = {};
+        const err: any = {};
         Object.keys(form).forEach(key => {
             const value = form[key];
             switch (key) {
                 case "registrationNumber":
                     if (!value) {
                         err[key] = "This field is required";
-                    }else if(value && !(/^[a-zA-Z]{2}[0-9]{1,2}[a-zA-Z]{1,2}[0-9]{1,4}$/.test(value))){
+                    } else if (value && !(/^[a-zA-Z]{2}[0-9]{1,2}[a-zA-Z]{1,2}[0-9]{1,4}$/.test(value))) {
                         err[key] = "Please Enter the vehicle number without spaces, eg: KL13AB1234";
                     }
-                    break;
-                case "insuranceValidTill":
-                    !value && (err[key] = "This field is required");
-                    break;
-                case "vehicleType":
-                    !value && (err[key] = "This field is required");
-                    break;
-                case "nameOfOwner":
-                    !value && (err[key] = "This field is required");
                     break;
                 case "ownerPhoneNumber":
                     if (!value) {
                         err[key] = "This field is required";
-                    } else if(value &&!(/^[0-9]{10}$/.test(value))) {
-                        err[key] = "Invalid phone number";
+                    } else if (value && !phonePreg(form[key])) {
+                        err[key] = "Please Enter 10/11 digit mobile number or landline as 0<std code><phone number>";
                     }
                     break;
+                case "insuranceValidTill":
+                case "vehicleType":
+                case "nameOfOwner":
                 case "primaryDistrict":
                 case "secondaryDistrict":
                 case "thirdDistrict":
                     !value && (err[key] = "This field is required");
+                    break;
+                case 'pricePerKm':
+                    if (!form['hasFreeService']) {
+                        if (!value) {
+                            err[key] = 'This field is required';
+                        } else if (value && !/^[+]?\d+(\.\d+)?$/.test(value)) {
+                            err[key] = 'Invalid price';
+                        }
+                    }
                     break;
                 default:
                     break;
@@ -163,21 +167,21 @@ export const VehicleDetailsForm = (props: any) => {
     const handleClear = (e: any) => {
         e.preventDefault();
         setDistrictOptions({
-            primaryDistrict: [ ...allDistrictOptions ],
-            secondaryDistrict: [ ...allDistrictOptions ],
-            thirdDistrict: [ ...allDistrictOptions ],
+            primaryDistrict: [...allDistrictOptions],
+            secondaryDistrict: [...allDistrictOptions],
+            thirdDistrict: [...allDistrictOptions],
         });
         setErrors(initErr);
         setForm(initVehicleData);
         setVehicleObj(initVehicleData);
     }
-    
+
     return (
         <div>
             <Grid container alignContent="center" justify="center">
                 <Grid item xs={12}>
-                    <Card style={{marginBottom: '20px'}}>
-                        <CardHeader title="Vehicle Details"/>
+                    <Card style={{ marginBottom: '20px' }}>
+                        <CardHeader title="Vehicle Details" />
                         <form onSubmit={e => {
                             handleSubmit(e)
                         }} className={`${classes.formBottomPadding}`}>
@@ -189,7 +193,7 @@ export const VehicleDetailsForm = (props: any) => {
                                         placeholder="eg: KL13AB1234"
                                         variant="outlined"
                                         margin="dense"
-                                        InputLabelProps={{shrink: !!form.registrationNumber}}
+                                        InputLabelProps={{ shrink: !!form.registrationNumber }}
                                         value={form.registrationNumber}
                                         onChange={handleChange}
                                         errors={errors.registrationNumber}
@@ -197,7 +201,7 @@ export const VehicleDetailsForm = (props: any) => {
                                     />
                                     <div className={`nativeSelectMod ${classes.selectField}`}>
                                         <NativeSelectField
-                                            name= "vehicleType"
+                                            name="vehicleType"
                                             variant="outlined"
                                             options={vehicleTypes}
                                             value={form.vehicleType}
@@ -211,7 +215,7 @@ export const VehicleDetailsForm = (props: any) => {
 
                                     <div className={`nativeSelectMod ${classes.selectField}`}>
                                         <NativeSelectField
-                                            name= "insuranceValidTill"
+                                            name="insuranceValidTill"
                                             variant="outlined"
                                             options={validTill}
                                             value={form.insuranceValidTill}
@@ -229,24 +233,25 @@ export const VehicleDetailsForm = (props: any) => {
                                         variant="outlined"
                                         margin="dense"
                                         value={form.nameOfOwner}
-                                        InputLabelProps={{shrink: !!form.nameOfOwner}}
+                                        InputLabelProps={{ shrink: !!form.nameOfOwner }}
                                         onChange={handleChange}
                                         errors={errors.nameOfOwner}
                                     />
                                     <TextInputField
                                         label="Owner phone number"
                                         name="ownerPhoneNumber"
+                                        type="number"
                                         placeholder=""
                                         variant="outlined"
                                         margin="dense"
                                         value={form.ownerPhoneNumber}
-                                        InputLabelProps={{shrink: !!form.ownerPhoneNumber}}
+                                        InputLabelProps={{ shrink: !!form.ownerPhoneNumber }}
                                         onChange={handleChange}
                                         errors={errors.ownerPhoneNumber}
-                                        inputProps={{ maxLength: 10 }}
+                                        inputProps={{ maxLength: 11 }}
                                     />
                                     <Box display="flex" flexDirection="row" justifyItems="flex-start"
-                                         alignItems="center">
+                                        alignItems="center">
                                         <Checkbox
                                             checked={form.isSmartPhone}
                                             onChange={handleCheckboxFieldChange}
@@ -262,7 +267,7 @@ export const VehicleDetailsForm = (props: any) => {
                                     </Box>
                                     <div className={`nativeSelectMod ${classes.selectField}`}>
                                         <NativeSelectField
-                                            name= "primaryDistrict"
+                                            name="primaryDistrict"
                                             label="Primary district served"
                                             variant="outlined"
                                             options={districtOptions.primaryDistrict}
@@ -276,7 +281,7 @@ export const VehicleDetailsForm = (props: any) => {
                                     </div>
                                     <div className={`nativeSelectMod ${classes.selectField}`}>
                                         <NativeSelectField
-                                            name= "secondaryDistrict"
+                                            name="secondaryDistrict"
                                             label="Secondary district served"
                                             variant="outlined"
                                             options={districtOptions.secondaryDistrict}
@@ -289,14 +294,14 @@ export const VehicleDetailsForm = (props: any) => {
                                     </div>
                                     <div className={`nativeSelectMod ${classes.selectField}`}>
                                         <NativeSelectField
-                                            name= "thirdDistrict"
+                                            name="thirdDistrict"
                                             label="Third district served"
                                             variant="outlined"
                                             options={districtOptions.thirdDistrict}
                                             value={form.thirdDistrict}
                                             onChange={handleChange}
                                         />
-                                        <ErrorHelperText error={errors.thirdDistrict}/>
+                                        <ErrorHelperText error={errors.thirdDistrict} />
                                     </div>
                                     <Box>
                                         <Typography>
@@ -304,7 +309,7 @@ export const VehicleDetailsForm = (props: any) => {
                                         </Typography>
                                     </Box>
                                     <Box display="flex" flexDirection="row" justifyItems="flex-start"
-                                         alignItems="center">
+                                        alignItems="center">
                                         <Checkbox
                                             checked={form.hasOxygenSupply}
                                             onChange={handleCheckboxFieldChange}
@@ -315,7 +320,7 @@ export const VehicleDetailsForm = (props: any) => {
                                         </Typography>
                                     </Box>
                                     <Box display="flex" flexDirection="row" justifyItems="flex-start"
-                                         alignItems="center">
+                                        alignItems="center">
                                         <Checkbox
                                             checked={form.hasVentilator}
                                             onChange={handleCheckboxFieldChange}
@@ -326,7 +331,7 @@ export const VehicleDetailsForm = (props: any) => {
                                         </Typography>
                                     </Box>
                                     <Box display="flex" flexDirection="row" justifyItems="flex-start"
-                                         alignItems="center">
+                                        alignItems="center">
                                         <Checkbox
                                             checked={form.hasSuctionMachine}
                                             onChange={handleCheckboxFieldChange}
@@ -337,7 +342,7 @@ export const VehicleDetailsForm = (props: any) => {
                                         </Typography>
                                     </Box>
                                     <Box display="flex" flexDirection="row" justifyItems="flex-start"
-                                         alignItems="center">
+                                        alignItems="center">
                                         <Checkbox
                                             checked={form.hasDefibrillator}
                                             onChange={handleCheckboxFieldChange}
@@ -349,8 +354,7 @@ export const VehicleDetailsForm = (props: any) => {
                                     </Box>
                                 </Box>
                             </CardContent>
-
-                            <CardActions style={{justifyContent: "space-between"}}>
+                            <CardActions style={{ justifyContent: "space-between" }}>
                                 <Button
                                     color="default"
                                     type="button"
