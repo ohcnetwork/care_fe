@@ -5,7 +5,7 @@ import { ErrorHelperText, NativeSelectField, TextInputField } from "../Common/He
 import SaveIcon from '@material-ui/icons/Save';
 import { navigate } from 'hookrouter';
 import { BED_TYPES } from "./constants";
-import { CapacityModal } from './modals';
+import { CapacityModal } from './models';
 import AppMessage from "../Common/AppMessage";
 import { Loading } from "../../Components/Common/Loading";
 import { createCapacity, getCapacity } from "../../Redux/actions";
