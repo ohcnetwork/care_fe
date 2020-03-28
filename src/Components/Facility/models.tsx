@@ -24,8 +24,8 @@ export interface DoctorModal {
     count?: number;
 }
 
-export interface BedType {
+export interface OptionsType {
     id: number;
     text: string; 
-    disabled: boolean;
+    disabled?: boolean;
 }

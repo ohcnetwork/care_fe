@@ -5,10 +5,10 @@ export const FACILITY_TYPES = {
 };
 
 export const BED_TYPES = [
-    { "id": 1, "text": "Normal", disabled: false },
-    { "id": 2, "text": "Hostel", disabled: false },
-    { "id": 10, "text": "ICU", disabled: false },
-    { "id": 20, "text": "Ventilator", disabled: false }
+    { "id": 1, "text": "Normal" },
+    { "id": 2, "text": "Hostel" },
+    { "id": 10, "text": "ICU" },
+    { "id": 20, "text": "Ventilator" }
 ];
 
 export const DOCTOR_SPECIALIZATION = [
