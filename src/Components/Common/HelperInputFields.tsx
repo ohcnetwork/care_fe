@@ -91,15 +91,15 @@ export const TextInputField = (props: TextFieldPropsExtended) => {
 };
 
 export const MultilineInputField = (props: TextFieldPropsExtended) => {
-    const { placeholder, onChange, value, name, variant, errors, label } = props;
+    const { placeholder, onChange, value, name, variant, errors, label, margin, rows } = props;
     return (
         <div>
             <TextField
                 multiline
-                rows={5}
+                rows={rows}
                 fullWidth
                 variant={variant}
-                margin="normal"
+                margin={margin}
                 label={label}
                 placeholder={placeholder}
                 onChange={onChange}
@@ -282,11 +282,11 @@ export const ShowCheckboxOptions = (props: OptionsProps) => {
     return (
         <div>
             {options.map((opt: any, i: number) => {
-                const checked = values.findIndex((val: any) => val.answerId == opt.id);
+                const checked = values.indexOf(opt.id) > -1;
                 return (
                     <div key={i}>
                         <Checkbox
-                            checked={checked !== -1}
+                            checked={checked}
                             value={opt.id}
                             onChange={onChange}
                         /> {opt.text}
@@ -298,13 +298,13 @@ export const ShowCheckboxOptions = (props: OptionsProps) => {
 };
 
 export const NativeSelectField = (props: DefaultNativeSelectInputProps) => {
-    const { options, variant, placeholder, label } = props;
+    const { options, variant, label } = props;
     return (
         <FormControl style={{ width: "100%" }} variant={variant}>
             {label && (<Box>{label}</Box>)}
             <NativeSelect {...props}>
                 {options.map((opt: any) => {
-                    return <option value={opt.id} key={opt.id}>{opt.text}</option>
+                    return <option value={opt.id} key={opt.id} disabled={opt.disabled}>{opt.text}</option>
                 })}
             </NativeSelect>
         </FormControl>

@@ -5,24 +5,31 @@ import { ErrorHelperText, NativeSelectField, TextInputField } from "../Common/He
 import SaveIcon from '@material-ui/icons/Save';
 import { navigate } from 'hookrouter';
 import { BED_TYPES } from "./constants";
-import { CapacityModal } from './modals';
+import { CapacityModal, OptionsType } from './models';
 import AppMessage from "../Common/AppMessage";
 import { Loading } from "../../Components/Common/Loading";
-import { createCapacity, getCapacity } from "../../Redux/actions";
+import { createCapacity, getCapacity, listCapacity } from "../../Redux/actions";
 
 interface BedCapacityProps extends CapacityModal {
     facilityId: number;
 }
+
+const initBedTypes: Array<OptionsType> = [{
+    id: 0,
+    text: 'Select',
+}, ...BED_TYPES];
 
 const initForm: any = {
     bedType: "",
     totalCapacity: "",
     currentOccupancy: ""
 };
+
 const initialState = {
     form: { ...initForm },
-    errors: { ...initForm }
+    errors: { ...initForm },
 };
+
 const bedCountReducer = (state = initialState, action: any) => {
     switch (action.type) {
         case "set_form": {
@@ -36,51 +43,71 @@ const bedCountReducer = (state = initialState, action: any) => {
                 ...state,
                 errors: action.errors
             }
-
         }
         default:
             return state
     }
 };
 
-const bedTypes = [{
-    id: 0,
-    text: 'Select',
-}, ...BED_TYPES]
-
 export const BedCapacityForm = (props: BedCapacityProps) => {
     const dispatchAction: any = useDispatch();
     const { facilityId, id } = props;
     const [state, dispatch] = useReducer(bedCountReducer, initialState);
     const [showAppMessage, setAppMessage] = useState({ show: false, message: "", type: "" });
+    const [isLastOptionType, setIsLastOptionType] = useState(false);
+    const [bedTypes, setBedTypes] = useState<Array<OptionsType>>(initBedTypes);
     const [isLoading, setIsLoading] = useState(false);
 
     const headerText = !id ? "Add Bed Capacity" : "Edit Bed Capacity";
-    const buttonText = !id ? "Save" : "Update";
+    const buttonText = !id ? `Save ${!isLastOptionType ? "& Add More" : ""}` : "Update";
 
     const fetchData = useCallback(async () => {
-        if (id) {
-            setIsLoading(true);
+        setIsLoading(true);
+        if (!id) {
+            // Add Form functionality
+            const capacityRes = await dispatchAction(listCapacity({}, { facilityId }));
+            if (capacityRes && capacityRes.data) {
+                const existingData = capacityRes.data.results;
+                // redirect to listing page if all options are diabled
+                if (existingData.length === BED_TYPES.length) {
+                    navigate(`/facility/${facilityId}`);
+                    return;
+                }
+                // disable existing bed types
+                const updatedBedTypes = initBedTypes.map((type: OptionsType) => {
+                    const isExisting = existingData.find((i: CapacityModal) => i.room_type === type.id);
+                    return {
+                        ...type,
+                        disabled: !!isExisting,
+                    }
+                });
+                setBedTypes(updatedBedTypes);
+            }
+        } else {
+            // Edit Form functionality
             const res = await dispatchAction(getCapacity(id, { facilityId }));
             if (res.data) {
-                dispatch({ 
-                        type: "set_form", 
-                        form: {
-                            bedType: res.data.room_type,
-                            totalCapacity: res.data.total_capacity,
-                            currentOccupancy: res.data.current_capacity,                    
-                        }
-                    })
-            } else {
-                navigate(`/facility/${facilityId}`);
+                dispatch({
+                    type: "set_form",
+                    form: {
+                        bedType: res.data.room_type,
+                        totalCapacity: res.data.total_capacity,
+                        currentOccupancy: res.data.current_capacity,
+                    }
+                })
             }
-            setIsLoading(false);
         }
+        setIsLoading(false);
     }, [dispatchAction, facilityId, id]);
 
     useEffect(() => {
         fetchData();
     }, [dispatch, fetchData, id]);
+
+    useEffect(() => {
+        const lastBedType = bedTypes.filter((i: OptionsType) => i.disabled).length === BED_TYPES.length - 1;
+        setIsLastOptionType(lastBedType);
+    }, [bedTypes]);
 
     const handleChange = (e: any) => {
         let form = { ...state.form };
@@ -94,6 +121,9 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
         Object.keys(state.form).forEach((field, i) => {
             if (!state.form[field]) {
                 errors[field] = "Field is required";
+                invalidForm = true;
+            } else if (field === "currentOccupancy" && Number(state.form[field]) > Number(state.form.totalCapacity)) {
+                errors[field] = "Occupied must be less than or equal to total capacity";
                 invalidForm = true;
             }
         });
@@ -117,17 +147,29 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
             };
             const res = await dispatchAction(createCapacity(id, data, { facilityId }));
             setIsLoading(false);
-            if (res.data) {
-                dispatch({ type: "set_form", form: initForm })
+            if (res.status !== 201 || !res.data) {
+                setAppMessage({ show: true, message: "Something went wrong..!", type: "error" })
+            } else {
+                // disable last added bed type
+                const updatedBedTypes = bedTypes.map((type: OptionsType) => {
+                    return {
+                        ...type,
+                        disabled: (res.data.room_type !== type.id) ? type.disabled : true,
+                    }
+                });
+                setBedTypes(updatedBedTypes);
+                // reset form
+                dispatch({ type: "set_form", form: initForm });
+                // show success message
                 if (!id) {
                     setAppMessage({ show: true, message: "Bed capacity added successfully", type: "success" });
-                    navigate(`/facility/${facilityId}/doctor`);
+                    if (isLastOptionType) {
+                        navigate(`/facility/${facilityId}/doctor`);
+                    }
                 } else {
                     setAppMessage({ show: true, message: "Bed capacity updated successfully", type: "success" });
                     navigate(`/facility/${facilityId}`);
                 }
-            } else {
-                setAppMessage({ show: true, message: "Error", type: "error" })
             }
         }
     };
@@ -153,6 +195,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
                                 value={state.form.bedType}
                                 options={bedTypes}
                                 onChange={handleChange}
+                                disabled={!!id}
                             />
                             <ErrorHelperText
                                 error={state.errors.bedType}
@@ -190,7 +233,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
                                     color="default"
                                     variant="contained"
                                     type="button"
-                                    onClick={(e) => handleCancel()}
+                                    onClick={handleCancel}
                                 >Cancel</Button>
                                 <Button
                                     color="primary"

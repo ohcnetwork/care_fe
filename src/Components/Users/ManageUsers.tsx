@@ -87,7 +87,7 @@ export default function ManageUsers(props: any) {
     const dispatch: any = useDispatch();
     const initialData: any[] = [];
     let manageUsers: any = null;
-    const [data, setData] = useState(initialData);
+    const [users, setUsers] = useState(initialData);
     const [isLoading, setIsLoading] = useState(false);
     const [totalCount, setTotalCount] = useState(0);
 
@@ -99,8 +99,8 @@ export default function ManageUsers(props: any) {
     const fetchData = useCallback(async (page, limit, offset) => {
         const res = await dispatch(getUserList({ page, limit, offset }));
         if (res && res.data) {
-            setData(res.results);
-            setTotalCount(res.count);
+            setUsers(res.data.results);
+            setTotalCount(res.data.count);
         }
         setIsLoading(false);
     }, [dispatch]);
@@ -116,8 +116,8 @@ export default function ManageUsers(props: any) {
 
 
     let userList: any[] = [];
-    if (data && data.length) {
-        userList = data.map((user: any, idx: number) => {
+    if (users && users.length) {
+        userList = users.map((user: any, idx: number) => {
             return (
                 <Grid item xs={12} md={3} key={`usr_${user.id}`}
                     className={classes.root}>
@@ -147,13 +147,13 @@ export default function ManageUsers(props: any) {
         });
     }
 
-    if (isLoading || !data) {
+    if (isLoading || !users) {
         manageUsers = (
             <Loading />
         );
-    } else if (data && data.length) {
+    } else if (users && users.length) {
         manageUsers = userList;
-    } else if (data && data.length === 0) {
+    } else if (users && users.length === 0) {
         manageUsers = (
             <Grid item xs={12} md={12} className="textMarginCenter">
                 <h5> No Users Found</h5>
@@ -168,7 +168,7 @@ export default function ManageUsers(props: any) {
             </TitleHeader>
             <Grid container>
                 {manageUsers}
-                {(data && data.length > 0 && totalCount > limit) && (
+                {(users && users.length > 0 && totalCount > limit) && (
                     <Grid container className={`w3-center ${classes.paginateTopPadding}`}>
                         <Pagination
                             cPage={currentPage}

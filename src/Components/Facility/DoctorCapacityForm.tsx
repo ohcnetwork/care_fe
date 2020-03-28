@@ -5,23 +5,30 @@ import { TextInputField, ErrorHelperText, NativeSelectField } from '../Common/He
 import { navigate } from 'hookrouter';
 import { Loading } from "../../Components/Common/Loading";
 import AppMessage from "../Common/AppMessage";
-import { createDoctor, getDoctor } from "../../Redux/actions";
+import { createDoctor, getDoctor, listDoctor } from "../../Redux/actions";
 import SaveIcon from '@material-ui/icons/Save';
-import { DoctorModal } from './modals';
+import { DoctorModal, OptionsType } from './models';
 import { DOCTOR_SPECIALIZATION } from './constants';
 
 interface DoctorCapacityProps extends DoctorModal {
     facilityId: number;
 }
 
+const initDoctorTypes: Array<OptionsType> = [{
+    id: 0,
+    text: 'Select',
+}, ...DOCTOR_SPECIALIZATION];
+
 const initForm: any = {
     area: "",
     count: ""
 };
+
 const initialState = {
     form: { ...initForm },
     errors: { ...initForm }
 };
+
 const doctorCapacityReducer = (state = initialState, action: any) => {
     switch (action.type) {
         case "set_form": {
@@ -41,38 +48,60 @@ const doctorCapacityReducer = (state = initialState, action: any) => {
     }
 }
 
-const doctorTypes = [{
-    id: 0,
-    text: 'Select',
-}, ...DOCTOR_SPECIALIZATION];
-
-
 export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
     const dispatchAction: any = useDispatch();
     const { facilityId, id } = props;
     const [state, dispatch] = useReducer(doctorCapacityReducer, initialState);
     const [showAppMessage, setAppMessage] = useState({ show: false, message: "", type: "" });
     const [isLoading, setIsLoading] = useState(false);
+    const [isLastOptionType, setIsLastOptionType] = useState(false);
+    const [doctorTypes, setDoctorTypes] = useState<Array<OptionsType>>(initDoctorTypes);
 
     const headerText = !id ? "Add Doctor Capacity" : "Edit Doctor Capacity";
-    const buttonText = !id ? "Save" : "Update";
+    const buttonText = !id ? `Save ${!isLastOptionType ? "& Add More" : ""}` : "Update";
 
     const fetchData = useCallback(async () => {
-        if (id) {
-            setIsLoading(true);
+        setIsLoading(true);
+        if (!id) {
+            // Add Form functionality
+            const doctorRes = await dispatchAction(listDoctor({}, { facilityId }));
+            if (doctorRes && doctorRes.data) {
+                const existingData = doctorRes.data.results;
+                // redirect to listing page if all options are diabled
+                if (existingData.length === DOCTOR_SPECIALIZATION.length) {
+                    navigate(`/facility/${facilityId}`);
+                    return;
+                }
+                // disable existing doctor types
+                const updatedDoctorTypes = initDoctorTypes.map((type: OptionsType) => {
+                    const isExisting = existingData.find((i: DoctorModal) => i.area === type.id);
+                    return {
+                        ...type,
+                        disabled: !!isExisting,
+                    }
+                });
+                setDoctorTypes(updatedDoctorTypes);
+            }
+        } else {
+            // Edit Form functionality
             const res = await dispatchAction(getDoctor(id, { facilityId }));
             if (res.data) {
                 dispatch({ type: "set_form", form: { area: res.data.area, count: res.data.count } })
             } else {
                 navigate(`/facility/${facilityId}`);
             }
-            setIsLoading(false);
         }
+        setIsLoading(false);
     }, [dispatchAction, facilityId, id]);
 
     useEffect(() => {
         fetchData();
     }, [dispatch, fetchData, id]);
+
+    useEffect(() => {
+        const lastDoctorType = doctorTypes.filter((i: OptionsType) => i.disabled).length === DOCTOR_SPECIALIZATION.length - 1;
+        setIsLastOptionType(lastDoctorType);
+    }, [doctorTypes]);
 
     const validateData = () => {
         let errors = { ...initForm };
@@ -114,16 +143,29 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
             };
             const res = await dispatchAction(createDoctor(id, data, { facilityId }));
             setIsLoading(false);
-            if (res.data) {
-                dispatch({ type: "set_form", form: initForm })
+            if (res.status !== 201 || !res.data) {
+                setAppMessage({ show: true, message: "Something went wrong..!", type: "error" })
+            } else {
+                // disable last added bed type
+                const updatedDoctorTypes = doctorTypes.map((type: OptionsType) => {
+                    return {
+                        ...type,
+                        disabled: (res.data.area !== type.id) ? type.disabled : true,
+                    }
+                });
+                setDoctorTypes(updatedDoctorTypes);
+                // reset form
+                dispatch({ type: "set_form", form: initForm });
+                // show success message
                 if (!id) {
                     setAppMessage({ show: true, message: "Doctor count added successfully", type: "success" });
+                    if (isLastOptionType) {
+                        navigate(`/facility/${facilityId}`);
+                    }
                 } else {
                     setAppMessage({ show: true, message: "Doctor count updated successfully", type: "success" });
+                    navigate(`/facility/${facilityId}`);
                 }
-                navigate(`/facility/${facilityId}`);
-            } else {
-                setAppMessage({ show: true, message: "Error", type: "error" })
             }
         }
     }
@@ -146,6 +188,7 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
                                 value={state.form.area}
                                 options={doctorTypes}
                                 onChange={handleChange}
+                                disabled={!!id}
                             />
                             <ErrorHelperText
                                 error={state.errors.area}

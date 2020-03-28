@@ -3,11 +3,17 @@ import { Box, Button, Card, CardHeader, Grid, CardContent, CardActions, Checkbox
 import { TextInputField } from '../Common/HelperInputFields';
 import { useDispatch } from "react-redux";
 import { postAmbulance } from "../../Redux/actions";
-import { isEmpty, get } from "lodash";
+import { isEmpty } from "lodash";
 import { navigate } from 'hookrouter';
+import AppMessage from "../Common/AppMessage"
 import SaveIcon from '@material-ui/icons/Save';
 import { AGREE_CONSENT, AMBULANCE_FREE_SERVICE_CONSENT, AMBULANCE_SERVICE_FEE_TEXT } from "./constants";
-import { phonePreg } from "../../Constants/common";
+import { vehicleForm } from "./VehicleDetailsForm";
+
+interface DriverDetailsProps {
+  classes: any;
+  vehicleInfo: vehicleForm;
+};
 
 interface formFields {
   driverName1: string;
@@ -16,8 +22,8 @@ interface formFields {
   driverName2: string;
   cellNumber2: string;
   isSmartPhone2: boolean;
-  pricePerKm: number;
   hasFreeService: boolean;
+  pricePerKm: string;
   agreeConsent: boolean;
 }
 
@@ -28,18 +34,20 @@ const initFormData: formFields = {
   driverName2: '',
   cellNumber2: '',
   isSmartPhone2: false,
-  pricePerKm: 0,
   hasFreeService: true,
+  pricePerKm: '',
   agreeConsent: false,
 };
 
-export const DriverDetailsForm = (props: any) => {
-  const { vehicleInfo } = props;
+export const DriverDetailsForm = (props: DriverDetailsProps) => {
+  const { vehicleInfo, classes } = props;
   const dispatch: any = useDispatch();
   const initForm: formFields = { ...initFormData };
   const initErr: any = {};
   const [form, setForm] = useState<any>(initForm);
   const [errors, setErrors] = useState<any>(initErr);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showAppMessage, setAppMessage] = useState({ show: false, message: "", type: "" });
 
   const handleChange = (e: any) => {
 
@@ -61,17 +69,27 @@ export const DriverDetailsForm = (props: any) => {
       const value = form[key];
       switch (key) {
         case 'driverName1':
-        case 'driverName2':
           if (!value) {
             err[key] = "This field is required"
           }
           break;
         case 'cellNumber1':
-        case 'cellNumber2':
           if (!value) {
             err[key] = "This field is required"
-          } else if (value && !phonePreg(form[key])) {
-            err[key] = "Please Enter 10/11 digit mobile number or landline as 0<std code><phone number>";
+          } else if (value && !(/^[0-9]{10}$/.test(form.cellNumber1))) {
+            err[key] = "Invalid phone number";
+          }
+          break;
+        case 'cellNumber2':
+          if (form.driverName2 && !value) {
+            err[key] = "This field is required"
+          } else if (form.driverName2 && value && !(/^[0-9]{10}$/.test(form.cellNumber2))) {
+            err[key] = "Invalid phone number";
+          }
+          break;
+        case 'pricePerKm':
+          if (!form.hasFreeService && !value) {
+            err[key] = "This field is required"
           }
           break;
         default: break;
@@ -89,7 +107,7 @@ export const DriverDetailsForm = (props: any) => {
     setForm({ ...form, [name]: checked });
   };
 
-  const handleSubmit = (e: any) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
     const valid = validateData();
     if (valid && vehicleInfo) {
@@ -100,40 +118,40 @@ export const DriverDetailsForm = (props: any) => {
             "phone_number": form.cellNumber1,
             "is_smart_phone": form.isSmartPhone1
           },
-          {
-            "name": form.driverName2,
-            "phone_number": form.cellNumber2,
-            "is_smart_phone": form.isSmartPhone2
-          }
         ],
         "vehicle_number": vehicleInfo.registrationNumber ? String(vehicleInfo.registrationNumber).toUpperCase() : "",
-        "vehicle_type": vehicleInfo.vehicleType ? vehicleInfo.vehicleType : null,
+        "vehicle_type": vehicleInfo.vehicleType ? vehicleInfo.vehicleType : undefined,
         "owner_name": vehicleInfo.nameOfOwner,
         "owner_phone_number": vehicleInfo.ownerPhoneNumber,
         "owner_is_smart_phone": vehicleInfo.isSmartPhone,
-        "primary_district": vehicleInfo.primaryDistrict ? vehicleInfo.primaryDistrict : null,
-        "secondary_district": vehicleInfo.secondaryDistrict ? vehicleInfo.secondaryDistrict : null,
-        "third_district": vehicleInfo.thirdDistrict ? vehicleInfo.thirdDistrict : null,
+        "primary_district": vehicleInfo.primaryDistrict ? Number(vehicleInfo.primaryDistrict) : undefined,
+        "secondary_district": vehicleInfo.secondaryDistrict ? Number(vehicleInfo.secondaryDistrict) : undefined,
+        "third_district": vehicleInfo.thirdDistrict ? Number(vehicleInfo.thirdDistrict) : undefined,
         "has_oxygen": vehicleInfo.hasOxygenSupply,
         "has_ventilator": vehicleInfo.hasVentilator,
         "has_suction_machine": vehicleInfo.hasSuctionMachine,
         "has_defibrillator": vehicleInfo.hasDefibrillator,
-        "insurance_valid_till_year": vehicleInfo.insuranceValidTill ? vehicleInfo.insuranceValidTill : null,
-        "has_free_service": form.hasFreeService,
-        "price_per_km": form.pricePerKm ? Number(form.pricePerKm) : null,
+        "insurance_valid_till_year": vehicleInfo.insuranceValidTill ? Number(vehicleInfo.insuranceValidTill) : undefined,
+        "has_free_service": Boolean(form.hasFreeService),
+        "price_per_km": !form.hasFreeService ? Number(form.pricePerKm) : undefined,
       };
 
-      dispatch(postAmbulance(ambulanceData)).then((resp: any) => {
-        console.log('resp: ', resp);
-        const res = get(resp, 'data', null);
-        const statusCode = get(resp, 'status', '');
-        if (res && statusCode === 401) {
-          alert('Something went wrong..!');
-        } else if (res && statusCode === 201) {
-          alert('Ambulance Added Successfully');
-          navigate("/")
-        }
-      })
+      if (!!form.driverName2) {
+        ambulanceData.drivers.push({
+          "name": form.driverName2,
+          "phone_number": form.cellNumber2,
+          "is_smart_phone": form.isSmartPhone2
+        })
+      }
+      setIsLoading(true);
+      const res = await dispatch(postAmbulance(ambulanceData))
+      if (res.status !== 201 || !res.data) {
+        setAppMessage({ show: true, message: "Something went wrong..!", type: "error" });
+        setIsLoading(false);
+      } else {
+        setAppMessage({ show: true, message: "Ambulance added successfully", type: "success" });
+        setTimeout(()=> navigate("/"), 3000);
+      }
     }
   };
 
@@ -145,8 +163,9 @@ export const DriverDetailsForm = (props: any) => {
 
   return (
     <div>
+      <AppMessage open={showAppMessage.show} type={showAppMessage.type} message={showAppMessage.message} handleClose={() => setAppMessage({ show: false, message: "", type: "" })} handleDialogClose={() => setAppMessage({ show: false, message: "", type: "" })} />
       <Grid container alignContent="center" justify="center">
-        <Grid item xs={12} >
+        <Grid item xs={12} className={`${classes.formBottomPadding}`}>
           <Card>
             <CardHeader title="Driver Details" />
             <form onSubmit={(e) => handleSubmit(e)}>
@@ -172,7 +191,7 @@ export const DriverDetailsForm = (props: any) => {
                   value={form.cellNumber1}
                   onChange={handleChange}
                   errors={errors.cellNumber1}
-                  inputProps={{ maxLength: 11 }}
+                  inputProps={{ maxLength: 10 }}
                 />
 
                 <Checkbox
@@ -203,7 +222,7 @@ export const DriverDetailsForm = (props: any) => {
                   value={form.cellNumber2}
                   onChange={handleChange}
                   errors={errors.cellNumber2}
-                  inputProps={{ maxLength: 11 }}
+                  inputProps={{ maxLength: 10 }}
                 />
 
                 <Box>
@@ -214,7 +233,6 @@ export const DriverDetailsForm = (props: any) => {
                   />{" "}
                   Is smart phone
                 </Box>
-
 
                 <Box>
                   <Typography>
@@ -245,6 +263,7 @@ export const DriverDetailsForm = (props: any) => {
                     />
                   </Box>
                 )}
+
                 <h4>Declaration</h4>
                 <Box display="flex">
                   <Box>
@@ -264,6 +283,7 @@ export const DriverDetailsForm = (props: any) => {
                   color="default"
                   type="button"
                   onClick={e => handleClear(e)}
+                  disabled={isLoading}
                 >
                   Clear
                 </Button>
@@ -273,7 +293,7 @@ export const DriverDetailsForm = (props: any) => {
                   type="submit"
                   onClick={(e) => handleSubmit(e)}
                   startIcon={<SaveIcon>save</SaveIcon>}
-                  disabled={!form.agreeConsent}
+                  disabled={!form.agreeConsent || isLoading}
                 >
                   Save Details
                 </Button>
