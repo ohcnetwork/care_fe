@@ -75,8 +75,15 @@ export const DriverDetailsForm = (props:any) => {
             err[key] = "Invalid phone number";
           }
           break;
+        // case 'driverName2':
+        //   if (!value) {
+        //     err[key] = "This field is required"
+        //   }
+        //   break;
         case 'cellNumber2':
-          if(value && !(/^[0-9]{10}$/.test(form.cellNumber2))){
+          if (form.driverName2 && !value) {
+            err[key] = "This field is required"
+          }else if(form.driverName2 && value && !(/^[0-9]{10}$/.test(form.cellNumber2))){
             err[key] = "Invalid phone number";
           }
           break;
