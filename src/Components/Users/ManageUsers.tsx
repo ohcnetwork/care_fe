@@ -99,8 +99,8 @@ export default function ManageUsers(props: any) {
     const fetchData = useCallback(async (page, limit, offset) => {
         const res = await dispatch(getUserList({ page, limit, offset }));
         if (res && res.data) {
-            setUsers(res.results);
-            setTotalCount(res.count);
+            setUsers(res.data.results);
+            setTotalCount(res.data.count);
         }
         setIsLoading(false);
     }, [dispatch]);
