@@ -261,8 +261,7 @@ export const VehicleDetailsForm = (props: any) => {
                                                     checked={form.isSmartPhone}
                                                     onChange={handleCheckboxFieldChange}
                                                     name="isSmartPhone"
-                                                />} label="Do you have a smart phone
-                                                ?">
+                                                />} label="I have a smart phone.">
                                             </FormControlLabel>
                                             </FormGroup>
                                         

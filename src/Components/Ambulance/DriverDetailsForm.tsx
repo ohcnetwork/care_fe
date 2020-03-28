@@ -7,6 +7,8 @@ import { isEmpty, get } from "lodash";
 import { navigate } from 'hookrouter';
 import SaveIcon from '@material-ui/icons/Save';
 import { AGREE_CONSENT } from "./constants";
+import FormGroup from '@material-ui/core/FormGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 
 interface formFields {
   driverName1: string;
@@ -187,13 +189,16 @@ export const DriverDetailsForm = (props:any) => {
                   errors={errors.cellNumber1}
                   inputProps={{ maxLength: 10 }}
                 />
-
-                <Checkbox
-                  checked={form.isSmartPhone1}
-                  onChange={handleCheckboxFieldChange}
-                  name="isSmartPhone1"
-                />{" "}
-                Is smart phone
+                  <FormGroup>
+                    <FormControlLabel
+                       control={<Checkbox
+                        checked={form.isSmartPhone1}
+                         onChange={handleCheckboxFieldChange}
+                          name="isSmartPhone1"
+                          />} label="Is this a Smart Phone?">
+                          </FormControlLabel>
+                    </FormGroup>
+                
 
                 <h4>Driver 2</h4>
                 <TextInputField
@@ -220,26 +225,30 @@ export const DriverDetailsForm = (props:any) => {
                 />
 
                 <Box>
-                  <Checkbox
-                    checked={form.isSmartPhone2}
-                    onChange={handleCheckboxFieldChange}
-                    name="isSmartPhone2"
-                  />{" "}
-                  Is smart phone
+                <FormGroup>
+                    <FormControlLabel
+                       control={<Checkbox
+                        checked={form.isSmartPhone2}
+                        onChange={handleCheckboxFieldChange}
+                        name="isSmartPhone2"
+                      />} label="Is this a Smart Phone?">
+                          </FormControlLabel>
+                    </FormGroup>
                 </Box>
 
                 <h4>Declaration</h4>
                 <Box display="flex">
-                  <Box>
-                    <Checkbox
-                      checked={form.agreeConsent}
-                      onChange={handleCheckboxFieldChange}
-                      name="agreeConsent"
-                      style={{padding: 0}}
-                    />{" "}
+                  <FormGroup>
+                                            <FormControlLabel
+                                                control={<Checkbox
+                                                  checked={form.agreeConsent}
+                                                  onChange={handleCheckboxFieldChange}
+                                                  name="agreeConsent"
+                                                />} label={<Box fontSize={12} textAlign="justify" ml={1}>{AGREE_CONSENT}</Box>}>
+                                            </FormControlLabel>
+                                            </FormGroup>
                   </Box>
-                  <Box fontSize={12} textAlign="justify" ml={1}>{AGREE_CONSENT}</Box>
-                </Box>
+                  
               </CardContent>
 
               <CardActions className="padding16" style={{justifyContent: "space-between"}}>
