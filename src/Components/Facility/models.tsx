@@ -1,7 +1,7 @@
 export interface FacilityModal {
     id?: number;
     name?: string;
-    district?: string;
+    district?: number;
     facility_type?: string;
     address?: string;
     location?: {
@@ -22,4 +22,10 @@ export interface DoctorModal {
     id?: number;
     area?: number; 
     count?: number;
+}
+
+export interface BedType {
+    id: number;
+    text: string; 
+    disabled: boolean;
 }
