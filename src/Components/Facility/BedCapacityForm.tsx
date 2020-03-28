@@ -203,9 +203,6 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
                                     variant="contained"
                                     type="submit"
                                     onClick={(e) => handleSubmit(e, true)}
-                                    // onClick={(e) => [setAddMore(true), setTimeout(() => {
-                                    //     handleSubmit(e)
-                                    // }, 300)]}
                                     startIcon={<SaveIcon >save</SaveIcon>}
                                 >Save && Add More</Button>}
                                 <Button
