@@ -123,7 +123,7 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
                 }
                 navigate(`/facility/${facilityId}`);
             } else {
-                setAppMessage({ show: true, message: "Error", type: "error" })
+                setAppMessage({ show: true, message: "Something went wrong..!", type: "error" })
             }
         }
     }
