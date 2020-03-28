@@ -161,10 +161,16 @@ export const getDoctor = (id: number, urlParam: object) => {
     return fireRequest('getDoctor', [id], {}, urlParam);
 };
 
-export const getPatients = (paginate: object) => {
-    return fireRequest('getPatients', [], paginate);
+export const getAllPatient = (paginate: object) => {
+    return fireRequest('patientList', [], paginate);
 };
 
-export const addPatient = (form: object) => {
+export const createPatient = (form: object) => {
     return fireRequest('addPatient', [], form)
+};
+export const getPatient = (urlParam: object) => {
+    return fireRequest('getPatient', [],{}, urlParam);
+};
+export const updatePatient = (form: object, urlParam: object)=>{
+    return fireRequest('updatePatient', [], form, urlParam)
 };

@@ -232,6 +232,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                             <Grid container justify="center" >
                                 <Grid item xs={12}>
                                     <MultilineInputField
+                                        rows={5}
                                         name="address"
                                         label="Hospital Address*"
                                         placeholder=""
