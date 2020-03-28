@@ -46,7 +46,7 @@ export const Login = () => {
     const [form, setForm] = useState(initForm);
     const [errors, setErrors] = useState(initErr);
     const [isCaptchaEnabled, setCaptcha] = useState(false);
-    
+
     const captchaKey = process.env.GOOGLE_KEY ? process.env.GOOGLE_KEY : '';
 
     const handleChange = (e: any) => {
@@ -191,9 +191,6 @@ export const Login = () => {
                     </Card>
                 </Grid>
             </Grid>
-            </Box>
-            <Box className={classes.imgSection} display="flex" flexDirection="column" justifyContent="center" alignContent="center">
-                <img src="https://care-coronasafe.s3.amazonaws.com/static/images/logos/ksdma_logo.png" alt="Care Logo" className={classes.logoImg}/>
             </Box>
         </Box>
 
