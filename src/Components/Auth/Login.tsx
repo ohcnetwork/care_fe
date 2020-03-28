@@ -1,12 +1,20 @@
-import {useDispatch} from "react-redux";
-import React, {useState} from "react";
-import {postLogin} from "../../Redux/actions";
-import { A, navigate} from 'hookrouter';
+import React, { useState } from "react";
+import { useDispatch } from "react-redux";
+import { postLogin } from "../../Redux/actions";
+import { A, navigate } from 'hookrouter';
 import {makeStyles} from "@material-ui/styles";
-import { Box, Button, Card, CardActions, CardContent, CardHeader, Grid} from '@material-ui/core';
+import {
+    Box,
+    Button,
+    Card,
+    CardActions,
+    CardContent,
+    CardHeader,
+    Grid
+} from '@material-ui/core';
 import {TextInputField} from '../Common/HelperInputFields';
 import { get } from 'lodash';
-import {PublicDashboard} from "../Dashboard/PublicDashboard";
+import { PublicDashboard } from "../Dashboard/PublicDashboard";
 
 const useStyles = makeStyles(theme => ({
     formTop: {
@@ -51,6 +59,7 @@ export const Login = () => {
         }
         setForm(fieldValue);
     };
+
     const validateData = () => {
         let hasError = false;
         const err = Object.assign({}, errors);
@@ -72,6 +81,7 @@ export const Login = () => {
         }
         return form;
     };
+
     const handleSubmit = (e: any) => {
         e.preventDefault();
         const valid = validateData();
@@ -130,7 +140,6 @@ export const Login = () => {
                                     errors={errors.password}
                                 />
                             </CardContent>
-
                             <CardActions className="padding16">
                                 {/*<A href="/forgot-password">Forgot password ?</A>*/}
                                 <Button
