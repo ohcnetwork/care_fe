@@ -15,6 +15,7 @@ import { CareCenterJoinForm } from "../Components/Facility/CareCenterJoinForm";
 import { BedCapacityForm } from '../Components/Facility/BedCapacityForm';
 import { DoctorCapacityForm } from '../Components/Facility/DoctorCapacityForm';
 import {PatientManager} from "../Components/Patient/ManagePatients";
+import { PatientHome } from '../Components/Patient/PatientHome';
 
 const routes = {
     '/': () => <PrivateDashboard />,
@@ -26,9 +27,11 @@ const routes = {
     '/facility/:facilityId': ({ facilityId }: any) => <FacilityHome facilityId={facilityId} />,
     '/facility/:facilityId/bed': ({ facilityId }: any) => <BedCapacityForm facilityId={facilityId} />,
     '/facility/:facilityId/doctor': ({ facilityId }: any) => <DoctorCapacityForm facilityId={facilityId} />,
-    '/facility/:facilityId/patients': () => <PatientManager/>,
+    '/facility/:facilityId/patients': ({ facilityId }: any) => <PatientManager facilityId={facilityId} />,
     '/facility/:facilityId/patient': ({ facilityId }: any) => <PatientRegister facilityId={facilityId} />,
-    '/facility/:facilityId/patient/:id': ({ facilityId, id}: any) => <PatientRegister facilityId={facilityId} id={id} />,
+    '/facility/:facilityId/patient/:id': ({ facilityId, id}: any) => <PatientHome facilityId={facilityId} id={id} />,
+    '/facility/:facilityId/patient/:id/update': ({ facilityId, id}: any) => <PatientRegister facilityId={facilityId} id={id} />,
+    '/facility/:facilityId/patient/:id/treatment': ({ facilityId, id}: any) => <TreatmentForm facilityId={facilityId} id={id} />,
     '/facility/:facilityId/bed/:id': ({ facilityId, id }: any) => <BedCapacityForm facilityId={facilityId} id={id} />,
     '/facility/:facilityId/doctor/:id': ({ facilityId, id }: any) => <DoctorCapacityForm facilityId={facilityId} id={id} />,
     '/patients': () => <PatientManager/>,
