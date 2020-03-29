@@ -4,10 +4,7 @@ import { FormControl, Grid, Card, CardHeader, CardContent, Button, InputLabel, S
 import { TextInputField, MultilineInputField } from "../Common/HelperInputFields"
 import Loader from "../Common/Loader"
 import AppMessage from "../Common/AppMessage"
-import { makeStyles } from "@material-ui/styles";
-
-import care_center_type from "../../Constants/Static_data/care_center_type.json";
-import districts from "../../Constants/Static_data/districts.json"
+import { FACILITY_TYPES, DISTRICT_CHOICES } from "../../Constants/constants";
 import { validateLocationCoordinates, phonePreg } from "../../Constants/common";
 import { createFacility } from "../../Redux/actions";
 
@@ -16,7 +13,7 @@ const initForm: any = {
     name: "",
     district: "",
     address: "",
-    centertype:"",
+    centertype: "",
     phone_number: "",
     latitude: "",
     longitude: "",
@@ -27,18 +24,9 @@ const initialState = {
     errors: { ...initForm },
 };
 
-const useStyles = makeStyles(theme => ({
-    formTop: {
-        marginTop: '100px',
-    },
-    pdLogo: {
-        height: '345px',
-        border: 'solid 3px white',
-    },
-    selectEmpty: {
-        marginTop: "10px",
-    },
-}));
+const careCenterTypes = [
+    ...FACILITY_TYPES.filter(i => i.id !== 2),
+]
 
 const CareCenterCreateReducer = (state = initialState, action: any) => {
 
@@ -68,15 +56,12 @@ export const CareCenterJoinForm = () => {
 
     const dispatchAction: any = useDispatch()
 
-    const classes = useStyles();
-
     const [state, dispatch] = useReducer(CareCenterCreateReducer, initialState)
     const [showAppMessage, setAppMessage] = useState({ show: false, message: "", type: "" })
     const [loading, setLoading] = useState(false)
 
     const handleChange = (e: any) => {
         let form = { ...state.form }
-
         form[e.target.name] = e.target.value
 
         dispatch({ type: "set_form", form })
@@ -89,7 +74,7 @@ export const CareCenterJoinForm = () => {
             if (!state.form[field].length && (field !== "district" && field !== "centertype")) {
                 errors[field] = "Field is required"
                 invalidForm = true
-            } else if ((field == "district" || field == "centertype" ) && state.form[field] == "") {
+            } else if ((field == "district" || field == "centertype") && state.form[field] == "") {
                 errors[field] = "Field is required"
                 invalidForm = true
             }
@@ -129,7 +114,7 @@ export const CareCenterJoinForm = () => {
                     dispatch({ type: "set_form", form: initForm })
                     setAppMessage({ show: true, message: "Care Center Added Successfully", type: "success" })
                 }
-            }).catch((error: any)=>{
+            }).catch((error: any) => {
                 console.log(error)
             })
         }
@@ -175,7 +160,7 @@ export const CareCenterJoinForm = () => {
                                             <MenuItem value="">
                                                 <em>None</em>
                                             </MenuItem>
-                                            {care_center_type.map((center_type) => {
+                                            {careCenterTypes.map((center_type: any) => {
                                                 return <MenuItem key={center_type.id.toString()} value={center_type.id}>{center_type.name}</MenuItem>
                                             })}
                                         </Select>
@@ -200,8 +185,8 @@ export const CareCenterJoinForm = () => {
                                             <MenuItem value="">
                                                 <em>None</em>
                                             </MenuItem>
-                                            {districts.map((district) => {
-                                                return <MenuItem key={district.id.toString()} value={district.id}>{district.name}</MenuItem>
+                                            {DISTRICT_CHOICES.map(district => {
+                                                return <MenuItem key={district.id.toString()} value={district.id}>{district.text}</MenuItem>
                                             })}
                                         </Select>
                                         <span className="error-text">{state.errors.district}</span>

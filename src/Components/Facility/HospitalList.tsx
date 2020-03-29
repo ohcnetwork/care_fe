@@ -10,7 +10,7 @@ import AddCard from '../Common/AddCard';
 import { navigate } from 'hookrouter';
 import { Loading } from "../Common/Loading";
 import { FacilityModal } from './models';
-import DISTRICTS from "../../Constants/Static_data/districts.json";
+import { DISTRICT_CHOICES } from "../../Constants/constants";
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -124,7 +124,7 @@ export const HospitalList = () => {
     let facilityList: any[] = [];
     if (data && data.length) {
         facilityList = data.map((facility: any, idx: number) => {
-            const districtName = DISTRICTS.find(i => i.id === facility.district)?.name;
+            const districtName = DISTRICT_CHOICES.find(i => i.id === facility.district)?.text;
             return (
                 <Grid item xs={12} md={6} lg={4} xl={3} key={`usr_${facility.id}`} className={classes.root}>
                     <Card className={classes.card} onClick={() => navigate(`/facility/${facility.id}`)}>

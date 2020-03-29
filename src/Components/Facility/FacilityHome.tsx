@@ -8,7 +8,7 @@ import BedTypeCard from "./BedTypeCard";
 import { Loading } from '../Common/Loading';
 import DoctorsCountCard from './DoctorsCountCard';
 import { BED_TYPES, DOCTOR_SPECIALIZATION } from "../../Constants/constants";
-import DISTRICTS from "../../Constants/Static_data/districts.json";
+import { DISTRICT_CHOICES } from "../../Constants/constants";
 import { FacilityModal, CapacityModal, DoctorModal } from './models';
 
 const useStyles = makeStyles(theme => ({
@@ -90,7 +90,7 @@ export const FacilityHome = (props: any) => {
         });
     }
 
-    const districtName = DISTRICTS.find(i => i.id === facilityData.district)?.name;
+    const districtName = DISTRICT_CHOICES.find(i => i.id === facilityData.district)?.text;
 
     return (
         <div className={`w3-content ${classes.content}`}>
