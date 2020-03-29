@@ -95,9 +95,9 @@ export const PatientHome = (props: any) => {
             <Grid container style={{ padding: "10px" }} spacing={1}>
                 <Grid item xs={12}>
                     <div className={`w3-black ${classes.title}`}>
-                        <Typography>
-                            Have you had contact with someone who was diagnosed with Covid 19?
-                        </Typography>
+                      <Typography>
+                          Has the patient had contact with someone already diagnosed with Covid 19?
+                      </Typography>
                     </div>
                     <div style={{ marginBottom: '10px' }}>
                         <Typography>

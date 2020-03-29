@@ -31,7 +31,7 @@ const DoctorsCountCard = (props: DoctorsCountProps) => {
                         </Grid>
                         <Grid item>
                             <Typography className="w3-text-grey">
-                                {area}
+                                {area} Doctors
                             </Typography>
                         </Grid>
                         <Grid item>
