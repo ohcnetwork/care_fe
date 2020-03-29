@@ -102,7 +102,7 @@ export const Login = () => {
                     setCaptcha(true);
                 } else if (res && statusCode === 200) {
                     localStorage.setItem('care_access_token', res.access);
-                    navigate('/privatedashboard');
+                    navigate('/dash');
                     window.location.reload();
                 }
             });
