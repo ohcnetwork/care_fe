@@ -111,7 +111,7 @@ export const PatientManager = () => {
 
     useEffect(() => {
         fetchData();
-    }, [dispatch, fetchData]);
+    }, [fetchData]);
 
     const handlePagination = (page: number, limit: number) => {
         const offset = (page - 1) * limit;

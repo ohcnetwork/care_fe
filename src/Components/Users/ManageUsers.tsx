@@ -107,7 +107,7 @@ export default function ManageUsers(props: any) {
 
     useEffect(() => {
         fetchData();
-    }, [dispatch, fetchData, offset]);
+    }, [fetchData]);
 
     const handlePagination = (page: number, limit: number) => {
         const offset = (page - 1) * limit;
