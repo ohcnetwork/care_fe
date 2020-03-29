@@ -11,6 +11,9 @@ import districts from "../../Constants/Static_data/districts.json"
 import SaveIcon from '@material-ui/icons/Save';
 import { FACILITY_TYPES } from "./constants";
 import { Loading } from "../../Components/Common/Loading";
+import LocationPicker from "react-leaflet-location-picker";
+import Popover from '@material-ui/core/Popover';
+import MyLocationIcon from '@material-ui/icons/MyLocation';
 
 interface FacilityProps {
     facilityId?: number;
@@ -46,6 +49,11 @@ const useStyles = makeStyles(theme => ({
         background: 'white',
         padding: '0px 10px'
     },
+    locationIcon: {
+        marginTop: "15px",
+        marginLeft: "10px",
+        cursor: 'pointer'
+    }
 }));
 
 const facility_create_reducer = (state = initialState, action: any) => {
@@ -76,9 +84,27 @@ export const FacilityCreate = (props: FacilityProps) => {
     const [state, dispatch] = useReducer(facility_create_reducer, initialState);
     const [showAppMessage, setAppMessage] = useState({ show: false, message: "", type: "" });
     const [isLoading, setIsLoading] = useState(false);
+    const [anchorEl, setAnchorEl] = React.useState(null);
+
+    const pointMode = {
+        banner: false,
+        control: {
+            values: [],
+            onClick: (point: any) => {
+                let form = { ...state.form };
+                form['latitude'] = point[0];
+                form['longitude'] = point[1];
+                dispatch({ type: "set_form", form });
+            },
+            onRemove: (point: any) =>
+                console.log("I've just been clicked for removal :(", point)
+        }
+    };
+  
 
     const headerText = !facilityId ? "Create Facility" : "Update Facility";
     const buttonText = !facilityId ? "Save" : "Update";
+    let mapLoadLocation = [8.55929, 76.9922];//Trivandrum
 
     const fetchData = useCallback(async () => {
         if (facilityId) {
@@ -121,6 +147,24 @@ export const FacilityCreate = (props: FacilityProps) => {
         form[e.target.name] = e.target.value
         dispatch({ type: "set_form", form })
     }
+
+    const handleClickLocationPicker = (event: any) => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((position)=>{
+                mapLoadLocation = [position.coords.latitude, position.coords.longitude];
+                let form = { ...state.form };
+                form['latitude'] = mapLoadLocation[0];
+                form['longitude'] = mapLoadLocation[1];
+                dispatch({ type: "set_form", form });
+            });
+          }
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
+
 
     const validateForm = () => {
         let errors = { ...initForm }
@@ -177,9 +221,12 @@ export const FacilityCreate = (props: FacilityProps) => {
             }
         }
     }
+
     if (isLoading) {
         return <Loading />
     }
+    const open = Boolean(anchorEl);
+    const id = open ? 'simple-popover' : undefined;
     return <div>
         <Grid container alignContent="center" justify="center">
             <Grid item xs={12} sm={10} md={8} lg={6} xl={4}>
@@ -277,8 +324,8 @@ export const FacilityCreate = (props: FacilityProps) => {
                                 </Grid>
                             </Grid>
 
-                            <Grid container justify="center" >
-                                <Grid item xs={12}>
+                            <Grid container >
+                                <Grid item xs={5}>
                                     <TextInputField
                                         name="latitude"
                                         label="Latitude"
@@ -289,11 +336,10 @@ export const FacilityCreate = (props: FacilityProps) => {
                                         onChange={handleChange}
                                         errors={state.errors.latitude}
                                     />
-                                </Grid>
-                            </Grid>
 
-                            <Grid container justify="center" >
-                                <Grid item xs={12}>
+                                </Grid>
+                                <Grid item xs={1}></Grid>
+                                <Grid item xs={5}>
                                     <TextInputField
                                         name="longitude"
                                         label="Longitude"
@@ -305,6 +351,41 @@ export const FacilityCreate = (props: FacilityProps) => {
                                         errors={state.errors.longitude}
                                     />
                                 </Grid>
+                                <Grid item xs={1} >
+                                    <div className={classes.locationIcon} onClick={handleClickLocationPicker}>
+                                        <MyLocationIcon />
+                                    </div>
+                                </Grid>
+                                {
+                                    <Popover
+                                        id={id}
+                                        open={open}
+                                        anchorEl={anchorEl}
+                                        onClose={handleClose}
+                                        anchorOrigin={{
+                                            vertical: 'bottom',
+                                            horizontal: 'right',
+                                        }}
+                                        transformOrigin={{
+                                            vertical: 'top',
+                                            horizontal: 'right',
+                                        }}
+                                        style={{ position: 'absolute', left: '300px' }}
+                                    >
+                                        <LocationPicker
+                                            showInputs={false}
+                                            mapStyle={{ width: 300, height: 300 }}
+                                            pointMode={pointMode}
+                                            bindMap={false}
+                                            startPort={{
+                                                center: [mapLoadLocation[0],mapLoadLocation[1]],
+                                                zoom: 9
+                                              }}
+                                              
+                                        />
+                                    </Popover>
+                                }
+
                             </Grid>
                         </CardContent>
 
