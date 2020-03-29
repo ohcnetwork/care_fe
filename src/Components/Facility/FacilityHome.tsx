@@ -90,8 +90,6 @@ export const FacilityHome = (props: any) => {
         });
     }
 
-    const districtName = DISTRICT_CHOICES.find(i => i.id === facilityData.district)?.text;
-
     return (
         <div className={`w3-content ${classes.content}`}>
             <h2>Facility</h2>
@@ -100,7 +98,7 @@ export const FacilityHome = (props: any) => {
                     <Typography variant="h6" component="h6">{facilityData.name}</Typography>
                     <Typography>Address : {facilityData.address}</Typography>
                     <Typography>Phone : {facilityData.phone_number}</Typography>
-                    <Typography>District : {districtName}</Typography>
+                    <Typography>District : {facilityData?.district_object?.name}</Typography>
                     <Typography>Oxygen Capacity :{` ${facilityData.oxygen_capacity} Litres`}</Typography>
                 </Grid>
                 <Grid item xs={12} md={5}>

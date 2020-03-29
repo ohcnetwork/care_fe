@@ -257,8 +257,7 @@ export const VehicleDetailsForm = (props: any) => {
                                             onChange={handleCheckboxFieldChange}
                                             name="isSmartPhone"
                                         />
-                                        <Typography className={classes.checkBoxLabel}> Do you have a smart phone
-                                            ?</Typography>
+                                        <Typography className={classes.checkBoxLabel}> Do you have a smart phone ?</Typography>
                                     </Box>
                                     <Box>
                                         <Typography variant="h6">

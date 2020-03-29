@@ -124,7 +124,6 @@ export const HospitalList = () => {
     let facilityList: any[] = [];
     if (data && data.length) {
         facilityList = data.map((facility: any, idx: number) => {
-            const districtName = DISTRICT_CHOICES.find(i => i.id === facility.district)?.text;
             return (
                 <Grid item xs={12} md={6} lg={4} xl={3} key={`usr_${facility.id}`} className={classes.root}>
                     <Card className={classes.card} onClick={() => navigate(`/facility/${facility.id}`)}>
@@ -142,7 +141,7 @@ export const HospitalList = () => {
                         />
                         <CardContent className={classes.content}>
                             <Typography>
-                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>District - </span>{districtName}
+                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>District - </span>{facility?.district_object?.name}
                             </Typography>
                         </CardContent>
                         <CardContent className={classes.content}>
