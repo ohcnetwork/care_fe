@@ -168,7 +168,7 @@ export const DriverDetailsForm = (props: DriverDetailsProps) => {
           ? Number(vehicleInfo.insuranceValidTill)
           : undefined,
         has_free_service: Boolean(form.hasFreeService),
-        price_per_km: !form.hasFreeService ? Number(form.pricePerKm) : undefined
+        price_per_km: !form.hasFreeService ? 20 : undefined
       };
 
       if (!!form.driverName2) {
@@ -292,25 +292,11 @@ export const DriverDetailsForm = (props: DriverDetailsProps) => {
                       name="hasFreeService"
                       inputProps={{ "aria-label": "secondary checkbox" }}
                     />
-                    {AMBULANCE_FREE_SERVICE_CONSENT}
+                    {form.hasFreeService
+                      ? AMBULANCE_FREE_SERVICE_CONSENT
+                      : AMBULANCE_SERVICE_FEE_TEXT}
                   </Typography>
                 </Box>
-                {!form.hasFreeService && (
-                  <Box>
-                    <Typography>{AMBULANCE_SERVICE_FEE_TEXT}</Typography>
-                    <TextInputField
-                      label="Price / KM"
-                      name="pricePerKm"
-                      placeholder=""
-                      variant="outlined"
-                      margin="dense"
-                      value={form.pricePerKm}
-                      InputLabelProps={{ shrink: !!form.pricePerKm }}
-                      onChange={handleChange}
-                      errors={errors.pricePerKm}
-                    />
-                  </Box>
-                )}
                 <h4>Declaration</h4>
                 <Box display="flex">
                   <Box>
