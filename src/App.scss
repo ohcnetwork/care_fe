@@ -213,6 +213,7 @@ flex-direction: column;
 }
 
 .MuiTypography-h6 {
+  font-weight: 400!important;
   @media (max-width: 768px){
     font-size: 1.10rem!important;
   }
