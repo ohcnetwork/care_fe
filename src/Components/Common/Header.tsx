@@ -159,6 +159,7 @@ const Header = () => {
                 }}>Settings</MenuItem>
                 <MenuItem onClick={() => {
                   localStorage.removeItem('care_access_token');
+                  localStorage.removeItem('care_refresh_token');
                   navigate('/login');
                   window.location.reload();
                 }}>Logout</MenuItem>
