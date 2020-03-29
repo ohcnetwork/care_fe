@@ -3,7 +3,7 @@ export const phonePreg = (phone: string) => {
     return pattern.test(phone);
 };
 
-export const validateLocationCoordinates = (location:string) => {
+export const validateLocationCoordinates = (location: string) => {
     const pattern = /^-?([1-8]?[1-9]|[1-9]0)\.{1}\d{1,6}/;
     return pattern.test(location);
 };
@@ -13,15 +13,15 @@ export const validateEmailAddress = (email: string) => {
     return pattern.test(email);
 };
 
-export const getArrayValueByKey = (arr:Array<any>, attr: string, value: string|number) => {
-    for( let i = 0; i< arr.length; i++) {
-        if(arr[i][attr] == value) {
-            return i
+export const getArrayValueByKey = (arr: Array<any>, attr: string, value: string | number) => {
+    for (let i = 0; i < arr.length; i++) {
+        if (arr[i][attr] == value) {
+            return i;
         }
     }
-    return -1
+    return -1;
 }
 
-export const getRandomNumbers = (min:number, max:number) => {
-    return Math.floor(Math.random() * max) + min
+export const getRandomNumbers = (min: number, max: number) => {
+    return Math.floor(Math.random() * max) + min;
 }

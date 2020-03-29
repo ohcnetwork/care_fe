@@ -1,9 +1,22 @@
 import React, { useState, useReducer, useCallback, useEffect } from "react"
 import { makeStyles, Theme } from '@material-ui/core/styles';
-import { IconButton } from '@material-ui/core';
 import { Refresh } from '@material-ui/icons';
 import { useDispatch } from "react-redux";
-import { Box, Grid, Checkbox, Card, CardHeader, CardContent, CardActions, Button, InputLabel, RadioGroup, Radio, FormControlLabel } from "@material-ui/core";
+import {
+    Box,
+    Grid,
+    Checkbox,
+    Card,
+    CardHeader,
+    CardContent,
+    CardActions,
+    Button,
+    InputLabel,
+    RadioGroup,
+    Radio,
+    FormControlLabel,
+    IconButton
+} from "@material-ui/core";
 import { TextInputField, NativeSelectField, ErrorHelperText, MultilineInputField } from "../Common/HelperInputFields";
 import { phonePreg, getArrayValueByKey, getRandomNumbers } from "../../Constants/common";
 import { navigate } from 'hookrouter';
@@ -40,7 +53,14 @@ const initialState = {
     errors: { ...initForm }
 };
 
-const optionalFields = ['district', "local_body", "medical_history2", "medical_history3", "medical_history4", "medical_history5"];
+const optionalFields = [
+    "district",
+    "local_body",
+    "medical_history2",
+    "medical_history3",
+    "medical_history4",
+    "medical_history5"
+];
 
 const patientFormReducer = (state = initialState, action: any) => {
     switch (action.type) {
@@ -102,7 +122,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
     const generateRandomname = () => {
         const form = { ...state.form }
-        form["name"] = `${patientnameCombinations.comb1[getRandomNumbers(1, patientnameCombinations.comb1.length - 1)]} ${patientnameCombinations.comb2[getRandomNumbers(1, patientnameCombinations.comb2.length - 1)]} ${getRandomNumbers(1000, 10000)}`
+        form["name"] = `${patientnameCombinations.comb1[getRandomNumbers(1, patientnameCombinations.comb1.length - 1)]} 
+        ${patientnameCombinations.comb2[getRandomNumbers(1, patientnameCombinations.comb2.length - 1)]} 
+        ${getRandomNumbers(1000, 10000)}`
         dispatch({ type: "set_form", form })
     }
 
@@ -157,7 +179,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         const stateIndex = getArrayValueByKey(states, "id", districts[index].state);
         if (index > 0) {
             setIsLoading(true);
-            const localBodyList = await dispatchAction(getLocalBody({ district_name: districts[index].name, state_name: states[stateIndex].name }))
+            const localBodyList = await dispatchAction(getLocalBody({
+                district_name: districts[index].name,
+                state_name: states[stateIndex].name
+            }))
             setIsLoading(false);
             setLocalBody([...localBody, ...localBodyList.data.results]);
         } else {
@@ -200,9 +225,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                 medical_history.push({ disease: 1, details: "" })
             }
 
-            const state_object = states[getArrayValueByKey(states, "id", state.form.state)]
-            const district_object = state.form.district !== "" ? districts[getArrayValueByKey(districts, "id", state.form.district)] : ""
-            const local_body_object = state.form.local_body !== "" ? localBody[getArrayValueByKey(localBody, "id", state.form.local_body)] : ""
+            const state_object = states[getArrayValueByKey(states, "id", state.form.state)];
+            const district_object = state.form.district !== "" ?
+                districts[getArrayValueByKey(districts, "id", state.form.district)] : "";
+            const local_body_object = state.form.local_body !== "" ?
+                localBody[getArrayValueByKey(localBody, "id", state.form.local_body)] : "";
             const data = {
                 "real_name": state.form.realName,
                 "name": state.form.name,
@@ -225,7 +252,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             if (res.data) {
                 dispatch({ type: "set_form", form: initForm })
                 if (!id) {
-                    setAlertMessage({ show: true, message: `Please note down patient name: ${state.form.name} and patient ID: ${res.data.id}`, title: "Patient Added Successfully"})
+                    setAlertMessage({
+                        show: true,
+                        message: `Please note down patient name: ${state.form.name} and patient ID: ${res.data.id}`,
+                        title: "Patient Added Successfully"
+                    })
                 } else {
                     setAppMessage({ show: true, message: "Patient updated successfully", type: "success" });
                     navigate(`/facility/${facilityId}`);
@@ -295,7 +326,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             <Grid item xs={12} sm={10} md={8} lg={6} xl={4}>
                 <Card>
                     <AppMessage open={showAppMessage.show} type={showAppMessage.type} message={showAppMessage.message} handleClose={() => setAppMessage({ show: false, message: "", type: "" })} handleDialogClose={() => setAppMessage({ show: false, message: "", type: "" })} />
-                    {showAlertMessage.show && <AlertDialog handleClose={() => handleCancel()} message={showAlertMessage.message} title={showAlertMessage.title} />}
+                    {showAlertMessage.show &&
+                        <AlertDialog handleClose={() => handleCancel()} message={showAlertMessage.message} title={showAlertMessage.title} />
+                    }
                     <CardHeader title={headerText} />
                     <form onSubmit={(e) => handleSubmit(e)}>
                         <CardContent>
@@ -311,10 +344,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 errors={state.errors.name}
                             />
                             <IconButton onClick={() => generateRandomname()}>
-                                <Refresh  />
+                                <Refresh />
                             </IconButton>
                         </CardContent>
-                        
+
                         <CardContent>
                             <InputLabel id="name-label">Name*</InputLabel>
                             <TextInputField
