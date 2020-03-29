@@ -85,7 +85,8 @@ const useStyles = makeStyles(theme => ({
     }
 }));
 
-export const PatientManager = () => {
+export const PatientManager = (props:any) => {
+    const { facilityId } = props;
     const classes = useStyles();
     const dispatch: any = useDispatch();
     const initialData: any[] = [];
@@ -124,7 +125,7 @@ export const PatientManager = () => {
         patientList = data.map((patient: any, idx: number) => {
             return (
                 <Grid item xs={12} md={3} key={`usr_${patient.id}`} className={classes.root}>
-                    <Card className={classes.card} onClick={() => navigate(`/patient/${patient.id}`)}>
+                    <Card className={classes.card} onClick={() => navigate(`/facility/${facilityId}/patient/${patient.id}`)}>
                         <CardHeader
                             className={classes.cardHeader}
                             title={

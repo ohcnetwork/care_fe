@@ -25,7 +25,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 }));
 
 
-export const TreatmentForm = () => {
+export const TreatmentForm = (props:any) => {
     const classes = useStyles();
     const dispatch: any = useDispatch();
     const inputLabel = React.useRef<HTMLLabelElement>(null);
