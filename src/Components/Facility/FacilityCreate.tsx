@@ -95,9 +95,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                 form['latitude'] = point[0];
                 form['longitude'] = point[1];
                 dispatch({ type: "set_form", form });
-            },
-            onRemove: (point: any) =>
-                console.log("I've just been clicked for removal :(", point)
+            }
         }
     };
   
