@@ -70,53 +70,51 @@ export const CareCenterJoinForm = () => {
     const validateForm = () => {
         const errors = { ...initForm }
         let invalidForm = false
-        Object.keys(state.form).map((field, i) => {
-            if (!state.form[field].length && (field !== "district" && field !== "centertype")) {
-                errors[field] = "Field is required"
-                invalidForm = true
-            } else if ((field == "district" || field == "centertype") && state.form[field] == "") {
-                errors[field] = "Field is required"
-                invalidForm = true
-            }
-            if (field == "phone_number" && !phonePreg(state.form.phone_number)) {
-                errors[field] = "Please Enter 10/11 digit mobile number or landline as 0<std code><phone number>"
-                invalidForm = true
-            }
-            if ((field == "latitude" || field == "longitude") && !validateLocationCoordinates(state.form[field])) {
-                errors[field] = "Please enter valid coordinates"
-                invalidForm = true
+        Object.keys(state.form).forEach(key => {
+            if (!state.form[key]) {
+                errors[key] = "Field is required";
+                invalidForm = true;
+            } else if (key === "phone_number" && !phonePreg(state.form.phone_number)) {
+                errors[key] = "Please Enter 10/11 digit mobile number or landline as 0<std code><phone number>";
+                invalidForm = true;
+            } else if ((key === "latitude" || key === "longitude") && !validateLocationCoordinates(state.form[key])) {
+                errors[key] = "Please enter valid coordinates";
+                invalidForm = true;
             }
         })
 
         if (invalidForm) {
             dispatch({ type: "set_error", errors })
-            return false
+            return false;
         }
         dispatch({ type: "set_error", errors })
-        return true
+        return true;
     }
 
-    const handleSubmit = (e: any) => {
+    const handleSubmit = async (e: any) => {
         e.preventDefault()
         const validated = validateForm()
         if (validated) {
-            setLoading(true)
-            const data = { ...state.form }
-            data.location = {
-                "latitude": data.latitude,
-                "longitude": data.longitude,
+            const data = {
+                name: state.form.name,
+                district: state.form.district,
+                address: state.form.address,
+                facility_type: state.form.centertype,
+                phone_number: state.form.phone_number,
+                location: state.form.latitude && state.form.latitude ? {
+                    latitude: Number(state.form.latitude),
+                    longitude: Number(state.form.latitude),
+                } : undefined,
             }
-            delete data.latitude
-            delete data.longitude
-            dispatchAction(createFacility(data)).then((res: any) => {
-                if (res.data) {
-                    setLoading(false)
-                    dispatch({ type: "set_form", form: initForm })
-                    setAppMessage({ show: true, message: "Care Center Added Successfully", type: "success" })
-                }
-            }).catch((error: any) => {
-                console.log(error)
-            })
+            setLoading(true);
+            const res = await dispatchAction(createFacility(data))
+            setLoading(false);
+            if (res.status !== 201 || !res.data) {
+                setAppMessage({ show: true, message: "Something went wrong..!", type: "error" })
+            } else {
+                dispatch({ type: "set_form", form: initForm })
+                setAppMessage({ show: true, message: "Care Center Added Successfully", type: "success" })
+            }
         }
     }
 
@@ -126,7 +124,7 @@ export const CareCenterJoinForm = () => {
             <form onSubmit={(e) => handleSubmit(e)}>
 
                 <Card>
-                    <AppMessage open={showAppMessage.show} type={showAppMessage.type} message={showAppMessage.message} handleClose={() => setAppMessage({ show: false, message: "", type: "" })} handleDialogClose={() => null} />
+                    <AppMessage open={showAppMessage.show} type={showAppMessage.type} message={showAppMessage.message} handleClose={() => setAppMessage({ show: false, message: "", type: "" })} handleDialogClose={() => setAppMessage({ show: false, message: "", type: "" })} />
                     <CardHeader title="Create Care Center" />
                     <CardContent>
                         <Grid item xs={12}>
@@ -134,7 +132,7 @@ export const CareCenterJoinForm = () => {
                                 <Grid item xs={12}>
                                     <TextInputField
                                         name="name"
-                                        placeholder="Care Center Name"
+                                        placeholder="Care Center Name*"
                                         variant="outlined"
                                         margin="dense"
                                         value={state.form.name}
@@ -147,11 +145,11 @@ export const CareCenterJoinForm = () => {
                             <Grid container justify="center" >
                                 <Grid item xs={12} style={{ marginBottom: '10px' }}>
                                     <FormControl fullWidth variant="outlined">
-                                        <InputLabel id="demo-simple-select-outlined-label">Care Center Type*</InputLabel>
+                                        <InputLabel id="care-center-type-label">Care Center Type*</InputLabel>
                                         <Select
                                             fullWidth
-                                            labelId="demo-simple-select-outlined-label"
-                                            id="demo-simple-select-outlined"
+                                            labelId="care-center-type-label"
+                                            id="care-center-type"
                                             name="centertype"
                                             value={state.form.centertype}
                                             onChange={handleChange}
@@ -160,8 +158,8 @@ export const CareCenterJoinForm = () => {
                                             <MenuItem value="">
                                                 <em>None</em>
                                             </MenuItem>
-                                            {careCenterTypes.map((center_type: any) => {
-                                                return <MenuItem key={center_type.id.toString()} value={center_type.id}>{center_type.name}</MenuItem>
+                                            {careCenterTypes.map(center_type => {
+                                                return <MenuItem key={center_type.id.toString()} value={center_type.id}>{center_type.text}</MenuItem>
                                             })}
                                         </Select>
                                         <span className="error-text">{state.errors.district}</span>
@@ -172,15 +170,15 @@ export const CareCenterJoinForm = () => {
                             <Grid container justify="center" >
                                 <Grid item xs={12} style={{ marginBottom: '10px' }}>
                                     <FormControl fullWidth variant="outlined">
-                                        <InputLabel id="demo-simple-select-outlined-label">Pick Your District*</InputLabel>
+                                        <InputLabel id="pick-your-district-label">Pick Your District*</InputLabel>
                                         <Select
                                             fullWidth
-                                            labelId="demo-simple-select-outlined-label"
-                                            id="demo-simple-select-outlined"
+                                            labelId="pick-your-district-label"
+                                            id="pick-your-district"
                                             name="district"
                                             value={state.form.district}
                                             onChange={handleChange}
-                                            label="District"
+                                            label="Pick Your District"
                                         >
                                             <MenuItem value="">
                                                 <em>None</em>
