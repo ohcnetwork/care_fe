@@ -103,7 +103,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     }
 
     const fetchData = useCallback(async (status: statusType) => {
-
         setIsLoading(true);
         const res = await dispatchAction(getPatient({ id }));
         if (!status.aborted) {
@@ -123,6 +122,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                 navigate(`/facility/${facilityId}`);
             }
         }
+        setIsLoading(false);
     }, [dispatchAction, facilityId, id]);
 
     const fetchStates = useCallback(async (status: statusType) => {
@@ -298,41 +298,45 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     }
                     <CardHeader title={headerText} />
                     <form onSubmit={(e) => handleSubmit(e)}>
-                        <CardContent>
-                            <InputLabel id="name-label">Name*</InputLabel>
-                            <Box display="flex" flexGrow="1">
-                                <Box flex="1">
+                        {!id && (
+                            <>
+                                <CardContent>
+                                    <InputLabel id="name-label">Name*</InputLabel>
+                                    <Box display="flex" flexGrow="1">
+                                        <Box flex="1">
+                                            <TextInputField
+                                                name="name"
+                                                variant="outlined"
+                                                margin="dense"
+                                                type="text"
+                                                value={state.form.name}
+                                                onChange={handleChange}
+                                                errors={state.errors.name}
+                                                inputProps={{
+                                                    readOnly: true,
+                                                }}
+                                            />
+                                        </Box>
+                                        <IconButton onClick={() => generateRandomname()}>
+                                            <Refresh />
+                                        </IconButton>
+                                    </Box>
+                                </CardContent>
+
+                                <CardContent>
+                                    <InputLabel id="name-label">Name*</InputLabel>
                                     <TextInputField
-                                        name="name"
+                                        name="realName"
                                         variant="outlined"
                                         margin="dense"
                                         type="text"
-                                        value={state.form.name}
+                                        value={state.form.realName}
                                         onChange={handleChange}
-                                        errors={state.errors.name}
-                                        inputProps={{
-                                            readOnly: true,
-                                        }}
+                                        errors={state.errors.realName}
                                     />
-                                </Box>
-                                <IconButton onClick={() => generateRandomname()}>
-                                    <Refresh />
-                                </IconButton>
-                            </Box>
-                        </CardContent>
-
-                        <CardContent>
-                            <InputLabel id="name-label">Name*</InputLabel>
-                            <TextInputField
-                                name="realName"
-                                variant="outlined"
-                                margin="dense"
-                                type="text"
-                                value={state.form.realName}
-                                onChange={handleChange}
-                                errors={state.errors.realName}
-                            />
-                        </CardContent>
+                                </CardContent>
+                            </>
+                        )}
                         <CardContent>
                             <InputLabel id="age-label">Age*</InputLabel>
                             <TextInputField
@@ -358,18 +362,20 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 error={state.errors.gender}
                             />
                         </CardContent>
-                        <CardContent>
-                            <InputLabel id="phone-label">Mobile Number*</InputLabel>
-                            <TextInputField
-                                name="phone_number"
-                                variant="outlined"
-                                margin="dense"
-                                type="number"
-                                value={state.form.phone_number}
-                                onChange={handleChange}
-                                errors={state.errors.phone_number}
-                            />
-                        </CardContent>
+                        {!id && (
+                            <CardContent>
+                                <InputLabel id="phone-label">Mobile Number*</InputLabel>
+                                <TextInputField
+                                    name="phone_number"
+                                    variant="outlined"
+                                    margin="dense"
+                                    type="number"
+                                    value={state.form.phone_number}
+                                    onChange={handleChange}
+                                    errors={state.errors.phone_number}
+                                />
+                            </CardContent>
+                        )}
                         <CardContent>
                             <InputLabel id="gender-label">State*</InputLabel>
                             <NativeSelectField
