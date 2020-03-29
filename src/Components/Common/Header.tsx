@@ -63,19 +63,14 @@ const Header = () => {
 
   let menus = [
     {
-      title: 'Dashboard',
-      link: '/dash',
-      icon: <DashboardIcon style={{ color: '#666', marginRight: '4px' }}/>
-    },
-    {
       title: 'Facilites',
       link: '/facility',
-      icon: <WorkIcon style={{ color: '#666', marginRight: '4px' }}/>
+      icon: <DashboardIcon style={{ color: '#666', marginRight: '4px' }}/>
     },
     {
       title: 'Patients',
       link: '/patients',
-      icon: <PersonIcon style={{color: '#666', marginRight: '4px'}}/>
+      icon: <InboxIcon style={{color: '#666', marginRight: '4px'}}/>
     },
     {
       title: 'users',

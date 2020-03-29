@@ -46,7 +46,7 @@ export const Login = () => {
     const [form, setForm] = useState(initForm);
     const [errors, setErrors] = useState(initErr);
     const [isCaptchaEnabled, setCaptcha] = useState(false);
-    
+
     const captchaKey = process.env.GOOGLE_KEY ? process.env.GOOGLE_KEY : '';
 
     const handleChange = (e: any) => {
@@ -102,7 +102,7 @@ export const Login = () => {
                     setCaptcha(true);
                 } else if (res && statusCode === 200) {
                     localStorage.setItem('care_access_token', res.access);
-                    navigate('/privatedashboard');
+                    navigate('/dash');
                     window.location.reload();
                 }
             });
@@ -121,13 +121,13 @@ export const Login = () => {
         <Box display="flex" flexDirection="column" className={`${classes.formTop}`}>
             <Box className={classes.imgSection} display="flex" flexDirection="column" justifyContent="flex-start">
             <Grid container spacing={2}>
-                <Grid item className="w3-hide-small" xs={12} sm={7} md={8} lg={9}>
+                <Grid item xs={12} sm={7} md={8} lg={9}>
                     <Grid item>
                         <PublicDashboard/>
                     </Grid>
 
                 </Grid>
-                <Grid item xs={12} sm={5} md={4} lg={3}>
+                <Grid item xs={12} sm={5} md={4} lg={3} style={{marginTop: '15px'}}>
                     <Card>
                         <CardHeader title="Authorized Login"/>
                         <form onSubmit={(e) => handleSubmit(e)}>
@@ -182,18 +182,9 @@ export const Login = () => {
                                 </Grid>
                             </CardActions>
                         </form>
-                        <CardContent className="alignCenter">
-                            You don't have an account? <A href="/register">Register</A>
-                        </CardContent>
-                        <CardContent className="alignCenter">
-                            Onboard Ambulances <A href="/ambulance">here</A>
-                        </CardContent>
                     </Card>
                 </Grid>
             </Grid>
-            </Box>
-            <Box className={classes.imgSection} display="flex" flexDirection="column" justifyContent="center" alignContent="center">
-                <img src="https://care-coronasafe.s3.amazonaws.com/static/images/logos/ksdma_logo.png" alt="Care Logo" className={classes.logoImg}/>
             </Box>
         </Box>
 
