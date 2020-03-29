@@ -169,8 +169,17 @@ export const createPatient = (form: object) => {
     return fireRequest('addPatient', [], form)
 };
 export const getPatient = (urlParam: object) => {
-    return fireRequest('getPatient', [],{}, urlParam);
+    return fireRequest('getPatient', [], {}, urlParam);
 };
-export const updatePatient = (form: object, urlParam: object)=>{
+export const updatePatient = (form: object, urlParam: object) => {
     return fireRequest('updatePatient', [], form, urlParam)
 };
+export const getStates = () => {
+    return fireRequest("statesList", [])
+}
+export const getDistricts = (urlParam: object) => {
+    return fireRequest("districtsList", [], {}, urlParam)
+}
+export const getLocalBody = (urlParam: object) => {
+    return fireRequest("localBodyList", [], {}, urlParam)
+}
