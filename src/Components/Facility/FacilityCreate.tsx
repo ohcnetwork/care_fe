@@ -6,14 +6,15 @@ import AppMessage from "../Common/AppMessage"
 import { makeStyles } from "@material-ui/styles";
 import { navigate } from 'hookrouter';
 import { createFacility, getFacility, updateFacility } from "../../Redux/actions";
-import { validateLocationCoordinates, phonePreg } from "../../Constants/common";
-import { DISTRICT_CHOICES } from "../../Constants/constants";
+import { validateLocationCoordinates, phonePreg } from "../../Common/validation";
+import { DISTRICT_CHOICES } from "../../Common/constants";
 import SaveIcon from '@material-ui/icons/Save';
-import { FACILITY_ID } from "../../Constants/constants";
+import { FACILITY_ID } from "../../Common/constants";
 import { Loading } from "../../Components/Common/Loading";
 import LocationPicker from "react-leaflet-location-picker";
 import Popover from '@material-ui/core/Popover';
 import MyLocationIcon from '@material-ui/icons/MyLocation';
+import { useAbortableEffect, statusType } from '../../Common/utils';
 
 interface FacilityProps {
     facilityId?: number;
@@ -104,11 +105,11 @@ export const FacilityCreate = (props: FacilityProps) => {
     const buttonText = !facilityId ? "Save" : "Update";
     let mapLoadLocation = [8.55929, 76.9922];//Trivandrum
 
-    const fetchData = useCallback(async () => {
+    const fetchData = useCallback(async (status: statusType) => {
         if (facilityId) {
             setIsLoading(true);
             const res = await dispatchAction(getFacility(facilityId));
-            if (res.data) {
+            if (!status.aborted && res.data) {
                 const formData = {
                     name: res.data.name,
                     district: res.data.district,
@@ -126,8 +127,8 @@ export const FacilityCreate = (props: FacilityProps) => {
         }
     }, [dispatchAction, facilityId]);
 
-    useEffect(() => {
-        fetchData();
+    useAbortableEffect((status: statusType) => {
+        fetchData(status);
     }, [dispatch, fetchData]);
 
     const handleCancel = (e: any) => {

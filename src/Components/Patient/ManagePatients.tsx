@@ -9,6 +9,8 @@ import Pagination from "../Common/Pagination";
 import AddCard from '../Common/AddCard';
 import { navigate } from 'hookrouter';
 import { Loading } from "../Common/Loading";
+import { useAbortableEffect, statusType } from '../../Common/utils';
+
 const useStyles = makeStyles(theme => ({
     root: {
         flexGrow: 1,
@@ -85,7 +87,7 @@ const useStyles = makeStyles(theme => ({
     }
 }));
 
-export const PatientManager = (props:any) => {
+export const PatientManager = (props: any) => {
     const { facilityId } = props;
     const classes = useStyles();
     const dispatch: any = useDispatch();
@@ -100,18 +102,20 @@ export const PatientManager = (props:any) => {
 
     const limit = 15;
 
-    const fetchData = useCallback(async () => {
+    const fetchData = useCallback(async (status: statusType) => {
         setIsLoading(true);
         const res = await dispatch(getAllPatient({ limit, offset }));
-        if (res && res.data) {
-            setData(res.data.results);
-            setTotalCount(res.data.count);
+        if (!status.aborted) {
+            if (res && res.data) {
+                setData(res.data.results);
+                setTotalCount(res.data.count);
+            }
+            setIsLoading(false);
         }
-        setIsLoading(false);
     }, [dispatch, offset]);
 
-    useEffect(() => {
-        fetchData();
+    useAbortableEffect((status: statusType) => {
+        fetchData(status);
     }, [fetchData]);
 
     const handlePagination = (page: number, limit: number) => {

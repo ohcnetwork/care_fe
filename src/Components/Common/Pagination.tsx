@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Grid } from '@material-ui/core/';
+import { useAbortableEffect, statusType } from '../../Common/utils';
 
 interface PaginationProps {
     data: { totalCount: number };
@@ -13,12 +14,14 @@ const Pagination = (props: PaginationProps) => {
     const [rowsPerPage, setRowsPerPage] = useState(3);
     const [currentPage, setCurrentPage] = useState(1);
 
-    useEffect(() => {
-        if (props.defaultPerPage) {
-            setRowsPerPage(props.defaultPerPage);
-        }
-        if (props.cPage) {
-            setCurrentPage(props.cPage);
+    useAbortableEffect((status: statusType) => {
+        if (!status.aborted) {
+            if (props.defaultPerPage) {
+                setRowsPerPage(props.defaultPerPage);
+            }
+            if (props.cPage) {
+                setCurrentPage(props.cPage);
+            }
         }
     }, [props]);
 

@@ -3,8 +3,8 @@ import { makeStyles, Theme } from '@material-ui/core/styles';
 import { useDispatch } from "react-redux";
 import { Box, Grid, Checkbox, Card, CardHeader, CardContent, CardActions, Button, FormControl, InputLabel, Select, MenuItem, Typography, FormLabel, RadioGroup, Radio, FormControlLabel } from "@material-ui/core";
 import { TextInputField } from "../Common/HelperInputFields";
-import { validateEmailAddress, phonePreg } from "../../Constants/common";
-import { GENDER_TYPES } from "../../Constants/constants";
+import { validateEmailAddress, phonePreg } from "../../Common/validation";
+import { GENDER_TYPES } from "../../Common/constants";
 import { isEmpty } from "lodash";
 
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Grid, Typography, Button, Divider } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { useDispatch } from "react-redux";
@@ -8,8 +8,9 @@ import BedTypeCard from "./BedTypeCard";
 import { Loading } from '../Common/Loading';
 import DoctorsCountCard from './DoctorsCountCard';
 import AppMessage from "../Common/AppMessage"
-import { BED_TYPES, DOCTOR_SPECIALIZATION } from "../../Constants/constants";
+import { BED_TYPES, DOCTOR_SPECIALIZATION } from "../../Common/constants";
 import { FacilityModal, CapacityModal, DoctorModal } from './models';
+import { useAbortableEffect, statusType } from '../../Common/utils';
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -40,29 +41,31 @@ export const FacilityHome = (props: any) => {
     const [isLoading, setIsLoading] = useState(false);
     const [showAppMessage, setAppMessage] = useState({ show: false, message: "", type: "" })
 
-    const fetchData = useCallback(async () => {
+    const fetchData = useCallback(async (status: statusType) => {
         setIsLoading(true);
         const [facilityRes, capacityRes, doctorRes] = await Promise.all([
             dispatch(getFacility(facilityId)),
             dispatch(listCapacity({}, { facilityId })),
             dispatch(listDoctor({}, { facilityId })),
         ]);
-        setIsLoading(false);
-        if (!(facilityRes.status === 200 || facilityRes.status === 201) || !facilityRes.data) {
-            setAppMessage({ show: true, message: "Something went wrong..!", type: "error" })
-        } else {
-            setFacilityData(facilityRes.data);
-            if (capacityRes && capacityRes.data) {
-                setCapacityData(capacityRes.data.results)
-            }
-            if (doctorRes && doctorRes.data) {
-                setDoctorData(doctorRes.data.results)
+        if (!status.aborted) {
+            setIsLoading(false);
+            if (!(facilityRes.status === 200 || facilityRes.status === 201) || !facilityRes.data) {
+                setAppMessage({ show: true, message: "Something went wrong..!", type: "error" })
+            } else {
+                setFacilityData(facilityRes.data);
+                if (capacityRes && capacityRes.data) {
+                    setCapacityData(capacityRes.data.results)
+                }
+                if (doctorRes && doctorRes.data) {
+                    setDoctorData(doctorRes.data.results)
+                }
             }
         }
     }, [dispatch, facilityId]);
 
-    useEffect(() => {
-        fetchData();
+    useAbortableEffect((status: statusType) => {
+        fetchData(status);
     }, [dispatch, fetchData]);
 
     if (isLoading) {

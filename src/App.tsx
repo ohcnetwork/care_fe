@@ -1,12 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import SessionRouter from './Router/SessionRouter';
 import AppRouter from './Router/AppRouter';
 import { useDispatch, useSelector } from 'react-redux';
 import { getCurrentUser } from './Redux/actions';
-import { CircularProgress } from '@material-ui/core';
 import './App.scss';
-import Grid from "@material-ui/core/Grid";
 import {Loading} from "./Components/Common/Loading";
+import { useAbortableEffect, statusType } from './Common/utils';
 const img = 'https://coronasafe.network/break-chain.png';
 
 const App: React.FC = () => {
@@ -15,13 +14,11 @@ const App: React.FC = () => {
   const { currentUser } = state;
   const [user, setUser] = useState(null);
   
-  useEffect(() => {
-    dispatch(getCurrentUser()).then((resp: any) => {
-      const res = resp ;
-      if (res && res.statusCode === 200) {
+  useAbortableEffect(async (status: statusType) => {
+    const res = await dispatch(getCurrentUser());
+    if (!status.aborted && res && res.statusCode === 200) {
         setUser(res.data);
-      }
-    });
+    }
   }, [dispatch]);
 
   if (!currentUser || currentUser.isFetching) {

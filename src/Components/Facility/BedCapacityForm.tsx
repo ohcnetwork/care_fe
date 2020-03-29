@@ -4,11 +4,12 @@ import { Grid, InputLabel, Select, Card, CardActions, CardHeader, CardContent, M
 import { ErrorHelperText, NativeSelectField, TextInputField } from "../Common/HelperInputFields";
 import SaveIcon from '@material-ui/icons/Save';
 import { navigate } from 'hookrouter';
-import { BED_TYPES } from "../../Constants/constants";
+import { BED_TYPES } from "../../Common/constants";
 import { CapacityModal, OptionsType } from './models';
 import AppMessage from "../Common/AppMessage";
 import { Loading } from "../../Components/Common/Loading";
 import { createCapacity, getCapacity, listCapacity } from "../../Redux/actions";
+import { useAbortableEffect, statusType } from '../../Common/utils';
 
 interface BedCapacityProps extends CapacityModal {
     facilityId: number;
@@ -61,27 +62,29 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
     const headerText = !id ? "Add Bed Capacity" : "Edit Bed Capacity";
     const buttonText = !id ? `Save ${!isLastOptionType ? "& Add More" : ""}` : "Update";
 
-    const fetchData = useCallback(async () => {
+    const fetchData = useCallback(async (status: statusType) => {
         setIsLoading(true);
         if (!id) {
             // Add Form functionality
             const capacityRes = await dispatchAction(listCapacity({}, { facilityId }));
-            if (capacityRes && capacityRes.data) {
-                const existingData = capacityRes.data.results;
-                // redirect to listing page if all options are diabled
-                if (existingData.length === BED_TYPES.length) {
-                    navigate(`/facility/${facilityId}`);
-                    return;
-                }
-                // disable existing bed types
-                const updatedBedTypes = initBedTypes.map((type: OptionsType) => {
-                    const isExisting = existingData.find((i: CapacityModal) => i.room_type === type.id);
-                    return {
-                        ...type,
-                        disabled: !!isExisting,
+            if (!status.aborted) {
+                if (capacityRes && capacityRes.data) {
+                    const existingData = capacityRes.data.results;
+                    // redirect to listing page if all options are diabled
+                    if (existingData.length === BED_TYPES.length) {
+                        navigate(`/facility/${facilityId}`);
+                        return;
                     }
-                });
-                setBedTypes(updatedBedTypes);
+                    // disable existing bed types
+                    const updatedBedTypes = initBedTypes.map((type: OptionsType) => {
+                        const isExisting = existingData.find((i: CapacityModal) => i.room_type === type.id);
+                        return {
+                            ...type,
+                            disabled: !!isExisting,
+                        }
+                    });
+                    setBedTypes(updatedBedTypes);
+                }
             }
         } else {
             // Edit Form functionality
@@ -100,8 +103,8 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
         setIsLoading(false);
     }, [dispatchAction, facilityId, id]);
 
-    useEffect(() => {
-        fetchData();
+    useAbortableEffect((status: statusType) => {
+        fetchData(status);
     }, [dispatch, fetchData, id]);
 
     useEffect(() => {

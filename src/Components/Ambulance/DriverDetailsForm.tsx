@@ -22,7 +22,7 @@ import {
   AGREE_CONSENT,
   AMBULANCE_FREE_SERVICE_CONSENT,
   AMBULANCE_SERVICE_FEE_TEXT
-} from "../../Constants/constants";
+} from "../../Common/constants";
 import { vehicleForm } from "./VehicleDetailsForm";
 
 interface DriverDetailsProps {

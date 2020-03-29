@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { Box, Button, Card, CardActions, CardContent, CardHeader, Checkbox, Grid, Typography } from "@material-ui/core";
 import { ErrorHelperText, NativeSelectField, TextInputField, CheckboxField } from "../Common/HelperInputFields";
-import { DISTRICT_CHOICES, VEHICLE_TYPES } from "../../Constants/constants";
+import { DISTRICT_CHOICES, VEHICLE_TYPES } from "../../Common/constants";
 import { isEmpty } from "lodash";
 import NavigateNextIcon from '@material-ui/icons/NavigateNext';
-import { phonePreg } from "../../Constants/common";
+import { phonePreg } from "../../Common/validation";
 
 export interface vehicleForm {
     registrationNumber: string;

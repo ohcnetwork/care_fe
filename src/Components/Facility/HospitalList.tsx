@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import Grid from '@material-ui/core/Grid';
 import { Card, CardContent, CardHeader, Tooltip, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
@@ -10,7 +10,7 @@ import AddCard from '../Common/AddCard';
 import { navigate } from 'hookrouter';
 import { Loading } from "../Common/Loading";
 import { FacilityModal } from './models';
-import { DISTRICT_CHOICES } from "../../Constants/constants";
+import { useAbortableEffect, statusType } from '../../Common/utils';
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -101,18 +101,20 @@ export const HospitalList = () => {
 
     const limit = 15;
 
-    const fetchData = useCallback(async () => {
+    const fetchData = useCallback(async (status: statusType) => {
         setIsLoading(true);
         const res = await dispatchAction(getFacilities({ limit, offset }));
-        if (res && res.data) {
-            setData(res.data.results);
-            setTotalCount(res.data.count);
+        if (!status.aborted) {
+            if (res && res.data) {
+                setData(res.data.results);
+                setTotalCount(res.data.count);
+            }
+            setIsLoading(false);
         }
-        setIsLoading(false);
     }, [dispatchAction, offset]);
 
-    useEffect(() => {
-        fetchData();
+    useAbortableEffect((status: statusType) => {
+        fetchData(status);
     }, [fetchData]);
 
     const handlePagination = (page: number, limit: number) => {

@@ -8,7 +8,8 @@ import AppMessage from "../Common/AppMessage";
 import { createDoctor, getDoctor, listDoctor } from "../../Redux/actions";
 import SaveIcon from '@material-ui/icons/Save';
 import { DoctorModal, OptionsType } from './models';
-import { DOCTOR_SPECIALIZATION } from '../../Constants/constants';
+import { useAbortableEffect, statusType } from '../../Common/utils';
+import { DOCTOR_SPECIALIZATION } from '../../Common/constants';
 
 interface DoctorCapacityProps extends DoctorModal {
     facilityId: number;
@@ -60,27 +61,29 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
     const headerText = !id ? "Add Doctor Capacity" : "Edit Doctor Capacity";
     const buttonText = !id ? `Save ${!isLastOptionType ? "& Add More" : ""}` : "Update";
 
-    const fetchData = useCallback(async () => {
+    const fetchData = useCallback(async (status: statusType) => {
         setIsLoading(true);
         if (!id) {
             // Add Form functionality
             const doctorRes = await dispatchAction(listDoctor({}, { facilityId }));
-            if (doctorRes && doctorRes.data) {
-                const existingData = doctorRes.data.results;
-                // redirect to listing page if all options are diabled
-                if (existingData.length === DOCTOR_SPECIALIZATION.length) {
-                    navigate(`/facility/${facilityId}`);
-                    return;
-                }
-                // disable existing doctor types
-                const updatedDoctorTypes = initDoctorTypes.map((type: OptionsType) => {
-                    const isExisting = existingData.find((i: DoctorModal) => i.area === type.id);
-                    return {
-                        ...type,
-                        disabled: !!isExisting,
+            if (!status.aborted) {
+                if (doctorRes && doctorRes.data) {
+                    const existingData = doctorRes.data.results;
+                    // redirect to listing page if all options are diabled
+                    if (existingData.length === DOCTOR_SPECIALIZATION.length) {
+                        navigate(`/facility/${facilityId}`);
+                        return;
                     }
-                });
-                setDoctorTypes(updatedDoctorTypes);
+                    // disable existing doctor types
+                    const updatedDoctorTypes = initDoctorTypes.map((type: OptionsType) => {
+                        const isExisting = existingData.find((i: DoctorModal) => i.area === type.id);
+                        return {
+                            ...type,
+                            disabled: !!isExisting,
+                        }
+                    });
+                    setDoctorTypes(updatedDoctorTypes);
+                }
             }
         } else {
             // Edit Form functionality
@@ -94,8 +97,8 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
         setIsLoading(false);
     }, [dispatchAction, facilityId, id]);
 
-    useEffect(() => {
-        fetchData();
+    useAbortableEffect((status: statusType) => {
+        fetchData(status);
     }, [dispatch, fetchData, id]);
 
     useEffect(() => {

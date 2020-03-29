@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import {
     Grid,
@@ -13,6 +13,8 @@ import Pagination from '../Common/Pagination';
 import TitleHeader from '../Common/TitleHeader';
 import { getUserList } from "../../Redux/actions";
 import { Loading } from '../Common/Loading';
+import { useAbortableEffect, statusType } from '../../Common/utils';
+
 const useStyles = makeStyles(theme => ({
     root: {
         flexGrow: 1,
@@ -95,18 +97,20 @@ export default function ManageUsers(props: any) {
 
     const limit = 15;
 
-    const fetchData = useCallback(async () => {
+    const fetchData = useCallback(async (status: statusType) => {
         setIsLoading(true);
         const res = await dispatch(getUserList({ limit, offset }));
-        if (res && res.data) {
-            setUsers(res.data.results);
-            setTotalCount(res.data.count);
+        if (!status.aborted) {
+            if (res && res.data) {
+                setUsers(res.data.results);
+                setTotalCount(res.data.count);
+            }
+            setIsLoading(false);
         }
-        setIsLoading(false);
     }, [dispatch, offset]);
 
-    useEffect(() => {
-        fetchData();
+    useAbortableEffect((status: statusType) => {
+        fetchData(status);
     }, [fetchData]);
 
     const handlePagination = (page: number, limit: number) => {

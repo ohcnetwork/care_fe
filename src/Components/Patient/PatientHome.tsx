@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Grid, Typography, Button, Divider } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { useDispatch } from "react-redux";
@@ -6,7 +6,8 @@ import { navigate } from 'hookrouter';
 import { Loading } from '../Common/Loading';
 import { getPatient } from '../../Redux/actions';
 import { PatientModal } from './models';
-import { MEDICAL_HISTORY_CHOICES, GENDER_TYPES } from "../../Constants/constants";
+import { MEDICAL_HISTORY_CHOICES, GENDER_TYPES } from "../../Common/constants";
+import { useAbortableEffect, statusType } from '../../Common/utils';
 
 
 const useStyles = makeStyles(theme => ({
@@ -39,17 +40,19 @@ export const PatientHome = (props: any) => {
     const [patientData, setPatientData] = useState<PatientModal>({});
     const [isLoading, setIsLoading] = useState(false);
 
-    const fetchData = useCallback(async () => {
+    const fetchData = useCallback(async (status: statusType) => {
         const patientRes = await dispatch(getPatient({ id }));
-        if (patientRes && patientRes.data) {
-            setPatientData(patientRes.data);
+        if (!status.aborted) {
+            if (patientRes && patientRes.data) {
+                setPatientData(patientRes.data);
+            }
+            setIsLoading(false);
         }
-        setIsLoading(false);
     }, [dispatch, id]);
 
-    useEffect(() => {
+    useAbortableEffect((status: statusType) => {
         setIsLoading(true);
-        fetchData();
+        fetchData(status);
     }, [dispatch, fetchData]);
 
     if (isLoading) {
@@ -95,8 +98,8 @@ export const PatientHome = (props: any) => {
             <Grid container style={{ padding: "10px" }} spacing={1}>
                 <Grid item xs={12}>
                     <div className={`w3-black ${classes.title}`}>
-                      <Typography>
-                          Has the patient had contact with someone already diagnosed with Covid 19?
+                        <Typography>
+                            Has the patient had contact with someone already diagnosed with Covid 19?
                       </Typography>
                     </div>
                     <div style={{ marginBottom: '10px' }}>

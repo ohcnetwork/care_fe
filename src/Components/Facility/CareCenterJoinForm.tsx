@@ -4,8 +4,8 @@ import { FormControl, Grid, Card, CardHeader, CardContent, Button, InputLabel, S
 import { TextInputField, MultilineInputField } from "../Common/HelperInputFields"
 import Loader from "../Common/Loader"
 import AppMessage from "../Common/AppMessage"
-import { FACILITY_TYPES, DISTRICT_CHOICES } from "../../Constants/constants";
-import { validateLocationCoordinates, phonePreg } from "../../Constants/common";
+import { FACILITY_TYPES, DISTRICT_CHOICES } from "../../Common/constants";
+import { validateLocationCoordinates, phonePreg } from "../../Common/validation";
 import { createFacility } from "../../Redux/actions";
 
 

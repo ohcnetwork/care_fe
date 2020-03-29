@@ -1,15 +1,16 @@
-import React, { useState, useReducer, useCallback, useEffect} from "react"
+import React, { useState, useReducer, useCallback, useEffect } from "react"
 import { makeStyles, Theme } from '@material-ui/core/styles';
 import { useDispatch } from "react-redux";
 import { Box, Grid, Checkbox, Card, CardHeader, CardContent, CardActions, Button, FormControl, InputLabel, Select, MenuItem, Typography, FormLabel, RadioGroup, Radio, FormControlLabel } from "@material-ui/core";
 import { TextInputField, NativeSelectField, ErrorHelperText, MultilineInputField, ShowCheckboxOptions } from "../Common/HelperInputFields";
-import { phonePreg } from "../../Constants/common";
+import { phonePreg } from "../../Common/validation";
 import { navigate } from 'hookrouter';
 import { Loading } from "../Common/Loading";
 import AppMessage from "../Common/AppMessage";
-import { PatientModal} from './models';
-import { MEDICAL_HISTORY_CHOICES, GENDER_TYPES } from "../../Constants/constants";
+import { PatientModal } from './models';
+import { MEDICAL_HISTORY_CHOICES, GENDER_TYPES } from "../../Common/constants";
 import { createPatient, getPatient, updatePatient } from "../../Redux/actions";
+import { useAbortableEffect, statusType } from '../../Common/utils';
 
 interface PatientRegisterProps extends PatientModal {
     facilityId: number;
@@ -18,10 +19,10 @@ interface PatientRegisterProps extends PatientModal {
 const initForm: any = {
     name: "",
     age: "",
-    gender:"",
+    gender: "",
     phone_number: "",
     medical_history: [],
-    contact_with_carrier:"",
+    contact_with_carrier: "",
     medical_history_details: ""
 };
 const initialState = {
@@ -75,25 +76,24 @@ const genderTypes = [{
 }, ...GENDER_TYPES]
 
 
-export const PatientRegister = (props:PatientRegisterProps) => {
-    const classes = useStyles();
+export const PatientRegister = (props: PatientRegisterProps) => {
     const dispatchAction: any = useDispatch();
     const { facilityId, id } = props;
     const [state, dispatch] = useReducer(patientFormReducer, initialState);
     const [showAppMessage, setAppMessage] = useState({ show: false, message: "", type: "" });
     const [isLoading, setIsLoading] = useState(false);
 
-
     const headerText = !id ? "Add Patient" : "Edit Patient";
     const buttonText = !id ? "Save" : "Update";
 
-    const fetchData = useCallback(async () => {
+    const fetchData = useCallback(async (status: statusType) => {
         if (id) {
             setIsLoading(true);
-            const res = await dispatchAction(getPatient({id}));
-            if (res.data) {
-                dispatch({ 
-                        type: "set_form", 
+            const res = await dispatchAction(getPatient({ id }));
+            if (!status.aborted) {
+                if (res.data) {
+                    dispatch({
+                        type: "set_form",
                         form: {
                             name: res.data.name,
                             age: res.data.age,
@@ -104,18 +104,17 @@ export const PatientRegister = (props:PatientRegisterProps) => {
                             medical_history_details: res.data.medical_history_details
                         }
                     })
-            } else {
-                navigate(`/facility/${facilityId}`);
+                } else {
+                    navigate(`/facility/${facilityId}`);
+                }
+                setIsLoading(false);
             }
-            setIsLoading(false);
         }
     }, [dispatchAction, facilityId, id]);
 
-    useEffect(() => {
-        fetchData();
+    useAbortableEffect((status: statusType) => {
+        fetchData(status);
     }, [dispatch, fetchData, id]);
-
-
 
     const validateForm = () => {
         let errors = { ...initForm };
@@ -124,10 +123,10 @@ export const PatientRegister = (props:PatientRegisterProps) => {
             if ((optionalFields.indexOf(field) === -1) && !state.form[field]) {
                 errors[field] = "Field is required";
                 invalidForm = true;
-            }else if(field === 'medical_history' && state.form['medical_history'].length == 0){
+            } else if (field === 'medical_history' && state.form['medical_history'].length == 0) {
                 errors['medical_history'] = "Field is required";
                 invalidForm = true;
-            }else if (field === "phone_number" && !phonePreg(state.form[field])) {
+            } else if (field === "phone_number" && !phonePreg(state.form[field])) {
                 errors[field] = "Please Enter 10/11 digit mobile number or landline as 0<std code><phone number>";
                 invalidForm = true;
             }
@@ -140,7 +139,7 @@ export const PatientRegister = (props:PatientRegisterProps) => {
         return true
     };
 
-    const handleSubmit = async(e: any) => {
+    const handleSubmit = async (e: any) => {
         e.preventDefault();
         const validForm = validateForm();
         if (validForm) {
@@ -155,8 +154,8 @@ export const PatientRegister = (props:PatientRegisterProps) => {
                 "medical_history_details": state.form.medical_history_details,
                 "is_active": true,
             };
-            
-            const res = await dispatchAction(id?updatePatient(data,{id}):createPatient(data));
+
+            const res = await dispatchAction(id ? updatePatient(data, { id }) : createPatient(data));
             setIsLoading(false);
             if (res.data) {
                 dispatch({ type: "set_form", form: initForm })
@@ -201,14 +200,14 @@ export const PatientRegister = (props:PatientRegisterProps) => {
     }
 
 
-console.log("form values", state.form);
+    console.log("form values", state.form);
     return <div>
 
         <Grid container alignContent="center" justify="center">
             <Grid item xs={12} sm={10} md={8} lg={6} xl={4}>
                 <Card>
                     <AppMessage open={showAppMessage.show} type={showAppMessage.type} message={showAppMessage.message} handleClose={() => setAppMessage({ show: false, message: "", type: "" })} handleDialogClose={() => setAppMessage({ show: false, message: "", type: "" })} />
-                    <CardHeader title={headerText}/>
+                    <CardHeader title={headerText} />
                     <form onSubmit={(e) => handleSubmit(e)}>
                         <CardContent>
                             <InputLabel id="name-label">Name*</InputLabel>

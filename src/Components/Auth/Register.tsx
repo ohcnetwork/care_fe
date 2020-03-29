@@ -14,8 +14,8 @@ import {
     MenuItem
 } from "@material-ui/core";
 import { TextInputField } from "../Common/HelperInputFields";
-import { validateEmailAddress, phonePreg } from "../../Constants/common";
-import { DISTRICT_CHOICES, GENDER_TYPES } from "../../Constants/constants";
+import { validateEmailAddress, phonePreg } from "../../Common/validation";
+import { DISTRICT_CHOICES, GENDER_TYPES } from "../../Common/constants";
 import { signupUser } from "../../Redux/actions";
 import ReCaptcha from "react-google-recaptcha";
 
