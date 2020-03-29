@@ -1,18 +1,6 @@
 import React from 'react';
-import {
-    Checkbox,
-    Grid,
-    IconButton,
-    Radio,
-    TextField,
-    NativeSelect,
-    TextFieldProps
-} from '@material-ui/core';
-import {
-    KeyboardDatePicker,
-    KeyboardTimePicker,
-    MuiPickersUtilsProvider
-} from '@material-ui/pickers';
+import { Checkbox, Grid, IconButton, Radio, TextField, NativeSelect, TextFieldProps, FormControlLabel, FormControlLabelProps } from '@material-ui/core';
+import { KeyboardDatePicker, KeyboardTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import { MaterialUiPickersDate } from '@material-ui/pickers/typings/date'
 import DateFnsUtils from '@date-io/date-fns';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -48,6 +36,11 @@ interface DateInputFieldProps {
 interface TimeInputFieldProps {
     value: string;
     onChange: (date: MaterialUiPickersDate, value?: string | null | undefined) => void;
+};
+
+
+interface CheckboxProps extends Omit<FormControlLabelProps, 'control'> {
+    label: string;
 };
 
 interface OptionsProps {
@@ -287,11 +280,14 @@ export const ShowCheckboxOptions = (props: OptionsProps) => {
                 const checked = values.indexOf(opt.id) > -1;
                 return (
                     <div key={i}>
-                        <Checkbox
-                            checked={checked}
-                            value={opt.id}
-                            onChange={onChange}
-                        /> {opt.text}
+                        <FormControlLabel
+                            control={<Checkbox
+                                checked={checked}
+                                value={opt.id}
+                                onChange={onChange}
+                            />}
+                            label={opt.text}
+                        />
                     </div>
                 );
             })}
@@ -312,5 +308,20 @@ export const NativeSelectField = (props: DefaultNativeSelectInputProps) => {
                 })}
             </NativeSelect>
         </FormControl>
+    );
+};
+
+export const CheckboxField = (props: CheckboxProps) => {
+    const { onChange, checked, name, style } = props;
+    return (
+        <FormControlLabel 
+            style={style}
+            control={<Checkbox
+                checked={checked}
+                name={name}
+                onChange={onChange}
+            />}
+            {...props}
+        />
     );
 };

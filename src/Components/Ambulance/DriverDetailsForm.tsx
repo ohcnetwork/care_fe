@@ -11,7 +11,7 @@ import {
   Typography,
   Switch
 } from "@material-ui/core";
-import { TextInputField } from "../Common/HelperInputFields";
+import { TextInputField, CheckboxField } from "../Common/HelperInputFields";
 import { useDispatch } from "react-redux";
 import { postAmbulance } from "../../Redux/actions";
 import { isEmpty } from "lodash";
@@ -247,12 +247,12 @@ export const DriverDetailsForm = (props: DriverDetailsProps) => {
                   errors={errors.cellNumber1}
                   inputProps={{ maxLength: 10 }}
                 />
-                <Checkbox
+                <CheckboxField
                   checked={form.isSmartPhone1}
                   onChange={handleCheckboxFieldChange}
                   name="isSmartPhone1"
-                />{" "}
-                Has smart phone
+                  label="Has smart phone"
+                />                
                 <h4>Driver 2</h4>
                 <TextInputField
                   name="driverName2"
@@ -277,12 +277,12 @@ export const DriverDetailsForm = (props: DriverDetailsProps) => {
                   inputProps={{ maxLength: 10 }}
                 />
                 <Box>
-                  <Checkbox
+                  <CheckboxField
                     checked={form.isSmartPhone2}
                     onChange={handleCheckboxFieldChange}
                     name="isSmartPhone2"
-                  />{" "}
-                  Has smart phone
+                    label="Has smart phone"
+                  />
                 </Box>
                 <Box>
                   <Typography>
@@ -299,7 +299,7 @@ export const DriverDetailsForm = (props: DriverDetailsProps) => {
                 </Box>
                 <h4>Declaration</h4>
                 <Box display="flex">
-                  <Box>
+                <Box>
                     <Checkbox
                       checked={form.agreeConsent}
                       onChange={handleCheckboxFieldChange}
