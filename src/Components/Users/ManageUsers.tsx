@@ -11,7 +11,7 @@ import {
 import { makeStyles } from '@material-ui/core/styles';
 import Pagination from '../Common/Pagination';
 import TitleHeader from '../Common/TitleHeader';
-import { getUserList, readUser } from "../../Redux/actions";
+import { getUserList } from "../../Redux/actions";
 import { Loading } from '../Common/Loading';
 const useStyles = makeStyles(theme => ({
     root: {
@@ -95,25 +95,25 @@ export default function ManageUsers(props: any) {
 
     const limit = 15;
 
-    const fetchData = useCallback(async (page, limit, offset) => {
-        const res = await dispatch(getUserList({ page, limit, offset }));
+    const fetchData = useCallback(async () => {
+        setIsLoading(true);
+        const res = await dispatch(getUserList({ limit, offset }));
         if (res && res.data) {
             setUsers(res.data.results);
             setTotalCount(res.data.count);
         }
         setIsLoading(false);
-    }, [dispatch]);
+    }, [dispatch, offset]);
+
     useEffect(() => {
-        setIsLoading(true);
-        fetchData(currentPage, limit, offset);
-    }, [currentPage, dispatch, fetchData, offset]);
+        fetchData();
+    }, [dispatch, fetchData, offset]);
 
     const handlePagination = (page: number, limit: number) => {
         const offset = (page - 1) * limit;
         setCurrentPage(page);
         setOffset(offset);
     };
-
 
     let userList: any[] = [];
     if (users && users.length) {
