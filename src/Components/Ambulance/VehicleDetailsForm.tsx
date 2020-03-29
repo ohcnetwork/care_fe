@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Box, Button, Card, CardActions, CardContent, CardHeader, Checkbox, Grid, Typography, InputLabel, Switch } from "@material-ui/core";
 import { ErrorHelperText, NativeSelectField, TextInputField } from "../Common/HelperInputFields";
-import { DISTRICT_CHOICES, VEHICLE_TYPES } from "./constants";
+import { DISTRICT_CHOICES, VEHICLE_TYPES } from "../../Constants/constants";
 import { isEmpty } from "lodash";
 import NavigateNextIcon from '@material-ui/icons/NavigateNext';
 import { phonePreg } from "../../Constants/common";

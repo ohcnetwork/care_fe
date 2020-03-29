@@ -9,7 +9,7 @@ import { createFacility, getFacility, updateFacility } from "../../Redux/actions
 import { validateLocationCoordinates, phonePreg } from "../../Constants/common";
 import districts from "../../Constants/Static_data/districts.json"
 import SaveIcon from '@material-ui/icons/Save';
-import { FACILITY_TYPES } from "./constants";
+import { FACILITY_TYPES } from "../../Constants/constants";
 import { Loading } from "../../Components/Common/Loading";
 
 interface FacilityProps {

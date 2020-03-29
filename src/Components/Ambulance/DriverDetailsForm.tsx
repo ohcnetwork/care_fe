@@ -7,7 +7,7 @@ import { isEmpty } from "lodash";
 import { navigate } from 'hookrouter';
 import AppMessage from "../Common/AppMessage"
 import SaveIcon from '@material-ui/icons/Save';
-import { AGREE_CONSENT, AMBULANCE_FREE_SERVICE_CONSENT, AMBULANCE_SERVICE_FEE_TEXT } from "./constants";
+import { AGREE_CONSENT, AMBULANCE_FREE_SERVICE_CONSENT, AMBULANCE_SERVICE_FEE_TEXT } from "../../Constants/constants";
 import { vehicleForm } from "./VehicleDetailsForm";
 
 interface DriverDetailsProps {

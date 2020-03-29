@@ -8,7 +8,7 @@ import AppMessage from "../Common/AppMessage";
 import { createDoctor, getDoctor, listDoctor } from "../../Redux/actions";
 import SaveIcon from '@material-ui/icons/Save';
 import { DoctorModal, OptionsType } from './models';
-import { DOCTOR_SPECIALIZATION } from './constants';
+import { DOCTOR_SPECIALIZATION } from '../../Constants/constants';
 
 interface DoctorCapacityProps extends DoctorModal {
     facilityId: number;
