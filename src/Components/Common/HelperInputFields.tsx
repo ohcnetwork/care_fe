@@ -306,7 +306,9 @@ export const NativeSelectField = (props: DefaultNativeSelectInputProps) => {
             {label && (<Box>{label}</Box>)}
             <NativeSelect {...props}>
                 {options.map((opt: any) => {
-                    return <option value={optionkey ? opt[optionkey] : opt.id} key={opt.id} disabled={opt.disabled}>{optionvalueidentifier ? opt[optionvalueidentifier] : opt.text}</option>
+                    return <option value={optionkey ? opt[optionkey] : opt.id} key={opt.id} disabled={opt.disabled}>
+                        {optionvalueidentifier ? opt[optionvalueidentifier] : opt.text}
+                    </option>
                 })}
             </NativeSelect>
         </FormControl>
