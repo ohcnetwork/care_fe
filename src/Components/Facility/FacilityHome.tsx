@@ -7,8 +7,8 @@ import { getFacility, listCapacity, listDoctor } from "../../Redux/actions";
 import BedTypeCard from "./BedTypeCard";
 import { Loading } from '../Common/Loading';
 import DoctorsCountCard from './DoctorsCountCard';
+import AppMessage from "../Common/AppMessage"
 import { BED_TYPES, DOCTOR_SPECIALIZATION } from "../../Constants/constants";
-import { DISTRICT_CHOICES } from "../../Constants/constants";
 import { FacilityModal, CapacityModal, DoctorModal } from './models';
 
 const useStyles = makeStyles(theme => ({
@@ -38,25 +38,30 @@ export const FacilityHome = (props: any) => {
     const [capacityData, setCapacityData] = useState<Array<CapacityModal>>([]);
     const [doctorData, setDoctorData] = useState<Array<DoctorModal>>([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [showAppMessage, setAppMessage] = useState({ show: false, message: "", type: "" })
 
     const fetchData = useCallback(async () => {
-        const facilityRes = await dispatch(getFacility(facilityId));
-        if (facilityRes && facilityRes.data) {
+        setIsLoading(true);
+        const [facilityRes, capacityRes, doctorRes] = await Promise.all([
+            dispatch(getFacility(facilityId)),
+            dispatch(listCapacity({}, { facilityId })),
+            dispatch(listDoctor({}, { facilityId })),
+        ]);
+        setIsLoading(false);
+        if (!(facilityRes.status === 200 || facilityRes.status === 201) || !facilityRes.data) {
+            setAppMessage({ show: true, message: "Something went wrong..!", type: "error" })
+        } else {
             setFacilityData(facilityRes.data);
-            const capacityRes = await dispatch(listCapacity({}, { facilityId }));
             if (capacityRes && capacityRes.data) {
                 setCapacityData(capacityRes.data.results)
             }
-            const doctorRes = await dispatch(listDoctor({}, { facilityId }));
             if (doctorRes && doctorRes.data) {
                 setDoctorData(doctorRes.data.results)
             }
         }
-        setIsLoading(false);
     }, [dispatch, facilityId]);
 
     useEffect(() => {
-        setIsLoading(true);
         fetchData();
     }, [dispatch, fetchData]);
 
@@ -92,6 +97,7 @@ export const FacilityHome = (props: any) => {
 
     return (
         <div className={`w3-content ${classes.content}`}>
+            <AppMessage open={showAppMessage.show} type={showAppMessage.type} message={showAppMessage.message} handleClose={() => setAppMessage({ show: false, message: "", type: "" })} handleDialogClose={() => setAppMessage({ show: false, message: "", type: "" })} />
             <h2>Facility</h2>
             <Grid container style={{ padding: "10px", marginBottom: '5px' }} spacing={2}>
                 <Grid item xs={12} md={7}>
@@ -126,7 +132,7 @@ export const FacilityHome = (props: any) => {
                     </Grid>
                 </Grid>
             </Grid>
-            <Grid container style={{ padding: "10px"}} spacing={1}>
+            <Grid container style={{ padding: "10px" }} spacing={1}>
                 <Grid item xs={12} md={6} className="w3-center">
                     <Button fullWidth variant="contained" color="primary" size="small"
                         onClick={() => navigate(`/facility/${facilityId}/patient`)}>
