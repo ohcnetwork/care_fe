@@ -94,30 +94,31 @@ export const PatientManager = () => {
     let managePatients: any = null;
     const [isLoading, setIsLoading] = useState(false);
     const [totalCount, setTotalCount] = useState(0);
-
-    const limit = 15;
-    const page = 1;
-    const offset = 0;
     const [currentPage, setCurrentPage] = useState(1);
+    const [offset, setOffset] = useState(0);
+    
+    const limit = 15;
 
-    const fetchData = useCallback(async (page, limit, offset) => {
-        const res = await dispatch(getAllPatient({page, offset, limit}));
+    const fetchData = useCallback(async () => {
+        setIsLoading(true);
+        const res = await dispatch(getAllPatient({ limit, offset }));
         if (res && res.data) {
             setData(res.data.results);
             setTotalCount(res.data.count);
         }
         setIsLoading(false);
-    },[dispatch]);
+    }, [dispatch, offset]);
 
     useEffect(() => {
-        setIsLoading(true);
-        fetchData(page, limit, offset);
+        fetchData();
     }, [dispatch, fetchData]);
 
-    const handlePagination = (page: any, perPage: any) => {
+    const handlePagination = (page: number, limit: number) => {
+        const offset = (page - 1) * limit;
         setCurrentPage(page);
-        fetchData(page, limit, perPage);
+        setOffset(offset);
     };
+
     let patientList: any[] = [];
     if (data && data.length) {
         patientList = data.map((patient: any, idx: number) => {
@@ -162,7 +163,20 @@ export const PatientManager = () => {
             <Loading />
         );
     } else if (data && data.length) {
-        managePatients = patientList;
+        managePatients = (
+            <>
+                {patientList}
+                <Grid container className={`w3-center ${classes.paginateTopPadding}`}>
+                    <Pagination
+                        cPage={currentPage}
+                        defaultPerPage={limit}
+                        data={{ totalCount }}
+                        onChange={handlePagination}
+                    />
+                </Grid>
+            </>
+        );
+
     } else if (data && data.length === 0) {
         managePatients = (
             <Grid item xs={12} md={12} className={classes.displayFlex}>
@@ -181,16 +195,6 @@ export const PatientManager = () => {
 
             <Grid container>
                 {managePatients}
-                {(data && data.length > 0 && totalCount > limit) && (
-                    <Grid container className={`w3-center ${classes.paginateTopPadding}`}>
-                        <Pagination
-                            cPage={currentPage}
-                            defaultPerPage={limit}
-                            data={{ totalCount }}
-                            onChange={handlePagination}
-                        />
-                    </Grid>
-                )}
             </Grid>
         </div>
     );
