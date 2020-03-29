@@ -23,9 +23,13 @@ const SessionRouter = () => {
                 {content}
             </div>
             <div className="app-footer">
-                <div className="copy-right" >
-                    <a href="https://coronasafe.network" >  Corona Care Network </a>
-                </div>
+                <img src="https://care-coronasafe.s3.amazonaws.com/static/images/logos/ksdma_logo.png" alt="Care Logo" />
+                <div className="copy-right">
+                <a href="https://coronasafe.network/">CoronaSafe Network is an open-source public utility designed by
+                  a multi-disciplinary team of innovators and volunteers who are working on a model to support
+                  Government efforts with full understanding and support of Government of
+                  Kerala.</a>&nbsp;<a href="https://github.com/coronasafe" className="care-secondary-color">(Github)</a>
+                  </div>
             </div>
         </div>
     )
