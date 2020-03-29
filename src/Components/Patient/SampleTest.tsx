@@ -8,7 +8,8 @@ import { Loading } from "../Common/Loading";
 import AppMessage from "../Common/AppMessage";
 // import { PatientModal} from './models';
 import { SAMPLE_TEST_STATUS, SAMPLE_TEST_RESULT } from "../../Common/constants";
-// import { createPatient, getPatient, updatePatient } from "../../Redux/actions";
+import { createSampleTest, getSampleTest, patchSampleTest } from "../../Redux/actions";
+import { useAbortableEffect, statusType } from '../../Common/utils';
 
 // interface SampleTestProps extends PatientModal {
     
@@ -26,7 +27,12 @@ const initialState = {
     errors: { ...initForm }
 };
 
-// const optionalFields = ["medical_history_details"];
+const optionalFields = [
+    "status",
+    "result",
+    "notes"
+];
+
 
 const sampleTestFormReducer = (state = initialState, action: any) => {
     switch (action.type) {
@@ -68,13 +74,13 @@ const statusTypes = [{
 const resultTypes = [{
     id: 0,
     text: 'Select',
-}, ...SAMPLE_TEST_STATUS]
+}, ...SAMPLE_TEST_RESULT]
 
 
 export const SampleTest = (props:any) => {
     const classes = useStyles();
     const dispatchAction: any = useDispatch();
-    const { facilityId, id } = props;
+    const { facilityId, patientId, id } = props;
     const [state, dispatch] = useReducer(sampleTestFormReducer, initialState);
     const [showAppMessage, setAppMessage] = useState({ show: false, message: "", type: "" });
     const [isLoading, setIsLoading] = useState(false);
@@ -83,89 +89,78 @@ export const SampleTest = (props:any) => {
     const headerText = !id ? "Add Sample Test" : "Edit Sample Test";
     const buttonText = !id ? "Save" : "Update";
 
-    // const fetchData = useCallback(async () => {
-    //     if (id) {
-    //         setIsLoading(true);
-    //         const res = await dispatchAction(getPatient({id}));
-    //         if (res.data) {
-    //             dispatch({ 
-    //                     type: "set_form", 
-    //                     form: {
-    //                         name: res.data.name,
-    //                         age: res.data.age,
-    //                         gender: res.data.gender,
-    //                         phone_number: res.data.phone_number,
-    //                         medical_history: res.data.medical_history,
-    //                         contact_with_carrier: `${res.data.contact_with_carrier}`,
-    //                         medical_history_details: res.data.medical_history_details
-    //                     }
-    //                 })
-    //         } else {
-    //             navigate(`/facility/${facilityId}`);
-    //         }
-    //         setIsLoading(false);
-    //     }
-    // }, [dispatchAction, facilityId, id]);
+    const fetchData = useCallback(async (status: statusType) => {
+        if (id) {
+            setIsLoading(true);
+            const res = await dispatchAction(getSampleTest(id,{patientId,id}));
+            if (!status.aborted) {
+                    if (res.data) {
+                        dispatch({
+                            type: "set_form",
+                            form: {
+                                status: res.data.status,
+                                result: res.data.result,
+                                notes: res.data.result,
+                                consultation: res.data.consultation,
+                            }
+                        })
+                    } else {
+                        navigate(`/facility/${facilityId}/patient/${patientId}`);
+                    }
+                }
+            }
+            setIsLoading(false);
+    }, [dispatchAction, facilityId, patientId, id]);
 
-    // useEffect(() => {
-    //     fetchData();
-    // }, [dispatch, fetchData, id]);
-
+    useAbortableEffect((status: statusType) => {
+        fetchData(status);
+    }, [dispatch, fetchData, patientId, id]);
 
 
-    // const validateForm = () => {
-    //     let errors = { ...initForm };
-    //     let invalidForm = false;
-    //     Object.keys(state.form).forEach((field, i) => {
-    //         if ((optionalFields.indexOf(field) === -1) && !state.form[field]) {
-    //             errors[field] = "Field is required";
-    //             invalidForm = true;
-    //         }else if(field === 'medical_history' && state.form['medical_history'].length == 0){
-    //             errors['medical_history'] = "Field is required";
-    //             invalidForm = true;
-    //         }else if (field === "phone_number" && !phonePreg(state.form[field])) {
-    //             errors[field] = "Please Enter 10/11 digit mobile number or landline as 0<std code><phone number>";
-    //             invalidForm = true;
-    //         }
-    //     });
-    //     if (invalidForm) {
-    //         dispatch({ type: "set_error", errors });
-    //         return false
-    //     }
-    //     dispatch({ type: "set_error", errors });
-    //     return true
-    // };
+
+    const validateForm = () => {
+        let errors = { ...initForm };
+        let invalidForm = false;
+        Object.keys(state.form).forEach((field, i) => {
+            if ((optionalFields.indexOf(field) === -1) && !state.form[field]) {
+                errors[field] = "Field is required";
+                invalidForm = true;
+            }
+        });
+        if (invalidForm) {
+            dispatch({ type: "set_error", errors });
+            return false
+        }
+        dispatch({ type: "set_error", errors });
+        return true
+    };
 
     const handleSubmit = async(e: any) => {
         e.preventDefault();
-        // const validForm = validateForm();
-        // if (validForm) {
-        //     setIsLoading(true);
-        //     const data = {
-        //         "name": state.form.name,
-        //         "age": Number(state.form.age),
-        //         "gender": Number(state.form.gender),
-        //         "phone_number": state.form.phone_number,
-        //         "medical_history": state.form.medical_history,
-        //         "contact_with_carrier": JSON.parse(state.form.contact_with_carrier),
-        //         "medical_history_details": state.form.medical_history_details,
-        //         "is_active": true,
-        //     };
+        const validForm = validateForm();
+        if (validForm) {
+            setIsLoading(true);
+            const data = {
+                "status": Number(state.form.status),
+                "result": Number(state.form.result),
+                "notes": state.form.notes,
+                "consultation": Number(state.form.consultation),
+            };
             
-        //     const res = await dispatchAction(id?updatePatient(data,{id}):createPatient(data));
-        //     setIsLoading(false);
-        //     if (res.data) {
-        //         dispatch({ type: "set_form", form: initForm })
-        //         if (!id) {
-        //             setAppMessage({ show: true, message: "Patient added successfully", type: "success" });
-        //         } else {
-        //             setAppMessage({ show: true, message: "Patient updated successfully", type: "success" });
-        //         }
-        //         navigate(`/facility/${facilityId}`);
-        //     } else {
-        //         setAppMessage({ show: true, message: "Error", type: "error" })
-        //     }
-        // }
+            const res = await dispatchAction(id?patchSampleTest(id,data,{patientId}):createSampleTest(data,{id,patientId}));
+            setIsLoading(false);
+            if (res.data) {
+                dispatch({ type: "set_form", form: initForm })
+                if (id) {
+                    setAppMessage({ show: true, message: "Sample test updated successfully", type: "success" });
+                } else {
+                    setAppMessage({ show: true, message: "Sample test created successfully", type: "success" });
+                    navigate(`/facility/${facilityId}/patient/${patientId}`);
+                }
+            } else {
+                setAppMessage({ show: true, message: "Error", type: "error" })
+            }
+        }
     };
 
     const handleChange = (e: any) => {
@@ -237,8 +232,9 @@ export const SampleTest = (props:any) => {
                         </CardContent>
 
                         <CardContent>
-                            <InputLabel id="age-label">Consultation</InputLabel>
+                            <InputLabel id="age-label">Sample Number*</InputLabel>
                             <TextInputField
+                                defaultValue={"1"}
                                 name="consultation"
                                 variant="outlined"
                                 margin="dense"
