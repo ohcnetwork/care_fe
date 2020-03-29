@@ -96,7 +96,7 @@ export const PatientManager = () => {
     const [totalCount, setTotalCount] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
     const [offset, setOffset] = useState(0);
-    
+
     const limit = 15;
 
     const fetchData = useCallback(async () => {
@@ -166,14 +166,16 @@ export const PatientManager = () => {
         managePatients = (
             <>
                 {patientList}
-                <Grid container className={`w3-center ${classes.paginateTopPadding}`}>
-                    <Pagination
-                        cPage={currentPage}
-                        defaultPerPage={limit}
-                        data={{ totalCount }}
-                        onChange={handlePagination}
-                    />
-                </Grid>
+                {(totalCount > limit) && (
+                    <Grid container className={`w3-center ${classes.paginateTopPadding}`}>
+                        <Pagination
+                            cPage={currentPage}
+                            defaultPerPage={limit}
+                            data={{ totalCount }}
+                            onChange={handlePagination}
+                        />
+                    </Grid>
+                )}
             </>
         );
 

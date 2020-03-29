@@ -155,14 +155,16 @@ export default function ManageUsers(props: any) {
         manageUsers = (
             <>
                 {userList}
-                <Grid container className={`w3-center ${classes.paginateTopPadding}`}>
-                    <Pagination
-                        cPage={currentPage}
-                        defaultPerPage={limit}
-                        data={{ totalCount }}
-                        onChange={handlePagination}
-                    />
-                </Grid>
+                {(totalCount > limit) && (
+                    <Grid container className={`w3-center ${classes.paginateTopPadding}`}>
+                        <Pagination
+                            cPage={currentPage}
+                            defaultPerPage={limit}
+                            data={{ totalCount }}
+                            onChange={handlePagination}
+                        />
+                    </Grid>
+                )}
             </>
         );
     } else if (users && users.length === 0) {
