@@ -1,22 +1,7 @@
-import React, { useState, useReducer, useCallback, useEffect } from "react"
-import { makeStyles, Theme } from '@material-ui/core/styles';
+import React, { useState, useReducer, useCallback } from "react";
 import { Refresh } from '@material-ui/icons';
 import { useDispatch } from "react-redux";
-import {
-    Box,
-    Grid,
-    Checkbox,
-    Card,
-    CardHeader,
-    CardContent,
-    CardActions,
-    Button,
-    InputLabel,
-    RadioGroup,
-    Radio,
-    FormControlLabel,
-    IconButton
-} from "@material-ui/core";
+import { Box, Grid, Checkbox, Card, CardHeader, CardContent, CardActions, Button, InputLabel, RadioGroup, Radio, FormControlLabel, IconButton } from "@material-ui/core";
 import { TextInputField, NativeSelectField, ErrorHelperText, MultilineInputField } from "../Common/HelperInputFields";
 import { phonePreg, getArrayValueByKey, getRandomNumbers } from "../../Common/validation";
 import { navigate } from 'hookrouter';
@@ -34,9 +19,7 @@ interface PatientRegisterProps extends PatientModal {
 }
 
 const initForm: any = {
-    name: `${patientnameCombinations.comb1[getRandomNumbers(1, patientnameCombinations.comb1.length - 1)]} 
-        ${patientnameCombinations.comb2[getRandomNumbers(1, patientnameCombinations.comb2.length - 1)]} 
-        ${getRandomNumbers(1000, 10000)}`,
+    name: "",
     realName: "",
     age: "",
     gender: "",
@@ -51,8 +34,14 @@ const initForm: any = {
     medical_history4: "",
     medical_history5: "",
 };
+
+const getRandomName = () => `${patientnameCombinations.comb1[getRandomNumbers(1, patientnameCombinations.comb1.length - 1)]}-${patientnameCombinations.comb2[getRandomNumbers(1, patientnameCombinations.comb2.length - 1)]}-${getRandomNumbers(1000, 10000)}`;
+
 const initialState = {
-    form: { ...initForm },
+    form: {
+        ...initForm,
+        name: getRandomName(),
+    },
     errors: { ...initForm }
 };
 
@@ -63,6 +52,10 @@ const optionalFields = [
     "medical_history3",
     "medical_history4",
     "medical_history5"
+];
+
+const initialStatesList = [
+    { id: 0, name: "Choose State *" }
 ];
 
 const patientFormReducer = (state = initialState, action: any) => {
@@ -84,28 +77,10 @@ const patientFormReducer = (state = initialState, action: any) => {
     }
 };
 
-const useStyles = makeStyles((theme: Theme) => ({
-    formTop: {
-        marginTop: '80px',
-        marginBottom: "70px"
-    },
-    formControl: {
-        margin: theme.spacing(1)
-    },
-    selectLabel: {
-        background: 'white',
-        padding: '2px 10px'
-    },
-    checkBoxLabel: {
-        marginLeft: '8px'
-    },
-}));
-
 const genderTypes = [{
     id: 0,
     text: 'Select',
-}, ...GENDER_TYPES]
-
+}, ...GENDER_TYPES];
 
 export const PatientRegister = (props: PatientRegisterProps) => {
     const dispatchAction: any = useDispatch();
@@ -114,7 +89,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     const [showAppMessage, setAppMessage] = useState({ show: false, message: "", type: "" });
     const [showAlertMessage, setAlertMessage] = useState({ show: false, message: "", title: "" });
     const [isLoading, setIsLoading] = useState(false);
-    const [states, setStates] = useState([{ id: 0, name: "Choose State *" }])
+    const [states, setStates] = useState(initialStatesList)
     const [districts, setDistricts] = useState([{ id: 0, name: "Choose District", state: 0 }])
     const [localBody, setLocalBody] = useState([{ id: 0, name: "Choose Localbody" }])
 
@@ -123,42 +98,46 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
     const generateRandomname = () => {
         const form = { ...state.form }
-        form["name"] = `${patientnameCombinations.comb1[getRandomNumbers(1, patientnameCombinations.comb1.length - 1)]} 
-        ${patientnameCombinations.comb2[getRandomNumbers(1, patientnameCombinations.comb2.length - 1)]} 
-        ${getRandomNumbers(1000, 10000)}`
+        form["name"] = getRandomName();
         dispatch({ type: "set_form", form })
     }
 
     const fetchData = useCallback(async (status: statusType) => {
-        const statesList = await dispatchAction(getStates())
-        setStates([...states, ...statesList.data.results]);
 
-        if (id) {
-            setIsLoading(true);
-            const res = await dispatchAction(getPatient({ id }));
-            if (!status.aborted) {
-                if (res.data) {
-                    dispatch({
-                        type: "set_form",
-                        form: {
-                            name: res.data.name,
-                            age: res.data.age,
-                            gender: res.data.gender,
-                            phone_number: res.data.phone_number,
-                            medical_history: res.data.medical_history,
-                            contact_with_carrier: `${res.data.contact_with_carrier}`,
-                        }
-                    })
-                } else {
-                    navigate(`/facility/${facilityId}`);
-                }
+        setIsLoading(true);
+        const res = await dispatchAction(getPatient({ id }));
+        if (!status.aborted) {
+            if (res.data) {
+                dispatch({
+                    type: "set_form",
+                    form: {
+                        name: res.data.name,
+                        age: res.data.age,
+                        gender: res.data.gender,
+                        phone_number: res.data.phone_number,
+                        medical_history: res.data.medical_history,
+                        contact_with_carrier: `${res.data.contact_with_carrier}`,
+                    }
+                })
+            } else {
+                navigate(`/facility/${facilityId}`);
             }
         }
-    }, [dispatchAction, facilityId, id, states]);
+    }, [dispatchAction, facilityId, id]);
+
+    const fetchStates = useCallback(async (status: statusType) => {
+        const statesRes = await dispatchAction(getStates())
+        if (!status.aborted && statesRes.data.results) {
+            setStates([...initialStatesList, ...statesRes.data.results]);
+        }
+    }, [dispatchAction])
 
     useAbortableEffect((status: statusType) => {
-        fetchData(status);
-    }, [dispatch, fetchData, id]);
+        if (id) {
+            fetchData(status);
+        }
+        fetchStates(status);
+    }, [dispatch, fetchData]);
 
     const fetchDistricts = async (e: any) => {
         const index = getArrayValueByKey(states, "id", e.target.value);
@@ -184,7 +163,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             setIsLoading(false);
             setLocalBody([...localBody, ...localBodyList.data.results]);
         } else {
-            setLocalBody([{ id: 0, name: "Choose Localbody" }])
+            setLocalBody([{ id: 0, name: "Choose Local body" }])
         }
     }
 
@@ -212,8 +191,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         e.preventDefault();
         const validForm = validateForm();
         if (validForm) {
-            // setIsLoading(true);
-
+            setIsLoading(true);
             let medical_history: Array<any> = []
             state.form.medical_history.map((disease: number) => {
                 medical_history.push({ disease, details: state.form[`medical_history${disease}`] })
@@ -222,12 +200,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             if (!medical_history.length) {
                 medical_history.push({ disease: 1, details: "" })
             }
-
-            const state_object = states[getArrayValueByKey(states, "id", state.form.state)];
-            const district_object = state.form.district !== "" ?
-                districts[getArrayValueByKey(districts, "id", state.form.district)] : "";
-            const local_body_object = state.form.local_body !== "" ?
-                localBody[getArrayValueByKey(localBody, "id", state.form.local_body)] : "";
             const data = {
                 "real_name": state.form.realName,
                 "name": state.form.name,
@@ -235,9 +207,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                 "gender": Number(state.form.gender),
                 "phone_number": state.form.phone_number,
                 "state": state.form.state,
-                state_object,
-                district_object,
-                local_body_object,
                 "district": state.form.district,
                 "local_body": state.form.local_body,
                 medical_history,
@@ -331,19 +300,25 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     <form onSubmit={(e) => handleSubmit(e)}>
                         <CardContent>
                             <InputLabel id="name-label">Name*</InputLabel>
-                            <TextInputField
-                                name="name"
-                                variant="outlined"
-                                margin="dense"
-                                type="text"
-                                InputLabelProps={{ shrink: !!state.form.name }}
-                                value={state.form.name}
-                                onChange={handleChange}
-                                errors={state.errors.name}
-                            />
-                            <IconButton onClick={() => generateRandomname()}>
-                                <Refresh />
-                            </IconButton>
+                            <Box display="flex" flexGrow="1">
+                                <Box flex="1">
+                                    <TextInputField
+                                        name="name"
+                                        variant="outlined"
+                                        margin="dense"
+                                        type="text"
+                                        value={state.form.name}
+                                        onChange={handleChange}
+                                        errors={state.errors.name}
+                                        inputProps={{
+                                            readOnly: true,
+                                        }}
+                                    />
+                                </Box>
+                                <IconButton onClick={() => generateRandomname()}>
+                                    <Refresh />
+                                </IconButton>
+                            </Box>
                         </CardContent>
 
                         <CardContent>
@@ -353,7 +328,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 variant="outlined"
                                 margin="dense"
                                 type="text"
-                                InputLabelProps={{ shrink: !!state.form.realName }}
                                 value={state.form.realName}
                                 onChange={handleChange}
                                 errors={state.errors.realName}
@@ -366,7 +340,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 variant="outlined"
                                 margin="dense"
                                 type="number"
-                                InputLabelProps={{ shrink: !!state.form.age }}
                                 value={state.form.age}
                                 onChange={handleChange}
                                 errors={state.errors.age}
@@ -392,7 +365,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 variant="outlined"
                                 margin="dense"
                                 type="number"
-                                InputLabelProps={{ shrink: !!state.form.phone_number }}
                                 value={state.form.phone_number}
                                 onChange={handleChange}
                                 errors={state.errors.phone_number}

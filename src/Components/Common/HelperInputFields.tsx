@@ -53,7 +53,7 @@ interface OptionsProps {
 
 
 export const TextInputField = (props: TextFieldPropsExtended) => {
-    const { placeholder, onChange, value, name, variant, type, margin, errors, label, inputProps, multiline, rows } = props;
+    const { onChange, type, errors } = props;
     const inputType = type === 'number' ? 'text' : type;
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (typeof onChange !== 'function') {
@@ -67,18 +67,10 @@ export const TextInputField = (props: TextFieldPropsExtended) => {
     return (
         <div>
             <TextField
-                label={label}
-                type={inputType}
+                {...props}
                 fullWidth
-                variant={variant}
-                margin={margin}
-                placeholder={placeholder}
+                type={inputType}
                 onChange={handleChange}
-                value={value}
-                name={name}
-                inputProps={inputProps}
-                multiline={multiline}
-                rows={rows}
             />
             <ErrorHelperText error={errors} />
         </div>
@@ -86,20 +78,13 @@ export const TextInputField = (props: TextFieldPropsExtended) => {
 };
 
 export const MultilineInputField = (props: TextFieldPropsExtended) => {
-    const { placeholder, onChange, value, name, variant, errors, label, margin, rows } = props;
+    const { errors } = props;
     return (
         <div>
             <TextField
+                {...props}
                 multiline
-                rows={rows}
                 fullWidth
-                variant={variant}
-                margin={margin}
-                label={label}
-                placeholder={placeholder}
-                onChange={onChange}
-                value={value}
-                name={name}
             />
             <ErrorHelperText error={errors} />
         </div>
