@@ -9,7 +9,7 @@ export interface FacilityModal {
     };
     oxygen_capacity?: number;
     phone_number?: string;
-    local_body_object?: any;
+    local_body_object?: { name: string, body_type: number, localbody_code: string, district: number };
     district_object?: { id: number, name: string, state: number }
     state_object?: { id: number, name: string }
 }
