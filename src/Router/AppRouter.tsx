@@ -16,6 +16,7 @@ import { BedCapacityForm } from '../Components/Facility/BedCapacityForm';
 import { DoctorCapacityForm } from '../Components/Facility/DoctorCapacityForm';
 import {PatientManager} from "../Components/Patient/ManagePatients";
 import { PatientHome } from '../Components/Patient/PatientHome';
+import { SampleTest } from '../Components/Patient/SampleTest';
 
 const routes = {
     '/': () => <PrivateDashboard />,
@@ -38,6 +39,7 @@ const routes = {
     '/patient/tele-consult': () => <TeleConsultation />,
     '/patient/discharge': () => <PatientDischarge />,
     '/patient/treatment': () => <TreatmentForm />,
+    '/sample':()=><SampleTest />,
     '/users': () => <ManageUsers />,
     '/join': () => <CareCenterJoinForm />,
 };
