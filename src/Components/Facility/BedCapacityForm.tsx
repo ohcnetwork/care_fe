@@ -4,7 +4,7 @@ import { Grid, InputLabel, Select, Card, CardActions, CardHeader, CardContent, M
 import { ErrorHelperText, NativeSelectField, TextInputField } from "../Common/HelperInputFields";
 import SaveIcon from '@material-ui/icons/Save';
 import { navigate } from 'hookrouter';
-import { BED_TYPES } from "./constants";
+import { BED_TYPES } from "../../Constants/constants";
 import { CapacityModal, OptionsType } from './models';
 import AppMessage from "../Common/AppMessage";
 import { Loading } from "../../Components/Common/Loading";

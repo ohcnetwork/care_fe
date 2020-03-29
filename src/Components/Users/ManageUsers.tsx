@@ -90,11 +90,10 @@ export default function ManageUsers(props: any) {
     const [users, setUsers] = useState(initialData);
     const [isLoading, setIsLoading] = useState(false);
     const [totalCount, setTotalCount] = useState(0);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [offset, setOffset] = useState(0);
 
     const limit = 15;
-    const page = 1;
-    const offset = 0;
-    const [currentPage, setCurrentPage] = useState(1);
 
     const fetchData = useCallback(async (page, limit, offset) => {
         const res = await dispatch(getUserList({ page, limit, offset }));
@@ -106,12 +105,13 @@ export default function ManageUsers(props: any) {
     }, [dispatch]);
     useEffect(() => {
         setIsLoading(true);
-        fetchData(page, limit, offset);
-    }, [dispatch, fetchData]);
+        fetchData(currentPage, limit, offset);
+    }, [currentPage, dispatch, fetchData, offset]);
 
-    const handlePagination = (page: any, perPage: any) => {
+    const handlePagination = (page: number, limit: number) => {
+        const offset = (page - 1) * limit;
         setCurrentPage(page);
-        fetchData(page, limit, perPage);
+        setOffset(offset);
     };
 
 
@@ -152,7 +152,19 @@ export default function ManageUsers(props: any) {
             <Loading />
         );
     } else if (users && users.length) {
-        manageUsers = userList;
+        manageUsers = (
+            <>
+                {userList}
+                <Grid container className={`w3-center ${classes.paginateTopPadding}`}>
+                    <Pagination
+                        cPage={currentPage}
+                        defaultPerPage={limit}
+                        data={{ totalCount }}
+                        onChange={handlePagination}
+                    />
+                </Grid>
+            </>
+        );
     } else if (users && users.length === 0) {
         manageUsers = (
             <Grid item xs={12} md={12} className="textMarginCenter">
@@ -168,15 +180,6 @@ export default function ManageUsers(props: any) {
             </TitleHeader>
             <Grid container>
                 {manageUsers}
-                {(users && users.length > 0 && totalCount > limit) && (
-                    <Grid container className={`w3-center ${classes.paginateTopPadding}`}>
-                        <Pagination
-                            cPage={currentPage}
-                            defaultPerPage={limit}
-                            data={{ totalCount }}
-                            onChange={handlePagination}
-                        />
-                    </Grid>)}
             </Grid>
         </div>
     );

@@ -8,7 +8,7 @@ import { navigate } from 'hookrouter';
 import { Loading } from "../Common/Loading";
 import AppMessage from "../Common/AppMessage";
 import { PatientModal} from './models';
-import { MEDICAL_HISTORY_CHOICES, GENDER_TYPES } from "./constants";
+import { MEDICAL_HISTORY_CHOICES, GENDER_TYPES } from "../../Constants/constants";
 import { createPatient, getPatient, updatePatient } from "../../Redux/actions";
 
 interface PatientRegisterProps extends PatientModal {

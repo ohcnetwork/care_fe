@@ -7,7 +7,7 @@ import { getFacility, listCapacity, listDoctor } from "../../Redux/actions";
 import BedTypeCard from "./BedTypeCard";
 import { Loading } from '../Common/Loading';
 import DoctorsCountCard from './DoctorsCountCard';
-import { BED_TYPES, DOCTOR_SPECIALIZATION } from "./constants";
+import { BED_TYPES, DOCTOR_SPECIALIZATION } from "../../Constants/constants";
 import DISTRICTS from "../../Constants/Static_data/districts.json";
 import { FacilityModal, CapacityModal, DoctorModal } from './models';
 
