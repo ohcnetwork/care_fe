@@ -4,8 +4,6 @@ import { useDispatch } from "react-redux";
 import { Box, Grid, Checkbox, Card, CardHeader, CardContent, CardActions, Button, FormControl, InputLabel, Select, MenuItem, Typography, FormLabel, RadioGroup, Radio, FormControlLabel } from "@material-ui/core";
 import { TextInputField } from "../Common/HelperInputFields";
 import { validateEmailAddress, phonePreg } from "../../Constants/common";
-// import {  } from "../../Redux/actions";
-import genderList from "../../Constants/Static_data/gender.json";
 import { isEmpty } from "lodash";
 
 

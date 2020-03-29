@@ -10,7 +10,7 @@ import AddCard from '../Common/AddCard';
 import { navigate } from 'hookrouter';
 import { Loading } from "../Common/Loading";
 import { FacilityModal } from './models';
-import DISTRICTS from "../../Constants/Static_data/districts.json";
+import { DISTRICT_CHOICES } from "../../Constants/constants";
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -96,34 +96,34 @@ export const HospitalList = () => {
     let manageFacilities: any = null;
     const [isLoading, setIsLoading] = useState(false);
     const [totalCount, setTotalCount] = useState(0);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [offset, setOffset] = useState(0);
 
     const limit = 15;
-    const page = 1;
-    const offset = 0;
-    const [currentPage, setCurrentPage] = useState(1);
 
-    const fetchData = useCallback(async (page, limit, offset) => {
-        const res = await dispatchAction(getFacilities({page, offset, limit}));
+    const fetchData = useCallback(async () => {
+        setIsLoading(true);
+        const res = await dispatchAction(getFacilities({ limit, offset }));
         if (res && res.data) {
             setData(res.data.results);
             setTotalCount(res.data.count);
         }
         setIsLoading(false);
-    }, [dispatchAction]);
+    }, [dispatchAction, offset]);
 
     useEffect(() => {
-        setIsLoading(true);
-        fetchData(page, limit, offset);
-    }, [dispatchAction, fetchData]);
+        fetchData();
+    }, [fetchData]);
 
-    const handlePagination = (page: any, perPage: any) => {
+    const handlePagination = (page: number, limit: number) => {
+        const offset = (page - 1) * limit;
         setCurrentPage(page);
-        fetchData(page, limit, perPage);
+        setOffset(offset);
     };
+
     let facilityList: any[] = [];
     if (data && data.length) {
         facilityList = data.map((facility: any, idx: number) => {
-            const districtName = DISTRICTS.find(i => i.id === facility.district)?.name;
             return (
                 <Grid item xs={12} md={6} lg={4} xl={3} key={`usr_${facility.id}`} className={classes.root}>
                     <Card className={classes.card} onClick={() => navigate(`/facility/${facility.id}`)}>
@@ -141,7 +141,7 @@ export const HospitalList = () => {
                         />
                         <CardContent className={classes.content}>
                             <Typography>
-                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>District - </span>{districtName}
+                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>District - </span>{facility?.district_object?.name}
                             </Typography>
                         </CardContent>
                         <CardContent className={classes.content}>
@@ -165,7 +165,21 @@ export const HospitalList = () => {
             <Loading />
         );
     } else if (data && data.length) {
-        manageFacilities = facilityList;
+        manageFacilities = (
+            <>
+                {facilityList}
+                {(totalCount > limit) && (
+                    <Grid container className={`w3-center ${classes.paginateTopPadding}`}>
+                        <Pagination
+                            cPage={currentPage}
+                            defaultPerPage={limit}
+                            data={{ totalCount }}
+                            onChange={handlePagination}
+                        />
+                    </Grid>
+                )}
+            </>
+        );
     } else if (data && data.length === 0) {
         manageFacilities = (
             <Grid item xs={12} md={12} className={classes.displayFlex}>
@@ -188,18 +202,6 @@ export const HospitalList = () => {
                     />
                 }
                 {manageFacilities}
-            </Grid>
-            <Grid container>
-                {(data && data.length > 0 && totalCount > limit) && (
-                    <Grid container className={`w3-center ${classes.paginateTopPadding}`}>
-                        <Pagination
-                            cPage={currentPage}
-                            defaultPerPage={limit}
-                            data={{ totalCount }}
-                            onChange={handlePagination}
-                        />
-                    </Grid>
-                )}
             </Grid>
         </div>
     );

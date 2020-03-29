@@ -4,8 +4,7 @@ import { useDispatch } from "react-redux";
 import { Box, Grid, Checkbox, Card, CardHeader, CardContent, CardActions, Button, FormControl, InputLabel, Select, MenuItem, Typography, FormLabel, RadioGroup, Radio, FormControlLabel } from "@material-ui/core";
 import { TextInputField } from "../Common/HelperInputFields";
 import { validateEmailAddress, phonePreg } from "../../Constants/common";
-// import {  } from "../../Redux/actions";
-import genderList from "../../Constants/Static_data/gender.json";
+import { GENDER_TYPES } from "../../Constants/constants";
 import { isEmpty } from "lodash";
 
 
@@ -176,8 +175,8 @@ export const PatientDischarge = () => {
                                         <MenuItem value="">
                                             <em>None</em>
                                         </MenuItem>
-                                        {genderList.map((gender) => {
-                                            return <MenuItem key={gender.id} value={gender.id}>{gender.name}</MenuItem>
+                                        {GENDER_TYPES.map((gender) => {
+                                            return <MenuItem key={gender.id} value={gender.id}>{gender.text}</MenuItem>
                                         })}
                                     </Select>
                                     <span className="error-text">{errors.gender}</span>

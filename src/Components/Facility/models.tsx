@@ -9,6 +9,9 @@ export interface FacilityModal {
     };
     oxygen_capacity?: number;
     phone_number?: string;
+    local_body_object?: { name: string, body_type: number, localbody_code: string, district: number };
+    district_object?: { id: number, name: string, state: number }
+    state_object?: { id: number, name: string }
 }
 
 export interface CapacityModal {
@@ -18,14 +21,14 @@ export interface CapacityModal {
     current_capacity?: number;
 }
 
-export interface DoctorModal { 
+export interface DoctorModal {
     id?: number;
-    area?: number; 
+    area?: number;
     count?: number;
 }
 
 export interface OptionsType {
     id: number;
-    text: string; 
+    text: string;
     disabled?: boolean;
 }

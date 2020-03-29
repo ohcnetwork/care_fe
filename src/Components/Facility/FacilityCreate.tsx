@@ -7,9 +7,9 @@ import { makeStyles } from "@material-ui/styles";
 import { navigate } from 'hookrouter';
 import { createFacility, getFacility, updateFacility } from "../../Redux/actions";
 import { validateLocationCoordinates, phonePreg } from "../../Constants/common";
-import districts from "../../Constants/Static_data/districts.json"
+import { DISTRICT_CHOICES } from "../../Constants/constants";
 import SaveIcon from '@material-ui/icons/Save';
-import { FACILITY_TYPES } from "./constants";
+import { FACILITY_ID } from "../../Constants/constants";
 import { Loading } from "../../Components/Common/Loading";
 
 interface FacilityProps {
@@ -151,7 +151,7 @@ export const FacilityCreate = (props: FacilityProps) => {
         if (validated) {
             setIsLoading(true);
             const data = {
-                facility_type: FACILITY_TYPES.HOSPITAL.id,
+                facility_type: FACILITY_ID.hospital,
                 name: state.form.name,
                 district: state.form.district,
                 address: state.form.address,
@@ -220,8 +220,8 @@ export const FacilityCreate = (props: FacilityProps) => {
                                             <MenuItem value="">
                                                 <em>None</em>
                                             </MenuItem>
-                                            {districts.map((district) => {
-                                                return <MenuItem key={district.id.toString()} value={district.id}>{district.name}</MenuItem>
+                                            {DISTRICT_CHOICES.map(district => {
+                                                return <MenuItem key={district.id.toString()} value={district.id}>{district.text}</MenuItem>
                                             })}
                                         </Select>
                                         <span className="error-text">{state.errors.district}</span>

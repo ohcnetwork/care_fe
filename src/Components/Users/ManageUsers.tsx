@@ -11,7 +11,7 @@ import {
 import { makeStyles } from '@material-ui/core/styles';
 import Pagination from '../Common/Pagination';
 import TitleHeader from '../Common/TitleHeader';
-import { getUserList, readUser } from "../../Redux/actions";
+import { getUserList } from "../../Redux/actions";
 import { Loading } from '../Common/Loading';
 const useStyles = makeStyles(theme => ({
     root: {
@@ -90,30 +90,30 @@ export default function ManageUsers(props: any) {
     const [users, setUsers] = useState(initialData);
     const [isLoading, setIsLoading] = useState(false);
     const [totalCount, setTotalCount] = useState(0);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [offset, setOffset] = useState(0);
 
     const limit = 15;
-    const page = 1;
-    const offset = 0;
-    const [currentPage, setCurrentPage] = useState(1);
 
-    const fetchData = useCallback(async (page, limit, offset) => {
-        const res = await dispatch(getUserList({ page, limit, offset }));
+    const fetchData = useCallback(async () => {
+        setIsLoading(true);
+        const res = await dispatch(getUserList({ limit, offset }));
         if (res && res.data) {
             setUsers(res.data.results);
             setTotalCount(res.data.count);
         }
         setIsLoading(false);
-    }, [dispatch]);
+    }, [dispatch, offset]);
+
     useEffect(() => {
-        setIsLoading(true);
-        fetchData(page, limit, offset);
-    }, [dispatch, fetchData]);
+        fetchData();
+    }, [fetchData]);
 
-    const handlePagination = (page: any, perPage: any) => {
+    const handlePagination = (page: number, limit: number) => {
+        const offset = (page - 1) * limit;
         setCurrentPage(page);
-        fetchData(page, limit, perPage);
+        setOffset(offset);
     };
-
 
     let userList: any[] = [];
     if (users && users.length) {
@@ -152,7 +152,21 @@ export default function ManageUsers(props: any) {
             <Loading />
         );
     } else if (users && users.length) {
-        manageUsers = userList;
+        manageUsers = (
+            <>
+                {userList}
+                {(totalCount > limit) && (
+                    <Grid container className={`w3-center ${classes.paginateTopPadding}`}>
+                        <Pagination
+                            cPage={currentPage}
+                            defaultPerPage={limit}
+                            data={{ totalCount }}
+                            onChange={handlePagination}
+                        />
+                    </Grid>
+                )}
+            </>
+        );
     } else if (users && users.length === 0) {
         manageUsers = (
             <Grid item xs={12} md={12} className="textMarginCenter">
@@ -168,15 +182,6 @@ export default function ManageUsers(props: any) {
             </TitleHeader>
             <Grid container>
                 {manageUsers}
-                {(users && users.length > 0 && totalCount > limit) && (
-                    <Grid container className={`w3-center ${classes.paginateTopPadding}`}>
-                        <Pagination
-                            cPage={currentPage}
-                            defaultPerPage={limit}
-                            data={{ totalCount }}
-                            onChange={handlePagination}
-                        />
-                    </Grid>)}
             </Grid>
         </div>
     );

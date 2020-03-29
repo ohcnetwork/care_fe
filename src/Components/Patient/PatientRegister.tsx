@@ -8,7 +8,7 @@ import { navigate } from 'hookrouter';
 import { Loading } from "../Common/Loading";
 import AppMessage from "../Common/AppMessage";
 import { PatientModal} from './models';
-import { MEDICAL_HISTORY_CHOICES, GENDER_TYPES } from "./constants";
+import { MEDICAL_HISTORY_CHOICES, GENDER_TYPES } from "../../Constants/constants";
 import { createPatient, getPatient, updatePatient } from "../../Redux/actions";
 
 interface PatientRegisterProps extends PatientModal {
@@ -264,7 +264,7 @@ console.log("form values", state.form);
                         </CardContent>
                         <CardContent>
                             <InputLabel id="contact-with-carrier-label">
-                                Have you had contact with someone who was diagnosed with Covid 19?
+                                Has the patient had contact with someone already diagnosed with Covid 19?
                             </InputLabel>
                             <RadioGroup aria-label="covid" name="contact_with_carrier" value={state.form.contact_with_carrier} onChange={handleChange} style={{ padding: '0px 5px' }}>
                                 <Box display="flex" flexDirection="row">
