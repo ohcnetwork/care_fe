@@ -122,10 +122,10 @@ export default {
     //     method: 'POST'
     // }
 
-// Patient
+    // Patient
 
-    patientList : {
-        path : '/api/v1/patient'
+    patientList: {
+        path: '/api/v1/patient'
     },
     addPatient: {
         path: '/api/v1/patient/',
@@ -136,6 +136,31 @@ export default {
     },
     updatePatient: {
         path: '/api/v1/patient/{id}/',
-        method:'PUT'
+        method: 'PUT'
+    },
+
+    // States
+    statesList: {
+        path: '/api/v1/state/'
+    },
+
+    getState: {
+        path: '/api/v1/state/{id}/'
+    },
+
+    // Districts
+    districtsList: {
+        path: '/api/v1/district/'
+    },
+    getDistrict: {
+        path: '/api/v1/district/{id}/'
+    },
+
+    // Districts
+    localBodyList: {
+        path: '/api/v1/local_body/'
+    },
+    getLocalBosy: {
+        path: '/api/v1/local_body/{id}/'
     },
 }

@@ -174,3 +174,12 @@ export const getPatient = (urlParam: object) => {
 export const updatePatient = (form: object, urlParam: object)=>{
     return fireRequest('updatePatient', [], form, urlParam)
 };
+export const getStates = () => {
+    return fireRequest("statesList", [])
+}
+export const getDistricts = (urlParam:object) => {
+    return fireRequest("districtsList", [], {}, urlParam)
+}
+export const getLocalBody = (urlParam:object) => {
+    return fireRequest("localBodyList", [], {}, urlParam)
+}
