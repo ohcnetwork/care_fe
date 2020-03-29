@@ -9,7 +9,7 @@ import { createFacility, getFacility, updateFacility } from "../../Redux/actions
 import { validateLocationCoordinates, phonePreg } from "../../Constants/common";
 import districts from "../../Constants/Static_data/districts.json"
 import SaveIcon from '@material-ui/icons/Save';
-import { FACILITY_TYPES } from "./constants";
+import { FACILITY_TYPES, DEFAULT_MAP_LOCATION } from "./constants";
 import { Loading } from "../../Components/Common/Loading";
 import LocationPicker from "react-leaflet-location-picker";
 import Popover from '@material-ui/core/Popover';
@@ -38,6 +38,11 @@ const useStyles = makeStyles(theme => ({
     formTop: {
         marginTop: '100px',
     },
+    locationIcon: {
+        marginLeft: "10px",
+        marginTop: "15px",
+        cursor: 'pointer',
+    },
     pdLogo: {
         height: '345px',
         border: 'solid 3px white'
@@ -48,12 +53,7 @@ const useStyles = makeStyles(theme => ({
     selectLabel: {
         background: 'white',
         padding: '0px 10px'
-    },
-    locationIcon: {
-        marginTop: "15px",
-        marginLeft: "10px",
-        cursor: 'pointer'
-    }
+    }    
 }));
 
 const facility_create_reducer = (state = initialState, action: any) => {
@@ -84,25 +84,25 @@ export const FacilityCreate = (props: FacilityProps) => {
     const [state, dispatch] = useReducer(facility_create_reducer, initialState);
     const [showAppMessage, setAppMessage] = useState({ show: false, message: "", type: "" });
     const [isLoading, setIsLoading] = useState(false);
-    const [anchorEl, setAnchorEl] = React.useState(null);
+    const [anchorEl, setAnchorEl] = React.useState<EventTarget & Element | null>(null);
 
     const pointMode = {
         banner: false,
-        control: {
-            values: [],
-            onClick: (point: any) => {
+        control: {            
+            onClick: (point: number[]) => {
                 let form = { ...state.form };
                 form['latitude'] = point[0];
                 form['longitude'] = point[1];
                 dispatch({ type: "set_form", form });
-            }
+            },
+            values: [],
         }
     };
   
 
     const headerText = !facilityId ? "Create Facility" : "Update Facility";
     const buttonText = !facilityId ? "Save" : "Update";
-    let mapLoadLocation = [8.55929, 76.9922];//Trivandrum
+    let mapLoadLocation = DEFAULT_MAP_LOCATION;//Trivandrum
 
     const fetchData = useCallback(async () => {
         if (facilityId) {
@@ -146,11 +146,11 @@ export const FacilityCreate = (props: FacilityProps) => {
         dispatch({ type: "set_form", form })
     }
 
-    const handleClickLocationPicker = (event: any) => {
+    const handleClickLocationPicker = (event: React.MouseEvent) => {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition((position)=>{
                 mapLoadLocation = [position.coords.latitude, position.coords.longitude];
-                let form = { ...state.form };
+                const form = { ...state.form };
                 form['latitude'] = mapLoadLocation[0];
                 form['longitude'] = mapLoadLocation[1];
                 dispatch({ type: "set_form", form });
@@ -361,12 +361,12 @@ export const FacilityCreate = (props: FacilityProps) => {
                                         anchorEl={anchorEl}
                                         onClose={handleClose}
                                         anchorOrigin={{
-                                            vertical: 'bottom',
                                             horizontal: 'right',
+                                            vertical: 'bottom',
                                         }}
                                         transformOrigin={{
-                                            vertical: 'top',
                                             horizontal: 'right',
+                                            vertical: 'top',
                                         }}
                                         style={{ position: 'absolute', left: '300px' }}
                                     >
@@ -377,7 +377,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                                             bindMap={false}
                                             startPort={{
                                                 center: [mapLoadLocation[0],mapLoadLocation[1]],
-                                                zoom: 9
+                                                zoom: 9,
                                               }}
                                               
                                         />

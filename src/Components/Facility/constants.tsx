@@ -18,3 +18,6 @@ export const DOCTOR_SPECIALIZATION = [
     {"id":4, "text": "Paediatrics"},
     {"id":5, "text": "Other Speciality"}
 ];
+
+
+export const DEFAULT_MAP_LOCATION = [8.55929, 76.9922];//Trivandrum
