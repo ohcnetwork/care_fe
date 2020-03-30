@@ -21,3 +21,6 @@ export const DOCTOR_SPECIALIZATION = [
 
 
 export const DEFAULT_MAP_LOCATION = [8.55929, 76.9922];//Trivandrum
+export const KEYS = {
+    "ENTER_KEY": 13
+}
