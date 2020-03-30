@@ -79,6 +79,28 @@ export default {
         path: '/api/v1/facility',
         method: 'DELETE'
     },
+    getConsultationList:{
+        path:'/api/v1/consultation/'
+    },
+    createConsultation:{
+        path:'/api/v1/consultation/',
+        method:'POST',
+    },
+    getConsultation:{
+        path:'/api/v1/consultation/{id}/',
+    },
+    updateConsultation: {
+        path: '/api/v1/consultation/{id}/',
+        method: 'PUT',
+    },
+    partialUpdateConsultation: {
+        path: '/api/v1/consultation/{id}/',
+        method: 'PATCH'
+    },
+    deleteConsultation: {
+        path: '/api/v1/consultation/{id}/',
+        method: 'DELETE'
+    },
 
     // Ambulance
 

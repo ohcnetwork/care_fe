@@ -197,7 +197,6 @@ export const SampleTest = (props:any) => {
                                 value={state.form.status}
                                 options={statusTypes}
                                 onChange={handleChange}
-                                disabled={!!id}
                             />
                             <ErrorHelperText
                                 error={state.errors.status}
