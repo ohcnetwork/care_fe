@@ -50,7 +50,7 @@ export const FacilityHome = (props: any) => {
         ]);
         if (!status.aborted) {
             setIsLoading(false);
-            if (!(facilityRes.status === 200 || facilityRes.status === 201) || !facilityRes.data) {
+            if (!facilityRes.data) {
                 setAppMessage({ show: true, message: "Something went wrong..!", type: "error" })
             } else {
                 setFacilityData(facilityRes.data);

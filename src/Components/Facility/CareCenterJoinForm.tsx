@@ -109,7 +109,7 @@ export const CareCenterJoinForm = () => {
             setLoading(true);
             const res = await dispatchAction(createFacility(data))
             setLoading(false);
-            if (res.status !== 201 || !res.data) {
+            if (!res.data) {
                 setAppMessage({ show: true, message: "Something went wrong..!", type: "error" })
             } else {
                 dispatch({ type: "set_form", form: initForm })

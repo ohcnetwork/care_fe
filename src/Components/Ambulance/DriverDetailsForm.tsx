@@ -180,14 +180,13 @@ export const DriverDetailsForm = (props: DriverDetailsProps) => {
       }
       setIsLoading(true);
       const res = await dispatch(postAmbulance(ambulanceData));
-      if (res.status !== 201 || !res.data) {
-        console.log(res);
+      setIsLoading(false);
+      if (!res.data) {
         setAppMessage({
           show: true,
           message: "Something went wrong..!",
           type: "error"
         });
-        setIsLoading(false);
       } else {
         setAppMessage({
           show: true,

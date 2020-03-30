@@ -150,7 +150,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
             };
             const res = await dispatchAction(createCapacity(id, data, { facilityId }));
             setIsLoading(false);
-            if (res.status !== 201 || !res.data) {
+            if (!res.data) {
                 setAppMessage({ show: true, message: "Something went wrong..!", type: "error" })
             } else {
                 // disable last added bed type
