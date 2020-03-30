@@ -108,7 +108,7 @@ export default function AmbulanceOnboarding() {
                 <VehicleDetailsForm classes={classes} vehicleDetails={vehicleObj} setVehicleObj={updateVehicleObj}/>
             </TabPanel>
             <TabPanel value={value} index={1}>
-               <DriverDetailsForm vehicleInfo={vehicleObj} />
+               <DriverDetailsForm classes={classes} vehicleInfo={vehicleObj} />
             </TabPanel>
                 </Grid>
             </Grid>

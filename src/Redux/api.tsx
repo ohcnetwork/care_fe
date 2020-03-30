@@ -1,7 +1,6 @@
 export default {
 
     // Auth Endpoints
-
     login: {
         path: '/api/v1/auth/login/',
         method: 'POST',
@@ -80,6 +79,28 @@ export default {
         path: '/api/v1/facility',
         method: 'DELETE'
     },
+    getConsultationList:{
+        path:'/api/v1/consultation/'
+    },
+    createConsultation:{
+        path:'/api/v1/consultation/',
+        method:'POST',
+    },
+    getConsultation:{
+        path:'/api/v1/consultation/{id}/',
+    },
+    updateConsultation: {
+        path: '/api/v1/consultation/{id}/',
+        method: 'PUT',
+    },
+    partialUpdateConsultation: {
+        path: '/api/v1/consultation/{id}/',
+        method: 'PATCH'
+    },
+    deleteConsultation: {
+        path: '/api/v1/consultation/{id}/',
+        method: 'DELETE'
+    },
 
     // Ambulance
 
@@ -122,16 +143,65 @@ export default {
     //     method: 'POST'
     // }
 
-// Patient
+    // Patient
 
-    getPatients : {
-        path : '/api/v1/patient'
+    patientList: {
+        path: "/api/v1/patient"
     },
     addPatient: {
-        path: '/api/v1/patient/',
+        path: "/api/v1/patient/",
         method: 'POST'
     },
-    getPatientId: {
+    getPatient: {
         path: '/api/v1/patient/{id}/'
-    }
+    },
+    updatePatient: {
+        path: '/api/v1/patient/{id}/',
+        method: 'PUT'
+    },
+    sampleTestList:{
+        path:'/api/v1/patient/{patientId}/test_sample/',
+    },
+    createSampleTest:{
+        path:'/api/v1/patient/{patientId}/test_sample/',
+        method:'POST',
+    },
+    getSampleTest:{
+        path:'/api/v1/patient/{patientId}/test_sample/{id}/',
+    },
+    patchSampleTest:{
+        path:'/api/v1/patient/{patientId}/test_sample/{id}/',
+        method:'PATCH',
+    },
+
+    // States
+    statesList: {
+        path: "/api/v1/state/",
+    },
+
+    getState: {
+        path: "/api/v1/state/{id}/",
+    },
+
+    // Districts
+    districtsList: {
+        path: "/api/v1/district/",
+    },
+    getDistrict: {
+        path: "/api/v1/district/{id}/",
+    },
+    getDistrictByState: {
+        path: "/api/v1/state/{id}/districts/",
+    },
+
+    // Districts
+    localBodyList: {
+        path: "/api/v1/local_body/",
+    },
+    getLocalBody: {
+        path: "/api/v1/local_body/{id}/",
+    },
+    getLocalbodyByDistrict: {
+        path: "/api/v1/district/{id}/local_bodies/",
+    },
 }

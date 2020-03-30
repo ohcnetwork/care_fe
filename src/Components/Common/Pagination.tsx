@@ -1,46 +1,29 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Grid } from '@material-ui/core/';
-import { makeStyles } from '@material-ui/core/styles';
-
-const useStyles = makeStyles({
-    root: {
-        backgroundColor: 'white',
-        width: '65px',
-        height: '28px',
-    },
-    select: {
-        backgroundColor: 'white',
-        border: '1px solid #B3ADAC',
-    },
-    selectMenu: {
-        padding: '0',
-        paddingTop: '8px',
-        paddingRight: '12px',
-        textAlign: 'center'
-    }
-});
+import { useAbortableEffect, statusType } from '../../Common/utils';
 
 interface PaginationProps {
-    data: {totalCount: number};
-    onChange: (page: number, rowsPerPage:number) => void;
+    data: { totalCount: number };
+    onChange: (page: number, rowsPerPage: number) => void;
     defaultPerPage: number;
     cPage: number;
 
 };
-const Pagination = (props :PaginationProps) => {
-    const classes = useStyles();
+const Pagination = (props: PaginationProps) => {
     const { data, onChange } = props;
-    const [ rowsPerPage, setRowsPerPage ] = useState(3);
-    const [ currentPage, setCurrentPage ] = useState(1);
+    const [rowsPerPage, setRowsPerPage] = useState(3);
+    const [currentPage, setCurrentPage] = useState(1);
 
-    useEffect(()=>{
-        if(props.defaultPerPage){
-            setRowsPerPage(props.defaultPerPage);
+    useAbortableEffect((status: statusType) => {
+        if (!status.aborted) {
+            if (props.defaultPerPage) {
+                setRowsPerPage(props.defaultPerPage);
+            }
+            if (props.cPage) {
+                setCurrentPage(props.cPage);
+            }
         }
-        if(props.cPage){
-            setCurrentPage(props.cPage);
-        }
-    },[props]);
+    }, [props]);
 
     const getPageNumbers = () => {
         const totalPage = Math.ceil(data.totalCount / rowsPerPage);
@@ -79,25 +62,25 @@ const Pagination = (props :PaginationProps) => {
 
 
     const handleChangePage = (evt: any, action: any) => {
-        
+
         let newPage = 1;
         const totalPage = Math.ceil(data.totalCount / rowsPerPage);
 
         switch (action) {
-        case 'prev':
-            newPage = currentPage - 1;
-            break;
+            case 'prev':
+                newPage = currentPage - 1;
+                break;
 
-        case 'next':
-            newPage = currentPage + 1;
-            break;
+            case 'next':
+                newPage = currentPage + 1;
+                break;
 
-        case 'last':
-            newPage = totalPage;
-            break;
+            case 'last':
+                newPage = totalPage;
+                break;
 
-        default:
-            break;
+            default:
+                break;
         }
 
         setCurrentPage(newPage);
@@ -109,48 +92,48 @@ const Pagination = (props :PaginationProps) => {
         onChange(page, rowsPerPage);
     }
 
-    const renderNavigationBtn = (label:any, disabled: any) => {
+    const renderNavigationBtn = (label: any, disabled: any) => {
         return (
-                <span
-                    onClick={e => (disabled ? false : handleChangePage(e, label.toLowerCase()))}
-                    className={`w3-button ${!disabled ? 'cursor-pointer' : 'non-clickable w3-disabled'}`}>
-                    {label}
-                </span>
+            <span
+                onClick={e => (disabled ? false : handleChangePage(e, label.toLowerCase()))}
+                className={`w3-button ${!disabled ? 'cursor-pointer' : 'non-clickable w3-disabled'}`}>
+                {label}
+            </span>
         );
     }
 
-        const totalCount = data.totalCount;
-        if (!totalCount) {
-            return null;
-        }
-        const totalPage = Math.ceil(totalCount / rowsPerPage);
-        const pageNumbers = getPageNumbers();
-        const firstBtnDisable = currentPage === 1;
-        const prevBtnDisable = currentPage - 1 <= 1;
-        const nextBtnDisable = currentPage + 1 >= totalPage;
-        const lastBtnDisable = totalPage === 0 || currentPage === totalPage;
+    const totalCount = data.totalCount;
+    if (!totalCount) {
+        return null;
+    }
+    const totalPage = Math.ceil(totalCount / rowsPerPage);
+    const pageNumbers = getPageNumbers();
+    const firstBtnDisable = currentPage === 1;
+    const prevBtnDisable = currentPage - 1 <= 1;
+    const nextBtnDisable = currentPage + 1 >= totalPage;
+    const lastBtnDisable = totalPage === 0 || currentPage === totalPage;
 
-        return (
-            <Grid container className="pagination w3-margin-top" >
-                <Grid item xs={12} md={12}>
-                    <div className="w3-bar w3-border w3-round w3-white">
-                        {renderNavigationBtn('First', firstBtnDisable)}
-                        {renderNavigationBtn('Prev', prevBtnDisable)}
-                                {pageNumbers.map(pageNo => (
-                                    <span
-                                        key={`page_${pageNo}`}
-                                        className={`w3-button cursor-pointer ${currentPage === pageNo ? 'current-page' : 'page-no'}`}
-                                        onClick={e => goToPage(e, pageNo)}
-                                    >
-                                        {pageNo}
-                                    </span>
-                                ))}
-                        {renderNavigationBtn('Next', nextBtnDisable)}
-                        {renderNavigationBtn('Last', lastBtnDisable)}
-                    </div>
-                </Grid>
+    return (
+        <Grid container className="pagination w3-margin-top" >
+            <Grid item xs={12} md={12}>
+                <div className="w3-bar w3-border w3-round w3-white">
+                    {renderNavigationBtn('First', firstBtnDisable)}
+                    {renderNavigationBtn('Prev', prevBtnDisable)}
+                    {pageNumbers.map(pageNo => (
+                        <span
+                            key={`page_${pageNo}`}
+                            className={`w3-button cursor-pointer ${currentPage === pageNo ? 'current-page' : 'page-no'}`}
+                            onClick={e => goToPage(e, pageNo)}
+                        >
+                            {pageNo}
+                        </span>
+                    ))}
+                    {renderNavigationBtn('Next', nextBtnDisable)}
+                    {renderNavigationBtn('Last', lastBtnDisable)}
+                </div>
             </Grid>
-        );
+        </Grid>
+    );
 }
 
 export default Pagination;

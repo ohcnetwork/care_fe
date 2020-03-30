@@ -25,7 +25,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 }));
 
 
-export const TreatmentForm = () => {
+export const TreatmentForm = (props: any) => {
     const classes = useStyles();
     const dispatch: any = useDispatch();
     const inputLabel = React.useRef<HTMLLabelElement>(null);
@@ -113,122 +113,125 @@ export const TreatmentForm = () => {
         setForm(formValues);
     };
 
-    return <div className={classes.formTop} >
+    return <div>
 
-        <Grid container justify="center">
-            <Grid item xs={12} sm={5} md={4} lg={3}>
+        <Grid container alignContent="center" justify="center">
+            <Grid item xs={12} sm={10} md={8} lg={6} xl={4}>
 
-                <Card>
+                <Card style={{ marginTop: '20px' }}>
                     <CardHeader title="Patient Treatment/Diagnostic" />
 
                     <form onSubmit={(e) => handleSubmit(e)}>
                         <CardContent>
-                            <Box display="flex" flexDirection="column">
-                                <TextInputField
-                                    fullWidth
-                                    multiline={true}
-                                    rows={4}
-                                    name="patientExamDetails"
-                                    label="Patient Examination Details"
-                                    placeholder=""
-                                    variant="outlined"
-                                    margin="dense"
-                                    InputLabelProps={{ shrink: !!form.patientExamDetails }}
-                                    value={form.patientExamDetails}
-                                    onChange={handleChange}
-                                    errors={errors.patientExamDetails}
-                                />
-
-                                <Typography>
-                                    Patient Daily Progress
-                                </Typography>
-                                <Grid container justify="space-between" alignItems="center" spacing={1}>
-                                    <Grid item xs={6}>
-                                        <TextInputField
-                                            type="number"
-                                            name="temperature"
-                                            label="Temperature"
-                                            placeholder=""
-                                            variant="outlined"
-                                            margin="dense"
-                                            value={form.temperature}
-                                            onChange={handleChange}
-                                            errors={errors.temperature}
-                                        />
-                                    </Grid>
-                                    <Grid item xs={6}>
-                                        <TimeInputField
-                                            label="Time"
-                                            value={form.time}
-                                            onChange={handleTimeFieldChange}
-                                        />
-                                    </Grid>
+                            <TextInputField
+                                fullWidth
+                                multiline={true}
+                                rows={4}
+                                name="patientExamDetails"
+                                label="Patient Examination Details"
+                                placeholder=""
+                                variant="outlined"
+                                margin="dense"
+                                InputLabelProps={{ shrink: !!form.patientExamDetails }}
+                                value={form.patientExamDetails}
+                                onChange={handleChange}
+                                errors={errors.patientExamDetails}
+                            />
+                        </CardContent>
+                        <CardContent>
+                            <Typography>
+                                Patient Daily Progress
+                            </Typography>
+                            <Grid container justify="space-between" alignItems="center" spacing={1}>
+                                <Grid item xs={6}>
+                                    <TextInputField
+                                        type="number"
+                                        name="temperature"
+                                        label="Temperature"
+                                        placeholder=""
+                                        variant="outlined"
+                                        margin="dense"
+                                        value={form.temperature}
+                                        onChange={handleChange}
+                                        errors={errors.temperature}
+                                    />
                                 </Grid>
-                                <TextInputField
-                                    fullWidth
-                                    multiline={true}
-                                    rows={4}
-                                    name="physicalExamSigns"
-                                    label="Physical Examination Signs"
-                                    placeholder=""
-                                    variant="outlined"
-                                    margin="dense"
-                                    InputLabelProps={{ shrink: !!form.physicalExamSigns }}
-                                    value={form.physicalExamSigns}
-                                    onChange={handleChange}
-                                    errors={errors.physicalExamSigns}
-                                />
-                                <TextInputField
-                                    fullWidth
-                                    multiline={true}
-                                    rows={4}
-                                    name="otherDetails"
-                                    label="Any Other Details"
-                                    placeholder=""
-                                    variant="outlined"
-                                    margin="dense"
-                                    InputLabelProps={{ shrink: !!form.otherDetails }}
-                                    value={form.otherDetails}
-                                    onChange={handleChange}
-                                    errors={errors.otherDetails}
-                                />
-
-                                <Typography>
-                                    Patient Medication
+                                <Grid item xs={6}>
+                                    <TimeInputField
+                                        label="Time"
+                                        value={form.time}
+                                        onChange={handleTimeFieldChange}
+                                    />
+                                </Grid>
+                            </Grid>
+                        </CardContent>
+                        <CardContent>
+                            <TextInputField
+                                fullWidth
+                                multiline={true}
+                                rows={4}
+                                name="physicalExamSigns"
+                                label="Physical Examination Signs"
+                                placeholder=""
+                                variant="outlined"
+                                margin="dense"
+                                InputLabelProps={{ shrink: !!form.physicalExamSigns }}
+                                value={form.physicalExamSigns}
+                                onChange={handleChange}
+                                errors={errors.physicalExamSigns}
+                            />
+                        </CardContent>
+                        <CardContent>
+                            <TextInputField
+                                fullWidth
+                                multiline={true}
+                                rows={4}
+                                name="otherDetails"
+                                label="Any Other Details"
+                                placeholder=""
+                                variant="outlined"
+                                margin="dense"
+                                InputLabelProps={{ shrink: !!form.otherDetails }}
+                                value={form.otherDetails}
+                                onChange={handleChange}
+                                errors={errors.otherDetails}
+                            />
+                        </CardContent>
+                        <CardContent>
+                            <Typography>
+                                Patient Medication
                                 </Typography>
 
-                                <TextInputField
-                                    fullWidth
-                                    multiline={true}
-                                    rows={4}
-                                    name="medicationAlready"
-                                    label="Medication Already Taking"
-                                    placeholder="Medication that the patient is already taking"
-                                    variant="outlined"
-                                    margin="dense"
-                                    InputLabelProps={{ shrink: !!form.medicationAlready }}
-                                    value={form.medicationAlready}
-                                    onChange={handleChange}
-                                    errors={errors.medicationAlready}
-                                />
-
-                                <TextInputField
-                                    fullWidth
-                                    multiline={true}
-                                    rows={4}
-                                    name="medProvidedAtCenter"
-                                    label="Medication Provided at Center/Hospital"
-                                    placeholder="Medication being provided at Center/Hospital"
-                                    variant="outlined"
-                                    margin="dense"
-                                    InputLabelProps={{ shrink: !!form.medProvidedAtCenter }}
-                                    value={form.medProvidedAtCenter}
-                                    onChange={handleChange}
-                                    errors={errors.medProvidedAtCenter}
-                                />
-
-                            </Box>
-
+                            <TextInputField
+                                fullWidth
+                                multiline={true}
+                                rows={4}
+                                name="medicationAlready"
+                                label="Medication Already Taking"
+                                placeholder="Medication that the patient is already taking"
+                                variant="outlined"
+                                margin="dense"
+                                InputLabelProps={{ shrink: !!form.medicationAlready }}
+                                value={form.medicationAlready}
+                                onChange={handleChange}
+                                errors={errors.medicationAlready}
+                            />
+                        </CardContent>
+                        <CardContent>
+                            <TextInputField
+                                fullWidth
+                                multiline={true}
+                                rows={4}
+                                name="medProvidedAtCenter"
+                                label="Medication Provided at Center/Hospital"
+                                placeholder="Medication being provided at Center/Hospital"
+                                variant="outlined"
+                                margin="dense"
+                                InputLabelProps={{ shrink: !!form.medProvidedAtCenter }}
+                                value={form.medProvidedAtCenter}
+                                onChange={handleChange}
+                                errors={errors.medProvidedAtCenter}
+                            />
                         </CardContent>
 
                         <CardActions className="padding16 w3-right">
@@ -239,11 +242,10 @@ export const TreatmentForm = () => {
                                 onClick={(e) => handleSubmit(e)}
                             >
                                 Submit
-                            </Button>
+                                </Button>
                         </CardActions>
                     </form>
                 </Card>
-
             </Grid>
         </Grid>
     </div>

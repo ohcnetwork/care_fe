@@ -63,22 +63,17 @@ const Header = () => {
 
   let menus = [
     {
-      title: 'Dashboard',
-      link: '/dash',
+      title: 'Facilities',
+      link: '/facility',
       icon: <DashboardIcon style={{ color: '#666', marginRight: '4px' }}/>
     },
+    // {
+    //   title: 'Patients',
+    //   link: '/patients',
+    //   icon: <InboxIcon style={{color: '#666', marginRight: '4px'}}/>
+    // },
     {
-      title: 'Facilites',
-      link: '/facility',
-      icon: <WorkIcon style={{ color: '#666', marginRight: '4px' }}/>
-    },
-    {
-      title: 'Patients',
-      link: '/patients',
-      icon: <PersonIcon style={{color: '#666', marginRight: '4px'}}/>
-    },
-    {
-      title: 'users',
+      title: 'Users',
       link: '/users',
       icon: <PersonIcon style={{color: '#666', marginRight: '4px'}}/>
     }
@@ -158,12 +153,8 @@ const Header = () => {
                   }}
               >
                 <MenuItem onClick={() => {
-                  navigate('/settings');
-                  handleClose();
-
-                }}>Settings</MenuItem>
-                <MenuItem onClick={() => {
                   localStorage.removeItem('care_access_token');
+                  localStorage.removeItem('care_refresh_token');
                   navigate('/login');
                   window.location.reload();
                 }}>Logout</MenuItem>

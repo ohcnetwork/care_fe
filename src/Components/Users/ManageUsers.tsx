@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import {
     Grid,
@@ -11,8 +11,10 @@ import {
 import { makeStyles } from '@material-ui/core/styles';
 import Pagination from '../Common/Pagination';
 import TitleHeader from '../Common/TitleHeader';
-import { getUserList, readUser } from "../../Redux/actions";
+import { getUserList } from "../../Redux/actions";
 import { Loading } from '../Common/Loading';
+import { useAbortableEffect, statusType } from '../../Common/utils';
+
 const useStyles = makeStyles(theme => ({
     root: {
         flexGrow: 1,
@@ -87,37 +89,39 @@ export default function ManageUsers(props: any) {
     const dispatch: any = useDispatch();
     const initialData: any[] = [];
     let manageUsers: any = null;
-    const [data, setData] = useState(initialData);
+    const [users, setUsers] = useState(initialData);
     const [isLoading, setIsLoading] = useState(false);
     const [totalCount, setTotalCount] = useState(0);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [offset, setOffset] = useState(0);
 
     const limit = 15;
-    const page = 1;
-    const offset = 0;
-    const [currentPage, setCurrentPage] = useState(1);
 
-    const fetchData = useCallback(async (page, limit, offset) => {
-        const res = await dispatch(getUserList({ page, limit, offset }));
-        if (res && res.data) {
-            setData(res.results);
-            setTotalCount(res.count);
-        }
-        setIsLoading(false);
-    }, [dispatch]);
-    useEffect(() => {
+    const fetchData = useCallback(async (status: statusType) => {
         setIsLoading(true);
-        fetchData(page, limit, offset);
-    }, [dispatch, fetchData]);
+        const res = await dispatch(getUserList({ limit, offset }));
+        if (!status.aborted) {
+            if (res && res.data) {
+                setUsers(res.data.results);
+                setTotalCount(res.data.count);
+            }
+            setIsLoading(false);
+        }
+    }, [dispatch, offset]);
 
-    const handlePagination = (page: any, perPage: any) => {
+    useAbortableEffect((status: statusType) => {
+        fetchData(status);
+    }, [fetchData]);
+
+    const handlePagination = (page: number, limit: number) => {
+        const offset = (page - 1) * limit;
         setCurrentPage(page);
-        fetchData(page, limit, perPage);
+        setOffset(offset);
     };
 
-
     let userList: any[] = [];
-    if (data && data.length) {
-        userList = data.map((user: any, idx: number) => {
+    if (users && users.length) {
+        userList = users.map((user: any, idx: number) => {
             return (
                 <Grid item xs={12} md={3} key={`usr_${user.id}`}
                     className={classes.root}>
@@ -147,13 +151,27 @@ export default function ManageUsers(props: any) {
         });
     }
 
-    if (isLoading || !data) {
+    if (isLoading || !users) {
         manageUsers = (
             <Loading />
         );
-    } else if (data && data.length) {
-        manageUsers = userList;
-    } else if (data && data.length === 0) {
+    } else if (users && users.length) {
+        manageUsers = (
+            <>
+                {userList}
+                {(totalCount > limit) && (
+                    <Grid container className={`w3-center ${classes.paginateTopPadding}`}>
+                        <Pagination
+                            cPage={currentPage}
+                            defaultPerPage={limit}
+                            data={{ totalCount }}
+                            onChange={handlePagination}
+                        />
+                    </Grid>
+                )}
+            </>
+        );
+    } else if (users && users.length === 0) {
         manageUsers = (
             <Grid item xs={12} md={12} className="textMarginCenter">
                 <h5> No Users Found</h5>
@@ -168,15 +186,6 @@ export default function ManageUsers(props: any) {
             </TitleHeader>
             <Grid container>
                 {manageUsers}
-                {(data && data.length > 0 && totalCount > limit) && (
-                    <Grid container className={`w3-center ${classes.paginateTopPadding}`}>
-                        <Pagination
-                            cPage={currentPage}
-                            defaultPerPage={limit}
-                            data={{ totalCount }}
-                            onChange={handlePagination}
-                        />
-                    </Grid>)}
             </Grid>
         </div>
     );

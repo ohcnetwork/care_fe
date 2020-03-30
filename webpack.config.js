@@ -4,14 +4,16 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
+let googleKey = '6LdvxuQUAAAAADDWVflgBqyHGfq-xmvNJaToM0pN';
+
 module.exports = (env, argv) => {
     const mode = argv.mode || 'development';
     const isDev = mode !== 'production';
     const app =['./src/index.tsx'];
     if (isDev) {
         app.push('webpack-dev-server/client');
+        googleKey = '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI';
     }
-
     return ({
         entry: {
             vendor: ['react', 'react-dom'],
@@ -67,6 +69,9 @@ module.exports = (env, argv) => {
             ],
         },
         plugins: [
+            new webpack.DefinePlugin({
+                "process.env.GOOGLE_KEY": JSON.stringify(googleKey)
+            }),
             new CleanWebpackPlugin(),
             new HtmlWebpackPlugin({
                 template: path.resolve(__dirname, 'src', 'index.html')

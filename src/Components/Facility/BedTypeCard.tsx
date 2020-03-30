@@ -1,9 +1,9 @@
 import React from 'react';
 import { Grid, Typography, Button } from "@material-ui/core";
 import { makeStyles } from '@material-ui/styles';
-import { CapacityModal } from './modals';
+import { CapacityModal } from './models';
 import { navigate } from 'hookrouter';
-import { BED_TYPES } from './constants';
+import { BED_TYPES } from '../../Common/constants';
 
 interface BedTypeProps extends CapacityModal {
     facilityId: number;

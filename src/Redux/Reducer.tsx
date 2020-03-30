@@ -1,4 +1,4 @@
-import { actions } from './actions';
+import { actions } from './fireRequest';
 
 const reducer = (state = {}, changeAction: any) => {
     switch (changeAction.type) {

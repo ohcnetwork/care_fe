@@ -2,18 +2,21 @@ import React, { useState, useReducer, useCallback, useEffect } from "react"
 import { useDispatch } from "react-redux"
 import { FormControl, Grid, Card, CardHeader, CardContent, Button, InputLabel, Select, MenuItem, CardActions } from "@material-ui/core"
 import { TextInputField, MultilineInputField } from "../Common/HelperInputFields"
-import AppMessage from "../Common/AppMessage"
 import { makeStyles } from "@material-ui/styles";
 import { navigate } from 'hookrouter';
 import { createFacility, getFacility, updateFacility } from "../../Redux/actions";
-import { validateLocationCoordinates, phonePreg } from "../../Constants/common";
-import districts from "../../Constants/Static_data/districts.json"
+import { validateLocationCoordinates, phonePreg } from "../../Common/validation";
+import { DISTRICT_CHOICES } from "../../Common/constants";
 import SaveIcon from '@material-ui/icons/Save';
-import { FACILITY_TYPES, DEFAULT_MAP_LOCATION } from "./constants";
+import { FACILITY_ID } from "../../Common/constants";
 import { Loading } from "../../Components/Common/Loading";
 import MyLocationIcon from '@material-ui/icons/MyLocation';
 import Popover from '@material-ui/core/Popover';
 import { LocationSearchAndPick } from "../Common/LocationSearchAndPick"
+import { useAbortableEffect, statusType } from '../../Common/utils';
+import * as Notification from '../../Utils/Notifications.js';
+
+const DEFAULT_MAP_LOCATION = [8.55929, 76.9922];// Trivandrum
 
 interface FacilityProps {
     facilityId?: number;
@@ -82,7 +85,6 @@ export const FacilityCreate = (props: FacilityProps) => {
     const { facilityId } = props;
 
     const [state, dispatch] = useReducer(facility_create_reducer, initialState);
-    const [showAppMessage, setAppMessage] = useState({ show: false, message: "", type: "" });
     const [isLoading, setIsLoading] = useState(false);
     const [anchorEl, setAnchorEl] = React.useState<EventTarget & Element | null>(null);
     const [mapLoadLocation, setMapLoadLocation] = useState(DEFAULT_MAP_LOCATION);
@@ -90,11 +92,11 @@ export const FacilityCreate = (props: FacilityProps) => {
     const headerText = !facilityId ? "Create Facility" : "Update Facility";
     const buttonText = !facilityId ? "Save" : "Update";
 
-    const fetchData = useCallback(async () => {
+    const fetchData = useCallback(async (status: statusType) => {
         if (facilityId) {
             setIsLoading(true);
             const res = await dispatchAction(getFacility(facilityId));
-            if (res.data) {
+            if (!status.aborted && res.data) {
                 const formData = {
                     name: res.data.name,
                     district: res.data.district,
@@ -112,8 +114,8 @@ export const FacilityCreate = (props: FacilityProps) => {
         }
     }, [dispatchAction, facilityId]);
 
-    useEffect(() => {
-        fetchData();
+    useAbortableEffect((status: statusType) => {
+        fetchData(status);
     }, [dispatch, fetchData]);
 
     const handleCancel = (e: any) => {
@@ -180,7 +182,7 @@ export const FacilityCreate = (props: FacilityProps) => {
         if (validated) {
             setIsLoading(true);
             const data = {
-                facility_type: FACILITY_TYPES.HOSPITAL.id,
+                facility_type: FACILITY_ID.hospital,
                 name: state.form.name,
                 district: state.form.district,
                 address: state.form.address,
@@ -197,10 +199,14 @@ export const FacilityCreate = (props: FacilityProps) => {
                 setIsLoading(false);
                 dispatch({ type: "set_form", form: initForm });
                 if (!facilityId) {
-                    setAppMessage({ show: true, message: "Facility added successfully", type: "success" });
+                    Notification.Success({
+                        msg: "Facility added successfully"
+                    })
                     navigate(`/facility/${id}/bed`);
                 } else {
-                    setAppMessage({ show: true, message: "Facility updated successfully", type: "success" });
+                    Notification.Success({
+                        msg: "Facility updated successfully"
+                    });
                     navigate(`/facility/${facilityId}`);
                 }
             }
@@ -227,7 +233,6 @@ export const FacilityCreate = (props: FacilityProps) => {
         <Grid container alignContent="center" justify="center">
             <Grid item xs={12} sm={10} md={8} lg={6} xl={4}>
                 <Card style={{ marginTop: '20px' }}>
-                    <AppMessage open={showAppMessage.show} type={showAppMessage.type} message={showAppMessage.message} handleClose={() => setAppMessage({ show: false, message: "", type: "" })} handleDialogClose={() => setAppMessage({ show: false, message: "", type: "" })} />
                     <CardHeader title={headerText} />
                     <form onSubmit={(e) => handleSubmit(e)}>
                         <CardContent>
@@ -263,8 +268,8 @@ export const FacilityCreate = (props: FacilityProps) => {
                                             <MenuItem value="">
                                                 <em>None</em>
                                             </MenuItem>
-                                            {districts.map((district) => {
-                                                return <MenuItem key={district.id.toString()} value={district.id}>{district.name}</MenuItem>
+                                            {DISTRICT_CHOICES.map(district => {
+                                                return <MenuItem key={district.id.toString()} value={district.id}>{district.text}</MenuItem>
                                             })}
                                         </Select>
                                         <span className="error-text">{state.errors.district}</span>
@@ -275,6 +280,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                             <Grid container justify="center" >
                                 <Grid item xs={12}>
                                     <MultilineInputField
+                                        rows={5}
                                         name="address"
                                         label="Hospital Address*"
                                         placeholder=""
