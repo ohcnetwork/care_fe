@@ -20,7 +20,7 @@ export const PublicDashboard = () => {
             {' '}
             <Grid item xs={12} container={true} justify="center">
             <Button variant="contained" style={{marginTop: '15px', marginRight:'5px'}} color="primary" href="/register">
-            Create An Account
+            KSDMA: Hospital Registration
             </Button>
             <Button variant="contained" style={{marginTop: '15px', marginLeft:'5px'}} color="primary" href="/ambulance">
             Add Ambulance Details
