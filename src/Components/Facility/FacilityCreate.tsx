@@ -314,7 +314,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                                 <Grid item xs={12}>
                                     <TextInputField
                                         name="oxygen_capacity"
-                                        label="Oxygen Capacity"
+                                        label="Oxygen Capacity in liters"
                                         type="number"
                                         placeholder=""
                                         variant="outlined"
