@@ -104,11 +104,6 @@ export const DriverDetailsForm = (props: DriverDetailsProps) => {
             err[key] = "Invalid phone number";
           }
           break;
-        case "pricePerKm":
-          if (!form.hasFreeService && !value) {
-            err[key] = "This field is required";
-          }
-          break;
         default:
           break;
       }
