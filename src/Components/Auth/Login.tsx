@@ -102,6 +102,7 @@ export const Login = () => {
                     setCaptcha(true);
                 } else if (res && statusCode === 200) {
                     localStorage.setItem('care_access_token', res.access);
+                    localStorage.setItem('care_refresh_token', res.refresh);
                     navigate('/dash');
                     window.location.reload();
                 }

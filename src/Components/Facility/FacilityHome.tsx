@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Grid, Typography, Button, Divider } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { useDispatch } from "react-redux";
@@ -7,9 +7,10 @@ import { getFacility, listCapacity, listDoctor } from "../../Redux/actions";
 import BedTypeCard from "./BedTypeCard";
 import { Loading } from '../Common/Loading';
 import DoctorsCountCard from './DoctorsCountCard';
-import { BED_TYPES, DOCTOR_SPECIALIZATION } from "../../Constants/constants";
-import DISTRICTS from "../../Constants/Static_data/districts.json";
+import { BED_TYPES, DOCTOR_SPECIALIZATION } from "../../Common/constants";
 import { FacilityModal, CapacityModal, DoctorModal } from './models';
+import { useAbortableEffect, statusType } from '../../Common/utils';
+import * as Notification from '../../Utils/Notifications.js';
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -39,25 +40,33 @@ export const FacilityHome = (props: any) => {
     const [doctorData, setDoctorData] = useState<Array<DoctorModal>>([]);
     const [isLoading, setIsLoading] = useState(false);
 
-    const fetchData = useCallback(async () => {
-        const facilityRes = await dispatch(getFacility(facilityId));
-        if (facilityRes && facilityRes.data) {
-            setFacilityData(facilityRes.data);
-            const capacityRes = await dispatch(listCapacity({}, { facilityId }));
-            if (capacityRes && capacityRes.data) {
-                setCapacityData(capacityRes.data.results)
-            }
-            const doctorRes = await dispatch(listDoctor({}, { facilityId }));
-            if (doctorRes && doctorRes.data) {
-                setDoctorData(doctorRes.data.results)
+    const fetchData = useCallback(async (status: statusType) => {
+        setIsLoading(true);
+        const [facilityRes, capacityRes, doctorRes] = await Promise.all([
+            dispatch(getFacility(facilityId)),
+            dispatch(listCapacity({}, { facilityId })),
+            dispatch(listDoctor({}, { facilityId })),
+        ]);
+        if (!status.aborted) {
+            setIsLoading(false);
+            if (!facilityRes.data) {
+                Notification.Error({
+                    msg: "Something went wrong..!"
+                });
+            } else {
+                setFacilityData(facilityRes.data);
+                if (capacityRes && capacityRes.data) {
+                    setCapacityData(capacityRes.data.results)
+                }
+                if (doctorRes && doctorRes.data) {
+                    setDoctorData(doctorRes.data.results)
+                }
             }
         }
-        setIsLoading(false);
     }, [dispatch, facilityId]);
 
-    useEffect(() => {
-        setIsLoading(true);
-        fetchData();
+    useAbortableEffect((status: statusType) => {
+        fetchData(status);
     }, [dispatch, fetchData]);
 
     if (isLoading) {
@@ -90,8 +99,6 @@ export const FacilityHome = (props: any) => {
         });
     }
 
-    const districtName = DISTRICTS.find(i => i.id === facilityData.district)?.name;
-
     return (
         <div className={`w3-content ${classes.content}`}>
             <h2>Facility</h2>
@@ -100,7 +107,7 @@ export const FacilityHome = (props: any) => {
                     <Typography variant="h6" component="h6">{facilityData.name}</Typography>
                     <Typography>Address : {facilityData.address}</Typography>
                     <Typography>Phone : {facilityData.phone_number}</Typography>
-                    <Typography>District : {districtName}</Typography>
+                    <Typography>District : {facilityData?.district_object?.name}</Typography>
                     <Typography>Oxygen Capacity :{` ${facilityData.oxygen_capacity} Litres`}</Typography>
                 </Grid>
                 <Grid item xs={12} md={5}>
@@ -128,11 +135,11 @@ export const FacilityHome = (props: any) => {
                     </Grid>
                 </Grid>
             </Grid>
-            <Grid container style={{ padding: "10px"}} spacing={1}>
+            <Grid container style={{ padding: "10px" }} spacing={1}>
                 <Grid item xs={12} md={6} className="w3-center">
                     <Button fullWidth variant="contained" color="primary" size="small"
                         onClick={() => navigate(`/facility/${facilityId}/patient`)}>
-                        Add More Patient
+                        Add More Patients
                     </Button>
                 </Grid>
                 <Grid item xs={12} md={6} className="w3-center">

@@ -11,19 +11,19 @@ import {
   Typography,
   Switch
 } from "@material-ui/core";
-import { TextInputField } from "../Common/HelperInputFields";
+import { TextInputField, CheckboxField } from "../Common/HelperInputFields";
 import { useDispatch } from "react-redux";
 import { postAmbulance } from "../../Redux/actions";
 import { isEmpty } from "lodash";
 import { navigate } from "hookrouter";
-import AppMessage from "../Common/AppMessage";
 import SaveIcon from "@material-ui/icons/Save";
 import {
   AGREE_CONSENT,
   AMBULANCE_FREE_SERVICE_CONSENT,
   AMBULANCE_SERVICE_FEE_TEXT
-} from "../../Constants/constants";
+} from "../../Common/constants";
 import { vehicleForm } from "./VehicleDetailsForm";
+import * as Notification from '../../Utils/Notifications.js';
 
 interface DriverDetailsProps {
   classes: any;
@@ -62,11 +62,6 @@ export const DriverDetailsForm = (props: DriverDetailsProps) => {
   const [form, setForm] = useState<any>(initForm);
   const [errors, setErrors] = useState<any>(initErr);
   const [isLoading, setIsLoading] = useState(false);
-  const [showAppMessage, setAppMessage] = useState({
-    show: false,
-    message: "",
-    type: ""
-  });
 
   const handleChange = (e: any) => {
     const { value, name } = e.target;
@@ -107,11 +102,6 @@ export const DriverDetailsForm = (props: DriverDetailsProps) => {
             !/^[0-9]{10}$/.test(form.cellNumber2)
           ) {
             err[key] = "Invalid phone number";
-          }
-          break;
-        case "pricePerKm":
-          if (!form.hasFreeService && !value) {
-            err[key] = "This field is required";
           }
           break;
         default:
@@ -180,19 +170,14 @@ export const DriverDetailsForm = (props: DriverDetailsProps) => {
       }
       setIsLoading(true);
       const res = await dispatch(postAmbulance(ambulanceData));
-      if (res.status !== 201 || !res.data) {
-        console.log(res);
-        setAppMessage({
-          show: true,
-          message: "Something went wrong..!",
-          type: "error"
+      setIsLoading(false);
+      if (!res.data) {
+        Notification.Error({
+          msg: "Something went wrong..!"
         });
-        setIsLoading(false);
       } else {
-        setAppMessage({
-          show: true,
-          message: "Ambulance added successfully",
-          type: "success"
+        Notification.Success({
+          msg: "Ambulance added successfully"
         });
         setTimeout(() => navigate("/"), 3000);
       }
@@ -207,17 +192,6 @@ export const DriverDetailsForm = (props: DriverDetailsProps) => {
 
   return (
     <div>
-      <AppMessage
-        open={showAppMessage.show}
-        type={showAppMessage.type}
-        message={showAppMessage.message}
-        handleClose={() =>
-          setAppMessage({ show: false, message: "", type: "" })
-        }
-        handleDialogClose={() =>
-          setAppMessage({ show: false, message: "", type: "" })
-        }
-      />
       <Grid container alignContent="center" justify="center">
         <Grid item xs={12} className={`${classes.formBottomPadding}`}>
           <Card>
@@ -247,12 +221,12 @@ export const DriverDetailsForm = (props: DriverDetailsProps) => {
                   errors={errors.cellNumber1}
                   inputProps={{ maxLength: 10 }}
                 />
-                <Checkbox
+                <CheckboxField
                   checked={form.isSmartPhone1}
                   onChange={handleCheckboxFieldChange}
                   name="isSmartPhone1"
-                />{" "}
-                Has smart phone
+                  label="Has smart phone"
+                />                
                 <h4>Driver 2</h4>
                 <TextInputField
                   name="driverName2"
@@ -277,12 +251,12 @@ export const DriverDetailsForm = (props: DriverDetailsProps) => {
                   inputProps={{ maxLength: 10 }}
                 />
                 <Box>
-                  <Checkbox
+                  <CheckboxField
                     checked={form.isSmartPhone2}
                     onChange={handleCheckboxFieldChange}
                     name="isSmartPhone2"
-                  />{" "}
-                  Has smart phone
+                    label="Has smart phone"
+                  />
                 </Box>
                 <Box>
                   <Typography>
@@ -299,7 +273,7 @@ export const DriverDetailsForm = (props: DriverDetailsProps) => {
                 </Box>
                 <h4>Declaration</h4>
                 <Box display="flex">
-                  <Box>
+                <Box>
                     <Checkbox
                       checked={form.agreeConsent}
                       onChange={handleCheckboxFieldChange}

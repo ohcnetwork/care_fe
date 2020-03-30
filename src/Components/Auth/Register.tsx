@@ -14,9 +14,8 @@ import {
     MenuItem
 } from "@material-ui/core";
 import { TextInputField } from "../Common/HelperInputFields";
-import { validateEmailAddress, phonePreg } from "../../Constants/common";
-import districts from "../../Constants/Static_data/districts.json"
-import gendorList from "../../Constants/Static_data/gender.json"
+import { validateEmailAddress, phonePreg } from "../../Common/validation";
+import { DISTRICT_CHOICES, GENDER_TYPES } from "../../Common/constants";
 import { signupUser } from "../../Redux/actions";
 import ReCaptcha from "react-google-recaptcha";
 
@@ -218,8 +217,8 @@ export const Register = () => {
                                                 <MenuItem value="">
                                                     <em>None</em>
                                                 </MenuItem>
-                                                {districts.map((district) => {
-                                                    return <MenuItem key={district.id.toString()} value={district.id}>{district.name}</MenuItem>
+                                                {DISTRICT_CHOICES.map(district => {
+                                                    return <MenuItem key={district.id.toString()} value={district.id}>{district.text}</MenuItem>
                                                 })}
                                             </Select>
                                             <span className="w3-text-red">{errors.district}</span>
@@ -240,8 +239,8 @@ export const Register = () => {
                                                 <MenuItem value="">
                                                     <em>None</em>
                                                 </MenuItem>
-                                                {gendorList.map((gender) => {
-                                                    return <MenuItem key={gender.id} value={gender.id}>{gender.name}</MenuItem>
+                                                {GENDER_TYPES.map(gender => {
+                                                    return <MenuItem key={gender.id} value={gender.id}>{gender.text}</MenuItem>
                                                 })}
                                             </Select>
                                             <span className="w3-text-red">{errors.gender}</span>
