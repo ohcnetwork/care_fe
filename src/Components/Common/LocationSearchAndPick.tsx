@@ -2,9 +2,12 @@ import React, { useState, useEffect } from "react";
 import LocationPicker from "react-leaflet-location-picker";
 import Popover from '@material-ui/core/Popover';
 import axios from 'axios';
-import { KEYS } from "../Facility/constants";
 import { makeStyles } from "@material-ui/styles";
 import { TextInputField } from "../Common/HelperInputFields"
+
+const KEYS = {
+    "ENTER_KEY": 13
+}
 
 const useStyles = makeStyles(theme => ({
     locationItem: {
