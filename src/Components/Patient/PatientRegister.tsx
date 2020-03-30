@@ -13,6 +13,8 @@ import { GENDER_TYPES } from "../../Common/constants";
 import { createPatient, getPatient, updatePatient, getStates, getDistricts, getLocalBody } from "../../Redux/actions";
 import { useAbortableEffect, statusType } from '../../Common/utils';
 import patientnameCombinations from "../../Constants/Static_data/PatientName.json"
+import Spinner from 'react-bootstrap/Spinner';
+
 
 interface PatientRegisterProps extends PatientModal {
     facilityId: number;
@@ -113,11 +115,20 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         name: res.data.name,
                         age: res.data.age,
                         gender: res.data.gender,
+                        state:res.data.state,
+                        district:res.data.district,
+                        local_body:res.data.local_body,
                         phone_number: res.data.phone_number,
                         medical_history: res.data.medical_history,
                         contact_with_carrier: `${res.data.contact_with_carrier}`,
                     }
                 })
+                if(res.data.state){
+                    fetchDistricts(res.data.state)
+                    if(res.data.district){
+                        fetchLocalBody(res.data.district)
+                    } 
+                }
             } else {
                 navigate(`/facility/${facilityId}`);
             }
@@ -137,15 +148,15 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             fetchData(status);
         }
         fetchStates(status);
-    }, [dispatch, fetchData]);
+    }, [dispatch, fetchData])
 
     const fetchDistricts = async (e: any) => {
         const index = getArrayValueByKey(states, "id", e.target.value);
         if (index > 0) {
-            setIsLoading(true);
+            // setIsLoading(true);
             const districtList = await dispatchAction(getDistricts({ state_name: states[index].name }))
             setDistricts([...districts, ...districtList.data.results]);
-            setIsLoading(false);
+            // setIsLoading(false);
         } else {
             setDistricts([{ id: 0, name: "Choose District", state: 0 }])
         }
@@ -155,12 +166,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         const index = getArrayValueByKey(districts, "id", e.target.value);
         const stateIndex = getArrayValueByKey(states, "id", districts[index].state);
         if (index > 0) {
-            setIsLoading(true);
+            // setIsLoading(true);
             const localBodyList = await dispatchAction(getLocalBody({
                 district_name: districts[index].name,
                 state_name: states[stateIndex].name
             }))
-            setIsLoading(false);
+            // setIsLoading(false);
             setLocalBody([...localBody, ...localBodyList.data.results]);
         } else {
             setLocalBody([{ id: 0, name: "Choose Local body" }])
@@ -238,6 +249,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         let form = { ...state.form };
         form[e.target.name] = e.target.value;
         dispatch({ type: "set_form", form })
+        
     };
 
     const handleCheckboxChange = (e: any) => {
@@ -286,9 +298,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     if (isLoading) {
         return <Loading />
     }
+    
 
     return <div>
-
+        
         <Grid container alignContent="center" justify="center">
             <Grid item xs={12} sm={10} md={8} lg={6} xl={4}>
                 <Card>
@@ -297,6 +310,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         <AlertDialog handleClose={() => handleCancel()} message={showAlertMessage.message} title={showAlertMessage.title} />
                     }
                     <CardHeader title={headerText} />
+                    
                     <form onSubmit={(e) => handleSubmit(e)}>
                         {!id && (
                             <>
@@ -338,6 +352,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             </>
                         )}
                         <CardContent>
+                        <Spinner animation="grow" />
                             <InputLabel id="age-label">Age*</InputLabel>
                             <TextInputField
                                 name="age"
@@ -376,6 +391,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 />
                             </CardContent>
                         )}
+                        
                         <CardContent>
                             <InputLabel id="gender-label">State*</InputLabel>
                             <NativeSelectField
@@ -390,14 +406,13 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 error={state.errors.state}
                             />
                         </CardContent>
-
-                        {districts.length > 1 && <CardContent>
+                        {(districts.length > 1 || state.form.district ) && <CardContent>
                             <InputLabel id="gender-label">District</InputLabel>
                             <NativeSelectField
                                 name="district"
                                 variant="outlined"
                                 value={state.form.district}
-                                options={districts}
+                                options={ districts } 
                                 optionvalueidentifier="name"
                                 onChange={(e) => [handleChange(e), fetchLocalBody(e)]}
                             />
@@ -405,8 +420,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 error={state.errors.district}
                             />
                         </CardContent>}
-
-                        {localBody.length > 1 && <CardContent>
+                        {(localBody.length > 1  || state.form.local_body  )&& <CardContent>
                             <InputLabel id="gender-label">Localbody</InputLabel>
                             <NativeSelectField
                                 name="local_body"

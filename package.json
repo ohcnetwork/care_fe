@@ -81,6 +81,7 @@
     "postcss-safe-parser": "4.0.1",
     "react": "^16.12.0",
     "react-app-polyfill": "^1.0.3",
+    "react-bootstrap": "^1.0.0",
     "react-csv": "^1.1.2",
     "react-dev-utils": "^9.0.4",
     "react-dom": "^16.12.0",
