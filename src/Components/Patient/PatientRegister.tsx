@@ -17,16 +17,16 @@ import * as Notification from '../../Utils/Notifications.js';
 import { makeStyles } from '@material-ui/core/styles';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    display: 'flex',
-    '& > * + *': {
-      marginLeft: theme.spacing(2),
-    },
-  },
-}));
+// const useStyles = makeStyles((theme) => ({
+//   root: {
+//     display: 'flex',
+//     '& > * + *': {
+//       marginLeft: theme.spacing(2),
+//     },
+//   },
+// }));
 
-const classes = useStyles();
+// const classes = useStyles();
 
 interface PatientRegisterProps extends PatientModal {
     facilityId: number;
@@ -405,9 +405,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 />
                             </CardContent>
                         )}
-                        <div className={classes.root}>
+                        {/* <div className={classes.root}>
                             <CircularProgress />
-                        </div>  
+                        </div>   */}
                         <CardContent>
                             <InputLabel id="gender-label">State*</InputLabel>
                             <NativeSelectField
