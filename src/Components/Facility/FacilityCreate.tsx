@@ -16,7 +16,7 @@ import { LocationSearchAndPick } from "../Common/LocationSearchAndPick"
 import { useAbortableEffect, statusType } from '../../Common/utils';
 import * as Notification from '../../Utils/Notifications.js';
 
-const DEFAULT_MAP_LOCATION = [8.55929, 76.9922];// Trivandrum
+const DEFAULT_MAP_LOCATION = [10.038394700000001, 76.5074145180173];// Ernakulam
 
 interface FacilityProps {
     facilityId?: number;
