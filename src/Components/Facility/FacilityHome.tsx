@@ -7,10 +7,10 @@ import { getFacility, listCapacity, listDoctor } from "../../Redux/actions";
 import BedTypeCard from "./BedTypeCard";
 import { Loading } from '../Common/Loading';
 import DoctorsCountCard from './DoctorsCountCard';
-import AppMessage from "../Common/AppMessage"
 import { BED_TYPES, DOCTOR_SPECIALIZATION } from "../../Common/constants";
 import { FacilityModal, CapacityModal, DoctorModal } from './models';
 import { useAbortableEffect, statusType } from '../../Common/utils';
+import * as Notification from '../../Utils/Notifications.js';
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -39,7 +39,6 @@ export const FacilityHome = (props: any) => {
     const [capacityData, setCapacityData] = useState<Array<CapacityModal>>([]);
     const [doctorData, setDoctorData] = useState<Array<DoctorModal>>([]);
     const [isLoading, setIsLoading] = useState(false);
-    const [showAppMessage, setAppMessage] = useState({ show: false, message: "", type: "" })
 
     const fetchData = useCallback(async (status: statusType) => {
         setIsLoading(true);
@@ -51,7 +50,9 @@ export const FacilityHome = (props: any) => {
         if (!status.aborted) {
             setIsLoading(false);
             if (!facilityRes.data) {
-                setAppMessage({ show: true, message: "Something went wrong..!", type: "error" })
+                Notification.Error({
+                    msg: "Something went wrong..!"
+                });
             } else {
                 setFacilityData(facilityRes.data);
                 if (capacityRes && capacityRes.data) {
@@ -100,7 +101,6 @@ export const FacilityHome = (props: any) => {
 
     return (
         <div className={`w3-content ${classes.content}`}>
-            <AppMessage open={showAppMessage.show} type={showAppMessage.type} message={showAppMessage.message} handleClose={() => setAppMessage({ show: false, message: "", type: "" })} handleDialogClose={() => setAppMessage({ show: false, message: "", type: "" })} />
             <h2>Facility</h2>
             <Grid container style={{ padding: "10px", marginBottom: '5px' }} spacing={2}>
                 <Grid item xs={12} md={7}>

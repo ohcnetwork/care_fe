@@ -6,10 +6,10 @@ import SaveIcon from '@material-ui/icons/Save';
 import { navigate } from 'hookrouter';
 import { BED_TYPES } from "../../Common/constants";
 import { CapacityModal, OptionsType } from './models';
-import AppMessage from "../Common/AppMessage";
 import { Loading } from "../../Components/Common/Loading";
 import { createCapacity, getCapacity, listCapacity } from "../../Redux/actions";
 import { useAbortableEffect, statusType } from '../../Common/utils';
+import * as Notification from '../../Utils/Notifications.js';
 
 interface BedCapacityProps extends CapacityModal {
     facilityId: number;
@@ -54,7 +54,6 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
     const dispatchAction: any = useDispatch();
     const { facilityId, id } = props;
     const [state, dispatch] = useReducer(bedCountReducer, initialState);
-    const [showAppMessage, setAppMessage] = useState({ show: false, message: "", type: "" });
     const [isLastOptionType, setIsLastOptionType] = useState(false);
     const [bedTypes, setBedTypes] = useState<Array<OptionsType>>(initBedTypes);
     const [isLoading, setIsLoading] = useState(false);
@@ -151,7 +150,9 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
             const res = await dispatchAction(createCapacity(id, data, { facilityId }));
             setIsLoading(false);
             if (!res.data) {
-                setAppMessage({ show: true, message: "Something went wrong..!", type: "error" })
+                Notification.Error({
+                    msg: "Something went wrong..!"
+                });
             } else {
                 // disable last added bed type
                 const updatedBedTypes = bedTypes.map((type: OptionsType) => {
@@ -165,12 +166,16 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
                 dispatch({ type: "set_form", form: initForm });
                 // show success message
                 if (!id) {
-                    setAppMessage({ show: true, message: "Bed capacity added successfully", type: "success" });
+                    Notification.Success({
+                        msg: "Bed capacity added successfully"
+                    });
                     if (isLastOptionType) {
                         navigate(`/facility/${facilityId}/doctor`);
                     }
                 } else {
-                    setAppMessage({ show: true, message: "Bed capacity updated successfully", type: "success" });
+                    Notification.Success({
+                        msg: "Bed capacity updated successfully"
+                    });
                     navigate(`/facility/${facilityId}`);
                 }
             }
@@ -187,7 +192,6 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
         <Grid container alignContent="center" justify="center">
             <Grid item xs={12} sm={10} md={8} lg={6} xl={4}>
                 <Card style={{ marginTop: '20px' }}>
-                    <AppMessage open={showAppMessage.show} type={showAppMessage.type} message={showAppMessage.message} handleClose={() => setAppMessage({ show: false, message: "", type: "" })} handleDialogClose={() => setAppMessage({ show: false, message: "", type: "" })} />
                     <CardHeader title={headerText} />
                     <form onSubmit={e => { handleSubmit(e) }}>
                         <CardContent>
