@@ -108,3 +108,9 @@ export const SAMPLE_TEST_RESULT = [
   {id:3,text:"AWAITING"},
   {id:4,text:"INVALID"},
 ];
+
+export const CONSULTATION_SUGGESTION = [
+  {id:1,text:"HI"},
+  {id:2,text:"A"},
+  {id:3,text:"R"},
+];
