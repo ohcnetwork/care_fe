@@ -95,16 +95,12 @@ export const fireRequest = (
                 });
                 return;
             }
-
-            // FIX-ME:  (Temporary) Ignore 403 Error
-            // This error is ignored because on the first page load 
-            // 403 error is displayed for invalid credential.
             
-            /** Other 4xx Errors and 5xx Errors */ 
-            /** can use the basic error handler */
+            // currentUser is ignored because on the first page load 
+            // 403 error is displayed for invalid credential.
 
             // 4xx Erros
-            if (error.response.status !== 403 &&
+            if (!(error.response.status === 403 && key === "currentUser") &&
                 error.response.status > 400 && 
                 error.response.status < 500) {
                 if ( error.response.data && error.response.data.detail ){
