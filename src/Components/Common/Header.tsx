@@ -153,11 +153,6 @@ const Header = () => {
                   }}
               >
                 <MenuItem onClick={() => {
-                  navigate('/settings');
-                  handleClose();
-
-                }}>Settings</MenuItem>
-                <MenuItem onClick={() => {
                   localStorage.removeItem('care_access_token');
                   localStorage.removeItem('care_refresh_token');
                   navigate('/login');
