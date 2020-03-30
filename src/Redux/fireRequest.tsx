@@ -1,5 +1,6 @@
 import axios from 'axios';
 import api from './api';
+import * as Notification from '../Utils/Notifications.js';
 
 const requestMap: any = api;
 export const actions = {
@@ -86,6 +87,20 @@ export const fireRequest = (
             dispatch(fetchResponseSuccess(key, response.data));
             return response;
         }).catch((error: any) => {
+            // Bad Request Error
+            if (error.response.status === 400) {
+                Notification.BadRequest({
+                    errs: error.response.data
+                });
+                return;
+            }
+            // Other 4xx Errors
+            // if (error.response.status > 400) {
+            //     Notification.Errors4XX({
+            //         errs: error.response.data.messages
+            //     });
+            //     return;
+            // }
             dispatch(fetchDataRequestError(key, error));
             return error.response;
         });
