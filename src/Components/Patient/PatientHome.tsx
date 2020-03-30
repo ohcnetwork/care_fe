@@ -94,13 +94,6 @@ export const PatientHome = (props: any) => {
                                 Update Patient Info
                             </Button>
                         </Grid>
-                        <Grid item xs={12} className="w3-center">
-                            <Button fullWidth variant="contained" color="primary" size="small"
-                                onClick={() => navigate(`/facility/${facilityId}/patient/${id}/treatment`)}>
-                                Add Treatement Info
-                            </Button>
-                        </Grid>
-
                     </Grid>
                 </Grid>
             </Grid>
@@ -152,18 +145,6 @@ export const PatientHome = (props: any) => {
                         </tbody>
                     </table>
                         :(<span className="w3-center"><h6 className="w3-text-grey">No Medical History so far</h6></span>)}
-                    </div>
-                </Grid>
-                <Grid item xs={12}>
-                    <div className={`w3-black w3-center ${classes.title}`}>
-                        <Typography>
-                            Treatment History
-                        </Typography>
-                    </div>
-                    <div style={{ marginBottom: '10px' }}>
-                        <Typography>
-                            Treatment history details
-                        </Typography>
                     </div>
                 </Grid>
             </Grid>
