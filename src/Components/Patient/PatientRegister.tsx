@@ -18,6 +18,11 @@ interface PatientRegisterProps extends PatientModal {
     facilityId: number;
 }
 
+interface medicalHistoryModel {
+    disease: string;
+    details: string;
+}
+
 const initForm: any = {
     name: "",
     age: "",
@@ -39,18 +44,11 @@ const initialState = {
     errors: { ...initForm }
 };
 
-const optionalFields = [
-    "district",
-    "local_body",
-    "medical_history2",
-    "medical_history3",
-    "medical_history4",
-    "medical_history5"
-];
-
 const initialStates = [{ id: 0, name: "Choose State *" }];
 const initialDistricts = [{ id: 0, name: "Choose District" }];
+const selectStates = [{ id: 0, name: "Please select your state" }];
 const initialLocalbodies = [{ id: 0, name: "Choose Localbody" }];
+const selectDistrict = [{ id: 0, name: "Please select your district" }];
 
 const patientFormReducer = (state = initialState, action: any) => {
     switch (action.type) {
@@ -86,8 +84,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     const [isDistrictLoading, setIsDistrictLoading] = useState(false);
     const [isLocalbodyLoading, setIsLocalbodyLoading] = useState(false);
     const [states, setStates] = useState(initialStates)
-    const [districts, setDistricts] = useState(initialDistricts)
-    const [localBody, setLocalBody] = useState(initialLocalbodies)
+    const [districts, setDistricts] = useState(selectDistrict)
+    const [localBody, setLocalBody] = useState(selectStates)
 
     const headerText = !id ? "Add Patient" : "Edit Patient";
     const buttonText = !id ? "Save" : "Update";
@@ -99,7 +97,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             setDistricts([...initialDistricts, ...districtList.data]);
             setIsDistrictLoading(false);
         } else {
-            setDistricts(initialDistricts)
+            setDistricts(selectStates)
         }
     }, [dispatchAction])
 
@@ -110,7 +108,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             setIsLocalbodyLoading(false);
             setLocalBody([...initialLocalbodies, ...localBodyList.data]);
         } else {
-            setLocalBody(initialLocalbodies)
+            setLocalBody(selectDistrict)
         }
     }, [dispatchAction])
 
@@ -161,15 +159,30 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         let errors = { ...initForm };
         let invalidForm = false;
         Object.keys(state.form).forEach((field, i) => {
-            if ((optionalFields.indexOf(field) === -1) && !state.form[field]) {
-                errors[field] = "Field is required";
-                invalidForm = true;
-            } else if (field === "phone_number" && !phonePreg(state.form[field])) {
-                errors[field] = "Please Enter 10/11 digit mobile number or landline as 0<std code><phone number>";
-                invalidForm = true;
-            } else if (field === "state" && (state.form[field] === "" || state.form[field] == 0)) {
-                errors[field] = "Field is required";
-                invalidForm = true;
+            switch (field) {
+                case "name":
+                case "age":
+                case "gender":
+                    if (!state.form[field]) {
+                        errors[field] = "Field is required";
+                        invalidForm = true;
+                    }
+                    return;
+                case "state":
+                case "district":
+                    if (!Number(state.form[field])) {
+                        errors[field] = "Field is required";
+                        invalidForm = true;
+                    }
+                    return;
+                case "phone_number":
+                    if (!phonePreg(state.form[field])) {
+                        errors[field] = "Please Enter 10/11 digit mobile number or landline as 0<std code><phone number>";
+                        invalidForm = true;
+                    }
+                    return;
+                default:
+                    return
             }
         });
         console.log(errors)
@@ -182,13 +195,13 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         const validForm = validateForm();
         if (validForm) {
             setIsLoading(true);
-            let medical_history: Array<any> = []
-            state.form.medical_history.map((disease: number) => {
-                medical_history.push({ disease, details: state.form[`medical_history${disease}`] })
+            let medical_history: Array<medicalHistoryModel> = []
+            state.form.medical_history.forEach((i:any) => {
+                medical_history.push({ disease: i.disease, details: state.form[`medical_history${i.disease}`] })
                 // return medical_history
             })
             if (!medical_history.length) {
-                medical_history.push({ disease: 1, details: "" })
+                medical_history.push({ disease: "No", details: "" })
             }
             const data = {
                 "name": state.form.name,
@@ -243,6 +256,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             values.splice(values.indexOf(chocieId), 1);
         }
         form['medical_history'] = values;
+        console.log(form)
         dispatch({ type: "set_form", form })
     }
 
