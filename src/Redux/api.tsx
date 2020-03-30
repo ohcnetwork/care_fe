@@ -1,7 +1,6 @@
 export default {
 
     // Auth Endpoints
-
     login: {
         path: '/api/v1/auth/login/',
         method: 'POST',
@@ -169,12 +168,18 @@ export default {
     getDistrict: {
         path: "/api/v1/district/{id}/",
     },
+    getDistrictByState: {
+        path: "/state/id/districts/",
+    },
 
     // Districts
     localBodyList: {
         path: "/api/v1/local_body/",
     },
-    getLocalBosy: {
+    getLocalBody: {
         path: "/api/v1/local_body/{id}/",
+    },
+    getLocalbodyByDistrict: {
+        path: "/district/id/local_bodies/",
     },
 }
