@@ -9,7 +9,7 @@ import { validateLocationCoordinates, phonePreg } from "../../Common/validation"
 import { DISTRICT_CHOICES } from "../../Common/constants";
 import SaveIcon from '@material-ui/icons/Save';
 import { FACILITY_ID } from "../../Common/constants";
-import { Loading } from "../../Components/Common/Loading";
+import { Loading } from "../Common/Loading";
 import LocationPicker from "react-leaflet-location-picker";
 import Popover from '@material-ui/core/Popover';
 import MyLocationIcon from '@material-ui/icons/MyLocation';
@@ -27,7 +27,7 @@ const initForm: any = {
     phone_number: "",
     latitude: "",
     longitude: "",
-    oxygen_capacity: "",
+    oxygen_capacity: " ",
 };
 
 const initialState = {
@@ -202,7 +202,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                     longitude: Number(state.form.latitude),
                 } : undefined,
                 phone_number: state.form.phone_number,
-                oxygen_capacity: state.form.oxygen_capacity ? Number(state.form.oxygen_capacity) : undefined,
+                oxygen_capacity: state.form.oxygen_capacity ? Number(state.form.oxygen_capacity) : 0,
             }
             const res = await dispatchAction(facilityId ? updateFacility(facilityId, data) : createFacility(data));
             if (res.data) {
