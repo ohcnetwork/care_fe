@@ -14,6 +14,19 @@ import { useAbortableEffect, statusType } from '../../Common/utils';
 import patientnameCombinations from "../../Constants/Static_data/PatientName.json"
 import Spinner from 'react-bootstrap/Spinner';
 import * as Notification from '../../Utils/Notifications.js';
+import { makeStyles } from '@material-ui/core/styles';
+import CircularProgress from '@material-ui/core/CircularProgress';
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    display: 'flex',
+    '& > * + *': {
+      marginLeft: theme.spacing(2),
+    },
+  },
+}));
+
+const classes = useStyles();
 
 interface PatientRegisterProps extends PatientModal {
     facilityId: number;
@@ -121,12 +134,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         contact_with_carrier: `${res.data.contact_with_carrier}`,
                     }
                 })
-                if(res.data.state){
-                    fetchDistricts(res.data.state)
-                    if(res.data.district){
-                        fetchLocalBody(res.data.district)
-                    } 
-                }
+                // if(res.data.state){
+                //     fetchDistricts(res.data.state)
+                //     if(res.data.district){
+                //         fetchLocalBody(res.data.district)
+                //     } 
+                // }
             } else {
                 navigate(`/facility/${facilityId}`);
             }
@@ -392,7 +405,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 />
                             </CardContent>
                         )}
-                        
+                        <div className={classes.root}>
+                            <CircularProgress />
+                        </div>  
                         <CardContent>
                             <InputLabel id="gender-label">State*</InputLabel>
                             <NativeSelectField
