@@ -20,20 +20,12 @@ export const Error = ({msg}) => {
     });
 };
 
-/** Bad Request handler */
+/** 400 Bad Request handler */
 export const BadRequest = ({errs}) => {
+    
     for (let [, value] of Object.entries(errs)) {
         PNotify.error({
             text: `Bad Request - ${value}`
-        });
-    }
-};
-
-/** All Other 4xx Error handler */
-export const Errors4XX = ({errs}) => {
-    for ( const msg of errs) {
-        PNotify.error({
-            text: msg.message
         });
     }
 };
