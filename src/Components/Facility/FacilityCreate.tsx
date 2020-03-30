@@ -2,7 +2,6 @@ import React, { useState, useReducer, useCallback, useEffect } from "react"
 import { useDispatch } from "react-redux"
 import { FormControl, Grid, Card, CardHeader, CardContent, Button, InputLabel, Select, MenuItem, CardActions } from "@material-ui/core"
 import { TextInputField, MultilineInputField } from "../Common/HelperInputFields"
-import AppMessage from "../Common/AppMessage"
 import { makeStyles } from "@material-ui/styles";
 import { navigate } from 'hookrouter';
 import { createFacility, getFacility, updateFacility } from "../../Redux/actions";
@@ -15,6 +14,7 @@ import LocationPicker from "react-leaflet-location-picker";
 import Popover from '@material-ui/core/Popover';
 import MyLocationIcon from '@material-ui/icons/MyLocation';
 import { useAbortableEffect, statusType } from '../../Common/utils';
+import * as Notification from '../../Utils/Notifications.js';
 
 interface FacilityProps {
     facilityId?: number;
@@ -83,7 +83,6 @@ export const FacilityCreate = (props: FacilityProps) => {
     const { facilityId } = props;
 
     const [state, dispatch] = useReducer(facility_create_reducer, initialState);
-    const [showAppMessage, setAppMessage] = useState({ show: false, message: "", type: "" });
     const [isLoading, setIsLoading] = useState(false);
     const [anchorEl, setAnchorEl] = React.useState(null);
 
@@ -211,10 +210,14 @@ export const FacilityCreate = (props: FacilityProps) => {
                 setIsLoading(false);
                 dispatch({ type: "set_form", form: initForm });
                 if (!facilityId) {
-                    setAppMessage({ show: true, message: "Facility added successfully", type: "success" });
+                    Notification.Success({
+                        msg: "Facility added successfully"
+                    })
                     navigate(`/facility/${id}/bed`);
                 } else {
-                    setAppMessage({ show: true, message: "Facility updated successfully", type: "success" });
+                    Notification.Success({
+                        msg: "Facility updated successfully"
+                    });
                     navigate(`/facility/${facilityId}`);
                 }
             }
@@ -230,7 +233,6 @@ export const FacilityCreate = (props: FacilityProps) => {
         <Grid container alignContent="center" justify="center">
             <Grid item xs={12} sm={10} md={8} lg={6} xl={4}>
                 <Card style={{ marginTop: '20px' }}>
-                    <AppMessage open={showAppMessage.show} type={showAppMessage.type} message={showAppMessage.message} handleClose={() => setAppMessage({ show: false, message: "", type: "" })} handleDialogClose={() => setAppMessage({ show: false, message: "", type: "" })} />
                     <CardHeader title={headerText} />
                     <form onSubmit={(e) => handleSubmit(e)}>
                         <CardContent>

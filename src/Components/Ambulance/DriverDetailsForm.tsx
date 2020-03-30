@@ -16,7 +16,6 @@ import { useDispatch } from "react-redux";
 import { postAmbulance } from "../../Redux/actions";
 import { isEmpty } from "lodash";
 import { navigate } from "hookrouter";
-import AppMessage from "../Common/AppMessage";
 import SaveIcon from "@material-ui/icons/Save";
 import {
   AGREE_CONSENT,
@@ -24,6 +23,7 @@ import {
   AMBULANCE_SERVICE_FEE_TEXT
 } from "../../Common/constants";
 import { vehicleForm } from "./VehicleDetailsForm";
+import * as Notification from '../../Utils/Notifications.js';
 
 interface DriverDetailsProps {
   classes: any;
@@ -62,11 +62,6 @@ export const DriverDetailsForm = (props: DriverDetailsProps) => {
   const [form, setForm] = useState<any>(initForm);
   const [errors, setErrors] = useState<any>(initErr);
   const [isLoading, setIsLoading] = useState(false);
-  const [showAppMessage, setAppMessage] = useState({
-    show: false,
-    message: "",
-    type: ""
-  });
 
   const handleChange = (e: any) => {
     const { value, name } = e.target;
@@ -107,11 +102,6 @@ export const DriverDetailsForm = (props: DriverDetailsProps) => {
             !/^[0-9]{10}$/.test(form.cellNumber2)
           ) {
             err[key] = "Invalid phone number";
-          }
-          break;
-        case "pricePerKm":
-          if (!form.hasFreeService && !value) {
-            err[key] = "This field is required";
           }
           break;
         default:
@@ -182,16 +172,12 @@ export const DriverDetailsForm = (props: DriverDetailsProps) => {
       const res = await dispatch(postAmbulance(ambulanceData));
       setIsLoading(false);
       if (!res.data) {
-        setAppMessage({
-          show: true,
-          message: "Something went wrong..!",
-          type: "error"
+        Notification.Error({
+          msg: "Something went wrong..!"
         });
       } else {
-        setAppMessage({
-          show: true,
-          message: "Ambulance added successfully",
-          type: "success"
+        Notification.Success({
+          msg: "Ambulance added successfully"
         });
         setTimeout(() => navigate("/"), 3000);
       }
@@ -206,17 +192,6 @@ export const DriverDetailsForm = (props: DriverDetailsProps) => {
 
   return (
     <div>
-      <AppMessage
-        open={showAppMessage.show}
-        type={showAppMessage.type}
-        message={showAppMessage.message}
-        handleClose={() =>
-          setAppMessage({ show: false, message: "", type: "" })
-        }
-        handleDialogClose={() =>
-          setAppMessage({ show: false, message: "", type: "" })
-        }
-      />
       <Grid container alignContent="center" justify="center">
         <Grid item xs={12} className={`${classes.formBottomPadding}`}>
           <Card>
