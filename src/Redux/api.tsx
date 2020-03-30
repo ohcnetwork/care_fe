@@ -169,7 +169,7 @@ export default {
         path: "/api/v1/district/{id}/",
     },
     getDistrictByState: {
-        path: "/state/id/districts/",
+        path: "/api/v1/state/{id}/districts/",
     },
 
     // Districts
@@ -180,6 +180,6 @@ export default {
         path: "/api/v1/local_body/{id}/",
     },
     getLocalbodyByDistrict: {
-        path: "/district/id/local_bodies/",
+        path: "/api/v1/district/{id}/local_bodies/",
     },
 }
