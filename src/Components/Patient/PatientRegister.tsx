@@ -6,13 +6,13 @@ import { TextInputField, NativeSelectField, ErrorHelperText, MultilineInputField
 import { phonePreg, getArrayValueByKey, getRandomNumbers } from "../../Common/validation";
 import { navigate } from 'hookrouter';
 import { Loading } from "../Common/Loading";
-import AppMessage from "../Common/AppMessage";
 import AlertDialog from "../Common/AlertDialog";
 import { PatientModal } from './models';
 import { GENDER_TYPES } from "../../Common/constants";
 import { createPatient, getPatient, updatePatient, getStates, getDistricts, getLocalBody } from "../../Redux/actions";
 import { useAbortableEffect, statusType } from '../../Common/utils';
 import patientnameCombinations from "../../Constants/Static_data/PatientName.json"
+import * as Notification from '../../Utils/Notifications.js';
 
 interface PatientRegisterProps extends PatientModal {
     facilityId: number;
@@ -86,7 +86,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     const dispatchAction: any = useDispatch();
     const { facilityId, id } = props;
     const [state, dispatch] = useReducer(patientFormReducer, initialState);
-    const [showAppMessage, setAppMessage] = useState({ show: false, message: "", type: "" });
     const [showAlertMessage, setAlertMessage] = useState({ show: false, message: "", title: "" });
     const [isLoading, setIsLoading] = useState(false);
     const [states, setStates] = useState(initialStatesList)
@@ -225,11 +224,15 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         title: "Patient Added Successfully"
                     })
                 } else {
-                    setAppMessage({ show: true, message: "Patient updated successfully", type: "success" });
+                    Notification.Success({
+                        msg: "Patient updated successfully"
+                    });
                     navigate(`/facility/${facilityId}`);
                 }
             } else {
-                setAppMessage({ show: true, message: "Error", type: "error" })
+                Notification.Error({
+                    msg: "Error"
+                });
             }
         }
     };
@@ -292,7 +295,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         <Grid container alignContent="center" justify="center">
             <Grid item xs={12} sm={10} md={8} lg={6} xl={4}>
                 <Card>
-                    <AppMessage open={showAppMessage.show} type={showAppMessage.type} message={showAppMessage.message} handleClose={() => setAppMessage({ show: false, message: "", type: "" })} handleDialogClose={() => setAppMessage({ show: false, message: "", type: "" })} />
                     {showAlertMessage.show &&
                         <AlertDialog handleClose={() => handleCancel()} message={showAlertMessage.message} title={showAlertMessage.title} />
                     }

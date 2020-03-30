@@ -3,10 +3,10 @@ import { useDispatch } from "react-redux"
 import { FormControl, Grid, Card, CardHeader, CardContent, Button, InputLabel, Select, MenuItem } from "@material-ui/core"
 import { TextInputField, MultilineInputField } from "../Common/HelperInputFields"
 import Loader from "../Common/Loader"
-import AppMessage from "../Common/AppMessage"
 import { FACILITY_TYPES, DISTRICT_CHOICES } from "../../Common/constants";
 import { validateLocationCoordinates, phonePreg } from "../../Common/validation";
 import { createFacility } from "../../Redux/actions";
+import * as Notification from '../../Utils/Notifications.js';
 
 
 const initForm: any = {
@@ -57,7 +57,6 @@ export const CareCenterJoinForm = () => {
     const dispatchAction: any = useDispatch()
 
     const [state, dispatch] = useReducer(CareCenterCreateReducer, initialState)
-    const [showAppMessage, setAppMessage] = useState({ show: false, message: "", type: "" })
     const [loading, setLoading] = useState(false)
 
     const handleChange = (e: any) => {
@@ -110,10 +109,14 @@ export const CareCenterJoinForm = () => {
             const res = await dispatchAction(createFacility(data))
             setLoading(false);
             if (!res.data) {
-                setAppMessage({ show: true, message: "Something went wrong..!", type: "error" })
+                Notification.Error({
+                    msg: "Something went wrong..!"
+                });
             } else {
                 dispatch({ type: "set_form", form: initForm })
-                setAppMessage({ show: true, message: "Care Center Added Successfully", type: "success" })
+                Notification.Success({
+                    msg: "Care Center Added Successfully"
+                });
             }
         }
     }
@@ -124,7 +127,6 @@ export const CareCenterJoinForm = () => {
             <form onSubmit={(e) => handleSubmit(e)}>
 
                 <Card>
-                    <AppMessage open={showAppMessage.show} type={showAppMessage.type} message={showAppMessage.message} handleClose={() => setAppMessage({ show: false, message: "", type: "" })} handleDialogClose={() => setAppMessage({ show: false, message: "", type: "" })} />
                     <CardHeader title="Create Care Center" />
                     <CardContent>
                         <Grid item xs={12}>

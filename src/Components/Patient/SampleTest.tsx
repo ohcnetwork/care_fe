@@ -5,11 +5,11 @@ import { Grid, Card, CardHeader, CardContent, CardActions, Button, FormControl, 
 import { TextInputField, NativeSelectField, ErrorHelperText, MultilineInputField, } from "../Common/HelperInputFields";
 import { navigate } from 'hookrouter';
 import { Loading } from "../Common/Loading";
-import AppMessage from "../Common/AppMessage";
 // import { PatientModal} from './models';
 import { SAMPLE_TEST_STATUS, SAMPLE_TEST_RESULT } from "../../Common/constants";
 import { createSampleTest, getSampleTest, patchSampleTest } from "../../Redux/actions";
 import { useAbortableEffect, statusType } from '../../Common/utils';
+import * as Notification from '../../Utils/Notifications.js';
 
 // interface SampleTestProps extends PatientModal {
     
@@ -82,7 +82,6 @@ export const SampleTest = (props:any) => {
     const dispatchAction: any = useDispatch();
     const { facilityId, patientId, id } = props;
     const [state, dispatch] = useReducer(sampleTestFormReducer, initialState);
-    const [showAppMessage, setAppMessage] = useState({ show: false, message: "", type: "" });
     const [isLoading, setIsLoading] = useState(false);
 
 
@@ -152,13 +151,19 @@ export const SampleTest = (props:any) => {
             if (res.data) {
                 dispatch({ type: "set_form", form: initForm })
                 if (id) {
-                    setAppMessage({ show: true, message: "Sample test updated successfully", type: "success" });
+                    Notification.Success({
+                        msg: "Sample test updated successfully"
+                    });
                 } else {
-                    setAppMessage({ show: true, message: "Sample test created successfully", type: "success" });
+                    Notification.Success({
+                        msg: "Sample test created successfully"
+                    });
                     navigate(`/facility/${facilityId}/patient/${patientId}`);
                 }
             } else {
-                setAppMessage({ show: true, message: "Error", type: "error" })
+                Notification.Error({
+                    msg: "Error"
+                });
             }
         }
     };
@@ -179,11 +184,9 @@ export const SampleTest = (props:any) => {
     }
 
     return <div>
-
         <Grid container alignContent="center" justify="center">
             <Grid item xs={12} sm={10} md={8} lg={6} xl={4}>
                 <Card>
-                    <AppMessage open={showAppMessage.show} type={showAppMessage.type} message={showAppMessage.message} handleClose={() => setAppMessage({ show: false, message: "", type: "" })} handleDialogClose={() => setAppMessage({ show: false, message: "", type: "" })} />
                     <CardHeader title={headerText}/>
                     <form onSubmit={(e) => handleSubmit(e)}>
                         <CardContent>
