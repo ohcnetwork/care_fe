@@ -6,8 +6,8 @@ import { getCurrentUser } from './Redux/actions';
 import './App.scss';
 import { Loading } from "./Components/Common/Loading";
 import { useAbortableEffect, statusType } from './Common/utils';
-const img = 'https://coronasafe.network/break-chain.png';
 import axios from 'axios';
+const img = 'https://coronasafe.network/break-chain.png';
 
 const App: React.FC = () => {
   const dispatch: any = useDispatch();
@@ -30,6 +30,7 @@ const App: React.FC = () => {
         refresh
       }).then((resp: any) => { 
         localStorage.setItem('care_access_token', resp.data.access)
+          localStorage.setItem('care_refresh_token', resp.data.refresh);
       }).catch( (ex:any)=> {
         console.error('Error while refreshing',ex);
       });
