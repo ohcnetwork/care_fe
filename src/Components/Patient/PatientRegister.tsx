@@ -12,21 +12,11 @@ import { GENDER_TYPES } from "../../Common/constants";
 import { createPatient, getPatient, updatePatient, getStates, getDistricts, getLocalBody } from "../../Redux/actions";
 import { useAbortableEffect, statusType } from '../../Common/utils';
 import patientnameCombinations from "../../Constants/Static_data/PatientName.json"
-import Spinner from 'react-bootstrap/Spinner';
 import * as Notification from '../../Utils/Notifications.js';
 import { makeStyles } from '@material-ui/core/styles';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
-// const useStyles = makeStyles((theme) => ({
-//   root: {
-//     display: 'flex',
-//     '& > * + *': {
-//       marginLeft: theme.spacing(2),
-//     },
-//   },
-// }));
 
-// const classes = useStyles();
 
 interface PatientRegisterProps extends PatientModal {
     facilityId: number;
@@ -102,12 +92,23 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     const [state, dispatch] = useReducer(patientFormReducer, initialState);
     const [showAlertMessage, setAlertMessage] = useState({ show: false, message: "", title: "" });
     const [isLoading, setIsLoading] = useState(false);
+    const [loadSpinner, isSpinning] = useState(false);
     const [states, setStates] = useState(initialStatesList)
     const [districts, setDistricts] = useState([{ id: 0, name: "Choose District", state: 0 }])
     const [localBody, setLocalBody] = useState([{ id: 0, name: "Choose Localbody" }])
 
     const headerText = !id ? "Add Patient" : "Edit Patient";
     const buttonText = !id ? "Save" : "Update";
+
+    const useStyles = makeStyles((theme) => ({
+        root: {
+          display: 'flex',
+          justifyContent: 'center',
+          marginTop: '10px',
+        },
+      }));
+      
+    const classes = useStyles();
 
     const generateRandomname = () => {
         const form = { ...state.form }
@@ -126,9 +127,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         name: res.data.name,
                         age: res.data.age,
                         gender: res.data.gender,
-                        state:res.data.state,
-                        district:res.data.district,
-                        local_body:res.data.local_body,
                         phone_number: res.data.phone_number,
                         medical_history: res.data.medical_history,
                         contact_with_carrier: `${res.data.contact_with_carrier}`,
@@ -164,10 +162,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     const fetchDistricts = async (e: any) => {
         const index = getArrayValueByKey(states, "id", e.target.value);
         if (index > 0) {
-            // setIsLoading(true);
+            isSpinning(true);
             const districtList = await dispatchAction(getDistricts({ state_name: states[index].name }))
             setDistricts([...districts, ...districtList.data.results]);
-            // setIsLoading(false);
+            isSpinning(false);
         } else {
             setDistricts([{ id: 0, name: "Choose District", state: 0 }])
         }
@@ -177,12 +175,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         const index = getArrayValueByKey(districts, "id", e.target.value);
         const stateIndex = getArrayValueByKey(states, "id", districts[index].state);
         if (index > 0) {
-            // setIsLoading(true);
+            isSpinning(true);
             const localBodyList = await dispatchAction(getLocalBody({
                 district_name: districts[index].name,
                 state_name: states[stateIndex].name
             }))
-            // setIsLoading(false);
+            isSpinning(false);
             setLocalBody([...localBody, ...localBodyList.data.results]);
         } else {
             setLocalBody([{ id: 0, name: "Choose Local body" }])
@@ -313,7 +311,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     if (isLoading) {
         return <Loading />
     }
-    
+    const Spinner= (
+        <div className={classes.root}>
+            <CircularProgress />
+        </div>  
+    )
 
     return <div>
         
@@ -366,7 +368,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             </>
                         )}
                         <CardContent>
-                        <Spinner animation="grow" />
                             <InputLabel id="age-label">Age*</InputLabel>
                             <TextInputField
                                 name="age"
@@ -405,9 +406,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 />
                             </CardContent>
                         )}
-                        {/* <div className={classes.root}>
-                            <CircularProgress />
-                        </div>   */}
                         <CardContent>
                             <InputLabel id="gender-label">State*</InputLabel>
                             <NativeSelectField
@@ -418,11 +416,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 optionvalueidentifier="name"
                                 onChange={(e) => [handleChange(e), fetchDistricts(e)]}
                             />
+                            {loadSpinner&& !state.form.district && Spinner}
                             <ErrorHelperText
                                 error={state.errors.state}
                             />
                         </CardContent>
-                        {(districts.length > 1 || state.form.district ) && <CardContent>
+                        {districts.length > 1 && <CardContent>
                             <InputLabel id="gender-label">District</InputLabel>
                             <NativeSelectField
                                 name="district"
@@ -432,11 +431,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 optionvalueidentifier="name"
                                 onChange={(e) => [handleChange(e), fetchLocalBody(e)]}
                             />
+                            {loadSpinner && !state.form.local_body && Spinner }
                             <ErrorHelperText
                                 error={state.errors.district}
                             />
                         </CardContent>}
-                        {(localBody.length > 1  || state.form.local_body  )&& <CardContent>
+                        {localBody.length > 1 && <CardContent>
                             <InputLabel id="gender-label">Localbody</InputLabel>
                             <NativeSelectField
                                 name="local_body"
