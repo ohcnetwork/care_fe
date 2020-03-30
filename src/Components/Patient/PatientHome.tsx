@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Grid, Typography, Button, Divider } from "@material-ui/core";
+import { Grid, Typography, Button, Divider, Box } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { useDispatch } from "react-redux";
 import { navigate } from 'hookrouter';
@@ -29,7 +29,11 @@ const useStyles = makeStyles(theme => ({
     },
     title: {
         padding: '5px',
-        marginBottom: '10px'
+        marginBottom: '10px',
+    },
+    details:{ 
+        padding:'5px', 
+        marginBottom: '10px',
     }
 }));
 
@@ -60,12 +64,18 @@ export const PatientHome = (props: any) => {
     }
 
     const patientGender = GENDER_TYPES.find(i => i.id === patientData.gender)?.text;
+
     let patientMedHis: any[] = [];
     if (patientData && patientData.medical_history && patientData.medical_history.length) {
         const medHis = patientData.medical_history;
-        patientMedHis = MEDICAL_HISTORY_CHOICES.filter(choice => medHis.find(item => item.id === choice.id));
+        patientMedHis = medHis.map((item: any, idx: number) => (
+            <tr key={`med_his_${idx}`}>
+                <td>{item.disease}</td>
+                <td>{item.details}</td>
+            </tr>
+        ));
     }
-
+    
     return (
         <div className={`w3-content ${classes.content}`}>
             <h2>Patient</h2>
@@ -94,6 +104,20 @@ export const PatientHome = (props: any) => {
                     </Grid>
                 </Grid>
             </Grid>
+            <Grid container style={{ padding: "10px" }} spacing={1}>
+                <Grid item xs={12} md={6} className="w3-center">
+                    <Button fullWidth variant="contained" color="primary" size="small"
+                        onClick={() => navigate(`/facility/${facilityId}/patient/${id}/sample-test`)}>
+                        Request Sample Test
+                    </Button>
+                </Grid>
+                <Grid item xs={12} md={6} className="w3-center">
+                    <Button fullWidth variant="contained" color="primary" size="small"
+                        onClick={() => navigate(`/facility/${facilityId}/patient/${id}/sample-test-list`)}>
+                        View Sample Test List
+                    </Button>
+                </Grid>
+            </Grid>
 
             <Grid container style={{ padding: "10px" }} spacing={1}>
                 <Grid item xs={12}>
@@ -102,7 +126,7 @@ export const PatientHome = (props: any) => {
                             Has the patient had contact with someone already diagnosed with Covid 19?
                       </Typography>
                     </div>
-                    <div style={{ marginBottom: '10px' }}>
+                    <div className={classes.details}>
                         <Typography>
                             {patientData.contact_with_carrier ? 'Yes' : 'No'}
                         </Typography>
@@ -114,15 +138,20 @@ export const PatientHome = (props: any) => {
                             Medical History
                         </Typography>
                     </div>
-                    <div style={{ marginBottom: '10px' }}>
-                        medical history
-                    </div>
-
-                    <div style={{ marginBottom: '10px' }}>
-                        <h5>Details</h5>
-                        <Typography>
-                            Medical History Details
-                        </Typography>
+                    <div className={classes.details}>
+                        {patientMedHis.length > 0? 
+                    <table className="w3-table w3-table-all">
+                        <thead>
+                            <tr>
+                                <th className="w3-center">Disease</th>
+                                <th className="w3-center">Details</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                          {patientMedHis} 
+                        </tbody>
+                    </table>
+                        :(<span className="w3-center"><h6 className="w3-text-grey">No Medical History so far</h6></span>)}
                     </div>
                 </Grid>
                 <Grid item xs={12}>

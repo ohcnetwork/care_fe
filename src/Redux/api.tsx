@@ -138,6 +138,20 @@ export default {
         path: '/api/v1/patient/{id}/',
         method: 'PUT'
     },
+    sampleTestList:{
+        path:'/api/v1/patient/{patientId}/test_sample/',
+    },
+    createSampleTest:{
+        path:'/api/v1/patient/{patientId}/test_sample/',
+        method:'POST',
+    },
+    getSampleTest:{
+        path:'/api/v1/patient/{patientId}/test_sample/{id}/',
+    },
+    patchSampleTest:{
+        path:'/api/v1/patient/{patientId}/test_sample/{id}/',
+        method:'PATCH',
+    },
 
     // States
     statesList: {

@@ -183,3 +183,18 @@ export const getDistricts = (urlParam: object) => {
 export const getLocalBody = (urlParam: object) => {
     return fireRequest("localBodyList", [], {}, urlParam)
 }
+
+export const getSampleTestList = (urlParam: object) => {
+    return fireRequest("sampleTestList", [], {}, urlParam)
+}
+
+export const createSampleTest = (form: object,urlParam: object) => {
+    return fireRequest('createSampleTest', [], form,urlParam)
+};
+
+export const getSampleTest = (id:number, urlParam: object) => {
+    return fireRequest('getSampleTest', [id], {}, urlParam)
+};
+export const patchSampleTest = (id:number,form: object, urlParam: object) => {
+    return fireRequest('patchSampleTest', [id], form, urlParam)
+};
