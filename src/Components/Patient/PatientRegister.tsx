@@ -290,7 +290,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     }
                     <CardHeader title={headerText} />
                     <form onSubmit={(e) => handleSubmit(e)}>
-                        {!id && (<CardContent>
+                        <CardContent>
                             <InputLabel id="name-label">Name*</InputLabel>
                             <TextInputField
                                 name="name"
@@ -301,7 +301,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 onChange={handleChange}
                                 errors={state.errors.name}
                             />
-                        </CardContent>)}
+                        </CardContent>
                         <CardContent>
                             <InputLabel id="age-label">Age*</InputLabel>
                             <TextInputField
@@ -327,20 +327,18 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 error={state.errors.gender}
                             />
                         </CardContent>
-                        {!id && (
-                            <CardContent>
-                                <InputLabel id="phone-label">Mobile Number*</InputLabel>
-                                <TextInputField
-                                    name="phone_number"
-                                    variant="outlined"
-                                    margin="dense"
-                                    type="number"
-                                    value={state.form.phone_number}
-                                    onChange={handleChange}
-                                    errors={state.errors.phone_number}
-                                />
-                            </CardContent>
-                        )}
+                        <CardContent>
+                            <InputLabel id="phone-label">Mobile Number*</InputLabel>
+                            <TextInputField
+                                name="phone_number"
+                                variant="outlined"
+                                margin="dense"
+                                type="number"
+                                value={state.form.phone_number}
+                                onChange={handleChange}
+                                errors={state.errors.phone_number}
+                            />
+                        </CardContent>
                         <CardContent>
                             <InputLabel id="gender-label">State*</InputLabel>
                             {isStateLoading ? (
