@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import Grid from '@material-ui/core/Grid';
-import { Card, CardContent, CardHeader, Tooltip, Typography } from "@material-ui/core";
+import { Card, CardContent, CardHeader, Tooltip, Typography, Box } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { useDispatch } from "react-redux";
 import { getFacilities, getAllPatient } from "../../Redux/actions";
@@ -127,9 +127,10 @@ export const PatientManager = (props: any) => {
     let patientList: any[] = [];
     if (data && data.length) {
         patientList = data.map((patient: any, idx: number) => {
+            const patientUrl = facilityId ? `/facility/${facilityId}/patient/${patient.id}` : `/patient/${patient.id}`;
             return (
-                <Grid item xs={12} md={3} key={`usr_${patient.id}`} className={classes.root}>
-                    <Card className={classes.card} onClick={() => navigate(`/facility/${facilityId}/patient/${patient.id}`)}>
+                <Grid item xs={12} sm={6} md={4} lg={3} key={`usr_${patient.id}`} className={classes.root}>
+                    <Card className={classes.card} onClick={() => navigate(patientUrl)}>
                         <CardHeader
                             className={classes.cardHeader}
                             title={
@@ -143,19 +144,22 @@ export const PatientManager = (props: any) => {
                             }
                         />
                         <CardContent className={classes.content}>
-                            <Typography>
-                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Age - </span>{patient.age}
-                            </Typography>
+                            <Box>
+                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Age - </span>
+                                <span>{patient.age}</span>
+                            </Box>
                         </CardContent>
                         <CardContent className={classes.content}>
-                            <Typography>
-                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Contact with carrier - </span>{patient.contact_with_carrier}
-                            </Typography>
+                            <Box>
+                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Contact with carrier - </span>
+                                <span>{patient.contact_with_carrier ? "Yes" : "No"}</span>
+                            </Box>
                         </CardContent>
                         <CardContent className={classes.content}>
-                            <Typography>
-                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Status - </span>{patient.is_active}
-                            </Typography>
+                            <Box>
+                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Status - </span>
+                                <span>{patient.is_active ? "Active" : "Inactive"}</span>
+                            </Box>
                         </CardContent>
                     </Card>
                 </Grid>

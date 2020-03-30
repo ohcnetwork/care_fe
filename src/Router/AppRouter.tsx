@@ -14,14 +14,14 @@ import { FacilityHome } from '../Components/Facility/FacilityHome';
 import { CareCenterJoinForm } from "../Components/Facility/CareCenterJoinForm";
 import { BedCapacityForm } from '../Components/Facility/BedCapacityForm';
 import { DoctorCapacityForm } from '../Components/Facility/DoctorCapacityForm';
-import {PatientManager} from "../Components/Patient/ManagePatients";
+import { PatientManager } from "../Components/Patient/ManagePatients";
 import { PatientHome } from '../Components/Patient/PatientHome';
 import { SampleTest } from '../Components/Patient/SampleTest';
 import { SampleTestList } from '../Components/Patient/SampleTestList';
 
 const routes = {
     '/': () => <PrivateDashboard />,
-    '/dash': () => <PrivateDashboard/>,
+    '/dash': () => <PrivateDashboard />,
     '/analytics': () => <Analytics />,
     '/facility': () => <HospitalList />,
     '/facility/create': () => <FacilityCreate />,
@@ -31,15 +31,16 @@ const routes = {
     '/facility/:facilityId/doctor': ({ facilityId }: any) => <DoctorCapacityForm facilityId={facilityId} />,
     '/facility/:facilityId/patients': ({ facilityId }: any) => <PatientManager facilityId={facilityId} />,
     '/facility/:facilityId/patient': ({ facilityId }: any) => <PatientRegister facilityId={facilityId} />,
-    '/facility/:facilityId/patient/:id': ({ facilityId, id}: any) => <PatientHome facilityId={facilityId} id={id} />,
-    '/facility/:facilityId/patient/:id/update': ({ facilityId, id}: any) => <PatientRegister facilityId={facilityId} id={id} />,
-    '/facility/:facilityId/patient/:patientId/sample-test':({ facilityId, patientId }: any) => <SampleTest facilityId={facilityId} patientId={patientId}/>,
-    '/facility/:facilityId/patient/:patientId/sample-test-list':({ facilityId, patientId }: any) => <SampleTestList facilityId={facilityId} patientId={patientId} />,
-    '/facility/:facilityId/patient/:patientId/sample-test/:id/update':({ facilityId, patientId, id}: any) => <SampleTest facilityId={facilityId} patientId={patientId} id={id} />,
-    '/facility/:facilityId/patient/:id/treatment': ({ facilityId, id}: any) => <TreatmentForm facilityId={facilityId} id={id} />,
+    '/facility/:facilityId/patient/:id': ({ facilityId, id }: any) => <PatientHome facilityId={facilityId} id={id} />,
+    '/facility/:facilityId/patient/:id/update': ({ facilityId, id }: any) => <PatientRegister facilityId={facilityId} id={id} />,
+    '/facility/:facilityId/patient/:patientId/sample-test': ({ facilityId, patientId }: any) => <SampleTest facilityId={facilityId} patientId={patientId} />,
+    '/facility/:facilityId/patient/:patientId/sample-test-list': ({ facilityId, patientId }: any) => <SampleTestList facilityId={facilityId} patientId={patientId} />,
+    '/facility/:facilityId/patient/:patientId/sample-test/:id/update': ({ facilityId, patientId, id }: any) => <SampleTest facilityId={facilityId} patientId={patientId} id={id} />,
+    '/facility/:facilityId/patient/:id/treatment': ({ facilityId, id }: any) => <TreatmentForm facilityId={facilityId} id={id} />,
     '/facility/:facilityId/bed/:id': ({ facilityId, id }: any) => <BedCapacityForm facilityId={facilityId} id={id} />,
     '/facility/:facilityId/doctor/:id': ({ facilityId, id }: any) => <DoctorCapacityForm facilityId={facilityId} id={id} />,
-    '/patients': () => <PatientManager/>,
+    '/patients': () => <PatientManager />,
+    '/patient/:id': ({ id }: any) => <PatientHome id={id} />,
     '/patient/tele-consult': () => <TeleConsultation />,
     '/patient/discharge': () => <PatientDischarge />,
     '/patient/treatment': () => <TreatmentForm />,
@@ -59,11 +60,11 @@ const AppRouter = () => {
             <div className="app-footer">
                 <img src="https://care-coronasafe.s3.amazonaws.com/static/images/logos/ksdma_logo.png" alt="Care Logo" />
                 <div className="copy-right">
-                <a href="https://coronasafe.network/">CoronaSafe Network is an open-source public utility designed by
-                  a multi-disciplinary team of innovators and volunteers who are working on a model to support
-                  Government efforts with full understanding and support of Government of
+                    <a href="https://coronasafe.network/">CoronaSafe Network is an open-source public utility designed by
+                    a multi-disciplinary team of innovators and volunteers who are working on a model to support
+                    Government efforts with full understanding and support of Government of
                   Kerala.</a>&nbsp;<a href="https://github.com/coronasafe" className="care-secondary-color">(Github)</a>
-                  </div>
+                </div>
             </div>
         </div>
     );
