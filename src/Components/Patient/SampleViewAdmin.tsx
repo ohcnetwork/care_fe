@@ -6,14 +6,15 @@ import {
     Card,
     CardHeader,
     CardContent,
-    Tooltip
+    Tooltip, Button
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import Pagination from '../Common/Pagination';
 import TitleHeader from '../Common/TitleHeader';
-import {getTestList} from "../../Redux/actions";
+import {getTestList, patchSample} from "../../Redux/actions";
 import { Loading } from '../Common/Loading';
 import { useAbortableEffect, statusType } from '../../Common/utils';
+import * as Notification from "../../Utils/Notifications";
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -119,17 +120,59 @@ export default function SampleViewAdmin(props: any) {
         setOffset(offset);
     };
 
+    const handleApproval = (status: number, sample: any) => {
+        const sampleData = {
+            id: sample.id,
+            status,
+            date_of_sample: null,
+            date_of_result: null,
+            consultation : sample.consultation_id
+        };
+        let statusName = '';
+       if(status === 1){
+           statusName = 'Approved'
+       }
+       else{
+
+           statusName = 'Denied'
+       }
+      dispatch(patchSample(sample.id, sampleData)).then((resp:any) => {
+          if(resp.status === 201 || resp.status === 200) {
+              Notification.Success({
+                  msg: `Request ${statusName}`
+              });
+              window.location.reload();
+          }
+        })
+    };
+
     let sampleList: any[] = [];
     if (sample && sample.length) {
         sampleList = sample.map((sample: any, idx: number) => {
             return (
                 <Grid item xs={12} md={3} key={`usr_${sample.id}`}
                       className={classes.root}>
-                    <Card className={classes.card}>
+                    <Card className={classes.card} >
                         <CardHeader className={classes.cardHeader}
-                                    title={<span className={classes.title}><Tooltip title={<span className={classes.toolTip}>Consultation Id -{sample.consultation_id}</span>}
-                                                                                    interactive={true}><span>{sample.consultation_Id}</span></Tooltip></span>}
+                                    title={<span className={classes.title}><Tooltip title={<span className={classes.toolTip}>Consultation Id -{sample.id}</span>}
+                                                                                    interactive={true}><span>{sample.id}</span></Tooltip></span>}
                         />
+                       <CardContent>
+                           {
+                               sample.status === 'REQUEST_SUBMITTED' &&
+                               <Button style={{color: 'green'}} variant="outlined" onClick ={ (e) => handleApproval(2, sample)}>
+                                   Approve
+                               </Button>
+                           }
+
+                           {' '}
+                           {
+                               sample.status === 'REQUEST_SUBMITTED' &&
+                               <Button style={{color: 'red'}} variant="outlined" onClick ={ (e) => handleApproval(3, sample)}>
+                                   Deny
+                               </Button>
+                           }
+                       </CardContent>
                         <CardContent className={classes.content}>
                             <Typography>
                                 <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Status - </span>{sample.status}
@@ -174,7 +217,7 @@ export default function SampleViewAdmin(props: any) {
     } else if (sample && sample.length === 0) {
         manageSamples = (
             <Grid item xs={12} md={12} className="textMarginCenter">
-                <h5> No Users Found</h5>
+                <h5 style={{color: 'red'}}> You are not Authorised to access this Page</h5>
             </Grid>
         );
     }

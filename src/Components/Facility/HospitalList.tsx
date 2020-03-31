@@ -186,7 +186,7 @@ export const HospitalList = () => {
         manageFacilities = (
             <Grid item xs={12} md={12} className={classes.displayFlex}>
                 <Grid container justify="center" alignItems="center">
-                    <h5> No Users Found</h5>
+                    <h5> No Facility Found</h5>
                 </Grid>
             </Grid>
         );

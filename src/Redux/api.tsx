@@ -210,5 +210,10 @@ export default {
     },
     getTestSampleList: {
         path: '/api/v1/test_sample'
+    },
+    patchSample: {
+        path:'/api/v1/test_sample/',
+        method:'PATCH',
     }
+
 }
