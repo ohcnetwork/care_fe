@@ -221,7 +221,7 @@ export const Consultation = (props:any) => {
                             />
                         </CardContent>
 
-                        <CardContent>
+<!--                         <CardContent>
                             <InputLabel id="facility-label">Facility</InputLabel>
                             <TextInputField
                                 name="facility"
@@ -233,7 +233,7 @@ export const Consultation = (props:any) => {
                                 onChange={handleChange}
                                 errors={state.errors.facility}
                             />
-                        </CardContent>
+                        </CardContent> -->
 
                         <CardContent>
                             <InputLabel id="patient-label">Patient Id</InputLabel>
