@@ -105,7 +105,7 @@ export default {
     // Ambulance
 
     createAmbulance: {
-        path: '/api/v1/ambulance/',
+        path: '/api/v1/ambulance/create/',
         method: 'POST',
         noAuth: true,
     },
