@@ -1,4 +1,4 @@
-import React, { useState, useReducer, useCallback, useEffect } from "react"
+import React, { useState, useReducer, useCallback } from "react"
 import { useDispatch } from "react-redux"
 import { FormControl, Grid, Card, CardHeader, CardContent, Button, InputLabel, Select, MenuItem, CardActions } from "@material-ui/core"
 import { TextInputField, MultilineInputField } from "../Common/HelperInputFields"
@@ -29,7 +29,7 @@ const initForm: any = {
     phone_number: "",
     latitude: "",
     longitude: "",
-    oxygen_capacity: " ",
+    oxygen_capacity: "",
 };
 
 const initialState = {
@@ -316,7 +316,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                                         name="oxygen_capacity"
                                         label="Oxygen Capacity in liters"
                                         type="number"
-                                        placeholder=""
+                                        placeholder="Oxygen Capacity in liters"
                                         variant="outlined"
                                         margin="dense"
                                         value={state.form.oxygen_capacity}
@@ -408,4 +408,3 @@ export const FacilityCreate = (props: FacilityProps) => {
         </Grid>
     </div>
 }
-
