@@ -76,14 +76,14 @@ export const ConsultationList = (props: any) => {
                                         </Typography>
                                     </Grid>
                                 </Grid>
-                                <Grid item xs={1}>
+                                {false && <Grid item xs={1}>
                                     <IconButton
                                         onClick={() => {
                                             navigate(`/facility/${facilityId}/patient/${patientId}/sample-test/${itemData.id}/update`)
                                         }}>
                                         <ArrowForwardIosIcon />
                                     </IconButton>
-                                </Grid>
+                                </Grid>}
                             </Grid>
                         </CardContent>
                     </Card>)}
