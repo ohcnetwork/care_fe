@@ -28,9 +28,11 @@ import * as Notification from '../../Utils/Notifications.js';
 interface DriverDetailsProps {
   classes: any;
   vehicleInfo: vehicleForm;
+  driverInfo: driverForm;
+  setDriverObj: (form: driverForm) => void;
 }
 
-interface formFields {
+export interface driverForm {
   driverName1: string;
   cellNumber1: string;
   isSmartPhone1: boolean;
@@ -42,7 +44,7 @@ interface formFields {
   agreeConsent: boolean;
 }
 
-const initFormData: formFields = {
+export const initDriverData: driverForm = {
   driverName1: "",
   cellNumber1: "",
   isSmartPhone1: false,
@@ -55,9 +57,9 @@ const initFormData: formFields = {
 };
 
 export const DriverDetailsForm = (props: DriverDetailsProps) => {
-  const { vehicleInfo, classes } = props;
+  const { vehicleInfo, classes, driverInfo, setDriverObj } = props;
   const dispatch: any = useDispatch();
-  const initForm: formFields = { ...initFormData };
+  const initForm: driverForm = { ...driverInfo };
   const initErr: any = {};
   const [form, setForm] = useState<any>(initForm);
   const [errors, setErrors] = useState<any>(initErr);
@@ -65,15 +67,16 @@ export const DriverDetailsForm = (props: DriverDetailsProps) => {
 
   const handleChange = (e: any) => {
     const { value, name } = e.target;
-    const fieldValue = Object.assign({}, form);
-    const errorField = Object.assign({}, errors);
+    const formData = { ...form };
+    const errorField = { ...errors };
 
     if (errorField[name]) {
       errorField[name] = null;
       setErrors(errorField);
     }
-    fieldValue[name] = value;
-    setForm(fieldValue);
+    formData[name] = value;
+    setForm(formData);
+    setDriverObj(formData);
   };
 
   const validateData = () => {
@@ -117,7 +120,9 @@ export const DriverDetailsForm = (props: DriverDetailsProps) => {
 
   const handleCheckboxFieldChange = (e: any) => {
     const { checked, name } = e.target;
-    setForm({ ...form, [name]: checked });
+    const formData = { ...form, [name]: checked };
+    setForm(formData);
+    setDriverObj(formData);
   };
 
   const handleSubmit = async (e: any) => {
@@ -183,7 +188,8 @@ export const DriverDetailsForm = (props: DriverDetailsProps) => {
   const handleClear = (e: any) => {
     e.preventDefault();
     setErrors(initErr);
-    setForm(initFormData);
+    setForm(initDriverData);
+    setDriverObj(initDriverData);
   };
 
   return (
