@@ -171,7 +171,7 @@ export const PatientHome = (props: any) => {
                     </Typography>
                 </div>
 
-                <ConsultationList/>
+                <ConsultationList facilityId={facilityId} patientId={id} />
 
             </Grid>
         </div>

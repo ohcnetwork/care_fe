@@ -39,7 +39,7 @@ export const ConsultationList = (props: any) => {
 
     return <div>
         <Grid container alignContent="center" justify="center">
-            <Grid item xs={12} sm={10} md={8} lg={6} xl={4}>
+            <Grid item xs={12}>
                 {consultationListData.map((itemData, idx) =>
                     <Card key={`consultation_${idx}`} style={{ marginBottom: '10px' }}>
                         <CardContent>
@@ -57,7 +57,7 @@ export const ConsultationList = (props: any) => {
                                     </Grid>
                                     <Grid item xs={6}>
                                         <Typography>
-                                            <span className="w3-text-grey">Suggetion:</span> {itemData.suggestion}
+                                            <span className="w3-text-grey">Suggestion:</span> {itemData.suggestion_text}
                                         </Typography>
                                     </Grid>
                                     <Grid item xs={6}>
@@ -65,31 +65,31 @@ export const ConsultationList = (props: any) => {
                                             <span className="w3-text-grey">Admitted:</span> {itemData.admitted ? 'Yes' : 'No'}
                                         </Typography>
                                     </Grid>
-                                    <Grid item xs={12}>
+                                    {itemData.existing_medication && (<Grid item xs={12}>
                                         <Typography>
                                             <span className="w3-text-grey">Existing Medication:</span> {itemData.existing_medication}
                                         </Typography>
-                                    </Grid>
-                                    <Grid item xs={12}>
+                                    </Grid>)}
+                                    {itemData.examination_details && (<Grid item xs={12}>
                                         <Typography>
                                             <span className="w3-text-grey">Examination Details:</span> {itemData.examination_details}
                                         </Typography>
-                                    </Grid>
-                                    <Grid item xs={12}>
+                                    </Grid>)}
+                                    {itemData.prescribed_medication && (<Grid item xs={12}>
                                         <Typography>
                                             <span className="w3-text-grey">Prescribed Medication:</span> {itemData.prescribed_medication}
                                         </Typography>
-                                    </Grid>
-                                    <Grid item xs={6}>
+                                    </Grid>)}
+                                    {itemData.admission_date && (<Grid item xs={6}>
                                         <Typography style={{ fontSize: '12px' }}>
                                             <span className="w3-text-grey">Admitted on :</span> {moment(itemData.admission_date).format('lll')}
                                         </Typography>
-                                    </Grid>
-                                    <Grid item xs={6}>
+                                    </Grid>)}
+                                    {itemData.discharge_date && (<Grid item xs={6}>
                                         <Typography style={{ fontSize: '12px' }}>
                                             <span className="w3-text-grey">Discharged on:</span> {moment(itemData.discharge_date).format('lll')}
                                         </Typography>
-                                    </Grid>
+                                    </Grid>)}
                                 </Grid>
                                 {false && <Grid item xs={1}>
                                     <IconButton

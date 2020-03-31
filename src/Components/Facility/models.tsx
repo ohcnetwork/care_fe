@@ -40,6 +40,7 @@ export interface ConsultationModal {
     existing_medication?: string;
     prescribed_medication?: string;
     suggestion?: string;
+    suggestion_text?: string;
     admitted?: boolean;
     admission_date?: string;
     discharge_date?: string;
