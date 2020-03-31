@@ -126,3 +126,7 @@ export const getConsultationList = (params: object) => {
 export const getConsultation = (urlParams: object) => {
     return fireRequest('getConsultation', [], {}, urlParams);
 };
+
+export const getTestList = (paginate: object) => {
+    return fireRequest('getTestSampleList', [], paginate);
+};

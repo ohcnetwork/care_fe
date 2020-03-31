@@ -208,4 +208,7 @@ export default {
     getLocalbodyByDistrict: {
         path: "/api/v1/district/{id}/local_bodies/",
     },
+    getTestSampleList: {
+        path: '/api/v1/test_sample'
+    }
 }
