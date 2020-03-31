@@ -5,6 +5,7 @@ import axios from 'axios';
 import { makeStyles } from "@material-ui/styles";
 import { TextInputField } from "../Common/HelperInputFields"
 
+const DEFAULT_MARKER_RADIUS = 100;
 const KEYS = {
     "ENTER_KEY": 13
 }
@@ -100,13 +101,13 @@ export const LocationSearchAndPick = (props: LocationSearchAndPickProps) => {
         </Popover>);
     }
 
-    const pointMode = {
+    const circleMode = {
         banner: false,
         control: {
             onClick: (point: number[]) => {
                 props.onSelectLocation({ lat: point[0], lon: point[1] });
             },
-            values: [],
+            values: [{ center: [latitude, longitude], radius: DEFAULT_MARKER_RADIUS }],
         }
     };
 
@@ -122,7 +123,7 @@ export const LocationSearchAndPick = (props: LocationSearchAndPickProps) => {
         <LocationPicker
             showInputs={false}
             mapStyle={{ width: 300, height: 300 }}
-            pointMode={pointMode}
+            circleMode={circleMode}
             bindMap={false}
             startPort={{
                 center: [latitude, longitude],
