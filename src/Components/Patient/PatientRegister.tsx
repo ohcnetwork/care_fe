@@ -8,10 +8,9 @@ import { navigate } from 'hookrouter';
 import { Loading } from "../Common/Loading";
 import AlertDialog from "../Common/AlertDialog";
 import { PatientModal } from './models';
-import { GENDER_TYPES } from "../../Common/constants";
+import { GENDER_TYPES, MEDICAL_HISTORY_CHOICES } from "../../Common/constants";
 import { createPatient, getPatient, updatePatient, getStates, getDistrictByState, getLocalbodyByDistrict } from "../../Redux/actions";
 import { useAbortableEffect, statusType } from '../../Common/utils';
-import patientnameCombinations from "../../Constants/Static_data/PatientName.json"
 import * as Notification from '../../Utils/Notifications.js';
 
 interface PatientRegisterProps extends PatientModal {
@@ -19,9 +18,18 @@ interface PatientRegisterProps extends PatientModal {
 }
 
 interface medicalHistoryModel {
-    disease: string;
+    id?: number;
+    disease: string | number;
     details: string;
 }
+
+const medicalHistoryTypes = MEDICAL_HISTORY_CHOICES.filter(i => i.id !== 1);
+
+const medicalHistoryChoices = medicalHistoryTypes.map(i => {
+    return {
+        [`medical_history_${i.id}`]: ""
+    }
+});
 
 const initForm: any = {
     name: "",
@@ -33,10 +41,7 @@ const initForm: any = {
     state: "",
     district: "",
     local_body: "",
-    medical_history2: "",
-    medical_history3: "",
-    medical_history4: "",
-    medical_history5: "",
+    ...medicalHistoryChoices,
 };
 
 const initialState = {
@@ -84,8 +89,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     const [isDistrictLoading, setIsDistrictLoading] = useState(false);
     const [isLocalbodyLoading, setIsLocalbodyLoading] = useState(false);
     const [states, setStates] = useState(initialStates)
-    const [districts, setDistricts] = useState(selectDistrict)
-    const [localBody, setLocalBody] = useState(selectStates)
+    const [districts, setDistricts] = useState(selectStates)
+    const [localBody, setLocalBody] = useState(selectDistrict)
 
     const headerText = !id ? "Add Patient" : "Edit Patient";
     const buttonText = !id ? "Save" : "Update";
@@ -116,21 +121,26 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         setIsLoading(true);
         const res = await dispatchAction(getPatient({ id }));
         if (!status.aborted) {
-            if (res.data) {
+            if (res && res.data) {
+                const formData: any = {
+                    name: res.data.name,
+                    age: res.data.age,
+                    gender: res.data.gender,
+                    phone_number: res.data.phone_number,
+                    medical_history: [],
+                    contact_with_carrier: `${res.data.contact_with_carrier}`,
+                    state: res.data.state,
+                    district: res.data.district,
+                    local_body: res.data.local_body,
+                };
+                res.data.medical_history.forEach((i: any) => {
+                    formData.medical_history.push(i.id);
+                    formData[`medical_history_${i.id}`] = i.details;
+                });
                 dispatch({
                     type: "set_form",
-                    form: {
-                        name: res.data.name,
-                        age: res.data.age,
-                        gender: res.data.gender,
-                        phone_number: res.data.phone_number,
-                        medical_history: res.data.medical_history,
-                        contact_with_carrier: `${res.data.contact_with_carrier}`,
-                        state: res.data.state,
-                        district: res.data.district,
-                        local_body: res.data.local_body,
-                    }
-                })
+                    form: formData
+                });
                 Promise.all([fetchDistricts(res.data.state), fetchLocalBody(res.data.district)]);
             } else {
                 navigate(`/facility/${facilityId}`);
@@ -196,12 +206,17 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         if (validForm) {
             setIsLoading(true);
             let medical_history: Array<medicalHistoryModel> = []
-            state.form.medical_history.forEach((i:any) => {
-                medical_history.push({ disease: i.disease, details: state.form[`medical_history${i.disease}`] })
-                // return medical_history
+            state.form.medical_history.forEach((id: number) => {
+                const medData = medicalHistoryTypes.find(i => i.id === id);
+                if (medData) {
+                    medical_history.push({
+                        disease: medData.text,
+                        details: state.form[`medical_history_${medData.id}`]
+                    });
+                }
             })
             if (!medical_history.length) {
-                medical_history.push({ disease: "No", details: "" })
+                medical_history.push({ disease: 1, details: "" });
             }
             const data = {
                 "name": state.form.name,
@@ -218,24 +233,20 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
             const res = await dispatchAction(id ? updatePatient(data, { id }) : createPatient(data));
             setIsLoading(false);
-            if (res.data) {
+            if (res && res.data) {
                 dispatch({ type: "set_form", form: initForm })
                 if (!id) {
                     setAlertMessage({
                         show: true,
                         message: `Please note down patient name: ${state.form.name} and patient ID: ${res.data.id}`,
                         title: "Patient Added Successfully"
-                    })
+                    });
                 } else {
                     Notification.Success({
                         msg: "Patient updated successfully"
                     });
-                    navigate(`/facility/${facilityId}`);
+                    navigate(`/facility/${facilityId}/patient/${res.data.id}`);
                 }
-            } else {
-                Notification.Error({
-                    msg: "Error"
-                });
             }
         }
     };
@@ -264,30 +275,33 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         navigate(`/facility/${facilityId}`);
     };
 
-    const renderMedicalHistory = (index: number, title: string, field: string, ) => {
-        return <div>
-            <div>
-                <Checkbox
-                    checked={state.form.medical_history.indexOf(index) !== -1}
-                    value={index}
-                    onChange={handleCheckboxChange}
-                /> {title}
-            </div>
-            {state.form.medical_history.indexOf(index) !== -1 && <CardContent>
-                <MultilineInputField
-                    placeholder="Details"
-                    rows={5}
-                    name={field}
-                    variant="outlined"
-                    margin="dense"
-                    type="text"
-                    InputLabelProps={{ shrink: !!state.form[field] }}
-                    value={state.form[field]}
-                    onChange={handleChange}
-                    errors={state.errors[field]}
-                />
-            </CardContent>}
-        </div>
+    const renderMedicalHistory = (id: number, title: string) => {
+        const field = `medical_history_${id}`
+        return (
+            <Box key={id}>
+                <div>
+                    <Checkbox
+                        checked={state.form.medical_history.indexOf(id) !== -1}
+                        value={id}
+                        onChange={handleCheckboxChange}
+                    /> {title}
+                </div>
+                {state.form.medical_history.indexOf(id) !== -1 && <CardContent>
+                    <MultilineInputField
+                        placeholder="Details"
+                        rows={5}
+                        name={field}
+                        variant="outlined"
+                        margin="dense"
+                        type="text"
+                        InputLabelProps={{ shrink: !!state.form[field] }}
+                        value={state.form[field]}
+                        onChange={handleChange}
+                        errors={state.errors[field]}
+                    />
+                </CardContent>}
+            </Box>
+        )
     }
 
     if (isLoading) {
@@ -421,10 +435,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
                         <CardContent>
                             <InputLabel id="med-history-label">Any medical history?</InputLabel>
-                            {renderMedicalHistory(2, "Diabetes", "medical_history2")}
-                            {renderMedicalHistory(3, "Heart Disease", "medical_history3")}
-                            {renderMedicalHistory(4, "HyperTension", "medical_history4")}
-                            {renderMedicalHistory(5, "Kidney Diseases", "medical_history5")}
+                            {medicalHistoryTypes.map(i => {
+                                return renderMedicalHistory(i.id, i.text)
+                            })}
                         </CardContent>
 
                         <CardActions className="padding16" style={{ justifyContent: "space-between" }}>
