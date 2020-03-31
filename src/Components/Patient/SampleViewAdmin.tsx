@@ -124,10 +124,11 @@ const [result, setResult] = useState(initialData);;
         setOffset(offset);
     };
 
-    const handleApproval = (status: number, sample: any) => {
+    const handleApproval = (status: number, sample: any, result: any) => {
         const sampleData = {
             id: sample.id,
             status,
+            result: result || null,
             date_of_sample: null,
             date_of_result: null,
             consultation : sample.consultation_id
@@ -174,7 +175,7 @@ let user = currentUser.data;
                            {
                                sample.status === 'REQUEST_SUBMITTED' && user.user_type === 'DistrictAdmin' &&
                            <Button style={{color: 'green'}} variant="outlined"
-                                   onClick={(e) => handleApproval(2, sample)}>
+                                   onClick={(e) => handleApproval(2, sample, null)}>
                                Approve
                            </Button>
                            }
@@ -182,7 +183,7 @@ let user = currentUser.data;
                            {' '}
                            {
                                sample.status === 'REQUEST_SUBMITTED' && user.user_type === 'DistrictAdmin' &&
-                           <Button style={{color: 'red'}} variant="outlined" onClick={(e) => handleApproval(3, sample)}>
+                           <Button style={{color: 'red'}} variant="outlined" onClick={(e) => handleApproval(3, sample, 4)}>
                                Deny
                            </Button>
                            }
@@ -190,7 +191,7 @@ let user = currentUser.data;
                         {
                             sample.status === 'SENT_TO_COLLECTON_CENTRE' && user.user_type === 'DistrictAdmin' &&
                            <CardContent>
-                               <Button style={{color: 'red'}} variant="outlined" onClick ={ (e) => handleApproval(5, sample)}>
+                               <Button style={{color: 'red'}} variant="outlined" onClick ={ (e) => handleApproval(5, sample, null)}>
                                    Recieved and forwarded
                                </Button>
                            </CardContent>
@@ -198,7 +199,7 @@ let user = currentUser.data;
                         {
                             sample.status === 'RECEIVED_AND_FORWARED' && user.user_type === 'StateLabAdmin' &&
                             <CardContent>
-                                <Button style={{color: 'red'}} variant="outlined" onClick ={ (e) => handleApproval(6, sample)}>
+                                <Button style={{color: 'red'}} variant="outlined" onClick ={ (e) => handleApproval(6, sample, null)}>
                                     Recieved at lab
                                 </Button>
                             </CardContent>
@@ -206,7 +207,7 @@ let user = currentUser.data;
                         {
                             sample.status === 'RECEIVED_AT_LAB' && user.user_type === 'StateLabAdmin' &&
                             <CardContent>
-                                <Button style={{color: 'red'}} variant="outlined" onClick ={ (e) => handleApproval(7, sample)}>
+                                <Button style={{color: 'red'}} variant="outlined" onClick ={ (e) => handleApproval(7, sample, null)}>
                                     Completed
                                 </Button>
                             </CardContent>
