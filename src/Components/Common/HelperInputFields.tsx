@@ -26,6 +26,9 @@ interface InputProps {
     ) => void;
     handleDeleteOption: (index: number) => void;
     errors: Array<Option>;
+    onKeyDown: (
+        e: React.KeyboardEvent<HTMLInputElement>
+    ) => void;
 }
 interface DateInputFieldProps {
     value: string;
@@ -53,7 +56,7 @@ interface OptionsProps {
 
 
 export const TextInputField = (props: TextFieldPropsExtended) => {
-    const { onChange, type, errors } = props;
+    const { onChange, type, errors, placeholder,onKeyDown } = props;
     const inputType = type === 'number' ? 'text' : type;
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (typeof onChange !== 'function') {
@@ -64,6 +67,12 @@ export const TextInputField = (props: TextFieldPropsExtended) => {
         }
         onChange(event);
     }
+    const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (typeof onKeyDown !== 'function') {
+            return
+        }
+        onKeyDown(event);
+    }
     return (
         <div>
             <TextField
@@ -71,6 +80,7 @@ export const TextInputField = (props: TextFieldPropsExtended) => {
                 fullWidth
                 type={inputType}
                 onChange={handleChange}
+                onKeyDown={handleKeyDown}
             />
             <ErrorHelperText error={errors} />
         </div>
