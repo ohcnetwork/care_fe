@@ -8,6 +8,7 @@ import { getPatient } from '../../Redux/actions';
 import { PatientModel } from './models';
 import { GENDER_TYPES } from "../../Common/constants";
 import { useAbortableEffect, statusType } from '../../Common/utils';
+import {ConsultationList} from "../Facility/ConsultationList";
 
 
 const useStyles = makeStyles(theme => ({
@@ -161,6 +162,17 @@ export const PatientHome = (props: any) => {
                         :(<span className="w3-center"><h6 className="w3-text-grey">No Medical History so far</h6></span>)}
                     </div>
                 </Grid>
+
+            </Grid>
+            <Grid item xs={12}>
+                <div className={`w3-black w3-center ${classes.title}`}>
+                    <Typography>
+                        Consultation History
+                    </Typography>
+                </div>
+
+                <ConsultationList/>
+
             </Grid>
         </div>
     );
