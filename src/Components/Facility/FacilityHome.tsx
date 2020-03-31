@@ -101,10 +101,10 @@ export const FacilityHome = (props: any) => {
 
     return (
         <div className={`w3-content ${classes.content}`}>
-            <h2>Facility</h2>
+            <h2 style={{ padding: "10px", marginBottom: '5px' }}>Facility</h2>
             <Grid container style={{ padding: "10px", marginBottom: '5px' }} spacing={2}>
                 <Grid item xs={12} md={7}>
-                    <Typography variant="h6" component="h6">{facilityData.name}</Typography>
+                    <Typography style={{ textTransform: 'capitalize' }} variant="h6" component="h6">{facilityData.name}</Typography>
                     <Typography>Address : {facilityData.address}</Typography>
                     <Typography>Phone : {facilityData.phone_number}</Typography>
                     <Typography>District : {facilityData?.district_object?.name}</Typography>
