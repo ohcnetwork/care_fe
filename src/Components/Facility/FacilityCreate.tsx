@@ -104,7 +104,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                     phone_number: res.data.phone_number,
                     latitude: res.data.location ? res.data.location.latitude : "",
                     longitude: res.data.location ? res.data.location.longitude : "",
-                    oxygen_capacity: res.data.oxygen_capacity ? res.data.oxygen_capacity : 0,
+                    oxygen_capacity: res.data.oxygen_capacity ? res.data.oxygen_capacity : "",
                 };
                 dispatch({ type: "set_form", form: formData })
             } else {
