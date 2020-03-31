@@ -47,7 +47,7 @@ export const ConsultationList = (props: any) => {
                                 <Grid item xs={11} container spacing={1}>
                                     <Grid item xs={6}>
                                         <Typography>
-                                            <span className="w3-text-grey">Facility:</span> {itemData.facility}
+                                            <span className="w3-text-grey">Facility:</span> {itemData.facility_name}
                                         </Typography>
                                     </Grid>
                                     <Grid item xs={6}>
@@ -63,6 +63,21 @@ export const ConsultationList = (props: any) => {
                                     <Grid item xs={6}>
                                         <Typography>
                                             <span className="w3-text-grey">Admitted:</span> {itemData.admitted ? 'Yes' : 'No'}
+                                        </Typography>
+                                    </Grid>
+                                    <Grid item xs={12}>
+                                        <Typography>
+                                            <span className="w3-text-grey">Existing Medication:</span> {itemData.existing_medication}
+                                        </Typography>
+                                    </Grid>
+                                    <Grid item xs={12}>
+                                        <Typography>
+                                            <span className="w3-text-grey">Examination Details:</span> {itemData.examination_details}
+                                        </Typography>
+                                    </Grid>
+                                    <Grid item xs={12}>
+                                        <Typography>
+                                            <span className="w3-text-grey">Prescribed Medication:</span> {itemData.prescribed_medication}
                                         </Typography>
                                     </Grid>
                                     <Grid item xs={6}>
