@@ -20,6 +20,7 @@
     "@material-ui/pickers": "^3.2.6",
     "@material-ui/styles": "^4.4.1",
     "@material-ui/types": "^4.1.1",
+    "@sentry/browser": "^5.15.4",
     "@svgr/webpack": "4.3.2",
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.4.0",

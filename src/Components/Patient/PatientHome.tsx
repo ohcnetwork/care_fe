@@ -4,10 +4,13 @@ import { makeStyles } from "@material-ui/core/styles";
 import { useDispatch } from "react-redux";
 import { navigate } from 'hookrouter';
 import { Loading } from '../Common/Loading';
-import { getPatient } from '../../Redux/actions';
-import { PatientModel } from './models';
+import { getPatient, getConsultationList, getSampleTestList } from '../../Redux/actions';
 import { GENDER_TYPES } from "../../Common/constants";
 import { useAbortableEffect, statusType } from '../../Common/utils';
+import { ConsultationCard } from "../Facility/ConsultationCard";
+import { SampleTestCard } from './SampleTestCard';
+import { PatientModel, SampleTestModel } from './models';
+import { ConsultationModal } from '../Facility/models';
 
 
 const useStyles = makeStyles(theme => ({
@@ -43,13 +46,25 @@ export const PatientHome = (props: any) => {
     const classes = useStyles();
     const dispatch: any = useDispatch();
     const [patientData, setPatientData] = useState<PatientModel>({});
+    const [consultationListData, setConsultationListData] = useState<Array<ConsultationModal>>([]);
+    const [sampleListData, setSampleListData] = useState<Array<SampleTestModel>>([]);
     const [isLoading, setIsLoading] = useState(false);
 
     const fetchData = useCallback(async (status: statusType) => {
-        const patientRes = await dispatch(getPatient({ id }));
+        const [patientRes, consultationRes, sampleRes] = await Promise.all([
+            dispatch(getPatient({ id })), 
+            dispatch(getConsultationList({ patient: id })),
+            dispatch(getSampleTestList({ patientId: id })),
+        ]);
         if (!status.aborted) {
             if (patientRes && patientRes.data) {
                 setPatientData(patientRes.data);
+            }
+            if (consultationRes && consultationRes.data && consultationRes.data.results) {
+                setConsultationListData(consultationRes.data.results);
+            }
+            if (sampleRes && sampleRes.data && sampleRes.data.results) {
+                setSampleListData(sampleRes.data.results);
             }
             setIsLoading(false);
         }
@@ -82,7 +97,7 @@ export const PatientHome = (props: any) => {
             <h2 style={{ padding: "0 0 0 10px" }}>Patient</h2>
             <Grid container style={{ padding: "10px", marginBottom: '5px', marginTop: "5px" }} spacing={2}>
                 <Grid item xs={12} md={7}>
-                    <Typography variant="h6" component="h6">{patientData.name}</Typography>
+                    <Typography variant="h6" component="h6">Name: {patientData.name}</Typography>
                     <Typography>Age : {patientData.age}</Typography>
                     <Typography>Gender : {patientGender}</Typography>
                     <Typography>Phone : {patientData.phone_number}</Typography>
@@ -95,21 +110,19 @@ export const PatientHome = (props: any) => {
                                 Update Patient Info
                             </Button>
                         </Grid>
+                        <Grid item xs={12} className="w3-center">
+                            <Button fullWidth variant="contained" color="primary" size="small"
+                                onClick={() => navigate(`/facility/${facilityId}/patient/${id}/consultation`)}>
+                                Add Consultation
+                            </Button>
+                        </Grid>
+                        <Grid item xs={12} className="w3-center">
+                            <Button fullWidth variant="contained" color="primary" size="small"
+                                onClick={() => navigate(`/facility/${facilityId}/patient/${id}/sample-test`)}>
+                                Request Sample Test
+                            </Button>
+                        </Grid>
                     </Grid>
-                </Grid>
-            </Grid>
-            <Grid container style={{ padding: "10px" }} spacing={1}>
-                <Grid item xs={12} md={6} className="w3-center">
-                    <Button fullWidth variant="contained" color="primary" size="small"
-                        onClick={() => navigate(`/facility/${facilityId}/patient/${id}/sample-test`)}>
-                        Request Sample Test
-                    </Button>
-                </Grid>
-                <Grid item xs={12} md={6} className="w3-center">
-                    <Button fullWidth variant="contained" color="primary" size="small"
-                        onClick={() => navigate(`/facility/${facilityId}/patient/${id}/sample-test-list`)}>
-                        View Sample Test List
-                    </Button>
                 </Grid>
             </Grid>
 
@@ -147,6 +160,38 @@ export const PatientHome = (props: any) => {
                             </table>
                             : (<span className="w3-center"><h6 className="w3-text-grey">No Medical History so far</h6></span>)}
                     </div>
+                </Grid>
+
+            </Grid>
+            <Grid item xs={12}>
+                <div className={`w3-black w3-center ${classes.title}`}>
+                    <Typography>
+                        Consultation History
+                    </Typography>
+                </div>
+
+                <Grid container alignContent="center" justify="center">
+                    <Grid item xs={12}>
+                        {consultationListData.map((itemData, idx) =>
+                            <ConsultationCard itemData={itemData} key={idx} />
+                        )}
+                    </Grid>
+                </Grid>
+            </Grid>
+
+            <Grid item xs={12}>
+                <div className={`w3-black w3-center ${classes.title}`}>
+                    <Typography>
+                        Sample Test History
+                    </Typography>
+                </div>
+
+                <Grid container alignContent="center" justify="center">
+                    <Grid item xs={12}>
+                        {sampleListData.map((itemData, idx) =>
+                            <SampleTestCard itemData={itemData} key={idx} />
+                        )}
+                    </Grid>
                 </Grid>
             </Grid>
         </div>

@@ -34,14 +34,17 @@ export interface OptionsType {
 }
 
 export interface ConsultationModal {
+    id?: number;
+    facility_name?: string;
+    examination_details?: string;
+    existing_medication?: string;
+    prescribed_medication?: string;
     suggestion?: string;
+    suggestion_text?: string;
     admitted?: boolean;
     admission_date?: string;
     discharge_date?: string;
     patient?: number;
     facility?: number;
     referred_to?: number;
-    examination_details?: string;
-    existing_medication?: string;
-    prescribed_medication?: string;
 }

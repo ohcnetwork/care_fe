@@ -105,9 +105,12 @@ export default {
     // Ambulance
 
     createAmbulance: {
-        path: '/api/v1/ambulance/',
+        path: '/api/v1/ambulance/create/',
         method: 'POST',
         noAuth: true,
+    },
+    listAmbulance: {
+        path: '/api/v1/ambulance',
     },
 
     // Hospital Beds
@@ -205,4 +208,7 @@ export default {
     getLocalbodyByDistrict: {
         path: "/api/v1/district/{id}/local_bodies/",
     },
+    getTestSampleList: {
+        path: '/api/v1/test_sample'
+    }
 }
