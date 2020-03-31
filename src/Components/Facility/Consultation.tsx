@@ -18,7 +18,6 @@ import { useAbortableEffect, statusType } from '../../Common/utils';
 const initForm: any = {
     suggestion: "",
     patient: "",
-    facility: "",
     admitted: "",
     admission_date: "",
     discharge_date: "",
@@ -85,7 +84,7 @@ const suggestionTypes = [{
 export const Consultation = (props:any) => {
     const classes = useStyles();
     const dispatchAction: any = useDispatch();
-    const { facilityId, patientId, id } = props;
+    const { patientId, id } = props;
     const [state, dispatch] = useReducer(consultationFormReducer, initialState);
     const [showAppMessage, setAppMessage] = useState({ show: false, message: "", type: "" });
     const [isLoading, setIsLoading] = useState(false);
@@ -111,7 +110,8 @@ export const Consultation = (props:any) => {
     //                         }
     //                     })
     //                 } else {
-    //                     navigate(`/facility/${facilityId}/patient/${patientId}`);
+    //                     navigate(`/
+    /${facilityId}/patient/${patientId}`);
     //                 }
     //             }
     //         }
@@ -155,7 +155,6 @@ export const Consultation = (props:any) => {
                 "admission_date": state.form.admission_date,
                 "discharge_date": state.form.discharge_date,
                 "patient": Number(state.form.patient),
-                "facility": Number(state.form.facility),
                 "referred_to": null || Number(state.form.referred_to),
             }
             
@@ -169,7 +168,7 @@ export const Consultation = (props:any) => {
                     setAppMessage({ show: true, message: "Sample test updated successfully", type: "success" });
                 } else {
                     setAppMessage({ show: true, message: "Sample test created successfully", type: "success" });
-                    navigate(`/facility/${facilityId}/patient/${patientId}`);
+                    navigate(`/patient/${patientId}`);
                 }
             } else {
                 setAppMessage({ show: true, message: "Error", type: "error" })
@@ -190,9 +189,9 @@ export const Consultation = (props:any) => {
         setSelectedDate(date);
     };
 
-    const handleCancel = () => {
-        navigate(`/facility/${facilityId}`);
-    };
+//     const handleCancel = () => {
+//         navigate(`/facility/${facilityId}`);
+//     };
 
 
     if (isLoading) {
@@ -330,19 +329,19 @@ export const Consultation = (props:any) => {
                             />
                         </CardContent>
 
-                        <CardContent>
-                            <InputLabel id="refered-label">Referred To Facility</InputLabel>
-                            <TextInputField
-                                name="referred_to"
-                                variant="outlined"
-                                margin="dense"
-                                type="number"
-                                InputLabelProps={{ shrink: !!state.form.referred_to}}
-                                value={state.form.referred_to}
-                                onChange={handleChange}
-                                errors={state.errors.referred_to}
-                            />
-                        </CardContent>
+//                         <CardContent>
+//                             <InputLabel id="refered-label">Referred To Facility</InputLabel>
+//                             <TextInputField
+//                                 name="referred_to"
+//                                 variant="outlined"
+//                                 margin="dense"
+//                                 type="number"
+//                                 InputLabelProps={{ shrink: !!state.form.referred_to}}
+//                                 value={state.form.referred_to}
+//                                 onChange={handleChange}
+//                                 errors={state.errors.referred_to}
+//                             />
+//                         </CardContent>
 
                         <CardActions className="padding16" style={{ justifyContent: "space-between" }}>
                             <Button
