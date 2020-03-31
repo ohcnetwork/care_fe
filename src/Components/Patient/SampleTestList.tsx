@@ -60,12 +60,12 @@ export const SampleTestList = (props: any) => {
                                     </Grid>
                                     <Grid item xs={6}>
                                         <Typography>
-                                            <span className="w3-text-grey">Tested on :</span> {moment(itemData.date_of_result).format('lll')}
+                                            <span className="w3-text-grey">Tested on :</span> {itemData.date_of_result ? moment(itemData.date_of_result).format('lll') : ""}
                                         </Typography>
                                     </Grid>
                                     <Grid item xs={6}>
                                         <Typography>
-                                            <span className="w3-text-grey">Result on:</span> {moment(itemData.date_of_result).format('lll')}
+                                            <span className="w3-text-grey">Result on:</span> {itemData.date_of_result ? moment(itemData.date_of_result).format('lll') : ""}
                                         </Typography>
                                     </Grid>
                                 </Grid>

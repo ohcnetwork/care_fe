@@ -5,7 +5,7 @@ import { Grid, Card, CardHeader, CardContent, CardActions, Button, FormControl, 
 import { TextInputField, NativeSelectField, ErrorHelperText, MultilineInputField, } from "../Common/HelperInputFields";
 import { navigate } from 'hookrouter';
 import { Loading } from "../Common/Loading";
-import { SAMPLE_TEST_STATUS, SAMPLE_TEST_RESULT } from "../../Common/constants";
+import { SAMPLE_TEST_STATUS, SAMPLE_TEST_RESULT, OptionsType } from "../../Common/constants";
 import { createSampleTest, getSampleTest, patchSampleTest, getConsultationList } from "../../Redux/actions";
 import { useAbortableEffect, statusType } from '../../Common/utils';
 import * as Notification from '../../Utils/Notifications.js';
@@ -24,11 +24,10 @@ const initialState = {
     errors: { ...initForm }
 };
 
-const optionalFields = [
-    "status",
-    "result",
-    "notes"
-];
+const initConsultationOptions = [{
+    id: 0,
+    text: "Please select a consultation",
+}]
 
 
 const sampleTestFormReducer = (state = initialState, action: any) => {
@@ -65,7 +64,7 @@ export const SampleTest = (props: any) => {
     const dispatchAction: any = useDispatch();
     const { facilityId, patientId, id } = props;
     const [state, dispatch] = useReducer(sampleTestFormReducer, initialState);
-    const [consultationListData, setConsultationListData] = useState<Array<ConsultationModal>>([]);
+    const [consultationOptions, setConsultationOptions] = useState<Array<OptionsType>>(initConsultationOptions);
     const [isLoading, setIsLoading] = useState(false);
 
 
@@ -85,7 +84,15 @@ export const SampleTest = (props: any) => {
                     });
                     navigate(`/facility/${facilityId}/patient/${patientId}/consultation`);
                 } else {
-                    setConsultationListData(res.data.results);
+                    setConsultationOptions([
+                        ...initConsultationOptions,
+                        ...res.data.results.map((i: ConsultationModal) => {
+                            return {
+                                id: i.id,
+                                text: `${i.facility_name}-${i.suggestion}`
+                            };
+                        }),
+                    ])
                 }
             }
         }
@@ -123,9 +130,21 @@ export const SampleTest = (props: any) => {
         let errors = { ...initForm };
         let invalidForm = false;
         Object.keys(state.form).forEach((field, i) => {
-            if ((optionalFields.indexOf(field) === -1) && !state.form[field]) {
-                errors[field] = "Field is required";
-                invalidForm = true;
+            switch (field) {
+                // case "notes":
+                //     if (!state.form[field]) {
+                //         errors[field] = "Field is required";
+                //         invalidForm = true;
+                //     }
+                //     break;
+                case "consultation":
+                    if (!Number(state.form[field])) {
+                        errors[field] = "Field is required";
+                        invalidForm = true;
+                    }
+                    return;
+                default:
+                    return
             }
         });
         if (invalidForm) {
@@ -142,10 +161,10 @@ export const SampleTest = (props: any) => {
         if (validForm) {
             setIsLoading(true);
             const data = {
-                "status": Number(state.form.status),
-                "result": Number(state.form.result),
-                "notes": state.form.notes,
-                "consultation": Number(state.form.consultation),
+                status: Number(state.form.status) ? Number(state.form.status): undefined,
+                result: Number(state.form.result) ? Number(state.form.result): undefined,
+                notes: state.form.notes ? state.form.notes : undefined,
+                consultation: Number(state.form.consultation),
             };
 
             const res = await dispatchAction(id ? patchSampleTest(id, data, { patientId }) : createSampleTest(data, { id, patientId }));
@@ -232,16 +251,17 @@ export const SampleTest = (props: any) => {
                         </CardContent>
 
                         <CardContent>
-                            <InputLabel id="age-label">Consultation ID*</InputLabel>
-                            <FormControl style={{ width: "100%" }} variant="outlined">                               
-                                <NativeSelect onChange={(e) => [handleChange(e)]} value={state.form.consultation} name="consultation" >
-                                    {consultationListData.map(opt => {
-                                        return <option value={opt.id} key={opt.id}>
-                                            {`${opt.facility_name}-${opt.suggestion}`}
-                                        </option>
-                                    })}
-                                </NativeSelect>
-                            </FormControl>
+                            <InputLabel id="age-label">Consultation*</InputLabel>
+                            <NativeSelectField
+                                name="consultation"
+                                variant="outlined"
+                                value={state.form.consultation}
+                                options={consultationOptions}
+                                onChange={handleChange}
+                            />
+                            <ErrorHelperText
+                                error={state.errors.consultation}
+                            />
                             {/* <TextInputField
                                 defaultValue={"1"}
                                 name="consultation"
