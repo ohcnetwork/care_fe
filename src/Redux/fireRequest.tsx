@@ -10,17 +10,7 @@ export const actions = {
     SET_DATA: 'SET_DATA',
 };
 
-const config: any = {
-    headers: {},
-};
-
 const isRunning: any = {}
-
-if (localStorage.getItem('care_access_token')) {
-    config.headers['Authorization'] = 'Bearer ' + localStorage.getItem('care_access_token');
-}
-
-const axiosApiCall: any = axios.create(config);
 
 export const setStoreData = (key: string, value: any) => {
     return {
@@ -57,15 +47,17 @@ export const fireRequest = (
     key: string, path: any = [], params: object = {}, urlParam?: any
 ) => {
     return (dispatch: any) => {
+        ;
+        // cancel previous api call
         if (isRunning[key]) {
             isRunning[key].cancel();
         }
         isRunning[key] = axios.CancelToken.source();
+        // get api url / method
         const request = Object.assign({}, requestMap[key]);
         if (path.length > 0) {
             request.path += '/' + path.join('/');
         }
-
         if (request.method === undefined || request.method === 'GET') {
             request.method = 'GET';
             const qs = $.param(params);
@@ -73,12 +65,22 @@ export const fireRequest = (
                 request.path += `?${qs}`;
             }
         }
-
+        // set dynamic params in the URL
         if (urlParam) {
             Object.keys(urlParam).forEach((param: any) => {
                 request.path = request.path.replace(`{${param}}`, urlParam[param])
             })
         }
+
+        // set authorization header in the request header
+        const config: any = {
+            headers: {},
+        };
+        if (!request.noAuth && localStorage.getItem('care_access_token')) {
+            config.headers['Authorization'] = 'Bearer ' + localStorage.getItem('care_access_token');
+        }
+        const axiosApiCall: any = axios.create(config)
+
         dispatch(fetchDataRequest(key));
         return axiosApiCall[request.method.toLowerCase()](request.path, {
             ...params,
@@ -87,23 +89,28 @@ export const fireRequest = (
             dispatch(fetchResponseSuccess(key, response.data));
             return response;
         }).catch((error: any) => {
+            dispatch(fetchDataRequestError(key, error));
+
+            // currentUser is ignored because on the first page load 
+            // 403 error is displayed for invalid credential.
+            if (error.response.status === 403 && key === "currentUser") {
+                if (localStorage.getItem('care_access_token')) {
+                    localStorage.removeItem('care_access_token');
+                }
+                return error.response;
+            }
 
             // 400 Bad Request Error
             if (error.response.status === 400) {
                 Notification.BadRequest({
                     errs: error.response.data
                 });
-                return;
             }
-            
-            // currentUser is ignored because on the first page load 
-            // 403 error is displayed for invalid credential.
 
-            // 4xx Erros
-            if (!(error.response.status === 403 && key === "currentUser") &&
-                error.response.status > 400 && 
+            // 4xx Errors
+            if (error.response.status > 400 &&
                 error.response.status < 500) {
-                if ( error.response.data && error.response.data.detail ){
+                if (error.response.data && error.response.data.detail) {
                     Notification.Error({
                         msg: error.response.data.detail
                     });
@@ -111,19 +118,15 @@ export const fireRequest = (
                     Notification.Error({
                         msg: 'Something went Wrong...!'
                     });
-                    return;
                 }
             }
 
             // 5xx Errors
-            if ( error.response.status >=500 && error.response.status < 599 ) {
+            if (error.response.status >= 500 && error.response.status <= 599) {
                 Notification.Error({
                     msg: 'Something went Wrong...!'
                 });
-                return;
             }
-
-            dispatch(fetchDataRequestError(key, error));
             return error.response;
         });
     };
