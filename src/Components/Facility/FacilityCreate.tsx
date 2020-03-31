@@ -191,7 +191,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                     longitude: Number(state.form.latitude),
                 } : undefined,
                 phone_number: state.form.phone_number,
-                oxygen_capacity: state.form.oxygen_capacity ? state.form.oxygen_capacity : "",
+                oxygen_capacity: state.form.oxygen_capacity ? state.form.oxygen_capacity : 0,
             }
             const res = await dispatchAction(facilityId ? updateFacility(facilityId, data) : createFacility(data));
             if (res.data) {
