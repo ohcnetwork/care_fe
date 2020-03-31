@@ -20,6 +20,8 @@ import { SampleTest } from '../Components/Patient/SampleTest';
 import { SampleTestList } from '../Components/Patient/SampleTestList';
 import { Consultation } from '../Components/Facility/Consultation';
 import { ConsultationList } from '../Components/Facility/ConsultationList';
+import { DailyRounds } from '../Components/Patient/DailyRounds';
+import { DailyRoundsList } from '../Components/Patient/DailyRoundsList';
 
 const routes = {
     '/': () => <PrivateDashboard />,
@@ -50,6 +52,8 @@ const routes = {
     '/patient/treatment': () => <TreatmentForm />,
     '/users': () => <ManageUsers />,
     '/join': () => <CareCenterJoinForm />,
+    '/daily-rounds':()=><DailyRounds />,
+    '/daily-rounds-list':()=><DailyRoundsList />
 };
 
 const AppRouter = () => {
