@@ -46,13 +46,11 @@
   }
 }
 
-
-
 .Mui-selected {
   .MuiSvgIcon-root {
     color: #0085ad !important;
   }
-  .MuiListItemText-root{
+  .MuiListItemText-root {
     color: #0085ad !important;
   }
 }
@@ -69,10 +67,10 @@
 #root {
   background-color: #fbfafc;
 }
-#root > div{
+#root > div {
   display: flex;
-min-height: 100vh;
-flex-direction: column;
+  min-height: 100vh;
+  flex-direction: column;
 }
 .app-footer {
   width: 100%;
@@ -83,29 +81,8 @@ flex-direction: column;
   display: flex;
   flex-direction: row;
   margin-top: auto;
-  @media (max-width: 768px){
+  @media (max-width: 768px) {
     flex-direction: column;
-  }
-  img {
-    height: 80px;
-    margin: 10px 10px auto auto;
-    display: block;
-    @media (max-width: 768px){
-      margin: 10px auto auto auto;
-    }
-  }
-  .copy-right {
-    width: 70%;
-    text-align: center;
-    color: black;
-    margin: auto;
-    @media (max-width: 768px){
-      width: 90%;
-      margin: 10px auto;
-    }
-    a{
-      text-decoration: none;
-    }
   }
 }
 
@@ -184,37 +161,36 @@ flex-direction: column;
   padding-top: 5px;
 }
 
-.nativeSelectMod{
-  .MuiInputBase-root{
-    width:100%
+.nativeSelectMod {
+  .MuiInputBase-root {
+    width: 100%;
   }
 }
 
 .care-secondary-color {
-    color: #3f51b5;
+  color: #3f51b5;
 }
 
-
-.hometext{
-  margin: 10px 35px!important;
-  @media (max-width: 768px){
-    margin: 10px 15px!important;
+.hometext {
+  margin: 10px 35px !important;
+  @media (max-width: 768px) {
+    margin: 10px 15px !important;
   }
 }
 
-.MuiCardHeader-title{
+.MuiCardHeader-title {
   text-align: center;
 }
 
-.hometitle{
-  @media (min-width: 768px){
-    margin-top: 15px!important;
+.hometitle {
+  @media (min-width: 768px) {
+    margin-top: 15px !important;
   }
 }
 
 .MuiTypography-h6 {
-  font-weight: 400!important;
-  @media (max-width: 768px){
-    font-size: 1.10rem!important;
+  font-weight: 400 !important;
+  @media (max-width: 768px) {
+    font-size: 1.1rem !important;
   }
-  }
+}
