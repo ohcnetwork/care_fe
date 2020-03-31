@@ -182,9 +182,9 @@ export const Consultation = (props:any) => {
                     <CardHeader title={headerText}/>
                     <form onSubmit={(e) => handleSubmit(e)}>
                         <CardContent>
-                            <InputLabel id="demo-simple-select-outlined-label">Suggestion</InputLabel>
+                            <InputLabel id="demo-simple-select-outlined-label">Decision after consultation</InputLabel>
                             <NativeSelectField
-                                name="Decision after consultation"
+                                name="suggestion"
                                 variant="outlined"
                                 value={state.form.suggestion}
                                 options={suggestionTypes}
