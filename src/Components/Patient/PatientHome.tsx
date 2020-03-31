@@ -87,7 +87,7 @@ export const PatientHome = (props: any) => {
             <h2>Patient</h2>
             <Grid container style={{ padding: "10px", marginBottom: '5px' }} spacing={2}>
                 <Grid item xs={12} md={7}>
-                    <Typography variant="h6" component="h6">{patientData.name}</Typography>
+                    <Typography variant="h6" component="h6">Name: {patientData.name}</Typography>
                     <Typography>Age : {patientData.age}</Typography>
                     <Typography>Gender : {patientGender}</Typography>
                     <Typography>Phone : {patientData.phone_number}</Typography>
