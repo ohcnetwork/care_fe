@@ -2,6 +2,7 @@ import React, { useState, useReducer, useCallback } from "react";
 import { Refresh } from '@material-ui/icons';
 import { useDispatch } from "react-redux";
 import { Box, Grid, Checkbox, Card, CardHeader, CardContent, CardActions, Button, InputLabel, RadioGroup, Radio, FormControlLabel, IconButton, CircularProgress } from "@material-ui/core";
+import { makeStyles, Theme } from '@material-ui/core/styles';
 import { TextInputField, NativeSelectField, ErrorHelperText, MultilineInputField } from "../Common/HelperInputFields";
 import { phonePreg, getArrayValueByKey, getRandomNumbers } from "../../Common/validation";
 import { navigate } from 'hookrouter';
@@ -55,6 +56,18 @@ const selectStates = [{ id: 0, name: "Please select your state" }];
 const initialLocalbodies = [{ id: 0, name: "Choose Localbody" }];
 const selectDistrict = [{ id: 0, name: "Please select your district" }];
 
+
+const useStyles = makeStyles((theme: Theme) => ({
+
+    card: {
+        padding: '16px'
+    },
+    buttonHolder: {
+        padding: '0 16px 16px',
+        justifyContent: 'space-between'
+    }
+}));
+
 const patientFormReducer = (state = initialState, action: any) => {
     switch (action.type) {
         case "set_form": {
@@ -80,6 +93,7 @@ const genderTypes = [{
 }, ...GENDER_TYPES];
 
 export const PatientRegister = (props: PatientRegisterProps) => {
+    const classes = useStyles();
     const dispatchAction: any = useDispatch();
     const { facilityId, id } = props;
     const [state, dispatch] = useReducer(patientFormReducer, initialState);
@@ -312,7 +326,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
         <Grid container alignContent="center" justify="center">
             <Grid item xs={12} sm={10} md={8} lg={6} xl={4}>
-                <Card>
+                <Card className={classes.card}>
                     {showAlertMessage.show &&
                         <AlertDialog handleClose={() => handleCancel()} message={showAlertMessage.message} title={showAlertMessage.title} />
                     }
@@ -440,7 +454,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             })}
                         </CardContent>
 
-                        <CardActions className="padding16" style={{ justifyContent: "space-between" }}>
+                        <CardActions className={classes.buttonHolder}>
                             <Button
                                 color="default"
                                 variant="contained"

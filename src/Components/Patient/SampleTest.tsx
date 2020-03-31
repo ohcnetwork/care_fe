@@ -59,7 +59,13 @@ const useStyles = makeStyles((theme: Theme) => ({
         background: 'white',
         padding: '2px 10px'
     },
-
+    card: {
+        padding: '16px'
+    },
+    buttonHolder: {
+        padding: '0 16px 16px',
+        justifyContent: 'space-between'
+    }
 }));
 
 const statusTypes = [{
@@ -182,7 +188,7 @@ export const SampleTest = (props: any) => {
     return <div>
         <Grid container alignContent="center" justify="center">
             <Grid item xs={12} sm={10} md={8} lg={6} xl={4}>
-                <Card>
+                <Card className={classes.card}>
                     <CardHeader title={headerText} />
                     <form onSubmit={(e) => handleSubmit(e)}>
                         <CardContent>
@@ -245,7 +251,7 @@ export const SampleTest = (props: any) => {
                         </CardContent>
 
 
-                        <CardActions className="padding16" style={{ justifyContent: "space-between" }}>
+                        <CardActions className={classes.buttonHolder}>
                             <Button
                                 color="default"
                                 variant="contained"
