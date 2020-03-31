@@ -145,11 +145,7 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
             };
             const res = await dispatchAction(createDoctor(id, data, { facilityId }));
             setIsLoading(false);
-            if (!res.data) {
-                Notification.Error({
-                    msg: "Something went wrong..!"
-                });
-            } else {
+            if (res && res.data) {
                 // disable last added bed type
                 const updatedDoctorTypes = doctorTypes.map((type: OptionsType) => {
                     return {

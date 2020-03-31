@@ -108,11 +108,7 @@ export const CareCenterJoinForm = () => {
             setLoading(true);
             const res = await dispatchAction(createFacility(data))
             setLoading(false);
-            if (!res.data) {
-                Notification.Error({
-                    msg: "Something went wrong..!"
-                });
-            } else {
+            if (res && res.data) {
                 dispatch({ type: "set_form", form: initForm })
                 Notification.Success({
                     msg: "Care Center Added Successfully"

@@ -93,12 +93,7 @@ export const Login = () => {
             dispatch(postLogin(valid)).then((resp: any) => {
                 const res = get(resp, 'data', null);
                 const statusCode = get(resp, 'status', '');
-                if (res && statusCode === 401) {
-                    const err = {
-                        password: 'Username or Password incorrect',
-                    };
-                    setErrors(err);
-                } else if (res && statusCode === 429) {
+                if (res && statusCode === 429) {
                     setCaptcha(true);
                 } else if (res && statusCode === 200) {
                     localStorage.setItem('care_access_token', res.access);

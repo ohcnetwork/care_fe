@@ -132,19 +132,20 @@ export default function ManageUsers(props: any) {
                         />
                         <CardContent className={classes.content}>
                             <Typography>
-                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Full Name - </span>{`${user.first_name} ${user.last_name}`}
+                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Full Name: </span>{`${user.first_name} ${user.last_name}`}
                             </Typography>
                         </CardContent>
-                        <CardContent className={classes.content}>
+                        {user.user_type && (
+                            <CardContent className={classes.content}>
+                                <Typography>
+                                    <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Role: </span>{user.user_type}
+                                </Typography>
+                            </CardContent>)}
+                        {user.phone_number && (<CardContent className={classes.content}>
                             <Typography>
-                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Role - </span>{user.user_type}
+                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Contact: </span>{user.phone_number}
                             </Typography>
-                        </CardContent>
-                        <CardContent className={classes.content}>
-                            <Typography>
-                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Contact - </span>{user.phone_number}
-                            </Typography>
-                        </CardContent>
+                        </CardContent>)}
                     </Card>
                 </Grid>
             );

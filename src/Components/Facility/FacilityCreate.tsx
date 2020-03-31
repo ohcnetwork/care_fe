@@ -9,12 +9,14 @@ import { validateLocationCoordinates, phonePreg } from "../../Common/validation"
 import { DISTRICT_CHOICES } from "../../Common/constants";
 import SaveIcon from '@material-ui/icons/Save';
 import { FACILITY_ID } from "../../Common/constants";
-import { Loading } from "../../Components/Common/Loading";
-import LocationPicker from "react-leaflet-location-picker";
+import { Loading } from "../Common/Loading";
 import Popover from '@material-ui/core/Popover';
 import MyLocationIcon from '@material-ui/icons/MyLocation';
+import { LocationSearchAndPick } from "../Common/LocationSearchAndPick"
 import { useAbortableEffect, statusType } from '../../Common/utils';
 import * as Notification from '../../Utils/Notifications.js';
+
+const DEFAULT_MAP_LOCATION = [10.038394700000001, 76.5074145180173];// Ernakulam
 
 interface FacilityProps {
     facilityId?: number;
@@ -27,7 +29,7 @@ const initForm: any = {
     phone_number: "",
     latitude: "",
     longitude: "",
-    oxygen_capacity: "",
+    oxygen_capacity: " ",
 };
 
 const initialState = {
@@ -39,6 +41,11 @@ const useStyles = makeStyles(theme => ({
     formTop: {
         marginTop: '100px',
     },
+    locationIcon: {
+        marginLeft: "10px",
+        marginTop: "15px",
+        cursor: 'pointer',
+    },
     pdLogo: {
         height: '345px',
         border: 'solid 3px white'
@@ -49,11 +56,6 @@ const useStyles = makeStyles(theme => ({
     selectLabel: {
         background: 'white',
         padding: '0px 10px'
-    },
-    locationIcon: {
-        marginTop: "15px",
-        marginLeft: "10px",
-        cursor: 'pointer'
     }
 }));
 
@@ -84,25 +86,11 @@ export const FacilityCreate = (props: FacilityProps) => {
 
     const [state, dispatch] = useReducer(facility_create_reducer, initialState);
     const [isLoading, setIsLoading] = useState(false);
-    const [anchorEl, setAnchorEl] = React.useState(null);
-
-    const pointMode = {
-        banner: false,
-        control: {
-            values: [],
-            onClick: (point: any) => {
-                let form = { ...state.form };
-                form['latitude'] = point[0];
-                form['longitude'] = point[1];
-                dispatch({ type: "set_form", form });
-            }
-        }
-    };
-  
+    const [anchorEl, setAnchorEl] = React.useState<EventTarget & Element | null>(null);
+    const [mapLoadLocation, setMapLoadLocation] = useState(DEFAULT_MAP_LOCATION);
 
     const headerText = !facilityId ? "Create Facility" : "Update Facility";
     const buttonText = !facilityId ? "Save" : "Update";
-    let mapLoadLocation = [8.55929, 76.9922];//Trivandrum
 
     const fetchData = useCallback(async (status: statusType) => {
         if (facilityId) {
@@ -146,16 +134,17 @@ export const FacilityCreate = (props: FacilityProps) => {
         dispatch({ type: "set_form", form })
     }
 
-    const handleClickLocationPicker = (event: any) => {
+    const handleClickLocationPicker = (event: React.MouseEvent) => {
         if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition((position)=>{
-                mapLoadLocation = [position.coords.latitude, position.coords.longitude];
-                let form = { ...state.form };
-                form['latitude'] = mapLoadLocation[0];
-                form['longitude'] = mapLoadLocation[1];
+            navigator.geolocation.getCurrentPosition((position) => {
+                setMapLoadLocation([position.coords.latitude, position.coords.longitude]);
+                const form = { ...state.form };
+                form['latitude'] = position.coords.latitude;
+                form['longitude'] = position.coords.longitude;
                 dispatch({ type: "set_form", form });
             });
-          }
+        }
+
         setAnchorEl(event.currentTarget);
     };
 
@@ -202,7 +191,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                     longitude: Number(state.form.latitude),
                 } : undefined,
                 phone_number: state.form.phone_number,
-                oxygen_capacity: state.form.oxygen_capacity ? Number(state.form.oxygen_capacity) : undefined,
+                oxygen_capacity: state.form.oxygen_capacity ? Number(state.form.oxygen_capacity) : 0,
             }
             const res = await dispatchAction(facilityId ? updateFacility(facilityId, data) : createFacility(data));
             if (res.data) {
@@ -224,11 +213,22 @@ export const FacilityCreate = (props: FacilityProps) => {
         }
     }
 
+
+    const handleLocationSelect = (location: any) => {
+        const form = { ...state.form };
+        const latitude = parseFloat(location.lat);
+        const longitude = parseFloat(location.lon);
+        form['latitude'] = latitude;
+        form['longitude'] = longitude;
+        dispatch({ type: "set_form", form });
+        setMapLoadLocation([latitude, longitude]);
+    }
+
     if (isLoading) {
         return <Loading />
     }
     const open = Boolean(anchorEl);
-    const id = open ? 'simple-popover' : undefined;
+    const id = open ? 'map-popover' : undefined;
     return <div>
         <Grid container alignContent="center" justify="center">
             <Grid item xs={12} sm={10} md={8} lg={6} xl={4}>
@@ -314,7 +314,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                                 <Grid item xs={12}>
                                     <TextInputField
                                         name="oxygen_capacity"
-                                        label="Oxygen Capacity"
+                                        label="Oxygen Capacity in liters"
                                         type="number"
                                         placeholder=""
                                         variant="outlined"
@@ -365,25 +365,19 @@ export const FacilityCreate = (props: FacilityProps) => {
                                         anchorEl={anchorEl}
                                         onClose={handleClose}
                                         anchorOrigin={{
-                                            vertical: 'bottom',
                                             horizontal: 'right',
+                                            vertical: 'bottom',
                                         }}
                                         transformOrigin={{
-                                            vertical: 'top',
                                             horizontal: 'right',
+                                            vertical: 'top',
                                         }}
                                         style={{ position: 'absolute', left: '300px' }}
                                     >
-                                        <LocationPicker
-                                            showInputs={false}
-                                            mapStyle={{ width: 300, height: 300 }}
-                                            pointMode={pointMode}
-                                            bindMap={false}
-                                            startPort={{
-                                                center: [mapLoadLocation[0],mapLoadLocation[1]],
-                                                zoom: 9
-                                              }}
-                                              
+                                        <LocationSearchAndPick
+                                            latitude= {mapLoadLocation[0]}
+                                            longitude = {mapLoadLocation[1]}
+                                            onSelectLocation={handleLocationSelect}
                                         />
                                     </Popover>
                                 }
@@ -414,3 +408,4 @@ export const FacilityCreate = (props: FacilityProps) => {
         </Grid>
     </div>
 }
+
