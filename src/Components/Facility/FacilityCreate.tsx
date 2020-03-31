@@ -194,7 +194,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                 oxygen_capacity: state.form.oxygen_capacity ? Number(state.form.oxygen_capacity) : 0,
             }
             const res = await dispatchAction(facilityId ? updateFacility(facilityId, data) : createFacility(data));
-            if (res.data) {
+            if (res && res.data) {
                 const id = res.data.id;
                 setIsLoading(false);
                 dispatch({ type: "set_form", form: initForm });

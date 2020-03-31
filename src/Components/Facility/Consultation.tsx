@@ -100,7 +100,7 @@ export const Consultation = (props:any) => {
     //         setIsLoading(true);
     //         const res = await dispatchAction(getSampleTest(id,{patientId,id}));
     //         if (!status.aborted) {
-    //                 if (res.data) {
+    //                 if (res && res.data) {
     //                     dispatch({
     //                         type: "set_form",
     //                         form: {
@@ -163,7 +163,7 @@ export const Consultation = (props:any) => {
             const res = await dispatchAction(createConsultation(data));
             console.log('res: ', res);
             setIsLoading(false);
-            if (res.data) {
+            if (res && res.data) {
                 dispatch({ type: "set_form", form: initForm })
                 if (id) {
                     setAppMessage({ show: true, message: "Sample test updated successfully", type: "success" });

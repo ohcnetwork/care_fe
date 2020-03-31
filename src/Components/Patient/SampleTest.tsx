@@ -93,7 +93,7 @@ export const SampleTest = (props:any) => {
             setIsLoading(true);
             const res = await dispatchAction(getSampleTest(id,{patientId,id}));
             if (!status.aborted) {
-                    if (res.data) {
+                    if (res && res.data) {
                         dispatch({
                             type: "set_form",
                             form: {
@@ -148,7 +148,7 @@ export const SampleTest = (props:any) => {
             
             const res = await dispatchAction(id?patchSampleTest(id,data,{patientId}):createSampleTest(data,{id,patientId}));
             setIsLoading(false);
-            if (res.data) {
+            if (res && res.data) {
                 dispatch({ type: "set_form", form: initForm })
                 if (id) {
                     Notification.Success({

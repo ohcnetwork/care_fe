@@ -88,7 +88,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
         } else {
             // Edit Form functionality
             const res = await dispatchAction(getCapacity(id, { facilityId }));
-            if (res.data) {
+            if (res && res.data) {
                 dispatch({
                     type: "set_form",
                     form: {

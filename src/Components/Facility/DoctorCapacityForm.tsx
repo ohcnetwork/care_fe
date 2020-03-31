@@ -87,7 +87,7 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
         } else {
             // Edit Form functionality
             const res = await dispatchAction(getDoctor(id, { facilityId }));
-            if (res.data) {
+            if (res && res.data) {
                 dispatch({ type: "set_form", form: { area: res.data.area, count: res.data.count } })
             } else {
                 navigate(`/facility/${facilityId}`);
