@@ -17,10 +17,10 @@ export const SampleTestList = (props: any) => {
     const [isLoading, setIsLoading] = useState(false);
 
     const fetchData = useCallback(async (status: statusType) => {
-        const sampleRes = await dispatch(getSampleTestList({ patientId }));
+        const res = await dispatch(getSampleTestList({ patientId }));
         if (!status.aborted) {
-            if (sampleRes && sampleRes.data) {
-                setSampleListData(sampleRes.data);
+            if (res && res.data && res.data.results) {
+                setSampleListData(res.data.results);
             }
             setIsLoading(false);
         }

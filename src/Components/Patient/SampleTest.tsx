@@ -1,14 +1,15 @@
 import React, { useState, useReducer, useCallback, useEffect } from "react"
 import { makeStyles, Theme } from '@material-ui/core/styles';
 import { useDispatch } from "react-redux";
-import { Grid, Card, CardHeader, CardContent, CardActions, Button, FormControl, InputLabel } from "@material-ui/core";
+import { Grid, Card, CardHeader, CardContent, CardActions, Button, FormControl, InputLabel, NativeSelect } from "@material-ui/core";
 import { TextInputField, NativeSelectField, ErrorHelperText, MultilineInputField, } from "../Common/HelperInputFields";
 import { navigate } from 'hookrouter';
 import { Loading } from "../Common/Loading";
 import { SAMPLE_TEST_STATUS, SAMPLE_TEST_RESULT } from "../../Common/constants";
-import { createSampleTest, getSampleTest, patchSampleTest } from "../../Redux/actions";
+import { createSampleTest, getSampleTest, patchSampleTest, getConsultationList } from "../../Redux/actions";
 import { useAbortableEffect, statusType } from '../../Common/utils';
 import * as Notification from '../../Utils/Notifications.js';
+import { ConsultationModal } from "../Facility/models";
 
 
 const initForm: any = {
@@ -49,19 +50,6 @@ const sampleTestFormReducer = (state = initialState, action: any) => {
     }
 };
 
-
-
-const useStyles = makeStyles((theme: Theme) => ({
-    formControl: {
-        margin: theme.spacing(1)
-    },
-    selectLabel: {
-        background: 'white',
-        padding: '2px 10px'
-    },
-
-}));
-
 const statusTypes = [{
     id: 0,
     text: 'Select',
@@ -74,15 +62,34 @@ const resultTypes = [{
 
 
 export const SampleTest = (props: any) => {
-    const classes = useStyles();
     const dispatchAction: any = useDispatch();
     const { facilityId, patientId, id } = props;
     const [state, dispatch] = useReducer(sampleTestFormReducer, initialState);
+    const [consultationListData, setConsultationListData] = useState<Array<ConsultationModal>>([]);
     const [isLoading, setIsLoading] = useState(false);
 
 
     const headerText = !id ? "Add Sample Test" : "Edit Sample Test";
     const buttonText = !id ? "Save" : "Update";
+
+
+    const fetchConsultation = useCallback(async (status: statusType) => {
+        const res = await dispatchAction(getConsultationList({
+            patient: patientId
+        }));
+        if (!status.aborted) {
+            if (res && res.data && res.data.results) {
+                if (res.data.results.length === 0) {
+                    Notification.Error({
+                        msg: "Please add a consultation before adding a sample test"
+                    });
+                    navigate(`/facility/${facilityId}/patient/${patientId}/consultation`);
+                } else {
+                    setConsultationListData(res.data.results);
+                }
+            }
+        }
+    }, [dispatchAction, facilityId, patientId]);
 
     const fetchData = useCallback(async (status: statusType) => {
         if (id) {
@@ -109,9 +116,8 @@ export const SampleTest = (props: any) => {
 
     useAbortableEffect((status: statusType) => {
         fetchData(status);
+        fetchConsultation(status)
     }, [dispatch, fetchData, patientId, id]);
-
-
 
     const validateForm = () => {
         let errors = { ...initForm };
@@ -156,10 +162,6 @@ export const SampleTest = (props: any) => {
                     });
                     navigate(`/facility/${facilityId}/patient/${patientId}`);
                 }
-            } else {
-                Notification.Error({
-                    msg: "Error"
-                });
             }
         }
     };
@@ -230,8 +232,17 @@ export const SampleTest = (props: any) => {
                         </CardContent>
 
                         <CardContent>
-                            <InputLabel id="age-label">Sample Number*</InputLabel>
-                            <TextInputField
+                            <InputLabel id="age-label">Consultation ID*</InputLabel>
+                            <FormControl style={{ width: "100%" }} variant="outlined">                               
+                                <NativeSelect onChange={(e) => [handleChange(e)]} value={state.form.consultation} name="consultation" >
+                                    {consultationListData.map(opt => {
+                                        return <option value={opt.id} key={opt.id}>
+                                            {`${opt.facility_name}-${opt.suggestion}`}
+                                        </option>
+                                    })}
+                                </NativeSelect>
+                            </FormControl>
+                            {/* <TextInputField
                                 defaultValue={"1"}
                                 name="consultation"
                                 variant="outlined"
@@ -241,7 +252,7 @@ export const SampleTest = (props: any) => {
                                 value={state.form.consultation}
                                 onChange={handleChange}
                                 errors={state.errors.consultation}
-                            />
+                            /> */}
                         </CardContent>
 
 
