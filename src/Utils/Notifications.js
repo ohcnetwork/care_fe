@@ -34,9 +34,10 @@ export const Error = ({msg}) => {
 /** 400 Bad Request handler */
 export const BadRequest = ({errs}) => {
     
-    for (let [, value] of Object.entries(errs)) {
+    for (let [key, value] of Object.entries(errs)) {
+        const errorMsg = typeof value === "string" ? `${key} - ${value}` : `Bad Request - ${key}`;
         PNotify.error({
-            text: `Bad Request - ${value}`,
+            text: errorMsg,
             modules: {
                 Desktop: {
                     desktop: true

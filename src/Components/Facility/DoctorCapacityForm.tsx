@@ -87,7 +87,7 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
         } else {
             // Edit Form functionality
             const res = await dispatchAction(getDoctor(id, { facilityId }));
-            if (res.data) {
+            if (res && res.data) {
                 dispatch({ type: "set_form", form: { area: res.data.area, count: res.data.count } })
             } else {
                 navigate(`/facility/${facilityId}`);
@@ -145,11 +145,7 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
             };
             const res = await dispatchAction(createDoctor(id, data, { facilityId }));
             setIsLoading(false);
-            if (!res.data) {
-                Notification.Error({
-                    msg: "Something went wrong..!"
-                });
-            } else {
+            if (res && res.data) {
                 // disable last added bed type
                 const updatedDoctorTypes = doctorTypes.map((type: OptionsType) => {
                     return {

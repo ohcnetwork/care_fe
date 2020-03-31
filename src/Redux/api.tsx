@@ -4,6 +4,7 @@ export default {
     login: {
         path: '/api/v1/auth/login/',
         method: 'POST',
+        noAuth: true,
     },
 
     token_refresh: {
@@ -15,7 +16,6 @@ export default {
         path: '/api/v1/auth/token/verify',
         method: 'POST'
     },
-
 
     // User Endpoints
     currentUser: {
@@ -29,10 +29,10 @@ export default {
         path: '/api/v1/users',
     },
 
-
     createUser: {
         path: '/api/v1/users/',
-        method: 'POST'
+        method: 'POST',
+        noAuth: true,
     },
 
     updateUser: {
@@ -106,7 +106,8 @@ export default {
 
     createAmbulance: {
         path: '/api/v1/ambulance/',
-        method: 'POST'
+        method: 'POST',
+        noAuth: true,
     },
 
     // Hospital Beds
@@ -194,7 +195,7 @@ export default {
         path: "/api/v1/state/{id}/districts/",
     },
 
-    // Districts
+    // Local Body
     localBodyList: {
         path: "/api/v1/local_body/",
     },

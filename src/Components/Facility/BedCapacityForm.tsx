@@ -88,7 +88,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
         } else {
             // Edit Form functionality
             const res = await dispatchAction(getCapacity(id, { facilityId }));
-            if (res.data) {
+            if (res && res.data) {
                 dispatch({
                     type: "set_form",
                     form: {
@@ -149,11 +149,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
             };
             const res = await dispatchAction(createCapacity(id, data, { facilityId }));
             setIsLoading(false);
-            if (!res.data) {
-                Notification.Error({
-                    msg: "Something went wrong..!"
-                });
-            } else {
+            if (res && res.data) {
                 // disable last added bed type
                 const updatedBedTypes = bedTypes.map((type: OptionsType) => {
                     return {

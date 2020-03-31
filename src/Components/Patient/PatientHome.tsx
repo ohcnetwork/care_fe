@@ -5,7 +5,7 @@ import { useDispatch } from "react-redux";
 import { navigate } from 'hookrouter';
 import { Loading } from '../Common/Loading';
 import { getPatient } from '../../Redux/actions';
-import { PatientModal } from './models';
+import { PatientModel } from './models';
 import { GENDER_TYPES } from "../../Common/constants";
 import { useAbortableEffect, statusType } from '../../Common/utils';
 
@@ -41,7 +41,7 @@ export const PatientHome = (props: any) => {
     const { facilityId, id } = props;
     const classes = useStyles();
     const dispatch: any = useDispatch();
-    const [patientData, setPatientData] = useState<PatientModal>({});
+    const [patientData, setPatientData] = useState<PatientModel>({});
     const [isLoading, setIsLoading] = useState(false);
 
     const fetchData = useCallback(async (status: statusType) => {

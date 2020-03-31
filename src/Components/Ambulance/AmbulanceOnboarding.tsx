@@ -6,7 +6,7 @@ import Tab from '@material-ui/core/Tab';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
 import {VehicleDetailsForm, vehicleForm, initVehicleData} from "./VehicleDetailsForm";
-import {DriverDetailsForm} from "./DriverDetailsForm";
+import {DriverDetailsForm, driverForm, initDriverData} from "./DriverDetailsForm";
 import {Grid} from "@material-ui/core";
 
 interface TabPanelProps {
@@ -77,6 +77,7 @@ export default function AmbulanceOnboarding() {
     const classes = useStyles();
     const [value, setValue] = React.useState(0);
     const [vehicleObj, setVehicleObj] = React.useState<vehicleForm>(initVehicleData);
+    const [driverObj, setDriverObj] = React.useState<driverForm>(initDriverData);
     
     const handleChange = (event: React.ChangeEvent<{}>, newValue: number) => {
         // prevent navigating to driver details without entering vehicle details
@@ -91,6 +92,10 @@ export default function AmbulanceOnboarding() {
         if (form.isValid) {
           setValue(1);
         }
+    };
+
+    const updateDriverObj = (form: driverForm)=>{
+        setDriverObj(form);
     };
 
     return (
@@ -108,7 +113,7 @@ export default function AmbulanceOnboarding() {
                 <VehicleDetailsForm classes={classes} vehicleDetails={vehicleObj} setVehicleObj={updateVehicleObj}/>
             </TabPanel>
             <TabPanel value={value} index={1}>
-               <DriverDetailsForm classes={classes} vehicleInfo={vehicleObj} />
+               <DriverDetailsForm classes={classes} vehicleInfo={vehicleObj} driverInfo={driverObj} setDriverObj={updateDriverObj}/>
             </TabPanel>
                 </Grid>
             </Grid>
