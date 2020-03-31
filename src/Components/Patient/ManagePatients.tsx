@@ -151,7 +151,7 @@ export const PatientManager = (props: any) => {
                         </CardContent>
                         <CardContent className={classes.content}>
                             <Box>
-                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Contact with carrier - </span>
+                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Contact with Covid Patient - </span>
                                 <span>{patient.contact_with_carrier ? "Yes" : "No"}</span>
                             </Box>
                         </CardContent>

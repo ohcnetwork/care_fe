@@ -62,7 +62,7 @@ export const Consultation = (props:any) => {
     const [state, dispatch] = useReducer(consultationFormReducer, initialState);
     const [isLoading, setIsLoading] = useState(false);
 
-    const headerText = !id ? "Add Consultation" : "Consultation";
+    const headerText = !id ? "Add Consultation Details" : "Consultation";
     const buttonText = !id ? "Save" : "Update";
 
     // const fetchData = useCallback(async (status: statusType) => {
@@ -184,7 +184,7 @@ export const Consultation = (props:any) => {
                         <CardContent>
                             <InputLabel id="demo-simple-select-outlined-label">Suggestion</InputLabel>
                             <NativeSelectField
-                                name="suggestion"
+                                name="Decision after consultation"
                                 variant="outlined"
                                 value={state.form.suggestion}
                                 options={suggestionTypes}
