@@ -1,7 +1,7 @@
 import React, { useState, useReducer, useCallback } from "react";
 import { Refresh } from '@material-ui/icons';
 import { useDispatch } from "react-redux";
-import { Box, Grid, Checkbox, Card, CardHeader, CardContent, CardActions, Button, InputLabel, RadioGroup, Radio, FormControlLabel, IconButton, CircularProgress } from "@material-ui/core";
+import { Box, Grid, Checkbox, Card, CardHeader, CardContent, CardActions, Button, InputLabel, RadioGroup, Radio, FormControlLabel, IconButton } from "@material-ui/core";
 import { TextInputField, NativeSelectField, ErrorHelperText, MultilineInputField } from "../Common/HelperInputFields";
 import { phonePreg, getArrayValueByKey, getRandomNumbers } from "../../Common/validation";
 import { navigate } from 'hookrouter';
@@ -9,26 +9,18 @@ import { Loading } from "../Common/Loading";
 import AlertDialog from "../Common/AlertDialog";
 import { PatientModal } from './models';
 import { GENDER_TYPES } from "../../Common/constants";
-import { createPatient, getPatient, updatePatient, getStates, getDistrictByState, getLocalbodyByDistrict } from "../../Redux/actions";
+import { createPatient, getPatient, updatePatient, getStates, getDistricts, getLocalBody } from "../../Redux/actions";
 import { useAbortableEffect, statusType } from '../../Common/utils';
 import patientnameCombinations from "../../Constants/Static_data/PatientName.json"
 import * as Notification from '../../Utils/Notifications.js';
-import { makeStyles } from '@material-ui/core/styles';
-import CircularProgress from '@material-ui/core/CircularProgress';
-
-
 
 interface PatientRegisterProps extends PatientModal {
     facilityId: number;
 }
 
-interface medicalHistoryModel {
-    disease: string;
-    details: string;
-}
-
 const initForm: any = {
     name: "",
+    realName: "",
     age: "",
     gender: "",
     phone_number: "",
@@ -43,16 +35,28 @@ const initForm: any = {
     medical_history5: "",
 };
 
+const getRandomName = () => `${patientnameCombinations.comb1[getRandomNumbers(1, patientnameCombinations.comb1.length - 1)]}-${patientnameCombinations.comb2[getRandomNumbers(1, patientnameCombinations.comb2.length - 1)]}-${getRandomNumbers(1000, 10000)}`;
+
 const initialState = {
-    form: { ...initForm },
+    form: {
+        ...initForm,
+        name: getRandomName(),
+    },
     errors: { ...initForm }
 };
 
-const initialStates = [{ id: 0, name: "Choose State *" }];
-const initialDistricts = [{ id: 0, name: "Choose District" }];
-const selectStates = [{ id: 0, name: "Please select your state" }];
-const initialLocalbodies = [{ id: 0, name: "Choose Localbody" }];
-const selectDistrict = [{ id: 0, name: "Please select your district" }];
+const optionalFields = [
+    "district",
+    "local_body",
+    "medical_history2",
+    "medical_history3",
+    "medical_history4",
+    "medical_history5"
+];
+
+const initialStatesList = [
+    { id: 0, name: "Choose State *" }
+];
 
 const patientFormReducer = (state = initialState, action: any) => {
     switch (action.type) {
@@ -84,37 +88,18 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     const [state, dispatch] = useReducer(patientFormReducer, initialState);
     const [showAlertMessage, setAlertMessage] = useState({ show: false, message: "", title: "" });
     const [isLoading, setIsLoading] = useState(false);
-    const [isStateLoading, setIsStateLoading] = useState(false);
-    const [isDistrictLoading, setIsDistrictLoading] = useState(false);
-    const [isLocalbodyLoading, setIsLocalbodyLoading] = useState(false);
-    const [states, setStates] = useState(initialStates)
-    const [districts, setDistricts] = useState(selectDistrict)
-    const [localBody, setLocalBody] = useState(selectStates)
+    const [states, setStates] = useState(initialStatesList)
+    const [districts, setDistricts] = useState([{ id: 0, name: "Choose District", state: 0 }])
+    const [localBody, setLocalBody] = useState([{ id: 0, name: "Choose Localbody" }])
 
     const headerText = !id ? "Add Patient" : "Edit Patient";
     const buttonText = !id ? "Save" : "Update";
 
-    const fetchDistricts = useCallback(async (id: string) => {
-        if (Number(id) > 0) {
-            setIsDistrictLoading(true);
-            const districtList = await dispatchAction(getDistrictByState({ id }))
-            setDistricts([...initialDistricts, ...districtList.data]);
-            setIsDistrictLoading(false);
-        } else {
-            setDistricts(selectStates)
-        }
-    }, [dispatchAction])
-
-    const fetchLocalBody = useCallback(async (id: string) => {
-        if (Number(id) > 0) {
-            setIsLocalbodyLoading(true);
-            const localBodyList = await dispatchAction(getLocalbodyByDistrict({ id }))
-            setIsLocalbodyLoading(false);
-            setLocalBody([...initialLocalbodies, ...localBodyList.data]);
-        } else {
-            setLocalBody(selectDistrict)
-        }
-    }, [dispatchAction])
+    const generateRandomname = () => {
+        const form = { ...state.form }
+        form["name"] = getRandomName();
+        dispatch({ type: "set_form", form })
+    }
 
     const fetchData = useCallback(async (status: statusType) => {
         setIsLoading(true);
@@ -130,26 +115,20 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         phone_number: res.data.phone_number,
                         medical_history: res.data.medical_history,
                         contact_with_carrier: `${res.data.contact_with_carrier}`,
-                        state: res.data.state,
-                        district: res.data.district,
-                        local_body: res.data.local_body,
                     }
                 })
-                Promise.all([fetchDistricts(res.data.state), fetchLocalBody(res.data.district)]);
             } else {
                 navigate(`/facility/${facilityId}`);
             }
         }
         setIsLoading(false);
-    }, [dispatchAction, facilityId, fetchDistricts, fetchLocalBody, id]);
+    }, [dispatchAction, facilityId, id]);
 
     const fetchStates = useCallback(async (status: statusType) => {
-        setIsStateLoading(true);
         const statesRes = await dispatchAction(getStates())
         if (!status.aborted && statesRes.data.results) {
-            setStates([...initialStates, ...statesRes.data.results]);
+            setStates([...initialStatesList, ...statesRes.data.results]);
         }
-        setIsStateLoading(false);
     }, [dispatchAction])
 
     useAbortableEffect((status: statusType) => {
@@ -157,39 +136,52 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             fetchData(status);
         }
         fetchStates(status);
-    }, [dispatch, fetchData])
+    }, [dispatch, fetchData]);
+
+    const fetchDistricts = async (e: any) => {
+        const index = getArrayValueByKey(states, "id", e.target.value);
+        if (index > 0) {
+            setIsLoading(true);
+            const districtList = await dispatchAction(getDistricts({ state_name: states[index].name }))
+            setDistricts([...districts, ...districtList.data.results]);
+            setIsLoading(false);
+        } else {
+            setDistricts([{ id: 0, name: "Choose District", state: 0 }])
+        }
+    }
+
+    const fetchLocalBody = async (e: any) => {
+        const index = getArrayValueByKey(districts, "id", e.target.value);
+        const stateIndex = getArrayValueByKey(states, "id", districts[index].state);
+        if (index > 0) {
+            setIsLoading(true);
+            const localBodyList = await dispatchAction(getLocalBody({
+                district_name: districts[index].name,
+                state_name: states[stateIndex].name
+            }))
+            setIsLoading(false);
+            setLocalBody([...localBody, ...localBodyList.data.results]);
+        } else {
+            setLocalBody([{ id: 0, name: "Choose Local body" }])
+        }
+    }
 
     const validateForm = () => {
         let errors = { ...initForm };
         let invalidForm = false;
         Object.keys(state.form).forEach((field, i) => {
-            switch (field) {
-                case "name":
-                case "age":
-                case "gender":
-                    if (!state.form[field]) {
-                        errors[field] = "Field is required";
-                        invalidForm = true;
-                    }
-                    return;
-                case "state":
-                case "district":
-                    if (!Number(state.form[field])) {
-                        errors[field] = "Field is required";
-                        invalidForm = true;
-                    }
-                    return;
-                case "phone_number":
-                    if (!phonePreg(state.form[field])) {
-                        errors[field] = "Please Enter 10/11 digit mobile number or landline as 0<std code><phone number>";
-                        invalidForm = true;
-                    }
-                    return;
-                default:
-                    return
+            if ((optionalFields.indexOf(field) === -1) && !state.form[field]) {
+                errors[field] = "Field is required";
+                invalidForm = true;
+            } else if (field === "phone_number" && !phonePreg(state.form[field])) {
+                errors[field] = "Please Enter 10/11 digit mobile number or landline as 0<std code><phone number>";
+                invalidForm = true;
+            } else if (field === "state" && (state.form[field] === "" || state.form[field] == 0)) {
+                errors[field] = "Field is required";
+                invalidForm = true;
             }
         });
-        console.log(errors)
+
         dispatch({ type: "set_error", errors });
         return !invalidForm
     };
@@ -199,15 +191,16 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         const validForm = validateForm();
         if (validForm) {
             setIsLoading(true);
-            let medical_history: Array<medicalHistoryModel> = []
-            state.form.medical_history.forEach((i:any) => {
-                medical_history.push({ disease: i.disease, details: state.form[`medical_history${i.disease}`] })
+            let medical_history: Array<any> = []
+            state.form.medical_history.map((disease: number) => {
+                medical_history.push({ disease, details: state.form[`medical_history${disease}`] })
                 // return medical_history
             })
             if (!medical_history.length) {
-                medical_history.push({ disease: "No", details: "" })
+                medical_history.push({ disease: 1, details: "" })
             }
             const data = {
+                "real_name": state.form.realName,
                 "name": state.form.name,
                 "age": Number(state.form.age),
                 "gender": Number(state.form.gender),
@@ -248,7 +241,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         let form = { ...state.form };
         form[e.target.name] = e.target.value;
         dispatch({ type: "set_form", form })
-        
     };
 
     const handleCheckboxChange = (e: any) => {
@@ -261,7 +253,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             values.splice(values.indexOf(chocieId), 1);
         }
         form['medical_history'] = values;
-        console.log(form)
         dispatch({ type: "set_form", form })
     }
 
@@ -298,14 +289,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     if (isLoading) {
         return <Loading />
     }
-    const Spinner= (
-        <div className={classes.root}>
-            <CircularProgress />
-        </div>  
-    )
 
     return <div>
-        
+
         <Grid container alignContent="center" justify="center">
             <Grid item xs={12} sm={10} md={8} lg={6} xl={4}>
                 <Card>
@@ -313,20 +299,46 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         <AlertDialog handleClose={() => handleCancel()} message={showAlertMessage.message} title={showAlertMessage.title} />
                     }
                     <CardHeader title={headerText} />
-                    
                     <form onSubmit={(e) => handleSubmit(e)}>
-                        <CardContent>
-                            <InputLabel id="name-label">Name*</InputLabel>
-                            <TextInputField
-                                name="name"
-                                variant="outlined"
-                                margin="dense"
-                                type="text"
-                                value={state.form.name}
-                                onChange={handleChange}
-                                errors={state.errors.name}
-                            />
-                        </CardContent>
+                        {!id && (
+                            <>
+                                <CardContent>
+                                    <InputLabel id="name-label">Name*</InputLabel>
+                                    <Box display="flex" flexGrow="1">
+                                        <Box flex="1">
+                                            <TextInputField
+                                                name="name"
+                                                variant="outlined"
+                                                margin="dense"
+                                                type="text"
+                                                value={state.form.name}
+                                                onChange={handleChange}
+                                                errors={state.errors.name}
+                                                inputProps={{
+                                                    readOnly: true,
+                                                }}
+                                            />
+                                        </Box>
+                                        <IconButton onClick={() => generateRandomname()}>
+                                            <Refresh />
+                                        </IconButton>
+                                    </Box>
+                                </CardContent>
+
+                                <CardContent>
+                                    <InputLabel id="name-label">Name*</InputLabel>
+                                    <TextInputField
+                                        name="realName"
+                                        variant="outlined"
+                                        margin="dense"
+                                        type="text"
+                                        value={state.form.realName}
+                                        onChange={handleChange}
+                                        errors={state.errors.realName}
+                                    />
+                                </CardContent>
+                            </>
+                        )}
                         <CardContent>
                             <InputLabel id="age-label">Age*</InputLabel>
                             <TextInputField
@@ -352,69 +364,64 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 error={state.errors.gender}
                             />
                         </CardContent>
-                        <CardContent>
-                            <InputLabel id="phone-label">Mobile Number*</InputLabel>
-                            <TextInputField
-                                name="phone_number"
-                                variant="outlined"
-                                margin="dense"
-                                type="number"
-                                value={state.form.phone_number}
-                                onChange={handleChange}
-                                errors={state.errors.phone_number}
-                            />
-                        </CardContent>
+                        {!id && (
+                            <CardContent>
+                                <InputLabel id="phone-label">Mobile Number*</InputLabel>
+                                <TextInputField
+                                    name="phone_number"
+                                    variant="outlined"
+                                    margin="dense"
+                                    type="number"
+                                    value={state.form.phone_number}
+                                    onChange={handleChange}
+                                    errors={state.errors.phone_number}
+                                />
+                            </CardContent>
+                        )}
                         <CardContent>
                             <InputLabel id="gender-label">State*</InputLabel>
-                            {isStateLoading ? (
-                                <CircularProgress size={20} />
-                            ) : (<NativeSelectField
+                            <NativeSelectField
                                 name="state"
                                 variant="outlined"
                                 value={state.form.state}
                                 options={states}
                                 optionvalueidentifier="name"
-                                onChange={(e) => [handleChange(e), fetchDistricts(e.target.value)]}
-                            />)}
+                                onChange={(e) => [handleChange(e), fetchDistricts(e)]}
+                            />
                             <ErrorHelperText
                                 error={state.errors.state}
                             />
                         </CardContent>
 
-                        <CardContent>
+                        {districts.length > 1 && <CardContent>
                             <InputLabel id="gender-label">District</InputLabel>
-                            {isDistrictLoading ? (
-                                <CircularProgress size={20} />
-                            ) : (<NativeSelectField
+                            <NativeSelectField
                                 name="district"
                                 variant="outlined"
                                 value={state.form.district}
-                                options={ districts } 
+                                options={districts}
                                 optionvalueidentifier="name"
-                                onChange={(e) => [handleChange(e), fetchLocalBody(e.target.value)]}
-                            />)}
+                                onChange={(e) => [handleChange(e), fetchLocalBody(e)]}
+                            />
                             <ErrorHelperText
                                 error={state.errors.district}
                             />
-                        </CardContent>
+                        </CardContent>}
 
-                        <CardContent>
+                        {localBody.length > 1 && <CardContent>
                             <InputLabel id="gender-label">Localbody</InputLabel>
-                            {isLocalbodyLoading ? (
-                                <CircularProgress size={20} />
-                            ) : (<NativeSelectField
+                            <NativeSelectField
                                 name="local_body"
                                 variant="outlined"
                                 value={state.form.local_body}
                                 options={localBody}
                                 optionvalueidentifier="name"
                                 onChange={handleChange}
-                            />)}
+                            />
                             <ErrorHelperText
                                 error={state.errors.local_body}
                             />
-                        </CardContent>
-
+                        </CardContent>}
                         <CardContent>
                             <InputLabel id="contact-with-carrier-label">
                                 Has the patient had contact with someone already diagnosed with Covid 19?
