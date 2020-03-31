@@ -1,4 +1,4 @@
-import React, { useState, useReducer, useCallback, useEffect } from "react"
+import React, { useState, useReducer, useCallback } from "react"
 import { useDispatch } from "react-redux"
 import { FormControl, Grid, Card, CardHeader, CardContent, Button, InputLabel, Select, MenuItem, CardActions } from "@material-ui/core"
 import { TextInputField, MultilineInputField } from "../Common/HelperInputFields"
@@ -29,7 +29,7 @@ const initForm: any = {
     phone_number: "",
     latitude: "",
     longitude: "",
-    oxygen_capacity: " ",
+    oxygen_capacity: "",
 };
 
 const initialState = {
@@ -104,7 +104,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                     phone_number: res.data.phone_number,
                     latitude: res.data.location ? res.data.location.latitude : "",
                     longitude: res.data.location ? res.data.location.longitude : "",
-                    oxygen_capacity: res.data.oxygen_capacity ? res.data.oxygen_capacity : "",
+                    oxygen_capacity: res.data.oxygen_capacity ? res.data.oxygen_capacity : 0,
                 };
                 dispatch({ type: "set_form", form: formData })
             } else {
@@ -167,6 +167,10 @@ export const FacilityCreate = (props: FacilityProps) => {
                 errors[field] = "Please enter valid coordinates";
                 invalidForm = true;
             }
+            if (field === "oxygen_capacity" && isNaN(state.form.oxygen_capacity)) {
+                errors[field] = "Please Enter a Number";
+                invalidForm = true;
+            }
         });
         if (invalidForm) {
             dispatch({ type: "set_error", errors })
@@ -191,7 +195,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                     longitude: Number(state.form.latitude),
                 } : undefined,
                 phone_number: state.form.phone_number,
-                oxygen_capacity: state.form.oxygen_capacity ? Number(state.form.oxygen_capacity) : 0,
+                oxygen_capacity: state.form.oxygen_capacity ? state.form.oxygen_capacity : "",
             }
             const res = await dispatchAction(facilityId ? updateFacility(facilityId, data) : createFacility(data));
             if (res.data) {
@@ -316,7 +320,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                                         name="oxygen_capacity"
                                         label="Oxygen Capacity in liters"
                                         type="number"
-                                        placeholder=""
+                                        placeholder="Oxygen Capacity in liters"
                                         variant="outlined"
                                         margin="dense"
                                         value={state.form.oxygen_capacity}
