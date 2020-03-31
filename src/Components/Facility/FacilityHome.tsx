@@ -101,7 +101,7 @@ export const FacilityHome = (props: any) => {
 
     return (
         <div className={`w3-content ${classes.content}`}>
-            <h2 style={{ padding: "10px", marginBottom: '5px' }}>Facility</h2>
+            <h2 style={{ padding: "0 0 0 10px"}}>Facility</h2>
             <Grid container style={{ padding: "10px", marginBottom: '5px' }} spacing={2}>
                 <Grid item xs={12} md={7}>
                     <Typography style={{ textTransform: 'capitalize' }} variant="h6" component="h6">{facilityData.name}</Typography>
@@ -146,18 +146,6 @@ export const FacilityHome = (props: any) => {
                     <Button fullWidth variant="contained" color="primary" size="small"
                         onClick={() => navigate(`/facility/${facilityId}/patients`)}>
                         View Patients
-                    </Button>
-                </Grid>
-                <Grid item xs={12} md={6} className="w3-center">
-                    <Button fullWidth variant="contained" color="primary" size="small"
-                        onClick={() => navigate(`/facility/${facilityId}/consultation`)}>
-                        Add Consultation
-                    </Button>
-                </Grid>
-                <Grid item xs={12} md={6} className="w3-center">
-                    <Button fullWidth variant="contained" color="primary" size="small"
-                        onClick={() => navigate(`/facility/${facilityId}/consultation-list`)}>
-                        View Consultation
                     </Button>
                 </Grid>
             </Grid>

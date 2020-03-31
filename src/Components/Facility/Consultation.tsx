@@ -8,20 +8,18 @@ import { Loading } from "../Common/Loading";
 import AppMessage from "../Common/AppMessage";
 import { ConsultationModal} from './models';
 import { CONSULTATION_SUGGESTION } from "../../Common/constants";
-import { createConsultation } from "../../Redux/actions";
+import { createConsultation, getConsultation } from "../../Redux/actions";
 import { useAbortableEffect, statusType } from '../../Common/utils';
+import * as Notification from '../../Utils/Notifications.js';
 
-// interface ConsultationProps extends ConsultationModal {
-    
-// }
 
 const initForm: any = {
     suggestion: "",
     patient: "",
     facility: "",
-    admitted: "",
-    admission_date: "",
-    discharge_date: "",
+    admitted: "false",
+    admission_date: null,
+    discharge_date: null,
     referred_to: "",
     examination_details: "",
     existing_medication: "",
@@ -32,17 +30,6 @@ const initialState = {
     form: { ...initForm },
     errors: { ...initForm }
 };
-
-const optionalFields = [
-    "admitted",
-    "admission_date",
-    "discharge_date",
-    "referred_to",
-    "examination_details",
-    "existing_medication",
-    "prescribed_medication",
-];
-
 
 const consultationFormReducer = (state = initialState, action: any) => {
     switch (action.type) {
@@ -63,19 +50,6 @@ const consultationFormReducer = (state = initialState, action: any) => {
     }
 };
 
-
-
-const useStyles = makeStyles((theme: Theme) => ({
-    formControl: {
-        margin: theme.spacing(1)
-    },
-    selectLabel: {
-        background: 'white',
-        padding: '2px 10px'
-    },
-    
-}));
-
 const suggestionTypes = [{
     id: 0,
     text: 'Select',
@@ -83,22 +57,18 @@ const suggestionTypes = [{
 
 
 export const Consultation = (props:any) => {
-    const classes = useStyles();
     const dispatchAction: any = useDispatch();
     const { facilityId, patientId, id } = props;
     const [state, dispatch] = useReducer(consultationFormReducer, initialState);
-    const [showAppMessage, setAppMessage] = useState({ show: false, message: "", type: "" });
     const [isLoading, setIsLoading] = useState(false);
-    const [selectedDate, setSelectedDate] = React.useState(new Date());
 
-
-    const headerText = !id ? "Add Consultation" : "Consultation";
+    const headerText = !id ? "Add Consultation Details" : "Consultation";
     const buttonText = !id ? "Save" : "Update";
 
     // const fetchData = useCallback(async (status: statusType) => {
     //     if (id) {
     //         setIsLoading(true);
-    //         const res = await dispatchAction(getSampleTest(id,{patientId,id}));
+    //         const res = await dispatchAction(getConsultation({id}));
     //         if (!status.aborted) {
     //                 if (res && res.data) {
     //                     dispatch({
@@ -122,15 +92,19 @@ export const Consultation = (props:any) => {
     //     fetchData(status);
     // }, [dispatch, fetchData, patientId, id]);
 
-
-
     const validateForm = () => {
         let errors = { ...initForm };
         let invalidForm = false;
         Object.keys(state.form).forEach((field, i) => {
-            if ((optionalFields.indexOf(field) === -1) && !state.form[field]) {
-                errors[field] = "Field is required";
-                invalidForm = true;
+            switch (field) {
+                case "suggestion":
+                    if (!state.form[field]) {
+                        errors[field] = "Field is required";
+                        invalidForm = true;
+                    }
+                    return;
+                default:
+                    return
             }
         });
         if (invalidForm) {
@@ -154,10 +128,10 @@ export const Consultation = (props:any) => {
                 "admitted": JSON.parse(state.form.admitted),
                 "admission_date": state.form.admission_date,
                 "discharge_date": state.form.discharge_date,
-                "patient": Number(state.form.patient),
-                "facility": Number(state.form.facility),
-                "referred_to": null || Number(state.form.referred_to),
-            }
+                "patient": Number(patientId),
+                "facility": Number(facilityId),
+                "referred_to": null,
+            };
             
             console.log('data: ', data);
             const res = await dispatchAction(createConsultation(data));
@@ -166,13 +140,15 @@ export const Consultation = (props:any) => {
             if (res && res.data) {
                 dispatch({ type: "set_form", form: initForm })
                 if (id) {
-                    setAppMessage({ show: true, message: "Sample test updated successfully", type: "success" });
+                    Notification.Success({
+                        msg: "Consultation updated successfully"
+                    });
                 } else {
-                    setAppMessage({ show: true, message: "Sample test created successfully", type: "success" });
+                    Notification.Success({
+                        msg: "Consultation created successfully"
+                    });
                     navigate(`/facility/${facilityId}/patient/${patientId}`);
                 }
-            } else {
-                setAppMessage({ show: true, message: "Error", type: "error" })
             }
         }
     };
@@ -187,11 +163,10 @@ export const Consultation = (props:any) => {
         let form = { ...state.form };
         form[key] = date;
         dispatch({ type: "set_form", form })
-        setSelectedDate(date);
     };
 
     const handleCancel = () => {
-        navigate(`/facility/${facilityId}`);
+        navigate(`/facility/${facilityId}/patient/${patientId}`);
     };
 
 
@@ -204,13 +179,12 @@ export const Consultation = (props:any) => {
         <Grid container alignContent="center" justify="center">
             <Grid item xs={12} sm={10} md={8} lg={6} xl={4}>
                 <Card>
-                    <AppMessage open={showAppMessage.show} type={showAppMessage.type} message={showAppMessage.message} handleClose={() => setAppMessage({ show: false, message: "", type: "" })} handleDialogClose={() => setAppMessage({ show: false, message: "", type: "" })} />
                     <CardHeader title={headerText}/>
                     <form onSubmit={(e) => handleSubmit(e)}>
                         <CardContent>
                             <InputLabel id="demo-simple-select-outlined-label">Suggestion</InputLabel>
                             <NativeSelectField
-                                name="suggestion"
+                                name="Decision after consultation"
                                 variant="outlined"
                                 value={state.form.suggestion}
                                 options={suggestionTypes}
@@ -218,34 +192,6 @@ export const Consultation = (props:any) => {
                             />
                             <ErrorHelperText
                                 error={state.errors.suggestion}
-                            />
-                        </CardContent>
-
-                        <CardContent>
-                            <InputLabel id="facility-label">Facility</InputLabel>
-                            <TextInputField
-                                name="facility"
-                                variant="outlined"
-                                margin="dense"
-                                type="number"
-                                InputLabelProps={{ shrink: !!state.form.facility}}
-                                value={facilityId}
-                                onChange={handleChange}
-                                errors={state.errors.facility}
-                            />
-                        </CardContent>
-
-                        <CardContent>
-                            <InputLabel id="patient-label">Patient Id</InputLabel>
-                            <TextInputField
-                                name="patient"
-                                variant="outlined"
-                                margin="dense"
-                                type="number"
-                                InputLabelProps={{ shrink: !!state.form.patient}}
-                                value={state.form.patient}
-                                onChange={handleChange}
-                                errors={state.errors.patient}
                             />
                         </CardContent>
 
@@ -269,7 +215,7 @@ export const Consultation = (props:any) => {
                                 <Grid item xs={6}>
                                     <DateInputField
                                         label="Admission Date"
-                                        value={state.form.admission_date?state.form.admission_date:selectedDate}
+                                        value={state.form.admission_date}
                                         onChange={(date)=>handleDateChange(date,'admission_date')}
                                         errors={state.errors.admission_date}
                                     />
@@ -277,7 +223,7 @@ export const Consultation = (props:any) => {
                                 <Grid item xs={6}>
                                     <DateInputField
                                         label="Discharge Date"
-                                        value={state.form.discharge_date?state.form.discharge_date:selectedDate}
+                                        value={state.form.discharge_date}
                                         onChange={(date)=>handleDateChange(date,'discharge_date')}
                                         errors={state.errors.discharge_date}
                                     />
@@ -330,19 +276,19 @@ export const Consultation = (props:any) => {
                             />
                         </CardContent>
 
-                        <CardContent>
-                            <InputLabel id="refered-label">Referred To Facility</InputLabel>
-                            <TextInputField
-                                name="referred_to"
-                                variant="outlined"
-                                margin="dense"
-                                type="number"
-                                InputLabelProps={{ shrink: !!state.form.referred_to}}
-                                value={state.form.referred_to}
-                                onChange={handleChange}
-                                errors={state.errors.referred_to}
-                            />
-                        </CardContent>
+                        {/*<CardContent>*/}
+                        {/*    <InputLabel id="refered-label">Referred To Facility</InputLabel>*/}
+                        {/*    <TextInputField*/}
+                        {/*        name="referred_to"*/}
+                        {/*        variant="outlined"*/}
+                        {/*        margin="dense"*/}
+                        {/*        type="number"*/}
+                        {/*        InputLabelProps={{ shrink: !!state.form.referred_to}}*/}
+                        {/*        value={state.form.referred_to}*/}
+                        {/*        onChange={handleChange}*/}
+                        {/*        errors={state.errors.referred_to}*/}
+                        {/*    />*/}
+                        {/*</CardContent>*/}
 
                         <CardActions className="padding16" style={{ justifyContent: "space-between" }}>
                             <Button

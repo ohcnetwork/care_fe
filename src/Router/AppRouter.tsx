@@ -17,14 +17,15 @@ import { DoctorCapacityForm } from '../Components/Facility/DoctorCapacityForm';
 import { PatientManager } from "../Components/Patient/ManagePatients";
 import { PatientHome } from '../Components/Patient/PatientHome';
 import { SampleTest } from '../Components/Patient/SampleTest';
-import { SampleTestList } from '../Components/Patient/SampleTestList';
 import { Consultation } from '../Components/Facility/Consultation';
-import { ConsultationList } from '../Components/Facility/ConsultationList';
+import { DailyRounds } from '../Components/Patient/DailyRounds';
+import { DailyRoundsList } from '../Components/Patient/DailyRoundsList';
+import AmbulanceList from "../Components/Ambulance/AmbulanceList";
 
 const routes = {
-    '/': () => <PrivateDashboard />,
-    '/dash': () => <PrivateDashboard />,
+    '/': () => <HospitalList />,
     '/analytics': () => <Analytics />,
+    '/ambulancelist': () => <AmbulanceList/>,
     '/facility': () => <HospitalList />,
     '/facility/create': () => <FacilityCreate />,
     '/facility/:facilityId/update': ({ facilityId }: any) => <FacilityCreate facilityId={facilityId} />,
@@ -35,14 +36,14 @@ const routes = {
     '/facility/:facilityId/patient': ({ facilityId }: any) => <PatientRegister facilityId={facilityId} />,
     '/facility/:facilityId/patient/:id': ({ facilityId, id }: any) => <PatientHome facilityId={facilityId} id={id} />,
     '/facility/:facilityId/patient/:id/update': ({ facilityId, id }: any) => <PatientRegister facilityId={facilityId} id={id} />,
+    '/facility/:facilityId/patient/:patientId/consultation': ({ facilityId, patientId }: any) => <Consultation facilityId={facilityId} patientId={patientId} />,
+    '/facility/:facilityId/patient/:patientId/consultation/:id': ({ facilityId, patientId, id }: any) => <Consultation facilityId={facilityId} patientId={patientId} id={id} />,
     '/facility/:facilityId/patient/:patientId/sample-test': ({ facilityId, patientId }: any) => <SampleTest facilityId={facilityId} patientId={patientId} />,
-    '/facility/:facilityId/patient/:patientId/sample-test-list': ({ facilityId, patientId }: any) => <SampleTestList facilityId={facilityId} patientId={patientId} />,
-    '/facility/:facilityId/patient/:patientId/sample-test/:id/update': ({ facilityId, patientId, id }: any) => <SampleTest facilityId={facilityId} patientId={patientId} id={id} />,
+    '/facility/:facilityId/patient/:patientId/sample-test/:id': ({ facilityId, patientId, id }: any) => <SampleTest facilityId={facilityId} patientId={patientId} id={id} />,
     '/facility/:facilityId/patient/:id/treatment': ({ facilityId, id }: any) => <TreatmentForm facilityId={facilityId} id={id} />,
     '/facility/:facilityId/bed/:id': ({ facilityId, id }: any) => <BedCapacityForm facilityId={facilityId} id={id} />,
     '/facility/:facilityId/doctor/:id': ({ facilityId, id }: any) => <DoctorCapacityForm facilityId={facilityId} id={id} />,
-    '/facility/:facilityId/consultation':({ facilityId }: any)=> <Consultation facilityId={facilityId} />,
-    '/facility/:facilityId/consultation-list':({ facilityId }: any)=> <ConsultationList facilityId={facilityId} />,
+    '/facility/:facilityId/consultation/:id': ({ facilityId, id }: any) => <Consultation facilityId={facilityId} id={id} />,
     '/patients': () => <PatientManager />,
     '/patient/:id': ({ id }: any) => <PatientHome id={id} />,
     '/patient/tele-consult': () => <TeleConsultation />,
@@ -50,10 +51,12 @@ const routes = {
     '/patient/treatment': () => <TreatmentForm />,
     '/users': () => <ManageUsers />,
     '/join': () => <CareCenterJoinForm />,
+    '/daily-rounds': () => <DailyRounds />,
+    '/daily-rounds-list': () => <DailyRoundsList />
 };
 
 const AppRouter = () => {
-    useRedirect('/', '/dash');
+    useRedirect('/', '/facility');
     const pages = useRoutes(routes);
     return (
         <div>
