@@ -68,8 +68,8 @@ export const SampleTest = (props: any) => {
     const [isLoading, setIsLoading] = useState(false);
 
 
-    const headerText = !id ? "Add Sample Test" : "Edit Sample Test";
-    const buttonText = !id ? "Save" : "Update";
+    const headerText = !id ? "Request Sample" : "Edit Sample Test";
+    const buttonText = !id ? "Confirm your request to send sample for testing" : "Update";
 
 
     // const fetchConsultation = useCallback(async (status: statusType) => {
@@ -236,7 +236,7 @@ export const SampleTest = (props: any) => {
                         </CardContent> */}
 
                         <CardContent>
-                            <InputLabel id="med-history-details-label">Notes</InputLabel>
+                            <InputLabel id="med-history-details-label">Notes (Optional)</InputLabel>
                             <MultilineInputField
                                 rows={5}
                                 name="notes"
