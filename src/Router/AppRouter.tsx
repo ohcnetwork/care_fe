@@ -18,8 +18,6 @@ import { PatientManager } from "../Components/Patient/ManagePatients";
 import { PatientHome } from '../Components/Patient/PatientHome';
 import { SampleTest } from '../Components/Patient/SampleTest';
 import { SampleTestList } from '../Components/Patient/SampleTestList';
-import { Consultation } from '../Components/Facility/Consultation';
-import { ConsultationList } from '../Components/Facility/ConsultationList';
 
 const routes = {
     '/': () => <PrivateDashboard />,
@@ -41,8 +39,6 @@ const routes = {
     '/facility/:facilityId/patient/:id/treatment': ({ facilityId, id }: any) => <TreatmentForm facilityId={facilityId} id={id} />,
     '/facility/:facilityId/bed/:id': ({ facilityId, id }: any) => <BedCapacityForm facilityId={facilityId} id={id} />,
     '/facility/:facilityId/doctor/:id': ({ facilityId, id }: any) => <DoctorCapacityForm facilityId={facilityId} id={id} />,
-    '/facility/:facilityId/consultation':({ facilityId }: any)=> <Consultation facilityId={facilityId} />,
-    '/facility/:facilityId/consultation-list':({ facilityId }: any)=> <ConsultationList facilityId={facilityId} />,
     '/patients': () => <PatientManager />,
     '/patient/:id': ({ id }: any) => <PatientHome id={id} />,
     '/patient/tele-consult': () => <TeleConsultation />,
