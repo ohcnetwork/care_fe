@@ -121,7 +121,9 @@ export const Login = () => {
       <PublicDashboard />
       <div>
         <div className="bg-white mt-4 md:mt-20 border shadow">
-          <CardHeader title="Authorized Login" />
+          <div className="text-2xl font-bold text-center pt-4">
+            Authorized Login
+          </div>
           <form onSubmit={e => handleSubmit(e)}>
             <CardContent>
               <TextInputField

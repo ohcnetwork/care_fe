@@ -105,7 +105,7 @@ const AppRouter = () => {
   return (
     <div className="bg-gray-100">
       <Header />
-      <div className="max-w-3xl mx-auto">{pages}</div>
+      <div className="max-w-3xl mx-auto my-10 md:my-20">{pages}</div>
 
       <div className="bg-white app-footer">
         <div className="max-w-5xl mx-auto flex flex-col p-4">
