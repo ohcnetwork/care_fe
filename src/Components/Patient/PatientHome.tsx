@@ -4,11 +4,12 @@ import { makeStyles } from "@material-ui/core/styles";
 import { useDispatch } from "react-redux";
 import { navigate } from 'hookrouter';
 import { Loading } from '../Common/Loading';
-import { getPatient } from '../../Redux/actions';
+import { getPatient, getConsultationList } from '../../Redux/actions';
 import { PatientModel } from './models';
 import { GENDER_TYPES } from "../../Common/constants";
 import { useAbortableEffect, statusType } from '../../Common/utils';
-import {ConsultationList} from "../Facility/ConsultationList";
+import { ConsultationCard } from "../Facility/ConsultationCard";
+import { ConsultationModal } from '../Facility/models';
 
 
 const useStyles = makeStyles(theme => ({
@@ -32,8 +33,8 @@ const useStyles = makeStyles(theme => ({
         padding: '5px',
         marginBottom: '10px',
     },
-    details:{ 
-        padding:'5px', 
+    details: {
+        padding: '5px',
         marginBottom: '10px',
     }
 }));
@@ -43,13 +44,17 @@ export const PatientHome = (props: any) => {
     const classes = useStyles();
     const dispatch: any = useDispatch();
     const [patientData, setPatientData] = useState<PatientModel>({});
+    const [consultationListData, setConsultationListData] = useState<Array<ConsultationModal>>([]);
     const [isLoading, setIsLoading] = useState(false);
 
     const fetchData = useCallback(async (status: statusType) => {
-        const patientRes = await dispatch(getPatient({ id }));
+        const [patientRes, consultationRes] = await Promise.all([dispatch(getPatient({ id })), dispatch(getConsultationList({ patient: id }))]);
         if (!status.aborted) {
             if (patientRes && patientRes.data) {
                 setPatientData(patientRes.data);
+            }
+            if (consultationRes && consultationRes.data && consultationRes.data.results) {
+                setConsultationListData(consultationRes.data.results);
             }
             setIsLoading(false);
         }
@@ -76,7 +81,7 @@ export const PatientHome = (props: any) => {
             </tr>
         ));
     }
-    
+
     return (
         <div className={`w3-content ${classes.content}`}>
             <h2>Patient</h2>
@@ -95,15 +100,17 @@ export const PatientHome = (props: any) => {
                                 Update Patient Info
                             </Button>
                         </Grid>
+                        <Grid item xs={12} className="w3-center">
+                            <Button fullWidth variant="contained" color="primary" size="small"
+                                onClick={() => navigate(`/facility/${facilityId}/patient/${id}/consultation`)}>
+                                Add Consultation
+                            </Button>
+                        </Grid>
                     </Grid>
                 </Grid>
             </Grid>
-            <Grid container style={{ padding: "10px" }} spacing={1}>
+            {/* <Grid container style={{ padding: "10px" }} spacing={1}>
             <Grid item xs={12} md={6} className="w3-center">
-                <Button fullWidth variant="contained" color="primary" size="small"
-                        onClick={() => navigate(`/facility/${facilityId}/patient/${id}/consultation`)}>
-                    Add Consultation
-                </Button>
             </Grid>
             <Grid item xs={12} md={6} className="w3-center">
                 <Button fullWidth variant="contained" color="primary" size="small"
@@ -111,7 +118,7 @@ export const PatientHome = (props: any) => {
                     View Consultation
                 </Button>
             </Grid>
-            </Grid>
+            </Grid>*/}
             <Grid container style={{ padding: "10px" }} spacing={1}>
                 <Grid item xs={12} md={6} className="w3-center">
                     <Button fullWidth variant="contained" color="primary" size="small"
@@ -147,19 +154,19 @@ export const PatientHome = (props: any) => {
                         </Typography>
                     </div>
                     <div className={classes.details}>
-                        {patientMedHis.length > 0? 
-                    <table className="w3-table w3-table-all">
-                        <thead>
-                            <tr>
-                                <th className="w3-center">Disease</th>
-                                <th className="w3-center">Details</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                          {patientMedHis} 
-                        </tbody>
-                    </table>
-                        :(<span className="w3-center"><h6 className="w3-text-grey">No Medical History so far</h6></span>)}
+                        {patientMedHis.length > 0 ?
+                            <table className="w3-table w3-table-all">
+                                <thead>
+                                    <tr>
+                                        <th className="w3-center">Disease</th>
+                                        <th className="w3-center">Details</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {patientMedHis}
+                                </tbody>
+                            </table>
+                            : (<span className="w3-center"><h6 className="w3-text-grey">No Medical History so far</h6></span>)}
                     </div>
                 </Grid>
 
@@ -171,8 +178,13 @@ export const PatientHome = (props: any) => {
                     </Typography>
                 </div>
 
-                <ConsultationList facilityId={facilityId} patientId={id} />
-
+                <Grid container alignContent="center" justify="center">
+                    <Grid item xs={12}>
+                        {consultationListData.map((itemData, idx) =>
+                            <ConsultationCard itemData={itemData} />
+                        )}
+                    </Grid>
+                </Grid>
             </Grid>
         </div>
     );

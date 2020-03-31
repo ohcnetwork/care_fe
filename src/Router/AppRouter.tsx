@@ -19,7 +19,6 @@ import { PatientHome } from '../Components/Patient/PatientHome';
 import { SampleTest } from '../Components/Patient/SampleTest';
 import { SampleTestList } from '../Components/Patient/SampleTestList';
 import { Consultation } from '../Components/Facility/Consultation';
-import { ConsultationList } from '../Components/Facility/ConsultationList';
 import { DailyRounds } from '../Components/Patient/DailyRounds';
 import { DailyRoundsList } from '../Components/Patient/DailyRoundsList';
 
@@ -38,7 +37,6 @@ const routes = {
     '/facility/:facilityId/patient/:id/update': ({ facilityId, id }: any) => <PatientRegister facilityId={facilityId} id={id} />,
     '/facility/:facilityId/patient/:patientId/consultation': ({ facilityId, patientId }: any) => <Consultation facilityId={facilityId} patientId={patientId} />,
     '/facility/:facilityId/patient/:patientId/consultation/:id': ({ facilityId, patientId, id }: any) => <Consultation facilityId={facilityId} patientId={patientId} id={id} />,
-    '/facility/:facilityId/patient/:patientId/consultation-list': ({ facilityId, patientId }: any) => <ConsultationList facilityId={facilityId} patientId={patientId} />,
     '/facility/:facilityId/patient/:patientId/sample-test': ({ facilityId, patientId }: any) => <SampleTest facilityId={facilityId} patientId={patientId} />,
     '/facility/:facilityId/patient/:patientId/sample-test-list': ({ facilityId, patientId }: any) => <SampleTestList facilityId={facilityId} patientId={patientId} />,
     '/facility/:facilityId/patient/:patientId/sample-test/:id/update': ({ facilityId, patientId, id }: any) => <SampleTest facilityId={facilityId} patientId={patientId} id={id} />,
@@ -46,7 +44,6 @@ const routes = {
     '/facility/:facilityId/bed/:id': ({ facilityId, id }: any) => <BedCapacityForm facilityId={facilityId} id={id} />,
     '/facility/:facilityId/doctor/:id': ({ facilityId, id }: any) => <DoctorCapacityForm facilityId={facilityId} id={id} />,
     '/facility/:facilityId/consultation/:id': ({ facilityId, id }: any) => <Consultation facilityId={facilityId} id={id} />,
-    '/facility/:facilityId/consultation-list': ({ facilityId }: any) => <ConsultationList facilityId={facilityId} />,
     '/patients': () => <PatientManager />,
     '/patient/:id': ({ id }: any) => <PatientHome id={id} />,
     '/patient/tele-consult': () => <TeleConsultation />,
