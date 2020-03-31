@@ -127,25 +127,19 @@ export default function AmbulanceList(props: any) {
                       className={classes.root}>
                     <Card className={classes.card}>
                         <CardHeader className={classes.cardHeader}
-                                    title={<span className={classes.title}><Tooltip title={<span className={classes.toolTip}>{ambulance.owner_name}</span>}
-                                                                                    interactive={true}><span>{ambulance.owner_name}</span></Tooltip></span>}
+                                    title={<span className={classes.title}><Tooltip title={<span className={classes.toolTip}>{ambulance.vehicle_number}</span>}
+                                                                                    interactive={true}><span>{ambulance.vehicle_number}</span></Tooltip></span>}
                         />
                         <CardContent className={classes.content}>
                             <Typography>
-                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Owner Phone Number </span>{ambulance.owner_phone_number}
+                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Owner Name </span>{ambulance.owner_name}
                             </Typography>
                         </CardContent>
                             <CardContent className={classes.content}>
                                 <Typography>
-                                    <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Primary Location : </span>
-                                    {ambulance && ambulance.drivers && ambulance.drivers.primary_district_object && ambulance.drivers.primary_district_object.name}
+                                    <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Owner Number </span>{ambulance.owner_phone_number}
                                 </Typography>
                             </CardContent>
-                        <CardContent className={classes.content}>
-                            <Typography>
-                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Has Free Service: </span>{ambulance.has_free_service}
-                            </Typography>
-                        </CardContent>
                     </Card>
                 </Grid>
             );
