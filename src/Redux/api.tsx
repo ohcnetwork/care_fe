@@ -109,6 +109,9 @@ export default {
         method: 'POST',
         noAuth: true,
     },
+    listAmbulance: {
+        path: '/api/v1/ambulance',
+    },
 
     // Hospital Beds
     createCapacity: {

@@ -18,6 +18,9 @@ export const signupUser = (form: object) => {
 export const postAmbulance = (form: object) => {
     return fireRequest('createAmbulance', [], form);
 };
+export const getAmbulanceList = (paginate: object) => {
+    return fireRequest('listAmbulance', [] , paginate);
+};
 
 // Facility
 export const createFacility = (form: object) => {

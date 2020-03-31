@@ -21,10 +21,12 @@ import { SampleTestList } from '../Components/Patient/SampleTestList';
 import { Consultation } from '../Components/Facility/Consultation';
 import { DailyRounds } from '../Components/Patient/DailyRounds';
 import { DailyRoundsList } from '../Components/Patient/DailyRoundsList';
+import AmbulanceList from "../Components/Ambulance/AmbulanceList";
 
 const routes = {
     '/': () => <HospitalList />,
     '/analytics': () => <Analytics />,
+    '/ambulancelist': () => <AmbulanceList/>,
     '/facility': () => <HospitalList />,
     '/facility/create': () => <FacilityCreate />,
     '/facility/:facilityId/update': ({ facilityId }: any) => <FacilityCreate facilityId={facilityId} />,
