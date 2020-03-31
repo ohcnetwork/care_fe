@@ -100,13 +100,13 @@ export const PatientHome = (props: any) => {
             <Grid container style={{ padding: "10px" }} spacing={1}>
             <Grid item xs={12} md={6} className="w3-center">
                 <Button fullWidth variant="contained" color="primary" size="small"
-                        onClick={() => navigate(`/facility/${facilityId}/consultation/${id}`)}>
+                        onClick={() => navigate(`/facility/${facilityId}/patient/${id}/consultation`)}>
                     Add Consultation
                 </Button>
             </Grid>
             <Grid item xs={12} md={6} className="w3-center">
                 <Button fullWidth variant="contained" color="primary" size="small"
-                        onClick={() => navigate(`/facility/${facilityId}/consultation-list`)}>
+                        onClick={() => navigate(`/facility/${facilityId}/patient/${id}/consultation-list`)}>
                     View Consultation
                 </Button>
             </Grid>

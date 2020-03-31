@@ -101,14 +101,14 @@ export const getSampleTestList = (urlParam: object) => {
     return fireRequest("sampleTestList", [], {}, urlParam)
 }
 
-export const createSampleTest = (form: object,urlParam: object) => {
-    return fireRequest('createSampleTest', [], form,urlParam)
+export const createSampleTest = (form: object, urlParam: object) => {
+    return fireRequest('createSampleTest', [], form, urlParam)
 };
 
-export const getSampleTest = (id:number, urlParam: object) => {
+export const getSampleTest = (id: number, urlParam: object) => {
     return fireRequest('getSampleTest', [id], {}, urlParam)
 };
-export const patchSampleTest = (id:number,form: object, urlParam: object) => {
+export const patchSampleTest = (id: number, form: object, urlParam: object) => {
     return fireRequest('patchSampleTest', [id], form, urlParam)
 };
 
@@ -116,6 +116,6 @@ export const createConsultation = (form: object) => {
     return fireRequest("createConsultation", [], form);
 };
 
-export const getConsultationList = () => {
-    return fireRequest('getConsultationList', [],{});
+export const getConsultationList = (params: object) => {
+    return fireRequest('getConsultationList', [], params);
 };
