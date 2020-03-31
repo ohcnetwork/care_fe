@@ -25,7 +25,6 @@ import { DailyRoundsList } from '../Components/Patient/DailyRoundsList';
 
 const routes = {
     '/': () => <HospitalList />,
-    '/dash': () => <HospitalList />,
     '/analytics': () => <Analytics />,
     '/facility': () => <HospitalList />,
     '/facility/create': () => <FacilityCreate />,
@@ -57,7 +56,7 @@ const routes = {
 };
 
 const AppRouter = () => {
-    useRedirect('/', '/dash');
+    useRedirect('/', '/facility');
     const pages = useRoutes(routes);
     return (
         <div>
