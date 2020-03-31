@@ -154,10 +154,10 @@ export const Consultation = (props:any) => {
                 "admitted": JSON.parse(state.form.admitted),
                 "admission_date": state.form.admission_date,
                 "discharge_date": state.form.discharge_date,
-                "patient": Number(state.form.patient),
-                "facility": Number(state.form.facility),
-                "referred_to": null || Number(state.form.referred_to),
-            }
+                "patient": Number(patientId),
+                "facility": Number(facilityId),
+                "referred_to": null,
+            };
             
             console.log('data: ', data);
             const res = await dispatchAction(createConsultation(data));
@@ -191,7 +191,7 @@ export const Consultation = (props:any) => {
     };
 
     const handleCancel = () => {
-        navigate(`/facility/${facilityId}`);
+        navigate(`/facility/${facilityId}/patient/${patientId}`);
     };
 
 
@@ -218,34 +218,6 @@ export const Consultation = (props:any) => {
                             />
                             <ErrorHelperText
                                 error={state.errors.suggestion}
-                            />
-                        </CardContent>
-
-                        <CardContent>
-                            <InputLabel id="facility-label">Facility</InputLabel>
-                            <TextInputField
-                                name="facility"
-                                variant="outlined"
-                                margin="dense"
-                                type="number"
-                                InputLabelProps={{ shrink: !!state.form.facility}}
-                                value={facilityId}
-                                onChange={handleChange}
-                                errors={state.errors.facility}
-                            />
-                        </CardContent>
-
-                        <CardContent>
-                            <InputLabel id="patient-label">Patient Id</InputLabel>
-                            <TextInputField
-                                name="patient"
-                                variant="outlined"
-                                margin="dense"
-                                type="number"
-                                InputLabelProps={{ shrink: !!state.form.patient}}
-                                value={state.form.patient}
-                                onChange={handleChange}
-                                errors={state.errors.patient}
                             />
                         </CardContent>
 
@@ -330,19 +302,19 @@ export const Consultation = (props:any) => {
                             />
                         </CardContent>
 
-                        <CardContent>
-                            <InputLabel id="refered-label">Referred To Facility</InputLabel>
-                            <TextInputField
-                                name="referred_to"
-                                variant="outlined"
-                                margin="dense"
-                                type="number"
-                                InputLabelProps={{ shrink: !!state.form.referred_to}}
-                                value={state.form.referred_to}
-                                onChange={handleChange}
-                                errors={state.errors.referred_to}
-                            />
-                        </CardContent>
+                        {/*<CardContent>*/}
+                        {/*    <InputLabel id="refered-label">Referred To Facility</InputLabel>*/}
+                        {/*    <TextInputField*/}
+                        {/*        name="referred_to"*/}
+                        {/*        variant="outlined"*/}
+                        {/*        margin="dense"*/}
+                        {/*        type="number"*/}
+                        {/*        InputLabelProps={{ shrink: !!state.form.referred_to}}*/}
+                        {/*        value={state.form.referred_to}*/}
+                        {/*        onChange={handleChange}*/}
+                        {/*        errors={state.errors.referred_to}*/}
+                        {/*    />*/}
+                        {/*</CardContent>*/}
 
                         <CardActions className="padding16" style={{ justifyContent: "space-between" }}>
                             <Button
