@@ -15,22 +15,22 @@ export const ConsultationCard = (props: ConsultationProps) => {
         <CardContent>
             <Grid container justify="space-between" alignItems="center">
                 <Grid item xs={11} container spacing={1}>
-                    <Grid item xs={6}>
+                    <Grid item xs={8}>
                         <Typography>
                             <span className="w3-text-grey">Facility:</span> {itemData.facility_name}
                         </Typography>
                     </Grid>
-                    <Grid item xs={6}>
+                    <Grid item xs={4}>
                         <Typography>
                             <span className="w3-text-grey">Patient:</span> {itemData.patient}
                         </Typography>
                     </Grid>
-                    <Grid item xs={6}>
+                    <Grid item xs={8}>
                         <Typography>
                             <span className="w3-text-grey">Suggestion:</span> {itemData.suggestion_text}
                         </Typography>
                     </Grid>
-                    <Grid item xs={6}>
+                    <Grid item xs={4}>
                         <Typography>
                             <span className="w3-text-grey">Admitted:</span> {itemData.admitted ? 'Yes' : 'No'}
                         </Typography>
