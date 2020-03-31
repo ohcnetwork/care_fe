@@ -7,13 +7,13 @@ import { phonePreg, getArrayValueByKey, getRandomNumbers } from "../../Common/va
 import { navigate } from 'hookrouter';
 import { Loading } from "../Common/Loading";
 import AlertDialog from "../Common/AlertDialog";
-import { PatientModal } from './models';
+import { PatientModel } from './models';
 import { GENDER_TYPES, MEDICAL_HISTORY_CHOICES } from "../../Common/constants";
 import { createPatient, getPatient, updatePatient, getStates, getDistrictByState, getLocalbodyByDistrict } from "../../Redux/actions";
 import { useAbortableEffect, statusType } from '../../Common/utils';
 import * as Notification from '../../Utils/Notifications.js';
 
-interface PatientRegisterProps extends PatientModal {
+interface PatientRegisterProps extends PatientModel {
     facilityId: number;
 }
 

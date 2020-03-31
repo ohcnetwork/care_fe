@@ -1,19 +1,15 @@
-import React, { useState, useReducer, useCallback, useEffect} from "react"
+import React, { useState, useReducer, useCallback, useEffect } from "react"
 import { makeStyles, Theme } from '@material-ui/core/styles';
 import { useDispatch } from "react-redux";
 import { Grid, Card, CardHeader, CardContent, CardActions, Button, FormControl, InputLabel } from "@material-ui/core";
 import { TextInputField, NativeSelectField, ErrorHelperText, MultilineInputField, } from "../Common/HelperInputFields";
 import { navigate } from 'hookrouter';
 import { Loading } from "../Common/Loading";
-// import { PatientModal} from './models';
 import { SAMPLE_TEST_STATUS, SAMPLE_TEST_RESULT } from "../../Common/constants";
 import { createSampleTest, getSampleTest, patchSampleTest } from "../../Redux/actions";
 import { useAbortableEffect, statusType } from '../../Common/utils';
 import * as Notification from '../../Utils/Notifications.js';
 
-// interface SampleTestProps extends PatientModal {
-    
-// }
 
 const initForm: any = {
     status: "",
@@ -63,7 +59,7 @@ const useStyles = makeStyles((theme: Theme) => ({
         background: 'white',
         padding: '2px 10px'
     },
-    
+
 }));
 
 const statusTypes = [{
@@ -77,7 +73,7 @@ const resultTypes = [{
 }, ...SAMPLE_TEST_RESULT]
 
 
-export const SampleTest = (props:any) => {
+export const SampleTest = (props: any) => {
     const classes = useStyles();
     const dispatchAction: any = useDispatch();
     const { facilityId, patientId, id } = props;
@@ -91,24 +87,24 @@ export const SampleTest = (props:any) => {
     const fetchData = useCallback(async (status: statusType) => {
         if (id) {
             setIsLoading(true);
-            const res = await dispatchAction(getSampleTest(id,{patientId,id}));
+            const res = await dispatchAction(getSampleTest(id, { patientId, id }));
             if (!status.aborted) {
-                    if (res && res.data) {
-                        dispatch({
-                            type: "set_form",
-                            form: {
-                                status: res.data.status,
-                                result: res.data.result,
-                                notes: res.data.result,
-                                consultation: res.data.consultation,
-                            }
-                        })
-                    } else {
-                        navigate(`/facility/${facilityId}/patient/${patientId}`);
-                    }
+                if (res && res.data) {
+                    dispatch({
+                        type: "set_form",
+                        form: {
+                            status: res.data.status,
+                            result: res.data.result,
+                            notes: res.data.result,
+                            consultation: res.data.consultation,
+                        }
+                    })
+                } else {
+                    navigate(`/facility/${facilityId}/patient/${patientId}`);
                 }
             }
-            setIsLoading(false);
+        }
+        setIsLoading(false);
     }, [dispatchAction, facilityId, patientId, id]);
 
     useAbortableEffect((status: statusType) => {
@@ -134,7 +130,7 @@ export const SampleTest = (props:any) => {
         return true
     };
 
-    const handleSubmit = async(e: any) => {
+    const handleSubmit = async (e: any) => {
         e.preventDefault();
         const validForm = validateForm();
         if (validForm) {
@@ -145,8 +141,8 @@ export const SampleTest = (props:any) => {
                 "notes": state.form.notes,
                 "consultation": Number(state.form.consultation),
             };
-            
-            const res = await dispatchAction(id?patchSampleTest(id,data,{patientId}):createSampleTest(data,{id,patientId}));
+
+            const res = await dispatchAction(id ? patchSampleTest(id, data, { patientId }) : createSampleTest(data, { id, patientId }));
             setIsLoading(false);
             if (res && res.data) {
                 dispatch({ type: "set_form", form: initForm })
@@ -187,7 +183,7 @@ export const SampleTest = (props:any) => {
         <Grid container alignContent="center" justify="center">
             <Grid item xs={12} sm={10} md={8} lg={6} xl={4}>
                 <Card>
-                    <CardHeader title={headerText}/>
+                    <CardHeader title={headerText} />
                     <form onSubmit={(e) => handleSubmit(e)}>
                         <CardContent>
                             <InputLabel id="demo-simple-select-outlined-label">Status</InputLabel>
@@ -241,7 +237,7 @@ export const SampleTest = (props:any) => {
                                 variant="outlined"
                                 margin="dense"
                                 type="number"
-                                InputLabelProps={{ shrink: !!state.form.consultation}}
+                                InputLabelProps={{ shrink: !!state.form.consultation }}
                                 value={state.form.consultation}
                                 onChange={handleChange}
                                 errors={state.errors.consultation}
