@@ -119,3 +119,7 @@ export const createConsultation = (form: object) => {
 export const getConsultationList = (params: object) => {
     return fireRequest('getConsultationList', [], params);
 };
+
+export const getConsultation = (urlParams: object) => {
+    return fireRequest('getConsultation', [], {}, urlParams);
+};

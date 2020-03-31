@@ -37,6 +37,7 @@ const routes = {
     '/facility/:facilityId/patient': ({ facilityId }: any) => <PatientRegister facilityId={facilityId} />,
     '/facility/:facilityId/patient/:id': ({ facilityId, id }: any) => <PatientHome facilityId={facilityId} id={id} />,
     '/facility/:facilityId/patient/:id/update': ({ facilityId, id }: any) => <PatientRegister facilityId={facilityId} id={id} />,
+    '/facility/:facilityId/patient/:patientId/consultation': ({ facilityId, patientId }: any) => <Consultation facilityId={facilityId} patientId={patientId} />,
     '/facility/:facilityId/patient/:patientId/consultation/:id': ({ facilityId, patientId, id }: any) => <Consultation facilityId={facilityId} patientId={patientId} id={id} />,
     '/facility/:facilityId/patient/:patientId/consultation-list': ({ facilityId, patientId }: any) => <ConsultationList facilityId={facilityId} patientId={patientId} />,
     '/facility/:facilityId/patient/:patientId/sample-test': ({ facilityId, patientId }: any) => <SampleTest facilityId={facilityId} patientId={patientId} />,
