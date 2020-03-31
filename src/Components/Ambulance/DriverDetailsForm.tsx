@@ -171,15 +171,11 @@ export const DriverDetailsForm = (props: DriverDetailsProps) => {
       setIsLoading(true);
       const res = await dispatch(postAmbulance(ambulanceData));
       setIsLoading(false);
-      if (!res.data) {
-        Notification.Error({
-          msg: "Something went wrong..!"
-        });
-      } else {
+      if (res && res.data) {
         Notification.Success({
           msg: "Ambulance added successfully"
         });
-        setTimeout(() => navigate("/"), 3000);
+        navigate("/");
       }
     }
   };
@@ -226,7 +222,7 @@ export const DriverDetailsForm = (props: DriverDetailsProps) => {
                   onChange={handleCheckboxFieldChange}
                   name="isSmartPhone1"
                   label="Has smart phone"
-                />                
+                />
                 <h4>Driver 2</h4>
                 <TextInputField
                   name="driverName2"
@@ -273,7 +269,7 @@ export const DriverDetailsForm = (props: DriverDetailsProps) => {
                 </Box>
                 <h4>Declaration</h4>
                 <Box display="flex">
-                <Box>
+                  <Box>
                     <Checkbox
                       checked={form.agreeConsent}
                       onChange={handleCheckboxFieldChange}

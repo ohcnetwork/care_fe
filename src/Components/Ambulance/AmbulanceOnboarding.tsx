@@ -80,9 +80,9 @@ export default function AmbulanceOnboarding() {
     
     const handleChange = (event: React.ChangeEvent<{}>, newValue: number) => {
         // prevent navigating to driver details without entering vehicle details
-        if (newValue === 1 && !vehicleObj.isValid) {
-          return;
-        }
+        // if (newValue === 1 && !vehicleObj.isValid) {
+        //   return;
+        // }
         setValue(newValue);
     };
     

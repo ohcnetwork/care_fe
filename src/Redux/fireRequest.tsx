@@ -97,7 +97,7 @@ export const fireRequest = (
                 if (localStorage.getItem('care_access_token')) {
                     localStorage.removeItem('care_access_token');
                 }
-                return error.response;
+                return;
             }
 
             // 400 Bad Request Error
@@ -105,6 +105,7 @@ export const fireRequest = (
                 Notification.BadRequest({
                     errs: error.response.data
                 });
+                return;
             }
 
             // 4xx Errors
@@ -119,6 +120,7 @@ export const fireRequest = (
                         msg: 'Something went Wrong...!'
                     });
                 }
+                return;
             }
 
             // 5xx Errors
@@ -126,8 +128,8 @@ export const fireRequest = (
                 Notification.Error({
                     msg: 'Something went Wrong...!'
                 });
+                return;
             }
-            return error.response;
         });
     };
 };
