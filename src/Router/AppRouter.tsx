@@ -17,7 +17,6 @@ import { DoctorCapacityForm } from '../Components/Facility/DoctorCapacityForm';
 import { PatientManager } from "../Components/Patient/ManagePatients";
 import { PatientHome } from '../Components/Patient/PatientHome';
 import { SampleTest } from '../Components/Patient/SampleTest';
-import { SampleTestList } from '../Components/Patient/SampleTestList';
 import { Consultation } from '../Components/Facility/Consultation';
 import { DailyRounds } from '../Components/Patient/DailyRounds';
 import { DailyRoundsList } from '../Components/Patient/DailyRoundsList';
@@ -40,8 +39,7 @@ const routes = {
     '/facility/:facilityId/patient/:patientId/consultation': ({ facilityId, patientId }: any) => <Consultation facilityId={facilityId} patientId={patientId} />,
     '/facility/:facilityId/patient/:patientId/consultation/:id': ({ facilityId, patientId, id }: any) => <Consultation facilityId={facilityId} patientId={patientId} id={id} />,
     '/facility/:facilityId/patient/:patientId/sample-test': ({ facilityId, patientId }: any) => <SampleTest facilityId={facilityId} patientId={patientId} />,
-    '/facility/:facilityId/patient/:patientId/sample-test-list': ({ facilityId, patientId }: any) => <SampleTestList facilityId={facilityId} patientId={patientId} />,
-    '/facility/:facilityId/patient/:patientId/sample-test/:id/update': ({ facilityId, patientId, id }: any) => <SampleTest facilityId={facilityId} patientId={patientId} id={id} />,
+    '/facility/:facilityId/patient/:patientId/sample-test/:id': ({ facilityId, patientId, id }: any) => <SampleTest facilityId={facilityId} patientId={patientId} id={id} />,
     '/facility/:facilityId/patient/:id/treatment': ({ facilityId, id }: any) => <TreatmentForm facilityId={facilityId} id={id} />,
     '/facility/:facilityId/bed/:id': ({ facilityId, id }: any) => <BedCapacityForm facilityId={facilityId} id={id} />,
     '/facility/:facilityId/doctor/:id': ({ facilityId, id }: any) => <DoctorCapacityForm facilityId={facilityId} id={id} />,

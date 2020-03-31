@@ -11,7 +11,7 @@ interface ConsultationProps {
 
 export const ConsultationCard = (props: ConsultationProps) => {
     const { itemData } = props;
-    return (<Card key={`consultation_${itemData.id}`} style={{ marginBottom: '10px' }}>
+    return (<Card style={{ marginBottom: '10px' }}>
         <CardContent>
             <Grid container justify="space-between" alignItems="center">
                 <Grid item xs={11} container spacing={1}>

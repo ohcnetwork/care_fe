@@ -1,7 +1,7 @@
 import React, { useState, useReducer, useCallback, useEffect } from "react"
 import { makeStyles, Theme } from '@material-ui/core/styles';
 import { useDispatch } from "react-redux";
-import { Grid, Card, CardHeader, CardContent, CardActions, Button, FormControl, InputLabel, NativeSelect } from "@material-ui/core";
+import { Grid, Card, CardHeader, CardContent, CardActions, Button, FormControl, InputLabel, NativeSelect, Typography, IconButton } from "@material-ui/core";
 import { TextInputField, NativeSelectField, ErrorHelperText, MultilineInputField, } from "../Common/HelperInputFields";
 import { navigate } from 'hookrouter';
 import { Loading } from "../Common/Loading";
@@ -9,8 +9,7 @@ import { SAMPLE_TEST_STATUS, SAMPLE_TEST_RESULT, OptionsType } from "../../Commo
 import { createSampleTest, getSampleTest, patchSampleTest, getConsultationList } from "../../Redux/actions";
 import { useAbortableEffect, statusType } from '../../Common/utils';
 import * as Notification from '../../Utils/Notifications.js';
-import { ConsultationModal } from "../Facility/models";
-
+import ArrowBackIosOutlinedIcon from '@material-ui/icons/ArrowBackIosOutlined';
 
 const initForm: any = {
     //status: "",
@@ -157,32 +156,32 @@ export const SampleTest = (props: any) => {
 
     const handleSubmit = async (e: any) => {
         e.preventDefault();
-        const validForm = validateForm();
-        if (validForm) {
-            setIsLoading(true);
-            const data = {
-                //status: Number(state.form.status) ? Number(state.form.status) : undefined,
-                //result: Number(state.form.result) ? Number(state.form.result) : undefined,
-                notes: state.form.notes ? state.form.notes : undefined,
-                //consultation: Number(state.form.consultation),
-            };
+        // const validForm = validateForm();
+        // if (validForm) {
+        setIsLoading(true);
+        const data = {
+            //status: Number(state.form.status) ? Number(state.form.status) : undefined,
+            //result: Number(state.form.result) ? Number(state.form.result) : undefined,
+            notes: state.form.notes ? state.form.notes : undefined,
+            //consultation: Number(state.form.consultation),
+        };
 
-            const res = await dispatchAction(id ? patchSampleTest(id, data, { patientId }) : createSampleTest(data, { id, patientId }));
-            setIsLoading(false);
-            if (res && res.data) {
-                dispatch({ type: "set_form", form: initForm })
-                if (id) {
-                    Notification.Success({
-                        msg: "Sample test updated successfully"
-                    });
-                } else {
-                    Notification.Success({
-                        msg: "Sample test created successfully"
-                    });
-                    navigate(`/facility/${facilityId}/patient/${patientId}`);
-                }
+        const res = await dispatchAction(id ? patchSampleTest(id, data, { patientId }) : createSampleTest(data, { id, patientId }));
+        setIsLoading(false);
+        if (res && res.data) {
+            dispatch({ type: "set_form", form: initForm })
+            if (id) {
+                Notification.Success({
+                    msg: "Sample test updated successfully"
+                });
+            } else {
+                Notification.Success({
+                    msg: "Sample test created successfully"
+                });
+                navigate(`/facility/${facilityId}/patient/${patientId}`);
             }
         }
+        //}
     };
 
     const handleChange = (e: any) => {
@@ -192,7 +191,7 @@ export const SampleTest = (props: any) => {
     };
 
     const handleCancel = () => {
-        navigate(`/facility/${facilityId}`);
+        navigate(`/facility/${facilityId}/patient/${patientId}`);
     };
 
 
@@ -204,7 +203,15 @@ export const SampleTest = (props: any) => {
         <Grid container alignContent="center" justify="center">
             <Grid item xs={12} sm={10} md={8} lg={6} xl={4}>
                 <Card>
-                    <CardHeader title={headerText} />
+                    <CardHeader
+                        avatar={
+                            <IconButton onClick={handleCancel}>
+                                <ArrowBackIosOutlinedIcon />
+                            </IconButton>
+                        }
+                        title={<Typography variant="h5">{headerText}</Typography>}
+                        disableTypography={true}
+                    />
                     <form onSubmit={(e) => handleSubmit(e)}>
                         {/* <CardContent>
                             <InputLabel id="demo-simple-select-outlined-label">Status</InputLabel>
@@ -276,27 +283,21 @@ export const SampleTest = (props: any) => {
                         </CardContent> */}
 
 
-                        <CardActions className="padding16" style={{ justifyContent: "space-between" }}>
+                        <CardContent>
                             <Button
-                                color="default"
-                                variant="contained"
-                                type="button"
-                                onClick={(e) => handleCancel()}
-                            >Cancel</Button>
-                            <Button
+                                fullWidth
                                 color="primary"
                                 variant="contained"
                                 type="submit"
-                                style={{ marginLeft: 'auto' }}
                                 onClick={(e) => handleSubmit(e)}
                             >
                                 {buttonText}
                             </Button>
-                        </CardActions>
+                        </CardContent>
                     </form>
                 </Card>
 
             </Grid>
         </Grid>
-    </div>
+    </div >
 };

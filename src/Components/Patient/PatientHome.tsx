@@ -4,11 +4,12 @@ import { makeStyles } from "@material-ui/core/styles";
 import { useDispatch } from "react-redux";
 import { navigate } from 'hookrouter';
 import { Loading } from '../Common/Loading';
-import { getPatient, getConsultationList } from '../../Redux/actions';
-import { PatientModel } from './models';
+import { getPatient, getConsultationList, getSampleTestList } from '../../Redux/actions';
 import { GENDER_TYPES } from "../../Common/constants";
 import { useAbortableEffect, statusType } from '../../Common/utils';
 import { ConsultationCard } from "../Facility/ConsultationCard";
+import { SampleTestCard } from './SampleTestCard';
+import { PatientModel, SampleTestModel } from './models';
 import { ConsultationModal } from '../Facility/models';
 
 
@@ -45,16 +46,24 @@ export const PatientHome = (props: any) => {
     const dispatch: any = useDispatch();
     const [patientData, setPatientData] = useState<PatientModel>({});
     const [consultationListData, setConsultationListData] = useState<Array<ConsultationModal>>([]);
+    const [sampleListData, setSampleListData] = useState<Array<SampleTestModel>>([]);
     const [isLoading, setIsLoading] = useState(false);
 
     const fetchData = useCallback(async (status: statusType) => {
-        const [patientRes, consultationRes] = await Promise.all([dispatch(getPatient({ id })), dispatch(getConsultationList({ patient: id }))]);
+        const [patientRes, consultationRes, sampleRes] = await Promise.all([
+            dispatch(getPatient({ id })), 
+            dispatch(getConsultationList({ patient: id })),
+            dispatch(getSampleTestList({ patientId: id })),
+        ]);
         if (!status.aborted) {
             if (patientRes && patientRes.data) {
                 setPatientData(patientRes.data);
             }
             if (consultationRes && consultationRes.data && consultationRes.data.results) {
                 setConsultationListData(consultationRes.data.results);
+            }
+            if (sampleRes && sampleRes.data && sampleRes.data.results) {
+                setSampleListData(sampleRes.data.results);
             }
             setIsLoading(false);
         }
@@ -106,31 +115,13 @@ export const PatientHome = (props: any) => {
                                 Add Consultation
                             </Button>
                         </Grid>
+                        <Grid item xs={12} className="w3-center">
+                            <Button fullWidth variant="contained" color="primary" size="small"
+                                onClick={() => navigate(`/facility/${facilityId}/patient/${id}/sample-test`)}>
+                                Request Sample Test
+                            </Button>
+                        </Grid>
                     </Grid>
-                </Grid>
-            </Grid>
-            {/* <Grid container style={{ padding: "10px" }} spacing={1}>
-            <Grid item xs={12} md={6} className="w3-center">
-            </Grid>
-            <Grid item xs={12} md={6} className="w3-center">
-                <Button fullWidth variant="contained" color="primary" size="small"
-                        onClick={() => navigate(`/facility/${facilityId}/patient/${id}/consultation-list`)}>
-                    View Consultation
-                </Button>
-            </Grid>
-            </Grid>*/}
-            <Grid container style={{ padding: "10px" }} spacing={1}>
-                <Grid item xs={12} md={6} className="w3-center">
-                    <Button fullWidth variant="contained" color="primary" size="small"
-                        onClick={() => navigate(`/facility/${facilityId}/patient/${id}/sample-test`)}>
-                        Request Sample Test
-                    </Button>
-                </Grid>
-                <Grid item xs={12} md={6} className="w3-center">
-                    <Button fullWidth variant="contained" color="primary" size="small"
-                        onClick={() => navigate(`/facility/${facilityId}/patient/${id}/sample-test-list`)}>
-                        View Sample Test List
-                    </Button>
                 </Grid>
             </Grid>
 
@@ -181,7 +172,23 @@ export const PatientHome = (props: any) => {
                 <Grid container alignContent="center" justify="center">
                     <Grid item xs={12}>
                         {consultationListData.map((itemData, idx) =>
-                            <ConsultationCard itemData={itemData} />
+                            <ConsultationCard itemData={itemData} key={idx} />
+                        )}
+                    </Grid>
+                </Grid>
+            </Grid>
+
+            <Grid item xs={12}>
+                <div className={`w3-black w3-center ${classes.title}`}>
+                    <Typography>
+                        Sample Test History
+                    </Typography>
+                </div>
+
+                <Grid container alignContent="center" justify="center">
+                    <Grid item xs={12}>
+                        {sampleListData.map((itemData, idx) =>
+                            <SampleTestCard itemData={itemData} key={idx} />
                         )}
                     </Grid>
                 </Grid>
