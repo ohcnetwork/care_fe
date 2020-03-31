@@ -168,8 +168,9 @@ export default function AmbulanceList(props: any) {
         );
     } else if (ambulances && ambulances.length === 0) {
         manageAmbulances = (
+
             <Grid item xs={12} md={12} className="textMarginCenter">
-                <h5> No Users Found</h5>
+                <h5 style={{color: 'red'}}> You are not Authorised to access this Page</h5>
             </Grid>
         );
     }

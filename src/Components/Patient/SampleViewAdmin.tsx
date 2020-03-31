@@ -1,19 +1,22 @@
 import React, { useState, useCallback } from 'react';
-import { useDispatch } from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {
     Grid,
     Typography,
     Card,
     CardHeader,
     CardContent,
-    Tooltip
+    Tooltip, Button, InputLabel
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import Pagination from '../Common/Pagination';
 import TitleHeader from '../Common/TitleHeader';
-import {getTestList} from "../../Redux/actions";
+import {getTestList, patchSample} from "../../Redux/actions";
 import { Loading } from '../Common/Loading';
 import { useAbortableEffect, statusType } from '../../Common/utils';
+import * as Notification from "../../Utils/Notifications";
+import {ErrorHelperText, NativeSelectField} from "../Common/HelperInputFields";
+import { SAMPLE_TEST_RESULT } from '../../Common/constants';
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -37,7 +40,7 @@ const useStyles = makeStyles(theme => ({
             width: '12vw'
         },
         [theme.breakpoints.down('sm')]: {
-            width: '40vw'
+            width: '12vw'
         },
         [theme.breakpoints.down('xs')]: {
             width: '65vw'
@@ -89,12 +92,14 @@ export default function SampleViewAdmin(props: any) {
     const dispatch: any = useDispatch();
     const initialData: any[] = [];
     let manageSamples: any = null;
+    const state: any = useSelector(state => state);
+    const { currentUser } = state;
     const [sample, setSample] = useState(initialData);
     const [isLoading, setIsLoading] = useState(false);
     const [totalCount, setTotalCount] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
     const [offset, setOffset] = useState(0);
-
+const [result, setResult] = useState(initialData);;
     const limit = 15;
 
     const fetchData = useCallback(async (status: statusType) => {
@@ -119,17 +124,94 @@ export default function SampleViewAdmin(props: any) {
         setOffset(offset);
     };
 
+    const handleApproval = (status: number, sample: any, result: any) => {
+        const sampleData = {
+            id: sample.id,
+            status,
+            result: result || null,
+            date_of_sample: null,
+            date_of_result: null,
+            consultation : sample.consultation_id
+        };
+        let statusName = '';
+       if(status === 2){
+           statusName = 'Approved'
+       }
+       if(status === 3) {
+           statusName = 'Denied'
+       }
+       if(status === 5) {
+           statusName = 'RECEIVED AND FORWARED'
+       }
+       if(status === 6 ){
+           statusName = 'RECEIVED AT LAB'
+       }
+       if(status === 7){
+           statusName = 'COMPLETED'
+       }
+      dispatch(patchSample(sample.id, sampleData)).then((resp:any) => {
+          if(resp.status === 201 || resp.status === 200) {
+              Notification.Success({
+                  msg: `Request ${statusName}`
+              });
+              window.location.reload();
+          }
+        })
+    };
+let user = currentUser.data;
     let sampleList: any[] = [];
     if (sample && sample.length) {
         sampleList = sample.map((sample: any, idx: number) => {
             return (
                 <Grid item xs={12} md={3} key={`usr_${sample.id}`}
                       className={classes.root}>
-                    <Card className={classes.card}>
+                    <Card className={classes.card} >
                         <CardHeader className={classes.cardHeader}
-                                    title={<span className={classes.title}><Tooltip title={<span className={classes.toolTip}>Consultation Id -{sample.consultation_id}</span>}
-                                                                                    interactive={true}><span>{sample.consultation_Id}</span></Tooltip></span>}
+                                    title={<span className={classes.title}><Tooltip title={<span className={classes.toolTip}>Patient Name -{sample.patient_name}</span>}
+                                                                                    interactive={true}><span>{sample.patient_name}</span></Tooltip></span>}
                         />
+
+                       <CardContent>
+                           {
+                               sample.status === 'REQUEST_SUBMITTED' && user.user_type === 'DistrictAdmin' &&
+                           <Button style={{color: 'green'}} variant="outlined"
+                                   onClick={(e) => handleApproval(2, sample, null)}>
+                               Approve
+                           </Button>
+                           }
+
+                           {' '}
+                           {
+                               sample.status === 'REQUEST_SUBMITTED' && user.user_type === 'DistrictAdmin' &&
+                           <Button style={{color: 'red'}} variant="outlined" onClick={(e) => handleApproval(3, sample, 4)}>
+                               Deny
+                           </Button>
+                           }
+                       </CardContent>
+                        {
+                            sample.status === 'SENT_TO_COLLECTON_CENTRE' && user.user_type === 'DistrictAdmin' &&
+                           <CardContent>
+                               <Button style={{color: 'red'}} variant="outlined" onClick ={ (e) => handleApproval(5, sample, null)}>
+                                   Recieved and forwarded
+                               </Button>
+                           </CardContent>
+                        }
+                        {
+                            sample.status === 'RECEIVED_AND_FORWARED' && user.user_type === 'StateLabAdmin' &&
+                            <CardContent>
+                                <Button style={{color: 'red'}} variant="outlined" onClick ={ (e) => handleApproval(6, sample, null)}>
+                                    Recieved at lab
+                                </Button>
+                            </CardContent>
+                        }
+                        {
+                            sample.status === 'RECEIVED_AT_LAB' && user.user_type === 'StateLabAdmin' &&
+                            <CardContent>
+                                <Button style={{color: 'red'}} variant="outlined" onClick ={ (e) => handleApproval(7, sample, null)}>
+                                    Completed
+                                </Button>
+                            </CardContent>
+                        }
                         <CardContent className={classes.content}>
                             <Typography>
                                 <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Status - </span>{sample.status}
@@ -174,7 +256,7 @@ export default function SampleViewAdmin(props: any) {
     } else if (sample && sample.length === 0) {
         manageSamples = (
             <Grid item xs={12} md={12} className="textMarginCenter">
-                <h5> No Users Found</h5>
+                <h5 style={{color: 'red'}}>Its looks like samples are empty, please visit once you submit a sample request</h5>
             </Grid>
         );
     }

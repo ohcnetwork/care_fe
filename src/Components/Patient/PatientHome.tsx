@@ -1,16 +1,17 @@
 import React, { useState, useCallback } from 'react';
-import { Grid, Typography, Button, Divider, Box } from "@material-ui/core";
+import {Grid, Typography, Button, Divider, Box, CardContent} from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { useDispatch } from "react-redux";
 import { navigate } from 'hookrouter';
 import { Loading } from '../Common/Loading';
-import { getPatient, getConsultationList, getSampleTestList } from '../../Redux/actions';
+import {getPatient, getConsultationList, getSampleTestList, patchSample} from '../../Redux/actions';
 import { GENDER_TYPES } from "../../Common/constants";
 import { useAbortableEffect, statusType } from '../../Common/utils';
 import { ConsultationCard } from "../Facility/ConsultationCard";
 import { SampleTestCard } from './SampleTestCard';
 import { PatientModel, SampleTestModel } from './models';
 import { ConsultationModal } from '../Facility/models';
+import * as Notification from "../../Utils/Notifications";
 
 
 const useStyles = makeStyles(theme => ({
