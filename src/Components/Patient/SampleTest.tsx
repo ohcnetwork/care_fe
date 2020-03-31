@@ -13,10 +13,10 @@ import { ConsultationModal } from "../Facility/models";
 
 
 const initForm: any = {
-    status: "",
-    result: "",
+    //status: "",
+    //result: "",
     notes: "",
-    consultation: "",
+    //consultation: "",
 };
 
 const initialState = {
@@ -24,10 +24,10 @@ const initialState = {
     errors: { ...initForm }
 };
 
-const initConsultationOptions = [{
-    id: 0,
-    text: "Please select a consultation",
-}]
+// const initConsultationOptions = [{
+//     id: 0,
+//     text: "Please select a consultation",
+// }]
 
 
 const sampleTestFormReducer = (state = initialState, action: any) => {
@@ -49,22 +49,22 @@ const sampleTestFormReducer = (state = initialState, action: any) => {
     }
 };
 
-const statusTypes = [{
-    id: 0,
-    text: 'Select',
-}, ...SAMPLE_TEST_STATUS]
+// const statusTypes = [{
+//     id: 0,
+//     text: 'Select',
+// }, ...SAMPLE_TEST_STATUS]
 
-const resultTypes = [{
-    id: 0,
-    text: 'Select',
-}, ...SAMPLE_TEST_RESULT]
+// const resultTypes = [{
+//     id: 0,
+//     text: 'Select',
+// }, ...SAMPLE_TEST_RESULT]
 
 
 export const SampleTest = (props: any) => {
     const dispatchAction: any = useDispatch();
     const { facilityId, patientId, id } = props;
     const [state, dispatch] = useReducer(sampleTestFormReducer, initialState);
-    const [consultationOptions, setConsultationOptions] = useState<Array<OptionsType>>(initConsultationOptions);
+    // const [consultationOptions, setConsultationOptions] = useState<Array<OptionsType>>(initConsultationOptions);
     const [isLoading, setIsLoading] = useState(false);
 
 
@@ -72,31 +72,31 @@ export const SampleTest = (props: any) => {
     const buttonText = !id ? "Save" : "Update";
 
 
-    const fetchConsultation = useCallback(async (status: statusType) => {
-        const res = await dispatchAction(getConsultationList({
-            patient: patientId
-        }));
-        if (!status.aborted) {
-            if (res && res.data && res.data.results) {
-                if (res.data.results.length === 0) {
-                    Notification.Error({
-                        msg: "Please add a consultation before adding a sample test"
-                    });
-                    navigate(`/facility/${facilityId}/patient/${patientId}/consultation`);
-                } else {
-                    setConsultationOptions([
-                        ...initConsultationOptions,
-                        ...res.data.results.map((i: ConsultationModal) => {
-                            return {
-                                id: i.id,
-                                text: `${i.facility_name}-${i.suggestion}`
-                            };
-                        }),
-                    ])
-                }
-            }
-        }
-    }, [dispatchAction, facilityId, patientId]);
+    // const fetchConsultation = useCallback(async (status: statusType) => {
+    //     const res = await dispatchAction(getConsultationList({
+    //         patient: patientId
+    //     }));
+    //     if (!status.aborted) {
+    //         if (res && res.data && res.data.results) {
+    //             if (res.data.results.length === 0) {
+    //                 Notification.Error({
+    //                     msg: "Please add a consultation before adding a sample test"
+    //                 });
+    //                 navigate(`/facility/${facilityId}/patient/${patientId}/consultation`);
+    //             } else {
+    //                 setConsultationOptions([
+    //                     ...initConsultationOptions,
+    //                     ...res.data.results.map((i: ConsultationModal) => {
+    //                         return {
+    //                             id: i.id,
+    //                             text: `${i.facility_name}-${i.suggestion}`
+    //                         };
+    //                     }),
+    //                 ])
+    //             }
+    //         }
+    //     }
+    // }, [dispatchAction, facilityId, patientId]);
 
     const fetchData = useCallback(async (status: statusType) => {
         if (id) {
@@ -107,10 +107,10 @@ export const SampleTest = (props: any) => {
                     dispatch({
                         type: "set_form",
                         form: {
-                            status: res.data.status,
-                            result: res.data.result,
+                            //status: res.data.status,
+                            //result: res.data.result,
                             notes: res.data.result,
-                            consultation: res.data.consultation,
+                            //consultation: res.data.consultation,
                         }
                     })
                 } else {
@@ -123,7 +123,7 @@ export const SampleTest = (props: any) => {
 
     useAbortableEffect((status: statusType) => {
         fetchData(status);
-        fetchConsultation(status)
+        //fetchConsultation(status)
     }, [dispatch, fetchData, patientId, id]);
 
     const validateForm = () => {
@@ -131,18 +131,18 @@ export const SampleTest = (props: any) => {
         let invalidForm = false;
         Object.keys(state.form).forEach((field, i) => {
             switch (field) {
-                // case "notes":
-                //     if (!state.form[field]) {
-                //         errors[field] = "Field is required";
-                //         invalidForm = true;
-                //     }
-                //     break;
-                case "consultation":
-                    if (!Number(state.form[field])) {
+                case "notes":
+                    if (!state.form[field]) {
                         errors[field] = "Field is required";
                         invalidForm = true;
                     }
-                    return;
+                    break;
+                // case "consultation":
+                //     if (!Number(state.form[field])) {
+                //         errors[field] = "Field is required";
+                //         invalidForm = true;
+                //     }
+                //     return;
                 default:
                     return
             }
@@ -161,10 +161,10 @@ export const SampleTest = (props: any) => {
         if (validForm) {
             setIsLoading(true);
             const data = {
-                status: Number(state.form.status) ? Number(state.form.status): undefined,
-                result: Number(state.form.result) ? Number(state.form.result): undefined,
+                //status: Number(state.form.status) ? Number(state.form.status) : undefined,
+                //result: Number(state.form.result) ? Number(state.form.result) : undefined,
                 notes: state.form.notes ? state.form.notes : undefined,
-                consultation: Number(state.form.consultation),
+                //consultation: Number(state.form.consultation),
             };
 
             const res = await dispatchAction(id ? patchSampleTest(id, data, { patientId }) : createSampleTest(data, { id, patientId }));
@@ -206,7 +206,7 @@ export const SampleTest = (props: any) => {
                 <Card>
                     <CardHeader title={headerText} />
                     <form onSubmit={(e) => handleSubmit(e)}>
-                        <CardContent>
+                        {/* <CardContent>
                             <InputLabel id="demo-simple-select-outlined-label">Status</InputLabel>
                             <NativeSelectField
                                 name="status"
@@ -233,7 +233,7 @@ export const SampleTest = (props: any) => {
                             <ErrorHelperText
                                 error={state.errors.result}
                             />
-                        </CardContent>
+                        </CardContent> */}
 
                         <CardContent>
                             <InputLabel id="med-history-details-label">Notes</InputLabel>
@@ -250,7 +250,7 @@ export const SampleTest = (props: any) => {
                             />
                         </CardContent>
 
-                        <CardContent>
+                        {/* <CardContent>
                             <InputLabel id="age-label">Consultation*</InputLabel>
                             <NativeSelectField
                                 name="consultation"
@@ -262,7 +262,7 @@ export const SampleTest = (props: any) => {
                             <ErrorHelperText
                                 error={state.errors.consultation}
                             />
-                            {/* <TextInputField
+                            <TextInputField
                                 defaultValue={"1"}
                                 name="consultation"
                                 variant="outlined"
@@ -272,8 +272,8 @@ export const SampleTest = (props: any) => {
                                 value={state.form.consultation}
                                 onChange={handleChange}
                                 errors={state.errors.consultation}
-                            /> */}
-                        </CardContent>
+                            />
+                        </CardContent> */}
 
 
                         <CardActions className="padding16" style={{ justifyContent: "space-between" }}>
