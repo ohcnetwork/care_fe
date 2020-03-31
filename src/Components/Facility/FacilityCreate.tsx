@@ -104,7 +104,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                     phone_number: res.data.phone_number,
                     latitude: res.data.location ? res.data.location.latitude : "",
                     longitude: res.data.location ? res.data.location.longitude : "",
-                    oxygen_capacity: res.data.oxygen_capacity ? Number(res.data.oxygen_capacity) : "",
+                    oxygen_capacity: res.data.oxygen_capacity ? res.data.oxygen_capacity : "",
                 };
                 dispatch({ type: "set_form", form: formData })
             } else {
@@ -165,10 +165,6 @@ export const FacilityCreate = (props: FacilityProps) => {
                 invalidForm = true;
             } else if (state.form[field] && (field === "latitude" || field === "longitude") && !validateLocationCoordinates(state.form[field])) {
                 errors[field] = "Please enter valid coordinates";
-                invalidForm = true;
-            }
-            if (field === "oxygen_capacity" && isNaN(state.form.oxygen_capacity)) {
-                errors[field] = "Please Enter a Number";
                 invalidForm = true;
             }
         });
