@@ -65,33 +65,6 @@ export const Consultation = (props:any) => {
     const headerText = !id ? "Add Consultation Details" : "Consultation";
     const buttonText = !id ? "Save" : "Update";
 
-    // const fetchData = useCallback(async (status: statusType) => {
-    //     if (id) {
-    //         setIsLoading(true);
-    //         const res = await dispatchAction(getConsultation({id}));
-    //         if (!status.aborted) {
-    //                 if (res && res.data) {
-    //                     dispatch({
-    //                         type: "set_form",
-    //                         form: {
-    //                             status: res.data.status,
-    //                             result: res.data.result,
-    //                             notes: res.data.result,
-    //                             consultation: res.data.consultation,
-    //                         }
-    //                     })
-    //                 } else {
-    //                     navigate(`/facility/${facilityId}/patient/${patientId}`);
-    //                 }
-    //             }
-    //         }
-    //         setIsLoading(false);
-    // }, [dispatchAction, facilityId, patientId, id]);
-
-    // useAbortableEffect((status: statusType) => {
-    //     fetchData(status);
-    // }, [dispatch, fetchData, patientId, id]);
-
     const validateForm = () => {
         let errors = { ...initForm };
         let invalidForm = false;
