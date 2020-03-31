@@ -210,7 +210,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                 const medData = medicalHistoryTypes.find(i => i.id === id);
                 if (medData) {
                     medical_history.push({
-                        disease: medData.text,
+                        disease: medData.id,
                         details: state.form[`medical_history_${medData.id}`]
                     });
                 }
