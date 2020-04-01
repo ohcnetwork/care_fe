@@ -22,6 +22,7 @@ import { DailyRounds } from "../Components/Patient/DailyRounds";
 import { DailyRoundsList } from "../Components/Patient/DailyRoundsList";
 import AmbulanceList from "../Components/Ambulance/AmbulanceList";
 import SampleViewAdmin from "../Components/Patient/SampleViewAdmin";
+import { TriageForm } from "../Components/Facility/TriageForm";
 
 const routes = {
   "/": () => <HospitalList />,
@@ -35,6 +36,9 @@ const routes = {
   ),
   "/facility/:facilityId": ({ facilityId }: any) => (
     <FacilityHome facilityId={facilityId} />
+  ),
+  "/facility/:facilityId/triage": ({ facilityId }: any) => (
+    <TriageForm facilityId={facilityId} />
   ),
   "/facility/:facilityId/bed": ({ facilityId }: any) => (
     <BedCapacityForm facilityId={facilityId} />
@@ -78,6 +82,9 @@ const routes = {
   ),
   "/facility/:facilityId/patient/:id/treatment": ({ facilityId, id }: any) => (
     <TreatmentForm facilityId={facilityId} id={id} />
+  ),
+  "/facility/:facilityId/triage/:id": ({ facilityId,id }: any) => (
+    <TriageForm facilityId={facilityId} id={id} />
   ),
   "/facility/:facilityId/bed/:id": ({ facilityId, id }: any) => (
     <BedCapacityForm facilityId={facilityId} id={id} />

@@ -220,6 +220,16 @@ export default {
     patchSample: {
         path:'/api/v1/test_sample',
         method:'PATCH',
-    }
+    },
+
+    //Triage
+    createTriage:{
+        path:'/api/v1/facility/{facilityId}/patient_stats/',
+        method:'POST'
+    },
+    getTriage:{
+        path:'/api/v1/facility/{facilityId}/patient_stats/{id}/',
+    },
+    
 
 }

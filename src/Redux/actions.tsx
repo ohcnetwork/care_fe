@@ -56,8 +56,10 @@ export const createDoctor = (id: number | undefined, form: object, urlParam: obj
     return id ? fireRequest('updateDoctor', [id], form, urlParam) : fireRequest("createDoctor", [], form, urlParam);
 };
 
-export const createTriageForm = (id: number, data: object) => {
-    return fireRequest('createTriageForm', [id], data)
+export const createTriageForm = (data: object,urlParam:object) => {
+    console.log('urlParam: ', urlParam, data);
+
+    return fireRequest('createTriageForm', [], data, urlParam)
 }
 export const listCapacity = (paginate: object, urlParam: object) => {
     return fireRequest('getCapacity', [], paginate, urlParam);

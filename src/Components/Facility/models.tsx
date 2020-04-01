@@ -48,3 +48,12 @@ export interface ConsultationModal {
     facility?: number;
     referred_to?: number;
 }
+
+export interface PatientStatsModel {
+    id?: number;
+    entryDate?:string;
+    num_patients_visited?: number;
+    num_patients_home_quarantine?: number;
+    num_patients_isolation?: number;
+    num_patient_referred?: number;
+}
