@@ -34,6 +34,7 @@ const useStyles = makeStyles(theme => ({
     overflow: "hidden",
     textOverflow: "ellipsis",
     fontWeight: 400,
+    textTransform: "capitalize",
     //padding: '10px',
     //fontSize: '14px',
     display: "inline-block",
