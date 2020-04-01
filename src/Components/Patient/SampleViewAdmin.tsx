@@ -289,7 +289,7 @@ export default function SampleViewAdmin(props: any) {
                       <Button
                         style={{ color: "red" }}
                         variant="outlined"
-                        // disabled={!result[sample.id.toString()]}
+                        disabled={!result[sample.id.toString()]}
                         onClick={e => handleComplete(7, sample, Number(result[sample.id.toString()]))}
                       >
                         Completed
