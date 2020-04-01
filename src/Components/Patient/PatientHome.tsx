@@ -77,8 +77,8 @@ export const PatientHome = (props: any) => {
     async (status: statusType) => {
       const [patientRes, consultationRes, sampleRes] = await Promise.all([
         dispatch(getPatient({ id })),
-        dispatch(getConsultationList({ patient: id, limit, consultationOffset })),
-        dispatch(getSampleTestList({ patientId: id, limit, sampleListOffset }))
+        dispatch(getConsultationList({ patient: id, limit, offset: consultationOffset })),
+        dispatch(getSampleTestList({ limit, offset: sampleListOffset }, { patientId: id }))
       ]);
       if (!status.aborted) {
         if (patientRes && patientRes.data) {
