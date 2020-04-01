@@ -59,7 +59,6 @@ export const Register = () => {
     age: "",
     password: "",
     c_password: "",
-    state: 1
   };
   const initErr: any = {};
   const [form, setForm] = useState(initForm);
