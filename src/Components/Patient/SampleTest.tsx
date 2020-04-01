@@ -48,15 +48,33 @@ const sampleTestFormReducer = (state = initialState, action: any) => {
     }
 };
 
-// const statusTypes = [{
-//     id: 0,
-//     text: 'Select',
-// }, ...SAMPLE_TEST_STATUS]
+const useStyles = makeStyles((theme: Theme) => ({
+    formControl: {
+        margin: theme.spacing(1)
+    },
+    selectLabel: {
+        background: 'white',
+        padding: '2px 10px'
+    },
+    card: {
+        padding: '16px'
+    },
+    buttonHolder: {
+        padding: '0 16px 16px',
+        justifyContent: 'space-between'
+    }
+}));
 
-// const resultTypes = [{
-//     id: 0,
-//     text: 'Select',
-// }, ...SAMPLE_TEST_RESULT]
+const statusTypes = [{
+    id: 0,
+    text: 'Select',
+}, ...SAMPLE_TEST_STATUS]
+
+const resultTypes = [{
+    id: 0,
+    text: 'Select',
+}, ...SAMPLE_TEST_RESULT]
+
 
 
 
@@ -203,7 +221,7 @@ export const SampleTest = (props: any) => {
     return <div>
         <Grid container alignContent="center" justify="center">
             <Grid item xs={12} sm={10} md={8} lg={6} xl={4}>
-                <Card>
+                <Card className={classes.card}>
                     <CardHeader
                         avatar={
                             <IconButton onClick={handleCancel}>
@@ -299,5 +317,5 @@ export const SampleTest = (props: any) => {
 
             </Grid>
         </Grid>
-    </div >
+    </div>
 };

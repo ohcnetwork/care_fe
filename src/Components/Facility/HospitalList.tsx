@@ -45,7 +45,8 @@ const useStyles = makeStyles(theme => ({
         padding: '5px 10px'
     },
     cardHeader: {
-        padding: '10px'
+        padding: '10px',
+        textTransform: 'capitalize'
     },
     contentText: {
         whiteSpace: 'nowrap',
@@ -78,7 +79,8 @@ const useStyles = makeStyles(theme => ({
         fontSize: '13px'
     },
     toolTip: {
-        fontSize: '13px'
+        fontSize: '13px',
+        textTransform: 'capitalize'
     },
     displayFlex: {
         display: 'flex'

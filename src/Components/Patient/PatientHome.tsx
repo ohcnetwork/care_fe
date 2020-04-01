@@ -31,11 +31,12 @@ const useStyles = makeStyles(theme => ({
         padding: "20px 20px 5px",
     },
     title: {
-        padding: '5px',
+        padding: '12px',
         marginBottom: '10px',
+        borderRadius: '4px'
     },
     details: {
-        padding: '5px',
+        padding: '5px 0',
         marginBottom: '10px',
     }
 }));
@@ -93,8 +94,8 @@ export const PatientHome = (props: any) => {
 
     return (
         <div className={`w3-content ${classes.content}`}>
-            <h2>Patient</h2>
-            <Grid container style={{ padding: "10px", marginBottom: '5px' }} spacing={2}>
+            <h2 style={{ padding: "0 0 0 10px" }}>Patient</h2>
+            <Grid container style={{ padding: "10px", marginBottom: '5px', marginTop: "5px" }} spacing={2}>
                 <Grid item xs={12} md={7}>
                     <Typography variant="h6" component="h6">Name: {patientData.name}</Typography>
                     <Typography>Age : {patientData.age}</Typography>
@@ -130,7 +131,7 @@ export const PatientHome = (props: any) => {
                     <div className={`w3-black ${classes.title}`}>
                         <Typography>
                             Has the patient had contact with someone already diagnosed with Covid 19?
-                      </Typography>
+                        </Typography>
                     </div>
                     <div className={classes.details}>
                         <Typography>
