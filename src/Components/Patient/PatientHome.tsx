@@ -47,7 +47,7 @@ const useStyles = makeStyles(theme => ({
     marginBottom: "10px"
   },
   details: {
-    padding: "5px",
+    padding: "5px 0",
     marginBottom: "10px"
   }
 }));
@@ -124,7 +124,7 @@ export const PatientHome = (props: any) => {
 
   return (
     <div className="px-2">
-      <div className="font-semibold text-3xl p-4 mt-4 border-b-4 border-orange-500">
+      <div className="font-semibold text-3xl p-4 pl-0 mt-4 border-b-4 border-orange-500">
         Patient #{id}
       </div>
 
@@ -196,7 +196,7 @@ export const PatientHome = (props: any) => {
       </div>
 
       <Grid item xs={12}>
-        <div className="font-semibold text-3xl p-4 mt-4 border-b-4 border-orange-500 mb-4">
+        <div className="font-semibold text-3xl p-4 pl-0 mt-4 border-b-4 border-orange-500 mb-4">
           Medical History
         </div>
         <div className={classes.details}>
@@ -219,7 +219,7 @@ export const PatientHome = (props: any) => {
       </Grid>
 
       <div>
-        <div className="font-semibold text-3xl p-4 mt-4 border-b-4 border-orange-500 mb-4">
+        <div className="font-semibold text-3xl p-4 pl-0 mt-4 border-b-4 border-orange-500 mb-4">
           Consultation History
         </div>
 
@@ -229,7 +229,7 @@ export const PatientHome = (props: any) => {
       </div>
 
       <div>
-        <div className="font-semibold text-3xl p-4 mt-4 border-b-4 border-orange-500 mb-4">
+        <div className="font-semibold text-3xl p-4 pl-0 mt-4 border-b-4 border-orange-500 mb-4">
           Sample Test History
         </div>
 

@@ -212,7 +212,7 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
   }
   return (
     <div>
-      <div className="font-semibold text-3xl p-4 mt-4 border-b-4 border-orange-500">
+      <div className="font-semibold text-3xl p-4 pl-0 mt-4 border-b-4 border-orange-500">
         {headerText}
       </div>
       <div>

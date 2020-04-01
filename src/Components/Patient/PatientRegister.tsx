@@ -374,7 +374,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
   return (
     <div>
-      <div className="font-semibold text-3xl p-4 mt-4 border-b-4 border-orange-500">
+      <div className="font-semibold text-3xl p-4 pl-0 mt-4 border-b-4 border-orange-500">
         {headerText}
       </div>
       <div className="mt-4">
@@ -531,7 +531,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
             <CardActions
               className="padding16"
-              style={{ justifyContent: "space-between" }}
+              style={{ justifyContent: "space-between",padding: "15px" }}
             >
               <Button
                 color="default"

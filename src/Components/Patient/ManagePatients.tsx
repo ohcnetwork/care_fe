@@ -224,7 +224,7 @@ export const PatientManager = (props: any) => {
 
   return (
     <div className="px-2">
-      <div className="font-semibold text-3xl p-4 mt-4 border-b-4 border-orange-500">
+      <div className="font-semibold text-3xl p-4 ml-3 pl-0 mt-4 border-b-4 border-orange-500">
         Patients
       </div>
 
