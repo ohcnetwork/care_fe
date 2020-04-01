@@ -82,7 +82,7 @@ export const Consultation = (props: any) => {
   const [state, dispatch] = useReducer(consultationFormReducer, initialState);
   const [isLoading, setIsLoading] = useState(false);
 
-  const headerText = !id ? "Add Consultation Details" : "Consultation";
+  const headerText = !id ? "OP Triage / Consultation" : "Consultation";
   const buttonText = !id ? "Save" : "Update";
 
   const validateForm = () => {
@@ -176,8 +176,8 @@ export const Consultation = (props: any) => {
           <CardHeader title={headerText} />
           <form onSubmit={e => handleSubmit(e)}>
             <CardContent>
-              <InputLabel id="demo-simple-select-outlined-label">
-                Decision after consultation
+              <InputLabel id="demo-simple-select-outlined-label" style={{fontWeight: 'bold'}}>
+                Decision after OP Triage
               </InputLabel>
               <NativeSelectField
                 name="suggestion"
