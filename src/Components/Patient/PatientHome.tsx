@@ -214,6 +214,8 @@ export const PatientHome = (props: any) => {
           Consultation History
         </div>
 
+        {consultationListData.length === 0 && <Typography>No consultations available.</Typography>}
+
         {consultationListData.map((itemData, idx) => (
           <ConsultationCard itemData={itemData} key={idx} />
         ))}
@@ -223,6 +225,8 @@ export const PatientHome = (props: any) => {
         <div className="font-semibold text-3xl p-4 mt-4 border-b-4 border-orange-500 mb-4">
           Sample Test History
         </div>
+
+        {sampleListData.length === 0 && <Typography>No sample test available.</Typography>}
 
         {sampleListData.map((itemData, idx) => (
           <SampleTestCard itemData={itemData} key={idx} />
