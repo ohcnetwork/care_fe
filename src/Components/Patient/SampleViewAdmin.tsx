@@ -126,13 +126,10 @@ export default function SampleViewAdmin(props: any) {
     setOffset(offset);
   };
 
-  const handleApproval = (status: number, sample: any, result: any) => {
+  const handleApproval = (status: number, sample: any) => {
     const sampleData = {
       id: sample.id,
       status,
-      result: result || null,
-      date_of_sample: null,
-      date_of_result: null,
       consultation: sample.consultation_id
     };
     let statusName = "";
@@ -191,7 +188,7 @@ export default function SampleViewAdmin(props: any) {
                   <Button
                     style={{ color: "green" }}
                     variant="outlined"
-                    onClick={e => handleApproval(2, sample, null)}
+                    onClick={e => handleApproval(2, sample)}
                   >
                     Approve
                   </Button>
@@ -201,7 +198,7 @@ export default function SampleViewAdmin(props: any) {
                   <Button
                     style={{ color: "red" }}
                     variant="outlined"
-                    onClick={e => handleApproval(3, sample, 4)}
+                    onClick={e => handleApproval(3, sample)}
                   >
                     Deny
                   </Button>
@@ -213,7 +210,7 @@ export default function SampleViewAdmin(props: any) {
                   <Button
                     style={{ color: "red" }}
                     variant="outlined"
-                    onClick={e => handleApproval(5, sample, null)}
+                    onClick={e => handleApproval(5, sample)}
                   >
                     Recieved and forwarded
                   </Button>
@@ -225,7 +222,7 @@ export default function SampleViewAdmin(props: any) {
                   <Button
                     style={{ color: "red" }}
                     variant="outlined"
-                    onClick={e => handleApproval(6, sample, null)}
+                    onClick={e => handleApproval(6, sample)}
                   >
                     Recieved at lab
                   </Button>
@@ -237,7 +234,7 @@ export default function SampleViewAdmin(props: any) {
                   <Button
                     style={{ color: "red" }}
                     variant="outlined"
-                    onClick={e => handleApproval(7, sample, null)}
+                    onClick={e => handleApproval(7, sample)}
                   >
                     Completed
                   </Button>
@@ -246,7 +243,7 @@ export default function SampleViewAdmin(props: any) {
             <CardContent className={classes.content}>
               <Typography>
                 <span className={`w3-text-gray ${classes.userCardSideTitle}`}>
-                  Status -{" "}
+                  Status - {" "}
                 </span>
                 {sample.status}
               </Typography>
