@@ -160,7 +160,7 @@ export default function SampleViewAdmin(props: any) {
   if (sample && sample.length) {
     sampleList = sample.map((sample: any, idx: number) => {
       return (
-        <div key={`usr_${sample.id}`} className="w-1/2 mt-4 px-2">
+        <div key={`usr_${sample.id}`} className="w-full md:w-1/2 mt-4 px-2">
           <div className="block border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black">
             <CardHeader
               className={classes.cardHeader}

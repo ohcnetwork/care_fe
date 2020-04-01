@@ -29,6 +29,7 @@ import WorkIcon from "@material-ui/icons/Work";
 import TimeToLeaveIcon from "@material-ui/icons/TimeToLeave";
 import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
 import LocalHospitalIcon from "@material-ui/icons/LocalHospital";
+import CancelIcon from "@material-ui/icons/Cancel";
 const img =
   "https://care-staging-coronasafe.s3.amazonaws.com/static/images/logos/black-logo.svg";
 const drawerWidth = 240;
@@ -95,7 +96,7 @@ const Header = () => {
     ""
   )}`;
   const sideBar = (
-    <div className="bg-white z-40">
+    <div className="">
       <div className="m-4 px-2">
         <a href="/">
           <img src={img} alt="care logo" style={{ height: "25px" }} />
@@ -104,23 +105,22 @@ const Header = () => {
       <div>
         {menus.map(item => {
           const parts = item.link.split("/");
+          const selectedClasses = url.includes(parts && parts[1])
+            ? "border-b bg-gray-200 border-grey-500 inline-flex items-center justify-start whitespace-no-wrap font-semibold cursor-pointer hover:bg-gray-300 w-full px-4 py-4 "
+            : "border-b border-grey-300 inline-flex items-center justify-start whitespace-no-wrap font-semibold cursor-pointer hover:bg-gray-300 w-full px-4 py-4 ";
           return (
-            <ListItem
-              button
+            <button
               key={item.title}
               onClick={() => navigate(item.link)}
-              selected={url.includes(parts && parts[1])}
+              className={selectedClasses}
             >
               {item.icon}
-              <ListItemText
-                style={{ marginLeft: "4px" }}
-                primary={item.title}
-              />
-            </ListItem>
+              <span className="pl-4">{item.title}</span>
+            </button>
           );
         })}
         <div
-          className="px-6 py-4 cursor-pointer hover:bg-gray-300"
+          className="border-b border-grey-500 inline-flex items-center justify-start whitespace-no-wrap font-semibold cursor-pointer hover:bg-gray-300 w-full px-4 py-4"
           onClick={() => {
             localStorage.removeItem("care_access_token");
             localStorage.removeItem("care_refresh_token");
@@ -128,7 +128,8 @@ const Header = () => {
             window.location.reload();
           }}
         >
-          Logout
+          <CancelIcon style={{ color: "#666", marginRight: "4px" }} />
+          <span className="pl-4">Logout</span>
         </div>
       </div>
     </div>
@@ -210,7 +211,7 @@ const Header = () => {
   };
 
   return (
-    <div className="header-section bg-white">
+    <div className="shadow-lg bg-white w-full">
       {headerSection()}
       <Hidden smUp implementation="css">
         <Drawer
@@ -228,7 +229,10 @@ const Header = () => {
           {sideBar}
         </Drawer>
       </Hidden>
-      <div className="md:block hidden" style={{ width: "264px" }}>
+      <div
+        className="flex flex-col justify-between overflow-y-auto md:block hidden"
+        style={{ width: "264px" }}
+      >
         <div>{sideBar}</div>
       </div>
     </div>
