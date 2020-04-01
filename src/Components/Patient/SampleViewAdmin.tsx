@@ -262,7 +262,7 @@ export default function SampleViewAdmin(props: any) {
                   </Button>
                 </CardContent>
               )}
-            {
+            {sample.status === "RECEIVED_AT_LAB" &&
               user.user_type === "StateLabAdmin" && (
                 <>
                   <CardContent>
