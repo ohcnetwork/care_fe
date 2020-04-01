@@ -5,7 +5,8 @@ import {
   Button,
   Divider,
   Box,
-  CardContent
+  CardContent,
+  CircularProgress
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { useDispatch } from "react-redux";
@@ -24,6 +25,7 @@ import { SampleTestCard } from "./SampleTestCard";
 import { PatientModel, SampleTestModel } from "./models";
 import { ConsultationModal } from "../Facility/models";
 import * as Notification from "../../Utils/Notifications";
+import Pagination from "../Common/Pagination";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -49,7 +51,10 @@ const useStyles = makeStyles(theme => ({
   details: {
     padding: "5px 0",
     marginBottom: "10px"
-  }
+  },
+  paginateTopPadding: {
+    paddingTop: "50px"
+  },
 }));
 
 export const PatientHome = (props: any) => {
@@ -57,34 +62,27 @@ export const PatientHome = (props: any) => {
   const classes = useStyles();
   const dispatch: any = useDispatch();
   const [patientData, setPatientData] = useState<PatientModel>({});
-  const [consultationListData, setConsultationListData] = useState<
-    Array<ConsultationModal>
-  >([]);
-  const [sampleListData, setSampleListData] = useState<Array<SampleTestModel>>(
-    []
-  );
+  const [consultationListData, setConsultationListData] = useState<Array<ConsultationModal>>([]);
+  const [sampleListData, setSampleListData] = useState<Array<SampleTestModel>>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [totalConsultationCount, setTotalConsultationCount] = useState(0);
+  const [currentConsultationPage, setCurrentConsultationPage] = useState(1);
+  const [consultationOffset, setConsultationOffset] = useState(0);
+  const [totalSampleListCount, setTotalSampleListCount] = useState(0);
+  const [currentSampleListPage, setCurrentSampleListPage] = useState(1);
+  const [sampleListOffset, setSampleListOffset] = useState(0);
+  const [isConsultationLoading, setIsConsultationLoading] = useState(false);
+  const [isSampleLoading, setIsSampleLoading] = useState(false);
 
-  const fetchData = useCallback(
+  const limit = 5;
+
+  const fetchpatient = useCallback(
     async (status: statusType) => {
-      const [patientRes, consultationRes, sampleRes] = await Promise.all([
-        dispatch(getPatient({ id })),
-        dispatch(getConsultationList({ patient: id })),
-        dispatch(getSampleTestList({ patientId: id }))
-      ]);
+      setIsLoading(true);
+      const patientRes = await dispatch(getPatient({ id }));
       if (!status.aborted) {
         if (patientRes && patientRes.data) {
           setPatientData(patientRes.data);
-        }
-        if (
-          consultationRes &&
-          consultationRes.data &&
-          consultationRes.data.results
-        ) {
-          setConsultationListData(consultationRes.data.results);
-        }
-        if (sampleRes && sampleRes.data && sampleRes.data.results) {
-          setSampleListData(sampleRes.data.results);
         }
         setIsLoading(false);
       }
@@ -92,13 +90,72 @@ export const PatientHome = (props: any) => {
     [dispatch, id]
   );
 
+  const fetchConsultation = useCallback(
+    async (status: statusType) => {
+      setIsConsultationLoading(true);
+      const consultationRes = await dispatch(getConsultationList({ patient: id, limit, offset: consultationOffset }));
+      if (!status.aborted) {
+        if (
+          consultationRes &&
+          consultationRes.data &&
+          consultationRes.data.results
+        ) {
+          setConsultationListData(consultationRes.data.results);
+          setTotalConsultationCount(consultationRes.data.count);
+        }
+        setIsConsultationLoading(false);
+      }
+    },
+    [dispatch, id, consultationOffset]
+  );
+
+  const fetchSampleTest = useCallback(
+    async (status: statusType) => {
+      setIsSampleLoading(true);
+      const sampleRes = await dispatch(getSampleTestList({ limit, offset: sampleListOffset }, { patientId: id }));
+      if (!status.aborted) {
+        if (sampleRes && sampleRes.data && sampleRes.data.results) {
+          setSampleListData(sampleRes.data.results);
+          setTotalSampleListCount(sampleRes.data.count);
+        }
+        setIsSampleLoading(false);
+      }
+    },
+    [dispatch, id, sampleListOffset]
+  );
+
   useAbortableEffect(
     (status: statusType) => {
-      setIsLoading(true);
-      fetchData(status);
+      fetchpatient(status);
     },
-    [dispatch, fetchData]
+    [dispatch, fetchpatient]
   );
+
+  useAbortableEffect(
+    (status: statusType) => {
+      fetchConsultation(status);
+    },
+    [dispatch, fetchConsultation]
+  );
+
+  useAbortableEffect(
+    (status: statusType) => {
+      fetchSampleTest(status);
+    },
+    [dispatch, fetchSampleTest]
+  );
+
+  const handleConsultationPagination = (page: number, limit: number) => {
+    const offset = (page - 1) * limit;
+    setCurrentConsultationPage(page);
+    setConsultationOffset(offset);
+  };
+
+  const handleSampleListPagination = (page: number, limit: number) => {
+    const offset = (page - 1) * limit;
+    setCurrentSampleListPage(page);
+    setSampleListOffset(offset);
+  };
 
   if (isLoading) {
     return <Loading />;
@@ -122,13 +179,35 @@ export const PatientHome = (props: any) => {
     ));
   }
 
+  let consultationList, sampleList;
+
+  if (isConsultationLoading) {
+    consultationList = <CircularProgress size={20} />;
+  } else if (consultationListData.length === 0) {
+    consultationList = <Typography>No consultations available.</Typography>
+  } else if (consultationListData.length > 0) {
+    consultationList = consultationListData.map((itemData, idx) => (
+      <ConsultationCard itemData={itemData} key={idx} />
+    ));
+  } 
+
+  if (isSampleLoading) {
+    sampleList = <CircularProgress size={20} />;
+  } else if (sampleListData.length === 0) {
+    sampleList = <Typography>No sample test available.</Typography>
+  } else if (sampleListData.length > 0) {
+    sampleList = sampleListData.map((itemData, idx) => (
+      <SampleTestCard itemData={itemData} key={idx} />
+    ));
+  } 
+
   return (
     <div className="px-2">
       <div className="font-semibold text-3xl p-4 pl-0 mt-4 border-b-4 border-orange-500">
         Patient #{id}
       </div>
 
-      <div className="block border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black mt-4 p-4 ">
+      <div className="flex justify-between border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black mt-4 p-4 ">
         <div className="max-w-md">
           <div>
             <span className="font-semibold">Name: </span>
@@ -162,9 +241,7 @@ export const PatientHome = (props: any) => {
               onClick={() =>
                 navigate(`/facility/${facilityId}/patient/${id}/update`)
               }
-            >
-              Update Patient Info
-            </Button>
+            >Update Patient Info</Button>
           </div>
           <div className="mt-2">
             <Button
@@ -175,27 +252,21 @@ export const PatientHome = (props: any) => {
               onClick={() =>
                 navigate(`/facility/${facilityId}/patient/${id}/consultation`)
               }
-            >
-              Add Consultation
-            </Button>
+            >Add Consultation</Button>
           </div>
-          {!consultationListData &&
           <div className="mt-2">
-            <Button
+          <Button
               fullWidth
               variant="contained"
               color="primary"
               size="small"
+              disabled={!consultationListData || !consultationListData.length}
               onClick={() =>
                 navigate(`/facility/${facilityId}/patient/${id}/sample-test`)
               }
-            >
-              Request Sample Test
-            </Button>
+            >Request Sample Test</Button>
           </div>
-          }
         </div>
-
       </div>
 
       <Grid item xs={12}>
@@ -214,10 +285,10 @@ export const PatientHome = (props: any) => {
               <tbody>{patientMedHis}</tbody>
             </table>
           ) : (
-            <span className="w3-center">
-              <h6 className="w3-text-grey">No Medical History so far</h6>
-            </span>
-          )}
+              <span className="w3-center">
+                <h6 className="w3-text-grey">No Medical History so far</h6>
+              </span>
+            )}
         </div>
       </Grid>
 
@@ -225,20 +296,34 @@ export const PatientHome = (props: any) => {
         <div className="font-semibold text-3xl p-4 pl-0 mt-4 border-b-4 border-orange-500 mb-4">
           Consultation History
         </div>
-
-        {consultationListData.map((itemData, idx) => (
-          <ConsultationCard itemData={itemData} key={idx} />
-        ))}
+        {consultationList}
+        {!isConsultationLoading && totalConsultationCount > limit && (
+          <Grid container className={`w3-center ${classes.paginateTopPadding}`}>
+            <Pagination
+              cPage={currentConsultationPage}
+              defaultPerPage={limit}
+              data={{ totalCount: totalConsultationCount }}
+              onChange={handleConsultationPagination}
+            />
+          </Grid>
+        )}
       </div>
 
       <div>
         <div className="font-semibold text-3xl p-4 pl-0 mt-4 border-b-4 border-orange-500 mb-4">
           Sample Test History
         </div>
-
-        {sampleListData.map((itemData, idx) => (
-          <SampleTestCard itemData={itemData} key={idx} />
-        ))}
+        {sampleList}
+        {!isSampleLoading && totalSampleListCount > limit && (
+          <Grid container className={`w3-center ${classes.paginateTopPadding}`}>
+            <Pagination
+              cPage={currentSampleListPage}
+              defaultPerPage={limit}
+              data={{ totalCount: totalSampleListCount }}
+              onChange={handleSampleListPagination}
+            />
+          </Grid>
+        )}
       </div>
     </div>
   );
