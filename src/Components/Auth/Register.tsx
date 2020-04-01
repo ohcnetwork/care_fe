@@ -26,7 +26,7 @@ const optionalFields = [
   "skill",
   "district",
   "gender",
-  "user_type"
+  "user_type",
 ];
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -58,7 +58,8 @@ export const Register = () => {
     gender: "",
     age: "",
     password: "",
-    c_password: ""
+    c_password: "",
+    state: 1
   };
   const initErr: any = {};
   const [form, setForm] = useState(initForm);
