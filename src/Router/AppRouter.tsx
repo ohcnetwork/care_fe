@@ -105,12 +105,12 @@ const AppRouter = () => {
   return (
     <div className="min-h-full flex flex-col items-stretch">
       <div className="flex-grow bg-gray-100">
-        <div className="antialiased flex h-screen overflow-hidden">
+        <div className="antialiased flex flex-col md:flex-row  h-screen overflow-hidden">
           <div className="flex school-admin-navbar flex-shrink-0">
             <Header />
           </div>
           <div className="flex-1 flex flex-col bg-gray-200 overflow-y-auto">
-            <div className="max-w-3xl mx-auto my-4 mdLmy-10 flex-1">
+            <div className="max-w-3xl mx-auto my-4 mdLmy-10 flex-1 w-full">
               {pages}
             </div>
           </div>

@@ -211,7 +211,7 @@ const Header = () => {
   };
 
   return (
-    <div className="shadow-lg bg-white">
+    <div className="shadow-lg bg-white w-full">
       {headerSection()}
       <Hidden smUp implementation="css">
         <Drawer
