@@ -8,7 +8,8 @@ import {
   CardContent,
   Tooltip,
   Button,
-  InputLabel
+  InputLabel,
+  Box
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import Pagination from "../Common/Pagination";
@@ -22,6 +23,7 @@ import {
   NativeSelectField
 } from "../Common/HelperInputFields";
 import { SAMPLE_TEST_RESULT } from "../../Common/constants";
+import moment from 'moment';
 import {navigate} from "hookrouter";
 
 const useStyles = makeStyles(theme => ({
@@ -96,8 +98,14 @@ export default function SampleViewAdmin(props: any) {
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [offset, setOffset] = useState(0);
-  const [result, setResult] = useState(initialData);
+  const [result, setResult] = useState<any>({});
   const limit = 15;
+
+  const resultTypes = [{
+        id: 0,
+        text: 'Select',
+    }, ...SAMPLE_TEST_RESULT];
+    
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -125,6 +133,12 @@ export default function SampleViewAdmin(props: any) {
     const offset = (page - 1) * limit;
     setCurrentPage(page);
     setOffset(offset);
+  };
+
+  const handleChange = (e: any) => {
+    let results = { ...result };
+    results[e.target.name] = e.target.value;
+    setResult(results);
   };
 
   const handleApproval = (status: number, sample: any) => {
@@ -252,17 +266,31 @@ export default function SampleViewAdmin(props: any) {
                   </Button>
                 </CardContent>
               )}
-            {sample.status === "RECEIVED_AT_LAB" &&
+            {
               user.user_type === "StateLabAdmin" && (
-                <CardContent>
-                  <Button
-                    style={{ color: "red" }}
-                    variant="outlined"
-                    onClick={e => handleComplete(7, sample, 1)}
-                  >
-                    Completed
+                <>
+                  <CardContent>
+                    <Box display="flex" >
+                      <Box flex="1" style={{marginRight:'4px'}}>
+                        <InputLabel id="result-select-label">Result</InputLabel>
+                        <NativeSelectField
+                          name={sample.id.toString()}
+                          variant="outlined"
+                          value={result[sample.id.toString()]}
+                          options={resultTypes}
+                          onChange={handleChange}
+                        />
+                      </Box>
+                      <Button
+                        style={{ color: "red" }}
+                        variant="outlined"
+                        onClick={e => handleComplete(7, sample, Number(result[sample.id.toString()]))}
+                      >
+                        Completed
                   </Button>
-                </CardContent>
+                    </Box>
+                  </CardContent>
+                </>
               )}
             <CardContent className={classes.content}>
               <Typography>
@@ -285,7 +313,7 @@ export default function SampleViewAdmin(props: any) {
                 <span className={`w3-text-gray ${classes.userCardSideTitle}`}>
                   Date Of Sample -{" "}
                 </span>
-                {sample.date_of_sample}
+                {moment(sample.date_of_sample).format('lll')}
               </Typography>
             </CardContent>
           </div>
@@ -329,7 +357,9 @@ export default function SampleViewAdmin(props: any) {
         Sample Collection
       </div>
 
-      <div className="flex flex-wrap mt-4">{manageSamples}</div>
+      <div className="flex flex-wrap mt-4">
+        {manageSamples}
+      </div>
     </div>
   );
 }
