@@ -1,20 +1,17 @@
-import React, { useEffect, useState, useCallback } from "react";
-import Grid from "@material-ui/core/Grid";
+import React, { useState, useCallback } from "react";
+import { useDispatch } from "react-redux";
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  Tooltip,
+  Grid,
   Typography,
-  Box
+  Card,
+  CardHeader,
+  CardContent,
+  Tooltip
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { useDispatch } from "react-redux";
-import { getFacilities, getAllPatient } from "../../Redux/actions";
-import TitleHeader from "../Common/TitleHeader";
 import Pagination from "../Common/Pagination";
-import AddCard from "../Common/AddCard";
-import { navigate } from "hookrouter";
+import TitleHeader from "../Common/TitleHeader";
+import { getAmbulanceList, getUserList } from "../../Redux/actions";
 import { Loading } from "../Common/Loading";
 import { useAbortableEffect, statusType } from "../../Common/utils";
 
@@ -26,8 +23,7 @@ const useStyles = makeStyles(theme => ({
   card: {
     height: 160,
     width: "100%",
-    backgroundColor: "#FFFFFF",
-    cursor: "pointer"
+    backgroundColor: "#FFFFFF"
   },
   title: {
     whiteSpace: "nowrap",
@@ -85,23 +81,15 @@ const useStyles = makeStyles(theme => ({
   },
   toolTip: {
     fontSize: "13px"
-  },
-  displayFlex: {
-    display: "flex"
-  },
-  minHeight: {
-    minHeight: "65vh"
   }
 }));
 
-export const PatientManager = (props: any) => {
-  const { facilityId } = props;
+export default function AmbulanceList(props: any) {
   const classes = useStyles();
   const dispatch: any = useDispatch();
   const initialData: any[] = [];
-  const [data, setData] = useState(initialData);
-
-  let managePatients: any = null;
+  let manageAmbulances: any = null;
+  const [ambulances, setAmbulances] = useState(initialData);
   const [isLoading, setIsLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
@@ -112,10 +100,10 @@ export const PatientManager = (props: any) => {
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const res = await dispatch(getAllPatient({ limit, offset }));
+      const res = await dispatch(getAmbulanceList({ limit, offset }));
       if (!status.aborted) {
         if (res && res.data) {
-          setData(res.data.results);
+          setAmbulances(res.data.results);
           setTotalCount(res.data.count);
         }
         setIsLoading(false);
@@ -137,56 +125,44 @@ export const PatientManager = (props: any) => {
     setOffset(offset);
   };
 
-  let patientList: any[] = [];
-  if (data && data.length) {
-    patientList = data.map((patient: any, idx: number) => {
-      const patientUrl = facilityId
-        ? `/facility/${facilityId}/patient/${patient.id}`
-        : `/patient/${patient.id}`;
+  let ambulanceList: any[] = [];
+  if (ambulances && ambulances.length) {
+    ambulanceList = ambulances.map((ambulance: any, idx: number) => {
       return (
-        <div key={`usr_${patient.id}`} className="w-full md:w-1/2 mt-4 px-2">
-          <div
-            className="block border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black"
-            onClick={() => navigate(patientUrl)}
-          >
+        <div key={`usr_${ambulance.id}`} className="w-full md:w-1/2 mt-4 px-2">
+          <div className="block border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black">
             <CardHeader
               className={classes.cardHeader}
               title={
                 <span className={classes.title}>
                   <Tooltip
                     title={
-                      <span className={classes.toolTip}>{patient.name}</span>
+                      <span className={classes.toolTip}>
+                        {ambulance.vehicle_number}
+                      </span>
                     }
                     interactive={true}
                   >
-                    <span>{patient.name}</span>
+                    <span>{ambulance.vehicle_number}</span>
                   </Tooltip>
                 </span>
               }
             />
             <CardContent className={classes.content}>
-              <Box>
+              <Typography>
                 <span className={`w3-text-gray ${classes.userCardSideTitle}`}>
-                  Age -{" "}
+                  Owner Name{" "}
                 </span>
-                <span>{patient.age}</span>
-              </Box>
+                {ambulance.owner_name}
+              </Typography>
             </CardContent>
             <CardContent className={classes.content}>
-              <Box>
+              <Typography>
                 <span className={`w3-text-gray ${classes.userCardSideTitle}`}>
-                  Contact with Covid Patient -{" "}
+                  Owner Number{" "}
                 </span>
-                <span>{patient.contact_with_carrier ? "Yes" : "No"}</span>
-              </Box>
-            </CardContent>
-            <CardContent className={classes.content}>
-              <Box>
-                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>
-                  Status -{" "}
-                </span>
-                <span>{patient.is_active ? "Active" : "Inactive"}</span>
-              </Box>
+                {ambulance.owner_phone_number}
+              </Typography>
             </CardContent>
           </div>
         </div>
@@ -194,12 +170,12 @@ export const PatientManager = (props: any) => {
     });
   }
 
-  if (isLoading || !data) {
-    managePatients = <Loading />;
-  } else if (data && data.length) {
-    managePatients = (
+  if (isLoading || !ambulances) {
+    manageAmbulances = <Loading />;
+  } else if (ambulances && ambulances.length) {
+    manageAmbulances = (
       <>
-        {patientList}
+        {ambulanceList}
         {totalCount > limit && (
           <Grid container className={`w3-center ${classes.paginateTopPadding}`}>
             <Pagination
@@ -212,23 +188,24 @@ export const PatientManager = (props: any) => {
         )}
       </>
     );
-  } else if (data && data.length === 0) {
-    managePatients = (
-      <Grid item xs={12} md={12} className={classes.displayFlex}>
-        <Grid container justify="center" alignItems="center">
-          <h5> No Patients Found</h5>
-        </Grid>
+  } else if (ambulances && ambulances.length === 0) {
+    manageAmbulances = (
+      <Grid item xs={12} md={12} className="textMarginCenter">
+        <h5 style={{ color: "red" }}>
+          {" "}
+          You are not Authorised to access this Page
+        </h5>
       </Grid>
     );
   }
 
   return (
-    <div className="px-2">
+    <div>
       <div className="font-semibold text-3xl p-4 mt-4 border-b-4 border-orange-500">
-        Patients
+        Ambulances
       </div>
 
-      <div className="flex flex-wrap mt-4">{managePatients}</div>
+      <div className="flex flex-wrap mt-4">{manageAmbulances}</div>
     </div>
   );
-};
+}

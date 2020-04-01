@@ -4,6 +4,7 @@ export default {
     login: {
         path: '/api/v1/auth/login/',
         method: 'POST',
+        noAuth: true,
     },
 
     token_refresh: {
@@ -15,7 +16,6 @@ export default {
         path: '/api/v1/auth/token/verify',
         method: 'POST'
     },
-
 
     // User Endpoints
     currentUser: {
@@ -29,10 +29,10 @@ export default {
         path: '/api/v1/users',
     },
 
-
     createUser: {
         path: '/api/v1/users/',
-        method: 'POST'
+        method: 'POST',
+        noAuth: true,
     },
 
     updateUser: {
@@ -79,12 +79,38 @@ export default {
         path: '/api/v1/facility',
         method: 'DELETE'
     },
+    getConsultationList:{
+        path:'/api/v1/consultation/'
+    },
+    createConsultation:{
+        path:'/api/v1/consultation/',
+        method:'POST',
+    },
+    getConsultation:{
+        path:'/api/v1/consultation/{id}/',
+    },
+    updateConsultation: {
+        path: '/api/v1/consultation/{id}/',
+        method: 'PUT',
+    },
+    partialUpdateConsultation: {
+        path: '/api/v1/consultation/{id}/',
+        method: 'PATCH'
+    },
+    deleteConsultation: {
+        path: '/api/v1/consultation/{id}/',
+        method: 'DELETE'
+    },
 
     // Ambulance
 
     createAmbulance: {
-        path: '/api/v1/ambulance/',
-        method: 'POST'
+        path: '/api/v1/ambulance/create/',
+        method: 'POST',
+        noAuth: true,
+    },
+    listAmbulance: {
+        path: '/api/v1/ambulance',
     },
 
     // Hospital Beds
@@ -115,6 +141,12 @@ export default {
         path: '/api/v1/facility/{facilityId}/hospital_doctor',
         method: 'PUT'
     },
+
+    createTriageForm: {
+        path: '/api/v1/facility/{facilityId/patient_stats/',
+        method: 'POST'
+    },
+
     // //Care Center
     // createCenter: {
     //     path: "/api/v1/carecenter/",
@@ -169,10 +201,10 @@ export default {
         path: "/api/v1/district/{id}/",
     },
     getDistrictByState: {
-        path: "/state/id/districts/",
+        path: "/api/v1/state/{id}/districts/",
     },
 
-    // Districts
+    // Local Body
     localBodyList: {
         path: "/api/v1/local_body/",
     },
@@ -180,6 +212,24 @@ export default {
         path: "/api/v1/local_body/{id}/",
     },
     getLocalbodyByDistrict: {
-        path: "/district/id/local_bodies/",
+        path: "/api/v1/district/{id}/local_bodies/",
     },
+    getTestSampleList: {
+        path: '/api/v1/test_sample'
+    },
+    patchSample: {
+        path:'/api/v1/test_sample',
+        method:'PATCH',
+    },
+
+    //Triage
+    createTriage:{
+        path:'/api/v1/facility/{facilityId}/patient_stats/',
+        method:'POST'
+    },
+    getTriage:{
+        path:'/api/v1/facility/{facilityId}/patient_stats/{id}/',
+    },
+    
+
 }

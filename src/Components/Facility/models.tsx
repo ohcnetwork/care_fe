@@ -32,3 +32,28 @@ export interface OptionsType {
     text: string;
     disabled?: boolean;
 }
+
+export interface ConsultationModal {
+    id?: number;
+    facility_name?: string;
+    examination_details?: string;
+    existing_medication?: string;
+    prescribed_medication?: string;
+    suggestion?: string;
+    suggestion_text?: string;
+    admitted?: boolean;
+    admission_date?: string;
+    discharge_date?: string;
+    patient?: number;
+    facility?: number;
+    referred_to?: number;
+}
+
+export interface PatientStatsModel {
+    id?: number;
+    entryDate?:string;
+    num_patients_visited?: number;
+    num_patients_home_quarantine?: number;
+    num_patients_isolation?: number;
+    num_patient_referred?: number;
+}
