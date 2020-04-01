@@ -24,6 +24,7 @@ import {
 } from "../Common/HelperInputFields";
 import { SAMPLE_TEST_RESULT } from "../../Common/constants";
 import moment from 'moment';
+import {navigate} from "hookrouter";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -191,6 +192,7 @@ export default function SampleViewAdmin(props: any) {
       }
     });
   };
+
   let user = currentUser.data;
   let sampleList: any[] = [];
   if (sample && sample.length) {
@@ -200,6 +202,9 @@ export default function SampleViewAdmin(props: any) {
           <div className="block border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black">
             <CardHeader
               className={classes.cardHeader}
+              onClick={() => {
+                navigate(`/facility/${sample.facility_id}/patient/${sample.patient_id}`)
+              }}
               title={
                 <span className={classes.title}>
                   <Tooltip
@@ -250,7 +255,8 @@ export default function SampleViewAdmin(props: any) {
                   </Button>
                 </CardContent>
               )}
-            {sample.status === "RECEIVED_AND_FORWARED" &&
+            {
+              sample.status === "RECEIVED_AND_FORWARED" &&
               user.user_type === "StateLabAdmin" && (
                 <CardContent>
                   <Button

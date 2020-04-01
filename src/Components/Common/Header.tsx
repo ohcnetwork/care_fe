@@ -131,6 +131,13 @@ const Header = () => {
           <CancelIcon style={{ color: "#666", marginRight: "4px" }} />
           <span className="pl-4">Logout</span>
         </div>
+        <div
+            className="border-b border-grey-500 inline-flex items-center justify-start whitespace-no-wrap font-semibold cursor-pointer hover:bg-gray-300 w-full px-4 py-4"
+
+        >
+          <PersonIcon style={{ color: "#666", marginRight: "4px" }} />
+          <span className="pl-4">{loginUser}</span>
+        </div>
       </div>
     </div>
   );
