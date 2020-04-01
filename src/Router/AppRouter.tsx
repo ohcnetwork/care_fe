@@ -103,10 +103,18 @@ const AppRouter = () => {
   useRedirect("/", "/facility");
   const pages = useRoutes(routes);
   return (
-    <div className="bg-gray-100">
-      <div className="flex flex-col md:flex-row">
-        <Header />
-        <div className="max-w-3xl mx-auto my-4 md:my-10 flex-1">{pages}</div>
+    <div className="min-h-full flex flex-col items-stretch">
+      <div className="flex-grow bg-gray-100">
+        <div className="antialiased flex h-screen overflow-hidden">
+          <div className="flex school-admin-navbar flex-shrink-0">
+            <Header />
+          </div>
+          <div className="flex-1 flex flex-col bg-gray-200 overflow-y-auto">
+            <div className="max-w-3xl mx-auto my-4 mdLmy-10 flex-1">
+              {pages}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

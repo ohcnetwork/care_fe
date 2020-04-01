@@ -106,8 +106,8 @@ const Header = () => {
         {menus.map(item => {
           const parts = item.link.split("/");
           const selectedClasses = url.includes(parts && parts[1])
-            ? "border-b bg-gray-300 border-grey-500 inline-flex items-center justify-start whitespace-no-wrap font-semibold rounded cursor-pointer hover:bg-gray-300 w-full px-4 py-4 "
-            : "border-b border-grey-500 inline-flex items-center justify-start whitespace-no-wrap font-semibold rounded cursor-pointer hover:bg-gray-300 w-full px-4 py-4 ";
+            ? "border-b bg-gray-200 border-grey-500 inline-flex items-center justify-start whitespace-no-wrap font-semibold cursor-pointer hover:bg-gray-300 w-full px-4 py-4 "
+            : "border-b border-grey-300 inline-flex items-center justify-start whitespace-no-wrap font-semibold cursor-pointer hover:bg-gray-300 w-full px-4 py-4 ";
           return (
             <button
               key={item.title}
@@ -120,7 +120,7 @@ const Header = () => {
           );
         })}
         <div
-          className="border-b border-grey-500 inline-flex items-center justify-start whitespace-no-wrap font-semibold rounded cursor-pointer hover:bg-gray-300 w-full px-4 py-4"
+          className="border-b border-grey-500 inline-flex items-center justify-start whitespace-no-wrap font-semibold cursor-pointer hover:bg-gray-300 w-full px-4 py-4"
           onClick={() => {
             localStorage.removeItem("care_access_token");
             localStorage.removeItem("care_refresh_token");
@@ -211,7 +211,7 @@ const Header = () => {
   };
 
   return (
-    <div className="shadow-lg bg-white z-40 h-screen">
+    <div className="shadow-lg bg-white">
       {headerSection()}
       <Hidden smUp implementation="css">
         <Drawer
@@ -229,7 +229,10 @@ const Header = () => {
           {sideBar}
         </Drawer>
       </Hidden>
-      <div className="md:block hidden" style={{ width: "264px" }}>
+      <div
+        className="flex flex-col justify-between overflow-y-auto md:block hidden"
+        style={{ width: "264px" }}
+      >
         <div>{sideBar}</div>
       </div>
     </div>
