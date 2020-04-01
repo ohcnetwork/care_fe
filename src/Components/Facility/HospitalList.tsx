@@ -137,9 +137,9 @@ export const HospitalList = () => {
   if (data && data.length) {
     facilityList = data.map((facility: any, idx: number) => {
       return (
-        <div key={`usr_${facility.id}`} className={classes.root}>
+        <div key={`usr_${facility.id}`} className="w-1/2 mt-4 px-2">
           <div
-            className="bg-white shadow-lg rounded-lg cursor-pointer"
+            className="block border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black"
             onClick={() => navigate(`/facility/${facility.id}`)}
           >
             <CardHeader
