@@ -192,6 +192,7 @@ export default function SampleViewAdmin(props: any) {
       }
     });
   };
+
   let user = currentUser.data;
   let sampleList: any[] = [];
   if (sample && sample.length) {
@@ -254,7 +255,8 @@ export default function SampleViewAdmin(props: any) {
                   </Button>
                 </CardContent>
               )}
-            {sample.status === "RECEIVED_AND_FORWARED" &&
+            {
+              sample.status === "RECEIVED_AND_FORWARED" &&
               user.user_type === "StateLabAdmin" && (
                 <CardContent>
                   <Button
@@ -267,7 +269,7 @@ export default function SampleViewAdmin(props: any) {
                 </CardContent>
               )}
             {
-              user.user_type === "StateLabAdmin" && (
+              user.user_type === "StateLabAdmin" &&  sample.status === "RECEIVED_AT_LAB" && (
                 <>
                   <CardContent>
                     <Box display="flex" >

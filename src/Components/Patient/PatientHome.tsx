@@ -179,7 +179,6 @@ export const PatientHome = (props: any) => {
               Add Consultation
             </Button>
           </div>
-          {!consultationListData &&
           <div className="mt-2">
             <Button
               fullWidth
@@ -193,7 +192,6 @@ export const PatientHome = (props: any) => {
               Request Sample Test
             </Button>
           </div>
-          }
         </div>
 
       </div>
