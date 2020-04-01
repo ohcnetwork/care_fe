@@ -141,6 +141,12 @@ export default {
         path: '/api/v1/facility/{facilityId}/hospital_doctor',
         method: 'PUT'
     },
+
+    createTriageForm: {
+        path: '/api/v1/facility/{facilityId/patient_stats/',
+        method: 'POST'
+    },
+
     // //Care Center
     // createCenter: {
     //     path: "/api/v1/carecenter/",
@@ -210,5 +216,10 @@ export default {
     },
     getTestSampleList: {
         path: '/api/v1/test_sample'
+    },
+    patchSample: {
+        path:'/api/v1/test_sample/',
+        method:'PATCH',
     }
+
 }
