@@ -271,33 +271,33 @@ export default function SampleViewAdmin(props: any) {
                   </Button>
                 </CardContent>
               )}
-            {/* {sample.status === "RECEIVED_AT_LAB" &&
-              user.user_type === "StateLabAdmin" && ( */}
-            <>
-              <CardContent>
-                <Box display="flex" >
-                  <Box flex="1" style={{ marginRight: '4px' }}>
-                    <InputLabel id="result-select-label">Result</InputLabel>
-                    <NativeSelectField
-                      name={sample.id.toString()}
-                      variant="outlined"
-                      value={result[sample.id.toString()]}
-                      options={resultTypes}
-                      onChange={handleChange}
-                    />
-                  </Box>
-                  <Button
-                    style={{ color: "red" }}
-                    variant="outlined"
-                    // disabled={!result[sample.id.toString()]}
-                    onClick={e => handleComplete(7, sample, Number(result[sample.id.toString()]))}
-                  >
-                    Completed
+            {sample.status === "RECEIVED_AT_LAB" &&
+              user.user_type === "StateLabAdmin" && (
+                <>
+                  <CardContent>
+                    <Box display="flex" >
+                      <Box flex="1" style={{ marginRight: '4px' }}>
+                        <InputLabel id="result-select-label">Result</InputLabel>
+                        <NativeSelectField
+                          name={sample.id.toString()}
+                          variant="outlined"
+                          value={result[sample.id.toString()]}
+                          options={resultTypes}
+                          onChange={handleChange}
+                        />
+                      </Box>
+                      <Button
+                        style={{ color: "red" }}
+                        variant="outlined"
+                        // disabled={!result[sample.id.toString()]}
+                        onClick={e => handleComplete(7, sample, Number(result[sample.id.toString()]))}
+                      >
+                        Completed
                   </Button>
-                </Box>
-              </CardContent>
-            </>
-            {/* )} */}
+                    </Box>
+                  </CardContent>
+                </>
+              )}
             <CardContent className={classes.content}>
               <Typography>
                 <span className={`w3-text-gray ${classes.userCardSideTitle}`}>
@@ -314,14 +314,14 @@ export default function SampleViewAdmin(props: any) {
                 {sample.result}
               </Typography>
             </CardContent>
-            <CardContent className={classes.content}>
+            {sample.date_of_sample && (<CardContent className={classes.content}>
               <Typography>
                 <span className={`w3-text-gray ${classes.userCardSideTitle}`}>
                   Date Of Sample -{" "}
                 </span>
                 {moment(sample.date_of_sample).format('lll')}
               </Typography>
-            </CardContent>
+            </CardContent>)}
           </div>
         </div>
       );
