@@ -79,6 +79,7 @@ const resultTypes = [{
 
 
 export const SampleTest = (props: any) => {
+    const classes = useStyles();
     const dispatchAction: any = useDispatch();
     const { facilityId, patientId, id } = props;
     const [state, dispatch] = useReducer(sampleTestFormReducer, initialState);
