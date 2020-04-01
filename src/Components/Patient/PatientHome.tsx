@@ -24,6 +24,7 @@ import { SampleTestCard } from "./SampleTestCard";
 import { PatientModel, SampleTestModel } from "./models";
 import { ConsultationModal } from "../Facility/models";
 import * as Notification from "../../Utils/Notifications";
+import Pagination from "../Common/Pagination";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -49,7 +50,10 @@ const useStyles = makeStyles(theme => ({
   details: {
     padding: "5px",
     marginBottom: "10px"
-  }
+  },
+  paginateTopPadding: {
+    paddingTop: "50px"
+  },
 }));
 
 export const PatientHome = (props: any) => {
@@ -60,13 +64,21 @@ export const PatientHome = (props: any) => {
   const [consultationListData, setConsultationListData] = useState<Array<ConsultationModal>>([]);
   const [sampleListData, setSampleListData] = useState<Array<SampleTestModel>>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [totalConsultationCount, setTotalConsultationCount] = useState(0);
+  const [currentConsultationPage, setCurrentConsultationPage] = useState(1);
+  const [consultationOffset, setConsultationOffset] = useState(0);
+  const [totalSampleListCount, setTotalSampleListCount] = useState(0);
+  const [currentSampleListPage, setCurrentSampleListPage] = useState(1);
+  const [sampleListOffset, setSampleListOffset] = useState(0);
+
+  const limit = 5;
 
   const fetchData = useCallback(
     async (status: statusType) => {
       const [patientRes, consultationRes, sampleRes] = await Promise.all([
         dispatch(getPatient({ id })),
-        dispatch(getConsultationList({ patient: id })),
-        dispatch(getSampleTestList({ patientId: id }))
+        dispatch(getConsultationList({ patient: id, limit, offset: consultationOffset })),
+        dispatch(getSampleTestList({ limit, offset: sampleListOffset }, { patientId: id }))
       ]);
       if (!status.aborted) {
         if (patientRes && patientRes.data) {
@@ -78,14 +90,16 @@ export const PatientHome = (props: any) => {
           consultationRes.data.results
         ) {
           setConsultationListData(consultationRes.data.results);
+          setTotalConsultationCount(consultationRes.data.count);
         }
         if (sampleRes && sampleRes.data && sampleRes.data.results) {
           setSampleListData(sampleRes.data.results);
+          setTotalSampleListCount(sampleRes.data.count);
         }
         setIsLoading(false);
       }
     },
-    [dispatch, id]
+    [dispatch, id, consultationOffset, sampleListOffset]
   );
 
   useAbortableEffect(
@@ -95,6 +109,18 @@ export const PatientHome = (props: any) => {
     },
     [dispatch, fetchData]
   );
+
+  const handleConsultationPagination = (page: number, limit: number) => {
+    const offset = (page - 1) * limit;
+    setCurrentConsultationPage(page);
+    setConsultationOffset(offset);
+  };
+
+  const handleSampleListPagination = (page: number, limit: number) => {
+    const offset = (page - 1) * limit;
+    setCurrentSampleListPage(page);
+    setSampleListOffset(offset);
+  };
 
   if (isLoading) {
     return <Loading />;
@@ -219,6 +245,16 @@ export const PatientHome = (props: any) => {
         {consultationListData.map((itemData, idx) => (
           <ConsultationCard itemData={itemData} key={idx} />
         ))}
+        {totalConsultationCount > limit && (
+          <Grid container className={`w3-center ${classes.paginateTopPadding}`}>
+            <Pagination
+              cPage={currentConsultationPage}
+              defaultPerPage={limit}
+              data={{ totalCount: totalConsultationCount }}
+              onChange={handleConsultationPagination}
+            />
+          </Grid>
+        )}
       </div>
 
       <div>
@@ -231,6 +267,16 @@ export const PatientHome = (props: any) => {
         {sampleListData.map((itemData, idx) => (
           <SampleTestCard itemData={itemData} key={idx} />
         ))}
+        {totalSampleListCount > limit && (
+          <Grid container className={`w3-center ${classes.paginateTopPadding}`}>
+            <Pagination
+              cPage={currentSampleListPage}
+              defaultPerPage={limit}
+              data={{ totalCount: totalSampleListCount }}
+              onChange={handleSampleListPagination}
+            />
+          </Grid>
+        )}
       </div>
     </div>
   );

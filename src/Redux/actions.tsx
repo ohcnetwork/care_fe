@@ -103,8 +103,8 @@ export const getDistrictByState = (urlParam: object) => {
 export const getLocalbodyByDistrict = (urlParam: object) => {
     return fireRequest("getLocalbodyByDistrict", [], {}, urlParam)
 }
-export const getSampleTestList = (urlParam: object) => {
-    return fireRequest("sampleTestList", [], {}, urlParam)
+export const getSampleTestList = (params: object, urlParam: object) => {
+    return fireRequest("sampleTestList", [], params, urlParam)
 }
 
 export const createSampleTest = (form: object, urlParam: object) => {
