@@ -83,7 +83,13 @@ const useStyles = makeStyles(theme => ({
   },
   toolTip: {
     fontSize: "13px"
-  }
+  },
+  statusPositive:{
+    borderColor:'red'
+  },
+  statusNegative:{
+    borderColor:'green'
+  },
 }));
 
 export default function SampleViewAdmin(props: any) {
@@ -202,11 +208,11 @@ export default function SampleViewAdmin(props: any) {
     sampleList = sample.map((sample: any, idx: number) => {
       return (
         <div key={`usr_${sample.id}`} className="w-full md:w-1/2 mt-4 px-2">
-          <div className="block border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black">
+          <div className={`block border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black ${sample.result === 'POSITIVE'? classes.statusPositive:''} ${sample.result === 'NEGATIVE'? classes.statusNegative:''}`}>
             <CardHeader
               className={classes.cardHeader}
               onClick={() => {
-                navigate(`/facility/${sample.facility_id}/patient/${sample.patient_id}`)
+                navigate(`/facility/${sample.facility}/patient/${sample.patient}`)
               }}
               title={
                 <span className={classes.title}>
