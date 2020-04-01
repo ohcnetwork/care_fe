@@ -212,7 +212,7 @@ export default function SampleViewAdmin(props: any) {
             <CardHeader
               className={classes.cardHeader}
               onClick={() => {
-                navigate(`/facility/${sample.facility_id}/patient/${sample.patient_id}`)
+                navigate(`/facility/${sample.facility}/patient/${sample.patient}`)
               }}
               title={
                 <span className={classes.title}>
