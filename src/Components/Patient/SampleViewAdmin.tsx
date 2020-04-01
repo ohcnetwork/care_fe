@@ -127,13 +127,10 @@ export default function SampleViewAdmin(props: any) {
     setOffset(offset);
   };
 
-  const handleApproval = (status: number, sample: any, result: any) => {
+  const handleApproval = (status: number, sample: any) => {
     const sampleData = {
       id: sample.id,
       status,
-      result: result || null,
-      date_of_sample: null,
-      date_of_result: null,
       consultation: sample.consultation_id
     };
     let statusName = "";
@@ -154,6 +151,26 @@ export default function SampleViewAdmin(props: any) {
     }
     dispatch(patchSample(sample.id, sampleData)).then((resp: any) => {
       if (resp.status === 201 || resp.status === 200) {
+      Notification.Success({
+        msg: `Request ${statusName}`
+      });
+      window.location.reload();
+      }
+    });
+  };
+  const handleComplete = (status: number, sample: any, result: number) => {
+    const sampleData = {
+      id: sample.id,
+      status,
+      result,
+      consultation: sample.consultation_id
+    };
+    let statusName = "";
+    if (status === 7) {
+      statusName = "COMPLETED";
+    }
+    dispatch(patchSample(sample.id, sampleData)).then((resp: any) => {
+      if (resp.status === 201 || resp.status === 200) {
         Notification.Success({
           msg: `Request ${statusName}`
         });
@@ -166,7 +183,7 @@ export default function SampleViewAdmin(props: any) {
   if (sample && sample.length) {
     sampleList = sample.map((sample: any, idx: number) => {
       return (
-        <div key={`usr_${sample.id}`} className="w-1/2 mt-4 px-2">
+        <div key={`usr_${sample.id}`} className="w-full md:w-1/2 mt-4 px-2">
           <div className="block border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black">
             <CardHeader
               className={classes.cardHeader}
@@ -192,7 +209,7 @@ export default function SampleViewAdmin(props: any) {
                   <Button
                     style={{ color: "green" }}
                     variant="outlined"
-                    onClick={e => handleApproval(2, sample, null)}
+                    onClick={e => handleApproval(2, sample)}
                   >
                     Approve
                   </Button>
@@ -202,7 +219,7 @@ export default function SampleViewAdmin(props: any) {
                   <Button
                     style={{ color: "red" }}
                     variant="outlined"
-                    onClick={e => handleApproval(3, sample, 4)}
+                    onClick={e => handleApproval(3, sample)}
                   >
                     Deny
                   </Button>
@@ -214,7 +231,7 @@ export default function SampleViewAdmin(props: any) {
                   <Button
                     style={{ color: "red" }}
                     variant="outlined"
-                    onClick={e => handleApproval(5, sample, null)}
+                    onClick={e => handleApproval(5, sample)}
                   >
                     Recieved and forwarded
                   </Button>
@@ -226,7 +243,7 @@ export default function SampleViewAdmin(props: any) {
                   <Button
                     style={{ color: "red" }}
                     variant="outlined"
-                    onClick={e => handleApproval(6, sample, null)}
+                    onClick={e => handleApproval(6, sample)}
                   >
                     Recieved at lab
                   </Button>
@@ -238,7 +255,7 @@ export default function SampleViewAdmin(props: any) {
                   <Button
                     style={{ color: "red" }}
                     variant="outlined"
-                    onClick={e => handleApproval(7, sample, null)}
+                    onClick={e => handleComplete(7, sample, 1)}
                   >
                     Completed
                   </Button>
@@ -247,7 +264,7 @@ export default function SampleViewAdmin(props: any) {
             <CardContent className={classes.content}>
               <Typography>
                 <span className={`w3-text-gray ${classes.userCardSideTitle}`}>
-                  Status -{" "}
+                  Status - {" "}
                 </span>
                 {sample.status}
               </Typography>

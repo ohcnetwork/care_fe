@@ -1,6 +1,4 @@
 import React from "react";
-import { AppBar, Toolbar, Typography } from "@material-ui/core";
-import { A } from "hookrouter";
 
 const img =
   "https://care-staging-coronasafe.s3.amazonaws.com/static/images/logos/black-logo.svg";

@@ -145,7 +145,7 @@ export const PatientManager = (props: any) => {
         ? `/facility/${facilityId}/patient/${patient.id}`
         : `/patient/${patient.id}`;
       return (
-        <div key={`usr_${patient.id}`} className="w-1/2 mt-4 px-2">
+        <div key={`usr_${patient.id}`} className="w-full md:w-1/2 mt-4 px-2">
           <div
             className="block border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black"
             onClick={() => navigate(patientUrl)}

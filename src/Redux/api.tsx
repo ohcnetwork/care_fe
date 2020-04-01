@@ -218,7 +218,7 @@ export default {
         path: '/api/v1/test_sample'
     },
     patchSample: {
-        path:'/api/v1/test_sample/',
+        path:'/api/v1/test_sample',
         method:'PATCH',
     }
 
