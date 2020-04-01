@@ -22,6 +22,7 @@ import {
   NativeSelectField
 } from "../Common/HelperInputFields";
 import { SAMPLE_TEST_RESULT } from "../../Common/constants";
+import {navigate} from "hookrouter";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -186,6 +187,9 @@ export default function SampleViewAdmin(props: any) {
           <div className="block border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black">
             <CardHeader
               className={classes.cardHeader}
+              onClick={() => {
+                navigate(`/facility/${sample.facility_id}/patient/${sample.patient_id}`)
+              }}
               title={
                 <span className={classes.title}>
                   <Tooltip
