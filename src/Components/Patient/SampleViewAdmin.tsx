@@ -213,7 +213,7 @@ export default function SampleViewAdmin(props: any) {
                   <Tooltip
                     title={
                       <span className={classes.toolTip}>
-                        Patient Name -{sample.patient_name}
+                        {sample.patient_name}
                       </span>
                     }
                     interactive={true}
