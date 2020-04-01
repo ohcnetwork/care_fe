@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import Grid from '@material-ui/core/Grid';
 import { Card, CardContent, CardHeader, Tooltip, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
@@ -9,7 +9,9 @@ import Pagination from "../Common/Pagination";
 import AddCard from '../Common/AddCard';
 import { navigate } from 'hookrouter';
 import { Loading } from "../Common/Loading";
-import { FacilityModal } from './modals';
+import { FacilityModal } from './models';
+import { useAbortableEffect, statusType } from '../../Common/utils';
+
 const useStyles = makeStyles(theme => ({
     root: {
         flexGrow: 1,
@@ -94,30 +96,33 @@ export const HospitalList = () => {
     let manageFacilities: any = null;
     const [isLoading, setIsLoading] = useState(false);
     const [totalCount, setTotalCount] = useState(0);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [offset, setOffset] = useState(0);
 
     const limit = 15;
-    const page = 1;
-    const offset = 0;
-    const [currentPage, setCurrentPage] = useState(1);
 
-    const fetchData = useCallback(async (page, limit, offset) => {
-        const res = await dispatchAction(getFacilities({page, offset, limit}));
-        if (res && res.data) {
-            setData(res.data.results);
-            setTotalCount(res.data.count);
-        }
-        setIsLoading(false);
-    }, [dispatchAction]);
-
-    useEffect(() => {
+    const fetchData = useCallback(async (status: statusType) => {
         setIsLoading(true);
-        fetchData(page, limit, offset);
-    }, [dispatchAction, fetchData]);
+        const res = await dispatchAction(getFacilities({ limit, offset }));
+        if (!status.aborted) {
+            if (res && res.data) {
+                setData(res.data.results);
+                setTotalCount(res.data.count);
+            }
+            setIsLoading(false);
+        }
+    }, [dispatchAction, offset]);
 
-    const handlePagination = (page: any, perPage: any) => {
+    useAbortableEffect((status: statusType) => {
+        fetchData(status);
+    }, [fetchData]);
+
+    const handlePagination = (page: number, limit: number) => {
+        const offset = (page - 1) * limit;
         setCurrentPage(page);
-        fetchData(page, limit, perPage);
+        setOffset(offset);
     };
+
     let facilityList: any[] = [];
     if (data && data.length) {
         facilityList = data.map((facility: any, idx: number) => {
@@ -138,7 +143,7 @@ export const HospitalList = () => {
                         />
                         <CardContent className={classes.content}>
                             <Typography>
-                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>District - </span>{facility.district}
+                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>District - </span>{facility?.district_object?.name}
                             </Typography>
                         </CardContent>
                         <CardContent className={classes.content}>
@@ -162,7 +167,21 @@ export const HospitalList = () => {
             <Loading />
         );
     } else if (data && data.length) {
-        manageFacilities = facilityList;
+        manageFacilities = (
+            <>
+                {facilityList}
+                {(totalCount > limit) && (
+                    <Grid container className={`w3-center ${classes.paginateTopPadding}`}>
+                        <Pagination
+                            cPage={currentPage}
+                            defaultPerPage={limit}
+                            data={{ totalCount }}
+                            onChange={handlePagination}
+                        />
+                    </Grid>
+                )}
+            </>
+        );
     } else if (data && data.length === 0) {
         manageFacilities = (
             <Grid item xs={12} md={12} className={classes.displayFlex}>
@@ -185,18 +204,6 @@ export const HospitalList = () => {
                     />
                 }
                 {manageFacilities}
-            </Grid>
-            <Grid container>
-                {(data && data.length > 0 && totalCount > limit) && (
-                    <Grid container className={`w3-center ${classes.paginateTopPadding}`}>
-                        <Pagination
-                            cPage={currentPage}
-                            defaultPerPage={limit}
-                            data={{ totalCount }}
-                            onChange={handlePagination}
-                        />
-                    </Grid>
-                )}
             </Grid>
         </div>
     );

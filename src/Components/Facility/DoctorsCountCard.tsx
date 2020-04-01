@@ -2,8 +2,8 @@ import React from 'react';
 import { Grid, Typography, Button } from "@material-ui/core";
 import { makeStyles } from '@material-ui/styles';
 import { navigate } from 'hookrouter'
-import { DoctorModal } from './modals';
-import { DOCTOR_SPECIALIZATION } from './constants';
+import { DoctorModal } from './models';
+import { DOCTOR_SPECIALIZATION } from '../../Common/constants';
 
 interface DoctorsCountProps extends DoctorModal {
     facilityId: number;
@@ -31,7 +31,7 @@ const DoctorsCountCard = (props: DoctorsCountProps) => {
                         </Grid>
                         <Grid item>
                             <Typography className="w3-text-grey">
-                                {area}
+                                {area} Doctors
                             </Typography>
                         </Grid>
                         <Grid item>

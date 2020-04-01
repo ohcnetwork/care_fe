@@ -1,14 +1,16 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import Grid from '@material-ui/core/Grid';
-import { Card, CardContent, CardHeader, Tooltip, Typography } from "@material-ui/core";
+import { Card, CardContent, CardHeader, Tooltip, Typography, Box } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { useDispatch } from "react-redux";
-import { getFacilities, getPatients } from "../../Redux/actions";
+import { getFacilities, getAllPatient } from "../../Redux/actions";
 import TitleHeader from "../Common/TitleHeader";
 import Pagination from "../Common/Pagination";
 import AddCard from '../Common/AddCard';
 import { navigate } from 'hookrouter';
 import { Loading } from "../Common/Loading";
+import { useAbortableEffect, statusType } from '../../Common/utils';
+
 const useStyles = makeStyles(theme => ({
     root: {
         flexGrow: 1,
@@ -85,7 +87,8 @@ const useStyles = makeStyles(theme => ({
     }
 }));
 
-export const PatientManager = () => {
+export const PatientManager = (props: any) => {
+    const { facilityId } = props;
     const classes = useStyles();
     const dispatch: any = useDispatch();
     const initialData: any[] = [];
@@ -94,36 +97,40 @@ export const PatientManager = () => {
     let managePatients: any = null;
     const [isLoading, setIsLoading] = useState(false);
     const [totalCount, setTotalCount] = useState(0);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [offset, setOffset] = useState(0);
 
     const limit = 15;
-    const page = 1;
-    const offset = 0;
-    const [currentPage, setCurrentPage] = useState(1);
 
-    const fetchData = useCallback(async (page, limit, offset) => {
-        const res = await dispatch(getPatients({page, offset, limit}));
-        if (res && res.data) {
-            setData(res.data.results);
-            setTotalCount(res.data.count);
-        }
-        setIsLoading(false);
-    },[dispatch]);
-
-    useEffect(() => {
+    const fetchData = useCallback(async (status: statusType) => {
         setIsLoading(true);
-        fetchData(page, limit, offset);
-    }, [dispatch, fetchData]);
+        const res = await dispatch(getAllPatient({ limit, offset }));
+        if (!status.aborted) {
+            if (res && res.data) {
+                setData(res.data.results);
+                setTotalCount(res.data.count);
+            }
+            setIsLoading(false);
+        }
+    }, [dispatch, offset]);
 
-    const handlePagination = (page: any, perPage: any) => {
+    useAbortableEffect((status: statusType) => {
+        fetchData(status);
+    }, [fetchData]);
+
+    const handlePagination = (page: number, limit: number) => {
+        const offset = (page - 1) * limit;
         setCurrentPage(page);
-        fetchData(page, limit, perPage);
+        setOffset(offset);
     };
+
     let patientList: any[] = [];
     if (data && data.length) {
         patientList = data.map((patient: any, idx: number) => {
+            const patientUrl = facilityId ? `/facility/${facilityId}/patient/${patient.id}` : `/patient/${patient.id}`;
             return (
-                <Grid item xs={12} md={3} key={`usr_${patient.id}`} className={classes.root}>
-                    <Card className={classes.card} onClick={() => navigate(`/patient/${patient.id}`)}>
+                <Grid item xs={12} sm={6} md={4} lg={3} key={`usr_${patient.id}`} className={classes.root}>
+                    <Card className={classes.card} onClick={() => navigate(patientUrl)}>
                         <CardHeader
                             className={classes.cardHeader}
                             title={
@@ -137,19 +144,22 @@ export const PatientManager = () => {
                             }
                         />
                         <CardContent className={classes.content}>
-                            <Typography>
-                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Age - </span>{patient.age}
-                            </Typography>
+                            <Box>
+                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Age - </span>
+                                <span>{patient.age}</span>
+                            </Box>
                         </CardContent>
                         <CardContent className={classes.content}>
-                            <Typography>
-                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Contact with carrier - </span>{patient.contact_with_carrier}
-                            </Typography>
+                            <Box>
+                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Contact with carrier - </span>
+                                <span>{patient.contact_with_carrier ? "Yes" : "No"}</span>
+                            </Box>
                         </CardContent>
                         <CardContent className={classes.content}>
-                            <Typography>
-                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Status - </span>{patient.is_active}
-                            </Typography>
+                            <Box>
+                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Status - </span>
+                                <span>{patient.is_active ? "Active" : "Inactive"}</span>
+                            </Box>
                         </CardContent>
                     </Card>
                 </Grid>
@@ -162,7 +172,22 @@ export const PatientManager = () => {
             <Loading />
         );
     } else if (data && data.length) {
-        managePatients = patientList;
+        managePatients = (
+            <>
+                {patientList}
+                {(totalCount > limit) && (
+                    <Grid container className={`w3-center ${classes.paginateTopPadding}`}>
+                        <Pagination
+                            cPage={currentPage}
+                            defaultPerPage={limit}
+                            data={{ totalCount }}
+                            onChange={handlePagination}
+                        />
+                    </Grid>
+                )}
+            </>
+        );
+
     } else if (data && data.length === 0) {
         managePatients = (
             <Grid item xs={12} md={12} className={classes.displayFlex}>
@@ -181,16 +206,6 @@ export const PatientManager = () => {
 
             <Grid container>
                 {managePatients}
-                {(data && data.length > 0 && totalCount > limit) && (
-                    <Grid container className={`w3-center ${classes.paginateTopPadding}`}>
-                        <Pagination
-                            cPage={currentPage}
-                            defaultPerPage={limit}
-                            data={{ totalCount }}
-                            onChange={handlePagination}
-                        />
-                    </Grid>
-                )}
             </Grid>
         </div>
     );
