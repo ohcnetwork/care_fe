@@ -95,8 +95,13 @@ const Header = () => {
     ""
   )}`;
   const sideBar = (
-    <div className="toolbar" style={{ position: "relative" }}>
-      <List>
+    <div className="bg-white z-40">
+      <div className="m-4 px-2">
+        <a href="/">
+          <img src={img} alt="care logo" style={{ height: "25px" }} />
+        </a>
+      </div>
+      <div>
         {menus.map(item => {
           const parts = item.link.split("/");
           return (
@@ -114,7 +119,18 @@ const Header = () => {
             </ListItem>
           );
         })}
-      </List>
+        <div
+          className="px-6 py-4 cursor-pointer hover:bg-gray-300"
+          onClick={() => {
+            localStorage.removeItem("care_access_token");
+            localStorage.removeItem("care_refresh_token");
+            navigate("/login");
+            window.location.reload();
+          }}
+        >
+          Logout
+        </div>
+      </div>
     </div>
   );
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -129,8 +145,8 @@ const Header = () => {
 
   const headerSection = () => {
     return (
-      <AppBar position="fixed" className={`appBar`}>
-        <Toolbar style={{ color: "black" }}>
+      <div className="bg-white block md:hidden">
+        <div className="p-2 flex w-full justify-between items-center">
           <IconButton
             color="inherit"
             aria-label="open drawer"
@@ -142,7 +158,6 @@ const Header = () => {
           </IconButton>
           <Typography variant="h6">
             <A href="/">
-              {" "}
               <img src={img} alt="care logo" style={{ height: "25px" }} />
             </A>
           </Typography>
@@ -189,13 +204,13 @@ const Header = () => {
               </MenuItem>
             </Menu>
           </div>
-        </Toolbar>
-      </AppBar>
+        </div>
+      </div>
     );
   };
 
   return (
-    <div className="header-section">
+    <div className="header-section bg-white">
       {headerSection()}
       <Hidden smUp implementation="css">
         <Drawer

@@ -139,7 +139,7 @@ export const HospitalList = () => {
       return (
         <div key={`usr_${facility.id}`} className={classes.root}>
           <div
-            className="bg-white shadow-lg rounded-lg"
+            className="bg-white shadow-lg rounded-lg cursor-pointer"
             onClick={() => navigate(`/facility/${facility.id}`)}
           >
             <CardHeader

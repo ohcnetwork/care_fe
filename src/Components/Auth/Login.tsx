@@ -120,7 +120,7 @@ export const Login = () => {
     <div className="flex flex-col md:flex-row mt-4 md:mt-20 items-center justify-between ">
       <PublicDashboard />
       <div>
-        <div className="bg-white mt-4 md:mt-20 border shadow">
+        <div className="bg-white mt-4 md:mt-20 border shadow px-4 pb-4">
           <div className="text-2xl font-bold text-center pt-4">
             Authorized Login
           </div>

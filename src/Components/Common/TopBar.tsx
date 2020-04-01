@@ -6,7 +6,7 @@ const img =
   "https://care-staging-coronasafe.s3.amazonaws.com/static/images/logos/black-logo.svg";
 const TopBar = () => {
   return (
-    <div className="bg-white shadow">
+    <div className="bg-white shadow-md">
       <div className="max-w-6xl mx-auto py-4 px-2">
         <div>
           <a href={"/"}>
