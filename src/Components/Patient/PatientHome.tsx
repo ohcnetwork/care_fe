@@ -31,8 +31,8 @@ const useStyles = makeStyles(theme => ({
         padding: '5px',
         marginBottom: '10px',
     },
-    details:{ 
-        padding:'5px', 
+    details:{
+        padding:'5px',
         marginBottom: '10px',
     }
 }));
@@ -75,7 +75,7 @@ export const PatientHome = (props: any) => {
             </tr>
         ));
     }
-    
+
     return (
         <div className={`w3-content ${classes.content}`}>
             <h2>Patient</h2>
@@ -139,7 +139,7 @@ export const PatientHome = (props: any) => {
                         </Typography>
                     </div>
                     <div className={classes.details}>
-                        {patientMedHis.length > 0? 
+                        {patientMedHis.length > 0?
                     <table className="w3-table w3-table-all">
                         <thead>
                             <tr>
@@ -148,7 +148,7 @@ export const PatientHome = (props: any) => {
                             </tr>
                         </thead>
                         <tbody>
-                          {patientMedHis} 
+                          {patientMedHis}
                         </tbody>
                     </table>
                         :(<span className="w3-center"><h6 className="w3-text-grey">No Medical History so far</h6></span>)}
