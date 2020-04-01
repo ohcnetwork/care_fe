@@ -5,7 +5,8 @@ import {
   Button,
   Divider,
   Box,
-  CardContent
+  CardContent,
+  CircularProgress
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { useDispatch } from "react-redux";
@@ -70,20 +71,30 @@ export const PatientHome = (props: any) => {
   const [totalSampleListCount, setTotalSampleListCount] = useState(0);
   const [currentSampleListPage, setCurrentSampleListPage] = useState(1);
   const [sampleListOffset, setSampleListOffset] = useState(0);
+  const [isConsultationLoading, setIsConsultationLoading] = useState(false);
+  const [isSampleLoading, setIsSampleLoading] = useState(false);
 
   const limit = 5;
 
-  const fetchData = useCallback(
+  const fetchpatient = useCallback(
     async (status: statusType) => {
-      const [patientRes, consultationRes, sampleRes] = await Promise.all([
-        dispatch(getPatient({ id })),
-        dispatch(getConsultationList({ patient: id, limit, offset: consultationOffset })),
-        dispatch(getSampleTestList({ limit, offset: sampleListOffset }, { patientId: id }))
-      ]);
+      setIsLoading(true);
+      const patientRes = await dispatch(getPatient({ id }));
       if (!status.aborted) {
         if (patientRes && patientRes.data) {
           setPatientData(patientRes.data);
         }
+        setIsLoading(false);
+      }
+    },
+    [dispatch, id]
+  );
+
+  const fetchConsultation = useCallback(
+    async (status: statusType) => {
+      setIsConsultationLoading(true);
+      const consultationRes = await dispatch(getConsultationList({ patient: id, limit, offset: consultationOffset }));
+      if (!status.aborted) {
         if (
           consultationRes &&
           consultationRes.data &&
@@ -92,22 +103,46 @@ export const PatientHome = (props: any) => {
           setConsultationListData(consultationRes.data.results);
           setTotalConsultationCount(consultationRes.data.count);
         }
+        setIsConsultationLoading(false);
+      }
+    },
+    [dispatch, id, consultationOffset]
+  );
+
+  const fetchSampleTest = useCallback(
+    async (status: statusType) => {
+      setIsSampleLoading(true);
+      const sampleRes = await dispatch(getSampleTestList({ limit, offset: sampleListOffset }, { patientId: id }));
+      if (!status.aborted) {
         if (sampleRes && sampleRes.data && sampleRes.data.results) {
           setSampleListData(sampleRes.data.results);
           setTotalSampleListCount(sampleRes.data.count);
         }
-        setIsLoading(false);
+        setIsSampleLoading(false);
       }
     },
-    [dispatch, id, consultationOffset, sampleListOffset]
+    [dispatch, id, sampleListOffset]
   );
 
   useAbortableEffect(
     (status: statusType) => {
-      setIsLoading(true);
-      fetchData(status);
+      fetchpatient(status);
     },
-    [dispatch, fetchData]
+    [dispatch, fetchpatient]
+  );
+
+  useAbortableEffect(
+    (status: statusType) => {
+      fetchConsultation(status);
+    },
+    [dispatch, fetchConsultation]
+  );
+
+  useAbortableEffect(
+    (status: statusType) => {
+      fetchSampleTest(status);
+    },
+    [dispatch, fetchSampleTest]
   );
 
   const handleConsultationPagination = (page: number, limit: number) => {
@@ -143,6 +178,28 @@ export const PatientHome = (props: any) => {
       </tr>
     ));
   }
+
+  let consultationList, sampleList;
+
+  if (isConsultationLoading) {
+    consultationList = <CircularProgress size={20} />;
+  } else if (consultationListData.length === 0) {
+    consultationList = <Typography>No consultations available.</Typography>
+  } else if (consultationListData.length > 0) {
+    consultationList = consultationListData.map((itemData, idx) => (
+      <ConsultationCard itemData={itemData} key={idx} />
+    ));
+  } 
+
+  if (isSampleLoading) {
+    sampleList = <CircularProgress size={20} />;
+  } else if (sampleListData.length === 0) {
+    sampleList = <Typography>No sample test available.</Typography>
+  } else if (sampleListData.length > 0) {
+    sampleList = sampleListData.map((itemData, idx) => (
+      <SampleTestCard itemData={itemData} key={idx} />
+    ));
+  } 
 
   return (
     <div className="px-2">
@@ -198,7 +255,7 @@ export const PatientHome = (props: any) => {
             >Add Consultation</Button>
           </div>
           <div className="mt-2">
-            <Button
+          <Button
               fullWidth
               variant="contained"
               color="primary"
@@ -239,13 +296,8 @@ export const PatientHome = (props: any) => {
         <div className="font-semibold text-3xl p-4 mt-4 border-b-4 border-orange-500 mb-4">
           Consultation History
         </div>
-
-        {consultationListData.length === 0 && <Typography>No consultations available.</Typography>}
-
-        {consultationListData.map((itemData, idx) => (
-          <ConsultationCard itemData={itemData} key={idx} />
-        ))}
-        {totalConsultationCount > limit && (
+        {consultationList}
+        {!isConsultationLoading && totalConsultationCount > limit && (
           <Grid container className={`w3-center ${classes.paginateTopPadding}`}>
             <Pagination
               cPage={currentConsultationPage}
@@ -261,13 +313,8 @@ export const PatientHome = (props: any) => {
         <div className="font-semibold text-3xl p-4 mt-4 border-b-4 border-orange-500 mb-4">
           Sample Test History
         </div>
-
-        {sampleListData.length === 0 && <Typography>No sample test available.</Typography>}
-
-        {sampleListData.map((itemData, idx) => (
-          <SampleTestCard itemData={itemData} key={idx} />
-        ))}
-        {totalSampleListCount > limit && (
+        {sampleList}
+        {!isSampleLoading && totalSampleListCount > limit && (
           <Grid container className={`w3-center ${classes.paginateTopPadding}`}>
             <Pagination
               cPage={currentSampleListPage}
