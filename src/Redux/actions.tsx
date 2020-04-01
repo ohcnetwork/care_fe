@@ -18,6 +18,9 @@ export const signupUser = (form: object) => {
 export const postAmbulance = (form: object) => {
     return fireRequest('createAmbulance', [], form);
 };
+export const getAmbulanceList = (paginate: object) => {
+    return fireRequest('listAmbulance', [] , paginate);
+};
 
 // Facility
 export const createFacility = (form: object) => {
@@ -53,6 +56,9 @@ export const createDoctor = (id: number | undefined, form: object, urlParam: obj
     return id ? fireRequest('updateDoctor', [id], form, urlParam) : fireRequest("createDoctor", [], form, urlParam);
 };
 
+export const createTriageForm = (id: number, data: object) => {
+    return fireRequest('createTriageForm', [id], data)
+}
 export const listCapacity = (paginate: object, urlParam: object) => {
     return fireRequest('getCapacity', [], paginate, urlParam);
 };
@@ -101,13 +107,33 @@ export const getSampleTestList = (paginate: object) => {
     return fireRequest("sampleTestList", [], paginate)
 }
 
-export const createSampleTest = (form: object,urlParam: object) => {
-    return fireRequest('createSampleTest', [], form,urlParam)
+export const createSampleTest = (form: object, urlParam: object) => {
+    return fireRequest('createSampleTest', [], form, urlParam)
 };
 
-export const getSampleTest = (id:number, urlParam: object) => {
+export const getSampleTest = (id: number, urlParam: object) => {
     return fireRequest('getSampleTest', [id], {}, urlParam)
 };
-export const patchSampleTest = (id:number,form: object, urlParam: object) => {
+export const patchSampleTest = (id: number, form: object, urlParam: object) => {
     return fireRequest('patchSampleTest', [id], form, urlParam)
+};
+
+export const createConsultation = (form: object) => {
+    return fireRequest("createConsultation", [], form);
+};
+
+export const getConsultationList = (params: object) => {
+    return fireRequest('getConsultationList', [], params);
+};
+
+export const getConsultation = (urlParams: object) => {
+    return fireRequest('getConsultation', [], {}, urlParams);
+};
+
+export const getTestList = (paginate: object) => {
+    return fireRequest('getTestSampleList', [], paginate);
+};
+
+export const patchSample = (id: number, form: object) => {
+    return fireRequest('patchSample', [id], form)
 };
