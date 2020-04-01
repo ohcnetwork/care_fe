@@ -73,6 +73,7 @@ export const PatientHome = (props: any) => {
   const [sampleListOffset, setSampleListOffset] = useState(0);
   const [isConsultationLoading, setIsConsultationLoading] = useState(false);
   const [isSampleLoading, setIsSampleLoading] = useState(false);
+  const [sampleFlag, callSampleList] = useState(false);
 
   const limit = 5;
 
@@ -142,7 +143,7 @@ export const PatientHome = (props: any) => {
     (status: statusType) => {
       fetchSampleTest(status);
     },
-    [dispatch, fetchSampleTest]
+    [dispatch, fetchSampleTest, sampleFlag]
   );
 
   const handleConsultationPagination = (page: number, limit: number) => {
@@ -155,6 +156,29 @@ export const PatientHome = (props: any) => {
     const offset = (page - 1) * limit;
     setCurrentSampleListPage(page);
     setSampleListOffset(offset);
+  };
+
+
+  const handleApproval = (status: number, sample: any) => {
+    const sampleData = {
+      id: sample.id,
+      status,
+      consultation: sample.consultation_id
+    };
+    let statusName = "";
+    if (status === 4) {
+      statusName = "SENT_TO_COLLECTON_CENTRE";
+    }
+
+    dispatch(patchSample(sample.id, sampleData)).then((resp: any) => {
+      if (resp.status === 201 || resp.status === 200) {
+        Notification.Success({
+          msg: `Request ${statusName}`
+        });
+        // window.location.reload();
+        callSampleList(!sampleFlag);
+      }
+    });
   };
 
   if (isLoading) {
@@ -197,7 +221,7 @@ export const PatientHome = (props: any) => {
     sampleList = <Typography>No sample test available.</Typography>
   } else if (sampleListData.length > 0) {
     sampleList = sampleListData.map((itemData, idx) => (
-      <SampleTestCard itemData={itemData} key={idx} />
+      <SampleTestCard itemData={itemData} key={idx} handleApproval={handleApproval} />
     ));
   } 
 

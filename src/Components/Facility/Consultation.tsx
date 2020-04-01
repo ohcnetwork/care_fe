@@ -82,7 +82,7 @@ export const Consultation = (props: any) => {
   const [state, dispatch] = useReducer(consultationFormReducer, initialState);
   const [isLoading, setIsLoading] = useState(false);
 
-  const headerText = !id ? "Add Consultation Details" : "Consultation";
+  const headerText = !id ? "OP Triage / Consultation" : "Consultation";
   const buttonText = !id ? "Save" : "Update";
 
   const validateForm = () => {
@@ -173,11 +173,10 @@ export const Consultation = (props: any) => {
       </div>
       <div className="mt-4">
         <Card>
-          <CardHeader title={headerText} />
           <form onSubmit={e => handleSubmit(e)}>
             <CardContent>
-              <InputLabel id="demo-simple-select-outlined-label">
-                Decision after consultation
+              <InputLabel id="demo-simple-select-outlined-label" style={{fontWeight: 'bold', fontSize: '18px'}}>
+                Decision after OP Triage
               </InputLabel>
               <NativeSelectField
                 name="suggestion"
@@ -250,6 +249,7 @@ export const Consultation = (props: any) => {
                 variant="outlined"
                 margin="dense"
                 type="text"
+                placeholder="Information optional"
                 InputLabelProps={{ shrink: !!state.form.existing_medication }}
                 value={state.form.existing_medication}
                 onChange={handleChange}
@@ -267,6 +267,7 @@ export const Consultation = (props: any) => {
                 variant="outlined"
                 margin="dense"
                 type="text"
+                placeholder="Information optional"
                 InputLabelProps={{ shrink: !!state.form.examination_details }}
                 value={state.form.examination_details}
                 onChange={handleChange}
@@ -284,6 +285,7 @@ export const Consultation = (props: any) => {
                 variant="outlined"
                 margin="dense"
                 type="text"
+                placeholder="Information optional"
                 InputLabelProps={{ shrink: !!state.form.prescribed_medication }}
                 value={state.form.prescribed_medication}
                 onChange={handleChange}

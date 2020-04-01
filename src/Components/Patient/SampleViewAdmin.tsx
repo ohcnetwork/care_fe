@@ -366,8 +366,9 @@ export default function SampleViewAdmin(props: any) {
 
   return (
     <div>
+
       <div className="font-semibold text-3xl p-4 pl-0 mx-3 mt-4 border-b-4 border-orange-500">
-        Sample Collection
+        Sample Management system
       </div>
 
       <div className="flex flex-wrap mt-4">
