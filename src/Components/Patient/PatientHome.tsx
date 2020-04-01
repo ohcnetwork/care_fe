@@ -57,12 +57,8 @@ export const PatientHome = (props: any) => {
   const classes = useStyles();
   const dispatch: any = useDispatch();
   const [patientData, setPatientData] = useState<PatientModel>({});
-  const [consultationListData, setConsultationListData] = useState<
-    Array<ConsultationModal>
-  >([]);
-  const [sampleListData, setSampleListData] = useState<Array<SampleTestModel>>(
-    []
-  );
+  const [consultationListData, setConsultationListData] = useState<Array<ConsultationModal>>([]);
+  const [sampleListData, setSampleListData] = useState<Array<SampleTestModel>>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const fetchData = useCallback(
@@ -128,7 +124,7 @@ export const PatientHome = (props: any) => {
         Patient #{id}
       </div>
 
-      <div className="block border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black mt-4 p-4 ">
+      <div className="flex justify-between border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black mt-4 p-4 ">
         <div className="max-w-md">
           <div>
             <span className="font-semibold">Name: </span>
@@ -162,9 +158,7 @@ export const PatientHome = (props: any) => {
               onClick={() =>
                 navigate(`/facility/${facilityId}/patient/${id}/update`)
               }
-            >
-              Update Patient Info
-            </Button>
+            >Update Patient Info</Button>
           </div>
           <div className="mt-2">
             <Button
@@ -175,9 +169,7 @@ export const PatientHome = (props: any) => {
               onClick={() =>
                 navigate(`/facility/${facilityId}/patient/${id}/consultation`)
               }
-            >
-              Add Consultation
-            </Button>
+            >Add Consultation</Button>
           </div>
           <div className="mt-2">
             <Button
@@ -185,15 +177,13 @@ export const PatientHome = (props: any) => {
               variant="contained"
               color="primary"
               size="small"
+              disabled={!consultationListData || !consultationListData.length}
               onClick={() =>
                 navigate(`/facility/${facilityId}/patient/${id}/sample-test`)
               }
-            >
-              Request Sample Test
-            </Button>
+            >Request Sample Test</Button>
           </div>
         </div>
-
       </div>
 
       <Grid item xs={12}>
@@ -212,10 +202,10 @@ export const PatientHome = (props: any) => {
               <tbody>{patientMedHis}</tbody>
             </table>
           ) : (
-            <span className="w3-center">
-              <h6 className="w3-text-grey">No Medical History so far</h6>
-            </span>
-          )}
+              <span className="w3-center">
+                <h6 className="w3-text-grey">No Medical History so far</h6>
+              </span>
+            )}
         </div>
       </Grid>
 
@@ -223,6 +213,8 @@ export const PatientHome = (props: any) => {
         <div className="font-semibold text-3xl p-4 mt-4 border-b-4 border-orange-500 mb-4">
           Consultation History
         </div>
+
+        {consultationListData.length === 0 && <Typography>No consultations available.</Typography>}
 
         {consultationListData.map((itemData, idx) => (
           <ConsultationCard itemData={itemData} key={idx} />
@@ -233,6 +225,8 @@ export const PatientHome = (props: any) => {
         <div className="font-semibold text-3xl p-4 mt-4 border-b-4 border-orange-500 mb-4">
           Sample Test History
         </div>
+
+        {sampleListData.length === 0 && <Typography>No sample test available.</Typography>}
 
         {sampleListData.map((itemData, idx) => (
           <SampleTestCard itemData={itemData} key={idx} />
