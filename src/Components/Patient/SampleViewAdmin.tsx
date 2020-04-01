@@ -149,10 +149,12 @@ export default function SampleViewAdmin(props: any) {
       statusName = "COMPLETED";
     }
     dispatch(patchSample(sample.id, sampleData)).then((resp: any) => {
-        Notification.Success({
-          msg: `Request ${statusName}`
-        });
-        window.location.reload();
+      if (resp.status === 201 || resp.status === 200) {
+      Notification.Success({
+        msg: `Request ${statusName}`
+      });
+      window.location.reload();
+      }
     });
   };
   let user = currentUser.data;
