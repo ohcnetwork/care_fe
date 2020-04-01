@@ -157,6 +157,26 @@ export default function SampleViewAdmin(props: any) {
       }
     });
   };
+  const handleComplete = (status: number, sample: any, result: number) => {
+    const sampleData = {
+      id: sample.id,
+      status,
+      result,
+      consultation: sample.consultation_id
+    };
+    let statusName = "";
+    if (status === 7) {
+      statusName = "COMPLETED";
+    }
+    dispatch(patchSample(sample.id, sampleData)).then((resp: any) => {
+      if (resp.status === 201 || resp.status === 200) {
+        Notification.Success({
+          msg: `Request ${statusName}`
+        });
+        window.location.reload();
+      }
+    });
+  };
   let user = currentUser.data;
   let sampleList: any[] = [];
   if (sample && sample.length) {
@@ -234,7 +254,7 @@ export default function SampleViewAdmin(props: any) {
                   <Button
                     style={{ color: "red" }}
                     variant="outlined"
-                    onClick={e => handleApproval(7, sample)}
+                    onClick={e => handleComplete(7, sample, 1)}
                   >
                     Completed
                   </Button>
