@@ -38,6 +38,7 @@ const useStyles = makeStyles(theme => ({
     overflow: "hidden",
     textOverflow: "ellipsis",
     fontWeight: 400,
+    textTransform : "capitalize",
     //padding: '10px',
     //fontSize: '14px',
     display: "inline-block",
@@ -304,7 +305,7 @@ export default function SampleViewAdmin(props: any) {
 
   return (
     <div>
-      <div className="font-semibold text-3xl p-4 mt-4 border-b-4 border-orange-500">
+      <div className="font-semibold text-3xl p-4 pl-0 mx-3 mt-4 border-b-4 border-orange-500">
         Sample Collection
       </div>
 

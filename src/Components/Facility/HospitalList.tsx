@@ -49,7 +49,8 @@ const useStyles = makeStyles(theme => ({
     padding: "5px 10px"
   },
   cardHeader: {
-    padding: "10px"
+    padding: "10px",
+    textTransform: "capitalize"
   },
   contentText: {
     whiteSpace: "nowrap",
@@ -220,7 +221,7 @@ export const HospitalList = () => {
 
   return (
     <div className="px-2">
-      <div className="font-semibold text-3xl p-4 mt-4 border-b-4 border-orange-500">
+      <div className="font-semibold text-3xl p-4 pl-0 mx-3 mt-4 border-b-4 border-orange-500">
         Facilities
       </div>
       <div className="flex flex-wrap mt-4">{manageFacilities}</div>
