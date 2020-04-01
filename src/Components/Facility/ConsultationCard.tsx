@@ -18,7 +18,7 @@ interface ConsultationProps {
 export const ConsultationCard = (props: ConsultationProps) => {
   const { itemData } = props;
   return (
-    <div className="bg-white shadow-lg rounded-lg cursor-pointer mt-4">
+    <div className="block border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black mt-4">
       <CardContent>
         <Grid container justify="space-between" alignItems="center">
           <Grid item xs={11} container spacing={1}>

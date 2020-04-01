@@ -104,9 +104,10 @@ const AppRouter = () => {
   const pages = useRoutes(routes);
   return (
     <div className="bg-gray-100">
-      <Header />
-      <div className="max-w-3xl mx-auto my-4 md:my-10">{pages}</div>
-
+      <div className="flex flex-col md:flex-row">
+        <Header />
+        <div className="max-w-3xl mx-auto my-4 md:my-10">{pages}</div>
+      </div>
       <div className="bg-white app-footer">
         <div className="max-w-5xl mx-auto flex flex-col p-4">
           <div className="mx-auto p-2">

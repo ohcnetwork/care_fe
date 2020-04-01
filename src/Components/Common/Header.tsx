@@ -228,18 +228,9 @@ const Header = () => {
           {sideBar}
         </Drawer>
       </Hidden>
-      <Hidden xsDown implementation="css">
-        <Drawer
-          open
-          variant="permanent"
-          className={classes.drawer}
-          classes={{
-            paper: classes.drawerPaper
-          }}
-        >
-          {sideBar}
-        </Drawer>
-      </Hidden>
+      <div className="md:block hidden" style={{ width: "264px" }}>
+        <div>{sideBar}</div>
+      </div>
     </div>
   );
 };

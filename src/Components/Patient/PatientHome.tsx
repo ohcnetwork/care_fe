@@ -128,7 +128,7 @@ export const PatientHome = (props: any) => {
         Patient #{id}
       </div>
 
-      <div className="bg-white shadow-lg rounded-lg cursor-pointer mt-4 p-4 flex flex-col md:flex-row justify-between">
+      <div className="block border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black mt-4 p-4 ">
         <div className="max-w-md">
           <div>
             <span className="font-semibold">Name: </span>
