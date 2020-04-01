@@ -19,3 +19,11 @@ export interface SampleTestModel {
     date_of_result?: string;
     consultation?: number;
 }
+
+export interface DailyRoundsModel {
+    temperature?: string;
+    temperature_measured_at?:string;
+    physical_examination_info?: string;
+    other_details?: string;
+    consultation?: number;
+}

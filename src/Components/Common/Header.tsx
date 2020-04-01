@@ -26,8 +26,9 @@ import InboxIcon from '@material-ui/icons/Inbox';
 import ListAltIcon from '@material-ui/icons/ListAlt';
 import SettingsIcon from '@material-ui/icons/Settings';
 import WorkIcon from '@material-ui/icons/Work';
+import TimeToLeaveIcon from '@material-ui/icons/TimeToLeave';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
-
+import LocalHospitalIcon from '@material-ui/icons/LocalHospital';
 const img = 'https://care-staging-coronasafe.s3.amazonaws.com/static/images/logos/black-logo.svg';
 const drawerWidth = 240;
 const useStyles = makeStyles({
@@ -72,6 +73,16 @@ const Header = () => {
     //   link: '/patients',
     //   icon: <InboxIcon style={{color: '#666', marginRight: '4px'}}/>
     // },
+    {
+      title: 'Ambulances',
+      link: '/ambulancelist',
+      icon: <TimeToLeaveIcon style={{color: '#666', marginRight: '4px'}}/>
+    },
+    {
+      title: 'Sample Test',
+      link: '/samplelist',
+      icon: <LocalHospitalIcon style={{color: '#666', marginRight: '4px'}}/>
+    },
     {
       title: 'Users',
       link: '/users',

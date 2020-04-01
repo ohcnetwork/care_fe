@@ -93,24 +93,24 @@ export const AMBULANCE_SERVICE_FEE_TEXT =
   "I / we will require fees for providing service";
 
 export const SAMPLE_TEST_STATUS = [
-  {id:1,text:"REQUEST_SUBMITTED"},
-  {id:2,text:"APPROVED"},
-  {id:3,text:"DENIED"},
-  {id:4,text:"SENT_TO_COLLECTON_CENTRE"},
-  {id:5,text:"RECEIVED_AND_FORWARED"},
-  {id:6,text:"RECEIVED_AT_LAB"},
-  {id:7,text:"COMPLETED"},
+  { id: 1, text: "REQUEST_SUBMITTED" },
+  { id: 2, text: "APPROVED" },
+  { id: 3, text: "DENIED" },
+  { id: 4, text: "SENT_TO_COLLECTON_CENTRE" },
+  { id: 5, text: "RECEIVED_AND_FORWARED" },
+  { id: 6, text: "RECEIVED_AT_LAB" },
+  { id: 7, text: "COMPLETED" },
 ];
 
 export const SAMPLE_TEST_RESULT = [
-  {id:1,text:"POSITIVE"},
-  {id:2,text:"NEGATIVE"},
-  {id:3,text:"AWAITING"},
-  {id:4,text:"INVALID"},
+  { id: 1, text: "POSITIVE" },
+  { id: 2, text: "NEGATIVE" },
+  { id: 3, text: "AWAITING" },
+  { id: 4, text: "INVALID" },
 ];
 
 export const CONSULTATION_SUGGESTION = [
-  {id:1,text:"HI"},
-  {id:2,text:"A"},
-  {id:3,text:"R"},
+  { id: "HI", text: "Home Isolation" },
+  { id: "A", text: "Admitted" },
+  { id: "R", text: "Refered to another Hospital" },
 ];

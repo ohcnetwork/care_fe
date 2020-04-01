@@ -1,14 +1,18 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import Grid from '@material-ui/core/Grid';
-import { Card, CardContent, CardHeader, Tooltip, Typography, Box } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
-import { useDispatch } from "react-redux";
-import { getFacilities, getAllPatient } from "../../Redux/actions";
-import TitleHeader from "../Common/TitleHeader";
-import Pagination from "../Common/Pagination";
-import AddCard from '../Common/AddCard';
-import { navigate } from 'hookrouter';
-import { Loading } from "../Common/Loading";
+import React, { useState, useCallback } from 'react';
+import { useDispatch } from 'react-redux';
+import {
+    Grid,
+    Typography,
+    Card,
+    CardHeader,
+    CardContent,
+    Tooltip
+} from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
+import Pagination from '../Common/Pagination';
+import TitleHeader from '../Common/TitleHeader';
+import {getTestList} from "../../Redux/actions";
+import { Loading } from '../Common/Loading';
 import { useAbortableEffect, statusType } from '../../Common/utils';
 
 const useStyles = makeStyles(theme => ({
@@ -20,7 +24,6 @@ const useStyles = makeStyles(theme => ({
         height: 160,
         width: '100%',
         backgroundColor: '#FFFFFF',
-        cursor: 'pointer'
     },
     title: {
         whiteSpace: 'nowrap',
@@ -78,23 +81,15 @@ const useStyles = makeStyles(theme => ({
     },
     toolTip: {
         fontSize: '13px'
-    },
-    displayFlex: {
-        display: 'flex'
-    },
-    minHeight: {
-        minHeight: '65vh'
     }
 }));
 
-export const PatientManager = (props: any) => {
-    const { facilityId } = props;
+export default function SampleViewAdmin(props: any) {
     const classes = useStyles();
     const dispatch: any = useDispatch();
     const initialData: any[] = [];
-    const [data, setData] = useState(initialData);
-
-    let managePatients: any = null;
+    let manageSamples: any = null;
+    const [sample, setSample] = useState(initialData);
     const [isLoading, setIsLoading] = useState(false);
     const [totalCount, setTotalCount] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
@@ -104,10 +99,10 @@ export const PatientManager = (props: any) => {
 
     const fetchData = useCallback(async (status: statusType) => {
         setIsLoading(true);
-        const res = await dispatch(getAllPatient({ limit, offset }));
+        const res = await dispatch(getTestList({ limit, offset }));
         if (!status.aborted) {
             if (res && res.data) {
-                setData(res.data.results);
+                setSample(res.data.results);
                 setTotalCount(res.data.count);
             }
             setIsLoading(false);
@@ -124,42 +119,31 @@ export const PatientManager = (props: any) => {
         setOffset(offset);
     };
 
-    let patientList: any[] = [];
-    if (data && data.length) {
-        patientList = data.map((patient: any, idx: number) => {
-            const patientUrl = facilityId ? `/facility/${facilityId}/patient/${patient.id}` : `/patient/${patient.id}`;
+    let sampleList: any[] = [];
+    if (sample && sample.length) {
+        sampleList = sample.map((sample: any, idx: number) => {
             return (
-                <Grid item xs={12} sm={6} md={4} lg={3} key={`usr_${patient.id}`} className={classes.root}>
-                    <Card className={classes.card} onClick={() => navigate(patientUrl)}>
-                        <CardHeader
-                            className={classes.cardHeader}
-                            title={
-                                <span className={classes.title}>
-                                    <Tooltip
-                                        title={<span className={classes.toolTip}>{patient.name}</span>}
-                                        interactive={true}>
-                                        <span>{patient.name}</span>
-                                    </Tooltip>
-                                </span>
-                            }
+                <Grid item xs={12} md={3} key={`usr_${sample.id}`}
+                      className={classes.root}>
+                    <Card className={classes.card}>
+                        <CardHeader className={classes.cardHeader}
+                                    title={<span className={classes.title}><Tooltip title={<span className={classes.toolTip}>Consultation Id -{sample.consultation_id}</span>}
+                                                                                    interactive={true}><span>{sample.consultation_Id}</span></Tooltip></span>}
                         />
                         <CardContent className={classes.content}>
-                            <Box>
-                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Age - </span>
-                                <span>{patient.age}</span>
-                            </Box>
+                            <Typography>
+                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Status - </span>{sample.status}
+                            </Typography>
                         </CardContent>
                         <CardContent className={classes.content}>
-                            <Box>
-                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Contact with Covid Patient - </span>
-                                <span>{patient.contact_with_carrier ? "Yes" : "No"}</span>
-                            </Box>
+                            <Typography>
+                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Result - </span>{sample.result}
+                            </Typography>
                         </CardContent>
                         <CardContent className={classes.content}>
-                            <Box>
-                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Status - </span>
-                                <span>{patient.is_active ? "Active" : "Inactive"}</span>
-                            </Box>
+                            <Typography>
+                                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>Date Of Sample - </span>{sample.date_of_sample}
+                            </Typography>
                         </CardContent>
                     </Card>
                 </Grid>
@@ -167,14 +151,14 @@ export const PatientManager = (props: any) => {
         });
     }
 
-    if (isLoading || !data) {
-        managePatients = (
+    if (isLoading || !sample) {
+        manageSamples = (
             <Loading />
         );
-    } else if (data && data.length) {
-        managePatients = (
+    } else if (sample && sample.length) {
+        manageSamples = (
             <>
-                {patientList}
+                {sampleList}
                 {(totalCount > limit) && (
                     <Grid container className={`w3-center ${classes.paginateTopPadding}`}>
                         <Pagination
@@ -187,27 +171,23 @@ export const PatientManager = (props: any) => {
                 )}
             </>
         );
-
-    } else if (data && data.length === 0) {
-        managePatients = (
-            <Grid item xs={12} md={12} className={classes.displayFlex}>
-                <Grid container justify="center" alignItems="center">
-                    <h5> No Patients Found</h5>
-                </Grid>
+    } else if (sample && sample.length === 0) {
+        manageSamples = (
+            <Grid item xs={12} md={12} className="textMarginCenter">
+                <h5> No Users Found</h5>
             </Grid>
         );
     }
 
     return (
         <div>
-            <TitleHeader title="Patients" showSearch={false}>
+            <TitleHeader title="Sample Collection" showSearch={false}>
 
             </TitleHeader>
-
             <Grid container>
-                {managePatients}
+                {manageSamples}
             </Grid>
         </div>
     );
 
-};
+}
