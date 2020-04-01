@@ -24,7 +24,7 @@ import {
 } from "../Common/HelperInputFields";
 import { SAMPLE_TEST_RESULT } from "../../Common/constants";
 import moment from 'moment';
-import {navigate} from "hookrouter";
+import { navigate } from "hookrouter";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -99,13 +99,14 @@ export default function SampleViewAdmin(props: any) {
   const [currentPage, setCurrentPage] = useState(1);
   const [offset, setOffset] = useState(0);
   const [result, setResult] = useState<any>({});
+  const [fetchFlag, callFetchData] = useState(false);
   const limit = 15;
 
   const resultTypes = [{
-        id: 0,
-        text: 'Select',
-    }, ...SAMPLE_TEST_RESULT];
-    
+    id: 0,
+    text: 'Select',
+  }, ...SAMPLE_TEST_RESULT];
+
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -126,7 +127,7 @@ export default function SampleViewAdmin(props: any) {
     (status: statusType) => {
       fetchData(status);
     },
-    [fetchData]
+    [fetchData, fetchFlag]
   );
 
   const handlePagination = (page: number, limit: number) => {
@@ -165,10 +166,11 @@ export default function SampleViewAdmin(props: any) {
     }
     dispatch(patchSample(sample.id, sampleData)).then((resp: any) => {
       if (resp.status === 201 || resp.status === 200) {
-      Notification.Success({
-        msg: `Request ${statusName}`
-      });
-      window.location.reload();
+        Notification.Success({
+          msg: `Request ${statusName}`
+        });
+        // window.location.reload();
+        callFetchData(!fetchFlag);
       }
     });
   };
@@ -188,7 +190,8 @@ export default function SampleViewAdmin(props: any) {
         Notification.Success({
           msg: `Request ${statusName}`
         });
-        window.location.reload();
+        // window.location.reload();
+        callFetchData(!fetchFlag);
       }
     });
   };
@@ -268,32 +271,33 @@ export default function SampleViewAdmin(props: any) {
                   </Button>
                 </CardContent>
               )}
-            {sample.status === "RECEIVED_AT_LAB" &&
-              user.user_type === "StateLabAdmin" && (
-                <>
-                  <CardContent>
-                    <Box display="flex" >
-                      <Box flex="1" style={{marginRight:'4px'}}>
-                        <InputLabel id="result-select-label">Result</InputLabel>
-                        <NativeSelectField
-                          name={sample.id.toString()}
-                          variant="outlined"
-                          value={result[sample.id.toString()]}
-                          options={resultTypes}
-                          onChange={handleChange}
-                        />
-                      </Box>
-                      <Button
-                        style={{ color: "red" }}
-                        variant="outlined"
-                        onClick={e => handleComplete(7, sample, Number(result[sample.id.toString()]))}
-                      >
-                        Completed
+            {/* {sample.status === "RECEIVED_AT_LAB" &&
+              user.user_type === "StateLabAdmin" && ( */}
+            <>
+              <CardContent>
+                <Box display="flex" >
+                  <Box flex="1" style={{ marginRight: '4px' }}>
+                    <InputLabel id="result-select-label">Result</InputLabel>
+                    <NativeSelectField
+                      name={sample.id.toString()}
+                      variant="outlined"
+                      value={result[sample.id.toString()]}
+                      options={resultTypes}
+                      onChange={handleChange}
+                    />
+                  </Box>
+                  <Button
+                    style={{ color: "red" }}
+                    variant="outlined"
+                    // disabled={!result[sample.id.toString()]}
+                    onClick={e => handleComplete(7, sample, Number(result[sample.id.toString()]))}
+                  >
+                    Completed
                   </Button>
-                    </Box>
-                  </CardContent>
-                </>
-              )}
+                </Box>
+              </CardContent>
+            </>
+            {/* )} */}
             <CardContent className={classes.content}>
               <Typography>
                 <span className={`w3-text-gray ${classes.userCardSideTitle}`}>
