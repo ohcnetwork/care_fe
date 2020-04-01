@@ -106,34 +106,7 @@ const AppRouter = () => {
     <div className="bg-gray-100">
       <div className="flex flex-col md:flex-row">
         <Header />
-        <div className="max-w-3xl mx-auto my-4 md:my-10">{pages}</div>
-      </div>
-      <div className="bg-white app-footer">
-        <div className="max-w-5xl mx-auto flex flex-col p-4">
-          <div className="mx-auto p-2">
-            <img
-              className="h-20"
-              src="https://care-coronasafe.s3.amazonaws.com/static/images/logos/ksdma_logo.png"
-              alt="Care Logo"
-            />
-          </div>
-          <div className="max-w-6xl text-sm">
-            <a href="https://coronasafe.network/">
-              CoronaSafe Network is an open-source public utility designed by a
-              multi-disciplinary team of innovators and volunteers who are
-              working on a model to support Government efforts with full
-              understanding and support of Government of Kerala.
-            </a>
-            <div className="mx-auto">
-              <a
-                href="https://github.com/coronasafe"
-                className="care-secondary-color"
-              >
-                (Github)
-              </a>
-            </div>
-          </div>
-        </div>
+        <div className="max-w-3xl mx-auto my-4 md:my-10 flex-1">{pages}</div>
       </div>
     </div>
   );
