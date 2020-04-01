@@ -139,7 +139,7 @@ export const FacilityHome = (props: any) => {
                 <Grid item xs={12} md={6} className="w3-center">
                     <Button fullWidth variant="contained" color="primary" size="small"
                         onClick={() => navigate(`/facility/${facilityId}/patient`)}>
-                        Add More Patients
+                        Add Details of Covid Suspects
                     </Button>
                 </Grid>
                 <Grid item xs={12} md={6} className="w3-center">
