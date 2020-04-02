@@ -54,11 +54,11 @@ export const SampleDetails = (props: SampleDetailsProps) => {
             </div>
             <div>
               <span className="font-semibold leading-relaxed">Created On :</span>{" "}
-              {moment(flow.created_date).format("lll")}
+              {flow.created_date ? moment(flow.created_date).format("lll") : "-"}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">Modified on:</span>{" "}
-              {moment(flow.modified_date).format("lll")}
+              {flow.modified_date ? moment(flow.modified_date).format("lll") : "-"}
             </div>
           </div>
         </CardContent>
@@ -86,11 +86,11 @@ export const SampleDetails = (props: SampleDetailsProps) => {
           </div>
           <div>
             <span className="font-semibold leading-relaxed">Tested on :</span>{" "}
-            {moment(sampleDetails.date_of_result).format("lll")}
+            {sampleDetails.date_of_result ? moment(sampleDetails.date_of_result).format("lll") : "-"}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">Result on:</span>{" "}
-            {moment(sampleDetails.date_of_result).format("lll")}
+            {sampleDetails.date_of_result ? moment(sampleDetails.date_of_result).format("lll") : "-"}
           </div>
           {sampleDetails.fast_track && (<div className="md:col-span-2">
             <span className="font-semibold leading-relaxed">Fast track testing reason: </span>
