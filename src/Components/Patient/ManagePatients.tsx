@@ -225,7 +225,7 @@ export const PatientManager = (props: any) => {
   return (
     <div className="px-2">
       <div className="font-semibold text-3xl p-4 mt-4 border-b-4 border-orange-500">
-        Patients
+        Covid Suspects
       </div>
 
       <div className="flex flex-wrap mt-4">{managePatients}</div>
