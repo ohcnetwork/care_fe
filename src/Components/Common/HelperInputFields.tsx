@@ -2,6 +2,7 @@ import React from 'react';
 import { Checkbox, Grid, IconButton, Radio, TextField, NativeSelect, TextFieldProps, FormControlLabel, FormControlLabelProps, Select } from '@material-ui/core';
 import { KeyboardDatePicker, KeyboardTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import { MaterialUiPickersDate } from '@material-ui/pickers/typings/date'
+import Autocomplete from '@material-ui/lab/Autocomplete';
 import DateFnsUtils from '@date-io/date-fns';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FormControl from '@material-ui/core/FormControl';
@@ -336,7 +337,7 @@ export const SelectField = (props: DefaultSelectInputProps) => {
 export const CheckboxField = (props: CheckboxProps) => {
     const { onChange, checked, name, style } = props;
     return (
-        <FormControlLabel 
+        <FormControlLabel
             style={style}
             control={<Checkbox
                 checked={checked}
@@ -347,3 +348,26 @@ export const CheckboxField = (props: CheckboxProps) => {
         />
     );
 };
+
+export const AutoCompleteMultiField = (props: any) => {
+    const { id, options, label, variant, placeholder, errors, onChange, value } = props;
+    return (<>
+        <Autocomplete
+            multiple
+            id={id}
+            options={options}
+            onChange={onChange}
+            value={value}
+            filterSelectedOptions
+            renderInput={(params: any) => (
+                <TextField
+                    {...params}
+                    variant={variant}
+                    label={label}
+                    placeholder={placeholder}
+                />
+            )}
+        />
+        <ErrorHelperText error={errors} />
+    </>)
+}

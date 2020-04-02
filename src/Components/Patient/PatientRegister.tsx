@@ -1,7 +1,7 @@
 import React, { useState, useReducer, useCallback } from "react";
 import { useDispatch } from "react-redux";
-import { Box, Checkbox, Card, CardContent, Button, InputLabel, RadioGroup, Radio, FormControlLabel, CircularProgress } from "@material-ui/core";
-import { TextInputField, SelectField, ErrorHelperText, MultilineInputField } from "../Common/HelperInputFields";
+import { Box, Card, CardContent, Button, InputLabel, RadioGroup, Radio, FormControlLabel, CircularProgress } from "@material-ui/core";
+import { TextInputField, SelectField, ErrorHelperText, MultilineInputField, CheckboxField, AutoCompleteMultiField } from "../Common/HelperInputFields";
 import { phonePreg } from "../../Common/validation";
 import { navigate } from "hookrouter";
 import { Loading } from "../Common/Loading";
@@ -10,6 +10,7 @@ import { PatientModel } from "./models";
 import { GENDER_TYPES, MEDICAL_HISTORY_CHOICES } from "../../Common/constants";
 import { createPatient, getPatient, updatePatient, getStates, getDistrictByState, getLocalbodyByDistrict } from "../../Redux/actions";
 import { useAbortableEffect, statusType } from "../../Common/utils";
+import countryList from "../../Common/static/countries.json"
 import * as Notification from "../../Utils/Notifications.js";
 
 interface PatientRegisterProps extends PatientModel {
@@ -36,10 +37,17 @@ const initForm: any = {
   gender: "",
   phone_number: "",
   medical_history: [],
-  contact_with_carrier: "",
   state: "",
   district: "",
   local_body: "",
+  address: "",
+  present_health: "",
+  contact_with_confirmed_carrier: "false",
+  contact_with_suspected_carrier: "false",
+  estimated_contact_date: "",
+  past_travel: false,
+  countries_travelled: [],
+  has_SARI: false,
   ...medicalHistoryChoices
 };
 
@@ -137,20 +145,25 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       const res = await dispatchAction(getPatient({ id }));
       if (!status.aborted) {
         if (res && res.data) {
-          const formData: any = {
-            name: res.data.name,
-            age: res.data.age,
-            gender: res.data.gender,
-            phone_number: res.data.phone_number,
+          // const countries_travelled = res.data.countries_travelled
+          //   ? res.data.countries_travelled.split(',').map((country:string)=>{
+          //     return {
+          //       name
+          //     }
+          //   }) : [];
+          const formData = {
+            ...res.data,
             medical_history: [],
-            contact_with_carrier: `${res.data.contact_with_carrier}`,
-            state: res.data.state,
-            district: res.data.district,
-            local_body: res.data.local_body
-          };
+            contact_with_confirmed_carrier: String(res.data.contact_with_confirmed_carrier),
+            contact_with_suspected_carrier: String(res.data.contact_with_suspected_carrier),
+            countries_travelled: res.data.countries_travelled ? res.data.countries_travelled.split(',') : [],
+          }
           res.data.medical_history.forEach((i: any) => {
-            formData.medical_history.push(i.id);
-            formData[`medical_history_${i.id}`] = i.details;
+            const medicalHistoryId = medicalHistoryTypes.find((j: any) => j.text === i.disease)?.id;
+            if (medicalHistoryId) {
+              formData.medical_history.push(medicalHistoryId);
+              formData[`medical_history_${medicalHistoryId}`] = i.details;
+            }
           });
           dispatch({
             type: "set_form",
@@ -199,6 +212,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         case "name":
         case "age":
         case "gender":
+        case "address":
+        case "present_health":
           if (!state.form[field]) {
             errors[field] = "Field is required";
             invalidForm = true;
@@ -218,11 +233,16 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             invalidForm = true;
           }
           return;
+        case "countries_travelled":
+          if (state.form.past_travel && !state.form[field].length) {
+            errors[field] = "Field is required";
+            invalidForm = true;
+          }
+          return;
         default:
           return;
       }
     });
-    console.log(errors);
     dispatch({ type: "set_error", errors });
     return !invalidForm;
   };
@@ -237,13 +257,13 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         const medData = medicalHistoryTypes.find(i => i.id === id);
         if (medData) {
           medical_history.push({
-            disease: medData.id,
+            disease: medData.text,
             details: state.form[`medical_history_${medData.id}`]
           });
         }
       });
       if (!medical_history.length) {
-        medical_history.push({ disease: 1, details: "" });
+        medical_history.push({ disease: "NO", details: "" });
       }
       const data = {
         name: state.form.name,
@@ -253,8 +273,15 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         state: state.form.state,
         district: state.form.district,
         local_body: state.form.local_body,
+        address: state.form.address,
+        present_health: state.form.present_health,
+        contact_with_confirmed_carrier: JSON.parse(state.form.contact_with_confirmed_carrier),
+        contact_with_suspected_carrier: JSON.parse(state.form.contact_with_suspected_carrier),
+        estimated_contact_date: state.form.estimated_contact_date,
+        past_travel: state.form.past_travel,
+        countries_travelled: state.form.past_travel ? state.form.countries_travelled.join(',') : "",
+        has_SARI: state.form.has_SARI,
         medical_history,
-        contact_with_carrier: JSON.parse(state.form.contact_with_carrier),
         is_active: true
       };
 
@@ -281,22 +308,33 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   };
 
   const handleChange = (e: any) => {
-    let form = { ...state.form };
+    const form = { ...state.form };
     form[e.target.name] = e.target.value;
     dispatch({ type: "set_form", form });
   };
 
-  const handleCheckboxChange = (e: any) => {
+  const handleCountryChange = (event: object, value: any, reason: string) => {
+    const form = { ...state.form };
+    form.countries_travelled = value;
+    dispatch({ type: "set_form", form });
+  }
+
+  const handleCheckboxFieldChange = (e: any) => {
+    const form = { ...state.form };
+    const { checked, name } = e.target;
+    form[name] = checked;
+    dispatch({ type: "set_form", form });
+  };
+
+  const handleMedicalCheckboxChange = (e: any, id: number) => {
     let form = { ...state.form };
     const values = state.form.medical_history;
-    const chocieId = Number(e.target.value);
     if (e.target.checked) {
-      values.push(chocieId);
+      values.push(id);
     } else {
-      values.splice(values.indexOf(chocieId), 1);
+      values.splice(values.indexOf(id), 1);
     }
     form["medical_history"] = values;
-    console.log(form);
     dispatch({ type: "set_form", form });
   };
 
@@ -305,34 +343,35 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   };
 
   const renderMedicalHistory = (id: number, title: string) => {
-    const field = `medical_history_${id}`;
+    const checkboxField = `medical_history_check_${id}`;
+    const textField = `medical_history_${id}`;
     return (
-      <Box key={id}>
+      <div key={textField}>
         <div>
-          <Checkbox
+          <CheckboxField
             checked={state.form.medical_history.indexOf(id) !== -1}
-            value={id}
-            onChange={handleCheckboxChange}
-          />{" "}
-          {title}
+            onChange={(e) => handleMedicalCheckboxChange(e, id)}
+            name={checkboxField}
+            label={title}
+          />
         </div>
         {state.form.medical_history.indexOf(id) !== -1 && (
           <CardContent>
             <MultilineInputField
               placeholder="Details"
               rows={5}
-              name={field}
+              name={textField}
               variant="outlined"
               margin="dense"
               type="text"
-              InputLabelProps={{ shrink: !!state.form[field] }}
-              value={state.form[field]}
+              InputLabelProps={{ shrink: !!state.form[textField] }}
+              value={state.form[textField]}
               onChange={handleChange}
-              errors={state.errors[field]}
+              errors={state.errors[textField]}
             />
           </CardContent>
         )}
-      </Box>
+      </div>
     );
   };
 
@@ -406,6 +445,39 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     errors={state.errors.phone_number}
                   />
                 </div>
+
+                <div>
+                  <InputLabel id="address-label">Address*</InputLabel>
+                  <MultilineInputField
+                    rows={2}
+                    name="address"
+                    variant="outlined"
+                    margin="dense"
+                    type="text"
+                    placeholder="Enter the address"
+                    InputLabelProps={{ shrink: !!state.form.address }}
+                    value={state.form.address}
+                    onChange={handleChange}
+                    errors={state.errors.address}
+                  />
+                </div>
+
+                <div>
+                  <InputLabel id="present_health-label">Present Health*</InputLabel>
+                  <MultilineInputField
+                    rows={2}
+                    name="present_health"
+                    variant="outlined"
+                    margin="dense"
+                    type="text"
+                    placeholder="Enter the present health condition"
+                    InputLabelProps={{ shrink: !!state.form.present_health }}
+                    value={state.form.present_health}
+                    onChange={handleChange}
+                    errors={state.errors.present_health}
+                  />
+                </div>
+
                 <div>
                   <InputLabel id="gender-label">State*</InputLabel>
                   {isStateLoading ? (
@@ -467,14 +539,14 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                 </div>
 
                 <div className="md:col-span-2">
-                  <InputLabel id="contact-with-carrier-label">
-                    Has the patient had contact with someone already diagnosed with
+                  <InputLabel id="contact_with_confirmed_carrier">
+                    Has the person had contact with someone already diagnosed with
                     Covid 19?
                   </InputLabel>
                   <RadioGroup
-                    aria-label="covid"
-                    name="contact_with_carrier"
-                    value={state.form.contact_with_carrier}
+                    aria-label="contact_with_confirmed_carrier"
+                    name="contact_with_confirmed_carrier"
+                    value={state.form.contact_with_confirmed_carrier}
                     onChange={handleChange}
                     style={{ padding: "0px 5px" }}
                   >
@@ -494,17 +566,78 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   <ErrorHelperText error={state.errors.contact_with_carrier} />
                 </div>
 
-                <div>
-                  <InputLabel id="med-history-label">
-                    Any medical history?
-              </InputLabel>
-                  {medicalHistoryTypes.map(i => {
-                    return renderMedicalHistory(i.id, i.text);
-                  })}
+                <div className="md:col-span-2">
+                  <InputLabel id="contact_with_suspected_carrier">
+                    Has the patient had contact with Covid 19 suspects?
+                  </InputLabel>
+                  <RadioGroup
+                    aria-label="contact_with_suspected_carrier"
+                    name="contact_with_suspected_carrier"
+                    value={state.form.contact_with_suspected_carrier}
+                    onChange={handleChange}
+                    style={{ padding: "0px 5px" }}
+                  >
+                    <Box display="flex" flexDirection="row">
+                      <FormControlLabel
+                        value="true"
+                        control={<Radio />}
+                        label="Yes"
+                      />
+                      <FormControlLabel
+                        value="false"
+                        control={<Radio />}
+                        label="No"
+                      />
+                    </Box>
+                  </RadioGroup>
+                  <ErrorHelperText error={state.errors.contact_with_carrier} />
                 </div>
+
+                <div className="md:col-span-2">
+                  <CheckboxField
+                    checked={state.form.past_travel}
+                    onChange={handleCheckboxFieldChange}
+                    name="past_travel"
+                    label="Domestic/international Travel History (within last 28 days)"
+                  />
+                </div>
+
+                {state.form.past_travel && (<div className="md:col-span-2">
+                  <AutoCompleteMultiField
+                    id="countries-travelled"
+                    options={countryList}
+                    label="Countries Visited*"
+                    variant="outlined"
+                    placeholder="Select a country"
+                    onChange={handleCountryChange}
+                    value={state.form.countries_travelled}
+                    errors={state.errors.countries_travelled}
+                  />
+                </div>)}
+
+                <div className="md:col-span-2">
+                  <CheckboxField
+                    checked={state.form.has_SARI}
+                    onChange={handleCheckboxFieldChange}
+                    name="has_SARI"
+                    label="Does the person have SARI (Severe Acute Respiratory illness)?"
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <InputLabel id="med-history-label">
+                    Any medical history? (Optional Information)
+                  </InputLabel>
+                  <div className="grid grid-cols-1 md:grid-cols-2">
+                    {medicalHistoryTypes.map(i => {
+                      return renderMedicalHistory(i.id, i.text);
+                    })}
+                  </div>
+                </div>
+
               </div>
               <div
-                className="flex justify-between"
+                className="flex justify-between mt-4"
               >
                 <Button
                   color="default"

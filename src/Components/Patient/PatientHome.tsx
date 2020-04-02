@@ -290,11 +290,11 @@ export const PatientHome = (props: any) => {
             {moment(patientData.estimated_contact_date).format("lll")}
           </div>)}
           <div>
-            <span className="font-semibold leading-relaxed">SARI (Severe Acute Respiratory illness): </span>
+            <span className="font-semibold leading-relaxed">Have SARI (Severe Acute Respiratory illness)?: </span>
             {patientData.has_SARI ? <span className="badge badge-pill badge-warning">Yes</span> : <span className="badge badge-pill badge-secondary">No</span>}
           </div>
           <div>
-            <span className="font-semibold leading-relaxed">Any domestic/international Travel history in the last 28 days: </span>
+            <span className="font-semibold leading-relaxed">Domestic/international Travel (within last 28 days): </span>
             {patientData.past_travel ? <span className="badge badge-pill badge-warning">Yes</span> : <span className="badge badge-pill badge-secondary">No</span>}
           </div>
           {patientData.countries_travelled && (<div>
