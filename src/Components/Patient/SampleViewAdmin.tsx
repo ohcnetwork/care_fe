@@ -1,30 +1,17 @@
-import React, { useState, useCallback } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  Grid,
-  Typography,
-  Card,
-  CardHeader,
-  CardContent,
-  Tooltip,
-  Button,
-  InputLabel,
-  Box
-} from "@material-ui/core";
+import { Box, Button, CardContent, CardHeader, Grid, InputLabel, Tooltip, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import Pagination from "../Common/Pagination";
-import TitleHeader from "../Common/TitleHeader";
-import { getTestList, patchSample } from "../../Redux/actions";
-import { Loading } from "../Common/Loading";
-import { useAbortableEffect, statusType } from "../../Common/utils";
-import * as Notification from "../../Utils/Notifications";
-import {
-  ErrorHelperText,
-  NativeSelectField
-} from "../Common/HelperInputFields";
-import { SAMPLE_TEST_RESULT } from "../../Common/constants";
-import moment from 'moment';
 import { navigate } from "hookrouter";
+import moment from 'moment';
+import React, { useCallback, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { SAMPLE_TEST_RESULT } from "../../Common/constants";
+import { statusType, useAbortableEffect } from "../../Common/utils";
+import { getTestList, patchSample } from "../../Redux/actions";
+import * as Notification from "../../Utils/Notifications";
+import { NativeSelectField } from "../Common/HelperInputFields";
+import { Loading } from "../Common/Loading";
+import PageTitle from "../Common/PageTitle";
+import Pagination from "../Common/Pagination";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -84,11 +71,11 @@ const useStyles = makeStyles(theme => ({
   toolTip: {
     fontSize: "13px"
   },
-  statusPositive:{
-    borderColor:'red'
+  statusPositive: {
+    borderColor: 'red'
   },
-  statusNegative:{
-    borderColor:'green'
+  statusNegative: {
+    borderColor: 'green'
   },
 }));
 
@@ -208,7 +195,7 @@ export default function SampleViewAdmin(props: any) {
     sampleList = sample.map((sample: any, idx: number) => {
       return (
         <div key={`usr_${sample.id}`} className="w-full md:w-1/2 mt-4 px-2">
-          <div className={`block border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black ${sample.result === 'POSITIVE'? classes.statusPositive:''} ${sample.result === 'NEGATIVE'? classes.statusNegative:''}`}>
+          <div className={`block border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black ${sample.result === 'POSITIVE' ? classes.statusPositive : ''} ${sample.result === 'NEGATIVE' ? classes.statusNegative : ''}`}>
             <CardHeader
               className={classes.cardHeader}
               onClick={() => {
@@ -365,10 +352,7 @@ export default function SampleViewAdmin(props: any) {
 
   return (
     <div>
-      <div className="font-semibold text-3xl p-4 mt-4 border-b-4 border-orange-500">
-        Sample Management system
-      </div>
-
+      <PageTitle title="Sample Management system" hideBack={true} />
       <div className="flex flex-wrap mt-4">
         {manageSamples}
       </div>

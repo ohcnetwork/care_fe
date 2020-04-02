@@ -1,19 +1,12 @@
-import React, { useState, useCallback } from "react";
-import { useDispatch } from "react-redux";
-import {
-  Grid,
-  Typography,
-  Card,
-  CardHeader,
-  CardContent,
-  Tooltip
-} from "@material-ui/core";
+import { CardContent, CardHeader, Grid, Tooltip, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import Pagination from "../Common/Pagination";
-import TitleHeader from "../Common/TitleHeader";
-import { getAmbulanceList, getUserList } from "../../Redux/actions";
+import React, { useCallback, useState } from "react";
+import { useDispatch } from "react-redux";
+import { statusType, useAbortableEffect } from "../../Common/utils";
+import { getAmbulanceList } from "../../Redux/actions";
 import { Loading } from "../Common/Loading";
-import { useAbortableEffect, statusType } from "../../Common/utils";
+import PageTitle from "../Common/PageTitle";
+import Pagination from "../Common/Pagination";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -201,9 +194,7 @@ export default function AmbulanceList(props: any) {
 
   return (
     <div>
-      <div className="font-semibold text-3xl p-4 mt-4 border-b-4 border-orange-500">
-        Ambulances
-      </div>
+      <PageTitle title="Ambulances" hideBack={true} />
 
       <div className="flex flex-wrap mt-4">{manageAmbulances}</div>
     </div>

@@ -12,6 +12,7 @@ import { createPatient, getPatient, updatePatient, getStates, getDistrictByState
 import { useAbortableEffect, statusType } from "../../Common/utils";
 import countryList from "../../Common/static/countries.json"
 import * as Notification from "../../Utils/Notifications.js";
+import PageTitle from "../Common/PageTitle";
 
 interface PatientRegisterProps extends PatientModel {
   facilityId: number;
@@ -388,9 +389,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
   return (
     <div>
-      <div className="font-semibold text-3xl p-4 mt-4 border-b-4 border-orange-500">
-        {headerText}
-      </div>
+      <PageTitle title={headerText} />
       <div className="mt-4">
         <Card>
           {showAlertMessage.show && (

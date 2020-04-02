@@ -1,35 +1,13 @@
-import React, { useState, useReducer, useCallback, useEffect } from "react";
-import { makeStyles, Theme } from "@material-ui/core/styles";
-import { useDispatch } from "react-redux";
-import {
-  Grid,
-  Card,
-  CardHeader,
-  CardContent,
-  CardActions,
-  Button,
-  FormControl,
-  InputLabel,
-  RadioGroup,
-  Radio,
-  FormControlLabel,
-  Box
-} from "@material-ui/core";
-import {
-  TextInputField,
-  NativeSelectField,
-  ErrorHelperText,
-  MultilineInputField,
-  DateInputField
-} from "../Common/HelperInputFields";
+import { Box, Button, Card, CardActions, CardContent, FormControlLabel, Grid, InputLabel, Radio, RadioGroup } from "@material-ui/core";
 import { navigate } from "hookrouter";
-import { Loading } from "../Common/Loading";
-import AppMessage from "../Common/AppMessage";
-import { ConsultationModal } from "./models";
+import React, { useReducer, useState } from "react";
+import { useDispatch } from "react-redux";
 import { CONSULTATION_SUGGESTION } from "../../Common/constants";
-import { createConsultation, getConsultation } from "../../Redux/actions";
-import { useAbortableEffect, statusType } from "../../Common/utils";
+import { createConsultation } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
+import { DateInputField, ErrorHelperText, MultilineInputField, NativeSelectField } from "../Common/HelperInputFields";
+import { Loading } from "../Common/Loading";
+import PageTitle from "../Common/PageTitle";
 
 const initForm: any = {
   suggestion: "",
@@ -168,14 +146,12 @@ export const Consultation = (props: any) => {
 
   return (
     <div>
-      <div className="font-semibold text-3xl p-4 mt-4 border-b-4 border-orange-500">
-        {headerText}
-      </div>
+      <PageTitle title={headerText} />
       <div className="mt-4">
         <Card>
           <form onSubmit={e => handleSubmit(e)}>
             <CardContent>
-              <InputLabel id="demo-simple-select-outlined-label" style={{fontWeight: 'bold', fontSize: '18px'}}>
+              <InputLabel id="demo-simple-select-outlined-label" style={{ fontWeight: 'bold', fontSize: '18px' }}>
                 Decision after OP Triage
               </InputLabel>
               <NativeSelectField

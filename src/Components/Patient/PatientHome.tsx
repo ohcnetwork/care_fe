@@ -1,32 +1,20 @@
-import React, { useState, useCallback } from "react";
-import {
-  Grid,
-  Typography,
-  Button,
-  Divider,
-  Box,
-  CardContent,
-  CircularProgress
-} from "@material-ui/core";
+import { Button, CircularProgress, Grid, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { useDispatch } from "react-redux";
 import { navigate } from "hookrouter";
-import { Loading } from "../Common/Loading";
-import {
-  getPatient,
-  getConsultationList,
-  getSampleTestList,
-  patchSample
-} from "../../Redux/actions";
-import { GENDER_TYPES } from "../../Common/constants";
-import { useAbortableEffect, statusType } from "../../Common/utils";
-import { ConsultationCard } from "../Facility/ConsultationCard";
-import { SampleTestCard } from "./SampleTestCard";
-import { PatientModel, SampleTestModel } from "./models";
-import { ConsultationModal } from "../Facility/models";
-import * as Notification from "../../Utils/Notifications";
-import Pagination from "../Common/Pagination";
 import moment from "moment";
+import React, { useCallback, useState } from "react";
+import { useDispatch } from "react-redux";
+import { GENDER_TYPES } from "../../Common/constants";
+import { statusType, useAbortableEffect } from "../../Common/utils";
+import { getConsultationList, getPatient, getSampleTestList, patchSample } from "../../Redux/actions";
+import * as Notification from "../../Utils/Notifications";
+import { Loading } from "../Common/Loading";
+import PageTitle from "../Common/PageTitle";
+import Pagination from "../Common/Pagination";
+import { ConsultationCard } from "../Facility/ConsultationCard";
+import { ConsultationModal } from "../Facility/models";
+import { PatientModel, SampleTestModel } from "./models";
+import { SampleTestCard } from "./SampleTestCard";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -50,6 +38,7 @@ const useStyles = makeStyles(theme => ({
     marginBottom: "10px"
   },
   details: {
+    marginTop: "10px",
     padding: "5px",
     marginBottom: "10px"
   },
@@ -228,9 +217,7 @@ export const PatientHome = (props: any) => {
 
   return (
     <div className="px-2">
-      <div className="font-semibold text-3xl p-4 mt-4 border-b-4 border-orange-500">
-        Covid Suspect #{id}
-      </div>
+      <PageTitle title={`Covid Suspect #${id}`} />
 
       <div className="border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black mt-4 p-4">
         <div className="flex justify-between">
@@ -331,9 +318,7 @@ export const PatientHome = (props: any) => {
       </div>
 
       <Grid item xs={12}>
-        <div className="font-semibold text-3xl p-4 mt-4 border-b-4 border-orange-500 mb-4">
-          Medical History
-        </div>
+        <PageTitle title="Medical History" hideBack={true} />
         <div className={classes.details}>
           {patientMedHis.length > 0 ? (
             <table className="w3-table w3-table-all">
@@ -354,9 +339,7 @@ export const PatientHome = (props: any) => {
       </Grid>
 
       <div>
-        <div className="font-semibold text-3xl p-4 mt-4 border-b-4 border-orange-500 mb-4">
-          OP Triage / Consultation History
-        </div>
+        <PageTitle title="OP Triage / Consultation History" hideBack={true} />
         {consultationList}
         {!isConsultationLoading && totalConsultationCount > limit && (
           <Grid container className={`w3-center ${classes.paginateTopPadding}`}>
@@ -371,9 +354,7 @@ export const PatientHome = (props: any) => {
       </div>
 
       <div>
-        <div className="font-semibold text-3xl p-4 mt-4 border-b-4 border-orange-500 mb-4">
-          Sample Test History
-        </div>
+        <PageTitle title="Sample Test History" hideBack={true} />
         {sampleList}
         {!isSampleLoading && totalSampleListCount > limit && (
           <Grid container className={`w3-center ${classes.paginateTopPadding}`}>

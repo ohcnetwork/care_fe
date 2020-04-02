@@ -1,21 +1,13 @@
-import React from "react";
-import { makeStyles, Theme } from "@material-ui/core/styles";
 import AppBar from "@material-ui/core/AppBar";
-import Tabs from "@material-ui/core/Tabs";
-import Tab from "@material-ui/core/Tab";
-import Typography from "@material-ui/core/Typography";
 import Box from "@material-ui/core/Box";
-import {
-  VehicleDetailsForm,
-  vehicleForm,
-  initVehicleData
-} from "./VehicleDetailsForm";
-import {
-  DriverDetailsForm,
-  driverForm,
-  initDriverData
-} from "./DriverDetailsForm";
-import { Grid } from "@material-ui/core";
+import { makeStyles, Theme } from "@material-ui/core/styles";
+import Tab from "@material-ui/core/Tab";
+import Tabs from "@material-ui/core/Tabs";
+import Typography from "@material-ui/core/Typography";
+import React from "react";
+import PageTitle from "../Common/PageTitle";
+import { DriverDetailsForm, driverForm, initDriverData } from "./DriverDetailsForm";
+import { initVehicleData, VehicleDetailsForm, vehicleForm } from "./VehicleDetailsForm";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -110,9 +102,7 @@ export default function AmbulanceOnboarding() {
 
   return (
     <div className="max-w-3xl mx-auto">
-      <div className="font-semibold text-3xl p-4 mt-4 border-b-4 border-orange-500 mb-4">
-        Ambulance Registration
-      </div>
+    <PageTitle title="Ambulance Registration" />
 
       <AppBar position="static">
         <Tabs
