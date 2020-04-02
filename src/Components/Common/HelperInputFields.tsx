@@ -1,5 +1,5 @@
 import React from 'react';
-import { Checkbox, Grid, IconButton, Radio, TextField, NativeSelect, TextFieldProps, FormControlLabel, FormControlLabelProps } from '@material-ui/core';
+import { Checkbox, Grid, IconButton, Radio, TextField, NativeSelect, TextFieldProps, FormControlLabel, FormControlLabelProps, Select } from '@material-ui/core';
 import { KeyboardDatePicker, KeyboardTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import { MaterialUiPickersDate } from '@material-ui/pickers/typings/date'
 import DateFnsUtils from '@date-io/date-fns';
@@ -7,6 +7,17 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import FormControl from '@material-ui/core/FormControl';
 import Box from '@material-ui/core/Box';
 import { NativeSelectInputProps } from '@material-ui/core/NativeSelect/NativeSelectInput';
+import { SelectProps } from '@material-ui/core/Select';
+
+export interface DefaultSelectInputProps extends SelectProps {
+    options: Array<{ id: string | number, text?: string }>,
+    placeholder?: string;
+    label?: string;
+    margin?: 'dense' | 'none';
+    optionkey?: string,
+    optionvalueidentifier?: string,
+}
+
 
 export interface DefaultNativeSelectInputProps extends NativeSelectInputProps {
     options: Array<{ id: string | number, text?: string }>,
@@ -56,7 +67,7 @@ interface OptionsProps {
 
 
 export const TextInputField = (props: TextFieldPropsExtended) => {
-    const { onChange, type, errors, placeholder,onKeyDown } = props;
+    const { onChange, type, errors, onKeyDown } = props;
     const inputType = type === 'number' ? 'text' : type;
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (typeof onChange !== 'function') {
@@ -293,7 +304,7 @@ export const ShowCheckboxOptions = (props: OptionsProps) => {
 export const NativeSelectField = (props: DefaultNativeSelectInputProps) => {
     const { options, variant, label, optionkey, optionvalueidentifier } = props;
     return (
-        <FormControl style={{ width: "100%" }} variant={variant}>
+        <FormControl style={{ width: "100%" }} variant={variant} margin="dense">
             {label && (<Box>{label}</Box>)}
             <NativeSelect {...props}>
                 {options.map((opt: any) => {
@@ -302,6 +313,22 @@ export const NativeSelectField = (props: DefaultNativeSelectInputProps) => {
                     </option>
                 })}
             </NativeSelect>
+        </FormControl>
+    );
+};
+
+export const SelectField = (props: DefaultSelectInputProps) => {
+    const { options, label, variant, margin, optionkey, optionvalueidentifier } = props;
+    return (
+        <FormControl style={{ width: "100%" }} variant={variant} margin={margin}>
+            {label && (<Box>{label}</Box>)}
+            <Select native {...props}>
+                {options.map((opt: any) => {
+                    return <option value={optionkey ? opt[optionkey] : opt.id} key={opt.id} disabled={opt.disabled}>
+                        {optionvalueidentifier ? opt[optionvalueidentifier] : opt.text}
+                    </option>
+                })}
+            </Select>
         </FormControl>
     );
 };
