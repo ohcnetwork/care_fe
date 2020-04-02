@@ -618,9 +618,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   <AutoCompleteMultiField
                     id="countries-travelled"
                     options={countryList}
-                    label="Countries Visited*"
+                    label="Countries / Places Visited *"
                     variant="outlined"
-                    placeholder="Enter country name"
+                    placeholder="Select country or enter the place of visit"
                     onChange={handleCountryChange}
                     value={state.form.countries_travelled}
                     errors={state.errors.countries_travelled}
