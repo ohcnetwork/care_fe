@@ -26,6 +26,7 @@ import { PatientModel, SampleTestModel } from "./models";
 import { ConsultationModal } from "../Facility/models";
 import * as Notification from "../../Utils/Notifications";
 import Pagination from "../Common/Pagination";
+import moment from "moment";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -208,12 +209,12 @@ export const PatientHome = (props: any) => {
   if (isConsultationLoading) {
     consultationList = <CircularProgress size={20} />;
   } else if (consultationListData.length === 0) {
-    consultationList = <Typography>No consultations available.</Typography>
+    consultationList = <Typography>No OP Triage / Consultation available.</Typography>
   } else if (consultationListData.length > 0) {
     consultationList = consultationListData.map((itemData, idx) => (
       <ConsultationCard itemData={itemData} key={idx} />
     ));
-  } 
+  }
 
   if (isSampleLoading) {
     sampleList = <CircularProgress size={20} />;
@@ -223,51 +224,87 @@ export const PatientHome = (props: any) => {
     sampleList = sampleListData.map((itemData, idx) => (
       <SampleTestCard itemData={itemData} key={idx} handleApproval={handleApproval} />
     ));
-  } 
+  }
 
   return (
     <div className="px-2">
       <div className="font-semibold text-3xl p-4 mt-4 border-b-4 border-orange-500">
-        Patient #{id}
+        Covid Suspect #{id}
       </div>
 
-      <div className="flex justify-between border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black mt-4 p-4 ">
-        <div className="max-w-md">
-          <div>
-            <span className="font-semibold">Name: </span>
-            {patientData.name}
+      <div className="border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black mt-4 p-4">
+        <div className="flex justify-between">
+          <div className="max-w-md">
+            <div>
+              <span className="font-semibold leading-relaxed">Name: </span>
+              {patientData.name}
+            </div>
+            <div>
+              <span className="font-semibold leading-relaxed">Age: </span>
+              {patientData.age}
+            </div>
+            <div>
+              <span className="font-semibold leading-relaxed">Gender: </span>
+              {patientGender}
+            </div>
+            <div>
+              <span className="font-semibold leading-relaxed">Phone: </span>
+              {patientData.phone_number}
+            </div>
           </div>
+
           <div>
-            <span className="font-semibold">Age: </span>
-            {patientData.age}
-          </div>
-          <div>
-            <span className="font-semibold">Gender: </span>
-            {patientGender}
-          </div>
-          <div>
-            <span className="font-semibold">Phone: </span>
-            {patientData.phone_number}
-          </div>
-          <div>
-            <span className="font-semibold">Had contact: </span>
-            {patientData.contact_with_carrier ? "Yes" : "No"}
+            <div className="mt-2">
+              <Button
+                fullWidth
+                variant="contained"
+                color="primary"
+                size="small"
+                onClick={() =>
+                  navigate(`/facility/${facilityId}/patient/${id}/update`)
+                }
+              >Update Details</Button>
+            </div>
           </div>
         </div>
 
-        <div>
-          <div className="mt-2">
-            <Button
-              fullWidth
-              variant="contained"
-              color="primary"
-              size="small"
-              onClick={() =>
-                navigate(`/facility/${facilityId}/patient/${id}/update`)
-              }
-            >Update Patient Info</Button>
+        <div className="flex flex-col">
+          <div>
+            <span className="font-semibold leading-relaxed">Address: </span>
+            {patientData.address}
           </div>
-          <div className="mt-2">
+          <div>
+            <span className="font-semibold leading-relaxed">Present health status: </span>
+            {patientData.present_health}
+          </div>
+          <div>
+            <span className="font-semibold leading-relaxed">Contact with confirmed carrier: </span>
+            {patientData.contact_with_confirmed_carrier ? <span className="badge badge-pill badge-warning">Yes</span> : <span className="badge badge-pill badge-secondary">No</span>}
+          </div>
+          <div>
+            <span className="font-semibold leading-relaxed">Contact with suspected carrier: </span>
+            {patientData.contact_with_suspected_carrier ? <span className="badge badge-pill badge-warning">Yes</span> : <span className="badge badge-pill badge-secondary">No</span>}
+          </div>
+          {patientData.estimated_contact_date && (<div>
+            <span className="font-semibold leading-relaxed">Estimated contact date: </span>
+            {moment(patientData.estimated_contact_date).format("lll")}
+          </div>)}
+          <div>
+            <span className="font-semibold leading-relaxed">SARI (Severe Acute Respiratory illness): </span>
+            {patientData.has_SARI ? <span className="badge badge-pill badge-warning">Yes</span> : <span className="badge badge-pill badge-secondary">No</span>}
+          </div>
+          <div>
+            <span className="font-semibold leading-relaxed">Any domestic/international Travel history in the last 28 days: </span>
+            {patientData.past_travel ? <span className="badge badge-pill badge-warning">Yes</span> : <span className="badge badge-pill badge-secondary">No</span>}
+          </div>
+          {patientData.countries_travelled && (<div>
+            <span className="font-semibold leading-relaxed">Countries travelled: </span>
+            {patientData.countries_travelled}
+          </div>)}
+        </div>
+
+        <div className="flex mt-4">
+          <div className="flex-1 mr-2">
             <Button
               fullWidth
               variant="contained"
@@ -276,10 +313,10 @@ export const PatientHome = (props: any) => {
               onClick={() =>
                 navigate(`/facility/${facilityId}/patient/${id}/consultation`)
               }
-            >Add Consultation</Button>
+            >Add OP Triage / Consultation</Button>
           </div>
-          <div className="mt-2">
-          <Button
+          <div className="flex-1 ml-2">
+            <Button
               fullWidth
               variant="contained"
               color="primary"
@@ -318,7 +355,7 @@ export const PatientHome = (props: any) => {
 
       <div>
         <div className="font-semibold text-3xl p-4 mt-4 border-b-4 border-orange-500 mb-4">
-          Consultation History
+          OP Triage / Consultation History
         </div>
         {consultationList}
         {!isConsultationLoading && totalConsultationCount > limit && (
