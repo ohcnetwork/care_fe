@@ -175,19 +175,17 @@ export const FacilityHome = (props: any) => {
                     Add More Doctor Types
               </Button>
                 </Grid>
-                <div className="hidden">
-                  <Grid item xs={12} className="w3-center">
-                    <Button
-                      fullWidth
-                      variant="contained"
-                      color="primary"
-                      size="small"
-                      onClick={() => navigate(`/facility/${facilityId}/triage`)}
-                    >
-                      Add Triage
-                </Button>
-                  </Grid>
-                </div>
+                <Grid item xs={12} className="w3-center">
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    color="primary"
+                    size="small"
+                    onClick={() => navigate(`/facility/${facilityId}/triage`)}
+                  >
+                    Add Triage
+                  </Button>
+                </Grid>
               </Grid>
             </Grid>
           </Grid>
@@ -215,30 +213,29 @@ export const FacilityHome = (props: any) => {
           </Button>
             </Grid>
           </Grid>
-          <div className="hidden">
-            <Grid container style={{ padding: "10px" }} spacing={1}>
-              <Grid item xs={12}>
-                <table className="w3-table-all w3-centered">
-                  <thead>
-                    <tr className="w3-light-grey">
-                      <th>TOTAL PATIENT VISITED IN CORONA TRAIGE</th>
-                      <th>TOTAL NO.OF PATIENT ADVISED HOME QUARANTINE</th>
-                      <th>TOTAL NO.OF PATIENTS UNDER ISOLATION</th>
-                      <th>TOTAL OF PATIENTS REFFERED</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>{patientStatsData.num_patients_visited}</td>
-                      <td>{patientStatsData.num_patients_home_quarantine}</td>
-                      <td>{patientStatsData.num_patients_isolation}</td>
-                      <td>{patientStatsData.num_patient_referred}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </Grid>
+          <Grid container style={{ padding: "10px" }} spacing={1}>
+            <Grid item xs={12}>
+              <table className="w3-table-all w3-centered">
+                <thead>
+                  <tr className="w3-light-grey">
+                    <th>TOTAL PATIENT VISITED IN CORONA TRAIGE</th>
+                    <th>TOTAL NO.OF PATIENT ADVISED HOME QUARANTINE</th>
+                    <th>TOTAL NO.OF PATIENTS UNDER ISOLATION</th>
+                    <th>TOTAL OF PATIENTS REFFERED</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>{patientStatsData.num_patients_visited}</td>
+                    <td>{patientStatsData.num_patients_home_quarantine}</td>
+                    <td>{patientStatsData.num_patients_isolation}</td>
+                    <td>{patientStatsData.num_patient_referred}</td>
+                  </tr>
+                </tbody>
+              </table>
             </Grid>
-          </div>
+          </Grid>
+          
           <Grid
             container
             style={{ padding: "10px", marginBottom: "15px" }}
