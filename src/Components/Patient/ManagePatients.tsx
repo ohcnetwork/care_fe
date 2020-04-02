@@ -141,7 +141,7 @@ export const PatientManager = (props: any) => {
   if (data && data.length) {
     patientList = data.map((patient: any, idx: number) => {
       const patientUrl = facilityId
-        ? `/facility/${facilityId}/patient/${patient.id}`
+        ? `/facility/${patient.facility}/patient/${patient.id}`
         : `/patient/${patient.id}`;
       return (
         <div key={`usr_${patient.id}`} className="w-full md:w-1/2 mt-4 px-2">
