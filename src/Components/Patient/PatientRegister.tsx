@@ -1,46 +1,14 @@
 import React, { useState, useReducer, useCallback } from "react";
-import { Refresh } from "@material-ui/icons";
 import { useDispatch } from "react-redux";
-import {
-  Box,
-  Grid,
-  Checkbox,
-  Card,
-  CardHeader,
-  CardContent,
-  CardActions,
-  Button,
-  InputLabel,
-  RadioGroup,
-  Radio,
-  FormControlLabel,
-  IconButton,
-  CircularProgress
-} from "@material-ui/core";
-import {
-  TextInputField,
-  NativeSelectField,
-  ErrorHelperText,
-  MultilineInputField
-} from "../Common/HelperInputFields";
-import {
-  phonePreg,
-  getArrayValueByKey,
-  getRandomNumbers
-} from "../../Common/validation";
+import { Box, Checkbox, Card, CardContent, Button, InputLabel, RadioGroup, Radio, FormControlLabel, CircularProgress } from "@material-ui/core";
+import { TextInputField, SelectField, ErrorHelperText, MultilineInputField } from "../Common/HelperInputFields";
+import { phonePreg } from "../../Common/validation";
 import { navigate } from "hookrouter";
 import { Loading } from "../Common/Loading";
 import AlertDialog from "../Common/AlertDialog";
 import { PatientModel } from "./models";
 import { GENDER_TYPES, MEDICAL_HISTORY_CHOICES } from "../../Common/constants";
-import {
-  createPatient,
-  getPatient,
-  updatePatient,
-  getStates,
-  getDistrictByState,
-  getLocalbodyByDistrict
-} from "../../Redux/actions";
+import { createPatient, getPatient, updatePatient, getStates, getDistrictByState, getLocalbodyByDistrict } from "../../Redux/actions";
 import { useAbortableEffect, statusType } from "../../Common/utils";
 import * as Notification from "../../Utils/Notifications.js";
 
@@ -130,7 +98,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   const [districts, setDistricts] = useState(selectStates);
   const [localBody, setLocalBody] = useState(selectDistrict);
 
-  const headerText = !id ? "Add Patient" : "Edit Patient";
+  const headerText = !id ? "Add Details of Covid Suspect" : "Update Covid Suspect Details";
   const buttonText = !id ? "Save" : "Update";
 
   const fetchDistricts = useCallback(
@@ -386,172 +354,174 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               title={showAlertMessage.title}
             />
           )}
+          <CardContent>
 
-          <form onSubmit={e => handleSubmit(e)}>
-            <CardContent>
-              <InputLabel id="name-label">Name*</InputLabel>
-              <TextInputField
-                name="name"
-                variant="outlined"
-                margin="dense"
-                type="text"
-                value={state.form.name}
-                onChange={handleChange}
-                errors={state.errors.name}
-              />
-            </CardContent>
-            <CardContent>
-              <InputLabel id="age-label">Age*</InputLabel>
-              <TextInputField
-                name="age"
-                variant="outlined"
-                margin="dense"
-                type="number"
-                value={state.form.age}
-                onChange={handleChange}
-                errors={state.errors.age}
-              />
-            </CardContent>
-            <CardContent>
-              <InputLabel id="gender-label">Gender*</InputLabel>
-              <NativeSelectField
-                name="gender"
-                variant="outlined"
-                value={state.form.gender}
-                options={genderTypes}
-                onChange={handleChange}
-              />
-              <ErrorHelperText error={state.errors.gender} />
-            </CardContent>
-            <CardContent>
-              <InputLabel id="phone-label">Mobile Number*</InputLabel>
-              <TextInputField
-                name="phone_number"
-                variant="outlined"
-                margin="dense"
-                type="number"
-                value={state.form.phone_number}
-                onChange={handleChange}
-                errors={state.errors.phone_number}
-              />
-            </CardContent>
-            <CardContent>
-              <InputLabel id="gender-label">State*</InputLabel>
-              {isStateLoading ? (
-                <CircularProgress size={20} />
-              ) : (
-                <NativeSelectField
-                  name="state"
-                  variant="outlined"
-                  value={state.form.state}
-                  options={states}
-                  optionvalueidentifier="name"
-                  onChange={e => [
-                    handleChange(e),
-                    fetchDistricts(e.target.value)
-                  ]}
-                />
-              )}
-              <ErrorHelperText error={state.errors.state} />
-            </CardContent>
-
-            <CardContent>
-              <InputLabel id="gender-label">District</InputLabel>
-              {isDistrictLoading ? (
-                <CircularProgress size={20} />
-              ) : (
-                <NativeSelectField
-                  name="district"
-                  variant="outlined"
-                  value={state.form.district}
-                  options={districts}
-                  optionvalueidentifier="name"
-                  onChange={e => [
-                    handleChange(e),
-                    fetchLocalBody(e.target.value)
-                  ]}
-                />
-              )}
-              <ErrorHelperText error={state.errors.district} />
-            </CardContent>
-
-            <CardContent>
-              <InputLabel id="gender-label">Localbody</InputLabel>
-              {isLocalbodyLoading ? (
-                <CircularProgress size={20} />
-              ) : (
-                <NativeSelectField
-                  name="local_body"
-                  variant="outlined"
-                  value={state.form.local_body}
-                  options={localBody}
-                  optionvalueidentifier="name"
-                  onChange={handleChange}
-                />
-              )}
-              <ErrorHelperText error={state.errors.local_body} />
-            </CardContent>
-
-            <CardContent>
-              <InputLabel id="contact-with-carrier-label">
-                Has the patient had contact with someone already diagnosed with
-                Covid 19?
-              </InputLabel>
-              <RadioGroup
-                aria-label="covid"
-                name="contact_with_carrier"
-                value={state.form.contact_with_carrier}
-                onChange={handleChange}
-                style={{ padding: "0px 5px" }}
-              >
-                <Box display="flex" flexDirection="row">
-                  <FormControlLabel
-                    value="true"
-                    control={<Radio />}
-                    label="Yes"
+            <form onSubmit={e => handleSubmit(e)}>
+              <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+                <div>
+                  <InputLabel id="name-label">Name*</InputLabel>
+                  <TextInputField
+                    name="name"
+                    variant="outlined"
+                    margin="dense"
+                    type="text"
+                    value={state.form.name}
+                    onChange={handleChange}
+                    errors={state.errors.name}
                   />
-                  <FormControlLabel
-                    value="false"
-                    control={<Radio />}
-                    label="No"
+                </div>
+                <div>
+                  <InputLabel id="age-label">Age*</InputLabel>
+                  <TextInputField
+                    name="age"
+                    variant="outlined"
+                    margin="dense"
+                    type="number"
+                    value={state.form.age}
+                    onChange={handleChange}
+                    errors={state.errors.age}
                   />
-                </Box>
-              </RadioGroup>
-              <ErrorHelperText error={state.errors.contact_with_carrier} />
-            </CardContent>
+                </div>
+                <div>
+                  <InputLabel id="gender-label">Gender*</InputLabel>
+                  <SelectField
+                    name="gender"
+                    variant="outlined"
+                    margin="dense"
+                    value={state.form.gender}
+                    options={genderTypes}
+                    onChange={handleChange}
+                  />
+                  <ErrorHelperText error={state.errors.gender} />
+                </div>
+                <div>
+                  <InputLabel id="phone-label">Mobile Number*</InputLabel>
+                  <TextInputField
+                    name="phone_number"
+                    variant="outlined"
+                    margin="dense"
+                    type="number"
+                    value={state.form.phone_number}
+                    onChange={handleChange}
+                    errors={state.errors.phone_number}
+                  />
+                </div>
+                <div>
+                  <InputLabel id="gender-label">State*</InputLabel>
+                  {isStateLoading ? (
+                    <CircularProgress size={20} />
+                  ) : (
+                      <SelectField
+                        name="state"
+                        variant="outlined"
+                        margin="dense"
+                        value={state.form.state}
+                        options={states}
+                        optionvalueidentifier="name"
+                        onChange={e => [
+                          handleChange(e),
+                          fetchDistricts(String(e.target.value))
+                        ]}
+                      />
+                    )}
+                  <ErrorHelperText error={state.errors.state} />
+                </div>
 
-            <CardContent>
-              <InputLabel id="med-history-label">
-                Any medical history?
+                <div>
+                  <InputLabel id="gender-label">District</InputLabel>
+                  {isDistrictLoading ? (
+                    <CircularProgress size={20} />
+                  ) : (
+                      <SelectField
+                        name="district"
+                        variant="outlined"
+                        margin="dense"
+                        value={state.form.district}
+                        options={districts}
+                        optionvalueidentifier="name"
+                        onChange={e => [
+                          handleChange(e),
+                          fetchLocalBody(String(e.target.value))
+                        ]}
+                      />
+                    )}
+                  <ErrorHelperText error={state.errors.district} />
+                </div>
+
+                <div className="md:col-span-2">
+                  <InputLabel id="gender-label">Localbody</InputLabel>
+                  {isLocalbodyLoading ? (
+                    <CircularProgress size={20} />
+                  ) : (
+                      <SelectField
+                        name="local_body"
+                        variant="outlined"
+                        margin="dense"
+                        value={state.form.local_body}
+                        options={localBody}
+                        optionvalueidentifier="name"
+                        onChange={handleChange}
+                      />
+                    )}
+                  <ErrorHelperText error={state.errors.local_body} />
+                </div>
+
+                <div className="md:col-span-2">
+                  <InputLabel id="contact-with-carrier-label">
+                    Has the patient had contact with someone already diagnosed with
+                    Covid 19?
+                  </InputLabel>
+                  <RadioGroup
+                    aria-label="covid"
+                    name="contact_with_carrier"
+                    value={state.form.contact_with_carrier}
+                    onChange={handleChange}
+                    style={{ padding: "0px 5px" }}
+                  >
+                    <Box display="flex" flexDirection="row">
+                      <FormControlLabel
+                        value="true"
+                        control={<Radio />}
+                        label="Yes"
+                      />
+                      <FormControlLabel
+                        value="false"
+                        control={<Radio />}
+                        label="No"
+                      />
+                    </Box>
+                  </RadioGroup>
+                  <ErrorHelperText error={state.errors.contact_with_carrier} />
+                </div>
+
+                <div>
+                  <InputLabel id="med-history-label">
+                    Any medical history?
               </InputLabel>
-              {medicalHistoryTypes.map(i => {
-                return renderMedicalHistory(i.id, i.text);
-              })}
-            </CardContent>
-
-            <CardActions
-              className="padding16"
-              style={{ justifyContent: "space-between" }}
-            >
-              <Button
-                color="default"
-                variant="contained"
-                type="button"
-                onClick={e => handleCancel()}
+                  {medicalHistoryTypes.map(i => {
+                    return renderMedicalHistory(i.id, i.text);
+                  })}
+                </div>
+              </div>
+              <div
+                className="flex justify-between"
               >
-                Cancel
-              </Button>
-              <Button
-                color="primary"
-                variant="contained"
-                type="submit"
-                style={{ marginLeft: "auto" }}
-                onClick={e => handleSubmit(e)}
-              >
-                {buttonText}
-              </Button>
-            </CardActions>
-          </form>
+                <Button
+                  color="default"
+                  variant="contained"
+                  type="button"
+                  onClick={e => handleCancel()}
+                > Cancel </Button>
+                <Button
+                  color="primary"
+                  variant="contained"
+                  type="submit"
+                  style={{ marginLeft: "auto" }}
+                  onClick={e => handleSubmit(e)}
+                > {buttonText} </Button>
+              </div>
+            </form>
+          </CardContent>
         </Card>
       </div>
     </div>
