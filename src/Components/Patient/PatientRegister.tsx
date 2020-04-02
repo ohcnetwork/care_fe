@@ -207,8 +207,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         case "name":
         case "age":
         case "gender":
-        case "address":
-        case "present_health":
           if (!state.form[field]) {
             errors[field] = "Field is required";
             invalidForm = true;
@@ -275,13 +273,13 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         state: state.form.state,
         district: state.form.district,
         local_body: state.form.local_body,
-        address: state.form.address,
-        present_health: state.form.present_health,
+        address: state.form.address ? state.form.address : undefined,
+        present_health: state.form.present_health ? state.form.present_health : undefined,
         contact_with_confirmed_carrier: JSON.parse(state.form.contact_with_confirmed_carrier),
         contact_with_suspected_carrier: JSON.parse(state.form.contact_with_suspected_carrier),
         estimated_contact_date: state.form.estimated_contact_date,
         past_travel: state.form.past_travel,
-        countries_travelled: state.form.past_travel ? state.form.countries_travelled.join(',') : "",
+        countries_travelled: state.form.past_travel ? state.form.countries_travelled.join(',') : undefined,
         has_SARI: state.form.has_SARI,
         medical_history,
         is_active: true
@@ -453,14 +451,14 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                 </div>
 
                 <div>
-                  <InputLabel id="address-label">Address*</InputLabel>
+                  <InputLabel id="address-label">Address</InputLabel>
                   <MultilineInputField
                     rows={2}
                     name="address"
                     variant="outlined"
                     margin="dense"
                     type="text"
-                    placeholder="Enter the address"
+                    placeholder="Optional Information"
                     InputLabelProps={{ shrink: !!state.form.address }}
                     value={state.form.address}
                     onChange={handleChange}
@@ -469,14 +467,14 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                 </div>
 
                 <div>
-                  <InputLabel id="present_health-label">Present Health*</InputLabel>
+                  <InputLabel id="present_health-label">Present Health</InputLabel>
                   <MultilineInputField
                     rows={2}
                     name="present_health"
                     variant="outlined"
                     margin="dense"
                     type="text"
-                    placeholder="Enter the present health condition"
+                    placeholder="Optional Information"
                     InputLabelProps={{ shrink: !!state.form.present_health }}
                     value={state.form.present_health}
                     onChange={handleChange}
