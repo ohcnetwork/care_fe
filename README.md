@@ -1,5 +1,9 @@
 # Coronasafe Care React Front end . 
-Auto Deployed to https://care.coronasafe.in for Develop Branch.
+Auto Deployed to https://care.coronasafe.in for Develop Branch. 
+
+[![CircleCI](https://circleci.com/gh/coronasafe/care_fe.svg?style=svg)](https://circleci.com/gh/coronasafe/care_fe)
+
+Auto Deployed to https://care.coronasafe.network for Master Branch
 
 Please comment on the issue if you are taking it up and tag pull requests with issues.
 tag @coronasafe/code-reviewers for faster resolution. 
