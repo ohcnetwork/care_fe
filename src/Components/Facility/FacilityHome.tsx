@@ -12,6 +12,7 @@ import PageTitle from "../Common/PageTitle";
 import BedTypeCard from "./BedTypeCard";
 import DoctorsCountCard from "./DoctorsCountCard";
 import { CapacityModal, DoctorModal, FacilityModal, PatientStatsModel } from "./models";
+import moment from "moment";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -66,7 +67,7 @@ export const FacilityHome = (props: any) => {
             setDoctorData(doctorRes.data.results);
           }
           if (triageRes && triageRes.data) {
-            setPatientStatsData(triageRes.data.data);
+            setPatientStatsData(triageRes.data.results[0]);
           }
         }
       }
@@ -218,6 +219,7 @@ export const FacilityHome = (props: any) => {
               <table className="w3-table-all w3-centered">
                 <thead>
                   <tr className="w3-light-grey">
+                    <th>Date of Entry</th>
                     <th>TOTAL PATIENT VISITED IN CORONA TRAIGE</th>
                     <th>TOTAL NO.OF PATIENT ADVISED HOME QUARANTINE</th>
                     <th>TOTAL NO.OF PATIENTS UNDER ISOLATION</th>
@@ -226,10 +228,11 @@ export const FacilityHome = (props: any) => {
                 </thead>
                 <tbody>
                   <tr>
-                    <td>{patientStatsData.num_patients_visited}</td>
-                    <td>{patientStatsData.num_patients_home_quarantine}</td>
-                    <td>{patientStatsData.num_patients_isolation}</td>
-                    <td>{patientStatsData.num_patient_referred}</td>
+                    <td>{patientStatsData.entry_date || ''}</td>
+                    <td>{patientStatsData.num_patients_visited || ''}</td>
+                    <td>{patientStatsData.num_patients_home_quarantine || ''}</td>
+                    <td>{patientStatsData.num_patients_isolation || ''}</td>
+                    <td>{patientStatsData.num_patient_referred || ''}</td>
                   </tr>
                 </tbody>
               </table>

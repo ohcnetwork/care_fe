@@ -148,7 +148,7 @@ export default {
         method:'POST'
     },
     getTriage:{
-        path:'/api/v1/facility/{facilityId}/patient_stats/{id}/',
+        path:'/api/v1/facility/{facilityId}/patient_stats',
     },
 
     // //Care Center
