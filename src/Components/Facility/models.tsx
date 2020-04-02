@@ -56,4 +56,5 @@ export interface PatientStatsModel {
     num_patients_home_quarantine?: number;
     num_patients_isolation?: number;
     num_patient_referred?: number;
+    entry_date?: number;
 }

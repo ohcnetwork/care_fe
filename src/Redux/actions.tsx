@@ -58,11 +58,12 @@ export const createDoctor = (id: number | undefined, form: object, urlParam: obj
 
 export const createTriageForm = (data: object,urlParam:object) => {
     return fireRequest('createTriage', [], data, urlParam)
-}
+};
 
-export const getTriageInfo = (urlParam:object) => {
-    return fireRequest('getTriage', [], {}, urlParam)
-}
+export const getTriageInfo = (urlParam: object) => {
+    return fireRequest('getTriage', [], {},urlParam)
+};
+
 export const listCapacity = (paginate: object, urlParam: object) => {
     return fireRequest('getCapacity', [], paginate, urlParam);
 };
