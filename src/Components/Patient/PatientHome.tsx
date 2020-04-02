@@ -287,7 +287,7 @@ export const PatientHome = (props: any) => {
           </div>
           {patientData.estimated_contact_date && (<div>
             <span className="font-semibold leading-relaxed">Estimated contact date: </span>
-            {moment(patientData.estimated_contact_date).format("lll")}
+            {moment(patientData.estimated_contact_date).format("LL")}
           </div>)}
           <div>
             <span className="font-semibold leading-relaxed">Have SARI (Severe Acute Respiratory illness)?: </span>
