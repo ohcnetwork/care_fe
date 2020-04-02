@@ -1,19 +1,15 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import Grid from "@material-ui/core/Grid";
 import {
-  Card,
   CardContent,
   CardHeader,
   Tooltip,
-  Typography,
   Box
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { useDispatch } from "react-redux";
-import { getFacilities, getAllPatient } from "../../Redux/actions";
-import TitleHeader from "../Common/TitleHeader";
+import { getAllPatient } from "../../Redux/actions";
 import Pagination from "../Common/Pagination";
-import AddCard from "../Common/AddCard";
 import { navigate } from "hookrouter";
 import { Loading } from "../Common/Loading";
 import { useAbortableEffect, statusType } from "../../Common/utils";
@@ -34,8 +30,6 @@ const useStyles = makeStyles(theme => ({
     overflow: "hidden",
     textOverflow: "ellipsis",
     fontWeight: 400,
-    //padding: '10px',
-    //fontSize: '14px',
     display: "inline-block",
     [theme.breakpoints.up("md")]: {
       width: "12vw"
@@ -112,7 +106,7 @@ export const PatientManager = (props: any) => {
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const res = await dispatch(getAllPatient({ limit, offset }));
+      const res = await dispatch(getAllPatient({ facility: facilityId, limit, offset }));
       if (!status.aborted) {
         if (res && res.data) {
           setData(res.data.results);
@@ -121,7 +115,7 @@ export const PatientManager = (props: any) => {
         setIsLoading(false);
       }
     },
-    [dispatch, offset]
+    [dispatch, facilityId, offset]
   );
 
   useAbortableEffect(
@@ -140,14 +134,11 @@ export const PatientManager = (props: any) => {
   let patientList: any[] = [];
   if (data && data.length) {
     patientList = data.map((patient: any, idx: number) => {
-      const patientUrl = facilityId
-        ? `/facility/${patient.facility}/patient/${patient.id}`
-        : `/patient/${patient.id}`;
       return (
         <div key={`usr_${patient.id}`} className="w-full md:w-1/2 mt-4 px-2">
           <div
             className="block border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black"
-            onClick={() => navigate(patientUrl)}
+            onClick={() => navigate(`/facility/${patient.facility}/patient/${patient.id}`)}
           >
             <CardHeader
               className={classes.cardHeader}
@@ -216,7 +207,7 @@ export const PatientManager = (props: any) => {
     managePatients = (
       <Grid item xs={12} md={12} className={classes.displayFlex}>
         <Grid container justify="center" alignItems="center">
-          <h5> No Patients Found</h5>
+          <h5> No Covid Suspects Found</h5>
         </Grid>
       </Grid>
     );
