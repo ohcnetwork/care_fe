@@ -152,7 +152,7 @@ export const Consultation = (props: any) => {
           <form onSubmit={e => handleSubmit(e)}>
             <CardContent>
               <InputLabel id="demo-simple-select-outlined-label" style={{ fontWeight: 'bold', fontSize: '18px' }}>
-                Decision after OP Triage
+                Decision after OP Triage/Consultation
               </InputLabel>
               <NativeSelectField
                 name="suggestion"
@@ -217,7 +217,7 @@ export const Consultation = (props: any) => {
 
             <CardContent>
               <InputLabel id="existing-medication-label">
-                Existing Medication
+                Medication, if any for the above-mentioned symptoms
               </InputLabel>
               <MultilineInputField
                 rows={5}

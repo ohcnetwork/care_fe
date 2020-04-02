@@ -210,7 +210,7 @@ export const FacilityHome = (props: any) => {
                 size="small"
                 onClick={() => navigate(`/facility/${facilityId}/patients`)}
               >
-                View Covid Suspects
+                View Suspects / Patients
           </Button>
             </Grid>
           </Grid>
