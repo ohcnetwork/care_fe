@@ -358,6 +358,7 @@ export const AutoCompleteMultiField = (props: any) => {
     return (<>
         <Autocomplete
             multiple
+            freeSolo
             id={id}
             options={options}
             onChange={onChange}
