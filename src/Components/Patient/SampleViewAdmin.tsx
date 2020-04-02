@@ -198,10 +198,10 @@ export default function SampleViewAdmin(props: any) {
           <div onClick={e => navigate(`/samplelist/${sample.id}`)} className={`block border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black ${sample.result === 'POSITIVE' ? classes.statusPositive : ''} ${sample.result === 'NEGATIVE' ? classes.statusNegative : ''}`}>
             <CardHeader
               className={classes.cardHeader}
-              onClick={(e) => {
-                e.stopPropagation();
-                navigate(`/facility/${sample.facility}/patient/${sample.patient}`)
-              }}
+              // onClick={(e) => {
+              //   e.stopPropagation();
+              //   navigate(`/facility/${sample.facility}/patient/${sample.patient}`)
+              // }}
               title={
                 <span className={classes.title}>
                   <Tooltip

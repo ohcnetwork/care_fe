@@ -1,12 +1,12 @@
-import { Card, CardContent, Grid, Typography } from "@material-ui/core";
+import { Card, CardContent } from "@material-ui/core";
 import moment from "moment";
 import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { Loading } from "../../Components/Common/Loading";
 import { getTestSample } from "../../Redux/actions";
-import { SampleTestModel, FlowModel } from "./models";
 import PageTitle from "../Common/PageTitle";
+import { FlowModel, SampleTestModel } from "./models";
 
 interface SampleDetailsProps {
   id: number;
