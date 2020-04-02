@@ -27,6 +27,7 @@ import moment from 'moment';
 
 interface triageFormProps extends PatientStatsModel {
     facilityId: number;
+    id?: number;
 }
   
 
