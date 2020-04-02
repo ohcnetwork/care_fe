@@ -101,16 +101,14 @@ export const TriageForm = (props: triageFormProps) => {
     if (validForm) {
       setIsLoading(true);
       const data = {
-        entry_date: moment(state.form.entry_date).format('YYYY-MM-DD'),
+        entry_date: `${moment(state.form.entry_date).format('YYYY-MM-DD')}`,
         num_patients_visited: Number(state.form.num_patients_visited),
         num_patients_home_quarantine: Number(state.form.num_patients_home_quarantine),
         num_patients_isolation: Number(state.form.num_patients_isolation),
         num_patient_referred: Number(state.form.num_patient_referred),
       };
 
-      console.log("data: ", data,{facilityId});
-      const res = await dispatchAction(createTriageForm(data,{facilityId:Number(facilityId)}));
-      console.log("res: ", res);
+      const res = await dispatchAction(createTriageForm(data,{facilityId}));
       setIsLoading(false);
       if (res && res.data) {
         dispatch({ type: "set_form", form: initForm });

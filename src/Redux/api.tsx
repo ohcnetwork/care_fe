@@ -141,10 +141,14 @@ export default {
         path: '/api/v1/facility/{facilityId}/hospital_doctor',
         method: 'PUT'
     },
-
-    createTriageForm: {
-        path: '/api/v1/facility/{facilityId/patient_stats/',
-        method: 'POST'
+    
+    //Triage
+    createTriage:{
+        path:'/api/v1/facility/{facilityId}/patient_stats/',
+        method:'POST'
+    },
+    getTriage:{
+        path:'/api/v1/facility/{facilityId}/patient_stats/{id}/',
     },
 
     // //Care Center
@@ -215,15 +219,6 @@ export default {
         path: "/api/v1/district/{id}/local_bodies/",
     },
 
-    //Triage
-    createTriage:{
-        path:'/api/v1/facility/{facilityId}/patient_stats/',
-        method:'POST'
-    },
-    getTriage:{
-        path:'/api/v1/facility/{facilityId}/patient_stats/{id}/',
-    },
-
     // Test Sample
     getTestSampleList: {
         path: '/api/v1/test_sample'
@@ -236,6 +231,5 @@ export default {
         path:'/api/v1/test_sample',
         method:'PATCH',
     },
-    
 
 }
