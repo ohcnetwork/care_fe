@@ -5,13 +5,13 @@ import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { BED_TYPES, DOCTOR_SPECIALIZATION } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getFacility, listCapacity, listDoctor } from "../../Redux/actions";
+import { getFacility, listCapacity, listDoctor, getTriageInfo } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 import BedTypeCard from "./BedTypeCard";
 import DoctorsCountCard from "./DoctorsCountCard";
-import { CapacityModal, DoctorModal, FacilityModal } from "./models";
+import { CapacityModal, DoctorModal, FacilityModal, PatientStatsModel } from "./models";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -40,14 +40,16 @@ export const FacilityHome = (props: any) => {
   const [capacityData, setCapacityData] = useState<Array<CapacityModal>>([]);
   const [doctorData, setDoctorData] = useState<Array<DoctorModal>>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [patientStatsData, setPatientStatsData] = useState<PatientStatsModel>({});
 
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const [facilityRes, capacityRes, doctorRes] = await Promise.all([
+      const [facilityRes, capacityRes, doctorRes, triageRes] = await Promise.all([
         dispatch(getFacility(facilityId)),
         dispatch(listCapacity({}, { facilityId })),
-        dispatch(listDoctor({}, { facilityId }))
+        dispatch(listDoctor({}, { facilityId })),
+        dispatch(getTriageInfo({ facilityId })),
       ]);
       if (!status.aborted) {
         setIsLoading(false);
@@ -62,6 +64,9 @@ export const FacilityHome = (props: any) => {
           }
           if (doctorRes && doctorRes.data) {
             setDoctorData(doctorRes.data.results);
+          }
+          if (triageRes && triageRes.data) {
+            setPatientStatsData(triageRes.data.data);
           }
         }
       }
@@ -224,10 +229,10 @@ export const FacilityHome = (props: any) => {
                   </thead>
                   <tbody>
                     <tr>
-                      <td>50</td>
-                      <td>50</td>
-                      <td>50</td>
-                      <td>50</td>
+                      <td>{patientStatsData.num_patients_visited}</td>
+                      <td>{patientStatsData.num_patients_home_quarantine}</td>
+                      <td>{patientStatsData.num_patients_isolation}</td>
+                      <td>{patientStatsData.num_patient_referred}</td>
                     </tr>
                   </tbody>
                 </table>
