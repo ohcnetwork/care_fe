@@ -136,6 +136,10 @@ export const getTestList = (paginate: object) => {
     return fireRequest('getTestSampleList', [], paginate);
 };
 
+export const getTestSample = (id: number) => {
+    return fireRequest('getTestSample', [id], {});
+};
+
 export const patchSample = (id: number, form: object) => {
     return fireRequest('patchSample', [id], form)
 };

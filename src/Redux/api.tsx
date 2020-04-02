@@ -214,13 +214,6 @@ export default {
     getLocalbodyByDistrict: {
         path: "/api/v1/district/{id}/local_bodies/",
     },
-    getTestSampleList: {
-        path: '/api/v1/test_sample'
-    },
-    patchSample: {
-        path:'/api/v1/test_sample',
-        method:'PATCH',
-    },
 
     //Triage
     createTriage:{
@@ -229,6 +222,19 @@ export default {
     },
     getTriage:{
         path:'/api/v1/facility/{facilityId}/patient_stats/{id}/',
+    },
+
+    // Test Sample
+    getTestSampleList: {
+        path: '/api/v1/test_sample'
+    },
+    getTestSample: {
+        path: '/api/v1/test_sample',
+        method: 'POST'
+    },
+    patchSample: {
+        path:'/api/v1/test_sample',
+        method:'PATCH',
     },
     
 

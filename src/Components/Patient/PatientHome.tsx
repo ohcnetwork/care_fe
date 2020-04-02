@@ -149,18 +149,18 @@ export const PatientHome = (props: any) => {
   };
 
 
-  const handleApproval = (status: number, sample: any) => {
+  const handleApproval = (status: number, sample: SampleTestModel) => {
     const sampleData = {
       id: sample.id,
       status,
-      consultation: sample.consultation_id
+      consultation: sample.consultation
     };
     let statusName = "";
     if (status === 4) {
       statusName = "SENT_TO_COLLECTON_CENTRE";
     }
 
-    dispatch(patchSample(sample.id, sampleData)).then((resp: any) => {
+    dispatch(patchSample(Number(sample.id), sampleData)).then((resp: any) => {
       if (resp.status === 201 || resp.status === 200) {
         Notification.Success({
           msg: `Request ${statusName}`

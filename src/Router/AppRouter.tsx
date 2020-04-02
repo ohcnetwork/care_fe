@@ -19,6 +19,7 @@ import { PatientHome } from "../Components/Patient/PatientHome";
 import { PatientRegister } from "../Components/Patient/PatientRegister";
 import { SampleTest } from "../Components/Patient/SampleTest";
 import SampleViewAdmin from "../Components/Patient/SampleViewAdmin";
+import { SampleDetails } from "../Components/Patient/SampleDetails";
 import { TeleConsultation } from "../Components/Patient/TeleConsultation";
 import { TreatmentForm } from "../Components/Patient/TreatmentForm";
 import ManageUsers from "../Components/Users/ManageUsers";
@@ -28,6 +29,7 @@ const routes = {
   "/analytics": () => <Analytics />,
   "/ambulancelist": () => <AmbulanceList />,
   "/samplelist": () => <SampleViewAdmin />,
+  "/samplelist/:id": ({ id }: any) => <SampleDetails id={id} />,
   "/facility": () => <HospitalList />,
   "/facility/create": () => <FacilityCreate />,
   "/facility/:facilityId/update": ({ facilityId }: any) => (
