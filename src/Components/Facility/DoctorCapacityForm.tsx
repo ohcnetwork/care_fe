@@ -1,26 +1,16 @@
-import React, { useState, useReducer, useEffect, useCallback } from "react";
-import { useDispatch } from "react-redux";
-import {
-  Grid,
-  InputLabel,
-  Card,
-  CardHeader,
-  CardContent,
-  Button
-} from "@material-ui/core";
-import {
-  TextInputField,
-  ErrorHelperText,
-  NativeSelectField
-} from "../Common/HelperInputFields";
+import { Button, Card, CardContent, Grid, InputLabel } from "@material-ui/core";
+import SaveIcon from "@material-ui/icons/Save";
 import { navigate } from "hookrouter";
+import React, { useCallback, useEffect, useReducer, useState } from "react";
+import { useDispatch } from "react-redux";
+import { DOCTOR_SPECIALIZATION } from "../../Common/constants";
+import { statusType, useAbortableEffect } from "../../Common/utils";
 import { Loading } from "../../Components/Common/Loading";
 import { createDoctor, getDoctor, listDoctor } from "../../Redux/actions";
-import SaveIcon from "@material-ui/icons/Save";
-import { DoctorModal, OptionsType } from "./models";
-import { useAbortableEffect, statusType } from "../../Common/utils";
-import { DOCTOR_SPECIALIZATION } from "../../Common/constants";
 import * as Notification from "../../Utils/Notifications.js";
+import { ErrorHelperText, NativeSelectField, TextInputField } from "../Common/HelperInputFields";
+import PageTitle from "../Common/PageTitle";
+import { DoctorModal, OptionsType } from "./models";
 
 interface DoctorCapacityProps extends DoctorModal {
   facilityId: number;
@@ -212,9 +202,7 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
   }
   return (
     <div>
-      <div className="font-semibold text-3xl p-4 mt-4 border-b-4 border-orange-500">
-        {headerText}
-      </div>
+      <PageTitle title={headerText} />
       <div>
         <Card style={{ marginTop: "20px" }}>
           <form

@@ -1,3 +1,14 @@
+export interface FlowModel {
+    id?: number;
+    status?: string;
+    created_date?: string;
+    modified_date?: string;
+    deleted?: boolean;
+    notes?: string;
+    patient_sample?: number;
+    created_by?: number;
+}
+
 export interface PatientModel {
     id?: number;
     name?: string;
@@ -33,6 +44,15 @@ export interface SampleTestModel {
     date_of_sample?: string;
     date_of_result?: string;
     consultation?: number;
+    patient_name?: number;
+    patient_has_sari?: boolean;
+    patient_has_confirmed_contact?: boolean;
+    patient_has_suspected_contact?: boolean;
+    patient_travel_history?: string;
+    facility?: number;
+    patient?: number;
+    fast_track?: number;
+    flow?: Array<FlowModel>;
 }
 
 export interface DailyRoundsModel {

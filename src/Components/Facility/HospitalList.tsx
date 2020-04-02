@@ -1,20 +1,15 @@
-import React, { useState, useCallback } from "react";
+import { CardContent, CardHeader, Tooltip, Typography } from "@material-ui/core";
 import Grid from "@material-ui/core/Grid";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  Tooltip,
-  Typography
-} from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { useDispatch } from "react-redux";
-import { getFacilities } from "../../Redux/actions";
-import Pagination from "../Common/Pagination";
 import { navigate } from "hookrouter";
+import React, { useCallback, useState } from "react";
+import { useDispatch } from "react-redux";
+import { statusType, useAbortableEffect } from "../../Common/utils";
+import { getFacilities } from "../../Redux/actions";
 import { Loading } from "../Common/Loading";
+import PageTitle from "../Common/PageTitle";
+import Pagination from "../Common/Pagination";
 import { FacilityModal } from "./models";
-import { useAbortableEffect, statusType } from "../../Common/utils";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -220,9 +215,7 @@ export const HospitalList = () => {
 
   return (
     <div className="px-2">
-      <div className="font-semibold text-3xl p-4 mt-4 border-b-4 border-orange-500">
-        Facilities
-      </div>
+      <PageTitle title="Facilities" hideBack={true} />
       <div className="flex flex-wrap mt-4">{manageFacilities}</div>
     </div>
   );

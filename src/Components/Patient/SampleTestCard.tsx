@@ -3,11 +3,13 @@ import { Grid, CardContent, Typography, Button } from "@material-ui/core";
 import moment from "moment";
 import { SampleTestModel } from "./models";
 
-interface ConsultationProps {
+
+interface SampleDetailsProps {
   itemData: SampleTestModel;
+  handleApproval: (status: number, sample: SampleTestModel) => void;
 }
 
-export const SampleTestCard = (props: any) => {
+export const SampleTestCard = (props: SampleDetailsProps) => {
   const { itemData, handleApproval } = props;
   return (
     <div className="block border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black mt-4">

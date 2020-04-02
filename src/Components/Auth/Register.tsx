@@ -1,23 +1,13 @@
-import React, { useState } from "react";
+import { Button, Card, CardActions, CardContent, FormControl, Grid, InputLabel, MenuItem, Select } from "@material-ui/core";
 import { makeStyles, Theme } from "@material-ui/core/styles";
-import { useDispatch } from "react-redux";
-import {
-  Grid,
-  Card,
-  CardHeader,
-  CardContent,
-  CardActions,
-  Button,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem
-} from "@material-ui/core";
-import { TextInputField } from "../Common/HelperInputFields";
-import { validateEmailAddress, phonePreg } from "../../Common/validation";
-import { DISTRICT_CHOICES, GENDER_TYPES } from "../../Common/constants";
-import { signupUser } from "../../Redux/actions";
+import React, { useState } from "react";
 import ReCaptcha from "react-google-recaptcha";
+import { useDispatch } from "react-redux";
+import { DISTRICT_CHOICES, GENDER_TYPES } from "../../Common/constants";
+import { phonePreg, validateEmailAddress } from "../../Common/validation";
+import { signupUser } from "../../Redux/actions";
+import { TextInputField } from "../Common/HelperInputFields";
+import PageTitle from "../Common/PageTitle";
 
 const optionalFields = [
   "first_name",
@@ -159,9 +149,7 @@ export const Register = () => {
 
   return (
     <div className="p-2 max-w-3xl mx-auto">
-      <div className="font-semibold text-3xl p-4 mt-4 border-b-4 border-orange-500 mb-4">
-        Register As Hospital Administrator
-      </div>
+    <PageTitle title="Register As Hospital Administrator" />
 
       <Card>
         <form onSubmit={e => handleSubmit(e)}>

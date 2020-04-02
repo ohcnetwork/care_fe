@@ -1,29 +1,16 @@
-import React, { useState, useReducer, useCallback, useEffect } from "react";
-import { useDispatch } from "react-redux";
-import {
-  Grid,
-  InputLabel,
-  Select,
-  Card,
-  CardActions,
-  CardHeader,
-  CardContent,
-  MenuItem,
-  Button
-} from "@material-ui/core";
-import {
-  ErrorHelperText,
-  NativeSelectField,
-  TextInputField
-} from "../Common/HelperInputFields";
+import { Button, Card, CardActions, CardContent, InputLabel } from "@material-ui/core";
 import SaveIcon from "@material-ui/icons/Save";
 import { navigate } from "hookrouter";
+import React, { useCallback, useEffect, useReducer, useState } from "react";
+import { useDispatch } from "react-redux";
 import { BED_TYPES } from "../../Common/constants";
-import { CapacityModal, OptionsType } from "./models";
+import { statusType, useAbortableEffect } from "../../Common/utils";
 import { Loading } from "../../Components/Common/Loading";
 import { createCapacity, getCapacity, listCapacity } from "../../Redux/actions";
-import { useAbortableEffect, statusType } from "../../Common/utils";
 import * as Notification from "../../Utils/Notifications.js";
+import { ErrorHelperText, NativeSelectField, TextInputField } from "../Common/HelperInputFields";
+import PageTitle from "../Common/PageTitle";
+import { CapacityModal, OptionsType } from "./models";
 
 interface BedCapacityProps extends CapacityModal {
   facilityId: number;
@@ -222,11 +209,9 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
   }
   return (
     <div>
-      <div className="font-semibold text-3xl p-4 mt-4 border-b-4 border-orange-500">
-        {headerText}
-      </div>
+      <PageTitle title={headerText} />
       <div>
-        <Card style={{ marginTop: "20px" }}>
+        <Card className="mt-4">
           <form
             onSubmit={e => {
               handleSubmit(e);

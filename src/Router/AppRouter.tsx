@@ -1,34 +1,35 @@
-import React from "react";
 import { useRedirect, useRoutes } from "hookrouter";
+import React from "react";
+import AmbulanceList from "../Components/Ambulance/AmbulanceList";
 import Header from "../Components/Common/Header";
-import { PrivateDashboard } from "../Components/Dashboard/PrivateDashboard";
-import { FacilityCreate } from "../Components/Facility/FacilityCreate";
-import { HospitalList } from "../Components/Facility/HospitalList";
 import { Analytics } from "../Components/Dashboard/Analytics";
-import ManageUsers from "../Components/Users/ManageUsers";
-import { PatientRegister } from "../Components/Patient/PatientRegister";
-import { TeleConsultation } from "../Components/Patient/TeleConsultation";
-import { PatientDischarge } from "../Components/Patient/PatientDischarge";
-import { TreatmentForm } from "../Components/Patient/TreatmentForm";
-import { FacilityHome } from "../Components/Facility/FacilityHome";
-import { CareCenterJoinForm } from "../Components/Facility/CareCenterJoinForm";
 import { BedCapacityForm } from "../Components/Facility/BedCapacityForm";
-import { DoctorCapacityForm } from "../Components/Facility/DoctorCapacityForm";
-import { PatientManager } from "../Components/Patient/ManagePatients";
-import { PatientHome } from "../Components/Patient/PatientHome";
-import { SampleTest } from "../Components/Patient/SampleTest";
+import { CareCenterJoinForm } from "../Components/Facility/CareCenterJoinForm";
 import { Consultation } from "../Components/Facility/Consultation";
+import { DoctorCapacityForm } from "../Components/Facility/DoctorCapacityForm";
+import { FacilityCreate } from "../Components/Facility/FacilityCreate";
+import { FacilityHome } from "../Components/Facility/FacilityHome";
+import { HospitalList } from "../Components/Facility/HospitalList";
+import { TriageForm } from "../Components/Facility/TriageForm";
 import { DailyRounds } from "../Components/Patient/DailyRounds";
 import { DailyRoundsList } from "../Components/Patient/DailyRoundsList";
-import AmbulanceList from "../Components/Ambulance/AmbulanceList";
+import { PatientManager } from "../Components/Patient/ManagePatients";
+import { PatientDischarge } from "../Components/Patient/PatientDischarge";
+import { PatientHome } from "../Components/Patient/PatientHome";
+import { PatientRegister } from "../Components/Patient/PatientRegister";
+import { SampleTest } from "../Components/Patient/SampleTest";
 import SampleViewAdmin from "../Components/Patient/SampleViewAdmin";
-import { TriageForm } from "../Components/Facility/TriageForm";
+import { SampleDetails } from "../Components/Patient/SampleDetails";
+import { TeleConsultation } from "../Components/Patient/TeleConsultation";
+import { TreatmentForm } from "../Components/Patient/TreatmentForm";
+import ManageUsers from "../Components/Users/ManageUsers";
 
 const routes = {
   "/": () => <HospitalList />,
   "/analytics": () => <Analytics />,
   "/ambulancelist": () => <AmbulanceList />,
   "/samplelist": () => <SampleViewAdmin />,
+  "/samplelist/:id": ({ id }: any) => <SampleDetails id={id} />,
   "/facility": () => <HospitalList />,
   "/facility/create": () => <FacilityCreate />,
   "/facility/:facilityId/update": ({ facilityId }: any) => (
@@ -67,23 +68,16 @@ const routes = {
     patientId,
     id
   }: any) => (
-    <Consultation facilityId={facilityId} patientId={patientId} id={id} />
-  ),
+      <Consultation facilityId={facilityId} patientId={patientId} id={id} />
+    ),
   "/facility/:facilityId/patient/:patientId/sample-test": ({
     facilityId,
     patientId
   }: any) => <SampleTest facilityId={facilityId} patientId={patientId} />,
-  "/facility/:facilityId/patient/:patientId/sample-test/:id": ({
-    facilityId,
-    patientId,
-    id
-  }: any) => (
-    <SampleTest facilityId={facilityId} patientId={patientId} id={id} />
-  ),
   "/facility/:facilityId/patient/:id/treatment": ({ facilityId, id }: any) => (
     <TreatmentForm facilityId={facilityId} id={id} />
   ),
-  "/facility/:facilityId/triage/:id": ({ facilityId,id }: any) => (
+  "/facility/:facilityId/triage/:id": ({ facilityId, id }: any) => (
     <TriageForm facilityId={facilityId} id={id} />
   ),
   "/facility/:facilityId/bed/:id": ({ facilityId, id }: any) => (
