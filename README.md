@@ -1,6 +1,7 @@
 # Coronasafe Care React Front end . 
 Auto Deployed to https://care.coronasafe.in for Develop Branch. 
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/200482ab117e4b5397ff3f5ae5719aa2)](https://www.codacy.com/gh/coronasafe/care_fe?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=coronasafe/care_fe&amp;utm_campaign=Badge_Grade) 
 [![CircleCI](https://circleci.com/gh/coronasafe/care_fe.svg?style=svg)](https://circleci.com/gh/coronasafe/care_fe)
      [![Sonarcloud Status](https://sonarcloud.io/api/project_badges/measure?project=coronasafe_care_fe&metric=alert_status)](https://sonarcloud.io/dashboard?id=coronasafe_care_fe)
 
