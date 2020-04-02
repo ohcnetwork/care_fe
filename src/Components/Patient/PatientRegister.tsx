@@ -1,7 +1,7 @@
 import React, { useState, useReducer, useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { Box, Card, CardContent, Button, InputLabel, RadioGroup, Radio, FormControlLabel, CircularProgress } from "@material-ui/core";
-import { TextInputField, SelectField, ErrorHelperText, MultilineInputField, CheckboxField, AutoCompleteMultiField } from "../Common/HelperInputFields";
+import { TextInputField, SelectField, ErrorHelperText, MultilineInputField, CheckboxField, AutoCompleteMultiField, DateInputField } from "../Common/HelperInputFields";
 import { phonePreg } from "../../Common/validation";
 import { navigate } from "hookrouter";
 import { Loading } from "../Common/Loading";
@@ -25,11 +25,9 @@ interface medicalHistoryModel {
 
 const medicalHistoryTypes = MEDICAL_HISTORY_CHOICES.filter(i => i.id !== 1);
 
-const medicalHistoryChoices = medicalHistoryTypes.map(i => {
-  return {
-    [`medical_history_${i.id}`]: ""
-  };
-});
+let medicalHistoryChoices: any = {};
+
+medicalHistoryTypes.forEach(i => medicalHistoryChoices[`medical_history_${i.id}`] = "");
 
 const initForm: any = {
   name: "",
@@ -51,9 +49,11 @@ const initForm: any = {
   ...medicalHistoryChoices
 };
 
+const initError = Object.assign({}, ...Object.keys(initForm).map(k => ({ [k]: "" })));
+
 const initialState = {
   form: { ...initForm },
-  errors: { ...initForm }
+  errors: { ...initError },
 };
 
 const initialStates = [{ id: 0, name: "Choose State *" }];
@@ -145,12 +145,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       const res = await dispatchAction(getPatient({ id }));
       if (!status.aborted) {
         if (res && res.data) {
-          // const countries_travelled = res.data.countries_travelled
-          //   ? res.data.countries_travelled.split(',').map((country:string)=>{
-          //     return {
-          //       name
-          //     }
-          //   }) : [];
           const formData = {
             ...res.data,
             medical_history: [],
@@ -205,7 +199,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   );
 
   const validateForm = () => {
-    let errors = { ...initForm };
+    let errors = { ...initError };
     let invalidForm = false;
     Object.keys(state.form).forEach((field, i) => {
       switch (field) {
@@ -235,7 +229,14 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           return;
         case "countries_travelled":
           if (state.form.past_travel && !state.form[field].length) {
-            errors[field] = "Field is required";
+            errors[field] = "Please enter the list of countries visited";
+            invalidForm = true;
+          }
+          return;
+        case "estimated_contact_date":
+          if ((JSON.parse(state.form.contact_with_confirmed_carrier) || JSON.parse(state.form.contact_with_suspected_carrier))
+            && !state.form[field]) {
+            errors[field] = "Please enter the estimated date of contact";
             invalidForm = true;
           }
           return;
@@ -318,6 +319,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     form.countries_travelled = value;
     dispatch({ type: "set_form", form });
   }
+
+  const handleDateChange = (date: any) => {
+    const form = { ...state.form };
+    form.estimated_contact_date = date;
+    dispatch({ type: "set_form", form });
+  };
 
   const handleCheckboxFieldChange = (e: any) => {
     const form = { ...state.form };
@@ -538,10 +545,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   <ErrorHelperText error={state.errors.local_body} />
                 </div>
 
-                <div className="md:col-span-2">
+                <div>
                   <InputLabel id="contact_with_confirmed_carrier">
-                    Has the person had contact with someone already diagnosed with
-                    Covid 19?
+                    Contact with confirmed Covid patient?
                   </InputLabel>
                   <RadioGroup
                     aria-label="contact_with_confirmed_carrier"
@@ -563,12 +569,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       />
                     </Box>
                   </RadioGroup>
-                  <ErrorHelperText error={state.errors.contact_with_carrier} />
                 </div>
 
-                <div className="md:col-span-2">
+                <div>
                   <InputLabel id="contact_with_suspected_carrier">
-                    Has the patient had contact with Covid 19 suspects?
+                    Contact with Covid suspect?
                   </InputLabel>
                   <RadioGroup
                     aria-label="contact_with_suspected_carrier"
@@ -590,8 +595,18 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       />
                     </Box>
                   </RadioGroup>
-                  <ErrorHelperText error={state.errors.contact_with_carrier} />
                 </div>
+
+                {(JSON.parse(state.form.contact_with_confirmed_carrier) || JSON.parse(state.form.contact_with_suspected_carrier)) && (<div>
+                  <DateInputField
+                    label="Esimate date of contact*"
+                    value={state.form.estimated_contact_date}
+                    onChange={date => handleDateChange(date)}
+                    errors={state.errors.estimated_contact_date}
+                    variant="outlined"
+                    maxDate={new Date()}
+                  />
+                </div>)}
 
                 <div className="md:col-span-2">
                   <CheckboxField
@@ -608,7 +623,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     options={countryList}
                     label="Countries Visited*"
                     variant="outlined"
-                    placeholder="Select a country"
+                    placeholder="Enter country name"
                     onChange={handleCountryChange}
                     value={state.form.countries_travelled}
                     errors={state.errors.countries_travelled}

@@ -47,6 +47,8 @@ interface DateInputFieldProps {
     onChange: (date: MaterialUiPickersDate, value?: string | null | undefined) => void;
     label: string;
     errors: string;
+    variant?: "standard" | "outlined" | "filled";
+    maxDate?: Date;
 };
 interface TimeInputFieldProps {
     value: string;
@@ -214,16 +216,18 @@ export const CheckboxInputField = (props: InputProps) => {
 };
 
 export const DateInputField = (props: DateInputFieldProps) => {
-    const { value, onChange, label, errors } = props;
+    const { value, onChange, label, errors, variant, maxDate } = props;
     return (
         <MuiPickersUtilsProvider utils={DateFnsUtils}>
             <KeyboardDatePicker
+                inputVariant={variant || 'standard'}
                 margin="normal"
                 id="date-picker-dialog"
                 label={label || "Date picker dialog"}
                 format="MM/dd/yyyy"
                 value={value}
                 onChange={onChange}
+                maxDate={maxDate}
                 KeyboardButtonProps={{
                     'aria-label': 'change date',
                 }}
