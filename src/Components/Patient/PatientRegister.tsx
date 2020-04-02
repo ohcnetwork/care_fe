@@ -42,7 +42,7 @@ const initForm: any = {
   present_health: "",
   contact_with_confirmed_carrier: "false",
   contact_with_suspected_carrier: "false",
-  estimated_contact_date: "",
+  estimated_contact_date: null,
   past_travel: false,
   countries_travelled: [],
   has_SARI: false,
