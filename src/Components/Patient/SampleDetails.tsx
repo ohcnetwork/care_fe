@@ -5,7 +5,7 @@ import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { Loading } from "../../Components/Common/Loading";
 import { getTestSample } from "../../Redux/actions";
-import { SampleTestModel } from "./models";
+import { SampleTestModel, FlowModel } from "./models";
 import PageTitle from "../Common/PageTitle";
 
 interface SampleDetailsProps {
@@ -21,12 +21,10 @@ export const SampleDetails = (props: SampleDetailsProps) => {
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-
       const res = await dispatch(getTestSample(id));
       if (!status.aborted) {
         if (res && res.data) {
           setSampleDetails(res.data);
-          console.log(res.data);
         }
         setIsLoading(false);
       }
@@ -40,6 +38,34 @@ export const SampleDetails = (props: SampleDetailsProps) => {
     },
     [dispatch, fetchData, id]
   );
+
+  const renderFlow = (flow: FlowModel) => {
+    return (
+      <Card className="mt-4" key={flow.id}>
+        <CardContent>
+          <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+            <div>
+              <span className="font-semibold leading-relaxed">Status: </span>{" "}
+              {flow.status}
+            </div>
+            <div>
+              <span className="font-semibold leading-relaxed">Notes:</span>{" "}
+              {flow.notes}
+            </div>
+            <div>
+              <span className="font-semibold leading-relaxed">Created On :</span>{" "}
+              {moment(flow.created_date).format("lll")}
+            </div>
+            <div>
+              <span className="font-semibold leading-relaxed">Modified on:</span>{" "}
+              {moment(flow.modified_date).format("lll")}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
 
   if (isLoading) {
     return <Loading />;
@@ -66,6 +92,10 @@ export const SampleDetails = (props: SampleDetailsProps) => {
             <span className="font-semibold leading-relaxed">Result on:</span>{" "}
             {moment(sampleDetails.date_of_result).format("lll")}
           </div>
+          {sampleDetails.fast_track && (<div className="md:col-span-2">
+            <span className="font-semibold leading-relaxed">Fast track testing reason: </span>
+            {sampleDetails.fast_track}
+          </div>)}
           <div>
             <span className="font-semibold leading-relaxed">Contact with confirmed carrier: </span>
             {sampleDetails.patient_has_confirmed_contact ? <span className="badge badge-pill badge-warning">Yes</span> : <span className="badge badge-pill badge-secondary">No</span>}
@@ -85,5 +115,8 @@ export const SampleDetails = (props: SampleDetailsProps) => {
         </div>
       </CardContent>
     </Card>
+
+    <PageTitle title="Sample History" hideBack={true} />
+    {sampleDetails.flow && sampleDetails.flow.map((flow: FlowModel) => renderFlow(flow))}
   </>);
 };
