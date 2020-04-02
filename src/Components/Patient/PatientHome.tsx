@@ -290,7 +290,7 @@ export const PatientHome = (props: any) => {
             {moment(patientData.estimated_contact_date).format("LL")}
           </div>)}
           <div>
-            <span className="font-semibold leading-relaxed">Have SARI (Severe Acute Respiratory illness)?: </span>
+            <span className="font-semibold leading-relaxed">Has SARI (Severe Acute Respiratory illness)?: </span>
             {patientData.has_SARI ? <span className="badge badge-pill badge-warning">Yes</span> : <span className="badge badge-pill badge-secondary">No</span>}
           </div>
           <div>
