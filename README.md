@@ -2,6 +2,7 @@
 Auto Deployed to https://care.coronasafe.in for Develop Branch. 
 
 [![CircleCI](https://circleci.com/gh/coronasafe/care_fe.svg?style=svg)](https://circleci.com/gh/coronasafe/care_fe)
+     [![Sonarcloud Status](https://sonarcloud.io/api/project_badges/measure?project=coronasafe_care_fe&metric=alert_status)](https://sonarcloud.io/dashboard?id=coronasafe_care_fe)
 
 Auto Deployed to https://care.coronasafe.network for Master Branch
 
