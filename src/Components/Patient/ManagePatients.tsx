@@ -13,6 +13,7 @@ import Pagination from "../Common/Pagination";
 import { navigate } from "hookrouter";
 import { Loading } from "../Common/Loading";
 import { useAbortableEffect, statusType } from "../../Common/utils";
+import PageTitle from "../Common/PageTitle";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -215,9 +216,7 @@ export const PatientManager = (props: any) => {
 
   return (
     <div className="px-2">
-      <div className="font-semibold text-3xl p-4 mt-4 border-b-4 border-orange-500">
-        Covid Suspects
-      </div>
+      <PageTitle title="Covid Suspects" />
 
       <div className="flex flex-wrap mt-4">{managePatients}</div>
     </div>
