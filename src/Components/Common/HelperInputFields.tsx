@@ -1,5 +1,5 @@
 import React from 'react';
-import { Checkbox, Grid, IconButton, Radio, TextField, NativeSelect, TextFieldProps, FormControlLabel, FormControlLabelProps, Select } from '@material-ui/core';
+import { Checkbox, Grid, IconButton, Radio, TextField, NativeSelect, TextFieldProps, FormControlLabel, FormControlLabelProps, Select, Input, Chip, MenuItem, ListItemText } from '@material-ui/core';
 import { KeyboardDatePicker, KeyboardTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import { MaterialUiPickersDate } from '@material-ui/pickers/typings/date'
 import Autocomplete from '@material-ui/lab/Autocomplete';
@@ -10,13 +10,14 @@ import Box from '@material-ui/core/Box';
 import { NativeSelectInputProps } from '@material-ui/core/NativeSelect/NativeSelectInput';
 import { SelectProps } from '@material-ui/core/Select';
 
-export interface DefaultSelectInputProps extends SelectProps {
-    options: Array<{ id: string | number, text?: string }>,
+export interface DefaultSelectInputProps extends Omit<SelectProps, 'onChange'> {
+    options: Array<any>,
     placeholder?: string;
     label?: string;
     margin?: 'dense' | 'none';
-    optionkey?: string,
-    optionvalueidentifier?: string,
+    optionKey?: string,
+    optionValue?: string,
+    onChange?: (e: any, child?: any) => void
 }
 
 
@@ -24,8 +25,8 @@ export interface DefaultNativeSelectInputProps extends NativeSelectInputProps {
     options: Array<{ id: string | number, text?: string }>,
     placeholder?: string;
     label?: string;
-    optionkey?: string,
-    optionvalueidentifier?: string,
+    optionKey?: string,
+    optionValue?: string,
 }
 
 // Type Declarations
@@ -49,6 +50,7 @@ interface DateInputFieldProps {
     errors: string;
     variant?: "standard" | "outlined" | "filled";
     maxDate?: Date;
+    disabled?: boolean;
 };
 interface TimeInputFieldProps {
     value: string;
@@ -216,7 +218,7 @@ export const CheckboxInputField = (props: InputProps) => {
 };
 
 export const DateInputField = (props: DateInputFieldProps) => {
-    const { value, onChange, label, errors, variant, maxDate } = props;
+    const { value, onChange, label, errors, variant, maxDate, disabled } = props;
     return (
         <MuiPickersUtilsProvider utils={DateFnsUtils}>
             <KeyboardDatePicker
@@ -228,6 +230,7 @@ export const DateInputField = (props: DateInputFieldProps) => {
                 value={value}
                 onChange={onChange}
                 maxDate={maxDate}
+                disabled={disabled}
                 KeyboardButtonProps={{
                     'aria-label': 'change date',
                 }}
@@ -307,14 +310,14 @@ export const ShowCheckboxOptions = (props: OptionsProps) => {
 };
 
 export const NativeSelectField = (props: DefaultNativeSelectInputProps) => {
-    const { options, variant, label, optionkey, optionvalueidentifier } = props;
+    const { options, variant, label, optionKey, optionValue } = props;
     return (
         <FormControl style={{ width: "100%" }} variant={variant} margin="dense">
             {label && (<Box>{label}</Box>)}
             <NativeSelect {...props}>
                 {options.map((opt: any) => {
-                    return <option value={optionkey ? opt[optionkey] : opt.id} key={opt.id} disabled={opt.disabled}>
-                        {optionvalueidentifier ? opt[optionvalueidentifier] : opt.text}
+                    return <option value={optionKey ? opt[optionKey] : opt.id} key={opt.id} disabled={opt.disabled}>
+                        {optionValue ? opt[optionValue] : opt.text}
                     </option>
                 })}
             </NativeSelect>
@@ -323,15 +326,50 @@ export const NativeSelectField = (props: DefaultNativeSelectInputProps) => {
 };
 
 export const SelectField = (props: DefaultSelectInputProps) => {
-    const { options, label, variant, margin, optionkey, optionvalueidentifier } = props;
+    const { options, label, variant, margin, optionKey, optionValue, ...restProps } = props;
     return (
         <FormControl style={{ width: "100%" }} variant={variant} margin={margin}>
             {label && (<Box>{label}</Box>)}
-            <Select native {...props}>
+            <Select native {...restProps}>
                 {options.map((opt: any) => {
-                    return <option value={optionkey ? opt[optionkey] : opt.id} key={opt.id} disabled={opt.disabled}>
-                        {optionvalueidentifier ? opt[optionvalueidentifier] : opt.text}
+                    return <option value={optionKey ? opt[optionKey] : opt.id} key={opt.id} disabled={opt.disabled}>
+                        {optionValue ? opt[optionValue] : opt.text}
                     </option>
+                })}
+            </Select>
+        </FormControl>
+    );
+};
+
+export const MultiSelectField = (props: DefaultSelectInputProps) => {
+    const { options, label, value, variant, margin, optionKey, optionValue, ...restProps } = props;
+    const optKey = optionKey ? optionKey : "id";
+    const optVal = optionValue ? optionValue : "text";
+    return (
+        <FormControl className="w-full" variant={variant} margin={margin}>
+            <Select
+                multiple
+                {...restProps}
+                value={value}
+                input={<Input id={`${label}_chip`} />}
+                renderValue={(selected: any) => (
+                    <div className="flex flex-wrap">
+                        {selected.map((value: any) => {
+                            const label = options.find(opt => value === opt[optKey])?.[optVal];
+                            return (
+                                <Chip key={value} label={label} className="m-1" />
+                            )
+                        })}
+                    </div>
+                )}
+            >
+                {options.map((opt: any) => {
+                    const selected = value as Array<any>;
+                    return (<MenuItem key={opt.id} value={opt[optKey]}>
+                        <Checkbox checked={selected.indexOf(opt[optKey]) > -1} />
+                        <ListItemText primary={opt[optVal]} />
+                    </MenuItem>
+                    )
                 })}
             </Select>
         </FormControl>

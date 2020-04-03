@@ -1,19 +1,22 @@
-import { Box, Button, Card, CardActions, CardContent, FormControlLabel, Grid, InputLabel, Radio, RadioGroup } from "@material-ui/core";
+import { Box, Button, Card, CardContent, FormControlLabel, InputLabel, Radio, RadioGroup } from "@material-ui/core";
 import { navigate } from "hookrouter";
 import React, { useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
-import { CONSULTATION_SUGGESTION } from "../../Common/constants";
+import { CONSULTATION_SUGGESTION, SYMPTOM_CHOICES, OptionsType } from "../../Common/constants";
 import { createConsultation } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import { DateInputField, ErrorHelperText, MultilineInputField, NativeSelectField } from "../Common/HelperInputFields";
+import { DateInputField, SelectField, MultiSelectField, ErrorHelperText, MultilineInputField, NativeSelectField } from "../Common/HelperInputFields";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 
 const initForm: any = {
+  hasSymptom: false,
+  symptoms: [],
   suggestion: "",
   patient: "",
   facility: "",
   admitted: "false",
+  symptoms_onset_date: null,
   admission_date: null,
   discharge_date: null,
   referred_to: "",
@@ -22,9 +25,11 @@ const initForm: any = {
   prescribed_medication: ""
 };
 
+const initError = Object.assign({}, ...Object.keys(initForm).map(k => ({ [k]: "" })));
+
 const initialState = {
   form: { ...initForm },
-  errors: { ...initForm }
+  errors: { ...initError }
 };
 
 const consultationFormReducer = (state = initialState, action: any) => {
@@ -49,9 +54,13 @@ const consultationFormReducer = (state = initialState, action: any) => {
 const suggestionTypes = [
   {
     id: 0,
-    text: "Select"
+    text: "Select the decision"
   },
   ...CONSULTATION_SUGGESTION
+];
+
+const symptomChoices = [
+  ...SYMPTOM_CHOICES
 ];
 
 export const Consultation = (props: any) => {
@@ -101,7 +110,9 @@ export const Consultation = (props: any) => {
         discharge_date: state.form.discharge_date,
         patient: Number(patientId),
         facility: Number(facilityId),
-        referred_to: null
+        referred_to: null,
+        symptoms: state.form.symptoms,
+        hasSymptom: state.form.hasSymptom
       };
 
       console.log("data: ", data);
@@ -125,10 +136,22 @@ export const Consultation = (props: any) => {
   };
 
   const handleChange = (e: any) => {
-    let form = { ...state.form };
-    form[e.target.name] = e.target.value;
+    const form = { ...state.form };
+    const { name, value } = e.target;
+    form[name] = value;
     dispatch({ type: "set_form", form });
   };
+
+  const handleSymptomChange = (e: any, child?: any) => {
+    const form = { ...state.form };
+    const { value } = e?.target;
+    const otherSymptoms = value.filter((i: number) => i !== 1);
+    // prevent user from selecting asymptomatic along with other options
+    form.symptoms = child?.props?.value === 1 ? otherSymptoms.length ? [1] : value : otherSymptoms;
+    form.hasSymptom = !!form.symptoms.filter((i: number) => i !== 1).length;
+    dispatch({ type: "set_form", form });
+  };
+
 
   const handleDateChange = (date: any, key: string) => {
     let form = { ...state.form };
@@ -151,160 +174,173 @@ export const Consultation = (props: any) => {
         <Card>
           <form onSubmit={e => handleSubmit(e)}>
             <CardContent>
-              <InputLabel id="demo-simple-select-outlined-label" style={{ fontWeight: 'bold', fontSize: '18px' }}>
-                Decision after OP Triage/Consultation
-              </InputLabel>
-              <NativeSelectField
-                name="suggestion"
-                variant="outlined"
-                value={state.form.suggestion}
-                options={suggestionTypes}
-                onChange={handleChange}
-              />
-              <ErrorHelperText error={state.errors.suggestion} />
-            </CardContent>
-
-            <CardContent>
-              <InputLabel id="admitted-label">Admitted</InputLabel>
-              <RadioGroup
-                aria-label="covid"
-                name="admitted"
-                value={state.form.admitted}
-                onChange={handleChange}
-                style={{ padding: "0px 5px" }}
-              >
-                <Box display="flex" flexDirection="row">
-                  <FormControlLabel
-                    value="true"
-                    control={<Radio />}
-                    label="Yes"
+              <div className="grid gap-4 grid-cols-1">
+                <div>
+                  <InputLabel id="symptoms-label">
+                    Symptoms
+                  </InputLabel>
+                  <MultiSelectField
+                    name="symptoms"
+                    variant="outlined"
+                    value={state.form.symptoms}
+                    options={symptomChoices}
+                    onChange={handleSymptomChange}
                   />
-                  <FormControlLabel
-                    value="false"
-                    control={<Radio />}
-                    label="No"
-                  />
-                </Box>
-              </RadioGroup>
-              <ErrorHelperText error={state.errors.contact_with_carrier} />
-            </CardContent>
+                  <ErrorHelperText error={state.errors.symptoms} />
+                </div>
 
-            <CardContent>
-              <Grid
-                container
-                justify="space-between"
-                alignItems="center"
-                spacing={1}
-              >
-                <Grid item xs={6}>
+                <div>
+                  <DateInputField
+                    label="Date of onset of the symptoms"
+                    value={state.form.symptoms_onset_date}
+                    onChange={date => handleDateChange(date, "symptoms_onset_date")}
+                    errors={state.errors.symptoms_onset_date}
+                    disabled={!state.form.hasSymptom}
+                  />
+                </div>
+
+                <div>
+                  <InputLabel id="exam-details-label">Examination Details</InputLabel>
+                  <MultilineInputField
+                    rows={5}
+                    name="examination_details"
+                    variant="outlined"
+                    margin="dense"
+                    type="text"
+                    placeholder="Information optional"
+                    InputLabelProps={{ shrink: !!state.form.examination_details }}
+                    value={state.form.examination_details}
+                    onChange={handleChange}
+                    errors={state.errors.examination_details}
+                  />
+                </div>
+
+                <div>
+                  <InputLabel id="existing-medication-label">Medication, if any for the above-mentioned symptoms</InputLabel>
+                  <MultilineInputField
+                    rows={5}
+                    name="existing_medication"
+                    variant="outlined"
+                    margin="dense"
+                    type="text"
+                    placeholder="Information optional"
+                    InputLabelProps={{ shrink: !!state.form.existing_medication }}
+                    value={state.form.existing_medication}
+                    onChange={handleChange}
+                    errors={state.errors.existing_medication}
+                  />
+                </div>
+
+                <div>
+                  <InputLabel id="prescribed-medication-label">Prescribed Medication</InputLabel>
+                  <MultilineInputField
+                    rows={5}
+                    name="prescribed_medication"
+                    variant="outlined"
+                    margin="dense"
+                    type="text"
+                    placeholder="Information optional"
+                    InputLabelProps={{ shrink: !!state.form.prescribed_medication }}
+                    value={state.form.prescribed_medication}
+                    onChange={handleChange}
+                    errors={state.errors.prescribed_medication}
+                  />
+                </div>
+
+
+                <div>
+                  <InputLabel id="demo-simple-select-outlined-label" style={{ fontWeight: 'bold', fontSize: '18px' }}>
+                    Decision after OP Triage/Consultation
+                  </InputLabel>
+                  <NativeSelectField
+                    name="suggestion"
+                    variant="outlined"
+                    value={state.form.suggestion}
+                    options={suggestionTypes}
+                    onChange={handleChange}
+                  />
+                  <ErrorHelperText error={state.errors.suggestion} />
+                </div>
+
+                <div>
+                  <InputLabel id="admitted-label">Admitted</InputLabel>
+                  <RadioGroup
+                    aria-label="covid"
+                    name="admitted"
+                    value={state.form.admitted}
+                    onChange={handleChange}
+                    style={{ padding: "0px 5px" }}
+                  >
+                    <Box display="flex" flexDirection="row">
+                      <FormControlLabel
+                        value="true"
+                        control={<Radio />}
+                        label="Yes"
+                      />
+                      <FormControlLabel
+                        value="false"
+                        control={<Radio />}
+                        label="No"
+                      />
+                    </Box>
+                  </RadioGroup>
+                  <ErrorHelperText error={state.errors.admitted} />
+                </div>
+
+
+
+                <div>
                   <DateInputField
                     label="Admission Date"
                     value={state.form.admission_date}
                     onChange={date => handleDateChange(date, "admission_date")}
                     errors={state.errors.admission_date}
                   />
-                </Grid>
-                <Grid item xs={6}>
+                </div>
+                <div>
                   <DateInputField
                     label="Discharge Date"
                     value={state.form.discharge_date}
                     onChange={date => handleDateChange(date, "discharge_date")}
                     errors={state.errors.discharge_date}
                   />
-                </Grid>
-              </Grid>
-            </CardContent>
+                </div>
 
-            <CardContent>
-              <InputLabel id="existing-medication-label">
-                Medication, if any for the above-mentioned symptoms
-              </InputLabel>
-              <MultilineInputField
-                rows={5}
-                name="existing_medication"
-                variant="outlined"
-                margin="dense"
-                type="text"
-                placeholder="Information optional"
-                InputLabelProps={{ shrink: !!state.form.existing_medication }}
-                value={state.form.existing_medication}
-                onChange={handleChange}
-                errors={state.errors.existing_medication}
-              />
-            </CardContent>
+                {/*<div>*/}
+                {/*    <InputLabel id="refered-label">Referred To Facility</InputLabel>*/}
+                {/*    <TextInputField*/}
+                {/*        name="referred_to"*/}
+                {/*        variant="outlined"*/}
+                {/*        margin="dense"*/}
+                {/*        type="number"*/}
+                {/*        InputLabelProps={{ shrink: !!state.form.referred_to}}*/}
+                {/*        value={state.form.referred_to}*/}
+                {/*        onChange={handleChange}*/}
+                {/*        errors={state.errors.referred_to}*/}
+                {/*    />*/}
+                {/*</div>*/}
 
-            <CardContent>
-              <InputLabel id="exam-details-label">
-                Examination Details
-              </InputLabel>
-              <MultilineInputField
-                rows={5}
-                name="examination_details"
-                variant="outlined"
-                margin="dense"
-                type="text"
-                placeholder="Information optional"
-                InputLabelProps={{ shrink: !!state.form.examination_details }}
-                value={state.form.examination_details}
-                onChange={handleChange}
-                errors={state.errors.examination_details}
-              />
-            </CardContent>
-
-            <CardContent>
-              <InputLabel id="prescribed-medication-label">
-                Prescribed Medication
-              </InputLabel>
-              <MultilineInputField
-                rows={5}
-                name="prescribed_medication"
-                variant="outlined"
-                margin="dense"
-                type="text"
-                placeholder="Information optional"
-                InputLabelProps={{ shrink: !!state.form.prescribed_medication }}
-                value={state.form.prescribed_medication}
-                onChange={handleChange}
-                errors={state.errors.prescribed_medication}
-              />
-            </CardContent>
-
-            {/*<CardContent>*/}
-            {/*    <InputLabel id="refered-label">Referred To Facility</InputLabel>*/}
-            {/*    <TextInputField*/}
-            {/*        name="referred_to"*/}
-            {/*        variant="outlined"*/}
-            {/*        margin="dense"*/}
-            {/*        type="number"*/}
-            {/*        InputLabelProps={{ shrink: !!state.form.referred_to}}*/}
-            {/*        value={state.form.referred_to}*/}
-            {/*        onChange={handleChange}*/}
-            {/*        errors={state.errors.referred_to}*/}
-            {/*    />*/}
-            {/*</CardContent>*/}
-
-            <CardActions
-              className="padding16"
-              style={{ justifyContent: "space-between" }}
-            >
-              <Button
-                color="default"
-                variant="contained"
-                type="button"
-                onClick={e => handleCancel()}
-              >
-                Cancel
+                <div>
+                  <Button
+                    color="default"
+                    variant="contained"
+                    type="button"
+                    onClick={e => handleCancel()}
+                  >
+                    Cancel
               </Button>
-              <Button
-                color="primary"
-                variant="contained"
-                type="submit"
-                style={{ marginLeft: "auto" }}
-                onClick={e => handleSubmit(e)}
-              >
-                {buttonText}
-              </Button>
-            </CardActions>
+                  <Button
+                    color="primary"
+                    variant="contained"
+                    type="submit"
+                    style={{ marginLeft: "auto" }}
+                    onClick={e => handleSubmit(e)}
+                  >
+                    {buttonText}
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
           </form>
         </Card>
       </div>
