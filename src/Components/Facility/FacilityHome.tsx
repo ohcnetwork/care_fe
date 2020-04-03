@@ -228,11 +228,11 @@ export const FacilityHome = (props: any) => {
                 </thead>
                 <tbody>
                   <tr>
-                    <td>{patientStatsData.entry_date || ''}</td>
-                    <td>{patientStatsData.num_patients_visited || ''}</td>
-                    <td>{patientStatsData.num_patients_home_quarantine || ''}</td>
-                    <td>{patientStatsData.num_patients_isolation || ''}</td>
-                    <td>{patientStatsData.num_patient_referred || ''}</td>
+                    <td>{patientStatsData.entry_date || '-'}</td>
+                    <td>{patientStatsData.num_patients_visited || '-'}</td>
+                    <td>{patientStatsData.num_patients_home_quarantine || '-'}</td>
+                    <td>{patientStatsData.num_patients_isolation || '-'}</td>
+                    <td>{patientStatsData.num_patient_referred || '-'}</td>
                   </tr>
                 </tbody>
               </table>
