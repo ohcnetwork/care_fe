@@ -110,7 +110,9 @@ export const Consultation = (props: any) => {
         discharge_date: state.form.discharge_date,
         patient: Number(patientId),
         facility: Number(facilityId),
-        referred_to: null
+        referred_to: null,
+        symptoms: state.form.symptoms,
+        hasSymptom: state.form.hasSymptom
       };
 
       console.log("data: ", data);
