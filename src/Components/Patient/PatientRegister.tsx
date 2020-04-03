@@ -213,7 +213,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           }
           return;
         case "state":
-        case "district":
           if (!Number(state.form[field])) {
             errors[field] = "Field is required";
             invalidForm = true;
@@ -286,7 +285,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       };
 
       const res = await dispatchAction(
-        id ? updatePatient(data, { id }) : createPatient(data)
+        id ? updatePatient(data, { id }) : createPatient({ ...data, facility: facilityId })
       );
       setIsLoading(false);
       if (res && res.data) {
@@ -434,8 +433,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     value={state.form.gender}
                     options={genderTypes}
                     onChange={handleChange}
+                    errors={state.errors.gender}
                   />
-                  <ErrorHelperText error={state.errors.gender} />
                 </div>
                 <div>
                   <InputLabel id="phone-label">Mobile Number*</InputLabel>
@@ -498,9 +497,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           handleChange(e),
                           fetchDistricts(String(e.target.value))
                         ]}
+                        errors={state.errors.state}
                       />
                     )}
-                  <ErrorHelperText error={state.errors.state} />
                 </div>
 
                 <div>
@@ -519,9 +518,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           handleChange(e),
                           fetchLocalBody(String(e.target.value))
                         ]}
+                        error={state.errors.district}
                       />
                     )}
-                  <ErrorHelperText error={state.errors.district} />
                 </div>
 
                 <div className="md:col-span-2">
@@ -537,9 +536,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         options={localBody}
                         optionValue="name"
                         onChange={handleChange}
+                        errors={state.errors.local_body}
                       />
                     )}
-                  <ErrorHelperText error={state.errors.local_body} />
                 </div>
 
                 <div>
