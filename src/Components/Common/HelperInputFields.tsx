@@ -10,13 +10,14 @@ import Box from '@material-ui/core/Box';
 import { NativeSelectInputProps } from '@material-ui/core/NativeSelect/NativeSelectInput';
 import { SelectProps } from '@material-ui/core/Select';
 
-export interface DefaultSelectInputProps extends SelectProps {
+export interface DefaultSelectInputProps extends Omit<SelectProps, 'onChange'> {
     options: Array<any>,
     placeholder?: string;
     label?: string;
     margin?: 'dense' | 'none';
     optionKey?: string,
     optionValue?: string,
+    onChange?: (e: any, child?: any) => void
 }
 
 
@@ -49,6 +50,7 @@ interface DateInputFieldProps {
     errors: string;
     variant?: "standard" | "outlined" | "filled";
     maxDate?: Date;
+    disabled?: boolean;
 };
 interface TimeInputFieldProps {
     value: string;
@@ -216,7 +218,7 @@ export const CheckboxInputField = (props: InputProps) => {
 };
 
 export const DateInputField = (props: DateInputFieldProps) => {
-    const { value, onChange, label, errors, variant, maxDate } = props;
+    const { value, onChange, label, errors, variant, maxDate, disabled } = props;
     return (
         <MuiPickersUtilsProvider utils={DateFnsUtils}>
             <KeyboardDatePicker
@@ -228,6 +230,7 @@ export const DateInputField = (props: DateInputFieldProps) => {
                 value={value}
                 onChange={onChange}
                 maxDate={maxDate}
+                disabled={disabled}
                 KeyboardButtonProps={{
                     'aria-label': 'change date',
                 }}
