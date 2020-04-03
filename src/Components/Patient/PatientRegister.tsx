@@ -44,9 +44,11 @@ const initForm: any = {
   contact_with_confirmed_carrier: "false",
   contact_with_suspected_carrier: "false",
   estimated_contact_date: null,
+  date_of_return: null,
   past_travel: false,
   countries_travelled: [],
   has_SARI: false,
+  prescribed_medication: false,
   ...medicalHistoryChoices
 };
 
@@ -231,6 +233,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             invalidForm = true;
           }
           return;
+        case "date_of_return":
+          if (state.form.past_travel && !state.form[field]) {
+            errors[field] = "Please enter the date of return from travel";
+            invalidForm = true;
+          }
+          return;
         case "estimated_contact_date":
           if ((JSON.parse(state.form.contact_with_confirmed_carrier) || JSON.parse(state.form.contact_with_suspected_carrier))
             && !state.form[field]) {
@@ -279,7 +287,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         estimated_contact_date: state.form.estimated_contact_date,
         past_travel: state.form.past_travel,
         countries_travelled: state.form.past_travel ? state.form.countries_travelled.join(',') : undefined,
+        date_of_return: state.form.past_travel ? state.form.date_of_return : undefined,
         has_SARI: state.form.has_SARI,
+        // prescribed_medication: state.form.prescribed_medication,
         medical_history,
         is_active: true
       };
@@ -321,6 +331,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   const handleDateChange = (date: any) => {
     const form = { ...state.form };
     form.estimated_contact_date = date;
+    dispatch({ type: "set_form", form });
+  };
+
+  const handleReturnDateChange = (date: any) => {
+    const form = { ...state.form };
+    form.date_of_return = date;
     dispatch({ type: "set_form", form });
   };
 
@@ -503,7 +519,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                 </div>
 
                 <div>
-                  <InputLabel id="gender-label">District</InputLabel>
+                  <InputLabel id="gender-label">District*</InputLabel>
                   {isDistrictLoading ? (
                     <CircularProgress size={20} />
                   ) : (
@@ -613,18 +629,30 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   />
                 </div>
 
-                {state.form.past_travel && (<div className="md:col-span-2">
-                  <AutoCompleteMultiField
-                    id="countries-travelled"
-                    options={countryList}
-                    label="Countries / Places Visited *"
-                    variant="outlined"
-                    placeholder="Select country or enter the place of visit"
-                    onChange={handleCountryChange}
-                    value={state.form.countries_travelled}
-                    errors={state.errors.countries_travelled}
-                  />
-                </div>)}
+                {state.form.past_travel && (<>
+                  <div className="md:col-span-2">
+                    <AutoCompleteMultiField
+                      id="countries-travelled"
+                      options={countryList}
+                      label="Countries / Places Visited*"
+                      variant="outlined"
+                      placeholder="Select country or enter the place of visit"
+                      onChange={handleCountryChange}
+                      value={state.form.countries_travelled}
+                      errors={state.errors.countries_travelled}
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <DateInputField
+                      label="Estimated date of return*"
+                      value={state.form.date_of_return}
+                      onChange={date => handleReturnDateChange(date)}
+                      errors={state.errors.date_of_return}
+                      variant="outlined"
+                      maxDate={new Date()}
+                    />
+                  </div>
+                </>)}
 
                 <div className="md:col-span-2">
                   <CheckboxField
@@ -634,6 +662,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     label="Does the person have SARI (Severe Acute Respiratory illness)?"
                   />
                 </div>
+
 
                 <div className="md:col-span-2">
                   <InputLabel id="med-history-label">
@@ -645,6 +674,15 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     })}
                   </div>
                 </div>
+
+                {/* <div className="md:col-span-2">
+                  <CheckboxField
+                    checked={state.form.prescribed_medication}
+                    onChange={handleCheckboxFieldChange}
+                    name="prescribed_medication"
+                    label="Already prescribed medication for any underlying condition?"
+                  />
+                </div> */}
 
               </div>
               <div
