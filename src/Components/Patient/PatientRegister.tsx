@@ -280,6 +280,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         contact_with_confirmed_carrier: JSON.parse(state.form.contact_with_confirmed_carrier),
         contact_with_suspected_carrier: JSON.parse(state.form.contact_with_suspected_carrier),
         estimated_contact_date: state.form.estimated_contact_date,
+        date_of_return: state.form.date_of_return,
         past_travel: state.form.past_travel,
         countries_travelled: state.form.past_travel ? state.form.countries_travelled.join(',') : undefined,
         has_SARI: state.form.has_SARI,
@@ -502,7 +503,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         margin="dense"
                         value={state.form.state}
                         options={states}
-                        optionvalueidentifier="name"
+                        optionValue="name"
                         onChange={e => [
                           handleChange(e),
                           fetchDistricts(String(e.target.value))
@@ -523,7 +524,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         margin="dense"
                         value={state.form.district}
                         options={districts}
-                        optionvalueidentifier="name"
+                        optionValue="name"
                         onChange={e => [
                           handleChange(e),
                           fetchLocalBody(String(e.target.value))
@@ -544,7 +545,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         margin="dense"
                         value={state.form.local_body}
                         options={localBody}
-                        optionvalueidentifier="name"
+                        optionValue="name"
                         onChange={handleChange}
                       />
                     )}
