@@ -135,11 +135,14 @@ export const PatientManager = (props: any) => {
   let patientList: any[] = [];
   if (data && data.length) {
     patientList = data.map((patient: any, idx: number) => {
+      const patientUrl = patient.facility
+      ? `/facility/${patient.facility}/patient/${patient.id}`
+      : `/patient/${patient.id}`;
       return (
         <div key={`usr_${patient.id}`} className="w-full md:w-1/2 mt-4 px-2">
           <div
             className="block border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black"
-            onClick={() => navigate(`/facility/${patient.facility}/patient/${patient.id}`)}
+            onClick={() => navigate(patientUrl)}
           >
             <CardHeader
               className={classes.cardHeader}
@@ -216,7 +219,7 @@ export const PatientManager = (props: any) => {
 
   return (
     <div className="px-2">
-      <PageTitle title="Covid Suspects" />
+      <PageTitle title="Covid Suspects" hideBack={!facilityId} />
 
       <div className="flex flex-wrap mt-4">{managePatients}</div>
     </div>
