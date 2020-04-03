@@ -66,7 +66,7 @@ export const FacilityHome = (props: any) => {
           if (doctorRes && doctorRes.data) {
             setDoctorData(doctorRes.data.results);
           }
-          if (triageRes && triageRes.data) {
+          if (triageRes && triageRes.data && triageRes.data.results && triageRes.data.results.length) {
             setPatientStatsData(triageRes.data.results[0]);
           }
         }
