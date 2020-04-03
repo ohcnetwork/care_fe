@@ -118,3 +118,15 @@ export const CONSULTATION_SUGGESTION = [
   { id: "A", text: "Admitted" },
   { id: "R", text: "Refered to another Hospital" },
 ];
+
+export const ADMITTED_TO = [
+  "Isolation Room",
+  "ICU",
+  "ICU with Ventilator",
+];
+
+export const PATIENT_CATEGORY = [
+  { id: "Category-A", text: "Mild (Category A)" },
+  { id: "Category-B", text: "Moderate (Category B)" },
+  { id: "Category-C", text: "Severe (Category C)" }
+];

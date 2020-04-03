@@ -1,22 +1,28 @@
 import { Box, Button, Card, CardContent, FormControlLabel, InputLabel, Radio, RadioGroup } from "@material-ui/core";
+import SaveIcon from "@material-ui/icons/Save";
 import { navigate } from "hookrouter";
 import React, { useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
-import { CONSULTATION_SUGGESTION, SYMPTOM_CHOICES, OptionsType } from "../../Common/constants";
+import { ADMITTED_TO, CONSULTATION_SUGGESTION, SYMPTOM_CHOICES, PATIENT_CATEGORY } from "../../Common/constants";
 import { createConsultation } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import { DateInputField, SelectField, MultiSelectField, ErrorHelperText, MultilineInputField, NativeSelectField } from "../Common/HelperInputFields";
+import { DateInputField, ErrorHelperText, MultilineInputField, MultiSelectField, NativeSelectField, SelectField } from "../Common/HelperInputFields";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
+import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 
 const initForm: any = {
   hasSymptom: false,
+  otherSymptom: false,
   symptoms: [],
+  other_symptoms: "",
+  symptoms_onset_date: null,
   suggestion: "",
   patient: "",
   facility: "",
   admitted: "false",
-  symptoms_onset_date: null,
+  admitted_to: "",
+  category: "",
   admission_date: null,
   discharge_date: null,
   referred_to: "",
@@ -63,6 +69,19 @@ const symptomChoices = [
   ...SYMPTOM_CHOICES
 ];
 
+const admittedToChoices = [
+  "Select",
+  ...ADMITTED_TO
+];
+
+const categoryChoices = [
+  {
+    id: 0,
+    text: "Select suspect category"
+  },
+  ...PATIENT_CATEGORY
+];
+
 export const Consultation = (props: any) => {
   const dispatchAction: any = useDispatch();
   const { facilityId, patientId, id } = props;
@@ -70,16 +89,41 @@ export const Consultation = (props: any) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const headerText = !id ? "OP Triage / Consultation" : "Consultation";
-  const buttonText = !id ? "Save" : "Update";
+  const buttonText = !id ? "Add OP Triage / Consultation" : "Update";
 
   const validateForm = () => {
-    let errors = { ...initForm };
+    let errors = { ...initError };
     let invalidForm = false;
     Object.keys(state.form).forEach((field, i) => {
       switch (field) {
+        case "symptoms":
+          if (!state.form[field] || !state.form[field].length) {
+            errors[field] = "Please select the symptoms";
+            invalidForm = true;
+          }
+          return;
         case "suggestion":
           if (!state.form[field]) {
-            errors[field] = "Field is required";
+            errors[field] = "Please enter the decision";
+            invalidForm = true;
+          }
+          return;
+        case "other_symptoms":
+          if (state.form.otherSymptom && !state.form[field]) {
+            errors[field] = "Please enter the other symptom details";
+            invalidForm = true;
+          }
+          return;
+        case "symptoms_onset_date":
+          if (state.form.hasSymptom && !state.form[field]) {
+            errors[field] = "Please enter date of onset of the above symptoms";
+            invalidForm = true;
+          }
+          return;
+        case "admitted_to":
+        case "admission_date":
+          if (JSON.parse(state.form.admitted) && !state.form[field]) {
+            errors[field] = "Field is required as person is admitted";
             invalidForm = true;
           }
           return;
@@ -101,18 +145,23 @@ export const Consultation = (props: any) => {
     if (validForm) {
       setIsLoading(true);
       const data = {
+        hasSymptom: false,
+        otherSymptom: false,
+        symptoms: state.form.symptoms,
+        other_symptoms: state.form.otherSymptom ? state.form.other_symptoms : undefined,
+        symptoms_onset_date: state.form.hasSymptom ? state.form.symptoms_onset_date : undefined,
+        suggestion: state.form.suggestion,
+        admitted: JSON.parse(state.form.admitted),
+        admitted_to: JSON.parse(state.form.admitted) ? state.form.admitted_to : undefined,
+        category: state.form.category,
         examination_details: state.form.examination_details,
         existing_medication: state.form.existing_medication,
         prescribed_medication: state.form.prescribed_medication,
-        suggestion: state.form.suggestion,
-        admitted: JSON.parse(state.form.admitted),
         admission_date: state.form.admission_date,
         discharge_date: state.form.discharge_date,
         patient: Number(patientId),
         facility: Number(facilityId),
         referred_to: null,
-        symptoms: state.form.symptoms,
-        hasSymptom: state.form.hasSymptom
       };
 
       console.log("data: ", data);
@@ -149,6 +198,7 @@ export const Consultation = (props: any) => {
     // prevent user from selecting asymptomatic along with other options
     form.symptoms = child?.props?.value === 1 ? otherSymptoms.length ? [1] : value : otherSymptoms;
     form.hasSymptom = !!form.symptoms.filter((i: number) => i !== 1).length;
+    form.otherSymptom = !!form.symptoms.filter((i: number) => i === 9).length;
     dispatch({ type: "set_form", form });
   };
 
@@ -189,13 +239,44 @@ export const Consultation = (props: any) => {
                   <ErrorHelperText error={state.errors.symptoms} />
                 </div>
 
-                <div>
+                {state.form.otherSymptom && (<div>
+                  <InputLabel id="other-symptoms-label">Other Symptom Details</InputLabel>
+                  <MultilineInputField
+                    rows={5}
+                    name="other_symptoms"
+                    variant="outlined"
+                    margin="dense"
+                    type="text"
+                    placeholder="Enter the other symptoms here"
+                    InputLabelProps={{ shrink: !!state.form.other_symptoms }}
+                    value={state.form.other_symptoms}
+                    onChange={handleChange}
+                    errors={state.errors.other_symptoms}
+                  />
+                </div>)}
+
+                {state.form.hasSymptom && (<div>
                   <DateInputField
                     label="Date of onset of the symptoms"
                     value={state.form.symptoms_onset_date}
                     onChange={date => handleDateChange(date, "symptoms_onset_date")}
+                    maxDate={new Date()}
                     errors={state.errors.symptoms_onset_date}
-                    disabled={!state.form.hasSymptom}
+                  />
+                </div>)}
+                <div>
+                  <InputLabel id="existing-medication-label">Medication, if any for the above-mentioned symptoms</InputLabel>
+                  <MultilineInputField
+                    rows={5}
+                    name="existing_medication"
+                    variant="outlined"
+                    margin="dense"
+                    type="text"
+                    placeholder="Information optional"
+                    InputLabelProps={{ shrink: !!state.form.existing_medication }}
+                    value={state.form.existing_medication}
+                    onChange={handleChange}
+                    errors={state.errors.existing_medication}
                   />
                 </div>
 
@@ -216,22 +297,6 @@ export const Consultation = (props: any) => {
                 </div>
 
                 <div>
-                  <InputLabel id="existing-medication-label">Medication, if any for the above-mentioned symptoms</InputLabel>
-                  <MultilineInputField
-                    rows={5}
-                    name="existing_medication"
-                    variant="outlined"
-                    margin="dense"
-                    type="text"
-                    placeholder="Information optional"
-                    InputLabelProps={{ shrink: !!state.form.existing_medication }}
-                    value={state.form.existing_medication}
-                    onChange={handleChange}
-                    errors={state.errors.existing_medication}
-                  />
-                </div>
-
-                <div>
                   <InputLabel id="prescribed-medication-label">Prescribed Medication</InputLabel>
                   <MultilineInputField
                     rows={5}
@@ -247,9 +312,20 @@ export const Consultation = (props: any) => {
                   />
                 </div>
 
+                <div className="flex-1">
+                  <InputLabel id="category-label">Category</InputLabel>
+                  <SelectField
+                    name="category"
+                    variant="standard"
+                    value={state.form.category}
+                    options={categoryChoices}
+                    onChange={handleChange}
+                    errors={state.errors.category}
+                  />
+                </div>
 
                 <div>
-                  <InputLabel id="demo-simple-select-outlined-label" style={{ fontWeight: 'bold', fontSize: '18px' }}>
+                  <InputLabel id="suggestion-label" style={{ fontWeight: 'bold', fontSize: '18px' }}>
                     Decision after OP Triage/Consultation
                   </InputLabel>
                   <NativeSelectField
@@ -262,83 +338,101 @@ export const Consultation = (props: any) => {
                   <ErrorHelperText error={state.errors.suggestion} />
                 </div>
 
-                <div>
-                  <InputLabel id="admitted-label">Admitted</InputLabel>
-                  <RadioGroup
-                    aria-label="covid"
-                    name="admitted"
-                    value={state.form.admitted}
-                    onChange={handleChange}
-                    style={{ padding: "0px 5px" }}
-                  >
-                    <Box display="flex" flexDirection="row">
-                      <FormControlLabel
-                        value="true"
-                        control={<Radio />}
-                        label="Yes"
-                      />
-                      <FormControlLabel
-                        value="false"
-                        control={<Radio />}
-                        label="No"
-                      />
-                    </Box>
-                  </RadioGroup>
-                  <ErrorHelperText error={state.errors.admitted} />
+                <div className="flex">
+                  <div className="flex-1">
+                    <InputLabel id="admitted-label">Admitted</InputLabel>
+                    <RadioGroup
+                      aria-label="covid"
+                      name="admitted"
+                      value={state.form.admitted}
+                      onChange={handleChange}
+                      style={{ padding: "0px 5px" }}
+                    >
+                      <Box display="flex" flexDirection="row">
+                        <FormControlLabel
+                          value="true"
+                          control={<Radio />}
+                          label="Yes"
+                        />
+                        <FormControlLabel
+                          value="false"
+                          control={<Radio />}
+                          label="No"
+                        />
+                      </Box>
+                    </RadioGroup>
+                    <ErrorHelperText error={state.errors.admitted} />
+                  </div>
+
+                  {JSON.parse(state.form.admitted) && (<div className="flex-1">
+                    <SelectField
+                      optionArray={true}
+                      name="admitted_to"
+                      variant="standard"
+                      value={state.form.admitted_to}
+                      options={admittedToChoices}
+                      onChange={handleChange}
+                      label="Admitted To*"
+                      labelId="admitted-to-label"
+                      errors={state.errors.admitted_to}
+                    />
+                  </div>)}
                 </div>
 
+                {JSON.parse(state.form.admitted) && (<div className="flex">
+                  <div className="flex-1">
+                    <DateInputField
+                      label="Admission Date"
+                      margin="dense"
+                      value={state.form.admission_date}
+                      maxDate={new Date()}
+                      onChange={date => handleDateChange(date, "admission_date")}
+                      errors={state.errors.admission_date}
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <DateInputField
+                      label="Discharge Date"
+                      margin="dense"
+                      value={state.form.discharge_date}
+                      onChange={date => handleDateChange(date, "discharge_date")}
+                      maxDate={new Date()}
+                      errors={state.errors.discharge_date}
+                    />
+                  </div>
+                </div>)}
 
+              </div>
 
-                <div>
-                  <DateInputField
-                    label="Admission Date"
-                    value={state.form.admission_date}
-                    onChange={date => handleDateChange(date, "admission_date")}
-                    errors={state.errors.admission_date}
-                  />
-                </div>
-                <div>
-                  <DateInputField
-                    label="Discharge Date"
-                    value={state.form.discharge_date}
-                    onChange={date => handleDateChange(date, "discharge_date")}
-                    errors={state.errors.discharge_date}
-                  />
-                </div>
+              {/*<div>*/}
+              {/*    <InputLabel id="refered-label">Referred To Facility</InputLabel>*/}
+              {/*    <TextInputField*/}
+              {/*        name="referred_to"*/}
+              {/*        variant="outlined"*/}
+              {/*        margin="dense"*/}
+              {/*        type="number"*/}
+              {/*        InputLabelProps={{ shrink: !!state.form.referred_to}}*/}
+              {/*        value={state.form.referred_to}*/}
+              {/*        onChange={handleChange}*/}
+              {/*        errors={state.errors.referred_to}*/}
+              {/*    />*/}
+              {/*</div>*/}
 
-                {/*<div>*/}
-                {/*    <InputLabel id="refered-label">Referred To Facility</InputLabel>*/}
-                {/*    <TextInputField*/}
-                {/*        name="referred_to"*/}
-                {/*        variant="outlined"*/}
-                {/*        margin="dense"*/}
-                {/*        type="number"*/}
-                {/*        InputLabelProps={{ shrink: !!state.form.referred_to}}*/}
-                {/*        value={state.form.referred_to}*/}
-                {/*        onChange={handleChange}*/}
-                {/*        errors={state.errors.referred_to}*/}
-                {/*    />*/}
-                {/*</div>*/}
-
-                <div>
-                  <Button
-                    color="default"
-                    variant="contained"
-                    type="button"
-                    onClick={e => handleCancel()}
-                  >
-                    Cancel
-              </Button>
-                  <Button
-                    color="primary"
-                    variant="contained"
-                    type="submit"
-                    style={{ marginLeft: "auto" }}
-                    onClick={e => handleSubmit(e)}
-                  >
-                    {buttonText}
-                  </Button>
-                </div>
+              <div className="mt-4 flex justify-between">
+                <Button
+                  color="default"
+                  variant="contained"
+                  type="button"
+                  onClick={e => handleCancel()}
+                >Cancel </Button>
+                <Button
+                  color="primary"
+                  variant="contained"
+                  type="submit"
+                  style={{ marginLeft: "auto" }}
+                  startIcon={<CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>}
+                  onClick={e => handleSubmit(e)}
+                >{buttonText}</Button>
               </div>
             </CardContent>
           </form>
