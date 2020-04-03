@@ -44,9 +44,11 @@ const initForm: any = {
   contact_with_confirmed_carrier: "false",
   contact_with_suspected_carrier: "false",
   estimated_contact_date: null,
+  date_of_return: null,
   past_travel: false,
   countries_travelled: [],
   has_SARI: false,
+  prescribed_medication: false,
   ...medicalHistoryChoices
 };
 
@@ -281,6 +283,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         past_travel: state.form.past_travel,
         countries_travelled: state.form.past_travel ? state.form.countries_travelled.join(',') : undefined,
         has_SARI: state.form.has_SARI,
+        prescribed_medication: state.form.prescribed_medication,
         medical_history,
         is_active: true
       };
@@ -322,6 +325,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   const handleDateChange = (date: any) => {
     const form = { ...state.form };
     form.estimated_contact_date = date;
+    dispatch({ type: "set_form", form });
+  };
+
+  const handleReturnDateChange = (date: any) => {
+    const form = { ...state.form };
+    form.date_of_return = date;
     dispatch({ type: "set_form", form });
   };
 
@@ -493,7 +502,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         margin="dense"
                         value={state.form.state}
                         options={states}
-                        optionValue="name"
+                        optionvalueidentifier="name"
                         onChange={e => [
                           handleChange(e),
                           fetchDistricts(String(e.target.value))
@@ -514,7 +523,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         margin="dense"
                         value={state.form.district}
                         options={districts}
-                        optionValue="name"
+                        optionvalueidentifier="name"
                         onChange={e => [
                           handleChange(e),
                           fetchLocalBody(String(e.target.value))
@@ -535,7 +544,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         margin="dense"
                         value={state.form.local_body}
                         options={localBody}
-                        optionValue="name"
+                        optionvalueidentifier="name"
                         onChange={handleChange}
                       />
                     )}
@@ -636,6 +645,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   />
                 </div>
 
+
                 <div className="md:col-span-2">
                   <InputLabel id="med-history-label">
                     Any medical history? (Optional Information)
@@ -645,6 +655,26 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       return renderMedicalHistory(i.id, i.text);
                     })}
                   </div>
+                </div>
+
+                <div className="md:col-span-2">
+                  <CheckboxField
+                    checked={state.form.prescribed_medication}
+                    onChange={handleCheckboxFieldChange}
+                    name="prescribed_medication"
+                    label="Already prescribed medication for any underlying condition?"
+                  />
+                </div>
+                
+
+                <div className="md:col-span-2">
+                    <DateInputField
+                      label="Esimate date of return*"
+                      value={state.form.date_of_return}
+                      onChange={date => handleReturnDateChange(date)}
+                      errors={state.errors.date_of_return}
+                      variant="outlined"
+                    />
                 </div>
 
               </div>
