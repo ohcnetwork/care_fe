@@ -493,7 +493,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         margin="dense"
                         value={state.form.state}
                         options={states}
-                        optionvalueidentifier="name"
+                        optionValue="name"
                         onChange={e => [
                           handleChange(e),
                           fetchDistricts(String(e.target.value))
@@ -514,7 +514,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         margin="dense"
                         value={state.form.district}
                         options={districts}
-                        optionvalueidentifier="name"
+                        optionValue="name"
                         onChange={e => [
                           handleChange(e),
                           fetchLocalBody(String(e.target.value))
@@ -535,7 +535,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         margin="dense"
                         value={state.form.local_body}
                         options={localBody}
-                        optionvalueidentifier="name"
+                        optionValue="name"
                         onChange={handleChange}
                       />
                     )}

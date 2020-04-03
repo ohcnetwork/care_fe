@@ -70,11 +70,15 @@ export const MEDICAL_HISTORY_CHOICES: Array<OptionsType> = [
 ];
 
 export const SYMPTOM_CHOICES: Array<OptionsType> = [
-  { id: 1, text: "NO" },
+  { id: 1, text: "ASYMPTOMATIC" },
   { id: 2, text: "FEVER" },
   { id: 3, text: "SORE THROAT" },
   { id: 4, text: "COUGH" },
-  { id: 5, text: "BREATHLESSNESS" }
+  { id: 5, text: "BREATHLESSNESS" },
+  { id: 6, text: "MYALGIA" },
+  { id: 7, text: "ABDOMINAL DISCOMFORT" },
+  { id: 8, text: "VOMITING/DIARRHOEA" },
+  { id: 9, text: "OTHERS" },
 ];
 
 export const GENDER_TYPES: Array<OptionsType> = [
