@@ -68,8 +68,8 @@ const routes = {
     patientId,
     id
   }: any) => (
-      <Consultation facilityId={facilityId} patientId={patientId} id={id} />
-    ),
+    <Consultation facilityId={facilityId} patientId={patientId} id={id} />
+  ),
   "/facility/:facilityId/patient/:patientId/sample-test": ({
     facilityId,
     patientId
@@ -111,7 +111,7 @@ const AppRouter = () => {
             <Header />
           </div>
           <div className="flex-1 flex flex-col bg-gray-200 overflow-y-auto">
-            <div className="max-w-3xl mx-auto my-4 mdLmy-10 flex-1 w-full">
+            <div className="max-w-3xl mx-auto my-4 md:my-10 flex-1 w-full">
               {pages}
             </div>
           </div>

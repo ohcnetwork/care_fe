@@ -1,17 +1,34 @@
-import { Button, Card, CardContent, Divider, Grid, Typography } from "@material-ui/core";
+import {
+  Button,
+  Card,
+  CardContent,
+  Divider,
+  Grid,
+  Typography
+} from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { navigate } from "hookrouter";
 import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { BED_TYPES, DOCTOR_SPECIALIZATION } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getFacility, listCapacity, listDoctor, getTriageInfo } from "../../Redux/actions";
+import {
+  getFacility,
+  listCapacity,
+  listDoctor,
+  getTriageInfo
+} from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 import BedTypeCard from "./BedTypeCard";
 import DoctorsCountCard from "./DoctorsCountCard";
-import { CapacityModal, DoctorModal, FacilityModal, PatientStatsModel } from "./models";
+import {
+  CapacityModal,
+  DoctorModal,
+  FacilityModal,
+  PatientStatsModel
+} from "./models";
 import moment from "moment";
 
 const useStyles = makeStyles(theme => ({
@@ -41,16 +58,23 @@ export const FacilityHome = (props: any) => {
   const [capacityData, setCapacityData] = useState<Array<CapacityModal>>([]);
   const [doctorData, setDoctorData] = useState<Array<DoctorModal>>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [patientStatsData, setPatientStatsData] = useState<PatientStatsModel>({});
+  const [patientStatsData, setPatientStatsData] = useState<
+    Array<PatientStatsModel>
+  >([]);
 
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const [facilityRes, capacityRes, doctorRes, triageRes] = await Promise.all([
+      const [
+        facilityRes,
+        capacityRes,
+        doctorRes,
+        triageRes
+      ] = await Promise.all([
         dispatch(getFacility(facilityId)),
         dispatch(listCapacity({}, { facilityId })),
         dispatch(listDoctor({}, { facilityId })),
-        dispatch(getTriageInfo({ facilityId })),
+        dispatch(getTriageInfo({ facilityId }))
       ]);
       if (!status.aborted) {
         setIsLoading(false);
@@ -66,8 +90,13 @@ export const FacilityHome = (props: any) => {
           if (doctorRes && doctorRes.data) {
             setDoctorData(doctorRes.data.results);
           }
-          if (triageRes && triageRes.data && triageRes.data.results && triageRes.data.results.length) {
-            setPatientStatsData(triageRes.data.results[0]);
+          if (
+            triageRes &&
+            triageRes.data &&
+            triageRes.data.results &&
+            triageRes.data.results.length
+          ) {
+            setPatientStatsData(triageRes.data.results);
           }
         }
       }
@@ -112,6 +141,22 @@ export const FacilityHome = (props: any) => {
     });
   }
 
+  let stats = patientStatsData.map((data: PatientStatsModel, index) => {
+    return (
+      <tr className="border" key={index}>
+        <td className="border px-4 py-2">{data.entry_date || "-"}</td>
+        <td className="border px-4 py-2">{data.num_patients_visited || "-"}</td>
+        <td className="border px-4 py-2">
+          {data.num_patients_home_quarantine || "-"}
+        </td>
+        <td className="border px-4 py-2">
+          {data.num_patients_isolation || "-"}
+        </td>
+        <td className="border px-4 py-2">{data.num_patient_referred || "-"}</td>
+      </tr>
+    );
+  });
+
   return (
     <div className="px-2">
       <PageTitle title="Facility" />
@@ -150,7 +195,7 @@ export const FacilityHome = (props: any) => {
                     onClick={() => navigate(`/facility/${facilityId}/update`)}
                   >
                     Update Hospital Info
-              </Button>
+                  </Button>
                 </Grid>
                 <Grid item xs={12} className="w3-center">
                   <Button
@@ -162,7 +207,7 @@ export const FacilityHome = (props: any) => {
                     disabled={capacityList.length === BED_TYPES.length}
                   >
                     Add More Bed Types
-              </Button>
+                  </Button>
                 </Grid>
                 <Grid item xs={12} className="w3-center">
                   <Button
@@ -171,10 +216,12 @@ export const FacilityHome = (props: any) => {
                     color="primary"
                     size="small"
                     onClick={() => navigate(`/facility/${facilityId}/doctor`)}
-                    disabled={doctorList.length === DOCTOR_SPECIALIZATION.length}
+                    disabled={
+                      doctorList.length === DOCTOR_SPECIALIZATION.length
+                    }
                   >
                     Add More Doctor Types
-              </Button>
+                  </Button>
                 </Grid>
                 <Grid item xs={12} className="w3-center">
                   <Button
@@ -200,7 +247,7 @@ export const FacilityHome = (props: any) => {
                 onClick={() => navigate(`/facility/${facilityId}/patient`)}
               >
                 Add Details of Covid Suspects
-          </Button>
+              </Button>
             </Grid>
             <Grid item xs={12} md={6} className="w3-center">
               <Button
@@ -211,56 +258,41 @@ export const FacilityHome = (props: any) => {
                 onClick={() => navigate(`/facility/${facilityId}/patients`)}
               >
                 View Suspects / Patients
-          </Button>
+              </Button>
             </Grid>
           </Grid>
-          <Grid container style={{ padding: "10px" }} spacing={1}>
-            <Grid item xs={12}>
-              <table className="w3-table-all w3-centered">
+
+          <div className="mt-4">
+            <div className="font-semibold text-xl border-b-2">
+              Total Capacity
+            </div>
+            <div className="mt-4 flex flex-wrap">{capacityList}</div>
+          </div>
+          <div className="mt-4">
+            <div className="font-semibold text-xl border-b-2">Doctors List</div>
+            <div className="mt-4 flex flex-wrap">{doctorList}</div>
+          </div>
+          <div className="-my-2 py-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 mt-4">
+            <div className="font-semibold text-xl border-b-2">
+              Corona Triage
+            </div>
+            <div className="align-middle inline-block min-w-full shadow overflow-hidden sm:rounded-lg border-b border-gray-200 mt-4">
+              <table className="min-w-full border-2 rounded overflow-hidden">
                 <thead>
-                  <tr className="w3-light-grey">
-                    <th>Date of Entry</th>
-                    <th>TOTAL PATIENT VISITED IN CORONA TRAIGE</th>
-                    <th>TOTAL NO.OF PATIENT ADVISED HOME QUARANTINE</th>
-                    <th>TOTAL NO.OF PATIENTS UNDER ISOLATION</th>
-                    <th>TOTAL OF PATIENTS REFFERED</th>
+                  <tr className="white border">
+                    <th className="border px-4 py-2">Date</th>
+                    <th className="border px-4 py-2">Visited</th>
+                    <th className="border px-4 py-2">
+                      Advised Home Quarantine
+                    </th>
+                    <th className="border px-4 py-2">Under Isolation</th>
+                    <th className="border px-4 py-2">Reffered</th>
                   </tr>
                 </thead>
-                <tbody>
-                  <tr>
-                    <td>{patientStatsData.entry_date || '-'}</td>
-                    <td>{patientStatsData.num_patients_visited || '-'}</td>
-                    <td>{patientStatsData.num_patients_home_quarantine || '-'}</td>
-                    <td>{patientStatsData.num_patients_isolation || '-'}</td>
-                    <td>{patientStatsData.num_patient_referred || '-'}</td>
-                  </tr>
-                </tbody>
+                <tbody>{stats}</tbody>
               </table>
-            </Grid>
-          </Grid>
-          
-          <Grid
-            container
-            style={{ padding: "10px", marginBottom: "15px" }}
-            spacing={1}
-          >
-            <Grid item xs={12} md={12}>
-              <h5>Bed Types</h5>
-              <Divider />
-            </Grid>
-            {capacityList}
-          </Grid>
-          <Grid
-            container
-            style={{ padding: "10px", marginBottom: "15px" }}
-            spacing={1}
-          >
-            <Grid item xs={12} md={12}>
-              <h5>Doctors Count</h5>
-              <Divider />
-            </Grid>
-            {doctorList}
-          </Grid>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>
