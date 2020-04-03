@@ -1,5 +1,5 @@
 import React from 'react';
-import { Checkbox, Grid, IconButton, Radio, TextField, NativeSelect, TextFieldProps, FormControlLabel, FormControlLabelProps, Select, Input, Chip, MenuItem, ListItemText } from '@material-ui/core';
+import { Checkbox, Grid, IconButton, Radio, TextField, InputLabel, NativeSelect, TextFieldProps, FormControlLabel, FormControlLabelProps, Select, Input, Chip, MenuItem, ListItemText } from '@material-ui/core';
 import { KeyboardDatePicker, KeyboardTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import { MaterialUiPickersDate } from '@material-ui/pickers/typings/date'
 import Autocomplete from '@material-ui/lab/Autocomplete';
@@ -11,15 +11,30 @@ import { NativeSelectInputProps } from '@material-ui/core/NativeSelect/NativeSel
 import { SelectProps } from '@material-ui/core/Select';
 
 export interface DefaultSelectInputProps extends Omit<SelectProps, 'onChange'> {
-    options: Array<any>,
+    options: Array<any>;
+    optionArray?: boolean;
     placeholder?: string;
     label?: string;
     margin?: 'dense' | 'none';
     optionKey?: string,
     optionValue?: string,
-    onChange?: (e: any, child?: any) => void
+    onChange?: (e: any, child?: any) => void,
+    name: string;
+    labelId?: string;
+    errors?: string;
+    showEmpty?: boolean;
 }
 
+export interface MultiSelectInputProps extends Omit<SelectProps, 'onChange'> {
+    options: Array<any>;
+    optionArray?: boolean;
+    placeholder?: string;
+    label?: string;
+    margin?: 'dense' | 'none';
+    optionKey?: string,
+    optionValue?: string,
+    onChange?: (e: any, child?: any) => void,
+}
 
 export interface DefaultNativeSelectInputProps extends NativeSelectInputProps {
     options: Array<{ id: string | number, text?: string }>,
@@ -51,6 +66,7 @@ interface DateInputFieldProps {
     variant?: "standard" | "outlined" | "filled";
     maxDate?: Date;
     disabled?: boolean;
+    margin?: "none" | "dense" | "normal";
 };
 interface TimeInputFieldProps {
     value: string;
@@ -218,12 +234,12 @@ export const CheckboxInputField = (props: InputProps) => {
 };
 
 export const DateInputField = (props: DateInputFieldProps) => {
-    const { value, onChange, label, errors, variant, maxDate, disabled } = props;
+    const { value, onChange, label, errors, variant, maxDate, disabled, margin } = props;
     return (
         <MuiPickersUtilsProvider utils={DateFnsUtils}>
             <KeyboardDatePicker
                 inputVariant={variant || 'standard'}
-                margin="normal"
+                margin={margin || "normal"}
                 id="date-picker-dialog"
                 label={label || "Date picker dialog"}
                 format="MM/dd/yyyy"
@@ -326,22 +342,36 @@ export const NativeSelectField = (props: DefaultNativeSelectInputProps) => {
 };
 
 export const SelectField = (props: DefaultSelectInputProps) => {
-    const { options, label, variant, margin, optionKey, optionValue, ...restProps } = props;
-    return (
+    const { options, optionArray, label, name, labelId, variant, margin, optionKey, optionValue, errors, value, showEmpty, ...restProps } = props;
+    return (<>
         <FormControl style={{ width: "100%" }} variant={variant} margin={margin}>
-            {label && (<Box>{label}</Box>)}
-            <Select native {...restProps}>
-                {options.map((opt: any) => {
+            {label && (<InputLabel htmlFor={labelId}>{label}</InputLabel>)}
+            <Select 
+            native 
+            inputProps={{
+                name: name,
+                id: labelId,
+            }}
+            value={value}
+            {...restProps}>
+                {showEmpty && <option aria-label="None" value="" />}
+                {!optionArray && options.map((opt: any) => {
                     return <option value={optionKey ? opt[optionKey] : opt.id} key={opt.id} disabled={opt.disabled}>
                         {optionValue ? opt[optionValue] : opt.text}
                     </option>
                 })}
+                {optionArray && options.map((opt: any) => {
+                    return <option value={opt} key={opt}>
+                        {opt}
+                    </option>
+                })}
             </Select>
         </FormControl>
-    );
+        {!!errors && <ErrorHelperText error={errors} />}
+    </>);
 };
 
-export const MultiSelectField = (props: DefaultSelectInputProps) => {
+export const MultiSelectField = (props: MultiSelectInputProps) => {
     const { options, label, value, variant, margin, optionKey, optionValue, ...restProps } = props;
     const optKey = optionKey ? optionKey : "id";
     const optVal = optionValue ? optionValue : "text";
