@@ -72,11 +72,8 @@ export const HospitalList = () => {
           >
             <div className="px-6 py-4 h-full flex flex-col justify-between">
               <div>
-                <div className="flex justify-between">
-                  <div className="font-bold text-xl capitalize mb-2">
-                    {facility.name}
-                  </div>
-                  <div>{!facility.is_active && <span className="badge badge-pill badge-dark">Inactive</span>}</div>
+                <div className="font-bold text-xl capitalize mb-2">
+                  {facility.name}
                 </div>
                 <div>
                   <span className="font-semibold leading-relaxed">District: </span>
