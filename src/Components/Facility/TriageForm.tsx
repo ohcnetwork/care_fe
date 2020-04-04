@@ -1,5 +1,5 @@
 import { Button, Card, CardActions, CardContent, InputLabel } from "@material-ui/core";
-import SaveIcon from "@material-ui/icons/Save";
+import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import { navigate } from "hookrouter";
 import moment from 'moment';
 import React, { useReducer, useState } from "react";
@@ -216,7 +216,7 @@ export const TriageForm = (props: triageFormProps) => {
                 variant="contained"
                 type="submit"
                 style={{ marginLeft: "auto" }}
-                startIcon={<SaveIcon>save</SaveIcon>}
+                startIcon={<CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>}
                 onClick={e => handleSubmit(e)}
               >
                 {buttonText}

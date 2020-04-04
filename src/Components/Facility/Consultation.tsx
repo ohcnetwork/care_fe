@@ -1,15 +1,14 @@
 import { Box, Button, Card, CardContent, FormControlLabel, InputLabel, Radio, RadioGroup } from "@material-ui/core";
-import SaveIcon from "@material-ui/icons/Save";
+import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import { navigate } from "hookrouter";
 import React, { useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
-import { ADMITTED_TO, CONSULTATION_SUGGESTION, SYMPTOM_CHOICES, PATIENT_CATEGORY } from "../../Common/constants";
+import { ADMITTED_TO, CONSULTATION_SUGGESTION, PATIENT_CATEGORY, SYMPTOM_CHOICES } from "../../Common/constants";
 import { createConsultation } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { DateInputField, ErrorHelperText, MultilineInputField, MultiSelectField, NativeSelectField, SelectField } from "../Common/HelperInputFields";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
-import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 
 const initForm: any = {
   hasSymptom: false,
@@ -209,7 +208,7 @@ export const Consultation = (props: any) => {
     form[key] = date;
     dispatch({ type: "set_form", form });
   };
-  
+
   if (isLoading) {
     return <Loading />;
   }

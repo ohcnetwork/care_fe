@@ -1,7 +1,7 @@
-import { Button, Card, CardActions, CardContent, CardHeader, FormControl, Grid, InputLabel, MenuItem, Select } from "@material-ui/core";
+import { Button, Card, CardActions, CardContent, FormControl, Grid, InputLabel, MenuItem, Select } from "@material-ui/core";
 import Popover from "@material-ui/core/Popover";
+import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import MyLocationIcon from "@material-ui/icons/MyLocation";
-import SaveIcon from "@material-ui/icons/Save";
 import { makeStyles } from "@material-ui/styles";
 import { navigate } from "hookrouter";
 import React, { useCallback, useReducer, useState } from "react";
@@ -438,7 +438,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                   type="submit"
                   style={{ marginLeft: "auto" }}
                   onClick={e => handleSubmit(e)}
-                  startIcon={<SaveIcon>save</SaveIcon>}
+                  startIcon={<CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>}
                 >
                   {buttonText}
                 </Button>

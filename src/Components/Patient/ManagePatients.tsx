@@ -1,4 +1,4 @@
-import { Tooltip } from "@material-ui/core";
+import Button from '@material-ui/core/Button';
 import Grid from "@material-ui/core/Grid";
 import { makeStyles } from "@material-ui/core/styles";
 import WarningRoundedIcon from '@material-ui/icons/WarningRounded';
@@ -12,77 +12,12 @@ import PageTitle from "../Common/PageTitle";
 import Pagination from "../Common/Pagination";
 
 const useStyles = makeStyles(theme => ({
-  root: {
-    flexGrow: 1,
-    padding: "8px"
-  },
-  card: {
-    height: 160,
-    width: "100%",
-    backgroundColor: "#FFFFFF",
-    cursor: "pointer"
-  },
-  title: {
-    whiteSpace: "nowrap",
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-    fontWeight: 400,
-    display: "inline-block",
-    [theme.breakpoints.up("md")]: {
-      width: "12vw"
-    },
-    [theme.breakpoints.down("sm")]: {
-      width: "40vw"
-    },
-    [theme.breakpoints.down("xs")]: {
-      width: "65vw"
-    }
-  },
-  content: {
-    padding: "5px 10px"
-  },
-  cardHeader: {
-    padding: "10px"
-  },
-  contentText: {
-    whiteSpace: "nowrap",
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-    display: "inline-block",
-    [theme.breakpoints.up("md")]: {
-      width: "10vw"
-    },
-    [theme.breakpoints.down("sm")]: {
-      width: "40vw"
-    },
-    [theme.breakpoints.down("xs")]: {
-      width: "40vw"
-    }
-  },
-  spacing: {
-    marginLeft: theme.spacing(1)
-  },
-  margin: {
-    margin: theme.spacing(1)
-  },
-  addUserCard: {
-    marginTop: "50px"
-  },
   paginateTopPadding: {
     paddingTop: "50px"
-  },
-  userCardSideTitle: {
-    fontSize: "13px"
-  },
-  toolTip: {
-    fontSize: "13px"
   },
   displayFlex: {
     display: "flex"
   },
-  minHeight: {
-    minHeight: "65vh"
-  }
 }));
 
 export const PatientManager = (props: any) => {
@@ -139,35 +74,33 @@ export const PatientManager = (props: any) => {
           <div
             onClick={() => navigate(patientUrl)}
             className="overflow-hidden shadow-lg block border rounded-lg bg-white h-full cursor-pointer hover:border-primary-500">
-            <div className="px-6 py-4">
-              <div className="flex justify-between">
-                <div className="font-bold text-xl mb-2">
-                  <Tooltip
-                    title={
-                      <span className={classes.toolTip}>{patient.name}</span>
-                    }
-                    interactive={true}
-                  >
-                    <span>{patient.name}</span>
-                  </Tooltip>
-                </div>
-                <div >{!patient.is_active && <span className="badge badge-pill badge-dark">Inactive</span>}</div>
-              </div>
+            <div className="px-6 py-4 h-full flex flex-col justify-between">
               <div>
-                <span className="font-semibold leading-relaxed">Age: </span>
-                {patient.age}
-              </div>              
-              {patient.contact_with_confirmed_carrier && (<div className="flex">
-                <span className="font-semibold leading-relaxed">Contact with confirmed carrier</span>
-                <WarningRoundedIcon color="error"></WarningRoundedIcon>
-              </div>)}
-              {patient.contact_with_suspected_carrier && !patient.contact_with_confirmed_carrier && (<div className="flex">
-                <span className="font-semibold leading-relaxed">Contact with suspected carrier</span>
-                <WarningRoundedIcon></WarningRoundedIcon>
-              </div>)}
-              <div>{patient.countries_travelled && (
-                <span className="font-semibold leading-relaxed">Travel History: </span>)}
-                {patient.countries_travelled.split(',').join(', ')}
+                <div className="flex justify-between">
+                  <div className="font-bold text-xl capitalize mb-2">
+                    {patient.name}
+                  </div>
+                  <div>{!patient.is_active && <span className="badge badge-pill badge-dark">Inactive</span>}</div>
+                </div>
+                <div>
+                  <span className="font-semibold leading-relaxed">Age: </span>
+                  {patient.age}
+                </div>
+                {patient.contact_with_confirmed_carrier && (<div className="flex">
+                  <span className="font-semibold leading-relaxed">Contact with confirmed carrier</span>
+                  <WarningRoundedIcon color="error"></WarningRoundedIcon>
+                </div>)}
+                {patient.contact_with_suspected_carrier && !patient.contact_with_confirmed_carrier && (<div className="flex">
+                  <span className="font-semibold leading-relaxed">Contact with suspected carrier</span>
+                  <WarningRoundedIcon></WarningRoundedIcon>
+                </div>)}
+                <div>{patient.countries_travelled && (
+                  <span className="font-semibold leading-relaxed">Travel History: </span>)}
+                  {patient.countries_travelled.split(',').join(', ')}
+                </div>
+              </div>
+              <div className="mt-2">
+                <Button size="small" variant="outlined" fullWidth>Click here to proceed</Button>
               </div>
             </div>
           </div>

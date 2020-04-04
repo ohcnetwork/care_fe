@@ -116,8 +116,8 @@ export const SAMPLE_TEST_RESULT = [
 
 export const CONSULTATION_SUGGESTION = [
   { id: "HI", text: "Home Isolation" },
-  { id: "A", text: "Admitted" },
-  { id: "R", text: "Refered to another Hospital" },
+  { id: "A", text: "Admission" },
+  { id: "R", text: "Refer to another Hospital" },
 ];
 
 export const ADMITTED_TO = [
