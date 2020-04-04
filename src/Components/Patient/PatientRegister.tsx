@@ -513,7 +513,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                 </div>
 
                 <div>
-                  <InputLabel id="gender-label">District*</InputLabel>
+                  <InputLabel id="gender-label">District</InputLabel>
                   {isDistrictLoading ? (
                     <CircularProgress size={20} />
                   ) : (
