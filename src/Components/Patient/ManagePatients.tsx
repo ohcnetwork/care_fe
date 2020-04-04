@@ -1,4 +1,4 @@
-import { Tooltip } from "@material-ui/core";
+import { Tooltip, Button } from "@material-ui/core";
 import Grid from "@material-ui/core/Grid";
 import { makeStyles } from "@material-ui/core/styles";
 import WarningRoundedIcon from '@material-ui/icons/WarningRounded';
@@ -93,9 +93,10 @@ export const PatientManager = (props: any) => {
   const [data, setData] = useState(initialData);
 
   let managePatients: any = null;
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
+  const [positivePatient, setPositivePatient] = useState(false);
   const [offset, setOffset] = useState(0);
 
   const limit = 10;
@@ -127,6 +128,7 @@ export const PatientManager = (props: any) => {
     setCurrentPage(page);
     setOffset(offset);
   };
+  //Variable to handle filtering
 
   let patientList: any[] = [];
   if (data && data.length) {
@@ -135,8 +137,8 @@ export const PatientManager = (props: any) => {
         ? `/facility/${patient.facility}/patient/${patient.id}`
         : `/patient/${patient.id}`;
       return (
-        <div key={`usr_${patient.id}`} className="w-full md:w-1/2 mt-4 px-2">
-          <div
+        <div key={`usr_${patient.id}`} className="w-full md:w-1/2 mt-4 px-2" >
+          <div style={{backgroundColor:patient.disease_status === 'POSITIVE' ? '#FF3333':'#00FF66'}}
             onClick={() => navigate(patientUrl)}
             className="overflow-hidden shadow-lg block border rounded-lg bg-white h-full cursor-pointer hover:border-primary-500">
             <div className="px-6 py-4">
@@ -175,25 +177,57 @@ export const PatientManager = (props: any) => {
       );
     });
   }
+  //Showing the patients who are positive
+  let positivePatientList = [];
+  if(!isLoading){
+    let i:any;
+    for(i=0;i<data.length - 1;i++){
+        if(data[i].disease_status === 'POSITIVE'){
+          positivePatientList.push(patientList.filter(element => element.id = 'usr_' + data[i].id))
+        }
+    }
+  }
+  function filterData(e:any){
+    setPositivePatient(!positivePatient)
+  }
 
   if (isLoading || !data) {
     managePatients = <Loading />;
   } else if (data && data.length) {
-    managePatients = (
-      <>
-        {patientList}
-        {totalCount > limit && (
-          <Grid container className={`w3-center ${classes.paginateTopPadding}`}>
-            <Pagination
-              cPage={currentPage}
-              defaultPerPage={limit}
-              data={{ totalCount }}
-              onChange={handlePagination}
-            />
-          </Grid>
-        )}
-      </>
-    );
+    if(!positivePatient){
+      managePatients = (
+        <>
+          {patientList}
+          {totalCount > limit && (
+            <Grid container className={`w3-center ${classes.paginateTopPadding}`}>
+              <Pagination
+                cPage={currentPage}
+                defaultPerPage={limit}
+                data={{ totalCount }}
+                onChange={handlePagination}
+              />
+            </Grid>
+          )}
+        </>
+      );
+    }
+    else{
+      managePatients = (
+        <>
+          {positivePatientList}
+          {totalCount > limit && (
+            <Grid container className={`w3-center ${classes.paginateTopPadding}`}>
+              <Pagination
+                cPage={currentPage}
+                defaultPerPage={limit}
+                data={{ totalCount }}
+                onChange={handlePagination}
+              />
+            </Grid>
+          )}
+        </>
+      );
+    }
   } else if (data && data.length === 0) {
     managePatients = (
       <Grid item xs={12} md={12} className={classes.displayFlex}>
@@ -207,7 +241,7 @@ export const PatientManager = (props: any) => {
   return (
     <div className="px-2">
       <PageTitle title="Covid Suspects" hideBack={!facilityId} />
-
+      <Button style={{backgroundColor:positivePatient ? '#FF6666':'#0066CC'}} onClick={filterData}> {positivePatient ? 'Show all':'Show positive cases'}</Button>
       <div className="flex flex-wrap mt-4">{managePatients}</div>
     </div>
   );
