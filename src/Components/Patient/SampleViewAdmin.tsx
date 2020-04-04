@@ -99,6 +99,10 @@ export default function SampleViewAdmin(props: any) {
 
   const handleApproval = () => {
     const { status, sample } = selectedStatus;
+    if (status === 7) {
+      handleComplete();
+      return;
+    }
     const sampleData = {
       id: sample.id,
       status,
@@ -117,9 +121,6 @@ export default function SampleViewAdmin(props: any) {
     if (status === 6) {
       statusName = "RECEIVED AT LAB";
     }
-    if (status === 7) {
-      statusName = "COMPLETED";
-    }
     dispatch(patchSample(sample.id, sampleData)).then((resp: any) => {
       if (resp.status === 201 || resp.status === 200) {
         Notification.Success({
@@ -132,11 +133,12 @@ export default function SampleViewAdmin(props: any) {
     dismissAlert();
   };
 
-  const handleComplete = (status: number, sample: any, result: number) => {
+  const handleComplete = () => {
+    const { status, sample } = selectedStatus;
     const sampleData = {
       id: sample.id,
       status,
-      result,
+      result: Number(result[sample.id.toString()]),
       consultation: sample.consultation_id,
     };
     let statusName = "";
@@ -152,14 +154,10 @@ export default function SampleViewAdmin(props: any) {
         callFetchData(!fetchFlag);
       }
     });
+    dismissAlert();
   };
 
-  const confirmApproval = (
-    e: MouseEvent,
-    status: number,
-    sample: any,
-    msg: string
-  ) => {
+  const confirmApproval = (e: MouseEvent, status: number, sample: any, msg: string) => {
     e.stopPropagation();
     setSelectedStatus({ status, sample });
     setAlertMessage({
@@ -273,9 +271,7 @@ export default function SampleViewAdmin(props: any) {
                         fullWidth
                         style={{ color: "red" }}
                         variant="outlined"
-                        onClick={(e) =>
-                          confirmApproval(e, 5, sample, "Received and forwarded")
-                        }
+                        onClick={(e) => confirmApproval(e, 5, sample, "Received and forwarded") }
                       >Received and forwarded</Button>
                     )}
                   {sample.status === "RECEIVED_AND_FORWARED" &&
@@ -284,9 +280,7 @@ export default function SampleViewAdmin(props: any) {
                         fullWidth
                         style={{ color: "red" }}
                         variant="outlined"
-                        onClick={(e) =>
-                          confirmApproval(e, 6, sample, "Received at lab")
-                        }
+                        onClick={(e) => confirmApproval(e, 6, sample, "Received at lab")}
                       >Received at lab</Button>
                     )}
                   {sample.status === "RECEIVED_AT_LAB" &&
@@ -306,7 +300,7 @@ export default function SampleViewAdmin(props: any) {
                         style={{ color: "red" }}
                         variant="outlined"
                         disabled={!result[sample.id.toString()]}
-                        onClick={(e) => handleComplete(7, sample, Number(result[sample.id.toString()]))}
+                        onClick={(e) => confirmApproval(e, 7, sample, "Complete")}
                       >Complete</Button>
                     </div>)}
                 </div>
