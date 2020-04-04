@@ -94,7 +94,7 @@ export const HospitalList = () => {
               </div>
               <div className="mt-2">
                 <Button size="small" variant="outlined" fullWidth>
-                  View Hospital
+                  View Facility
                 </Button>
               </div>
             </div>
