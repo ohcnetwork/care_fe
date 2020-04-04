@@ -173,7 +173,7 @@ export default function SampleViewAdmin(props: any) {
   if (sample && sample.length) {
     sampleList = sample.map((item: SampleListModel, idx: number) => {
       return (
-        <div key={`usr_itemid}`} className="w-full md:w-1/2 mt-4 px-2">
+        <div key={`usr_${item.id}`} className="w-full md:w-1/2 mt-4 px-2">
           <div
             className={`block border rounded-lg bg-white shadow h-full hover:border-primary-500 text-black ${
               item.result === "POSITIVE" ? "border-red-700 bg-red-100" : ""
