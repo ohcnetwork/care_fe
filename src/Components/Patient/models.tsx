@@ -28,6 +28,7 @@ export interface PatientModel {
     address?: string;
     contact_with_confirmed_carrier?: boolean;
     contact_with_suspected_carrier?: boolean;
+    is_medical_worker?: boolean;
     estimated_contact_date?: string;
     past_travel?: boolean;
     ongoing_medication?: string;
