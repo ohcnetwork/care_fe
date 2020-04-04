@@ -1,13 +1,4 @@
-import {
-  Box,
-  Button,
-  CardContent,
-  CardHeader,
-  Grid,
-  InputLabel,
-  Tooltip,
-  Typography,
-} from "@material-ui/core";
+import { Box, Button, CardContent, CardHeader, Grid, InputLabel, Tooltip, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { navigate } from "hookrouter";
 import moment from "moment";
@@ -22,64 +13,11 @@ import { NativeSelectField } from "../Common/HelperInputFields";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 import Pagination from "../Common/Pagination";
+import WarningRoundedIcon from "@material-ui/icons/WarningRounded";
 
 const useStyles = makeStyles((theme) => ({
-  root: {
-    flexGrow: 1,
-    padding: "8px",
-  },
-  card: {
-    height: 160,
-    width: "100%",
-    backgroundColor: "#FFFFFF",
-  },
-  title: {
-    whiteSpace: "nowrap",
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-    fontWeight: 400,
-    //padding: '10px',
-    //fontSize: '14px',
-    display: "inline-block",
-    [theme.breakpoints.up("md")]: {
-      width: "12vw",
-    },
-    [theme.breakpoints.down("sm")]: {
-      width: "12vw",
-    },
-    [theme.breakpoints.down("xs")]: {
-      width: "65vw",
-    },
-  },
-  content: {
-    padding: "5px 10px",
-  },
-  cardHeader: {
-    padding: "10px",
-  },
-  contentText: {
-    whiteSpace: "nowrap",
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-    display: "inline-block",
-  },
-  spacing: {
-    marginLeft: theme.spacing(1),
-  },
-  margin: {
-    margin: theme.spacing(1),
-  },
-  addUserCard: {
-    marginTop: "50px",
-  },
   paginateTopPadding: {
     paddingTop: "50px",
-  },
-  userCardSideTitle: {
-    fontSize: "13px",
-  },
-  toolTip: {
-    fontSize: "13px",
   },
 }));
 
@@ -240,138 +178,120 @@ export default function SampleViewAdmin(props: any) {
           <div
             className={`block border rounded-lg bg-white shadow h-full hover:border-primary-500 p-4 text-black ${
               sample.result === "POSITIVE" ? "border-red-700 bg-red-100" : ""
-            } ${
+              } ${
               sample.result === "NEGATIVE"
                 ? "border-green-700 bg-green-100"
                 : ""
-            }`}
+              }`}
           >
-            <CardHeader
-              className={classes.cardHeader}
-              // onClick={(e) => {
-              //   e.stopPropagation();
-              //   navigate(`/facility/${sample.facility}/patient/${sample.patient}`)
-              // }}
-              title={
-                <span className={classes.title}>
-                  <Tooltip
-                    title={
-                      <span className={classes.toolTip}>
-                        {sample.patient_name}
-                      </span>
-                    }
-                    interactive={true}
-                  >
-                    <span>{sample.patient_name}</span>
-                  </Tooltip>
-                </span>
-              }
-            />
-            <div className="px-2">
-              {sample.fast_track && (
-                <div className="md:col-span-2">
+            <div className="px-6 py-4 h-full flex flex-col justify-between">
+              <div>
+                <div className="font-bold text-xl capitalize mb-2">
+                  {sample.patient_name}
+                </div>
+                {sample.fast_track && (<div>
                   <span className="font-semibold leading-relaxed">
                     Fast track:{" "}
                   </span>
                   {sample.fast_track}
-                </div>
-              )}
-              <div>
-                <span className="font-semibold leading-relaxed">
-                  Contact with confirmed carrier:{" "}
-                </span>
-                {sample.patient_has_confirmed_contact ? (
-                  <span className="badge badge-pill badge-warning">Yes</span>
-                ) : (
-                  <span className="badge badge-pill badge-secondary">No</span>
+                </div>)}
+                {sample.contact_with_confirmed_carrier && (
+                  <div className="flex">
+                    <span className="font-semibold leading-relaxed">
+                      Contact with confirmed carrier
+                    </span>
+                    <WarningRoundedIcon className="text-red-500"></WarningRoundedIcon>
+                  </div>
                 )}
-              </div>
-              <div>
-                <span className="font-semibold leading-relaxed">
-                  Contact with suspected carrier:{" "}
-                </span>
-                {sample.patient_has_suspected_contact ? (
-                  <span className="badge badge-pill badge-warning">Yes</span>
-                ) : (
-                  <span className="badge badge-pill badge-secondary">No</span>
-                )}
-              </div>
-              <div className="md:col-span-2">
-                <span className="font-semibold leading-relaxed">
-                  Has SARI?:{" "}
-                </span>
-                {sample.patient_has_sari ? (
-                  <span className="badge badge-pill badge-warning">Yes</span>
-                ) : (
-                  <span className="badge badge-pill badge-secondary">No</span>
-                )}
-              </div>
-              {sample.patient_travel_history && (
-                <div className="md:col-span-2">
+                {sample.contact_with_suspected_carrier &&
+                  !sample.contact_with_confirmed_carrier && (
+                    <div className="flex">
+                      <span className="font-semibold leading-relaxed">
+                        Contact with suspected carrier
+                      </span>
+                      <WarningRoundedIcon className="text-yellow-500"></WarningRoundedIcon>
+                    </div>
+                  )}
+                {sample.patient_has_sari && (<div>
                   <span className="font-semibold leading-relaxed">
-                    Countries travelled:{" "}
-                  </span>
-                  {sample.patient_travel_history}
-                </div>
-              )}
-            </div>
-
-            <CardContent>
-              {sample.status === "REQUEST_SUBMITTED" &&
-                user.user_type === "DistrictAdmin" && (
-                  <Button
-                    style={{ color: "green" }}
-                    variant="outlined"
-                    onClick={(e) => confirmApproval(e, 2, sample, "Approve")}
-                  >
-                    Approve
-                  </Button>
-                )}{" "}
-              {sample.status === "REQUEST_SUBMITTED" &&
-                user.user_type === "DistrictAdmin" && (
-                  <Button
-                    style={{ color: "red" }}
-                    variant="outlined"
-                    onClick={(e) => confirmApproval(e, 3, sample, "Deny")}
-                  >
-                    Deny
-                  </Button>
+                    Has SARI (Severe Acute Respiratory illness)?
+                      </span>
+                  <WarningRoundedIcon className="text-yellow-500"></WarningRoundedIcon>
+                </div>)}
+                {sample.patient_travel_history && (
+                  <div className="md:col-span-2">
+                    <span className="font-semibold leading-relaxed">
+                      Countries travelled:{" "}
+                    </span>
+                    {sample.patient_travel_history.split(',').join(', ')}
+                  </div>
                 )}
-            </CardContent>
-            {sample.status === "SENT_TO_COLLECTON_CENTRE" &&
-              user.user_type === "DistrictAdmin" && (
-                <CardContent>
-                  <Button
-                    style={{ color: "red" }}
-                    variant="outlined"
-                    onClick={(e) =>
-                      confirmApproval(e, 5, sample, "Received and forwarded")
-                    }
-                  >
-                    Received and forwarded
-                  </Button>
-                </CardContent>
-              )}
-            {sample.status === "RECEIVED_AND_FORWARED" &&
-              user.user_type === "StateLabAdmin" && (
-                <CardContent>
-                  <Button
-                    style={{ color: "red" }}
-                    variant="outlined"
-                    onClick={(e) =>
-                      confirmApproval(e, 6, sample, "Received at lab")
-                    }
-                  >
-                    Received at lab
-                  </Button>
-                </CardContent>
-              )}
-            {sample.status === "RECEIVED_AT_LAB" &&
-              user.user_type === "StateLabAdmin" && (
-                <>
-                  <CardContent>
-                    <Box display="flex">
-                      <Box flex="1" style={{ marginRight: "4px" }}>
+                <div>
+                  <span className="font-semibold leading-relaxed">
+                    Status:{" "}
+                  </span>
+                  {sample.status}
+                </div>
+                <div>
+                  <span className="font-semibold leading-relaxed">
+                    Result:{" "}
+                  </span>
+                  {sample.result}
+                </div>
+                {sample.date_of_sample && (<div>
+                  <span className="font-semibold leading-relaxed">
+                    Date Of Sample :{" "}
+                  </span>
+                  {moment(sample.date_of_sample).format("lll")}
+                </div>)}
+              </div>
+
+              <div className="mt-2">
+                {sample.status === "REQUEST_SUBMITTED" &&
+                  user.user_type === "DistrictAdmin" && (<div className="grid grid-cols-2 gap-2">
+                    <div className="flex-1">
+                      <Button
+                        fullWidth
+                        style={{ color: "green" }}
+                        variant="outlined"
+                        onClick={(e) => confirmApproval(e, 2, sample, "Approve")}
+                      >Approve</Button>
+                    </div>
+                    <div className="flex-1">
+                      <Button
+                        fullWidth
+                        style={{ color: "red" }}
+                        variant="outlined"
+                        onClick={(e) => confirmApproval(e, 3, sample, "Deny")}
+                      >Deny</Button>
+                    </div>
+                  </div>)}
+                <div>
+                  {sample.status === "SENT_TO_COLLECTON_CENTRE" &&
+                    user.user_type === "DistrictAdmin" && (
+                      <Button
+                        fullWidth
+                        style={{ color: "red" }}
+                        variant="outlined"
+                        onClick={(e) =>
+                          confirmApproval(e, 5, sample, "Received and forwarded")
+                        }
+                      >Received and forwarded</Button>
+                    )}
+                  {sample.status === "RECEIVED_AND_FORWARED" &&
+                    user.user_type === "StateLabAdmin" && (
+                      <Button
+                        fullWidth
+                        style={{ color: "red" }}
+                        variant="outlined"
+                        onClick={(e) =>
+                          confirmApproval(e, 6, sample, "Received at lab")
+                        }
+                      >Received at lab</Button>
+                    )}
+                  {sample.status === "RECEIVED_AT_LAB" &&
+                    user.user_type === "StateLabAdmin" && (<div className="grid grid-cols-2 gap-2">
+                      <div>
                         <InputLabel id="result-select-label">Result</InputLabel>
                         <NativeSelectField
                           name={sample.id.toString()}
@@ -380,69 +300,32 @@ export default function SampleViewAdmin(props: any) {
                           options={resultTypes}
                           onChange={handleChange}
                         />
-                      </Box>
+                      </div>
                       <Button
+                        fullWidth
                         style={{ color: "red" }}
                         variant="outlined"
                         disabled={!result[sample.id.toString()]}
-                        onClick={(e) =>
-                          handleComplete(
-                            7,
-                            sample,
-                            Number(result[sample.id.toString()])
-                          )
-                        }
-                      >
-                        Completed
-                      </Button>
-                    </Box>
-                  </CardContent>
-                </>
-              )}
-            <CardContent className={classes.content}>
-              <Typography>
-                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>
-                  Status -{" "}
-                </span>
-                {sample.status}
-              </Typography>
-            </CardContent>
-            <CardContent className={classes.content}>
-              <Typography>
-                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>
-                  Result -{" "}
-                </span>
-                {sample.result}
-              </Typography>
-            </CardContent>
-            {sample.date_of_sample && (
-              <CardContent className={classes.content}>
-                <Typography>
-                  <span className={`w3-text-gray ${classes.userCardSideTitle}`}>
-                    Date Of Sample -{" "}
-                  </span>
-                  {moment(sample.date_of_sample).format("lll")}
-                </Typography>
-              </CardContent>
-            )}
-            <div className="mt-2">
-              <div
-                onClick={(e) => navigate(`/samplelist/${sample.patient}`)}
-                className="px-4 py-2 shadow border bg-white rounded-md border border-grey-500 whitespace-no-wrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300 text-center"
-              >
-                View Patient Details
-              </div>
-            </div>
-            <div className="mt-2">
-              <div
-                onClick={(e) => navigate(`/samplelist/${sample.id}`)}
-                className="px-4 py-2 shadow border bg-white rounded-md border border-grey-500 whitespace-no-wrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300 text-center"
-              >
-                View Sample Details
+                        onClick={(e) => handleComplete(7, sample, Number(result[sample.id.toString()]))}
+                      >Complete</Button>
+                    </div>)}
+                </div>
+                <div className="mt-2">
+                  <div
+                    onClick={(e) => navigate(`/facility/${sample.facility}/patient/${sample.patient}/sample/${sample.id}`)}
+                    className="px-4 py-2 shadow border bg-white rounded-md border border-grey-500 whitespace-no-wrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300 text-center"
+                  >View Patient Details</div>
+                </div>
+                <div className="mt-2">
+                  <div
+                    onClick={(e) => navigate(`/samplelist/${sample.id}`)}
+                    className="px-4 py-2 shadow border bg-white rounded-md border border-grey-500 whitespace-no-wrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300 text-center"
+                  >View Sample Details</div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        </div >
       );
     });
   }
