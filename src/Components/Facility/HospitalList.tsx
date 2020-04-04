@@ -11,12 +11,12 @@ import PageTitle from "../Common/PageTitle";
 import Pagination from "../Common/Pagination";
 import { FacilityModal } from "./models";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   paginateTopPadding: {
-    paddingTop: "50px"
+    paddingTop: "50px",
   },
   displayFlex: {
-    display: "flex"
+    display: "flex",
   },
 }));
 
@@ -76,20 +76,26 @@ export const HospitalList = () => {
                   {facility.name}
                 </div>
                 <div>
-                  <span className="font-semibold leading-relaxed">District: </span>
+                  <span className="font-semibold leading-relaxed">
+                    District:{" "}
+                  </span>
                   {facility.district_object?.name}
                 </div>
                 <div>
-                  <span className="font-semibold leading-relaxed">Facility Type: </span>
+                  <span className="font-semibold leading-relaxed">
+                    Facility Type:{" "}
+                  </span>
                   {facility.facility_type}
                 </div>
                 <div>
                   <span className="font-semibold leading-relaxed">Phone: </span>
-                  {facility.phone_number || '-'}
+                  {facility.phone_number || "-"}
                 </div>
               </div>
               <div className="mt-2">
-                <Button size="small" variant="outlined" fullWidth>Click here to proceed</Button>
+                <Button size="small" variant="outlined" fullWidth>
+                  View Facility
+                </Button>
               </div>
             </div>
           </div>

@@ -1,3 +1,5 @@
+import { SAMPLE_TEST_STATUS } from "../../Common/constants"
+
 export interface FlowModel {
     id?: number;
     status?: string;
@@ -53,6 +55,23 @@ export interface SampleTestModel {
     patient?: number;
     fast_track?: number;
     flow?: Array<FlowModel>;
+}
+
+export interface SampleListModel {
+    id?: number;
+    patient_name?: string;
+    patient_has_sari?: boolean;
+    patient_has_confirmed_contact?: boolean;
+    patient_has_suspected_contact?: boolean;
+    patient_travel_history?: string;
+    facility?: number;
+    status?: keyof typeof SAMPLE_TEST_STATUS;
+    result?: string;
+    patient?: number;
+    consultation?: number;
+    date_of_sample?: string;
+    date_of_result?: string;
+    fast_track?: string;
 }
 
 export interface DailyRoundsModel {
