@@ -143,6 +143,14 @@ export default function SampleViewAdmin(props: any) {
     setResult(results);
   };
 
+  const dismissAlert = () => {
+    setAlertMessage({
+      show: false,
+      message: "",
+      title: "",
+    })
+  };
+
   const handleApproval = () => {
     const { status, sample } = selectedStatus;
     const sampleData = {
@@ -175,6 +183,7 @@ export default function SampleViewAdmin(props: any) {
         callFetchData(!fetchFlag);
       }
     });
+    dismissAlert();
   };
 
   const handleComplete = (status: number, sample: any, result: number) => {
@@ -378,11 +387,7 @@ export default function SampleViewAdmin(props: any) {
           title={showAlertMessage.title}
           message={showAlertMessage.message}
           handleClose={() => handleApproval()}
-          handleCancel={() => setAlertMessage({
-            show: false,
-            message: "",
-            title: "",
-          })}
+          handleCancel={() => dismissAlert()}
         />
       )}
       <PageTitle title="Sample Management system" hideBack={true} />
