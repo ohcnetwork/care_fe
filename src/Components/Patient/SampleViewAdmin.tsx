@@ -307,7 +307,7 @@ export default function SampleViewAdmin(props: any) {
                 </div>
                 <div className="mt-2">
                   <div
-                    onClick={(e) => navigate(`/facility/${item.facility}/patient/${item.patient}/sample/${item.id}`)}
+                    onClick={(e) => navigate(`/facility/${item.facility}/patient/${item.patient}`)}
                     className="px-4 py-2 shadow border bg-white rounded-md border border-grey-500 whitespace-no-wrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300 text-center"
                   >View Patient Details</div>
                 </div>
