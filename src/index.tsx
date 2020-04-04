@@ -12,6 +12,7 @@ import "./index.css";
 const store = createStore(reducer, applyMiddleware(thunk));
 
 Sentry.init({
+    environment: process.env.NODE_ENV,
   dsn: "https://8801155bd0b848a09de9ebf6f387ebc8@sentry.io/5183632"
 });
 
