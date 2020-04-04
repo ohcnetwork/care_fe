@@ -1,27 +1,36 @@
-import React, { useState, useReducer, useCallback, useEffect} from "react"
+import React, { useState, useReducer} from "react"
 import { makeStyles, Theme } from '@material-ui/core/styles';
 import { useDispatch } from "react-redux";
-import { Grid, Card, CardHeader, CardContent, CardActions, Button, FormControl, InputLabel, RadioGroup, Radio, FormControlLabel, Box } from "@material-ui/core";
-import { TextInputField, NativeSelectField, ErrorHelperText, MultilineInputField, DateInputField } from "../Common/HelperInputFields";
+import { Grid, Card, CardHeader, CardContent, CardActions, Button, InputLabel } from "@material-ui/core";
+import {
+    TextInputField,
+    MultilineInputField,
+    DateInputField,
+    SelectField, MultiSelectField, ErrorHelperText
+} from "../Common/HelperInputFields";
 import { navigate } from 'hookrouter';
 import { Loading } from "../Common/Loading";
 import AppMessage from "../Common/AppMessage";
-// import { DailyRoundsModel } from './models';
-// import { CONSULTATION_SUGGESTION } from "../../Common/constants";
-// import {  } from "../../Redux/actions";
-import { useAbortableEffect, statusType } from '../../Common/utils';
+import {createDailyReport} from "../../Redux/actions";
+import * as Notification from "../../Utils/Notifications";
+import {PATIENT_CATEGORY} from "../../Common/constants";
 
-// interface DailyRoundsProps extends DailyRoundsModal {
-    
-// }
 
 const initForm: any = {
     temperature: "",
-    temperature_measured_at:"",
+    temperature_measured_at: null,
     physical_examination_info:"",
     other_details:"",
-    consultation:"",
+    category: ""
 };
+
+const categoryChoices = [
+    {
+        id: 0,
+        text: "Select suspect category"
+    },
+    ...PATIENT_CATEGORY
+];
 
 const initialState = {
     form: { ...initForm },
@@ -55,7 +64,6 @@ const DailyRoundsFormReducer = (state = initialState, action: any) => {
 };
 
 
-
 const useStyles = makeStyles((theme: Theme) => ({
     formControl: {
         margin: theme.spacing(1)
@@ -72,11 +80,10 @@ const useStyles = makeStyles((theme: Theme) => ({
 export const DailyRounds = (props:any) => {
     const classes = useStyles();
     const dispatchAction: any = useDispatch();
-    const { facilityId, patientId, id } = props;
+    const { facilityId, patientId, id , consultationId} = props;
     const [state, dispatch] = useReducer(DailyRoundsFormReducer, initialState);
     const [showAppMessage, setAppMessage] = useState({ show: false, message: "", type: "" });
     const [isLoading, setIsLoading] = useState(false);
-    const [selectedDate, setSelectedDate] = React.useState(new Date());
 
 
     const headerText = !id ? "Add Daily Rounds" : "Edit Daily Rounds";
@@ -100,6 +107,7 @@ export const DailyRounds = (props:any) => {
         return true
     };
 
+
     const handleSubmit = async(e: any) => {
         e.preventDefault();
         const validForm = validateForm();
@@ -107,31 +115,46 @@ export const DailyRounds = (props:any) => {
             setIsLoading(true);
             const data = {
                 "temperature": state.form.temperature,
-                "temperature_measured_at": state.form.temperature_measure_at,
+                "temperature_measured_at": state.form.temperature_measured_at,
                 "physical_examination_info": state.form.physical_examination_info,
                 "other_details": state.form.other_details,
-                "consultation": Number(state.form.consultation)
+                "consultation": Number(consultationId),
+                "patient_category" : state.form.category
+            };
+
+            const res = await dispatchAction(createDailyReport( data,{ consultationId }));
+            setIsLoading(false);
+            if (res && res.data) {
+                dispatch({ type: "set_form", form: initForm });
+                if (id) {
+                    Notification.Success({
+                        msg: "Triage updated successfully"
+                    });
+                } else {
+                    Notification.Success({
+                        msg: "Triage created successfully"
+                    });
+                    navigate(`/facility/${facilityId}/patient/${patientId}`);
+                }
             }
-            
-            console.log('data: ', data);
         }
     };
 
     const handleChange = (e: any) => {
-        let form = { ...state.form };
-        form[e.target.name] = e.target.value;
-        dispatch({ type: "set_form", form })
+        const form = { ...state.form };
+        const { name, value } = e.target;
+        form[name] = value;
+        dispatch({ type: "set_form", form });
     };
 
-    const handleDateChange = (date:any, key:string) => {
+    const handleDateChange = (date: any, key: string) => {
         let form = { ...state.form };
         form[key] = date;
-        dispatch({ type: "set_form", form })
-        setSelectedDate(date);
+        dispatch({ type: "set_form", form });
     };
 
     const handleCancel = () => {
-        navigate(`/facility/${facilityId}`);
+        navigate(`/facility/${facilityId}/patient/${patientId}`);
     };
 
 
@@ -164,10 +187,12 @@ export const DailyRounds = (props:any) => {
                                 </Grid>
                                 <Grid item xs={6} md={6}>
                                     <DateInputField
-                                        label="Temperature Measure At"
-                                        value={state.form.temperature_measure_at?state.form.temperature_measure_at:selectedDate}
-                                        onChange={(date)=>handleDateChange(date,'temperature_measure_at')}
-                                        errors={state.errors.temperature_measure_at}
+                                        label="Temperature Measured At"
+                                        margin="dense"
+                                        value={state.form.temperature_measured_at}
+                                        maxDate={new Date()}
+                                        onChange={date => handleDateChange(date, "temperature_measured_at")}
+                                        errors={state.errors.temperature_measured_at}
                                     />
                                 </Grid>
                             </Grid>
@@ -204,17 +229,15 @@ export const DailyRounds = (props:any) => {
                         </CardContent>
 
                         <CardContent>
-                            <InputLabel id="consultation-label">Consultation Id</InputLabel>
-                            <TextInputField
-                                name="consultation"
-                                variant="outlined"
-                                margin="dense"
-                                type="number"
-                                InputLabelProps={{ shrink: !!state.form.consultation}}
-                                value={state.form.consultation}
-                                onChange={handleChange}
-                                errors={state.errors.consultation}
-                            />
+                                <InputLabel id="category-label">Category</InputLabel>
+                                <SelectField
+                                    name="category"
+                                    variant="standard"
+                                    value={state.form.category}
+                                    options={categoryChoices}
+                                    onChange={handleChange}
+                                    errors={state.errors.category}
+                                />
                         </CardContent>
 
                         <CardActions className="padding16" style={{ justifyContent: "space-between" }}>

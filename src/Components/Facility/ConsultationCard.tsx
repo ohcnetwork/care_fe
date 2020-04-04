@@ -4,7 +4,8 @@ import {
   Card,
   CardContent,
   IconButton,
-  Typography
+  Typography,
+  Button
 } from "@material-ui/core";
 import ArrowForwardIosIcon from "@material-ui/icons/ArrowForwardIos";
 import moment from "moment";
@@ -86,6 +87,17 @@ export const ConsultationCard = (props: ConsultationProps) => {
                 </Typography>
               </Grid>
             )}
+          </Grid>
+          <Grid item xs={6}>
+            <Typography style={{ fontSize: "12px" }}>
+             <Button color="primary"
+                     variant="contained"
+                     fullWidth
+                     onClick={
+               () => navigate(`/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/daily-rounds`)}>
+               Add Daily Rounds
+             </Button>
+            </Typography>
           </Grid>
         </Grid>
       </CardContent>

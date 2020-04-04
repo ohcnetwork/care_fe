@@ -86,6 +86,12 @@ const routes = {
   "/facility/:facilityId/consultation/:id": ({ facilityId, id }: any) => (
     <Consultation facilityId={facilityId} id={id} />
   ),
+  "/facility/:facilityId/patient/:patientId/consultation/:id/daily-rounds": ({facilityId, patientId, id}: any) =>
+     <DailyRounds facilityId={facilityId} patientId={patientId} consultationId={id}/>,
+
+  "/facility/:facilityId/patient/:patientId/consultation/:id/daily-rounds-list/": ({facilityId, patientId, id}: any) =>
+      <DailyRoundsList facilityId={facilityId} patientId={patientId} consultationId={id}/>,
+
   "/patients": () => <PatientManager />,
   "/patient/:id": ({ id }: any) => <PatientHome id={id} />,
   "/patient/tele-consult": () => <TeleConsultation />,
@@ -93,7 +99,6 @@ const routes = {
   "/patient/treatment": () => <TreatmentForm />,
   "/users": () => <ManageUsers />,
   "/join": () => <CareCenterJoinForm />,
-  "/daily-rounds": () => <DailyRounds />,
   "/daily-rounds-list": () => <DailyRoundsList />
 };
 
