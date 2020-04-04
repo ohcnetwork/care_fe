@@ -97,15 +97,15 @@ export const AMBULANCE_FREE_SERVICE_CONSENT =
 export const AMBULANCE_SERVICE_FEE_TEXT =
   "I / we will require fees for providing service";
 
-export const SAMPLE_TEST_STATUS = [
-  { id: 1, text: "REQUEST_SUBMITTED" },
-  { id: 2, text: "APPROVED" },
-  { id: 3, text: "DENIED" },
-  { id: 4, text: "SENT_TO_COLLECTON_CENTRE" },
-  { id: 5, text: "RECEIVED_AND_FORWARED" },
-  { id: 6, text: "RECEIVED_AT_LAB" },
-  { id: 7, text: "COMPLETED" },
-];
+export const SAMPLE_TEST_STATUS = {
+  REQUEST_SUBMITTED: "Request Submitted",
+  APPROVED: "Approved for Sample Collection",
+  DENIED: "Denied",
+  SENT_TO_COLLECTON_CENTRE: "Sample taken and sent to collection centre",
+  RECEIVED_AND_FORWARED: "Received And Forwarded",
+  RECEIVED_AT_LAB: "Received At Lab",
+  COMPLETED: "Completed",
+};
 
 export const SAMPLE_TEST_RESULT = [
   { id: 1, text: "POSITIVE" },
