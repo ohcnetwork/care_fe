@@ -130,10 +130,10 @@ export const PatientManager = (props: any) => {
                 <div>
                   {patient.is_medical_worker && (
                       <span className="font-semibold leading-relaxed">
-                      Medical Worker
+                      Medical Worker :
                     </span>
                   )}
-                  {patient.is_medical_worker}
+                 True
                 </div>
               </div>
               <div className="mt-2">

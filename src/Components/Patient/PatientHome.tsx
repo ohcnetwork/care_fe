@@ -275,7 +275,7 @@ export const PatientHome = (props: any) => {
               patientData.is_medical_worker &&
             <div>
               <span className="font-semibold leading-relaxed">Medical Worker: </span>
-              {patientData.is_medical_worker}
+              True
             </div>
             }
           </div>
