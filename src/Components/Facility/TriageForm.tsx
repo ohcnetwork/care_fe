@@ -1,42 +1,28 @@
-import React, { useState, useReducer, useCallback, useEffect } from "react";
-import { makeStyles, Theme } from "@material-ui/core/styles";
-import { useDispatch } from "react-redux";
-import {
-  Grid,
-  Card,
-  CardHeader,
-  CardContent,
-  CardActions,
-  Button,
-  InputLabel,
-  FormControlLabel,
-  Box
-} from "@material-ui/core";
-import {
-    DateInputField,
-    TextInputField,
-    ErrorHelperText
-} from "../Common/HelperInputFields";
+import { Button, Card, CardActions, CardContent, InputLabel } from "@material-ui/core";
+import SaveIcon from "@material-ui/icons/Save";
 import { navigate } from "hookrouter";
-import { Loading } from "../Common/Loading";
-import { PatientStatsModel } from "./models";
-import { createTriageForm } from "../../Redux/actions";
-import { useAbortableEffect, statusType } from "../../Common/utils";
-import * as Notification from "../../Utils/Notifications.js";
 import moment from 'moment';
+import React, { useReducer, useState } from "react";
+import { useDispatch } from "react-redux";
+import { createTriageForm } from "../../Redux/actions";
+import * as Notification from "../../Utils/Notifications.js";
+import { DateInputField, TextInputField } from "../Common/HelperInputFields";
+import { Loading } from "../Common/Loading";
+import PageTitle from "../Common/PageTitle";
+import { PatientStatsModel } from "./models";
 
 interface triageFormProps extends PatientStatsModel {
-    facilityId: number;
-    id?: number;
+  facilityId: number;
+  id?: number;
 }
-  
+
 
 const initForm: any = {
-    entry_date: null,
-    num_patients_visited: "",
-    num_patients_home_quarantine: "",
-    num_patients_isolation: "",
-    num_patient_referred: "",
+  entry_date: null,
+  num_patients_visited: "",
+  num_patients_home_quarantine: "",
+  num_patients_isolation: "",
+  num_patient_referred: "",
 };
 
 const initialState = {
@@ -63,6 +49,10 @@ const triageFormReducer = (state = initialState, action: any) => {
   }
 };
 
+const goBack = () => {
+  window.history.go(-1);
+};
+
 export const TriageForm = (props: triageFormProps) => {
   const dispatchAction: any = useDispatch();
   const { facilityId, id } = props;
@@ -70,7 +60,7 @@ export const TriageForm = (props: triageFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const headerText = !id ? "Add Triage" : "Edit Triage";
-  const buttonText = !id ? "Save" : "Update";
+  const buttonText = !id ? "Save Triage" : "Update Triage";
 
   const validateForm = () => {
     let errors = { ...initForm };
@@ -108,7 +98,7 @@ export const TriageForm = (props: triageFormProps) => {
         num_patient_referred: Number(state.form.num_patient_referred),
       };
 
-      const res = await dispatchAction(createTriageForm(data,{facilityId}));
+      const res = await dispatchAction(createTriageForm(data, { facilityId }));
       setIsLoading(false);
       if (res && res.data) {
         dispatch({ type: "set_form", form: initForm });
@@ -138,81 +128,75 @@ export const TriageForm = (props: triageFormProps) => {
     dispatch({ type: "set_form", form });
   };
 
-  const handleCancel = () => {
-    navigate(`/facility/${facilityId}`);
-  };
-
   if (isLoading) {
     return <Loading />;
   }
 
   return (
     <div>
-      <div className="font-semibold text-3xl p-4 mt-4 border-b-4 border-orange-500">
-        {headerText}
-      </div>
+      <PageTitle title={headerText} />
       <div className="mt-4">
         <Card>
           <form onSubmit={e => handleSubmit(e)}>
             <CardContent>
-                <DateInputField
-                    label="Entry Date"
-                    value={state.form.entry_date}
-                    onChange={date => handleDateChange(date, "entry_date")}
-                    errors={state.errors.entry_date}
-                />
+              <DateInputField
+                label="Entry Date"
+                value={state.form.entry_date}
+                onChange={date => handleDateChange(date, "entry_date")}
+                errors={state.errors.entry_date}
+              />
             </CardContent>
             <CardContent>
-               <InputLabel id="num-patients-visited-label">Patients Visited</InputLabel>
-               <TextInputField
-                   name="num_patients_visited"
-                   variant="outlined"
-                   margin="dense"
-                   type="number"
-                   InputLabelProps={{ shrink: !!state.form.num_patients_visited}}
-                   value={state.form.num_patients_visited}
-                   onChange={handleChange}
-                   errors={state.errors.num_patients_visited}
-               />
+              <InputLabel id="num-patients-visited-label">Patients Visited</InputLabel>
+              <TextInputField
+                name="num_patients_visited"
+                variant="outlined"
+                margin="dense"
+                type="number"
+                InputLabelProps={{ shrink: !!state.form.num_patients_visited }}
+                value={state.form.num_patients_visited}
+                onChange={handleChange}
+                errors={state.errors.num_patients_visited}
+              />
             </CardContent>
             <CardContent>
-               <InputLabel id="num-patients-home-quarantine-label">Patients in Home Quarantine</InputLabel>
-               <TextInputField
-                   name="num_patients_home_quarantine"
-                   variant="outlined"
-                   margin="dense"
-                   type="number"
-                   InputLabelProps={{ shrink: !!state.form.num_patients_home_quarantine}}
-                   value={state.form.num_patients_home_quarantine}
-                   onChange={handleChange}
-                   errors={state.errors.num_patients_home_quarantine}
-               />
+              <InputLabel id="num-patients-home-quarantine-label">Patients in Home Quarantine</InputLabel>
+              <TextInputField
+                name="num_patients_home_quarantine"
+                variant="outlined"
+                margin="dense"
+                type="number"
+                InputLabelProps={{ shrink: !!state.form.num_patients_home_quarantine }}
+                value={state.form.num_patients_home_quarantine}
+                onChange={handleChange}
+                errors={state.errors.num_patients_home_quarantine}
+              />
             </CardContent>
             <CardContent>
-               <InputLabel id="num-patients-isolation-label">Patients in Isolation</InputLabel>
-               <TextInputField
-                   name="num_patients_isolation"
-                   variant="outlined"
-                   margin="dense"
-                   type="number"
-                   InputLabelProps={{ shrink: !!state.form.num_patients_isolation}}
-                   value={state.form.num_patients_isolation}
-                   onChange={handleChange}
-                   errors={state.errors.num_patients_isolation}
-               />
+              <InputLabel id="num-patients-isolation-label">Patients in Isolation</InputLabel>
+              <TextInputField
+                name="num_patients_isolation"
+                variant="outlined"
+                margin="dense"
+                type="number"
+                InputLabelProps={{ shrink: !!state.form.num_patients_isolation }}
+                value={state.form.num_patients_isolation}
+                onChange={handleChange}
+                errors={state.errors.num_patients_isolation}
+              />
             </CardContent>
             <CardContent>
-               <InputLabel id="num-patient-referred-label">Patients Referred so far</InputLabel>
-               <TextInputField
-                   name="num_patient_referred"
-                   variant="outlined"
-                   margin="dense"
-                   type="number"
-                   InputLabelProps={{ shrink: !!state.form.num_patient_referred}}
-                   value={state.form.num_patient_referred}
-                   onChange={handleChange}
-                   errors={state.errors.num_patient_referred}
-               />
+              <InputLabel id="num-patient-referred-label">Patients Referred so far</InputLabel>
+              <TextInputField
+                name="num_patient_referred"
+                variant="outlined"
+                margin="dense"
+                type="number"
+                InputLabelProps={{ shrink: !!state.form.num_patient_referred }}
+                value={state.form.num_patient_referred}
+                onChange={handleChange}
+                errors={state.errors.num_patient_referred}
+              />
             </CardContent>
 
             <CardActions
@@ -223,7 +207,7 @@ export const TriageForm = (props: triageFormProps) => {
                 color="default"
                 variant="contained"
                 type="button"
-                onClick={e => handleCancel()}
+                onClick={goBack}
               >
                 Cancel
               </Button>
@@ -232,6 +216,7 @@ export const TriageForm = (props: triageFormProps) => {
                 variant="contained"
                 type="submit"
                 style={{ marginLeft: "auto" }}
+                startIcon={<SaveIcon>save</SaveIcon>}
                 onClick={e => handleSubmit(e)}
               >
                 {buttonText}

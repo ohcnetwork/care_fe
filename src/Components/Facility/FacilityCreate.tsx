@@ -1,41 +1,20 @@
-import React, { useState, useReducer, useCallback } from "react";
-import { useDispatch } from "react-redux";
-import {
-  FormControl,
-  Grid,
-  Card,
-  CardHeader,
-  CardContent,
-  Button,
-  InputLabel,
-  Select,
-  MenuItem,
-  CardActions
-} from "@material-ui/core";
-import {
-  TextInputField,
-  MultilineInputField
-} from "../Common/HelperInputFields";
-import { makeStyles } from "@material-ui/styles";
-import { navigate } from "hookrouter";
-import {
-  createFacility,
-  getFacility,
-  updateFacility
-} from "../../Redux/actions";
-import {
-  validateLocationCoordinates,
-  phonePreg
-} from "../../Common/validation";
-import { DISTRICT_CHOICES } from "../../Common/constants";
-import SaveIcon from "@material-ui/icons/Save";
-import { FACILITY_ID } from "../../Common/constants";
-import { Loading } from "../Common/Loading";
+import { Button, Card, CardActions, CardContent, CardHeader, FormControl, Grid, InputLabel, MenuItem, Select } from "@material-ui/core";
 import Popover from "@material-ui/core/Popover";
 import MyLocationIcon from "@material-ui/icons/MyLocation";
-import { LocationSearchAndPick } from "../Common/LocationSearchAndPick";
-import { useAbortableEffect, statusType } from "../../Common/utils";
+import SaveIcon from "@material-ui/icons/Save";
+import { makeStyles } from "@material-ui/styles";
+import { navigate } from "hookrouter";
+import React, { useCallback, useReducer, useState } from "react";
+import { useDispatch } from "react-redux";
+import { DISTRICT_CHOICES, FACILITY_ID } from "../../Common/constants";
+import { statusType, useAbortableEffect } from "../../Common/utils";
+import { phonePreg, validateLocationCoordinates } from "../../Common/validation";
+import { createFacility, getFacility, updateFacility } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
+import { MultilineInputField, TextInputField } from "../Common/HelperInputFields";
+import { Loading } from "../Common/Loading";
+import { LocationSearchAndPick } from "../Common/LocationSearchAndPick";
+import PageTitle from "../Common/PageTitle";
 
 const DEFAULT_MAP_LOCATION = [10.038394700000001, 76.5074145180173]; // Ernakulam
 
@@ -99,6 +78,10 @@ const facility_create_reducer = (state = initialState, action: any) => {
   }
 };
 
+const goBack = () => {
+  window.history.go(-1);
+};
+
 export const FacilityCreate = (props: FacilityProps) => {
   const dispatchAction: any = useDispatch();
   const classes = useStyles();
@@ -112,7 +95,7 @@ export const FacilityCreate = (props: FacilityProps) => {
   const [mapLoadLocation, setMapLoadLocation] = useState(DEFAULT_MAP_LOCATION);
 
   const headerText = !facilityId ? "Create Facility" : "Update Facility";
-  const buttonText = !facilityId ? "Save" : "Update";
+  const buttonText = !facilityId ? "Save Facility" : "Update Facility";
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -147,16 +130,6 @@ export const FacilityCreate = (props: FacilityProps) => {
     },
     [dispatch, fetchData]
   );
-
-  const handleCancel = (e: any) => {
-    const form = { ...initForm };
-    dispatch({ type: "set_form", form });
-    if (facilityId) {
-      navigate(`/facility/${facilityId}`);
-    } else {
-      navigate("/facility");
-    }
-  };
 
   const handleChange = (e: any) => {
     let form = { ...state.form };
@@ -232,9 +205,9 @@ export const FacilityCreate = (props: FacilityProps) => {
         location:
           state.form.latitude && state.form.latitude
             ? {
-                latitude: Number(state.form.latitude),
-                longitude: Number(state.form.latitude)
-              }
+              latitude: Number(state.form.latitude),
+              longitude: Number(state.form.latitude)
+            }
             : undefined,
         phone_number: state.form.phone_number,
         oxygen_capacity: state.form.oxygen_capacity
@@ -280,9 +253,9 @@ export const FacilityCreate = (props: FacilityProps) => {
   const id = open ? "map-popover" : undefined;
   return (
     <div>
+      <PageTitle title={headerText} />
       <div>
-        <Card style={{ marginTop: "20px" }}>
-          <CardHeader title={headerText} />
+        <Card className="mt-4">
           <form onSubmit={e => handleSubmit(e)}>
             <CardContent>
               <Grid container justify="center" style={{ marginBottom: "10px" }}>
@@ -455,7 +428,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                 <Button
                   color="default"
                   variant="contained"
-                  onClick={handleCancel}
+                  onClick={goBack}
                 >
                   Cancel
                 </Button>

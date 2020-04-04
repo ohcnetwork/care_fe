@@ -82,6 +82,10 @@ const categoryChoices = [
   ...PATIENT_CATEGORY
 ];
 
+const goBack = () => {
+  window.history.go(-1);
+};
+
 export const Consultation = (props: any) => {
   const dispatchAction: any = useDispatch();
   const { facilityId, patientId, id } = props;
@@ -163,10 +167,7 @@ export const Consultation = (props: any) => {
         facility: Number(facilityId),
         referred_to: null,
       };
-
-      console.log("data: ", data);
       const res = await dispatchAction(createConsultation(data));
-      console.log("res: ", res);
       setIsLoading(false);
       if (res && res.data) {
         dispatch({ type: "set_form", form: initForm });
@@ -208,11 +209,7 @@ export const Consultation = (props: any) => {
     form[key] = date;
     dispatch({ type: "set_form", form });
   };
-
-  const handleCancel = () => {
-    navigate(`/facility/${facilityId}/patient/${patientId}`);
-  };
-
+  
   if (isLoading) {
     return <Loading />;
   }
@@ -423,7 +420,7 @@ export const Consultation = (props: any) => {
                   color="default"
                   variant="contained"
                   type="button"
-                  onClick={e => handleCancel()}
+                  onClick={goBack}
                 >Cancel </Button>
                 <Button
                   color="primary"
