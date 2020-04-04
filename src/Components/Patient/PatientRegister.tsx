@@ -93,6 +93,10 @@ const genderTypes = [
   ...GENDER_TYPES
 ];
 
+const goBack = () => {
+  window.history.go(-1);
+};
+
 export const PatientRegister = (props: PatientRegisterProps) => {
   const dispatchAction: any = useDispatch();
   const { facilityId, id } = props;
@@ -110,8 +114,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   const [districts, setDistricts] = useState(selectStates);
   const [localBody, setLocalBody] = useState(selectDistrict);
 
-  const headerText = !id ? "Add Details of Covid Suspect" : "Update Covid Suspect Details";
-  const buttonText = !id ? "Add Covid Suspect" : "Save Details";
+  const headerText = !id ? "Add Details of Covid Suspect / Patient" : "Update Covid Suspect / Patient Details";
+  const buttonText = !id ? "Add Covid Suspect / Patient" : "Save Details";
 
   const fetchDistricts = useCallback(
     async (id: string) => {
@@ -402,7 +406,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         <Card>
           {showAlertMessage.show && (
             <AlertDialog
-              handleClose={() => window.history.go(-1)}
+              handleClose={() => goBack()}
               message={showAlertMessage.message}
               title={showAlertMessage.title}
             />
@@ -681,8 +685,14 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
               </div>
               <div
-                className="flex mt-4"
+                className="flex justify-between mt-4"
               >
+                <Button
+                  color="default"
+                  variant="contained"
+                  type="button"
+                  onClick={goBack}
+                > Cancel </Button>
                 <Button
                   color="primary"
                   variant="contained"

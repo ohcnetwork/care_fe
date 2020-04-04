@@ -53,6 +53,10 @@ const doctorCapacityReducer = (state = initialState, action: any) => {
   }
 };
 
+const goBack = () => {
+  window.history.go(-1);
+};
+
 export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
   const dispatchAction: any = useDispatch();
   const { facilityId, id } = props;
@@ -65,8 +69,8 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
 
   const headerText = !id ? "Add Doctor Capacity" : "Edit Doctor Capacity";
   const buttonText = !id
-    ? `Save ${!isLastOptionType ? "& Add More" : ""}`
-    : "Update";
+    ? `Save ${!isLastOptionType ? "& Add More" : "Doctor Capacity"}`
+    : "Update Doctor Capacity";
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -149,12 +153,6 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
     let form = { ...state.form };
     form[e.target.name] = e.target.value;
     dispatch({ type: "set_form", form });
-  };
-
-  const handleCancel = (e: any) => {
-    const form = { ...initForm };
-    dispatch({ type: "set_form", form });
-    navigate(`/facility/${facilityId}`);
   };
 
   const handleSubmit = async (e: any) => {
@@ -245,7 +243,7 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
                   <Button
                     color="default"
                     variant="contained"
-                    onClick={handleCancel}
+                    onClick={goBack}
                   >
                     Cancel
                   </Button>
