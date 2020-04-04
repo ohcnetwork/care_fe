@@ -12,77 +12,12 @@ import PageTitle from "../Common/PageTitle";
 import Pagination from "../Common/Pagination";
 
 const useStyles = makeStyles(theme => ({
-  root: {
-    flexGrow: 1,
-    padding: "8px"
-  },
-  card: {
-    height: 160,
-    width: "100%",
-    backgroundColor: "#FFFFFF",
-    cursor: "pointer"
-  },
-  title: {
-    whiteSpace: "nowrap",
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-    fontWeight: 400,
-    display: "inline-block",
-    [theme.breakpoints.up("md")]: {
-      width: "12vw"
-    },
-    [theme.breakpoints.down("sm")]: {
-      width: "40vw"
-    },
-    [theme.breakpoints.down("xs")]: {
-      width: "65vw"
-    }
-  },
-  content: {
-    padding: "5px 10px"
-  },
-  cardHeader: {
-    padding: "10px"
-  },
-  contentText: {
-    whiteSpace: "nowrap",
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-    display: "inline-block",
-    [theme.breakpoints.up("md")]: {
-      width: "10vw"
-    },
-    [theme.breakpoints.down("sm")]: {
-      width: "40vw"
-    },
-    [theme.breakpoints.down("xs")]: {
-      width: "40vw"
-    }
-  },
-  spacing: {
-    marginLeft: theme.spacing(1)
-  },
-  margin: {
-    margin: theme.spacing(1)
-  },
-  addUserCard: {
-    marginTop: "50px"
-  },
   paginateTopPadding: {
     paddingTop: "50px"
-  },
-  userCardSideTitle: {
-    fontSize: "13px"
-  },
-  toolTip: {
-    fontSize: "13px"
   },
   displayFlex: {
     display: "flex"
   },
-  minHeight: {
-    minHeight: "65vh"
-  }
 }));
 
 export const PatientManager = (props: any) => {
