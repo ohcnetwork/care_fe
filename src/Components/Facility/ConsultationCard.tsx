@@ -99,6 +99,18 @@ export const ConsultationCard = (props: ConsultationProps) => {
              </Button>
             </Typography>
           </Grid>
+          { ' '} { ''}
+          <Grid item xs={6}>
+            <Typography style={{ fontSize: "12px" }}>
+              <Button color="primary"
+                      variant="contained"
+                      fullWidth
+                      onClick={
+                        () => navigate(`/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/daily-rounds-list`)}>
+                View Daily Rounds
+              </Button>
+            </Typography>
+          </Grid>
         </Grid>
       </CardContent>
     </div>
