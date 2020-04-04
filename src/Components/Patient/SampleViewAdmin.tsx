@@ -1,7 +1,16 @@
-import { Box, Button, CardContent, CardHeader, Grid, InputLabel, Tooltip, Typography } from "@material-ui/core";
+import {
+  Box,
+  Button,
+  CardContent,
+  CardHeader,
+  Grid,
+  InputLabel,
+  Tooltip,
+  Typography,
+} from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { navigate } from "hookrouter";
-import moment from 'moment';
+import moment from "moment";
 import React, { MouseEvent, useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { SAMPLE_TEST_RESULT } from "../../Common/constants";
@@ -14,15 +23,15 @@ import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 import Pagination from "../Common/Pagination";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
-    padding: "8px"
+    padding: "8px",
   },
   card: {
     height: 160,
     width: "100%",
-    backgroundColor: "#FFFFFF"
+    backgroundColor: "#FFFFFF",
   },
   title: {
     whiteSpace: "nowrap",
@@ -33,50 +42,50 @@ const useStyles = makeStyles(theme => ({
     //fontSize: '14px',
     display: "inline-block",
     [theme.breakpoints.up("md")]: {
-      width: "12vw"
+      width: "12vw",
     },
     [theme.breakpoints.down("sm")]: {
-      width: "12vw"
+      width: "12vw",
     },
     [theme.breakpoints.down("xs")]: {
-      width: "65vw"
-    }
+      width: "65vw",
+    },
   },
   content: {
-    padding: "5px 10px"
+    padding: "5px 10px",
   },
   cardHeader: {
-    padding: "10px"
+    padding: "10px",
   },
   contentText: {
     whiteSpace: "nowrap",
     overflow: "hidden",
     textOverflow: "ellipsis",
-    display: "inline-block"
+    display: "inline-block",
   },
   spacing: {
-    marginLeft: theme.spacing(1)
+    marginLeft: theme.spacing(1),
   },
   margin: {
-    margin: theme.spacing(1)
+    margin: theme.spacing(1),
   },
   addUserCard: {
-    marginTop: "50px"
+    marginTop: "50px",
   },
   paginateTopPadding: {
-    paddingTop: "50px"
+    paddingTop: "50px",
   },
   userCardSideTitle: {
-    fontSize: "13px"
+    fontSize: "13px",
   },
   toolTip: {
-    fontSize: "13px"
+    fontSize: "13px",
   },
   statusPositive: {
-    borderColor: 'red'
+    borderColor: "red",
   },
   statusNegative: {
-    borderColor: 'green'
+    borderColor: "green",
   },
 }));
 
@@ -85,7 +94,7 @@ export default function SampleViewAdmin(props: any) {
   const dispatch: any = useDispatch();
   const initialData: any[] = [];
   let manageSamples: any = null;
-  const state: any = useSelector(state => state);
+  const state: any = useSelector((state) => state);
   const { currentUser } = state;
   const [sample, setSample] = useState(initialData);
   const [isLoading, setIsLoading] = useState(false);
@@ -99,15 +108,20 @@ export default function SampleViewAdmin(props: any) {
     message: "",
     title: "",
   });
-  const [selectedStatus, setSelectedStatus] = useState<{ status: number, sample: any }>({ status: 0, sample: null });
+  const [selectedStatus, setSelectedStatus] = useState<{
+    status: number;
+    sample: any;
+  }>({ status: 0, sample: null });
 
   const limit = 10;
 
-  const resultTypes = [{
-    id: 0,
-    text: 'Select',
-  }, ...SAMPLE_TEST_RESULT];
-
+  const resultTypes = [
+    {
+      id: 0,
+      text: "Select",
+    },
+    ...SAMPLE_TEST_RESULT,
+  ];
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -148,7 +162,7 @@ export default function SampleViewAdmin(props: any) {
       show: false,
       message: "",
       title: "",
-    })
+    });
   };
 
   const handleApproval = () => {
@@ -156,7 +170,7 @@ export default function SampleViewAdmin(props: any) {
     const sampleData = {
       id: sample.id,
       status,
-      consultation: sample.consultation_id
+      consultation: sample.consultation_id,
     };
     let statusName = "";
     if (status === 2) {
@@ -177,7 +191,7 @@ export default function SampleViewAdmin(props: any) {
     dispatch(patchSample(sample.id, sampleData)).then((resp: any) => {
       if (resp.status === 201 || resp.status === 200) {
         Notification.Success({
-          msg: `Request ${statusName}`
+          msg: `Request ${statusName}`,
         });
         // window.location.reload();
         callFetchData(!fetchFlag);
@@ -191,7 +205,7 @@ export default function SampleViewAdmin(props: any) {
       id: sample.id,
       status,
       result,
-      consultation: sample.consultation_id
+      consultation: sample.consultation_id,
     };
     let statusName = "";
     if (status === 7) {
@@ -200,7 +214,7 @@ export default function SampleViewAdmin(props: any) {
     dispatch(patchSample(sample.id, sampleData)).then((resp: any) => {
       if (resp.status === 201 || resp.status === 200) {
         Notification.Success({
-          msg: `Request ${statusName}`
+          msg: `Request ${statusName}`,
         });
         // window.location.reload();
         callFetchData(!fetchFlag);
@@ -208,7 +222,12 @@ export default function SampleViewAdmin(props: any) {
     });
   };
 
-  const confirmApproval = (e: MouseEvent, status: number, sample: any, msg: string) => {
+  const confirmApproval = (
+    e: MouseEvent,
+    status: number,
+    sample: any,
+    msg: string
+  ) => {
     e.stopPropagation();
     setSelectedStatus({ status, sample });
     setAlertMessage({
@@ -216,7 +235,7 @@ export default function SampleViewAdmin(props: any) {
       message: `Are you sure you want to change the status to ${msg}`,
       title: "Confirm",
     });
-  }
+  };
 
   let user = currentUser.data;
   let sampleList: any[] = [];
@@ -224,7 +243,12 @@ export default function SampleViewAdmin(props: any) {
     sampleList = sample.map((sample: any, idx: number) => {
       return (
         <div key={`usr_${sample.id}`} className="w-full md:w-1/2 mt-4 px-2">
-          <div onClick={e => navigate(`/samplelist/${sample.id}`)} className={`block border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black ${sample.result === 'POSITIVE' ? classes.statusPositive : ''} ${sample.result === 'NEGATIVE' ? classes.statusNegative : ''}`}>
+          <div
+            onClick={(e) => navigate(`/samplelist/${sample.id}`)}
+            className={`block border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black ${
+              sample.result === "POSITIVE" ? classes.statusPositive : ""
+            } ${sample.result === "NEGATIVE" ? classes.statusNegative : ""}`}
+          >
             <CardHeader
               className={classes.cardHeader}
               // onClick={(e) => {
@@ -246,6 +270,54 @@ export default function SampleViewAdmin(props: any) {
                 </span>
               }
             />
+            <div className="px-2">
+              {sample.fast_track && (
+                <div className="md:col-span-2">
+                  <span className="font-semibold leading-relaxed">
+                    Fast track:{" "}
+                  </span>
+                  {sample.fast_track}
+                </div>
+              )}
+              <div>
+                <span className="font-semibold leading-relaxed">
+                  Contact with confirmed carrier:{" "}
+                </span>
+                {sample.patient_has_confirmed_contact ? (
+                  <span className="badge badge-pill badge-warning">Yes</span>
+                ) : (
+                  <span className="badge badge-pill badge-secondary">No</span>
+                )}
+              </div>
+              <div>
+                <span className="font-semibold leading-relaxed">
+                  Contact with suspected carrier:{" "}
+                </span>
+                {sample.patient_has_suspected_contact ? (
+                  <span className="badge badge-pill badge-warning">Yes</span>
+                ) : (
+                  <span className="badge badge-pill badge-secondary">No</span>
+                )}
+              </div>
+              <div className="md:col-span-2">
+                <span className="font-semibold leading-relaxed">
+                  Has SARI?:{" "}
+                </span>
+                {sample.patient_has_sari ? (
+                  <span className="badge badge-pill badge-warning">Yes</span>
+                ) : (
+                  <span className="badge badge-pill badge-secondary">No</span>
+                )}
+              </div>
+              {sample.patient_travel_history && (
+                <div className="md:col-span-2">
+                  <span className="font-semibold leading-relaxed">
+                    Countries travelled:{" "}
+                  </span>
+                  {sample.patient_travel_history}
+                </div>
+              )}
+            </div>
 
             <CardContent>
               {sample.status === "REQUEST_SUBMITTED" &&
@@ -253,7 +325,7 @@ export default function SampleViewAdmin(props: any) {
                   <Button
                     style={{ color: "green" }}
                     variant="outlined"
-                    onClick={e => confirmApproval(e, 2, sample, "Approve")}
+                    onClick={(e) => confirmApproval(e, 2, sample, "Approve")}
                   >
                     Approve
                   </Button>
@@ -263,7 +335,7 @@ export default function SampleViewAdmin(props: any) {
                   <Button
                     style={{ color: "red" }}
                     variant="outlined"
-                    onClick={e => confirmApproval(e, 3, sample, "Deny")}
+                    onClick={(e) => confirmApproval(e, 3, sample, "Deny")}
                   >
                     Deny
                   </Button>
@@ -275,20 +347,23 @@ export default function SampleViewAdmin(props: any) {
                   <Button
                     style={{ color: "red" }}
                     variant="outlined"
-                    onClick={e => confirmApproval(e, 5, sample, "Received and forwarded")}
+                    onClick={(e) =>
+                      confirmApproval(e, 5, sample, "Received and forwarded")
+                    }
                   >
                     Received and forwarded
                   </Button>
                 </CardContent>
               )}
-            {
-              sample.status === "RECEIVED_AND_FORWARED" &&
+            {sample.status === "RECEIVED_AND_FORWARED" &&
               user.user_type === "StateLabAdmin" && (
                 <CardContent>
                   <Button
                     style={{ color: "red" }}
                     variant="outlined"
-                    onClick={e => confirmApproval(e, 6, sample, "Received at lab")}
+                    onClick={(e) =>
+                      confirmApproval(e, 6, sample, "Received at lab")
+                    }
                   >
                     Received at lab
                   </Button>
@@ -298,8 +373,8 @@ export default function SampleViewAdmin(props: any) {
               user.user_type === "StateLabAdmin" && (
                 <>
                   <CardContent>
-                    <Box display="flex" >
-                      <Box flex="1" style={{ marginRight: '4px' }}>
+                    <Box display="flex">
+                      <Box flex="1" style={{ marginRight: "4px" }}>
                         <InputLabel id="result-select-label">Result</InputLabel>
                         <NativeSelectField
                           name={sample.id.toString()}
@@ -313,10 +388,16 @@ export default function SampleViewAdmin(props: any) {
                         style={{ color: "red" }}
                         variant="outlined"
                         disabled={!result[sample.id.toString()]}
-                        onClick={e => handleComplete(7, sample, Number(result[sample.id.toString()]))}
+                        onClick={(e) =>
+                          handleComplete(
+                            7,
+                            sample,
+                            Number(result[sample.id.toString()])
+                          )
+                        }
                       >
                         Completed
-                  </Button>
+                      </Button>
                     </Box>
                   </CardContent>
                 </>
@@ -324,7 +405,7 @@ export default function SampleViewAdmin(props: any) {
             <CardContent className={classes.content}>
               <Typography>
                 <span className={`w3-text-gray ${classes.userCardSideTitle}`}>
-                  Status - {" "}
+                  Status -{" "}
                 </span>
                 {sample.status}
               </Typography>
@@ -337,14 +418,16 @@ export default function SampleViewAdmin(props: any) {
                 {sample.result}
               </Typography>
             </CardContent>
-            {sample.date_of_sample && (<CardContent className={classes.content}>
-              <Typography>
-                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>
-                  Date Of Sample -{" "}
-                </span>
-                {moment(sample.date_of_sample).format('lll')}
-              </Typography>
-            </CardContent>)}
+            {sample.date_of_sample && (
+              <CardContent className={classes.content}>
+                <Typography>
+                  <span className={`w3-text-gray ${classes.userCardSideTitle}`}>
+                    Date Of Sample -{" "}
+                  </span>
+                  {moment(sample.date_of_sample).format("lll")}
+                </Typography>
+              </CardContent>
+            )}
           </div>
         </div>
       );
@@ -391,9 +474,7 @@ export default function SampleViewAdmin(props: any) {
         />
       )}
       <PageTitle title="Sample Management system" hideBack={true} />
-      <div className="flex flex-wrap mt-4">
-        {manageSamples}
-      </div>
+      <div className="flex flex-wrap mt-4">{manageSamples}</div>
     </div>
   );
 }
