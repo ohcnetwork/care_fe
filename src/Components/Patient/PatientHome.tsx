@@ -271,6 +271,13 @@ export const PatientHome = (props: any) => {
               <span className="font-semibold leading-relaxed">Phone: </span>
               {patientData.phone_number}
             </div>
+            {
+              patientData.is_medical_worker &&
+            <div>
+              <span className="font-semibold leading-relaxed">Medical Worker: </span>
+              {patientData.is_medical_worker}
+            </div>
+            }
           </div>
 
           <div>

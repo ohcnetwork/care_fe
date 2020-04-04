@@ -127,6 +127,14 @@ export const PatientManager = (props: any) => {
                   )}
                   {patient.countries_travelled.split(",").join(", ")}
                 </div>
+                <div>
+                  {patient.is_medical_worker && (
+                      <span className="font-semibold leading-relaxed">
+                      Medical Worker
+                    </span>
+                  )}
+                  {patient.is_medical_worker}
+                </div>
               </div>
               <div className="mt-2">
                 <Button size="small" variant="outlined" fullWidth>
