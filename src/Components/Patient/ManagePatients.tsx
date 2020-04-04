@@ -1,7 +1,7 @@
-import Button from '@material-ui/core/Button';
+import Button from "@material-ui/core/Button";
 import Grid from "@material-ui/core/Grid";
 import { makeStyles } from "@material-ui/core/styles";
-import WarningRoundedIcon from '@material-ui/icons/WarningRounded';
+import WarningRoundedIcon from "@material-ui/icons/WarningRounded";
 import { navigate } from "hookrouter";
 import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -11,12 +11,12 @@ import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 import Pagination from "../Common/Pagination";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   paginateTopPadding: {
-    paddingTop: "50px"
+    paddingTop: "50px",
   },
   displayFlex: {
-    display: "flex"
+    display: "flex",
   },
 }));
 
@@ -38,7 +38,9 @@ export const PatientManager = (props: any) => {
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const res = await dispatch(getAllPatient({ facility: facilityId, limit, offset }));
+      const res = await dispatch(
+        getAllPatient({ facility: facilityId, limit, offset })
+      );
       if (!status.aborted) {
         if (res && res.data) {
           setData(res.data.results);
@@ -73,34 +75,56 @@ export const PatientManager = (props: any) => {
         <div key={`usr_${patient.id}`} className="w-full md:w-1/2 mt-4 px-2">
           <div
             onClick={() => navigate(patientUrl)}
-            className="overflow-hidden shadow-lg block border rounded-lg bg-white h-full cursor-pointer hover:border-primary-500">
+            className="overflow-hidden shadow-lg block border rounded-lg bg-white h-full cursor-pointer hover:border-primary-500"
+          >
             <div className="px-6 py-4 h-full flex flex-col justify-between">
               <div>
                 <div className="flex justify-between">
                   <div className="font-bold text-xl capitalize mb-2">
                     {patient.name}
                   </div>
-                  <div>{!patient.is_active && <span className="badge badge-pill badge-dark">Inactive</span>}</div>
+                  <div>
+                    {!patient.is_active && (
+                      <span className="badge badge-pill badge-dark">
+                        Inactive
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <div>
                   <span className="font-semibold leading-relaxed">Age: </span>
                   {patient.age}
                 </div>
-                {patient.contact_with_confirmed_carrier && (<div className="flex">
-                  <span className="font-semibold leading-relaxed">Contact with confirmed carrier</span>
-                  <WarningRoundedIcon color="error"></WarningRoundedIcon>
-                </div>)}
-                {patient.contact_with_suspected_carrier && !patient.contact_with_confirmed_carrier && (<div className="flex">
-                  <span className="font-semibold leading-relaxed">Contact with suspected carrier</span>
-                  <WarningRoundedIcon></WarningRoundedIcon>
-                </div>)}
-                <div>{patient.countries_travelled && (
-                  <span className="font-semibold leading-relaxed">Travel History: </span>)}
-                  {patient.countries_travelled.split(',').join(', ')}
+                {patient.contact_with_confirmed_carrier && (
+                  <div className="flex">
+                    <span className="font-semibold leading-relaxed">
+                      Contact with confirmed carrier
+                    </span>
+                    <WarningRoundedIcon color="error"></WarningRoundedIcon>
+                  </div>
+                )}
+                {patient.contact_with_suspected_carrier &&
+                  !patient.contact_with_confirmed_carrier && (
+                    <div className="flex">
+                      <span className="font-semibold leading-relaxed">
+                        Contact with suspected carrier
+                      </span>
+                      <WarningRoundedIcon></WarningRoundedIcon>
+                    </div>
+                  )}
+                <div>
+                  {patient.countries_travelled && (
+                    <span className="font-semibold leading-relaxed">
+                      Travel History:{" "}
+                    </span>
+                  )}
+                  {patient.countries_travelled.split(",").join(", ")}
                 </div>
               </div>
               <div className="mt-2">
-                <Button size="small" variant="outlined" fullWidth>Click here to proceed</Button>
+                <Button size="small" variant="outlined" fullWidth>
+                  View Patient Details
+                </Button>
               </div>
             </div>
           </div>

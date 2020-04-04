@@ -81,12 +81,6 @@ const useStyles = makeStyles((theme) => ({
   toolTip: {
     fontSize: "13px",
   },
-  statusPositive: {
-    borderColor: "red",
-  },
-  statusNegative: {
-    borderColor: "green",
-  },
 }));
 
 export default function SampleViewAdmin(props: any) {
@@ -245,9 +239,13 @@ export default function SampleViewAdmin(props: any) {
         <div key={`usr_${sample.id}`} className="w-full md:w-1/2 mt-4 px-2">
           <div
             onClick={(e) => navigate(`/samplelist/${sample.id}`)}
-            className={`block border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black ${
-              sample.result === "POSITIVE" ? classes.statusPositive : ""
-            } ${sample.result === "NEGATIVE" ? classes.statusNegative : ""}`}
+            className={`block border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 p-4 text-black ${
+              sample.result === "POSITIVE" ? "border-red-700 bg-red-100" : ""
+            } ${
+              sample.result === "NEGATIVE"
+                ? "border-green-700 bg-green-100"
+                : ""
+            }`}
           >
             <CardHeader
               className={classes.cardHeader}
@@ -428,6 +426,11 @@ export default function SampleViewAdmin(props: any) {
                 </Typography>
               </CardContent>
             )}
+            <div className="mt-2">
+              <div className="px-4 py-2 bg-white rounded-md border border-grey-500 whitespace-no-wrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300 text-center">
+                View Patient Details
+              </div>
+            </div>
           </div>
         </div>
       );
