@@ -95,6 +95,13 @@ export const PatientManager = (props: any) => {
                   <span className="font-semibold leading-relaxed">Age: </span>
                   {patient.age}
                 </div>
+                {
+                  patient.facility &&
+                <div>
+                  <span className="font-semibold leading-relaxed">Facility: </span>
+                  { (patient && patient.facility_object && patient.facility_object.name) || ''}
+                </div>
+                }
                 {patient.contact_with_confirmed_carrier && (
                   <div className="flex">
                     <span className="font-semibold leading-relaxed">
