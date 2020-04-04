@@ -1,7 +1,7 @@
 import React, { useState, useReducer, useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { Box, Card, CardContent, Button, InputLabel, RadioGroup, Radio, FormControlLabel, CircularProgress } from "@material-ui/core";
-import { TextInputField, SelectField, ErrorHelperText, MultilineInputField, CheckboxField, AutoCompleteMultiField, DateInputField } from "../Common/HelperInputFields";
+import { TextInputField, SelectField, MultilineInputField, CheckboxField, AutoCompleteMultiField, DateInputField } from "../Common/HelperInputFields";
 import { phonePreg } from "../../Common/validation";
 import { navigate } from "hookrouter";
 import { Loading } from "../Common/Loading";
@@ -13,6 +13,7 @@ import { useAbortableEffect, statusType } from "../../Common/utils";
 import countryList from "../../Common/static/countries.json"
 import * as Notification from "../../Utils/Notifications.js";
 import PageTitle from "../Common/PageTitle";
+import SaveIcon from "@material-ui/icons/Save";
 
 interface PatientRegisterProps extends PatientModel {
   facilityId: number;
@@ -110,7 +111,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   const [localBody, setLocalBody] = useState(selectDistrict);
 
   const headerText = !id ? "Add Details of Covid Suspect" : "Update Covid Suspect Details";
-  const buttonText = !id ? "Save" : "Update";
+  const buttonText = !id ? "Add Covid Suspect" : "Save Details";
 
   const fetchDistricts = useCallback(
     async (id: string) => {
@@ -150,6 +151,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         if (res && res.data) {
           const formData = {
             ...res.data,
+            gender: res.data.gender ? res.data.gender : "",
+            state: res.data.state ? res.data.state : "",
+            district: res.data.district ? res.data.district : "",
+            local_body: res.data.local_body ? res.data.local_body : "",
             medical_history: [],
             contact_with_confirmed_carrier: String(res.data.contact_with_confirmed_carrier),
             contact_with_suspected_carrier: String(res.data.contact_with_suspected_carrier),
@@ -353,10 +358,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     dispatch({ type: "set_form", form });
   };
 
-  const handleCancel = () => {
-    navigate(`/facility/${facilityId}`);
-  };
-
   const renderMedicalHistory = (id: number, title: string) => {
     const checkboxField = `medical_history_check_${id}`;
     const textField = `medical_history_${id}`;
@@ -401,7 +402,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         <Card>
           {showAlertMessage.show && (
             <AlertDialog
-              handleClose={() => handleCancel()}
+              handleClose={() => window.history.go(-1)}
               message={showAlertMessage.message}
               title={showAlertMessage.title}
             />
@@ -513,7 +514,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                 </div>
 
                 <div>
-                  <InputLabel id="gender-label">District*</InputLabel>
+                  <InputLabel id="gender-label">District</InputLabel>
                   {isDistrictLoading ? (
                     <CircularProgress size={20} />
                   ) : (
@@ -528,7 +529,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           handleChange(e),
                           fetchLocalBody(String(e.target.value))
                         ]}
-                        error={state.errors.district}
+                        errors={state.errors.district}
                       />
                     )}
                 </div>
@@ -680,19 +681,14 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
               </div>
               <div
-                className="flex justify-between mt-4"
+                className="flex mt-4"
               >
-                <Button
-                  color="default"
-                  variant="contained"
-                  type="button"
-                  onClick={e => handleCancel()}
-                > Cancel </Button>
                 <Button
                   color="primary"
                   variant="contained"
                   type="submit"
                   style={{ marginLeft: "auto" }}
+                  startIcon={<SaveIcon>save</SaveIcon>}
                   onClick={e => handleSubmit(e)}
                 > {buttonText} </Button>
               </div>

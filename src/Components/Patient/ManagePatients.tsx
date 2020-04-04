@@ -1,19 +1,15 @@
-import React, { useState, useCallback } from "react";
+import { Tooltip } from "@material-ui/core";
 import Grid from "@material-ui/core/Grid";
-import {
-  CardContent,
-  CardHeader,
-  Tooltip,
-  Box
-} from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { useDispatch } from "react-redux";
-import { getAllPatient } from "../../Redux/actions";
-import Pagination from "../Common/Pagination";
+import WarningRoundedIcon from '@material-ui/icons/WarningRounded';
 import { navigate } from "hookrouter";
+import React, { useCallback, useState } from "react";
+import { useDispatch } from "react-redux";
+import { statusType, useAbortableEffect } from "../../Common/utils";
+import { getAllPatient } from "../../Redux/actions";
 import { Loading } from "../Common/Loading";
-import { useAbortableEffect, statusType } from "../../Common/utils";
 import PageTitle from "../Common/PageTitle";
+import Pagination from "../Common/Pagination";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -102,7 +98,7 @@ export const PatientManager = (props: any) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [offset, setOffset] = useState(0);
 
-  const limit = 15;
+  const limit = 10;
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -136,18 +132,16 @@ export const PatientManager = (props: any) => {
   if (data && data.length) {
     patientList = data.map((patient: any, idx: number) => {
       const patientUrl = patient.facility
-      ? `/facility/${patient.facility}/patient/${patient.id}`
-      : `/patient/${patient.id}`;
+        ? `/facility/${patient.facility}/patient/${patient.id}`
+        : `/patient/${patient.id}`;
       return (
         <div key={`usr_${patient.id}`} className="w-full md:w-1/2 mt-4 px-2">
           <div
-            className="block border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black"
             onClick={() => navigate(patientUrl)}
-          >
-            <CardHeader
-              className={classes.cardHeader}
-              title={
-                <span className={classes.title}>
+            className="overflow-hidden shadow-lg block border rounded-lg bg-white h-full cursor-pointer hover:border-primary-500">
+            <div className="px-6 py-4">
+              <div className="flex justify-between">
+                <div className="font-bold text-xl mb-2">
                   <Tooltip
                     title={
                       <span className={classes.toolTip}>{patient.name}</span>
@@ -156,33 +150,26 @@ export const PatientManager = (props: any) => {
                   >
                     <span>{patient.name}</span>
                   </Tooltip>
-                </span>
-              }
-            />
-            <CardContent className={classes.content}>
-              <Box>
-                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>
-                  Age -{" "}
-                </span>
-                <span>{patient.age}</span>
-              </Box>
-            </CardContent>
-            <CardContent className={classes.content}>
-              <Box>
-                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>
-                  Contact with Covid Patient -{" "}
-                </span>
-                <span>{patient.contact_with_carrier ? "Yes" : "No"}</span>
-              </Box>
-            </CardContent>
-            <CardContent className={classes.content}>
-              <Box>
-                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>
-                  Status -{" "}
-                </span>
-                <span>{patient.is_active ? "Active" : "Inactive"}</span>
-              </Box>
-            </CardContent>
+                </div>
+                <div >{!patient.is_active && <span className="badge badge-pill badge-dark">Inactive</span>}</div>
+              </div>
+              <div>
+                <span className="font-semibold leading-relaxed">Age: </span>
+                {patient.age}
+              </div>              
+              {patient.contact_with_confirmed_carrier && (<div className="flex">
+                <span className="font-semibold leading-relaxed">Contact with confirmed carrier</span>
+                <WarningRoundedIcon color="error"></WarningRoundedIcon>
+              </div>)}
+              {patient.contact_with_suspected_carrier && !patient.contact_with_confirmed_carrier && (<div className="flex">
+                <span className="font-semibold leading-relaxed">Contact with suspected carrier</span>
+                <WarningRoundedIcon></WarningRoundedIcon>
+              </div>)}
+              <div>{patient.countries_travelled && (
+                <span className="font-semibold leading-relaxed">Travel History: </span>)}
+                {patient.countries_travelled.split(',').join(', ')}
+              </div>
+            </div>
           </div>
         </div>
       );

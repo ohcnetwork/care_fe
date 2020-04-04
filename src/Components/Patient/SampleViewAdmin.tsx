@@ -101,7 +101,7 @@ export default function SampleViewAdmin(props: any) {
   });
   const [selectedStatus, setSelectedStatus] = useState<{ status: number, sample: any }>({ status: 0, sample: null });
 
-  const limit = 15;
+  const limit = 10;
 
   const resultTypes = [{
     id: 0,

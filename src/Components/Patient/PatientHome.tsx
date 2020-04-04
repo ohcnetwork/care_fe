@@ -319,7 +319,7 @@ export const PatientHome = (props: any) => {
           </div>
           {patientData.countries_travelled && (<div>
             <span className="font-semibold leading-relaxed">Countries travelled: </span>
-            {patientData.countries_travelled}
+            {patientData.countries_travelled.split(',').join(', ')}
           </div>)}
         </div>
 
