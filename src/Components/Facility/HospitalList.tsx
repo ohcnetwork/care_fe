@@ -1,4 +1,4 @@
-import { CardContent, CardHeader, Tooltip, Typography } from "@material-ui/core";
+import { Button } from "@material-ui/core";
 import Grid from "@material-ui/core/Grid";
 import { makeStyles } from "@material-ui/core/styles";
 import { navigate } from "hookrouter";
@@ -12,79 +12,12 @@ import Pagination from "../Common/Pagination";
 import { FacilityModal } from "./models";
 
 const useStyles = makeStyles(theme => ({
-  root: {
-    flexGrow: 1,
-    padding: "8px"
-  },
-  card: {
-    height: 160,
-    width: "100%",
-    backgroundColor: "#FFFFFF",
-    cursor: "pointer"
-  },
-  title: {
-    whiteSpace: "nowrap",
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-    fontWeight: 400,
-    //padding: '10px',
-    //fontSize: '14px',
-    display: "inline-block",
-    [theme.breakpoints.up("md")]: {
-      width: "12vw"
-    },
-    [theme.breakpoints.down("sm")]: {
-      width: "40vw"
-    },
-    [theme.breakpoints.down("xs")]: {
-      width: "65vw"
-    }
-  },
-  content: {
-    padding: "5px 10px"
-  },
-  cardHeader: {
-    padding: "10px"
-  },
-  contentText: {
-    whiteSpace: "nowrap",
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-    display: "inline-block",
-    [theme.breakpoints.up("md")]: {
-      width: "10vw"
-    },
-    [theme.breakpoints.down("sm")]: {
-      width: "40vw"
-    },
-    [theme.breakpoints.down("xs")]: {
-      width: "40vw"
-    }
-  },
-  spacing: {
-    marginLeft: theme.spacing(1)
-  },
-  margin: {
-    margin: theme.spacing(1)
-  },
-  addUserCard: {
-    marginTop: "50px"
-  },
   paginateTopPadding: {
     paddingTop: "50px"
-  },
-  userCardSideTitle: {
-    fontSize: "13px"
-  },
-  toolTip: {
-    fontSize: "13px"
   },
   displayFlex: {
     display: "flex"
   },
-  minHeight: {
-    minHeight: "65vh"
-  }
 }));
 
 export const HospitalList = () => {
@@ -137,45 +70,31 @@ export const HospitalList = () => {
             className="block border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black"
             onClick={() => navigate(`/facility/${facility.id}`)}
           >
-            <CardHeader
-              className={classes.cardHeader}
-              title={
-                <span className={classes.title}>
-                  <Tooltip
-                    title={
-                      <span className={classes.toolTip}>{facility.name}</span>
-                    }
-                    interactive={true}
-                  >
-                    <span>{facility.name}</span>
-                  </Tooltip>
-                </span>
-              }
-            />
-            <CardContent className={classes.content}>
-              <Typography>
-                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>
-                  District -{" "}
-                </span>
-                {facility?.district_object?.name}
-              </Typography>
-            </CardContent>
-            <CardContent className={classes.content}>
-              <Typography>
-                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>
-                  Facility Type -{" "}
-                </span>
-                {facility.facility_type}
-              </Typography>
-            </CardContent>
-            <CardContent className={classes.content}>
-              <Typography>
-                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>
-                  Contact -{" "}
-                </span>
-                {facility.phone_number}
-              </Typography>
-            </CardContent>
+            <div className="px-6 py-4 h-full flex flex-col justify-between">
+              <div>
+                <div className="flex justify-between">
+                  <div className="font-bold text-xl capitalize mb-2">
+                    {facility.name}
+                  </div>
+                  <div>{!facility.is_active && <span className="badge badge-pill badge-dark">Inactive</span>}</div>
+                </div>
+                <div>
+                  <span className="font-semibold leading-relaxed">District: </span>
+                  {facility.district_object?.name}
+                </div>
+                <div>
+                  <span className="font-semibold leading-relaxed">Facility Type: </span>
+                  {facility.facility_type}
+                </div>
+                <div>
+                  <span className="font-semibold leading-relaxed">Phone: </span>
+                  {facility.phone_number || '-'}
+                </div>
+              </div>
+              <div className="mt-2">
+                <Button size="small" variant="outlined" fullWidth>Click here to proceed</Button>
+              </div>
+            </div>
           </div>
         </div>
       );
