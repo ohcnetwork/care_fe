@@ -328,15 +328,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     dispatch({ type: "set_form", form });
   }
 
-  const handleDateChange = (date: any) => {
+  const handleDateChange = (date: any, field: string) => {
     const form = { ...state.form };
-    form.estimated_contact_date = date;
-    dispatch({ type: "set_form", form });
-  };
-
-  const handleReturnDateChange = (date: any) => {
-    const form = { ...state.form };
-    form.date_of_return = date;
+    form[field] = date;
     dispatch({ type: "set_form", form });
   };
 
@@ -613,7 +607,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   <DateInputField
                     label="Esimate date of contact*"
                     value={state.form.estimated_contact_date}
-                    onChange={date => handleDateChange(date)}
+                    onChange={date => handleDateChange(date, "estimated_contact_date")}
                     errors={state.errors.estimated_contact_date}
                     variant="outlined"
                     maxDate={new Date()}
@@ -646,7 +640,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     <DateInputField
                       label="Estimated date of return*"
                       value={state.form.date_of_return}
-                      onChange={date => handleReturnDateChange(date)}
+                      onChange={date => handleDateChange(date, "date_of_return")}
                       errors={state.errors.date_of_return}
                       variant="outlined"
                       maxDate={new Date()}

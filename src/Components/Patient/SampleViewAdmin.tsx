@@ -2,7 +2,7 @@ import { Box, Button, CardContent, CardHeader, Grid, InputLabel, Tooltip, Typogr
 import { makeStyles } from "@material-ui/core/styles";
 import { navigate } from "hookrouter";
 import moment from 'moment';
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, MouseEvent } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { SAMPLE_TEST_RESULT } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -11,6 +11,7 @@ import * as Notification from "../../Utils/Notifications";
 import { NativeSelectField } from "../Common/HelperInputFields";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
+import AlertDialog from "../Common/AlertDialog";
 import Pagination from "../Common/Pagination";
 
 const useStyles = makeStyles(theme => ({
@@ -93,6 +94,13 @@ export default function SampleViewAdmin(props: any) {
   const [offset, setOffset] = useState(0);
   const [result, setResult] = useState<any>({});
   const [fetchFlag, callFetchData] = useState(false);
+  const [showAlertMessage, setAlertMessage] = useState({
+    show: false,
+    message: "",
+    title: "",
+  });
+  const [selectedStatus, setSelectedStatus] = useState<{ status: number, sample: any }>({ status: 0, sample: null });
+
   const limit = 15;
 
   const resultTypes = [{
@@ -135,7 +143,8 @@ export default function SampleViewAdmin(props: any) {
     setResult(results);
   };
 
-  const handleApproval = (status: number, sample: any) => {
+  const handleApproval = () => {
+    const { status, sample } = selectedStatus;
     const sampleData = {
       id: sample.id,
       status,
@@ -167,6 +176,7 @@ export default function SampleViewAdmin(props: any) {
       }
     });
   };
+
   const handleComplete = (status: number, sample: any, result: number) => {
     const sampleData = {
       id: sample.id,
@@ -188,6 +198,16 @@ export default function SampleViewAdmin(props: any) {
       }
     });
   };
+
+  const confirmApproval = (e: MouseEvent, status: number, sample: any, msg: string) => {
+    e.stopPropagation();
+    setSelectedStatus({ status, sample });
+    setAlertMessage({
+      show: true,
+      message: `Are you sure you want to change the status to ${msg}`,
+      title: "Confirm",
+    });
+  }
 
   let user = currentUser.data;
   let sampleList: any[] = [];
@@ -224,7 +244,7 @@ export default function SampleViewAdmin(props: any) {
                   <Button
                     style={{ color: "green" }}
                     variant="outlined"
-                    onClick={e => handleApproval(2, sample)}
+                    onClick={e => confirmApproval(e, 2, sample, "Approve")}
                   >
                     Approve
                   </Button>
@@ -234,7 +254,7 @@ export default function SampleViewAdmin(props: any) {
                   <Button
                     style={{ color: "red" }}
                     variant="outlined"
-                    onClick={e => handleApproval(3, sample)}
+                    onClick={e => confirmApproval(e, 3, sample, "Deny")}
                   >
                     Deny
                   </Button>
@@ -246,9 +266,9 @@ export default function SampleViewAdmin(props: any) {
                   <Button
                     style={{ color: "red" }}
                     variant="outlined"
-                    onClick={e => handleApproval(5, sample)}
+                    onClick={e => confirmApproval(e, 5, sample, "Received and forwarded")}
                   >
-                    Recieved and forwarded
+                    Received and forwarded
                   </Button>
                 </CardContent>
               )}
@@ -259,9 +279,9 @@ export default function SampleViewAdmin(props: any) {
                   <Button
                     style={{ color: "red" }}
                     variant="outlined"
-                    onClick={e => handleApproval(6, sample)}
+                    onClick={e => confirmApproval(e, 6, sample, "Received at lab")}
                   >
-                    Recieved at lab
+                    Received at lab
                   </Button>
                 </CardContent>
               )}
@@ -353,6 +373,18 @@ export default function SampleViewAdmin(props: any) {
 
   return (
     <div>
+      {showAlertMessage.show && (
+        <AlertDialog
+          title={showAlertMessage.title}
+          message={showAlertMessage.message}
+          handleClose={() => handleApproval()}
+          handleCancel={() => setAlertMessage({
+            show: false,
+            message: "",
+            title: "",
+          })}
+        />
+      )}
       <PageTitle title="Sample Management system" hideBack={true} />
       <div className="flex flex-wrap mt-4">
         {manageSamples}
