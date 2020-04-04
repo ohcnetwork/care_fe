@@ -49,6 +49,7 @@ export const FACILITY_ID = {
 export const BED_TYPES: Array<OptionsType> = [
   { id: 1, text: "Normal" },
   { id: 2, text: "Hostel" },
+  { id: 3, text: "Single Room with Attached Bathroom"},
   { id: 10, text: "ICU" },
   { id: 20, text: "Ventilator" }
 ];
