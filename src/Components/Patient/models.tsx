@@ -30,6 +30,7 @@ export interface PatientModel {
     contact_with_suspected_carrier?: boolean;
     estimated_contact_date?: string;
     past_travel?: boolean;
+    ongoing_medication?: string;
     countries_travelled?: string;
     present_health?: string;
     has_SARI?: boolean;

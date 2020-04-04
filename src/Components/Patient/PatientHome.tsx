@@ -321,6 +321,12 @@ export const PatientHome = (props: any) => {
             <span className="font-semibold leading-relaxed">Countries travelled: </span>
             {patientData.countries_travelled.split(',').join(', ')}
           </div>)}
+          { patientData.ongoing_medication &&
+            <div>
+              <span className="font-semibold leading-relaxed">Ongoing Medications </span>
+              {patientData.ongoing_medication}
+            </div>
+          }
         </div>
 
         <div className="flex mt-4">

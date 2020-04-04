@@ -50,6 +50,7 @@ const initForm: any = {
   countries_travelled: [],
   has_SARI: false,
   prescribed_medication: false,
+  ongoing_medication: "",
   ...medicalHistoryChoices
 };
 
@@ -162,8 +163,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             medical_history: [],
             contact_with_confirmed_carrier: String(res.data.contact_with_confirmed_carrier),
             contact_with_suspected_carrier: String(res.data.contact_with_suspected_carrier),
+            ongoing_medication: String(res.data.ongoing_medication),
             countries_travelled: res.data.countries_travelled ? res.data.countries_travelled.split(',') : [],
-          }
+          };
           res.data.medical_history.forEach((i: any) => {
             const medicalHistoryId = medicalHistoryTypes.find((j: any) => j.text === i.disease)?.id;
             if (medicalHistoryId) {
@@ -298,7 +300,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         countries_travelled: state.form.past_travel ? state.form.countries_travelled.join(',') : undefined,
         date_of_return: state.form.past_travel ? state.form.date_of_return : undefined,
         has_SARI: state.form.has_SARI,
-        // prescribed_medication: state.form.prescribed_medication,
+        ongoing_medication: state.form.ongoing_medication,
         medical_history,
         is_active: true
       };
@@ -674,14 +676,22 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   </div>
                 </div>
 
-                {/* <div className="md:col-span-2">
-                  <CheckboxField
-                    checked={state.form.prescribed_medication}
-                    onChange={handleCheckboxFieldChange}
-                    name="prescribed_medication"
-                    label="Already prescribed medication for any underlying condition?"
+                <div>
+                  <InputLabel id="ongoing_medication-label">Ongoing Medication</InputLabel>
+                  <MultilineInputField
+                      rows={2}
+                      name="ongoing_medication"
+                      variant="outlined"
+                      margin="dense"
+                      type="text"
+                      placeholder="Optional Information"
+                      InputLabelProps={{ shrink: !!state.form.ongoing_medication }}
+                      value={state.form.ongoing_medication}
+                      onChange={handleChange}
+                      errors={state.errors.ongoing_medication}
                   />
-                </div> */}
+                </div>
+
 
               </div>
               <div
