@@ -1,29 +1,14 @@
-import React, { useState } from "react";
-import {
-  Box,
-  Button,
-  Card,
-  CardHeader,
-  Grid,
-  CardContent,
-  CardActions,
-  Checkbox,
-  Typography,
-  Switch
-} from "@material-ui/core";
-import { TextInputField, CheckboxField } from "../Common/HelperInputFields";
-import { useDispatch } from "react-redux";
-import { postAmbulance } from "../../Redux/actions";
-import { isEmpty } from "lodash";
+import { Box, Button, Card, CardActions, CardContent, CardHeader, Checkbox, Grid, Switch, Typography } from "@material-ui/core";
+import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import { navigate } from "hookrouter";
-import SaveIcon from "@material-ui/icons/Save";
-import {
-  AGREE_CONSENT,
-  AMBULANCE_FREE_SERVICE_CONSENT,
-  AMBULANCE_SERVICE_FEE_TEXT
-} from "../../Common/constants";
-import { vehicleForm } from "./VehicleDetailsForm";
+import { isEmpty } from "lodash";
+import React, { useState } from "react";
+import { useDispatch } from "react-redux";
+import { AGREE_CONSENT, AMBULANCE_FREE_SERVICE_CONSENT, AMBULANCE_SERVICE_FEE_TEXT } from "../../Common/constants";
+import { postAmbulance } from "../../Redux/actions";
 import * as Notification from '../../Utils/Notifications.js';
+import { CheckboxField, TextInputField } from "../Common/HelperInputFields";
+import { vehicleForm } from "./VehicleDetailsForm";
 
 interface DriverDetailsProps {
   classes: any;
@@ -306,10 +291,10 @@ export const DriverDetailsForm = (props: DriverDetailsProps) => {
                   variant="contained"
                   type="submit"
                   onClick={e => handleSubmit(e)}
-                  startIcon={<SaveIcon>save</SaveIcon>}
+                  startIcon={<CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>}
                   disabled={!form.agreeConsent || isLoading}
                 >
-                  Save Details
+                  Add Ambulance
                 </Button>
               </CardActions>
             </form>

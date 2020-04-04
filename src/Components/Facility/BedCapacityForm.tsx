@@ -1,5 +1,5 @@
 import { Button, Card, CardActions, CardContent, InputLabel } from "@material-ui/core";
-import SaveIcon from "@material-ui/icons/Save";
+import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import { navigate } from "hookrouter";
 import React, { useCallback, useEffect, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -280,7 +280,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
                   variant="contained"
                   type="submit"
                   onClick={e => handleSubmit(e)}
-                  startIcon={<SaveIcon>save</SaveIcon>}
+                  startIcon={<CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>}
                 >
                   {buttonText}
                 </Button>

@@ -1,19 +1,19 @@
-import React, { useState, useReducer, useCallback } from "react";
-import { useDispatch } from "react-redux";
-import { Box, Card, CardContent, Button, InputLabel, RadioGroup, Radio, FormControlLabel, CircularProgress } from "@material-ui/core";
-import { TextInputField, SelectField, MultilineInputField, CheckboxField, AutoCompleteMultiField, DateInputField } from "../Common/HelperInputFields";
-import { phonePreg } from "../../Common/validation";
+import { Box, Button, Card, CardContent, CircularProgress, FormControlLabel, InputLabel, Radio, RadioGroup } from "@material-ui/core";
+import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import { navigate } from "hookrouter";
-import { Loading } from "../Common/Loading";
-import AlertDialog from "../Common/AlertDialog";
-import { PatientModel } from "./models";
+import React, { useCallback, useReducer, useState } from "react";
+import { useDispatch } from "react-redux";
 import { GENDER_TYPES, MEDICAL_HISTORY_CHOICES } from "../../Common/constants";
-import { createPatient, getPatient, updatePatient, getStates, getDistrictByState, getLocalbodyByDistrict } from "../../Redux/actions";
-import { useAbortableEffect, statusType } from "../../Common/utils";
-import countryList from "../../Common/static/countries.json"
+import countryList from "../../Common/static/countries.json";
+import { statusType, useAbortableEffect } from "../../Common/utils";
+import { phonePreg } from "../../Common/validation";
+import { createPatient, getDistrictByState, getLocalbodyByDistrict, getPatient, getStates, updatePatient } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
+import AlertDialog from "../Common/AlertDialog";
+import { AutoCompleteMultiField, CheckboxField, DateInputField, MultilineInputField, SelectField, TextInputField } from "../Common/HelperInputFields";
+import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
-import SaveIcon from "@material-ui/icons/Save";
+import { PatientModel } from "./models";
 
 interface PatientRegisterProps extends PatientModel {
   facilityId: number;
@@ -698,7 +698,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   variant="contained"
                   type="submit"
                   style={{ marginLeft: "auto" }}
-                  startIcon={<SaveIcon>save</SaveIcon>}
+                  startIcon={<CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>}
                   onClick={e => handleSubmit(e)}
                 > {buttonText} </Button>
               </div>
