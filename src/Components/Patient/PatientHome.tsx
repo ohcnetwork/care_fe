@@ -212,9 +212,9 @@ export const PatientHome = (props: any) => {
   ) {
     const medHis = patientData.medical_history;
     patientMedHis = medHis.map((item: any, idx: number) => (
-      <tr key={`med_his_${idx}`}>
-        <td>{item.disease}</td>
-        <td>{item.details}</td>
+      <tr className="white border" key={`med_his_${idx}`}>
+        <td className="border px-4 py-2">{item.disease}</td>
+        <td className="border px-4 py-2">{item.details}</td>
       </tr>
     ));
   }
@@ -321,7 +321,7 @@ export const PatientHome = (props: any) => {
             <span className="font-semibold leading-relaxed">Countries travelled: </span>
             {patientData.countries_travelled.split(',').join(', ')}
           </div>)}
-          { patientData.ongoing_medication &&
+          {patientData.ongoing_medication &&
             <div>
               <span className="font-semibold leading-relaxed">Ongoing Medications </span>
               {patientData.ongoing_medication}
@@ -360,15 +360,20 @@ export const PatientHome = (props: any) => {
         <PageTitle title="Medical History" hideBack={true} />
         <div className={classes.details}>
           {patientMedHis.length > 0 ? (
-            <table className="w3-table w3-table-all">
-              <thead>
-                <tr>
-                  <th className="w3-center">Disease</th>
-                  <th className="w3-center">Details</th>
-                </tr>
-              </thead>
-              <tbody>{patientMedHis}</tbody>
-            </table>
+            <div className="-my-2 py-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 mt-4">
+              <div className="align-middle inline-block min-w-full shadow overflow-hidden sm:rounded-lg border-b border-gray-200 mt-4">
+
+                <table className="min-w-full border-2 rounded overflow-hidden bg-white">
+                  <thead>
+                    <tr className="white border" >
+                      <th className="border px-4 py-2">Disease</th>
+                      <th className="border px-4 py-2">Details</th>
+                    </tr>
+                  </thead>
+                  <tbody>{patientMedHis}</tbody>
+                </table>
+              </div>
+            </div>
           ) : (
               <span className="w3-center">
                 <h6 className="w3-text-grey">No Medical History so far</h6>

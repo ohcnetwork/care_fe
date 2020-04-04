@@ -88,29 +88,18 @@ export const ConsultationCard = (props: ConsultationProps) => {
               </Grid>
             )}
           </Grid>
-          <Grid item xs={6}>
-            <Typography style={{ fontSize: "12px" }}>
-             <Button color="primary"
-                     variant="contained"
-                     fullWidth
-                     onClick={
-               () => navigate(`/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/daily-rounds`)}>
-               Add Daily Rounds
-             </Button>
-            </Typography>
-          </Grid>
-          { ' '} { ''}
-          <Grid item xs={6}>
-            <Typography style={{ fontSize: "12px" }}>
-              <Button color="primary"
-                      variant="contained"
-                      fullWidth
-                      onClick={
-                        () => navigate(`/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/daily-rounds-list`)}>
-                View Daily Rounds
-              </Button>
-            </Typography>
-          </Grid>
+          <div className="mt-4">
+            <button className="mr-4 px-4 py-2 shadow border bg-white rounded-md border border-grey-500 whitespace-no-wrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300 text-center"
+              onClick={
+                () => navigate(`/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/daily-rounds`)}>
+              Add Daily Rounds
+            </button>
+            <button className="px-4 py-2 shadow border bg-white rounded-md border border-grey-500 whitespace-no-wrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300 text-center"
+              onClick={
+                () => navigate(`/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/daily-rounds-list`)}>
+              View Daily Rounds
+            </button>
+          </div>
         </Grid>
       </CardContent>
     </div>

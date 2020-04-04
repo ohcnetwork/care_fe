@@ -1,12 +1,12 @@
-import React, {useCallback, useState} from "react"
-import {makeStyles, Theme} from '@material-ui/core/styles';
-import {useDispatch} from "react-redux";
-import {Card, CardContent, Grid, IconButton, Typography,} from "@material-ui/core";
+import React, { useCallback, useState } from "react"
+import { makeStyles, Theme } from '@material-ui/core/styles';
+import { useDispatch } from "react-redux";
+import { Card, CardContent, Grid, IconButton, Typography, } from "@material-ui/core";
 import moment from 'moment';
 import ArrowForwardIosIcon from '@material-ui/icons/ArrowForwardIos';
-import {statusType, useAbortableEffect} from "../../Common/utils";
-import {getDailyReport} from "../../Redux/actions";
-import {Loading} from "../Common/Loading";
+import { statusType, useAbortableEffect } from "../../Common/utils";
+import { getDailyReport } from "../../Redux/actions";
+import { Loading } from "../Common/Loading";
 import Pagination from "../Common/Pagination";
 import PageTitle from "../Common/PageTitle";
 
@@ -18,7 +18,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 
 
 export const DailyRoundsList = (props: any) => {
-    const {facilityId, patientId, consultationId, id} = props;
+    const { facilityId, patientId, consultationId, id } = props;
     const classes = useStyles();
     const dispatch: any = useDispatch();
     const initialData: any[] = [];
@@ -32,7 +32,7 @@ export const DailyRoundsList = (props: any) => {
     const fetchData = useCallback(
         async (status: statusType) => {
             setIsLoading(true);
-            const res = await dispatch(getDailyReport({consultationId, limit, offset}));
+            const res = await dispatch(getDailyReport({ consultationId, limit, offset }));
             if (!status.aborted) {
                 if (res && res.data) {
                     setDailyRoundsListData(res.data.results);
@@ -59,70 +59,59 @@ export const DailyRoundsList = (props: any) => {
 
     let roundsList: any[] = [];
     if (dailyRoundsListData && dailyRoundsListData.length) {
-        roundsList =  dailyRoundsListData.map((itemData: any, idx: any) => {
+        roundsList = dailyRoundsListData.map((itemData: any, idx: any) => {
             return (
-                <div>
-                    <Grid container alignContent="center" justify="center">
-                        <Grid item xs={12} sm={10} md={8} lg={6} xl={4}>
-                            {
-                                <Card key={`daily_round_${idx}`} style={{marginBottom: '10px'}}>
-                                    <CardContent>
-                                        <Grid container justify="space-between" alignItems="center">
-                                            <Grid item xs={11} container spacing={1}>
-                                                <Grid item xs={6}>
-                                                    <Typography>
-                                                        <span
-                                                            className="w3-text-grey">Date :</span> {moment(itemData.temperature_measured_at).format('lll')}
-                                                    </Typography>
-                                                </Grid>
-                                                <Grid item xs={6}>
-                                                    <Typography>
-                                                        <span
-                                                            className="w3-text-grey">Temperature:</span> {itemData.temperature}
-                                                    </Typography>
-                                                </Grid>
-                                                <Grid item xs={12}>
-                                                    <Typography>
-                                                        <span
-                                                            className="w3-text-grey">Physical Examination Info:</span> {itemData.physical_examination_info}
-                                                    </Typography>
-                                                </Grid>
-                                                <Grid item xs={12}>
-                                                    <Typography>
-                                                        <span
-                                                            className="w3-text-grey">Other Details:</span> {itemData.other_details}
-                                                    </Typography>
-                                                </Grid>
-                                            </Grid>
-                                            <Grid item xs={1}>
-                                                <IconButton
-                                                    onClick={() => {
-                                                    }}>
-                                                    <ArrowForwardIosIcon/>
-                                                </IconButton>
-                                            </Grid>
+                <div key={`daily_round_${idx}`} className="w-full mt-4 px-2">
+                    <div className="block border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black">
+                        {
+                            <div className="p-4">
+                                <Grid container justify="space-between" alignItems="center">
+                                    <Grid item xs={11} container spacing={1}>
+                                        <Grid item xs={6}>
+                                            <Typography>
+                                                <span
+                                                    className="w3-text-grey">Date :</span> {moment(itemData.temperature_measured_at).format('lll')}
+                                            </Typography>
                                         </Grid>
-                                    </CardContent>
-                                </Card>
-                            }
-                        </Grid>
-                    </Grid>
-                </div>
+                                        <Grid item xs={6}>
+                                            <Typography>
+                                                <span
+                                                    className="w3-text-grey">Temperature:</span> {itemData.temperature}
+                                            </Typography>
+                                        </Grid>
+                                        <Grid item xs={12}>
+                                            <Typography>
+                                                <span
+                                                    className="w3-text-grey">Physical Examination Info:</span> {itemData.physical_examination_info}
+                                            </Typography>
+                                        </Grid>
+                                        <Grid item xs={12}>
+                                            <Typography>
+                                                <span
+                                                    className="w3-text-grey">Other Details:</span> {itemData.other_details}
+                                            </Typography>
+                                        </Grid>
+                                    </Grid>
+                                </Grid>
+                            </div>
+                        }
+                    </div>
+                </div >
             );
         });
     }
     if (isLoading || !dailyRoundsListData) {
-        manageRounds = <Loading/>;
+        manageRounds = <Loading />;
     } else if (dailyRoundsListData && dailyRoundsListData.length) {
         manageRounds = (
             <>
                 {roundsList}
                 {totalCount > limit && (
-                    <Grid container className={`w3-center`} style={{paddingTop: "50px"}}>
+                    <Grid container className={`w3-center`} style={{ paddingTop: "50px" }}>
                         <Pagination
                             cPage={currentPage}
                             defaultPerPage={limit}
-                            data={{totalCount}}
+                            data={{ totalCount }}
                             onChange={handlePagination}
                         />
                     </Grid>
@@ -139,7 +128,7 @@ export const DailyRoundsList = (props: any) => {
 
     return (
         <div>
-            <PageTitle title="Daily Rounds" hideBack={true}/>
+            <PageTitle title="Daily Rounds" />
             <div className="flex flex-wrap mt-4">{manageRounds}</div>
         </div>
     );
