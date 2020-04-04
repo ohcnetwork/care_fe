@@ -1,5 +1,6 @@
-import { Box, Button, CardContent, CardHeader, Grid, InputLabel, Tooltip, Typography } from "@material-ui/core";
+import { Button, Grid, InputLabel } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import WarningRoundedIcon from "@material-ui/icons/WarningRounded";
 import { navigate } from "hookrouter";
 import moment from "moment";
 import React, { MouseEvent, useCallback, useState } from "react";
@@ -13,7 +14,6 @@ import { NativeSelectField } from "../Common/HelperInputFields";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 import Pagination from "../Common/Pagination";
-import WarningRoundedIcon from "@material-ui/icons/WarningRounded";
 import { SampleListModel } from "./models";
 
 const useStyles = makeStyles((theme) => ({
@@ -43,8 +43,8 @@ export default function SampleViewAdmin(props: any) {
   });
   const [selectedStatus, setSelectedStatus] = useState<{
     status: number;
-    sample: any;
-  }>({ status: 0, sample: null });
+    sample: SampleListModel;
+  }>({ status: 0, sample: {} });
 
   const limit = 10;
 
@@ -107,7 +107,7 @@ export default function SampleViewAdmin(props: any) {
     const sampleData = {
       id: sample.id,
       status,
-      consultation: sample.consultation_id,
+      consultation: sample.consultation,
     };
     let statusName = "";
     if (status === 2) {
@@ -122,7 +122,7 @@ export default function SampleViewAdmin(props: any) {
     if (status === 6) {
       statusName = "RECEIVED AT LAB";
     }
-    dispatch(patchSample(sample.id, sampleData)).then((resp: any) => {
+    dispatch(patchSample(Number(sample.id), sampleData)).then((resp: any) => {
       if (resp.status === 201 || resp.status === 200) {
         Notification.Success({
           msg: `Request ${statusName}`,
@@ -137,16 +137,16 @@ export default function SampleViewAdmin(props: any) {
   const handleComplete = () => {
     const { status, sample } = selectedStatus;
     const sampleData = {
+      consultation: sample.consultation,
       id: sample.id,
+      result: Number(result[String(sample.id)]),
       status,
-      result: Number(result[sample.id.toString()]),
-      consultation: sample.consultation_id,
     };
     let statusName = "";
     if (status === 7) {
       statusName = "COMPLETED";
     }
-    dispatch(patchSample(sample.id, sampleData)).then((resp: any) => {
+    dispatch(patchSample(Number(sample.id), sampleData)).then((resp: any) => {
       if (resp.status === 201 || resp.status === 200) {
         Notification.Success({
           msg: `Request ${statusName}`,
@@ -158,7 +158,7 @@ export default function SampleViewAdmin(props: any) {
     dismissAlert();
   };
 
-  const confirmApproval = (e: MouseEvent, status: number, sample: any, msg: string) => {
+  const confirmApproval = (e: MouseEvent, status: number, sample: SampleListModel, msg: string) => {
     e.stopPropagation();
     setSelectedStatus({ status, sample });
     setAlertMessage({
@@ -253,7 +253,7 @@ export default function SampleViewAdmin(props: any) {
                         fullWidth
                         style={{ color: "green" }}
                         variant="outlined"
-                        onClick={(e) => confirmApproval(e, 2, sample, "Approve")}
+                        onClick={(e) => confirmApproval(e, 2, item, "Approve")}
                       >Approve</Button>
                     </div>
                     <div className="flex-1">
@@ -261,7 +261,7 @@ export default function SampleViewAdmin(props: any) {
                         fullWidth
                         style={{ color: "red" }}
                         variant="outlined"
-                        onClick={(e) => confirmApproval(e, 3, sample, "Deny")}
+                        onClick={(e) => confirmApproval(e, 3, item, "Deny")}
                       >Deny</Button>
                     </div>
                   </div>)}
@@ -272,7 +272,7 @@ export default function SampleViewAdmin(props: any) {
                         fullWidth
                         style={{ color: "red" }}
                         variant="outlined"
-                        onClick={(e) => confirmApproval(e, 5, sample, "Received and forwarded")}
+                        onClick={(e) => confirmApproval(e, 5, item, "Received and forwarded")}
                       >Received and forwarded</Button>
                     )}
                   {item.status === "RECEIVED_AND_FORWARED" &&
@@ -281,7 +281,7 @@ export default function SampleViewAdmin(props: any) {
                         fullWidth
                         style={{ color: "red" }}
                         variant="outlined"
-                        onClick={(e) => confirmApproval(e, 6, sample, "Received at lab")}
+                        onClick={(e) => confirmApproval(e, 6, item, "Received at lab")}
                       >Received at lab</Button>
                     )}
                   {item.status === "RECEIVED_AT_LAB" &&
@@ -301,7 +301,7 @@ export default function SampleViewAdmin(props: any) {
                         style={{ color: "red" }}
                         variant="outlined"
                         disabled={!result[String(item.id)]}
-                        onClick={(e) => confirmApproval(e, 7, sample, "Complete")}
+                        onClick={(e) => confirmApproval(e, 7, item, "Complete")}
                       >Complete</Button>
                     </div>)}
                 </div>

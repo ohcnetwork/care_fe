@@ -1,58 +1,19 @@
-import {
-  Button,
-  Card,
-  CardContent,
-  Divider,
-  Grid,
-  Typography,
-} from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
+import { Button, Card, CardContent, Grid, Typography } from "@material-ui/core";
 import { navigate } from "hookrouter";
 import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { BED_TYPES, DOCTOR_SPECIALIZATION } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import {
-  getFacility,
-  listCapacity,
-  listDoctor,
-  getTriageInfo,
-} from "../../Redux/actions";
+import { getFacility, getTriageInfo, listCapacity, listDoctor } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 import BedTypeCard from "./BedTypeCard";
 import DoctorsCountCard from "./DoctorsCountCard";
-import {
-  CapacityModal,
-  DoctorModal,
-  FacilityModal,
-  PatientStatsModel,
-} from "./models";
-import moment from "moment";
-
-const useStyles = makeStyles((theme) => ({
-  root: {
-    flexGrow: 1,
-    padding: "8px",
-  },
-  margin: {
-    margin: theme.spacing(1),
-  },
-  displayFlex: {
-    display: "flex",
-  },
-  content: {
-    marginTop: "10px",
-    maxWidth: "560px",
-    background: "white",
-    padding: "20px 20px 5px",
-  },
-}));
+import { CapacityModal, DoctorModal, FacilityModal, PatientStatsModel } from "./models";
 
 export const FacilityHome = (props: any) => {
   const { facilityId } = props;
-  const classes = useStyles();
   const dispatch: any = useDispatch();
   const [facilityData, setFacilityData] = useState<FacilityModal>({});
   const [capacityData, setCapacityData] = useState<Array<CapacityModal>>([]);
