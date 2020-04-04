@@ -88,11 +88,11 @@ export const PatientManager = (props: any) => {
                 </div>
                 {patient.contact_with_confirmed_carrier && (<div className="flex">
                   <span className="font-semibold leading-relaxed">Contact with confirmed carrier</span>
-                  <WarningRoundedIcon color="error"></WarningRoundedIcon>
+                  <WarningRoundedIcon className="text-red-500"></WarningRoundedIcon>
                 </div>)}
                 {patient.contact_with_suspected_carrier && !patient.contact_with_confirmed_carrier && (<div className="flex">
                   <span className="font-semibold leading-relaxed">Contact with suspected carrier</span>
-                  <WarningRoundedIcon></WarningRoundedIcon>
+                  <WarningRoundedIcon className="text-yellow-500"></WarningRoundedIcon>
                 </div>)}
                 <div>{patient.countries_travelled && (
                   <span className="font-semibold leading-relaxed">Travel History: </span>)}
