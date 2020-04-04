@@ -8,6 +8,7 @@ import { GENDER_TYPES } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getConsultationList, getPatient, getSampleTestList, patchSample } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
+import AlertDialog from "../Common/AlertDialog";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 import Pagination from "../Common/Pagination";
@@ -64,6 +65,12 @@ export const PatientHome = (props: any) => {
   const [isConsultationLoading, setIsConsultationLoading] = useState(false);
   const [isSampleLoading, setIsSampleLoading] = useState(false);
   const [sampleFlag, callSampleList] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState<{ status: number, sample: any }>({ status: 0, sample: null });
+  const [showAlertMessage, setAlertMessage] = useState({
+    show: false,
+    message: "",
+    title: "",
+  });
 
   const limit = 5;
 
@@ -148,8 +155,25 @@ export const PatientHome = (props: any) => {
     setSampleListOffset(offset);
   };
 
+  const dismissAlert = () => {
+    setAlertMessage({
+      show: false,
+      message: "",
+      title: "",
+    })
+  };
 
-  const handleApproval = (status: number, sample: SampleTestModel) => {
+  const confirmApproval = (status: number, sample: any) => {
+    setSelectedStatus({ status, sample });
+    setAlertMessage({
+      show: true,
+      message: `Are you sure you want to sent the sample to Collection Centre?`,
+      title: "Confirm",
+    });
+  }
+
+  const handleApproval = () => {
+    const { status, sample } = selectedStatus;
     const sampleData = {
       id: sample.id,
       status,
@@ -169,6 +193,8 @@ export const PatientHome = (props: any) => {
         callSampleList(!sampleFlag);
       }
     });
+
+    dismissAlert()
   };
 
   if (isLoading) {
@@ -211,14 +237,21 @@ export const PatientHome = (props: any) => {
     sampleList = <Typography>No sample test available.</Typography>
   } else if (sampleListData.length > 0) {
     sampleList = sampleListData.map((itemData, idx) => (
-      <SampleTestCard itemData={itemData} key={idx} handleApproval={handleApproval} />
+      <SampleTestCard itemData={itemData} key={idx} handleApproval={confirmApproval} facilityId={facilityId} patientId={id} />
     ));
   }
 
   return (
     <div className="px-2">
+      {showAlertMessage.show && (
+        <AlertDialog
+          title={showAlertMessage.title}
+          message={showAlertMessage.message}
+          handleClose={() => handleApproval()}
+          handleCancel={() => dismissAlert()}
+        />
+      )}
       <PageTitle title={`Covid Suspect #${id}`} />
-
       <div className="border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black mt-4 p-4">
         <div className="flex justify-between">
           <div className="max-w-md">

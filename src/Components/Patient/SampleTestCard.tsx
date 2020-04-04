@@ -1,18 +1,21 @@
-import React from "react";
-import { Grid, CardContent, Typography, Button } from "@material-ui/core";
+import { Button, CardContent, Grid, Typography } from "@material-ui/core";
+import { navigate } from "hookrouter";
 import moment from "moment";
+import React from "react";
 import { SampleTestModel } from "./models";
 
-
 interface SampleDetailsProps {
+  facilityId: number;
+  patientId: number;
   itemData: SampleTestModel;
   handleApproval: (status: number, sample: SampleTestModel) => void;
 }
 
 export const SampleTestCard = (props: SampleDetailsProps) => {
-  const { itemData, handleApproval } = props;
+  const { itemData, handleApproval, facilityId, patientId } = props;
+
   return (
-    <div className="block border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black mt-4">
+    <div onClick={e => navigate(`/facility/${facilityId}/patient/${patientId}/sample/${itemData.id}`)} className="block border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black mt-4">
       <CardContent>
         <Grid container justify="space-between" alignItems="center">
           <Grid item xs={11} container spacing={1}>
@@ -51,7 +54,7 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
               <Button
                 style={{ color: "green" }}
                 variant="outlined"
-                onClick={e => handleApproval(4, itemData)}
+                onClick={e => { e.stopPropagation(); handleApproval(4, itemData) }}
               >
                 Sent to Collection Centre
               </Button>

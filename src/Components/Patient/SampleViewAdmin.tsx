@@ -2,16 +2,16 @@ import { Box, Button, CardContent, CardHeader, Grid, InputLabel, Tooltip, Typogr
 import { makeStyles } from "@material-ui/core/styles";
 import { navigate } from "hookrouter";
 import moment from 'moment';
-import React, { useCallback, useState, MouseEvent } from "react";
+import React, { MouseEvent, useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { SAMPLE_TEST_RESULT } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getTestList, patchSample } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
+import AlertDialog from "../Common/AlertDialog";
 import { NativeSelectField } from "../Common/HelperInputFields";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
-import AlertDialog from "../Common/AlertDialog";
 import Pagination from "../Common/Pagination";
 
 const useStyles = makeStyles(theme => ({
