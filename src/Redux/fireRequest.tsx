@@ -91,44 +91,46 @@ export const fireRequest = (
         }).catch((error: any) => {
             dispatch(fetchDataRequestError(key, error));
 
-            // currentUser is ignored because on the first page load 
-            // 403 error is displayed for invalid credential.
-            if (error.response.status === 403 && key === "currentUser") {
-                if (localStorage.getItem('care_access_token')) {
-                    localStorage.removeItem('care_access_token');
+            if (error.response) {
+                // currentUser is ignored because on the first page load 
+                // 403 error is displayed for invalid credential.
+                if (error.response.status === 403 && key === "currentUser") {
+                    if (localStorage.getItem('care_access_token')) {
+                        localStorage.removeItem('care_access_token');
+                    }
+                    return;
                 }
-                return;
-            }
 
-            // 400 Bad Request Error
-            if (error.response.status === 400) {
-                Notification.BadRequest({
-                    errs: error.response.data
-                });
-                return;
-            }
-
-            // 4xx Errors
-            if (error.response.status > 400 &&
-                error.response.status < 500) {
-                if (error.response.data && error.response.data.detail) {
-                    Notification.Error({
-                        msg: error.response.data.detail
+                // 400 Bad Request Error
+                if (error.response.status === 400) {
+                    Notification.BadRequest({
+                        errs: error.response.data
                     });
-                } else {
+                    return;
+                }
+
+                // 4xx Errors
+                if (error.response.status > 400 &&
+                    error.response.status < 500) {
+                    if (error.response.data && error.response.data.detail) {
+                        Notification.Error({
+                            msg: error.response.data.detail
+                        });
+                    } else {
+                        Notification.Error({
+                            msg: 'Something went Wrong...!'
+                        });
+                    }
+                    return;
+                }
+
+                // 5xx Errors
+                if (error.response.status >= 500 && error.response.status <= 599) {
                     Notification.Error({
                         msg: 'Something went Wrong...!'
                     });
+                    return;
                 }
-                return;
-            }
-
-            // 5xx Errors
-            if (error.response.status >= 500 && error.response.status <= 599) {
-                Notification.Error({
-                    msg: 'Something went Wrong...!'
-                });
-                return;
             }
         });
     };
