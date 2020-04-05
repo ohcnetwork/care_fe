@@ -1,5 +1,3 @@
-import { SAMPLE_TEST_STATUS } from "../../Common/constants"
-
 export interface FlowModel {
     id?: number;
     status?: string;
@@ -70,7 +68,7 @@ export interface SampleListModel {
     patient_travel_history?: string;
     facility?: number;
     facility_object?: { id: number; name: string, facility_type?: { id: number; name: string } }
-    status?: keyof typeof SAMPLE_TEST_STATUS;
+    status?: string;
     result?: string;
     patient?: number;
     consultation?: number;

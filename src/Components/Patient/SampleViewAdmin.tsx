@@ -1,20 +1,19 @@
-import { Button, Grid, InputLabel } from "@material-ui/core";
+import { Grid } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import WarningRoundedIcon from "@material-ui/icons/WarningRounded";
 import { navigate } from "hookrouter";
 import moment from "moment";
-import React, { MouseEvent, useCallback, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import React, { useCallback, useState } from "react";
+import { useDispatch } from "react-redux";
 import { SAMPLE_TEST_RESULT, SAMPLE_TEST_STATUS } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getTestList, patchSample } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
-import AlertDialog from "../Common/AlertDialog";
-import { NativeSelectField } from "../Common/HelperInputFields";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 import Pagination from "../Common/Pagination";
 import { SampleListModel } from "./models";
+import UpdateStatusDialog from "./UpdateStatusDialog";
 
 const useStyles = makeStyles((theme) => ({
   paginateTopPadding: {
@@ -27,8 +26,6 @@ export default function SampleViewAdmin(props: any) {
   const dispatch: any = useDispatch();
   const initialData: any[] = [];
   let manageSamples: any = null;
-  const state: any = useSelector((state) => state);
-  const { currentUser } = state;
   const [sample, setSample] = useState<Array<SampleListModel>>(initialData);
   const [isLoading, setIsLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
@@ -36,15 +33,11 @@ export default function SampleViewAdmin(props: any) {
   const [offset, setOffset] = useState(0);
   const [result, setResult] = useState<any>({});
   const [fetchFlag, callFetchData] = useState(false);
-  const [showAlertMessage, setAlertMessage] = useState({
-    show: false,
-    message: "",
-    title: "",
-  });
   const [selectedStatus, setSelectedStatus] = useState<{
     status: number;
     sample: SampleListModel;
   }>({ status: 0, sample: {} });
+  const [statusDialog, setStatusDialog] = useState<{ show: boolean; sample: SampleListModel }>({ show: false, sample: {} });
 
   const limit = 10;
 
@@ -84,22 +77,17 @@ export default function SampleViewAdmin(props: any) {
     setOffset(offset);
   };
 
-  const handleChange = (e: any) => {
-    let results = { ...result };
-    results[e.target.name] = e.target.value;
-    setResult(results);
-  };
+  // const handleChange = (e: any) => {
+  //   let results = { ...result };
+  //   results[e.target.name] = e.target.value;
+  //   setResult(results);
+  // };
 
-  const dismissAlert = () => {
-    setAlertMessage({
-      show: false,
-      message: "",
-      title: "",
-    });
-  };
-
-  const handleApproval = () => {
-    const { status, sample } = selectedStatus;
+  const handleApproval = async (status: number, sample: SampleListModel) => {
+    if (status === 0) {
+      console.log(sample);
+      return;
+    }
     if (status === 7) {
       handleComplete();
       return;
@@ -122,19 +110,17 @@ export default function SampleViewAdmin(props: any) {
     if (status === 6) {
       statusName = "RECEIVED AT LAB";
     }
-    dispatch(patchSample(Number(sample.id), sampleData)).then((resp: any) => {
-      if (resp.status === 201 || resp.status === 200) {
-        Notification.Success({
-          msg: `Request ${statusName}`,
-        });
-        // window.location.reload();
-        callFetchData(!fetchFlag);
-      }
-    });
-    dismissAlert();
+    const res = await dispatch(patchSample(Number(sample.id), sampleData));
+    if (res && (res.status === 201 || res.status === 200)) {
+      Notification.Success({
+        msg: `Request ${statusName}`,
+      });
+      callFetchData(!fetchFlag);
+    }
+    dismissUpdateStatus();
   };
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
     const { status, sample } = selectedStatus;
     const sampleData = {
       consultation: sample.consultation,
@@ -146,32 +132,35 @@ export default function SampleViewAdmin(props: any) {
     if (status === 7) {
       statusName = "COMPLETED";
     }
-    dispatch(patchSample(Number(sample.id), sampleData)).then((resp: any) => {
-      if (resp.status === 201 || resp.status === 200) {
-        Notification.Success({
-          msg: `Request ${statusName}`,
-        });
-        // window.location.reload();
-        callFetchData(!fetchFlag);
-      }
-    });
-    dismissAlert();
+    const res = dispatch(patchSample(Number(sample.id), sampleData));
+    if (res && (res.status === 201 || res.status === 200)) {
+      Notification.Success({
+        msg: `Request ${statusName}`,
+      });
+      callFetchData(!fetchFlag);
+    }
+    dismissUpdateStatus();
   };
 
-  const confirmApproval = (e: MouseEvent, status: number, sample: SampleListModel, msg: string) => {
-    e.stopPropagation();
-    setSelectedStatus({ status, sample });
-    setAlertMessage({
+  const showUpdateStatus = (sample: SampleListModel) => {
+    console.log(sample)
+    setStatusDialog({
       show: true,
-      message: `Are you sure you want to change the status to ${msg}`,
-      title: "Confirm",
+      sample,
     });
-  };
+  }
 
-  let user = currentUser.data;
+  const dismissUpdateStatus = () => {
+    setStatusDialog({
+      show: false,
+      sample: {},
+    });
+  }
+
   let sampleList: any[] = [];
   if (sample && sample.length) {
     sampleList = sample.map((item: SampleListModel, idx: number) => {
+      const statusText = SAMPLE_TEST_STATUS.find(i => i.text === item.status)?.desc;
       return (
         <div key={`usr_${item.id}`} className="w-full md:w-1/2 mt-4 px-2">
           <div
@@ -233,7 +222,7 @@ export default function SampleViewAdmin(props: any) {
                   <span className="font-semibold leading-relaxed">
                     Status:{" "}
                   </span>
-                  {item.status ? SAMPLE_TEST_STATUS[item.status] : "-"}
+                  {statusText}
                 </div>
                 <div className="capitalize">
                   <span className="font-semibold leading-relaxed">
@@ -250,7 +239,7 @@ export default function SampleViewAdmin(props: any) {
               </div>
 
               <div className="mt-2">
-                {item.status === "REQUEST_SUBMITTED" &&
+                {/* {item.status === "REQUEST_SUBMITTED" &&
                   user.user_type === "DistrictAdmin" && (<div className="grid grid-cols-2 gap-2">
                     <div className="flex-1">
                       <Button
@@ -308,18 +297,24 @@ export default function SampleViewAdmin(props: any) {
                         onClick={(e) => confirmApproval(e, 7, item, "Complete")}
                       >Complete</Button>
                     </div>)}
+                </div> */}
+                <div className="mt-2">
+                  <button
+                    onClick={(e) => showUpdateStatus(item)}
+                    className="w-full text-sm bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-4 border border-gray-400 rounded shadow text-center"
+                  >UPDATE SAMPLE STATUS</button>
                 </div>
                 <div className="mt-2">
-                  <div
-                    onClick={(e) => navigate(`/facility/${item.facility}/patient/${item.patient}`)}
-                    className="px-4 py-2 shadow border bg-white rounded-md border border-grey-500 whitespace-no-wrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300 text-center"
-                  >View Patient Details</div>
-                </div>
-                <div className="mt-2">
-                  <div
+                  <button
                     onClick={(e) => navigate(`/samplelist/${item.id}`)}
-                    className="px-4 py-2 shadow border bg-white rounded-md border border-grey-500 whitespace-no-wrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300 text-center"
-                  >View Test Sample Details</div>
+                    className="w-full text-sm bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow text-center"
+                  >View Test Sample Details</button>
+                </div>
+                <div className="mt-2">
+                  <button
+                    onClick={(e) => navigate(`/facility/${item.facility}/patient/${item.patient}`)}
+                    className="w-full text-sm bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow text-center"
+                  >View Patient Details</button>
                 </div>
               </div>
             </div>
@@ -350,9 +345,9 @@ export default function SampleViewAdmin(props: any) {
   } else if (sample && sample.length === 0) {
     manageSamples = (
       <Grid item xs={12} md={12} className="textMarginCenter">
-        <h5 style={{ color: "red" }}>
-          Its looks like samples are empty, please visit once you submit a
-          sample request
+        <h5 style={{ color: "red" }}>h
+        Its looks like samples are empty, please visit once you submit a
+        sample request
         </h5>
       </Grid>
     );
@@ -360,14 +355,12 @@ export default function SampleViewAdmin(props: any) {
 
   return (
     <div>
-      {showAlertMessage.show && (
-        <AlertDialog
-          title={showAlertMessage.title}
-          message={showAlertMessage.message}
-          handleClose={() => handleApproval()}
-          handleCancel={() => dismissAlert()}
-        />
-      )}
+      <UpdateStatusDialog
+        open={statusDialog.show}
+        sample={statusDialog.sample}
+        handleOk={handleApproval}
+        handleCancel={dismissUpdateStatus}
+      />
       <PageTitle title="Sample Management system" hideBack={true} />
       <div className="flex flex-wrap mt-4">{manageSamples}</div>
     </div>
