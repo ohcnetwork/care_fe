@@ -55,6 +55,7 @@ export interface SampleTestModel {
     patient_has_suspected_contact?: boolean;
     patient_travel_history?: string;
     facility?: number;
+    facility_object?: { id: number; name: string, facility_type?: { id: number; name: string } }
     patient?: number;
     fast_track?: number;
     flow?: Array<FlowModel>;

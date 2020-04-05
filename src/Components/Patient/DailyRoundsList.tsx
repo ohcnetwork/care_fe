@@ -58,14 +58,14 @@ export const DailyRoundsList = (props: any) => {
                                 <Grid item xs={11} container spacing={1}>
                                     <Grid item xs={6}>
                                         <Typography>
-                                            <span className="w3-text-grey">Date :</span>{" "}
-                                            {itemData.temperature_measured_at ? moment(itemData.temperature_measured_at).format('lll') : "-"}
+                                            <span className="w3-text-grey">Temperature:</span>{" "}
+                                            {itemData.temperature}
                                         </Typography>
                                     </Grid>
                                     <Grid item xs={6}>
                                         <Typography>
-                                            <span className="w3-text-grey">Temperature:</span>{" "}
-                                            {itemData.temperature}
+                                            <span className="w3-text-grey">Temperature taken at :</span>{" "}
+                                            {itemData.temperature_measured_at ? moment(itemData.temperature_measured_at).format('lll') : "-"}
                                         </Typography>
                                     </Grid>
                                     <Grid item xs={12}>

@@ -81,15 +81,23 @@ export const SampleDetails = (props: SampleDetailsProps) => {
             {sampleDetails.status}
           </div>
           <div>
-            <span className="font-semibold leading-relaxed">Result:</span>
+            <span className="font-semibold leading-relaxed">Result: </span>
             {sampleDetails.result}
           </div>
           <div>
-            <span className="font-semibold leading-relaxed">Tested on :</span>{" "}
+            <span className="font-semibold leading-relaxed">Patient: </span>
+            {sampleDetails.patient_name}
+          </div>
+          {sampleDetails.facility_object && (<div>
+            <span className="font-semibold leading-relaxed">{sampleDetails.facility_object.name} </span>
+             ({sampleDetails.facility_object.facility_type?.name || "-"})
+          </div>)}
+          <div>
+            <span className="font-semibold leading-relaxed">Tested on: </span>
             {sampleDetails.date_of_result ? moment(sampleDetails.date_of_result).format("lll") : "-"}
           </div>
           <div>
-            <span className="font-semibold leading-relaxed">Result on:</span>{" "}
+            <span className="font-semibold leading-relaxed">Result on: </span>
             {sampleDetails.date_of_result ? moment(sampleDetails.date_of_result).format("lll") : "-"}
           </div>
           {sampleDetails.fast_track && (<div className="md:col-span-2">
