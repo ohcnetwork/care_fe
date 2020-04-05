@@ -1,16 +1,15 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@material-ui/core';
 import { WithStyles, withStyles } from '@material-ui/styles';
-import React, { useState, useReducer } from 'react';
-import { useSelector } from 'react-redux';
-import { SAMPLE_TEST_STATUS, SAMPLE_TEST_RESULT } from '../../Common/constants';
+import React, { useReducer } from 'react';
+import { ROLE_STATUS_MAP, SAMPLE_TEST_STATUS, SAMPLE_TEST_RESULT } from '../../Common/constants';
 import { CheckboxField, SelectField } from '../Common/HelperInputFields';
 import { SampleListModel } from './models';
 
 interface Props {
     sample: SampleListModel;
-    open: boolean;
     handleOk: (sample: SampleListModel, status: number, result: number) => void;
     handleCancel: () => void;
+    userType: "Staff" | "DistrictAdmin" | "StateLabAdmin";
 };
 
 const styles = {
@@ -20,13 +19,7 @@ const styles = {
     }
 };
 
-const statusChoices = [
-    {
-        id: 0,
-        desc: "Select",
-    },
-    ...SAMPLE_TEST_STATUS
-];
+const statusChoices = [ ...SAMPLE_TEST_STATUS ];
 
 const resultTypes = [
     {
@@ -35,6 +28,8 @@ const resultTypes = [
     },
     ...SAMPLE_TEST_RESULT,
 ];
+
+const roleStatusMap = { ...ROLE_STATUS_MAP };
 
 const initForm: any = {
     confirm: false,
@@ -61,12 +56,22 @@ const updateStatusReducer = (state = initialState, action: any) => {
 };
 
 const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
-    const { open, sample, handleOk, handleCancel, classes } = props;
+    const { sample, handleOk, handleCancel, classes, userType } = props;
     const [state, dispatch] = useReducer(updateStatusReducer, initialState);
 
-    // console.log(currentUser.data.user_type)
-
     const currentStatus = SAMPLE_TEST_STATUS.find(i => i.text === sample.status)?.desc;
+
+    const validStatusChoices = statusChoices
+    .filter(i => roleStatusMap[userType].includes(i.text))
+    .filter(i => i.id > Number(SAMPLE_TEST_STATUS.find(i => i.text === sample.status)?.id));
+
+    const newStatusChoices = [
+        {
+            id: 0,
+            text: "Select",
+        },
+        ...validStatusChoices
+    ];
 
     const okClicked = () => {
         handleOk(sample, state.form.status, state.form.result);
@@ -85,11 +90,9 @@ const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
         dispatch({ type: "set_form", form });
     };
 
-    console.log(state.form.status)
-
     return (
         <Dialog
-            open={open}
+            open={true}
             classes={{
                 paper: classes.paper,
             }}
@@ -110,7 +113,7 @@ const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
                             variant="standard"
                             optionValue="desc"
                             value={state.form.status}
-                            options={statusChoices}
+                            options={newStatusChoices}
                             onChange={(e: any) => handleChange(e.target.name, e.target.value)}
                         />
                     </div>

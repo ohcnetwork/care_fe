@@ -98,15 +98,6 @@ export const AMBULANCE_FREE_SERVICE_CONSENT =
 export const AMBULANCE_SERVICE_FEE_TEXT =
   "I / we will require fees for providing service";
 
-export const SAMPLE_TEST_STATUS = [
-  { id: 1, text: "REQUEST_SUBMITTED", desc: "Request Submitted" },
-  { id: 2, text: "APPROVED", desc: "Approved for Sample Collection" },
-  { id: 3, text: "DENIED", desc: "Request Denied" },
-  { id: 4, text: "SENT_TO_COLLECTON_CENTRE", desc: "Sample taken and sent to collection centre" },
-  { id: 5, text: "RECEIVED_AND_FORWARED", desc: "Received And Forwarded" },
-  { id: 6, text: "RECEIVED_AT_LAB", desc: "Received At Lab" },
-  { id: 7, text: "COMPLETED", desc: "Sample Testing Completed" },
-];
 
 export const SAMPLE_TEST_RESULT = [
   { id: 1, text: "POSITIVE" },
@@ -140,3 +131,19 @@ export const CURRENT_HEALTH_CHANGE = [
   { id: 3, text: 'Status Quo' },
   { id: 4, text: 'Better' },
 ]
+
+export const SAMPLE_TEST_STATUS = [
+  { id: 1, text: "REQUEST_SUBMITTED", desc: "Request Submitted" },
+  { id: 2, text: "APPROVED", desc: "Approved for Sample Collection" },
+  { id: 3, text: "DENIED", desc: "Request Denied" },
+  { id: 4, text: "SENT_TO_COLLECTON_CENTRE", desc: "Sample taken and sent to collection centre" },
+  { id: 5, text: "RECEIVED_AND_FORWARED", desc: "Received And Forwarded" },
+  { id: 6, text: "RECEIVED_AT_LAB", desc: "Received At Lab" },
+  { id: 7, text: "COMPLETED", desc: "Sample Testing Completed" },
+];
+
+export const ROLE_STATUS_MAP = {
+  Staff: ["SENT_TO_COLLECTON_CENTRE"],
+  DistrictAdmin: ["APPROVED", "DENIED", "SENT_TO_COLLECTON_CENTRE"],
+  StateLabAdmin: ["APPROVED", "DENIED", "SENT_TO_COLLECTON_CENTRE", "RECEIVED_AND_FORWARED", "RECEIVED_AT_LAB", "COMPLETED"],
+};

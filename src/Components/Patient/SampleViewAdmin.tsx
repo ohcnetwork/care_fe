@@ -4,8 +4,8 @@ import WarningRoundedIcon from "@material-ui/icons/WarningRounded";
 import { navigate } from "hookrouter";
 import moment from "moment";
 import React, { useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
-import { SAMPLE_TEST_RESULT, SAMPLE_TEST_STATUS } from "../../Common/constants";
+import { useDispatch, useSelector } from "react-redux";
+import { SAMPLE_TEST_STATUS, ROLE_STATUS_MAP } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getTestList, patchSample } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
@@ -21,6 +21,10 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+const statusChoices = [ ...SAMPLE_TEST_STATUS ];
+
+const roleStatusMap = { ...ROLE_STATUS_MAP };
+
 export default function SampleViewAdmin(props: any) {
   const classes = useStyles();
   const dispatch: any = useDispatch();
@@ -31,23 +35,13 @@ export default function SampleViewAdmin(props: any) {
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [offset, setOffset] = useState(0);
-  const [result, setResult] = useState<any>({});
   const [fetchFlag, callFetchData] = useState(false);
-  const [selectedStatus, setSelectedStatus] = useState<{
-    status: number;
-    sample: SampleListModel;
-  }>({ status: 0, sample: {} });
   const [statusDialog, setStatusDialog] = useState<{ show: boolean; sample: SampleListModel }>({ show: false, sample: {} });
+  const state: any = useSelector((state) => state);
+  const { currentUser } = state;
+  const userType: "Staff" | "DistrictAdmin" | "StateLabAdmin" = currentUser.data.user_type;
 
   const limit = 10;
-
-  const resultTypes = [
-    {
-      id: 0,
-      text: "Select",
-    },
-    ...SAMPLE_TEST_RESULT,
-  ];
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -122,6 +116,9 @@ export default function SampleViewAdmin(props: any) {
   if (sample && sample.length) {
     sampleList = sample.map((item: SampleListModel, idx: number) => {
       const statusText = SAMPLE_TEST_STATUS.find(i => i.text === item.status)?.desc;
+      const validStatusChoices = statusChoices
+        .filter(i => roleStatusMap[userType].includes(i.text))
+        .filter(i => i.id > Number(SAMPLE_TEST_STATUS.find(i => i.text === item.status)?.id))
       return (
         <div key={`usr_${item.id}`} className="w-full md:w-1/2 mt-4 px-2">
           <div
@@ -200,71 +197,12 @@ export default function SampleViewAdmin(props: any) {
               </div>
 
               <div className="mt-2">
-                {/* {item.status === "REQUEST_SUBMITTED" &&
-                  user.user_type === "DistrictAdmin" && (<div className="grid grid-cols-2 gap-2">
-                    <div className="flex-1">
-                      <Button
-                        fullWidth
-                        style={{ color: "green" }}
-                        variant="outlined"
-                        onClick={(e) => confirmApproval(e, 2, item, "Approve")}
-                      >Approve</Button>
-                    </div>
-                    <div className="flex-1">
-                      <Button
-                        fullWidth
-                        style={{ color: "red" }}
-                        variant="outlined"
-                        onClick={(e) => confirmApproval(e, 3, item, "Deny")}
-                      >Deny</Button>
-                    </div>
-                  </div>)}
-                <div>
-                  {item.status === "SENT_TO_COLLECTON_CENTRE" &&
-                    user.user_type === "DistrictAdmin" && (
-                      <Button
-                        fullWidth
-                        style={{ color: "red" }}
-                        variant="outlined"
-                        onClick={(e) => confirmApproval(e, 5, item, "Received and forwarded")}
-                      >Received and forwarded</Button>
-                    )}
-                  {item.status === "RECEIVED_AND_FORWARED" &&
-                    user.user_type === "StateLabAdmin" && (
-                      <Button
-                        fullWidth
-                        style={{ color: "red" }}
-                        variant="outlined"
-                        onClick={(e) => confirmApproval(e, 6, item, "Received at lab")}
-                      >Received at lab</Button>
-                    )}
-                  {item.status === "RECEIVED_AT_LAB" &&
-                    user.user_type === "StateLabAdmin" && (<div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <InputLabel id="result-select-label">Result</InputLabel>
-                        <NativeSelectField
-                          name={String(item.id)}
-                          variant="outlined"
-                          value={result[String(item.id)]}
-                          options={resultTypes}
-                          onChange={handleChange}
-                        />
-                      </div>
-                      <Button
-                        fullWidth
-                        style={{ color: "red" }}
-                        variant="outlined"
-                        disabled={!result[String(item.id)]}
-                        onClick={(e) => confirmApproval(e, 7, item, "Complete")}
-                      >Complete</Button>
-                    </div>)}
-                </div> */}
-                <div className="mt-2">
+                {!!validStatusChoices.length && (<div className="mt-2">
                   <button
                     onClick={(e) => showUpdateStatus(item)}
                     className="w-full text-sm bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-4 border border-gray-400 rounded shadow text-center"
                   >UPDATE SAMPLE TEST STATUS</button>
-                </div>
+                </div>)}
                 <div className="mt-2">
                   <button
                     onClick={(e) => navigate(`/samplelist/${item.id}`)}
@@ -316,12 +254,12 @@ export default function SampleViewAdmin(props: any) {
 
   return (
     <div>
-      <UpdateStatusDialog
-        open={statusDialog.show}
+      {statusDialog.show && (<UpdateStatusDialog
         sample={statusDialog.sample}
         handleOk={handleApproval}
         handleCancel={dismissUpdateStatus}
-      />
+        userType={userType}
+      />)}
       <PageTitle title="Sample Management system" hideBack={true} />
       <div className="flex flex-wrap mt-4">{manageSamples}</div>
     </div>
