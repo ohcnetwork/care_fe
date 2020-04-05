@@ -365,7 +365,7 @@ export const PatientHome = (props: any) => {
               onClick={() =>
                 navigate(`/facility/${facilityId}/patient/${id}/sample-test`)
               }
-            >Request Test Sample</Button>
+            >Request Sample Test</Button>
           </div>
         </div>
       </div>
@@ -412,7 +412,7 @@ export const PatientHome = (props: any) => {
       </div>
 
       <div>
-        <PageTitle title="Test Sample History" hideBack={true} />
+        <PageTitle title="Sample Test History" hideBack={true} />
         {sampleList}
         {!isSampleLoading && totalSampleListCount > limit && (
           <Grid container className={`w3-center ${classes.paginateTopPadding}`}>

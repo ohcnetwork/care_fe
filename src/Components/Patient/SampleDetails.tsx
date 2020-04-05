@@ -72,7 +72,7 @@ export const SampleDetails = (props: SampleDetailsProps) => {
   }
 
   return (<>
-    <PageTitle title={`Test Sample Details #${sampleDetails.id}`} />
+    <PageTitle title={`Sample Test Details #${sampleDetails.id}`} />
     <Card className="mt-4">
       <CardContent>
         <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
@@ -124,7 +124,7 @@ export const SampleDetails = (props: SampleDetailsProps) => {
       </CardContent>
     </Card>
 
-    <PageTitle title="Test Sample History" hideBack={true} />
+    <PageTitle title="Sample Test History" hideBack={true} />
     {sampleDetails.flow && sampleDetails.flow.map((flow: FlowModel) => renderFlow(flow))}
   </>);
 };

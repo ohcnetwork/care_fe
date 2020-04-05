@@ -225,7 +225,7 @@ createDailyRounds:{
         path: "/api/v1/district/{id}/local_bodies/",
     },
 
-    // Test Sample
+    // Sample Test
     getTestSampleList: {
         path: '/api/v1/test_sample'
     },

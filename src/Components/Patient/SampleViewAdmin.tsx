@@ -83,59 +83,20 @@ export default function SampleViewAdmin(props: any) {
   //   setResult(results);
   // };
 
-  const handleApproval = async (status: number, sample: SampleListModel) => {
-    if (status === 0) {
-      console.log(sample);
-      return;
-    }
-    if (status === 7) {
-      handleComplete();
-      return;
-    }
-    const sampleData = {
+  const handleApproval = async (sample: SampleListModel, status: number, result: number) => {
+    let sampleData: any = {
       id: sample.id,
       status,
       consultation: sample.consultation,
     };
-    let statusName = "";
-    if (status === 2) {
-      statusName = "Approved";
+    if (status === 7) {
+      sampleData.result = result;
     }
-    if (status === 3) {
-      statusName = "Denied";
-    }
-    if (status === 5) {
-      statusName = "RECEIVED AND FORWARED";
-    }
-    if (status === 6) {
-      statusName = "RECEIVED AT LAB";
-    }
+    const statusName = SAMPLE_TEST_STATUS.find(i => i.id === status)?.desc;
     const res = await dispatch(patchSample(Number(sample.id), sampleData));
     if (res && (res.status === 201 || res.status === 200)) {
       Notification.Success({
-        msg: `Request ${statusName}`,
-      });
-      callFetchData(!fetchFlag);
-    }
-    dismissUpdateStatus();
-  };
-
-  const handleComplete = async () => {
-    const { status, sample } = selectedStatus;
-    const sampleData = {
-      consultation: sample.consultation,
-      id: sample.id,
-      result: Number(result[String(sample.id)]),
-      status,
-    };
-    let statusName = "";
-    if (status === 7) {
-      statusName = "COMPLETED";
-    }
-    const res = dispatch(patchSample(Number(sample.id), sampleData));
-    if (res && (res.status === 201 || res.status === 200)) {
-      Notification.Success({
-        msg: `Request ${statusName}`,
+        msg: `Success - ${statusName}`,
       });
       callFetchData(!fetchFlag);
     }
@@ -302,13 +263,13 @@ export default function SampleViewAdmin(props: any) {
                   <button
                     onClick={(e) => showUpdateStatus(item)}
                     className="w-full text-sm bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-4 border border-gray-400 rounded shadow text-center"
-                  >UPDATE SAMPLE STATUS</button>
+                  >UPDATE SAMPLE TEST STATUS</button>
                 </div>
                 <div className="mt-2">
                   <button
                     onClick={(e) => navigate(`/samplelist/${item.id}`)}
                     className="w-full text-sm bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow text-center"
-                  >View Test Sample Details</button>
+                  >View Sample Details</button>
                 </div>
                 <div className="mt-2">
                   <button

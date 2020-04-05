@@ -1,15 +1,15 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@material-ui/core';
 import { WithStyles, withStyles } from '@material-ui/styles';
-import React, { useState } from 'react';
+import React, { useState, useReducer } from 'react';
 import { useSelector } from 'react-redux';
-import { SAMPLE_TEST_STATUS } from '../../Common/constants';
+import { SAMPLE_TEST_STATUS, SAMPLE_TEST_RESULT } from '../../Common/constants';
 import { CheckboxField, SelectField } from '../Common/HelperInputFields';
 import { SampleListModel } from './models';
 
 interface Props {
     sample: SampleListModel;
     open: boolean;
-    handleOk: (status: number, sample: SampleListModel) => void;
+    handleOk: (sample: SampleListModel, status: number, result: number) => void;
     handleCancel: () => void;
 };
 
@@ -28,29 +28,64 @@ const statusChoices = [
     ...SAMPLE_TEST_STATUS
 ];
 
+const resultTypes = [
+    {
+        id: 0,
+        text: "Select",
+    },
+    ...SAMPLE_TEST_RESULT,
+];
+
+const initForm: any = {
+    confirm: false,
+    status: 0,
+    result: 0,
+    disabled: true,
+};
+
+const initialState = {
+    form: { ...initForm },
+};
+
+const updateStatusReducer = (state = initialState, action: any) => {
+    switch (action.type) {
+        case "set_form": {
+            return {
+                ...state,
+                form: action.form
+            };
+        }
+        default:
+            return state;
+    }
+};
+
 const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
     const { open, sample, handleOk, handleCancel, classes } = props;
-    const [newStatus, setNewStatus] = useState(0);
-    const [confirm, setConfirmation] = useState(false);
+    const [state, dispatch] = useReducer(updateStatusReducer, initialState);
 
-    const state: any = useSelector((state) => state);
-    const { currentUser } = state;
-
-    console.log(currentUser);
+    // console.log(currentUser.data.user_type)
 
     const currentStatus = SAMPLE_TEST_STATUS.find(i => i.text === sample.status)?.desc;
 
     const okClicked = () => {
-        handleOk(newStatus, sample)
-        setNewStatus(0);
-        setConfirmation(false);
+        handleOk(sample, state.form.status, state.form.result);
+        dispatch({ type: "set_form", form: initForm });
     };
 
     const cancelClicked = () => {
         handleCancel();
-        setNewStatus(0);
-        setConfirmation(false);
+        dispatch({ type: "set_form", form: initForm });
     };
+
+    const handleChange = (name: string, value: any) => {
+        const form = { ...state.form };
+        form[name] = (name === 'status' || name === 'result') ? Number(value) : value;
+        form.disabled = !form.status || !form.confirm || (form.status === 7 && !form.result);
+        dispatch({ type: "set_form", form });
+    };
+
+    console.log(state.form.status)
 
     return (
         <Dialog
@@ -59,7 +94,7 @@ const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
                 paper: classes.paper,
             }}
         >
-            <DialogTitle id="test-sample-title">Update Test Sample Status</DialogTitle>
+            <DialogTitle id="test-sample-title">Update Sample Test Status</DialogTitle>
             <DialogContent>
                 <div className="grid gap-4 grid-cols-3">
                     <div className="font-semibold leading-relaxed text-right">
@@ -71,18 +106,32 @@ const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
                     </div>
                     <div className="md:col-span-2">
                         <SelectField
-                            name="new_status"
+                            name="status"
                             variant="standard"
                             optionValue="desc"
-                            value={newStatus}
+                            value={state.form.status}
                             options={statusChoices}
-                            onChange={(e: any) => setNewStatus(e.target.value)}
+                            onChange={(e: any) => handleChange(e.target.name, e.target.value)}
                         />
                     </div>
+                    {Number(state.form.status) === 7 && (<>
+                        <div className="font-semibold leading-relaxed text-right">
+                            Result :
+                        </div>
+                        <div className="md:col-span-2">
+                            <SelectField
+                                name="result"
+                                variant="standard"
+                                value={state.form.result}
+                                options={resultTypes}
+                                onChange={(e: any) => handleChange(e.target.name, e.target.value)}
+                            />
+                        </div>
+                    </>)}
                     <div className="md:col-span-3">
                         <CheckboxField
-                            checked={confirm}
-                            onChange={(e: any) => setConfirmation(e.target.checked)}
+                            checked={state.form.confirm}
+                            onChange={(e: any) => handleChange(e.target.name, e.target.checked)}
                             name="confirm"
                             label="Select this checkbox to confirm the status update"
                         />
@@ -91,7 +140,7 @@ const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
             </DialogContent>
             <DialogActions>
                 <Button onClick={cancelClicked}>Cancel</Button>
-                <Button onClick={okClicked} color="primary" variant="contained" disabled={!confirm || !newStatus}>OK</Button>
+                <Button onClick={okClicked} color="primary" variant="contained" disabled={state.form.disabled}>OK</Button>
             </DialogActions>
         </Dialog>
     );
