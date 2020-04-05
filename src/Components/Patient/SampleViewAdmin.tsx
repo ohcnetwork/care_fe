@@ -189,7 +189,7 @@ export default function SampleViewAdmin(props: any) {
                   {item.patient_name}
                 </div>
                 {item.facility_object && (<div>
-                  <span className="font-semibold leading-relaxed">{item.facility_object.name} </span>
+                  <span className="font-semibold leading-relaxed"> Facility - {item.facility_object.name} </span>
                   {/* ({item.facility_object.facility_type?.name || "-"}) */}
                 </div>)}
                 {item.fast_track && (<div>
