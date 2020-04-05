@@ -188,6 +188,10 @@ export default function SampleViewAdmin(props: any) {
                 <div className="font-bold text-xl capitalize mb-2">
                   {item.patient_name}
                 </div>
+                {item.facility_object && (<div>
+                  <span className="font-semibold leading-relaxed">{item.facility_object.name} </span>
+                  ({item.facility_object.facility_type?.name || "-"})
+                </div>)}
                 {item.fast_track && (<div>
                   <span className="font-semibold leading-relaxed">
                     Fast track:{" "}

@@ -69,6 +69,7 @@ export interface SampleListModel {
     patient_has_suspected_contact?: boolean;
     patient_travel_history?: string;
     facility?: number;
+    facility_object?: { id: number; name: string, facility_type?: { id: number; name: string } }
     status?: keyof typeof SAMPLE_TEST_STATUS;
     result?: string;
     patient?: number;
