@@ -89,8 +89,8 @@ export const SampleDetails = (props: SampleDetailsProps) => {
             {sampleDetails.patient_name}
           </div>
           {sampleDetails.facility_object && (<div>
-            <span className="font-semibold leading-relaxed">{sampleDetails.facility_object.name} </span>
-             {/* ({sampleDetails.facility_object.facility_type?.name || "-"}) */}
+            <span className="font-semibold leading-relaxed">Facility: </span>
+            {sampleDetails.facility_object.name}
           </div>)}
           <div>
             <span className="font-semibold leading-relaxed">Tested on: </span>
