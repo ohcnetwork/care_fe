@@ -50,6 +50,8 @@ const initForm: any = {
   countries_travelled: [],
   has_SARI: false,
   prescribed_medication: false,
+  ongoing_medication: "",
+  is_medical_worker: "false",
   ...medicalHistoryChoices
 };
 
@@ -158,12 +160,14 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             gender: res.data.gender ? res.data.gender : "",
             state: res.data.state ? res.data.state : "",
             district: res.data.district ? res.data.district : "",
+            is_medical_worker: String(res.data.is_medical_worker),
             local_body: res.data.local_body ? res.data.local_body : "",
             medical_history: [],
             contact_with_confirmed_carrier: String(res.data.contact_with_confirmed_carrier),
             contact_with_suspected_carrier: String(res.data.contact_with_suspected_carrier),
+            ongoing_medication: String(res.data.ongoing_medication),
             countries_travelled: res.data.countries_travelled ? res.data.countries_travelled.split(',') : [],
-          }
+          };
           res.data.medical_history.forEach((i: any) => {
             const medicalHistoryId = medicalHistoryTypes.find((j: any) => j.text === i.disease)?.id;
             if (medicalHistoryId) {
@@ -298,7 +302,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         countries_travelled: state.form.past_travel ? state.form.countries_travelled.join(',') : undefined,
         date_of_return: state.form.past_travel ? state.form.date_of_return : undefined,
         has_SARI: state.form.has_SARI,
-        // prescribed_medication: state.form.prescribed_medication,
+        ongoing_medication: state.form.ongoing_medication,
+        is_medical_worker: JSON.parse(state.form.is_medical_worker),
         medical_history,
         is_active: true
       };
@@ -384,8 +389,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               variant="outlined"
               margin="dense"
               type="text"
-              InputLabelProps={{ shrink: !!state.form[textField] }}
-              value={state.form[textField]}
+              InputLabelProps={{ shrink: !!state.form.textField }}
+              value={state.form.textField}
               onChange={handleChange}
               errors={state.errors[textField]}
             />
@@ -555,7 +560,31 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       />
                     )}
                 </div>
-
+                <div>
+                  <InputLabel id="is_medical_worker">
+                    Medical Worker
+                  </InputLabel>
+                  <RadioGroup
+                      aria-label="is_medical_worker"
+                      name="is_medical_worker"
+                      value={state.form.is_medical_worker}
+                      onChange={handleChange}
+                      style={{ padding: "0px 5px" }}
+                  >
+                    <Box display="flex" flexDirection="row">
+                      <FormControlLabel
+                          value="true"
+                          control={<Radio />}
+                          label="Yes"
+                      />
+                      <FormControlLabel
+                          value="false"
+                          control={<Radio />}
+                          label="No"
+                      />
+                    </Box>
+                  </RadioGroup>
+                </div>
                 <div>
                   <InputLabel id="contact_with_confirmed_carrier">
                     Contact with confirmed Covid patient?
@@ -674,14 +703,22 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   </div>
                 </div>
 
-                {/* <div className="md:col-span-2">
-                  <CheckboxField
-                    checked={state.form.prescribed_medication}
-                    onChange={handleCheckboxFieldChange}
-                    name="prescribed_medication"
-                    label="Already prescribed medication for any underlying condition?"
+                <div>
+                  <InputLabel id="ongoing_medication-label">Ongoing Medication</InputLabel>
+                  <MultilineInputField
+                      rows={2}
+                      name="ongoing_medication"
+                      variant="outlined"
+                      margin="dense"
+                      type="text"
+                      placeholder="Optional Information"
+                      InputLabelProps={{ shrink: !!state.form.ongoing_medication }}
+                      value={state.form.ongoing_medication}
+                      onChange={handleChange}
+                      errors={state.errors.ongoing_medication}
                   />
-                </div> */}
+                </div>
+
 
               </div>
               <div

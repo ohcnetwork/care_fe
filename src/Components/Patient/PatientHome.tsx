@@ -172,7 +172,7 @@ export const PatientHome = (props: any) => {
     });
   }
 
-  const handleApproval = () => {
+  const handleApproval = async () => {
     const { status, sample } = selectedStatus;
     const sampleData = {
       id: sample.id,
@@ -184,15 +184,13 @@ export const PatientHome = (props: any) => {
       statusName = "SENT_TO_COLLECTON_CENTRE";
     }
 
-    dispatch(patchSample(Number(sample.id), sampleData)).then((resp: any) => {
-      if (resp.status === 201 || resp.status === 200) {
-        Notification.Success({
-          msg: `Request ${statusName}`
-        });
-        // window.location.reload();
-        callSampleList(!sampleFlag);
-      }
-    });
+    const res = await dispatch(patchSample(Number(sample.id), sampleData));
+    if (res && (res.status === 201 || res.status === 200)) {
+      Notification.Success({
+        msg: `Request ${statusName}`
+      });
+      callSampleList(!sampleFlag);
+    }
 
     dismissAlert()
   };
@@ -212,9 +210,9 @@ export const PatientHome = (props: any) => {
   ) {
     const medHis = patientData.medical_history;
     patientMedHis = medHis.map((item: any, idx: number) => (
-      <tr key={`med_his_${idx}`}>
-        <td>{item.disease}</td>
-        <td>{item.details}</td>
+      <tr className="white border" key={`med_his_${idx}`}>
+        <td className="border px-4 py-2">{item.disease}</td>
+        <td className="border px-4 py-2">{item.details}</td>
       </tr>
     ));
   }
@@ -227,7 +225,7 @@ export const PatientHome = (props: any) => {
     consultationList = <Typography>No OP Triage / Consultation available.</Typography>
   } else if (consultationListData.length > 0) {
     consultationList = consultationListData.map((itemData, idx) => (
-      <ConsultationCard itemData={itemData} key={idx} />
+      <ConsultationCard itemData={itemData} key={idx} isLastConsultation={itemData.id === patientData.last_consultation?.id} />
     ));
   }
 
@@ -255,9 +253,18 @@ export const PatientHome = (props: any) => {
       <div className="border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black mt-4 p-4">
         <div className="flex justify-between">
           <div className="max-w-md">
-            <div>
-              <span className="font-semibold leading-relaxed">Name: </span>
-              {patientData.name}
+            <div className="flex items-baseline">
+              <div>
+                <span className="font-semibold leading-relaxed">Name: </span>
+                {patientData.name}
+              </div>
+              <div>
+                {!patientData.is_active && (
+                  <span className="ml-2 badge badge-pill badge-dark">
+                    Inactive
+                  </span>
+                )}
+              </div>
             </div>
             <div>
               <span className="font-semibold leading-relaxed">Age: </span>
@@ -271,6 +278,13 @@ export const PatientHome = (props: any) => {
               <span className="font-semibold leading-relaxed">Phone: </span>
               {patientData.phone_number}
             </div>
+            {
+              patientData.is_medical_worker &&
+              <div>
+                <span className="font-semibold leading-relaxed">Medical Worker: </span>
+                <span className="badge badge-pill badge-primary">Yes</span>
+              </div>
+            }
           </div>
 
           <div>
@@ -321,6 +335,12 @@ export const PatientHome = (props: any) => {
             <span className="font-semibold leading-relaxed">Countries travelled: </span>
             {patientData.countries_travelled.split(',').join(', ')}
           </div>)}
+          {patientData.ongoing_medication &&
+            <div>
+              <span className="font-semibold leading-relaxed">Ongoing Medications </span>
+              {patientData.ongoing_medication}
+            </div>
+          }
         </div>
 
         <div className="flex mt-4">
@@ -354,15 +374,20 @@ export const PatientHome = (props: any) => {
         <PageTitle title="Medical History" hideBack={true} />
         <div className={classes.details}>
           {patientMedHis.length > 0 ? (
-            <table className="w3-table w3-table-all">
-              <thead>
-                <tr>
-                  <th className="w3-center">Disease</th>
-                  <th className="w3-center">Details</th>
-                </tr>
-              </thead>
-              <tbody>{patientMedHis}</tbody>
-            </table>
+            <div className="-my-2 py-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 mt-4">
+              <div className="align-middle inline-block min-w-full shadow overflow-hidden sm:rounded-lg border-b border-gray-200 mt-4">
+
+                <table className="min-w-full border-2 rounded overflow-hidden bg-white">
+                  <thead>
+                    <tr className="white border" >
+                      <th className="border px-4 py-2">Disease</th>
+                      <th className="border px-4 py-2">Details</th>
+                    </tr>
+                  </thead>
+                  <tbody>{patientMedHis}</tbody>
+                </table>
+              </div>
+            </div>
           ) : (
               <span className="w3-center">
                 <h6 className="w3-text-grey">No Medical History so far</h6>

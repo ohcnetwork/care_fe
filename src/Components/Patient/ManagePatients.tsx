@@ -84,6 +84,11 @@ export const PatientManager = (props: any) => {
                     {patient.name}
                   </div>
                   <div>
+                    {patient.is_medical_worker && patient.is_active && (
+                      <span className="badge badge-pill badge-primary">
+                        Medical Worker
+                      </span>
+                    )}
                     {!patient.is_active && (
                       <span className="badge badge-pill badge-dark">
                         Inactive
@@ -95,6 +100,10 @@ export const PatientManager = (props: any) => {
                   <span className="font-semibold leading-relaxed">Age: </span>
                   {patient.age}
                 </div>
+                {patient.facility_object && (<div>
+                  <span className="font-semibold leading-relaxed">Facility: </span>
+                  {patient.facility_object.name}
+                </div>)}
                 {patient.contact_with_confirmed_carrier && (
                   <div className="flex">
                     <span className="font-semibold leading-relaxed">
@@ -113,12 +122,12 @@ export const PatientManager = (props: any) => {
                     </div>
                   )}
                 <div>
-                  {patient.countries_travelled && (
+                  {patient.countries_travelled && (<>
                     <span className="font-semibold leading-relaxed">
                       Travel History:{" "}
                     </span>
-                  )}
-                  {patient.countries_travelled.split(",").join(", ")}
+                    {patient.countries_travelled.split(",").join(", ")}
+                  </>)}
                 </div>
               </div>
               <div className="mt-2">

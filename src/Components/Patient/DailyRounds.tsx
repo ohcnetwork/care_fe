@@ -1,37 +1,50 @@
-import React, { useState, useReducer, useCallback, useEffect} from "react"
-import { makeStyles, Theme } from '@material-ui/core/styles';
-import { useDispatch } from "react-redux";
-import { Grid, Card, CardHeader, CardContent, CardActions, Button, FormControl, InputLabel, RadioGroup, Radio, FormControlLabel, Box } from "@material-ui/core";
-import { TextInputField, NativeSelectField, ErrorHelperText, MultilineInputField, DateInputField } from "../Common/HelperInputFields";
+import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
+import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import { navigate } from 'hookrouter';
+import React, { useReducer, useState } from "react";
+import { useDispatch } from "react-redux";
+import { PATIENT_CATEGORY, SYMPTOM_CHOICES, CURRENT_HEALTH_CHANGE } from "../../Common/constants";
+import { createDailyReport } from "../../Redux/actions";
+import * as Notification from "../../Utils/Notifications";
+import { DateInputField, ErrorHelperText, MultilineInputField, MultiSelectField, SelectField, TextInputField, CheckboxField } from "../Common/HelperInputFields";
 import { Loading } from "../Common/Loading";
-import AppMessage from "../Common/AppMessage";
-// import { DailyRoundsModel } from './models';
-// import { CONSULTATION_SUGGESTION } from "../../Common/constants";
-// import {  } from "../../Redux/actions";
-import { useAbortableEffect, statusType } from '../../Common/utils';
+import PageTitle from "../Common/PageTitle";
 
-// interface DailyRoundsProps extends DailyRoundsModal {
-    
-// }
 
 const initForm: any = {
+    otherSymptom: false,
+    additional_symptoms: [],
+    other_symptoms: "",
     temperature: "",
-    temperature_measured_at:"",
-    physical_examination_info:"",
-    other_details:"",
-    consultation:"",
+    temperature_measured_at: null,
+    physical_examination_info: "",
+    other_details: "",
+    category: "",
+    current_health: 0,
+    recommend_discharge: false,
 };
+
+const initError = Object.assign({}, ...Object.keys(initForm).map(k => ({ [k]: "" })));
+
+const categoryChoices = [
+    {
+        id: 0,
+        text: "Select suspect category"
+    },
+    ...PATIENT_CATEGORY
+];
 
 const initialState = {
     form: { ...initForm },
-    errors: { ...initForm }
+    errors: { ...initError }
 };
 
-const optionalFields = [
-    "temperature_measured_at",
-    "physical_examination_info",
-    "other_details"
+const symptomChoices = [
+    ...SYMPTOM_CHOICES
+];
+
+const currentHealthChoices = [
+    ...CURRENT_HEALTH_CHANGE
 ];
 
 
@@ -54,42 +67,34 @@ const DailyRoundsFormReducer = (state = initialState, action: any) => {
     }
 };
 
+const goBack = () => {
+    window.history.go(-1);
+};
 
-
-const useStyles = makeStyles((theme: Theme) => ({
-    formControl: {
-        margin: theme.spacing(1)
-    },
-    selectLabel: {
-        background: 'white',
-        padding: '2px 10px'
-    },
-    
-}));
-
-
-
-export const DailyRounds = (props:any) => {
-    const classes = useStyles();
+export const DailyRounds = (props: any) => {
     const dispatchAction: any = useDispatch();
-    const { facilityId, patientId, id } = props;
+    const { facilityId, patientId, id, consultationId } = props;
     const [state, dispatch] = useReducer(DailyRoundsFormReducer, initialState);
-    const [showAppMessage, setAppMessage] = useState({ show: false, message: "", type: "" });
     const [isLoading, setIsLoading] = useState(false);
-    const [selectedDate, setSelectedDate] = React.useState(new Date());
 
 
     const headerText = !id ? "Add Daily Rounds" : "Edit Daily Rounds";
-    const buttonText = !id ? "Save" : "Update";
+    const buttonText = !id ? "Save Daily Round" : "Update Daily Round";
 
 
     const validateForm = () => {
-        let errors = { ...initForm };
+        let errors = { ...initError };
         let invalidForm = false;
         Object.keys(state.form).forEach((field, i) => {
-            if ((optionalFields.indexOf(field) === -1) && !state.form[field]) {
-                errors[field] = "Field is required";
-                invalidForm = true;
+            switch (field) {
+                case "other_symptoms":
+                    if (state.form.otherSymptom && !state.form[field]) {
+                        errors[field] = "Please enter the other symptom details";
+                        invalidForm = true;
+                    }
+                    return;
+                default:
+                    return;
             }
         });
         if (invalidForm) {
@@ -100,144 +105,224 @@ export const DailyRounds = (props:any) => {
         return true
     };
 
-    const handleSubmit = async(e: any) => {
+
+    const handleSubmit = async (e: any) => {
         e.preventDefault();
         const validForm = validateForm();
         if (validForm) {
             setIsLoading(true);
             const data = {
-                "temperature": state.form.temperature,
-                "temperature_measured_at": state.form.temperature_measure_at,
-                "physical_examination_info": state.form.physical_examination_info,
-                "other_details": state.form.other_details,
-                "consultation": Number(state.form.consultation)
+                additional_symptoms: state.form.additional_symptoms,
+                other_symptoms: state.form.otherSymptom ? state.form.other_symptoms : undefined,
+                temperature: state.form.temperature ? state.form.temperature : undefined,
+                temperature_measured_at: state.form.temperature_measured_at,
+                physical_examination_info: state.form.physical_examination_info,
+                other_details: state.form.other_details,
+                consultation: Number(consultationId),
+                patient_category: state.form.category,
+                current_health: Number(state.form.current_health),
+                recommend_discharge: JSON.parse(state.form.recommend_discharge),
+            };
+
+            console.log(data);
+
+            const res = await dispatchAction(createDailyReport(data, { consultationId }));
+            setIsLoading(false);
+            if (res && res.data) {
+                dispatch({ type: "set_form", form: initForm });
+                if (id) {
+                    Notification.Success({
+                        msg: "Daily round details updated successfully"
+                    });
+                } else {
+                    Notification.Success({
+                        msg: "Daily round details created successfully"
+                    });
+                    navigate(`/facility/${facilityId}/patient/${patientId}`);
+                }
             }
-            
-            console.log('data: ', data);
         }
     };
 
     const handleChange = (e: any) => {
-        let form = { ...state.form };
-        form[e.target.name] = e.target.value;
-        dispatch({ type: "set_form", form })
+        const form = { ...state.form };
+        const { name, value } = e.target;
+        form[name] = value;
+        dispatch({ type: "set_form", form });
     };
 
-    const handleDateChange = (date:any, key:string) => {
+    const handleDateChange = (date: any, key: string) => {
         let form = { ...state.form };
         form[key] = date;
-        dispatch({ type: "set_form", form })
-        setSelectedDate(date);
+        dispatch({ type: "set_form", form });
     };
 
-    const handleCancel = () => {
-        navigate(`/facility/${facilityId}`);
+    const handleCheckboxFieldChange = (e: any) => {
+        const form = { ...state.form };
+        const { checked, name } = e.target;
+        form[name] = checked;
+        dispatch({ type: "set_form", form });
     };
 
+    const handleSymptomChange = (e: any, child?: any) => {
+        const form = { ...state.form };
+        const { value } = e?.target;
+        const otherSymptoms = value.filter((i: number) => i !== 1);
+        // prevent user from selecting asymptomatic along with other options
+        form.additional_symptoms = child?.props?.value === 1 ? otherSymptoms.length ? [1] : value : otherSymptoms;
+        form.otherSymptom = !!form.additional_symptoms.filter((i: number) => i === 9).length;
+        dispatch({ type: "set_form", form });
+    };
 
     if (isLoading) {
         return <Loading />
     }
-    
-    return <div>
 
-        <Grid container alignContent="center" justify="center">
-            <Grid item xs={12} sm={10} md={8} lg={6} xl={4}>
-                <Card>
-                    <AppMessage open={showAppMessage.show} type={showAppMessage.type} message={showAppMessage.message} handleClose={() => setAppMessage({ show: false, message: "", type: "" })} handleDialogClose={() => setAppMessage({ show: false, message: "", type: "" })} />
-                    <CardHeader title={headerText}/>
-                    <form onSubmit={(e) => handleSubmit(e)}>
-                        <CardContent>
-                            <Grid container justify="space-between" alignItems="center" spacing={1}>
-                                <Grid item xs={6} md={6}>
-                                    <InputLabel id="temperature-label">Temperature*</InputLabel>
-                                    <TextInputField
-                                        name="temperature"
-                                        variant="outlined"
-                                        margin="dense"
-                                        type="text"
-                                        InputLabelProps={{ shrink: !!state.form.temperature }}
-                                        value={state.form.temperature}
-                                        onChange={handleChange}
-                                        errors={state.errors.temperature}
-                                    />
-                                </Grid>
-                                <Grid item xs={6} md={6}>
-                                    <DateInputField
-                                        label="Temperature Measure At"
-                                        value={state.form.temperature_measure_at?state.form.temperature_measure_at:selectedDate}
-                                        onChange={(date)=>handleDateChange(date,'temperature_measure_at')}
-                                        errors={state.errors.temperature_measure_at}
-                                    />
-                                </Grid>
-                            </Grid>
-                        </CardContent>
+    return (<div>
+        <PageTitle title={headerText} />
+        <div className="mt-4">
+            <Card>
+                <form onSubmit={e => handleSubmit(e)}>
+                    <CardContent>
+                        <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+                            <div>
+                                <InputLabel id="temperature-label">Temperature</InputLabel>
+                                <TextInputField
+                                    name="temperature"
+                                    variant="outlined"
+                                    margin="dense"
+                                    type="text"
+                                    InputLabelProps={{ shrink: !!state.form.temperature }}
+                                    value={state.form.temperature}
+                                    onChange={handleChange}
+                                    errors={state.errors.temperature}
+                                />
+                            </div>
+                            <div>
+                                <DateInputField
+                                    label="Temperature Measured At"
+                                    margin="dense"
+                                    value={state.form.temperature_measured_at}
+                                    maxDate={new Date()}
+                                    onChange={date => handleDateChange(date, "temperature_measured_at")}
+                                    errors={state.errors.temperature_measured_at}
+                                />
+                            </div>
+                            <div>
+                                <InputLabel id="physical-examination-info-label">Physical Examination Info</InputLabel>
+                                <MultilineInputField
+                                    rows={5}
+                                    name="physical_examination_info"
+                                    variant="outlined"
+                                    margin="dense"
+                                    type="text"
+                                    InputLabelProps={{ shrink: !!state.form.physical_examination_info }}
+                                    value={state.form.physical_examination_info}
+                                    onChange={handleChange}
+                                    errors={state.errors.physical_examination_info}
+                                />
+                            </div>
 
-                        <CardContent>
-                            <InputLabel id="physical-examination-info-label">Physical Examination Info</InputLabel>
-                            <MultilineInputField
-                                rows={5}
-                                name="physical_examination_info"
-                                variant="outlined"
-                                margin="dense"
-                                type="text"
-                                InputLabelProps={{ shrink: !!state.form.physical_examination_info }}
-                                value={state.form.physical_examination_info}
-                                onChange={handleChange}
-                                errors={state.errors.physical_examination_info}
-                            />
-                        </CardContent>
+                            <div>
+                                <InputLabel id="other-details-label">Other Details</InputLabel>
+                                <MultilineInputField
+                                    rows={5}
+                                    name="other_details"
+                                    variant="outlined"
+                                    margin="dense"
+                                    type="text"
+                                    InputLabelProps={{ shrink: !!state.form.other_details }}
+                                    value={state.form.other_details}
+                                    onChange={handleChange}
+                                    errors={state.errors.other_details}
+                                />
+                            </div>
 
-                        <CardContent>
-                            <InputLabel id="other-details-label">Other Details</InputLabel>
-                            <MultilineInputField
-                                rows={5}
-                                name="other_details"
-                                variant="outlined"
-                                margin="dense"
-                                type="text"
-                                InputLabelProps={{ shrink: !!state.form.other_details }}
-                                value={state.form.other_details}
-                                onChange={handleChange}
-                                errors={state.errors.other_details}
-                            />
-                        </CardContent>
+                            <div className="md:col-span-2">
+                                <InputLabel id="symptoms-label">
+                                    Symptoms
+                                </InputLabel>
+                                <MultiSelectField
+                                    name="additional_symptoms"
+                                    variant="outlined"
+                                    value={state.form.additional_symptoms}
+                                    options={symptomChoices}
+                                    onChange={handleSymptomChange}
+                                />
+                                <ErrorHelperText error={state.errors.additional_symptoms} />
+                            </div>
 
-                        <CardContent>
-                            <InputLabel id="consultation-label">Consultation Id</InputLabel>
-                            <TextInputField
-                                name="consultation"
-                                variant="outlined"
-                                margin="dense"
-                                type="number"
-                                InputLabelProps={{ shrink: !!state.form.consultation}}
-                                value={state.form.consultation}
-                                onChange={handleChange}
-                                errors={state.errors.consultation}
-                            />
-                        </CardContent>
+                            {state.form.otherSymptom && (<div className="md:col-span-2">
+                                <InputLabel id="other-symptoms-label">Other Symptom Details</InputLabel>
+                                <MultilineInputField
+                                    rows={5}
+                                    name="other_symptoms"
+                                    variant="outlined"
+                                    margin="dense"
+                                    type="text"
+                                    placeholder="Enter the other symptoms here"
+                                    InputLabelProps={{ shrink: !!state.form.other_symptoms }}
+                                    value={state.form.other_symptoms}
+                                    onChange={handleChange}
+                                    errors={state.errors.other_symptoms}
+                                />
+                            </div>)}
 
-                        <CardActions className="padding16" style={{ justifyContent: "space-between" }}>
+                            <div>
+                                <InputLabel id="category-label">Category</InputLabel>
+                                <SelectField
+                                    name="category"
+                                    variant="standard"
+                                    value={state.form.category}
+                                    options={categoryChoices}
+                                    onChange={handleChange}
+                                    errors={state.errors.category}
+                                />
+                            </div>
+
+                            <div>
+                                <InputLabel id="current-health-label">Current Health</InputLabel>
+                                <SelectField
+                                    name="current_health"
+                                    variant="standard"
+                                    value={state.form.current_health}
+                                    options={currentHealthChoices}
+                                    onChange={handleChange}
+                                    errors={state.errors.current_health}
+                                />
+                            </div>
+
+                            <div>
+                                <CheckboxField
+                                    checked={state.form.recommend_discharge}
+                                    onChange={handleCheckboxFieldChange}
+                                    name="recommend_discharge"
+                                    label="Recommend Discharge"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="mt-4 flex justify-between">
                             <Button
                                 color="default"
                                 variant="contained"
                                 type="button"
-                                onClick={(e) => handleCancel()}
+                                onClick={(e) => goBack()}
                             >Cancel</Button>
                             <Button
                                 color="primary"
                                 variant="contained"
                                 type="submit"
                                 style={{ marginLeft: 'auto' }}
+                                startIcon={<CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>}
                                 onClick={(e) => handleSubmit(e)}
                             >
                                 {buttonText}
                             </Button>
-                        </CardActions>
-                    </form>
-                </Card>
-
-            </Grid>
-        </Grid>
-    </div>
+                        </div>
+                    </CardContent>
+                </form>
+            </Card>
+        </div>
+    </div>)
 };

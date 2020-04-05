@@ -72,7 +72,7 @@ export const SampleDetails = (props: SampleDetailsProps) => {
   }
 
   return (<>
-    <PageTitle title={`Sample Details #${sampleDetails.id}`} />
+    <PageTitle title={`Sample Test Details #${sampleDetails.id}`} />
     <Card className="mt-4">
       <CardContent>
         <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
@@ -81,15 +81,23 @@ export const SampleDetails = (props: SampleDetailsProps) => {
             {sampleDetails.status}
           </div>
           <div>
-            <span className="font-semibold leading-relaxed">Result:</span>
+            <span className="font-semibold leading-relaxed">Result: </span>
             {sampleDetails.result}
           </div>
           <div>
-            <span className="font-semibold leading-relaxed">Tested on :</span>{" "}
+            <span className="font-semibold leading-relaxed">Patient: </span>
+            {sampleDetails.patient_name}
+          </div>
+          {sampleDetails.facility_object && (<div>
+            <span className="font-semibold leading-relaxed">Facility: </span>
+            {sampleDetails.facility_object.name}
+          </div>)}
+          <div>
+            <span className="font-semibold leading-relaxed">Tested on: </span>
             {sampleDetails.date_of_result ? moment(sampleDetails.date_of_result).format("lll") : "-"}
           </div>
           <div>
-            <span className="font-semibold leading-relaxed">Result on:</span>{" "}
+            <span className="font-semibold leading-relaxed">Result on: </span>
             {sampleDetails.date_of_result ? moment(sampleDetails.date_of_result).format("lll") : "-"}
           </div>
           {sampleDetails.fast_track && (<div className="md:col-span-2">
@@ -116,7 +124,7 @@ export const SampleDetails = (props: SampleDetailsProps) => {
       </CardContent>
     </Card>
 
-    <PageTitle title="Sample History" hideBack={true} />
+    <PageTitle title="Sample Test History" hideBack={true} />
     {sampleDetails.flow && sampleDetails.flow.map((flow: FlowModel) => renderFlow(flow))}
   </>);
 };

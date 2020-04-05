@@ -1,4 +1,5 @@
 import { fireRequest } from "./fireRequest";
+import {url} from "inspector";
 
 // User
 export const postLogin = (form: object) => {
@@ -56,7 +57,7 @@ export const createDoctor = (id: number | undefined, form: object, urlParam: obj
     return id ? fireRequest('updateDoctor', [id], form, urlParam) : fireRequest("createDoctor", [], form, urlParam);
 };
 
-export const createTriageForm = (data: object,urlParam:object) => {
+export const createTriageForm = (data: object ,urlParam:object) => {
     return fireRequest('createTriage', [], data, urlParam)
 };
 
@@ -118,6 +119,13 @@ export const createSampleTest = (form: object, urlParam: object) => {
 
 export const getSampleTest = (id: number, urlParam: object) => {
     return fireRequest('getSampleTest', [id], {}, urlParam)
+};
+
+export const createDailyReport = (data: object, urlParam: object) => {
+    return fireRequest('createDailyRounds', [],  data, urlParam)
+};
+export const getDailyReport = (paginate: object, urlParam: object) => {
+    return fireRequest('getDailyReports', [], paginate, urlParam)
 };
 export const patchSampleTest = (id: number, form: object, urlParam: object) => {
     return fireRequest('patchSampleTest', [id], form, urlParam)

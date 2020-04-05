@@ -25,8 +25,8 @@ const BedTypeCard = (props: BedTypeProps) => {
   return (
     <div className="px-2 py-2 md:w-1/2 w-full">
       <div className="flex flex-col items-center shadow rounded-lg p-4">
-        <div className="font-semibold text-xl mt-2">{roomType}</div>
-        <div className="text-bold text-6xl mt-2">
+        <div className="font-semibold text-sm mt-2">{roomType}</div>
+        <div className="text-bold text-3xl md:text-6xl mt-2">
           {props.current_capacity} / {props.total_capacity}
         </div>
         <div className="font-bold text-xs mt-2">

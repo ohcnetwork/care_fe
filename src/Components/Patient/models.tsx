@@ -1,5 +1,3 @@
-import { SAMPLE_TEST_STATUS } from "../../Common/constants"
-
 export interface FlowModel {
     id?: number;
     status?: string;
@@ -25,11 +23,14 @@ export interface PatientModel {
     district_object?: { id: number; name: string; };
     state_object?: { id: number; name: string; };
     tele_consultation_history?: Array<any>;
+    last_consultation?: { id: number };
     address?: string;
     contact_with_confirmed_carrier?: boolean;
     contact_with_suspected_carrier?: boolean;
+    is_medical_worker?: boolean;
     estimated_contact_date?: string;
     past_travel?: boolean;
+    ongoing_medication?: string;
     countries_travelled?: string;
     present_health?: string;
     has_SARI?: boolean;
@@ -52,6 +53,7 @@ export interface SampleTestModel {
     patient_has_suspected_contact?: boolean;
     patient_travel_history?: string;
     facility?: number;
+    facility_object?: { id: number; name: string, facility_type?: { id: number; name: string } }
     patient?: number;
     fast_track?: number;
     flow?: Array<FlowModel>;
@@ -65,7 +67,8 @@ export interface SampleListModel {
     patient_has_suspected_contact?: boolean;
     patient_travel_history?: string;
     facility?: number;
-    status?: keyof typeof SAMPLE_TEST_STATUS;
+    facility_object?: { id: number; name: string, facility_type?: { id: number; name: string } }
+    status?: string;
     result?: string;
     patient?: number;
     consultation?: number;
