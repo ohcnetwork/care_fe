@@ -148,8 +148,6 @@ export const Consultation = (props: any) => {
     if (validForm) {
       setIsLoading(true);
       const data = {
-        hasSymptom: false,
-        otherSymptom: false,
         symptoms: state.form.symptoms,
         other_symptoms: state.form.otherSymptom ? state.form.other_symptoms : undefined,
         symptoms_onset_date: state.form.hasSymptom ? state.form.symptoms_onset_date : undefined,

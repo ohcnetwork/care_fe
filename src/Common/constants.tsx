@@ -49,7 +49,7 @@ export const FACILITY_ID = {
 export const BED_TYPES: Array<OptionsType> = [
   { id: 1, text: "Normal" },
   { id: 2, text: "Hostel" },
-  { id: 3, text: "Single Room with Attached Bathroom"},
+  { id: 3, text: "Single Room with Attached Bathroom" },
   { id: 10, text: "ICU" },
   { id: 20, text: "Ventilator" }
 ];
@@ -131,3 +131,11 @@ export const PATIENT_CATEGORY = [
   { id: "Category-B", text: "Moderate (Category B)" },
   { id: "Category-C", text: "Severe (Category C)" }
 ];
+
+export const CURRENT_HEALTH_CHANGE = [
+  { id: 0, text: 'No Change' },
+  { id: 1, text: 'Requires Ventilator' },
+  { id: 2, text: 'Worse' },
+  { id: 3, text: 'Status Quo' },
+  { id: 4, text: 'Better' },
+]

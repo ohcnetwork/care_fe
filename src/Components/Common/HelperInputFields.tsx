@@ -356,9 +356,11 @@ export const SelectField = (props: DefaultSelectInputProps) => {
             {...restProps}>
                 {showEmpty && <option aria-label="None" value="" />}
                 {!optionArray && options.map((opt: any) => {
-                    return <option value={optionKey ? opt[optionKey] : opt.id} key={opt.id} disabled={opt.disabled}>
-                        {optionValue ? opt[optionValue] : opt.text}
-                    </option>
+                    const value = optionKey ? opt[optionKey] : opt.id;
+                    const text = optionValue ? opt[optionValue] : opt.text;
+                    return (<option value={value} key={opt.id} disabled={opt.disabled}>
+                        {text}
+                    </option>)
                 })}
                 {optionArray && options.map((opt: any) => {
                     return <option value={opt} key={opt}>
