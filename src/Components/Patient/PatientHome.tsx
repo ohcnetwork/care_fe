@@ -255,9 +255,18 @@ export const PatientHome = (props: any) => {
       <div className="border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black mt-4 p-4">
         <div className="flex justify-between">
           <div className="max-w-md">
-            <div>
-              <span className="font-semibold leading-relaxed">Name: </span>
-              {patientData.name}
+            <div className="flex items-baseline">
+              <div>
+                <span className="font-semibold leading-relaxed">Name: </span>
+                {patientData.name}
+              </div>
+              <div>
+                {!patientData.is_active && (
+                  <span className="badge badge-pill badge-dark">
+                    Inactive
+                  </span>
+                )}
+              </div>
             </div>
             <div>
               <span className="font-semibold leading-relaxed">Age: </span>
@@ -273,10 +282,10 @@ export const PatientHome = (props: any) => {
             </div>
             {
               patientData.is_medical_worker &&
-            <div>
-              <span className="font-semibold leading-relaxed">Medical Worker: </span>
-              True
-            </div>
+              <div>
+                <span className="font-semibold leading-relaxed">Medical Worker: </span>
+                <span className="badge badge-pill badge-primary">Yes</span>
+              </div>
             }
           </div>
 

@@ -84,6 +84,11 @@ export const PatientManager = (props: any) => {
                     {patient.name}
                   </div>
                   <div>
+                    {patient.is_medical_worker && patient.is_active && (
+                      <span className="badge badge-pill badge-primary">
+                        Medical Worker
+                      </span>
+                    )}
                     {!patient.is_active && (
                       <span className="badge badge-pill badge-dark">
                         Inactive
@@ -97,10 +102,10 @@ export const PatientManager = (props: any) => {
                 </div>
                 {
                   patient.facility &&
-                <div>
-                  <span className="font-semibold leading-relaxed">Facility: </span>
-                  { (patient && patient.facility_object && patient.facility_object.name) || ''}
-                </div>
+                  <div>
+                    <span className="font-semibold leading-relaxed">Facility: </span>
+                    {(patient && patient.facility_object && patient.facility_object.name) || ''}
+                  </div>
                 }
                 {patient.contact_with_confirmed_carrier && (
                   <div className="flex">
@@ -120,20 +125,12 @@ export const PatientManager = (props: any) => {
                     </div>
                   )}
                 <div>
-                  {patient.countries_travelled && (
+                  {patient.countries_travelled && (<>
                     <span className="font-semibold leading-relaxed">
                       Travel History:{" "}
                     </span>
-                  )}
-                  {patient.countries_travelled.split(",").join(", ")}
-                </div>
-                <div>
-                  {patient.is_medical_worker && (
-                      <span className="font-semibold leading-relaxed">
-                      Medical Worker :
-                    </span>
-                  )}
-                 True
+                    {patient.countries_travelled.split(",").join(", ")}
+                  </>)}
                 </div>
               </div>
               <div className="mt-2">
