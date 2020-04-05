@@ -1,4 +1,5 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@material-ui/core';
+import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import { WithStyles, withStyles } from '@material-ui/styles';
 import React, { useReducer } from 'react';
 import { ROLE_STATUS_MAP, SAMPLE_TEST_STATUS, SAMPLE_TEST_RESULT } from '../../Common/constants';
@@ -19,7 +20,7 @@ const styles = {
     }
 };
 
-const statusChoices = [ ...SAMPLE_TEST_STATUS ];
+const statusChoices = [...SAMPLE_TEST_STATUS];
 
 const resultTypes = [
     {
@@ -62,13 +63,13 @@ const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
     const currentStatus = SAMPLE_TEST_STATUS.find(i => i.text === sample.status)?.desc;
 
     const validStatusChoices = statusChoices
-    .filter(i => roleStatusMap[userType].includes(i.text))
-    .filter(i => i.id > Number(SAMPLE_TEST_STATUS.find(i => i.text === sample.status)?.id));
+        .filter(i => roleStatusMap[userType].includes(i.text))
+        .filter(i => i.id > Number(SAMPLE_TEST_STATUS.find(i => i.text === sample.status)?.id));
 
     const newStatusChoices = [
         {
             id: 0,
-            text: "Select",
+            desc: "Select",
         },
         ...validStatusChoices
     ];
@@ -136,14 +137,20 @@ const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
                             checked={state.form.confirm}
                             onChange={(e: any) => handleChange(e.target.name, e.target.checked)}
                             name="confirm"
-                            label="Select this checkbox to confirm the status update"
+                            label="I agree to update the sample status"
                         />
                     </div>
                 </div>
             </DialogContent>
-            <DialogActions>
+            <DialogActions style={{ justifyContent: "space-between" }}>
                 <Button onClick={cancelClicked}>Cancel</Button>
-                <Button onClick={okClicked} color="primary" variant="contained" disabled={state.form.disabled}>OK</Button>
+                <Button
+                    onClick={okClicked}
+                    color="primary"
+                    variant="contained"
+                    disabled={state.form.disabled}
+                    startIcon={<CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>}
+                >Update Status</Button>
             </DialogActions>
         </Dialog>
     );
