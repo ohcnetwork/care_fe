@@ -137,7 +137,7 @@ const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
                             checked={state.form.confirm}
                             onChange={(e: any) => handleChange(e.target.name, e.target.checked)}
                             name="confirm"
-                            label="I agree to update the sample status"
+                            label="I agree to update the sample test status."
                         />
                     </div>
                 </div>

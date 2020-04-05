@@ -389,8 +389,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               variant="outlined"
               margin="dense"
               type="text"
-              InputLabelProps={{ shrink: !!state.form[textField] }}
-              value={state.form[textField]}
+              InputLabelProps={{ shrink: !!state.form.textField }}
+              value={state.form.textField}
               onChange={handleChange}
               errors={state.errors[textField]}
             />
