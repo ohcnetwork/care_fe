@@ -1,25 +1,15 @@
-import React, { useCallback, useState } from "react"
-import { makeStyles, Theme } from '@material-ui/core/styles';
-import { useDispatch } from "react-redux";
-import { Card, CardContent, Grid, IconButton, Typography, } from "@material-ui/core";
+import { Grid, Typography } from "@material-ui/core";
 import moment from 'moment';
-import ArrowForwardIosIcon from '@material-ui/icons/ArrowForwardIos';
+import React, { useCallback, useState } from "react";
+import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getDailyReport } from "../../Redux/actions";
 import { Loading } from "../Common/Loading";
-import Pagination from "../Common/Pagination";
 import PageTitle from "../Common/PageTitle";
-
-const useStyles = makeStyles((theme: Theme) => ({
-    formControl: {
-        margin: theme.spacing(1)
-    },
-}));
-
+import Pagination from "../Common/Pagination";
 
 export const DailyRoundsList = (props: any) => {
-    const { facilityId, patientId, consultationId, id } = props;
-    const classes = useStyles();
+    const { facilityId, patientId, consultationId } = props;
     const dispatch: any = useDispatch();
     const initialData: any[] = [];
     let manageRounds: any = null;
@@ -32,7 +22,7 @@ export const DailyRoundsList = (props: any) => {
     const fetchData = useCallback(
         async (status: statusType) => {
             setIsLoading(true);
-            const res = await dispatch(getDailyReport({ consultationId, limit, offset }));
+            const res = await dispatch(getDailyReport({ limit, offset }, { consultationId }));
             if (!status.aborted) {
                 if (res && res.data) {
                     setDailyRoundsListData(res.data.results);
@@ -41,7 +31,7 @@ export const DailyRoundsList = (props: any) => {
                 setIsLoading(false);
             }
         },
-        [dispatch, offset]
+        [consultationId, dispatch, offset]
     );
 
     useAbortableEffect(
@@ -63,38 +53,36 @@ export const DailyRoundsList = (props: any) => {
             return (
                 <div key={`daily_round_${idx}`} className="w-full mt-4 px-2">
                     <div className="block border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black">
-                        {
-                            <div className="p-4">
-                                <Grid container justify="space-between" alignItems="center">
-                                    <Grid item xs={11} container spacing={1}>
-                                        <Grid item xs={6}>
-                                            <Typography>
-                                                <span
-                                                    className="w3-text-grey">Date :</span> {moment(itemData.temperature_measured_at).format('lll')}
-                                            </Typography>
-                                        </Grid>
-                                        <Grid item xs={6}>
-                                            <Typography>
-                                                <span
-                                                    className="w3-text-grey">Temperature:</span> {itemData.temperature}
-                                            </Typography>
-                                        </Grid>
-                                        <Grid item xs={12}>
-                                            <Typography>
-                                                <span
-                                                    className="w3-text-grey">Physical Examination Info:</span> {itemData.physical_examination_info}
-                                            </Typography>
-                                        </Grid>
-                                        <Grid item xs={12}>
-                                            <Typography>
-                                                <span
-                                                    className="w3-text-grey">Other Details:</span> {itemData.other_details}
-                                            </Typography>
-                                        </Grid>
+                        <div className="p-4">
+                            <Grid container justify="space-between" alignItems="center">
+                                <Grid item xs={11} container spacing={1}>
+                                    <Grid item xs={6}>
+                                        <Typography>
+                                            <span className="w3-text-grey">Date :</span>{" "}
+                                            {itemData.temperature_measured_at ? moment(itemData.temperature_measured_at).format('lll') : "-"}
+                                        </Typography>
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                        <Typography>
+                                            <span className="w3-text-grey">Temperature:</span>{" "}
+                                            {itemData.temperature}
+                                        </Typography>
+                                    </Grid>
+                                    <Grid item xs={12}>
+                                        <Typography>
+                                            <span className="w3-text-grey">Physical Examination Info:</span>{" "}
+                                            {itemData.physical_examination_info}
+                                        </Typography>
+                                    </Grid>
+                                    <Grid item xs={12}>
+                                        <Typography>
+                                            <span className="w3-text-grey">Other Details:</span>{" "}
+                                            {itemData.other_details}
+                                        </Typography>
                                     </Grid>
                                 </Grid>
-                            </div>
-                        }
+                            </Grid>
+                        </div>
                     </div>
                 </div >
             );

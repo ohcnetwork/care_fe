@@ -1,23 +1,16 @@
-import React from "react";
-import {
-  Grid,
-  Card,
-  CardContent,
-  IconButton,
-  Typography,
-  Button
-} from "@material-ui/core";
-import ArrowForwardIosIcon from "@material-ui/icons/ArrowForwardIos";
-import moment from "moment";
+import { CardContent, Grid, Typography } from "@material-ui/core";
 import { navigate } from "hookrouter";
+import moment from "moment";
+import React from "react";
 import { ConsultationModal } from "./models";
 
 interface ConsultationProps {
   itemData: ConsultationModal;
+  isLastConsultation?: boolean;
 }
 
 export const ConsultationCard = (props: ConsultationProps) => {
-  const { itemData } = props;
+  const { itemData, isLastConsultation } = props;
   return (
     <div className="block border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black mt-4">
       <CardContent>
@@ -88,20 +81,19 @@ export const ConsultationCard = (props: ConsultationProps) => {
               </Grid>
             )}
           </Grid>
-          <div className="mt-4">
-            <button className="mr-4 px-4 py-2 shadow border bg-white rounded-md border border-grey-500 whitespace-no-wrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300 text-center"
+          <div className="mt-4 flex justify-between w-full">            
+            <button className="px-4 py-2 shadow border bg-white rounded-md border border-grey-500 whitespace-no-wrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300 text-center"
+              onClick={() => navigate(`/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/daily-rounds-list`)}>
+              View Daily Rounds
+            </button>
+            {isLastConsultation && (<button className="mr-4 px-4 py-2 shadow border bg-white rounded-md border border-grey-500 whitespace-no-wrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300 text-center"
               onClick={
                 () => navigate(`/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/daily-rounds`)}>
               Add Daily Rounds
-            </button>
-            {/*<button className="px-4 py-2 shadow border bg-white rounded-md border border-grey-500 whitespace-no-wrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300 text-center"*/}
-            {/*  onClick={*/}
-            {/*    () => navigate(`/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/daily-rounds-list`)}>*/}
-            {/*  View Daily Rounds*/}
-            {/*</button>*/}
+            </button>)}
           </div>
         </Grid>
       </CardContent>
-    </div>
+    </div >
   );
 };

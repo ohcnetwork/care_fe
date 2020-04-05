@@ -25,6 +25,7 @@ export interface PatientModel {
     district_object?: { id: number; name: string; };
     state_object?: { id: number; name: string; };
     tele_consultation_history?: Array<any>;
+    last_consultation?: { id: number };
     address?: string;
     contact_with_confirmed_carrier?: boolean;
     contact_with_suspected_carrier?: boolean;

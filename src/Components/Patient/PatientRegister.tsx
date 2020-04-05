@@ -160,7 +160,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             gender: res.data.gender ? res.data.gender : "",
             state: res.data.state ? res.data.state : "",
             district: res.data.district ? res.data.district : "",
-            is_medical_worker: res.data.is_medical_worker ? res.data.is_medical_worker : false,
+            is_medical_worker: String(res.data.is_medical_worker),
             local_body: res.data.local_body ? res.data.local_body : "",
             medical_history: [],
             contact_with_confirmed_carrier: String(res.data.contact_with_confirmed_carrier),

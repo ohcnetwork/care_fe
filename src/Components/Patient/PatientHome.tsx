@@ -227,7 +227,7 @@ export const PatientHome = (props: any) => {
     consultationList = <Typography>No OP Triage / Consultation available.</Typography>
   } else if (consultationListData.length > 0) {
     consultationList = consultationListData.map((itemData, idx) => (
-      <ConsultationCard itemData={itemData} key={idx} />
+      <ConsultationCard itemData={itemData} key={idx} isLastConsultation={itemData.id === patientData.last_consultation?.id} />
     ));
   }
 
@@ -262,7 +262,7 @@ export const PatientHome = (props: any) => {
               </div>
               <div>
                 {!patientData.is_active && (
-                  <span className="badge badge-pill badge-dark">
+                  <span className="ml-2 badge badge-pill badge-dark">
                     Inactive
                   </span>
                 )}
