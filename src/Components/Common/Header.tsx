@@ -80,7 +80,7 @@ const Header = () => {
       icon: <TimeToLeaveIcon style={{ color: "#666", marginRight: "4px" }} />
     },
     {
-      title: "Sample Test",
+      title: "Test Sample",
       link: "/samplelist",
       icon: <LocalHospitalIcon style={{ color: "#666", marginRight: "4px" }} />
     },
