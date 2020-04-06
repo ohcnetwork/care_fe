@@ -65,6 +65,10 @@ export const getTriageInfo = (urlParam: object) => {
     return fireRequest('getTriage', [], {},urlParam)
 };
 
+export const getTriageDetails = (id: number, urlParam: object) => {
+    return fireRequest('getTriage', [id], {},urlParam)
+};
+
 export const listCapacity = (paginate: object, urlParam: object) => {
     return fireRequest('getCapacity', [], paginate, urlParam);
 };
