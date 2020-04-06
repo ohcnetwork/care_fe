@@ -1,4 +1,5 @@
 import { Grid, Typography } from "@material-ui/core";
+import Button from "@material-ui/core/Button";
 import moment from 'moment';
 import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -7,6 +8,7 @@ import { getDailyReport } from "../../Redux/actions";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 import Pagination from "../Common/Pagination";
+import { navigate } from "hookrouter";
 
 export const DailyRoundsList = (props: any) => {
     const { facilityId, patientId, consultationId } = props;
@@ -82,6 +84,11 @@ export const DailyRoundsList = (props: any) => {
                                     </Grid>
                                 </Grid>
                             </Grid>
+                            <div className="mt-2">
+                                <Button size="small" variant="outlined" fullWidth onClick={(e) => navigate(`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds-list/${itemData.id}`)}>
+                                View Patient Details
+                                </Button>
+                            </div>
                         </div>
                     </div>
                 </div >

@@ -154,3 +154,6 @@ export const getTestSample = (id: number) => {
 export const patchSample = (id: number, form: object) => {
     return fireRequest('patchSample', [id], form)
 };
+export const getConsultationDailyRoundsDetails = (urlParam: object) => {
+    return fireRequest('getConsultationDailyRoundsDetails', [], {}, urlParam);
+};

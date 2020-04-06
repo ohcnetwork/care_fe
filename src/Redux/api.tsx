@@ -108,6 +108,9 @@ createDailyRounds:{
     getDailyReports:{
         path: '/api/v1/consultation/{consultationId}/daily_rounds',
     },
+    getConsultationDailyRoundsDetails:{
+        path: '/api/v1/consultation/{consultationId}/daily_rounds/{dailyRoundListId}/',
+    },
     // Ambulance
 
     createAmbulance: {
