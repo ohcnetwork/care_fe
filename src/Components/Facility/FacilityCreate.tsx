@@ -203,10 +203,10 @@ export const FacilityCreate = (props: FacilityProps) => {
         district: state.form.district,
         address: state.form.address,
         location:
-          state.form.latitude && state.form.latitude
+          state.form.latitude && state.form.longitude
             ? {
               latitude: Number(state.form.latitude),
-              longitude: Number(state.form.latitude)
+              longitude: Number(state.form.longitude)
             }
             : undefined,
         phone_number: state.form.phone_number,
