@@ -254,7 +254,7 @@ export const Consultation = (props: any) => {
                     label="Date of onset of the symptoms"
                     value={state.form.symptoms_onset_date}
                     onChange={date => handleDateChange(date, "symptoms_onset_date")}
-                    maxDate={new Date()}
+                    disableFuture={true}
                     errors={state.errors.symptoms_onset_date}
                   />
                 </div>)}
@@ -379,7 +379,7 @@ export const Consultation = (props: any) => {
                       label="Admission Date"
                       margin="dense"
                       value={state.form.admission_date}
-                      maxDate={new Date()}
+                      disableFuture={true}
                       onChange={date => handleDateChange(date, "admission_date")}
                       errors={state.errors.admission_date}
                     />
@@ -390,7 +390,6 @@ export const Consultation = (props: any) => {
                       margin="dense"
                       value={state.form.discharge_date}
                       onChange={date => handleDateChange(date, "discharge_date")}
-                      maxDate={new Date()}
                       errors={state.errors.discharge_date}
                     />
                   </div>

@@ -6,7 +6,7 @@ import { useDispatch } from "react-redux";
 import { PATIENT_CATEGORY, SYMPTOM_CHOICES, CURRENT_HEALTH_CHANGE } from "../../Common/constants";
 import { createDailyReport } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
-import { DateInputField, ErrorHelperText, MultilineInputField, MultiSelectField, SelectField, TextInputField, CheckboxField } from "../Common/HelperInputFields";
+import { DateTimeFiled, ErrorHelperText, MultilineInputField, MultiSelectField, SelectField, TextInputField, CheckboxField } from "../Common/HelperInputFields";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 
@@ -115,7 +115,7 @@ export const DailyRounds = (props: any) => {
                 additional_symptoms: state.form.additional_symptoms,
                 other_symptoms: state.form.otherSymptom ? state.form.other_symptoms : undefined,
                 temperature: state.form.temperature ? state.form.temperature : undefined,
-                temperature_measured_at: state.form.temperature_measured_at,
+                temperature_measured_at: state.form.temperature ? state.form.temperature_measured_at : undefined,
                 physical_examination_info: state.form.physical_examination_info,
                 other_details: state.form.other_details,
                 consultation: Number(consultationId),
@@ -199,11 +199,13 @@ export const DailyRounds = (props: any) => {
                                 />
                             </div>
                             <div>
-                                <DateInputField
+                                <DateTimeFiled
                                     label="Temperature Measured At"
                                     margin="dense"
+                                    disabled={!state.form.temperature}
                                     value={state.form.temperature_measured_at}
-                                    maxDate={new Date()}
+                                    disableFuture={true}
+                                    showTodayButton={true}
                                     onChange={date => handleDateChange(date, "temperature_measured_at")}
                                     errors={state.errors.temperature_measured_at}
                                 />
