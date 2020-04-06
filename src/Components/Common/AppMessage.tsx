@@ -6,7 +6,7 @@ import { makeStyles, Theme } from '@material-ui/core/styles';
 const useStyles = makeStyles((theme: Theme) => ({
         root: {
             'width': '100%',
-            'z-index': '100001',
+            'z-index': '1203',
             '& > * + *': {
                 marginTop: theme.spacing(2),
                 backgroundColor: 'ghostwhite'
