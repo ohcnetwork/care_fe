@@ -139,7 +139,7 @@ export const SAMPLE_TEST_STATUS = [
   { id: 4, text: "SENT_TO_COLLECTON_CENTRE", desc: "Sample taken and sent to collection centre" },
   { id: 5, text: "RECEIVED_AND_FORWARED", desc: "Received And Forwarded" },
   { id: 6, text: "RECEIVED_AT_LAB", desc: "Received At Lab" },
-  { id: 7, text: "COMPLETED", desc: "Sample Testing Completed" },
+  { id: 7, text: "COMPLETED", desc: "Test Completed" },
 ];
 
 export const ROLE_STATUS_MAP = {
