@@ -5,7 +5,7 @@ import { navigate } from "hookrouter";
 import moment from "moment";
 import React, { useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { SAMPLE_TEST_STATUS, ROLE_STATUS_MAP } from "../../Common/constants";
+import { SAMPLE_TEST_STATUS, ROLE_STATUS_MAP, SAMPLE_FLOW_RULES } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getTestList, patchSample } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
@@ -21,7 +21,9 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const statusChoices = [ ...SAMPLE_TEST_STATUS ];
+const statusChoices = [...SAMPLE_TEST_STATUS];
+
+const statusFlow = { ...SAMPLE_FLOW_RULES };
 
 const roleStatusMap = { ...ROLE_STATUS_MAP };
 
@@ -115,10 +117,11 @@ export default function SampleViewAdmin(props: any) {
   let sampleList: any[] = [];
   if (sample && sample.length) {
     sampleList = sample.map((item: SampleListModel, idx: number) => {
-      const statusText = SAMPLE_TEST_STATUS.find(i => i.text === item.status)?.desc;
+      const status = String(item.status) as keyof typeof SAMPLE_FLOW_RULES;
+      const statusText = SAMPLE_TEST_STATUS.find(i => i.text === status)?.desc;
       const validStatusChoices = statusChoices
-        .filter(i => roleStatusMap[userType].includes(i.text))
-        .filter(i => i.id > Number(SAMPLE_TEST_STATUS.find(i => i.text === item.status)?.id))
+        .filter(i => status && statusFlow[status] && statusFlow[status].includes(i.text))
+        .filter(i => roleStatusMap[userType] && roleStatusMap[userType].includes(i.text))
       return (
         <div key={`usr_${item.id}`} className="w-full md:w-1/2 mt-4 px-2">
           <div

@@ -565,26 +565,28 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     Medical Worker
                   </InputLabel>
                   <RadioGroup
-                      aria-label="is_medical_worker"
-                      name="is_medical_worker"
-                      value={state.form.is_medical_worker}
-                      onChange={handleChange}
-                      style={{ padding: "0px 5px" }}
+                    aria-label="is_medical_worker"
+                    name="is_medical_worker"
+                    value={state.form.is_medical_worker}
+                    onChange={handleChange}
+                    style={{ padding: "0px 5px" }}
                   >
                     <Box display="flex" flexDirection="row">
                       <FormControlLabel
-                          value="true"
-                          control={<Radio />}
-                          label="Yes"
+                        value="true"
+                        control={<Radio />}
+                        label="Yes"
                       />
                       <FormControlLabel
-                          value="false"
-                          control={<Radio />}
-                          label="No"
+                        value="false"
+                        control={<Radio />}
+                        label="No"
                       />
                     </Box>
                   </RadioGroup>
                 </div>
+              </div>
+              <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
                 <div>
                   <InputLabel id="contact_with_confirmed_carrier">
                     Contact with confirmed Covid patient?
@@ -643,8 +645,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     value={state.form.estimated_contact_date}
                     onChange={date => handleDateChange(date, "estimated_contact_date")}
                     errors={state.errors.estimated_contact_date}
-                    variant="outlined"
-                    maxDate={new Date()}
+                    inputVariant="outlined"
+                    disableFuture={true}
                   />
                 </div>)}
 
@@ -676,8 +678,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       value={state.form.date_of_return}
                       onChange={date => handleDateChange(date, "date_of_return")}
                       errors={state.errors.date_of_return}
-                      variant="outlined"
-                      maxDate={new Date()}
+                      inputVariant="outlined"
+                      disableFuture={true}
                     />
                   </div>
                 </>)}
@@ -706,16 +708,16 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                 <div>
                   <InputLabel id="ongoing_medication-label">Ongoing Medication</InputLabel>
                   <MultilineInputField
-                      rows={2}
-                      name="ongoing_medication"
-                      variant="outlined"
-                      margin="dense"
-                      type="text"
-                      placeholder="Optional Information"
-                      InputLabelProps={{ shrink: !!state.form.ongoing_medication }}
-                      value={state.form.ongoing_medication}
-                      onChange={handleChange}
-                      errors={state.errors.ongoing_medication}
+                    rows={2}
+                    name="ongoing_medication"
+                    variant="outlined"
+                    margin="dense"
+                    type="text"
+                    placeholder="Optional Information"
+                    InputLabelProps={{ shrink: !!state.form.ongoing_medication }}
+                    value={state.form.ongoing_medication}
+                    onChange={handleChange}
+                    errors={state.errors.ongoing_medication}
                   />
                 </div>
 
