@@ -2,7 +2,7 @@ import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mate
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import { WithStyles, withStyles } from '@material-ui/styles';
 import React, { useReducer } from 'react';
-import { ROLE_STATUS_MAP, SAMPLE_TEST_STATUS, SAMPLE_TEST_RESULT } from '../../Common/constants';
+import { ROLE_STATUS_MAP, SAMPLE_TEST_STATUS, SAMPLE_TEST_RESULT, SAMPLE_FLOW_RULES } from '../../Common/constants';
 import { CheckboxField, SelectField } from '../Common/HelperInputFields';
 import { SampleListModel } from './models';
 
@@ -21,6 +21,8 @@ const styles = {
 };
 
 const statusChoices = [...SAMPLE_TEST_STATUS];
+
+const statusFlow = { ...SAMPLE_FLOW_RULES };
 
 const resultTypes = [
     {
@@ -62,9 +64,10 @@ const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
 
     const currentStatus = SAMPLE_TEST_STATUS.find(i => i.text === sample.status)?.desc;
 
+    const status = String(sample.status) as keyof typeof SAMPLE_FLOW_RULES;
     const validStatusChoices = statusChoices
-        .filter(i => roleStatusMap[userType].includes(i.text))
-        .filter(i => i.id > Number(SAMPLE_TEST_STATUS.find(i => i.text === sample.status)?.id));
+        .filter(i => status && statusFlow[status] && statusFlow[status].includes(i.text))
+        .filter(i => roleStatusMap[userType] && roleStatusMap[userType].includes(i.text))
 
     const newStatusChoices = [
         {
