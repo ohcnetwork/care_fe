@@ -101,12 +101,19 @@ export default {
         path: '/api/v1/consultation/{id}/',
         method: 'DELETE'
     },
-createDailyRounds:{
-    path: '/api/v1/consultation/{consultationId}/daily_rounds/',
-    method: 'POST'
-},
+    createDailyRounds:{
+        path: '/api/v1/consultation/{consultationId}/daily_rounds/',
+        method: 'POST'
+    },
+    updateDailyReport:{
+        path: '/api/v1/consultation/{consultationId}/daily_rounds/{dailyRoundListId}/',
+        method: 'PUT'
+    },
     getDailyReports:{
         path: '/api/v1/consultation/{consultationId}/daily_rounds',
+    },
+    getConsultationDailyRoundsDetails:{
+        path: '/api/v1/consultation/{consultationId}/daily_rounds/{dailyRoundListId}/',
     },
     // Ambulance
 
