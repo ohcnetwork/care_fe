@@ -4,7 +4,7 @@ import { navigate } from 'hookrouter';
 import React, { useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
 import { PATIENT_CATEGORY, SYMPTOM_CHOICES, CURRENT_HEALTH_CHANGE } from "../../Common/constants";
-import { createDailyReport } from "../../Redux/actions";
+import { createDailyReport, updateDailyReport } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
 import { DateInputField, ErrorHelperText, MultilineInputField, MultiSelectField, SelectField, TextInputField, CheckboxField } from "../Common/HelperInputFields";
 import { Loading } from "../Common/Loading";
@@ -73,13 +73,13 @@ const goBack = () => {
 
 export const DailyRounds = (props: any) => {
     const dispatchAction: any = useDispatch();
-    const { facilityId, patientId, id, consultationId } = props;
+    const { facilityId, patientId, id, consultationId, dailyRoundListId } = props;
     const [state, dispatch] = useReducer(DailyRoundsFormReducer, initialState);
     const [isLoading, setIsLoading] = useState(false);
 
 
-    const headerText = !id ? "Add Daily Rounds" : "Edit Daily Rounds";
-    const buttonText = !id ? "Save Daily Round" : "Update Daily Round";
+    const headerText = (!dailyRoundListId ) ? "Add Daily Rounds" : "Edit Daily Rounds";
+    const buttonText = (!dailyRoundListId ) ? "Save Daily Round" : "Update Daily Round";
 
 
     const validateForm = () => {
@@ -126,14 +126,21 @@ export const DailyRounds = (props: any) => {
 
             console.log(data);
 
-            const res = await dispatchAction(createDailyReport(data, { consultationId }));
+            let res;
+            if(dailyRoundListId){
+                res = await dispatchAction(updateDailyReport(data, { consultationId, dailyRoundListId }));
+            }else{
+                res = await dispatchAction(createDailyReport(data, { consultationId }));
+            }
+
             setIsLoading(false);
             if (res && res.data) {
                 dispatch({ type: "set_form", form: initForm });
-                if (id) {
+                if (dailyRoundListId) {
                     Notification.Success({
                         msg: "Daily round details updated successfully"
                     });
+                    navigate(`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds-list/${dailyRoundListId}`)
                 } else {
                     Notification.Success({
                         msg: "Daily round details created successfully"

@@ -86,7 +86,7 @@ export const DailyRoundsList = (props: any) => {
                             </Grid>
                             <div className="mt-2">
                                 <Button size="small" variant="outlined" fullWidth onClick={(e) => navigate(`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds-list/${itemData.id}`)}>
-                                View Patient Details
+                                View Daily Rounds Details
                                 </Button>
                             </div>
                         </div>

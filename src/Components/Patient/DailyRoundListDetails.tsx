@@ -1,4 +1,4 @@
-import { Button, CircularProgress, Grid, Typography } from "@material-ui/core";
+import { Button } from "@material-ui/core";
 import { navigate } from "hookrouter";
 import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -8,23 +8,13 @@ import * as Notification from "../../Utils/Notifications";
 import AlertDialog from "../Common/AlertDialog";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
+import { SYMPTOM_CHOICES } from "../../Common/constants";
+import moment from 'moment';
 
 export const DailyRoundListDetails = (props: any) => {
   const { facilityId, id, patientId, consultationId, dailyRoundListId } = props;
   const dispatch: any = useDispatch();
-  const [dailyRoundListDetailsData, setDailyRoundListDetails] = useState< {
-    id?: number;
-    additional_symptoms?: object;
-    patient_category?: string;
-    current_health?: number ;
-    temperature?: string;
-    temperature_measured_at?: string ;
-    physical_examination_info?: string;
-    other_symptoms?: string;
-    recommend_discharge?: boolean;
-    other_details?: string;
-    consultation?: number;
-  }>({});
+  const [dailyRoundListDetailsData, setDailyRoundListDetails] = useState< any >({});
   const [isLoading, setIsLoading] = useState(false);
   const [sampleFlag, callSampleList] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState<{ status: number, sample: any }>({ status: 0, sample: null });
@@ -92,7 +82,18 @@ export const DailyRoundListDetails = (props: any) => {
   if (isLoading) {
     return <Loading />;
   }
-
+  const showAdditionalSymtoms = ()=>{ 
+    let additionalSymtomsValue = '';
+    (dailyRoundListDetailsData.additional_symptoms) && (dailyRoundListDetailsData.additional_symptoms.length>0) && 
+    dailyRoundListDetailsData.additional_symptoms.find((value:any) => {
+        SYMPTOM_CHOICES.find((symtomObj:any) => {
+            if(symtomObj.id === value){
+                additionalSymtomsValue += (symtomObj.text + ', ')
+            }
+        })
+    })
+    return additionalSymtomsValue;
+  }
   return (
     <div className="px-2">
       {showAlertMessage.show && (
@@ -134,12 +135,16 @@ export const DailyRoundListDetails = (props: any) => {
 
         <div className="flex flex-col">
           <div>
+            <span className="font-semibold leading-relaxed">Additional Symptoms: </span>
+            {showAdditionalSymtoms()}
+          </div>
+          <div>
             <span className="font-semibold leading-relaxed">Temperature: </span>
             {dailyRoundListDetailsData.temperature}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">Temperature Measured At: </span>
-            {dailyRoundListDetailsData.temperature_measured_at}
+            {dailyRoundListDetailsData.temperature_measured_at ? moment(dailyRoundListDetailsData.temperature_measured_at).format("MM-DD-YYYY"):'Not Available'}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">Physical Examination Info: </span>
