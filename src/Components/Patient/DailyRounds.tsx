@@ -100,7 +100,7 @@ export const DailyRounds = (props: any) => {
                     let healthValue:any = CURRENT_HEALTH_CHANGE.find((value:any) => {
                         return (dailyRoundListDetails.data.current_health === value.text);
                     })
-                    dailyRoundListDetails.data.current_health = healthValue.id;
+                    dailyRoundListDetails.data.current_health = healthValue ? healthValue.id : 0;
                     dispatch({ type: "set_form", form: dailyRoundListDetails.data });
                 }
                 setIsLoading(false);
@@ -110,7 +110,9 @@ export const DailyRounds = (props: any) => {
     );
     useAbortableEffect(
         (status: statusType) => {
-            fetchpatient(status);
+            if(dailyRoundListId){
+                fetchpatient(status);
+            }
         },
         [dispatchAction, fetchpatient]
     );
@@ -172,7 +174,7 @@ export const DailyRounds = (props: any) => {
                     Notification.Success({
                         msg: "Daily round details updated successfully"
                     });
-                    navigate(`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds-list/${dailyRoundListId}`)
+                    goBack();
                 } else {
                     Notification.Success({
                         msg: "Daily round details created successfully"
@@ -312,10 +314,10 @@ export const DailyRounds = (props: any) => {
                                 <SelectField
                                     name="category"
                                     variant="standard"
-                                    value={state.form.category}
+                                    value={state.form.patient_category}
                                     options={categoryChoices}
                                     onChange={handleChange}
-                                    errors={state.errors.category}
+                                    errors={state.errors.patient_category}
                                 />
                             </div>
 
