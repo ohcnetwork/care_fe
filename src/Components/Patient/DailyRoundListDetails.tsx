@@ -8,7 +8,7 @@ import * as Notification from "../../Utils/Notifications";
 import AlertDialog from "../Common/AlertDialog";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
-import { SYMPTOM_CHOICES } from "../../Common/constants";
+import { SYMPTOM_CHOICES , PATIENT_CATEGORY} from "../../Common/constants";
 import moment from 'moment';
 
 export const DailyRoundListDetails = (props: any) => {
@@ -83,16 +83,25 @@ export const DailyRoundListDetails = (props: any) => {
     return <Loading />;
   }
   const showAdditionalSymtoms = ()=>{ 
-    let additionalSymtomsValue = '';
-    (dailyRoundListDetailsData.additional_symptoms) && (dailyRoundListDetailsData.additional_symptoms.length>0) && 
-    dailyRoundListDetailsData.additional_symptoms.find((value:any) => {
-        SYMPTOM_CHOICES.find((symtomObj:any) => {
-            if(symtomObj.id === value){
-                additionalSymtomsValue += (symtomObj.text + ', ')
-            }
+    let additionalSymtomsValue: any = '';
+    if( (dailyRoundListDetailsData.additional_symptoms) && (dailyRoundListDetailsData.additional_symptoms.length>0) ){
+        dailyRoundListDetailsData.additional_symptoms.find((value:any) => {
+            SYMPTOM_CHOICES.find((symtomObj:any) => {
+                if(symtomObj.id === value){
+                    additionalSymtomsValue += (symtomObj.text + ', ')
+                }
+            })
         })
-    })
+    }
     return additionalSymtomsValue;
+  }
+  function findPatientCategory(){
+    PATIENT_CATEGORY.find((value:any) => {
+        if(value.id === dailyRoundListDetailsData.patient_category){
+            dailyRoundListDetailsData.patient_category = value.text;
+        }
+    })
+    return dailyRoundListDetailsData.patient_category
   }
   return (
     <div className="px-2">
@@ -110,7 +119,7 @@ export const DailyRoundListDetails = (props: any) => {
           <div className="max-w-md">
           <div>
               <span className="font-semibold leading-relaxed">Patient Category: </span>
-              {dailyRoundListDetailsData.patient_category}
+              {findPatientCategory()}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">Current Health: </span>
