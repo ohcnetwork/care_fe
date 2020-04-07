@@ -85,23 +85,20 @@ export const DailyRoundListDetails = (props: any) => {
   const showAdditionalSymtoms = ()=>{ 
     let additionalSymtomsValue: any = '';
     if( (dailyRoundListDetailsData.additional_symptoms) && (dailyRoundListDetailsData.additional_symptoms.length>0) ){
-        dailyRoundListDetailsData.additional_symptoms.find((value:any) => {
-            SYMPTOM_CHOICES.find((symtomObj:any) => {
-                if(symtomObj.id === value){
-                    additionalSymtomsValue += (symtomObj.text + ', ')
-                }
+        for(let i=0;i<dailyRoundListDetailsData.additional_symptoms.length;i++){
+            let symptomValue:any = SYMPTOM_CHOICES.find((symtomObj:any) => {
+                return (symtomObj.id === dailyRoundListDetailsData.additional_symptoms[i]);
             })
-        })
+            additionalSymtomsValue += (symptomValue && symptomValue.text + ', ')
+        }
     }
     return additionalSymtomsValue;
   }
   function findPatientCategory(){
-    PATIENT_CATEGORY.find((value:any) => {
-        if(value.id === dailyRoundListDetailsData.patient_category){
-            dailyRoundListDetailsData.patient_category = value.text;
-        }
-    })
-    return dailyRoundListDetailsData.patient_category
+    let categoryValue:any = PATIENT_CATEGORY.find((value:any) => {
+        return (value.id === dailyRoundListDetailsData.patient_category);
+    });
+    return categoryValue ? categoryValue.text : '' ;
   }
   return (
     <div className="px-2">

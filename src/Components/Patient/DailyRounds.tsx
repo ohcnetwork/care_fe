@@ -97,12 +97,10 @@ export const DailyRounds = (props: any) => {
             if (!status.aborted) {
                 if (dailyRoundListDetails && dailyRoundListDetails.data) {
                     dailyRoundListDetails.data.current_health = convertUpperCase(dailyRoundListDetails.data.current_health)
-                    CURRENT_HEALTH_CHANGE.find((value:any) => {
-                        if(value.text === dailyRoundListDetails.data.current_health){
-                            dailyRoundListDetails.data.current_health = value.id;
-                        }
+                    let healthValue:any = CURRENT_HEALTH_CHANGE.find((value:any) => {
+                        return (dailyRoundListDetails.data.current_health === value.text);
                     })
-                    
+                    dailyRoundListDetails.data.current_health = healthValue.id;
                     dispatch({ type: "set_form", form: dailyRoundListDetails.data });
                 }
                 setIsLoading(false);
