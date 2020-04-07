@@ -90,7 +90,7 @@ const routes = {
   "/facility/:facilityId/patient/:patientId/consultation/:id/daily-rounds": ({facilityId, patientId, id}: any) =>
      <DailyRounds facilityId={facilityId} patientId={patientId} consultationId={id}/>,
 
-  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily-rounds-list": ({facilityId, patientId, id}: any) =>
+  "/facility/:facilityId/patient/:patientId/consultation/:id/daily-rounds-list": ({facilityId, patientId, id}: any) =>
     <DailyRoundsList facilityId={facilityId} patientId={patientId} consultationId={id}/>,
 
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily-rounds-list/:id": ({facilityId, patientId, consultationId, id}: any) =>
