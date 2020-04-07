@@ -119,8 +119,10 @@ const Header = () => {
             </button>
           );
         })}
-        <div className="dropdown border-b border-grey-500 items-center justify-start whitespace-no-wrap font-semibold cursor-pointer hover:bg-gray-100 w-full px-4 py-5">
-            PROFILE
+        <div className="dropdown border-b border-grey-500 items-center justify-start whitespace-no-wrap font-semibold cursor-pointer hover:bg-gray-100 w-full py-5">
+            <div className="px-4">
+              PROFILE
+            </div>
         <div
           className="dropdown-menu hidden border-b border-grey-500 inline-flex items-center justify-start whitespace-no-wrap font-semibold cursor-pointer hover:bg-gray-300 w-full px-4 py-4"
           onClick={() => {
