@@ -54,10 +54,6 @@ const bedCountReducer = (state = initialState, action: any) => {
   }
 };
 
-const goBack = () => {
-  window.history.go(-1);
-};
-
 export const BedCapacityForm = (props: BedCapacityProps) => {
   const dispatchAction: any = useDispatch();
   const { facilityId, id } = props;
@@ -70,6 +66,14 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
   const buttonText = !id
     ? `Save ${!isLastOptionType ? "& Add More" : "Bed Capacity"}`
     : "Update Bed Capacity";
+
+  const goBack = () => {
+    if (!id) {
+      navigate(`/facility/${facilityId}/doctor`);
+    } else {
+      window.history.go(-1);
+    }
+  };
 
   const fetchData = useCallback(
     async (status: statusType) => {

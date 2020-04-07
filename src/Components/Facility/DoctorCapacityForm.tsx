@@ -53,10 +53,6 @@ const doctorCapacityReducer = (state = initialState, action: any) => {
   }
 };
 
-const goBack = () => {
-  window.history.go(-1);
-};
-
 export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
   const dispatchAction: any = useDispatch();
   const { facilityId, id } = props;
@@ -71,6 +67,14 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
   const buttonText = !id
     ? `Save ${!isLastOptionType ? "& Add More" : "Doctor Capacity"}`
     : "Update Doctor Capacity";
+
+  const goBack = () => {
+    if (!id) {
+      navigate(`/facility/${facilityId}`);
+    } else {
+      window.history.go(-1);
+    }
+  };
 
   const fetchData = useCallback(
     async (status: statusType) => {
