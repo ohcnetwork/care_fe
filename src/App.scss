@@ -234,3 +234,9 @@
   color: #fff;
   background-color: #343a40;
 }
+
+// logout drop-down
+
+.dropdown:hover .dropdown-menu {
+  display: block;
+}
