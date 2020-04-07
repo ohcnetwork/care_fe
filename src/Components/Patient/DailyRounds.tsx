@@ -1,17 +1,15 @@
 import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import { navigate } from 'hookrouter';
-import React, { useReducer, useState , useCallback} from "react";
+import React, { useCallback, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
-import { PATIENT_CATEGORY, SYMPTOM_CHOICES, CURRENT_HEALTH_CHANGE } from "../../Common/constants";
-import { createDailyReport, updateDailyReport } from "../../Redux/actions";
+import { CURRENT_HEALTH_CHANGE, PATIENT_CATEGORY, SYMPTOM_CHOICES } from "../../Common/constants";
+import { statusType, useAbortableEffect } from "../../Common/utils";
+import { createDailyReport, getConsultationDailyRoundsDetails, updateDailyReport } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
-import { DateTimeFiled, ErrorHelperText, MultilineInputField, MultiSelectField, SelectField, TextInputField, CheckboxField } from "../Common/HelperInputFields";
+import { CheckboxField, DateTimeFiled, ErrorHelperText, MultilineInputField, MultiSelectField, SelectField, TextInputField } from "../Common/HelperInputFields";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import {  getConsultationDailyRoundsDetails } from "../../Redux/actions";
-
 
 const initForm: any = {
     otherSymptom: false,
@@ -75,29 +73,29 @@ const goBack = () => {
 
 export const DailyRounds = (props: any) => {
     const dispatchAction: any = useDispatch();
-    const { facilityId, patientId, id, consultationId, dailyRoundListId } = props;
+    const { facilityId, patientId, consultationId, id } = props;
     const [state, dispatch] = useReducer(DailyRoundsFormReducer, initialState);
     const [isLoading, setIsLoading] = useState(false);
 
-    const headerText = (!dailyRoundListId ) ? "Add Daily Rounds" : "Edit Daily Rounds";
-    const buttonText = (!dailyRoundListId ) ? "Save Daily Round" : "Update Daily Round";
-    
-    function convertUpperCase(str:any) {
-        let splitStr:any = str.toLowerCase().split(' ');
+    const headerText = (!id) ? "Add Daily Rounds" : "Edit Daily Rounds";
+    const buttonText = (!id) ? "Save Daily Round" : "Update Daily Round";
+
+    function convertUpperCase(str: any) {
+        let splitStr: any = str.toLowerCase().split(' ');
         for (let i = 0; i < splitStr.length; i++) {
-            splitStr[i] = splitStr[i].charAt(0).toUpperCase() + splitStr[i].substring(1);     
+            splitStr[i] = splitStr[i].charAt(0).toUpperCase() + splitStr[i].substring(1);
         }
-        return splitStr.join(' '); 
+        return splitStr.join(' ');
     }
 
     const fetchpatient = useCallback(
         async (status: statusType) => {
             setIsLoading(true);
-            const dailyRoundListDetails = await dispatchAction(getConsultationDailyRoundsDetails({ dailyRoundListId,consultationId }));
+            const dailyRoundListDetails = await dispatchAction(getConsultationDailyRoundsDetails(id, { consultationId }));
             if (!status.aborted) {
                 if (dailyRoundListDetails && dailyRoundListDetails.data) {
                     dailyRoundListDetails.data.current_health = convertUpperCase(dailyRoundListDetails.data.current_health)
-                    let healthValue:any = CURRENT_HEALTH_CHANGE.find((value:any) => {
+                    let healthValue: any = CURRENT_HEALTH_CHANGE.find((value: any) => {
                         return (dailyRoundListDetails.data.current_health === value.text);
                     })
                     dailyRoundListDetails.data.current_health = healthValue ? healthValue.id : 0;
@@ -106,11 +104,11 @@ export const DailyRounds = (props: any) => {
                 setIsLoading(false);
             }
         },
-        [dispatchAction, id]
+        [consultationId, id, dispatchAction]
     );
     useAbortableEffect(
         (status: statusType) => {
-            if(dailyRoundListId){
+            if (id) {
                 fetchpatient(status);
             }
         },
@@ -161,16 +159,16 @@ export const DailyRounds = (props: any) => {
             console.log(data);
 
             let res;
-            if(dailyRoundListId){
-                res = await dispatchAction(updateDailyReport(data, { consultationId, dailyRoundListId }));
-            }else{
+            if (id) {
+                res = await dispatchAction(updateDailyReport(data, { consultationId, id }));
+            } else {
                 res = await dispatchAction(createDailyReport(data, { consultationId }));
             }
 
             setIsLoading(false);
             if (res && res.data) {
                 dispatch({ type: "set_form", form: initForm });
-                if (dailyRoundListId) {
+                if (id) {
                     Notification.Success({
                         msg: "Daily round details updated successfully"
                     });

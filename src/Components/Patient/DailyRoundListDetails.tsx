@@ -1,35 +1,24 @@
 import { Button } from "@material-ui/core";
 import { navigate } from "hookrouter";
+import moment from 'moment';
 import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
+import { PATIENT_CATEGORY, SYMPTOM_CHOICES } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import {  getConsultationDailyRoundsDetails, patchSample } from "../../Redux/actions";
-import * as Notification from "../../Utils/Notifications";
-import AlertDialog from "../Common/AlertDialog";
+import { getConsultationDailyRoundsDetails } from "../../Redux/actions";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
-import { SYMPTOM_CHOICES , PATIENT_CATEGORY} from "../../Common/constants";
-import moment from 'moment';
 
 export const DailyRoundListDetails = (props: any) => {
-  const { facilityId, id, patientId, consultationId, dailyRoundListId } = props;
+  const { facilityId, patientId, consultationId, id } = props;
   const dispatch: any = useDispatch();
-  const [dailyRoundListDetailsData, setDailyRoundListDetails] = useState< any >({});
+  const [dailyRoundListDetailsData, setDailyRoundListDetails] = useState<any>({});
   const [isLoading, setIsLoading] = useState(false);
-  const [sampleFlag, callSampleList] = useState(false);
-  const [selectedStatus, setSelectedStatus] = useState<{ status: number, sample: any }>({ status: 0, sample: null });
-  const [showAlertMessage, setAlertMessage] = useState({
-    show: false,
-    message: "",
-    title: "",
-  });
-
-  const limit = 5;
 
   const fetchpatient = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const dailyRoundListDetails = await dispatch(getConsultationDailyRoundsDetails({ dailyRoundListId,consultationId }));
+      const dailyRoundListDetails = await dispatch(getConsultationDailyRoundsDetails(id, { consultationId }));
       if (!status.aborted) {
         if (dailyRoundListDetails && dailyRoundListDetails.data) {
           setDailyRoundListDetails(dailyRoundListDetails.data);
@@ -37,7 +26,7 @@ export const DailyRoundListDetails = (props: any) => {
         setIsLoading(false);
       }
     },
-    [dispatch, id]
+    [consultationId, dispatch, id]
   );
   useAbortableEffect(
     (status: statusType) => {
@@ -46,75 +35,37 @@ export const DailyRoundListDetails = (props: any) => {
     [dispatch, fetchpatient]
   );
 
-  const dismissAlert = () => {
-    setAlertMessage({
-      show: false,
-      message: "",
-      title: "",
-    })
-  };
-
-  const handleApproval = () => {
-    const { status, sample } = selectedStatus;
-    const sampleData = {
-      id: sample.id,
-      status,
-      consultation: sample.consultation
-    };
-    let statusName = "";
-    if (status === 4) {
-      statusName = "SENT_TO_COLLECTON_CENTRE";
-    }
-
-    dispatch(patchSample(Number(sample.id), sampleData)).then((resp: any) => {
-      if (resp.status === 201 || resp.status === 200) {
-        Notification.Success({
-          msg: `Request ${statusName}`
-        });
-        // window.location.reload();
-        callSampleList(!sampleFlag);
-      }
-    });
-
-    dismissAlert()
-  };
-
   if (isLoading) {
     return <Loading />;
   }
-  const showAdditionalSymtoms = ()=>{ 
+
+  const showAdditionalSymtoms = () => {
     let additionalSymtomsValue: any = '';
-    if( (dailyRoundListDetailsData.additional_symptoms) && (dailyRoundListDetailsData.additional_symptoms.length>0) ){
-        for(let i=0;i<dailyRoundListDetailsData.additional_symptoms.length;i++){
-            let symptomValue:any = SYMPTOM_CHOICES.find((symtomObj:any) => {
-                return (symtomObj.id === dailyRoundListDetailsData.additional_symptoms[i]);
-            })
-            additionalSymtomsValue += (symptomValue && symptomValue.text + ', ')
-        }
+    if ((dailyRoundListDetailsData.additional_symptoms) && (dailyRoundListDetailsData.additional_symptoms.length > 0)) {
+      for (let i = 0; i < dailyRoundListDetailsData.additional_symptoms.length; i++) {
+        let symptomValue: any = SYMPTOM_CHOICES.find((symtomObj: any) => {
+          return (symtomObj.id === dailyRoundListDetailsData.additional_symptoms[i]);
+        })
+        additionalSymtomsValue += (symptomValue && symptomValue.text + ', ')
+      }
     }
     return additionalSymtomsValue;
   }
-  function findPatientCategory(){
-    let categoryValue:any = PATIENT_CATEGORY.find((value:any) => {
-        return (value.id === dailyRoundListDetailsData.patient_category);
+
+  function findPatientCategory() {
+    let categoryValue: any = PATIENT_CATEGORY.find((value: any) => {
+      return (value.id === dailyRoundListDetailsData.patient_category);
     });
-    return categoryValue ? categoryValue.text : '' ;
+    return categoryValue ? categoryValue.text : '';
   }
+
   return (
     <div className="px-2">
-      {showAlertMessage.show && (
-        <AlertDialog
-          title={showAlertMessage.title}
-          message={showAlertMessage.message}
-          handleClose={() => handleApproval()}
-          handleCancel={() => dismissAlert()}
-        />
-      )}
-      <PageTitle title={`Daily Rounds #${dailyRoundListId}`} />
+      <PageTitle title={`Daily Rounds #${id}`} />
       <div className="border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black mt-4 p-4">
         <div className="flex justify-between">
           <div className="max-w-md">
-          <div>
+            <div>
               <span className="font-semibold leading-relaxed">Patient Category: </span>
               {findPatientCategory()}
             </div>
@@ -132,7 +83,7 @@ export const DailyRoundListDetails = (props: any) => {
                 color="primary"
                 size="small"
                 onClick={() =>
-                    navigate(`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds-list/${dailyRoundListId}/update`)
+                  navigate(`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds-list/${id}/update`)
                 }
               >Update Details</Button>
             </div>
@@ -150,7 +101,7 @@ export const DailyRoundListDetails = (props: any) => {
           </div>
           <div>
             <span className="font-semibold leading-relaxed">Temperature Measured At: </span>
-            {dailyRoundListDetailsData.temperature_measured_at ? moment(dailyRoundListDetailsData.temperature_measured_at).format("MM-DD-YYYY"):'Not Available'}
+            {dailyRoundListDetailsData.temperature_measured_at ? moment(dailyRoundListDetailsData.temperature_measured_at).format("MM-DD-YYYY") : 'Not Available'}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">Physical Examination Info: </span>
@@ -173,7 +124,7 @@ export const DailyRoundListDetails = (props: any) => {
             {dailyRoundListDetailsData.consultation}
           </div>
         </div>
-       
+
       </div>
     </div>
   );

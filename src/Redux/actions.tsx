@@ -136,6 +136,9 @@ export const updateDailyReport = (data: object, urlParam: object) => {
 export const getDailyReport = (paginate: object, urlParam: object) => {
     return fireRequest('getDailyReports', [], paginate, urlParam)
 };
+export const getConsultationDailyRoundsDetails = (id: number, urlParam: object) => {
+    return fireRequest('getDailyReports', [id], {}, urlParam);
+};
 export const patchSampleTest = (id: number, form: object, urlParam: object) => {
     return fireRequest('patchSampleTest', [id], form, urlParam)
 };
@@ -162,7 +165,4 @@ export const getTestSample = (id: number) => {
 
 export const patchSample = (id: number, form: object) => {
     return fireRequest('patchSample', [id], form)
-};
-export const getConsultationDailyRoundsDetails = (urlParam: object) => {
-    return fireRequest('getConsultationDailyRoundsDetails', [], {}, urlParam);
 };

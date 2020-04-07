@@ -79,15 +79,15 @@ export default {
         path: '/api/v1/facility',
         method: 'DELETE'
     },
-    getConsultationList:{
-        path:'/api/v1/consultation/'
+    getConsultationList: {
+        path: '/api/v1/consultation/'
     },
-    createConsultation:{
-        path:'/api/v1/consultation/',
-        method:'POST',
+    createConsultation: {
+        path: '/api/v1/consultation/',
+        method: 'POST',
     },
-    getConsultation:{
-        path:'/api/v1/consultation/{id}/',
+    getConsultation: {
+        path: '/api/v1/consultation/{id}/',
     },
     updateConsultation: {
         path: '/api/v1/consultation/{id}/',
@@ -101,19 +101,16 @@ export default {
         path: '/api/v1/consultation/{id}/',
         method: 'DELETE'
     },
-    createDailyRounds:{
+    createDailyRounds: {
         path: '/api/v1/consultation/{consultationId}/daily_rounds/',
         method: 'POST'
     },
-    updateDailyReport:{
-        path: '/api/v1/consultation/{consultationId}/daily_rounds/{dailyRoundListId}/',
+    updateDailyReport: {
+        path: '/api/v1/consultation/{consultationId}/daily_rounds/{id}/',
         method: 'PUT'
     },
-    getDailyReports:{
+    getDailyReports: {
         path: '/api/v1/consultation/{consultationId}/daily_rounds',
-    },
-    getConsultationDailyRoundsDetails:{
-        path: '/api/v1/consultation/{consultationId}/daily_rounds/{dailyRoundListId}/',
     },
     // Ambulance
 
@@ -154,14 +151,14 @@ export default {
         path: '/api/v1/facility/{facilityId}/hospital_doctor',
         method: 'PUT'
     },
-    
+
     //Triage
-    createTriage:{
-        path:'/api/v1/facility/{facilityId}/patient_stats/',
-        method:'POST'
+    createTriage: {
+        path: '/api/v1/facility/{facilityId}/patient_stats/',
+        method: 'POST'
     },
-    getTriage:{
-        path:'/api/v1/facility/{facilityId}/patient_stats',
+    getTriage: {
+        path: '/api/v1/facility/{facilityId}/patient_stats',
     },
 
     // //Care Center
@@ -186,19 +183,19 @@ export default {
         path: '/api/v1/patient/{id}/',
         method: 'PUT'
     },
-    sampleTestList:{
-        path:'/api/v1/patient/{patientId}/test_sample/',
+    sampleTestList: {
+        path: '/api/v1/patient/{patientId}/test_sample/',
     },
-    createSampleTest:{
-        path:'/api/v1/patient/{patientId}/test_sample/',
-        method:'POST',
+    createSampleTest: {
+        path: '/api/v1/patient/{patientId}/test_sample/',
+        method: 'POST',
     },
-    getSampleTest:{
-        path:'/api/v1/patient/{patientId}/test_sample/{id}/',
+    getSampleTest: {
+        path: '/api/v1/patient/{patientId}/test_sample/{id}/',
     },
-    patchSampleTest:{
-        path:'/api/v1/patient/{patientId}/test_sample/{id}/',
-        method:'PATCH',
+    patchSampleTest: {
+        path: '/api/v1/patient/{patientId}/test_sample/{id}/',
+        method: 'PATCH',
     },
 
     // States
@@ -241,8 +238,8 @@ export default {
         method: 'POST'
     },
     patchSample: {
-        path:'/api/v1/test_sample',
-        method:'PATCH',
+        path: '/api/v1/test_sample',
+        method: 'PATCH',
     },
 
 }

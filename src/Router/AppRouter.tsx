@@ -90,13 +90,13 @@ const routes = {
   "/facility/:facilityId/patient/:patientId/consultation/:id/daily-rounds": ({facilityId, patientId, id}: any) =>
      <DailyRounds facilityId={facilityId} patientId={patientId} consultationId={id}/>,
 
-  "/facility/:facilityId/patient/:patientId/consultation/:id/daily-rounds-list": ({facilityId, patientId, id}: any) =>
+  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily-rounds-list": ({facilityId, patientId, id}: any) =>
     <DailyRoundsList facilityId={facilityId} patientId={patientId} consultationId={id}/>,
 
-  "/facility/:facilityId/patient/:patientId/consultation/:id/daily-rounds-list/:dailyRoundListId": ({facilityId, patientId, id, dailyRoundListId}: any) =>
-    <DailyRoundListDetails facilityId={facilityId} patientId={patientId} consultationId={id} dailyRoundListId={dailyRoundListId}/>,
-  "/facility/:facilityId/patient/:patientId/consultation/:id/daily-rounds-list/:dailyRoundListId/update": ({facilityId, patientId, id, dailyRoundListId}: any) =>
-    <DailyRounds facilityId={facilityId} patientId={patientId} consultationId={id} dailyRoundListId={dailyRoundListId}/>,
+  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily-rounds-list/:id": ({facilityId, patientId, consultationId, id}: any) =>
+    <DailyRoundListDetails facilityId={facilityId} patientId={patientId} consultationId={consultationId} id={id}/>,
+  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily-rounds-list/:id/update": ({facilityId, patientId, consultationId, id}: any) =>
+    <DailyRounds facilityId={facilityId} patientId={patientId} consultationId={consultationId} id={id}/>,
 
   "/patients": () => <PatientManager />,
   "/patient/:id": ({ id }: any) => <PatientHome id={id} />,
