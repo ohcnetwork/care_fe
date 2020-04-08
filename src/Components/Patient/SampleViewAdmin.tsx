@@ -168,7 +168,7 @@ export default function SampleViewAdmin(props: any) {
       title: "Confirm",
     });
   };
-  const onSearchSuspects = async (event: React.KeyboardEvent<HTMLInputElement>):Promise<any> => {
+  const onSearchDistrictName = async (event: React.KeyboardEvent<HTMLInputElement>):Promise<any> => {
     let searchValue:any = (event.target as HTMLInputElement).value
     if(event.keyCode === 13){
       setIsLoading(true);
@@ -384,7 +384,7 @@ export default function SampleViewAdmin(props: any) {
       )}
       <PageTitle title="Sample Management system" hideBack={true} />
       <InputSearchBox
-        onKeyUp = {onSearchSuspects}
+        onKeyUp = {onSearchDistrictName}
         placeholder = 'Search District Name'
         errors=''
       />
