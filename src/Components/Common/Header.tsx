@@ -129,18 +129,18 @@ const Header = () => {
                 <PersonIcon style={{ color: "#666", marginRight: "4px" }} />
                 <span className="pl-4">Users</span>
             </button>
-        <div
-          className="dropdown-menu hidden border-b border-grey-500 inline-flex items-center justify-start whitespace-no-wrap font-semibold cursor-pointer hover:bg-gray-300 w-full px-4 py-4"
-          onClick={() => {
-            localStorage.removeItem("care_access_token");
-            localStorage.removeItem("care_refresh_token");
-            navigate("/login");
-            window.location.reload();
-          }}
-          >
-          <CancelIcon style={{ color: "#666", marginRight: "4px" }} />
-          <span className="pl-4">Logout</span>
-        </div>
+            <div
+              className="dropdown-menu hidden border-b border-grey-500 inline-flex items-center justify-start whitespace-no-wrap font-semibold cursor-pointer hover:bg-gray-300 w-full px-4 py-4"
+              onClick={() => {
+                localStorage.removeItem("care_access_token");
+                localStorage.removeItem("care_refresh_token");
+                navigate("/login");
+                window.location.reload();
+              }}
+              >
+                <CancelIcon style={{ color: "#666", marginRight: "4px" }} />
+                <span className="pl-4">Logout</span>
+            </div>
         </div>
         <div
             className="border-b border-grey-500 inline-flex items-center justify-start whitespace-no-wrap font-semibold cursor-pointer hover:bg-gray-300 w-full px-4 py-4"
