@@ -84,11 +84,12 @@ const Header = () => {
       link: "/samplelist",
       icon: <LocalHospitalIcon style={{ color: "#666", marginRight: "4px" }} />
     },
-    {
-      title: "Users",
-      link: "/users",
-      icon: <PersonIcon style={{ color: "#666", marginRight: "4px" }} />
-    }
+    // Added a dropdown hover effect
+    // {
+    //   title: "Users",
+    //   link: "/users",
+    //   icon: <PersonIcon style={{ color: "#666", marginRight: "4px" }} />
+    // }
   ];
   const loginUser = `${get(currentUser, "data.first_name", "")} ${get(
     currentUser,
@@ -119,10 +120,15 @@ const Header = () => {
             </button>
           );
         })}
-        <div className="dropdown border-b border-grey-500 items-center justify-start whitespace-no-wrap font-semibold cursor-pointer hover:bg-gray-100 w-full py-5">
-            <div className="px-4">
-              PROFILE
-            </div>
+        <div 
+          className="dropdown border-b border-grey-500 items-center justify-start whitespace-no-wrap font-semibold cursor-pointer hover:bg-gray-100 w-full">
+            <button 
+              onClick={()=>navigate("/users")}
+              className="border-b border-grey-300 inline-flex items-center justify-start whitespace-no-wrap font-semibold cursor-pointer hover:bg-gray-300 w-full px-4 py-4 "
+              > 
+                <PersonIcon style={{ color: "#666", marginRight: "4px" }} />
+                <span className="pl-4">Users</span>
+            </button>
         <div
           className="dropdown-menu hidden border-b border-grey-500 inline-flex items-center justify-start whitespace-no-wrap font-semibold cursor-pointer hover:bg-gray-300 w-full px-4 py-4"
           onClick={() => {
