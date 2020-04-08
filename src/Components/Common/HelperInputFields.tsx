@@ -1,14 +1,13 @@
-import React from 'react';
-import { Checkbox, Grid, IconButton, Radio, TextField, InputLabel, NativeSelect, TextFieldProps, FormControlLabel, FormControlLabelProps, Select, Input, Chip, MenuItem, ListItemText } from '@material-ui/core';
-import { KeyboardDatePicker, KeyboardTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
-import { MaterialUiPickersDate } from '@material-ui/pickers/typings/date'
-import Autocomplete from '@material-ui/lab/Autocomplete';
 import DateFnsUtils from '@date-io/date-fns';
-import DeleteIcon from '@material-ui/icons/Delete';
-import FormControl from '@material-ui/core/FormControl';
+import { Checkbox, Chip, FormControlLabel, FormControlLabelProps, Input, InputLabel, ListItemText, MenuItem, NativeSelect, Radio, Select, TextField, TextFieldProps } from '@material-ui/core';
 import Box from '@material-ui/core/Box';
+import FormControl from '@material-ui/core/FormControl';
 import { NativeSelectInputProps } from '@material-ui/core/NativeSelect/NativeSelectInput';
 import { SelectProps } from '@material-ui/core/Select';
+import Autocomplete from '@material-ui/lab/Autocomplete';
+import { DatePickerProps, KeyboardDateTimePicker, KeyboardDatePicker, KeyboardTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import { MaterialUiPickersDate } from '@material-ui/pickers/typings/date';
+import React from 'react';
 
 export interface DefaultSelectInputProps extends Omit<SelectProps, 'onChange'> {
     options: Array<any>;
@@ -58,13 +57,12 @@ interface InputProps {
         e: React.KeyboardEvent<HTMLInputElement>
     ) => void;
 }
-interface DateInputFieldProps {
+interface DateInputFieldProps extends DatePickerProps {
     value: string;
     onChange: (date: MaterialUiPickersDate, value?: string | null | undefined) => void;
     label: string;
     errors: string;
-    variant?: "standard" | "outlined" | "filled";
-    maxDate?: Date;
+    inputVariant?: "standard" | "outlined" | "filled";
     disabled?: boolean;
     margin?: "none" | "dense" | "normal";
 };
@@ -133,123 +131,39 @@ export const MultilineInputField = (props: TextFieldPropsExtended) => {
     );
 };
 
-export const RadioButtonField = (props: InputProps) => {
-    const { options, onChange, handleDeleteOption, errors } = props;
-    return (
-        <div>
-            {options.map((opt: Option, idx: number) => {
-                return (
-                    <Grid container key={idx}>
-                        <Grid item>
-                            <Radio disabled style={{ paddingLeft: 0 }} />
-                        </Grid>
-                        <Grid item style={{ flexGrow: 1 }}>
-                            <Grid container spacing={2}>
-                                <Grid xs={4} item>
-                                    <TextField
-                                        name="text"
-                                        value={opt.text}
-                                        placeholder={`option ${idx + 1}`}
-                                        onChange={e => onChange(e, idx)}
-                                    />
-                                    <ErrorHelperText error={errors && errors[idx] && errors[idx].text} />
-                                </Grid>
-                                <Grid xs={4} item>
-                                    <TextField
-                                        type="number"
-                                        name="score"
-                                        value={opt.score}
-                                        placeholder="Score"
-                                        onChange={e => onChange(e, idx)}
-                                    />
-                                    <ErrorHelperText error={errors && errors[idx] && errors[idx].score} />
-                                </Grid>
-                                <Grid xs={4} item>
-                                    {options.length > 1
-                                        ? (
-                                            <Grid item style={{ flexGrow: 1, textAlign: 'right' }}>
-                                                <IconButton onClick={() => handleDeleteOption(idx)}>
-                                                    <DeleteIcon fontSize="small" />
-                                                </IconButton>
-                                            </Grid>
-                                        ) : null}
-                                </Grid>
-                            </Grid>
-                        </Grid>
-                    </Grid>
-                );
-            })}
-        </div>
-    );
-};
-
-export const CheckboxInputField = (props: InputProps) => {
-    const { options, onChange, handleDeleteOption, errors } = props;
-    return (
-        <div>
-            {options.map((opt: Option, idx: number) => {
-                return (
-                    <Grid container key={idx}>
-                        <Grid item>
-                            <Checkbox disabled style={{ paddingLeft: 0 }} />
-                        </Grid>
-                        <Grid item style={{ flexGrow: 1 }}>
-                            <Grid container spacing={2}>
-                                <Grid xs={4} item>
-                                    <TextField
-                                        name="text"
-                                        value={opt.text}
-                                        placeholder={`option ${idx + 1}`}
-                                        onChange={e => onChange(e, idx)}
-                                    />
-                                    <ErrorHelperText error={errors && errors[idx] && errors[idx].text} />
-                                </Grid>
-                                <Grid xs={4} item>
-                                    <TextField
-                                        type="number"
-                                        name="score"
-                                        value={opt.score}
-                                        placeholder="Score"
-                                        onChange={e => onChange(e, idx)}
-                                    />
-                                    <ErrorHelperText error={errors && errors[idx] && errors[idx].score} />
-                                </Grid>
-                                <Grid xs={4} item>
-                                    {options.length > 1
-                                        ? (
-                                            <Grid item style={{ flexGrow: 1, textAlign: 'right' }}>
-                                                <IconButton onClick={() => handleDeleteOption(idx)}>
-                                                    <DeleteIcon fontSize="small" />
-                                                </IconButton>
-                                            </Grid>
-                                        ) : null}
-                                </Grid>
-                            </Grid>
-                        </Grid>
-                    </Grid>
-                );
-            })}
-        </div>
-    );
-};
+export const DateTimeFiled = (props: DateInputFieldProps) => {
+    const { label, errors, onChange, value, margin, disabled, ...restProps } = props;
+    return (<MuiPickersUtilsProvider utils={DateFnsUtils}>
+        <KeyboardDateTimePicker
+            margin={margin || "normal"}
+            id="date-time-picker-dialog"
+            label={label}
+            value={value}
+            format="dd/MM/yyyy HH:mm"
+            onChange={onChange}
+            disabled={disabled}
+            {...restProps}
+        />
+        <ErrorHelperText error={errors} />
+    </MuiPickersUtilsProvider>)
+}
 
 export const DateInputField = (props: DateInputFieldProps) => {
-    const { value, onChange, label, errors, variant, maxDate, disabled, margin } = props;
+    const { value, onChange, label, errors, variant, disabled, margin, ...restProps } = props;
     return (
         <MuiPickersUtilsProvider utils={DateFnsUtils}>
             <KeyboardDatePicker
-                inputVariant={variant || 'standard'}
                 margin={margin || "normal"}
                 id="date-picker-dialog"
                 label={label || "Date picker dialog"}
-                format="MM/dd/yyyy"
+                format="dd/MM/yyyy"
                 value={value}
                 onChange={onChange}
-                maxDate={maxDate}
                 disabled={disabled}
                 KeyboardButtonProps={{
                     'aria-label': 'change date',
                 }}
+                {...restProps}
             />
             <ErrorHelperText error={errors} />
         </MuiPickersUtilsProvider>
@@ -346,14 +260,14 @@ export const SelectField = (props: DefaultSelectInputProps) => {
     return (<>
         <FormControl style={{ width: "100%" }} variant={variant} margin={margin}>
             {label && (<InputLabel htmlFor={labelId}>{label}</InputLabel>)}
-            <Select 
-            native 
-            inputProps={{
-                name: name,
-                id: labelId,
-            }}
-            value={value}
-            {...restProps}>
+            <Select
+                native
+                inputProps={{
+                    name: name,
+                    id: labelId,
+                }}
+                value={value}
+                {...restProps}>
                 {showEmpty && <option aria-label="None" value="" />}
                 {!optionArray && options.map((opt: any) => {
                     const value = optionKey ? opt[optionKey] : opt.id;

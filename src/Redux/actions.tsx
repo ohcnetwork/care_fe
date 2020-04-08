@@ -65,6 +65,10 @@ export const getTriageInfo = (urlParam: object) => {
     return fireRequest('getTriage', [], {},urlParam)
 };
 
+export const getTriageDetails = (id: number, urlParam: object) => {
+    return fireRequest('getTriage', [id], {},urlParam)
+};
+
 export const listCapacity = (paginate: object, urlParam: object) => {
     return fireRequest('getCapacity', [], paginate, urlParam);
 };
@@ -124,8 +128,16 @@ export const getSampleTest = (id: number, urlParam: object) => {
 export const createDailyReport = (data: object, urlParam: object) => {
     return fireRequest('createDailyRounds', [],  data, urlParam)
 };
+
+export const updateDailyReport = (data: object, urlParam: object) => {
+    return fireRequest('updateDailyReport', [],  data, urlParam)
+};
+
 export const getDailyReport = (paginate: object, urlParam: object) => {
     return fireRequest('getDailyReports', [], paginate, urlParam)
+};
+export const getConsultationDailyRoundsDetails = (id: number, urlParam: object) => {
+    return fireRequest('getDailyReports', [id], {}, urlParam);
 };
 export const patchSampleTest = (id: number, form: object, urlParam: object) => {
     return fireRequest('patchSampleTest', [id], form, urlParam)

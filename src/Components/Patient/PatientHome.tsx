@@ -172,7 +172,7 @@ export const PatientHome = (props: any) => {
     });
   }
 
-  const handleApproval = () => {
+  const handleApproval = async () => {
     const { status, sample } = selectedStatus;
     const sampleData = {
       id: sample.id,
@@ -184,15 +184,13 @@ export const PatientHome = (props: any) => {
       statusName = "SENT_TO_COLLECTON_CENTRE";
     }
 
-    dispatch(patchSample(Number(sample.id), sampleData)).then((resp: any) => {
-      if (resp.status === 201 || resp.status === 200) {
-        Notification.Success({
-          msg: `Request ${statusName}`
-        });
-        // window.location.reload();
-        callSampleList(!sampleFlag);
-      }
-    });
+    const res = await dispatch(patchSample(Number(sample.id), sampleData));
+    if (res && (res.status === 201 || res.status === 200)) {
+      Notification.Success({
+        msg: `Request ${statusName}`
+      });
+      callSampleList(!sampleFlag);
+    }
 
     dismissAlert()
   };

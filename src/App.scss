@@ -77,7 +77,7 @@
   background: #ffffff no-repeat;
   background-size: 100% 100%;
   min-height: 80px;
-  z-index: 10000;
+  z-index: 1202;
   display: flex;
   flex-direction: row;
   margin-top: auto;
@@ -142,14 +142,6 @@
 
 .pagination {
   margin: auto;
-  .current-page {
-    color: white;
-    background-color: #3f51b5;
-  }
-  .page-no {
-    color: black;
-    background-color: white;
-  }
 }
 .error-text {
   font-size: 14px;

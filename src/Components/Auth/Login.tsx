@@ -128,7 +128,7 @@ export const Login = () => {
             <CardContent>
               <TextInputField
                 name="username"
-                placeholder="User Name"
+                label="User Name"
                 variant="outlined"
                 margin="dense"
                 InputLabelProps={{ shrink: !!form.username }}
@@ -139,7 +139,7 @@ export const Login = () => {
               <TextInputField
                 type="password"
                 name="password"
-                placeholder="Password"
+                label="Password"
                 variant="outlined"
                 margin="dense"
                 InputLabelProps={{ shrink: !!form.password }}

@@ -120,13 +120,13 @@ const Pagination = (props: PaginationProps) => {
                     {renderNavigationBtn('First', firstBtnDisable)}
                     {renderNavigationBtn('Prev', prevBtnDisable)}
                     {pageNumbers.map(pageNo => (
-                        <span
+                        <button
                             key={`page_${pageNo}`}
-                            className={`w3-button cursor-pointer ${currentPage === pageNo ? 'current-page' : 'page-no'}`}
+                            className={`w3-button cursor-pointer ${currentPage === pageNo ? 'bg-blue-500 text-white' : 'bg-white text-gray-800'}`}
                             onClick={e => goToPage(e, pageNo)}
                         >
                             {pageNo}
-                        </span>
+                        </button>
                     ))}
                     {renderNavigationBtn('Next', nextBtnDisable)}
                     {renderNavigationBtn('Last', lastBtnDisable)}

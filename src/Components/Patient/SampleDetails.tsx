@@ -72,7 +72,7 @@ export const SampleDetails = (props: SampleDetailsProps) => {
   }
 
   return (<>
-    <PageTitle title={`Sample Details #${sampleDetails.id}`} />
+    <PageTitle title={`Sample Test Details #${sampleDetails.id}`} />
     <Card className="mt-4">
       <CardContent>
         <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
@@ -89,8 +89,8 @@ export const SampleDetails = (props: SampleDetailsProps) => {
             {sampleDetails.patient_name}
           </div>
           {sampleDetails.facility_object && (<div>
-            <span className="font-semibold leading-relaxed">{sampleDetails.facility_object.name} </span>
-             {/* ({sampleDetails.facility_object.facility_type?.name || "-"}) */}
+            <span className="font-semibold leading-relaxed">Facility: </span>
+            {sampleDetails.facility_object.name}
           </div>)}
           <div>
             <span className="font-semibold leading-relaxed">Tested on: </span>
@@ -124,7 +124,7 @@ export const SampleDetails = (props: SampleDetailsProps) => {
       </CardContent>
     </Card>
 
-    <PageTitle title="Sample History" hideBack={true} />
+    <PageTitle title="Sample Test History" hideBack={true} />
     {sampleDetails.flow && sampleDetails.flow.map((flow: FlowModel) => renderFlow(flow))}
   </>);
 };

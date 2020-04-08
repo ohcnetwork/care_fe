@@ -105,15 +105,15 @@ export const FacilityHome = (props: any) => {
   let stats = patientStatsData.map((data: PatientStatsModel, index) => {
     return (
       <tr className="border" key={index}>
-        <td className="border px-4 py-2">{data.entry_date || "-"}</td>
-        <td className="border px-4 py-2">{data.num_patients_visited || "-"}</td>
-        <td className="border px-4 py-2">
+        <td className="border px-4 py-2 whitespace-no-wrap">{data.entry_date || "-"}</td>
+        <td className="border px-4 py-2 text-center">{data.num_patients_visited || "-"}</td>
+        <td className="border px-4 py-2 text-center">
           {data.num_patients_home_quarantine || "-"}
         </td>
-        <td className="border px-4 py-2">
+        <td className="border px-4 py-2 text-center">
           {data.num_patients_isolation || "-"}
         </td>
-        <td className="border px-4 py-2">{data.num_patient_referred || "-"}</td>
+        <td className="border px-4 py-2 text-center">{data.num_patient_referred || "-"}</td>
         <td className="border px-4 py-2">
           <Button
               className="py-2 mt-2 px-6 bg-white rounded-md border border-grey-500 inline-flex items-center justify-center whitespace-no-wrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300"
