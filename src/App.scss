@@ -1,3 +1,5 @@
+$primary: #B21E35;
+
 .header-section {
   .appBar {
     z-index: 1201;
@@ -233,4 +235,8 @@
 .badge-dark {
   color: #fff;
   background-color: #343a40;
+}
+
+.border-primary {
+  border-color: $primary;
 }
