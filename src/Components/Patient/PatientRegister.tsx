@@ -14,6 +14,7 @@ import { AutoCompleteMultiField, CheckboxField, DateInputField, MultilineInputFi
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 import { PatientModel } from "./models";
+import countries from "../../Common/static/countries.json"
 
 interface PatientRegisterProps extends PatientModel {
   facilityId: number;
@@ -37,6 +38,10 @@ const initForm: any = {
   gender: "",
   phone_number: "",
   medical_history: [],
+  isForeign: false,
+  nationality: "",
+  passport_no: "",
+  aadhar_no: "",
   state: "",
   district: "",
   local_body: "",
@@ -259,6 +264,18 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             invalidForm = true;
           }
           return;
+        case "nationality":
+          if ( state.form.isForiegn && !state.form[field] ){
+            errors[field] = "Please enter the country of origin";
+            invalidForm = true;
+          }
+          return;
+        case "passport_no":
+          if ( state.form.isForiegn && !state.form[field] ){
+            errors[field] = "Please enter the passport no";
+            invalidForm = true;
+          }
+          return;
         default:
           return;
       }
@@ -290,6 +307,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         age: Number(state.form.age),
         gender: Number(state.form.gender),
         phone_number: state.form.phone_number,
+        isForeign: state.form.isForeign,
+        nationality: state.form.isForeign?state.form.nationality:"India",
+        passport_no: state.form.isForeign?state.form.passport_no:"",
+        aadhar_no: state.form.isForeign?"":state.form.aadhar_no,
         state: state.form.state,
         district: state.form.district,
         local_body: state.form.local_body,
@@ -500,6 +521,61 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     errors={state.errors.present_health}
                   />
                 </div>
+
+                <div className="md:col-span-2">
+                  <CheckboxField
+                    checked={state.form.isForeign}
+                    onChange={handleCheckboxFieldChange}
+                    name="isForeign"
+                    label="Foreign national"
+                  />
+                </div>
+
+                {state.form.isForeign  && (<>
+                  <div>
+                      <InputLabel id="country-label">Country*</InputLabel>
+                      <SelectField
+                        name="nationality"
+                        variant="outlined"
+                        margin="dense"
+                        value={state.form.nationality}
+                        options={countries.filter(a=>a!="India")}
+                        optionArray
+                        optionValue="name"
+                        onChange={handleChange}
+                        errors={state.errors.nationality}
+                      />
+                  </div>
+                  <div >
+                    <InputLabel id="passport-label">Passport No*</InputLabel>
+                    <TextInputField
+                      name="passport_no"
+                      variant="outlined"
+                      margin="dense"
+                      type="text"
+                      value={state.form.passport_no}
+                      onChange={handleChange}
+                      errors={state.errors.passport_no}
+                    />
+                  </div>
+
+                </>)}
+
+                {!state.form.isForeign  && (<>
+                  <div >
+                    <InputLabel id="aadhar-label">Aadhar No</InputLabel>
+                    <TextInputField
+                      name="aadhar_no"
+                      variant="outlined"
+                      margin="dense"
+                      type="text"
+                      value={state.form.aadhar_no}
+                      onChange={handleChange}
+                      errors={state.errors.aadhar_no}
+                    />
+                  </div>
+                  <br/>
+                </>)}
 
                 <div>
                   <InputLabel id="gender-label">State*</InputLabel>
