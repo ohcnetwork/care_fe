@@ -42,7 +42,7 @@ export const Register = () => {
     first_name: "",
     last_name: "",
     email: "",
-    user_type: 20,
+    user_type: 10,
     district: "",
     phone_number: "",
     gender: "",
@@ -149,7 +149,7 @@ export const Register = () => {
 
   return (
     <div className="p-2 max-w-3xl mx-auto">
-    <PageTitle title="Register As Hospital Administrator" />
+      <PageTitle title="Register As Hospital Administrator" />
 
       <Card>
         <form onSubmit={e => handleSubmit(e)}>

@@ -10,6 +10,7 @@ import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 import Pagination from "../Common/Pagination";
 import { FacilityModal } from "./models";
+import {InputSearchBox} from "../Common/SearchBox";
 
 const useStyles = makeStyles((theme) => ({
   paginateTopPadding: {
@@ -17,7 +18,7 @@ const useStyles = makeStyles((theme) => ({
   },
   displayFlex: {
     display: "flex",
-  },
+  }
 }));
 
 export const HospitalList = () => {
@@ -60,6 +61,19 @@ export const HospitalList = () => {
     setCurrentPage(page);
     setOffset(offset);
   };
+  const onSearchSuspects = async (event: React.KeyboardEvent<HTMLInputElement>):Promise<any> => {
+    let searchValue:any = (event.target as HTMLInputElement).value
+    if(event.keyCode === 13){
+      setIsLoading(true);
+      const res = await dispatchAction(getFacilities({ limit, offset, name: searchValue }));
+        if (res && res.data) {
+          setData(res.data.results);
+          setTotalCount(res.data.count);
+        }
+        setIsLoading(false);
+      event.stopPropagation();
+    }
+  }
 
   let facilityList: any[] = [];
   if (data && data.length) {
@@ -138,6 +152,11 @@ export const HospitalList = () => {
   return (
     <div className="px-2">
       <PageTitle title="Facilities" hideBack={true} />
+      <InputSearchBox
+        onKeyUp = {onSearchSuspects}
+        placeholder = 'Search Facilities'
+        errors=''
+      />
       <div className="flex flex-wrap mt-4">{manageFacilities}</div>
     </div>
   );

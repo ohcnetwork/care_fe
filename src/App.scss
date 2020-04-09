@@ -237,6 +237,12 @@ $primary: #B21E35;
   background-color: #343a40;
 }
 
+// logout drop-down
+
+.dropdown:hover .dropdown-menu {
+  display: block;
+}
+
 .border-primary {
   border-color: $primary;
 }

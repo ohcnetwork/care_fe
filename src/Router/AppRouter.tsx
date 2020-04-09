@@ -23,6 +23,7 @@ import { SampleDetails } from "../Components/Patient/SampleDetails";
 import { TeleConsultation } from "../Components/Patient/TeleConsultation";
 import { TreatmentForm } from "../Components/Patient/TreatmentForm";
 import ManageUsers from "../Components/Users/ManageUsers";
+import { DailyRoundListDetails } from "../Components/Patient/DailyRoundListDetails";
 
 const routes = {
   "/": () => <HospitalList />,
@@ -90,7 +91,12 @@ const routes = {
      <DailyRounds facilityId={facilityId} patientId={patientId} consultationId={id}/>,
 
   "/facility/:facilityId/patient/:patientId/consultation/:id/daily-rounds-list": ({facilityId, patientId, id}: any) =>
-      <DailyRoundsList facilityId={facilityId} patientId={patientId} consultationId={id}/>,
+    <DailyRoundsList facilityId={facilityId} patientId={patientId} consultationId={id}/>,
+
+  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily-rounds-list/:id": ({facilityId, patientId, consultationId, id}: any) =>
+    <DailyRoundListDetails facilityId={facilityId} patientId={patientId} consultationId={consultationId} id={id}/>,
+  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily-rounds-list/:id/update": ({facilityId, patientId, consultationId, id}: any) =>
+    <DailyRounds facilityId={facilityId} patientId={patientId} consultationId={consultationId} id={id}/>,
 
   "/patients": () => <PatientManager />,
   "/patient/:id": ({ id }: any) => <PatientHome id={id} />,
