@@ -36,7 +36,10 @@ const initForm: any = {
   age: "",
   gender: "",
   phone_number: "",
+  aadhar_no: "",
   medical_history: [],
+  nationality: "India",
+  passport_no: "",
   state: "",
   district: "",
   local_body: "",
@@ -157,6 +160,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         if (res && res.data) {
           const formData = {
             ...res.data,
+            nationality: res.data.nationality ? res.data.nationality : "",
             gender: res.data.gender ? res.data.gender : "",
             state: res.data.state ? res.data.state : "",
             district: res.data.district ? res.data.district : "",
@@ -227,9 +231,21 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             invalidForm = true;
           }
           return;
+        case "aadhar_no":
+          if (state.form[field] && state.form[field].length !== 12) {
+            errors[field] = "Please enter the 12 digit Aadhaar Number if available";
+            invalidForm = true;
+          }
+          return;
         case "state":
-          if (!Number(state.form[field])) {
-            errors[field] = "Field is required";
+          if (state.form.nationality === "India" && !Number(state.form[field])) {
+            errors[field] = "Please enter the state";
+            invalidForm = true;
+          }
+          return;
+        case "passport_no":
+          if (state.form.nationality !== "India" && !state.form[field]) {
+            errors[field] = "Please enter the passport number";
             invalidForm = true;
           }
           return;
@@ -290,9 +306,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         age: Number(state.form.age),
         gender: Number(state.form.gender),
         phone_number: state.form.phone_number,
-        state: state.form.state,
-        district: state.form.district,
-        local_body: state.form.local_body,
+        aadhar_no: state.form.aadhar_no,
+        nationality: state.form.nationality,
+        passport_no: state.form.nationality !== "India" ? state.form.passport_no : undefined,
+        state: state.form.nationality === "India" ? state.form.state : undefined,
+        district: state.form.nationality === "India" ? state.form.district : undefined,
+        local_body: state.form.nationality === "India" ? state.form.local_body : undefined,
         address: state.form.address ? state.form.address : undefined,
         present_health: state.form.present_health ? state.form.present_health : undefined,
         contact_with_confirmed_carrier: JSON.parse(state.form.contact_with_confirmed_carrier),
@@ -336,9 +355,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     dispatch({ type: "set_form", form });
   };
 
-  const handleCountryChange = (event: object, value: any, reason: string) => {
+  const handleDropdownChange = (event: object, value: any, name: string) => {
     const form = { ...state.form };
-    form.countries_travelled = value;
+    form[name] = value;
     dispatch({ type: "set_form", form });
   }
 
@@ -432,6 +451,31 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     errors={state.errors.name}
                   />
                 </div>
+
+                <div>
+                  <InputLabel id="is_medical_worker">Medical Worker</InputLabel>
+                  <RadioGroup
+                    aria-label="is_medical_worker"
+                    name="is_medical_worker"
+                    value={state.form.is_medical_worker}
+                    onChange={handleChange}
+                    style={{ padding: "0px 5px" }}
+                  >
+                    <Box display="flex" flexDirection="row">
+                      <FormControlLabel
+                        value="true"
+                        control={<Radio />}
+                        label="Yes"
+                      />
+                      <FormControlLabel
+                        value="false"
+                        control={<Radio />}
+                        label="No"
+                      />
+                    </Box>
+                  </RadioGroup>
+                </div>
+
                 <div>
                   <InputLabel id="age-label">Age*</InputLabel>
                   <TextInputField
@@ -444,6 +488,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     errors={state.errors.age}
                   />
                 </div>
+
                 <div>
                   <InputLabel id="gender-label">Gender*</InputLabel>
                   <SelectField
@@ -456,8 +501,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     errors={state.errors.gender}
                   />
                 </div>
+
                 <div>
-                  <InputLabel id="phone-label">Mobile Number*</InputLabel>
+                  <InputLabel id="phone-label">Phone Number*</InputLabel>
                   <TextInputField
                     name="phone_number"
                     variant="outlined"
@@ -466,6 +512,20 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     value={state.form.phone_number}
                     onChange={handleChange}
                     errors={state.errors.phone_number}
+                  />
+                </div>
+
+                <div>
+                  <InputLabel id="aadhaar-label">Aadhaar Number</InputLabel>
+                  <TextInputField
+                    name="aadhar_no"
+                    variant="outlined"
+                    margin="dense"
+                    type="number"
+                    value={state.form.aadhar_no}
+                    onChange={handleChange}
+                    errors={state.errors.aadhar_no}
+                    inputProps={{ maxLength: 12 }}
                   />
                 </div>
 
@@ -502,89 +562,91 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                 </div>
 
                 <div>
-                  <InputLabel id="gender-label">State*</InputLabel>
-                  {isStateLoading ? (
-                    <CircularProgress size={20} />
-                  ) : (
-                      <SelectField
-                        name="state"
-                        variant="outlined"
-                        margin="dense"
-                        value={state.form.state}
-                        options={states}
-                        optionValue="name"
-                        onChange={e => [
-                          handleChange(e),
-                          fetchDistricts(String(e.target.value))
-                        ]}
-                        errors={state.errors.state}
-                      />
-                    )}
-                </div>
-
-                <div>
-                  <InputLabel id="gender-label">District</InputLabel>
-                  {isDistrictLoading ? (
-                    <CircularProgress size={20} />
-                  ) : (
-                      <SelectField
-                        name="district"
-                        variant="outlined"
-                        margin="dense"
-                        value={state.form.district}
-                        options={districts}
-                        optionValue="name"
-                        onChange={e => [
-                          handleChange(e),
-                          fetchLocalBody(String(e.target.value))
-                        ]}
-                        errors={state.errors.district}
-                      />
-                    )}
-                </div>
-
-                <div className="md:col-span-2">
-                  <InputLabel id="gender-label">Localbody</InputLabel>
-                  {isLocalbodyLoading ? (
-                    <CircularProgress size={20} />
-                  ) : (
-                      <SelectField
-                        name="local_body"
-                        variant="outlined"
-                        margin="dense"
-                        value={state.form.local_body}
-                        options={localBody}
-                        optionValue="name"
-                        onChange={handleChange}
-                        errors={state.errors.local_body}
-                      />
-                    )}
-                </div>
-                <div>
-                  <InputLabel id="is_medical_worker">
-                    Medical Worker
-                  </InputLabel>
-                  <RadioGroup
-                    aria-label="is_medical_worker"
-                    name="is_medical_worker"
-                    value={state.form.is_medical_worker}
+                  <InputLabel id="gender-label">Nationality*</InputLabel>
+                  <SelectField
+                    name="nationality"
+                    variant="outlined"
+                    margin="dense"
+                    optionArray={true}
+                    value={state.form.nationality}
+                    options={countryList}
                     onChange={handleChange}
-                    style={{ padding: "0px 5px" }}
-                  >
-                    <Box display="flex" flexDirection="row">
-                      <FormControlLabel
-                        value="true"
-                        control={<Radio />}
-                        label="Yes"
-                      />
-                      <FormControlLabel
-                        value="false"
-                        control={<Radio />}
-                        label="No"
-                      />
-                    </Box>
-                  </RadioGroup>
+                    errors={state.errors.nationality}
+                  />
                 </div>
+
+                {state.form.nationality === 'India' ? (<>
+                  <div>
+                    <InputLabel id="gender-label">State*</InputLabel>
+                    {isStateLoading ? (
+                      <CircularProgress size={20} />
+                    ) : (
+                        <SelectField
+                          name="state"
+                          variant="outlined"
+                          margin="dense"
+                          value={state.form.state}
+                          options={states}
+                          optionValue="name"
+                          onChange={e => [
+                            handleChange(e),
+                            fetchDistricts(String(e.target.value))
+                          ]}
+                          errors={state.errors.state}
+                        />
+                      )}
+                  </div>
+
+                  <div>
+                    <InputLabel id="gender-label">District</InputLabel>
+                    {isDistrictLoading ? (
+                      <CircularProgress size={20} />
+                    ) : (
+                        <SelectField
+                          name="district"
+                          variant="outlined"
+                          margin="dense"
+                          value={state.form.district}
+                          options={districts}
+                          optionValue="name"
+                          onChange={e => [
+                            handleChange(e),
+                            fetchLocalBody(String(e.target.value))
+                          ]}
+                          errors={state.errors.district}
+                        />
+                      )}
+                  </div>
+
+                  <div>
+                    <InputLabel id="gender-label">Localbody</InputLabel>
+                    {isLocalbodyLoading ? (
+                      <CircularProgress size={20} />
+                    ) : (
+                        <SelectField
+                          name="local_body"
+                          variant="outlined"
+                          margin="dense"
+                          value={state.form.local_body}
+                          options={localBody}
+                          optionValue="name"
+                          onChange={handleChange}
+                          errors={state.errors.local_body}
+                        />
+                      )}
+                  </div>
+                </>) : (<div>
+                  <InputLabel id="passport-label">Passport Number*</InputLabel>
+                  <TextInputField
+                    name="passport_no"
+                    variant="outlined"
+                    margin="dense"
+                    value={state.form.passport_no}
+                    onChange={handleChange}
+                    errors={state.errors.passport_no}
+                  />
+                </div>)}
+
               </div>
               <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
                 <div>
@@ -667,7 +729,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       label="Countries / Places Visited* (including transit stops)"
                       variant="outlined"
                       placeholder="Select country or enter the place of visit"
-                      onChange={handleCountryChange}
+                      onChange={(e: object, value: any) => handleDropdownChange(e, value, 'countries_travelled')}
                       value={state.form.countries_travelled}
                       errors={state.errors.countries_travelled}
                     />
