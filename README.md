@@ -1,3 +1,6 @@
+# Report bugs at https://bugs.coronasafe.in
+
+## Issue tracker : https://bugs.coronasafe.network/projects/CARE/issues
 # Coronasafe Care React Front end . 
 Auto Deployed to https://care.coronasafe.in for Develop Branch. 
 
