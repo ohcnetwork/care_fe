@@ -252,7 +252,7 @@ export const PatientHome = (props: any) => {
       <PageTitle title={`Covid Suspect #${id}`} />
       <div className="border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black mt-4 p-4">
         <div className="flex justify-between">
-          <div className="max-w-md">
+          <div className="grid gap-2 grid-cols-1">
             <div className="flex items-baseline">
               <div>
                 <span className="font-semibold leading-relaxed">Name: </span>
@@ -266,25 +266,14 @@ export const PatientHome = (props: any) => {
                 )}
               </div>
             </div>
+            {patientData.is_medical_worker && (<div>
+              <span className="font-semibold leading-relaxed">Medical Worker: </span>
+              <span className="badge badge-pill badge-primary">Yes</span>
+            </div>)}
             <div>
               <span className="font-semibold leading-relaxed">Age: </span>
               {patientData.age}
             </div>
-            <div>
-              <span className="font-semibold leading-relaxed">Gender: </span>
-              {patientGender}
-            </div>
-            <div>
-              <span className="font-semibold leading-relaxed">Phone: </span>
-              {patientData.phone_number}
-            </div>
-            {
-              patientData.is_medical_worker &&
-              <div>
-                <span className="font-semibold leading-relaxed">Medical Worker: </span>
-                <span className="badge badge-pill badge-primary">Yes</span>
-              </div>
-            }
           </div>
 
           <div>
@@ -302,14 +291,44 @@ export const PatientHome = (props: any) => {
           </div>
         </div>
 
-        <div className="flex flex-col">
+        <div className="grid gap-2 grid-cols-1 md:grid-cols-2 mt-2">
           <div>
-            <span className="font-semibold leading-relaxed">Address: </span>
-            {patientData.address}
+            <span className="font-semibold leading-relaxed">Gender: </span>
+            {patientGender}
           </div>
           <div>
-            <span className="font-semibold leading-relaxed">Present health status: </span>
-            {patientData.present_health}
+            <span className="font-semibold leading-relaxed">Phone: </span>
+            {patientData.phone_number}
+          </div>
+          <div>
+            <span className="font-semibold leading-relaxed">Nationality: </span>
+            {patientData.nationality || '-'}
+          </div>
+          <div>
+            <span className="font-semibold leading-relaxed">Aadhaar Number: </span>
+            {patientData.aadhar_no || '-'}
+          </div>
+          {patientData.nationality !== 'India' && <div>
+            <span className="font-semibold leading-relaxed">Passport Number: </span>
+            {patientData.passport_no || '-'}
+          </div>}
+          {patientData.nationality === 'India' && (<>
+            <div>
+              <span className="font-semibold leading-relaxed">State: </span>
+              {patientData.state_object?.name}
+            </div>
+            <div>
+              <span className="font-semibold leading-relaxed">District: </span>
+              {patientData.district_object?.name || '-'}
+            </div>
+            <div>
+              <span className="font-semibold leading-relaxed">Local Body: </span>
+              {patientData.local_body_object?.name || '-'}
+            </div>
+          </>)}
+          <div>
+            <span className="font-semibold leading-relaxed">Address: </span>
+            {patientData.address || '-'}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">Contact with confirmed carrier: </span>
@@ -323,20 +342,20 @@ export const PatientHome = (props: any) => {
             <span className="font-semibold leading-relaxed">Estimated contact date: </span>
             {moment(patientData.estimated_contact_date).format("LL")}
           </div>)}
-          <div>
+          <div className="md:col-span-2">
             <span className="font-semibold leading-relaxed">Has SARI (Severe Acute Respiratory illness)?: </span>
             {patientData.has_SARI ? <span className="badge badge-pill badge-warning">Yes</span> : <span className="badge badge-pill badge-secondary">No</span>}
           </div>
-          <div>
+          <div className="md:col-span-2">
             <span className="font-semibold leading-relaxed">Domestic/international Travel (within last 28 days): </span>
             {patientData.past_travel ? <span className="badge badge-pill badge-warning">Yes</span> : <span className="badge badge-pill badge-secondary">No</span>}
           </div>
-          {patientData.countries_travelled && (<div>
+          {patientData.countries_travelled && (<div className="md:col-span-2">
             <span className="font-semibold leading-relaxed">Countries travelled: </span>
             {patientData.countries_travelled.split(',').join(', ')}
           </div>)}
           {patientData.ongoing_medication &&
-            <div>
+            <div className="md:col-span-2">
               <span className="font-semibold leading-relaxed">Ongoing Medications </span>
               {patientData.ongoing_medication}
             </div>

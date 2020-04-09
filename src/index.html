@@ -30,12 +30,20 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
   <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
   <style>
+    @media (min-width: 768px) {
+      #google_translate_element {
+        top: 0;
+      }
+    }
+
     #google_translate_element {
       position: absolute;
+      bottom: 0;
       right: 0;
-      top: 0;
+      opacity: 0.7;
     }
-    #google_translate_element *{
+
+    #google_translate_element * {
       display: flex;
     }
   </style>

@@ -37,6 +37,9 @@ export interface PatientModel {
     local_body?: number;
     district?: number;
     state?: number;
+    nationality?: string;
+    passport_no?: string;
+    aadhar_no?: string;
 }
 
 export interface SampleTestModel {

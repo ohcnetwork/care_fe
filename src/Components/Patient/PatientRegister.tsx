@@ -160,7 +160,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         if (res && res.data) {
           const formData = {
             ...res.data,
-            nationality: res.data.nationality ? res.data.nationality : "",
+            nationality: res.data.nationality ? res.data.nationality : "India",
             gender: res.data.gender ? res.data.gender : "",
             state: res.data.state ? res.data.state : "",
             district: res.data.district ? res.data.district : "",
@@ -292,9 +292,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       state.form.medical_history.forEach((id: number) => {
         const medData = medicalHistoryTypes.find(i => i.id === id);
         if (medData) {
+          const details = state.form[`medical_history_${medData.id}`];
           medical_history.push({
             disease: medData.text,
-            details: state.form[`medical_history_${medData.id}`]
+            details: details ? details : "",
           });
         }
       });
@@ -306,7 +307,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         age: Number(state.form.age),
         gender: Number(state.form.gender),
         phone_number: state.form.phone_number,
-        aadhar_no: state.form.aadhar_no,
+        aadhar_no: state.form.aadhar_no ? state.form.aadhar_no : undefined,
         nationality: state.form.nationality,
         passport_no: state.form.nationality !== "India" ? state.form.passport_no : undefined,
         state: state.form.nationality === "India" ? state.form.state : undefined,
