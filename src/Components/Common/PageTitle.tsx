@@ -19,7 +19,7 @@ const PageTitle = (props: PageTitleProps) => {
         }
     }
     return (
-        <div className="flex py-4 mt-4 border-b-4 border-orange-500">
+        <div className="flex py-4 mt-4 border-b-4 border-primary">
             {!hideBack && (<IconButton onClick={goBack}>
                 <ArrowBackIosOutlinedIcon />
             </IconButton>)}

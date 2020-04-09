@@ -1,3 +1,5 @@
+$primary: #5c6ac4;
+
 .header-section {
   .appBar {
     z-index: 1201;
@@ -239,4 +241,8 @@
 
 .dropdown:hover .dropdown-menu {
   display: block;
+}
+
+.border-primary {
+  border-color: $primary;
 }
