@@ -1,16 +1,16 @@
 import { Box, Button, Card, CardContent, CircularProgress, FormControlLabel, InputLabel, Radio, RadioGroup } from "@material-ui/core";
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import { navigate } from "hookrouter";
+import { parsePhoneNumberFromString } from 'libphonenumber-js';
 import React, { useCallback, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
 import { GENDER_TYPES, MEDICAL_HISTORY_CHOICES } from "../../Common/constants";
 import countryList from "../../Common/static/countries.json";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { phonePreg } from "../../Common/validation";
 import { createPatient, getDistrictByState, getLocalbodyByDistrict, getPatient, getStates, updatePatient } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import AlertDialog from "../Common/AlertDialog";
-import { AutoCompleteMultiField, CheckboxField, DateInputField, MultilineInputField, SelectField, TextInputField } from "../Common/HelperInputFields";
+import { AutoCompleteMultiField, CheckboxField, DateInputField, MultilineInputField, PhoneNumberField, SelectField, TextInputField } from "../Common/HelperInputFields";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 import { PatientModel } from "./models";
@@ -250,9 +250,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           }
           return;
         case "phone_number":
-          if (!phonePreg(state.form[field])) {
-            errors[field] =
-              "Please Enter 10/11 digit mobile number or landline as 0<std code><phone number>";
+          const phoneNumber = parsePhoneNumberFromString(state.form[field]);
+          if (!state.form[field] || !phoneNumber?.isPossible()) {
+            errors[field] = "Please enter valid phone number";
             invalidForm = true;
           }
           return;
@@ -306,7 +306,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         name: state.form.name,
         age: Number(state.form.age),
         gender: Number(state.form.gender),
-        phone_number: state.form.phone_number,
+        phone_number: parsePhoneNumberFromString(state.form.phone_number)?.format('E.164'),
         aadhar_no: state.form.aadhar_no ? state.form.aadhar_no : undefined,
         nationality: state.form.nationality,
         passport_no: state.form.nationality !== "India" ? state.form.passport_no : undefined,
@@ -356,11 +356,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     dispatch({ type: "set_form", form });
   };
 
-  const handleDropdownChange = (event: object, value: any, name: string) => {
+  const handleValueChange = (value: any, name: string) => {
     const form = { ...state.form };
     form[name] = value;
     dispatch({ type: "set_form", form });
-  }
+  };
 
   const handleDateChange = (date: any, field: string) => {
     const form = { ...state.form };
@@ -504,14 +504,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                 </div>
 
                 <div>
-                  <InputLabel id="phone-label">Phone Number*</InputLabel>
-                  <TextInputField
-                    name="phone_number"
-                    variant="outlined"
-                    margin="dense"
-                    type="number"
+                  <PhoneNumberField
+                    label="Phone Number*"
                     value={state.form.phone_number}
-                    onChange={handleChange}
+                    onChange={(value: any) => handleValueChange(value, 'phone_number')}
                     errors={state.errors.phone_number}
                   />
                 </div>
@@ -730,7 +726,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       label="Countries / Places Visited* (including transit stops)"
                       variant="outlined"
                       placeholder="Select country or enter the place of visit"
-                      onChange={(e: object, value: any) => handleDropdownChange(e, value, 'countries_travelled')}
+                      onChange={(e: object, value: any) => handleValueChange(value, 'countries_travelled')}
                       value={state.form.countries_travelled}
                       errors={state.errors.countries_travelled}
                     />

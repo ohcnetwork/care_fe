@@ -1,10 +1,11 @@
 import React, { useState, useReducer } from "react"
 import { useDispatch } from "react-redux"
 import { FormControl, Grid, Card, CardHeader, CardContent, Button, InputLabel, Select, MenuItem } from "@material-ui/core"
-import { TextInputField, MultilineInputField } from "../Common/HelperInputFields"
+import { TextInputField, MultilineInputField, PhoneNumberField } from "../Common/HelperInputFields"
 import Loader from "../Common/Loader"
 import { FACILITY_TYPES, DISTRICT_CHOICES } from "../../Common/constants";
-import { validateLocationCoordinates, phonePreg } from "../../Common/validation";
+import { validateLocationCoordinates } from "../../Common/validation";
+import { parsePhoneNumberFromString } from 'libphonenumber-js';
 import { createFacility } from "../../Redux/actions";
 import * as Notification from '../../Utils/Notifications.js';
 
@@ -62,9 +63,14 @@ export const CareCenterJoinForm = () => {
     const handleChange = (e: any) => {
         let form = { ...state.form }
         form[e.target.name] = e.target.value
-
         dispatch({ type: "set_form", form })
-    }
+    };
+
+    const handleValueChange = (value: any, name: string) => {
+      const form = { ...state.form };
+      form[name] = value;
+      dispatch({ type: "set_form", form });
+    };
 
     const validateForm = () => {
         const errors = { ...initForm }
@@ -73,9 +79,12 @@ export const CareCenterJoinForm = () => {
             if (!state.form[key]) {
                 errors[key] = "Field is required";
                 invalidForm = true;
-            } else if (key === "phone_number" && !phonePreg(state.form.phone_number)) {
-                errors[key] = "Please Enter 10/11 digit mobile number or landline as 0<std code><phone number>";
-                invalidForm = true;
+            } else if (key === "phone_number") {
+                const phoneNumber = parsePhoneNumberFromString(state.form[key]);
+                if (!state.form[key] || !phoneNumber?.isPossible()) {
+                    errors[key] = "Please enter valid phone number";
+                    invalidForm = true;
+                }
             } else if ((key === "latitude" || key === "longitude") && !validateLocationCoordinates(state.form[key])) {
                 errors[key] = "Please enter valid coordinates";
                 invalidForm = true;
@@ -99,7 +108,7 @@ export const CareCenterJoinForm = () => {
                 district: state.form.district,
                 address: state.form.address,
                 facility_type: state.form.centertype,
-                phone_number: state.form.phone_number,
+                phone_number: parsePhoneNumberFromString(state.form.phone_number)?.format('E.164'),
                 location: state.form.latitude && state.form.latitude ? {
                     latitude: Number(state.form.latitude),
                     longitude: Number(state.form.latitude),
@@ -207,13 +216,10 @@ export const CareCenterJoinForm = () => {
 
                             <Grid container justify="center" >
                                 <Grid item xs={12}>
-                                    <TextInputField
-                                        name="phone_number"
-                                        placeholder="Emergency Contact Number*"
-                                        variant="outlined"
-                                        margin="dense"
+                                    <PhoneNumberField
+                                        label="Emergency Contact Number*"
                                         value={state.form.phone_number}
-                                        onChange={handleChange}
+                                        onChange={(value: any) => handleValueChange(value, 'phone_number')}
                                         errors={state.errors.phone_number}
                                     />
                                 </Grid>

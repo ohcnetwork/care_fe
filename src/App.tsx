@@ -7,6 +7,7 @@ import './App.scss';
 import { Loading } from "./Components/Common/Loading";
 import { useAbortableEffect, statusType } from './Common/utils';
 import axios from 'axios';
+
 const img = 'https://coronasafe.network/break-chain.png';
 
 const App: React.FC = () => {

@@ -5,9 +5,11 @@ import FormControl from '@material-ui/core/FormControl';
 import { NativeSelectInputProps } from '@material-ui/core/NativeSelect/NativeSelectInput';
 import { SelectProps } from '@material-ui/core/Select';
 import Autocomplete from '@material-ui/lab/Autocomplete';
-import { DatePickerProps, KeyboardDateTimePicker, KeyboardDatePicker, KeyboardTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import { DatePickerProps, KeyboardDatePicker, KeyboardDateTimePicker, KeyboardTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import { MaterialUiPickersDate } from '@material-ui/pickers/typings/date';
 import React from 'react';
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/material.css';
 
 export interface DefaultSelectInputProps extends Omit<SelectProps, 'onChange'> {
     options: Array<any>;
@@ -356,6 +358,19 @@ export const AutoCompleteMultiField = (props: any) => {
                     placeholder={placeholder}
                 />
             )}
+        />
+        <ErrorHelperText error={errors} />
+    </>)
+}
+export const PhoneNumberField = (props: any) => {
+    const { label, placeholder, errors, onChange, value } = props;
+    return (<>
+        {label && <InputLabel>{label}</InputLabel>}
+        <PhoneInput
+            country="in"
+            value={value}
+            placeholder={placeholder}
+            onChange={onChange}
         />
         <ErrorHelperText error={errors} />
     </>)

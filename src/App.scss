@@ -246,3 +246,24 @@ $primary: #5c6ac4;
 .border-primary {
   border-color: $primary;
 }
+
+// Phone number styles
+
+.react-tel-input .form-control + div:before {
+  content: "";
+}
+
+.react-tel-input {
+  margin-top: 8px;
+  margin-bottom: 4px;
+  .form-control {
+    padding-top: 6px;
+    padding-bottom: 6px;
+    width: 100%;
+    border-radius: 4px;
+    &:focus {
+      border-color: $primary;
+      box-shadow: 0 0 0 1px $primary;
+    }
+  }
+}

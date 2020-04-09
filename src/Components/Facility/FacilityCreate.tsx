@@ -4,14 +4,15 @@ import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import MyLocationIcon from "@material-ui/icons/MyLocation";
 import { makeStyles } from "@material-ui/styles";
 import { navigate } from "hookrouter";
+import { parsePhoneNumberFromString } from 'libphonenumber-js';
 import React, { useCallback, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
 import { DISTRICT_CHOICES, FACILITY_ID } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { phonePreg, validateLocationCoordinates } from "../../Common/validation";
+import { validateLocationCoordinates } from "../../Common/validation";
 import { createFacility, getFacility, updateFacility } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import { MultilineInputField, TextInputField } from "../Common/HelperInputFields";
+import { MultilineInputField, PhoneNumberField, TextInputField } from "../Common/HelperInputFields";
 import { Loading } from "../Common/Loading";
 import { LocationSearchAndPick } from "../Common/LocationSearchAndPick";
 import PageTitle from "../Common/PageTitle";
@@ -137,6 +138,12 @@ export const FacilityCreate = (props: FacilityProps) => {
     dispatch({ type: "set_form", form });
   };
 
+  const handleValueChange = (value: any, name: string) => {
+    const form = { ...state.form };
+    form[name] = value;
+    dispatch({ type: "set_form", form });
+  };
+
   const handleClickLocationPicker = (event: React.MouseEvent) => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(position => {
@@ -162,26 +169,31 @@ export const FacilityCreate = (props: FacilityProps) => {
     let errors = { ...initForm };
     let invalidForm = false;
     Object.keys(state.form).forEach(field => {
-      if (
-        !state.form[field] &&
-        (field === "name" || field === "district" || field === "address")
-      ) {
-        errors[field] = "Field is required";
-        invalidForm = true;
-      } else if (
-        field === "phone_number" &&
-        !phonePreg(state.form.phone_number)
-      ) {
-        errors[field] =
-          "Please Enter 10/11 digit mobile number or landline as 0<std code><phone number>";
-        invalidForm = true;
-      } else if (
-        state.form[field] &&
-        (field === "latitude" || field === "longitude") &&
-        !validateLocationCoordinates(state.form[field])
-      ) {
-        errors[field] = "Please enter valid coordinates";
-        invalidForm = true;
+      switch (field) {
+        case "name":
+        case "district":
+        case "address":
+          if (!state.form[field]) {
+            errors[field] = "Field is required";
+            invalidForm = true;
+          }
+          return;
+        case "phone_number":
+          const phoneNumber = parsePhoneNumberFromString(state.form[field]);
+          if (!state.form[field] || !phoneNumber?.isPossible()) {
+            errors[field] = "Please enter valid phone number";
+            invalidForm = true;
+          }
+          return;
+        case "latitude":
+        case "longitude":
+         if (!!state.form.latitude && !!state.form.longitude && !validateLocationCoordinates(state.form[field])) {
+            errors[field] = "Please enter valid coordinates";
+            invalidForm = true;
+          }
+          return;
+        default:
+          return;
       }
     });
     if (invalidForm) {
@@ -209,7 +221,7 @@ export const FacilityCreate = (props: FacilityProps) => {
               longitude: Number(state.form.longitude)
             }
             : undefined,
-        phone_number: state.form.phone_number,
+        phone_number: parsePhoneNumberFromString(state.form.phone_number)?.format('E.164'),
         oxygen_capacity: state.form.oxygen_capacity
           ? Number(state.form.oxygen_capacity)
           : 0
@@ -219,7 +231,6 @@ export const FacilityCreate = (props: FacilityProps) => {
       );
       if (res && res.data) {
         const id = res.data.id;
-        setIsLoading(false);
         dispatch({ type: "set_form", form: initForm });
         if (!facilityId) {
           Notification.Success({
@@ -233,6 +244,7 @@ export const FacilityCreate = (props: FacilityProps) => {
           navigate(`/facility/${facilityId}`);
         }
       }
+      setIsLoading(false);
     }
   };
 
@@ -329,18 +341,12 @@ export const FacilityCreate = (props: FacilityProps) => {
 
               <Grid container justify="center">
                 <Grid item xs={12}>
-                  <TextInputField
-                    name="phone_number"
-                    label="Emergency Contact Number*"
-                    type="number"
-                    placeholder=""
-                    variant="outlined"
-                    margin="dense"
-                    value={state.form.phone_number}
-                    onChange={handleChange}
-                    errors={state.errors.phone_number}
-                    inputProps={{ maxLength: 11 }}
-                  />
+                  <PhoneNumberField
+                      label="Emergency Contact Number*"
+                      value={state.form.phone_number}
+                      onChange={(value: any) => handleValueChange(value, 'phone_number')}
+                      errors={state.errors.phone_number}
+                    />
                 </Grid>
               </Grid>
 
