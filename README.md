@@ -1,6 +1,7 @@
-# Report bugs at https://bugs.coronasafe.in
+# Report bugs at [JIRA SERVICE DESK](https://bugs.coronasafe.in)
 
-## Issue tracker : https://bugs.coronasafe.network/projects/CARE/issues
+## Issue tracker : [JIRA SOFTWARE](https://bugs.coronasafe.network/projects/CARE/issues)
+
 # Coronasafe Care React Front end . 
 Auto Deployed to https://care.coronasafe.in for Develop Branch. 
 
