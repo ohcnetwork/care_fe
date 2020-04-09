@@ -20,7 +20,7 @@ Sentry.init({
 const theme = createMuiTheme({
   palette: {
     primary: {
-      main: '#B21E35',
+      main: '#5c6ac4',
     },
   },
 });
