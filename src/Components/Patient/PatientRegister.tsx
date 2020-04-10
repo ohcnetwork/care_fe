@@ -73,6 +73,8 @@ const initForm: any = {
   prescribed_medication: false,
   ongoing_medication: "",
   is_medical_worker: "false",
+  number_of_aged_dependents: "",
+  number_of_chronic_diseased_dependents: "",
   ...medicalHistoryChoices
 };
 
@@ -332,6 +334,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         ongoing_medication: state.form.ongoing_medication,
         is_medical_worker: JSON.parse(state.form.is_medical_worker),
         blood_group: state.form.blood_group ? state.form.blood_group : undefined,
+        number_of_aged_dependents: Number(state.form.number_of_aged_dependents),
+        number_of_chronic_diseased_dependents: Number(state.form.number_of_chronic_diseased_dependents),
         medical_history,
         is_active: true
       };
@@ -348,11 +352,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             message: `Please note down patient name: ${state.form.name} and patient ID: ${res.data.id}`,
             title: "Patient Added Successfully"
           });
+          navigate(`/facility/${facilityId}/patient/${res.data.id}`);
         } else {
           Notification.Success({
             msg: "Patient updated successfully"
           });
-          navigate(`/facility/${facilityId}/patient/${res.data.id}`);
+          goBack();
         }
       }
     }
@@ -451,7 +456,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               variant="outlined"
               margin="dense"
               type="text"
-              InputLabelProps={{ shrink: !!state.form.textField }}
               value={state.form.textField}
               onChange={handleChange}
               errors={state.errors[textField]}
@@ -670,7 +674,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     margin="dense"
                     type="text"
                     placeholder="Optional Information"
-                    InputLabelProps={{ shrink: !!state.form.address }}
                     value={state.form.address}
                     onChange={handleChange}
                     errors={state.errors.address}
@@ -826,7 +829,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     margin="dense"
                     type="text"
                     placeholder="Optional Information"
-                    InputLabelProps={{ shrink: !!state.form.present_health }}
                     value={state.form.present_health}
                     onChange={handleChange}
                     errors={state.errors.present_health}
@@ -842,10 +844,35 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     margin="dense"
                     type="text"
                     placeholder="Optional Information"
-                    InputLabelProps={{ shrink: !!state.form.ongoing_medication }}
                     value={state.form.ongoing_medication}
                     onChange={handleChange}
                     errors={state.errors.ongoing_medication}
+                  />
+                </div>
+
+                <div>
+                  <InputLabel id="number_of_aged_dependents-label">Number Of Aged Dependents (Above 60)</InputLabel>
+                  <TextInputField
+                    name="number_of_aged_dependents"
+                    variant="outlined"
+                    margin="dense"
+                    type="number"
+                    value={state.form.number_of_aged_dependents}
+                    onChange={handleChange}
+                    errors={state.errors.number_of_aged_dependents}
+                  />
+                </div>
+
+                <div>
+                  <InputLabel id="number_of_chronic_diseased_dependents-label">Number Of Chronic Diseased Dependents</InputLabel>
+                  <TextInputField
+                    name="number_of_chronic_diseased_dependents"
+                    variant="outlined"
+                    margin="dense"
+                    type="number"
+                    value={state.form.number_of_chronic_diseased_dependents}
+                    onChange={handleChange}
+                    errors={state.errors.number_of_chronic_diseased_dependents}
                   />
                 </div>
 

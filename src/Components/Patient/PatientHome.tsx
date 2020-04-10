@@ -271,8 +271,8 @@ export const PatientHome = (props: any) => {
               <span className="badge badge-pill badge-primary">Yes</span>
             </div>)}
             <div>
-              <span className="font-semibold leading-relaxed">Age: </span>
-              {patientData.age}
+              <span className="font-semibold leading-relaxed">Disease Status: </span>
+              {patientData.disease_status}
             </div>
           </div>
 
@@ -293,6 +293,17 @@ export const PatientHome = (props: any) => {
 
         <div className="grid gap-2 grid-cols-1 md:grid-cols-2 mt-2">
           <div>
+            <span className="font-semibold leading-relaxed">Facility: </span>
+            {patientData.facility_object?.name || '-'}
+          </div>
+          {patientData.date_of_birth ? (<div>
+            <span className="font-semibold leading-relaxed">Date of birth: </span>
+            {patientData.date_of_birth}
+          </div>) : (<div>
+            <span className="font-semibold leading-relaxed">Age: </span>
+            {patientData.age}
+          </div>)}
+          <div>
             <span className="font-semibold leading-relaxed">Gender: </span>
             {patientGender}
           </div>
@@ -305,8 +316,8 @@ export const PatientHome = (props: any) => {
             {patientData.nationality || '-'}
           </div>
           <div>
-            <span className="font-semibold leading-relaxed">Aadhaar Number: </span>
-            {patientData.aadhar_no || '-'}
+            <span className="font-semibold leading-relaxed">Blood Group: </span>
+            {patientData.blood_group || '-'}
           </div>
           {patientData.nationality !== 'India' && <div>
             <span className="font-semibold leading-relaxed">Passport Number: </span>
@@ -354,12 +365,18 @@ export const PatientHome = (props: any) => {
             <span className="font-semibold leading-relaxed">Countries travelled: </span>
             {patientData.countries_travelled.split(',').join(', ')}
           </div>)}
-          {patientData.ongoing_medication &&
-            <div className="md:col-span-2">
-              <span className="font-semibold leading-relaxed">Ongoing Medications </span>
-              {patientData.ongoing_medication}
-            </div>
-          }
+          {patientData.ongoing_medication && (<div className="md:col-span-2">
+            <span className="font-semibold leading-relaxed">Ongoing Medications </span>
+            {patientData.ongoing_medication}
+          </div>)}
+          {patientData.number_of_aged_dependents && (<div>
+            <span className="font-semibold leading-relaxed">Number Of Aged Dependents (Above 60): </span>
+            {patientData.number_of_aged_dependents}
+          </div>)}
+          {patientData.number_of_chronic_diseased_dependents && (<div>
+            <span className="font-semibold leading-relaxed">Number Of Chronic Diseased Dependents: </span>
+            {patientData.number_of_chronic_diseased_dependents}
+          </div>)}
         </div>
 
         <div className="flex mt-4">
