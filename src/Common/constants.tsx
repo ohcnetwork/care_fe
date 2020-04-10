@@ -158,12 +158,12 @@ export const ROLE_STATUS_MAP = {
 };
 
 export const DISEASE_STATUS = [
-  { id: 1, text: "SUSPECTED" },
-  { id: 2, text: "POSITIVE" },
-  { id: 3, text: "NEGATIVE" },
-  { id: 4, text: "RECOVERY" },
-  { id: 5, text: "RECOVERED" },
-  { id: 6, text: "EXPIRED" },
+  "SUSPECTED",
+  "POSITIVE",
+  "NEGATIVE",
+  "RECOVERY",
+  "RECOVERED",
+  "EXPIRED",
 ];
 
 export const BLOOD_GROUPS = [

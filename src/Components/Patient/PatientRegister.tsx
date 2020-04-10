@@ -6,7 +6,7 @@ import { debounce } from "lodash";
 import moment from "moment";
 import React, { useCallback, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
-import { GENDER_TYPES, MEDICAL_HISTORY_CHOICES } from "../../Common/constants";
+import { BLOOD_GROUPS, DISEASE_STATUS, GENDER_TYPES, MEDICAL_HISTORY_CHOICES } from "../../Common/constants";
 import countryList from "../../Common/static/countries.json";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { createPatient, getDistrictByState, getLocalbodyByDistrict, getPatient, getStates, searchPatient, updatePatient } from "../../Redux/actions";
@@ -15,9 +15,9 @@ import AlertDialog from "../Common/AlertDialog";
 import { AutoCompleteMultiField, CheckboxField, DateInputField, MultilineInputField, PhoneNumberField, SelectField, TextInputField } from "../Common/HelperInputFields";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
-import { PatientModel } from "./models";
-import { DupPatientModel } from "../Facility/models";
 import DuplicatePatientDialog from "../Facility/DuplicatePatientDialog";
+import { DupPatientModel } from "../Facility/models";
+import { PatientModel } from "./models";
 
 interface PatientRegisterProps extends PatientModel {
   facilityId: number;
@@ -35,11 +35,25 @@ let medicalHistoryChoices: any = {};
 
 medicalHistoryTypes.forEach(i => medicalHistoryChoices[`medical_history_${i.id}`] = "");
 
+const genderTypes = [
+  {
+    id: 0,
+    text: "Select"
+  },
+  ...GENDER_TYPES
+];
+
+const diseaseStatus = [...DISEASE_STATUS];
+
+const bloodGroups = [...BLOOD_GROUPS];
+
 const initForm: any = {
   name: "",
   age: "",
   gender: "",
   phone_number: "",
+  blood_group: "",
+  disease_status: diseaseStatus[0],
   date_of_birth: null,
   medical_history: [],
   nationality: "India",
@@ -93,14 +107,6 @@ const patientFormReducer = (state = initialState, action: any) => {
       return state;
   }
 };
-
-const genderTypes = [
-  {
-    id: 0,
-    text: "Select"
-  },
-  ...GENDER_TYPES
-];
 
 const goBack = () => {
   window.history.go(-1);
@@ -169,6 +175,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             gender: res.data.gender ? res.data.gender : "",
             state: res.data.state ? res.data.state : "",
             district: res.data.district ? res.data.district : "",
+            blood_group: res.data.blood_group ? res.data.blood_group : "",
             is_medical_worker: String(res.data.is_medical_worker),
             local_body: res.data.local_body ? res.data.local_body : "",
             medical_history: [],
@@ -305,6 +312,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         phone_number: parsePhoneNumberFromString(state.form.phone_number)?.format('E.164'),
         date_of_birth: moment(state.form.date_of_birth).format('YYYY-MM-DD'),
         age: Number(moment().diff(state.form.date_of_birth, 'years', false)),
+        disease_status: state.form.disease_status,
         name: state.form.name,
         gender: Number(state.form.gender),
         nationality: state.form.nationality,
@@ -323,6 +331,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         has_SARI: state.form.has_SARI,
         ongoing_medication: state.form.ongoing_medication,
         is_medical_worker: JSON.parse(state.form.is_medical_worker),
+        blood_group: state.form.blood_group ? state.form.blood_group : undefined,
         medical_history,
         is_active: true
       };
@@ -395,12 +404,14 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         date_of_birth: moment(date_of_birth).format('YYYY-MM-DD')
       };
       const res = await dispatchAction(searchPatient(query))
-      if (!status.aborted && res && res.data && res.data.results && res.data.results.length) {
-        console.log(res.data);
-        setStatusDialog({
-          show: true,
-          patientList: res.data.results
-        })
+      if (!status.aborted && res && res.data && res.data.results) {
+        const duplicateList = !id ? res.data.results : res.data.results.filter((item: DupPatientModel) => Number(item.patient_id) !== Number(id));
+        if (duplicateList.length) {
+          setStatusDialog({
+            show: true,
+            patientList: duplicateList
+          });
+        }
       }
     }
   }
@@ -461,6 +472,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         patientList={statusDialog.patientList}
         handleOk={dismissStatusDialog}
         handleCancel={goBack}
+        isNew={!id}
       />)}
       <PageTitle title={headerText} />
       <div className="mt-4">
@@ -486,7 +498,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                 </div>
 
                 <div>
-                  <InputLabel id="name-label">Date of birth*</InputLabel>
+                  <InputLabel id="date_of_birth-label">Date of birth*</InputLabel>
                   <DateInputField
                     fullWidth={true}
                     value={state.form.date_of_birth}
@@ -509,6 +521,33 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     value={state.form.name}
                     onChange={handleChange}
                     errors={state.errors.name}
+                  />
+                </div>
+
+                <div>
+                  <InputLabel id="disease_status-label">Disease Status*</InputLabel>
+                  <SelectField
+                    name="disease_status"
+                    variant="outlined"
+                    margin="dense"
+                    optionArray={true}
+                    value={state.form.disease_status}
+                    options={diseaseStatus}
+                    onChange={handleChange}
+                    errors={state.errors.disease_status}
+                  />
+                </div>
+
+                <div>
+                  <InputLabel id="gender-label">Gender*</InputLabel>
+                  <SelectField
+                    name="gender"
+                    variant="outlined"
+                    margin="dense"
+                    value={state.form.gender}
+                    options={genderTypes}
+                    onChange={handleChange}
+                    errors={state.errors.gender}
                   />
                 </div>
 
@@ -537,33 +576,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                 </div>
 
                 <div>
-                  <InputLabel id="age-label">Age*</InputLabel>
-                  <TextInputField
-                    name="age"
-                    variant="outlined"
-                    margin="dense"
-                    type="number"
-                    value={state.form.age}
-                    onChange={handleChange}
-                    errors={state.errors.age}
-                  />
-                </div>
-
-                <div>
-                  <InputLabel id="gender-label">Gender*</InputLabel>
-                  <SelectField
-                    name="gender"
-                    variant="outlined"
-                    margin="dense"
-                    value={state.form.gender}
-                    options={genderTypes}
-                    onChange={handleChange}
-                    errors={state.errors.gender}
-                  />
-                </div>
-
-                <div>
-                  <InputLabel id="gender-label">Nationality*</InputLabel>
+                  <InputLabel id="nationality-label">Nationality*</InputLabel>
                   <SelectField
                     name="nationality"
                     variant="outlined"
@@ -599,7 +612,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   </div>
 
                   <div>
-                    <InputLabel id="gender-label">District</InputLabel>
+                    <InputLabel id="district-label">District</InputLabel>
                     {isDistrictLoading ? (
                       <CircularProgress size={20} />
                     ) : (
@@ -620,7 +633,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   </div>
 
                   <div>
-                    <InputLabel id="gender-label">Localbody</InputLabel>
+                    <InputLabel id="local_body-label">Localbody</InputLabel>
                     {isLocalbodyLoading ? (
                       <CircularProgress size={20} />
                     ) : (
@@ -661,6 +674,21 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     value={state.form.address}
                     onChange={handleChange}
                     errors={state.errors.address}
+                  />
+                </div>
+
+                <div>
+                  <InputLabel id="blood_group-label">Blood Group</InputLabel>
+                  <SelectField
+                    name="blood_group"
+                    variant="outlined"
+                    margin="dense"
+                    showEmpty={true}
+                    optionArray={true}
+                    value={state.form.blood_group}
+                    options={bloodGroups}
+                    onChange={handleChange}
+                    errors={state.errors.blood_group}
                   />
                 </div>
               </div>
@@ -720,11 +748,13 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
                 {(JSON.parse(state.form.contact_with_confirmed_carrier) || JSON.parse(state.form.contact_with_suspected_carrier)) && (<div>
                   <DateInputField
+                    fullWidth={true}
                     label="Esimate date of contact*"
                     value={state.form.estimated_contact_date}
                     onChange={date => handleDateChange(date, "estimated_contact_date")}
                     errors={state.errors.estimated_contact_date}
                     inputVariant="outlined"
+                    margin="dense"
                     disableFuture={true}
                   />
                 </div>)}
@@ -751,18 +781,22 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       errors={state.errors.countries_travelled}
                     />
                   </div>
-                  <div className="md:col-span-2">
+                  <div>
                     <DateInputField
+                      fullWidth={true}
                       label="Estimated date of return*"
                       value={state.form.date_of_return}
                       onChange={date => handleDateChange(date, "date_of_return")}
                       errors={state.errors.date_of_return}
                       inputVariant="outlined"
+                      margin="dense"
                       disableFuture={true}
                     />
                   </div>
                 </>)}
+              </div>
 
+              <div className="grid gap-4 grid-cols-1 md:grid-cols-2 mt-4">
                 <div className="md:col-span-2">
                   <CheckboxField
                     checked={state.form.has_SARI}

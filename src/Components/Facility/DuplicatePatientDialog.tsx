@@ -10,6 +10,7 @@ interface Props {
     patientList: Array<DupPatientModel>;
     handleOk: () => void;
     handleCancel: () => void;
+    isNew: boolean;
 };
 
 const styles = {
@@ -39,8 +40,10 @@ const columns = [
 ];
 
 const DuplicatePatientDialog = (props: Props & WithStyles<typeof styles>) => {
-    const { patientList, handleOk, handleCancel, classes } = props;
+    const { patientList, handleOk, handleCancel, classes, isNew } = props;
     const [confirm, setConfirm] = useState(false)
+
+    const text = isNew ? 'Registration' : 'Update';
 
     return (
         <Dialog
@@ -78,14 +81,14 @@ const DuplicatePatientDialog = (props: Props & WithStyles<typeof styles>) => {
                 <Button
                     color="secondary"
                     onClick={() => handleCancel()}
-                >Cancel Registration</Button>
+                >Cancel {text}</Button>
                 <Button
                     onClick={() => handleOk()}
                     color="primary"
                     variant="contained"
                     disabled={!confirm}
                     startIcon={<CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>}
-                >Continue Registration</Button>
+                >Continue {text}</Button>
             </DialogActions>
         </Dialog>
     );
