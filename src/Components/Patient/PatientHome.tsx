@@ -369,11 +369,11 @@ export const PatientHome = (props: any) => {
             <span className="font-semibold leading-relaxed">Ongoing Medications </span>
             {patientData.ongoing_medication}
           </div>)}
-          {patientData.number_of_aged_dependents && (<div>
+          {!!patientData.number_of_aged_dependents && (<div>
             <span className="font-semibold leading-relaxed">Number Of Aged Dependents (Above 60): </span>
             {patientData.number_of_aged_dependents}
           </div>)}
-          {patientData.number_of_chronic_diseased_dependents && (<div>
+          {!!patientData.number_of_chronic_diseased_dependents && (<div>
             <span className="font-semibold leading-relaxed">Number Of Chronic Diseased Dependents: </span>
             {patientData.number_of_chronic_diseased_dependents}
           </div>)}
