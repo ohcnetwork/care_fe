@@ -62,7 +62,7 @@ interface InputProps {
 interface DateInputFieldProps extends DatePickerProps {
     value: string;
     onChange: (date: MaterialUiPickersDate, value?: string | null | undefined) => void;
-    label: string;
+    label?: string;
     errors: string;
     inputVariant?: "standard" | "outlined" | "filled";
     disabled?: boolean;
@@ -157,7 +157,7 @@ export const DateInputField = (props: DateInputFieldProps) => {
             <KeyboardDatePicker
                 margin={margin || "normal"}
                 id="date-picker-dialog"
-                label={label || "Date picker dialog"}
+                label={label}
                 format="dd/MM/yyyy"
                 value={value}
                 onChange={onChange}

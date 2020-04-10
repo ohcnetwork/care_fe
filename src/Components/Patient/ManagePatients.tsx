@@ -174,7 +174,7 @@ export const PatientManager = (props: any) => {
     <div className="px-2">
       <PageTitle title="Covid Suspects" hideBack={!facilityId} />
 
-      <div className="flex flex-wrap mt-4">{managePatients}</div>
+      <div className="flex flex-wrap mt-2">{managePatients}</div>
     </div>
   );
 };

@@ -156,3 +156,23 @@ export const ROLE_STATUS_MAP = {
   DistrictAdmin: ["APPROVED", "DENIED", "SENT_TO_COLLECTON_CENTRE", "RECEIVED_AND_FORWARED"],
   StateLabAdmin: ["APPROVED", "DENIED", "SENT_TO_COLLECTON_CENTRE", "RECEIVED_AND_FORWARED", "RECEIVED_AT_LAB", "COMPLETED"],
 };
+
+export const DISEASE_STATUS = [
+  { id: 1, text: "SUSPECTED" },
+  { id: 2, text: "POSITIVE" },
+  { id: 3, text: "NEGATIVE" },
+  { id: 4, text: "RECOVERY" },
+  { id: 5, text: "RECOVERED" },
+  { id: 6, text: "EXPIRED" },
+];
+
+export const BLOOD_GROUPS = [
+  "A+",
+  "A-",
+  "B+",
+  "B-",
+  "AB+",
+  "AB-",
+  "O+",
+  "O-",
+];

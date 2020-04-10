@@ -64,3 +64,14 @@ export interface PatientStatsModel {
   num_patient_referred?: number;
   entry_date?: number;
 }
+
+export interface DupPatientModel {
+  id: number;
+  gender: string;
+  phone_number: string;
+  patient_id: number
+  name: string
+  date_of_birth: string;
+  year_of_birth: number
+  state_id: number
+}

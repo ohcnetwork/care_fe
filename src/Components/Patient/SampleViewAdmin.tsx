@@ -279,7 +279,7 @@ export default function SampleViewAdmin(props: any) {
         placeholder='Search by district'
         errors=''
       />
-      <div className="flex flex-wrap mt-4">{manageSamples}</div>
+      <div className="flex flex-wrap mt-2">{manageSamples}</div>
     </div>
   );
 }

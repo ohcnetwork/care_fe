@@ -35,6 +35,9 @@ const styles = (theme: Theme): any => ({
         '& .ReactVirtualized__Table__headerRow': {
             flip: false,
             paddingRight: theme.direction === 'rtl' ? '0px !important' : undefined,
+            '& .MuiTableCell-head': {
+                fontWeight: "bold",
+            }
         },
     },
     tableRow: {

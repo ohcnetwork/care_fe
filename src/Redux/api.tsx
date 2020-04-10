@@ -169,8 +169,11 @@ export default {
 
     // Patient
 
+    searchPatient: {
+        path: "/api/v1/patient/search",
+    },
     patientList: {
-        path: "/api/v1/patient"
+        path: "/api/v1/patient",
     },
     addPatient: {
         path: "/api/v1/patient/",

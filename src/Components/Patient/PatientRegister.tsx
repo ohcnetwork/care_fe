@@ -2,18 +2,22 @@ import { Box, Button, Card, CardContent, CircularProgress, FormControlLabel, Inp
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import { navigate } from "hookrouter";
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
+import { debounce } from "lodash";
+import moment from "moment";
 import React, { useCallback, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
 import { GENDER_TYPES, MEDICAL_HISTORY_CHOICES } from "../../Common/constants";
 import countryList from "../../Common/static/countries.json";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { createPatient, getDistrictByState, getLocalbodyByDistrict, getPatient, getStates, updatePatient } from "../../Redux/actions";
+import { createPatient, getDistrictByState, getLocalbodyByDistrict, getPatient, getStates, searchPatient, updatePatient } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import AlertDialog from "../Common/AlertDialog";
 import { AutoCompleteMultiField, CheckboxField, DateInputField, MultilineInputField, PhoneNumberField, SelectField, TextInputField } from "../Common/HelperInputFields";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 import { PatientModel } from "./models";
+import { DupPatientModel } from "../Facility/models";
+import DuplicatePatientDialog from "../Facility/DuplicatePatientDialog";
 
 interface PatientRegisterProps extends PatientModel {
   facilityId: number;
@@ -36,7 +40,7 @@ const initForm: any = {
   age: "",
   gender: "",
   phone_number: "",
-  aadhar_no: "",
+  date_of_birth: null,
   medical_history: [],
   nationality: "India",
   passport_no: "",
@@ -118,6 +122,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   const [states, setStates] = useState(initialStates);
   const [districts, setDistricts] = useState(selectStates);
   const [localBody, setLocalBody] = useState(selectDistrict);
+  const [statusDialog, setStatusDialog] = useState<{ show: boolean; patientList: Array<DupPatientModel> }>({ show: false, patientList: [] });
 
   const headerText = !id ? "Add Details of Covid Suspect / Patient" : "Update Covid Suspect / Patient Details";
   const buttonText = !id ? "Add Covid Suspect / Patient" : "Save Details";
@@ -224,16 +229,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     Object.keys(state.form).forEach((field, i) => {
       switch (field) {
         case "name":
-        case "age":
         case "gender":
+        case "date_of_birth":
           if (!state.form[field]) {
             errors[field] = "Field is required";
-            invalidForm = true;
-          }
-          return;
-        case "aadhar_no":
-          if (state.form[field] && state.form[field].length !== 12) {
-            errors[field] = "Please enter the 12 digit Aadhaar Number if available";
             invalidForm = true;
           }
           return;
@@ -303,11 +302,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         medical_history.push({ disease: "NO", details: "" });
       }
       const data = {
-        name: state.form.name,
-        age: Number(state.form.age),
-        gender: Number(state.form.gender),
         phone_number: parsePhoneNumberFromString(state.form.phone_number)?.format('E.164'),
-        aadhar_no: state.form.aadhar_no ? state.form.aadhar_no : undefined,
+        date_of_birth: moment(state.form.date_of_birth).format('YYYY-MM-DD'),
+        age: Number(moment().diff(state.form.date_of_birth, 'years', false)),
+        name: state.form.name,
+        gender: Number(state.form.gender),
         nationality: state.form.nationality,
         passport_no: state.form.nationality !== "India" ? state.form.passport_no : undefined,
         state: state.form.nationality === "India" ? state.form.state : undefined,
@@ -366,6 +365,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     const form = { ...state.form };
     form[field] = date;
     dispatch({ type: "set_form", form });
+
   };
 
   const handleCheckboxFieldChange = (e: any) => {
@@ -385,6 +385,37 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     }
     form["medical_history"] = values;
     dispatch({ type: "set_form", form });
+  };
+
+  const duplicateCheck = async (status: statusType) => {
+    const { phone_number, date_of_birth } = state.form;
+    if (phone_number && date_of_birth && parsePhoneNumberFromString(phone_number)?.isPossible()) {
+      const query = {
+        phone_number: parsePhoneNumberFromString(phone_number)?.format('E.164'),
+        date_of_birth: moment(date_of_birth).format('YYYY-MM-DD')
+      };
+      const res = await dispatchAction(searchPatient(query))
+      if (!status.aborted && res && res.data && res.data.results && res.data.results.length) {
+        console.log(res.data);
+        setStatusDialog({
+          show: true,
+          patientList: res.data.results
+        })
+      }
+    }
+  }
+
+  const duplicateCheckHandler = useCallback(debounce(duplicateCheck, 500), [state.form]);
+
+  useAbortableEffect(
+    (status: statusType) => {
+      duplicateCheckHandler(status);
+    },
+    [state.form.phone_number, state.form.date_of_birth]
+  );
+
+  const dismissStatusDialog = () => {
+    setStatusDialog({ show: false, patientList: [] })
   };
 
   const renderMedicalHistory = (id: number, title: string) => {
@@ -426,6 +457,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
   return (
     <div>
+      {statusDialog.show && (<DuplicatePatientDialog
+        patientList={statusDialog.patientList}
+        handleOk={dismissStatusDialog}
+        handleCancel={goBack}
+      />)}
       <PageTitle title={headerText} />
       <div className="mt-4">
         <Card>
@@ -440,6 +476,29 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
             <form onSubmit={e => handleSubmit(e)}>
               <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+                <div>
+                  <PhoneNumberField
+                    label="Phone Number*"
+                    value={state.form.phone_number}
+                    onChange={(value: any) => handleValueChange(value, 'phone_number')}
+                    errors={state.errors.phone_number}
+                  />
+                </div>
+
+                <div>
+                  <InputLabel id="name-label">Date of birth*</InputLabel>
+                  <DateInputField
+                    fullWidth={true}
+                    value={state.form.date_of_birth}
+                    onChange={date => handleDateChange(date, "date_of_birth")}
+                    errors={state.errors.date_of_birth}
+                    inputVariant="outlined"
+                    margin="dense"
+                    openTo="year"
+                    disableFuture={true}
+                  />
+                </div>
+
                 <div>
                   <InputLabel id="name-label">Name*</InputLabel>
                   <TextInputField
@@ -500,61 +559,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     options={genderTypes}
                     onChange={handleChange}
                     errors={state.errors.gender}
-                  />
-                </div>
-
-                <div>
-                  <PhoneNumberField
-                    label="Phone Number*"
-                    value={state.form.phone_number}
-                    onChange={(value: any) => handleValueChange(value, 'phone_number')}
-                    errors={state.errors.phone_number}
-                  />
-                </div>
-
-                <div>
-                  <InputLabel id="aadhaar-label">Aadhaar Number</InputLabel>
-                  <TextInputField
-                    name="aadhar_no"
-                    variant="outlined"
-                    margin="dense"
-                    type="number"
-                    value={state.form.aadhar_no}
-                    onChange={handleChange}
-                    errors={state.errors.aadhar_no}
-                    inputProps={{ maxLength: 12 }}
-                  />
-                </div>
-
-                <div>
-                  <InputLabel id="address-label">Address</InputLabel>
-                  <MultilineInputField
-                    rows={2}
-                    name="address"
-                    variant="outlined"
-                    margin="dense"
-                    type="text"
-                    placeholder="Optional Information"
-                    InputLabelProps={{ shrink: !!state.form.address }}
-                    value={state.form.address}
-                    onChange={handleChange}
-                    errors={state.errors.address}
-                  />
-                </div>
-
-                <div>
-                  <InputLabel id="present_health-label">Present Health</InputLabel>
-                  <MultilineInputField
-                    rows={2}
-                    name="present_health"
-                    variant="outlined"
-                    margin="dense"
-                    type="text"
-                    placeholder="Optional Information"
-                    InputLabelProps={{ shrink: !!state.form.present_health }}
-                    value={state.form.present_health}
-                    onChange={handleChange}
-                    errors={state.errors.present_health}
                   />
                 </div>
 
@@ -644,8 +648,24 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   />
                 </div>)}
 
+                <div>
+                  <InputLabel id="address-label">Address</InputLabel>
+                  <MultilineInputField
+                    rows={2}
+                    name="address"
+                    variant="outlined"
+                    margin="dense"
+                    type="text"
+                    placeholder="Optional Information"
+                    InputLabelProps={{ shrink: !!state.form.address }}
+                    value={state.form.address}
+                    onChange={handleChange}
+                    errors={state.errors.address}
+                  />
+                </div>
               </div>
-              <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+
+              <div className="grid gap-4 grid-cols-1 md:grid-cols-2 mt-4">
                 <div>
                   <InputLabel id="contact_with_confirmed_carrier">
                     Contact with confirmed Covid patient?
@@ -752,7 +772,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   />
                 </div>
 
-
                 <div className="md:col-span-2">
                   <InputLabel id="med-history-label">
                     Any medical history? (Optional Information)
@@ -762,6 +781,22 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       return renderMedicalHistory(i.id, i.text);
                     })}
                   </div>
+                </div>
+
+                <div>
+                  <InputLabel id="present_health-label">Present Health</InputLabel>
+                  <MultilineInputField
+                    rows={2}
+                    name="present_health"
+                    variant="outlined"
+                    margin="dense"
+                    type="text"
+                    placeholder="Optional Information"
+                    InputLabelProps={{ shrink: !!state.form.present_health }}
+                    value={state.form.present_health}
+                    onChange={handleChange}
+                    errors={state.errors.present_health}
+                  />
                 </div>
 
                 <div>
@@ -779,7 +814,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     errors={state.errors.ongoing_medication}
                   />
                 </div>
-
 
               </div>
               <div

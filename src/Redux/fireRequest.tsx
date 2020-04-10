@@ -44,7 +44,7 @@ export const fetchResponseSuccess = (key: string, data: any) => {
 };
 
 export const fireRequest = (
-    key: string, path: any = [], params: object = {}, urlParam?: any
+    key: string, path: any = [], queryParam: object = {}, pathParam?: any
 ) => {
     return (dispatch: any) => {
         ;
@@ -60,15 +60,15 @@ export const fireRequest = (
         }
         if (request.method === undefined || request.method === 'GET') {
             request.method = 'GET';
-            const qs = $.param(params);
+            const qs = $.param(queryParam);
             if (qs !== '') {
                 request.path += `?${qs}`;
             }
         }
         // set dynamic params in the URL
-        if (urlParam) {
-            Object.keys(urlParam).forEach((param: any) => {
-                request.path = request.path.replace(`{${param}}`, urlParam[param])
+        if (pathParam) {
+            Object.keys(pathParam).forEach((param: any) => {
+                request.path = request.path.replace(`{${param}}`, pathParam[param])
             })
         }
 
@@ -83,7 +83,7 @@ export const fireRequest = (
 
         dispatch(fetchDataRequest(key));
         return axiosApiCall[request.method.toLowerCase()](request.path, {
-            ...params,
+            ...queryParam,
             cancelToken: isRunning[key].token
         }).then((response: any) => {
             dispatch(fetchResponseSuccess(key, response.data));
@@ -92,6 +92,12 @@ export const fireRequest = (
             dispatch(fetchDataRequestError(key, error));
 
             if (error.response) {
+                
+                // temporarily don't show invalid phone number error on duplicate patient check
+                if (error.response.status === 400 && key === "searchPatient") {
+                    return;
+                }
+
                 // currentUser is ignored because on the first page load 
                 // 403 error is displayed for invalid credential.
                 if (error.response.status === 403 && key === "currentUser") {
