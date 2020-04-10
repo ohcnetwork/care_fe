@@ -10,7 +10,7 @@ import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 import Pagination from "../Common/Pagination";
 import { FacilityModal } from "./models";
-import {InputSearchBox} from "../Common/SearchBox";
+import { InputSearchBox } from "../Common/SearchBox";
 
 const useStyles = makeStyles((theme) => ({
   paginateTopPadding: {
@@ -32,7 +32,7 @@ export const HospitalList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [offset, setOffset] = useState(0);
 
-  const limit = 15;
+  const limit = 14;
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -61,18 +61,14 @@ export const HospitalList = () => {
     setCurrentPage(page);
     setOffset(offset);
   };
-  const onSearchSuspects = async (event: React.KeyboardEvent<HTMLInputElement>):Promise<any> => {
-    let searchValue:any = (event.target as HTMLInputElement).value
-    if(event.keyCode === 13){
-      setIsLoading(true);
-      const res = await dispatchAction(getFacilities({ limit, offset, name: searchValue }));
-        if (res && res.data) {
-          setData(res.data.results);
-          setTotalCount(res.data.count);
-        }
-        setIsLoading(false);
-      event.stopPropagation();
+  const onSearchSuspects = async (searchValue: string) => {
+    setIsLoading(true);
+    const res = await dispatchAction(getFacilities({ limit, offset, search_text: searchValue }));
+    if (res && res.data) {
+      setData(res.data.results);
+      setTotalCount(res.data.count);
     }
+    setIsLoading(false);
   }
 
   let facilityList: any[] = [];
@@ -153,8 +149,8 @@ export const HospitalList = () => {
     <div className="px-2">
       <PageTitle title="Facilities" hideBack={true} />
       <InputSearchBox
-        onKeyUp = {onSearchSuspects}
-        placeholder = 'Search Facilities'
+        search={onSearchSuspects}
+        placeholder='Search by facility / district'
         errors=''
       />
       <div className="flex flex-wrap mt-4">{manageFacilities}</div>

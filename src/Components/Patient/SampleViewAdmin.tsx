@@ -13,7 +13,7 @@ import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 import Pagination from "../Common/Pagination";
 import { SampleListModel } from "./models";
-import {InputSearchBox} from "../Common/SearchBox";
+import { InputSearchBox } from "../Common/SearchBox";
 import UpdateStatusDialog from "./UpdateStatusDialog";
 
 const useStyles = makeStyles((theme) => ({
@@ -114,18 +114,14 @@ export default function SampleViewAdmin(props: any) {
       sample: {},
     });
   };
-  const onSearchDistrictName = async (event: React.KeyboardEvent<HTMLInputElement>):Promise<any> => {
-    let searchValue:any = (event.target as HTMLInputElement).value
-    if(event.keyCode === 13){
-      setIsLoading(true);
-      const res = await dispatch(getTestList({ limit, offset, district_name : searchValue}));
-        if (res && res.data) {
-          setSample(res.data.results);
-          setTotalCount(res.data.count);
-        }
-        setIsLoading(false);
-      event.stopPropagation();
+  const onSearchDistrictName = async (searchValue: string) => {
+    setIsLoading(true);
+    const res = await dispatch(getTestList({ limit, offset, district_name: searchValue }));
+    if (res && res.data) {
+      setSample(res.data.results);
+      setTotalCount(res.data.count);
     }
+    setIsLoading(false);
   }
 
   let sampleList: any[] = [];
@@ -279,8 +275,8 @@ export default function SampleViewAdmin(props: any) {
       />)}
       <PageTitle title="Sample Management system" hideBack={true} />
       <InputSearchBox
-        onKeyUp = {onSearchDistrictName}
-        placeholder = 'Search District Name'
+        search={onSearchDistrictName}
+        placeholder='Search by district'
         errors=''
       />
       <div className="flex flex-wrap mt-4">{manageSamples}</div>
