@@ -173,7 +173,6 @@ export const PatientManager = (props: any) => {
   if (isLoading || !data ) {
     managePatients = <Loading />;
   } else if (data && data.length) {
-      console.log(isLoading,data)
       managePatients = (
         <>
           {patientList}
