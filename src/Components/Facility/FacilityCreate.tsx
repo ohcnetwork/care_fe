@@ -1,4 +1,4 @@
-import { Button, Card, CardActions, CardContent, FormControl, Grid, InputLabel, MenuItem, Select } from "@material-ui/core";
+import { Button, Card, CardContent, CircularProgress, InputLabel, IconButton } from "@material-ui/core";
 import Popover from "@material-ui/core/Popover";
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import MyLocationIcon from "@material-ui/icons/MyLocation";
@@ -7,12 +7,12 @@ import { navigate } from "hookrouter";
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
 import React, { useCallback, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
-import { DISTRICT_CHOICES, FACILITY_ID } from "../../Common/constants";
+import { FACILITY_TYPES } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { validateLocationCoordinates } from "../../Common/validation";
-import { createFacility, getFacility, updateFacility } from "../../Redux/actions";
+import { createFacility, getDistrictByState, getFacility, getLocalbodyByDistrict, getStates, updateFacility } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import { MultilineInputField, PhoneNumberField, TextInputField } from "../Common/HelperInputFields";
+import { MultilineInputField, PhoneNumberField, SelectField, TextInputField } from "../Common/HelperInputFields";
 import { Loading } from "../Common/Loading";
 import { LocationSearchAndPick } from "../Common/LocationSearchAndPick";
 import PageTitle from "../Common/PageTitle";
@@ -23,9 +23,19 @@ interface FacilityProps {
   facilityId?: number;
 }
 
+const facilityTypes = [...FACILITY_TYPES.map(i => i.text)];
+const initialStates = [{ id: 0, name: "Choose State *" }];
+const initialDistricts = [{ id: 0, name: "Choose District" }];
+const selectStates = [{ id: 0, name: "Please select your state" }];
+const initialLocalbodies = [{ id: 0, name: "Choose Localbody" }];
+const selectDistrict = [{ id: 0, name: "Please select your district" }];
+
 const initForm: any = {
+  facility_type: "2",
   name: "",
+  state: "",
   district: "",
+  local_body: "",
   address: "",
   phone_number: "",
   latitude: "",
@@ -33,32 +43,12 @@ const initForm: any = {
   oxygen_capacity: ""
 };
 
+const initError = Object.assign({}, ...Object.keys(initForm).map(k => ({ [k]: "" })));
+
 const initialState = {
   form: { ...initForm },
-  errors: { ...initForm }
+  errors: { ...initError }
 };
-
-const useStyles = makeStyles(theme => ({
-  formTop: {
-    marginTop: "100px"
-  },
-  locationIcon: {
-    marginLeft: "10px",
-    marginTop: "15px",
-    cursor: "pointer"
-  },
-  pdLogo: {
-    height: "345px",
-    border: "solid 3px white"
-  },
-  selectEmpty: {
-    marginTop: "10px"
-  },
-  selectLabel: {
-    background: "white",
-    padding: "0px 10px"
-  }
-}));
 
 const facility_create_reducer = (state = initialState, action: any) => {
   switch (action.type) {
@@ -85,11 +75,17 @@ const goBack = () => {
 
 export const FacilityCreate = (props: FacilityProps) => {
   const dispatchAction: any = useDispatch();
-  const classes = useStyles();
   const { facilityId } = props;
 
   const [state, dispatch] = useReducer(facility_create_reducer, initialState);
   const [isLoading, setIsLoading] = useState(false);
+  const [isStateLoading, setIsStateLoading] = useState(false);
+  const [isDistrictLoading, setIsDistrictLoading] = useState(false);
+  const [isLocalbodyLoading, setIsLocalbodyLoading] = useState(false);
+  const [states, setStates] = useState(initialStates);
+  const [districts, setDistricts] = useState(selectStates);
+  const [localBody, setLocalBody] = useState(selectDistrict);
+
   const [anchorEl, setAnchorEl] = React.useState<
     (EventTarget & Element) | null
   >(null);
@@ -98,6 +94,36 @@ export const FacilityCreate = (props: FacilityProps) => {
   const headerText = !facilityId ? "Create Facility" : "Update Facility";
   const buttonText = !facilityId ? "Save Facility" : "Update Facility";
 
+  const fetchDistricts = useCallback(
+    async (id: string) => {
+      if (Number(id) > 0) {
+        setIsDistrictLoading(true);
+        const districtList = await dispatchAction(getDistrictByState({ id }));
+        setDistricts([...initialDistricts, ...districtList.data]);
+        setIsDistrictLoading(false);
+      } else {
+        setDistricts(selectStates);
+      }
+    },
+    [dispatchAction]
+  );
+
+  const fetchLocalBody = useCallback(
+    async (id: string) => {
+      if (Number(id) > 0) {
+        setIsLocalbodyLoading(true);
+        const localBodyList = await dispatchAction(
+          getLocalbodyByDistrict({ id })
+        );
+        setIsLocalbodyLoading(false);
+        setLocalBody([...initialLocalbodies, ...localBodyList.data]);
+      } else {
+        setLocalBody(selectDistrict);
+      }
+    },
+    [dispatchAction]
+  );
+
   const fetchData = useCallback(
     async (status: statusType) => {
       if (facilityId) {
@@ -105,8 +131,11 @@ export const FacilityCreate = (props: FacilityProps) => {
         const res = await dispatchAction(getFacility(facilityId));
         if (!status.aborted && res.data) {
           const formData = {
+            facility_type: res.data.facility_type,
             name: res.data.name,
-            district: res.data.district,
+            state: res.data.state ? res.data.state : "",
+            district: res.data.district ? res.data.district : "",
+            local_body: res.data.local_body ? res.data.local_body : "",
             address: res.data.address,
             phone_number: res.data.phone_number,
             latitude: res.data.location ? res.data.location.latitude : "",
@@ -116,18 +145,37 @@ export const FacilityCreate = (props: FacilityProps) => {
               : ""
           };
           dispatch({ type: "set_form", form: formData });
+          Promise.all([
+            fetchDistricts(res.data.state),
+            fetchLocalBody(res.data.district)
+          ]);
         } else {
           navigate(`/facility/${facilityId}`);
         }
         setIsLoading(false);
       }
     },
-    [dispatchAction, facilityId]
+    [dispatchAction, facilityId, fetchDistricts, fetchLocalBody]
+  );
+
+  const fetchStates = useCallback(
+    async (status: statusType) => {
+      setIsStateLoading(true);
+      const statesRes = await dispatchAction(getStates());
+      if (!status.aborted && statesRes.data.results) {
+        setStates([...initialStates, ...statesRes.data.results]);
+      }
+      setIsStateLoading(false);
+    },
+    [dispatchAction]
   );
 
   useAbortableEffect(
     (status: statusType) => {
-      fetchData(status);
+      if (facilityId) {
+        fetchData(status);
+      }
+      fetchStates(status);
     },
     [dispatch, fetchData]
   );
@@ -166,13 +214,14 @@ export const FacilityCreate = (props: FacilityProps) => {
   };
 
   const validateForm = () => {
-    let errors = { ...initForm };
+    let errors = { ...initError };
     let invalidForm = false;
     Object.keys(state.form).forEach(field => {
       switch (field) {
         case "name":
         case "district":
         case "address":
+        case "state":
           if (!state.form[field]) {
             errors[field] = "Field is required";
             invalidForm = true;
@@ -187,7 +236,7 @@ export const FacilityCreate = (props: FacilityProps) => {
           return;
         case "latitude":
         case "longitude":
-         if (!!state.form.latitude && !!state.form.longitude && !validateLocationCoordinates(state.form[field])) {
+          if (!!state.form.latitude && !!state.form.longitude && !validateLocationCoordinates(state.form[field])) {
             errors[field] = "Please enter valid coordinates";
             invalidForm = true;
           }
@@ -210,10 +259,12 @@ export const FacilityCreate = (props: FacilityProps) => {
     if (validated) {
       setIsLoading(true);
       const data = {
-        facility_type: FACILITY_ID.hospital,
+        facility_type: state.form.facility_type,
         name: state.form.name,
         district: state.form.district,
+        state: state.form.state,
         address: state.form.address,
+        local_body: state.form.local_body,
         location:
           state.form.latitude && state.form.longitude
             ? {
@@ -266,193 +317,210 @@ export const FacilityCreate = (props: FacilityProps) => {
   return (
     <div>
       <PageTitle title={headerText} />
-      <div>
-        <Card className="mt-4">
+      <Card className="mt-4">
+        <CardContent>
           <form onSubmit={e => handleSubmit(e)}>
-            <CardContent>
-              <Grid container justify="center" style={{ marginBottom: "10px" }}>
-                <Grid item xs={12}>
-                  <TextInputField
-                    fullWidth
-                    name="name"
-                    label="Hospital Name*"
-                    placeholder=""
-                    variant="outlined"
-                    margin="dense"
-                    value={state.form.name}
-                    onChange={handleChange}
-                    errors={state.errors.name}
-                  />
-                </Grid>
-              </Grid>
+            <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
 
-              <Grid container justify="center">
-                <Grid item xs={12}>
-                  <FormControl fullWidth variant="outlined">
-                    <InputLabel
-                      id="demo-simple-select-outlined-label"
-                      className={classes.selectLabel}
-                    >
-                      Pick Your District*
-                    </InputLabel>
-                    <Select
-                      fullWidth
-                      labelId="demo-simple-select-outlined-label"
-                      id="demo-simple-select-outlined"
+              <div>
+                <InputLabel id="facility_type-label">Facility Type*</InputLabel>
+                <SelectField
+                  name="facility_type"
+                  variant="outlined"
+                  margin="dense"
+                  optionArray={true}
+                  value={state.form.facility_type}
+                  options={facilityTypes}
+                  onChange={handleChange}
+                  errors={state.errors.facility_type}
+                />
+              </div>
+
+              <div>
+                <InputLabel id="name-label">Facility Name*</InputLabel>
+                <TextInputField
+                  fullWidth
+                  name="name"
+                  placeholder=""
+                  variant="outlined"
+                  margin="dense"
+                  value={state.form.name}
+                  onChange={handleChange}
+                  errors={state.errors.name}
+                />
+              </div>
+
+              <div>
+                <InputLabel id="gender-label">State*</InputLabel>
+                {isStateLoading ? (
+                  <CircularProgress size={20} />
+                ) : (
+                    <SelectField
+                      name="state"
+                      variant="outlined"
+                      margin="dense"
+                      value={state.form.state}
+                      options={states}
+                      optionValue="name"
+                      onChange={e => [
+                        handleChange(e),
+                        fetchDistricts(String(e.target.value))
+                      ]}
+                      errors={state.errors.state}
+                    />
+                  )}
+              </div>
+
+              <div>
+                <InputLabel id="district-label">District*</InputLabel>
+                {isDistrictLoading ? (
+                  <CircularProgress size={20} />
+                ) : (
+                    <SelectField
                       name="district"
+                      variant="outlined"
+                      margin="dense"
                       value={state.form.district}
+                      options={districts}
+                      optionValue="name"
+                      onChange={e => [
+                        handleChange(e),
+                        fetchLocalBody(String(e.target.value))
+                      ]}
+                      errors={state.errors.district}
+                    />
+                  )}
+              </div>
+
+              <div className="md:col-span-2">
+                <InputLabel id="local_body-label">Localbody</InputLabel>
+                {isLocalbodyLoading ? (
+                  <CircularProgress size={20} />
+                ) : (
+                    <SelectField
+                      name="local_body"
+                      variant="outlined"
+                      margin="dense"
+                      value={state.form.local_body}
+                      options={localBody}
+                      optionValue="name"
                       onChange={handleChange}
-                      label="District"
-                    >
-                      <MenuItem value="">
-                        <em>None</em>
-                      </MenuItem>
-                      {DISTRICT_CHOICES.map(district => {
-                        return (
-                          <MenuItem
-                            key={district.id.toString()}
-                            value={district.id}
-                          >
-                            {district.text}
-                          </MenuItem>
-                        );
-                      })}
-                    </Select>
-                    <span className="error-text">{state.errors.district}</span>
-                  </FormControl>
-                </Grid>
-              </Grid>
-
-              <Grid container justify="center">
-                <Grid item xs={12}>
-                  <MultilineInputField
-                    rows={5}
-                    name="address"
-                    label="Hospital Address*"
-                    placeholder=""
-                    variant="outlined"
-                    margin="dense"
-                    value={state.form.address}
-                    onChange={handleChange}
-                    errors={state.errors.address}
-                  />
-                </Grid>
-              </Grid>
-
-              <Grid container justify="center">
-                <Grid item xs={12}>
-                  <PhoneNumberField
-                      label="Emergency Contact Number*"
-                      value={state.form.phone_number}
-                      onChange={(value: any) => handleValueChange(value, 'phone_number')}
-                      errors={state.errors.phone_number}
+                      errors={state.errors.local_body}
                     />
-                </Grid>
-              </Grid>
+                  )}
+              </div>
 
-              <Grid container justify="center">
-                <Grid item xs={12}>
-                  <TextInputField
-                    name="oxygen_capacity"
-                    label="Oxygen Capacity in liters"
-                    type="number"
-                    placeholder="Oxygen Capacity in liters"
-                    variant="outlined"
-                    margin="dense"
-                    value={state.form.oxygen_capacity}
-                    onChange={handleChange}
-                    errors={state.errors.oxygen_capacity}
-                  />
-                </Grid>
-              </Grid>
+              <div className="md:col-span-2">
+                <InputLabel id="name-label">Address*</InputLabel>
+                <MultilineInputField
+                  rows={5}
+                  name="address"
+                  placeholder=""
+                  variant="outlined"
+                  margin="dense"
+                  value={state.form.address}
+                  onChange={handleChange}
+                  errors={state.errors.address}
+                />
+              </div>
 
-              <Grid container>
-                <Grid item xs={5}>
-                  <TextInputField
-                    name="latitude"
-                    label="Latitude"
-                    placeholder=""
-                    variant="outlined"
-                    margin="dense"
-                    value={state.form.latitude}
-                    onChange={handleChange}
-                    errors={state.errors.latitude}
-                  />
-                </Grid>
-                <Grid item xs={1}></Grid>
-                <Grid item xs={5}>
-                  <TextInputField
-                    name="longitude"
-                    label="Longitude"
-                    placeholder=""
-                    variant="outlined"
-                    margin="dense"
-                    value={state.form.longitude}
-                    onChange={handleChange}
-                    errors={state.errors.longitude}
-                  />
-                </Grid>
-                <Grid item xs={1}>
-                  <div
-                    className={classes.locationIcon}
-                    onClick={handleClickLocationPicker}
-                  >
-                    <MyLocationIcon />
-                  </div>
-                </Grid>
-                {
-                  <Popover
-                    id={id}
-                    open={open}
-                    anchorEl={anchorEl}
-                    onClose={handleClose}
-                    anchorOrigin={{
-                      horizontal: "right",
-                      vertical: "bottom"
-                    }}
-                    transformOrigin={{
-                      horizontal: "right",
-                      vertical: "top"
-                    }}
-                    style={{ position: "absolute", left: "300px" }}
-                  >
-                    <LocationSearchAndPick
-                      latitude={mapLoadLocation[0]}
-                      longitude={mapLoadLocation[1]}
-                      onSelectLocation={handleLocationSelect}
-                    />
-                  </Popover>
-                }
-              </Grid>
-            </CardContent>
-
-            <CardContent>
-              <CardActions
-                className="padding16"
-                style={{ justifyContent: "space-between" }}
+              <div>
+                <PhoneNumberField
+                  label="Emergency Contact Number"
+                  value={state.form.phone_number}
+                  onChange={(value: any) => handleValueChange(value, 'phone_number')}
+                  errors={state.errors.phone_number}
+                  onlyIndia={true}
+                />
+              </div>
+              <div>
+                <InputLabel id="name-label">Oxygen Capacity in liters</InputLabel>
+                <TextInputField
+                  name="oxygen_capacity"
+                  type="number"
+                  variant="outlined"
+                  margin="dense"
+                  value={state.form.oxygen_capacity}
+                  onChange={handleChange}
+                  errors={state.errors.oxygen_capacity}
+                />
+              </div>
+            </div>
+            <div className="flex items-center mt-4 -mx-2">
+              <div className="flex-1 px-2">
+                <InputLabel id="location-label">Location</InputLabel>
+                <TextInputField
+                  name="latitude"
+                  label="Latitude"
+                  placeholder=""
+                  variant="outlined"
+                  margin="dense"
+                  value={state.form.latitude}
+                  onChange={handleChange}
+                  errors={state.errors.latitude}
+                />
+              </div>
+              <div
+                className="pt-4"
               >
-                <Button
-                  color="default"
-                  variant="contained"
-                  onClick={goBack}
+                <IconButton onClick={handleClickLocationPicker}>
+                  <MyLocationIcon />
+                </IconButton>
+                <Popover
+                  id={id}
+                  open={open}
+                  anchorEl={anchorEl}
+                  onClose={handleClose}
+                  anchorOrigin={{
+                    vertical: 'top',
+                    horizontal: 'left',
+                  }}
+                  transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'left',
+                  }}
                 >
-                  Cancel
-                </Button>
-                <Button
-                  color="primary"
-                  variant="contained"
-                  type="submit"
-                  style={{ marginLeft: "auto" }}
-                  onClick={e => handleSubmit(e)}
-                  startIcon={<CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>}
-                >
-                  {buttonText}
-                </Button>
-              </CardActions>
-            </CardContent>
+                  <LocationSearchAndPick
+                    latitude={mapLoadLocation[0]}
+                    longitude={mapLoadLocation[1]}
+                    onSelectLocation={handleLocationSelect}
+                  />
+                </Popover>
+              </div>
+              <div className="flex-1 px-2">
+                <InputLabel>&nbsp;</InputLabel>
+                <TextInputField
+                  name="longitude"
+                  label="Longitude"
+                  placeholder=""
+                  variant="outlined"
+                  margin="dense"
+                  value={state.form.longitude}
+                  onChange={handleChange}
+                  errors={state.errors.longitude}
+                />
+              </div>
+            </div>
+            <div
+              className="flex justify-between mt-4"
+            >
+              <Button
+                color="default"
+                variant="contained"
+                onClick={goBack}
+              >Cancel</Button>
+              <Button
+                color="primary"
+                variant="contained"
+                type="submit"
+                style={{ marginLeft: "auto" }}
+                onClick={e => handleSubmit(e)}
+                startIcon={<CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>}
+              >{buttonText}</Button>
+            </div>
           </form>
-        </Card>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
