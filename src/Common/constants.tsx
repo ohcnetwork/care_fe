@@ -31,32 +31,33 @@ export const VEHICLE_TYPES: Array<OptionsType> = [
 
 export const FACILITY_TYPES: Array<OptionsType> = [
   { id: 1, text: "Educational Inst" },
-  { id: 2, text: "Private Hospital" },
+  { id: 2, text: "Hospital" },
   { id: 3, text: "Other" },
   { id: 4, text: "Hostel" },
   { id: 5, text: "Hotel" },
   { id: 6, text: "Lodge" },
   { id: 7, text: "TeleMedicine" },
-  { id: 900, text: "Primary Health Centres" },
-  { id: 901, text: "24x7 Public Health Centres" },
-  { id: 902, text: "Family Health Centres" },
-  { id: 903, text: "Community Health Centres" },
-  { id: 920, text: "Urban Primary Health Center" },
-  { id: 930, text: "Taluk Hospitals" },
-  { id: 931, text: "Taluk Headquarters Hospitals" },
-  { id: 940, text: "Women and Child Health Centres" },
-  { id: 950, text: "General hospitals" },
-  { id: 960, text: "District Hospitals" },
 ];
 
-export const FACILITY_ID = {
-  educational: 1,
-  hospital: 2,
-  other: 3,
-  hostel: 4,
-  hotel: 5,
-  lodge: 6,
-};
+// export const FACILITY_TYPES: Array<OptionsType> = [
+//   { id: 1, text: "Educational Inst" },
+//   { id: 2, text: "Private Hospital" },
+//   { id: 3, text: "Other" },
+//   { id: 4, text: "Hostel" },
+//   { id: 5, text: "Hotel" },
+//   { id: 6, text: "Lodge" },
+//   { id: 7, text: "TeleMedicine" },
+//   { id: 900, text: "Primary Health Centres" },
+//   { id: 901, text: "24x7 Public Health Centres" },
+//   { id: 902, text: "Family Health Centres" },
+//   { id: 903, text: "Community Health Centres" },
+//   { id: 920, text: "Urban Primary Health Center" },
+//   { id: 930, text: "Taluk Hospitals" },
+//   { id: 931, text: "Taluk Headquarters Hospitals" },
+//   { id: 940, text: "Women and Child Health Centres" },
+//   { id: 950, text: "General hospitals" },
+//   { id: 960, text: "District Hospitals" },
+// ];
 
 export const BED_TYPES: Array<OptionsType> = [
   { id: 1, text: "Normal" },
