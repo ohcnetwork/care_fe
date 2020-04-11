@@ -239,9 +239,14 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       switch (field) {
         case "name":
         case "gender":
-        case "date_of_birth":
           if (!state.form[field]) {
             errors[field] = "Field is required";
+            invalidForm = true;
+          }
+          return;
+        case "date_of_birth":
+          if (!state.form[field]) {
+            errors[field] = "Please enter date in DD/MM/YYYY format";
             invalidForm = true;
           }
           return;
@@ -277,10 +282,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           }
           return;
         case "estimated_contact_date":
-          if ((JSON.parse(state.form.contact_with_confirmed_carrier) || JSON.parse(state.form.contact_with_suspected_carrier))
-            && !state.form[field]) {
-            errors[field] = "Please enter the estimated date of contact";
-            invalidForm = true;
+          if ((JSON.parse(state.form.contact_with_confirmed_carrier) || JSON.parse(state.form.contact_with_suspected_carrier))) {
+            if (!state.form[field]) {
+              errors[field] = "Please enter the estimated date of contact";
+              invalidForm = true;
+            }
           }
           return;
         default:
@@ -376,10 +382,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   };
 
   const handleDateChange = (date: any, field: string) => {
-    const form = { ...state.form };
-    form[field] = date;
-    dispatch({ type: "set_form", form });
-
+    if (moment(date).isValid()) {
+      const form = { ...state.form };
+      form[field] = date;
+      dispatch({ type: "set_form", form });
+    }
   };
 
   const handleCheckboxFieldChange = (e: any) => {
@@ -403,7 +410,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
   const duplicateCheck = async (status: statusType) => {
     const { phone_number, date_of_birth } = state.form;
-    if (phone_number && date_of_birth && parsePhoneNumberFromString(phone_number)?.isPossible()) {
+    if (phone_number && date_of_birth && parsePhoneNumberFromString(phone_number)?.isPossible() && moment(date_of_birth).isValid()) {
       const query = {
         phone_number: parsePhoneNumberFromString(phone_number)?.format('E.164'),
         date_of_birth: moment(date_of_birth).format('YYYY-MM-DD')
@@ -421,7 +428,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     }
   }
 
-  const duplicateCheckHandler = useCallback(debounce(duplicateCheck, 500), [state.form]);
+  const duplicateCheckHandler = useCallback(debounce(duplicateCheck, 500), [state.form.phone_number, state.form.date_of_birth]);
 
   useAbortableEffect(
     (status: statusType) => {

@@ -1,6 +1,7 @@
 import { Box, Button, Card, CardContent, FormControlLabel, InputLabel, Radio, RadioGroup } from "@material-ui/core";
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import { navigate } from "hookrouter";
+import moment from "moment";
 import React, { useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
 import { ADMITTED_TO, CONSULTATION_SUGGESTION, PATIENT_CATEGORY, SYMPTOM_CHOICES } from "../../Common/constants";
@@ -202,9 +203,11 @@ export const Consultation = (props: any) => {
 
 
   const handleDateChange = (date: any, key: string) => {
-    let form = { ...state.form };
-    form[key] = date;
-    dispatch({ type: "set_form", form });
+    if (moment(date).isValid()) {
+      const form = { ...state.form };
+      form[key] = date;
+      dispatch({ type: "set_form", form });
+    }
   };
 
   if (isLoading) {
