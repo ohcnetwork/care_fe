@@ -56,69 +56,9 @@ export const PatientManager = (props: any) => {
             setIsLoading(false);
           }
         }
-        else if(diseaseStatus === 'POSITIVE'){
+        else {
           const res = await dispatch(
-            getAllPatient({ facility: facilityId, limit, offset,disease_status:'POSITIVE' })
-          );
-          if (!status.aborted) {
-            if (res && res.data) {
-              setData(res.data.results);
-              setTotalCount(res.data.count);
-            }
-            setIsLoading(false);
-          }
-        }
-        else if(diseaseStatus === 'SUSPECTED'){
-          const res = await dispatch(
-            getAllPatient({ facility: facilityId, limit, offset,disease_status:'SUSPECTED' })
-          );
-          if (!status.aborted) {
-            if (res && res.data) {
-              setData(res.data.results);
-              setTotalCount(res.data.count);
-            }
-            setIsLoading(false);
-          }
-        }
-        else if(diseaseStatus === 'NEGATIVE'){
-          const res = await dispatch(
-            getAllPatient({ facility: facilityId, limit, offset,disease_status:'NEGATIVE' })
-          );
-          if (!status.aborted) {
-            if (res && res.data) {
-              setData(res.data.results);
-              setTotalCount(res.data.count);
-            }
-            setIsLoading(false);
-          }
-        }
-        else if(diseaseStatus === 'EXPIRED'){
-          const res = await dispatch(
-            getAllPatient({ facility: facilityId, limit, offset,disease_status:'EXPIRED' })
-          );
-          if (!status.aborted) {
-            if (res && res.data) {
-              setData(res.data.results);
-              setTotalCount(res.data.count);
-            }
-            setIsLoading(false);
-          }
-        }
-        else if(diseaseStatus === 'RECOVERY'){
-          const res = await dispatch(
-            getAllPatient({ facility: facilityId, limit, offset,disease_status:'RECOVERY' })
-          );
-          if (!status.aborted) {
-            if (res && res.data) {
-              setData(res.data.results);
-              setTotalCount(res.data.count);
-            }
-            setIsLoading(false);
-          }
-        }
-        else if(diseaseStatus === 'RECOVERED'){
-          const res = await dispatch(
-            getAllPatient({ facility: facilityId, limit, offset,disease_status:'RECOVERED' })
+            getAllPatient({ facility: facilityId, limit, offset,disease_status: diseaseStatus })
           );
           if (!status.aborted) {
             if (res && res.data) {
@@ -152,10 +92,12 @@ export const PatientManager = (props: any) => {
         : `/patient/${patient.id}`;
       return (
         <div key={`usr_${patient.id}`} className="w-full md:w-1/2 mt-4 px-2">
-          <div style={{backgroundColor:patient.disease_status === 'POSITIVE' ? '#FF3333':
-          ['NEGATIVE','RECOVERY','RECOVERED'].indexOf(patient.disease_status) >= 0 ? '#00FF66':'#FFFFFF'}}
+          <div
             onClick={() => navigate(patientUrl)}
-            className="overflow-hidden shadow-lg block border rounded-lg bg-white h-full cursor-pointer hover:border-primary-500"
+            className={`overflow-hidden shadow-lg block border rounded-lg bg-white h-full cursor-pointer hover:border-primary-500
+            ${patient.disease_status === 'POSITIVE' ? "border-red-700 bg-red-100": 
+            ['NEGATIVE','RECOVERY','RECOVERED'].indexOf(patient.disease_status) >= 0 ? "border-green-700 bg-green-100": "" }
+            `}
           >
             <div className="px-6 py-4 h-full flex flex-col justify-between">
               <div>
