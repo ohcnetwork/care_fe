@@ -39,12 +39,26 @@
     #google_translate_element {
       position: absolute;
       bottom: 0;
-      right: 0;
+      right: 15px;
       opacity: 0.7;
     }
 
     #google_translate_element * {
       display: flex;
+    }
+
+    /* Fix to prevent double scrollbar */
+
+    html.translated-ltr body {
+      top: 0 !important;
+    }
+
+    html.translated-ltr .h-screen {
+      padding-top: 40px;
+    }
+
+    html.translated-ltr #google_translate_element {
+      top: 40px;
     }
   </style>
 </head>
