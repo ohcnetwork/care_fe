@@ -10,6 +10,8 @@ import { getAllPatient } from "../../Redux/actions";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 import Pagination from "../Common/Pagination";
+import {SelectField } from "../Common/HelperInputFields";
+import { DISEASE_STATUS } from "../../Common/constants";
 
 const useStyles = makeStyles((theme) => ({
   paginateTopPadding: {
@@ -20,46 +22,123 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+let diseaseStatusOptions = [...DISEASE_STATUS];
+diseaseStatusOptions.unshift('All');
+let disease_status : string;
+
 export const PatientManager = (props: any) => {
   const { facilityId } = props;
   const classes = useStyles();
   const dispatch: any = useDispatch();
   const initialData: any[] = [];
   const [data, setData] = useState(initialData);
-
   let managePatients: any = null;
   const [isLoading, setIsLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
+  const [diseaseStatus, setDiseaseStatus] = useState('All');
   const [offset, setOffset] = useState(0);
 
   const limit = 10;
 
-  const fetchData = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const res = await dispatch(
-        getAllPatient({ facility: facilityId, limit, offset })
-      );
-      if (!status.aborted) {
-        if (res && res.data) {
-          setData(res.data.results);
-          setTotalCount(res.data.count);
+    const fetchData = useCallback(
+      async (status: statusType) => {
+        setIsLoading(true);
+        if(diseaseStatus === 'All'){
+          const res = await dispatch(
+            getAllPatient({ facility: facilityId, limit, offset })
+          );
+          if (!status.aborted) {
+            if (res && res.data) {
+              setData(res.data.results);
+              setTotalCount(res.data.count);
+            }
+            setIsLoading(false);
+          }
         }
-        setIsLoading(false);
-      }
-    },
-    [dispatch, facilityId, offset]
-  );
+        else if(diseaseStatus === 'POSITIVE'){
+          const res = await dispatch(
+            getAllPatient({ facility: facilityId, limit, offset,disease_status:'POSITIVE' })
+          );
+          if (!status.aborted) {
+            if (res && res.data) {
+              setData(res.data.results);
+              setTotalCount(res.data.count);
+            }
+            setIsLoading(false);
+          }
+        }
+        else if(diseaseStatus === 'SUSPECTED'){
+          const res = await dispatch(
+            getAllPatient({ facility: facilityId, limit, offset,disease_status:'SUSPECTED' })
+          );
+          if (!status.aborted) {
+            if (res && res.data) {
+              setData(res.data.results);
+              setTotalCount(res.data.count);
+            }
+            setIsLoading(false);
+          }
+        }
+        else if(diseaseStatus === 'NEGATIVE'){
+          const res = await dispatch(
+            getAllPatient({ facility: facilityId, limit, offset,disease_status:'NEGATIVE' })
+          );
+          if (!status.aborted) {
+            if (res && res.data) {
+              setData(res.data.results);
+              setTotalCount(res.data.count);
+            }
+            setIsLoading(false);
+          }
+        }
+        else if(diseaseStatus === 'EXPIRED'){
+          const res = await dispatch(
+            getAllPatient({ facility: facilityId, limit, offset,disease_status:'EXPIRED' })
+          );
+          if (!status.aborted) {
+            if (res && res.data) {
+              setData(res.data.results);
+              setTotalCount(res.data.count);
+            }
+            setIsLoading(false);
+          }
+        }
+        else if(diseaseStatus === 'RECOVERY'){
+          const res = await dispatch(
+            getAllPatient({ facility: facilityId, limit, offset,disease_status:'RECOVERY' })
+          );
+          if (!status.aborted) {
+            if (res && res.data) {
+              setData(res.data.results);
+              setTotalCount(res.data.count);
+            }
+            setIsLoading(false);
+          }
+        }
+        else if(diseaseStatus === 'RECOVERED'){
+          const res = await dispatch(
+            getAllPatient({ facility: facilityId, limit, offset,disease_status:'RECOVERED' })
+          );
+          if (!status.aborted) {
+            if (res && res.data) {
+              setData(res.data.results);
+              setTotalCount(res.data.count);
+            }
+            setIsLoading(false);
+          }
+        }
+       },
+      [dispatch, facilityId, offset, diseaseStatus]
+    );
+    useAbortableEffect(
+      (status: statusType) => {
+        fetchData(status);
+      },
+      [fetchData]
+    );
 
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(status);
-    },
-    [fetchData]
-  );
-
-  const handlePagination = (page: number, limit: number) => {
+    const handlePagination = (page: number, limit: number) => {
     const offset = (page - 1) * limit;
     setCurrentPage(page);
     setOffset(offset);
@@ -73,7 +152,8 @@ export const PatientManager = (props: any) => {
         : `/patient/${patient.id}`;
       return (
         <div key={`usr_${patient.id}`} className="w-full md:w-1/2 mt-4 px-2">
-          <div
+          <div style={{backgroundColor:patient.disease_status === 'POSITIVE' ? '#FF3333':
+          ['NEGATIVE','RECOVERY','RECOVERED'].indexOf(patient.disease_status) >= 0 ? '#00FF66':'#FFFFFF'}}
             onClick={() => navigate(patientUrl)}
             className="overflow-hidden shadow-lg block border rounded-lg bg-white h-full cursor-pointer hover:border-primary-500"
           >
@@ -142,25 +222,33 @@ export const PatientManager = (props: any) => {
     });
   }
 
-  if (isLoading || !data) {
+  let handleChange = (disease_status:any) => {
+    setDiseaseStatus(disease_status.target.value)
+    setOffset(0);
+    setCurrentPage(1);
+  }
+ 
+  if (isLoading || !data ) {
     managePatients = <Loading />;
   } else if (data && data.length) {
-    managePatients = (
-      <>
-        {patientList}
-        {totalCount > limit && (
-          <Grid container className={`w3-center ${classes.paginateTopPadding}`}>
-            <Pagination
-              cPage={currentPage}
-              defaultPerPage={limit}
-              data={{ totalCount }}
-              onChange={handlePagination}
-            />
-          </Grid>
-        )}
-      </>
-    );
-  } else if (data && data.length === 0) {
+      console.log(isLoading,data)
+      managePatients = (
+        <>
+          {patientList}
+          {totalCount > limit && (
+            <Grid container className={`w3-center ${classes.paginateTopPadding}`}>
+              <Pagination
+                cPage={currentPage}
+                defaultPerPage={limit}
+                data={{ totalCount }}
+                onChange={handlePagination}
+              />
+            </Grid>
+          )}
+        </>
+      );
+  }
+  else if (data && data.length === 0) {
     managePatients = (
       <Grid item xs={12} md={12} className={classes.displayFlex}>
         <Grid container justify="center" alignItems="center">
@@ -173,8 +261,17 @@ export const PatientManager = (props: any) => {
   return (
     <div className="px-2">
       <PageTitle title="Covid Suspects" hideBack={!facilityId} />
-
-      <div className="flex flex-wrap mt-2">{managePatients}</div>
+      <SelectField
+                    name="disease_status"
+                    variant="outlined"
+                    margin="dense"
+                    optionArray={true}
+                    value={disease_status}
+                    options={diseaseStatusOptions}
+                    onChange={(value: any) => handleChange(value)}
+                  />
+      <div className="flex flex-wrap mt-4">{managePatients}</div>
     </div>
   );
 };
+
