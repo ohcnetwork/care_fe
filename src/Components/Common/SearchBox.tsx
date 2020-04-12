@@ -42,7 +42,7 @@ export const InputSearchBox = (props: TextFieldPropsExtended) => {
     };
 
     return (
-        <Grid item xs={6} md={12} className={classes.searchboxSticky}>
+        <Grid item xs={12} className={classes.searchboxSticky}>
             <Grid container justify="center" alignItems="center" className='mt-4'>
                 <TextField
                     name="search"

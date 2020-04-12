@@ -10,6 +10,7 @@ const useStyles = makeStyles(theme => ({
         background: "#ffffff"
     },
     searchboxSticky: {
+        width: "100%",
         position: "sticky",
         zIndex: 1,
         top: "0px",
@@ -17,25 +18,25 @@ const useStyles = makeStyles(theme => ({
     }
 }));
 
-const diseaseStatusOptions = [ 'Show All', ...DISEASE_STATUS];
+const diseaseStatusOptions = ['Show All', ...DISEASE_STATUS];
 
-type TextFieldPropsExtended = TextFieldProps & { errors: string, search: (value: string) => void }
+type PatientFilterProps = { filter: (value: string) => void }
 
-export const PatientFilter = (props: any) => {
+export const PatientFilter = (props: PatientFilterProps) => {
     const classes = useStyles();
     const [diseaseStatus, setDiseaseStatus] = useState('Show All');
     const { filter } = props;
 
-    const handleChange = (event:any) => {
+    const handleChange = (event: any) => {
         setDiseaseStatus(event.target.value)
         const filterVal = event.target.value !== 'Show All' ? event.target.value : '';
         filter(filterVal);
     };
 
     return (
-        <Grid item xs={6} md={12} className={classes.searchboxSticky}>
-            <Grid container justify="center" alignItems="center" className='mt-4'>
-
+        <div className={classes.searchboxSticky}>
+            <div className="w-56 m-auto items-center flex">
+                <div className="font-semibold leading-relaxed mr-4">Status: </div>
                 <SelectField
                     name="disease_status"
                     variant="outlined"
@@ -44,8 +45,9 @@ export const PatientFilter = (props: any) => {
                     value={diseaseStatus}
                     options={diseaseStatusOptions}
                     onChange={(value: any) => handleChange(value)}
+                    className="bg-white"
                 />
-            </Grid>
-        </Grid>
+            </div>
+        </div>
     )
 }
