@@ -1,34 +1,13 @@
-import { TextField, TextFieldProps, Icon } from '@material-ui/core';
+import { TextField, TextFieldProps } from '@material-ui/core';
 import Grid from "@material-ui/core/Grid";
-import IconButton from "@material-ui/core/IconButton";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import { makeStyles } from '@material-ui/core/styles';
-import SearchIcon from "@material-ui/icons/Search";
-import React, { useState, useCallback } from 'react';
 import HighlightOffRoundedIcon from '@material-ui/icons/HighlightOffRounded';
+import SearchIcon from "@material-ui/icons/Search";
 import { debounce } from "lodash";
-
+import React, { useCallback, useState } from 'react';
 
 const useStyles = makeStyles(theme => ({
-    root: {
-        flexGrow: 1,
-        marginTop: '10px'
-    },
-    card: {
-        width: 300,
-        height: 120,
-        backgroundColor: '#C4C4C4',
-        margin: theme.spacing(1),
-    },
-    title: {
-        fontSize: 14,
-    },
-    spacing: {
-        marginLeft: theme.spacing(1),
-    },
-    margin: {
-        margin: theme.spacing(1),
-    },
     searchboxInput: {
         background: "#ffffff"
     },
@@ -56,7 +35,7 @@ export const InputSearchBox = (props: TextFieldPropsExtended) => {
             handler(value);
         }
     };
-    
+
     const clearSearch = () => {
         handler("");
         setState("");
@@ -73,7 +52,7 @@ export const InputSearchBox = (props: TextFieldPropsExtended) => {
                     value={state}
                     placeholder={placeholder}
                     InputProps={{
-                        endAdornment: <InputAdornment position="start">{state ? <HighlightOffRoundedIcon className="cursor-pointer text-gray-500" onClick={clearSearch} /> : <SearchIcon className="text-gray-500"/>}</InputAdornment>
+                        endAdornment: <InputAdornment position="start">{state ? <HighlightOffRoundedIcon className="cursor-pointer text-gray-500" onClick={clearSearch} /> : <SearchIcon className="text-gray-500" />}</InputAdornment>
                     }}
                     onChange={handleKeyDown}
                     className={`MuiInput-fullWidth ${classes.searchboxInput}`}
