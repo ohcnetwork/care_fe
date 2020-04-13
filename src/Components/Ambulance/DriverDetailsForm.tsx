@@ -124,7 +124,7 @@ export const DriverDetailsForm = (props: DriverDetailsProps) => {
           {
             name: form.driverName1,
             phone_number: parsePhoneNumberFromString(form.cellNumber1)?.format('E.164'),
-            is_smart_phone: form.isSmartPhone1
+            has_smart_phone: form.isSmartPhone1
           }
         ],
         vehicle_number: vehicleInfo.registrationNumber
@@ -135,7 +135,7 @@ export const DriverDetailsForm = (props: DriverDetailsProps) => {
           : undefined,
         owner_name: vehicleInfo.nameOfOwner,
         owner_phone_number: parsePhoneNumberFromString(vehicleInfo.ownerPhoneNumber)?.format('E.164'),
-        owner_is_smart_phone: vehicleInfo.isSmartPhone,
+        owner_has_smart_phone: vehicleInfo.isSmartPhone,
         primary_district: vehicleInfo.primaryDistrict
           ? Number(vehicleInfo.primaryDistrict)
           : undefined,
@@ -160,7 +160,7 @@ export const DriverDetailsForm = (props: DriverDetailsProps) => {
         ambulanceData.drivers.push({
           name: form.driverName2,
           phone_number: parsePhoneNumberFromString(form.cellNumber2)?.format('E.164'),
-          is_smart_phone: form.isSmartPhone2
+          has_smart_phone: form.isSmartPhone2
         });
       }
       setIsLoading(true);
