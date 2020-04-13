@@ -114,8 +114,8 @@ export const getSampleTest = (id: number, pathParam: object) => {
     return fireRequest('getSampleTest', [id], {}, pathParam)
 };
 
-export const sampleReport = (id: any) => {
-    return fireRequest('sampleReport', [id], {})
+export const sampleReport = (pathParam: object) => {
+    return fireRequest('sampleReport', [], {}, pathParam)
 };
 
 export const patchSampleTest = (id: number, queryParam: object, pathParam: object) => {

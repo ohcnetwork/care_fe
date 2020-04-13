@@ -1,10 +1,10 @@
-import React, {useCallback, useEffect, useState} from 'react';
-import {Box, Button, Paper, Typography} from '@material-ui/core';
-import {makeStyles} from '@material-ui/core/styles';
-import {useDispatch} from "react-redux";
-import {Loading} from "../Common/Loading";
-import {getDailyReport, sampleReport} from "../../Redux/actions";
-import {statusType, useAbortableEffect} from "../../Common/utils";
+import React, { useCallback, useEffect, useState } from 'react';
+import { Box, Button, Paper, Typography } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
+import { useDispatch } from "react-redux";
+import { Loading } from "../Common/Loading";
+import { getDailyReport, sampleReport } from "../../Redux/actions";
+import { statusType, useAbortableEffect } from "../../Common/utils";
 
 const useStyles = makeStyles({
     root: {
@@ -75,7 +75,7 @@ const useStyles = makeStyles({
 const coronasafeLogo = 'https://cdn.coronasafe.network/coronaSafeLogo.png';
 const SampleInfo = (props: any) => {
     const classes = useStyles();
-    const {data, count, key} = props;
+    const { data, count, key } = props;
 
     useEffect(() => {
 
@@ -89,7 +89,7 @@ ${classes.borderRight} ${classes.borderLeft} ${classes.borderTop} ${classes.cell
                     Sample ID
                 </Typography>
             </Box>
-            <div style={{border: "solid 5px black"}}>
+            <div style={{ border: "solid 5px black" }}>
                 <Box display="flex" flexDirection="row" justifyContent="center" className={`${classes.subHeader} 
         ${classes.borderRight} ${classes.borderLeft} ${classes.borderBottom} ${classes.cellTBPadding}`}>
                     <Typography component="h6" variant="h6">
@@ -104,28 +104,28 @@ ${classes.borderRight} ${classes.borderLeft} ${classes.borderTop} ${classes.cell
     return (
         <Box display='flex' flexDirection='column' key={key}>
             <Box display="flex" flexDirection="row" justifyContent="center"
-                 className={`${classes.mainHeader} ${classes.borderRight} ${classes.borderLeft} ${classes.borderTop} ${classes.cellTBPadding}`}>
+                className={`${classes.mainHeader} ${classes.borderRight} ${classes.borderLeft} ${classes.borderTop} ${classes.cellTBPadding}`}>
                 <Typography component="h6" variant="h6">
                     Sample Id
                 </Typography>
             </Box>
 
-            <div style={{border: "solid 5px black"}}>
+            <div style={{ border: "solid 5px black" }}>
                 <Box display="flex" flexDirection="row" justifyContent="center"
-                     className={`${classes.subHeader} ${classes.borderRight} ${classes.borderLeft} ${classes.borderBottom} ${classes.cellTBPadding}`}>
+                    className={`${classes.subHeader} ${classes.borderRight} ${classes.borderLeft} ${classes.borderBottom} ${classes.cellTBPadding}`}>
                     <Typography component="h6" variant="h6">
                         SECTION A - MANDATORY FIELDS
                     </Typography>
                 </Box>
                 <Box display="flex" flexDirection="row" justifyContent="center"
-                     className={`${classes.subHeader} ${classes.borderRight} ${classes.borderLeft} ${classes.borderBottom} ${classes.cellTBPadding}`}>
+                    className={`${classes.subHeader} ${classes.borderRight} ${classes.borderLeft} ${classes.borderBottom} ${classes.cellTBPadding}`}>
                     <Typography component="h6" variant="h6">
                         A.1 PERSON DETAILS
                     </Typography>
                 </Box>
                 <Box display="flex" flexDirection="row" className={`${classes.borderBottom}`}>
                     <Box width="50%" display="flex" flexDirection="row"
-                         className={`${classes.borderRight} ${classes.borderLeft}`}>
+                        className={`${classes.borderRight} ${classes.borderLeft}`}>
                         <Box width="65%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>
                             <Typography className={`${classes.cellTitle} ${classes.marginRight10}`}>
                                 Patient Name
@@ -153,7 +153,7 @@ ${classes.borderRight} ${classes.borderLeft} ${classes.borderTop} ${classes.cell
 
                 <Box display="flex" flexDirection="row" className={`${classes.borderBottom}`}>
                     <Box width="50%" display="flex" flexDirection="row"
-                         className={`${classes.borderRight} ${classes.borderLeft}`}>
+                        className={`${classes.borderRight} ${classes.borderLeft}`}>
                         <Box width="65%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>
                             <Typography className={`${classes.cellTitle} ${classes.marginRight10}`}>
                                 Present Patient Village or Town
@@ -181,7 +181,7 @@ ${classes.borderRight} ${classes.borderLeft} ${classes.borderTop} ${classes.cell
 
                 <Box display="flex" flexDirection="row" className={`${classes.borderBottom}`}>
                     <Box width="50%" display="flex" flexDirection="row"
-                         className={`${classes.borderRight} ${classes.borderLeft}`}>
+                        className={`${classes.borderRight} ${classes.borderLeft}`}>
                         <Box width="65%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>
                             <Typography className={`${classes.cellTitle} ${classes.marginRight10}`}>
                                 Mobile Number (Self)
@@ -209,7 +209,7 @@ ${classes.borderRight} ${classes.borderLeft} ${classes.borderTop} ${classes.cell
 
                 <Box display="flex" flexDirection="row" className={`${classes.borderBottom}`}>
                     <Box width="50%" display="flex" flexDirection="row"
-                         className={`${classes.borderRight} ${classes.borderLeft}`}>
+                        className={`${classes.borderRight} ${classes.borderLeft}`}>
                         <Box width="65%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>
                             <Typography className={`${classes.cellTitle} ${classes.marginRight10}`}>
                                 Nationality
@@ -245,7 +245,7 @@ ${classes.borderRight} ${classes.borderLeft} ${classes.borderTop} ${classes.cell
 
                 <Box display="flex" flexDirection="row" className={`${classes.borderBottom}`}>
                     <Box width="50%" display="flex" flexDirection="row"
-                         className={`${classes.borderRight} ${classes.borderLeft}`}>
+                        className={`${classes.borderRight} ${classes.borderLeft}`}>
                         <Box width="65%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>
                             <Typography className={`${classes.cellTitle} ${classes.marginRight10}`}>
                                 Collection Date
@@ -273,7 +273,7 @@ ${classes.borderRight} ${classes.borderLeft} ${classes.borderTop} ${classes.cell
 
                 <Box display="flex" flexDirection="row" className={`${classes.borderBottom}`}>
                     <Box width="50%" display="flex" flexDirection="row"
-                         className={`${classes.borderRight} ${classes.borderLeft}`}>
+                        className={`${classes.borderRight} ${classes.borderLeft}`}>
                         <Box width="65%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>
                             <Typography className={`${classes.cellTitle} ${classes.marginRight10}`}>
                                 Sample Repeated
@@ -301,7 +301,7 @@ ${classes.borderRight} ${classes.borderLeft} ${classes.borderTop} ${classes.cell
 
                 <Box display="flex" flexDirection="row" className={`${classes.borderBottom}`}>
                     <Box width="50%" display="flex" flexDirection="row"
-                         className={`${classes.borderRight} ${classes.borderLeft}`}>
+                        className={`${classes.borderRight} ${classes.borderLeft}`}>
                         <Box width="65%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>
                             <Typography className={`${classes.cellTitle} ${classes.marginRight10}`}>
                                 Collection Facility Pin code
@@ -324,7 +324,7 @@ ${classes.borderRight} ${classes.borderLeft} ${classes.borderTop} ${classes.cell
 
                 <Box display="flex" flexDirection="row" className={`${classes.borderBottom}`}>
                     <Box width="50%" display="flex" flexDirection="row"
-                         className={`${classes.borderRight} ${classes.borderLeft}`}>
+                        className={`${classes.borderRight} ${classes.borderLeft}`}>
                         <Box width="65%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>
                             <Typography className={`${classes.cellTitle} ${classes.marginRight10}`}>
                                 Symptomatic International Traveller in last 14 days
@@ -352,7 +352,7 @@ ${classes.borderRight} ${classes.borderLeft} ${classes.borderTop} ${classes.cell
 
                 <Box display="flex" flexDirection="row" className={`${classes.borderBottom}`}>
                     <Box width="50%" display="flex" flexDirection="row"
-                         className={`${classes.borderRight} ${classes.borderLeft}`}>
+                        className={`${classes.borderRight} ${classes.borderLeft}`}>
                         <Box width="65%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>
                             <Typography className={`${classes.cellTitle} ${classes.marginRight10}`}>
                                 Symptomatic Healthcare Worker
@@ -380,7 +380,7 @@ ${classes.borderRight} ${classes.borderLeft} ${classes.borderTop} ${classes.cell
 
                 <Box display="flex" flexDirection="row" className={`${classes.borderBottom}`}>
                     <Box width="50%" display="flex" flexDirection="row"
-                         className={`${classes.borderRight} ${classes.borderLeft}`}>
+                        className={`${classes.borderRight} ${classes.borderLeft}`}>
                         <Box width="65%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>
                             <Typography className={`${classes.cellTitle} ${classes.marginRight10}`}>
                                 Asymptomatic Direct and High Risk contact of confirmed case - family Member
@@ -409,13 +409,13 @@ ${classes.borderRight} ${classes.borderLeft} ${classes.borderTop} ${classes.cell
 
 
                 <Box display="flex" flexDirection="row" justifyContent="center"
-                     className={`${classes.subHeader} ${classes.borderRight} ${classes.borderLeft} ${classes.borderBottom} ${classes.cellTBPadding}`}>
+                    className={`${classes.subHeader} ${classes.borderRight} ${classes.borderLeft} ${classes.borderBottom} ${classes.cellTBPadding}`}>
                     <Typography component="h6" variant="h6">
                         SECTION B - OTHER FIELDS TO BE UPDATED
                     </Typography>
                 </Box>
                 <Box display="flex" flexDirection="row" justifyContent="center"
-                     className={`${classes.subHeader} ${classes.borderRight} ${classes.borderLeft} ${classes.borderBottom} ${classes.cellTBPadding}`}>
+                    className={`${classes.subHeader} ${classes.borderRight} ${classes.borderLeft} ${classes.borderBottom} ${classes.cellTBPadding}`}>
                     <Typography component="h6" variant="h6">
                         B.1 PERSON DETAILS
                     </Typography>
@@ -423,7 +423,7 @@ ${classes.borderRight} ${classes.borderLeft} ${classes.borderTop} ${classes.cell
 
                 <Box display="flex" flexDirection="row" className={`${classes.borderBottom}`}>
                     <Box width="50%" display="flex" flexDirection="row"
-                         className={`${classes.borderRight} ${classes.borderLeft}`}>
+                        className={`${classes.borderRight} ${classes.borderLeft}`}>
                         <Box width="65%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>
                             <Typography className={`${classes.cellTitle} ${classes.marginRight10}`}>
                                 Present Patient Address
@@ -451,7 +451,7 @@ ${classes.borderRight} ${classes.borderLeft} ${classes.borderTop} ${classes.cell
 
                 <Box display="flex" flexDirection="row" className={`${classes.borderBottom}`}>
                     <Box width="50%" display="flex" flexDirection="row"
-                         className={`${classes.borderRight} ${classes.borderLeft}`}>
+                        className={`${classes.borderRight} ${classes.borderLeft}`}>
                         <Box width="65%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>
                             <Typography className={`${classes.cellTitle} ${classes.marginRight10}`}>
                                 Email Id
@@ -479,7 +479,7 @@ ${classes.borderRight} ${classes.borderLeft} ${classes.borderTop} ${classes.cell
 
                 <Box display="flex" flexDirection="row" className={`${classes.borderBottom}`}>
                     <Box width="50%" display="flex" flexDirection="row"
-                         className={`${classes.borderRight} ${classes.borderLeft}`}>
+                        className={`${classes.borderRight} ${classes.borderLeft}`}>
                         <Box width="65%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>
                             <Typography className={`${classes.cellTitle} ${classes.marginRight10}`}>
                                 Patient Aadhar Number
@@ -506,7 +506,7 @@ ${classes.borderRight} ${classes.borderLeft} ${classes.borderTop} ${classes.cell
                 </Box>
 
                 <Box display="flex" flexDirection="row" justifyContent="center"
-                     className={`${classes.subHeader} ${classes.borderRight} ${classes.borderLeft} ${classes.borderBottom} ${classes.cellTBPadding}`}>
+                    className={`${classes.subHeader} ${classes.borderRight} ${classes.borderLeft} ${classes.borderBottom} ${classes.cellTBPadding}`}>
                     <Typography component="h6" variant="h6">
                         B.2 EXPOSURE HISTORY ( 2 WEEKS BEFORE THE ONSET OF SYMPTOMS )
                     </Typography>
@@ -514,7 +514,7 @@ ${classes.borderRight} ${classes.borderLeft} ${classes.borderTop} ${classes.cell
 
                 <Box display="flex" flexDirection="row" className={`${classes.borderBottom}`}>
                     <Box width="50%" display="flex" flexDirection="row"
-                         className={`${classes.borderRight} ${classes.borderLeft}`}>
+                        className={`${classes.borderRight} ${classes.borderLeft}`}>
                         <Box width="65%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>
                             <Typography className={`${classes.cellTitle} ${classes.marginRight10}`}>
                                 Travel to foreign country in last 14 days
@@ -543,7 +543,7 @@ ${classes.borderRight} ${classes.borderLeft} ${classes.borderTop} ${classes.cell
 
                 <Box display="flex" flexDirection="row" className={`${classes.borderBottom}`}>
                     <Box width="50%" display="flex" flexDirection="row"
-                         className={`${classes.borderRight} ${classes.borderLeft}`}>
+                        className={`${classes.borderRight} ${classes.borderLeft}`}>
                         <Box width="65%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>
                             <Typography className={`${classes.cellTitle} ${classes.marginRight10}`}>
                                 Travel Start Date
@@ -571,7 +571,7 @@ ${classes.borderRight} ${classes.borderLeft} ${classes.borderTop} ${classes.cell
 
                 <Box display="flex" flexDirection="row" className={`${classes.borderBottom}`}>
                     <Box width="50%" display="flex" flexDirection="row"
-                         className={`${classes.borderRight} ${classes.borderLeft}`}>
+                        className={`${classes.borderRight} ${classes.borderLeft}`}>
                         <Box width="65%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>
                             <Typography className={`${classes.cellTitle} ${classes.marginRight10}`}>
                                 In Contact with lab confimed Covid 19 Patient
@@ -599,7 +599,7 @@ ${classes.borderRight} ${classes.borderLeft} ${classes.borderTop} ${classes.cell
 
                 <Box display="flex" flexDirection="row" className={`${classes.borderBottom}`}>
                     <Box width="50%" display="flex" flexDirection="row"
-                         className={`${classes.borderRight} ${classes.borderLeft}`}>
+                        className={`${classes.borderRight} ${classes.borderLeft}`}>
                         <Box width="65%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>
                             <Typography className={`${classes.cellTitle} ${classes.marginRight10}`}>
                                 Quarantine Status
@@ -627,7 +627,7 @@ ${classes.borderRight} ${classes.borderLeft} ${classes.borderTop} ${classes.cell
 
                 <Box display="flex" flexDirection="row" className={`${classes.borderBottom}`}>
                     <Box width="50%" display="flex" flexDirection="row"
-                         className={`${classes.borderRight} ${classes.borderLeft}`}>
+                        className={`${classes.borderRight} ${classes.borderLeft}`}>
                         <Box width="65%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>
                             <Typography className={`${classes.cellTitle} ${classes.marginRight10}`}>
                                 Health care worker working in a hospital involved in managing patients
@@ -642,7 +642,7 @@ ${classes.borderRight} ${classes.borderLeft} ${classes.borderTop} ${classes.cell
                 </Box>
 
                 <Box display="flex" flexDirection="row" justifyContent="center"
-                     className={`${classes.subHeader} ${classes.borderRight} ${classes.borderLeft} ${classes.borderBottom} ${classes.cellTBPadding}`}>
+                    className={`${classes.subHeader} ${classes.borderRight} ${classes.borderLeft} ${classes.borderBottom} ${classes.cellTBPadding}`}>
                     <Typography component="h6" variant="h6">
                         B.3 PERSON DETAILS
                     </Typography>
@@ -650,7 +650,7 @@ ${classes.borderRight} ${classes.borderLeft} ${classes.borderTop} ${classes.cell
 
                 <Box display="flex" flexDirection="row" className={`${classes.borderBottom}`}>
                     <Box width="50%" display="flex" flexDirection="row"
-                         className={`${classes.borderRight} ${classes.borderLeft}`}>
+                        className={`${classes.borderRight} ${classes.borderLeft}`}>
                         <Box width="65%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>
                             <Typography className={`${classes.cellTitle} ${classes.marginRight10}`}>
                                 Date of Onset of Symptoms
@@ -678,7 +678,7 @@ ${classes.borderRight} ${classes.borderLeft} ${classes.borderTop} ${classes.cell
 
                 <Box display="flex" flexDirection="row" className={`${classes.borderBottom}`}>
                     <Box width="50%" display="flex" flexDirection="row"
-                         className={`${classes.borderRight} ${classes.borderLeft}`}>
+                        className={`${classes.borderRight} ${classes.borderLeft}`}>
                         <Box width="65%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>
                             <Typography className={`${classes.cellTitle} ${classes.marginRight10}`}>
                                 First Symptom
@@ -706,7 +706,7 @@ ${classes.borderRight} ${classes.borderLeft} ${classes.borderTop} ${classes.cell
 
                 <Box display="flex" flexDirection="row" className={`${classes.borderBottom}`}>
                     <Box width="50%" display="flex" flexDirection="row"
-                         className={`${classes.borderRight} ${classes.borderLeft}`}>
+                        className={`${classes.borderRight} ${classes.borderLeft}`}>
                         <Box width="65%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>
                             <Typography className={`${classes.cellTitle} ${classes.marginRight10}`}>
                                 Person Has Acute Respiratory Illness
@@ -721,7 +721,7 @@ ${classes.borderRight} ${classes.borderLeft} ${classes.borderTop} ${classes.cell
                 </Box>
 
                 <Box display="flex" flexDirection="row" justifyContent="center"
-                     className={`${classes.subHeader} ${classes.borderRight} ${classes.borderLeft} ${classes.borderBottom} ${classes.cellTBPadding}`}>
+                    className={`${classes.subHeader} ${classes.borderRight} ${classes.borderLeft} ${classes.borderBottom} ${classes.cellTBPadding}`}>
                     <Typography component="h6" variant="h6">
                         B.4 UNDERLYING MEDICAL CONDITIONS
                     </Typography>
@@ -729,7 +729,7 @@ ${classes.borderRight} ${classes.borderLeft} ${classes.borderTop} ${classes.cell
 
                 <Box display="flex" flexDirection="row" className={`${classes.borderBottom}`}>
                     <Box width="50%" display="flex" flexDirection="row"
-                         className={`${classes.borderRight} ${classes.borderLeft}`}>
+                        className={`${classes.borderRight} ${classes.borderLeft}`}>
                         <Box width="65%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>
                             <Typography className={`${classes.cellTitle} ${classes.marginRight10}`}>
                                 Medical Conditions
@@ -757,7 +757,7 @@ ${classes.borderRight} ${classes.borderLeft} ${classes.borderTop} ${classes.cell
 
 
                 <Box display="flex" flexDirection="row" justifyContent="center"
-                     className={`${classes.subHeader} ${classes.borderRight} ${classes.borderLeft} ${classes.borderBottom} ${classes.cellTBPadding}`}>
+                    className={`${classes.subHeader} ${classes.borderRight} ${classes.borderLeft} ${classes.borderBottom} ${classes.cellTBPadding}`}>
                     <Typography component="h6" variant="h6">
                         B.5 HOSPITALIZATION , TREATMENT AND INVESTIGATION
                     </Typography>
@@ -765,7 +765,7 @@ ${classes.borderRight} ${classes.borderLeft} ${classes.borderTop} ${classes.cell
 
                 <Box display="flex" flexDirection="row" className={`${classes.borderBottom}`}>
                     <Box width="50%" display="flex" flexDirection="row"
-                         className={`${classes.borderRight} ${classes.borderLeft}`}>
+                        className={`${classes.borderRight} ${classes.borderLeft}`}>
                         <Box width="65%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>
                             <Typography className={`${classes.cellTitle} ${classes.marginRight10}`}>
                                 Hospitalization Date
@@ -778,7 +778,7 @@ ${classes.borderRight} ${classes.borderLeft} ${classes.borderTop} ${classes.cell
                         </Box>
                     </Box>
                     <Box width="50%" display="flex" flexDirection="row"
-                         className={`${classes.borderRight} ${classes.borderLeft}`}>
+                        className={`${classes.borderRight} ${classes.borderLeft}`}>
                         <Box width="65%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>
                             <Typography className={`${classes.cellTitle} ${classes.marginRight10}`}>
                                 Diagnosis
@@ -794,7 +794,7 @@ ${classes.borderRight} ${classes.borderLeft} ${classes.borderTop} ${classes.cell
 
                 <Box display="flex" flexDirection="row" className={`${classes.borderBottom}`}>
                     <Box width="50%" display="flex" flexDirection="row"
-                         className={`${classes.borderRight} ${classes.borderLeft}`}>
+                        className={`${classes.borderRight} ${classes.borderLeft}`}>
                         <Box width="65%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>
                             <Typography className={`${classes.cellTitle} ${classes.marginRight10}`}>
                                 Differential diagnosis
@@ -807,7 +807,7 @@ ${classes.borderRight} ${classes.borderLeft} ${classes.borderTop} ${classes.cell
                         </Box>
                     </Box>
                     <Box width="50%" display="flex" flexDirection="row"
-                         className={`${classes.borderRight} ${classes.borderLeft}`}>
+                        className={`${classes.borderRight} ${classes.borderLeft}`}>
                         <Box width="65%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>
                             <Typography className={`${classes.cellTitle} ${classes.marginRight10}`}>
                                 Etiology Identified
@@ -823,7 +823,7 @@ ${classes.borderRight} ${classes.borderLeft} ${classes.borderTop} ${classes.cell
 
                 <Box display="flex" flexDirection="row" className={`${classes.borderBottom}`}>
                     <Box width="50%" display="flex" flexDirection="row"
-                         className={`${classes.borderRight} ${classes.borderLeft}`}>
+                        className={`${classes.borderRight} ${classes.borderLeft}`}>
                         <Box width="65%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>
                             <Typography className={`${classes.cellTitle} ${classes.marginRight10}`}>
                                 Asypical Presentation
@@ -836,7 +836,7 @@ ${classes.borderRight} ${classes.borderLeft} ${classes.borderTop} ${classes.cell
                         </Box>
                     </Box>
                     <Box width="50%" display="flex" flexDirection="row"
-                         className={`${classes.borderRight} ${classes.borderLeft}`}>
+                        className={`${classes.borderRight} ${classes.borderLeft}`}>
                         <Box width="65%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>
                             <Typography className={`${classes.cellTitle} ${classes.marginRight10}`}>
                                 Unusual or Unexpected Course
@@ -852,7 +852,7 @@ ${classes.borderRight} ${classes.borderLeft} ${classes.borderTop} ${classes.cell
 
                 <Box display="flex" flexDirection="row" className={`${classes.borderBottom}`}>
                     <Box width="50%" display="flex" flexDirection="row"
-                         className={`${classes.borderRight} ${classes.borderLeft}`}>
+                        className={`${classes.borderRight} ${classes.borderLeft}`}>
                         <Box width="65%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>
                             <Typography className={`${classes.cellTitle} ${classes.marginRight10}`}>
                                 Outcome
@@ -865,7 +865,7 @@ ${classes.borderRight} ${classes.borderLeft} ${classes.borderTop} ${classes.cell
                         </Box>
                     </Box>
                     <Box width="50%" display="flex" flexDirection="row"
-                         className={`${classes.borderRight} ${classes.borderLeft}`}>
+                        className={`${classes.borderRight} ${classes.borderLeft}`}>
                         <Box width="65%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>
                             <Typography className={`${classes.cellTitle} ${classes.marginRight10}`}>
                                 Outcome Date
@@ -881,7 +881,7 @@ ${classes.borderRight} ${classes.borderLeft} ${classes.borderTop} ${classes.cell
 
                 <Box display="flex" flexDirection="row" className={`${classes.borderBottom}`}>
                     <Box width="50%" display="flex" flexDirection="row"
-                         className={`${classes.borderRight} ${classes.borderLeft}`}>
+                        className={`${classes.borderRight} ${classes.borderLeft}`}>
                         <Box width="65%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>
                             <Typography className={`${classes.cellTitle} ${classes.marginRight10}`}>
                                 Hospital Name / Address
@@ -894,7 +894,7 @@ ${classes.borderRight} ${classes.borderLeft} ${classes.borderTop} ${classes.cell
                         </Box>
                     </Box>
                     <Box width="50%" display="flex" flexDirection="row"
-                         className={`${classes.borderRight} ${classes.borderLeft}`}>
+                        className={`${classes.borderRight} ${classes.borderLeft}`}>
                         <Box width="65%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>
                             <Typography className={`${classes.cellTitle} ${classes.marginRight10}`}>
                                 Hospital Phone Number
@@ -910,7 +910,7 @@ ${classes.borderRight} ${classes.borderLeft} ${classes.borderTop} ${classes.cell
 
                 <Box display="flex" flexDirection="row" className={`${classes.borderBottom}`}>
                     <Box width="50%" display="flex" flexDirection="row"
-                         className={`${classes.borderRight} ${classes.borderLeft}`}>
+                        className={`${classes.borderRight} ${classes.borderLeft}`}>
                         <Box width="65%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>
                             <Typography className={`${classes.cellTitle} ${classes.marginRight10}`}>
                                 Name of Doctor
@@ -923,7 +923,7 @@ ${classes.borderRight} ${classes.borderLeft} ${classes.borderTop} ${classes.cell
                         </Box>
                     </Box>
                     <Box width="50%" display="flex" flexDirection="row"
-                         className={`${classes.borderRight} ${classes.borderLeft}`}>
+                        className={`${classes.borderRight} ${classes.borderLeft}`}>
                         <Box width="65%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>
                             <Typography className={`${classes.cellTitle} ${classes.marginRight10}`}>
                                 Signature & Date
@@ -946,25 +946,24 @@ ${classes.borderRight} ${classes.borderLeft} ${classes.borderTop} ${classes.cell
 
 export default function SampleReport(props: any) {
     const classes = useStyles();
-    const dispatch = useDispatch();
-    const {id} = props;
+    const dispatch: any = useDispatch();
+    const { id } = props;
     const [isLoading, setIsLoading] = useState(false);
     const [sampleData, setSampleData] = useState();
     let report: any = null;
     let reportData: any = null;
-    let sampleDetails: any = null;
+    // let sampleDetails: any = null;
 
     const fetchData = useCallback(
         async (status: statusType) => {
             setIsLoading(true);
-            const res = await dispatch(sampleReport({id}));
-            setIsLoading(false);
+            const res = await dispatch(sampleReport({ id }));
             if (!status.aborted) {
                 if (res && res.data) {
-                    setSampleData(sampleDetails.data.results);
+                    setSampleData(res.data.results);
                 }
+                setIsLoading(false);
             }
-            setIsLoading(false);
         },
         [dispatch, id]
     );
@@ -979,7 +978,7 @@ export default function SampleReport(props: any) {
     if (sampleData) {
         reportData = (<>
             <Box display="flex" flexDirection="row" justifyContent="flex-end" displayPrint="none"
-                 className={classes.printBtn}>
+                className={classes.printBtn}>
                 <Button
                     color="primary"
                     variant="contained"
@@ -990,39 +989,39 @@ export default function SampleReport(props: any) {
             <Box display="block">
                 <Box component="div" display="flex" flexDirection="column">
                     <Box component="div" display="flex" flexDirection="row" justifyContent="space-between"
-                         alignItems="center"
-                         className={`${classes.borderTop} ${classes.borderRight} ${classes.borderBottom} ${classes.borderLeft}`}>
-                        <Box justifySelf="flex-start" style={{padding: '8px'}}>
+                        alignItems="center"
+                        className={`${classes.borderTop} ${classes.borderRight} ${classes.borderBottom} ${classes.borderLeft}`}>
+                        <Box justifySelf="flex-start" style={{ padding: '8px' }}>
                         </Box>
                         <Box justifySelf="flex-end">
-                            <Box style={{padding: '8px'}}>
-                                <img src={coronasafeLogo} className={classes.allLogo} alt="Coronasafe"/>
+                            <Box style={{ padding: '8px' }}>
+                                <img src={coronasafeLogo} className={classes.allLogo} alt="Coronasafe" />
                             </Box>
                         </Box>
                     </Box>
                     <Box component="div" display="flex" flexDirection="row" justifyContent="flex-start"
-                         className={`${classes.borderRight} ${classes.borderLeft} ${classes.borderBottom}`}>
+                        className={`${classes.borderRight} ${classes.borderLeft} ${classes.borderBottom}`}>
                         <Box style={{
                             background: '#4da0b4',
                             padding: '10px 20px'
                         }} className={`${classes.borderRight} ${classes.cellTBPadding} w3-center`}>
-                            <img src={coronasafeLogo} className={classes.allLogo} alt="PipeDiver"/>
+                            <img src={coronasafeLogo} className={classes.allLogo} alt="PipeDiver" />
                         </Box>
-                        <Box className={`${classes.cellTBPadding} w3-black`} style={{padding: '20px', width: '100%'}}>
-                            <Typography style={{fontSize: '18px', fontWeight: 'bold', color: 'white'}}>
+                        <Box className={`${classes.cellTBPadding} w3-black`} style={{ padding: '20px', width: '100%' }}>
+                            <Typography style={{ fontSize: '18px', fontWeight: 'bold', color: 'white' }}>
                                 ICMR Specimen Referral Data for COVID-19 (SARS-CoV2)
                             </Typography>
                         </Box>
                     </Box>
                     <Box display="flex" flexDirection="row" justifyContent="center"
-                         className={`${classes.borderRight} ${classes.borderLeft} ${classes.borderBottom} ${classes.cellTBPadding}`}>
+                        className={`${classes.borderRight} ${classes.borderLeft} ${classes.borderBottom} ${classes.cellTBPadding}`}>
                         <Typography component="h6" variant="h6" className={classes.internalUse}
-                                    style={{fontWeight: 'bold'}}>
+                            style={{ fontWeight: 'bold' }}>
                             FOR INTERNAL USE ONLY
                         </Typography>
                     </Box>
                     {
-                        sampleData && <SampleInfo count={1} key={1} data={report}/>
+                        sampleData && <SampleInfo count={1} key={1} data={report} />
                     }
                 </Box>
             </Box>
@@ -1031,16 +1030,16 @@ export default function SampleReport(props: any) {
     if (isLoading) {
         report = (
             <Box display="flex" flexDirection="row" justifyContent="center" displayPrint="none"
-                 className={classes.contentDiv}>
-                <Loading/>
+                className={classes.contentDiv}>
+                <Loading />
             </Box>);
     } else if (sampleData && reportData) {
         report = reportData;
     } else if (!sampleData) {
         report = (
             <Box display="flex" flexDirection="row" justifyContent="center" displayPrint="none"
-                 className={classes.contentDiv}>
-                <Typography component="h5" variant="h5" style={{alignSelf: 'center'}}>
+                className={classes.contentDiv}>
+                <Typography component="h5" variant="h5" style={{ alignSelf: 'center' }}>
                     No Data Found
                 </Typography>
             </Box>);

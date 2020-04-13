@@ -29,9 +29,9 @@ import SampleReport from "../Components/Patient/SamplePreview";
 const routes = {
   "/": () => <HospitalList />,
   "/analytics": () => <Analytics />,
-  "/ambulancelist": () => <AmbulanceList />,
-  "/samplelist": () => <SampleViewAdmin />,
-  "/samplelist/:id": ({ id }: any) => <SampleDetails id={id} />,
+  "/ambulance": () => <AmbulanceList />,
+  "/sample": () => <SampleViewAdmin />,
+  "/sample/:id": ({ id }: any) => <SampleDetails id={id} />,
   "/facility": () => <HospitalList />,
   "/facility/create": () => <FacilityCreate />,
   "/facility/:facilityId/update": ({ facilityId }: any) => (
@@ -104,7 +104,7 @@ const routes = {
   "/patient/tele-consult": () => <TeleConsultation />,
   "/patient/discharge": () => <PatientDischarge />,
   "/patient/treatment": () => <TreatmentForm />,
-  '/patient/:id/samplereport' : ({ id } : any) => <SampleReport id={id}/>,
+  '/sample/report/:patientId' : ({ patientId } : any) => <SampleReport id={patientId}/>,
   "/users": () => <ManageUsers />,
   "/join": () => <CareCenterJoinForm />,
   "/daily-rounds-list": () => <DailyRoundsList />
