@@ -326,7 +326,7 @@ export default function SampleReport(props: samplePreviewProps) {
                                         </Box>
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                {sampleData && sampleData.specimen_details && sampleData.specimen_details.is_repeated_sample}
+                                                {sampleData && sampleData.specimen_details && sampleData.specimen_details.is_repeated_sample !== null ? sampleData.specimen_details.is_repeated_sample ? 'Yes' : 'No' : ''}
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -377,7 +377,7 @@ export default function SampleReport(props: samplePreviewProps) {
                                         </Box>
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                {sampleData && sampleData.patient_category && sampleData.patient_category.symptomatic_international_traveller}
+                                                {sampleData && sampleData.patient_category && sampleData.patient_category.symptomatic_international_traveller !== null ? sampleData.patient_category.symptomatic_international_traveller ? 'Yes' : 'No' : ''}
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -389,7 +389,7 @@ export default function SampleReport(props: samplePreviewProps) {
                                         </Box>
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                {sampleData && sampleData.patient_category && sampleData.patient_category.symptomatic_contact_of_confirmed_case}
+                                                {sampleData && sampleData.patient_category && sampleData.patient_category.symptomatic_contact_of_confirmed_case !== null ? sampleData.patient_category.symptomatic_contact_of_confirmed_case ? 'Yes' : 'No' : ''}
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -405,7 +405,7 @@ export default function SampleReport(props: samplePreviewProps) {
                                         </Box>
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                {sampleData && sampleData.patient_category && sampleData.patient_category.symptomatic_healthcare_worker}
+                                                {sampleData && sampleData.patient_category && sampleData.patient_category.symptomatic_healthcare_worker !== null ? sampleData.patient_category.symptomatic_healthcare_worker ? 'Yes' : 'No' : ''}
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -417,7 +417,7 @@ export default function SampleReport(props: samplePreviewProps) {
                                         </Box>
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                {sampleData && sampleData.patient_category && sampleData.patient_category.hospitalized_sari_patient}
+                                                {sampleData && sampleData.patient_category && sampleData.patient_category.hospitalized_sari_patient !== null ? sampleData.patient_category.hospitalized_sari_patient ? 'Yes' : 'No' : ''}
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -433,7 +433,7 @@ export default function SampleReport(props: samplePreviewProps) {
                                         </Box>
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                {sampleData && sampleData.patient_category && sampleData.patient_category.asymptomatic_family_member_of_confirmed_case}
+                                                {sampleData && sampleData.patient_category && sampleData.patient_category.asymptomatic_family_member_of_confirmed_case !== null ? sampleData.patient_category.asymptomatic_family_member_of_confirmed_case ? 'Yes' : 'No' : ''}
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -446,7 +446,7 @@ export default function SampleReport(props: samplePreviewProps) {
                                         </Box>
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                {sampleData && sampleData.patient_category && sampleData.patient_category.asymptomatic_healthcare_worker_without_protection}
+                                                {sampleData && sampleData.patient_category && sampleData.patient_category.asymptomatic_healthcare_worker_without_protection !== null ? sampleData.patient_category.asymptomatic_healthcare_worker_without_protection ? 'Yes' : 'No' : ''}
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -567,7 +567,7 @@ export default function SampleReport(props: samplePreviewProps) {
                                         </Box>
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                {sampleData && sampleData.exposure_history && sampleData.exposure_history.has_travel_to_foreign_last_14_days}
+                                                {sampleData && sampleData.exposure_history && sampleData.exposure_history.has_travel_to_foreign_last_14_days !== null ? sampleData.exposure_history.has_travel_to_foreign_last_14_days ? 'Yes' : 'No' : ''}
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -624,7 +624,7 @@ export default function SampleReport(props: samplePreviewProps) {
                                         </Box>
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                {sampleData && sampleData.exposure_history && sampleData.exposure_history.contact_with_confirmed_case}
+                                                {sampleData && sampleData.exposure_history && sampleData.exposure_history.contact_with_confirmed_case !== null ? sampleData.exposure_history.contact_with_confirmed_case ? 'Yes' : 'No' : ''}
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -652,7 +652,7 @@ export default function SampleReport(props: samplePreviewProps) {
                                         </Box>
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                {sampleData && sampleData.exposure_history && sampleData.exposure_history.was_quarantined}
+                                                {sampleData && sampleData.exposure_history && sampleData.exposure_history.was_quarantined !== null ? sampleData.exposure_history.was_quarantined ? 'Yes' : 'No' : ''}
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -680,7 +680,7 @@ export default function SampleReport(props: samplePreviewProps) {
                                         </Box>
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                {sampleData && sampleData.exposure_history && sampleData.exposure_history.healthcare_worker}
+                                                {sampleData && sampleData.exposure_history && sampleData.exposure_history.healthcare_worker !== null ? sampleData.exposure_history.healthcare_worker ? 'Yes' : 'No' : ''}
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -689,7 +689,7 @@ export default function SampleReport(props: samplePreviewProps) {
                                 <Box display="flex" flexDirection="row" justifyContent="center"
                                      className={`${classes.subHeader} ${classes.borderRight} ${classes.borderLeft} ${classes.borderBottom} ${classes.cellTBPadding}`}>
                                     <Typography component="h6" variant="h6">
-                                        B.3 PERSON DETAILS
+                                        B.3 CLINICAL SYMPTOMS AND SIGNS
                                     </Typography>
                                 </Box>
 
@@ -715,7 +715,7 @@ export default function SampleReport(props: samplePreviewProps) {
                                         </Box>
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                {sampleData && sampleData.medical_conditions && sampleData.medical_conditions.symptoms}
+                                                {sampleData && sampleData.medical_conditions && sampleData.medical_conditions.symptoms && !!sampleData.medical_conditions.symptoms.length && sampleData.medical_conditions.symptoms.join(', ')}
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -731,7 +731,7 @@ export default function SampleReport(props: samplePreviewProps) {
                                         </Box>
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                {sampleData && sampleData.medical_conditions && sampleData.medical_conditions.has_sari}
+                                                -
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -743,7 +743,7 @@ export default function SampleReport(props: samplePreviewProps) {
                                         </Box>
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                True
+                                                {sampleData && sampleData.medical_conditions && sampleData.medical_conditions.has_sari !== null ? sampleData.medical_conditions.has_sari ? 'Yes' : 'No' : ''}
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -759,7 +759,7 @@ export default function SampleReport(props: samplePreviewProps) {
                                         </Box>
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                {sampleData && sampleData.medical_conditions && sampleData.medical_conditions.has_ari}
+                                                {sampleData && sampleData.medical_conditions && sampleData.medical_conditions.has_ari !== null ? sampleData.medical_conditions.has_ari ? 'Yes' : 'No' : ''}
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -782,7 +782,7 @@ export default function SampleReport(props: samplePreviewProps) {
                                         </Box>
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                {sampleData && sampleData.medical_conditions && sampleData.medical_conditions.medical_conditions}
+                                                {sampleData && sampleData.medical_conditions && sampleData.medical_conditions.medical_conditions && !!sampleData.medical_conditions.medical_conditions.length && sampleData.medical_conditions.medical_conditions.join(', ')}
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -876,7 +876,7 @@ export default function SampleReport(props: samplePreviewProps) {
                                         </Box>
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                {sampleData && sampleData.medical_conditions && sampleData.medical_conditions.is_atypical_presentation}
+                                                {sampleData && sampleData.medical_conditions && sampleData.medical_conditions.is_atypical_presentation !== null ? sampleData.medical_conditions.is_atypical_presentation ? 'Yes' : 'No' : ''}
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -889,7 +889,7 @@ export default function SampleReport(props: samplePreviewProps) {
                                         </Box>
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                {sampleData && sampleData.medical_conditions && sampleData.medical_conditions.is_unusual_course}
+                                                {sampleData && sampleData.medical_conditions && sampleData.medical_conditions.is_unusual_course !== null ? sampleData.medical_conditions.is_unusual_course ? 'Yes' : 'No' : ''}
                                             </Typography>
                                         </Box>
                                     </Box>
