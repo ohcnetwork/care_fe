@@ -111,15 +111,15 @@ export default function SampleReport(props: samplePreviewProps) {
 
     if (sampleData) {
         reportData = (<>
-            {/*<Box display="flex" flexDirection="row" justifyContent="flex-end" displayPrint="none"*/}
-            {/*    className={classes.printBtn}>*/}
-            {/*    <Button*/}
-            {/*        color="primary"*/}
-            {/*        variant="contained"*/}
-            {/*        size="small"*/}
-            {/*        onClick={() => window.print()}>Print Report</Button>*/}
-            {/*</Box>*/}
-            <Box display="block">
+            <Box display="flex" flexDirection="row" justifyContent="flex-end" displayPrint="none"
+                className={classes.printBtn}>
+                <Button
+                    color="primary"
+                    variant="contained"
+                    size="small"
+                    onClick={() => window.print()}>Print Report</Button>
+            </Box>
+            <Box display="block" id="section-to-print">
                 <Box component="div" display="flex" flexDirection="column">
                     <Box component="div" display="flex" flexDirection="row" justifyContent="space-between"
                         alignItems="center"
