@@ -87,7 +87,8 @@ export default function SampleReport(props: any) {
     const fetchData = useCallback(
         async (status: statusType) => {
             setIsLoading(true);
-            const res = await dispatch(sampleReport({ id }));
+            const res: any = await dispatch(sampleReport({id}));
+            setIsLoading(false);
             if (!status.aborted) {
                 if (res && res.data) {
                     setSampleData(res.data.results);
