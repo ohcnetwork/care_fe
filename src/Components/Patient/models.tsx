@@ -90,17 +90,17 @@ export interface SampleReportModel {
         collection_type?: string;
         collection_date?: string;
         label?: string;
-        is_repeated_sample?: string;
+        is_repeated_sample?: boolean;
         lab_name?: string;
         lab_pincode?: string;
     }
     patient_category?: {
-        symptomatic_international_traveller?: string;
-        symptomatic_contact_of_confirmed_case?: string;
-        symptomatic_healthcare_worker?: string;
-        hospitalized_sari_patient?: string;
-        asymptomatic_family_member_of_confirmed_case?: string;
-        asymptomatic_healthcare_worker_without_protection?: string;
+        symptomatic_international_traveller?: boolean;
+        symptomatic_contact_of_confirmed_case?: boolean;
+        symptomatic_healthcare_worker?: boolean;
+        hospitalized_sari_patient?: boolean;
+        asymptomatic_family_member_of_confirmed_case?: boolean;
+        asymptomatic_healthcare_worker_without_protection?: boolean;
     }
     exposure_history?: {
         has_travel_to_foreign_last_14_days?: boolean;

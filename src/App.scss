@@ -1,5 +1,19 @@
 $primary: #5c6ac4;
 
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #section-to-print, #section-to-print * {
+    visibility: visible;
+  }
+  #section-to-print {
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+}
+
 .header-section {
   .appBar {
     z-index: 1201;
@@ -267,3 +281,4 @@ $primary: #5c6ac4;
     }
   }
 }
+
