@@ -201,7 +201,7 @@ export default {
         method: 'PATCH',
     },
     sampleReport:{
-        path:'/api/v1/patient/{id}/icmr_sample/'
+        path:'/api/v1/patient/{id}/icmr_sample'
     },
 
     // States

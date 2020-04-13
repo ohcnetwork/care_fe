@@ -67,6 +67,70 @@ export interface SampleTestModel {
     flow?: Array<FlowModel>;
 }
 
+export interface SampleReportModel {
+    id?: number;
+    personal_details?: {
+        name?: string;
+        gender?: string;
+        age_years?: number;
+        age_months?: number;
+        date_of_birth?: string;
+        phone_number?: string;
+        email?: string;
+        address?: string;
+        pincode?: string;
+        passport_no?: string;
+        aadhar_no?: string;
+        local_body_name?: string;
+        district_name?: string;
+        state_name?: string;
+    }
+    specimen_details?: {
+        sample_type?: string;
+        collection_type?: string;
+        collection_date?: string;
+        label?: string;
+        is_repeated_sample?: string;
+        lab_name?: string;
+        lab_pincode?: string;
+    }
+    patient_category?: {
+        symptomatic_international_traveller?: string;
+        symptomatic_contact_of_confirmed_case?: string;
+        symptomatic_healthcare_worker?: string;
+        hospitalized_sari_patient?: string;
+        asymptomatic_family_member_of_confirmed_case?: string;
+        asymptomatic_healthcare_worker_without_protection?: string;
+    }
+    exposure_history?: {
+        has_travel_to_foreign_last_14_days?: boolean;
+        places_of_travel?: string;
+        travel_start_date?: string;
+        travel_end_date?: string;
+        contact_with_confirmed_case?: boolean;
+        contact_case_name?: string;
+        was_quarantined?: boolean;
+        quarantined_type?: string;
+        healthcare_worker?: boolean;
+    }
+    medical_conditions?: {
+        date_of_onset_of_symptoms?: string;
+        symptoms?: Array<any>;
+        has_sari?: boolean;
+        has_ari?: boolean;
+        medical_conditions?: Array<any>;
+        hospitalization_date?: string;
+        diagnosis?: string;
+        diff_diagnosis?: string;
+        etiology_identified?: string;
+        is_atypical_presentation?: boolean;
+        is_unusual_course?: boolean;
+        hospital_phone_number?: string;
+        hospital_name?: string;
+        doctor_name?: string;
+    }
+}
+
 export interface SampleListModel {
     id?: number;
     patient_name?: string;
@@ -85,6 +149,8 @@ export interface SampleListModel {
     fast_track?: string;
 }
 
+
+
 export interface DailyRoundsModel {
     temperature?: string;
     temperature_measured_at?: string;
@@ -92,3 +158,5 @@ export interface DailyRoundsModel {
     other_details?: string;
     consultation?: number;
 }
+
+

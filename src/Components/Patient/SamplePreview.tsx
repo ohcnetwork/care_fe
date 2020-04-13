@@ -5,6 +5,7 @@ import {useDispatch} from "react-redux";
 import {Loading} from "../Common/Loading";
 import { sampleReport} from "../../Redux/actions";
 import {statusType, useAbortableEffect} from "../../Common/utils";
+import { SampleReportModel } from "./models";
 
 const useStyles = makeStyles({
     root: {
@@ -74,27 +75,29 @@ const useStyles = makeStyles({
 });
 const coronasafeLogo = 'https://cdn.coronasafe.network/coronaSafeLogo.png';
 
-export default function SampleReport(props: any) {
+interface  samplePreviewProps {
+    id: number;
+}
+export default function SampleReport(props: samplePreviewProps) {
     const classes = useStyles();
     const dispatch: any = useDispatch();
     const { id } = props;
     const [isLoading, setIsLoading] = useState(false);
-    const [sampleData, setSampleData] = useState();
+    const [ sampleData, setSampleData] = useState<SampleReportModel>({});
     let report: any = null;
     let reportData: any = null;
-    // let sampleDetails: any = null;
 
     const fetchData = useCallback(
         async (status: statusType) => {
             setIsLoading(true);
             const res: any = await dispatch(sampleReport({id}));
-            setIsLoading(false);
+
             if (!status.aborted) {
                 if (res && res.data) {
-                    setSampleData(res.data.results);
+                    setSampleData(res.data);
                 }
-                setIsLoading(false);
             }
+            setIsLoading(false);
         },
         [dispatch, id]
     );
@@ -108,15 +111,14 @@ export default function SampleReport(props: any) {
 
     if (sampleData) {
         reportData = (<>
-            <Box display="flex" flexDirection="row" justifyContent="flex-end" displayPrint="none"
-                className={classes.printBtn}>
-                <Button
-                    color="primary"
-                    variant="contained"
-                    size="small"
-                    onClick={() => window.print()}>Print Report</Button>
-            </Box>
-
+            {/*<Box display="flex" flexDirection="row" justifyContent="flex-end" displayPrint="none"*/}
+            {/*    className={classes.printBtn}>*/}
+            {/*    <Button*/}
+            {/*        color="primary"*/}
+            {/*        variant="contained"*/}
+            {/*        size="small"*/}
+            {/*        onClick={() => window.print()}>Print Report</Button>*/}
+            {/*</Box>*/}
             <Box display="block">
                 <Box component="div" display="flex" flexDirection="column">
                     <Box component="div" display="flex" flexDirection="row" justifyContent="space-between"
@@ -132,12 +134,6 @@ export default function SampleReport(props: any) {
                     </Box>
                     <Box component="div" display="flex" flexDirection="row" justifyContent="flex-start"
                         className={`${classes.borderRight} ${classes.borderLeft} ${classes.borderBottom}`}>
-                        <Box style={{
-                            background: '#4da0b4',
-                            padding: '10px 20px'
-                        }} className={`${classes.borderRight} ${classes.cellTBPadding} w3-center`}>
-                            <img src={coronasafeLogo} className={classes.allLogo} alt="PipeDiver" />
-                        </Box>
                         <Box className={`${classes.cellTBPadding} w3-black`} style={{ padding: '20px', width: '100%' }}>
                             <Typography style={{ fontSize: '18px', fontWeight: 'bold', color: 'white' }}>
                                 ICMR Specimen Referral Data for COVID-19 (SARS-CoV2)
@@ -155,7 +151,7 @@ export default function SampleReport(props: any) {
                             <Box display="flex" flexDirection="row" justifyContent="center"
                                  className={`${classes.mainHeader} ${classes.borderRight} ${classes.borderLeft} ${classes.borderTop} ${classes.cellTBPadding}`}>
                                 <Typography component="h6" variant="h6">
-                                    Sample Id
+                                    Sample Id : {id}
                                 </Typography>
                             </Box>
 
@@ -182,7 +178,7 @@ export default function SampleReport(props: any) {
                                         </Box>
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                Patient Name
+                                                {sampleData && sampleData.personal_details && sampleData.personal_details.name}
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -194,7 +190,7 @@ export default function SampleReport(props: any) {
                                         </Box>
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                Age
+                                                {sampleData && sampleData.personal_details && sampleData.personal_details.age_years } years{''}  {sampleData && sampleData.personal_details && sampleData.personal_details.age_months } Months
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -210,7 +206,7 @@ export default function SampleReport(props: any) {
                                         </Box>
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                Present Patient Village or Town
+                                                {sampleData && sampleData.personal_details && sampleData.personal_details.name}
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -222,7 +218,7 @@ export default function SampleReport(props: any) {
                                         </Box>
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                Gender
+                                                {sampleData && sampleData.personal_details && sampleData.personal_details.gender}
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -238,7 +234,7 @@ export default function SampleReport(props: any) {
                                         </Box>
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                Mobile Number
+                                                {sampleData && sampleData.personal_details && sampleData.personal_details.phone_number}
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -250,7 +246,7 @@ export default function SampleReport(props: any) {
                                         </Box>
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                District of Present Residence
+                                                {sampleData && sampleData.personal_details && sampleData.personal_details.district_name}
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -266,7 +262,7 @@ export default function SampleReport(props: any) {
                                         </Box>
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                Nationality
+                                                Indian
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -278,7 +274,7 @@ export default function SampleReport(props: any) {
                                         </Box>
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                State Of Present Residence
+                                                {sampleData && sampleData.personal_details && sampleData.personal_details.state_name}
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -302,7 +298,7 @@ export default function SampleReport(props: any) {
                                         </Box>
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                Collection Date
+                                                {sampleData && sampleData.specimen_details && sampleData.specimen_details.collection_date}
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -314,7 +310,7 @@ export default function SampleReport(props: any) {
                                         </Box>
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                Label
+                                                {sampleData && sampleData.specimen_details && sampleData.specimen_details.label}
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -330,7 +326,7 @@ export default function SampleReport(props: any) {
                                         </Box>
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                Sample Repeated
+                                                {sampleData && sampleData.specimen_details && sampleData.specimen_details.is_repeated_sample}
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -342,7 +338,7 @@ export default function SampleReport(props: any) {
                                         </Box>
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                Sample Collection Facility Name
+                                                {sampleData && sampleData.specimen_details && sampleData.specimen_details.lab_name}
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -358,7 +354,7 @@ export default function SampleReport(props: any) {
                                         </Box>
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                Collection Facility PinCode
+                                                {sampleData && sampleData.specimen_details && sampleData.specimen_details.lab_pincode}
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -381,7 +377,7 @@ export default function SampleReport(props: any) {
                                         </Box>
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                True
+                                                {sampleData && sampleData.patient_category && sampleData.patient_category.symptomatic_international_traveller}
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -393,7 +389,7 @@ export default function SampleReport(props: any) {
                                         </Box>
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                True
+                                                {sampleData && sampleData.patient_category && sampleData.patient_category.symptomatic_contact_of_confirmed_case}
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -409,19 +405,19 @@ export default function SampleReport(props: any) {
                                         </Box>
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                True
+                                                {sampleData && sampleData.patient_category && sampleData.patient_category.symptomatic_healthcare_worker}
                                             </Typography>
                                         </Box>
                                     </Box>
                                     <Box width="50%" display="flex" flexDirection="row" className={`${classes.borderRight}`}>
                                         <Box width="65%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellTitle} ${classes.marginRight10}`}>
-                                                Hospitalized SARI(Severe Acute Respiratory Illness Patient)
+                                                Hospitalized SARI (Severe Acute Respiratory Illness Patient)
                                             </Typography>
                                         </Box>
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                True
+                                                {sampleData && sampleData.patient_category && sampleData.patient_category.hospitalized_sari_patient}
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -437,7 +433,7 @@ export default function SampleReport(props: any) {
                                         </Box>
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                True
+                                                {sampleData && sampleData.patient_category && sampleData.patient_category.asymptomatic_family_member_of_confirmed_case}
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -450,7 +446,7 @@ export default function SampleReport(props: any) {
                                         </Box>
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                True
+                                                {sampleData && sampleData.patient_category && sampleData.patient_category.asymptomatic_healthcare_worker_without_protection}
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -480,7 +476,7 @@ export default function SampleReport(props: any) {
                                         </Box>
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                present Patient Address
+                                                {sampleData && sampleData.personal_details && sampleData.personal_details.address}
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -492,7 +488,7 @@ export default function SampleReport(props: any) {
                                         </Box>
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                682030
+                                                {sampleData && sampleData.personal_details && sampleData.personal_details.pincode}
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -508,7 +504,7 @@ export default function SampleReport(props: any) {
                                         </Box>
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                care@coronasafe.network
+                                                {sampleData && sampleData.personal_details && sampleData.personal_details.email}
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -520,7 +516,7 @@ export default function SampleReport(props: any) {
                                         </Box>
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                01-01-2020
+                                                {sampleData && sampleData.personal_details && sampleData.personal_details.date_of_birth}
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -548,7 +544,7 @@ export default function SampleReport(props: any) {
                                         </Box>
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                Passport Number
+                                                {sampleData && sampleData.personal_details && sampleData.personal_details.passport_no}
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -571,7 +567,7 @@ export default function SampleReport(props: any) {
                                         </Box>
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                True
+                                                {sampleData && sampleData.exposure_history && sampleData.exposure_history.has_travel_to_foreign_last_14_days}
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -584,7 +580,7 @@ export default function SampleReport(props: any) {
                                         </Box>
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                places of travel
+                                                {sampleData && sampleData.exposure_history && sampleData.exposure_history.places_of_travel}
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -600,7 +596,7 @@ export default function SampleReport(props: any) {
                                         </Box>
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                Start Date
+                                                {sampleData && sampleData.exposure_history && sampleData.exposure_history.travel_start_date}
                                             </Typography>
                                         </Box>
                                     </Box>
