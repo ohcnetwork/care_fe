@@ -775,7 +775,7 @@ export default function SampleReport(props: samplePreviewProps) {
                                 <Box display="flex" flexDirection="row" className={`${classes.borderBottom}`}>
                                     {/* <Box width="50%" display="flex" flexDirection="row"
                                          className={`${classes.borderRight} ${classes.borderLeft}`}> */}
-                                        <Box width="33.33%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>
+                                        <Box width="33.1%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellTitle} ${classes.marginRight10}`}>
                                                 Medical Conditions
                                             </Typography>
@@ -823,7 +823,7 @@ export default function SampleReport(props: samplePreviewProps) {
                                         </Box>
                                     </Box>
                                     <Box width="50%" display="flex" flexDirection="row"
-                                         className={`${classes.borderRight} ${classes.borderLeft}`}>
+                                         className={`${classes.borderRight}`}>
                                         <Box width="65%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellTitle} ${classes.marginRight10}`}>
                                                 Diagnosis
@@ -852,7 +852,7 @@ export default function SampleReport(props: samplePreviewProps) {
                                         </Box>
                                     </Box>
                                     <Box width="50%" display="flex" flexDirection="row"
-                                         className={`${classes.borderRight} ${classes.borderLeft}`}>
+                                         className={`${classes.borderRight}`}>
                                         <Box width="65%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellTitle} ${classes.marginRight10}`}>
                                                 Etiology Identified
@@ -881,7 +881,7 @@ export default function SampleReport(props: samplePreviewProps) {
                                         </Box>
                                     </Box>
                                     <Box width="50%" display="flex" flexDirection="row"
-                                         className={`${classes.borderRight} ${classes.borderLeft}`}>
+                                         className={`${classes.borderRight}`}>
                                         <Box width="65%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellTitle} ${classes.marginRight10}`}>
                                                 Unusual or Unexpected Course
@@ -896,19 +896,19 @@ export default function SampleReport(props: samplePreviewProps) {
                                 </Box>
 
                                 <Box display="flex" flexDirection="row" className={`${classes.borderBottom}`}>
-                                    <Box width="50%" display="flex" flexDirection="row"
-                                         className={`${classes.borderRight} ${classes.borderLeft}`}>
-                                        <Box width="65%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>
+                                    {/* <Box width="50%" display="flex" flexDirection="row"
+                                         className={`${classes.borderRight} ${classes.borderLeft}`}> */}
+                                        <Box width="33.1%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellTitle} ${classes.marginRight10}`}>
                                                 Outcome
                                             </Typography>
                                         </Box>
-                                        <Box width="35%" className={`${classes.cellTBPadding}`}>
+                                        <Box width="69%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
                                                 {sampleData && sampleData.medical_conditions && sampleData.medical_conditions.diagnosis}
                                             </Typography>
                                         </Box>
-                                    </Box>
+                                    {/* </Box> */}
                                     {/*<Box width="50%" display="flex" flexDirection="row"*/}
                                     {/*     className={`${classes.borderRight} ${classes.borderLeft}`}>*/}
                                     {/*    <Box width="65%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>*/}
@@ -939,7 +939,7 @@ export default function SampleReport(props: samplePreviewProps) {
                                         </Box>
                                     </Box>
                                     <Box width="50%" display="flex" flexDirection="row"
-                                         className={`${classes.borderRight} ${classes.borderLeft}`}>
+                                         className={`${classes.borderRight}`}>
                                         <Box width="65%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellTitle} ${classes.marginRight10}`}>
                                                 Hospital Phone Number
@@ -968,7 +968,7 @@ export default function SampleReport(props: samplePreviewProps) {
                                         </Box>
                                     </Box>
                                     <Box width="50%" display="flex" flexDirection="row"
-                                         className={`${classes.borderRight} ${classes.borderLeft}`}>
+                                         className={`${classes.borderRight}`}>
                                         <Box width="65%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellTitle} ${classes.marginRight10}`}>
                                                 Signature & Date
