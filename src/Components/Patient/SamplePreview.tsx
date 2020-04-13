@@ -151,8 +151,7 @@ export default function SampleReport(props: any) {
                             FOR INTERNAL USE ONLY
                         </Typography>
                     </Box>
-                    {
-                        sampleData &&  <Box display='flex' flexDirection='column'>
+                         <Box display='flex' flexDirection='column'>
                             <Box display="flex" flexDirection="row" justifyContent="center"
                                  className={`${classes.mainHeader} ${classes.borderRight} ${classes.borderLeft} ${classes.borderTop} ${classes.cellTBPadding}`}>
                                 <Typography component="h6" variant="h6">
@@ -988,7 +987,6 @@ export default function SampleReport(props: any) {
                                 </Box>
                             </div>
                         </Box>
-                    }
                 </Box>
             </Box>
         </>)
