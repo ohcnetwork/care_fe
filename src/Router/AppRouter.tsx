@@ -24,13 +24,14 @@ import { TeleConsultation } from "../Components/Patient/TeleConsultation";
 import { TreatmentForm } from "../Components/Patient/TreatmentForm";
 import ManageUsers from "../Components/Users/ManageUsers";
 import { DailyRoundListDetails } from "../Components/Patient/DailyRoundListDetails";
+import SampleReport from "../Components/Patient/SamplePreview";
 
 const routes = {
   "/": () => <HospitalList />,
   "/analytics": () => <Analytics />,
-  "/ambulancelist": () => <AmbulanceList />,
-  "/samplelist": () => <SampleViewAdmin />,
-  "/samplelist/:id": ({ id }: any) => <SampleDetails id={id} />,
+  "/ambulance": () => <AmbulanceList />,
+  "/sample": () => <SampleViewAdmin />,
+  "/sample/:id": ({ id }: any) => <SampleDetails id={id} />,
   "/facility": () => <HospitalList />,
   "/facility/create": () => <FacilityCreate />,
   "/facility/:facilityId/update": ({ facilityId }: any) => (
@@ -103,6 +104,7 @@ const routes = {
   "/patient/tele-consult": () => <TeleConsultation />,
   "/patient/discharge": () => <PatientDischarge />,
   "/patient/treatment": () => <TreatmentForm />,
+  '/sample/report/:patientId' : ({ patientId } : any) => <SampleReport id={patientId}/>,
   "/users": () => <ManageUsers />,
   "/join": () => <CareCenterJoinForm />,
   "/daily-rounds-list": () => <DailyRoundsList />

@@ -113,6 +113,11 @@ export const createSampleTest = (queryParam: object, pathParam: object) => {
 export const getSampleTest = (id: number, pathParam: object) => {
     return fireRequest('getSampleTest', [id], {}, pathParam)
 };
+
+export const sampleReport = (pathParam: object) => {
+    return fireRequest('sampleReport', [], {}, pathParam)
+};
+
 export const patchSampleTest = (id: number, queryParam: object, pathParam: object) => {
     return fireRequest('patchSampleTest', [id], queryParam, pathParam)
 };
