@@ -773,19 +773,19 @@ export default function SampleReport(props: samplePreviewProps) {
                                 </Box>
 
                                 <Box display="flex" flexDirection="row" className={`${classes.borderBottom}`}>
-                                    <Box width="50%" display="flex" flexDirection="row"
-                                         className={`${classes.borderRight} ${classes.borderLeft}`}>
-                                        <Box width="65%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>
+                                    {/* <Box width="50%" display="flex" flexDirection="row"
+                                         className={`${classes.borderRight} ${classes.borderLeft}`}> */}
+                                        <Box width="33.33%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellTitle} ${classes.marginRight10}`}>
                                                 Medical Conditions
                                             </Typography>
                                         </Box>
-                                        <Box width="35%" className={`${classes.cellTBPadding}`}>
+                                        <Box width="69%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
                                                 {sampleData && sampleData.medical_conditions && sampleData.medical_conditions.medical_conditions && !!sampleData.medical_conditions.medical_conditions.length && sampleData.medical_conditions.medical_conditions.join(', ')}
                                             </Typography>
                                         </Box>
-                                    </Box>
+                                    {/* </Box> */}
                                     {/*<Box width="50%" display="flex" flexDirection="row" className={`${classes.borderRight}`}>*/}
                                     {/*    <Box width="65%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>*/}
                                     {/*        <Typography className={`${classes.cellTitle} ${classes.marginRight10}`}>*/}
