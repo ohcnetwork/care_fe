@@ -51,7 +51,7 @@ export const FACILITY_TYPES: Array<OptionsType> = [
 
 export const BED_TYPES: Array<OptionsType> = [
   { id: 1, text: "Normal" },
-  { id: 2, text: "Hostel" },
+  // { id: 2, text: "Hostel" }, // CARE-210: Removing Hostel from Bed Types
   { id: 3, text: "Single Room with Attached Bathroom" },
   { id: 10, text: "ICU" },
   { id: 20, text: "Ventilator" }
