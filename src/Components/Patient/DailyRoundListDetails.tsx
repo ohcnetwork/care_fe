@@ -101,7 +101,7 @@ export const DailyRoundListDetails = (props: any) => {
           </div>
           <div>
             <span className="font-semibold leading-relaxed">Temperature Measured At: </span>
-            {dailyRoundListDetailsData.temperature_measured_at ? moment(dailyRoundListDetailsData.temperature_measured_at).format("MM-DD-YYYY") : 'Not Available'}
+            {dailyRoundListDetailsData.temperature_measured_at ? moment(dailyRoundListDetailsData.temperature_measured_at).format('lll') : 'Not Available'}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">Physical Examination Info: </span>
