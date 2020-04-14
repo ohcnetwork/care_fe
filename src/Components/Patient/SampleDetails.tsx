@@ -104,17 +104,49 @@ export const SampleDetails = (props: SampleDetailsProps) => {
             <span className="font-semibold leading-relaxed">Fast track testing reason: </span>
             {sampleDetails.fast_track}
           </div>)}
+          {sampleDetails.doctor_name && (<div className="md:col-span-2">
+            <span className="font-semibold leading-relaxed">Doctor's Name: </span>
+            {sampleDetails.doctor_name}
+          </div>)}
+          {sampleDetails.diagnosis && (<div className="md:col-span-2">
+            <span className="font-semibold leading-relaxed">Diagnosis: </span>
+            {sampleDetails.diagnosis}
+          </div>)}
+          {sampleDetails.diff_diagnosis && (<div className="md:col-span-2">
+            <span className="font-semibold leading-relaxed">Differential diagnosis: </span>
+            {sampleDetails.diff_diagnosis}
+          </div>)}
+          {sampleDetails.etiology_identified && (<div className="md:col-span-2">
+            <span className="font-semibold leading-relaxed">Etiology identified: </span>
+            {sampleDetails.etiology_identified}
+          </div>)}
           <div>
-            <span className="font-semibold leading-relaxed">Contact with confirmed carrier: </span>
+            <span className="font-semibold leading-relaxed">Is Atypical presentation </span>
+            {sampleDetails.is_atypical_presentation ? <span className="badge badge-pill badge-warning">Yes</span> : <span className="badge badge-pill badge-secondary">No</span>}
+          </div>
+          <div>
+            <span className="font-semibold leading-relaxed">Is unusual course </span>
+            {sampleDetails.is_unusual_course ? <span className="badge badge-pill badge-warning">Yes</span> : <span className="badge badge-pill badge-secondary">No</span>}
+          </div>
+          {sampleDetails.atypical_presentation && (<div className="md:col-span-2">
+            <span className="font-semibold leading-relaxed">Atypical presentation details: </span>
+            {sampleDetails.atypical_presentation}
+          </div>)}
+          <div>
+            <span className="font-semibold leading-relaxed">SARI - Severe Acute Respiratory illness </span>
+            {sampleDetails.has_sari ? <span className="badge badge-pill badge-warning">Yes</span> : <span className="badge badge-pill badge-secondary">No</span>}
+          </div>
+          <div>
+            <span className="font-semibold leading-relaxed">ARI - Acute Respiratory illness </span>
+            {sampleDetails.has_ari ? <span className="badge badge-pill badge-warning">Yes</span> : <span className="badge badge-pill badge-secondary">No</span>}
+          </div>
+          <div>
+            <span className="font-semibold leading-relaxed">Contact with confirmed carrier </span>
             {sampleDetails.patient_has_confirmed_contact ? <span className="badge badge-pill badge-warning">Yes</span> : <span className="badge badge-pill badge-secondary">No</span>}
           </div>
           <div>
-            <span className="font-semibold leading-relaxed">Contact with suspected carrier: </span>
+            <span className="font-semibold leading-relaxed">Contact with suspected carrier </span>
             {sampleDetails.patient_has_suspected_contact ? <span className="badge badge-pill badge-warning">Yes</span> : <span className="badge badge-pill badge-secondary">No</span>}
-          </div>
-          <div className="md:col-span-2">
-            <span className="font-semibold leading-relaxed">Has SARI (Severe Acute Respiratory illness)?: </span>
-            {sampleDetails.patient_has_sari ? <span className="badge badge-pill badge-warning">Yes</span> : <span className="badge badge-pill badge-secondary">No</span>}
           </div>
           {sampleDetails.patient_travel_history && (<div className="md:col-span-2">
             <span className="font-semibold leading-relaxed">Countries travelled: </span>

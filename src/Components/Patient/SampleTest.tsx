@@ -272,7 +272,7 @@ export const SampleTest = (props: any) => {
                   />
                 </div>
                 {state.form.is_atypical_presentation && (<div>
-                  <InputLabel>Atypical presentation*</InputLabel>
+                  <InputLabel>Atypical presentation details*</InputLabel>
                   <MultilineInputField
                     rows={4}
                     name="atypical_presentation"

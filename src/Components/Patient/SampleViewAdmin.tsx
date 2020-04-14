@@ -148,14 +148,14 @@ export default function SampleViewAdmin(props: any) {
                 <div className="font-bold text-xl capitalize mb-2">
                   {item.patient_name}
                 </div>
-                <div>
-                  <span className="font-semibold leading-relaxed">Status: </span>
-                  {statusText}
-                </div>
                 {item.result !== 'AWAITING' && (<div className="capitalize">
                   <span className="font-semibold leading-relaxed">Result: </span>
                   {item.result ? item.result.toLocaleLowerCase() : "-"}
                 </div>)}
+                <div>
+                  <span className="font-semibold leading-relaxed">Status: </span>
+                  {statusText}
+                </div>
                 {item.facility_object && (<div>
                   <span className="font-semibold leading-relaxed">Facility: </span>
                   {item.facility_object.name}
