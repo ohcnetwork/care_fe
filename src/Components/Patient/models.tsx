@@ -167,4 +167,11 @@ export interface DailyRoundsModel {
     physical_examination_info?: string;
     other_details?: string;
     consultation?: number;
+    additional_symptoms?: Array<number>;
+    additional_symptoms_text?: string;
+    current_health?: string;
+    id?: number;
+    other_symptoms?: string;
+    patient_category?: string;
+    recommend_discharge?: boolean;
 }

@@ -1,5 +1,6 @@
 import { Grid, Typography } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
+import { navigate } from "hookrouter";
 import moment from 'moment';
 import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -8,7 +9,6 @@ import { getDailyReport } from "../../Redux/actions";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 import Pagination from "../Common/Pagination";
-import { navigate } from "hookrouter";
 
 export const DailyRoundsList = (props: any) => {
     const { facilityId, patientId, consultationId } = props;
@@ -66,7 +66,7 @@ export const DailyRoundsList = (props: any) => {
                                     </Grid>
                                     <Grid item xs={6}>
                                         <Typography>
-                                            <span className="w3-text-grey">Temperature taken at :</span>{" "}
+                                            <span className="w3-text-grey">Taken at :</span>{" "}
                                             {itemData.temperature_measured_at ? moment(itemData.temperature_measured_at).format('lll') : "-"}
                                         </Typography>
                                     </Grid>

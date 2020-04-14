@@ -80,26 +80,17 @@ export const DailyRounds = (props: any) => {
     const headerText = (!id) ? "Add Daily Rounds" : "Edit Daily Rounds";
     const buttonText = (!id) ? "Save Daily Round" : "Update Daily Round";
 
-    function convertUpperCase(str: any) {
-        let splitStr: any = str.toLowerCase().split(' ');
-        for (let i = 0; i < splitStr.length; i++) {
-            splitStr[i] = splitStr[i].charAt(0).toUpperCase() + splitStr[i].substring(1);
-        }
-        return splitStr.join(' ');
-    }
-
     const fetchpatient = useCallback(
         async (status: statusType) => {
             setIsLoading(true);
-            const dailyRoundListDetails = await dispatchAction(getConsultationDailyRoundsDetails(id, { consultationId }));
+            const res = await dispatchAction(getConsultationDailyRoundsDetails(id, { consultationId }));
             if (!status.aborted) {
-                if (dailyRoundListDetails && dailyRoundListDetails.data) {
-                    dailyRoundListDetails.data.current_health = convertUpperCase(dailyRoundListDetails.data.current_health)
-                    let healthValue: any = CURRENT_HEALTH_CHANGE.find((value: any) => {
-                        return (dailyRoundListDetails.data.current_health === value.text);
-                    })
-                    dailyRoundListDetails.data.current_health = healthValue ? healthValue.id : 0;
-                    dispatch({ type: "set_form", form: dailyRoundListDetails.data });
+                if (res && res.data) {
+                    const data = {
+                        ...res.data,
+                        temperature: Number(res.data.temperature) ? res.data.temperature : '',
+                    }
+                    dispatch({ type: "set_form", form: data });
                 }
                 setIsLoading(false);
             }
@@ -152,7 +143,7 @@ export const DailyRounds = (props: any) => {
                 other_details: state.form.other_details,
                 consultation: Number(consultationId),
                 patient_category: state.form.category,
-                current_health: Number(state.form.current_health),
+                current_health: state.form.current_health,
                 recommend_discharge: JSON.parse(state.form.recommend_discharge),
             };
 
@@ -329,6 +320,8 @@ export const DailyRounds = (props: any) => {
                                     value={state.form.current_health}
                                     options={currentHealthChoices}
                                     onChange={handleChange}
+                                    optionKey="text"
+                                    optionValue="desc"
                                     errors={state.errors.current_health}
                                 />
                             </div>

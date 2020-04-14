@@ -3,25 +3,45 @@ import { navigate } from "hookrouter";
 import moment from 'moment';
 import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
-import { PATIENT_CATEGORY, SYMPTOM_CHOICES } from "../../Common/constants";
+import { CURRENT_HEALTH_CHANGE, PATIENT_CATEGORY, SYMPTOM_CHOICES } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getConsultationDailyRoundsDetails } from "../../Redux/actions";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
+import { DailyRoundsModel } from "./models";
+
+const symptomChoices = [...SYMPTOM_CHOICES];
+
+const currentHealthChoices = [...CURRENT_HEALTH_CHANGE];
 
 export const DailyRoundListDetails = (props: any) => {
   const { facilityId, patientId, consultationId, id } = props;
   const dispatch: any = useDispatch();
-  const [dailyRoundListDetailsData, setDailyRoundListDetails] = useState<any>({});
+  const [dailyRoundListDetailsData, setDailyRoundListDetails] = useState<DailyRoundsModel>({});
   const [isLoading, setIsLoading] = useState(false);
 
   const fetchpatient = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const dailyRoundListDetails = await dispatch(getConsultationDailyRoundsDetails(id, { consultationId }));
+      const res = await dispatch(getConsultationDailyRoundsDetails(id, { consultationId }));
       if (!status.aborted) {
-        if (dailyRoundListDetails && dailyRoundListDetails.data) {
-          setDailyRoundListDetails(dailyRoundListDetails.data);
+        if (res && res.data) {
+          const currentHealth = currentHealthChoices.find(i => i.text === res.data.current_health);
+          const data:DailyRoundsModel  = {
+            ...res.data,
+            temperature: Number(res.data.temperature) ? res.data.temperature : '',
+            additional_symptoms_text: '',
+            patient_category: PATIENT_CATEGORY.find(i => i.id === res.data.patient_category)?.text || res.data.patient_category,
+            current_health: currentHealth ? currentHealth.desc : res.data.current_health,
+          }
+          if (res.data.additional_symptoms && res.data.additional_symptoms.length) {
+            const symptoms = res.data.additional_symptoms.map((symptom: number) => {
+              const option = symptomChoices.find(i => i.id === symptom);
+              return option ? option.text.toLowerCase() : symptom;
+            });
+            data.additional_symptoms_text = symptoms.join(', ');
+          }
+          setDailyRoundListDetails(data);
         }
         setIsLoading(false);
       }
@@ -39,26 +59,6 @@ export const DailyRoundListDetails = (props: any) => {
     return <Loading />;
   }
 
-  const showAdditionalSymtoms = () => {
-    let additionalSymtomsValue: any = '';
-    if ((dailyRoundListDetailsData.additional_symptoms) && (dailyRoundListDetailsData.additional_symptoms.length > 0)) {
-      for (let i = 0; i < dailyRoundListDetailsData.additional_symptoms.length; i++) {
-        let symptomValue: any = SYMPTOM_CHOICES.find((symtomObj: any) => {
-          return (symtomObj.id === dailyRoundListDetailsData.additional_symptoms[i]);
-        })
-        additionalSymtomsValue += (symptomValue && symptomValue.text + ', ')
-      }
-    }
-    return additionalSymtomsValue;
-  }
-
-  function findPatientCategory() {
-    let categoryValue: any = PATIENT_CATEGORY.find((value: any) => {
-      return (value.id === dailyRoundListDetailsData.patient_category);
-    });
-    return categoryValue ? categoryValue.text : '';
-  }
-
   return (
     <div className="px-2">
       <PageTitle title={`Daily Rounds #${id}`} />
@@ -67,11 +67,11 @@ export const DailyRoundListDetails = (props: any) => {
           <div className="max-w-md">
             <div>
               <span className="font-semibold leading-relaxed">Patient Category: </span>
-              {findPatientCategory()}
+              {dailyRoundListDetailsData.patient_category|| '-'}
             </div>
-            <div>
+            <div className="capitalize mt-4">
               <span className="font-semibold leading-relaxed">Current Health: </span>
-              {dailyRoundListDetailsData.current_health}
+              {dailyRoundListDetailsData.current_health || '-'}
             </div>
           </div>
 
@@ -90,38 +90,34 @@ export const DailyRoundListDetails = (props: any) => {
           </div>
         </div>
 
-        <div className="flex flex-col">
-          <div>
-            <span className="font-semibold leading-relaxed">Additional Symptoms: </span>
-            {showAdditionalSymtoms()}
-          </div>
+        <div className="mt-4 grid gap-4 grid-cols-1 md:grid-cols-2">
           <div>
             <span className="font-semibold leading-relaxed">Temperature: </span>
-            {dailyRoundListDetailsData.temperature}
+            {dailyRoundListDetailsData.temperature || '-'}
           </div>
           <div>
-            <span className="font-semibold leading-relaxed">Temperature Measured At: </span>
-            {dailyRoundListDetailsData.temperature_measured_at ? moment(dailyRoundListDetailsData.temperature_measured_at).format('lll') : 'Not Available'}
+            <span className="font-semibold leading-relaxed">Taken at: </span>
+            {dailyRoundListDetailsData.temperature_measured_at ? moment(dailyRoundListDetailsData.temperature_measured_at).format('lll') : '-'}
           </div>
-          <div>
+          <div  className="md:col-span-2 capitalize">
+            <span className="font-semibold leading-relaxed">Additional Symptoms: </span>
+            {dailyRoundListDetailsData.additional_symptoms_text || '-'}
+          </div>
+          <div className="md:col-span-2">
             <span className="font-semibold leading-relaxed">Physical Examination Info: </span>
-            {dailyRoundListDetailsData.physical_examination_info}
+            {dailyRoundListDetailsData.physical_examination_info || '-'}
           </div>
-          <div>
+          <div className="md:col-span-2">
             <span className="font-semibold leading-relaxed">Other Symptoms: </span>
-            {dailyRoundListDetailsData.other_symptoms}
+            {dailyRoundListDetailsData.other_symptoms || '-'}
+          </div>
+          <div className="md:col-span-2">
+            <span className="font-semibold leading-relaxed">Other Details: </span>
+            {dailyRoundListDetailsData.other_details || '-'}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">Recommend Discharge: </span>
-            {dailyRoundListDetailsData.recommend_discharge}
-          </div>
-          <div>
-            <span className="font-semibold leading-relaxed">Other Details: </span>
-            {dailyRoundListDetailsData.other_details}
-          </div>
-          <div>
-            <span className="font-semibold leading-relaxed">Consultation: </span>
-            {dailyRoundListDetailsData.consultation}
+            {dailyRoundListDetailsData.recommend_discharge ? <span className="badge badge-pill badge-warning">Yes</span> : <span className="badge badge-pill badge-secondary">No</span>}
           </div>
         </div>
 

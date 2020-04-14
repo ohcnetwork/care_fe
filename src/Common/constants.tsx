@@ -134,12 +134,12 @@ export const PATIENT_CATEGORY = [
 ];
 
 export const CURRENT_HEALTH_CHANGE = [
-  { id: 0, text: 'No Change' },
-  { id: 1, text: 'Requires Ventilator' },
-  { id: 2, text: 'Worse' },
-  { id: 3, text: 'Status Quo' },
-  { id: 4, text: 'Better' },
-]
+  { id: 0, text: 'NO DATA', desc: '', },
+  { id: 3, text: 'STATUS QUO', desc: 'No Change' },
+  { id: 4, text: 'BETTER', desc: 'Better' },
+  { id: 2, text: 'WORSE', desc: 'Worse' },
+  { id: 1, text: 'REQUIRES VENTILATOR', desc: 'Requires Ventilator' },
+];
 
 export const SAMPLE_TEST_STATUS = [
   { id: 1, text: "REQUEST_SUBMITTED", desc: "Request Submitted" },
