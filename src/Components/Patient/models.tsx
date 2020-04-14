@@ -48,6 +48,17 @@ export interface PatientModel {
 }
 
 export interface SampleTestModel {
+    atypical_presentation?: string;
+    diagnosis?: string;
+    diff_diagnosis?: string;
+    doctor_name?: string;
+    etiology_identified?: string;
+    has_ari?: boolean;
+    has_sari?: boolean;
+    is_atypical_presentation?: boolean;
+    is_unusual_course?: boolean;
+    sample_type?: string;
+    sample_type_other?: string;
     id?: number;
     status?: string;
     result?: string;
@@ -63,7 +74,8 @@ export interface SampleTestModel {
     facility?: number;
     facility_object?: { id: number; name: string, facility_type?: { id: number; name: string } }
     patient?: number;
-    fast_track?: number;
+    fast_track?: string;
+    isFastTrack?: boolean;
     flow?: Array<FlowModel>;
 }
 
@@ -149,8 +161,6 @@ export interface SampleListModel {
     fast_track?: string;
 }
 
-
-
 export interface DailyRoundsModel {
     temperature?: string;
     temperature_measured_at?: string;
@@ -158,5 +168,3 @@ export interface DailyRoundsModel {
     other_details?: string;
     consultation?: number;
 }
-
-

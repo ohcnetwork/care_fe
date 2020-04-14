@@ -178,3 +178,13 @@ export const BLOOD_GROUPS = [
   "O+",
   "O-",
 ];
+
+export const SAMPLE_TYPE_CHOICES = [
+  "UNKNOWN",
+  "BA/ETA",
+  "TS/NPS/NS",
+  "Blood in EDTA",
+  "Acute Sera",
+  "Covalescent sera",
+  "OTHER TYPE",
+];
