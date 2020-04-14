@@ -163,7 +163,7 @@ export const FacilityHome = (props: any) => {
                     size="small"
                     onClick={() => navigate(`/facility/${facilityId}/update`)}
                   >
-                    Update Hospital Info
+                    Update Facility
                   </Button>
                 </Grid>
                 <Grid item xs={12} className="w3-center">
