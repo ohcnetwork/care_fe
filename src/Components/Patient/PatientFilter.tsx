@@ -35,7 +35,7 @@ export const PatientFilter = (props: PatientFilterProps) => {
 
     return (
         <div className={classes.searchboxSticky}>
-            <div className="w-56 m-auto items-center flex">
+            <div className="w-56 m-auto items-center flex mt-4">
                 <div className="font-semibold leading-relaxed mr-4">Status: </div>
                 <SelectField
                     name="disease_status"
