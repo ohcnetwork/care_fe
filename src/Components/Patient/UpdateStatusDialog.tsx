@@ -4,11 +4,11 @@ import { WithStyles, withStyles } from '@material-ui/styles';
 import React, { useReducer } from 'react';
 import { ROLE_STATUS_MAP, SAMPLE_TEST_STATUS, SAMPLE_TEST_RESULT, SAMPLE_FLOW_RULES } from '../../Common/constants';
 import { CheckboxField, SelectField } from '../Common/HelperInputFields';
-import { SampleListModel } from './models';
+import { SampleTestModel } from './models';
 
 interface Props {
-    sample: SampleListModel;
-    handleOk: (sample: SampleListModel, status: number, result: number) => void;
+    sample: SampleTestModel;
+    handleOk: (sample: SampleTestModel, status: number, result: number) => void;
     handleCancel: () => void;
     userType: "Staff" | "DistrictAdmin" | "StateLabAdmin";
 };

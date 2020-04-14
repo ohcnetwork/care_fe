@@ -174,17 +174,19 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           const formData = {
             ...res.data,
             nationality: res.data.nationality ? res.data.nationality : "India",
-            gender: res.data.gender ? res.data.gender : "",
-            state: res.data.state ? res.data.state : "",
-            district: res.data.district ? res.data.district : "",
-            blood_group: res.data.blood_group ? res.data.blood_group : "",
-            is_medical_worker: String(res.data.is_medical_worker),
-            local_body: res.data.local_body ? res.data.local_body : "",
+            gender: res.data.gender ? res.data.gender : '',
+            state: res.data.state ? res.data.state : '',
+            district: res.data.district ? res.data.district : '',
+            blood_group: res.data.blood_group ? res.data.blood_group : '',
+            local_body: res.data.local_body ? res.data.local_body : '',
             medical_history: [],
-            contact_with_confirmed_carrier: String(res.data.contact_with_confirmed_carrier),
-            contact_with_suspected_carrier: String(res.data.contact_with_suspected_carrier),
-            ongoing_medication: String(res.data.ongoing_medication),
+            ongoing_medication: res.data.ongoing_medication ? res.data.ongoing_medication : '',
             countries_travelled: res.data.countries_travelled ? res.data.countries_travelled.split(',') : [],
+            is_medical_worker: res.data.is_medical_worker ? String(res.data.is_medical_worker) : 'false',
+            contact_with_confirmed_carrier: res.data.contact_with_confirmed_carrier ? String(res.data.contact_with_confirmed_carrier) : 'false',
+            contact_with_suspected_carrier: res.data.contact_with_suspected_carrier ? String(res.data.contact_with_suspected_carrier) : 'false',
+            number_of_aged_dependents: Number(res.data.number_of_aged_dependents) ? Number(res.data.number_of_aged_dependents) : '',
+            number_of_chronic_diseased_dependents: Number(res.data.number_of_chronic_diseased_dependents) ? Number(res.data.number_of_chronic_diseased_dependents) : '',
           };
           res.data.medical_history.forEach((i: any) => {
             const medicalHistoryId = medicalHistoryTypes.find((j: any) => j.text === i.disease)?.id;
@@ -319,7 +321,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       const data = {
         phone_number: parsePhoneNumberFromString(state.form.phone_number)?.format('E.164'),
         date_of_birth: moment(state.form.date_of_birth).format('YYYY-MM-DD'),
-        age: Number(moment().diff(state.form.date_of_birth, 'years', false)),
         disease_status: state.form.disease_status,
         name: state.form.name,
         gender: Number(state.form.gender),
@@ -340,8 +341,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         ongoing_medication: state.form.ongoing_medication,
         is_medical_worker: JSON.parse(state.form.is_medical_worker),
         blood_group: state.form.blood_group ? state.form.blood_group : undefined,
-        number_of_aged_dependents: Number(state.form.number_of_aged_dependents),
-        number_of_chronic_diseased_dependents: Number(state.form.number_of_chronic_diseased_dependents),
+        number_of_aged_dependents: Number(state.form.number_of_aged_dependents) ? Number(state.form.number_of_aged_dependents) : undefined,
+        number_of_chronic_diseased_dependents: Number(state.form.number_of_chronic_diseased_dependents) ? Number(state.form.number_of_chronic_diseased_dependents) : undefined,
         medical_history,
         is_active: true
       };

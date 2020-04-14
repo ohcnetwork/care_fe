@@ -32,6 +32,7 @@ const routes = {
   "/ambulance": () => <AmbulanceList />,
   "/sample": () => <SampleViewAdmin />,
   "/sample/:id": ({ id }: any) => <SampleDetails id={id} />,
+  '/sample/report/:patientId' : ({ patientId } : any) => <SampleReport id={patientId}/>,
   "/facility": () => <HospitalList />,
   "/facility/create": () => <FacilityCreate />,
   "/facility/:facilityId/update": ({ facilityId }: any) => (
@@ -104,7 +105,6 @@ const routes = {
   "/patient/tele-consult": () => <TeleConsultation />,
   "/patient/discharge": () => <PatientDischarge />,
   "/patient/treatment": () => <TreatmentForm />,
-  '/sample/report/:patientId' : ({ patientId } : any) => <SampleReport id={patientId}/>,
   "/users": () => <ManageUsers />,
   "/join": () => <CareCenterJoinForm />,
   "/daily-rounds-list": () => <DailyRoundsList />
