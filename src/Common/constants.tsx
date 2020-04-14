@@ -82,6 +82,13 @@ export const SYMPTOM_CHOICES: Array<OptionsType> = [
   { id: 6, text: "MYALGIA" },
   { id: 7, text: "ABDOMINAL DISCOMFORT" },
   { id: 8, text: "VOMITING/DIARRHOEA" },
+  { id: 10, text: "SARI" },
+  { id: 11, text: "SPUTUM" },
+  { id: 12, text: "NAUSEA" },
+  { id: 13, text: "CHEST PAIN" },
+  { id: 14, text: "HEMOPTYSIS" },
+  { id: 15, text: "NASAL DISCHARGE" },
+  { id: 16, text: "BODY ACHE" },
   { id: 9, text: "OTHERS" },
 ];
 
