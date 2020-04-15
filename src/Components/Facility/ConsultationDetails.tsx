@@ -124,9 +124,12 @@ export const ConsultationDetails = (props: any) => {
                                 </Grid>
                             </Grid>
                             <div className="mt-2">
-                                <Button size="small" variant="outlined" fullWidth onClick={(e) => navigate(`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${itemData.id}`)}>
-                                    View Daily Rounds Details
-                                </Button>
+                                <Button
+                                    size="small"
+                                    variant="outlined"
+                                    fullWidth
+                                    onClick={(e) => navigate(`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${itemData.id}`)}
+                                >View Daily Rounds Details</Button>
                             </div>
                         </div>
                     </div>
@@ -139,15 +142,30 @@ export const ConsultationDetails = (props: any) => {
         <div>
             <PageTitle title={`Consultation #${consultationId}`} />
             <div className="border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black mt-4 p-4">
+                <div className="flex justify-between">
+                    <div className="grid gap-2 grid-cols-1">
+                        <div className="capitalize">
+                            <span className="font-semibold leading-relaxed">Suggestion: </span>
+                            {consultationData.suggestion_text?.toLocaleLowerCase()}
+                        </div>
+                        <div>
+                            <span className="font-semibold leading-relaxed">Facility: </span>
+                            {consultationData.facility_name || '-'}
+                        </div>
+                    </div>
+                    <div>
+                        {/* <Button
+                            fullWidth
+                            variant="contained"
+                            color="primary"
+                            size="small"
+                            onClick={() =>
+                                navigate(`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/update`)
+                            }
+                        >Update Details</Button> */}
+                    </div>
+                </div>
                 <div className="grid gap-2 grid-cols-1 md:grid-cols-2">
-                    <div className="md:col-span-2">
-                        <span className="font-semibold leading-relaxed">Facility: </span>
-                        {consultationData.facility_name || '-'}
-                    </div>
-                    <div className="capitalize">
-                        <span className="font-semibold leading-relaxed">Suggestion: </span>
-                        {consultationData.suggestion_text?.toLocaleLowerCase()}
-                    </div>
                     <div className="md:col-span-2">
                         <span className="font-semibold leading-relaxed">Category: </span>
                         {consultationData.category || '-'}

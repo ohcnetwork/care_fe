@@ -204,12 +204,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             fetchLocalBody(res.data.district)
           ]);
         } else {
-          navigate(`/facility/${facilityId}`);
+          goBack();
         }
+        setIsLoading(false);
       }
-      setIsLoading(false);
     },
-    [dispatchAction, facilityId, fetchDistricts, fetchLocalBody, id]
+    [dispatchAction, fetchDistricts, fetchLocalBody, id]
   );
 
   const fetchStates = useCallback(

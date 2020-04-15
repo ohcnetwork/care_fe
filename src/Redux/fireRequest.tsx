@@ -44,7 +44,7 @@ export const fetchResponseSuccess = (key: string, data: any) => {
 };
 
 export const fireRequest = (
-    key: string, path: any = [], queryParam: object = {}, pathParam?: any
+    key: string, path: any = [], params: object = {}, pathParam?: any
 ) => {
     return (dispatch: any) => {
         ;
@@ -60,7 +60,7 @@ export const fireRequest = (
         }
         if (request.method === undefined || request.method === 'GET') {
             request.method = 'GET';
-            const qs = $.param(queryParam);
+            const qs = $.param(params);
             if (qs !== '') {
                 request.path += `?${qs}`;
             }
@@ -83,7 +83,7 @@ export const fireRequest = (
 
         dispatch(fetchDataRequest(key));
         return axiosApiCall[request.method.toLowerCase()](request.path, {
-            ...queryParam,
+            ...params,
             cancelToken: isRunning[key].token
         }).then((response: any) => {
             dispatch(fetchResponseSuccess(key, response.data));

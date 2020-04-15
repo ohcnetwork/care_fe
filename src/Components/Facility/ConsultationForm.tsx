@@ -1,11 +1,11 @@
 import { Box, Button, Card, CardContent, FormControlLabel, InputLabel, Radio, RadioGroup } from "@material-ui/core";
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
-import { navigate } from "hookrouter";
 import moment from "moment";
-import React, { useReducer, useState } from "react";
+import React, { useCallback, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
 import { ADMITTED_TO, CONSULTATION_SUGGESTION, PATIENT_CATEGORY, SYMPTOM_CHOICES } from "../../Common/constants";
-import { createConsultation } from "../../Redux/actions";
+import { statusType, useAbortableEffect } from "../../Common/utils";
+import { createConsultation, getConsultation, updateConsultation } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { DateInputField, ErrorHelperText, MultilineInputField, MultiSelectField, NativeSelectField, SelectField } from "../Common/HelperInputFields";
 import { Loading } from "../Common/Loading";
@@ -65,14 +65,9 @@ const suggestionTypes = [
   ...CONSULTATION_SUGGESTION
 ];
 
-const symptomChoices = [
-  ...SYMPTOM_CHOICES
-];
+const symptomChoices = [...SYMPTOM_CHOICES];
 
-const admittedToChoices = [
-  "Select",
-  ...ADMITTED_TO
-];
+const admittedToChoices = ["Select", ...ADMITTED_TO];
 
 const categoryChoices = [
   {
@@ -92,8 +87,42 @@ export const ConsultationForm = (props: any) => {
   const [state, dispatch] = useReducer(consultationFormReducer, initialState);
   const [isLoading, setIsLoading] = useState(false);
 
-  const headerText = !id ? "OP Triage / Consultation" : "Consultation";
-  const buttonText = !id ? "Add OP Triage / Consultation" : "Update";
+  const headerText = !id ? "OP Triage / Consultation" : "Edit OP Triage / Consultation";
+  const buttonText = !id ? "Add OP Triage / Consultation" : "Update OP Triage / Consultation";
+
+  const fetchData = useCallback(
+    async (status: statusType) => {
+      setIsLoading(true);
+      const res = await dispatchAction(getConsultation(id));
+      if (!status.aborted) {
+        if (res && res.data) {
+          const formData = {
+            ...res.data,
+            hasSymptom: !!res.data.symptoms && !!res.data.symptoms.length && !!res.data.symptoms.filter((i: number) => i !== 1).length,
+            otherSymptom: !!res.data.symptoms && !!res.data.symptoms.length && !!res.data.symptoms.filter((i: number) => i === 9).length,
+            admitted: res.data.admitted ? String(res.data.admitted) : 'false',
+            admitted_to: res.data.admitted_to ? res.data.admitted_to : '',
+            category: res.data.category ? res.data.category : '',
+          };
+          dispatch({ type: "set_form", form: formData });
+        } else {
+          goBack();
+        }
+        setIsLoading(false);
+      }
+    },
+    [dispatchAction, id]
+  );
+
+  useAbortableEffect(
+    (status: statusType) => {
+      if (id) {
+        fetchData(status);
+      }
+    },
+    [dispatch, fetchData]
+  );
+
 
   const validateForm = () => {
     let errors = { ...initError };
@@ -165,7 +194,7 @@ export const ConsultationForm = (props: any) => {
         facility: Number(facilityId),
         referred_to: null,
       };
-      const res = await dispatchAction(createConsultation(data));
+      const res = await dispatchAction(id ? updateConsultation(id, data) : createConsultation(data));
       setIsLoading(false);
       if (res && res.data) {
         dispatch({ type: "set_form", form: initForm });
@@ -177,8 +206,8 @@ export const ConsultationForm = (props: any) => {
           Notification.Success({
             msg: "Consultation created successfully"
           });
-          navigate(`/facility/${facilityId}/patient/${patientId}`);
         }
+        goBack();
       }
     }
   };
