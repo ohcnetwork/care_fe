@@ -42,7 +42,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
             </Grid>
             {itemData.admission_date && (
               <Grid item xs={7}>
-                <Typography style={{ fontSize: "12px" }}>
+                <Typography>
                   <span className="w3-text-grey">Admitted on: </span>
                   {moment(itemData.admission_date).format("lll")}
                 </Typography>
@@ -50,7 +50,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
             )}
             {itemData.discharge_date && (
               <Grid item xs={5}>
-                <Typography style={{ fontSize: "12px" }}>
+                <Typography>
                   <span className="w3-text-grey">Discharged on: </span>
                   {moment(itemData.discharge_date).format("lll")}
                 </Typography>
