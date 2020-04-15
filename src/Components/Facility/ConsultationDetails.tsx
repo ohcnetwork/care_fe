@@ -165,7 +165,7 @@ export const ConsultationDetails = (props: any) => {
                         >Update Details</Button> */}
                     </div>
                 </div>
-                <div className="grid gap-2 grid-cols-1 md:grid-cols-2">
+                <div className="grid gap-2 grid-cols-1 md:grid-cols-2 mt-2">
                     <div className="md:col-span-2">
                         <span className="font-semibold leading-relaxed">Category: </span>
                         {consultationData.category || '-'}
