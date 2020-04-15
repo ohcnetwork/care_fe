@@ -24,13 +24,13 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
           <div>
             <span className="w3-text-grey">Result: </span>{itemData.result}
           </div>
-          {itemData.fast_track && <div className="md:col-span-2">
-            <span className="w3-text-grey">Fast-Track:</span> {itemData.fast_track}
-          </div>}
           <div className="md:col-span-2">
             <span className="w3-text-grey">Sample Type: </span>
             {itemData.sample_type !== 'OTHER TYPE' ? itemData.sample_type : itemData.sample_type_other}
           </div>
+          {itemData.fast_track && <div className="md:col-span-2">
+            <span className="w3-text-grey">Fast-Track:</span> {itemData.fast_track}
+          </div>}
           {itemData.date_of_result && (
             <div>
               <span className="w3-text-grey">Tested on :</span>{" "}
