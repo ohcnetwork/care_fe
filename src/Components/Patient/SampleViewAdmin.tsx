@@ -243,10 +243,7 @@ export default function SampleViewAdmin(props: any) {
   } else if (sample && sample.length === 0) {
     manageSamples = (
       <Grid item xs={12} md={12} className="textMarginCenter">
-        <h5 style={{ color: "red" }}>h
-        Its looks like samples are empty, please visit once you submit a
-        sample request
-        </h5>
+        <h5 style={{ color: "red" }}>Its looks like samples are empty, please visit once you submit a sample request</h5>
       </Grid>
     );
   }

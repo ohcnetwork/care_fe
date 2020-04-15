@@ -120,7 +120,7 @@ export const SampleTest = (props: any) => {
         doctor_name: state.form.doctor_name ? state.form.doctor_name : undefined,
         etiology_identified: state.form.etiology_identified ? state.form.etiology_identified : undefined,
         sample_type: state.form.sample_type,
-        sample_type_other: state.form.sample_type === 'UNKNOWN' ? state.form.sample_type_other : undefined,
+        sample_type_other: state.form.sample_type === 'OTHER TYPE' ? state.form.sample_type_other : undefined,
       };
       const res = await dispatchAction(createSampleTest(data, { patientId }));
       setIsLoading(false);
