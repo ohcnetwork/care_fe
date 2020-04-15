@@ -1,5 +1,5 @@
 import DateFnsUtils from '@date-io/date-fns';
-import { Checkbox, Chip, FormControlLabel, FormControlLabelProps, Input, InputLabel, ListItemText, MenuItem, NativeSelect, Radio, Select, TextField, TextFieldProps } from '@material-ui/core';
+import { Checkbox, Chip, CircularProgress, FormControlLabel, FormControlLabelProps, Input, InputLabel, ListItemText, MenuItem, NativeSelect, Radio, Select, TextField, TextFieldProps } from '@material-ui/core';
 import Box from '@material-ui/core/Box';
 import FormControl from '@material-ui/core/FormControl';
 import { NativeSelectInputProps } from '@material-ui/core/NativeSelect/NativeSelectInput';
@@ -362,6 +362,43 @@ export const AutoCompleteMultiField = (props: any) => {
         <ErrorHelperText error={errors} />
     </>)
 }
+
+export const AutoCompleteAsyncField = (props: any) => {
+    const { id, options, label, optionKey, optionValue, variant, placeholder, errors, onChange, onSearch, value, loading, onOpen, noOptionsText } = props;
+    return (<>
+        <Autocomplete
+            id={id}
+            onOpen={onOpen}
+            options={options}
+            onChange={onChange}
+            value={value}
+            loading={loading}
+            noOptionsText={noOptionsText}
+            getOptionSelected={(option, value) => option[optionKey] === value[optionKey]}
+            getOptionLabel={(option) => option[optionValue]}
+            renderInput={(params: any) => (
+                <TextField
+                    {...params}
+                    variant={variant}
+                    label={label}
+                    onChange={onSearch}
+                    placeholder={placeholder}
+                    InputProps={{
+                        ...params.InputProps,
+                        endAdornment: (
+                            <React.Fragment>
+                                {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                                {params.InputProps.endAdornment}
+                            </React.Fragment>
+                        ),
+                    }}
+                />
+            )}
+        />
+        <ErrorHelperText error={errors} />
+    </>)
+}
+
 export const PhoneNumberField = (props: any) => {
     const { label, placeholder, errors, onChange, onlyIndia, value } = props;
     const countryRestriction = !!onlyIndia ? { onlyCountries: ['in'] } : {};
