@@ -13,7 +13,7 @@ import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 import Pagination from "../Common/Pagination";
 import { ConsultationCard } from "../Facility/ConsultationCard";
-import { ConsultationModal } from "../Facility/models";
+import { ConsultationModel } from "../Facility/models";
 import { PatientModel, SampleTestModel } from "./models";
 import { SampleTestCard } from "./SampleTestCard";
 
@@ -53,7 +53,7 @@ export const PatientHome = (props: any) => {
   const classes = useStyles();
   const dispatch: any = useDispatch();
   const [patientData, setPatientData] = useState<PatientModel>({});
-  const [consultationListData, setConsultationListData] = useState<Array<ConsultationModal>>([]);
+  const [consultationListData, setConsultationListData] = useState<Array<ConsultationModel>>([]);
   const [sampleListData, setSampleListData] = useState<Array<SampleTestModel>>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [totalConsultationCount, setTotalConsultationCount] = useState(0);

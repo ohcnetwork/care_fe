@@ -153,6 +153,6 @@ export const createConsultation = (queryParam: object) => {
 export const getConsultationList = (params: object) => {
     return fireRequest('getConsultationList', [], params);
 };
-export const getConsultation = (pathParams: object) => {
-    return fireRequest('getConsultation', [], {}, pathParams);
+export const getConsultation = (id: number) => {
+    return fireRequest('getConsultation', [id], {});
 };

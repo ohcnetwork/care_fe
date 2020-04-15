@@ -87,7 +87,7 @@ export default {
         method: 'POST',
     },
     getConsultation: {
-        path: '/api/v1/consultation/{id}/',
+        path: '/api/v1/consultation/',
     },
     updateConsultation: {
         path: '/api/v1/consultation/{id}/',

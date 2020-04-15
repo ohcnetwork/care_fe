@@ -86,7 +86,7 @@ const goBack = () => {
   window.history.go(-1);
 };
 
-export const Consultation = (props: any) => {
+export const ConsultationForm = (props: any) => {
   const dispatchAction: any = useDispatch();
   const { facilityId, patientId, id } = props;
   const [state, dispatch] = useReducer(consultationFormReducer, initialState);
