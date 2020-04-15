@@ -1,13 +1,14 @@
 import { Box, Button, Card, CardContent, FormControlLabel, InputLabel, Radio, RadioGroup } from "@material-ui/core";
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
+import { debounce } from "lodash";
 import moment from "moment";
 import React, { useCallback, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
 import { ADMITTED_TO, CONSULTATION_SUGGESTION, PATIENT_CATEGORY, SYMPTOM_CHOICES } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { createConsultation, getConsultation, updateConsultation } from "../../Redux/actions";
+import { createConsultation, getConsultation, getFacilities, updateConsultation } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import { DateInputField, ErrorHelperText, MultilineInputField, MultiSelectField, NativeSelectField, SelectField } from "../Common/HelperInputFields";
+import { AutoCompleteAsyncField, DateInputField, ErrorHelperText, MultilineInputField, MultiSelectField, NativeSelectField, SelectField } from "../Common/HelperInputFields";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 
@@ -85,6 +86,9 @@ export const ConsultationForm = (props: any) => {
   const dispatchAction: any = useDispatch();
   const { facilityId, patientId, id } = props;
   const [state, dispatch] = useReducer(consultationFormReducer, initialState);
+  const [facilityLoading, isFacilityLoading] = useState(false);
+  const [selectedFacility, setSelectedFacility] = useState(null);
+  const [facilityList, setFacilityList] = useState<any>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const headerText = !id ? "OP Triage / Consultation" : "Edit OP Triage / Consultation";
@@ -123,7 +127,6 @@ export const ConsultationForm = (props: any) => {
     [dispatch, fetchData]
   );
 
-
   const validateForm = () => {
     let errors = { ...initError };
     let invalidForm = false;
@@ -160,6 +163,12 @@ export const ConsultationForm = (props: any) => {
             invalidForm = true;
           }
           return;
+        case "referred_to":
+          if (state.form.suggestion === 'R' && !state.form[field]) {
+            errors[field] = "Please select the referred to facility";
+            invalidForm = true;
+          }
+          return;
         default:
           return;
       }
@@ -192,7 +201,7 @@ export const ConsultationForm = (props: any) => {
         discharge_date: state.form.discharge_date,
         patient: Number(patientId),
         facility: Number(facilityId),
-        referred_to: null,
+        referred_to: state.form.suggestion === 'R' ? state.form.referred_to : undefined,
       };
       const res = await dispatchAction(id ? updateConsultation(id, data) : createConsultation(data));
       setIsLoading(false);
@@ -218,6 +227,24 @@ export const ConsultationForm = (props: any) => {
     form[name] = value;
     dispatch({ type: "set_form", form });
   };
+
+  const handleValueChange = (value: any, name: string) => {
+    const form = { ...state.form };
+    form[name] = value;
+    dispatch({ type: "set_form", form });
+    if (name === 'referred_to' && !value) {
+      onFacilitySearch("");
+    }
+  };
+  
+  const onFacilitySearch = useCallback(debounce(async (text: string) => {
+    isFacilityLoading(true);
+    const res = await dispatchAction(getFacilities({ limit: 50, offset: 0, name: text }));
+    if (res && res.data) {
+      setFacilityList(res.data.results);
+    }
+    isFacilityLoading(false);
+  }, 300), []);
 
   const handleSymptomChange = (e: any, child?: any) => {
     const form = { ...state.form };
@@ -363,6 +390,31 @@ export const ConsultationForm = (props: any) => {
                   />
                   <ErrorHelperText error={state.errors.suggestion} />
                 </div>
+
+                {state.form.suggestion === 'R' && <div>
+                  <InputLabel className="mb-2">Referred To Facility</InputLabel>
+                  <AutoCompleteAsyncField
+                    name="referred_to"
+                    variant="outlined"
+                    value={selectedFacility}
+                    options={facilityList}
+                    onOpen={() => [
+                      setFacilityList([]),
+                      onFacilitySearch("")
+                    ]}
+                    onSearch={(e: any) => onFacilitySearch(e.target.value)}
+                    onChange={(e: any, selected: any) => [
+                      setSelectedFacility(selected),
+                      handleValueChange(selected?.id, 'referred_to'),
+                    ]}
+                    optionKey="id"
+                    optionValue="name"
+                    loading={facilityLoading}
+                    placeholder="Search by facility name"
+                    noOptionsText="No facility found, please try again"
+                  />
+                  <ErrorHelperText error={state.errors.referred_to} />
+                </div>}
 
                 <div className="flex">
                   <div className="flex-1">
