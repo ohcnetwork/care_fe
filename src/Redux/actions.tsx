@@ -1,37 +1,37 @@
 import { fireRequest } from "./fireRequest";
 
 // User
-export const postLogin = (queryParam: object) => {
-    return fireRequest('login', [], queryParam);
+export const postLogin = (params: object) => {
+    return fireRequest('login', [], params);
 };
 export const getCurrentUser = () => {
     return fireRequest('currentUser');
 };
-export const signupUser = (queryParam: object) => {
-    return fireRequest("createUser", [], queryParam)
+export const signupUser = (params: object) => {
+    return fireRequest("createUser", [], params)
 };
 
 
 // Ambulance
-export const postAmbulance = (queryParam: object) => {
-    return fireRequest('createAmbulance', [], queryParam);
+export const postAmbulance = (params: object) => {
+    return fireRequest('createAmbulance', [], params);
 };
-export const getAmbulanceList = (queryParam: object) => {
-    return fireRequest('listAmbulance', [] , queryParam);
+export const getAmbulanceList = (params: object) => {
+    return fireRequest('listAmbulance', [] , params);
 };
 
 // Facility
-export const createFacility = (queryParam: object) => {
-    return fireRequest("createFacility", [], queryParam);
+export const createFacility = (params: object) => {
+    return fireRequest("createFacility", [], params);
 };
-export const updateFacility = (id: number, queryParam: object) => {
-    return fireRequest('updateFacility', [id], queryParam);
+export const updateFacility = (id: number, params: object) => {
+    return fireRequest('updateFacility', [id], params);
 };
-export const getUserList = (queryParam: object) => {
-    return fireRequest('userList', [], queryParam);
+export const getUserList = (params: object) => {
+    return fireRequest('userList', [], params);
 };
-export const getFacilities = (queryParam: object) => {
-    return fireRequest('listFacility', [], queryParam);
+export const getFacilities = (params: object) => {
+    return fireRequest('listFacility', [], params);
 };
 export const getFacility = (id: number) => {
     return fireRequest('getFacility', [id], {});
@@ -41,14 +41,14 @@ export const readUser = (username: any) => {
 };
 
 // Capacity/Triage/Doctor
-export const createCapacity = (id: number | undefined, queryParam: object, pathParam: object) => {
-    return id ? fireRequest('updateCapacity', [id], queryParam, pathParam) : fireRequest("createCapacity", [], queryParam, pathParam);
+export const createCapacity = (id: number | undefined, params: object, pathParam: object) => {
+    return id ? fireRequest('updateCapacity', [id], params, pathParam) : fireRequest("createCapacity", [], params, pathParam);
 };
-export const createDoctor = (id: number | undefined, queryParam: object, pathParam: object) => {
-    return id ? fireRequest('updateDoctor', [id], queryParam, pathParam) : fireRequest("createDoctor", [], queryParam, pathParam);
+export const createDoctor = (id: number | undefined, params: object, pathParam: object) => {
+    return id ? fireRequest('updateDoctor', [id], params, pathParam) : fireRequest("createDoctor", [], params, pathParam);
 };
-export const createTriageForm = (queryParam: object ,pathParam:object) => {
-    return fireRequest('createTriage', [], queryParam, pathParam)
+export const createTriageForm = (params: object ,pathParam:object) => {
+    return fireRequest('createTriage', [], params, pathParam)
 };
 export const getTriageInfo = (pathParam: object) => {
     return fireRequest('getTriage', [], {},pathParam)
@@ -56,11 +56,11 @@ export const getTriageInfo = (pathParam: object) => {
 export const getTriageDetails = (id: number, pathParam: object) => {
     return fireRequest('getTriage', [id], {},pathParam)
 };
-export const listCapacity = (queryParam: object, pathParam: object) => {
-    return fireRequest('getCapacity', [], queryParam, pathParam);
+export const listCapacity = (params: object, pathParam: object) => {
+    return fireRequest('getCapacity', [], params, pathParam);
 };
-export const listDoctor = (queryParam: object, pathParam: object) => {
-    return fireRequest('getDoctor', [], queryParam, pathParam);
+export const listDoctor = (params: object, pathParam: object) => {
+    return fireRequest('getDoctor', [], params, pathParam);
 };
 export const getCapacity = (id: number, pathParam: object) => {
     return fireRequest('getCapacity', [id], {}, pathParam);
@@ -70,20 +70,20 @@ export const getDoctor = (id: number, pathParam: object) => {
 };
 
 //Patient
-export const searchPatient = (queryParam: object) => {
-    return fireRequest('searchPatient', [], queryParam);
+export const searchPatient = (params: object) => {
+    return fireRequest('searchPatient', [], params);
 };
-export const getAllPatient = (queryParam: object) => {
-    return fireRequest('patientList', [], queryParam);
+export const getAllPatient = (params: object) => {
+    return fireRequest('patientList', [], params);
 };
-export const createPatient = (queryParam: object) => {
-    return fireRequest('addPatient', [], queryParam)
+export const createPatient = (params: object) => {
+    return fireRequest('addPatient', [], params)
 };
 export const getPatient = (pathParam: object) => {
     return fireRequest('getPatient', [], {}, pathParam);
 };
-export const updatePatient = (queryParam: object, pathParam: object) => {
-    return fireRequest('updatePatient', [], queryParam, pathParam)
+export const updatePatient = (params: object, pathParam: object) => {
+    return fireRequest('updatePatient', [], params, pathParam)
 };
 export const getStates = () => {
     return fireRequest("statesList", [])
@@ -107,8 +107,8 @@ export const getLocalbodyByDistrict = (pathParam: object) => {
 export const getSampleTestList = (params: object, pathParam: object) => {
     return fireRequest("sampleTestList", [], params, pathParam)
 }
-export const createSampleTest = (queryParam: object, pathParam: object) => {
-    return fireRequest('createSampleTest', [], queryParam, pathParam)
+export const createSampleTest = (params: object, pathParam: object) => {
+    return fireRequest('createSampleTest', [], params, pathParam)
 };
 export const getSampleTest = (id: number, pathParam: object) => {
     return fireRequest('getSampleTest', [id], {}, pathParam)
@@ -118,41 +118,44 @@ export const sampleReport = (pathParam: object) => {
     return fireRequest('sampleReport', [], {}, pathParam)
 };
 
-export const patchSampleTest = (id: number, queryParam: object, pathParam: object) => {
-    return fireRequest('patchSampleTest', [id], queryParam, pathParam)
+export const patchSampleTest = (id: number, params: object, pathParam: object) => {
+    return fireRequest('patchSampleTest', [id], params, pathParam)
 };
-export const getTestList = (queryParam: object) => {
-    return fireRequest('getTestSampleList', [], queryParam);
+export const getTestList = (params: object) => {
+    return fireRequest('getTestSampleList', [], params);
 };
 export const getTestSample = (id: number) => {
     return fireRequest('getTestSample', [id], {});
 };
-export const patchSample = (id: number, queryParam: object) => {
-    return fireRequest('patchSample', [id], queryParam)
+export const patchSample = (id: number, params: object) => {
+    return fireRequest('patchSample', [id], params)
 };
 
 // Daily Rounds
 
-export const createDailyReport = (queryParam: object, pathParam: object) => {
-    return fireRequest('createDailyRounds', [],  queryParam, pathParam)
+export const createDailyReport = (params: object, pathParam: object) => {
+    return fireRequest('createDailyRounds', [],  params, pathParam)
 };
-export const updateDailyReport = (queryParam: object, pathParam: object) => {
-    return fireRequest('updateDailyReport', [],  queryParam, pathParam)
+export const updateDailyReport = (params: object, pathParam: object) => {
+    return fireRequest('updateDailyReport', [],  params, pathParam)
 };
-export const getDailyReport = (queryParam: object, pathParam: object) => {
-    return fireRequest('getDailyReports', [], queryParam, pathParam)
+export const getDailyReport = (params: object, pathParam: object) => {
+    return fireRequest('getDailyReports', [], params, pathParam)
 };
 export const getConsultationDailyRoundsDetails = (id: number, pathParam: object) => {
     return fireRequest('getDailyReports', [id], {}, pathParam);
 };
 
 // Consultation
-export const createConsultation = (queryParam: object) => {
-    return fireRequest("createConsultation", [], queryParam);
+export const createConsultation = (params: object) => {
+    return fireRequest("createConsultation", [], params);
 };
 export const getConsultationList = (params: object) => {
     return fireRequest('getConsultationList', [], params);
 };
-export const getConsultation = (pathParams: object) => {
-    return fireRequest('getConsultation', [], {}, pathParams);
+export const getConsultation = (id: number) => {
+    return fireRequest('getConsultation', [id], {});
+};
+export const updateConsultation = (id: number, params: object) => {
+    return fireRequest("updateConsultation", [id], params);
 };

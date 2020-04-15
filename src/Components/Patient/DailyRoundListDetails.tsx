@@ -11,8 +11,8 @@ import PageTitle from "../Common/PageTitle";
 import { DailyRoundsModel } from "./models";
 
 const symptomChoices = [...SYMPTOM_CHOICES];
-
 const currentHealthChoices = [...CURRENT_HEALTH_CHANGE];
+const patientCategoryChoices = [...PATIENT_CATEGORY]
 
 export const DailyRoundListDetails = (props: any) => {
   const { facilityId, patientId, consultationId, id } = props;
@@ -27,11 +27,11 @@ export const DailyRoundListDetails = (props: any) => {
       if (!status.aborted) {
         if (res && res.data) {
           const currentHealth = currentHealthChoices.find(i => i.text === res.data.current_health);
-          const data:DailyRoundsModel  = {
+          const data: DailyRoundsModel = {
             ...res.data,
             temperature: Number(res.data.temperature) ? res.data.temperature : '',
             additional_symptoms_text: '',
-            patient_category: PATIENT_CATEGORY.find(i => i.id === res.data.patient_category)?.text || res.data.patient_category,
+            patient_category: patientCategoryChoices.find(i => i.id === res.data.patient_category)?.text || res.data.patient_category,
             current_health: currentHealth ? currentHealth.desc : res.data.current_health,
           }
           if (res.data.additional_symptoms && res.data.additional_symptoms.length) {
@@ -67,7 +67,7 @@ export const DailyRoundListDetails = (props: any) => {
           <div className="max-w-md">
             <div>
               <span className="font-semibold leading-relaxed">Patient Category: </span>
-              {dailyRoundListDetailsData.patient_category|| '-'}
+              {dailyRoundListDetailsData.patient_category || '-'}
             </div>
             <div className="capitalize mt-4">
               <span className="font-semibold leading-relaxed">Current Health: </span>
@@ -83,7 +83,7 @@ export const DailyRoundListDetails = (props: any) => {
                 color="primary"
                 size="small"
                 onClick={() =>
-                  navigate(`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds-list/${id}/update`)
+                  navigate(`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${id}/update`)
                 }
               >Update Details</Button>
             </div>
@@ -99,7 +99,7 @@ export const DailyRoundListDetails = (props: any) => {
             <span className="font-semibold leading-relaxed">Taken at: </span>
             {dailyRoundListDetailsData.temperature_measured_at ? moment(dailyRoundListDetailsData.temperature_measured_at).format('lll') : '-'}
           </div>
-          <div  className="md:col-span-2 capitalize">
+          <div className="md:col-span-2 capitalize">
             <span className="font-semibold leading-relaxed">Additional Symptoms: </span>
             {dailyRoundListDetailsData.additional_symptoms_text || '-'}
           </div>
