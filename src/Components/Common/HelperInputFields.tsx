@@ -364,13 +364,14 @@ export const AutoCompleteMultiField = (props: any) => {
 }
 export const PhoneNumberField = (props: any) => {
     const { label, placeholder, errors, onChange, onlyIndia, value } = props;
-    const countryRestriction = !onlyIndia ? { country: 'in' } : { country: 'in', onlyCountries: ['in'] };
+    const countryRestriction = !!onlyIndia ? { onlyCountries: ['in'] } : {};
     return (<>
         {label && <InputLabel>{label}</InputLabel>}
         <PhoneInput
             value={value}
             placeholder={placeholder}
             onChange={onChange}
+            country="in"
             {...countryRestriction}
         />
         <ErrorHelperText error={errors} />
