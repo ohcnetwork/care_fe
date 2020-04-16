@@ -79,6 +79,6 @@ export interface DupPatientModel {
   patient_id: number
   name: string
   date_of_birth: string;
-  year_of_birth: number
-  state_id: number
+  year_of_birth: number;
+  state_id: number;
 }

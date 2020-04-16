@@ -186,6 +186,10 @@ export default {
         path: '/api/v1/patient/{id}/',
         method: 'PUT'
     },
+    transferPatient: {
+        path: '/api/v1/patient/{id}/transfer/',
+        method: 'POST'
+    },
     sampleTestList: {
         path: '/api/v1/patient/{patientId}/test_sample/',
     },

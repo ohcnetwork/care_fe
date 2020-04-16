@@ -18,6 +18,7 @@ import PageTitle from "../Common/PageTitle";
 import DuplicatePatientDialog from "../Facility/DuplicatePatientDialog";
 import { DupPatientModel } from "../Facility/models";
 import { PatientModel } from "./models";
+import TransferPatientDialog from "../Facility/TransferPatientDialog";
 
 interface PatientRegisterProps extends PatientModel {
   facilityId: number;
@@ -130,7 +131,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   const [states, setStates] = useState(initialStates);
   const [districts, setDistricts] = useState(selectStates);
   const [localBody, setLocalBody] = useState(selectDistrict);
-  const [statusDialog, setStatusDialog] = useState<{ show: boolean; patientList: Array<DupPatientModel> }>({ show: false, patientList: [] });
+  const [statusDialog, setStatusDialog] = useState<{ show?: boolean; transfer?: boolean; patientList: Array<DupPatientModel> }>({ patientList: [] });
 
   const headerText = !id ? "Add Details of Covid Suspect / Patient" : "Update Covid Suspect / Patient Details";
   const buttonText = !id ? "Add Covid Suspect / Patient" : "Save Details";
@@ -409,15 +410,13 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     dispatch({ type: "set_form", form });
   };
 
-  const duplicateCheck = async (status: statusType) => {
-    const { phone_number, date_of_birth } = state.form;
-    if (phone_number && date_of_birth && parsePhoneNumberFromString(phone_number)?.isPossible() && moment(date_of_birth).isValid()) {
+  const duplicateCheck = useCallback(debounce(async (phoneNo: string) => {
+    if (phoneNo && parsePhoneNumberFromString(phoneNo)?.isPossible()) {
       const query = {
-        phone_number: parsePhoneNumberFromString(phone_number)?.format('E.164'),
-        date_of_birth: moment(date_of_birth).format('YYYY-MM-DD')
+        phone_number: parsePhoneNumberFromString(phoneNo)?.format('E.164')
       };
       const res = await dispatchAction(searchPatient(query))
-      if (!status.aborted && res && res.data && res.data.results) {
+      if (res && res.data && res.data.results) {
         const duplicateList = !id ? res.data.results : res.data.results.filter((item: DupPatientModel) => Number(item.patient_id) !== Number(id));
         if (duplicateList.length) {
           setStatusDialog({
@@ -427,20 +426,17 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         }
       }
     }
+  }, 300), []);
+
+  const handleDialogClose = (action: string) => {
+    if (action === 'transfer') {
+      setStatusDialog({ ...statusDialog, show: false, transfer: true });
+    } else if (action === 'back') {
+      setStatusDialog({ ...statusDialog, show: true, transfer: false });
+    } else {
+      setStatusDialog({ show: false, transfer: false, patientList: [] });
+    }
   }
-
-  const duplicateCheckHandler = useCallback(debounce(duplicateCheck, 500), [state.form.phone_number, state.form.date_of_birth]);
-
-  useAbortableEffect(
-    (status: statusType) => {
-      duplicateCheckHandler(status);
-    },
-    [state.form.phone_number, state.form.date_of_birth]
-  );
-
-  const dismissStatusDialog = () => {
-    setStatusDialog({ show: false, patientList: [] })
-  };
 
   const renderMedicalHistory = (id: number, title: string) => {
     const checkboxField = `medical_history_check_${id}`;
@@ -482,9 +478,15 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     <div>
       {statusDialog.show && (<DuplicatePatientDialog
         patientList={statusDialog.patientList}
-        handleOk={dismissStatusDialog}
+        handleOk={handleDialogClose}
         handleCancel={goBack}
         isNew={!id}
+      />)}
+      {statusDialog.transfer && (<TransferPatientDialog
+        patientList={statusDialog.patientList}
+        handleOk={() => handleDialogClose("close")}
+        handleCancel={() => handleDialogClose("back")}
+        facilityId={facilityId}
       />)}
       <PageTitle title={headerText} />
       <div className="mt-4">
@@ -504,11 +506,13 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   <PhoneNumberField
                     label="Phone Number*"
                     value={state.form.phone_number}
-                    onChange={(value: any) => handleValueChange(value, 'phone_number')}
+                    onChange={(value: any) => [
+                      duplicateCheck(value),
+                      handleValueChange(value, 'phone_number'),
+                    ]}
                     errors={state.errors.phone_number}
                   />
                 </div>
-
                 <div>
                   <InputLabel id="date_of_birth-label">Date of birth*</InputLabel>
                   <DateInputField

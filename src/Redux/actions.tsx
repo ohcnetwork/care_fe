@@ -85,6 +85,9 @@ export const getPatient = (pathParam: object) => {
 export const updatePatient = (params: object, pathParam: object) => {
     return fireRequest('updatePatient', [], params, pathParam)
 };
+export const transferPatient = (params: object, pathParam: object) => {
+    return fireRequest('transferPatient', [], params, pathParam)
+}
 export const getStates = () => {
     return fireRequest("statesList", [])
 }
