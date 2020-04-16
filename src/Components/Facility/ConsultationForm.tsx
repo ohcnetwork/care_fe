@@ -88,6 +88,7 @@ export const ConsultationForm = (props: any) => {
   const [state, dispatch] = useReducer(consultationFormReducer, initialState);
   const [facilityLoading, isFacilityLoading] = useState(false);
   const [selectedFacility, setSelectedFacility] = useState(null);
+  const [hasSearchText, setHasSearchText] = useState(false);
   const [facilityList, setFacilityList] = useState<any>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -233,17 +234,22 @@ export const ConsultationForm = (props: any) => {
     form[name] = value;
     dispatch({ type: "set_form", form });
     if (name === 'referred_to' && !value) {
-      onFacilitySearch("");
+      setFacilityList([]);
+      isFacilityLoading(false);
     }
   };
-  
+
   const onFacilitySearch = useCallback(debounce(async (text: string) => {
-    isFacilityLoading(true);
-    const res = await dispatchAction(getFacilities({ limit: 50, offset: 0, name: text }));
-    if (res && res.data) {
-      setFacilityList(res.data.results);
+    if (text) {
+      const res = await dispatchAction(getFacilities({ limit: 50, offset: 0, search_text: text, all: true }));
+      if (res && res.data) {
+        setFacilityList(res.data.results);
+      }
+      isFacilityLoading(false);
+    } else {
+      setFacilityList([]);
+      isFacilityLoading(false);
     }
-    isFacilityLoading(false);
   }, 300), []);
 
   const handleSymptomChange = (e: any, child?: any) => {
@@ -398,11 +404,12 @@ export const ConsultationForm = (props: any) => {
                     variant="outlined"
                     value={selectedFacility}
                     options={facilityList}
-                    onOpen={() => [
-                      setFacilityList([]),
-                      onFacilitySearch("")
+                    onOpen={() => setFacilityList([])}
+                    onSearch={(e: any) => [
+                      isFacilityLoading(true),
+                      setHasSearchText(!!e.target.value),
+                      onFacilitySearch(e.target.value)
                     ]}
-                    onSearch={(e: any) => onFacilitySearch(e.target.value)}
                     onChange={(e: any, selected: any) => [
                       setSelectedFacility(selected),
                       handleValueChange(selected?.id, 'referred_to'),
@@ -411,7 +418,10 @@ export const ConsultationForm = (props: any) => {
                     optionValue="name"
                     loading={facilityLoading}
                     placeholder="Search by facility name"
-                    noOptionsText="No facility found, please try again"
+                    noOptionsText={hasSearchText ? "No facility found, please try again" : "Start typing to begin search"}
+                    renderOption={(option: any) => (
+                      <div>{option.name} {option.district_object ? `- ${option.district_object.name}` : ''}</div>
+                    )}
                   />
                   <ErrorHelperText error={state.errors.referred_to} />
                 </div>}
