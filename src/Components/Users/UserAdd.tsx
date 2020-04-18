@@ -2,20 +2,19 @@ import { Button, Card, CardContent, CircularProgress, InputLabel } from "@materi
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import { navigate } from "hookrouter";
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
-import { debounce } from "lodash";
 import moment from "moment";
 import React, { useCallback, useReducer, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { GENDER_TYPES, USER_TYPES } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { validateEmailAddress, validateUsername, validatePassword } from "../../Common/validation";
-import { addUser, getDistrictByState, getFacilities, getLocalbodyByDistrict, getStates } from "../../Redux/actions";
+import { validateEmailAddress, validatePassword, validateUsername } from "../../Common/validation";
+import { addUser, getDistrictByState, getLocalbodyByDistrict, getStates } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import { AutoCompleteAsyncField, DateInputField, PhoneNumberField, SelectField, TextInputField } from "../Common/HelperInputFields";
+import { FacilitySelect } from "../Common/FacilitySelect";
+import { DateInputField, PhoneNumberField, SelectField, TextInputField } from "../Common/HelperInputFields";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 import { FacilityModel } from "../Facility/models";
-import { FacilitySelect } from "../Common/FacilitySelect";
 
 const genderTypes = [
   {
@@ -227,7 +226,6 @@ export const UserAdd = (props: UserProps) => {
     Object.keys(state.form).forEach(field => {
       switch (field) {
         case "user_type":
-        case "facility":
           if (!state.form[field]) {
             errors[field] = "Please select the User Type";
             invalidForm = true;
@@ -388,6 +386,7 @@ export const UserAdd = (props: UserProps) => {
                   value={state.form.phone_number}
                   onChange={(value: any) => handleValueChange(value, 'phone_number')}
                   errors={state.errors.phone_number}
+                  onlyIndia={true}
                 />
               </div>
 
