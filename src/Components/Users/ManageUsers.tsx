@@ -129,7 +129,7 @@ export default function ManageUsers(props: any) {
 
   const addUser = (<div className="w-full md:w-1/2 mt-4 px-2">
     <div
-      className="block border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 flex justify-center items-center text-black"
+      className="block border rounded-lg bg-white shadow h-full cursor-pointer hover:bg-gray-300 font-semibold flex justify-center items-center text-black"
       onClick={() => navigate("/user/add")}
     >
       Add a new user
@@ -141,7 +141,7 @@ export default function ManageUsers(props: any) {
     userList = users.map((user: any, idx: number) => {
       return (
         <div key={`usr_${user.id}`} className="w-full md:w-1/2 mt-4 px-2">
-          <div className="block border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black">
+          <div className="block border rounded-lg bg-white shadow h-full text-black">
             <CardHeader
               className={classes.cardHeader}
               title={
@@ -194,34 +194,33 @@ export default function ManageUsers(props: any) {
   if (isLoading || !users) {
     manageUsers = <Loading />;
   } else if (users && users.length) {
-    manageUsers = (
-      <>
-        {userList}
-        {totalCount > limit && (
-          <Grid container className={`w3-center ${classes.paginateTopPadding}`}>
-            <Pagination
-              cPage={currentPage}
-              defaultPerPage={limit}
-              data={{ totalCount }}
-              onChange={handlePagination}
-            />
-          </Grid>
-        )}
-      </>
-    );
+    manageUsers = (<>
+      {userTypes.length && addUser}
+      {userList}
+      {totalCount > limit && (
+        <Grid container className={`w3-center ${classes.paginateTopPadding}`}>
+          <Pagination
+            cPage={currentPage}
+            defaultPerPage={limit}
+            data={{ totalCount }}
+            onChange={handlePagination}
+          />
+        </Grid>
+      )}
+    </>);
   } else if (users && users.length === 0) {
-    manageUsers = (
+    manageUsers = (<>
+      {userTypes.length && addUser}
       <Grid item xs={12} md={12} className="textMarginCenter">
         <h5> No Users Found</h5>
       </Grid>
-    );
+    </>);
   }
 
   return (
     <div>
       <PageTitle title="Users" hideBack={true} />
       <div className="flex flex-wrap mt-4">
-        {userTypes.length && addUser}
         {manageUsers}
       </div>
     </div>
