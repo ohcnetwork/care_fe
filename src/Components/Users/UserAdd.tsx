@@ -227,7 +227,6 @@ export const UserAdd = (props: UserProps) => {
     Object.keys(state.form).forEach(field => {
       switch (field) {
         case "user_type":
-        case "facility":
           if (!state.form[field]) {
             errors[field] = "Please select the User Type";
             invalidForm = true;
