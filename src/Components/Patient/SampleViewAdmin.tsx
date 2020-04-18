@@ -12,7 +12,8 @@ import * as Notification from "../../Utils/Notifications";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 import Pagination from "../Common/Pagination";
-import { SampleListModel } from "./models";
+import { SampleTestModel } from "./models";
+import { InputSearchBox } from "../Common/SearchBox";
 import UpdateStatusDialog from "./UpdateStatusDialog";
 
 const useStyles = makeStyles((theme) => ({
@@ -32,13 +33,13 @@ export default function SampleViewAdmin(props: any) {
   const dispatch: any = useDispatch();
   const initialData: any[] = [];
   let manageSamples: any = null;
-  const [sample, setSample] = useState<Array<SampleListModel>>(initialData);
+  const [sample, setSample] = useState<Array<SampleTestModel>>(initialData);
   const [isLoading, setIsLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [offset, setOffset] = useState(0);
   const [fetchFlag, callFetchData] = useState(false);
-  const [statusDialog, setStatusDialog] = useState<{ show: boolean; sample: SampleListModel }>({ show: false, sample: {} });
+  const [statusDialog, setStatusDialog] = useState<{ show: boolean; sample: SampleTestModel }>({ show: false, sample: {} });
   const state: any = useSelector((state) => state);
   const { currentUser } = state;
   const userType: "Staff" | "DistrictAdmin" | "StateLabAdmin" = currentUser.data.user_type;
@@ -79,7 +80,7 @@ export default function SampleViewAdmin(props: any) {
   //   setResult(results);
   // };
 
-  const handleApproval = async (sample: SampleListModel, status: number, result: number) => {
+  const handleApproval = async (sample: SampleTestModel, status: number, result: number) => {
     let sampleData: any = {
       id: sample.id,
       status,
@@ -99,7 +100,7 @@ export default function SampleViewAdmin(props: any) {
     dismissUpdateStatus();
   };
 
-  const showUpdateStatus = (sample: SampleListModel) => {
+  const showUpdateStatus = (sample: SampleTestModel) => {
     console.log(sample)
     setStatusDialog({
       show: true,
@@ -112,11 +113,20 @@ export default function SampleViewAdmin(props: any) {
       show: false,
       sample: {},
     });
+  };
+  const onSearchDistrictName = async (searchValue: string) => {
+    setIsLoading(true);
+    const res = await dispatch(getTestList({ limit, offset, district_name: searchValue }));
+    if (res && res.data) {
+      setSample(res.data.results);
+      setTotalCount(res.data.count);
+    }
+    setIsLoading(false);
   }
 
   let sampleList: any[] = [];
   if (sample && sample.length) {
-    sampleList = sample.map((item: SampleListModel, idx: number) => {
+    sampleList = sample.map(item => {
       const status = String(item.status) as keyof typeof SAMPLE_FLOW_RULES;
       const statusText = SAMPLE_TEST_STATUS.find(i => i.text === status)?.desc;
       const validStatusChoices = statusChoices
@@ -138,64 +148,46 @@ export default function SampleViewAdmin(props: any) {
                 <div className="font-bold text-xl capitalize mb-2">
                   {item.patient_name}
                 </div>
+                {item.result !== 'AWAITING' && (<div className="capitalize">
+                  <span className="font-semibold leading-relaxed">Result: </span>
+                  {item.result ? item.result.toLocaleLowerCase() : "-"}
+                </div>)}
+                <div>
+                  <span className="font-semibold leading-relaxed">Status: </span>
+                  {statusText}
+                </div>
                 {item.facility_object && (<div>
                   <span className="font-semibold leading-relaxed">Facility: </span>
                   {item.facility_object.name}
                 </div>)}
                 {item.fast_track && (<div>
-                  <span className="font-semibold leading-relaxed">
-                    Fast track:{" "}
-                  </span>
+                  <span className="font-semibold leading-relaxed">Fast track: </span>
                   {item.fast_track}
                 </div>)}
-                {item.patient_has_confirmed_contact && (
-                  <div className="flex">
-                    <span className="font-semibold leading-relaxed">
-                      Contact with confirmed carrier
-                    </span>
-                    <WarningRoundedIcon className="text-red-500"></WarningRoundedIcon>
-                  </div>
-                )}
-                {item.patient_has_suspected_contact &&
-                  !item.patient_has_confirmed_contact && (
-                    <div className="flex">
-                      <span className="font-semibold leading-relaxed">
-                        Contact with suspected carrier
-                      </span>
-                      <WarningRoundedIcon className="text-yellow-500"></WarningRoundedIcon>
-                    </div>
-                  )}
-                {item.patient_has_sari && (<div>
-                  <span className="font-semibold leading-relaxed">
-                    Severe Acute Respiratory illness
-                  </span>
-                  <WarningRoundedIcon className="text-yellow-500"></WarningRoundedIcon>
-                </div>)}
-                {item.patient_travel_history && (
-                  <div className="md:col-span-2">
-                    <span className="font-semibold leading-relaxed">
-                      Countries travelled:{" "}
-                    </span>
-                    {item.patient_travel_history.split(',').join(', ')}
-                  </div>
-                )}
-                <div>
-                  <span className="font-semibold leading-relaxed">
-                    Status:{" "}
-                  </span>
-                  {statusText}
-                </div>
-                <div className="capitalize">
-                  <span className="font-semibold leading-relaxed">
-                    Result:{" "}
-                  </span>
-                  {item.result ? item.result.toLocaleLowerCase() : "-"}
-                </div>
                 {item.date_of_sample && (<div>
-                  <span className="font-semibold leading-relaxed">
-                    Date Of Sample :{" "}
-                  </span>
+                  <span className="font-semibold leading-relaxed">Date of Sample: </span>
                   {moment(item.date_of_sample).format("lll")}
+                </div>)}
+                {item.patient_has_confirmed_contact && (<div>
+                  <span className="font-semibold leading-relaxed">Contact: </span>
+                    Confirmed carrier
+                  <WarningRoundedIcon className="text-red-500"></WarningRoundedIcon>
+                </div>)}
+                {item.patient_has_suspected_contact &&
+                  !item.patient_has_confirmed_contact && (<div>
+                    <span className="font-semibold leading-relaxed">Contact: </span>
+                      Suspected carrier
+                    <WarningRoundedIcon className="text-yellow-500"></WarningRoundedIcon>
+                  </div>)}
+                {item.has_sari && (<div>
+                  <span className="font-semibold leading-relaxed">SARI: </span>
+                    Severe Acute Respiratory illness
+                  <WarningRoundedIcon className="text-orange-500"></WarningRoundedIcon>
+                </div>)}
+                {item.has_ari && !item.has_sari && (<div>
+                  <span className="font-semibold leading-relaxed">ARI: </span>
+                    Acute Respiratory illness
+                  <WarningRoundedIcon className="text-yellow-500"></WarningRoundedIcon>
                 </div>)}
               </div>
 
@@ -208,15 +200,19 @@ export default function SampleViewAdmin(props: any) {
                 </div>)}
                 <div className="mt-2">
                   <button
-                    onClick={(e) => navigate(`/samplelist/${item.id}`)}
+                    onClick={(e) => navigate(`/sample/report/${item.patient}`)}
                     className="w-full text-sm bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow text-center"
-                  >View Sample Details</button>
+                  >View Sample Report</button>
                 </div>
-                <div className="mt-2">
+                <div className="grid gap-2 grid-cols-2 mt-2">
                   <button
                     onClick={(e) => navigate(`/facility/${item.facility}/patient/${item.patient}`)}
                     className="w-full text-sm bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow text-center"
-                  >View Patient Details</button>
+                  >Patient Details</button>
+                  <button
+                    onClick={(e) => navigate(`/sample/${item.id}`)}
+                    className="w-full text-sm bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow text-center"
+                  >Sample Details</button>
                 </div>
               </div>
             </div>
@@ -247,10 +243,7 @@ export default function SampleViewAdmin(props: any) {
   } else if (sample && sample.length === 0) {
     manageSamples = (
       <Grid item xs={12} md={12} className="textMarginCenter">
-        <h5 style={{ color: "red" }}>h
-        Its looks like samples are empty, please visit once you submit a
-        sample request
-        </h5>
+        <h5 style={{ color: "red" }}>Its looks like samples are empty, please visit once you submit a sample request</h5>
       </Grid>
     );
   }
@@ -264,7 +257,12 @@ export default function SampleViewAdmin(props: any) {
         userType={userType}
       />)}
       <PageTitle title="Sample Management system" hideBack={true} />
-      <div className="flex flex-wrap mt-4">{manageSamples}</div>
+      <InputSearchBox
+        search={onSearchDistrictName}
+        placeholder='Search by district'
+        errors=''
+      />
+      <div className="flex flex-wrap mt-2">{manageSamples}</div>
     </div>
   );
 }

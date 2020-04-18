@@ -79,18 +79,18 @@ export default {
         path: '/api/v1/facility',
         method: 'DELETE'
     },
-    getConsultationList:{
-        path:'/api/v1/consultation/'
+    getConsultationList: {
+        path: '/api/v1/consultation/'
     },
-    createConsultation:{
-        path:'/api/v1/consultation/',
-        method:'POST',
+    createConsultation: {
+        path: '/api/v1/consultation/',
+        method: 'POST',
     },
-    getConsultation:{
-        path:'/api/v1/consultation/{id}/',
+    getConsultation: {
+        path: '/api/v1/consultation',
     },
     updateConsultation: {
-        path: '/api/v1/consultation/{id}/',
+        path: '/api/v1/consultation',
         method: 'PUT',
     },
     partialUpdateConsultation: {
@@ -101,11 +101,15 @@ export default {
         path: '/api/v1/consultation/{id}/',
         method: 'DELETE'
     },
-createDailyRounds:{
-    path: '/api/v1/consultation/{consultationId}/daily_rounds/',
-    method: 'POST'
-},
-    getDailyReports:{
+    createDailyRounds: {
+        path: '/api/v1/consultation/{consultationId}/daily_rounds/',
+        method: 'POST'
+    },
+    updateDailyReport: {
+        path: '/api/v1/consultation/{consultationId}/daily_rounds/{id}/',
+        method: 'PUT'
+    },
+    getDailyReports: {
         path: '/api/v1/consultation/{consultationId}/daily_rounds',
     },
     // Ambulance
@@ -147,14 +151,14 @@ createDailyRounds:{
         path: '/api/v1/facility/{facilityId}/hospital_doctor',
         method: 'PUT'
     },
-    
+
     //Triage
-    createTriage:{
-        path:'/api/v1/facility/{facilityId}/patient_stats/',
-        method:'POST'
+    createTriage: {
+        path: '/api/v1/facility/{facilityId}/patient_stats/',
+        method: 'POST'
     },
-    getTriage:{
-        path:'/api/v1/facility/{facilityId}/patient_stats',
+    getTriage: {
+        path: '/api/v1/facility/{facilityId}/patient_stats',
     },
 
     // //Care Center
@@ -165,8 +169,11 @@ createDailyRounds:{
 
     // Patient
 
+    searchPatient: {
+        path: "/api/v1/patient/search",
+    },
     patientList: {
-        path: "/api/v1/patient"
+        path: "/api/v1/patient",
     },
     addPatient: {
         path: "/api/v1/patient/",
@@ -179,19 +186,26 @@ createDailyRounds:{
         path: '/api/v1/patient/{id}/',
         method: 'PUT'
     },
-    sampleTestList:{
-        path:'/api/v1/patient/{patientId}/test_sample/',
+    transferPatient: {
+        path: '/api/v1/patient/{id}/transfer/',
+        method: 'POST'
     },
-    createSampleTest:{
-        path:'/api/v1/patient/{patientId}/test_sample/',
-        method:'POST',
+    sampleTestList: {
+        path: '/api/v1/patient/{patientId}/test_sample/',
     },
-    getSampleTest:{
-        path:'/api/v1/patient/{patientId}/test_sample/{id}/',
+    createSampleTest: {
+        path: '/api/v1/patient/{patientId}/test_sample/',
+        method: 'POST',
     },
-    patchSampleTest:{
-        path:'/api/v1/patient/{patientId}/test_sample/{id}/',
-        method:'PATCH',
+    getSampleTest: {
+        path: '/api/v1/patient/{patientId}/test_sample/{id}/',
+    },
+    patchSampleTest: {
+        path: '/api/v1/patient/{patientId}/test_sample/{id}/',
+        method: 'PATCH',
+    },
+    sampleReport:{
+        path:'/api/v1/patient/{id}/icmr_sample'
     },
 
     // States
@@ -234,8 +248,8 @@ createDailyRounds:{
         method: 'POST'
     },
     patchSample: {
-        path:'/api/v1/test_sample',
-        method:'PATCH',
+        path: '/api/v1/test_sample',
+        method: 'PATCH',
     },
 
 }

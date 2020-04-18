@@ -10,6 +10,7 @@ import { getAllPatient } from "../../Redux/actions";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 import Pagination from "../Common/Pagination";
+import { PatientFilter } from "./PatientFilter";
 
 const useStyles = makeStyles((theme) => ({
   paginateTopPadding: {
@@ -26,20 +27,20 @@ export const PatientManager = (props: any) => {
   const dispatch: any = useDispatch();
   const initialData: any[] = [];
   const [data, setData] = useState(initialData);
-
+  const [diseaseStatus, setDiseaseStatus] = useState('');
   let managePatients: any = null;
   const [isLoading, setIsLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [offset, setOffset] = useState(0);
 
-  const limit = 10;
+  const limit = 14;
 
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
       const res = await dispatch(
-        getAllPatient({ facility: facilityId, limit, offset })
+        getAllPatient({ facility: facilityId, limit, offset, disease_status: diseaseStatus })
       );
       if (!status.aborted) {
         if (res && res.data) {
@@ -49,9 +50,8 @@ export const PatientManager = (props: any) => {
         setIsLoading(false);
       }
     },
-    [dispatch, facilityId, offset]
+    [diseaseStatus, dispatch, facilityId, offset]
   );
-
   useAbortableEffect(
     (status: statusType) => {
       fetchData(status);
@@ -65,6 +65,12 @@ export const PatientManager = (props: any) => {
     setOffset(offset);
   };
 
+  const handleFilter = async (diseaseStatus: string) => {
+    setDiseaseStatus(diseaseStatus);
+    setOffset(0);
+    setCurrentPage(1);
+  }
+
   let patientList: any[] = [];
   if (data && data.length) {
     patientList = data.map((patient: any, idx: number) => {
@@ -75,7 +81,10 @@ export const PatientManager = (props: any) => {
         <div key={`usr_${patient.id}`} className="w-full md:w-1/2 mt-4 px-2">
           <div
             onClick={() => navigate(patientUrl)}
-            className="overflow-hidden shadow-lg block border rounded-lg bg-white h-full cursor-pointer hover:border-primary-500"
+            className={`overflow-hidden shadow-lg block border rounded-lg bg-white h-full cursor-pointer hover:border-primary-500
+            ${patient.disease_status === 'POSITIVE' ? "border-red-700 bg-red-100" :
+                ['NEGATIVE', 'RECOVERY', 'RECOVERED'].indexOf(patient.disease_status) >= 0 ? "border-green-700 bg-green-100" : ""}
+            `}
           >
             <div className="px-6 py-4 h-full flex flex-col justify-between">
               <div>
@@ -160,7 +169,8 @@ export const PatientManager = (props: any) => {
         )}
       </>
     );
-  } else if (data && data.length === 0) {
+  }
+  else if (data && data.length === 0) {
     managePatients = (
       <Grid item xs={12} md={12} className={classes.displayFlex}>
         <Grid container justify="center" alignItems="center">
@@ -173,8 +183,9 @@ export const PatientManager = (props: any) => {
   return (
     <div className="px-2">
       <PageTitle title="Covid Suspects" hideBack={!facilityId} />
-
-      <div className="flex flex-wrap mt-4">{managePatients}</div>
+      <PatientFilter filter={handleFilter} />
+      <div className="flex flex-wrap mt-2">{managePatients}</div>
     </div>
   );
 };
+

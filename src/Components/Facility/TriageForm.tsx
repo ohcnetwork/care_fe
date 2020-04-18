@@ -1,16 +1,15 @@
-import { Button, Card, CardActions, CardContent, InputLabel } from "@material-ui/core";
+import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
-import { navigate } from "hookrouter";
 import moment from 'moment';
-import React, { useReducer, useState, useCallback } from "react";
+import React, { useCallback, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
+import { statusType, useAbortableEffect } from "../../Common/utils";
 import { createTriageForm, getTriageDetails } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { DateInputField, TextInputField } from "../Common/HelperInputFields";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 import { PatientStatsModel } from "./models";
-import { useAbortableEffect, statusType } from "../../Common/utils";
 
 interface triageFormProps extends PatientStatsModel {
   facilityId: number;
@@ -155,9 +154,11 @@ export const TriageForm = (props: triageFormProps) => {
   };
 
   const handleDateChange = (date: any, key: string) => {
-    let form = { ...state.form };
-    form[key] = date;
-    dispatch({ type: "set_form", form });
+    if (moment(date).isValid()) {
+      const form = { ...state.form };
+      form[key] = date;
+      dispatch({ type: "set_form", form });
+    }
   };
 
   if (isLoading) {
@@ -180,7 +181,7 @@ export const TriageForm = (props: triageFormProps) => {
             </div>
             <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
               <div>
-                <InputLabel id="num-patients-visited-label">Patients Visited</InputLabel>
+                <InputLabel id="num-patients-visited-label">Patients Visited in Triage</InputLabel>
                 <TextInputField
                   name="num_patients_visited"
                   variant="outlined"
@@ -219,7 +220,7 @@ export const TriageForm = (props: triageFormProps) => {
                 />
               </div>
               <div>
-                <InputLabel id="num-patient-referred-label">Patients Referred so far</InputLabel>
+                <InputLabel id="num-patient-referred-label">Patients Referred</InputLabel>
                 <TextInputField
                   name="num_patient_referred"
                   variant="outlined"

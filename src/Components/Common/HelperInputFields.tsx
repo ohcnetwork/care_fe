@@ -1,13 +1,15 @@
 import DateFnsUtils from '@date-io/date-fns';
-import { Checkbox, Chip, FormControlLabel, FormControlLabelProps, Input, InputLabel, ListItemText, MenuItem, NativeSelect, Radio, Select, TextField, TextFieldProps } from '@material-ui/core';
+import { Checkbox, Chip, CircularProgress, FormControlLabel, FormControlLabelProps, Input, InputLabel, ListItemText, MenuItem, NativeSelect, Radio, Select, TextField, TextFieldProps } from '@material-ui/core';
 import Box from '@material-ui/core/Box';
 import FormControl from '@material-ui/core/FormControl';
 import { NativeSelectInputProps } from '@material-ui/core/NativeSelect/NativeSelectInput';
 import { SelectProps } from '@material-ui/core/Select';
 import Autocomplete from '@material-ui/lab/Autocomplete';
-import { DatePickerProps, KeyboardDateTimePicker, KeyboardDatePicker, KeyboardTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import { DatePickerProps, KeyboardDatePicker, KeyboardDateTimePicker, KeyboardTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import { MaterialUiPickersDate } from '@material-ui/pickers/typings/date';
 import React from 'react';
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/material.css';
 
 export interface DefaultSelectInputProps extends Omit<SelectProps, 'onChange'> {
     options: Array<any>;
@@ -60,7 +62,7 @@ interface InputProps {
 interface DateInputFieldProps extends DatePickerProps {
     value: string;
     onChange: (date: MaterialUiPickersDate, value?: string | null | undefined) => void;
-    label: string;
+    label?: string;
     errors: string;
     inputVariant?: "standard" | "outlined" | "filled";
     disabled?: boolean;
@@ -155,7 +157,7 @@ export const DateInputField = (props: DateInputFieldProps) => {
             <KeyboardDatePicker
                 margin={margin || "normal"}
                 id="date-picker-dialog"
-                label={label || "Date picker dialog"}
+                label={label}
                 format="dd/MM/yyyy"
                 value={value}
                 onChange={onChange}
@@ -356,6 +358,59 @@ export const AutoCompleteMultiField = (props: any) => {
                     placeholder={placeholder}
                 />
             )}
+        />
+        <ErrorHelperText error={errors} />
+    </>)
+}
+
+export const AutoCompleteAsyncField = (props: any) => {
+    const { id, options, label, optionKey, optionValue, renderOption, variant, placeholder, errors, onChange, onSearch, value, loading, onOpen, noOptionsText } = props;
+    return (<>
+        <Autocomplete
+            id={id}
+            onOpen={onOpen}
+            options={options}
+            onChange={onChange}
+            value={value}
+            loading={loading}
+            noOptionsText={noOptionsText}
+            getOptionSelected={(option, value) => option[optionKey] === value[optionKey]}
+            getOptionLabel={(option) => option[optionValue]}
+            renderOption={renderOption}
+            renderInput={(params: any) => (
+                <TextField
+                    {...params}
+                    variant={variant}
+                    label={label}
+                    onChange={onSearch}
+                    placeholder={placeholder}
+                    InputProps={{
+                        ...params.InputProps,
+                        endAdornment: (
+                            <React.Fragment>
+                                {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                                {params.InputProps.endAdornment}
+                            </React.Fragment>
+                        ),
+                    }}
+                />
+            )}
+        />
+        <ErrorHelperText error={errors} />
+    </>)
+}
+
+export const PhoneNumberField = (props: any) => {
+    const { label, placeholder, errors, onChange, onlyIndia, value } = props;
+    const countryRestriction = !!onlyIndia ? { onlyCountries: ['in'] } : {};
+    return (<>
+        {label && <InputLabel>{label}</InputLabel>}
+        <PhoneInput
+            value={value}
+            placeholder={placeholder}
+            onChange={onChange}
+            country="in"
+            {...countryRestriction}
         />
         <ErrorHelperText error={errors} />
     </>)

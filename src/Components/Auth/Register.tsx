@@ -1,12 +1,13 @@
 import { Button, Card, CardActions, CardContent, FormControl, Grid, InputLabel, MenuItem, Select } from "@material-ui/core";
 import { makeStyles, Theme } from "@material-ui/core/styles";
+import { parsePhoneNumberFromString } from 'libphonenumber-js';
 import React, { useState } from "react";
 import ReCaptcha from "react-google-recaptcha";
 import { useDispatch } from "react-redux";
 import { DISTRICT_CHOICES, GENDER_TYPES } from "../../Common/constants";
-import { phonePreg, validateEmailAddress } from "../../Common/validation";
+import { validateEmailAddress } from "../../Common/validation";
 import { signupUser } from "../../Redux/actions";
-import { TextInputField } from "../Common/HelperInputFields";
+import { PhoneNumberField, TextInputField } from "../Common/HelperInputFields";
 import PageTitle from "../Common/PageTitle";
 
 const optionalFields = [
@@ -75,10 +76,12 @@ export const Register = () => {
       ) {
         oldError[field] = "Please Enter a Valid Email Address";
         hasError = true;
-      } else if (field === "phone_number" && !phonePreg(form[field])) {
-        oldError[field] =
-          "Please Enter 10/11 digit mobile number or landline as 0<std code><phone number>";
-        hasError = true;
+      } else if (field === "phone_number") {
+        const phoneNumber = parsePhoneNumberFromString(form[field]);
+        if (!form[field] || !phoneNumber?.isPossible()) {
+          oldError[field] = "Please enter valid phone number";
+          hasError = true;
+        }
       } else if (
         (field === "district" || field === "gender") &&
         form[field] === ""
@@ -115,7 +118,11 @@ export const Register = () => {
     e.preventDefault();
     const validForm = validateForm();
     if (validForm) {
-      dispatch(signupUser(form)).then((res: any) => {
+      const data = {
+        ...form,
+        phone_number: parsePhoneNumberFromString(form.phone_number)?.format('E.164'),
+      };
+      dispatch(signupUser(data)).then((res: any) => {
         if (res.status === 201) {
           window.location.href = "/login";
         }
@@ -134,6 +141,12 @@ export const Register = () => {
 
   const handleChange = (e: any) => {
     const { name, value } = e.target;
+    const formOld = { ...form };
+    formOld[name] = value;
+    setForm(formOld);
+  };
+
+  const handleValueChange = (value: any, name: string) => {
     const formOld = { ...form };
     formOld[name] = value;
     setForm(formOld);
@@ -196,17 +209,14 @@ export const Register = () => {
               onChange={handleChange}
               errors={errors.email}
             />
-            <TextInputField
-              type="tel"
-              name="phone_number"
+
+            <PhoneNumberField
               label="Phone Number*"
-              placeholder=""
-              variant="outlined"
-              margin="dense"
               value={form.phone_number}
-              onChange={handleChange}
+              onChange={(value: any) => handleValueChange(value, 'phone_number')}
               errors={errors.phone_number}
             />
+
             <Grid
               container
               justify="space-between"

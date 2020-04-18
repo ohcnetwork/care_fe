@@ -10,6 +10,7 @@ import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 import Pagination from "../Common/Pagination";
 import { FacilityModal } from "./models";
+import { InputSearchBox } from "../Common/SearchBox";
 
 const useStyles = makeStyles((theme) => ({
   paginateTopPadding: {
@@ -17,7 +18,7 @@ const useStyles = makeStyles((theme) => ({
   },
   displayFlex: {
     display: "flex",
-  },
+  }
 }));
 
 export const HospitalList = () => {
@@ -31,7 +32,7 @@ export const HospitalList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [offset, setOffset] = useState(0);
 
-  const limit = 15;
+  const limit = 14;
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -60,6 +61,15 @@ export const HospitalList = () => {
     setCurrentPage(page);
     setOffset(offset);
   };
+  const onSearchSuspects = async (searchValue: string) => {
+    setIsLoading(true);
+    const res = await dispatchAction(getFacilities({ limit, offset, search_text: searchValue }));
+    if (res && res.data) {
+      setData(res.data.results);
+      setTotalCount(res.data.count);
+    }
+    setIsLoading(false);
+  }
 
   let facilityList: any[] = [];
   if (data && data.length) {
@@ -138,7 +148,12 @@ export const HospitalList = () => {
   return (
     <div className="px-2">
       <PageTitle title="Facilities" hideBack={true} />
-      <div className="flex flex-wrap mt-4">{manageFacilities}</div>
+      <InputSearchBox
+        search={onSearchSuspects}
+        placeholder='Search by facility / district'
+        errors=''
+      />
+      <div className="flex flex-wrap mt-2">{manageFacilities}</div>
     </div>
   );
 };

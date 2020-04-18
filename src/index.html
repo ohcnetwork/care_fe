@@ -8,13 +8,17 @@
   <meta name="description" content="Corona Care" />
   <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width, shrink-to-fit=no" />
   <meta property="og:title" content="Corona Care" />
-  <meta property="og:description" content="CoronaSafe Network is an open-source public utility designed by a multi-disciplinary team of innovators and volunteers who are working on a model to support Government efforts with full understanding and support of Government of Kerala." />
-  <meta property="og:image" content="https://care-staging-coronasafe.s3.amazonaws.com/static/images/logos/ksdma_logo.png" />
+  <meta property="og:description"
+    content="CoronaSafe Network is an open-source public utility designed by a multi-disciplinary team of innovators and volunteers who are working on a model to support Government efforts with full understanding and support of Government of Kerala." />
+  <meta property="og:image"
+    content="https://care-staging-coronasafe.s3.amazonaws.com/static/images/logos/ksdma_logo.png" />
   <meta property="og:url" content="https://care.coronasafe.in/" />
   <meta property="og:site_name" content="Care CoronaSafe Network." />
   <meta name="twitter:title" content="Corona Care" />
-  <meta name="twitter:description" content="CoronaSafe Network is an open-source public utility designed by a multi-disciplinary team of innovators and volunteers who are working on a model to support Government efforts with full understanding and support of Government of Kerala." />
-  <meta name="twitter:image" content="https://care-staging-coronasafe.s3.amazonaws.com/static/images/logos/ksdma_logo.png" />
+  <meta name="twitter:description"
+    content="CoronaSafe Network is an open-source public utility designed by a multi-disciplinary team of innovators and volunteers who are working on a model to support Government efforts with full understanding and support of Government of Kerala." />
+  <meta name="twitter:image"
+    content="https://care-staging-coronasafe.s3.amazonaws.com/static/images/logos/ksdma_logo.png" />
   <meta name="twitter:card" content="summary" />
 
 
@@ -25,10 +29,63 @@
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
   <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
-  
+  <style>
+    @media (min-width: 768px) {
+      #google_translate_element {
+        top: 0;
+      }
+    }
+
+    @media (max-width: 767px) {
+      #google_translate_element {
+        bottom: 0;
+      }
+    }
+
+    #google_translate_element {
+      position: absolute;
+      right: 15px;
+      opacity: 0.7;
+      z-index: 2;
+    }
+
+    #google_translate_element * {
+      display: flex;
+    }
+
+    /* Fix to prevent double scrollbar */
+
+    html.translated-ltr body {
+      top: 0 !important;
+    }
+
+    html.translated-ltr .h-screen {
+      padding-top: 40px;
+    }
+
+    html.translated-ltr #google_translate_element {
+      top: 40px;
+    }
+  </style>
 </head>
+
 <body>
-<noscript>You need to enable JavaScript to run this app.</noscript>
-<div id="root"></div>
+  <noscript>You need to enable JavaScript to run this app.</noscript>
+  <div id="google_translate_element"></div>
+  <div id="root"></div>
+  <script type="text/javascript">
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement(
+        {
+          pageLanguage: 'en',
+          layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+          includedLanguages: 'bn,gu,hi,kn,ml,mr,pa,sd,ta,te,ur',
+        },
+        'google_translate_element');
+    }
+  </script>
+  <script type="text/javascript"
+    src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </body>
+
 </html>

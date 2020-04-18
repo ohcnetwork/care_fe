@@ -39,22 +39,29 @@ export interface OptionsType {
   disabled?: boolean;
 }
 
-export interface ConsultationModal {
-  id?: number;
-  facility_name?: string;
+export interface ConsultationModel {
+  admission_date?: string;
+  admitted?: boolean;
+  admitted_to?: string;
+  category?: string;
+  created_date?: string;
+  discharge_date?: string;
   examination_details?: string;
   existing_medication?: string;
+  facility?: number;
+  facility_name?: string;
+  id?: number;
+  modified_date?: string;
+  other_symptoms?: string;
+  patient?: number;
   prescribed_medication?: string;
+  referred_to?: number | null;
   suggestion?: string;
   suggestion_text?: string;
-  admitted?: boolean;
-  admission_date?: string;
-  discharge_date?: string;
-  patient?: number;
-  facility?: number;
-  referred_to?: number;
+  symptoms?: Array<number>;
+  symptoms_text?: string;
+  symptoms_onset_date?: string;
 }
-
 export interface PatientStatsModel {
   id?: number;
   entryDate?: string;
@@ -63,4 +70,15 @@ export interface PatientStatsModel {
   num_patients_isolation?: number;
   num_patient_referred?: number;
   entry_date?: number;
+}
+
+export interface DupPatientModel {
+  id: number;
+  gender: string;
+  phone_number: string;
+  patient_id: number
+  name: string
+  date_of_birth: string;
+  year_of_birth: number;
+  state_id: number;
 }

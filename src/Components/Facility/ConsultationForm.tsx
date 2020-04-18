@@ -1,12 +1,14 @@
 import { Box, Button, Card, CardContent, FormControlLabel, InputLabel, Radio, RadioGroup } from "@material-ui/core";
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
-import { navigate } from "hookrouter";
-import React, { useReducer, useState } from "react";
+import { debounce } from "lodash";
+import moment from "moment";
+import React, { useCallback, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
 import { ADMITTED_TO, CONSULTATION_SUGGESTION, PATIENT_CATEGORY, SYMPTOM_CHOICES } from "../../Common/constants";
-import { createConsultation } from "../../Redux/actions";
+import { statusType, useAbortableEffect } from "../../Common/utils";
+import { createConsultation, getConsultation, getFacilities, updateConsultation } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import { DateInputField, ErrorHelperText, MultilineInputField, MultiSelectField, NativeSelectField, SelectField } from "../Common/HelperInputFields";
+import { AutoCompleteAsyncField, DateInputField, ErrorHelperText, MultilineInputField, MultiSelectField, NativeSelectField, SelectField } from "../Common/HelperInputFields";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 
@@ -64,14 +66,9 @@ const suggestionTypes = [
   ...CONSULTATION_SUGGESTION
 ];
 
-const symptomChoices = [
-  ...SYMPTOM_CHOICES
-];
+const symptomChoices = [...SYMPTOM_CHOICES];
 
-const admittedToChoices = [
-  "Select",
-  ...ADMITTED_TO
-];
+const admittedToChoices = ["Select", ...ADMITTED_TO];
 
 const categoryChoices = [
   {
@@ -85,14 +82,51 @@ const goBack = () => {
   window.history.go(-1);
 };
 
-export const Consultation = (props: any) => {
+export const ConsultationForm = (props: any) => {
   const dispatchAction: any = useDispatch();
   const { facilityId, patientId, id } = props;
   const [state, dispatch] = useReducer(consultationFormReducer, initialState);
+  const [facilityLoading, isFacilityLoading] = useState(false);
+  const [selectedFacility, setSelectedFacility] = useState(null);
+  const [hasSearchText, setHasSearchText] = useState(false);
+  const [facilityList, setFacilityList] = useState<any>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const headerText = !id ? "OP Triage / Consultation" : "Consultation";
-  const buttonText = !id ? "Add OP Triage / Consultation" : "Update";
+  const headerText = !id ? "OP Triage / Consultation" : "Edit OP Triage / Consultation";
+  const buttonText = !id ? "Add OP Triage / Consultation" : "Update OP Triage / Consultation";
+
+  const fetchData = useCallback(
+    async (status: statusType) => {
+      setIsLoading(true);
+      const res = await dispatchAction(getConsultation(id));
+      if (!status.aborted) {
+        if (res && res.data) {
+          const formData = {
+            ...res.data,
+            hasSymptom: !!res.data.symptoms && !!res.data.symptoms.length && !!res.data.symptoms.filter((i: number) => i !== 1).length,
+            otherSymptom: !!res.data.symptoms && !!res.data.symptoms.length && !!res.data.symptoms.filter((i: number) => i === 9).length,
+            admitted: res.data.admitted ? String(res.data.admitted) : 'false',
+            admitted_to: res.data.admitted_to ? res.data.admitted_to : '',
+            category: res.data.category ? res.data.category : '',
+          };
+          dispatch({ type: "set_form", form: formData });
+        } else {
+          goBack();
+        }
+        setIsLoading(false);
+      }
+    },
+    [dispatchAction, id]
+  );
+
+  useAbortableEffect(
+    (status: statusType) => {
+      if (id) {
+        fetchData(status);
+      }
+    },
+    [dispatch, fetchData]
+  );
 
   const validateForm = () => {
     let errors = { ...initError };
@@ -130,6 +164,12 @@ export const Consultation = (props: any) => {
             invalidForm = true;
           }
           return;
+        case "referred_to":
+          if (state.form.suggestion === 'R' && !state.form[field]) {
+            errors[field] = "Please select the referred to facility";
+            invalidForm = true;
+          }
+          return;
         default:
           return;
       }
@@ -162,9 +202,9 @@ export const Consultation = (props: any) => {
         discharge_date: state.form.discharge_date,
         patient: Number(patientId),
         facility: Number(facilityId),
-        referred_to: null,
+        referred_to: state.form.suggestion === 'R' ? state.form.referred_to : undefined,
       };
-      const res = await dispatchAction(createConsultation(data));
+      const res = await dispatchAction(id ? updateConsultation(id, data) : createConsultation(data));
       setIsLoading(false);
       if (res && res.data) {
         dispatch({ type: "set_form", form: initForm });
@@ -176,8 +216,8 @@ export const Consultation = (props: any) => {
           Notification.Success({
             msg: "Consultation created successfully"
           });
-          navigate(`/facility/${facilityId}/patient/${patientId}`);
         }
+        goBack();
       }
     }
   };
@@ -188,6 +228,29 @@ export const Consultation = (props: any) => {
     form[name] = value;
     dispatch({ type: "set_form", form });
   };
+
+  const handleValueChange = (value: any, name: string) => {
+    const form = { ...state.form };
+    form[name] = value;
+    dispatch({ type: "set_form", form });
+    if (name === 'referred_to' && !value) {
+      setFacilityList([]);
+      isFacilityLoading(false);
+    }
+  };
+
+  const onFacilitySearch = useCallback(debounce(async (text: string) => {
+    if (text) {
+      const res = await dispatchAction(getFacilities({ limit: 50, offset: 0, search_text: text, all: true }));
+      if (res && res.data) {
+        setFacilityList(res.data.results);
+      }
+      isFacilityLoading(false);
+    } else {
+      setFacilityList([]);
+      isFacilityLoading(false);
+    }
+  }, 300), []);
 
   const handleSymptomChange = (e: any, child?: any) => {
     const form = { ...state.form };
@@ -202,9 +265,11 @@ export const Consultation = (props: any) => {
 
 
   const handleDateChange = (date: any, key: string) => {
-    let form = { ...state.form };
-    form[key] = date;
-    dispatch({ type: "set_form", form });
+    if (moment(date).isValid()) {
+      const form = { ...state.form };
+      form[key] = date;
+      dispatch({ type: "set_form", form });
+    }
   };
 
   if (isLoading) {
@@ -331,6 +396,35 @@ export const Consultation = (props: any) => {
                   />
                   <ErrorHelperText error={state.errors.suggestion} />
                 </div>
+
+                {state.form.suggestion === 'R' && <div>
+                  <InputLabel className="mb-2">Referred To Facility</InputLabel>
+                  <AutoCompleteAsyncField
+                    name="referred_to"
+                    variant="outlined"
+                    value={selectedFacility}
+                    options={facilityList}
+                    onOpen={() => setFacilityList([])}
+                    onSearch={(e: any) => [
+                      isFacilityLoading(true),
+                      setHasSearchText(!!e.target.value),
+                      onFacilitySearch(e.target.value)
+                    ]}
+                    onChange={(e: any, selected: any) => [
+                      setSelectedFacility(selected),
+                      handleValueChange(selected?.id, 'referred_to'),
+                    ]}
+                    optionKey="id"
+                    optionValue="name"
+                    loading={facilityLoading}
+                    placeholder="Search by facility name"
+                    noOptionsText={hasSearchText ? "No facility found, please try again" : "Start typing to begin search"}
+                    renderOption={(option: any) => (
+                      <div>{option.name} {option.district_object ? `- ${option.district_object.name}` : ''}</div>
+                    )}
+                  />
+                  <ErrorHelperText error={state.errors.referred_to} />
+                </div>}
 
                 <div className="flex">
                   <div className="flex-1">

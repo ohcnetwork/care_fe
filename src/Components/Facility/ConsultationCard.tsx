@@ -2,10 +2,10 @@ import { CardContent, Grid, Typography } from "@material-ui/core";
 import { navigate } from "hookrouter";
 import moment from "moment";
 import React from "react";
-import { ConsultationModal } from "./models";
+import { ConsultationModel } from "./models";
 
 interface ConsultationProps {
-  itemData: ConsultationModal;
+  itemData: ConsultationModel;
   isLastConsultation?: boolean;
 }
 
@@ -15,67 +15,43 @@ export const ConsultationCard = (props: ConsultationProps) => {
     <div className="block border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black mt-4">
       <CardContent>
         <Grid container justify="space-between" alignItems="center">
-          <Grid item xs={11} container spacing={1}>
-            <Grid item xs={8}>
+          <Grid item xs={12} container spacing={1}>
+            <Grid item xs={7}>
               <Typography>
-                <span className="w3-text-grey">Facility:</span>{" "}
+                <span className="w3-text-grey">Facility: </span>
                 {itemData.facility_name}
               </Typography>
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={5}>
               <Typography>
-                <span className="w3-text-grey">Patient:</span>{" "}
-                {itemData.patient}
+                <span className="w3-text-grey">Updated on: </span>
+                {itemData.created_date ? moment(itemData.created_date).format("lll") : "-"}
               </Typography>
             </Grid>
-            <Grid item xs={8}>
-              <Typography>
-                <span className="w3-text-grey">Suggestion:</span>{" "}
-                {itemData.suggestion_text}
+            <Grid item xs={7}>
+              <Typography className="capitalize">
+                <span className="w3-text-grey">Suggestion: </span>
+                {itemData.suggestion_text?.toLocaleLowerCase()}
               </Typography>
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={5}>
               <Typography>
-                <span className="w3-text-grey">Admitted:</span>{" "}
+                <span className="w3-text-grey">Admitted: </span>
                 {itemData.admitted ? "Yes" : "No"}
               </Typography>
             </Grid>
-            {itemData.existing_medication && (
-              <Grid item xs={12}>
-                <Typography>
-                  <span className="w3-text-grey">Existing Medication:</span>{" "}
-                  {itemData.existing_medication}
-                </Typography>
-              </Grid>
-            )}
-            {itemData.examination_details && (
-              <Grid item xs={12}>
-                <Typography>
-                  <span className="w3-text-grey">Examination Details:</span>{" "}
-                  {itemData.examination_details}
-                </Typography>
-              </Grid>
-            )}
-            {itemData.prescribed_medication && (
-              <Grid item xs={12}>
-                <Typography>
-                  <span className="w3-text-grey">Prescribed Medication:</span>{" "}
-                  {itemData.prescribed_medication}
-                </Typography>
-              </Grid>
-            )}
             {itemData.admission_date && (
-              <Grid item xs={6}>
-                <Typography style={{ fontSize: "12px" }}>
-                  <span className="w3-text-grey">Admitted on :</span>{" "}
+              <Grid item xs={7}>
+                <Typography>
+                  <span className="w3-text-grey">Admitted on: </span>
                   {moment(itemData.admission_date).format("lll")}
                 </Typography>
               </Grid>
             )}
             {itemData.discharge_date && (
-              <Grid item xs={6}>
-                <Typography style={{ fontSize: "12px" }}>
-                  <span className="w3-text-grey">Discharged on:</span>{" "}
+              <Grid item xs={5}>
+                <Typography>
+                  <span className="w3-text-grey">Discharged on: </span>
                   {moment(itemData.discharge_date).format("lll")}
                 </Typography>
               </Grid>
@@ -83,8 +59,8 @@ export const ConsultationCard = (props: ConsultationProps) => {
           </Grid>
           <div className="mt-4 flex justify-between w-full">            
             <button className="px-4 py-2 shadow border bg-white rounded-md border border-grey-500 whitespace-no-wrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300 text-center"
-              onClick={() => navigate(`/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/daily-rounds-list`)}>
-              View Daily Rounds
+              onClick={() => navigate(`/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/`)}>
+              View Consultation / Daily Rounds Details
             </button>
             {isLastConsultation && (<button className="mr-4 px-4 py-2 shadow border bg-white rounded-md border border-grey-500 whitespace-no-wrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300 text-center"
               onClick={

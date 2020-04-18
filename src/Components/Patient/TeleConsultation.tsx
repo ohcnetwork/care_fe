@@ -1,10 +1,9 @@
-import React, { useState } from "react"
+import { Box, Button, Card, CardActions, CardContent, CardHeader, Checkbox, Grid, Typography } from "@material-ui/core";
 import { makeStyles, Theme } from '@material-ui/core/styles';
-import { useDispatch } from "react-redux";
-import { Box, Grid, Checkbox, Card, CardHeader, CardContent, CardActions, Button, FormControl, InputLabel, Select, MenuItem, Typography, FormLabel, RadioGroup, Radio, FormControlLabel } from "@material-ui/core";
-import { TextInputField } from "../Common/HelperInputFields";
-import { validateEmailAddress, phonePreg } from "../../Common/validation";
 import { isEmpty } from "lodash";
+import React, { useState } from "react";
+import { useDispatch } from "react-redux";
+import { TextInputField } from "../Common/HelperInputFields";
 
 
 const useStyles = makeStyles((theme: Theme) => ({

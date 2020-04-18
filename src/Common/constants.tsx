@@ -31,21 +31,23 @@ export const VEHICLE_TYPES: Array<OptionsType> = [
 
 export const FACILITY_TYPES: Array<OptionsType> = [
   { id: 1, text: "Educational Inst" },
-  { id: 2, text: "Hospital" },
+  { id: 2, text: "Private Hospital" },
   { id: 3, text: "Other" },
   { id: 4, text: "Hostel" },
   { id: 5, text: "Hotel" },
-  { id: 6, text: "Lodge" }
+  { id: 6, text: "Lodge" },
+  { id: 7, text: "TeleMedicine" },
+  { id: 900, text: "Primary Health Centres" },
+  { id: 901, text: "24x7 Public Health Centres" },
+  { id: 902, text: "Family Health Centres" },
+  { id: 903, text: "Community Health Centres" },
+  { id: 920, text: "Urban Primary Health Center" },
+  { id: 930, text: "Taluk Hospitals" },
+  { id: 931, text: "Taluk Headquarters Hospitals" },
+  { id: 940, text: "Women and Child Health Centres" },
+  { id: 950, text: "General hospitals" },
+  { id: 960, text: "District Hospitals" },
 ];
-
-export const FACILITY_ID = {
-  educational: 1,
-  hospital: 2,
-  other: 3,
-  hostel: 4,
-  hotel: 5,
-  lodge: 6,
-};
 
 export const BED_TYPES: Array<OptionsType> = [
   { id: 1, text: "Normal" },
@@ -80,6 +82,13 @@ export const SYMPTOM_CHOICES: Array<OptionsType> = [
   { id: 6, text: "MYALGIA" },
   { id: 7, text: "ABDOMINAL DISCOMFORT" },
   { id: 8, text: "VOMITING/DIARRHOEA" },
+  { id: 10, text: "SARI" },
+  { id: 11, text: "SPUTUM" },
+  { id: 12, text: "NAUSEA" },
+  { id: 13, text: "CHEST PAIN" },
+  { id: 14, text: "HEMOPTYSIS" },
+  { id: 15, text: "NASAL DISCHARGE" },
+  { id: 16, text: "BODY ACHE" },
   { id: 9, text: "OTHERS" },
 ];
 
@@ -125,12 +134,12 @@ export const PATIENT_CATEGORY = [
 ];
 
 export const CURRENT_HEALTH_CHANGE = [
-  { id: 0, text: 'No Change' },
-  { id: 1, text: 'Requires Ventilator' },
-  { id: 2, text: 'Worse' },
-  { id: 3, text: 'Status Quo' },
-  { id: 4, text: 'Better' },
-]
+  { id: 0, text: 'NO DATA', desc: '', },
+  { id: 3, text: 'STATUS QUO', desc: 'No Change' },
+  { id: 4, text: 'BETTER', desc: 'Better' },
+  { id: 2, text: 'WORSE', desc: 'Worse' },
+  { id: 1, text: 'REQUIRES VENTILATOR', desc: 'Requires Ventilator' },
+];
 
 export const SAMPLE_TEST_STATUS = [
   { id: 1, text: "REQUEST_SUBMITTED", desc: "Request Submitted" },
@@ -156,3 +165,33 @@ export const ROLE_STATUS_MAP = {
   DistrictAdmin: ["APPROVED", "DENIED", "SENT_TO_COLLECTON_CENTRE", "RECEIVED_AND_FORWARED"],
   StateLabAdmin: ["APPROVED", "DENIED", "SENT_TO_COLLECTON_CENTRE", "RECEIVED_AND_FORWARED", "RECEIVED_AT_LAB", "COMPLETED"],
 };
+
+export const DISEASE_STATUS = [
+  "SUSPECTED",
+  "POSITIVE",
+  "NEGATIVE",
+  "RECOVERY",
+  "RECOVERED",
+  "EXPIRED",
+];
+
+export const BLOOD_GROUPS = [
+  "A+",
+  "A-",
+  "B+",
+  "B-",
+  "AB+",
+  "AB-",
+  "O+",
+  "O-",
+];
+
+export const SAMPLE_TYPE_CHOICES = [
+  "UNKNOWN",
+  "BA/ETA",
+  "TS/NPS/NS",
+  "Blood in EDTA",
+  "Acute Sera",
+  "Covalescent sera",
+  "OTHER TYPE",
+];

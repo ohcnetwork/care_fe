@@ -1,22 +1,40 @@
 import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
+import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import { navigate } from "hookrouter";
 import React, { useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
+import { SAMPLE_TYPE_CHOICES } from "../../Common/constants";
 import { createSampleTest } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import { CheckboxField, MultilineInputField } from "../Common/HelperInputFields";
+import { CheckboxField, MultilineInputField, SelectField, TextInputField } from "../Common/HelperInputFields";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
+import { SampleTestModel } from "./models";
 
-const initForm: any = {
+const sampleTestTypes = [...SAMPLE_TYPE_CHOICES];
+
+const initForm: SampleTestModel = {
   isFastTrack: false,
   fast_track: "",
-  notes: ""
+  notes: "",
+  atypical_presentation: "",
+  diagnosis: "",
+  diff_diagnosis: "",
+  doctor_name: "",
+  etiology_identified: "",
+  has_ari: false,
+  has_sari: false,
+  is_atypical_presentation: false,
+  is_unusual_course: false,
+  sample_type: "UNKNOWN",
+  sample_type_other: "",
 };
+
+const initError = Object.assign({}, ...Object.keys(initForm).map(k => ({ [k]: "" })));
 
 const initialState = {
   form: { ...initForm },
-  errors: { ...initForm }
+  errors: { ...initError }
 };
 
 const sampleTestFormReducer = (state = initialState, action: any) => {
@@ -48,13 +66,25 @@ export const SampleTest = (props: any) => {
   const buttonText = "Confirm your request to send sample for testing";
 
   const validateForm = () => {
-    let errors = { ...initForm };
+    let errors = { ...initError };
     let invalidForm = false;
     Object.keys(state.form).forEach((field, i) => {
       switch (field) {
         case "fast_track":
           if (state.form.isFastTrack && !state.form[field]) {
-            errors[field] = "Field is required";
+            errors[field] = "Please provide reasons for fast-track testing";
+            invalidForm = true;
+          }
+          break;
+        case "sample_type_other":
+          if (state.form.sample_type === 'OTHER TYPE' && !state.form[field]) {
+            errors[field] = "Please provide details of the sample type";
+            invalidForm = true;
+          }
+          break;
+        case "atypical_presentation":
+          if (state.form.is_atypical_presentation && !state.form[field]) {
+            errors[field] = "Please provide details of atypical presentation";
             invalidForm = true;
           }
           break;
@@ -75,11 +105,22 @@ export const SampleTest = (props: any) => {
     const validForm = validateForm();
     if (validForm) {
       setIsLoading(true);
-      const data = {
+      const data: SampleTestModel = {
         fast_track: state.form.isFastTrack ? state.form.fast_track : undefined,
         notes: state.form.notes ? state.form.notes : undefined,
-        facility: facilityId, 
+        facility: facilityId,
         patient: patientId,
+        has_ari: state.form.has_ari,
+        has_sari: state.form.has_sari,
+        is_unusual_course: state.form.is_unusual_course,
+        is_atypical_presentation: state.form.is_atypical_presentation,
+        atypical_presentation: state.form.is_atypical_presentation ? state.form.atypical_presentation : undefined,
+        diagnosis: state.form.diagnosis ? state.form.diagnosis : undefined,
+        diff_diagnosis: state.form.diff_diagnosis ? state.form.diff_diagnosis : undefined,
+        doctor_name: state.form.doctor_name ? state.form.doctor_name : undefined,
+        etiology_identified: state.form.etiology_identified ? state.form.etiology_identified : undefined,
+        sample_type: state.form.sample_type,
+        sample_type_other: state.form.sample_type === 'OTHER TYPE' ? state.form.sample_type_other : undefined,
       };
       const res = await dispatchAction(createSampleTest(data, { patientId }));
       setIsLoading(false);
@@ -94,7 +135,7 @@ export const SampleTest = (props: any) => {
   };
 
   const handleChange = (e: any) => {
-    let form = { ...state.form };
+    const form = { ...state.form };
     form[e.target.name] = e.target.value;
     dispatch({ type: "set_form", form });
   };
@@ -106,9 +147,9 @@ export const SampleTest = (props: any) => {
     dispatch({ type: "set_form", form });
   };
 
-  // const handleCancel = () => {
-  //   navigate(`/facility/${facilityId}/patient/${patientId}`);
-  // };
+  const goBack = () => {
+    window.history.go(-1);
+  };
 
   if (isLoading) {
     return <Loading />;
@@ -119,62 +160,178 @@ export const SampleTest = (props: any) => {
       <PageTitle title={headerText} />
       <div className="mt-4">
         <Card>
-          <form onSubmit={e => handleSubmit(e)}>
-            <CardContent>
-              <CheckboxField
-                checked={state.form.isFastTrack}
-                onChange={handleCheckboxFieldChange}
-                name="isFastTrack"
-                label="Is fast-track testing required?"
-              />
-            </CardContent>
-
-            {state.form.isFastTrack && (<CardContent>
-              <InputLabel id="med-history-details-label">
-                Provide reasons for fast-track testing
-              </InputLabel>
-              <MultilineInputField
-                rows={5}
-                name="fast_track"
-                variant="outlined"
-                margin="dense"
-                type="text"
-                InputLabelProps={{ shrink: !!state.form.fast_track }}
-                value={state.form.fast_track}
-                onChange={handleChange}
-                errors={state.errors.fast_track}
-              />
-            </CardContent>)}
-
-            <CardContent>
-              <InputLabel id="med-history-details-label">
-                Notes (Optional)
-              </InputLabel>
-              <MultilineInputField
-                rows={5}
-                name="notes"
-                variant="outlined"
-                margin="dense"
-                type="text"
-                InputLabelProps={{ shrink: !!state.form.notes }}
-                value={state.form.notes}
-                onChange={handleChange}
-                errors={state.errors.notes}
-              />
-            </CardContent>
-
-            <CardContent>
-              <Button
-                fullWidth
-                color="primary"
-                variant="contained"
-                type="submit"
-                onClick={e => handleSubmit(e)}
+          <CardContent>
+            <form onSubmit={e => handleSubmit(e)}>
+              <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+                <div>
+                  <InputLabel>Sample Test Type*</InputLabel>
+                  <SelectField
+                    name="sample_type"
+                    variant="outlined"
+                    margin="dense"
+                    optionArray={true}
+                    value={state.form.sample_type}
+                    options={sampleTestTypes}
+                    onChange={handleChange}
+                    errors={state.errors.sample_type}
+                  />
+                </div>
+                <div className="flex items-center">
+                  <CheckboxField
+                    checked={state.form.isFastTrack}
+                    onChange={handleCheckboxFieldChange}
+                    name="isFastTrack"
+                    label="Is fast-track testing required?"
+                  />
+                </div>
+                {state.form.sample_type === 'OTHER TYPE' && (<div>
+                  <InputLabel>Sample Test Type Details*</InputLabel>
+                  <MultilineInputField
+                    rows={4}
+                    name="sample_type_other"
+                    variant="outlined"
+                    margin="dense"
+                    type="text"
+                    value={state.form.sample_type_other}
+                    onChange={handleChange}
+                    errors={state.errors.sample_type_other}
+                  />
+                </div>)}
+                {state.form.isFastTrack && (<div>
+                  <InputLabel>Provide reasons for fast-track testing</InputLabel>
+                  <MultilineInputField
+                    rows={4}
+                    name="fast_track"
+                    variant="outlined"
+                    margin="dense"
+                    type="text"
+                    InputLabelProps={{ shrink: !!state.form.fast_track }}
+                    value={state.form.fast_track}
+                    onChange={handleChange}
+                    errors={state.errors.fast_track}
+                  />
+                </div>)}
+              </div>
+              <div className="mt-4 grid gap-4 grid-cols-1 md:grid-cols-2">
+                <div>
+                  <InputLabel>Doctor's Name</InputLabel>
+                  <TextInputField
+                    name="doctor_name"
+                    variant="outlined"
+                    margin="dense"
+                    value={state.form.doctor_name}
+                    onChange={handleChange}
+                    errors={state.errors.doctor_name}
+                  />
+                </div>
+                <div className="flex items-center">
+                  <CheckboxField
+                    checked={state.form.is_atypical_presentation}
+                    onChange={handleCheckboxFieldChange}
+                    name="is_atypical_presentation"
+                    label="Is atypical presentation?"
+                  />
+                </div>
+                <div>
+                  <InputLabel>Diagnosis</InputLabel>
+                  <MultilineInputField
+                    rows={4}
+                    name="diagnosis"
+                    variant="outlined"
+                    margin="dense"
+                    type="text"
+                    value={state.form.diagnosis}
+                    onChange={handleChange}
+                    errors={state.errors.diagnosis}
+                  />
+                </div>
+                <div>
+                  <InputLabel>Etiology identified</InputLabel>
+                  <MultilineInputField
+                    rows={4}
+                    name="etiology_identified"
+                    variant="outlined"
+                    margin="dense"
+                    type="text"
+                    value={state.form.etiology_identified}
+                    onChange={handleChange}
+                    errors={state.errors.etiology_identified}
+                  />
+                </div>
+                <div>
+                  <InputLabel>Differential diagnosis</InputLabel>
+                  <MultilineInputField
+                    rows={4}
+                    name="diff_diagnosis"
+                    variant="outlined"
+                    margin="dense"
+                    type="text"
+                    value={state.form.diff_diagnosis}
+                    onChange={handleChange}
+                    errors={state.errors.diff_diagnosis}
+                  />
+                </div>
+                {state.form.is_atypical_presentation && (<div>
+                  <InputLabel>Atypical presentation details*</InputLabel>
+                  <MultilineInputField
+                    rows={4}
+                    name="atypical_presentation"
+                    variant="outlined"
+                    margin="dense"
+                    type="text"
+                    value={state.form.atypical_presentation}
+                    onChange={handleChange}
+                    errors={state.errors.atypical_presentation}
+                  />
+                </div>)}
+              </div>
+              <div className="mt-4 grid gap-4 grid-cols-1 md:grid-cols-2">
+                <div className="flex items-center">
+                  <CheckboxField
+                    checked={state.form.has_sari}
+                    onChange={handleCheckboxFieldChange}
+                    name="has_sari"
+                    label="SARI - Severe Acute Respiratory illness ?"
+                  />
+                </div>
+                <div className="flex items-center">
+                  <CheckboxField
+                    checked={state.form.has_ari}
+                    onChange={handleCheckboxFieldChange}
+                    name="has_ari"
+                    label="ARI - Acute Respiratory illness ?"
+                  />
+                </div>
+                <div className="flex items-center">
+                  <CheckboxField
+                    checked={state.form.is_unusual_course}
+                    onChange={handleCheckboxFieldChange}
+                    name="is_unusual_course"
+                    label="Is unusual course?"
+                  />
+                </div>
+              </div>
+              <div
+                className="flex justify-between mt-4"
               >
-                {buttonText}
-              </Button>
-            </CardContent>
-          </form>
+                <Button
+                  color="default"
+                  variant="contained"
+                  type="button"
+                  onClick={goBack}
+                > Cancel </Button>
+                <Button
+                  color="primary"
+                  variant="contained"
+                  type="submit"
+                  style={{ marginLeft: "auto" }}
+                  startIcon={<CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>}
+                  onClick={e => handleSubmit(e)}
+                > {buttonText} </Button>
+              </div>
+
+            </form>
+          </CardContent>
         </Card>
       </div>
     </div>

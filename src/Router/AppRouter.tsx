@@ -5,31 +5,41 @@ import Header from "../Components/Common/Header";
 import { Analytics } from "../Components/Dashboard/Analytics";
 import { BedCapacityForm } from "../Components/Facility/BedCapacityForm";
 import { CareCenterJoinForm } from "../Components/Facility/CareCenterJoinForm";
-import { Consultation } from "../Components/Facility/Consultation";
+import { ConsultationForm } from "../Components/Facility/ConsultationForm";
 import { DoctorCapacityForm } from "../Components/Facility/DoctorCapacityForm";
 import { FacilityCreate } from "../Components/Facility/FacilityCreate";
 import { FacilityHome } from "../Components/Facility/FacilityHome";
 import { HospitalList } from "../Components/Facility/HospitalList";
 import { TriageForm } from "../Components/Facility/TriageForm";
+import { ConsultationDetails } from "../Components/Facility/ConsultationDetails";
+import { DailyRoundListDetails } from "../Components/Patient/DailyRoundListDetails";
 import { DailyRounds } from "../Components/Patient/DailyRounds";
-import { DailyRoundsList } from "../Components/Patient/DailyRoundsList";
 import { PatientManager } from "../Components/Patient/ManagePatients";
 import { PatientDischarge } from "../Components/Patient/PatientDischarge";
 import { PatientHome } from "../Components/Patient/PatientHome";
 import { PatientRegister } from "../Components/Patient/PatientRegister";
+import { SampleDetails } from "../Components/Patient/SampleDetails";
+import SampleReport from "../Components/Patient/SamplePreview";
 import { SampleTest } from "../Components/Patient/SampleTest";
 import SampleViewAdmin from "../Components/Patient/SampleViewAdmin";
-import { SampleDetails } from "../Components/Patient/SampleDetails";
 import { TeleConsultation } from "../Components/Patient/TeleConsultation";
 import { TreatmentForm } from "../Components/Patient/TreatmentForm";
 import ManageUsers from "../Components/Users/ManageUsers";
 
 const routes = {
   "/": () => <HospitalList />,
+  "/users": () => <ManageUsers />,
+  "/join": () => <CareCenterJoinForm />,
   "/analytics": () => <Analytics />,
-  "/ambulancelist": () => <AmbulanceList />,
-  "/samplelist": () => <SampleViewAdmin />,
-  "/samplelist/:id": ({ id }: any) => <SampleDetails id={id} />,
+  "/ambulance": () => <AmbulanceList />,
+  "/patients": () => <PatientManager />,
+  "/patient/:id": ({ id }: any) => <PatientHome id={id} />,
+  "/patient/tele-consult": () => <TeleConsultation />,
+  "/patient/discharge": () => <PatientDischarge />,
+  "/patient/treatment": () => <TreatmentForm />,
+  "/sample": () => <SampleViewAdmin />,
+  "/sample/:id": ({ id }: any) => <SampleDetails id={id} />,
+  '/sample/report/:patientId': ({ patientId }: any) => <SampleReport id={patientId} />,
   "/facility": () => <HospitalList />,
   "/facility/create": () => <FacilityCreate />,
   "/facility/:facilityId/update": ({ facilityId }: any) => (
@@ -59,12 +69,6 @@ const routes = {
   "/facility/:facilityId/patient/:id/update": ({ facilityId, id }: any) => (
     <PatientRegister facilityId={facilityId} id={id} />
   ),
-  "/facility/:facilityId/patient/:patientId/consultation": ({ facilityId, patientId }: any) => (
-    <Consultation facilityId={facilityId} patientId={patientId} />
-  ),
-  "/facility/:facilityId/patient/:patientId/consultation/:id": ({ facilityId, patientId, id }: any) => (
-    <Consultation facilityId={facilityId} patientId={patientId} id={id} />
-  ),
   "/facility/:facilityId/patient/:patientId/sample-test": ({ facilityId, patientId }: any) => (
     <SampleTest facilityId={facilityId} patientId={patientId} />
   ),
@@ -83,23 +87,24 @@ const routes = {
   "/facility/:facilityId/doctor/:id": ({ facilityId, id }: any) => (
     <DoctorCapacityForm facilityId={facilityId} id={id} />
   ),
-  "/facility/:facilityId/consultation/:id": ({ facilityId, id }: any) => (
-    <Consultation facilityId={facilityId} id={id} />
+  "/facility/:facilityId/patient/:patientId/consultation": ({ facilityId, patientId }: any) => (
+    <ConsultationForm facilityId={facilityId} patientId={patientId} />
   ),
-  "/facility/:facilityId/patient/:patientId/consultation/:id/daily-rounds": ({facilityId, patientId, id}: any) =>
-     <DailyRounds facilityId={facilityId} patientId={patientId} consultationId={id}/>,
-
-  "/facility/:facilityId/patient/:patientId/consultation/:id/daily-rounds-list": ({facilityId, patientId, id}: any) =>
-      <DailyRoundsList facilityId={facilityId} patientId={patientId} consultationId={id}/>,
-
-  "/patients": () => <PatientManager />,
-  "/patient/:id": ({ id }: any) => <PatientHome id={id} />,
-  "/patient/tele-consult": () => <TeleConsultation />,
-  "/patient/discharge": () => <PatientDischarge />,
-  "/patient/treatment": () => <TreatmentForm />,
-  "/users": () => <ManageUsers />,
-  "/join": () => <CareCenterJoinForm />,
-  "/daily-rounds-list": () => <DailyRoundsList />
+  "/facility/:facilityId/patient/:patientId/consultation/:id/update": ({ facilityId, patientId, id }: any) => (
+    <ConsultationForm facilityId={facilityId} patientId={patientId} id={id} />
+  ),
+  "/facility/:facilityId/patient/:patientId/consultation/:id/": ({ facilityId, patientId, id }: any) => (
+    <ConsultationDetails facilityId={facilityId} patientId={patientId} consultationId={id} />
+  ),
+  "/facility/:facilityId/patient/:patientId/consultation/:id/daily-rounds": ({ facilityId, patientId, id }: any) => (
+    <DailyRounds facilityId={facilityId} patientId={patientId} consultationId={id} />
+  ),
+  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily-rounds/:id/update": ({ facilityId, patientId, consultationId, id }: any) => (
+    <DailyRounds facilityId={facilityId} patientId={patientId} consultationId={consultationId} id={id} />
+  ),
+  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily-rounds/:id": ({ facilityId, patientId, consultationId, id }: any) => (
+    <DailyRoundListDetails facilityId={facilityId} patientId={patientId} consultationId={consultationId} id={id} />
+  ),
 };
 
 const AppRouter = () => {
