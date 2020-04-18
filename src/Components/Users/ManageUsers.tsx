@@ -194,34 +194,33 @@ export default function ManageUsers(props: any) {
   if (isLoading || !users) {
     manageUsers = <Loading />;
   } else if (users && users.length) {
-    manageUsers = (
-      <>
-        {userList}
-        {totalCount > limit && (
-          <Grid container className={`w3-center ${classes.paginateTopPadding}`}>
-            <Pagination
-              cPage={currentPage}
-              defaultPerPage={limit}
-              data={{ totalCount }}
-              onChange={handlePagination}
-            />
-          </Grid>
-        )}
-      </>
-    );
+    manageUsers = (<>
+      {userTypes.length && addUser}
+      {userList}
+      {totalCount > limit && (
+        <Grid container className={`w3-center ${classes.paginateTopPadding}`}>
+          <Pagination
+            cPage={currentPage}
+            defaultPerPage={limit}
+            data={{ totalCount }}
+            onChange={handlePagination}
+          />
+        </Grid>
+      )}
+    </>);
   } else if (users && users.length === 0) {
-    manageUsers = (
+    manageUsers = (<>
+      {userTypes.length && addUser}
       <Grid item xs={12} md={12} className="textMarginCenter">
         <h5> No Users Found</h5>
       </Grid>
-    );
+    </>);
   }
 
   return (
     <div>
       <PageTitle title="Users" hideBack={true} />
       <div className="flex flex-wrap mt-4">
-        {userTypes.length && addUser}
         {manageUsers}
       </div>
     </div>
