@@ -181,7 +181,7 @@ export const TriageForm = (props: triageFormProps) => {
             </div>
             <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
               <div>
-                <InputLabel id="num-patients-visited-label">Patients Visited</InputLabel>
+                <InputLabel id="num-patients-visited-label">Patients Visited in Triage</InputLabel>
                 <TextInputField
                   name="num_patients_visited"
                   variant="outlined"
@@ -220,7 +220,7 @@ export const TriageForm = (props: triageFormProps) => {
                 />
               </div>
               <div>
-                <InputLabel id="num-patient-referred-label">Patients Referred so far</InputLabel>
+                <InputLabel id="num-patient-referred-label">Patients Referred</InputLabel>
                 <TextInputField
                   name="num_patient_referred"
                   variant="outlined"
