@@ -39,7 +39,6 @@ const initForm: any = {
   gender: "",
   password: "",
   c_password: "",
-  facility: "",
   facilities: [],
   username: "",
   first_name: "",
@@ -95,7 +94,7 @@ export const UserAdd = (props: UserProps) => {
   const [states, setStates] = useState(initialStates);
   const [districts, setDistricts] = useState(selectStates);
   const [localBody, setLocalBody] = useState(selectDistrict);
-  const [selectedFacility, setSelectedFacility] = useState<FacilityModel | null>(null);
+  const [selectedFacility, setSelectedFacility] = useState<FacilityModel[] | null>([]);
 
   const rootState: any = useSelector((rootState) => rootState);
   const { currentUser } = rootState;
@@ -213,10 +212,10 @@ export const UserAdd = (props: UserProps) => {
     dispatch({ type: "set_form", form });
   };
 
-  const setFacility = (selected: FacilityModel | null) => {
-    setSelectedFacility(selected);
+  const setFacility = (selected: FacilityModel | FacilityModel[] | null) => {
+    setSelectedFacility(selected as FacilityModel[]);
     const form = { ...state.form };
-    form.facility = selected ? selected.id : "";
+    form.facilities = selected ? (selected as FacilityModel[]).map(i => i.id) : [];
     dispatch({ type: "set_form", form });
   }
 
@@ -310,7 +309,7 @@ export const UserAdd = (props: UserProps) => {
         user_type: state.form.user_type,
         gender: state.form.gender,
         password: state.form.password,
-        facilities: state.form.facility ? [state.form.facility] : undefined,
+        facilities: state.form.facilities ? state.form.facilities : undefined,
         username: state.form.username,
         first_name: state.form.first_name ? state.form.first_name : undefined,
         last_name: state.form.last_name ? state.form.last_name : undefined,
@@ -370,23 +369,23 @@ export const UserAdd = (props: UserProps) => {
               </div>
 
               <div>
-                <InputLabel>Facility</InputLabel>
-                <FacilitySelect
-                  name="facility"
-                  selected={selectedFacility}
-                  setSelected={setFacility}
-                  margin="dense"
-                  errors={state.errors.facility}
-                />
-              </div>
-
-              <div>
                 <PhoneNumberField
                   label="Phone Number*"
                   value={state.form.phone_number}
                   onChange={(value: any) => handleValueChange(value, 'phone_number')}
                   errors={state.errors.phone_number}
                   onlyIndia={true}
+                />
+              </div>
+
+              <div className="col-span-2">
+                <InputLabel>Facilities</InputLabel>
+                <FacilitySelect
+                  multiple={true}
+                  name="facilities"
+                  selected={selectedFacility}
+                  setSelected={setFacility}
+                  errors={state.errors.facilities}
                 />
               </div>
 
@@ -400,6 +399,20 @@ export const UserAdd = (props: UserProps) => {
                   value={state.form.username}
                   onChange={handleChange}
                   errors={state.errors.username}
+                />
+              </div>
+
+              <div>
+                <InputLabel>Date of birth*</InputLabel>
+                <DateInputField
+                  fullWidth={true}
+                  value={state.form.date_of_birth}
+                  onChange={date => handleDateChange(date, "date_of_birth")}
+                  errors={state.errors.date_of_birth}
+                  inputVariant="outlined"
+                  margin="dense"
+                  openTo="year"
+                  disableFuture={true}
                 />
               </div>
 
@@ -467,20 +480,6 @@ export const UserAdd = (props: UserProps) => {
                   value={state.form.email}
                   onChange={handleChange}
                   errors={state.errors.email}
-                />
-              </div>
-
-              <div>
-                <InputLabel>Date of birth*</InputLabel>
-                <DateInputField
-                  fullWidth={true}
-                  value={state.form.date_of_birth}
-                  onChange={date => handleDateChange(date, "date_of_birth")}
-                  errors={state.errors.date_of_birth}
-                  inputVariant="outlined"
-                  margin="dense"
-                  openTo="year"
-                  disableFuture={true}
                 />
               </div>
 
