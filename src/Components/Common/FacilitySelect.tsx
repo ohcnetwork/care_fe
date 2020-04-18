@@ -37,7 +37,7 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
 
     const onFacilitySearch = useCallback(debounce(async (text: string) => {
         if (text) {
-            const params = { limit: 50, offset: 0, name: text, all: searchAll };
+            const params = { limit: 50, offset: 0, search_text: text, all: searchAll };
             const res = await dispatchAction(getFacilities(params));
             if (res && res.data) {
                 setFacilityList(res.data.results);
@@ -59,13 +59,14 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
         onSearch={handelSearch}
         onChange={(e: any, selected: any) => handleValueChange(selected)}
         loading={facilityLoading}
-        placeholder="Search by facility name"
+        placeholder="Search by facility name, district, state"
         noOptionsText={hasSearchText ? "No facility found, please try again" : "Start typing to begin search"}
         renderOption={(option: any) => (
             <div>{option.name} {option.district_object ? `- ${option.district_object.name}` : ''}</div>
         )}
-        getOptionLabel={(option: any) => option.name || option.district || option.state}
         getOptionSelected={(option: any, value: any) => option.id === value.id}
+        getOptionLabel={(option: any) => option.name + ' ' + option.district_object?.name + ' ' + option.state_object?.name}
+        filterOptions={(option: any) => option}
         errors={errors}
     />);
 };
