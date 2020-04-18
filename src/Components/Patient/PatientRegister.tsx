@@ -799,7 +799,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   <div>
                     <DateInputField
                       fullWidth={true}
-                      label="Estimated date of return*"
+                      label="Estimated date of Arrival*"
                       value={state.form.date_of_return}
                       onChange={date => handleDateChange(date, "date_of_return")}
                       errors={state.errors.date_of_return}
