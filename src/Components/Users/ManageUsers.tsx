@@ -97,7 +97,7 @@ export default function ManageUsers(props: any) {
   const userIndex = USER_TYPES.indexOf(userType);
   const userTypes = isSuperuser ? [...USER_TYPES] : USER_TYPES.slice(0, userIndex + 1);
 
-  const limit = 14;
+  const limit = userTypes.length ? 13 : 14;
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -111,7 +111,7 @@ export default function ManageUsers(props: any) {
         setIsLoading(false);
       }
     },
-    [dispatch, offset]
+    [dispatch, limit, offset]
   );
 
   useAbortableEffect(
