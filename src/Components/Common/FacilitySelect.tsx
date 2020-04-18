@@ -7,27 +7,28 @@ import { FacilityModel } from "../Facility/models";
 
 interface FacilitySelectProps {
     name: string;
-    selected: FacilityModel | null;
-    setSelected: (selected: FacilityModel | null) => void;
     margin?: string;
     errors: string;
     searchAll?: boolean;
+    multiple?: boolean;
+    selected: FacilityModel | FacilityModel[] | null;
+    setSelected: (selected: FacilityModel | FacilityModel[] | null) => void;
 }
 
 export const FacilitySelect = (props: FacilitySelectProps) => {
-    const { name, selected, setSelected, margin, errors, searchAll } = props;
+    const { name, multiple, selected, setSelected, margin, errors, searchAll } = props;
     const dispatchAction: any = useDispatch();
     const [facilityLoading, isFacilityLoading] = useState(false);
     const [hasSearchText, setHasSearchText] = useState(false);
     const [facilityList, setFacilityList] = useState<Array<FacilityModel>>([]);
 
-    const handleValueChange = (selected: FacilityModel | null) => {
-        if (!selected) {
+    const handleValueChange = (current: FacilityModel | FacilityModel[] | null) => {
+        if (!current) {
             setFacilityList([]);
             isFacilityLoading(false);
             setHasSearchText(false);
         }
-        setSelected(selected);
+        setSelected(current);
     };
 
     const handelSearch = (e: any) => {
@@ -52,6 +53,7 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
 
     return (<AutoCompleteAsyncField
         name={name}
+        multiple={multiple}
         variant="outlined"
         margin={margin}
         value={selected}
@@ -59,14 +61,14 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
         onSearch={handelSearch}
         onChange={(e: any, selected: any) => handleValueChange(selected)}
         loading={facilityLoading}
-        placeholder="Search by facility name, district, state"
+        placeholder="Search by facility name or by district"
         noOptionsText={hasSearchText ? "No facility found, please try again" : "Start typing to begin search"}
         renderOption={(option: any) => (
-            <div>{option.name} {option.district_object ? `- ${option.district_object.name}` : ''}</div>
+            <div>{option.name}{option.district_object ? `, ${option.district_object.name}` : ''}</div>
         )}
         getOptionSelected={(option: any, value: any) => option.id === value.id}
-        getOptionLabel={(option: any) => option.name + ' ' + option.district_object?.name + ' ' + option.state_object?.name}
-        filterOptions={(option: any) => option}
+        getOptionLabel={(option: any) => option.name + (option.district_object ? `, ${option.district_object.name}` : '')}
+        filterOptions={(options: FacilityModel[]) => options}
         errors={errors}
     />);
 };

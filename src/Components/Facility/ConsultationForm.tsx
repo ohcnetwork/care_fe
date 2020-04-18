@@ -247,10 +247,10 @@ export const ConsultationForm = (props: any) => {
     }
   };
 
-  const setFacility = (selected: FacilityModel | null) => {
-    setSelectedFacility(selected);
+  const setFacility = (selected: FacilityModel | FacilityModel[] | null) => {
+    setSelectedFacility(selected as FacilityModel);
     const form = { ...state.form };
-    form.referred_to = selected ? selected.id : "";
+    form.referred_to = selected ? (selected as FacilityModel).id : "";
     dispatch({ type: "set_form", form });
   }
 
