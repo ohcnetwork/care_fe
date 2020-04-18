@@ -1,4 +1,4 @@
-export interface FacilityModal {
+export interface FacilityModel {
   id?: number;
   name?: string;
   district?: number;

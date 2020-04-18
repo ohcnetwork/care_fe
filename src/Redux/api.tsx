@@ -49,6 +49,11 @@ export default {
         method: 'DELETE'
     },
 
+    addUser: {
+        path: "/api/v1/users/add_user/",
+        method: 'POST',
+    },
+
 
     // Facility Endpoints
 
@@ -204,8 +209,8 @@ export default {
         path: '/api/v1/patient/{patientId}/test_sample/{id}/',
         method: 'PATCH',
     },
-    sampleReport:{
-        path:'/api/v1/patient/{id}/icmr_sample'
+    sampleReport: {
+        path: '/api/v1/patient/{id}/icmr_sample'
     },
 
     // States

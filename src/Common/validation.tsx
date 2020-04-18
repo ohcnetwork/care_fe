@@ -20,8 +20,18 @@ export const getArrayValueByKey = (arr: Array<any>, attr: string, value: string 
         }
     }
     return -1;
-}
+};
 
 export const getRandomNumbers = (min: number, max: number) => {
     return Math.floor(Math.random() * max) + min;
+};
+
+export const validateUsername = (username: string) => {
+    const pattern = /^[\w.@+-]+$/;
+    return pattern.test(username);
+};
+
+export const validatePassword = (password: string) => {
+    const pattern = /(?=(.*[0-9]))((?=.*[A-Za-z0-9])(?=.*[A-Z])(?=.*[a-z]))^.{8,}$/;
+    return pattern.test(password);
 }

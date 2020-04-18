@@ -5,13 +5,13 @@ import Header from "../Components/Common/Header";
 import { Analytics } from "../Components/Dashboard/Analytics";
 import { BedCapacityForm } from "../Components/Facility/BedCapacityForm";
 import { CareCenterJoinForm } from "../Components/Facility/CareCenterJoinForm";
+import { ConsultationDetails } from "../Components/Facility/ConsultationDetails";
 import { ConsultationForm } from "../Components/Facility/ConsultationForm";
 import { DoctorCapacityForm } from "../Components/Facility/DoctorCapacityForm";
 import { FacilityCreate } from "../Components/Facility/FacilityCreate";
 import { FacilityHome } from "../Components/Facility/FacilityHome";
 import { HospitalList } from "../Components/Facility/HospitalList";
 import { TriageForm } from "../Components/Facility/TriageForm";
-import { ConsultationDetails } from "../Components/Facility/ConsultationDetails";
 import { DailyRoundListDetails } from "../Components/Patient/DailyRoundListDetails";
 import { DailyRounds } from "../Components/Patient/DailyRounds";
 import { PatientManager } from "../Components/Patient/ManagePatients";
@@ -25,10 +25,12 @@ import SampleViewAdmin from "../Components/Patient/SampleViewAdmin";
 import { TeleConsultation } from "../Components/Patient/TeleConsultation";
 import { TreatmentForm } from "../Components/Patient/TreatmentForm";
 import ManageUsers from "../Components/Users/ManageUsers";
+import { UserAdd } from "../Components/Users/UserAdd";
 
 const routes = {
   "/": () => <HospitalList />,
   "/users": () => <ManageUsers />,
+  "/user/add": () => <UserAdd />,
   "/join": () => <CareCenterJoinForm />,
   "/analytics": () => <Analytics />,
   "/ambulance": () => <AmbulanceList />,
