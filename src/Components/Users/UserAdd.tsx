@@ -222,7 +222,7 @@ export const UserAdd = (props: UserProps) => {
 
   const onFacilitySearch = useCallback(debounce(async (text: string) => {
     if (text) {
-      const res = await dispatchAction(getFacilities({ limit: 50, offset: 0, search_text: text, all: true }));
+      const res = await dispatchAction(getFacilities({ limit: 50, offset: 0, search_text: text }));
       if (res && res.data) {
         setFacilityList(res.data.results);
       }
