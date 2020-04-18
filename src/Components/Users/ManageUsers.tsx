@@ -129,7 +129,7 @@ export default function ManageUsers(props: any) {
 
   const addUser = (<div className="w-full md:w-1/2 mt-4 px-2">
     <div
-      className="block border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 flex justify-center items-center text-black"
+      className="block border rounded-lg bg-white shadow h-full cursor-pointer hover:bg-gray-300 font-semibold flex justify-center items-center text-black"
       onClick={() => navigate("/user/add")}
     >
       Add a new user
@@ -141,7 +141,7 @@ export default function ManageUsers(props: any) {
     userList = users.map((user: any, idx: number) => {
       return (
         <div key={`usr_${user.id}`} className="w-full md:w-1/2 mt-4 px-2">
-          <div className="block border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black">
+          <div className="block border rounded-lg bg-white shadow h-full text-black">
             <CardHeader
               className={classes.cardHeader}
               title={
