@@ -1,16 +1,17 @@
 import { Box, Button, Card, CardContent, FormControlLabel, InputLabel, Radio, RadioGroup } from "@material-ui/core";
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
-import { debounce } from "lodash";
 import moment from "moment";
 import React, { useCallback, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
 import { ADMITTED_TO, CONSULTATION_SUGGESTION, PATIENT_CATEGORY, SYMPTOM_CHOICES } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { createConsultation, getConsultation, getFacilities, updateConsultation } from "../../Redux/actions";
+import { createConsultation, getConsultation, updateConsultation } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import { AutoCompleteAsyncField, DateInputField, ErrorHelperText, MultilineInputField, MultiSelectField, NativeSelectField, SelectField } from "../Common/HelperInputFields";
+import { FacilitySelect } from "../Common/FacilitySelect";
+import { DateInputField, ErrorHelperText, MultilineInputField, MultiSelectField, NativeSelectField, SelectField } from "../Common/HelperInputFields";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
+import { FacilityModel } from "./models";
 
 const initForm: any = {
   hasSymptom: false,
@@ -86,10 +87,7 @@ export const ConsultationForm = (props: any) => {
   const dispatchAction: any = useDispatch();
   const { facilityId, patientId, id } = props;
   const [state, dispatch] = useReducer(consultationFormReducer, initialState);
-  const [facilityLoading, isFacilityLoading] = useState(false);
-  const [selectedFacility, setSelectedFacility] = useState(null);
-  const [hasSearchText, setHasSearchText] = useState(false);
-  const [facilityList, setFacilityList] = useState<any>([]);
+  const [selectedFacility, setSelectedFacility] = useState<FacilityModel | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const headerText = !id ? "OP Triage / Consultation" : "Edit OP Triage / Consultation";
@@ -229,29 +227,6 @@ export const ConsultationForm = (props: any) => {
     dispatch({ type: "set_form", form });
   };
 
-  const handleValueChange = (value: any, name: string) => {
-    const form = { ...state.form };
-    form[name] = value;
-    dispatch({ type: "set_form", form });
-    if (name === 'referred_to' && !value) {
-      setFacilityList([]);
-      isFacilityLoading(false);
-    }
-  };
-
-  const onFacilitySearch = useCallback(debounce(async (text: string) => {
-    if (text) {
-      const res = await dispatchAction(getFacilities({ limit: 50, offset: 0, search_text: text, all: true }));
-      if (res && res.data) {
-        setFacilityList(res.data.results);
-      }
-      isFacilityLoading(false);
-    } else {
-      setFacilityList([]);
-      isFacilityLoading(false);
-    }
-  }, 300), []);
-
   const handleSymptomChange = (e: any, child?: any) => {
     const form = { ...state.form };
     const { value } = e?.target;
@@ -271,6 +246,13 @@ export const ConsultationForm = (props: any) => {
       dispatch({ type: "set_form", form });
     }
   };
+
+  const setFacility = (selected: FacilityModel | null) => {
+    setSelectedFacility(selected);
+    const form = { ...state.form };
+    form.referred_to = selected ? selected.id : "";
+    dispatch({ type: "set_form", form });
+  }
 
   if (isLoading) {
     return <Loading />;
@@ -398,30 +380,12 @@ export const ConsultationForm = (props: any) => {
                 </div>
 
                 {state.form.suggestion === 'R' && <div>
-                  <InputLabel className="mb-2">Referred To Facility</InputLabel>
-                  <AutoCompleteAsyncField
+                  <InputLabel>Referred To Facility</InputLabel>
+                  <FacilitySelect
                     name="referred_to"
-                    variant="outlined"
-                    value={selectedFacility}
-                    options={facilityList}
-                    onOpen={() => setFacilityList([])}
-                    onSearch={(e: any) => [
-                      isFacilityLoading(true),
-                      setHasSearchText(!!e.target.value),
-                      onFacilitySearch(e.target.value)
-                    ]}
-                    onChange={(e: any, selected: any) => {
-                      handleValueChange(selected?.id, 'referred_to');
-                      return setSelectedFacility(selected);
-                    }}
-                    optionKey="id"
-                    optionValue="name"
-                    loading={facilityLoading}
-                    placeholder="Search by facility name"
-                    noOptionsText={hasSearchText ? "No facility found, please try again" : "Start typing to begin search"}
-                    renderOption={(option: any) => (
-                      <div>{option.name} {option.district_object ? `- ${option.district_object.name}` : ''}</div>
-                    )}
+                    searchAll={true}
+                    selected={selectedFacility}
+                    setSelected={setFacility}
                     errors={state.errors.referred_to}
                   />
                 </div>}

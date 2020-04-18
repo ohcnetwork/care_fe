@@ -10,12 +10,12 @@ import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 import BedTypeCard from "./BedTypeCard";
 import DoctorsCountCard from "./DoctorsCountCard";
-import { CapacityModal, DoctorModal, FacilityModal, PatientStatsModel } from "./models";
+import { CapacityModal, DoctorModal, FacilityModel, PatientStatsModel } from "./models";
 
 export const FacilityHome = (props: any) => {
   const { facilityId } = props;
   const dispatch: any = useDispatch();
-  const [facilityData, setFacilityData] = useState<FacilityModal>({});
+  const [facilityData, setFacilityData] = useState<FacilityModel>({});
   const [capacityData, setCapacityData] = useState<Array<CapacityModal>>([]);
   const [doctorData, setDoctorData] = useState<Array<DoctorModal>>([]);
   const [isLoading, setIsLoading] = useState(false);

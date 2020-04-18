@@ -9,7 +9,7 @@ import { getFacilities } from "../../Redux/actions";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 import Pagination from "../Common/Pagination";
-import { FacilityModal } from "./models";
+import { FacilityModel } from "./models";
 import { InputSearchBox } from "../Common/SearchBox";
 
 const useStyles = makeStyles((theme) => ({
@@ -24,7 +24,7 @@ const useStyles = makeStyles((theme) => ({
 export const HospitalList = () => {
   const classes = useStyles();
   const dispatchAction: any = useDispatch();
-  const [data, setData] = useState<Array<FacilityModal>>([]);
+  const [data, setData] = useState<Array<FacilityModel>>([]);
 
   let manageFacilities: any = null;
   const [isLoading, setIsLoading] = useState(false);

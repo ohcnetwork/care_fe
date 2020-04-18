@@ -14,6 +14,8 @@ import * as Notification from "../../Utils/Notifications.js";
 import { AutoCompleteAsyncField, DateInputField, PhoneNumberField, SelectField, TextInputField } from "../Common/HelperInputFields";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
+import { FacilityModel } from "../Facility/models";
+import { FacilitySelect } from "../Common/FacilitySelect";
 
 const genderTypes = [
   {
@@ -94,11 +96,7 @@ export const UserAdd = (props: UserProps) => {
   const [states, setStates] = useState(initialStates);
   const [districts, setDistricts] = useState(selectStates);
   const [localBody, setLocalBody] = useState(selectDistrict);
-
-  const [facilityLoading, isFacilityLoading] = useState(false);
-  const [selectedFacility, setSelectedFacility] = useState(null);
-  const [hasSearchText, setHasSearchText] = useState(false);
-  const [facilityList, setFacilityList] = useState<any>([]);
+  const [selectedFacility, setSelectedFacility] = useState<FacilityModel | null>(null);
 
   const rootState: any = useSelector((rootState) => rootState);
   const { currentUser } = rootState;
@@ -214,24 +212,14 @@ export const UserAdd = (props: UserProps) => {
     const form = { ...state.form };
     form[name] = value;
     dispatch({ type: "set_form", form });
-    if (name === 'referred_to' && !value) {
-      setFacilityList([]);
-      isFacilityLoading(false);
-    }
   };
 
-  const onFacilitySearch = useCallback(debounce(async (text: string) => {
-    if (text) {
-      const res = await dispatchAction(getFacilities({ limit: 50, offset: 0, search_text: text }));
-      if (res && res.data) {
-        setFacilityList(res.data.results);
-      }
-      isFacilityLoading(false);
-    } else {
-      setFacilityList([]);
-      isFacilityLoading(false);
-    }
-  }, 300), []);
+  const setFacility = (selected: FacilityModel | null) => {
+    setSelectedFacility(selected);
+    const form = { ...state.form };
+    form.facility = selected ? selected.id : "";
+    dispatch({ type: "set_form", form });
+  }
 
   const validateForm = () => {
     let errors = { ...initError };
@@ -239,6 +227,7 @@ export const UserAdd = (props: UserProps) => {
     Object.keys(state.form).forEach(field => {
       switch (field) {
         case "user_type":
+        case "facility":
           if (!state.form[field]) {
             errors[field] = "Please select the User Type";
             invalidForm = true;
@@ -384,30 +373,11 @@ export const UserAdd = (props: UserProps) => {
 
               <div>
                 <InputLabel>Facility</InputLabel>
-                <AutoCompleteAsyncField
+                <FacilitySelect
                   name="facility"
-                  variant="outlined"
+                  selected={selectedFacility}
+                  setSelected={setFacility}
                   margin="dense"
-                  value={selectedFacility}
-                  options={facilityList}
-                  onOpen={() => setFacilityList([])}
-                  onSearch={(e: any) => [
-                    isFacilityLoading(true),
-                    setHasSearchText(!!e.target.value),
-                    onFacilitySearch(e.target.value)
-                  ]}
-                  onChange={(e: any, selected: any) => {
-                    handleValueChange(selected?.id, 'facility');
-                    return setSelectedFacility(selected);
-                  }}
-                  optionKey="id"
-                  optionValue="name"
-                  loading={facilityLoading}
-                  placeholder="Search by facility name"
-                  noOptionsText={hasSearchText ? "No facility found, please try again" : "Start typing to begin search"}
-                  renderOption={(option: any) => (
-                    <div>{option.name} {option.district_object ? `- ${option.district_object.name}` : ''}</div>
-                  )}
                   errors={state.errors.facility}
                 />
               </div>
