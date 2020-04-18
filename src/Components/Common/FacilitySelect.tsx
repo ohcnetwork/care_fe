@@ -25,8 +25,9 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
         if (!selected) {
             setFacilityList([]);
             isFacilityLoading(false);
+            setHasSearchText(false);
         }
-        setSelected(selected)
+        setSelected(selected);
     };
 
     const handelSearch = (e: any) => {
@@ -55,7 +56,6 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
         margin={margin}
         value={selected}
         options={facilityList}
-        onOpen={() => setFacilityList([])}
         onSearch={handelSearch}
         onChange={(e: any, selected: any) => handleValueChange(selected)}
         loading={facilityLoading}
