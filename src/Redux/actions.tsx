@@ -10,6 +10,9 @@ export const getCurrentUser = () => {
 export const signupUser = (params: object) => {
     return fireRequest("createUser", [], params)
 };
+export const addUser = (params: object) => {
+    return fireRequest("addUser", [], params)
+};
 
 
 // Ambulance

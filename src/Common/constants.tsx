@@ -6,6 +6,14 @@ export interface OptionsType {
   disabled?: boolean;
 }
 
+export const USER_TYPES: Array<String> = [
+  "Staff",
+  "DistrictLabAdmin",
+  "DistrictAdmin",
+  "StateLabAdmin",
+  "StateAdmin"
+];
+
 export const DISTRICT_CHOICES: Array<OptionsType> = [
   { id: 1, text: "Thiruvananthapuram" },
   { id: 2, text: "Kollam" },

@@ -410,10 +410,10 @@ export const ConsultationForm = (props: any) => {
                       setHasSearchText(!!e.target.value),
                       onFacilitySearch(e.target.value)
                     ]}
-                    onChange={(e: any, selected: any) => [
-                      setSelectedFacility(selected),
-                      handleValueChange(selected?.id, 'referred_to'),
-                    ]}
+                    onChange={(e: any, selected: any) => {
+                      handleValueChange(selected?.id, 'referred_to');
+                      return setSelectedFacility(selected);
+                    }}
                     optionKey="id"
                     optionValue="name"
                     loading={facilityLoading}
@@ -422,8 +422,8 @@ export const ConsultationForm = (props: any) => {
                     renderOption={(option: any) => (
                       <div>{option.name} {option.district_object ? `- ${option.district_object.name}` : ''}</div>
                     )}
+                    errors={state.errors.referred_to}
                   />
-                  <ErrorHelperText error={state.errors.referred_to} />
                 </div>}
 
                 <div className="flex">

@@ -364,10 +364,9 @@ export const AutoCompleteMultiField = (props: any) => {
 }
 
 export const AutoCompleteAsyncField = (props: any) => {
-    const { id, options, label, optionKey, optionValue, renderOption, variant, placeholder, errors, onChange, onSearch, value, loading, onOpen, noOptionsText } = props;
+    const { margin, options, label, optionKey, optionValue, renderOption, variant, placeholder, errors, onChange, onSearch, value, loading, onOpen, noOptionsText } = props;
     return (<>
         <Autocomplete
-            id={id}
             onOpen={onOpen}
             options={options}
             onChange={onChange}
@@ -381,6 +380,7 @@ export const AutoCompleteAsyncField = (props: any) => {
                 <TextField
                     {...params}
                     variant={variant}
+                    margin={margin || "normal"}
                     label={label}
                     onChange={onSearch}
                     placeholder={placeholder}

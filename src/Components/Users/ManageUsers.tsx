@@ -1,12 +1,14 @@
 import { CardContent, CardHeader, Grid, Tooltip, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import React, { useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getUserList } from "../../Redux/actions";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 import Pagination from "../Common/Pagination";
+import { navigate } from "hookrouter";
+import { USER_TYPES } from "../../Common/constants";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -88,6 +90,13 @@ export default function ManageUsers(props: any) {
   const [currentPage, setCurrentPage] = useState(1);
   const [offset, setOffset] = useState(0);
 
+  const state: any = useSelector((state) => state);
+  const { currentUser } = state;
+  const isSuperuser = currentUser.data.is_superuser;
+  const userType = currentUser.data.user_type;
+  const userIndex = USER_TYPES.indexOf(userType);
+  const userTypes = isSuperuser ? [...USER_TYPES] : USER_TYPES.slice(0, userIndex + 1);
+
   const limit = 14;
 
   const fetchData = useCallback(
@@ -117,6 +126,15 @@ export default function ManageUsers(props: any) {
     setCurrentPage(page);
     setOffset(offset);
   };
+
+  const addUser = (<div className="w-full md:w-1/2 mt-4 px-2">
+    <div
+      className="block border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 flex justify-center items-center text-black"
+      onClick={() => navigate("/user/add")}
+    >
+      Add a new user
+    </div>
+  </div>);
 
   let userList: any[] = [];
   if (users && users.length) {
@@ -202,7 +220,10 @@ export default function ManageUsers(props: any) {
   return (
     <div>
       <PageTitle title="Users" hideBack={true} />
-      <div className="flex flex-wrap mt-4">{manageUsers}</div>
+      <div className="flex flex-wrap mt-4">
+        {userTypes.length && addUser}
+        {manageUsers}
+      </div>
     </div>
   );
 }
