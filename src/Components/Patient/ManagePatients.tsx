@@ -131,11 +131,11 @@ export const PatientManager = (props: any) => {
                     </div>
                   )}
                 <div>
-                  {patient.countries_travelled && (<>
+                  {patient.countries_travelled && !!patient.countries_travelled.length && (<>
                     <span className="font-semibold leading-relaxed">
                       Travel History:{" "}
                     </span>
-                    {patient.countries_travelled.split(",").join(", ")}
+                    {patient.countries_travelled.join(", ")}
                   </>)}
                 </div>
               </div>

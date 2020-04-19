@@ -361,9 +361,9 @@ export const PatientHome = (props: any) => {
             <span className="font-semibold leading-relaxed">Domestic/international Travel (within last 28 days): </span>
             {patientData.past_travel ? <span className="badge badge-pill badge-warning">Yes</span> : <span className="badge badge-pill badge-secondary">No</span>}
           </div>
-          {patientData.countries_travelled && (<div className="md:col-span-2">
+          {patientData.countries_travelled && !!patientData.countries_travelled.length && (<div className="md:col-span-2">
             <span className="font-semibold leading-relaxed">Countries travelled: </span>
-            {patientData.countries_travelled.split(',').join(', ')}
+            {patientData.countries_travelled.join(', ')}
           </div>)}
           {patientData.ongoing_medication && (<div className="md:col-span-2">
             <span className="font-semibold leading-relaxed">Ongoing Medications </span>
