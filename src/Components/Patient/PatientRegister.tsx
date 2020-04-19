@@ -7,7 +7,7 @@ import moment from "moment";
 import React, { useCallback, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
 import { BLOOD_GROUPS, DISEASE_STATUS, GENDER_TYPES, MEDICAL_HISTORY_CHOICES } from "../../Common/constants";
-import countryList from "../../Common/static/countries.json";
+import placesList from "../../Common/static/places.json";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { createPatient, getDistrictByState, getLocalbodyByDistrict, getPatient, getStates, searchPatient, updatePatient } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
@@ -599,7 +599,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     margin="dense"
                     optionArray={true}
                     value={state.form.nationality}
-                    options={countryList}
+                    options={placesList}
                     onChange={handleChange}
                     errors={state.errors.nationality}
                   />
@@ -787,7 +787,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   <div className="md:col-span-2">
                     <AutoCompleteMultiField
                       id="countries-travelled"
-                      options={countryList}
+                      options={placesList}
                       label="Countries / Places Visited* (including transit stops)"
                       variant="outlined"
                       placeholder="Select country or enter the place of visit"
