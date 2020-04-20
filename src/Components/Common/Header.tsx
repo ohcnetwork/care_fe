@@ -69,11 +69,11 @@ const Header = () => {
       link: "/facility",
       icon: <DashboardIcon style={{ color: "#666", marginRight: "4px" }} />
     },
-    // {
-    //   title: 'Patients / Suspects',
-    //   link: '/patients',
-    //   icon: <InboxIcon style={{color: '#666', marginRight: '4px'}}/>
-    // },
+    {
+      title: 'Patients / Suspects',
+      link: '/patients',
+      icon: <InboxIcon style={{color: '#666', marginRight: '4px'}}/>
+    },
     {
       title: "Ambulances",
       link: "/ambulance",
