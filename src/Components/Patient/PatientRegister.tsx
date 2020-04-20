@@ -8,6 +8,7 @@ import React, { useCallback, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
 import { BLOOD_GROUPS, DISEASE_STATUS, GENDER_TYPES, MEDICAL_HISTORY_CHOICES } from "../../Common/constants";
 import countryList from "../../Common/static/countries.json";
+import statesList from "../../Common/static/states.json";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { createPatient, getDistrictByState, getLocalbodyByDistrict, getPatient, getStates, searchPatient, updatePatient } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
@@ -19,6 +20,8 @@ import DuplicatePatientDialog from "../Facility/DuplicatePatientDialog";
 import { DupPatientModel } from "../Facility/models";
 import { PatientModel } from "./models";
 import TransferPatientDialog from "../Facility/TransferPatientDialog";
+
+const placesList = countryList.concat(statesList.filter((i: string) => i !== 'Kerala'));
 
 interface PatientRegisterProps extends PatientModel {
   facilityId: number;
@@ -182,7 +185,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             local_body: res.data.local_body ? res.data.local_body : '',
             medical_history: [],
             ongoing_medication: res.data.ongoing_medication ? res.data.ongoing_medication : '',
-            countries_travelled: res.data.countries_travelled ? res.data.countries_travelled.split(',') : [],
+            countries_travelled: res.data.countries_travelled,
             is_medical_worker: res.data.is_medical_worker ? String(res.data.is_medical_worker) : 'false',
             contact_with_confirmed_carrier: res.data.contact_with_confirmed_carrier ? String(res.data.contact_with_confirmed_carrier) : 'false',
             contact_with_suspected_carrier: res.data.contact_with_suspected_carrier ? String(res.data.contact_with_suspected_carrier) : 'false',
@@ -336,7 +339,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         contact_with_suspected_carrier: JSON.parse(state.form.contact_with_suspected_carrier),
         estimated_contact_date: state.form.estimated_contact_date,
         past_travel: state.form.past_travel,
-        countries_travelled: state.form.past_travel ? state.form.countries_travelled.join(',') : undefined,
+        countries_travelled: state.form.past_travel ? state.form.countries_travelled : [],
         date_of_return: state.form.past_travel ? state.form.date_of_return : undefined,
         has_SARI: state.form.has_SARI,
         ongoing_medication: state.form.ongoing_medication,
@@ -787,7 +790,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   <div className="md:col-span-2">
                     <AutoCompleteMultiField
                       id="countries-travelled"
-                      options={countryList}
+                      options={placesList}
                       label="Countries / Places Visited* (including transit stops)"
                       variant="outlined"
                       placeholder="Select country or enter the place of visit"

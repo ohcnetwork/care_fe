@@ -1,4 +1,4 @@
-import { CardContent, CardHeader, Grid, Tooltip, Typography } from "@material-ui/core";
+import {Card, CardContent, CardHeader, Grid, Tooltip, Typography} from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import React, { useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
