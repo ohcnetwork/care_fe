@@ -79,11 +79,11 @@ const Header = () => {
       link: "/ambulance",
       icon: <TimeToLeaveIcon style={{ color: "#666", marginRight: "4px" }} />
     },
-    {
-      title: "Sample Test",
-      link: "/sample",
-      icon: <LocalHospitalIcon style={{ color: "#666", marginRight: "4px" }} />
-    },
+    // {
+    //   title: "Sample Test",
+    //   link: "/sample",
+    //   icon: <LocalHospitalIcon style={{ color: "#666", marginRight: "4px" }} />
+    // },
     {
       title: "Users",
       link: "/users",
