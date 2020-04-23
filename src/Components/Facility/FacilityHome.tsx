@@ -206,30 +206,30 @@ export const FacilityHome = (props: any) => {
               </Grid>
             </Grid>
           </Grid>
-          {/*<Grid container style={{ padding: "10px" }} spacing={1}>*/}
-          {/*  <Grid item xs={12} md={6} className="w3-center">*/}
-          {/*    <Button*/}
-          {/*      fullWidth*/}
-          {/*      variant="contained"*/}
-          {/*      color="primary"*/}
-          {/*      size="small"*/}
-          {/*      onClick={() => navigate(`/facility/${facilityId}/patient`)}*/}
-          {/*    >*/}
-          {/*      Add Details of Covid Suspects*/}
-          {/*    </Button>*/}
-          {/*  </Grid>*/}
-          {/*  <Grid item xs={12} md={6} className="w3-center">*/}
-          {/*    <Button*/}
-          {/*      fullWidth*/}
-          {/*      variant="contained"*/}
-          {/*      color="primary"*/}
-          {/*      size="small"*/}
-          {/*      onClick={() => navigate(`/facility/${facilityId}/patients`)}*/}
-          {/*    >*/}
-          {/*      View Suspects / Patients*/}
-          {/*    </Button>*/}
-          {/*  </Grid>*/}
-          {/*</Grid>*/}
+          <Grid container style={{ padding: "10px" }} spacing={1}>
+            <Grid item xs={12} md={6} className="w3-center">
+              <Button
+                fullWidth
+                variant="contained"
+                color="primary"
+                size="small"
+                onClick={() => navigate(`/facility/${facilityId}/patient`)}
+              >
+                Add Details of Covid Suspects
+              </Button>
+            </Grid>
+            <Grid item xs={12} md={6} className="w3-center">
+              <Button
+                fullWidth
+                variant="contained"
+                color="primary"
+                size="small"
+                onClick={() => navigate(`/facility/${facilityId}/patients`)}
+              >
+                View Suspects / Patients
+              </Button>
+            </Grid>
+          </Grid>
 
           <div className="mt-4">
             <div className="font-semibold text-xl border-b-2">

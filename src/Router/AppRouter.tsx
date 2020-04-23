@@ -26,6 +26,7 @@ import { TeleConsultation } from "../Components/Patient/TeleConsultation";
 import { TreatmentForm } from "../Components/Patient/TreatmentForm";
 import ManageUsers from "../Components/Users/ManageUsers";
 import { UserAdd } from "../Components/Users/UserAdd";
+import AmbulanceOnboarding from "../Components/Ambulance/AmbulanceOnboarding";
 
 const routes = {
   "/": () => <HospitalList />,
@@ -34,6 +35,7 @@ const routes = {
   "/join": () => <CareCenterJoinForm />,
   "/analytics": () => <Analytics />,
   "/ambulance": () => <AmbulanceList />,
+  "/ambulance/add": () => <AmbulanceOnboarding />,
   "/patients": () => <PatientManager />,
   "/patient/:id": ({ id }: any) => <PatientHome id={id} />,
   "/patient/tele-consult": () => <TeleConsultation />,

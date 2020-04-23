@@ -302,6 +302,7 @@ export const Register = () => {
               placeholder=""
               variant="outlined"
               margin="dense"
+              autoComplete='new-password'
               value={form.password}
               onChange={handleChange}
               errors={errors.password}
@@ -313,6 +314,7 @@ export const Register = () => {
               placeholder=""
               variant="outlined"
               margin="dense"
+              autoComplete='new-password'
               value={form.c_password}
               onChange={handleChange}
               errors={errors.c_password}
