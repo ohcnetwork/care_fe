@@ -7,6 +7,7 @@ import { getAmbulanceList } from "../../Redux/actions";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 import Pagination from "../Common/Pagination";
+import {navigate} from "hookrouter";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -118,6 +119,16 @@ export default function AmbulanceList(props: any) {
     setOffset(offset);
   };
 
+  const addAmbulance = (<div className="w-full md:w-1/2 mt-4 px-2">
+    <div
+        className="block border rounded-lg bg-white shadow h-full cursor-pointer hover:bg-gray-300 font-semibold flex justify-center items-center text-black"
+        onClick={() => navigate("/ambulance/add")}
+    >
+     Onboard New Ambulance
+    </div>
+  </div>);
+
+
   let ambulanceList: any[] = [];
   if (ambulances && ambulances.length) {
     ambulanceList = ambulances.map((ambulance: any, idx: number) => {
@@ -168,6 +179,7 @@ export default function AmbulanceList(props: any) {
   } else if (ambulances && ambulances.length) {
     manageAmbulances = (
       <>
+        {addAmbulance}
         {ambulanceList}
         {totalCount > limit && (
           <Grid container className={`w3-center ${classes.paginateTopPadding}`}>

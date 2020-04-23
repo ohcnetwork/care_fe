@@ -10,7 +10,6 @@ const routes = {
   "/": () => <Login />,
   "/login": () => <Login />,
   "/dashboard": () => <PublicDashboard />,
-  "/ambulance": () => <AmbulanceOnboarding />,
   "/register": () => <Register />
 };
 
