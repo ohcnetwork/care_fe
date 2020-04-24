@@ -363,7 +363,7 @@ export const PatientHome = (props: any) => {
           </div>
           {patientData.countries_travelled && !!patientData.countries_travelled.length && (<div className="md:col-span-2">
             <span className="font-semibold leading-relaxed">Countries travelled: </span>
-            {patientData.countries_travelled.join(', ')}
+            {Array.isArray(patientData.countries_travelled) ? patientData.countries_travelled.join(", ") : patientData.countries_travelled.split(',').join(', ')}
           </div>)}
           {patientData.ongoing_medication && (<div className="md:col-span-2">
             <span className="font-semibold leading-relaxed">Ongoing Medications </span>
