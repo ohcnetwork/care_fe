@@ -32,7 +32,7 @@ export interface PatientModel {
     estimated_contact_date?: string;
     past_travel?: boolean;
     ongoing_medication?: string;
-    countries_travelled?: Array<string>;
+    countries_travelled?: Array<string> | string;
     present_health?: string;
     has_SARI?: boolean;
     local_body?: number;

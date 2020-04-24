@@ -135,7 +135,7 @@ export const PatientManager = (props: any) => {
                     <span className="font-semibold leading-relaxed">
                       Travel History:{" "}
                     </span>
-                    {patient.countries_travelled.join(", ")}
+                    {Array.isArray(patient.countries_travelled) ? patient.countries_travelled.join(", ") : patient.countries_travelled.split(',').join(', ')}
                   </>)}
                 </div>
               </div>
