@@ -10,7 +10,7 @@ export interface FlowModel {
 }
 
 export interface PatientModel {
-    id?: number;
+    id?: number | string;
     name?: string;
     age?: number;
     gender?: number;
@@ -73,7 +73,7 @@ export interface SampleTestModel {
     patient_travel_history?: string;
     facility?: number;
     facility_object?: { id: number; name: string, facility_type?: { id: number; name: string } }
-    patient?: number;
+    patient?: number | string;
     fast_track?: string;
     isFastTrack?: boolean;
     flow?: Array<FlowModel>;
@@ -154,7 +154,7 @@ export interface SampleListModel {
     facility_object?: { id: number; name: string, facility_type?: { id: number; name: string } }
     status?: string;
     result?: string;
-    patient?: number;
+    patient?: number | string;
     consultation?: number;
     date_of_sample?: string;
     date_of_result?: string;

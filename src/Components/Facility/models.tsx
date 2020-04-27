@@ -53,7 +53,7 @@ export interface ConsultationModel {
   id?: number;
   modified_date?: string;
   other_symptoms?: string;
-  patient?: number;
+  patient?: number | string;
   prescribed_medication?: string;
   referred_to?: number | null;
   suggestion?: string;
@@ -76,7 +76,7 @@ export interface DupPatientModel {
   id: number;
   gender: string;
   phone_number: string;
-  patient_id: number
+  patient_id: number | string;
   name: string
   date_of_birth: string;
   year_of_birth: number;
