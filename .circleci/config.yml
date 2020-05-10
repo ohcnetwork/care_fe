@@ -5,7 +5,7 @@ orbs:
   aws-eks: circleci/aws-eks@0.2.6
 
 workflows:
-  deploy-to-production:
+  deploy-to-staging:
     jobs:
       - aws-ecr/build-and-push-image:
           account-url: AWS_ECR_ACCOUNT_URL
@@ -21,6 +21,25 @@ workflows:
           cluster-name: "${EKS_CLUSTER_NAME}"
           aws-region: "${AWS_DEFAULT_REGION}"
           container-image-updates: '${EKS_CONTAINER_NAME}=${AWS_ECR_ACCOUNT_URL}/${ECR_REPO_NAME}:${CIRCLE_SHA1}'
-          resource-name: "${EKS_RESOURCE_NAME}"
+          resource-name: "${EKS_STAGING_RESOURCE_NAME}"
+          requires:
+            - aws-ecr/build-and-push-image
+  deploy-to-production:
+    jobs:
+      - aws-ecr/build-and-push-image:
+          account-url: AWS_ECR_ACCOUNT_URL
+          aws-access-key-id: AWS_ACCESS_KEY_ID
+          aws-secret-access-key: AWS_SECRET_ACCESS_KEY
+          region: AWS_DEFAULT_REGION
+          repo: "${ECR_REPO_NAME}"
+          tag: "${CIRCLE_SHA1},production-latest"
+          filters:
+            branches:
+              only: master
+      - aws-eks/update-container-image:
+          cluster-name: "${EKS_CLUSTER_NAME}"
+          aws-region: "${AWS_DEFAULT_REGION}"
+          container-image-updates: '${EKS_CONTAINER_NAME}=${AWS_ECR_ACCOUNT_URL}/${ECR_REPO_NAME}:${CIRCLE_SHA1}'
+          resource-name: "${EKS_PRODUCTION_RESOURCE_NAME}"
           requires:
             - aws-ecr/build-and-push-image
