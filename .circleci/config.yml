@@ -1,55 +1,26 @@
-version: 2.1 # use CircleCI 2.1
-jobs: # a collection of steps
-  build: # runs not using Workflows must have a `build` job as entry point
-    working_directory: ~/care # directory where steps will run
-    docker: # run the steps with Docker
-      - image: circleci/node:10.16.3 # ...with this image as the primary container; this is where all `steps` will run
-    steps: # a collection of executable commands
-      - add_ssh_keys:
-          fingerprints:
-            - "7b:31:e5:d0:a8:97:2a:e1:b5:09:07:6f:77:6f:e5:72"
-      - checkout # special step to check out source code to working directory
-      - run:
-          name: update-npm
-          command: 'sudo npm install -g npm@latest'
-      - restore_cache: # special step to restore the dependency cache
-          # Read about caching dependencies: https://circleci.com/docs/2.0/caching/
-          key: dependency-cache-{{ checksum "package-lock.json" }}
-      - run:
-          name: install-npm-wee
-          command: npm install
-      - save_cache: # special step to save the dependency cache
-          key: dependency-cache-{{ checksum "package-lock.json" }}
-          paths:
-            - ./node_modules
-      - run: 
-          name: build
-          command: npm run build
-      - run:
-          name: list
-          command: ls -lah
-      - run:
-          name: Deploy
-          command: |
-            
-            sudo apt-get update && sudo apt-get install rsync -y
+version: 2.1
 
-            echo "The branch is: $CIRCLE_BRANCH"
-            if [[ $CIRCLE_BRANCH = "master" ]]
-            then
-              echo "Syncing to production"
-              ssh-keyscan -H 3.7.18.69 >> ~/.ssh/known_hosts
-              rsync -avz --delete -e 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o ProxyCommand="ssh -A -W %h:%p deploy@3.7.18.69"' dist/ deploy@3.7.60.240:/opt/care_prod/
-            elif [[ "$CIRCLE_BRANCH" == "develop" || "$CIRCLE_BRANCH" == "migrate-to-aws" ]]
-            then
-              echo "Syncing to dev"
-              ssh-keyscan -H 3.7.18.69 >> ~/.ssh/known_hosts
-              rsync -avz --delete -e 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o ProxyCommand="ssh -A -W %h:%p deploy@3.7.18.69"' dist/ deploy@3.7.60.169:/opt/care/
-            else
-              echo "Not Syncing the branch $CIRCLE_BRANCH"
-            fi
+orbs:
+  aws-ecr: circleci/aws-ecr@6.8.0
+  aws-eks: circleci/aws-eks@0.2.6
 
-            # tar -czf build.tar.gz dist/
-            # scp build.tar.gz netlify@34.93.26.100:/home/netlify/releases/
-            # ssh netlify@34.93.26.100 "cd /home/netlify/releases/; tar xf build.tar.gz; cp -rf /opt/care_fe/ /opt/care_fe.old; mv dist /opt/care_fe/"
-
+workflows:
+  deploy-to-production:
+    jobs:
+      - aws-ecr/build-and-push-image:
+          account-url: AWS_ECR_ACCOUNT_URL
+          aws-access-key-id: AWS_ACCESS_KEY_ID
+          aws-secret-access-key: AWS_SECRET_ACCESS_KEY
+          region: AWS_DEFAULT_REGION
+          repo: "${ECR_REPO_NAME}"
+          tag: "${CIRCLE_SHA1},latest"
+          filters:
+            branches:
+              only: develop
+      - aws-eks/update-container-image:
+          cluster-name: "${EKS_CLUSTER_NAME}"
+          aws-region: "${AWS_DEFAULT_REGION}"
+          container-image-updates: '${EKS_CONTAINER_NAME}=${AWS_ECR_ACCOUNT_URL}/${ECR_REPO_NAME}:${CIRCLE_SHA1}'
+          resource-name: "${EKS_RESOURCE_NAME}"
+          requires:
+            - aws-ecr/build-and-push-image
