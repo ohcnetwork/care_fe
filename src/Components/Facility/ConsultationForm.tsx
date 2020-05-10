@@ -198,8 +198,8 @@ export const ConsultationForm = (props: any) => {
         prescribed_medication: state.form.prescribed_medication,
         admission_date: state.form.admission_date,
         discharge_date: state.form.discharge_date,
-        patient: Number(patientId),
-        facility: Number(facilityId),
+        patient: patientId,
+        facility: facilityId,
         referred_to: state.form.suggestion === 'R' ? state.form.referred_to : undefined,
       };
       const res = await dispatchAction(id ? updateConsultation(id, data) : createConsultation(data));

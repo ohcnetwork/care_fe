@@ -184,7 +184,7 @@ export const PatientHome = (props: any) => {
       statusName = "SENT_TO_COLLECTON_CENTRE";
     }
 
-    const res = await dispatch(patchSample(Number(sample.id), sampleData));
+    const res = await dispatch(patchSample(sample.id, sampleData));
     if (res && (res.status === 201 || res.status === 200)) {
       Notification.Success({
         msg: `Request ${statusName}`
@@ -249,7 +249,7 @@ export const PatientHome = (props: any) => {
           handleCancel={() => dismissAlert()}
         />
       )}
-      <PageTitle title={`Covid Suspect #${id}`} />
+      <PageTitle title={`Covid Suspect Details`} />
       <div className="border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black mt-4 p-4">
         <div className="flex justify-between">
           <div className="grid gap-2 grid-cols-1">

@@ -141,7 +141,7 @@ export const DailyRounds = (props: any) => {
                 temperature_measured_at: state.form.temperature ? state.form.temperature_measured_at : undefined,
                 physical_examination_info: state.form.physical_examination_info,
                 other_details: state.form.other_details,
-                consultation: Number(consultationId),
+                consultation: consultationId,
                 patient_category: state.form.category,
                 current_health: state.form.current_health,
                 recommend_discharge: JSON.parse(state.form.recommend_discharge),

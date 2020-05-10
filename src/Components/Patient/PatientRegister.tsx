@@ -420,7 +420,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       };
       const res = await dispatchAction(searchPatient(query))
       if (res && res.data && res.data.results) {
-        const duplicateList = !id ? res.data.results : res.data.results.filter((item: DupPatientModel) => Number(item.patient_id) !== Number(id));
+        const duplicateList = !id ? res.data.results : res.data.results.filter((item: DupPatientModel) => item.patient_id !== id);
         if (duplicateList.length) {
           setStatusDialog({
             show: true,
