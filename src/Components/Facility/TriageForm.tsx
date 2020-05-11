@@ -73,7 +73,7 @@ export const TriageForm = (props: triageFormProps) => {
             type: "set_form",
             form: {
               entry_date: res.data.entry_date ? moment(res.data.entry_date, 'YYYY-MM-DD') : null,
-              num_patients_visited: res.data.num_patients_visited,
+              num_patients_visited: Number(res.data.num_patients_home_quarantine) + Number(res.data.num_patients_isolation) + Number(res.data.num_patient_referred),
               num_patients_home_quarantine: res.data.num_patients_home_quarantine,
               num_patients_isolation: res.data.num_patients_isolation,
               num_patient_referred: res.data.num_patient_referred,
@@ -123,7 +123,7 @@ export const TriageForm = (props: triageFormProps) => {
       setIsLoading(true);
       const data = {
         entry_date: `${moment(state.form.entry_date).format('YYYY-MM-DD')}`,
-        num_patients_visited: Number(state.form.num_patients_visited),
+        num_patients_visited: Number(state.form.num_patients_home_quarantine) + Number(state.form.num_patients_isolation) + Number(state.form.num_patient_referred),
         num_patients_home_quarantine: Number(state.form.num_patients_home_quarantine),
         num_patients_isolation: Number(state.form.num_patients_isolation),
         num_patient_referred: Number(state.form.num_patient_referred),
@@ -179,20 +179,7 @@ export const TriageForm = (props: triageFormProps) => {
                 errors={state.errors.entry_date}
               />
             </div>
-            <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
-              <div>
-                <InputLabel id="num-patients-visited-label">Patients Visited in Triage</InputLabel>
-                <TextInputField
-                  name="num_patients_visited"
-                  variant="outlined"
-                  margin="dense"
-                  type="number"
-                  InputLabelProps={{ shrink: !!state.form.num_patients_visited }}
-                  value={state.form.num_patients_visited}
-                  onChange={handleChange}
-                  errors={state.errors.num_patients_visited}
-                />
-              </div>
+            <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2"> 
               <div>
                 <InputLabel id="num-patients-home-quarantine-label">Patients in Home Quarantine</InputLabel>
                 <TextInputField
