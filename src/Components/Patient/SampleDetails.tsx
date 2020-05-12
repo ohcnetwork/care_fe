@@ -72,7 +72,7 @@ export const SampleDetails = (props: SampleDetailsProps) => {
   }
 
   return (<>
-    <PageTitle title={`Sample Test Details #${sampleDetails.id}`} />
+    <PageTitle title={`Sample Test Details`} />
     <Card className="mt-4">
       <CardContent>
         <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
