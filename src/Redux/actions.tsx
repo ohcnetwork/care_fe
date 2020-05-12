@@ -133,7 +133,7 @@ export const getTestList = (params: object) => {
 export const getTestSample = (id: number) => {
     return fireRequest('getTestSample', [id], {});
 };
-export const patchSample = (id: number, params: object) => {
+export const patchSample = (id: any, params: object) => {
     return fireRequest('patchSample', [id], params)
 };
 

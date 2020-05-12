@@ -117,11 +117,11 @@ export const Login = () => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row mt-4 md:mt-20 items-center justify-between ">
+    <div className="flex flex-col md:flex-row my-20 md:my-40 items-center justify-between ">
       <PublicDashboard />
-      <div>
-        <div className="bg-white mt-4 md:mt-20 border shadow px-4 pb-4">
-          <div className="text-2xl font-bold text-center pt-4">
+      <div className="w-full md:w-auto mt-10 md:mt-0">
+        <div className="bg-white mt-4 md:mt-20 rounded-lg shadow-lg px-4 py-4">
+          <div className="text-2xl font-bold text-center pt-4 text-green-600">
             Authorized Login
           </div>
           <form onSubmit={e => handleSubmit(e)}>

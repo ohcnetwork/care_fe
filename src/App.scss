@@ -1,4 +1,4 @@
-$primary: #5c6ac4;
+$primary: #03543f;
 
 @media print {
   body * {
@@ -79,14 +79,6 @@ $primary: #5c6ac4;
     margin-left: 240px;
   }
   min-height: 100vh;
-}
-#root {
-  background-color: #fbfafc;
-}
-#root > div {
-  display: flex;
-  min-height: 100vh;
-  flex-direction: column;
 }
 .app-footer {
   width: 100%;
@@ -281,4 +273,3 @@ $primary: #5c6ac4;
     }
   }
 }
-

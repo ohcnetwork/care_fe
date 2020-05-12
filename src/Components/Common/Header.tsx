@@ -72,7 +72,7 @@ const Header = () => {
     {
       title: 'Patients / Suspects',
       link: '/patients',
-      icon: <InboxIcon style={{color: '#666', marginRight: '4px'}}/>
+      icon: <InboxIcon style={{ color: '#666', marginRight: '4px' }} />
     },
     {
       title: "Ambulances",
@@ -120,7 +120,7 @@ const Header = () => {
           );
         })}
         <div
-            className="dropdown border-b border-grey-500 items-center justify-start whitespace-no-wrap font-semibold cursor-pointer hover:bg-gray-100 w-full"
+          className="dropdown border-b border-grey-500 items-center justify-start whitespace-no-wrap font-semibold cursor-pointer hover:bg-gray-100 w-full"
 
         >
           <div className="px-4 py-4">
@@ -128,17 +128,17 @@ const Header = () => {
             <span className="pl-4">{loginUser}</span>
           </div>
           <div
-              className="dropdown-menu hidden border-b border-grey-500 inline-flex items-center justify-start whitespace-no-wrap font-semibold cursor-pointer hover:bg-gray-300 w-full px-4 py-4"
-              onClick={() => {
-                localStorage.removeItem("care_access_token");
-                localStorage.removeItem("care_refresh_token");
-                navigate("/login");
-                window.location.reload();
-              }}
-              >
-                <CancelIcon style={{ color: "#666", marginRight: "4px" }} />
-                <span className="pl-4">Logout</span>
-            </div>
+            className="dropdown-menu hidden border-b border-grey-500 inline-flex items-center justify-start whitespace-no-wrap font-semibold cursor-pointer hover:bg-gray-300 w-full px-4 py-4"
+            onClick={() => {
+              localStorage.removeItem("care_access_token");
+              localStorage.removeItem("care_refresh_token");
+              navigate("/login");
+              window.location.reload();
+            }}
+          >
+            <CancelIcon style={{ color: "#666", marginRight: "4px" }} />
+            <span className="pl-4">Logout</span>
+          </div>
         </div>
       </div>
     </div>

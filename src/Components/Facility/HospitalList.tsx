@@ -77,35 +77,34 @@ export const HospitalList = () => {
       return (
         <div key={`usr_${facility.id}`} className="w-full md:w-1/2 mt-4 px-2">
           <div
-            className="block border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black"
+            className="block rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 overflow-hidden"
             onClick={() => navigate(`/facility/${facility.id}`)}
           >
-            <div className="px-6 py-4 h-full flex flex-col justify-between">
-              <div>
-                <div className="font-bold text-xl capitalize mb-2">
-                  {facility.name}
-                </div>
-                <div>
-                  <span className="font-semibold leading-relaxed">
-                    District:{" "}
-                  </span>
-                  {facility.district_object?.name}
-                </div>
-                <div>
-                  <span className="font-semibold leading-relaxed">
-                    Facility Type:{" "}
-                  </span>
+            <div className="h-full flex flex-col justify-between">
+              <div className="px-6 py-4">
+                <div className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800">
                   {facility.facility_type}
                 </div>
-                <div>
-                  <span className="font-semibold leading-relaxed">Phone: </span>
-                  {facility.phone_number || "-"}
+                <div className="font-black text-2xl capitalize mt-2">
+                  {facility.name}
+                </div>
+                <div className="mt-2">
+                  <div className="text-gray-500 leading-relaxed font-light">District:</div>
+                  <div className="font-semibold">{facility.district_object?.name}</div>
                 </div>
               </div>
-              <div className="mt-2">
-                <Button size="small" variant="outlined" fullWidth>
-                  View Facility
-                </Button>
+              <div className="mt-2 bg-gray-50 border-t px-6 py-2">
+                <div className="flex py-4 justify-between">
+                  <div>
+                    <div className="text-gray-500 leading-relaxed">Phone:</div>
+                    <div className="font-semibold">{facility.phone_number || "-"}</div>
+                  </div>
+                  <span className="inline-flex rounded-md shadow-sm">
+                    <button type="button" className="inline-flex items-center px-3 py-2 border border-green-500 text-sm leading-4 font-medium rounded-md text-green-700 bg-white hover:text-green-500 focus:outline-none focus:border-green-300 focus:shadow-outline-blue active:text-green-800 active:bg-gray-50 transition ease-in-out duration-150">
+                      View Facility
+                    </button>
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -147,13 +146,15 @@ export const HospitalList = () => {
 
   return (
     <div className="px-2">
-      <PageTitle title="Facilities" hideBack={true} />
+      <div className="font-bold text-3xl">
+        Facilities
+      </div>
       <InputSearchBox
         search={onSearchSuspects}
         placeholder='Search by facility / district'
         errors=''
       />
-      <div className="flex flex-wrap mt-2">{manageFacilities}</div>
+      <div className="flex flex-wrap -mx-2 mt-2">{manageFacilities}</div>
     </div>
   );
 };

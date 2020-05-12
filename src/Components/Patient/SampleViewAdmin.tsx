@@ -90,7 +90,7 @@ export default function SampleViewAdmin(props: any) {
       sampleData.result = result;
     }
     const statusName = SAMPLE_TEST_STATUS.find(i => i.id === status)?.desc;
-    const res = await dispatch(patchSample(Number(sample.id), sampleData));
+    const res = await dispatch(patchSample(sample.id, sampleData));
     if (res && (res.status === 201 || res.status === 200)) {
       Notification.Success({
         msg: `Success - ${statusName}`,

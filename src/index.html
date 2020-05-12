@@ -29,6 +29,8 @@
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
   <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tailwindcss/ui@latest/dist/tailwind-ui.min.css">
+  <script src="https://kit.fontawesome.com/7ef943e539.js" crossorigin="anonymous"></script>
   <style>
     @media (min-width: 768px) {
       #google_translate_element {
@@ -38,15 +40,16 @@
 
     @media (max-width: 767px) {
       #google_translate_element {
-        bottom: 0;
+        top: 0;
       }
     }
 
     #google_translate_element {
       position: absolute;
+      padding-top: 1rem;
       right: 15px;
       opacity: 0.7;
-      z-index: 2;
+      z-index: 40;
     }
 
     #google_translate_element * {
@@ -71,7 +74,7 @@
 
 <body>
   <noscript>You need to enable JavaScript to run this app.</noscript>
-  <div id="google_translate_element"></div>
+  <div className ="z-40" id="google_translate_element"></div>
   <div id="root"></div>
   <script type="text/javascript">
     function googleTranslateElementInit() {

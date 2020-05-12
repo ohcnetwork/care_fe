@@ -43,4 +43,3 @@ workflows:
           resource-name: "${EKS_PRODUCTION_RESOURCE_NAME}"
           requires:
             - aws-ecr/build-and-push-image
-
