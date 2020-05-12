@@ -26,7 +26,7 @@ export const InputSearchBox = (props: TextFieldPropsExtended) => {
     };
 
     return (
-        <div className="flex flex sticky top-0 ">
+        <div className="md:flex sticky top-0 ">
             <div className="mt-1 relative rounded-md shadow-sm">
                 <input name="search" type="text" value={state} placeholder={placeholder} onChange={handleKeyDown} className="form-input block w-full pl-7 pr-12 sm:text-sm sm:leading-5" />
 

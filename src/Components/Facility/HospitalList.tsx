@@ -154,7 +154,7 @@ export const HospitalList = () => {
         placeholder='Search by facility / district'
         errors=''
       />
-      <div className="flex flex-wrap mt-2">{manageFacilities}</div>
+      <div className="flex flex-wrap -mx-2 mt-2">{manageFacilities}</div>
     </div>
   );
 };
