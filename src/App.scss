@@ -80,14 +80,6 @@ $primary: #5c6ac4;
   }
   min-height: 100vh;
 }
-#root {
-  background-color: #fbfafc;
-}
-#root > div {
-  display: flex;
-  min-height: 100vh;
-  flex-direction: column;
-}
 .app-footer {
   width: 100%;
   background: #ffffff no-repeat;
@@ -281,4 +273,3 @@ $primary: #5c6ac4;
     }
   }
 }
-
