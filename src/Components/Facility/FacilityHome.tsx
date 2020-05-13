@@ -250,7 +250,7 @@ export const FacilityHome = (props: any) => {
                 <thead>
                   <tr className="white border">
                     <th className="border px-4 py-2">Date</th>
-                    <th className="border px-4 py-2">Visited</th>
+                    <th className="border px-4 py-2">Total Triaged</th>
                     <th className="border px-4 py-2">
                       Advised Home Quarantine
                     </th>
