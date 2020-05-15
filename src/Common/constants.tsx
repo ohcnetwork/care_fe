@@ -49,12 +49,13 @@ export const FACILITY_TYPES: Array<OptionsType> = [
   { id: 901, text: "24x7 Public Health Centres" },
   { id: 902, text: "Family Health Centres" },
   { id: 903, text: "Community Health Centres" },
-  { id: 920, text: "Urban Primary Health Center" },
+  { id: 920, text: "Urban Primary Health Centre" },
   { id: 930, text: "Taluk Hospitals" },
   { id: 931, text: "Taluk Headquarters Hospitals" },
   { id: 940, text: "Women and Child Health Centres" },
   { id: 950, text: "General hospitals" },
   { id: 960, text: "District Hospitals" },
+  {id: 1000, text: "Corona Care Centre"}
 ];
 
 export const BED_TYPES: Array<OptionsType> = [
