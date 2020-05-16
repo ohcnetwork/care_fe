@@ -32,9 +32,22 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tailwindcss/ui@latest/dist/tailwind-ui.min.css">
   <script src="https://kit.fontawesome.com/7ef943e539.js" crossorigin="anonymous"></script>
   <style>
+    #google_translate_element {
+      position: absolute;
+      padding-top: 1.25rem;
+      right: 1rem;
+      opacity: 0.7;
+      z-index: 40;
+    }
+
+    #google_translate_element * {
+      display: flex;
+    }
+
     @media (min-width: 768px) {
       #google_translate_element {
         top: 0;
+        right: 3rem;
       }
     }
 
@@ -44,17 +57,6 @@
       }
     }
 
-    #google_translate_element {
-      position: absolute;
-      padding-top: 1rem;
-      right: 15px;
-      opacity: 0.7;
-      z-index: 40;
-    }
-
-    #google_translate_element * {
-      display: flex;
-    }
 
     /* Fix to prevent double scrollbar */
 
@@ -74,7 +76,7 @@
 
 <body>
   <noscript>You need to enable JavaScript to run this app.</noscript>
-  <div className ="z-40" id="google_translate_element"></div>
+  <div className="z-40" id="google_translate_element"></div>
   <div id="root"></div>
   <script type="text/javascript">
     function googleTranslateElementInit() {

@@ -1,4 +1,4 @@
-import {Card, CardContent, CardHeader, Grid, Tooltip, Typography} from "@material-ui/core";
+import { Card, CardContent, CardHeader, Grid, Tooltip, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import React, { useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -127,7 +127,7 @@ export default function ManageUsers(props: any) {
     setOffset(offset);
   };
 
-  const addUser = (<div className="w-full md:w-1/2 mt-4 px-2">
+  const addUser = (<div className="w-full md:w-1/2 mt-6 md:px-4">
     <div
       className="block border rounded-lg bg-white shadow h-full cursor-pointer hover:bg-gray-300 font-semibold flex justify-center items-center text-black"
       onClick={() => navigate("/user/add")}
@@ -140,8 +140,8 @@ export default function ManageUsers(props: any) {
   if (users && users.length) {
     userList = users.map((user: any, idx: number) => {
       return (
-        <div key={`usr_${user.id}`} className="w-full md:w-1/2 mt-4 px-2">
-          <div className="block border rounded-lg bg-white shadow h-full text-black">
+        <div key={`usr_${user.id}`} className="w-full md:w-1/2 mt-6 md:px-4">
+          <div className="block rounded-lg bg-white shadow h-full ">
             <CardHeader
               className={classes.cardHeader}
               title={
@@ -220,8 +220,10 @@ export default function ManageUsers(props: any) {
   return (
     <div>
       <PageTitle title="Users" hideBack={true} />
-      <div className="flex flex-wrap mt-4">
-        {manageUsers}
+      <div className="px-3 md:px-8">
+        <div className="flex flex-wrap md:-mx-4">
+          {manageUsers}
+        </div>
       </div>
     </div>
   );
