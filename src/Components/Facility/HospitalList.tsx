@@ -75,7 +75,7 @@ export const HospitalList = () => {
   if (data && data.length) {
     facilityList = data.map((facility: any, idx: number) => {
       return (
-        <div key={`usr_${facility.id}`} className="w-full md:w-1/2 mt-4 px-2">
+        <div key={`usr_${facility.id}`} className="w-full md:w-1/2 mt-6 md:px-4">
           <div
             className="block rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 overflow-hidden"
             onClick={() => navigate(`/facility/${facility.id}`)}
@@ -145,16 +145,18 @@ export const HospitalList = () => {
   }
 
   return (
-    <div className="px-2">
-      <div className="font-bold text-3xl">
+    <div>
+      <h2 className="font-semibold text-2xl leading-tight px-3 md:px-8 pt-4">
         Facilities
-      </div>
+      </h2>
       <InputSearchBox
         search={onSearchSuspects}
         placeholder='Search by facility / district'
         errors=''
       />
-      <div className="flex flex-wrap -mx-2 mt-2">{manageFacilities}</div>
+      <div className="px-3 md:px-8">
+        <div className="flex flex-wrap md:-mx-4">{manageFacilities}</div>
+      </div>
     </div>
   );
 };

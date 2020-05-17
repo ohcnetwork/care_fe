@@ -133,7 +133,7 @@ export default function SampleViewAdmin(props: any) {
         .filter(i => status && statusFlow[status] && statusFlow[status].includes(i.text))
         .filter(i => roleStatusMap[userType] && roleStatusMap[userType].includes(i.text))
       return (
-        <div key={`usr_${item.id}`} className="w-full md:w-1/2 mt-4 px-2">
+        <div key={`usr_${item.id}`} className="w-full md:w-1/2 mt-6 md:px-4">
           <div
             className={`block border rounded-lg bg-white shadow h-full hover:border-primary-500 text-black ${
               item.result === "POSITIVE" ? "border-red-700 bg-red-100" : ""
@@ -262,7 +262,9 @@ export default function SampleViewAdmin(props: any) {
         placeholder='Search by district'
         errors=''
       />
-      <div className="flex flex-wrap mt-2">{manageSamples}</div>
+      <div className="px-3 md:px-8">
+        <div className="flex flex-wrap md:-mx-4">{manageSamples}</div>
+      </div>
     </div>
   );
 }
