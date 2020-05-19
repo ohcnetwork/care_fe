@@ -79,9 +79,7 @@
     "typescript": "^3.7.5"
   },
   "scripts": {
-    "build:css": "postcss src/tailwind.css -o src/index.css",
-    "watch:css": "postcss src/tailwind.css -o src/index.css -w",
-    "start": "concurrently --kill-others \"npm run watch:css\" \"webpack-dev-server --open\"",
+    "start": "webpack-dev-server --open",
     "build": "./node_modules/.bin/webpack --mode=production"
   },
   "eslintConfig": {
