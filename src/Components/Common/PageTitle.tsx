@@ -1,6 +1,4 @@
 import React from 'react';
-import { IconButton } from '@material-ui/core';
-import ArrowBackIosOutlinedIcon from "@material-ui/icons/ArrowBackIosOutlined";
 import { navigate } from 'hookrouter';
 
 interface PageTitleProps {
@@ -19,11 +17,14 @@ const PageTitle = (props: PageTitleProps) => {
         }
     }
     return (
-        <div>
-            {!hideBack && (<IconButton onClick={goBack}>
-                <ArrowBackIosOutlinedIcon />
-            </IconButton>)}
-            <h2 className="font-semibold text-2xl leading-tight px-3 md:px-8 pt-4">{title}</h2>
+        <div className="flex px-3 md:px-8 pt-4">
+            {!hideBack && (
+                <button onClick={goBack}>
+                    <i className="fas fa-chevron-left text-2xl rounded-full p-2 hover:bg-gray-200"> </i>
+                </button>
+            )}
+
+            <h2 className="font-semibold text-2xl p-2 leading-tight">{title}</h2>
         </div>
     )
 };

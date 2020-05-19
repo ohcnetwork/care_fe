@@ -158,14 +158,14 @@ export const PatientManager = (props: any) => {
       <>
         {patientList}
         {totalCount > limit && (
-          <Grid container className={`w3-center ${classes.paginateTopPadding}`}>
+          <div className="mt-4 flex w-full justify-center">
             <Pagination
               cPage={currentPage}
               defaultPerPage={limit}
               data={{ totalCount }}
               onChange={handlePagination}
             />
-          </Grid>
+          </div>
         )}
       </>
     );
