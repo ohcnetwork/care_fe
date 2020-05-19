@@ -1,31 +1,16 @@
-import { Button } from "@material-ui/core";
-import Grid from "@material-ui/core/Grid";
-import { makeStyles } from "@material-ui/core/styles";
 import { navigate } from "hookrouter";
 import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getFacilities } from "../../Redux/actions";
 import { Loading } from "../Common/Loading";
-import PageTitle from "../Common/PageTitle";
 import Pagination from "../Common/Pagination";
 import { FacilityModel } from "./models";
 import { InputSearchBox } from "../Common/SearchBox";
 
-const useStyles = makeStyles((theme) => ({
-  paginateTopPadding: {
-    paddingTop: "50px",
-  },
-  displayFlex: {
-    display: "flex",
-  }
-}));
-
 export const HospitalList = () => {
-  const classes = useStyles();
   const dispatchAction: any = useDispatch();
   const [data, setData] = useState<Array<FacilityModel>>([]);
-
   let manageFacilities: any = null;
   const [isLoading, setIsLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
@@ -120,14 +105,14 @@ export const HospitalList = () => {
       <>
         {facilityList}
         {totalCount > limit && (
-          <Grid container className={`w3-center ${classes.paginateTopPadding}`}>
+          <div className="mt-4 flex w-full justify-center">
             <Pagination
               cPage={currentPage}
               defaultPerPage={limit}
               data={{ totalCount }}
               onChange={handlePagination}
             />
-          </Grid>
+          </div>
         )}
       </>
     );
