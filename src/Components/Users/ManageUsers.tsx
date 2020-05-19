@@ -1,5 +1,4 @@
-import {Card, CardContent, CardHeader, Grid, Tooltip, Typography} from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
+
 import React, { useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -10,77 +9,9 @@ import Pagination from "../Common/Pagination";
 import { navigate } from "hookrouter";
 import { USER_TYPES } from "../../Common/constants";
 
-const useStyles = makeStyles(theme => ({
-  root: {
-    flexGrow: 1,
-    padding: "8px"
-  },
-  card: {
-    height: 160,
-    width: "100%",
-    backgroundColor: "#FFFFFF"
-  },
-  title: {
-    whiteSpace: "nowrap",
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-    fontWeight: 400,
-    //padding: '10px',
-    //fontSize: '14px',
-    display: "inline-block",
-    [theme.breakpoints.up("md")]: {
-      width: "12vw"
-    },
-    [theme.breakpoints.down("sm")]: {
-      width: "40vw"
-    },
-    [theme.breakpoints.down("xs")]: {
-      width: "65vw"
-    }
-  },
-  content: {
-    padding: "5px 10px"
-  },
-  cardHeader: {
-    padding: "10px"
-  },
-  contentText: {
-    whiteSpace: "nowrap",
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-    display: "inline-block",
-    [theme.breakpoints.up("md")]: {
-      width: "10vw"
-    },
-    [theme.breakpoints.down("sm")]: {
-      width: "40vw"
-    },
-    [theme.breakpoints.down("xs")]: {
-      width: "40vw"
-    }
-  },
-  spacing: {
-    marginLeft: theme.spacing(1)
-  },
-  margin: {
-    margin: theme.spacing(1)
-  },
-  addUserCard: {
-    marginTop: "50px"
-  },
-  paginateTopPadding: {
-    paddingTop: "50px"
-  },
-  userCardSideTitle: {
-    fontSize: "13px"
-  },
-  toolTip: {
-    fontSize: "13px"
-  }
-}));
+
 
 export default function ManageUsers(props: any) {
-  const classes = useStyles();
   const dispatch: any = useDispatch();
   const initialData: any[] = [];
   let manageUsers: any = null;
@@ -127,64 +58,55 @@ export default function ManageUsers(props: any) {
     setOffset(offset);
   };
 
-  const addUser = (<div className="w-full md:w-1/2 mt-4 px-2">
-    <div
-      className="block border rounded-lg bg-white shadow h-full cursor-pointer hover:bg-gray-300 font-semibold flex justify-center items-center text-black"
-      onClick={() => navigate("/user/add")}
-    >
-      Add a new user
-    </div>
-  </div>);
+  const addUser = (<button className="px-4 py-1 rounded-md bg-green-500 text-white text-lg font-semibold rounded shadow"
+    onClick={() => navigate("/user/add")}>
+    <i className="fas fa-plus mr-2"></i>
+    Add New User
+  </button >);
 
   let userList: any[] = [];
   if (users && users.length) {
     userList = users.map((user: any, idx: number) => {
       return (
-        <div key={`usr_${user.id}`} className="w-full md:w-1/2 mt-4 px-2">
-          <div className="block border rounded-lg bg-white shadow h-full text-black">
-            <CardHeader
-              className={classes.cardHeader}
-              title={
-                <span className={classes.title}>
-                  <Tooltip
-                    title={
-                      <span className={classes.toolTip}>{user.username}</span>
-                    }
-                    interactive={true}
-                  >
-                    <span>{user.username}</span>
-                  </Tooltip>
-                </span>
-              }
-            />
-            <CardContent className={classes.content}>
-              <Typography>
-                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>
-                  Full Name:{" "}
-                </span>
-                {`${user.first_name} ${user.last_name}`}
-              </Typography>
-            </CardContent>
-            {user.user_type && (
-              <CardContent className={classes.content}>
-                <Typography>
-                  <span className={`w3-text-gray ${classes.userCardSideTitle}`}>
-                    Role:{" "}
-                  </span>
-                  {user.user_type}
-                </Typography>
-              </CardContent>
-            )}
-            {user.phone_number && (
-              <CardContent className={classes.content}>
-                <Typography>
-                  <span className={`w3-text-gray ${classes.userCardSideTitle}`}>
-                    Contact:{" "}
-                  </span>
-                  {user.phone_number}
-                </Typography>
-              </CardContent>
-            )}
+        <div key={`usr_${user.id}`} className="w-full md:w-1/2 mt-6 md:px-4">
+          <div
+            className="block rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 overflow-hidden"
+          >
+            <div className="h-full flex flex-col justify-between">
+              <div className="px-6 py-4">
+                {user.username && (
+                  <div className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800">
+                    {user.username}
+                  </div>)}
+                <div className="font-black text-2xl capitalize mt-2">
+                  {`${user.first_name} ${user.last_name}`}
+                </div>
+
+                {user.user_type && (
+                  <div className="mt-2">
+                    <div className="text-gray-500 leading-relaxed font-light">Role:</div>
+                    <div className="font-semibold">{user.user_type}</div>
+                  </div>)}
+                {user.local_body_object && (
+                  <div className="mt-2">
+                    <div className="text-gray-500 leading-relaxed font-light">Location:</div>
+                    <div className="font-semibold">{user.local_body_object.name}</div>
+                  </div>)}
+                {user.district_object && (
+                  <div className="mt-2">
+                    <div className="text-gray-500 leading-relaxed font-light">District:</div>
+                    <div className="font-semibold">{user.district_object.name}</div>
+                  </div>)}
+              </div>
+              <div className="mt-2 bg-gray-50 border-t px-6 py-2">
+                <div className="flex py-4 justify-between">
+                  <div>
+                    <div className="text-gray-500 leading-relaxed">Phone:</div>
+                    <div className="font-semibold">{user.phone_number || "-"}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       );
@@ -194,34 +116,38 @@ export default function ManageUsers(props: any) {
   if (isLoading || !users) {
     manageUsers = <Loading />;
   } else if (users && users.length) {
-    manageUsers = (<>
+    manageUsers = (<div>
       {userTypes.length && addUser}
-      {userList}
+      <div className="flex flex-wrap md:-mx-4">
+        {userList}
+      </div>
       {totalCount > limit && (
-        <Grid container className={`w3-center ${classes.paginateTopPadding}`}>
+        <div className="mt-4 flex w-full justify-center">
           <Pagination
             cPage={currentPage}
             defaultPerPage={limit}
             data={{ totalCount }}
             onChange={handlePagination}
           />
-        </Grid>
+        </div>
       )}
-    </>);
+    </div>);
   } else if (users && users.length === 0) {
-    manageUsers = (<>
+    manageUsers = (<div>
       {userTypes.length && addUser}
-      <Grid item xs={12} md={12} className="textMarginCenter">
+      <div>
         <h5> No Users Found</h5>
-      </Grid>
-    </>);
+      </div>
+    </div>);
   }
 
   return (
     <div>
       <PageTitle title="Users" hideBack={true} />
-      <div className="flex flex-wrap mt-4">
-        {manageUsers}
+      <div className="px-3 md:px-8">
+        <div>
+          {manageUsers}
+        </div>
       </div>
     </div>
   );

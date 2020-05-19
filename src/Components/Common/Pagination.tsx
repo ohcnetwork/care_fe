@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Grid } from '@material-ui/core/';
 import { useAbortableEffect, statusType } from '../../Common/utils';
 
 interface PaginationProps {
@@ -92,13 +91,14 @@ const Pagination = (props: PaginationProps) => {
         onChange(page, rowsPerPage);
     }
 
-    const renderNavigationBtn = (label: any, disabled: any) => {
+    const renderNavigationBtn = (label: any, disabled: any, classes: string) => {
         return (
-            <span
-                onClick={e => (disabled ? false : handleChangePage(e, label.toLowerCase()))}
-                className={`w3-button ${!disabled ? 'cursor-pointer' : 'non-clickable w3-disabled'}`}>
+            <button
+                disabled={disabled}
+                onClick={e => (handleChangePage(e, label.toLowerCase()))}
+                className={`${classes} -ml-px relative bg-white text-gray-600 hover:text-gray-800 hover:bg-gray-200 inline-flex items-center px-4 py-2 border border-gray-300 text-sm leading-5 font-medium focus:z-10 focus:outline-none focus:border-green-300 focus:shadow-outline-green transition ease-in-out duration-150  ${!disabled ? 'cursor-pointer' : 'cursor-not-allowed'}`}>
                 {label}
-            </span>
+            </button>
         );
     }
 
@@ -109,30 +109,42 @@ const Pagination = (props: PaginationProps) => {
     const totalPage = Math.ceil(totalCount / rowsPerPage);
     const pageNumbers = getPageNumbers();
     const firstBtnDisable = currentPage === 1;
-    const prevBtnDisable = currentPage - 1 <= 1;
+    const prevBtnDisable = currentPage - 1 <= 0;
     const nextBtnDisable = currentPage + 1 >= totalPage;
     const lastBtnDisable = totalPage === 0 || currentPage === totalPage;
 
     return (
-        <Grid container className="pagination w3-margin-top" >
-            <Grid item xs={12} md={12}>
-                <div className="w3-bar w3-border w3-round w3-white">
-                    {renderNavigationBtn('First', firstBtnDisable)}
-                    {renderNavigationBtn('Prev', prevBtnDisable)}
-                    {pageNumbers.map(pageNo => (
-                        <button
-                            key={`page_${pageNo}`}
-                            className={`w3-button cursor-pointer ${currentPage === pageNo ? 'bg-blue-500 text-white' : 'bg-white text-gray-800'}`}
-                            onClick={e => goToPage(e, pageNo)}
-                        >
-                            {pageNo}
-                        </button>
-                    ))}
-                    {renderNavigationBtn('Next', nextBtnDisable)}
-                    {renderNavigationBtn('Last', lastBtnDisable)}
+
+        <div className="mx-auto mb-4">
+            <div className="flex-1 flex justify-between sm:hidden">
+                <a onClick={e => (handleChangePage(e, 'prev'))} className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm leading-5 font-medium rounded-md text-gray-700 bg-white hover:text-gray-500 focus:outline-none focus:shadow-outline-green focus:border-green-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150">
+                    Previous
+                    </a>
+                <a onClick={e => (handleChangePage(e, 'next'))} className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm leading-5 font-medium rounded-md text-gray-700 bg-white hover:text-gray-500 focus:outline-none focus:shadow-outline-green focus:border-green-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150">
+                    Next
+                    </a>
+            </div>
+            <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                <div>
+                    <nav className="relative z-0 inline-flex shadow-sm">
+                        {renderNavigationBtn('First', firstBtnDisable, "rounded-l-md")}
+                        {renderNavigationBtn('Prev', prevBtnDisable, "")}
+                        {pageNumbers.map(pageNo => (
+                            <button type="button"
+
+                                key={`page_${pageNo}`}
+                                className={`-ml-px relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm leading-5 font-medium focus:z-10 focus:outline-none focus:border-green-300 focus:shadow-outline-green transition ease-in-out duration-150 ${currentPage === pageNo ? 'bg-green-500 text-white' : 'bg-white text-gray-600 hover:text-gray-800 hover:bg-gray-200'}`}
+                                onClick={e => goToPage(e, pageNo)}
+                            >
+                                {pageNo}
+                            </button>
+                        ))}
+                        {renderNavigationBtn('Next', nextBtnDisable, "")}
+                        {renderNavigationBtn('Last', lastBtnDisable, "rounded-r-md")}
+                    </nav>
                 </div>
-            </Grid>
-        </Grid>
+            </div>
+        </div>
     );
 }
 

@@ -1,4 +1,6 @@
-/* Custom Style */
+@import "tailwindcss/base";
+
+@import "tailwindcss/components";
 
 html {
   width: 100%;
@@ -57,3 +59,5 @@ h6 {
 .btn-large {
   @apply py-2 px-5 text-base h-10;
 }
+
+@import "tailwindcss/utilities";

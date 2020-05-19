@@ -225,14 +225,14 @@ export const ConsultationDetails = (props: any) => {
                 <div className="flex flex-wrap mt-4">
                     {roundsList}
                     {!isDailyRoundLoading && totalCount > limit && (
-                        <Grid container className={`w3-center`} style={{ paddingTop: "50px" }}>
+                        <div className="mt-4 flex w-full justify-center">
                             <Pagination
                                 cPage={currentPage}
                                 defaultPerPage={limit}
                                 data={{ totalCount }}
                                 onChange={handlePagination}
                             />
-                        </Grid>
+                        </div>
                     )}
                 </div>
             </div>

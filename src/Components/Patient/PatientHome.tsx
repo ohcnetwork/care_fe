@@ -436,14 +436,14 @@ export const PatientHome = (props: any) => {
         <PageTitle title="OP Triage / Consultation History" hideBack={true} />
         {consultationList}
         {!isConsultationLoading && totalConsultationCount > limit && (
-          <Grid container className={`w3-center ${classes.paginateTopPadding}`}>
+          <div className="mt-4 flex w-full justify-center">
             <Pagination
               cPage={currentConsultationPage}
               defaultPerPage={limit}
               data={{ totalCount: totalConsultationCount }}
               onChange={handleConsultationPagination}
             />
-          </Grid>
+          </div>
         )}
       </div>
 
@@ -451,14 +451,14 @@ export const PatientHome = (props: any) => {
         <PageTitle title="Sample Test History" hideBack={true} />
         {sampleList}
         {!isSampleLoading && totalSampleListCount > limit && (
-          <Grid container className={`w3-center ${classes.paginateTopPadding}`}>
+          <div className="mt-4 flex w-full justify-center">
             <Pagination
               cPage={currentSampleListPage}
               defaultPerPage={limit}
               data={{ totalCount: totalSampleListCount }}
               onChange={handleSampleListPagination}
             />
-          </Grid>
+          </div>
         )}
       </div>
     </div>

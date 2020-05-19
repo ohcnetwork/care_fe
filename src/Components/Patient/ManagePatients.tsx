@@ -78,10 +78,10 @@ export const PatientManager = (props: any) => {
         ? `/facility/${patient.facility}/patient/${patient.id}`
         : `/patient/${patient.id}`;
       return (
-        <div key={`usr_${patient.id}`} className="w-full md:w-1/2 mt-4 px-2">
+        <div key={`usr_${patient.id}`} className="w-full md:w-1/2 mt-6 md:px-4">
           <div
             onClick={() => navigate(patientUrl)}
-            className={`overflow-hidden shadow-lg block border rounded-lg bg-white h-full cursor-pointer hover:border-primary-500
+            className={`overflow-hidden shadow block border rounded-lg bg-white h-full cursor-pointer hover:border-primary-500
             ${patient.disease_status === 'POSITIVE' ? "border-red-700 bg-red-100" :
                 ['NEGATIVE', 'RECOVERY', 'RECOVERED'].indexOf(patient.disease_status) >= 0 ? "border-green-700 bg-green-100" : ""}
             `}
@@ -158,14 +158,14 @@ export const PatientManager = (props: any) => {
       <>
         {patientList}
         {totalCount > limit && (
-          <Grid container className={`w3-center ${classes.paginateTopPadding}`}>
+          <div className="mt-4 flex w-full justify-center">
             <Pagination
               cPage={currentPage}
               defaultPerPage={limit}
               data={{ totalCount }}
               onChange={handlePagination}
             />
-          </Grid>
+          </div>
         )}
       </>
     );
@@ -181,11 +181,12 @@ export const PatientManager = (props: any) => {
   }
 
   return (
-    <div className="px-2">
+    <div>
       <PageTitle title="Covid Suspects" hideBack={!facilityId} />
       <PatientFilter filter={handleFilter} />
-      <div className="flex flex-wrap mt-2">{managePatients}</div>
+      <div className="px-3 md:px-8">
+        <div className="flex flex-wrap md:-mx-4">{managePatients}</div>
+      </div>
     </div>
   );
 };
-

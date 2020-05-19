@@ -1,31 +1,16 @@
-import { Button } from "@material-ui/core";
-import Grid from "@material-ui/core/Grid";
-import { makeStyles } from "@material-ui/core/styles";
 import { navigate } from "hookrouter";
 import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getFacilities } from "../../Redux/actions";
 import { Loading } from "../Common/Loading";
-import PageTitle from "../Common/PageTitle";
 import Pagination from "../Common/Pagination";
 import { FacilityModel } from "./models";
 import { InputSearchBox } from "../Common/SearchBox";
 
-const useStyles = makeStyles((theme) => ({
-  paginateTopPadding: {
-    paddingTop: "50px",
-  },
-  displayFlex: {
-    display: "flex",
-  }
-}));
-
 export const HospitalList = () => {
-  const classes = useStyles();
   const dispatchAction: any = useDispatch();
   const [data, setData] = useState<Array<FacilityModel>>([]);
-
   let manageFacilities: any = null;
   const [isLoading, setIsLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
@@ -75,7 +60,7 @@ export const HospitalList = () => {
   if (data && data.length) {
     facilityList = data.map((facility: any, idx: number) => {
       return (
-        <div key={`usr_${facility.id}`} className="w-full md:w-1/2 mt-4 px-2">
+        <div key={`usr_${facility.id}`} className="w-full md:w-1/2 mt-6 md:px-4">
           <div
             className="block rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 overflow-hidden"
             onClick={() => navigate(`/facility/${facility.id}`)}
@@ -120,14 +105,14 @@ export const HospitalList = () => {
       <>
         {facilityList}
         {totalCount > limit && (
-          <Grid container className={`w3-center ${classes.paginateTopPadding}`}>
+          <div className="mt-4 flex w-full justify-center">
             <Pagination
               cPage={currentPage}
               defaultPerPage={limit}
               data={{ totalCount }}
               onChange={handlePagination}
             />
-          </Grid>
+          </div>
         )}
       </>
     );
@@ -145,16 +130,18 @@ export const HospitalList = () => {
   }
 
   return (
-    <div className="px-2">
-      <div className="font-bold text-3xl">
+    <div>
+      <h2 className="font-semibold text-2xl leading-tight px-3 md:px-8 pt-4">
         Facilities
-      </div>
+      </h2>
       <InputSearchBox
         search={onSearchSuspects}
         placeholder='Search by facility / district'
         errors=''
       />
-      <div className="flex flex-wrap -mx-2 mt-2">{manageFacilities}</div>
+      <div className="px-3 md:px-8">
+        <div className="flex flex-wrap md:-mx-4">{manageFacilities}</div>
+      </div>
     </div>
   );
 };

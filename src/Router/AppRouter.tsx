@@ -188,8 +188,8 @@ const AppRouter = () => {
                   {menus.map(item => {
                     const parts = item.link.split("/");
                     const selectedClasses = url.includes(parts && parts[1])
-                      ? "group flex items-center px-2 py-2 text-sm leading-5 font-medium text-white rounded-md bg-green-900 focus:outline-none focus:bg-green-700 transition ease-in-out duration-150"
-                      : "mt-1 group flex items-center px-2 py-2 text-md leading-5 font-medium text-green-300 rounded-md hover:text-white hover:bg-green-700 focus:outline-none focus:text-white focus:bg-green-700 transition ease-in-out duration-150";
+                      ? "mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-white rounded-md bg-green-900 focus:outline-none focus:bg-green-900 transition ease-in-out duration-150"
+                      : "mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-green-300 rounded-md hover:text-white hover:bg-green-700 focus:outline-none focus:bg-green-900 transition ease-in-out duration-150";
                     return (
                       <a
                         key={item.title}
@@ -236,7 +236,7 @@ const AppRouter = () => {
       }
 
       <div className="hidden md:flex md:flex-shrink-0">
-        <div className="flex flex-col w-64 bg-green-800 pt-5 pb-4">
+        <div className="flex flex-col w-64 bg-green-800 pt-5">
           <div className="flex items-center flex-shrink-0 px-4">
             <a href="/">
               <img className="h-8 w-auto" src={img} alt="care logo" />
@@ -247,18 +247,18 @@ const AppRouter = () => {
               {menus.map(item => {
                 const parts = item.link.split("/");
                 const selectedClasses = url.includes(parts && parts[1])
-                  ? "group flex items-center px-2 py-2 text-sm leading-5 font-medium text-white rounded-md bg-green-900 focus:outline-none focus:bg-green-700 transition ease-in-out duration-150"
-                  : "mt-1 group flex items-center px-2 py-2 text-md leading-5 font-medium text-green-300 rounded-md hover:text-white hover:bg-green-700 focus:outline-none focus:text-white focus:bg-green-700 transition ease-in-out duration-150";
+                  ? "mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-white rounded-md bg-green-900 focus:outline-none focus:bg-green-900 transition ease-in-out duration-150"
+                  : "mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-green-300 rounded-md hover:text-white hover:bg-green-700 focus:outline-none focus:bg-green-900 transition ease-in-out duration-150";
                 return (
-                  <a
+                  <button
                     key={item.title}
                     onClick={() => navigate(item.link)}
                     className={selectedClasses}
                   >
-                    <i className={item.icon + (url.includes(parts && parts[1]) ? " text-white" : " text-green-400") + " mr-3 text-md group-hover:text-green-300 group-focus:text-green-300 transition ease-in-out duration-150"}>
+                    <i className={item.icon + (url.includes(parts && parts[1]) ? " text-white" : " text-green-400") + " mr-3 text-lg group-hover:text-green-300 group-focus:text-green-300 transition ease-in-out duration-150"}>
                     </i>
                     {item.title}
-                  </a>
+                  </button>
                 );
               })}
             </nav>
@@ -290,19 +290,19 @@ const AppRouter = () => {
         </div>
       </div>
       <div className="flex flex-col w-full flex-1 overflow-hidden">
-        <div className="relative z-10 flex-shrink-0 flex h-16 bg-white shadow">
+        <div className="flex md:hidden relative z-10 flex-shrink-0 h-16 bg-white shadow">
           <button onClick={_ => setDrawer(true)} className="px-4 border-r border-gray-200 text-gray-500 focus:outline-none focus:bg-gray-100 focus:text-gray-600 md:hidden" aria-label="Open sidebar">
             <svg className="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h7" />
             </svg>
           </button>
           <a href="/" className="md:hidden flex h-full w-full items-center px-4">
-            <img className="h-8 w-auto" src={logoBlack} alt="care logo" />
+            <img className="h-6 w-auto" src={logoBlack} alt="care logo" />
           </a>
         </div>
 
-        <main className="flex-1 relative z-0 overflow-y-auto py-6 focus:outline-none" >
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+        <main className="flex-1 relative z-0 overflow-y-auto pb-4 md:py-0 focus:outline-none" >
+          <div className="max-w-7xl mx-auto px-0">
             {pages}
           </div>
         </main>
