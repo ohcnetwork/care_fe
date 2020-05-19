@@ -74,10 +74,13 @@
     "resolve": "1.12.0",
     "sass-loader": "7.2.0",
     "save": "^2.4.0",
-    "typescript": "^3.7.5"
+    "typescript": "^3.7.5",
+    "tailwindcss": "^1.2.0"
   },
   "scripts": {
-    "start": "webpack-dev-server --open",
+    "build:css": "postcss src/tailwind.css -o src/index.css",
+    "watch:css": "postcss src/tailwind.css -o src/index.css -w",
+    "start": "concurrently --kill-others \"npm run watch:css\" \"webpack-dev-server --open\"",
     "build": "./node_modules/.bin/webpack --mode=production"
   },
   "eslintConfig": {
@@ -96,6 +99,11 @@
     ]
   },
   "devDependencies": {
+    "autoprefixer": "^9.7.6",
+    "concurrently": "^5.1.0",
+    "postcss-cli": "^7.1.0",
+    "cssnano": "^4.1.10",
+    "@fullhuman/postcss-purgecss": "^2.1.2",
     "@types/mocha": "^5.2.7",
     "css-loader": "^3.2.0",
     "cypress": "^4.4.0",
