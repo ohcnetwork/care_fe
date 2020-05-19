@@ -4,14 +4,6 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
-const autoprefixer = require("autoprefixer");
-const tailwindcss = require("tailwindcss");
-const cssnano = require("cssnano");
-const purgecss = require("@fullhuman/postcss-purgecss")({
-  content: ["./public/**/*.html", "./src/**/*.js", "./src/**/*.jsx"],
-  efaultExtractor: (content) => content.match(/[\w-/.:]+(?<!:)/g) || [],
-});
-
 let googleKey = '6LdvxuQUAAAAADDWVflgBqyHGfq-xmvNJaToM0pN';
 
 module.exports = (env, argv) => {
@@ -62,33 +54,19 @@ module.exports = (env, argv) => {
                     loader: 'source-map-loader'
                 },
                 {
+                    test: /\.(sa|sc|c)ss$/,
+                    use: [MiniCssExtractPlugin.loader,
+                        'css-loader',
+                        'sass-loader',
+                        'postcss-loader'
+                    ]
+                },
+                {
                     test: /\.(png|jpe?g|gif)$/i,
                     use: [{
                         loader: 'file-loader'
                     }]
-                },
-                {
-                    test: /\.(sa|sc|c)ss$/,
-                    use: [
-                      isDev ? 'style-loader' : MiniCssExtractPlugin.loader,
-                      'css-loader',
-                      'sass-loader',
-                      {
-                        loader: 'postcss-loader',
-                        options: {
-                          ident: 'postcss',
-                          plugins: [
-                            tailwindcss,
-                            autoprefixer,
-                            cssnano({
-                                preset: "default",
-                              }),
-                              ...(!isDev ? [purgecss] : [])
-                          ],
-                        },
-                      }
-                    ]
-                },
+                }
             ],
         },
         plugins: [
