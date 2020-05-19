@@ -23,6 +23,7 @@
     "@material-ui/types": "^4.1.1",
     "@sentry/browser": "^5.15.4",
     "@svgr/webpack": "4.3.2",
+    "@tailwindcss/ui": "^0.3.0",
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.4.0",
     "@testing-library/user-event": "^7.2.1",
@@ -74,8 +75,8 @@
     "resolve": "1.12.0",
     "sass-loader": "7.2.0",
     "save": "^2.4.0",
-    "typescript": "^3.7.5",
-    "tailwindcss": "^1.2.0"
+    "tailwindcss": "^1.4.5",
+    "typescript": "^3.7.5"
   },
   "scripts": {
     "build:css": "postcss src/tailwind.css -o src/index.css",

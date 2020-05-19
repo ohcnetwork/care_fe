@@ -1,7 +1,7 @@
 const cssnano = require("cssnano");
 const purgecss = require("@fullhuman/postcss-purgecss")({
   content: ["./public/**/*.html", "./src/**/*.js", "./src/**/*.jsx"],
-  defaultExtractor: (content) => content.match(/[\w-/:]+(?<!:)/g) || [],
+  efaultExtractor: (content) => content.match(/[\w-/.:]+(?<!:)/g) || [],
 });
 module.exports = {
   plugins: [
