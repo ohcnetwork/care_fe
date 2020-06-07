@@ -30,6 +30,7 @@ import { TreatmentForm } from "../Components/Patient/TreatmentForm";
 import ManageUsers from "../Components/Users/ManageUsers";
 import { UserAdd } from "../Components/Users/UserAdd";
 import AmbulanceOnboarding from "../Components/Ambulance/AmbulanceOnboarding";
+import InventoryList from "../Components/Inventory/InventoryList";
 const img =
   "https://care-staging-coronasafe.s3.amazonaws.com/static/images/logos/light-logo.svg";
 const logoBlack =
@@ -116,6 +117,7 @@ const routes = {
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily-rounds/:id": ({ facilityId, patientId, consultationId, id }: any) => (
     <DailyRoundListDetails facilityId={facilityId} patientId={patientId} consultationId={consultationId} id={id} />
   ),
+  "/inventory": () => <InventoryList />,
 };
 
 let menus = [
@@ -143,6 +145,12 @@ let menus = [
     title: "Users",
     link: "/users",
     icon: "fas fa-user-friends"
+  },
+  {
+    title: "Inventory",
+    link:"/inventory",
+    icon: "fas fa-store"
+    
   }
 ];
 
