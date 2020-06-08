@@ -18,7 +18,7 @@ export const ForgotPassword = () => {
     const classes = useStyles();
     const dispatch: any = useDispatch();
     const initForm: any = {
-        email: '',
+        username: '',
     };
     const initErr: any = {};
     const [form, setForm] = useState(initForm);
@@ -41,12 +41,8 @@ export const ForgotPassword = () => {
     const validateData = () => {
         let hasError = false;
         const err = Object.assign({}, errors);
-        if (!/^(([^<>()[\]{}'^?\\.,!|//#%*-+=&;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/.test(form.email)) {
-            hasError = true;
-            err.email = 'Enter a valid email.';
-        }
         Object.keys(form).forEach((key) => {
-            if (typeof (form[key]) === 'string' && key !== 'password' && key !== 'confirm') {
+            if (typeof (form[key]) === 'string') {
                 if (!form[key].match(/\w/)) {
                     hasError = true;
                     err[key] = 'This field is required';
@@ -101,15 +97,15 @@ export const ForgotPassword = () => {
                         Forgot Password
                     </div>
                     <CardContent>
-                        Enter your email address and we will send you a link to reset your password.
+                        Enter your username and we will send you a link to reset your password.
                                 <TextInputField
-                            name="email"
-                            placeholder="Email"
+                            name="username"
+                            placeholder="username"
                             variant="outlined"
                             margin="dense"
-                            value={form.email.toLowerCase()}
+                            value={form.username.toLowerCase()}
                             onChange={handleChange}
-                            errors={errors.email}
+                            errors={errors.username}
                         />
                     </CardContent>
 
