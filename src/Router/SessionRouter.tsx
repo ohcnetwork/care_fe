@@ -1,16 +1,16 @@
 import React from "react";
-import { Login, Register } from "../Components/Auth";
+import {ForgotPassword, Login, Register, ResetPassword} from "../Components/Auth";
 import { useRoutes } from "hookrouter";
 import TopBar from "../Components/Common/TopBar";
 import { PublicDashboard } from "../Components/Dashboard/PublicDashboard";
-
-import AmbulanceOnboarding from "../Components/Ambulance/AmbulanceOnboarding";
 
 const routes = {
   "/": () => <Login />,
   "/login": () => <Login />,
   "/dashboard": () => <PublicDashboard />,
-  "/register": () => <Register />
+  "/register": () => <Register />,
+  "/forgot-password": () => <ForgotPassword />,
+  "/reset-password/:token": ({ token }: any) => <ResetPassword token={token} />,
 };
 
 const SessionRouter = () => {

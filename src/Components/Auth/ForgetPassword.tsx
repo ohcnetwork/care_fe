@@ -1,0 +1,136 @@
+import { Button, Card, CardActions, CardContent, CardHeader, Grid } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
+import { A } from 'hookrouter';
+import React, {useEffect, useState} from 'react';
+import { useDispatch } from 'react-redux';
+import {postForgotPassword} from '../../Redux/actions';
+import { TextInputField } from '../Common/HelperInputFields';
+import * as Notification from "../../Utils/Notifications.js";
+import { Loading } from "../Common/Loading";
+
+const useStyles = makeStyles(theme => ({
+    formTop: {
+        marginTop: '100px',
+    },
+}));
+
+export const ForgotPassword = () => {
+    const classes = useStyles();
+    const dispatch: any = useDispatch();
+    const initForm: any = {
+        email: '',
+    };
+    const initErr: any = {};
+    const [form, setForm] = useState(initForm);
+    const [errors, setErrors] = useState(initErr);
+    const [disableBtn, setDisableBtn] = useState(false);
+    const [ showLoader, setShowLoader ] = useState(false);
+
+    const handleChange = (e: any) => {
+        const { value, name } = e.target;
+        const fieldValue = Object.assign({}, form);
+        const errorField = Object.assign({}, errors);
+        if (errorField[name]) {
+            errorField[name] = null;
+            setErrors(errorField);
+        }
+        fieldValue[name] = value;
+        setForm(fieldValue);
+    };
+
+    const validateData = () => {
+        let hasError = false;
+        const err = Object.assign({}, errors);
+        if (!/^(([^<>()[\]{}'^?\\.,!|//#%*-+=&;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/.test(form.email)) {
+            hasError = true;
+            err.email = 'Enter a valid email.';
+        }
+        Object.keys(form).forEach((key) => {
+            if (typeof (form[key]) === 'string' && key !== 'password' && key !== 'confirm') {
+                if (!form[key].match(/\w/)) {
+                    hasError = true;
+                    err[key] = 'This field is required';
+                }
+            }
+            if (!form[key]) {
+                hasError = true;
+                err[key] = 'This field is required';
+            }
+        });
+        if (hasError) {
+            setErrors(err);
+            return false;
+        }
+        return form;
+    };
+
+    const handleSubmit = (e: any) => {
+        e.preventDefault();
+        const valid = validateData();
+        if (valid) {
+            setShowLoader(true)
+            setDisableBtn(true);
+            dispatch(postForgotPassword(valid)).then((resp: any) => {
+                setShowLoader(false)
+                const res = resp && resp.data;
+                if (res && res.status === 'OK') {
+                    Notification.Success({
+                        msg: "Password Reset Email Sent"
+                    });
+                } else if (res && res.data) {
+                    setErrors(res.data);
+                } else {
+                    Notification.Error({
+                        msg: "Something went wrong try again later "
+                    });
+                }
+                setDisableBtn(false);
+            });
+        }
+    };
+    if (showLoader) {
+        return <Loading />;
+    }
+    return (
+        <div>
+            <Grid container className={classes.formTop}>
+
+                <Grid item xs={12} sm={3} className="marginAuto marginTop50">
+                    <Card>
+                        <form onSubmit={(e) => {
+                            handleSubmit(e);
+                        }}>
+                            <CardHeader title="Forgot Password"/>
+                            <CardContent>
+                                Enter your email address and we will send you a link to reset your password.
+                                <TextInputField
+                                    name="email"
+                                    placeholder="Email"
+                                    variant="outlined"
+                                    margin="dense"
+                                    value={form.email.toLowerCase()}
+                                    onChange={handleChange}
+                                    errors={errors.email}
+                                />
+                            </CardContent>
+
+                            <CardActions style={{ justifyContent: 'center' }}>
+                                <Button
+                                    disabled={disableBtn}
+                                    color="primary"
+                                    variant="contained"
+                                    onClick={handleSubmit}
+                                >Send Reset Link
+                                </Button>
+                            </CardActions>
+                            <CardContent className="alignCenter">
+                                Already a member? <A href="/login">Login</A>
+                            </CardContent>
+                        </form>
+                    </Card>
+                </Grid>
+            </Grid>
+        </div>
+    );
+};
+

@@ -17,6 +17,14 @@ export default {
         method: 'POST'
     },
 
+    resetPassword: {
+        path: '/api/v1/password_reset/confirm/',
+        method: 'POST',
+    },
+    forgotPassword: {
+        path: '/api/v1/password_reset/',
+        method: 'POST',
+    },
     // User Endpoints
     currentUser: {
         path: '/api/v1/users/getcurrentuser',

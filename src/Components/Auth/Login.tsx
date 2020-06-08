@@ -164,6 +164,7 @@ export const Login = () => {
                 <Grid item style={{ display: "flex" }}>
                   <Grid container alignItems="center" justify="center">
                     <Grid item>
+                      <A href="/forgot-password">Forgot password?</A>
                       <Button
                         color="primary"
                         variant="contained"
