@@ -10,7 +10,7 @@ const routes = {
   "/dashboard": () => <PublicDashboard />,
   "/register": () => <Register />,
   "/forgot-password": () => <ForgotPassword />,
-  "/reset-password/:token": ({ token }: any) => <ResetPassword token={token} />,
+  "/password_reset/:token": ({ token }: any) => <ResetPassword token={token} />,
 };
 
 const SessionRouter = () => {
