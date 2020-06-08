@@ -1,9 +1,9 @@
 import { Button, Card, CardActions, CardContent, CardHeader, Grid } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { A } from 'hookrouter';
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import {postForgotPassword} from '../../Redux/actions';
+import { postForgotPassword } from '../../Redux/actions';
 import { TextInputField } from '../Common/HelperInputFields';
 import * as Notification from "../../Utils/Notifications.js";
 import { Loading } from "../Common/Loading";
@@ -24,7 +24,7 @@ export const ForgotPassword = () => {
     const [form, setForm] = useState(initForm);
     const [errors, setErrors] = useState(initErr);
     const [disableBtn, setDisableBtn] = useState(false);
-    const [ showLoader, setShowLoader ] = useState(false);
+    const [showLoader, setShowLoader] = useState(false);
 
     const handleChange = (e: any) => {
         const { value, name } = e.target;
@@ -93,44 +93,40 @@ export const ForgotPassword = () => {
     }
     return (
         <div>
-            <Grid container className={classes.formTop}>
-
-                <Grid item xs={12} sm={3} className="marginAuto marginTop50">
-                    <Card>
-                        <form onSubmit={(e) => {
-                            handleSubmit(e);
-                        }}>
-                            <CardHeader title="Forgot Password"/>
-                            <CardContent>
-                                Enter your email address and we will send you a link to reset your password.
+            <div className="py-10 md:py-40">
+                <form className="max-w-xl bg-white shadow rounded-lg mx-auto" onSubmit={(e) => {
+                    handleSubmit(e);
+                }}>
+                    <div className="text-xl font-bold pt-4 text-center">
+                        Forgot Password
+                    </div>
+                    <CardContent>
+                        Enter your email address and we will send you a link to reset your password.
                                 <TextInputField
-                                    name="email"
-                                    placeholder="Email"
-                                    variant="outlined"
-                                    margin="dense"
-                                    value={form.email.toLowerCase()}
-                                    onChange={handleChange}
-                                    errors={errors.email}
-                                />
-                            </CardContent>
+                            name="email"
+                            placeholder="Email"
+                            variant="outlined"
+                            margin="dense"
+                            value={form.email.toLowerCase()}
+                            onChange={handleChange}
+                            errors={errors.email}
+                        />
+                    </CardContent>
 
-                            <CardActions style={{ justifyContent: 'center' }}>
-                                <Button
-                                    disabled={disableBtn}
-                                    color="primary"
-                                    variant="contained"
-                                    onClick={handleSubmit}
-                                >Send Reset Link
+                    <CardActions style={{ justifyContent: 'center' }}>
+                        <Button
+                            disabled={disableBtn}
+                            color="primary"
+                            variant="contained"
+                            onClick={handleSubmit}
+                        >Send Reset Link
                                 </Button>
-                            </CardActions>
-                            <CardContent className="alignCenter">
-                                Already a member? <A href="/login">Login</A>
-                            </CardContent>
-                        </form>
-                    </Card>
-                </Grid>
-            </Grid>
+                    </CardActions>
+                    <CardContent className="alignCenter">
+                        Already a member? <A href="/login">Login</A>
+                    </CardContent>
+                </form>
+            </div>
         </div>
     );
 };
-
