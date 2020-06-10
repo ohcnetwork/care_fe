@@ -150,7 +150,6 @@ export const Login = () => {
               />
             </CardContent>
             <CardActions className="padding16">
-              {/*<A href="/forgot-password">Forgot password ?</A>*/}
               <Grid container justify="center">
                 {isCaptchaEnabled && (
                   <Grid item className="w3-padding">
@@ -161,20 +160,12 @@ export const Login = () => {
                     <span className="w3-text-red">{errors.captcha}</span>
                   </Grid>
                 )}
-                <Grid item style={{ display: "flex" }}>
-                  <Grid container alignItems="center" justify="center">
-                    <Grid item>
-                      <Button
-                        color="primary"
-                        variant="contained"
-                        type="submit"
-                        onClick={e => handleSubmit(e)}
-                      >
-                        Login
-                      </Button>
-                    </Grid>
-                  </Grid>
-                </Grid>
+                <div className="w-full flex justify-between items-center">
+                  <a href="/forgot-password">Forgot password?</a>
+                  <button className="bg-green-500 btn text-white px-6" onClick={e => handleSubmit(e)}>
+                    Login
+                  </button>
+                </div>
               </Grid>
             </CardActions>
           </form>
