@@ -1,6 +1,6 @@
 import React from 'react';
 import { Grid } from "@material-ui/core";
-const img = 'https://coronasafe.network/break-chain.png';
+const img = 'https://cdn.coronasafe.network/break-chain.png';
 export const Loading = () => {
     return (
         <Grid container>
