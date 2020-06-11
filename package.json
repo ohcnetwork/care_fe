@@ -105,7 +105,6 @@
     "@fullhuman/postcss-purgecss": "^2.1.2",
     "@types/mocha": "^5.2.7",
     "css-loader": "^3.2.0",
-    "cypress": "^4.4.0",
     "eslint": "^6.4.0",
     "eslint-config-airbnb": "^18.0.1",
     "eslint-config-react-app": "^5.0.2",
