@@ -14,6 +14,13 @@ export const addUser = (params: object) => {
     return fireRequest("addUser", [], params)
 };
 
+export const postResetPassword = (form: object) => {
+    return fireRequest('resetPassword', [], form);
+};
+
+export const postForgotPassword = (form: object) => {
+    return fireRequest('forgotPassword', [], form);
+};
 
 // Ambulance
 export const postAmbulance = (params: object) => {

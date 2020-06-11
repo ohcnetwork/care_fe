@@ -1,7 +1,7 @@
 import React from "react";
 
 const img =
-  "https://care-staging-coronasafe.s3.amazonaws.com/static/images/logos/black-logo.svg";
+  "https://cdn.coronasafe.network/black-logo.svg";
 const TopBar = () => {
   return (
     <div className="bg-white shadow-md">

@@ -32,9 +32,9 @@ import { UserAdd } from "../Components/Users/UserAdd";
 import AmbulanceOnboarding from "../Components/Ambulance/AmbulanceOnboarding";
 import InventoryList from "../Components/Inventory/InventoryList";
 const img =
-  "https://care-staging-coronasafe.s3.amazonaws.com/static/images/logos/light-logo.svg";
+  "https://cdn.coronasafe.network/light-logo.svg";
 const logoBlack =
-  "https://care-staging-coronasafe.s3.amazonaws.com/static/images/logos/black-logo.svg";
+  "https://cdn.coronasafe.network/black-logo.svg";
 
 const routes = {
   "/": () => <HospitalList />,
