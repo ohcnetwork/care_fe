@@ -1,4 +1,5 @@
 $primary: #03543f;
+$border: #28a745;
 
 @media print {
   body * {
@@ -243,17 +244,13 @@ $primary: #03543f;
   background-color: #343a40;
 }
 
-// logout drop-down
-
 .dropdown:hover .dropdown-menu {
   display: block;
 }
 
 .border-primary {
-  border-color: $primary;
+  border-color: $border;
 }
-
-// Phone number styles
 
 .react-tel-input .form-control + div:before {
   content: "";
@@ -267,9 +264,10 @@ $primary: #03543f;
     padding-bottom: 6px;
     width: 100%;
     border-radius: 4px;
+    height: 38px;
     &:focus {
-      border-color: $primary;
-      box-shadow: 0 0 0 1px $primary;
+      border-color: $border;
+      box-shadow: 0 0 0 1px $border;
     }
   }
 }
