@@ -31,7 +31,7 @@ import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
 import LocalHospitalIcon from "@material-ui/icons/LocalHospital";
 import CancelIcon from "@material-ui/icons/Cancel";
 const img =
-  "https://care-staging-coronasafe.s3.amazonaws.com/static/images/logos/black-logo.svg";
+  "https://cdn.coronasafe.network/black-logo.svg";
 const drawerWidth = 240;
 const useStyles = makeStyles({
   flexGrow: {
