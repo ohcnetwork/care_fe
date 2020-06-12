@@ -30,7 +30,8 @@ import { TreatmentForm } from "../Components/Patient/TreatmentForm";
 import ManageUsers from "../Components/Users/ManageUsers";
 import { UserAdd } from "../Components/Users/UserAdd";
 import AmbulanceOnboarding from "../Components/Ambulance/AmbulanceOnboarding";
-import InventoryList from "../Components/Inventory/InventoryList";
+import InventoryList from "../Components/Facility/InventoryList";
+import {AddInventoryForm} from "../Components/Facility/AddInventoryForm"
 const img =
   "https://cdn.coronasafe.network/light-logo.svg";
 const logoBlack =
@@ -117,8 +118,13 @@ const routes = {
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily-rounds/:id": ({ facilityId, patientId, consultationId, id }: any) => (
     <DailyRoundListDetails facilityId={facilityId} patientId={patientId} consultationId={consultationId} id={id} />
   ),
-  "/inventory": () => <InventoryList />,
+  "/facility/:facilityId/inventory": ({ facilityId }: any) => (<InventoryList />),
+  "/facility/:facilityId/inventory/add": ({ facilityId }: any) => (<AddInventoryForm />),
+  "/facility/inventory/add": () => (<AddInventoryForm />),
+
 };
+
+
 
 let menus = [
   {
@@ -145,12 +151,6 @@ let menus = [
     title: "Users",
     link: "/users",
     icon: "fas fa-user-friends"
-  },
-  {
-    title: "Inventory",
-    link:"/inventory",
-    icon: "fas fa-store"
-    
   }
 ];
 

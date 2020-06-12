@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 import PageTitle from '../Common/PageTitle'
-import AddInventory from './AddInventory';
+import { Button } from "@material-ui/core";
+import { navigate } from "hookrouter";
+
 
 export default function InventoryList() {
 
@@ -16,8 +18,7 @@ export default function InventoryList() {
         {id: "21", name: "jai", description: "Hey", stock: "100", minStock :"20"},
         {id: "3", name: "will", description: "Hey", stock: "100", minStock :"20"},
         {id: "4", name: "sss", description: "Hey", stock: "100", minStock :"20"},
-        {id: "5", name: "bodhi", description: "Hey", stock: "100", minStock :"20"},
-        {id: "6", name: "bodhi", description: "Hey", stock: "100", minStock :"20"},
+   
     ]
     
     return (
@@ -25,6 +26,17 @@ export default function InventoryList() {
         <PageTitle title="Inventory" hideBack={true} />
         <div className="container mx-auto px-4 sm:px-8">
             <div className="py-8">
+
+            <Button
+                    variant="contained"
+                    color="primary"
+                    size="small"
+                    // onClick={() => navigate(`/facility/${facilityId}/inventory/add`)}
+                    onClick={() => navigate(`/facility/inventory/add`)}
+
+                  >
+                    Add Inventory
+                  </Button>
                 <div className="my-2 flex sm:flex-row flex-col">
                     <div className="flex flex-row mb-1 sm:mb-0">
                         <div className="relative">
@@ -74,19 +86,19 @@ export default function InventoryList() {
                             <thead>
                                 <tr>
                                     <th
-                                        className="px-5 py-3 border-b-2 border-gray-200 bg-green-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                        className="px-5 py-3 border-b-2 border-gray-200 bg-green-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
                                         Name
                                     </th>
                                     <th
-                                        className="px-5 py-3 border-b-2 border-gray-200 bg-green-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                        className="px-5 py-3 border-b-2 border-gray-200 bg-green-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
                                         Description
                                     </th>
                                     <th
-                                        className="px-5 py-3 border-b-2 border-gray-200 bg-green-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                        className="px-5 py-3 border-b-2 border-gray-200 bg-green-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
                                         Stock
                                     </th>
                                     <th
-                                        className="px-5 py-3 border-b-2 border-gray-200 bg-green-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                        className="px-5 py-3 border-b-2 border-gray-200 bg-green-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
                                         Minimum Stock
                                     </th>
                                 </tr>
@@ -118,14 +130,6 @@ export default function InventoryList() {
                                         {item.minStock}
                                         </p>
                                     </td>
-                                    {/* <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                        <span
-                                            className="relative inline-block px-3 py-1 font-semibold text-green-900 leading-tight">
-                                            <span aria-hidden
-                                                className="absolute inset-0 bg-green-200 opacity-50 rounded-full"></span>
-                                            <span className="relative">Activo</span>
-                                        </span>
-                                    </td> */}
                                 </tr>
                                 
                             </tbody>
@@ -138,11 +142,11 @@ export default function InventoryList() {
                             </span>
                             <div className="inline-flex mt-2 xs:mt-0">
                                 <button
-                                    className="text-sm bg-green-300 hover:bg-green-400 text-gray-800 font-semibold py-2 px-4 rounded-l">
+                                    className="text-sm bg-green-400 hover:bg-green-500 text-white font-semibold py-2 px-4 rounded-l">
                                     Prev
                                 </button>
                                 <button
-                                    className="text-sm bg-green-300 hover:bg-green-400 text-gray-800 font-semibold py-2 px-4 rounded-r">
+                                    className="text-sm bg-green-400 hover:bg-green-500 text-white font-semibold py-2 px-4 rounded-r">
                                     Next
                                 </button>
                             </div>
