@@ -3,8 +3,8 @@ node_js:
   - 13
 
 before_script:
-  - npm run install
-  - npm run install
+  - npm install
+  - npm run build
 
 after_success:
   - RUN |
