@@ -3,6 +3,7 @@ const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const SentryWebpackPlugin = require('@sentry/webpack-plugin');
 
 let googleKey = '6LdvxuQUAAAAADDWVflgBqyHGfq-xmvNJaToM0pN';
 
@@ -81,6 +82,12 @@ module.exports = (env, argv) => {
             new MiniCssExtractPlugin({
                 filename: isDev ? 'css/[name][hash].bundle.css' : 'css/[name][hash].prod.bundle.css',
             }),
+            new SentryWebpackPlugin({
+                include: '.',
+                ignoreFile: '.sentrycliignore',
+                ignore: ['node_modules', 'webpack.config.js'],
+                configFile: 'sentry.properties'
+            })
         ],
     })
    
