@@ -2,15 +2,10 @@ language: node_js
 
 before_script:
   - npm run install
-
-after_success:
   - npm run install
 
-jobs:
-  include:
-     - name: Sentry Release
-          env: SENTRY_ORG=coronasafe-network SENTRY_PROJECT=care-fe SENTRY_ENVIRONMENT=production
-          script: |
+after_success:
+  - RUN |
             curl -sL https://sentry.io/get-cli/ | bash
             export SENTRY_RELEASE=$(sentry-cli releases propose-version)
             sentry-cli releases new -p $SENTRY_PROJECT $SENTRY_RELEASE
