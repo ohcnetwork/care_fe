@@ -256,6 +256,18 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             invalidForm = true;
           }
           return;
+        case "local_body":
+          if (!state.form[field]) {
+            errors[field] = "Please select local body";
+            invalidForm = true;
+          }
+          return;
+        case "district":
+          if (!state.form[field]) {
+            errors[field] = "Please select district";
+            invalidForm = true;
+          }
+          return;
         case "state":
           if (state.form.nationality === "India" && !Number(state.form[field])) {
             errors[field] = "Please enter the state";
@@ -631,7 +643,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   </div>
 
                   <div>
-                    <InputLabel id="district-label">District</InputLabel>
+                    <InputLabel id="district-label">District*</InputLabel>
                     {isDistrictLoading ? (
                       <CircularProgress size={20} />
                     ) : (
@@ -652,7 +664,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   </div>
 
                   <div>
-                    <InputLabel id="local_body-label">Localbody</InputLabel>
+                    <InputLabel id="local_body-label">Localbody*</InputLabel>
                     {isLocalbodyLoading ? (
                       <CircularProgress size={20} />
                     ) : (
