@@ -532,7 +532,7 @@ export default function SampleReport(props: samplePreviewProps) {
                                         </Box>
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                Not Avaliable
+                                                ....................
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -976,7 +976,7 @@ export default function SampleReport(props: samplePreviewProps) {
                                         </Box>
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                Signature and Date
+                                               ................................
                                             </Typography>
                                         </Box>
                                     </Box>
