@@ -49,6 +49,9 @@ export const getFacility = (id: number) => {
 export const readUser = (username: any) => {
     return fireRequest('readUser', [username], {});
 };
+export const getInventorySummary = (facilityId: number, params: object) => {
+    return fireRequest('getInventorySummary', [facilityId, "inventorysummary"], params);
+};
 
 // Capacity/Triage/Doctor
 export const createCapacity = (id: number | undefined, params: object, pathParam: object) => {

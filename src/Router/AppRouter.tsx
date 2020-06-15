@@ -118,7 +118,7 @@ const routes = {
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily-rounds/:id": ({ facilityId, patientId, consultationId, id }: any) => (
     <DailyRoundListDetails facilityId={facilityId} patientId={patientId} consultationId={consultationId} id={id} />
   ),
-  "/facility/:facilityId/inventory": ({ facilityId }: any) => (<InventoryList />),
+  "/facility/:facilityId/inventory": ({ facilityId }: any) => (<InventoryList facilityId={facilityId} />),
   "/facility/:facilityId/inventory/add": ({ facilityId }: any) => (<AddInventoryForm />),
   "/facility/inventory/add": () => (<AddInventoryForm />),
 

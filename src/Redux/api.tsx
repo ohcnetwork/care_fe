@@ -92,6 +92,13 @@ export default {
         path: '/api/v1/facility',
         method: 'DELETE'
     },
+    
+    getInventorySummary: {
+        path: '/api/v1/facility',
+        method: 'GET',
+    },
+    
+
     getConsultationList: {
         path: '/api/v1/consultation/'
     },
