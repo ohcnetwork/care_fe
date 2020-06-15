@@ -4,7 +4,7 @@ import moment from 'moment';
 import React, { useCallback, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getItems } from "../../Redux/actions";
+import { getItems, postInventory } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { DateInputField, TextInputField } from "../Common/HelperInputFields";
 import { Loading } from "../Common/Loading";
@@ -22,7 +22,7 @@ const initForm = {
   id: "",
   quantity: "",
   unit: "",
-  isIncoming: true,
+  isIncoming: "true",
 };
 const initialState = {
   form: { ...initForm }
@@ -84,9 +84,29 @@ export const AddInventoryForm = (props: any) => {
     },
     [fetchData]
   );
-  console.log("dataaaa", data);
   const handleSubmit = async (e: any) => {
     e.preventDefault();
+    setIsLoading(true);
+    const data = {
+      quantity: Number(state.form.quantity),
+      is_incoming: Boolean(state.form.isIncoming),
+      item: Number(state.form.id),
+      unit: Number(state.form.unit),
+    };
+
+    const res = await dispatchAction(postInventory(data, { facilityId }));
+    setIsLoading(false);
+    if (res && res.data) {
+      Notification.Success({
+        msg: "Inventory created successfully"
+      });
+    } else {
+      Notification.Success({
+        msg: "something went wrong!"
+      });
+    }
+    goBack();
+
   };
 
   const handleChange = (e: any) => {
@@ -126,7 +146,7 @@ export const AddInventoryForm = (props: any) => {
                 <InputLabel id="inventory_description_label">Status:</InputLabel>
                 <select
                   className="appearance-none focus:shadow-outline w-full py-1 px-5 py-1 text-gray-700 bg-gray-200 rounded"
-                  name="isIncoming">
+                  name="isIncoming" value={form.isIncoming}>
                   <option value="true" >Incoming</option>
                   <option value="false">Outgoing</option>
                 </select>
@@ -148,11 +168,11 @@ export const AddInventoryForm = (props: any) => {
                 <select
                   className="appearance-none focus:shadow-outline w-full py-1 px-5 py-1 text-gray-700 bg-gray-200 rounded"
                   name="id"
-                  value={form.id}
+                  value={form.unit}
                   onChange={handleChange}>
-                  {/* {...data.map((e) => (
-                    <option value={e.default_unit[id]} key={e.name}>{e.default_unit[name]}</option>
-                  ))} */}
+                  {/* {data.reduce((accumulator,item) => [...accumulator , ...item.allowed_units],[]).map((default) =>
+                    <option value={default.id} key={default.name} >{default.name}</option>
+                  );} */}
                 </select>
               </div>
             </div>

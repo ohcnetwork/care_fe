@@ -87,7 +87,7 @@ export interface InventoryItemsModel {
   // count?: number;
   id?: number;
   name?: string;
-  default_unit?: {
+  allowed_units?: {
     id: number;
     name: string;
   };

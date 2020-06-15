@@ -264,8 +264,15 @@ export default {
         path: '/api/v1/test_sample',
         method: 'PATCH',
     },
+
+    //inventory
     getItems: {
         path: '/api/v1//items/'
+    },
+
+    postInventory: {
+        path: '/api/v1/facility​/{facility_external_id}​/inventory​/',
+        method: "POST",
     },
 
 }
