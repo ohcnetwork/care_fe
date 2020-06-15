@@ -1,12 +1,12 @@
 import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import moment from 'moment';
-import React, { useCallback, useReducer, useState } from "react";
+import React, { useCallback, useReducer, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getItems } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import { DateInputField, TextInputField } from "../Common/HelperInputFields";
+import { SelectField, TextInputField } from "../Common/HelperInputFields";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 import { InventoryItemsModel } from "./models";
@@ -28,7 +28,7 @@ const initialState = {
   form: { ...initForm }
 };
 
-const triageFormReducer = (state = initialState, action: any) => {
+const inventoryFormReducer = (state = initialState, action: any) => {
   switch (action.type) {
     case "set_form": {
       return {
@@ -52,18 +52,16 @@ const goBack = () => {
 };
 
 export const AddInventoryForm = (props: any) => {
-  const [state, dispatch] = useReducer(triageFormReducer, initialState);
+  const [state, dispatch] = useReducer(inventoryFormReducer, initialState);
   const { facilityId } = props;
   const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [offset, setOffset] = useState(0);
   const [data, setData] = useState<Array<InventoryItemsModel>>([]);
-  const [totalCount, setTotalCount] = useState(0);
+  const [currentUnit, setCurrentUnit] = useState<any>();
 
   const limit = 14;
 
-
-  const [form, setForm] = useState(initForm);
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
@@ -71,7 +69,7 @@ export const AddInventoryForm = (props: any) => {
       if (!status.aborted) {
         if (res && res.data) {
           setData(res.data.results);
-          setTotalCount(res.data.count);
+          dispatch({ type: "set_form", form: { ...state.form, id: res.data.results[0]?.id } });
         }
         setIsLoading(false);
       }
@@ -84,18 +82,25 @@ export const AddInventoryForm = (props: any) => {
     },
     [fetchData]
   );
+
+  useEffect(() => {
+    // set the default units according to the item
+    const item = data.find(item => item.id === state.form.id);
+    if (item) {
+      dispatch({ type: "set_form", form: { ...state.form, unit: item.default_unit?.id } });
+      setCurrentUnit(item.allowed_units);
+    }
+  }, [state.form.id])
+
   console.log("dataaaa", data);
   const handleSubmit = async (e: any) => {
     e.preventDefault();
   };
 
   const handleChange = (e: any) => {
-    //handlechange
-    // const { value, name } = e.target;
-    // setForm({ ...form, [name]: value });
     let form = { ...state.form };
     form[e.target.name] = e.target.value;
-    dispatchAction({ type: "set_form", form });
+    dispatch({ type: "set_form", form });
   };
 
 
@@ -112,24 +117,29 @@ export const AddInventoryForm = (props: any) => {
             <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
               <div>
                 <InputLabel id="inventory_name_label">Inventory Name</InputLabel>
-                <select
-                  className="appearance-none focus:shadow-outline w-full py-1 px-5 py-1 text-gray-700 bg-gray-200 rounded"
+                <SelectField
                   name="id"
-                  value={form.id}
-                  onChange={handleChange}>
-                  {...data.map((e) => (
-                    <option value={e.id} key={e.name}>{e.name}</option>
-                  ))}
-                </select>
+                  variant="standard"
+                  value={state.form.id}
+                  options={data.map((e) => { return { id: e.id, name: e.name }})}
+                  onChange={handleChange}
+                  optionKey="id"
+                  optionValue="name"
+                  // errors={state.errors.isIncoming}
+                />
               </div>
-              <div>
+              <div>    
                 <InputLabel id="inventory_description_label">Status:</InputLabel>
-                <select
-                  className="appearance-none focus:shadow-outline w-full py-1 px-5 py-1 text-gray-700 bg-gray-200 rounded"
-                  name="isIncoming">
-                  <option value="true" >Incoming</option>
-                  <option value="false">Outgoing</option>
-                </select>
+                <SelectField
+                  name="isIncoming"
+                  variant="standard"
+                  value={state.form.isIncoming}
+                  options={[ {id: true, value: "Incoming"}, {id: false, value: "Outgoing"} ]}
+                  onChange={handleChange}
+                  optionKey="id"
+                  optionValue="value"
+                  // errors={state.errors.isIncoming}
+                />
               </div>
               <div>
                 <InputLabel id="quantity">Quantity</InputLabel>
@@ -138,22 +148,23 @@ export const AddInventoryForm = (props: any) => {
                   variant="outlined"
                   margin="dense"
                   type="number"
-                  value={form.quantity}
+                  value={state.form.quantity}
                   onChange={handleChange}
                   errors=""
                 />
               </div>
-              <div>
+              <div>    
                 <InputLabel id="min_stock_label">Unit</InputLabel>
-                <select
-                  className="appearance-none focus:shadow-outline w-full py-1 px-5 py-1 text-gray-700 bg-gray-200 rounded"
-                  name="id"
-                  value={form.id}
-                  onChange={handleChange}>
-                  {/* {...data.map((e) => (
-                    <option value={e.default_unit[id]} key={e.name}>{e.default_unit[name]}</option>
-                  ))} */}
-                </select>
+                <SelectField
+                  name="unit"
+                  variant="standard"
+                  value={state.form.unit}
+                  options={currentUnit || []}
+                  onChange={handleChange}
+                  optionKey="id"
+                  optionValue="name"
+                  // errors={state.errors.isIncoming}
+                />
               </div>
             </div>
             <div className="flex justify-between mt-4">
