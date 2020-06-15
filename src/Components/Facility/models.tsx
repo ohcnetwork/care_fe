@@ -82,3 +82,13 @@ export interface DupPatientModel {
   year_of_birth: number;
   state_id: number;
 }
+
+export interface InventoryItemsModel {
+  // count?: number;
+  id?: number;
+  name?: string;
+  default_unit?: {
+    id: number;
+    name: string;
+  };
+}

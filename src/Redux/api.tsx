@@ -264,5 +264,8 @@ export default {
         path: '/api/v1/test_sample',
         method: 'PATCH',
     },
+    getItems: {
+        path: '/api/v1//items/'
+    },
 
 }
