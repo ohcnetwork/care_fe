@@ -91,4 +91,8 @@ export interface InventoryItemsModel {
     id: number;
     name: string;
   };
+  allowed_units?: [{
+    id: number;
+    name: string;
+  }];
 }
