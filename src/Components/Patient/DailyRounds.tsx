@@ -147,8 +147,6 @@ export const DailyRounds = (props: any) => {
                 recommend_discharge: JSON.parse(state.form.recommend_discharge),
             };
 
-            console.log(data);
-
             let res;
             if (id) {
                 res = await dispatchAction(updateDailyReport(data, { consultationId, id }));
