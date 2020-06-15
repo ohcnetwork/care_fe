@@ -4,7 +4,7 @@ import moment from 'moment';
 import React, { useCallback, useReducer, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getItems } from "../../Redux/actions";
+import { getItems, postInventory } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { SelectField, TextInputField } from "../Common/HelperInputFields";
 import { Loading } from "../Common/Loading";
@@ -95,6 +95,27 @@ export const AddInventoryForm = (props: any) => {
   console.log("dataaaa", data);
   const handleSubmit = async (e: any) => {
     e.preventDefault();
+    setIsLoading(true);
+    const data = {
+      quantity: Number(state.form.quantity),
+      is_incoming: Boolean(state.form.isIncoming),
+      item: Number(state.form.id),
+      unit: Number(state.form.unit),
+    };
+    console.log("id", facilityId);
+    const res = await dispatchAction(postInventory(data, { facilityId }));
+    setIsLoading(false);
+    if (res && res.data) {
+      Notification.Success({
+        msg: "Inventory created successfully"
+      });
+    } else {
+      Notification.Success({
+        msg: "something went wrong!"
+      });
+    }
+    goBack();
+
   };
 
   const handleChange = (e: any) => {
@@ -121,24 +142,24 @@ export const AddInventoryForm = (props: any) => {
                   name="id"
                   variant="standard"
                   value={state.form.id}
-                  options={data.map((e) => { return { id: e.id, name: e.name }})}
+                  options={data.map((e) => { return { id: e.id, name: e.name } })}
                   onChange={handleChange}
                   optionKey="id"
                   optionValue="name"
-                  // errors={state.errors.isIncoming}
+                // errors={state.errors.isIncoming}
                 />
               </div>
-              <div>    
+              <div>
                 <InputLabel id="inventory_description_label">Status:</InputLabel>
                 <SelectField
                   name="isIncoming"
                   variant="standard"
                   value={state.form.isIncoming}
-                  options={[ {id: true, value: "Incoming"}, {id: false, value: "Outgoing"} ]}
+                  options={[{ id: true, value: "Incoming" }, { id: false, value: "Outgoing" }]}
                   onChange={handleChange}
                   optionKey="id"
                   optionValue="value"
-                  // errors={state.errors.isIncoming}
+                // errors={state.errors.isIncoming}
                 />
               </div>
               <div>
@@ -153,7 +174,7 @@ export const AddInventoryForm = (props: any) => {
                   errors=""
                 />
               </div>
-              <div>    
+              <div>
                 <InputLabel id="min_stock_label">Unit</InputLabel>
                 <SelectField
                   name="unit"
@@ -163,7 +184,7 @@ export const AddInventoryForm = (props: any) => {
                   onChange={handleChange}
                   optionKey="id"
                   optionValue="name"
-                  // errors={state.errors.isIncoming}
+                // errors={state.errors.isIncoming}
                 />
               </div>
             </div>

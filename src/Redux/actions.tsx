@@ -172,6 +172,10 @@ export const getConsultation = (id: number) => {
 export const updateConsultation = (id: number, params: object) => {
     return fireRequest("updateConsultation", [id], params);
 };
+//Inventory
 export const getItems = (params: object) => {
     return fireRequest("getItems", [], params);
+};
+export const postInventory = (params: object, pathParams: object) => {
+    return fireRequest("createInventory", [], params, pathParams)
 };
