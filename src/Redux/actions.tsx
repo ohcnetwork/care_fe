@@ -49,9 +49,7 @@ export const getFacility = (id: number) => {
 export const readUser = (username: any) => {
     return fireRequest('readUser', [username], {});
 };
-export const getInventorySummary = (facilityId: number, params: object) => {
-    return fireRequest('getInventorySummary', [facilityId, "inventorysummary"], params);
-};
+
 
 // Capacity/Triage/Doctor
 export const createCapacity = (id: number | undefined, params: object, pathParam: object) => {
@@ -184,4 +182,13 @@ export const postInventory = (params: object, pathParams: object) => {
 };
 export const getInventoryLog = (params: object, pathParams: object) => {
     return fireRequest("getInventoryLog", [params, "inventory"], pathParams)
-}
+};
+export const setMinQuantity = (params: object, pathParams: object) => {
+    return fireRequest("setMinQuantity", [], params, pathParams)
+};
+export const getMinQuantity = (facilityId: object, params: object) => {
+    return fireRequest("getMinQuantity", [facilityId, "min_quantity"], params);
+};
+export const getInventorySummary = (facilityId: number, params: object) => {
+    return fireRequest('getInventorySummary', [facilityId, "inventorysummary"], params);
+};

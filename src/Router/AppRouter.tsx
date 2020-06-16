@@ -33,7 +33,8 @@ import AmbulanceOnboarding from "../Components/Ambulance/AmbulanceOnboarding";
 import InventoryList from "../Components/Facility/InventoryList";
 import InventoryLog from "../Components/Facility/InventoryLog";
 import { AddInventoryForm } from "../Components/Facility/AddInventoryForm";
-import { UpdateInventoryForm } from "../Components/Facility/UpdateInventoryForm"
+import { SetInventoryForm } from "../Components/Facility/SetInventoryForm";
+import UpdateInventoryForm from "../Components/Facility/UpdateInventoryForm";
 
 const img =
   "https://cdn.coronasafe.network/light-logo.svg";
@@ -123,8 +124,9 @@ const routes = {
   ),
   "/facility/:facilityId/inventory": ({ facilityId }: any) => (<InventoryList facilityId={facilityId} />),
   "/facility/:facilityId/inventory/add": ({ facilityId }: any) => (<AddInventoryForm facilityId={facilityId} />),
-  "/facility/:facilityId/inventory/update": ({ facilityId }: any) => (<UpdateInventoryForm facilityId={facilityId} />),
+  "/facility/:facilityId/inventory/min_quantity/set": ({ facilityId }: any) => (<SetInventoryForm facilityId={facilityId} />),
   "/facility/:facilityId/inventory/:inventoryId": ({ facilityId, inventoryId }: any) => (<InventoryLog facilityId={facilityId} inventoryId={inventoryId} />),
+  "/facility/:facilityId/inventory/min_quantity/update": ({ facilityId }: any) => (<UpdateInventoryForm facilityId={facilityId} />),
 };
 
 

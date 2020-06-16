@@ -1,178 +1,148 @@
-import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
-import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
-import React, { useCallback, useReducer, useState, useEffect } from "react";
+import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getItems, postInventory } from "../../Redux/actions";
-import * as Notification from "../../Utils/Notifications.js";
-import { SelectField, TextInputField } from "../Common/HelperInputFields";
+import { getMinQuantity } from "../../Redux/actions";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
-import { InventoryItemsModel } from "./models";
+import Pagination from "../Common/Pagination";
 
-const initForm = {
-  id: "",
-  quantity: "",
-};
-const initialState = {
-  form: { ...initForm }
-};
+export default function UpdateInventoryForm(props: any) {
+    const { facilityId }: any = props;
+    const dispatchAction: any = useDispatch();
+    const [isLoading, setIsLoading] = useState(false);
+    const initialInventory: any[] = [];
+    let inventoryItem: any = null;
+    const [inventory, setInventory] = useState(initialInventory);
+    const [offset, setOffset] = useState(0);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalCount, setTotalCount] = useState(0);
+    const limit = 14;
 
-const inventoryFormReducer = (state = initialState, action: any) => {
-  switch (action.type) {
-    case "set_form": {
-      return {
-        ...state,
-        form: action.form
-      };
-    }
-    case "set_error": {
-      return {
-        ...state,
-        errors: action.errors
-      };
-    }
-    default:
-      return state;
-  }
-};
+    const fetchData = useCallback(
+        async (status: statusType) => {
+            setIsLoading(true);
+            const res = await dispatchAction(getMinQuantity(facilityId, { limit, offset }));
+            if (!status.aborted) {
+                if (res && res.data) {
+                    setInventory(res.data.results);
+                    setTotalCount(res.data.count);
+                }
+                setIsLoading(false);
+            }
+        },
+        [dispatchAction, offset, facilityId]
+    );
 
-const goBack = () => {
-  window.history.go(-1);
-};
+    useAbortableEffect(
+        (status: statusType) => {
+            fetchData(status);
+        },
+        [fetchData]
+    );
 
-export const UpdateInventoryForm = (props: any) => {
-  const [state, dispatch] = useReducer(inventoryFormReducer, initialState);
-  const { facilityId } = props;
-  const dispatchAction: any = useDispatch();
-  const [isLoading, setIsLoading] = useState(false);
-  const [offset, setOffset] = useState(0);
-  const [data, setData] = useState<Array<InventoryItemsModel>>([]);
-  const [currentUnit, setCurrentUnit] = useState<any>();
-
-  const limit = 14;
-
-  const fetchData = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const res = await dispatchAction(getItems({ limit, offset }));
-      if (!status.aborted) {
-        if (res && res.data) {
-          setData(res.data.results);
-          dispatch({ type: "set_form", form: { ...state.form, id: res.data.results[0]?.id } });
-        }
-        setIsLoading(false);
-      }
-    },
-    [dispatchAction, offset]
-  );
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(status);
-    },
-    [fetchData]
-  );
-
-  useEffect(() => {
-    // set the default units according to the item
-    const item = data.find(item => item.id === state.form.id);
-    if (item) {
-      dispatch({ type: "set_form", form: { ...state.form, unit: item.default_unit?.id } });
-      setCurrentUnit(item.allowed_units);
-    }
-  }, [state.form.id])
-
-  const handleSubmit = async (e: any) => {
-    e.preventDefault();
-    setIsLoading(true);
-    const data = {
-      quantity: Number(state.form.quantity),
-      is_incoming: Boolean(state.form.isIncoming),
-      item: Number(state.form.id),
-      unit: Number(state.form.unit),
+    const handlePagination = (page: number, limit: number) => {
+        const offset = (page - 1) * limit;
+        setCurrentPage(page);
+        setOffset(offset);
     };
 
-    const res = await dispatchAction(postInventory(data, { facilityId }));
-    setIsLoading(false);
-    if (res && res.data) {
-      Notification.Success({
-        msg: "Inventory created successfully"
-      });
-    }
-    //  else {
-    //   Notification.Error({
-    //     msg: "something went wrong!"
-    //   });
+    // const onSearchSuspects = async (searchValue: string) => {
+    //     setIsLoading(true);
+    //     const res = await dispatchAction(getFacilities({ limit, offset, search_text: searchValue }));
+    //     if (res && res.data) {
+    //       setData(res.data.results);
+    //       setTotalCount(res.data.count);
+    //     }
+    //     setIsLoading(false);
     // }
-    goBack();
 
-  };
+    let inventoryList: any = [];
+    if (inventory && inventory.length) {
+        inventoryList = inventory.map((inventoryItem: any) => (
+            <tr key={inventoryItem.id} className="bg-white" >
+                <td className="px-5 py-5 border-b border-gray-200 text-sm ">
+                    <div className="flex items-center">
+                        <div className="ml-3">
+                            <p className="text-gray-900 whitespace-no-wrap">
+                                {inventoryItem.item_object?.name}
+                            </p>
+                        </div>
+                    </div>
+                </td>
+                <td className="px-5 py-5 border-b border-gray-200 text-sm ">
+                    <p className="text-gray-900 whitespace-no-wrap lowercase">
+                        {inventoryItem.item_object?.min_quantity}
+                    </p>
+                </td>
+                <td className="px-5 py-5 border-b border-gray-200 text-sm ">
+                    <button className="bg-green-400">
+                        UPDATE
+                    </button>
+                </td>
+            </tr>
 
-  const handleChange = (e: any) => {
-    let form = { ...state.form };
-    form[e.target.name] = e.target.value;
-    dispatch({ type: "set_form", form });
-  };
+        ));
+    } else if (inventory && inventory.length === 0) {
+        inventoryList = (
+            <tr className="bg-white">
+                <td colSpan={3} className="px-5 py-5 border-b border-gray-200 text-center">
+                    <p className="text-gray-500 whitespace-no-wrap">
+                        No item with minimum quantity set
+                    </p>
+                </td>
+            </tr>
+        );
+    }
 
+    if (isLoading || !inventory) {
+        inventoryItem = <Loading />;
+    } else if (inventory) {
+        inventoryItem = (
+            <>
+                <div className="-mx-4 sm:-mx-8 px-4 sm:px-8 py-4 overflow-x-auto">
+                    <div className="inline-block min-w-full">
+                        <table className="min-w-full leading-normal shadow rounded-lg overflow-hidden">
+                            <thead>
+                                <tr>
+                                    <th
+                                        className="px-5 py-3 border-b-2 border-gray-200 bg-green-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                                        Item
+                                    </th>
+                                    <th
+                                        className="px-5 py-3 border-b-2 border-gray-200 bg-green-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                                        Minimum Quantity
+                                    </th>
+                                    <th
+                                        className="px-5 py-3 border-b-2 border-gray-200 bg-green-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {inventoryList}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {totalCount > limit && (
+                    <div className="mt-4 flex w-full justify-center">
+                        <Pagination
+                            cPage={currentPage}
+                            defaultPerPage={limit}
+                            data={{ totalCount }}
+                            onChange={handlePagination}
+                        />
+                    </div>
+                )}
+            </>
+        );
+    }
 
-  if (isLoading) {
-    return <Loading />;
-  }
-
-  return (<div>
-    <PageTitle title="Update Inventory Item " />
-    <div className="mt-4">
-      <Card>
-        <form onSubmit={e => handleSubmit(e)}>
-          <CardContent>
-            <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
-              <div >
-                <InputLabel id="inventory_name_label">Inventory Name</InputLabel>
-                <SelectField
-                className="pt-3"
-                  name="id"
-                  variant="standard"
-                  value={state.form.id}
-                  options={data.map((e) => { return { id: e.id, name: e.name } })}
-                  onChange={handleChange}
-                  optionKey="id"
-                  optionValue="name"
-                // errors={state.errors.isIncoming}
-                />
-              </div>
-              
-              <div>
-                <InputLabel id="quantity">Item Min_Quantity</InputLabel>
-                <TextInputField
-                  name="quantity"
-                  variant="outlined"
-                  margin="dense"
-                  type="number"
-                  value={state.form.quantity}
-                  onChange={handleChange}
-                  errors=""
-                />
-              </div>
+    return (<div>
+        <PageTitle title="Set Minimum Quantity " />
+        <div className="container mx-auto px-4 sm:px-8">
+            <div className="py-8">
+                {inventoryItem}
             </div>
-            <div className="flex justify-between mt-4">
-              <Button
-                color="default"
-                variant="contained"
-                type="button"
-                onClick={goBack}
-              >Cancel</Button>
-              <Button
-                color="primary"
-                variant="contained"
-                type="submit"
-                style={{ marginLeft: "auto" }}
-                startIcon={<CheckCircleOutlineIcon></CheckCircleOutlineIcon>}
-                onClick={e => handleSubmit(e)}
-              >Update Inventory</Button>
-            </div>
-          </CardContent>
-        </form>
-      </Card>
-    </div>
-  </div>);
+        </div>
+    </div>);
 };

@@ -151,13 +151,22 @@ export default function InventoryList(props: any) {
                         Add Inventory
                     </Button>
                     <Button
-                        className= "ml-2"
+                        className="ml-2"
                         variant="contained"
                         color="primary"
                         size="small"
-                        onClick={() => navigate(`/facility/${facilityId}/inventory/update`)}
+                        onClick={() => navigate(`/facility/${facilityId}/inventory/min_quantity/set`)}
                     >
-                        Update Item Min_Quantity
+                        Set Min Quantity
+                    </Button>
+                    <Button
+                        className="ml-2"
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        onClick={() => navigate(`/facility/${facilityId}/inventory/min_quantity/update`)}
+                    >
+                        Update Min Quantity
                     </Button>
                     {inventoryItem}
                 </div>
