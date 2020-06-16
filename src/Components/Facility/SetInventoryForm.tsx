@@ -130,7 +130,6 @@ export const SetInventoryForm = (props: any) => {
                   onChange={handleChange}
                   optionKey="id"
                   optionValue="name"
-                // errors={state.errors.isIncoming}
                 />
               </div>
 
