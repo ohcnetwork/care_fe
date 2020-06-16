@@ -13,8 +13,6 @@ import { InventoryItemsModel } from "./models";
 const initForm = {
   id: "",
   quantity: "",
-  unit: "",
-  isIncoming: false,
 };
 const initialState = {
   form: { ...initForm }
@@ -43,7 +41,7 @@ const goBack = () => {
   window.history.go(-1);
 };
 
-export const AddInventoryForm = (props: any) => {
+export const UpdateInventoryForm = (props: any) => {
   const [state, dispatch] = useReducer(inventoryFormReducer, initialState);
   const { facilityId } = props;
   const dispatchAction: any = useDispatch();
@@ -122,15 +120,16 @@ export const AddInventoryForm = (props: any) => {
   }
 
   return (<div>
-    <PageTitle title="Add Inventory" />
+    <PageTitle title="Update Inventory Item " />
     <div className="mt-4">
       <Card>
         <form onSubmit={e => handleSubmit(e)}>
           <CardContent>
             <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
-              <div>
+              <div >
                 <InputLabel id="inventory_name_label">Inventory Name</InputLabel>
                 <SelectField
+                className="pt-3"
                   name="id"
                   variant="standard"
                   value={state.form.id}
@@ -141,21 +140,9 @@ export const AddInventoryForm = (props: any) => {
                 // errors={state.errors.isIncoming}
                 />
               </div>
+              
               <div>
-                <InputLabel id="inventory_description_label">Status:</InputLabel>
-                <SelectField
-                  name="isIncoming"
-                  variant="standard"
-                  value={state.form.isIncoming}
-                  options={[{ id: true, value: "Incoming" }, { id: false, value: "Outgoing" }]}
-                  onChange={handleChange}
-                  optionKey="id"
-                  optionValue="value"
-                // errors={state.errors.isIncoming}
-                />
-              </div>
-              <div>
-                <InputLabel id="quantity">Quantity</InputLabel>
+                <InputLabel id="quantity">Item Min_Quantity</InputLabel>
                 <TextInputField
                   name="quantity"
                   variant="outlined"
@@ -164,20 +151,6 @@ export const AddInventoryForm = (props: any) => {
                   value={state.form.quantity}
                   onChange={handleChange}
                   errors=""
-                />
-              </div>
-              <div>
-                <InputLabel id="min_stock_label">Unit</InputLabel>
-                <SelectField
-                  className="pt-3"
-                  name="unit"
-                  variant="standard"
-                  value={state.form.unit}
-                  options={currentUnit || []}
-                  onChange={handleChange}
-                  optionKey="id"
-                  optionValue="name"
-                // errors={state.errors.isIncoming}
                 />
               </div>
             </div>
@@ -195,7 +168,7 @@ export const AddInventoryForm = (props: any) => {
                 style={{ marginLeft: "auto" }}
                 startIcon={<CheckCircleOutlineIcon></CheckCircleOutlineIcon>}
                 onClick={e => handleSubmit(e)}
-              >Add Inventory</Button>
+              >Update Inventory</Button>
             </div>
           </CardContent>
         </form>
