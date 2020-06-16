@@ -139,25 +139,31 @@ export default function InventoryList(props: any) {
 
     return (
         <div>
-            <PageTitle title="Inventory" hideBack={false} />
+            <PageTitle title="Inventory Summary" hideBack={false} />
             <div className="container mx-auto px-4 sm:px-8">
-                <div className="py-8">
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        size="small"
-                        onClick={() => navigate(`/facility/${facilityId}/inventory/add`)}
-                    >
-                        Add Inventory
+                <div className="py-4 md:py-8">
+                    <div className="flex flex-col md:flex-row items-center">
+                        <div className="mt-2">
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                size="small"
+                                onClick={() => navigate(`/facility/${facilityId}/inventory/add`)}
+                            >
+                                Add Inventory
                     </Button>
-                    <Button
-                        className="ml-2"
-                        variant="contained"
-                        color="primary"
-                        size="small"
-                        onClick={() => navigate(`/facility/${facilityId}/inventory/min_quantity/list`)}>
-                        Min Quantity
+                        </div>
+                        <div className="mt-2">
+                            <Button
+                                className="ml-2"
+                                variant="contained"
+                                color="primary"
+                                size="small"
+                                onClick={() => navigate(`/facility/${facilityId}/inventory/min_quantity/list`)}>
+                                Minimum Quantity Required
                     </Button>
+                        </div>
+                    </div>
                     {inventoryItem}
                 </div>
             </div>
