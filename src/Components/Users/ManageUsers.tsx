@@ -2,13 +2,14 @@
 import React, { useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getUserList } from "../../Redux/actions";
+import {getUserList, searchPatient, searchUser} from "../../Redux/actions";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 import Pagination from "../Common/Pagination";
 import { navigate } from "hookrouter";
 import { USER_TYPES } from "../../Common/constants";
-
+import {InputSearchBox} from "../Common/SearchBox";
+import {SearchPhone} from "../Common/SearchPhone";
 
 
 export default function ManageUsers(props: any) {
@@ -58,6 +59,24 @@ export default function ManageUsers(props: any) {
     setOffset(offset);
   };
 
+  const searchByName = async (searchValue: string) => {
+    setIsLoading(true);
+    const res = await dispatch(searchUser({ limit, offset, name: searchValue }));
+    if (res && res.data) {
+      setUsers(res.data.results);
+      setTotalCount(res.data.count);
+    }
+    setIsLoading(false);
+  }
+  const searchByPhone = async (searchValue: string) => {
+    setIsLoading(true);
+    const res = await dispatch(searchUser({ limit, offset, phone_number: encodeURI(searchValue) }));
+    if (res && res.data) {
+      setUsers(res.data.results);
+      setTotalCount(res.data.count);
+    }
+    setIsLoading(false);
+  }
   const addUser = (<button className="px-4 py-1 rounded-md bg-green-500 text-white text-lg font-semibold rounded shadow"
     onClick={() => navigate("/user/add")}>
     <i className="fas fa-plus mr-2"></i>
@@ -144,6 +163,16 @@ export default function ManageUsers(props: any) {
   return (
     <div>
       <PageTitle title="Users" hideBack={true} />
+      <InputSearchBox
+          search={searchByName}
+          placeholder='Search by Name'
+          errors=''
+      />
+      <SearchPhone
+          search={searchByPhone}
+          placeholder='Search by Phone Number .. eg +919876543210'
+          errors=''
+      />
       <div className="px-3 md:px-8">
         <div>
           {manageUsers}

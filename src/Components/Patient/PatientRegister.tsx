@@ -66,6 +66,7 @@ const initForm: any = {
   district: "",
   local_body: "",
   address: "",
+  pincode: "",
   present_health: "",
   contact_with_confirmed_carrier: "false",
   contact_with_suspected_carrier: "false",
@@ -184,6 +185,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             blood_group: res.data.blood_group ? res.data.blood_group : '',
             local_body: res.data.local_body ? res.data.local_body : '',
             medical_history: [],
+            pincode: res.data.pincode ? res.data.pincode : '',
             ongoing_medication: res.data.ongoing_medication ? res.data.ongoing_medication : '',
             countries_travelled: res.data.countries_travelled,
             is_medical_worker: res.data.is_medical_worker ? String(res.data.is_medical_worker) : 'false',
@@ -253,6 +255,24 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         case "date_of_birth":
           if (!state.form[field]) {
             errors[field] = "Please enter date in DD/MM/YYYY format";
+            invalidForm = true;
+          }
+          return;
+        case "local_body":
+          if (!state.form[field]) {
+            errors[field] = "Please select local body";
+            invalidForm = true;
+          }
+          return;
+        case "district":
+          if (!state.form[field]) {
+            errors[field] = "Please select district";
+            invalidForm = true;
+          }
+          return;
+        case "pincode":
+          if (!state.form[field]) {
+            errors[field] = "Please enter pincode";
             invalidForm = true;
           }
           return;
@@ -327,6 +347,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         date_of_birth: moment(state.form.date_of_birth).format('YYYY-MM-DD'),
         disease_status: state.form.disease_status,
         name: state.form.name,
+        pincode: state.form.pincode,
         gender: Number(state.form.gender),
         nationality: state.form.nationality,
         passport_no: state.form.nationality !== "India" ? state.form.passport_no : undefined,
@@ -631,7 +652,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   </div>
 
                   <div>
-                    <InputLabel id="district-label">District</InputLabel>
+                    <InputLabel id="district-label">District*</InputLabel>
                     {isDistrictLoading ? (
                       <CircularProgress size={20} />
                     ) : (
@@ -652,7 +673,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   </div>
 
                   <div>
-                    <InputLabel id="local_body-label">Localbody</InputLabel>
+                    <InputLabel id="local_body-label">Localbody*</InputLabel>
                     {isLocalbodyLoading ? (
                       <CircularProgress size={20} />
                     ) : (
@@ -681,7 +702,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                 </div>)}
 
                 <div>
-                  <InputLabel id="address-label">Address</InputLabel>
+                  <InputLabel id="address-label">Address*</InputLabel>
                   <MultilineInputField
                     rows={2}
                     name="address"
@@ -692,6 +713,18 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     value={state.form.address}
                     onChange={handleChange}
                     errors={state.errors.address}
+                  />
+                </div>
+                <div>
+                  <InputLabel id="name-label">Pincode*</InputLabel>
+                  <TextInputField
+                      name="pincode"
+                      variant="outlined"
+                      margin="dense"
+                      type="text"
+                      value={state.form.pincode}
+                      onChange={handleChange}
+                      errors={state.errors.pincode}
                   />
                 </div>
 

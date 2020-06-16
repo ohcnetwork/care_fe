@@ -6,11 +6,13 @@ import { navigate } from "hookrouter";
 import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getAllPatient } from "../../Redux/actions";
+import { getAllPatient, getFacilities, searchPatient } from "../../Redux/actions";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 import Pagination from "../Common/Pagination";
 import { PatientFilter } from "./PatientFilter";
+import { InputSearchBox } from "../Common/SearchBox";
+import { SearchPhone } from "../Common/SearchPhone";
 
 const useStyles = makeStyles((theme) => ({
   paginateTopPadding: {
@@ -64,6 +66,26 @@ export const PatientManager = (props: any) => {
     setCurrentPage(page);
     setOffset(offset);
   };
+
+  const searchByName = async (searchValue: string) => {
+    setIsLoading(true);
+    const res = await dispatch(searchPatient({ limit, offset, name: searchValue }));
+    if (res && res.data) {
+      setData(res.data.results);
+      setTotalCount(res.data.count);
+    }
+    setIsLoading(false);
+  }
+
+  const searchByPhone = async (searchValue: string) => {
+    setIsLoading(true);
+    const res = await dispatch(searchPatient({ limit, offset, phone_number: encodeURI(searchValue) }));
+    if (res && res.data) {
+      setData(res.data.results);
+      setTotalCount(res.data.count);
+    }
+    setIsLoading(false);
+  }
 
   const handleFilter = async (diseaseStatus: string) => {
     setDiseaseStatus(diseaseStatus);
@@ -183,7 +205,32 @@ export const PatientManager = (props: any) => {
   return (
     <div>
       <PageTitle title="Covid Suspects" hideBack={!facilityId} />
-      <PatientFilter filter={handleFilter} />
+      <div className="flex flex-col md:flex-row px-4 md:px-8">
+        <div>
+          <div className="text-sm font-semibold">Filter by Status</div>
+          <PatientFilter filter={handleFilter} />
+        </div>
+        <div className="md:px-4">
+          <div className="text-sm font-semibold mb-2">
+            Search by Name
+          </div>
+          <InputSearchBox
+            search={searchByName}
+            placeholder='Search by Patient Name'
+            errors=''
+          />
+        </div>
+        <div>
+          <div className="text-sm font-semibold mb-2">
+            Search by number
+          </div>
+          <SearchPhone
+            search={searchByPhone}
+            placeholder='+919876543210'
+            errors=''
+          />
+        </div>
+      </div>
       <div className="px-3 md:px-8">
         <div className="flex flex-wrap md:-mx-4">{managePatients}</div>
       </div>

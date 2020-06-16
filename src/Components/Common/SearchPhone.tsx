@@ -6,7 +6,7 @@ import React, { useCallback, useState } from 'react';
 
 type TextFieldPropsExtended = TextFieldProps & { errors: string, search: (value: string) => void }
 
-export const InputSearchBox = (props: TextFieldPropsExtended) => {
+export const SearchPhone = (props: TextFieldPropsExtended) => {
     const [state, setState] = useState("")
     const { search, placeholder } = props;
 
@@ -15,7 +15,7 @@ export const InputSearchBox = (props: TextFieldPropsExtended) => {
     const handleKeyDown = (event: any) => {
         const value = event.target.value;
         setState(value);
-        if (value.length === 0 || value.length > 2) {
+        if (value.length === 0 || value.length > 10) {
             handler(value);
         }
     };

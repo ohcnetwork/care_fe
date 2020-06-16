@@ -140,7 +140,7 @@ export default function MinQuantityList(props: any) {
     }
 
     return (<div>
-        <PageTitle title="Inventory List" hideBack={false} />
+        <PageTitle title="Minimum Quantity Required" hideBack={false} />
         <div className="container mx-auto px-4 sm:px-8">
             <div className="py-8">
                 <Button

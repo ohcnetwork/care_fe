@@ -101,7 +101,6 @@ export default function SampleViewAdmin(props: any) {
   };
 
   const showUpdateStatus = (sample: SampleTestModel) => {
-    console.log(sample)
     setStatusDialog({
       show: true,
       sample,

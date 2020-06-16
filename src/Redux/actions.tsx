@@ -84,6 +84,9 @@ export const getDoctor = (id: number, pathParam: object) => {
 export const searchPatient = (params: object) => {
     return fireRequest('searchPatient', [], params);
 };
+export const searchUser = (params: object) => {
+    return fireRequest('searchUser', [],params);
+}
 export const getAllPatient = (params: object) => {
     return fireRequest('patientList', [], params);
 };
@@ -195,6 +198,9 @@ export const updateMinQuantity = (pathParams: object, params: object) => {
 export const getInventorySummary = (facilityId: number, params: object) => {
     return fireRequest('getInventorySummary', [facilityId, "inventorysummary"], params);
 };
+<<<<<<< HEAD
 export const getItemName = (id: number) => {
     return fireRequest('getItemName', [id], {})
 };
+=======
+>>>>>>> ecb4216ed509d165f8ce9790b039fcab5e454af0
