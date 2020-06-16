@@ -31,7 +31,8 @@ import ManageUsers from "../Components/Users/ManageUsers";
 import { UserAdd } from "../Components/Users/UserAdd";
 import AmbulanceOnboarding from "../Components/Ambulance/AmbulanceOnboarding";
 import InventoryList from "../Components/Facility/InventoryList";
-import {AddInventoryForm} from "../Components/Facility/AddInventoryForm"
+
+import { AddInventoryForm } from "../Components/Facility/AddInventoryForm"
 const img =
   "https://cdn.coronasafe.network/light-logo.svg";
 const logoBlack =
@@ -119,8 +120,7 @@ const routes = {
     <DailyRoundListDetails facilityId={facilityId} patientId={patientId} consultationId={consultationId} id={id} />
   ),
   "/facility/:facilityId/inventory": ({ facilityId }: any) => (<InventoryList facilityId={facilityId} />),
-  "/facility/:facilityId/inventory/add": ({ facilityId }: any) => (<AddInventoryForm />),
-  "/facility/inventory/add": () => (<AddInventoryForm />),
+  "/facility/:facilityId/inventory/add": ({ facilityId }: any) => (<AddInventoryForm facilityId={facilityId} />),
 
 };
 

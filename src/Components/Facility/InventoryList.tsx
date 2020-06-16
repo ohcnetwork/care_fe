@@ -148,20 +148,20 @@ export default function InventoryList(props: any) {
     
     return (
         <div>
-        <PageTitle title="Inventory" hideBack={true} />
-        <div className="container mx-auto px-4 sm:px-8">
-            <div className="py-8">
-                <Button
-                    variant="contained"
-                    color="primary"
-                    size="small"
-                    onClick={() => navigate(`/facility/${facilityId}/inventory/add`)}
-                  >
-                    Add Inventory
-                  </Button>
-                {inventoryItem}
+            <PageTitle title="Inventory" hideBack={true} />
+            <div className="container mx-auto px-4 sm:px-8">
+                <div className="py-8">
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        onClick={() => navigate(`/facility/${facilityId}/inventory/add`)}
+                    >
+                        Add Inventory
+                    </Button>
+                    {inventoryItem}
+                </div>
             </div>
-        </div>
         </div>
     )
 }

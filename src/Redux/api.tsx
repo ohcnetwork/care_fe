@@ -272,4 +272,14 @@ export default {
         method: 'PATCH',
     },
 
+    //inventory
+    getItems: {
+        path: '/api/v1/items/'
+    },
+
+    createInventory: {
+        path: "/api/v1/facility/{facilityId}/inventory/",
+        method: 'POST'
+    },
+
 }
