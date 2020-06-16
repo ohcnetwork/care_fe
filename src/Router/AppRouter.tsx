@@ -143,11 +143,6 @@ let menus = [
     icon: "fas fa-user-injured"
   },
   {
-    title: "Ambulances",
-    link: "/ambulance",
-    icon: "fas fa-ambulance"
-  },
-  {
     title: "Sample Test",
     link: "/sample",
     icon: "fas fa-cog"
