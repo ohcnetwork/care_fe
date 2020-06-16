@@ -77,7 +77,7 @@ export const AddInventoryForm = (props: any) => {
 
   useEffect(() => {
     // set the default units according to the item
-    const item = data.find(item => item.id === state.form.id);
+    const item = data.find(item => item.id === parseInt(state.form.id));
     if (item) {
       dispatch({ type: "set_form", form: { ...state.form, unit: item.default_unit?.id } });
       setCurrentUnit(item.allowed_units);
@@ -101,11 +101,6 @@ export const AddInventoryForm = (props: any) => {
         msg: "Inventory created successfully"
       });
     }
-    //  else {
-    //   Notification.Error({
-    //     msg: "something went wrong!"
-    //   });
-    // }
     goBack();
 
   };
@@ -138,7 +133,6 @@ export const AddInventoryForm = (props: any) => {
                   onChange={handleChange}
                   optionKey="id"
                   optionValue="name"
-                // errors={state.errors.isIncoming}
                 />
               </div>
               <div>
@@ -147,11 +141,10 @@ export const AddInventoryForm = (props: any) => {
                   name="isIncoming"
                   variant="standard"
                   value={state.form.isIncoming}
-                  options={[{ id: true, value: "Incoming" }, { id: false, value: "Outgoing" }]}
+                  options={[{ id: true, value: "Add Stock" }, { id: false, value: "Use Stock" }]}
                   onChange={handleChange}
                   optionKey="id"
                   optionValue="value"
-                // errors={state.errors.isIncoming}
                 />
               </div>
               <div>
@@ -177,7 +170,6 @@ export const AddInventoryForm = (props: any) => {
                   onChange={handleChange}
                   optionKey="id"
                   optionValue="name"
-                // errors={state.errors.isIncoming}
                 />
               </div>
             </div>

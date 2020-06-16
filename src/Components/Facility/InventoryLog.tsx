@@ -13,8 +13,6 @@ import moment from "moment";
 export default function InventoryLog(props: any) {
 
     const { facilityId, inventoryId }: any = props;
-    console.log(facilityId);
-    console.log(inventoryId);
 
 
     const dispatchAction: any = useDispatch();
@@ -87,7 +85,7 @@ export default function InventoryLog(props: any) {
                 </td>
                 <td className="px-5 py-5 border-b border-gray-200 text-sm hover:bg-gray-100">
                     <p className="text-gray-900 whitespace-no-wrap lowercase">
-                        {inventoryItem.is_incoming ? <span className="ml-2 text-green-600">Incoming</span> : <span className="ml-2 text-red-600">Outgoing</span>}
+                        {inventoryItem.is_incoming ? <span className="ml-2 text-green-600">Added Stock</span> : <span className="ml-2 text-red-600">Used Stock</span>}
                     </p>
                 </td>
             </tr>
