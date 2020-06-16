@@ -77,7 +77,7 @@ export const AddInventoryForm = (props: any) => {
 
   useEffect(() => {
     // set the default units according to the item
-    const item = data.find(item => item.id === parseInt(state.form.id));
+    const item = data.find(item => item.id === Number(state.form.id));
     if (item) {
       dispatch({ type: "set_form", form: { ...state.form, unit: item.default_unit?.id } });
       setCurrentUnit(item.allowed_units);

@@ -290,8 +290,16 @@ export default {
         path: "/api/v1/facility",
         method: 'GET',
     },
+    updateMinQuantity: {
+        path: "/api/v1/facility/{facilityId}/min_quantity/{inventoryId}",
+        method: 'PATCH',
+    },
     getInventorySummary: {
         path: '/api/v1/facility',
+        method: 'GET',
+    },
+    getItemName: {
+        path: '/api/v1/items/',
         method: 'GET',
     },
 }
