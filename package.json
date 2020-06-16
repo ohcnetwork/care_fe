@@ -79,8 +79,8 @@
     "typescript": "^3.7.5"
   },
   "scripts": {
-    "start": "webpack-dev-server --open",
-    "build": "./node_modules/.bin/webpack --mode=production"
+    "start": "webpack-dev-server -p --open",
+    "build": "./node_modules/.bin/webpack -p --mode=production"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -98,13 +98,12 @@
     ]
   },
   "devDependencies": {
-    "autoprefixer": "^9.7.6",
-    "concurrently": "^5.1.0",
-    "postcss-cli": "^7.1.0",
-    "cssnano": "^4.1.10",
     "@fullhuman/postcss-purgecss": "^2.1.2",
     "@types/mocha": "^5.2.7",
+    "autoprefixer": "^9.7.6",
+    "concurrently": "^5.1.0",
     "css-loader": "^3.2.0",
+    "cssnano": "^4.1.10",
     "eslint": "^6.4.0",
     "eslint-config-airbnb": "^18.0.1",
     "eslint-config-react-app": "^5.0.2",
@@ -114,10 +113,12 @@
     "eslint-plugin-jsx-a11y": "6.2.3",
     "eslint-plugin-react": "7.14.3",
     "eslint-plugin-react-hooks": "^1.6.1",
+    "postcss-cli": "^7.1.0",
     "redux-devtools-extension": "^2.13.8",
     "source-map-loader": "^0.2.4",
     "ts-loader": "^6.2.0",
     "webpack": "^4.41.1",
+    "webpack-bundle-analyzer": "^3.8.0",
     "webpack-cli": "^3.3.9",
     "webpack-dev-middleware": "^3.7.1",
     "webpack-dev-server": "3.10.1",
