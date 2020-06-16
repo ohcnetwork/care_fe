@@ -35,6 +35,7 @@ import InventoryLog from "../Components/Facility/InventoryLog";
 import { AddInventoryForm } from "../Components/Facility/AddInventoryForm";
 import { SetInventoryForm } from "../Components/Facility/SetInventoryForm";
 import MinQuantityList from "../Components/Facility/MinQuantityList";
+import { UpdateMinQuantity } from "../Components/Facility/UpdateMinQuantity";
 
 const img =
   "https://cdn.coronasafe.network/light-logo.svg";
@@ -127,6 +128,7 @@ const routes = {
   "/facility/:facilityId/inventory/min_quantity/set": ({ facilityId }: any) => (<SetInventoryForm facilityId={facilityId} />),
   "/facility/:facilityId/inventory/:inventoryId": ({ facilityId, inventoryId }: any) => (<InventoryLog facilityId={facilityId} inventoryId={inventoryId} />),
   "/facility/:facilityId/inventory/min_quantity/list": ({ facilityId }: any) => (<MinQuantityList facilityId={facilityId} />),
+  "/facility/:facilityId/inventory/:inventoryId/update/:itemId": ({ facilityId, inventoryId, itemId }: any) => (<UpdateMinQuantity facilityId={facilityId} inventoryId={inventoryId} itemId={itemId} />),
 };
 
 

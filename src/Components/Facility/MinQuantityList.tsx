@@ -73,11 +73,11 @@ export default function MinQuantityList(props: any) {
                 </td>
                 <td className="px-5 py-5 border-b border-gray-200 text-sm ">
                     <p className="text-gray-900 whitespace-no-wrap lowercase">
-                        {inventoryItem.item_object?.min_quantity}
+                        {inventoryItem.item_object?.min_quantity} {inventoryItem.item_object?.default_unit?.name}
                     </p>
                 </td>
                 <td className="px-5 py-5 border-b border-gray-200 text-sm ">
-                    <Button className="ml-2 bg-green-400 hover:bg-green-600">
+                    <Button className="ml-2 bg-green-400 hover:bg-green-600" onClick={() => navigate(`/facility/${facilityId}/inventory/${inventoryItem.id}/update/${inventoryItem.item_object?.id}`)}>
                         UPDATE
                     </Button>
                 </td>
