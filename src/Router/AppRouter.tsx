@@ -30,6 +30,11 @@ import { TreatmentForm } from "../Components/Patient/TreatmentForm";
 import ManageUsers from "../Components/Users/ManageUsers";
 import { UserAdd } from "../Components/Users/UserAdd";
 import AmbulanceOnboarding from "../Components/Ambulance/AmbulanceOnboarding";
+import InventoryList from "../Components/Facility/InventoryList";
+import InventoryLog from "../Components/Facility/InventoryLog";
+import { AddInventoryForm } from "../Components/Facility/AddInventoryForm";
+import { UpdateInventoryForm } from "../Components/Facility/UpdateInventoryForm"
+
 const img =
   "https://cdn.coronasafe.network/light-logo.svg";
 const logoBlack =
@@ -116,7 +121,13 @@ const routes = {
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily-rounds/:id": ({ facilityId, patientId, consultationId, id }: any) => (
     <DailyRoundListDetails facilityId={facilityId} patientId={patientId} consultationId={consultationId} id={id} />
   ),
+  "/facility/:facilityId/inventory": ({ facilityId }: any) => (<InventoryList facilityId={facilityId} />),
+  "/facility/:facilityId/inventory/add": ({ facilityId }: any) => (<AddInventoryForm facilityId={facilityId} />),
+  "/facility/:facilityId/inventory/update": ({ facilityId }: any) => (<UpdateInventoryForm facilityId={facilityId} />),
+  "/facility/:facilityId/inventory/:inventoryId": ({ facilityId, inventoryId }: any) => (<InventoryLog facilityId={facilityId} inventoryId={inventoryId} />),
 };
+
+
 
 let menus = [
   {

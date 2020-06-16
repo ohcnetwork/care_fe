@@ -203,6 +203,17 @@ export const FacilityHome = (props: any) => {
                     Add Triage
                   </Button>
                 </Grid>
+                <Grid item xs={12} className="w3-center">
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    color="primary"
+                    size="small"
+                    onClick={() => navigate(`/facility/${facilityId}/inventory`)}
+                  >
+                    Inventory Management
+                  </Button>
+                </Grid>
               </Grid>
             </Grid>
           </Grid>
