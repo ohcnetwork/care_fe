@@ -3,7 +3,6 @@ const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
-const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 let googleKey = '6LdvxuQUAAAAADDWVflgBqyHGfq-xmvNJaToM0pN';
 
 module.exports = (env, argv) => {
@@ -89,7 +88,6 @@ module.exports = (env, argv) => {
             new HtmlWebpackPlugin({
                 template: path.resolve(__dirname, 'src', 'index.html')
             }),
-            new BundleAnalyzerPlugin(),
             new webpack.HotModuleReplacementPlugin(),
             new webpack.ContextReplacementPlugin(/moment[/\\]locale$/, /en/),
             new MiniCssExtractPlugin({
