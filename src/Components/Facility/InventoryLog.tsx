@@ -1,24 +1,22 @@
 import React, { useState, useCallback } from 'react'
 import PageTitle from '../Common/PageTitle'
 import { Button } from "@material-ui/core";
+import { Loading } from "../Common/Loading";
 import { navigate } from "hookrouter";
 import { useDispatch } from "react-redux";
-import { Loading } from "../Common/Loading";
+import { getInventoryLog } from '../../Redux/actions';
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getInventorySummary } from '../../Redux/actions';
 import Pagination from "../Common/Pagination";
+import { FacilityCreate } from './FacilityCreate';
+import moment from "moment";
+
+export default function InventoryLog(props: any) {
+
+    const { facilityId, inventoryId }: any = props;
+    console.log(facilityId);
+    console.log(inventoryId);
 
 
-export default function InventoryList(props: any) {
-
-    const { facilityId }: any = props;
-
-    // interface InventoryProps {
-    //     name: string;
-    //     description: string;
-    //     stock: number;
-    //     minStock: number;
-    // }
     const dispatchAction: any = useDispatch();
     const [isLoading, setIsLoading] = useState(false);
     const initialInventory: any[] = [];
@@ -28,11 +26,12 @@ export default function InventoryList(props: any) {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalCount, setTotalCount] = useState(0);
     const limit = 14;
+    const item = inventoryId;
 
     const fetchData = useCallback(
         async (status: statusType) => {
             setIsLoading(true);
-            const res = await dispatchAction(getInventorySummary(facilityId, { limit, offset }));
+            const res = await dispatchAction(getInventoryLog(facilityId, { item, limit, offset }));
             if (!status.aborted) {
                 if (res && res.data) {
                     setInventory(res.data.results);
@@ -70,23 +69,25 @@ export default function InventoryList(props: any) {
     let inventoryList: any = [];
     if (inventory && inventory.length) {
         inventoryList = inventory.map((inventoryItem: any) => (
-            <tr key={inventoryItem.id} className={`${inventoryItem.is_low ? "bg-red-100 hover:bg-gray-200" : "bg-white hover:bg-gray-200"}`} onClick={() => navigate(`/facility/${facilityId}/inventory/${inventoryItem.item_object?.id}`)}>
-                <td className="px-5 py-5 border-b border-gray-200 text-sm ">
+            <tr key={inventoryItem.id} className="bg-white" onClick={() => navigate(`/facility/${facilityId}/inventory/${inventoryItem.id}`)}>
+                <td className="px-5 py-5 border-b border-gray-200 text-sm hover:bg-gray-100">
                     <div className="flex items-center">
                         <div className="ml-3">
                             <p className="text-gray-900 whitespace-no-wrap">
-                                {inventoryItem.item_object?.name}
-                                {
-                                    inventoryItem.is_low &&
-                                    <span className="ml-2 badge badge badge-danger">Low Stock</span>
-                                }
+                                {moment(inventoryItem.created_date).format("DD-MM-YYYY hh:mm:ss")}
+                                {/* {new Date(inventoryItem.created_date).getDate()}-{new Date(inventoryItem.created_date).getMonth()}-{new Date(inventoryItem.created_date).getFullYear()} */}
                             </p>
                         </div>
                     </div>
                 </td>
-                <td className="px-5 py-5 border-b border-gray-200 text-sm ">
+                <td className="px-5 py-5 border-b border-gray-200 text-sm hover:bg-gray-100">
                     <p className="text-gray-900 whitespace-no-wrap lowercase">
                         {inventoryItem.quantity} {inventoryItem.item_object?.default_unit?.name}
+                    </p>
+                </td>
+                <td className="px-5 py-5 border-b border-gray-200 text-sm hover:bg-gray-100">
+                    <p className="text-gray-900 whitespace-no-wrap lowercase">
+                        {inventoryItem.is_incoming ? <span className="ml-2 text-green-600">Incoming</span> : <span className="ml-2 text-red-600">Outgoing</span>}
                     </p>
                 </td>
             </tr>
@@ -97,7 +98,7 @@ export default function InventoryList(props: any) {
             <tr className="bg-white">
                 <td colSpan={3} className="px-5 py-5 border-b border-gray-200 text-center">
                     <p className="text-gray-500 whitespace-no-wrap">
-                        No inventory available
+                        No log for this inventory available
                     </p>
                 </td>
             </tr>
@@ -116,12 +117,17 @@ export default function InventoryList(props: any) {
                                 <tr>
                                     <th
                                         className="px-5 py-3 border-b-2 border-gray-200 bg-green-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
-                                        Name
+                                        Created On
                                     </th>
                                     <th
                                         className="px-5 py-3 border-b-2 border-gray-200 bg-green-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
-                                        Stock
+                                        Quantity
                                     </th>
+                                    <th
+                                        className="px-5 py-3 border-b-2 border-gray-200 bg-green-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                                        Status
+                                    </th>
+
                                 </tr>
                             </thead>
                             <tbody>
@@ -146,17 +152,10 @@ export default function InventoryList(props: any) {
 
     return (
         <div>
-            <PageTitle title="Inventory" hideBack={false} />
+            <PageTitle title="Inventory Log" hideBack={false} />
             <div className="container mx-auto px-4 sm:px-8">
                 <div className="py-8">
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        size="small"
-                        onClick={() => navigate(`/facility/${facilityId}/inventory/add`)}
-                    >
-                        Add Inventory
-                    </Button>
+
                     {inventoryItem}
                 </div>
             </div>

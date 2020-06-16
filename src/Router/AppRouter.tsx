@@ -31,6 +31,7 @@ import ManageUsers from "../Components/Users/ManageUsers";
 import { UserAdd } from "../Components/Users/UserAdd";
 import AmbulanceOnboarding from "../Components/Ambulance/AmbulanceOnboarding";
 import InventoryList from "../Components/Facility/InventoryList";
+import InventoryLog from "../Components/Facility/InventoryLog";
 
 import { AddInventoryForm } from "../Components/Facility/AddInventoryForm"
 const img =
@@ -121,7 +122,7 @@ const routes = {
   ),
   "/facility/:facilityId/inventory": ({ facilityId }: any) => (<InventoryList facilityId={facilityId} />),
   "/facility/:facilityId/inventory/add": ({ facilityId }: any) => (<AddInventoryForm facilityId={facilityId} />),
-
+  "/facility/:facilityId/inventory/:inventoryId": ({ facilityId, inventoryId }: any) => (<InventoryLog facilityId={facilityId} inventoryId={inventoryId} />),
 };
 
 
