@@ -6,11 +6,13 @@ import { navigate } from "hookrouter";
 import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getAllPatient } from "../../Redux/actions";
+import {getAllPatient, getFacilities, searchPatient} from "../../Redux/actions";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 import Pagination from "../Common/Pagination";
 import { PatientFilter } from "./PatientFilter";
+import { InputSearchBox } from "../Common/SearchBox";
+import {SearchPhone} from "../Common/SearchPhone";
 
 const useStyles = makeStyles((theme) => ({
   paginateTopPadding: {
@@ -65,6 +67,24 @@ export const PatientManager = (props: any) => {
     setOffset(offset);
   };
 
+  const searchByName = async (searchValue: string) => {
+    setIsLoading(true);
+    const res = await dispatch(searchPatient({ limit, offset, name: searchValue }));
+    if (res && res.data) {
+      setData(res.data.results);
+      setTotalCount(res.data.count);
+    }
+    setIsLoading(false);
+  }
+  const searchByPhone = async (searchValue: string) => {
+    setIsLoading(true);
+    const res = await dispatch(searchPatient({ limit, offset, phone_number: searchValue }));
+    if (res && res.data) {
+      setData(res.data.results);
+      setTotalCount(res.data.count);
+    }
+    setIsLoading(false);
+  }
   const handleFilter = async (diseaseStatus: string) => {
     setDiseaseStatus(diseaseStatus);
     setOffset(0);
@@ -184,6 +204,16 @@ export const PatientManager = (props: any) => {
     <div>
       <PageTitle title="Covid Suspects" hideBack={!facilityId} />
       <PatientFilter filter={handleFilter} />
+      <InputSearchBox
+          search={searchByName}
+          placeholder='Search by Patient Name'
+          errors=''
+      />
+      <SearchPhone
+          search={searchByPhone}
+          placeholder='Search by Phone Number .. eg +919876543210'
+          errors=''
+      />
       <div className="px-3 md:px-8">
         <div className="flex flex-wrap md:-mx-4">{managePatients}</div>
       </div>
