@@ -205,3 +205,14 @@ export const SAMPLE_TYPE_CHOICES = [
   "Covalescent sera",
   "OTHER TYPE",
 ];
+
+export const ICMR_CATEGORY = [
+    "Cat 0",
+    "Cat 1",
+    "Cat 2",
+    "Cat 3",
+    "Cat 4",
+    "Cat 5a",
+    "Cat 5b",
+
+]

@@ -62,6 +62,7 @@ export interface SampleTestModel {
     id?: number;
     status?: string;
     result?: string;
+    icmr_category?: string;
     notes?: string;
     date_of_sample?: string;
     date_of_result?: string;

@@ -3,7 +3,7 @@ import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import { navigate } from "hookrouter";
 import React, { useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
-import { SAMPLE_TYPE_CHOICES } from "../../Common/constants";
+import { SAMPLE_TYPE_CHOICES, ICMR_CATEGORY } from "../../Common/constants";
 import { createSampleTest } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { CheckboxField, MultilineInputField, SelectField, TextInputField } from "../Common/HelperInputFields";
@@ -12,6 +12,7 @@ import PageTitle from "../Common/PageTitle";
 import { SampleTestModel } from "./models";
 
 const sampleTestTypes = [...SAMPLE_TYPE_CHOICES];
+const icmrCategories = [...ICMR_CATEGORY];
 
 const initForm: SampleTestModel = {
   isFastTrack: false,
@@ -27,6 +28,7 @@ const initForm: SampleTestModel = {
   is_atypical_presentation: false,
   is_unusual_course: false,
   sample_type: "UNKNOWN",
+  icmr_category: "Cat 0",
   sample_type_other: "",
 };
 
@@ -76,6 +78,12 @@ export const SampleTest = (props: any) => {
             invalidForm = true;
           }
           break;
+        case "icmr_category":
+          if ( !state.form[field]) {
+            errors[field] = "Please Choose a category";
+            invalidForm = true;
+          }
+          break;
         case "sample_type_other":
           if (state.form.sample_type === 'OTHER TYPE' && !state.form[field]) {
             errors[field] = "Please provide details of the sample type";
@@ -120,6 +128,7 @@ export const SampleTest = (props: any) => {
         doctor_name: state.form.doctor_name ? state.form.doctor_name : undefined,
         etiology_identified: state.form.etiology_identified ? state.form.etiology_identified : undefined,
         sample_type: state.form.sample_type,
+        icmr_category: state.form.icmr_category,
         sample_type_other: state.form.sample_type === 'OTHER TYPE' ? state.form.sample_type_other : undefined,
       };
       const res = await dispatchAction(createSampleTest(data, { patientId }));
@@ -174,6 +183,19 @@ export const SampleTest = (props: any) => {
                     options={sampleTestTypes}
                     onChange={handleChange}
                     errors={state.errors.sample_type}
+                  />
+                </div>
+                <div>
+                  <InputLabel>ICMR Category*</InputLabel>
+                  <SelectField
+                      name="sample_type"
+                      variant="outlined"
+                      margin="dense"
+                      optionArray={true}
+                      value={state.form.icmr_category}
+                      options={icmrCategories}
+                      onChange={handleChange}
+                      errors={state.errors.icmr_category}
                   />
                 </div>
                 <div className="flex items-center">
