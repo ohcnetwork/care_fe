@@ -12,12 +12,6 @@ import PageTitle from "../Common/PageTitle";
 import { InventoryItemsModel } from "./models";
 
 
-// const initForm: any = {
-//   inventory_id: "",
-//   inventory_description: "",
-//   inventory_stock: "",
-//   inventory_min_stock: "",
-// };
 const initForm = {
   id: "",
   quantity: "",

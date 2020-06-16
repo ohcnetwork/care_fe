@@ -12,13 +12,6 @@ import Pagination from "../Common/Pagination";
 export default function InventoryList(props: any) {
 
     const { facilityId }: any = props;
-
-    // interface InventoryProps {
-    //     name: string;
-    //     description: string;
-    //     stock: number;
-    //     minStock: number;
-    // }
     const dispatchAction: any = useDispatch();
     const [isLoading, setIsLoading] = useState(false);
     const initialInventory: any[] = [];
@@ -148,7 +141,7 @@ export default function InventoryList(props: any) {
     
     return (
         <div>
-            <PageTitle title="Inventory" hideBack={true} />
+            <PageTitle title="Inventory" hideBack={false} />
             <div className="container mx-auto px-4 sm:px-8">
                 <div className="py-8">
                     <Button
