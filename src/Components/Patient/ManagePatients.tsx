@@ -76,15 +76,17 @@ export const PatientManager = (props: any) => {
     }
     setIsLoading(false);
   }
+
   const searchByPhone = async (searchValue: string) => {
     setIsLoading(true);
-    const res = await dispatch(searchPatient({ limit, offset, phone_number: searchValue }));
+    const res = await dispatch(searchPatient({ limit, offset, phone_number: encodeURI(searchValue) }));
     if (res && res.data) {
       setData(res.data.results);
       setTotalCount(res.data.count);
     }
     setIsLoading(false);
   }
+
   const handleFilter = async (diseaseStatus: string) => {
     setDiseaseStatus(diseaseStatus);
     setOffset(0);

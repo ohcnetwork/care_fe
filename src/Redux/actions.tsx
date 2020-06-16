@@ -84,6 +84,9 @@ export const getDoctor = (id: number, pathParam: object) => {
 export const searchPatient = (params: object) => {
     return fireRequest('searchPatient', [], params);
 };
+export const searchUser = (params: object) => {
+    return fireRequest('searchUser', [],params);
+}
 export const getAllPatient = (params: object) => {
     return fireRequest('patientList', [], params);
 };

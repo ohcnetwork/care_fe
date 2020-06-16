@@ -61,7 +61,9 @@ export default {
         path: "/api/v1/users/add_user/",
         method: 'POST',
     },
-
+    searchUser: {
+        path: "/api/v1/users/search",
+    },
 
     // Facility Endpoints
 
