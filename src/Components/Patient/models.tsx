@@ -26,6 +26,7 @@ export interface PatientModel {
     tele_consultation_history?: Array<any>;
     last_consultation?: { id: number };
     address?: string;
+    pincode?: number;
     contact_with_confirmed_carrier?: boolean;
     contact_with_suspected_carrier?: boolean;
     is_medical_worker?: boolean;
@@ -102,6 +103,7 @@ export interface SampleReportModel {
         sample_type?: string;
         collection_type?: string;
         collection_date?: string;
+        icmr_category?: string;
         label?: string;
         is_repeated_sample?: boolean;
         lab_name?: string;

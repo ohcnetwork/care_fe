@@ -49,7 +49,7 @@ export const SampleDetails = (props: SampleDetailsProps) => {
               {flow.status}
             </div>
             <div>
-              <span className="font-semibold leading-relaxed">Notes:</span>{" "}
+              <span className="font-semibold leading-relaxed">Label:</span>{" "}
               {flow.notes}
             </div>
             <div>

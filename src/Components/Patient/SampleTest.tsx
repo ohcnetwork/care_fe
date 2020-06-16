@@ -11,6 +11,13 @@ import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 import { SampleTestModel } from "./models";
 
+import ExpansionPanel from '@material-ui/core/ExpansionPanel';
+import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
+import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
+import Typography from '@material-ui/core/Typography';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import color = Mocha.reporters.Base.color;
+
 const sampleTestTypes = [...SAMPLE_TYPE_CHOICES];
 const icmrCategories = [...ICMR_CATEGORY];
 
@@ -81,6 +88,12 @@ export const SampleTest = (props: any) => {
         case "icmr_category":
           if ( !state.form[field]) {
             errors[field] = "Please Choose a category";
+            invalidForm = true;
+          }
+          break;
+        case "notes":
+          if ( !state.form[field]) {
+            errors[field] = "Please specify the label";
             invalidForm = true;
           }
           break;
@@ -188,7 +201,7 @@ export const SampleTest = (props: any) => {
                 <div>
                   <InputLabel>ICMR Category*</InputLabel>
                   <SelectField
-                      name="sample_type"
+                      name="icmr_category"
                       variant="outlined"
                       margin="dense"
                       optionArray={true}
@@ -197,6 +210,54 @@ export const SampleTest = (props: any) => {
                       onChange={handleChange}
                       errors={state.errors.icmr_category}
                   />
+                </div>
+                <div>
+                  <InputLabel>Label*</InputLabel>
+                  <TextInputField
+                      name="notes"
+                      variant="outlined"
+                      margin="dense"
+                      value={state.form.notes}
+                      onChange={handleChange}
+                      errors={state.errors.notes}
+                  />
+                </div>
+                <div>
+                  <InputLabel> Reference below to know more about ICMR Categories </InputLabel>
+                  <ExpansionPanel>
+                    <ExpansionPanelSummary
+                        expandIcon={<ExpandMoreIcon />}
+                        aria-controls="panel1a-content"
+                        id="panel1a-header"
+                    >
+                      <Typography> ICMR Categories </Typography>
+                    </ExpansionPanelSummary>
+                    <ExpansionPanelDetails>
+                      <Typography>
+                        <li>
+                          Cat 0 - Repeat Sample of Positive Case / Follow Up case
+                        </li>
+                        <li>
+                          Cat 1 -  Symptomatic International Traveller in last 14 days
+                        </li>
+                        <li>
+                          Cat 2 - Symptomatic contact of lab confirmed Case
+                        </li>
+                        <li>
+                          Cat 3 - Symptomatic Healthcare Worker
+                        </li>
+                        <li>
+                          Cat 4 - Hospitalized SARI (Severe Acute Respiratory illness Patient)
+                        </li>
+                        <li>
+                          Cat 5a - Asymptomatic Direct and High Risk contact of confirmed case - family Member
+                        </li>
+                        <li>
+                          Cat 5b - Asymptomatic Healthcare worker in contact with confimred case without adequete protection
+                        </li>
+                      </Typography>
+                    </ExpansionPanelDetails>
+                  </ExpansionPanel>
                 </div>
                 <div className="flex items-center">
                   <CheckboxField

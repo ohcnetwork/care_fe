@@ -368,90 +368,59 @@ export default function SampleReport(props: samplePreviewProps) {
                                 </Box>
 
                                 <Box display="flex" flexDirection="row" className={`${classes.borderBottom}`}>
-                                    <Box width="50%" display="flex" flexDirection="row"
+                                    <Box width="100%" display="flex" flexDirection="row"
                                          className={`${classes.borderRight} ${classes.borderLeft}`}>
-                                        <Box width="65%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>
-                                            <Typography className={`${classes.cellTitle} ${classes.marginRight10}`}>
-                                                Symptomatic International Traveller in last 14 days
-                                            </Typography>
-                                        </Box>
+                                        {sampleData && sampleData.specimen_details && sampleData.specimen_details.icmr_category === 'Cat 0' &&
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                {sampleData && sampleData.patient_category && sampleData.patient_category.symptomatic_international_traveller !== null ? sampleData.patient_category.symptomatic_international_traveller ? 'Yes' : 'No' : ''}
+                                                Cat 0 - Repeat Sample of Positive Case / Follow Up case
                                             </Typography>
                                         </Box>
-                                    </Box>
-                                    <Box width="50%" display="flex" flexDirection="row" className={`${classes.borderRight}`}>
-                                        <Box width="65%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>
-                                            <Typography className={`${classes.cellTitle} ${classes.marginRight10}`}>
-                                                Symptomatic contact of lab confirmed Case
-                                            </Typography>
-                                        </Box>
+                                        }
+                                        {sampleData && sampleData.specimen_details && sampleData.specimen_details.icmr_category === 'Cat 1' &&
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                {sampleData && sampleData.patient_category && sampleData.patient_category.symptomatic_contact_of_confirmed_case !== null ? sampleData.patient_category.symptomatic_contact_of_confirmed_case ? 'Yes' : 'No' : ''}
+                                                Cat 1 - Symptomatic International Traveller in last 14 days
                                             </Typography>
                                         </Box>
+                                        }
+                                        {sampleData && sampleData.specimen_details && sampleData.specimen_details.icmr_category === 'Cat 2' &&
+                                        <Box width="35%" className={`${classes.cellTBPadding}`}>
+                                            <Typography className={`${classes.cellText}`}>
+                                                Cat 2 - Symptomatic contact of lab confirmed Case
+                                            </Typography>
+                                        </Box>
+                                        }
+                                        {sampleData && sampleData.specimen_details && sampleData.specimen_details.icmr_category === 'Cat 3' &&
+                                        <Box width="35%" className={`${classes.cellTBPadding}`}>
+                                            <Typography className={`${classes.cellText}`}>
+                                                Cat 3 - Symptomatic Healthcare Worker
+                                            </Typography>
+                                        </Box>
+                                        }
+                                        {sampleData && sampleData.specimen_details && sampleData.specimen_details.icmr_category === 'Cat 4' &&
+                                        <Box width="35%" className={`${classes.cellTBPadding}`}>
+                                            <Typography className={`${classes.cellText}`}>
+                                                Cat 4 - Hospitalized SARI (Severe Acute Respiratory illness Patient)
+                                            </Typography>
+                                        </Box>
+                                        }
+                                        {sampleData && sampleData.specimen_details && sampleData.specimen_details.icmr_category === 'Cat 5a' &&
+                                        <Box width="35%" className={`${classes.cellTBPadding}`}>
+                                            <Typography className={`${classes.cellText}`}>
+                                                Cat 5a - Asymptomatic Direct and High Risk contact of confirmed case - family Member
+                                            </Typography>
+                                        </Box>
+                                        }
+                                        {sampleData && sampleData.specimen_details && sampleData.specimen_details.icmr_category === 'Cat 5b' &&
+                                        <Box width="35%" className={`${classes.cellTBPadding}`}>
+                                            <Typography className={`${classes.cellText}`}>
+                                                Cat 5b - Asymptomatic Healthcare worker in contact with confimred case without adequete protection
+                                            </Typography>
+                                        </Box>
+                                        }
                                     </Box>
                                 </Box>
-
-                                <Box display="flex" flexDirection="row" className={`${classes.borderBottom}`}>
-                                    <Box width="50%" display="flex" flexDirection="row"
-                                         className={`${classes.borderRight} ${classes.borderLeft}`}>
-                                        <Box width="65%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>
-                                            <Typography className={`${classes.cellTitle} ${classes.marginRight10}`}>
-                                                Symptomatic Healthcare Worker
-                                            </Typography>
-                                        </Box>
-                                        <Box width="35%" className={`${classes.cellTBPadding}`}>
-                                            <Typography className={`${classes.cellText}`}>
-                                                {sampleData && sampleData.patient_category && sampleData.patient_category.symptomatic_healthcare_worker !== null ? sampleData.patient_category.symptomatic_healthcare_worker ? 'Yes' : 'No' : ''}
-                                            </Typography>
-                                        </Box>
-                                    </Box>
-                                    <Box width="50%" display="flex" flexDirection="row" className={`${classes.borderRight}`}>
-                                        <Box width="65%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>
-                                            <Typography className={`${classes.cellTitle} ${classes.marginRight10}`}>
-                                                Hospitalized SARI (Severe Acute Respiratory Illness Patient)
-                                            </Typography>
-                                        </Box>
-                                        <Box width="35%" className={`${classes.cellTBPadding}`}>
-                                            <Typography className={`${classes.cellText}`}>
-                                                {sampleData && sampleData.patient_category && sampleData.patient_category.hospitalized_sari_patient !== null ? sampleData.patient_category.hospitalized_sari_patient ? 'Yes' : 'No' : ''}
-                                            </Typography>
-                                        </Box>
-                                    </Box>
-                                </Box>
-
-                                <Box display="flex" flexDirection="row" className={`${classes.borderBottom}`}>
-                                    <Box width="50%" display="flex" flexDirection="row"
-                                         className={`${classes.borderRight} ${classes.borderLeft}`}>
-                                        <Box width="65%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>
-                                            <Typography className={`${classes.cellTitle} ${classes.marginRight10}`}>
-                                                Asymptomatic Direct and High Risk contact of confirmed case - family Member
-                                            </Typography>
-                                        </Box>
-                                        <Box width="35%" className={`${classes.cellTBPadding}`}>
-                                            <Typography className={`${classes.cellText}`}>
-                                                {sampleData && sampleData.patient_category && sampleData.patient_category.asymptomatic_family_member_of_confirmed_case !== null ? sampleData.patient_category.asymptomatic_family_member_of_confirmed_case ? 'Yes' : 'No' : ''}
-                                            </Typography>
-                                        </Box>
-                                    </Box>
-                                    <Box width="50%" display="flex" flexDirection="row" className={`${classes.borderRight}`}>
-                                        <Box width="65%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>
-                                            <Typography className={`${classes.cellTitle} ${classes.marginRight10}`}>
-                                                Asymptomatic Healthcare worker in contact with confimred case without adequete
-                                                protection
-                                            </Typography>
-                                        </Box>
-                                        <Box width="35%" className={`${classes.cellTBPadding}`}>
-                                            <Typography className={`${classes.cellText}`}>
-                                                {sampleData && sampleData.patient_category && sampleData.patient_category.asymptomatic_healthcare_worker_without_protection !== null ? sampleData.patient_category.asymptomatic_healthcare_worker_without_protection ? 'Yes' : 'No' : ''}
-                                            </Typography>
-                                        </Box>
-                                    </Box>
-                                </Box>
-
 
                                 <Box display="flex" flexDirection="row" justifyContent="center"
                                      className={`${classes.subHeader} ${classes.borderRight} ${classes.borderLeft} ${classes.borderBottom} ${classes.cellTBPadding}`}>
