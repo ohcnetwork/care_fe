@@ -1,6 +1,5 @@
 import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
-import moment from 'moment';
 import React, { useCallback, useReducer, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -11,12 +10,11 @@ import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 import { InventoryItemsModel } from "./models";
 
-
 const initForm = {
   id: "",
   quantity: "",
   unit: "",
-  isIncoming: true,
+  isIncoming: false,
 };
 const initialState = {
   form: { ...initForm }
@@ -95,18 +93,19 @@ export const AddInventoryForm = (props: any) => {
       item: Number(state.form.id),
       unit: Number(state.form.unit),
     };
-    
+
     const res = await dispatchAction(postInventory(data, { facilityId }));
     setIsLoading(false);
     if (res && res.data) {
       Notification.Success({
         msg: "Inventory created successfully"
       });
-    } else {
-      Notification.Success({
-        msg: "something went wrong!"
-      });
     }
+    //  else {
+    //   Notification.Error({
+    //     msg: "something went wrong!"
+    //   });
+    // }
     goBack();
 
   };

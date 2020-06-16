@@ -92,12 +92,12 @@ export default {
         path: '/api/v1/facility',
         method: 'DELETE'
     },
-    
+
     getInventorySummary: {
         path: '/api/v1/facility',
         method: 'GET',
     },
-    
+
 
     getConsultationList: {
         path: '/api/v1/consultation/'
@@ -276,10 +276,12 @@ export default {
     getItems: {
         path: '/api/v1/items/'
     },
-
     createInventory: {
         path: "/api/v1/facility/{facilityId}/inventory/",
         method: 'POST'
+    },
+    getInventoryLog: {
+        path: "/api/v1/facility/",
     },
 
 }
