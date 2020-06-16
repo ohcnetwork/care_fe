@@ -5,8 +5,10 @@ import { getMinQuantity } from "../../Redux/actions";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 import Pagination from "../Common/Pagination";
+import { Button, ButtonBase } from "@material-ui/core";
+import { navigate } from "hookrouter";
 
-export default function UpdateInventoryForm(props: any) {
+export default function MinQuantityList(props: any) {
     const { facilityId }: any = props;
     const dispatchAction: any = useDispatch();
     const [isLoading, setIsLoading] = useState(false);
@@ -75,9 +77,9 @@ export default function UpdateInventoryForm(props: any) {
                     </p>
                 </td>
                 <td className="px-5 py-5 border-b border-gray-200 text-sm ">
-                    <button className="bg-green-400">
+                    <Button className="ml-2 bg-green-400 hover:bg-green-600">
                         UPDATE
-                    </button>
+                    </Button>
                 </td>
             </tr>
 
@@ -138,9 +140,17 @@ export default function UpdateInventoryForm(props: any) {
     }
 
     return (<div>
-        <PageTitle title="Set Minimum Quantity " />
+        <PageTitle title="Inventory List" hideBack={false} />
         <div className="container mx-auto px-4 sm:px-8">
             <div className="py-8">
+                <Button
+                    className="ml-2"
+                    variant="contained"
+                    color="primary"
+                    size="small"
+                    onClick={() => navigate(`/facility/${facilityId}/inventory/min_quantity/set`)}>
+                    Set Min Quantity
+                    </Button>
                 {inventoryItem}
             </div>
         </div>
