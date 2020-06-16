@@ -12,13 +12,6 @@ import Pagination from "../Common/Pagination";
 export default function InventoryList(props: any) {
 
     const { facilityId }: any = props;
-
-    // interface InventoryProps {
-    //     name: string;
-    //     description: string;
-    //     stock: number;
-    //     minStock: number;
-    // }
     const dispatchAction: any = useDispatch();
     const [isLoading, setIsLoading] = useState(false);
     const initialInventory: any[] = [];

@@ -187,9 +187,10 @@ export const TriageForm = (props: triageFormProps) => {
                     variant="outlined"
                     margin="dense"
                     type="number"
-                    value=""
+                    InputLabelProps={{ shrink: !!state.form.num_patients_visited }}
+                    value={state.form.num_patients_visited}
                     onChange={handleChange}
-                    errors=""
+                    errors={state.errors.num_patients_visited}
                 />
               </div>
               <div>
