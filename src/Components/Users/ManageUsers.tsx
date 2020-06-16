@@ -68,6 +68,7 @@ export default function ManageUsers(props: any) {
     }
     setIsLoading(false);
   }
+
   const searchByPhone = async (searchValue: string) => {
     setIsLoading(true);
     const res = await dispatch(searchUser({ limit, offset, phone_number: encodeURI(searchValue) }));
@@ -77,7 +78,7 @@ export default function ManageUsers(props: any) {
     }
     setIsLoading(false);
   }
-  const addUser = (<button className="px-4 py-1 rounded-md bg-green-500 text-white text-lg font-semibold rounded shadow"
+  const addUser = (<button className="px-4 py-1 rounded-md bg-green-500 mt-4 text-white text-lg font-semibold rounded shadow"
     onClick={() => navigate("/user/add")}>
     <i className="fas fa-plus mr-2"></i>
     Add New User
@@ -162,17 +163,29 @@ export default function ManageUsers(props: any) {
 
   return (
     <div>
-      <PageTitle title="Users" hideBack={true} />
-      <InputSearchBox
-          search={searchByName}
-          placeholder='Search by Name'
-          errors=''
-      />
-      <SearchPhone
-          search={searchByPhone}
-          placeholder='Search by Phone Number .. eg +919876543210'
-          errors=''
-      />
+      <PageTitle title="User Management" hideBack={true} />
+      <div className="flex flex-col md:flex-row px-4 md:px-8">
+      <div className="md:px-4">
+        <div className="text-sm font-semibold mb-2">
+          Search by Name
+        </div>
+        <InputSearchBox
+            search={searchByName}
+            placeholder='Search by Name'
+            errors=''
+        />
+      </div>
+      <div>
+        <div className="text-sm font-semibold mb-2">
+          Search by number
+        </div>
+        <SearchPhone
+            search={searchByPhone}
+            placeholder='+919876543210'
+            errors=''
+        />
+      </div>
+      </div>
       <div className="px-3 md:px-8">
         <div>
           {manageUsers}

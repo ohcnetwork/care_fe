@@ -124,6 +124,9 @@ export const getLocalbodyByDistrict = (pathParam: object) => {
 export const getSampleTestList = (params: object, pathParam: object) => {
     return fireRequest("sampleTestList", [], params, pathParam)
 }
+export const sampleSearch = (param: object) => {
+    return fireRequest('getTestSampleList', [], param)
+}
 export const createSampleTest = (params: object, pathParam: object) => {
     return fireRequest('createSampleTest', [], params, pathParam)
 };
