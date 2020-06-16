@@ -93,10 +93,7 @@ export default {
         method: 'DELETE'
     },
 
-    getInventorySummary: {
-        path: '/api/v1/facility',
-        method: 'GET',
-    },
+
 
 
     getConsultationList: {
@@ -281,7 +278,18 @@ export default {
         method: 'POST'
     },
     getInventoryLog: {
-        path: "/api/v1/facility/",
+        path: "/api/v1/facility",
     },
-
+    setMinQuantity: {
+        path: "/api/v1/facility/{facilityId}/min_quantity/",
+        method: 'POST'
+    },
+    getMinQuantity: {
+        path: "/api/v1/facility",
+        method: 'GET',
+    },
+    getInventorySummary: {
+        path: '/api/v1/facility',
+        method: 'GET',
+    },
 }

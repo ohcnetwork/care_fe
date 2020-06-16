@@ -3,7 +3,7 @@ import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import React, { useCallback, useReducer, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getItems, postInventory } from "../../Redux/actions";
+import { getItems, setMinQuantity } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { SelectField, TextInputField } from "../Common/HelperInputFields";
 import { Loading } from "../Common/Loading";
@@ -13,8 +13,6 @@ import { InventoryItemsModel } from "./models";
 const initForm = {
   id: "",
   quantity: "",
-  unit: "",
-  isIncoming: false,
 };
 const initialState = {
   form: { ...initForm }
@@ -43,7 +41,7 @@ const goBack = () => {
   window.history.go(-1);
 };
 
-export const AddInventoryForm = (props: any) => {
+export const SetInventoryForm = (props: any) => {
   const [state, dispatch] = useReducer(inventoryFormReducer, initialState);
   const { facilityId } = props;
   const dispatchAction: any = useDispatch();
@@ -79,7 +77,7 @@ export const AddInventoryForm = (props: any) => {
     // set the default units according to the item
     const item = data.find(item => item.id === state.form.id);
     if (item) {
-      dispatch({ type: "set_form", form: { ...state.form, unit: item.default_unit?.id } });
+      dispatch({ type: "set_form", form: { ...state.form, unit: item.default_unit?.name } });
       setCurrentUnit(item.allowed_units);
     }
   }, [state.form.id])
@@ -87,25 +85,18 @@ export const AddInventoryForm = (props: any) => {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     setIsLoading(true);
-    const data = {
-      quantity: Number(state.form.quantity),
-      is_incoming: Boolean(state.form.isIncoming),
-      item: Number(state.form.id),
-      unit: Number(state.form.unit),
+    const data: any = {
+      min_quantity: Number(state.form.quantity),
+      item: Number(state.form.id)
     };
 
-    const res = await dispatchAction(postInventory(data, { facilityId }));
+    const res = await dispatchAction(setMinQuantity(data, { facilityId }));
     setIsLoading(false);
     if (res && res.data) {
       Notification.Success({
-        msg: "Inventory created successfully"
+        msg: "Minimum quantiy updated successfully"
       });
     }
-    //  else {
-    //   Notification.Error({
-    //     msg: "something went wrong!"
-    //   });
-    // }
     goBack();
 
   };
@@ -122,15 +113,16 @@ export const AddInventoryForm = (props: any) => {
   }
 
   return (<div>
-    <PageTitle title="Add Inventory" />
+    <PageTitle title="Set Minimum Quantity " />
     <div className="mt-4">
       <Card>
         <form onSubmit={e => handleSubmit(e)}>
           <CardContent>
             <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
-              <div>
+              <div >
                 <InputLabel id="inventory_name_label">Inventory Name</InputLabel>
                 <SelectField
+                  className="pt-3"
                   name="id"
                   variant="standard"
                   value={state.form.id}
@@ -141,21 +133,9 @@ export const AddInventoryForm = (props: any) => {
                 // errors={state.errors.isIncoming}
                 />
               </div>
+
               <div>
-                <InputLabel id="inventory_description_label">Status:</InputLabel>
-                <SelectField
-                  name="isIncoming"
-                  variant="standard"
-                  value={state.form.isIncoming}
-                  options={[{ id: true, value: "Incoming" }, { id: false, value: "Outgoing" }]}
-                  onChange={handleChange}
-                  optionKey="id"
-                  optionValue="value"
-                // errors={state.errors.isIncoming}
-                />
-              </div>
-              <div>
-                <InputLabel id="quantity">Quantity</InputLabel>
+                <InputLabel id="quantity">Item Min_Quantity</InputLabel>
                 <TextInputField
                   name="quantity"
                   variant="outlined"
@@ -164,20 +144,6 @@ export const AddInventoryForm = (props: any) => {
                   value={state.form.quantity}
                   onChange={handleChange}
                   errors=""
-                />
-              </div>
-              <div>
-                <InputLabel id="unit">Unit</InputLabel>
-                <SelectField
-                  className="pt-3"
-                  name="unit"
-                  variant="standard"
-                  value={state.form.unit}
-                  options={currentUnit || []}
-                  onChange={handleChange}
-                  optionKey="id"
-                  optionValue="name"
-                // errors={state.errors.isIncoming}
                 />
               </div>
             </div>
@@ -195,7 +161,7 @@ export const AddInventoryForm = (props: any) => {
                 style={{ marginLeft: "auto" }}
                 startIcon={<CheckCircleOutlineIcon></CheckCircleOutlineIcon>}
                 onClick={e => handleSubmit(e)}
-              >Add Inventory</Button>
+              >SET </Button>
             </div>
           </CardContent>
         </form>
