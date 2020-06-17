@@ -2,7 +2,7 @@ version: 2
 updates:
   - package-ecosystem: "npm"
     directory: "/"
-    schedule:
+    schedule: "daily"
     allow:
       - dependency-name: "*"
         dependency-type: "production"
