@@ -80,6 +80,7 @@
   },
   "scripts": {
     "start": "webpack-dev-server -p --open",
+    "start:Dev": "http-server dist",
     "build": "./node_modules/.bin/webpack -p --mode=production"
   },
   "eslintConfig": {
@@ -102,6 +103,7 @@
     "@types/mocha": "^5.2.7",
     "autoprefixer": "^9.7.6",
     "concurrently": "^5.1.0",
+    "copy-webpack-plugin": "^6.0.2",
     "css-loader": "^3.2.0",
     "cssnano": "^4.1.10",
     "eslint": "^6.4.0",
@@ -113,6 +115,7 @@
     "eslint-plugin-jsx-a11y": "6.2.3",
     "eslint-plugin-react": "7.14.3",
     "eslint-plugin-react-hooks": "^1.6.1",
+    "http-server": "^0.12.3",
     "postcss-cli": "^7.1.0",
     "redux-devtools-extension": "^2.13.8",
     "source-map-loader": "^0.2.4",
@@ -123,7 +126,7 @@
     "webpack-dev-server": "3.10.1",
     "webpack-hot-middleware": "^2.25.0",
     "webpack-manifest-plugin": "2.0.4",
-    "workbox-webpack-plugin": "4.3.1"
+    "workbox-webpack-plugin": "^4.3.1"
   },
   "jest": {
     "roots": [

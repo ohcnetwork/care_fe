@@ -73,7 +73,7 @@ const useStyles = makeStyles({
     }
 
 });
-const coronasafeLogo = 'https://cdn.coronasafe.network/coronaSafeLogo.png';
+const coronasafeLogo = 'https://cdn.coronasafe.network/coronaSafeLogo.webp';
 
 interface  samplePreviewProps {
     id: number;

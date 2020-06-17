@@ -4,8 +4,6 @@ import { navigate, usePath, A } from "hookrouter";
 import { get } from "lodash";
 import { useDispatch, useSelector } from "react-redux";
 import AmbulanceList from "../Components/Ambulance/AmbulanceList";
-import Header from "../Components/Common/Header";
-import { Analytics } from "../Components/Dashboard/Analytics";
 import { BedCapacityForm } from "../Components/Facility/BedCapacityForm";
 import { CareCenterJoinForm } from "../Components/Facility/CareCenterJoinForm";
 import { ConsultationDetails } from "../Components/Facility/ConsultationDetails";
@@ -47,7 +45,6 @@ const routes = {
   "/users": () => <ManageUsers />,
   "/user/add": () => <UserAdd />,
   "/join": () => <CareCenterJoinForm />,
-  "/analytics": () => <Analytics />,
   "/ambulance": () => <AmbulanceList />,
   "/ambulance/add": () => <AmbulanceOnboarding />,
   "/patients": () => <PatientManager />,
