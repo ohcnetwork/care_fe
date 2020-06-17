@@ -1,0 +1,14 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+    allow:
+      - dependency-name: "*"
+        dependency-type: "production"
+    assignees:
+      - "tomahawk_pilot"
+    labels:
+      - "npm"
+      - "dependencies"
+       
