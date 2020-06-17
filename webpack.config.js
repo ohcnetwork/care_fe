@@ -4,6 +4,8 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 let googleKey = '6LdvxuQUAAAAADDWVflgBqyHGfq-xmvNJaToM0pN';
+const WorkboxPlugin = require('workbox-webpack-plugin');
+const CopyPlugin = require('copy-webpack-plugin');
 
 module.exports = (env, argv) => {
     const mode = argv.mode || 'development';
@@ -24,14 +26,29 @@ module.exports = (env, argv) => {
             chunkFilename: '[name].[chunkhash].chunk.js',
             publicPath: '/',
         },
+        optimization: {
+            moduleIds: 'hashed',
+            runtimeChunk: 'single',
+            splitChunks: {
+                cacheGroups: {
+                    commons: {
+                        test: /[\\/]node_modules[\\/]/,
+                        name: "vendors",
+                        chunks: "all"
+                    }
+                }
+            }
+        },
+
         devtool: isDev ? 'source-map' : 'none',
         mode,
         resolve: {
-            extensions: ['.js', '.jsx', '.json', '.ts', '.tsx'],
+            extensions: ['.js', '.jsx', '.json', '.ts', '.tsx', '.manifest'],
         },
         devServer: {
             contentBase: path.join(__dirname, 'dist'),
             compress: true,
+            writeToDisk: true,
             host: "0.0.0.0",
             port: 4000,
             proxy: {
@@ -68,26 +85,24 @@ module.exports = (env, argv) => {
                 }
             ],
         },
-        optimization: {
-            splitChunks: {
-                cacheGroups: {
-                    commons: {
-                        test: /[\\/]node_modules[\\/]/,
-                        name: "vendors",
-                        chunks: "all"
-                    }
-                }
-            }
-        },
-
         plugins: [
             new webpack.DefinePlugin({
                 "process.env.GOOGLE_KEY": JSON.stringify(googleKey)
             }),
+            new CopyPlugin({
+                patterns: [
+                    { from: 'public/manifest.webmanifest', to: 'manifest.webmanifest' },
+                ],
+            }),
             new CleanWebpackPlugin(),
             new HtmlWebpackPlugin({
-                template: path.resolve(__dirname, 'src', 'index.html')
+                template: path.resolve(__dirname, 'src', 'index.html'),
+                title: 'Coronasafe Care',
             }),
+               new WorkboxPlugin.GenerateSW({
+                    skipWaiting: true,
+      }),
+
             new webpack.HotModuleReplacementPlugin(),
             new webpack.ContextReplacementPlugin(/moment[/\\]locale$/, /en/),
             new MiniCssExtractPlugin({
