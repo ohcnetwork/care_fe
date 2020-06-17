@@ -3,7 +3,6 @@ const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
-
 let googleKey = '6LdvxuQUAAAAADDWVflgBqyHGfq-xmvNJaToM0pN';
 
 module.exports = (env, argv) => {
@@ -69,6 +68,18 @@ module.exports = (env, argv) => {
                 }
             ],
         },
+        optimization: {
+            splitChunks: {
+                cacheGroups: {
+                    commons: {
+                        test: /[\\/]node_modules[\\/]/,
+                        name: "vendors",
+                        chunks: "all"
+                    }
+                }
+            }
+        },
+
         plugins: [
             new webpack.DefinePlugin({
                 "process.env.GOOGLE_KEY": JSON.stringify(googleKey)
@@ -78,12 +89,13 @@ module.exports = (env, argv) => {
                 template: path.resolve(__dirname, 'src', 'index.html')
             }),
             new webpack.HotModuleReplacementPlugin(),
+            new webpack.ContextReplacementPlugin(/moment[/\\]locale$/, /en/),
             new MiniCssExtractPlugin({
                 filename: isDev ? 'css/[name][hash].bundle.css' : 'css/[name][hash].prod.bundle.css',
             }),
         ],
     })
-   
+
 
 };
 

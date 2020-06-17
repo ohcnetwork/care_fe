@@ -143,6 +143,7 @@ export interface SampleReportModel {
         hospital_phone_number?: string;
         hospital_name?: string;
         doctor_name?: string;
+        hospital_pincode?: string;
     }
 }
 

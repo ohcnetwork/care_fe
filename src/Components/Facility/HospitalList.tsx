@@ -136,7 +136,7 @@ export const HospitalList = () => {
       </h2>
       <InputSearchBox
         search={onSearchSuspects}
-        placeholder='Search by facility / district'
+        placeholder='Search by Facility / District Name'
         errors=''
       />
       <div className="px-3 md:px-8">

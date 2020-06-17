@@ -338,7 +338,7 @@ export default function SampleReport(props: samplePreviewProps) {
                                         </Box>
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                {sampleData && sampleData.specimen_details && sampleData.specimen_details.lab_name}
+                                                {sampleData && sampleData.medical_conditions && sampleData.medical_conditions.hospital_name}
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -354,7 +354,7 @@ export default function SampleReport(props: samplePreviewProps) {
                                         </Box>
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                {sampleData && sampleData.specimen_details && sampleData.specimen_details.lab_pincode}
+                                                {sampleData && sampleData.medical_conditions && sampleData.medical_conditions.hospital_pincode}
                                             </Typography>
                                         </Box>
                                     </Box>
