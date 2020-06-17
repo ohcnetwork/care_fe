@@ -48,16 +48,6 @@ export default function MinQuantityList(props: any) {
         setOffset(offset);
     };
 
-    // const onSearchSuspects = async (searchValue: string) => {
-    //     setIsLoading(true);
-    //     const res = await dispatchAction(getFacilities({ limit, offset, search_text: searchValue }));
-    //     if (res && res.data) {
-    //       setData(res.data.results);
-    //       setTotalCount(res.data.count);
-    //     }
-    //     setIsLoading(false);
-    // }
-
     let inventoryList: any = [];
     if (inventory && inventory.length) {
         inventoryList = inventory.map((inventoryItem: any) => (
@@ -73,7 +63,7 @@ export default function MinQuantityList(props: any) {
                 </td>
                 <td className="px-5 py-5 border-b border-gray-200 text-sm ">
                     <p className="text-gray-900 whitespace-no-wrap lowercase">
-                        {inventoryItem.item_object?.min_quantity} {inventoryItem.item_object?.default_unit?.name}
+                        {inventoryItem.min_quantity} {inventoryItem.item_object?.default_unit?.name}
                     </p>
                 </td>
                 <td className="px-5 py-5 border-b border-gray-200 text-sm ">

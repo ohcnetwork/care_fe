@@ -299,7 +299,7 @@ export default {
         method: 'GET',
     },
     getItemName: {
-        path: '/api/v1/items/',
+        path: '/api/v1/items',
         method: 'GET',
     },
 }
