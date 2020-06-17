@@ -4,9 +4,8 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 let googleKey = '6LdvxuQUAAAAADDWVflgBqyHGfq-xmvNJaToM0pN';
-// const WorkboxPlugin = require('workbox-webpack-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
-
+const WorkboxPlugin = require('workbox-webpack-plugin');
 
 module.exports = (env, argv) => {
     const mode = argv.mode || 'development';
@@ -94,10 +93,7 @@ module.exports = (env, argv) => {
                 patterns: [
                     {
                         from: 'public/manifest.webmanifest', to: 'manifest.webmanifest'
-                    },
-                    {
-                        from: 'src/service-worker.js', to: 'service-worker.js'
-                    },
+                    }
                 ],
             }),
             new CleanWebpackPlugin(),
@@ -105,10 +101,9 @@ module.exports = (env, argv) => {
                 template: path.resolve(__dirname, 'src', 'index.html'),
                 title: 'Coronasafe Care',
             }),
-      //          new WorkboxPlugin.GenerateSW({
-      //               skipWaiting: true,
-      // }),
-
+            new WorkboxPlugin.GenerateSW({
+                skipWaiting: true,
+            }),
             new webpack.HotModuleReplacementPlugin(),
             new webpack.ContextReplacementPlugin(/moment[/\\]locale$/, /en/),
             new MiniCssExtractPlugin({
