@@ -85,7 +85,7 @@ export const searchPatient = (params: object) => {
     return fireRequest('searchPatient', [], params);
 };
 export const searchUser = (params: object) => {
-    return fireRequest('searchUser', [],params);
+    return fireRequest('searchUser', [], params);
 }
 export const getAllPatient = (params: object) => {
     return fireRequest('patientList', [], params);
@@ -123,9 +123,6 @@ export const getLocalbodyByDistrict = (pathParam: object) => {
 // Sample Test
 export const getSampleTestList = (params: object, pathParam: object) => {
     return fireRequest("sampleTestList", [], params, pathParam)
-}
-export const sampleSearch = (param: object) => {
-    return fireRequest('getTestSampleList', [], param)
 }
 export const createSampleTest = (params: object, pathParam: object) => {
     return fireRequest('createSampleTest', [], params, pathParam)
@@ -201,7 +198,6 @@ export const updateMinQuantity = (pathParams: object, params: object) => {
 export const getInventorySummary = (facilityId: number, params: object) => {
     return fireRequest('getInventorySummary', [facilityId, "inventorysummary"], params);
 };
-
 export const getItemName = (id: number) => {
     return fireRequest('getItemName', [id], {})
 };

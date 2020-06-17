@@ -50,16 +50,6 @@ export default function InventoryList(props: any) {
         setOffset(offset);
     };
 
-    // const onSearchSuspects = async (searchValue: string) => {
-    //     setIsLoading(true);
-    //     const res = await dispatchAction(getFacilities({ limit, offset, search_text: searchValue }));
-    //     if (res && res.data) {
-    //       setData(res.data.results);
-    //       setTotalCount(res.data.count);
-    //     }
-    //     setIsLoading(false);
-    // }
-
     let inventoryList: any = [];
     if (inventory && inventory.length) {
         inventoryList = inventory.map((inventoryItem: any) => (
