@@ -59,7 +59,7 @@
     "libphonenumber-js": "^1.7.50",
     "lodash": "^4.17.15",
     "mini-css-extract-plugin": "0.8.0",
-    "moment": "^2.24.0",
+    "moment": "^2.26.0",
     "node-sass": "^4.13.1",
     "pnotify": "^4.0.1",
     "react": "^16.12.0",
