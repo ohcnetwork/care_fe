@@ -1,13 +1,10 @@
 import React, { useState, useCallback } from 'react'
 import PageTitle from '../Common/PageTitle'
-import { Button } from "@material-ui/core";
 import { Loading } from "../Common/Loading";
-import { navigate } from "hookrouter";
 import { useDispatch } from "react-redux";
 import { getInventoryLog } from '../../Redux/actions';
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import Pagination from "../Common/Pagination";
-import { FacilityCreate } from './FacilityCreate';
 import moment from "moment";
 
 export default function InventoryLog(props: any) {
@@ -25,6 +22,7 @@ export default function InventoryLog(props: any) {
     const [totalCount, setTotalCount] = useState(0);
     const limit = 14;
     const item = inventoryId;
+    const [itemName, setItemName] = useState(" ");
 
     const fetchData = useCallback(
         async (status: statusType) => {
@@ -34,6 +32,7 @@ export default function InventoryLog(props: any) {
                 if (res && res.data) {
                     setInventory(res.data.results);
                     setTotalCount(res.data.count);
+                    setItemName(res.data.results[0].item_object.name);
                 }
                 setIsLoading(false);
             }
@@ -47,33 +46,22 @@ export default function InventoryLog(props: any) {
         },
         [fetchData]
     );
-
     const handlePagination = (page: number, limit: number) => {
         const offset = (page - 1) * limit;
         setCurrentPage(page);
         setOffset(offset);
     };
 
-    // const onSearchSuspects = async (searchValue: string) => {
-    //     setIsLoading(true);
-    //     const res = await dispatchAction(getFacilities({ limit, offset, search_text: searchValue }));
-    //     if (res && res.data) {
-    //       setData(res.data.results);
-    //       setTotalCount(res.data.count);
-    //     }
-    //     setIsLoading(false);
-    // }
-
     let inventoryList: any = [];
     if (inventory && inventory.length) {
+
         inventoryList = inventory.map((inventoryItem: any) => (
-            <tr key={inventoryItem.id} className="bg-white" onClick={() => navigate(`/facility/${facilityId}/inventory/${inventoryItem.id}`)}>
+            <tr key={inventoryItem.id} className="bg-white" >
                 <td className="px-5 py-5 border-b border-gray-200 text-sm hover:bg-gray-100">
                     <div className="flex items-center">
                         <div className="ml-3">
                             <p className="text-gray-900 whitespace-no-wrap">
                                 {moment(inventoryItem.created_date).format("DD-MM-YYYY hh:mm:ss")}
-                                {/* {new Date(inventoryItem.created_date).getDate()}-{new Date(inventoryItem.created_date).getMonth()}-{new Date(inventoryItem.created_date).getFullYear()} */}
                             </p>
                         </div>
                     </div>
@@ -152,8 +140,8 @@ export default function InventoryLog(props: any) {
         <div>
             <PageTitle title="Inventory Log" hideBack={false} />
             <div className="container mx-auto px-4 sm:px-8">
-                <div className="py-8">
-
+                <div className="py-8 ">
+                    <h4 >Item: {itemName}</h4>
                     {inventoryItem}
                 </div>
             </div>
