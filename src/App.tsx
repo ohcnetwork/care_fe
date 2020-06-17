@@ -31,7 +31,7 @@ const App: React.FC = () => {
         localStorage.setItem('care_access_token', resp.data.access)
           localStorage.setItem('care_refresh_token', resp.data.refresh);
       }).catch( (ex:any)=> {
-        console.error('Error while refreshing',ex);
+        // console.error('Error while refreshing',ex);
       });
     
   } 
