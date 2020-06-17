@@ -103,6 +103,8 @@ module.exports = (env, argv) => {
             }),
             new WorkboxPlugin.GenerateSW({
                 skipWaiting: true,
+                maximumFileSizeToCacheInBytes: 4194304,
+                mode: 'production'
             }),
             new webpack.HotModuleReplacementPlugin(),
             new webpack.ContextReplacementPlugin(/moment[/\\]locale$/, /en/),
