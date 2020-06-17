@@ -113,7 +113,7 @@ export default {
         method: 'PUT',
     },
     partialUpdateConsultation: {
-        path: '/api/v1/consultation/{id}',
+        path: '/api/v1/consultation/{id}/',
         method: 'PATCH'
     },
     deleteConsultation: {
@@ -220,7 +220,7 @@ export default {
         path: '/api/v1/patient/{patientId}/test_sample/{id}/',
     },
     patchSampleTest: {
-        path: '/api/v1/patient/{patientId}/test_sample/{id}',
+        path: '/api/v1/patient/{patientId}/test_sample/{id}/',
         method: 'PATCH',
     },
     sampleReport: {
