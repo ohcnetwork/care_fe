@@ -119,7 +119,7 @@ export default function SampleReport(props: samplePreviewProps) {
                     size="small"
                     onClick={() => window.print()}>Print Report</Button>
             </Box>
-            <Box display="block" id="section-to-print">
+            <Box display="block overflow-scroll h-screen" id="section-to-print">
                 <Box component="div" display="flex" flexDirection="column">
                     <Box component="div" display="flex" flexDirection="row" justifyContent="space-between"
                         alignItems="center"
@@ -941,11 +941,6 @@ export default function SampleReport(props: samplePreviewProps) {
                                         <Box width="65%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellTitle} ${classes.marginRight10}`}>
                                                 Signature & Date
-                                            </Typography>
-                                        </Box>
-                                        <Box width="35%" className={`${classes.cellTBPadding}`}>
-                                            <Typography className={`${classes.cellText}`}>
-                                               ................................
                                             </Typography>
                                         </Box>
                                     </Box>
