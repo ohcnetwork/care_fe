@@ -27,7 +27,7 @@
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.4.0",
     "@testing-library/user-event": "^7.2.1",
-    "@types/draft-js": "^0.10.37",
+    "@types/draft-js": "^0.10.41",
     "@types/draftjs-to-html": "^0.8.0",
     "@types/hookrouter": "^2.2.1",
     "@types/html-to-draftjs": "^1.4.0",
