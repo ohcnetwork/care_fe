@@ -76,6 +76,7 @@
     "sass-loader": "7.2.0",
     "save": "^2.4.0",
     "tailwindcss": "^1.4.5",
+    "tslib": "^2.0.0",
     "typescript": "^3.7.5"
   },
   "scripts": {
@@ -102,6 +103,7 @@
     "@fullhuman/postcss-purgecss": "^2.1.2",
     "@types/mocha": "^5.2.7",
     "autoprefixer": "^9.7.6",
+    "compression-webpack-plugin": "^4.0.0",
     "concurrently": "^5.1.0",
     "copy-webpack-plugin": "^6.0.2",
     "css-loader": "^3.2.0",
