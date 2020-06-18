@@ -152,12 +152,12 @@ export const Login = () => {
             <CardActions className="padding16">
               <Grid container justify="center">
                 {isCaptchaEnabled && (
-                  <Grid item className="w3-padding">
+                  <Grid item className="px-8 py-4">
                     <ReCaptcha
                       sitekey={captchaKey}
                       onChange={onCaptchaChange}
                     />
-                    <span className="w3-text-red">{errors.captcha}</span>
+                    <span className="text-red-500">{errors.captcha}</span>
                   </Grid>
                 )}
                 <div className="w-full flex justify-between items-center">

@@ -426,7 +426,7 @@ export const PatientHome = (props: any) => {
             </div>
           ) : (
               <span className="w3-center">
-                <h6 className="w3-text-grey">No Medical History so far</h6>
+                <h6 className="text-gray-700">No Medical History so far</h6>
               </span>
             )}
         </div>

@@ -154,7 +154,7 @@ export default function AmbulanceList(props: any) {
             />
             <CardContent className={classes.content}>
               <Typography>
-                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>
+                <span className={`text-gray-700 ${classes.userCardSideTitle}`}>
                   Owner Name{" "}
                 </span>
                 {ambulance.owner_name}
@@ -162,7 +162,7 @@ export default function AmbulanceList(props: any) {
             </CardContent>
             <CardContent className={classes.content}>
               <Typography>
-                <span className={`w3-text-gray ${classes.userCardSideTitle}`}>
+                <span className={`text-gray-700 ${classes.userCardSideTitle}`}>
                   Owner Number{" "}
                 </span>
                 {ambulance.owner_phone_number}

@@ -134,7 +134,7 @@ export default function SampleReport(props: samplePreviewProps) {
                     </Box>
                     <Box component="div" display="flex" flexDirection="row" justifyContent="flex-start"
                         className={`${classes.borderRight} ${classes.borderLeft} ${classes.borderBottom}`}>
-                        <Box className={`${classes.cellTBPadding} w3-black`} style={{ padding: '20px', width: '100%' }}>
+                        <Box className={`${classes.cellTBPadding} text-black`} style={{ padding: '20px', width: '100%' }}>
                             <Typography style={{ fontSize: '18px', fontWeight: 'bold', color: 'white' }}>
                                 ICMR Specimen Referral Data for COVID-19 (SARS-CoV2)
                             </Typography>

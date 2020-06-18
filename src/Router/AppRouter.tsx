@@ -5,7 +5,6 @@ import { get } from "lodash";
 import { useDispatch, useSelector } from "react-redux";
 import AmbulanceList from "../Components/Ambulance/AmbulanceList";
 import { BedCapacityForm } from "../Components/Facility/BedCapacityForm";
-import { CareCenterJoinForm } from "../Components/Facility/CareCenterJoinForm";
 import { ConsultationDetails } from "../Components/Facility/ConsultationDetails";
 import { ConsultationForm } from "../Components/Facility/ConsultationForm";
 import { DoctorCapacityForm } from "../Components/Facility/DoctorCapacityForm";
@@ -44,7 +43,6 @@ const routes = {
   "/": () => <HospitalList />,
   "/users": () => <ManageUsers />,
   "/user/add": () => <UserAdd />,
-  "/join": () => <CareCenterJoinForm />,
   "/ambulance": () => <AmbulanceList />,
   "/ambulance/add": () => <AmbulanceOnboarding />,
   "/patients": () => <PatientManager />,
