@@ -41,7 +41,7 @@ const SessionRouter = () => {
                 href="https://github.com/coronasafe"
                 className="care-secondary-color"
               >
-                (Github)
+               Contribute on Github 
               </a>
             </div>
           </div>
