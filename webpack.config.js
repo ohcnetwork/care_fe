@@ -6,7 +6,6 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 let googleKey = '6LdvxuQUAAAAADDWVflgBqyHGfq-xmvNJaToM0pN';
 const CopyPlugin = require('copy-webpack-plugin');
 const WorkboxPlugin = require('workbox-webpack-plugin');
-const CompressionPlugin = require('compression-webpack-plugin');
 
 module.exports = (env, argv) => {
     const mode = argv.mode || 'development';
@@ -109,25 +108,6 @@ module.exports = (env, argv) => {
                 skipWaiting: true,
                 maximumFileSizeToCacheInBytes: 4194304,
                 mode: 'production'
-            }),
-            new CompressionPlugin({
-                filename: '[path].br[query]',
-                algorithm: 'brotliCompress',
-                test: /\.(js|tsx|ts|css|html|png|scss|svg)$/,
-                compressionOptions: {
-                    // zlib’s `level` option matches Brotli’s `BROTLI_PARAM_QUALITY` option.
-                    level: 11,
-                },
-                threshold: 10240,
-                minRatio: 0.8,
-                deleteOriginalAssets: false,
-            }),
-            new CompressionPlugin({
-                filename: '[path].gz[query]',
-                algorithm: 'gzip',
-                test: /\.(js|tsx|ts|css|html|png|scss|svg)$/,
-                threshold: 10240,
-                minRatio: 0.8,
             }),
             new webpack.HotModuleReplacementPlugin(),
             new webpack.ContextReplacementPlugin(/moment[/\\]locale$/, /en/),
