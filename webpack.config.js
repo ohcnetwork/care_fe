@@ -26,20 +26,6 @@ module.exports = (env, argv) => {
             chunkFilename: '[name].[chunkhash].chunk.js',
             publicPath: '/',
         },
-        optimization: {
-            moduleIds: 'hashed',
-            runtimeChunk: 'single',
-            splitChunks: {
-                cacheGroups: {
-                    commons: {
-                        test: /[\\/]node_modules[\\/]/,
-                        name: "vendors",
-                        chunks: "all"
-                    }
-                }
-            }
-        },
-
         devtool: isDev ? 'source-map' : 'none',
         mode,
         resolve: {
@@ -95,7 +81,7 @@ module.exports = (env, argv) => {
                         from: 'public/manifest.webmanifest', to: 'manifest.webmanifest'
                     },
                     {
-                        from: 'public/robots.txt', to: 'robot.txt'
+                        from: 'public/robots.txt', to: 'robots.txt'
                     }
                 ],
             }),
