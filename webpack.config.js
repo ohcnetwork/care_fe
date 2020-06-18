@@ -26,6 +26,19 @@ module.exports = (env, argv) => {
             chunkFilename: '[name].[chunkhash].chunk.js',
             publicPath: '/',
         },
+        optimization: {
+            moduleIds: 'hashed',
+            runtimeChunk: 'single',
+            splitChunks: {
+                cacheGroups: {
+                    commons: {
+                        test: /[\\/]node_modules[\\/]/,
+                        name: "vendors",
+                        chunks: "all"
+                    }
+                }
+            }
+        },
         devtool: isDev ? 'source-map' : 'none',
         mode,
         resolve: {
