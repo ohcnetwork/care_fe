@@ -82,7 +82,7 @@
   "scripts": {
     "start": "webpack-dev-server -p --open",
     "start:Dev": "NODE_ENV=production http-server dist",
-    "build": "./node_modules/.bin/webpack -p --mode=production"
+    "build": "NODE_ENV=production ./node_modules/.bin/webpack -p --mode=production"
   },
   "eslintConfig": {
     "extends": "react-app"
