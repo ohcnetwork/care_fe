@@ -869,7 +869,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                 </div>
 
                 <div>
-                  <InputLabel id="present_health-label">Present Health</InputLabel>
+                  <InputLabel id="present_health-label">Present Health Condition</InputLabel>
                   <MultilineInputField
                     rows={2}
                     name="present_health"
