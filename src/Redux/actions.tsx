@@ -27,7 +27,7 @@ export const postAmbulance = (params: object) => {
     return fireRequest('createAmbulance', [], params);
 };
 export const getAmbulanceList = (params: object) => {
-    return fireRequest('listAmbulance', [] , params);
+    return fireRequest('listAmbulance', [], params);
 };
 
 // Facility
@@ -50,6 +50,7 @@ export const readUser = (username: any) => {
     return fireRequest('readUser', [username], {});
 };
 
+
 // Capacity/Triage/Doctor
 export const createCapacity = (id: number | undefined, params: object, pathParam: object) => {
     return id ? fireRequest('updateCapacity', [id], params, pathParam) : fireRequest("createCapacity", [], params, pathParam);
@@ -57,14 +58,14 @@ export const createCapacity = (id: number | undefined, params: object, pathParam
 export const createDoctor = (id: number | undefined, params: object, pathParam: object) => {
     return id ? fireRequest('updateDoctor', [id], params, pathParam) : fireRequest("createDoctor", [], params, pathParam);
 };
-export const createTriageForm = (params: object ,pathParam:object) => {
+export const createTriageForm = (params: object, pathParam: object) => {
     return fireRequest('createTriage', [], params, pathParam)
 };
 export const getTriageInfo = (pathParam: object) => {
-    return fireRequest('getTriage', [], {},pathParam)
+    return fireRequest('getTriage', [], {}, pathParam)
 };
 export const getTriageDetails = (id: number, pathParam: object) => {
-    return fireRequest('getTriage', [id], {},pathParam)
+    return fireRequest('getTriage', [id], {}, pathParam)
 };
 export const listCapacity = (params: object, pathParam: object) => {
     return fireRequest('getCapacity', [], params, pathParam);
@@ -83,6 +84,9 @@ export const getDoctor = (id: number, pathParam: object) => {
 export const searchPatient = (params: object) => {
     return fireRequest('searchPatient', [], params);
 };
+export const searchUser = (params: object) => {
+    return fireRequest('searchUser', [], params);
+}
 export const getAllPatient = (params: object) => {
     return fireRequest('patientList', [], params);
 };
@@ -120,6 +124,10 @@ export const getLocalbodyByDistrict = (pathParam: object) => {
 export const getSampleTestList = (params: object, pathParam: object) => {
     return fireRequest("sampleTestList", [], params, pathParam)
 }
+
+export const sampleSearch = (params: object) => {
+    return fireRequest('getTestSampleList', [], params);
+}
 export const createSampleTest = (params: object, pathParam: object) => {
     return fireRequest('createSampleTest', [], params, pathParam)
 };
@@ -147,10 +155,10 @@ export const patchSample = (id: any, params: object) => {
 // Daily Rounds
 
 export const createDailyReport = (params: object, pathParam: object) => {
-    return fireRequest('createDailyRounds', [],  params, pathParam)
+    return fireRequest('createDailyRounds', [], params, pathParam)
 };
 export const updateDailyReport = (params: object, pathParam: object) => {
-    return fireRequest('updateDailyReport', [],  params, pathParam)
+    return fireRequest('updateDailyReport', [], params, pathParam)
 };
 export const getDailyReport = (params: object, pathParam: object) => {
     return fireRequest('getDailyReports', [], params, pathParam)
@@ -171,4 +179,29 @@ export const getConsultation = (id: number) => {
 };
 export const updateConsultation = (id: number, params: object) => {
     return fireRequest("updateConsultation", [id], params);
+};
+//Inventory
+export const getItems = (params: object) => {
+    return fireRequest("getItems", [], params);
+};
+export const postInventory = (params: object, pathParams: object) => {
+    return fireRequest("createInventory", [], params, pathParams)
+};
+export const getInventoryLog = (params: object, pathParams: object) => {
+    return fireRequest("getInventoryLog", [params, "inventory"], pathParams)
+};
+export const setMinQuantity = (params: object, pathParams: object) => {
+    return fireRequest("setMinQuantity", [], params, pathParams)
+};
+export const getMinQuantity = (facilityId: object, params: object) => {
+    return fireRequest("getMinQuantity", [facilityId, "min_quantity"], params);
+};
+export const updateMinQuantity = (pathParams: object, params: object) => {
+    return fireRequest("updateMinQuantity", [], pathParams, params);
+}
+export const getInventorySummary = (facilityId: number, params: object) => {
+    return fireRequest('getInventorySummary', [facilityId, "inventorysummary"], params);
+};
+export const getItemName = (id: number) => {
+    return fireRequest('getItemName', [id], {})
 };

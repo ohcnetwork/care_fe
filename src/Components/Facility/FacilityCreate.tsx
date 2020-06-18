@@ -40,6 +40,7 @@ const initForm: any = {
   phone_number: "",
   latitude: "",
   longitude: "",
+  pincode: "",
   oxygen_capacity: ""
 };
 
@@ -137,6 +138,7 @@ export const FacilityCreate = (props: FacilityProps) => {
             district: res.data.district ? res.data.district : "",
             local_body: res.data.local_body ? res.data.local_body : "",
             address: res.data.address,
+            pincode: res.data.pincode,
             phone_number: res.data.phone_number,
             latitude: res.data.location ? res.data.location.latitude : "",
             longitude: res.data.location ? res.data.location.longitude : "",
@@ -227,6 +229,12 @@ export const FacilityCreate = (props: FacilityProps) => {
             invalidForm = true;
           }
           return;
+        case "pincode":
+          if (!Number(state.form[field])) {
+            errors[field] = "Field is required";
+            invalidForm = true;
+          }
+          return;
         case "phone_number":
           const phoneNumber = parsePhoneNumberFromString(state.form[field]);
           if (!state.form[field] || !phoneNumber?.isPossible()) {
@@ -264,6 +272,7 @@ export const FacilityCreate = (props: FacilityProps) => {
         district: state.form.district,
         state: state.form.state,
         address: state.form.address,
+        pincode: state.form.pincode,
         local_body: state.form.local_body,
         location:
           state.form.latitude && state.form.longitude
@@ -423,7 +432,18 @@ export const FacilityCreate = (props: FacilityProps) => {
                   errors={state.errors.address}
                 />
               </div>
-
+              <div>
+              <InputLabel id="name-label">Pincode*</InputLabel>
+              <TextInputField
+                  name="pincode"
+                  variant="outlined"
+                  margin="dense"
+                  type="text"
+                  value={state.form.pincode}
+                  onChange={handleChange}
+                  errors={state.errors.pincode}
+              />
+            </div>
               <div>
                 <PhoneNumberField
                   label="Emergency Contact Number"

@@ -99,25 +99,25 @@ export const ConsultationDetails = (props: any) => {
                                 <Grid item xs={11} container spacing={1}>
                                     <Grid item xs={6}>
                                         <Typography>
-                                            <span className="w3-text-grey">Temperature:</span>{" "}
+                                            <span className="text-gray-700">Temperature:</span>{" "}
                                             {itemData.temperature}
                                         </Typography>
                                     </Grid>
                                     <Grid item xs={6}>
                                         <Typography>
-                                            <span className="w3-text-grey">Taken at :</span>{" "}
+                                            <span className="text-gray-700">Taken at :</span>{" "}
                                             {itemData.temperature_measured_at ? moment(itemData.temperature_measured_at).format('lll') : "-"}
                                         </Typography>
                                     </Grid>
                                     <Grid item xs={12}>
                                         <Typography>
-                                            <span className="w3-text-grey">Physical Examination Info:</span>{" "}
+                                            <span className="text-gray-700">Physical Examination Info:</span>{" "}
                                             {itemData.physical_examination_info}
                                         </Typography>
                                     </Grid>
                                     <Grid item xs={12}>
                                         <Typography>
-                                            <span className="w3-text-grey">Other Details:</span>{" "}
+                                            <span className="text-gray-700">Other Details:</span>{" "}
                                             {itemData.other_details}
                                         </Typography>
                                     </Grid>

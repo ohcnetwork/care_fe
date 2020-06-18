@@ -4,10 +4,7 @@ import { navigate, usePath, A } from "hookrouter";
 import { get } from "lodash";
 import { useDispatch, useSelector } from "react-redux";
 import AmbulanceList from "../Components/Ambulance/AmbulanceList";
-import Header from "../Components/Common/Header";
-import { Analytics } from "../Components/Dashboard/Analytics";
 import { BedCapacityForm } from "../Components/Facility/BedCapacityForm";
-import { CareCenterJoinForm } from "../Components/Facility/CareCenterJoinForm";
 import { ConsultationDetails } from "../Components/Facility/ConsultationDetails";
 import { ConsultationForm } from "../Components/Facility/ConsultationForm";
 import { DoctorCapacityForm } from "../Components/Facility/DoctorCapacityForm";
@@ -30,6 +27,13 @@ import { TreatmentForm } from "../Components/Patient/TreatmentForm";
 import ManageUsers from "../Components/Users/ManageUsers";
 import { UserAdd } from "../Components/Users/UserAdd";
 import AmbulanceOnboarding from "../Components/Ambulance/AmbulanceOnboarding";
+import InventoryList from "../Components/Facility/InventoryList";
+import InventoryLog from "../Components/Facility/InventoryLog";
+import { AddInventoryForm } from "../Components/Facility/AddInventoryForm";
+import { SetInventoryForm } from "../Components/Facility/SetInventoryForm";
+import MinQuantityList from "../Components/Facility/MinQuantityList";
+import { UpdateMinQuantity } from "../Components/Facility/UpdateMinQuantity";
+
 const img =
   "https://cdn.coronasafe.network/light-logo.svg";
 const logoBlack =
@@ -39,8 +43,6 @@ const routes = {
   "/": () => <HospitalList />,
   "/users": () => <ManageUsers />,
   "/user/add": () => <UserAdd />,
-  "/join": () => <CareCenterJoinForm />,
-  "/analytics": () => <Analytics />,
   "/ambulance": () => <AmbulanceList />,
   "/ambulance/add": () => <AmbulanceOnboarding />,
   "/patients": () => <PatientManager />,
@@ -116,7 +118,15 @@ const routes = {
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily-rounds/:id": ({ facilityId, patientId, consultationId, id }: any) => (
     <DailyRoundListDetails facilityId={facilityId} patientId={patientId} consultationId={consultationId} id={id} />
   ),
+  "/facility/:facilityId/inventory": ({ facilityId }: any) => (<InventoryList facilityId={facilityId} />),
+  "/facility/:facilityId/inventory/add": ({ facilityId }: any) => (<AddInventoryForm facilityId={facilityId} />),
+  "/facility/:facilityId/inventory/min_quantity/set": ({ facilityId }: any) => (<SetInventoryForm facilityId={facilityId} />),
+  "/facility/:facilityId/inventory/:inventoryId": ({ facilityId, inventoryId }: any) => (<InventoryLog facilityId={facilityId} inventoryId={inventoryId} />),
+  "/facility/:facilityId/inventory/min_quantity/list": ({ facilityId }: any) => (<MinQuantityList facilityId={facilityId} />),
+  "/facility/:facilityId/inventory/:inventoryId/update/:itemId": ({ facilityId, inventoryId, itemId }: any) => (<UpdateMinQuantity facilityId={facilityId} inventoryId={inventoryId} itemId={itemId} />),
 };
+
+
 
 let menus = [
   {
@@ -128,11 +138,6 @@ let menus = [
     title: 'Patients / Suspects',
     link: '/patients',
     icon: "fas fa-user-injured"
-  },
-  {
-    title: "Ambulances",
-    link: "/ambulance",
-    icon: "fas fa-ambulance"
   },
   {
     title: "Sample Test",
@@ -301,7 +306,7 @@ const AppRouter = () => {
           </a>
         </div>
 
-        <main className="flex-1 relative z-0 overflow-y-auto pb-4 md:py-0 focus:outline-none" >
+        <main className="flex-1 overflow-y-auto pb-4 md:py-0 focus:outline-none" >
           <div className="max-w-7xl mx-auto px-0">
             {pages}
           </div>

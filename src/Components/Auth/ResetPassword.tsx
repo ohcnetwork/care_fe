@@ -130,7 +130,7 @@ export const ResetPassword = (props: any) => {
                                     <div className={panel.root}>
                                         <ExpansionPanel>
                                             <ExpansionPanelDetails>
-                                                <Typography className="w3-text-red">
+                                                <Typography className="text-red-500">
                                                     <li> Minimum password length 8</li>
                                                     <li>Require at least one digit</li>
                                                     <li>Require at least one upper case</li>

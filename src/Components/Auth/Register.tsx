@@ -252,7 +252,7 @@ export const Register = () => {
                       );
                     })}
                   </Select>
-                  <span className="w3-text-red">{errors.district}</span>
+                  <span className="text-red-500">{errors.district}</span>
                 </FormControl>
               </Grid>
               <Grid item xs={6}>
@@ -280,7 +280,7 @@ export const Register = () => {
                       );
                     })}
                   </Select>
-                  <span className="w3-text-red">{errors.gender}</span>
+                  <span className="text-red-500">{errors.gender}</span>
                 </FormControl>
               </Grid>
             </Grid>
@@ -328,7 +328,7 @@ export const Register = () => {
                       sitekey={captchaKey}
                       onChange={onCaptchaChange}
                     />
-                    <span className="w3-text-red">{errors.captcha}</span>
+                    <span className="text-red-500">{errors.captcha}</span>
                   </Grid>
                 )}
                 <Grid item style={{ display: "flex", padding: 10 }}>

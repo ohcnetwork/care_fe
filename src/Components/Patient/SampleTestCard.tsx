@@ -19,27 +19,27 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
       <CardContent>
         <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
           <div>
-            <span className="w3-text-grey">Status: </span>{itemData.status}
+            <span className="text-gray-700">Status: </span>{itemData.status}
           </div>
           <div>
-            <span className="w3-text-grey">Result: </span>{itemData.result}
+            <span className="text-gray-700">Result: </span>{itemData.result}
           </div>
           <div className="md:col-span-2">
-            <span className="w3-text-grey">Sample Type: </span>
+            <span className="text-gray-700">Sample Type: </span>
             {itemData.sample_type !== 'OTHER TYPE' ? itemData.sample_type : itemData.sample_type_other}
           </div>
           {itemData.fast_track && <div className="md:col-span-2">
-            <span className="w3-text-grey">Fast-Track:</span> {itemData.fast_track}
+            <span className="text-gray-700">Fast-Track:</span> {itemData.fast_track}
           </div>}
           {itemData.date_of_result && (
             <div>
-              <span className="w3-text-grey">Tested on :</span>{" "}
+              <span className="text-gray-700">Tested on :</span>{" "}
               {moment(itemData.date_of_result).format("lll")}
             </div>
           )}
           {itemData.date_of_result && (
             <div>
-              <span className="w3-text-grey">Result on:</span>{" "}
+              <span className="text-gray-700">Result on:</span>{" "}
               {moment(itemData.date_of_result).format("lll")}
             </div>
           )}

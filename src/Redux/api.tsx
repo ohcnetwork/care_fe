@@ -61,7 +61,9 @@ export default {
         path: "/api/v1/users/add_user/",
         method: 'POST',
     },
-
+    searchUser: {
+        path: "/api/v1/users/search",
+    },
 
     // Facility Endpoints
 
@@ -92,6 +94,10 @@ export default {
         path: '/api/v1/facility',
         method: 'DELETE'
     },
+
+
+
+
     getConsultationList: {
         path: '/api/v1/consultation/'
     },
@@ -265,4 +271,35 @@ export default {
         method: 'PATCH',
     },
 
+    //inventory
+    getItems: {
+        path: '/api/v1/items/'
+    },
+    createInventory: {
+        path: "/api/v1/facility/{facilityId}/inventory/",
+        method: 'POST'
+    },
+    getInventoryLog: {
+        path: "/api/v1/facility",
+    },
+    setMinQuantity: {
+        path: "/api/v1/facility/{facilityId}/min_quantity/",
+        method: 'POST'
+    },
+    getMinQuantity: {
+        path: "/api/v1/facility",
+        method: 'GET',
+    },
+    updateMinQuantity: {
+        path: "/api/v1/facility/{facilityId}/min_quantity/{inventoryId}",
+        method: 'PATCH',
+    },
+    getInventorySummary: {
+        path: '/api/v1/facility',
+        method: 'GET',
+    },
+    getItemName: {
+        path: '/api/v1/items',
+        method: 'GET',
+    },
 }
