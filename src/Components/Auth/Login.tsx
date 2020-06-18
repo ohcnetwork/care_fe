@@ -10,7 +10,7 @@ import {
   CardActions,
   CardContent,
   CardHeader,
-  Grid, TextField
+  Grid, InputLabel, TextField
 } from "@material-ui/core";
 import { TextInputField } from "../Common/HelperInputFields";
 import { get } from "lodash";
@@ -126,6 +126,9 @@ export const Login = () => {
           </div>
           <form onSubmit={e => handleSubmit(e)}>
             <CardContent>
+              <InputLabel>
+                Username
+              </InputLabel>
               <TextInputField
                 name="username"
                 label="User Name"
@@ -136,6 +139,9 @@ export const Login = () => {
                 onChange={handleChange}
                 errors={errors.username}
               />
+              <InputLabel>
+                Password
+              </InputLabel>
               <TextInputField
                 type="password"
                 name="password"
