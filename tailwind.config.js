@@ -5,5 +5,10 @@ module.exports = {
   },
   variants: {},
   plugins: [require("@tailwindcss/ui")],
-  purge: false
+  purge: {
+    content: ["./src/**/*.html", "./src/**/*.tsx", "./src/**/*.ts", "./src/**/*.js"],
+    options: {
+      whitelistPatterns: [/^bg-/, /^text-/, /^border-/, /^hover:/],
+    },
+  }
 };
