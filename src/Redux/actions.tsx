@@ -22,14 +22,6 @@ export const postForgotPassword = (form: object) => {
     return fireRequest('forgotPassword', [], form);
 };
 
-// Ambulance
-export const postAmbulance = (params: object) => {
-    return fireRequest('createAmbulance', [], params);
-};
-export const getAmbulanceList = (params: object) => {
-    return fireRequest('listAmbulance', [], params);
-};
-
 // Facility
 export const createFacility = (params: object) => {
     return fireRequest("createFacility", [], params);

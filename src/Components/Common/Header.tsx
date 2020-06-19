@@ -74,11 +74,6 @@ const Header = () => {
       link: '/patients',
       icon: <InboxIcon style={{ color: '#666', marginRight: '4px' }} />
     },
-    {
-      title: "Ambulances",
-      link: "/ambulance",
-      icon: <TimeToLeaveIcon style={{ color: "#666", marginRight: "4px" }} />
-    },
     // {
     //   title: "Sample Test",
     //   link: "/sample",

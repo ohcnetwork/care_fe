@@ -131,16 +131,7 @@ export default {
     getDailyReports: {
         path: '/api/v1/consultation/{consultationId}/daily_rounds',
     },
-    // Ambulance
 
-    createAmbulance: {
-        path: '/api/v1/ambulance/create/',
-        method: 'POST',
-        noAuth: true,
-    },
-    listAmbulance: {
-        path: '/api/v1/ambulance',
-    },
 
     // Hospital Beds
     createCapacity: {
