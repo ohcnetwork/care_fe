@@ -7,6 +7,7 @@ let googleKey = "6LdvxuQUAAAAADDWVflgBqyHGfq-xmvNJaToM0pN";
 const CopyPlugin = require("copy-webpack-plugin");
 const WorkboxPlugin = require("workbox-webpack-plugin");
 const CompressionPlugin = require('compression-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
 
 module.exports = (env, argv) => {
   const mode = argv.mode || "development";
@@ -29,6 +30,8 @@ module.exports = (env, argv) => {
     },
     optimization: {
       moduleIds: "hashed",
+      minimize: true,
+      minimizer: [new TerserPlugin()],
       runtimeChunk: "single",
       splitChunks: {
         cacheGroups: {
