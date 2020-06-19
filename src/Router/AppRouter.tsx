@@ -3,7 +3,6 @@ import React, {  useState } from "react";
 import { navigate, usePath } from "hookrouter";
 import { get } from "lodash";
 import {  useSelector } from "react-redux";
-import AmbulanceList from "../Components/Ambulance/AmbulanceList";
 import { BedCapacityForm } from "../Components/Facility/BedCapacityForm";
 import { ConsultationDetails } from "../Components/Facility/ConsultationDetails";
 import { ConsultationForm } from "../Components/Facility/ConsultationForm";
@@ -26,7 +25,6 @@ import { TeleConsultation } from "../Components/Patient/TeleConsultation";
 import { TreatmentForm } from "../Components/Patient/TreatmentForm";
 import ManageUsers from "../Components/Users/ManageUsers";
 import { UserAdd } from "../Components/Users/UserAdd";
-import AmbulanceOnboarding from "../Components/Ambulance/AmbulanceOnboarding";
 import InventoryList from "../Components/Facility/InventoryList";
 import InventoryLog from "../Components/Facility/InventoryLog";
 import { AddInventoryForm } from "../Components/Facility/AddInventoryForm";
@@ -43,8 +41,6 @@ const routes = {
   "/": () => <HospitalList />,
   "/users": () => <ManageUsers />,
   "/user/add": () => <UserAdd />,
-  "/ambulance": () => <AmbulanceList />,
-  "/ambulance/add": () => <AmbulanceOnboarding />,
   "/patients": () => <PatientManager />,
   "/patient/:id": ({ id }: any) => <PatientHome id={id} />,
   "/patient/tele-consult": () => <TeleConsultation />,

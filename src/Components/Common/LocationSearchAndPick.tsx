@@ -70,7 +70,7 @@ export const LocationSearchAndPick = (props: LocationSearchAndPickProps) => {
 
     const renderLocationResults = () => {
         const locResultListOpen = Boolean(searchResultAnchorEl);
-        const searchResultPopoverId = open ? 'search-result-popover' : undefined;
+        const searchResultPopoverId =  'search-result-popover';
         return (<Popover
             id={searchResultPopoverId}
             open={locResultListOpen}

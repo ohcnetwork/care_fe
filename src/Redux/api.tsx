@@ -133,15 +133,6 @@ export default {
     },
     // Ambulance
 
-    createAmbulance: {
-        path: '/api/v1/ambulance/create/',
-        method: 'POST',
-        noAuth: true,
-    },
-    listAmbulance: {
-        path: '/api/v1/ambulance',
-    },
-
     // Hospital Beds
     createCapacity: {
         path: "/api/v1/facility/{facilityId}/capacity/",
