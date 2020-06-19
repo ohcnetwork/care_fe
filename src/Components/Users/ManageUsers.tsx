@@ -1,4 +1,3 @@
-
 import React, { useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -9,7 +8,7 @@ import Pagination from "../Common/Pagination";
 import { navigate } from "hookrouter";
 import { USER_TYPES } from "../../Common/constants";
 import {InputSearchBox} from "../Common/SearchBox";
-import {SearchPhone} from "../Common/SearchPhone";
+
 
 
 export default function ManageUsers(props: any) {
@@ -179,7 +178,7 @@ export default function ManageUsers(props: any) {
         <div className="text-sm font-semibold mb-2">
           Search by number
         </div>
-        <SearchPhone
+        <InputSearchBox
             search={searchByPhone}
             placeholder='+919876543210'
             errors=''
