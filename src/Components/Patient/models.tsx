@@ -64,7 +64,7 @@ export interface SampleTestModel {
     status?: string;
     result?: string;
     icmr_category?: string;
-    notes?: string;
+    icmr_label?: string;
     date_of_sample?: string;
     date_of_result?: string;
     consultation?: number;
@@ -102,9 +102,9 @@ export interface SampleReportModel {
     specimen_details?: {
         sample_type?: string;
         collection_type?: string;
-        collection_date?: string;
+        created_date?: string;
         icmr_category?: string;
-        label?: string;
+        icmr_label?: string;
         is_repeated_sample?: boolean;
         lab_name?: string;
         lab_pincode?: string;

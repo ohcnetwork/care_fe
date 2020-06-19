@@ -191,6 +191,9 @@ export default {
     searchPatient: {
         path: "/api/v1/patient/search",
     },
+    searchPatientFilter: {
+        path: "/api/v1/patient_search"
+    },
     patientList: {
         path: "/api/v1/patient",
     },
