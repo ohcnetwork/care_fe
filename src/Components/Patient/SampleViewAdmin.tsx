@@ -7,7 +7,7 @@ import React, { useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { SAMPLE_TEST_STATUS, ROLE_STATUS_MAP, SAMPLE_FLOW_RULES } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import {getTestList, patchSample, sampleSearch, searchUser} from "../../Redux/actions";
+import {getTestList, patchSample, sampleSearch} from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";

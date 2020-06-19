@@ -1,8 +1,8 @@
 import { useRedirect, useRoutes } from "hookrouter";
-import React, { useEffect, useState } from "react";
-import { navigate, usePath, A } from "hookrouter";
+import React, {  useState } from "react";
+import { navigate, usePath } from "hookrouter";
 import { get } from "lodash";
-import { useDispatch, useSelector } from "react-redux";
+import {  useSelector } from "react-redux";
 import AmbulanceList from "../Components/Ambulance/AmbulanceList";
 import { BedCapacityForm } from "../Components/Facility/BedCapacityForm";
 import { ConsultationDetails } from "../Components/Facility/ConsultationDetails";
