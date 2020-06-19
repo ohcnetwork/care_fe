@@ -10,12 +10,8 @@ import { CheckboxField, MultilineInputField, SelectField, TextInputField } from 
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 import { SampleTestModel } from "./models";
-
-import ExpansionPanel from '@material-ui/core/ExpansionPanel';
-import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
-import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import Typography from '@material-ui/core/Typography';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import Container from "@material-ui/core/Container";
 import color = Mocha.reporters.Base.color;
 
 const sampleTestTypes = [...SAMPLE_TYPE_CHOICES];
@@ -223,16 +219,9 @@ export const SampleTest = (props: any) => {
                   />
                 </div>
                 <div>
+
+                  <Container>
                   <InputLabel> Reference below to know more about ICMR Categories </InputLabel>
-                  <ExpansionPanel>
-                    <ExpansionPanelSummary
-                        expandIcon={<ExpandMoreIcon />}
-                        aria-controls="panel1a-content"
-                        id="panel1a-header"
-                    >
-                      <Typography> ICMR Categories </Typography>
-                    </ExpansionPanelSummary>
-                    <ExpansionPanelDetails>
                       <Typography>
                         <li>
                           Cat 0 - Repeat Sample of Positive Case / Follow Up case
@@ -253,11 +242,10 @@ export const SampleTest = (props: any) => {
                           Cat 5a - Asymptomatic Direct and High Risk contact of confirmed case - family Member
                         </li>
                         <li>
-                          Cat 5b - Asymptomatic Healthcare worker in contact with confimred case without adequete protection
+                          Cat 5b - Asymptomatic Healthcare worker in contact with confirmed case without adequate protection
                         </li>
                       </Typography>
-                    </ExpansionPanelDetails>
-                  </ExpansionPanel>
+                  </Container>
                 </div>
                 <div className="flex items-center">
                   <CheckboxField
