@@ -1,6 +1,5 @@
-import { useRedirect, useRoutes } from "hookrouter";
+import { useRedirect, useRoutes, navigate, usePath } from "hookrouter";
 import React, {  useState } from "react";
-import { navigate, usePath } from "hookrouter";
 import { get } from "lodash";
 import {  useSelector } from "react-redux";
 import { BedCapacityForm } from "../Components/Facility/BedCapacityForm";
