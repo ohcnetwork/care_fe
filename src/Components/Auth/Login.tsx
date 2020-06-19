@@ -1,41 +1,19 @@
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { postLogin } from "../../Redux/actions";
-import { A, navigate } from "hookrouter";
+import {  navigate } from "hookrouter";
 import { makeStyles } from "@material-ui/styles";
 import {
-  Box,
-  Button,
-  Card,
   CardActions,
   CardContent,
-  CardHeader,
-  Grid, TextField
+  Grid
 } from "@material-ui/core";
 import { TextInputField } from "../Common/HelperInputFields";
 import { get } from "lodash";
 import { PublicDashboard } from "../Dashboard/PublicDashboard";
 import ReCaptcha from "react-google-recaptcha";
 
-const useStyles = makeStyles(theme => ({
-  formTop: {
-    marginTop: "100px"
-  },
-  pdLogo: {
-    height: "345px",
-    border: "solid 3px white"
-  },
-  logoImg: {
-    objectFit: "contain",
-    height: "8rem"
-  },
-  imgSection: {
-    paddingBottom: "45px"
-  }
-}));
-
 export const Login = () => {
-  const classes = useStyles();
   const dispatch: any = useDispatch();
   const initForm: any = {
     username: "",
