@@ -20,7 +20,7 @@ const icmrCategories = [...ICMR_CATEGORY];
 const initForm: SampleTestModel = {
   isFastTrack: false,
   fast_track: "",
-  notes: "",
+  icmr_label: "",
   atypical_presentation: "",
   diagnosis: "",
   diff_diagnosis: "",
@@ -87,7 +87,7 @@ export const SampleTest = (props: any) => {
             invalidForm = true;
           }
           break;
-        case "notes":
+        case "icmr_label":
           if ( !state.form[field]) {
             errors[field] = "Please specify the label";
             invalidForm = true;
@@ -124,7 +124,7 @@ export const SampleTest = (props: any) => {
       setIsLoading(true);
       const data: SampleTestModel = {
         fast_track: state.form.isFastTrack ? state.form.fast_track : undefined,
-        notes: state.form.notes ? state.form.notes : undefined,
+        icmr_label: state.form.icmr_label ? state.form.icmr_label : undefined,
         facility: facilityId,
         patient: patientId,
         has_ari: state.form.has_ari,
@@ -210,12 +210,12 @@ export const SampleTest = (props: any) => {
                 <div>
                   <InputLabel>Label*</InputLabel>
                   <TextInputField
-                      name="notes"
+                      name="icmr_label"
                       variant="outlined"
                       margin="dense"
-                      value={state.form.notes}
+                      value={state.form.icmr_label}
                       onChange={handleChange}
-                      errors={state.errors.notes}
+                      errors={state.errors.icmr_label}
                   />
                 </div>
                 <div>

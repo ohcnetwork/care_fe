@@ -6,6 +6,7 @@ import {Loading} from "../Common/Loading";
 import { sampleReport} from "../../Redux/actions";
 import {statusType, useAbortableEffect} from "../../Common/utils";
 import { SampleReportModel } from "./models";
+import moment from "moment";
 
 const useStyles = makeStyles({
     root: {
@@ -298,7 +299,10 @@ export default function SampleReport(props: samplePreviewProps) {
                                         </Box>
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                {sampleData && sampleData.specimen_details && sampleData.specimen_details.collection_date}
+                                                {
+                                                    sampleData &&
+                                                    sampleData.specimen_details
+                                                    && moment(sampleData.specimen_details.created_date).format("lll") }
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -310,7 +314,7 @@ export default function SampleReport(props: samplePreviewProps) {
                                         </Box>
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                {sampleData && sampleData.specimen_details && sampleData.specimen_details.label}
+                                                {sampleData && sampleData.specimen_details && sampleData.specimen_details.icmr_label}
                                             </Typography>
                                         </Box>
                                     </Box>
