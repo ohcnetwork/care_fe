@@ -19,7 +19,7 @@
     "@material-ui/icons": "^4.4.1",
     "@material-ui/lab": "^4.0.0-alpha.47",
     "@material-ui/pickers": "^3.2.6",
-    "@material-ui/styles": "^4.4.1",
+    "@material-ui/styles": "^4.10.0",
     "@material-ui/types": "^4.1.1",
     "@sentry/browser": "^5.15.4",
     "@svgr/webpack": "4.3.2",
