@@ -96,7 +96,7 @@
     "@types/draft-js": "^0.10.37",
     "@types/draftjs-to-html": "^0.8.0",
     "@types/html-to-draftjs": "^1.4.0",
-    "@types/jest": "^24.9.1",
+    "@types/jest": "^26.0.0",
     "@types/mocha": "^5.2.7",
     "autoprefixer": "^9.7.6",
     "concurrently": "^5.1.0",
