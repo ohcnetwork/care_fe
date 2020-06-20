@@ -1,4 +1,4 @@
-import { useRedirect, useRoutes , navigate, usePath } from "hookrouter";
+import { useRedirect, useRoutes, navigate, usePath } from "hookrouter";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { BedCapacityForm } from "../Components/Facility/BedCapacityForm";
@@ -19,8 +19,6 @@ import { SampleDetails } from "../Components/Patient/SampleDetails";
 import SampleReport from "../Components/Patient/SamplePreview";
 import { SampleTest } from "../Components/Patient/SampleTest";
 import SampleViewAdmin from "../Components/Patient/SampleViewAdmin";
-import { TeleConsultation } from "../Components/Patient/TeleConsultation";
-import { TreatmentForm } from "../Components/Patient/TreatmentForm";
 import ManageUsers from "../Components/Users/ManageUsers";
 import { UserAdd } from "../Components/Users/UserAdd";
 import InventoryList from "../Components/Facility/InventoryList";
@@ -42,9 +40,7 @@ const routes = {
   "/user/add": () => <UserAdd />,
   "/patients": () => <PatientManager />,
   "/patient/:id": ({ id }: any) => <PatientHome id={id} />,
-  "/patient/tele-consult": () => <TeleConsultation />,
   "/patient/discharge": () => <PatientDischarge />,
-  "/patient/treatment": () => <TreatmentForm />,
   "/sample": () => <SampleViewAdmin />,
   "/sample/:id": ({ id }: any) => <SampleDetails id={id} />,
   '/sample/report/:patientId': ({ patientId }: any) => <SampleReport id={patientId} />,
@@ -82,9 +78,6 @@ const routes = {
   ),
   "/facility/:facilityId/patient/:patientId/sample/:id": ({ id }: any) => (
     <SampleDetails id={id} />
-  ),
-  "/facility/:facilityId/patient/:id/treatment": ({ facilityId, id }: any) => (
-    <TreatmentForm facilityId={facilityId} id={id} />
   ),
   "/facility/:facilityId/triage/:id": ({ facilityId, id }: any) => (
     <TriageForm facilityId={facilityId} id={id} />
