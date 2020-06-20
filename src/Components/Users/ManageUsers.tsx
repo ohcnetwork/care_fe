@@ -1,4 +1,3 @@
-
 import React, { useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -9,7 +8,6 @@ import Pagination from "../Common/Pagination";
 import { navigate } from "hookrouter";
 import { USER_TYPES } from "../../Common/constants";
 import {InputSearchBox} from "../Common/SearchBox";
-
 
 export default function ManageUsers(props: any) {
   const dispatch: any = useDispatch();

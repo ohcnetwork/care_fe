@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useState} from 'react';
 import {Box, Button, Paper, Typography} from '@material-ui/core';
 import {makeStyles} from '@material-ui/core/styles';
 import {useDispatch} from "react-redux";
@@ -6,7 +6,7 @@ import {Loading} from "../Common/Loading";
 import { sampleReport} from "../../Redux/actions";
 import {statusType, useAbortableEffect} from "../../Common/utils";
 import { SampleReportModel } from "./models";
-import moment from 'moment';
+import moment from "moment";
 
 const useStyles = makeStyles({
     root: {

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import api from './api';
 import * as Notification from '../Utils/Notifications.js';
-
+import querystring from 'querystring';
 const requestMap: any = api;
 export const actions = {
     FETCH_REQUEST: 'FETCH_REQUEST',
@@ -44,7 +44,7 @@ export const fetchResponseSuccess = (key: string, data: any) => {
 };
 
 export const fireRequest = (
-    key: string, path: any = [], params: object = {}, pathParam?: any
+    key: string, path: any = [], params: any = {}, pathParam?: any
 ) => {
     return (dispatch: any) => {
         ;
@@ -60,7 +60,7 @@ export const fireRequest = (
         }
         if (request.method === undefined || request.method === 'GET') {
             request.method = 'GET';
-            const qs = $.param(params);
+            const qs = querystring.stringify(params);
             if (qs !== '') {
                 request.path += `?${qs}`;
             }

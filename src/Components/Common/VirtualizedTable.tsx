@@ -4,27 +4,6 @@ import clsx from 'clsx';
 import React from 'react';
 import { AutoSizer, Column, Table } from 'react-virtualized';
 
-// sample data
-// const columns = [
-//     {
-//       width: 200,
-//       flexGrow: 1,
-//       label: 'Name',
-//       dataKey: 'name',
-//     },
-//     {
-//       width: 60,
-//       label: 'Age',
-//       dataKey: 'age',
-//       numeric: true,
-//     },
-//     {
-//       width: 120,
-//       label: 'Nationality',
-//       dataKey: 'nationality',
-//     },
-//   ];
-
 const styles = (theme: Theme): any => ({
     flexContainer: {
         display: 'flex',

@@ -1,14 +1,15 @@
-# Coronasafe Care React Front end . 
+# Coronasafe Care Frontend . 
+[![SonarCloud](https://sonarcloud.io/images/project_badges/sonarcloud-white.svg)](https://sonarcloud.io/dashboard?id=coronasafe_care_fe)
 
 Auto Deployed to https://care.coronasafe.in for Develop Branch. 
 
 ### Report bugs at [JIRA SERVICE DESK](https://bugs.coronasafe.in)
 
-### Issue tracker : [JIRA SOFTWARE](https://bugs.coronasafe.network/projects/CARE/issues)
+### Issue tracker : [JIRA SOFTWARE](https://rakshalife.atlassian.net/browse/CARE)
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/200482ab117e4b5397ff3f5ae5719aa2)](https://www.codacy.com/gh/coronasafe/care_fe?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=coronasafe/care_fe&amp;utm_campaign=Badge_Grade) 
 [![CircleCI](https://circleci.com/gh/coronasafe/care_fe.svg?style=svg)](https://circleci.com/gh/coronasafe/care_fe)
-     [![Sonarcloud Status](https://sonarcloud.io/api/project_badges/measure?project=coronasafe_care_fe&metric=alert_status)](https://sonarcloud.io/dashboard?id=coronasafe_care_fe)
+[![Maintainability](https://api.codeclimate.com/v1/badges/f1438f693aa459805301/maintainability)](https://codeclimate.com/github/coronasafe/care_fe/maintainability)
 
 Auto Deployed to https://care.coronasafe.network for Master Branch
 
@@ -34,6 +35,9 @@ You will also see any lint errors in the console.
 
 Builds the app for production to the `build` folder.<br />
 It correctly bundles React in production mode and optimizes the build for the best performance.
+
+###    `npm run start:Dev`
+Starts a production http-server in local to run the project with Service worker
 
 The build is minified and the filenames include the hashes.<br />
 Your app is ready to be deployed!

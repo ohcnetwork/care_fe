@@ -100,6 +100,7 @@ export interface SampleReportModel {
         state_name?: string;
     }
     specimen_details?: {
+        created_date?: string;
         sample_type?: string;
         collection_type?: string;
         created_date?: string;

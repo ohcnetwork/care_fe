@@ -120,11 +120,6 @@ export const PatientManager = (props: any) => {
                         Medical Worker
                       </span>
                     )}
-                    {!patient.is_active && (
-                      <span className="badge badge-pill badge-dark">
-                        Inactive
-                      </span>
-                    )}
                   </div>
                 </div>
                 <div>

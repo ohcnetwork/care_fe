@@ -221,7 +221,6 @@ export const SampleTest = (props: any) => {
                 <div>
                   <Container>
                   <InputLabel> Reference below to know more about ICMR Categories </InputLabel>
-
                       <Typography>
                         <li>
                           Cat 0 - Repeat Sample of Positive Case / Follow Up case

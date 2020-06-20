@@ -132,7 +132,6 @@ export default {
         path: '/api/v1/consultation/{consultationId}/daily_rounds',
     },
 
-
     // Hospital Beds
     createCapacity: {
         path: "/api/v1/facility/{facilityId}/capacity/",
