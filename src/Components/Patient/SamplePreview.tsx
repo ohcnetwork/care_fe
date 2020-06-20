@@ -299,10 +299,8 @@ export default function SampleReport(props: samplePreviewProps) {
                                         </Box>
                                         <Box width="35%" className={`${classes.cellTBPadding}`}>
                                             <Typography className={`${classes.cellText}`}>
-                                                {
-                                                    sampleData &&
-                                                    sampleData.specimen_details
-                                                    && moment(sampleData.specimen_details.created_date).format("lll") }
+
+                                                {sampleData && sampleData.specimen_details && moment(sampleData.specimen_details.created_date).format("lll")}
                                             </Typography>
                                         </Box>
                                     </Box>

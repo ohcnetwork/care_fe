@@ -9,8 +9,6 @@ import { navigate } from "hookrouter";
 import { USER_TYPES } from "../../Common/constants";
 import {InputSearchBox} from "../Common/SearchBox";
 
-
-
 export default function ManageUsers(props: any) {
   const dispatch: any = useDispatch();
   const initialData: any[] = [];
@@ -163,28 +161,28 @@ export default function ManageUsers(props: any) {
   return (
     <div>
       <PageTitle title="User Management" hideBack={true} />
-      <div className="flex flex-col md:flex-row px-4 md:px-8">
-      <div className="md:px-4">
-        <div className="text-sm font-semibold mb-2">
-          Search by Name
-        </div>
-        <InputSearchBox
-            search={searchByName}
-            placeholder='Search by Name'
-            errors=''
-        />
-      </div>
-      <div>
-        <div className="text-sm font-semibold mb-2">
-          Search by number
-        </div>
-        <InputSearchBox
-            search={searchByPhone}
-            placeholder='+919876543210'
-            errors=''
-        />
-      </div>
-      </div>
+      {/*<div className="flex flex-col md:flex-row px-4 md:px-8">*/}
+      {/*<div className="md:px-4">*/}
+      {/*  <div className="text-sm font-semibold mb-2">*/}
+      {/*    Search by Name*/}
+      {/*  </div>*/}
+      {/*  <InputSearchBox*/}
+      {/*      search={searchByName}*/}
+      {/*      placeholder='Search by Name'*/}
+      {/*      errors=''*/}
+      {/*  />*/}
+      {/*</div>*/}
+      {/*<div>*/}
+      {/*  <div className="text-sm font-semibold mb-2">*/}
+      {/*    Search by number*/}
+      {/*  </div>*/}
+      {/*  <InputSearchBox*/}
+      {/*      search={searchByPhone}*/}
+      {/*      placeholder='+919876543210'*/}
+      {/*      errors=''*/}
+      {/*  />*/}
+      {/*</div>*/}
+      {/*</div>*/}
       <div className="px-3 md:px-8">
         <div>
           {manageUsers}

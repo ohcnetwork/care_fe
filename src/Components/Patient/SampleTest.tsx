@@ -219,7 +219,6 @@ export const SampleTest = (props: any) => {
                   />
                 </div>
                 <div>
-
                   <Container>
                   <InputLabel> Reference below to know more about ICMR Categories </InputLabel>
                       <Typography>

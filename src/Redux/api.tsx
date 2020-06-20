@@ -131,7 +131,6 @@ export default {
     getDailyReports: {
         path: '/api/v1/consultation/{consultationId}/daily_rounds',
     },
-    // Ambulance
 
     // Hospital Beds
     createCapacity: {
