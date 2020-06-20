@@ -7,8 +7,8 @@ import { SelectProps } from '@material-ui/core/Select';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { DatePickerProps, KeyboardDatePicker, KeyboardDateTimePicker, KeyboardTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import { MaterialUiPickersDate } from '@material-ui/pickers/typings/date';
-import React from 'react';
-import PhoneInput from 'react-phone-input-2';
+import React, { ChangeEvent } from 'react';
+import PhoneInput, { ICountryData } from 'react-phone-input-2';
 import 'react-phone-input-2/lib/high-res.css';
 
 export interface DefaultSelectInputProps extends Omit<SelectProps, 'onChange'> {
@@ -405,12 +405,16 @@ export const AutoCompleteAsyncField = (props: any) => {
 export const PhoneNumberField = (props: any) => {
     const { label, placeholder, errors, onChange, onlyIndia, value } = props;
     const countryRestriction = !!onlyIndia ? { onlyCountries: ['in'] } : {};
+    const handleChange = (value: string, data: ICountryData | {}, event: ChangeEvent<HTMLInputElement>, formattedValue: string) => {
+        onChange(formattedValue);
+    }
     return (<>
         {label && <InputLabel>{label}</InputLabel>}
         <PhoneInput
+            countryCodeEditable={false}
             value={value}
             placeholder={placeholder}
-            onChange={onChange}
+            onChange={handleChange}
             country="in"
             {...countryRestriction}
         />

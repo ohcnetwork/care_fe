@@ -1,7 +1,7 @@
 declare module "react-phone-input-2" {
     import React from "react";
   
-    interface ICountryData {
+    export interface ICountryData {
       name: string;
       dialCode: string;
       countryCode: string;
@@ -23,7 +23,7 @@ declare module "react-phone-input-2" {
     }
   
     interface IPhoneInputEventsProps {
-      onChange?(value: string, data: ICountryData | {}): void;
+      onChange?(value: string, data: ICountryData | {}, event: ChangeEvent<HTMLInputElement>, formattedValue: string): void;
       onFocus?(
         event: React.FocusEvent<HTMLInputElement>,
         data: ICountryData | {}
