@@ -103,7 +103,6 @@ export interface SampleReportModel {
         created_date?: string;
         sample_type?: string;
         collection_type?: string;
-        created_date?: string;
         icmr_category?: string;
         icmr_label?: string;
         is_repeated_sample?: boolean;
