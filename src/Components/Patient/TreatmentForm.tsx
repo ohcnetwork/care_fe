@@ -4,7 +4,7 @@ import { useDispatch } from "react-redux";
 import { Box, Grid, Checkbox, Card, CardHeader, CardContent, CardActions, Button, FormControl, InputLabel, Select, MenuItem, Typography, FormLabel, RadioGroup, Radio, FormControlLabel } from "@material-ui/core";
 import { TextInputField, TimeInputField } from "../Common/HelperInputFields";
 // import {  } from "../../Redux/actions";
-import { isEmpty } from "lodash";
+const isEmpty = require('lodash.isempty');
 
 
 const useStyles = makeStyles((theme: Theme) => ({

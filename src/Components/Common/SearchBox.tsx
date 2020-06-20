@@ -1,5 +1,5 @@
 import { TextFieldProps } from '@material-ui/core';
-import { debounce } from "lodash";
+const debounce = require('lodash.debounce');
 import React, { useCallback, useState } from 'react';
 
 
