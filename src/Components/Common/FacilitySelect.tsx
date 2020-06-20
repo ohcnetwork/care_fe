@@ -1,10 +1,9 @@
-import { debounce } from "lodash";
 import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { getFacilities } from "../../Redux/actions";
 import { AutoCompleteAsyncField } from "../Common/HelperInputFields";
 import { FacilityModel } from "../Facility/models";
-
+const debounce = require('lodash.debounce');
 interface FacilitySelectProps {
     name: string;
     margin?: string;

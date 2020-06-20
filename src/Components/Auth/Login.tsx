@@ -8,9 +8,9 @@ import {
   Grid
 } from "@material-ui/core";
 import { TextInputField } from "../Common/HelperInputFields";
-import { get } from "lodash";
 import { PublicDashboard } from "../Dashboard/PublicDashboard";
 import ReCaptcha from "react-google-recaptcha";
+const get = require('lodash.get');
 
 export const Login = () => {
   const dispatch: any = useDispatch();

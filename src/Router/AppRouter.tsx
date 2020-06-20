@@ -1,7 +1,6 @@
-import { useRedirect, useRoutes, navigate, usePath } from "hookrouter";
-import React, {  useState } from "react";
-import { get } from "lodash";
-import {  useSelector } from "react-redux";
+import { useRedirect, useRoutes , navigate, usePath } from "hookrouter";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { BedCapacityForm } from "../Components/Facility/BedCapacityForm";
 import { ConsultationDetails } from "../Components/Facility/ConsultationDetails";
 import { ConsultationForm } from "../Components/Facility/ConsultationForm";
@@ -30,6 +29,7 @@ import { AddInventoryForm } from "../Components/Facility/AddInventoryForm";
 import { SetInventoryForm } from "../Components/Facility/SetInventoryForm";
 import MinQuantityList from "../Components/Facility/MinQuantityList";
 import { UpdateMinQuantity } from "../Components/Facility/UpdateMinQuantity";
+const get = require('lodash.get');
 
 const img =
   "https://cdn.coronasafe.network/light-logo.svg";
