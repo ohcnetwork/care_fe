@@ -1,21 +1,13 @@
-import { Button, Card, CardActions, CardContent, CardHeader, Grid } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
+import { Button,  CardActions, CardContent } from '@material-ui/core';
 import { A } from 'hookrouter';
-import React, { useEffect, useState } from 'react';
+import React, {  useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { postForgotPassword } from '../../Redux/actions';
 import { TextInputField } from '../Common/HelperInputFields';
 import * as Notification from "../../Utils/Notifications.js";
 import { Loading } from "../Common/Loading";
 
-const useStyles = makeStyles(theme => ({
-    formTop: {
-        marginTop: '100px',
-    },
-}));
-
 export const ForgotPassword = () => {
-    const classes = useStyles();
     const dispatch: any = useDispatch();
     const initForm: any = {
         username: '',

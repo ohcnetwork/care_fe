@@ -22,14 +22,6 @@ export const postForgotPassword = (form: object) => {
     return fireRequest('forgotPassword', [], form);
 };
 
-// Ambulance
-export const postAmbulance = (params: object) => {
-    return fireRequest('createAmbulance', [], params);
-};
-export const getAmbulanceList = (params: object) => {
-    return fireRequest('listAmbulance', [], params);
-};
-
 // Facility
 export const createFacility = (params: object) => {
     return fireRequest("createFacility", [], params);
@@ -84,9 +76,12 @@ export const getDoctor = (id: number, pathParam: object) => {
 export const searchPatient = (params: object) => {
     return fireRequest('searchPatient', [], params);
 };
+export const searchPatientFilter = (params: object) => {
+    return fireRequest('searchPatientFilter', [], params);
+};
 export const searchUser = (params: object) => {
     return fireRequest('searchUser', [], params);
-}
+};
 export const getAllPatient = (params: object) => {
     return fireRequest('patientList', [], params);
 };

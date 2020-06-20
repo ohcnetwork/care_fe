@@ -7,7 +7,7 @@ import React, { useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { SAMPLE_TEST_STATUS, ROLE_STATUS_MAP, SAMPLE_FLOW_RULES } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import {getTestList, patchSample, sampleSearch, searchUser} from "../../Redux/actions";
+import {getTestList, patchSample, sampleSearch} from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
@@ -15,7 +15,6 @@ import Pagination from "../Common/Pagination";
 import { SampleTestModel } from "./models";
 import { InputSearchBox } from "../Common/SearchBox";
 import UpdateStatusDialog from "./UpdateStatusDialog";
-import {SearchPhone} from "../Common/SearchPhone";
 
 const useStyles = makeStyles((theme) => ({
   paginateTopPadding: {
@@ -287,26 +286,26 @@ export default function SampleViewAdmin(props: any) {
               errors=''
           />
         </div>
-      <div className="md:px-4">
-        <div className="text-sm font-semibold mb-2">
-          Search by Name
-        </div>
-        <InputSearchBox
-            search={searchByName}
-            placeholder='Search by Patient Name'
-            errors=''
-        />
-      </div>
-      <div>
-        <div className="text-sm font-semibold mb-2">
-          Search by number
-        </div>
-        <SearchPhone
-            search={searchByPhone}
-            placeholder='+919876543210'
-            errors=''
-        />
-      </div>
+      {/*<div className="md:px-4">*/}
+      {/*  <div className="text-sm font-semibold mb-2">*/}
+      {/*    Search by Name*/}
+      {/*  </div>*/}
+      {/*  <InputSearchBox*/}
+      {/*      search={searchByName}*/}
+      {/*      placeholder='Search by Patient Name'*/}
+      {/*      errors=''*/}
+      {/*  />*/}
+      {/*</div>*/}
+      {/*<div>*/}
+      {/*  <div className="text-sm font-semibold mb-2">*/}
+      {/*    Search by number*/}
+      {/*  </div>*/}
+      {/*  <InputSearchBox*/}
+      {/*      search={searchByPhone}*/}
+      {/*      placeholder='+919876543210'*/}
+      {/*      errors=''*/}
+      {/*  />*/}
+      {/*</div>*/}
       </div>
       <div className="px-3 md:px-8">
         <div className="flex flex-wrap md:-mx-4">{manageSamples}</div>

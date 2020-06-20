@@ -1,10 +1,10 @@
 import { Box, Button, Card, CardActions, CardContent, CardHeader, FormControl, Grid, InputLabel, MenuItem, Select, Typography } from "@material-ui/core";
 import { makeStyles, Theme } from '@material-ui/core/styles';
-import { isEmpty } from "lodash";
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { GENDER_TYPES } from "../../Common/constants";
 import { TextInputField } from "../Common/HelperInputFields";
+const isEmpty = require('lodash.isempty');
 
 
 const useStyles = makeStyles((theme: Theme) => ({

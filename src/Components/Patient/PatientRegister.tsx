@@ -2,7 +2,6 @@ import { Box, Button, Card, CardContent, CircularProgress, FormControlLabel, Inp
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import { navigate } from "hookrouter";
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
-import { debounce } from "lodash";
 import moment from "moment";
 import React, { useCallback, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -20,6 +19,7 @@ import DuplicatePatientDialog from "../Facility/DuplicatePatientDialog";
 import { DupPatientModel } from "../Facility/models";
 import { PatientModel } from "./models";
 import TransferPatientDialog from "../Facility/TransferPatientDialog";
+const debounce = require('lodash.debounce');
 
 const placesList = countryList.concat(statesList.filter((i: string) => i !== 'Kerala'));
 
