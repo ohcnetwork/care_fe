@@ -499,7 +499,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   }
 
   return (
-    <div>
+    <div className="px-2 pb-2">
       {statusDialog.show && (<DuplicatePatientDialog
         patientList={statusDialog.patientList}
         handleOk={handleDialogClose}

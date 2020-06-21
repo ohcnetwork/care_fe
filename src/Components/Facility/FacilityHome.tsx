@@ -127,8 +127,9 @@ export const FacilityHome = (props: any) => {
   });
 
   return (
-    <div className="px-2">
-      <PageTitle title={facilityData.name || "Facility"} />
+    <div className="px-2 pb-2">
+      <PageTitle 
+        title={facilityData.name || "Facility"} />
       <Card className="mt-4">
         <CardContent>
           <Grid

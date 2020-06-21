@@ -174,7 +174,7 @@ export const SampleTest = (props: any) => {
   }
 
   return (
-    <div>
+    <div className="px-2 pb-2">
       <PageTitle title={headerText} />
       <div className="mt-4">
         <Card>

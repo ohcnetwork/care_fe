@@ -27,7 +27,7 @@ export const PatientFilter = (props: PatientFilterProps) => {
                     value={diseaseStatus}
                     options={diseaseStatusOptions}
                     onChange={(value: any) => handleChange(value)}
-                    className="bg-white"
+                    className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
                 />
             </div>
         </div>

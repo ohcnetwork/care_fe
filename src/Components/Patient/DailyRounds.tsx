@@ -206,7 +206,8 @@ export const DailyRounds = (props: any) => {
         return <Loading />
     }
 
-    return (<div>
+    return (
+    <div className="px-2 pb-2">
         <PageTitle title={headerText} />
         <div className="mt-4">
             <Card>

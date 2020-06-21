@@ -274,9 +274,13 @@ export default function SampleViewAdmin(props: any) {
         handleCancel={dismissUpdateStatus}
         userType={userType}
       />)}
-      <PageTitle title="Sample Management System" hideBack={true} />
+      <PageTitle 
+        title="Sample Management System" 
+        hideBack={true}
+        className="mx-3 md:mx-8" />
+
       <div className="flex flex-col md:flex-row px-4 md:px-8">
-        <div className="md:px-4">
+        <div>
           <div className="text-sm font-semibold mb-2">
             Search by District Name
           </div>

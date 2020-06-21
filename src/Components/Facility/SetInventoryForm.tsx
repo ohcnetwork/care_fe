@@ -113,7 +113,8 @@ export const SetInventoryForm = (props: any) => {
     return <Loading />;
   }
 
-  return (<div>
+  return (
+  <div className="px-2 pb-2">
     <PageTitle title="Set Minimum Quantity " />
     <div className="mt-4">
       <Card>

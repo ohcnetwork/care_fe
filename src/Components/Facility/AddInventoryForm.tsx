@@ -116,7 +116,8 @@ export const AddInventoryForm = (props: any) => {
     return <Loading />;
   }
 
-  return (<div>
+  return (
+  <div className="px-2">
     <PageTitle title="Add Inventory" />
     <div className="mt-4">
       <Card>

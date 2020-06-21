@@ -203,7 +203,7 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
     return <Loading />;
   }
   return (
-    <div>
+    <div className="px-2 pb-2">
       <PageTitle title={headerText} />
       <div>
         <Card style={{ marginTop: "20px" }}>

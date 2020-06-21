@@ -199,7 +199,11 @@ export const PatientManager = (props: any) => {
 
   return (
     <div>
-      <PageTitle title="Covid Suspects" hideBack={!facilityId} />
+      <PageTitle 
+        title="Covid Suspects" 
+        hideBack={!facilityId}
+        className="mx-3 md:mx-8" />
+
       <div className="flex flex-col md:flex-row px-4 md:px-8">
         <div>
           <div className="text-sm font-semibold">Filter by Status</div>
