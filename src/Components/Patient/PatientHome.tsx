@@ -425,7 +425,7 @@ export const PatientHome = (props: any) => {
               </div>
             </div>
           ) : (
-              <span className="w3-center">
+              <span className="flex items-center justify-center">
                 <h6 className="text-gray-700">No Medical History so far</h6>
               </span>
             )}
