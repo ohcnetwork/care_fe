@@ -155,7 +155,7 @@ export const FacilityHome = (props: any) => {
             </Grid>
             <Grid item xs={12} md={5}>
               <Grid container spacing={1} direction="column">
-                <Grid item xs={12} className=" ">
+                <Grid item xs={12}>
                   <Button
                     fullWidth
                     variant="contained"
@@ -166,7 +166,7 @@ export const FacilityHome = (props: any) => {
                     Update Facility
                   </Button>
                 </Grid>
-                <Grid item xs={12} className=" ">
+                <Grid item xs={12}>
                   <Button
                     fullWidth
                     variant="contained"
@@ -178,7 +178,7 @@ export const FacilityHome = (props: any) => {
                     Add More Bed Types
                   </Button>
                 </Grid>
-                <Grid item xs={12} className=" ">
+                <Grid item xs={12}>
                   <Button
                     fullWidth
                     variant="contained"
@@ -192,7 +192,7 @@ export const FacilityHome = (props: any) => {
                     Add More Doctor Types
                   </Button>
                 </Grid>
-                <Grid item xs={12} className=" ">
+                <Grid item xs={12}>
                   <Button
                     fullWidth
                     variant="contained"
@@ -203,7 +203,7 @@ export const FacilityHome = (props: any) => {
                     Add Triage
                   </Button>
                 </Grid>
-                <Grid item xs={12} className=" ">
+                <Grid item xs={12}>
                   <Button
                     fullWidth
                     variant="contained"
@@ -218,7 +218,7 @@ export const FacilityHome = (props: any) => {
             </Grid>
           </Grid>
           <Grid container style={{ padding: "10px" }} spacing={1}>
-            <Grid item xs={12} md={6} className=" ">
+            <Grid item xs={12} md={6}>
               <Button
                 fullWidth
                 variant="contained"
@@ -229,7 +229,7 @@ export const FacilityHome = (props: any) => {
                 Add Details of Covid Suspects
               </Button>
             </Grid>
-            <Grid item xs={12} md={6} className=" ">
+            <Grid item xs={12} md={6}>
               <Button
                 fullWidth
                 variant="contained"
