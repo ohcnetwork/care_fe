@@ -102,7 +102,8 @@ export const UpdateMinQuantity = (props: any) => {
         return <Loading />;
     }
 
-    return (<div>
+    return (
+    <div className="px-2 pb-2">
         <PageTitle title="Update Minimum Quantity " hideBack={false} />
         <div className="mt-4">
             <Card>

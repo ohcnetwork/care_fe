@@ -7,6 +7,7 @@ import { Loading } from "../Common/Loading";
 import Pagination from "../Common/Pagination";
 import { FacilityModel } from "./models";
 import { InputSearchBox } from "../Common/SearchBox";
+import PageTitle from "../Common/PageTitle";
 
 export const HospitalList = () => {
   const dispatchAction: any = useDispatch();
@@ -131,14 +132,18 @@ export const HospitalList = () => {
 
   return (
     <div>
-      <h2 className="font-semibold text-2xl leading-tight px-3 md:px-8 pt-4">
-        Facilities
-      </h2>
-      <InputSearchBox
-        search={onSearchSuspects}
-        placeholder='Search by Facility / District Name'
-        errors=''
-      />
+      <PageTitle 
+        title="Facilities"
+        hideBack={true}
+        className="mx-3 md:mx-8" />
+
+      <div className="ml-3 md:ml-8">
+        <InputSearchBox
+          search={onSearchSuspects}
+          placeholder='Search by Facility / District Name'
+          errors=''
+        />
+      </div>
       <div className="px-3 md:px-8">
         <div className="flex flex-wrap md:-mx-4">{manageFacilities}</div>
       </div>

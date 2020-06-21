@@ -240,7 +240,7 @@ export const PatientHome = (props: any) => {
   }
 
   return (
-    <div className="px-2">
+    <div className="px-2 pb-2">
       {showAlertMessage.show && (
         <AlertDialog
           title={showAlertMessage.title}
