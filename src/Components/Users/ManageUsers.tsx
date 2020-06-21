@@ -160,7 +160,10 @@ export default function ManageUsers(props: any) {
 
   return (
     <div>
-      <PageTitle title="User Management" hideBack={true} />
+      <PageTitle 
+        title="User Management" 
+        hideBack={true} 
+        className="mx-3 md:mx-8" />
       {/*<div className="flex flex-col md:flex-row px-4 md:px-8">*/}
       {/*<div className="md:px-4">*/}
       {/*  <div className="text-sm font-semibold mb-2">*/}

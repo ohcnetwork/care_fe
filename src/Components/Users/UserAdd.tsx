@@ -346,7 +346,7 @@ export const UserAdd = (props: UserProps) => {
   }
 
   return (
-    <div>
+    <div className="px-2 pb-2">
       <PageTitle title={headerText} />
       <Card className="mt-4">
         <CardContent>
