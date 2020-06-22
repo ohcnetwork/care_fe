@@ -60,4 +60,17 @@ h6 {
   @apply py-2 px-5 text-base h-10;
 }
 
+a {
+  @apply text-blue-800;
+}
+
+a:hover {
+  @apply text-blue-600;
+}
+
+a[href^="tel:"]:before {
+  content: "\260e";
+  @apply mr-1;
+}
+
 @import "tailwindcss/utilities";

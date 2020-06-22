@@ -309,7 +309,7 @@ export const PatientHome = (props: any) => {
           </div>
           <div>
             <span className="font-semibold leading-relaxed">Phone: </span>
-            {patientData.phone_number}
+            <a href={`tel:${patientData.phone_number}`}>{patientData.phone_number || "-"}</a>
           </div>
           <div>
             <span className="font-semibold leading-relaxed">Nationality: </span>
