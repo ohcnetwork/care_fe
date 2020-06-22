@@ -71,7 +71,7 @@
     "typescript": "^3.7.5"
   },
   "scripts": {
-    "start": "webpack-dev-server -p --open",
+    "start": "webpack-dev-server -p --open --mode=development",
     "start:Dev": "NODE_ENV=production http-server dist",
     "build": "NODE_ENV=production ./node_modules/.bin/webpack -p --mode=production"
   },
