@@ -30,7 +30,8 @@ const SessionRouter = () => {
             />
           </div>
           <div className="max-w-xl text-sm">
-            <a href="https://coronasafe.network/">
+            <a href="https://coronasafe.network/"
+                className="text-gray-600">
               CoronaSafe Network is an open-source public utility designed by a
               multi-disciplinary team of innovators and volunteers who are
               working on a model to support Government efforts with full
