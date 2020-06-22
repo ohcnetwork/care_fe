@@ -119,7 +119,7 @@ export default function ManageUsers(props: any) {
                 <div className="flex py-4 justify-between">
                   <div>
                     <div className="text-gray-500 leading-relaxed">Phone:</div>
-                    <div className="font-semibold">{user.phone_number || "-"}</div>
+                    <a href={`tel:${user.phone_number}`} className="font-semibold">{user.phone_number || "-"}</a>
                   </div>
                 </div>
               </div>
