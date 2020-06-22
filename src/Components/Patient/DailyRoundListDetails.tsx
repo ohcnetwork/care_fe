@@ -62,7 +62,7 @@ export const DailyRoundListDetails = (props: any) => {
   return (
     <div className="px-2">
       <PageTitle title={`Daily Rounds #${id}`} />
-      <div className="border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black mt-4 p-4">
+      <div className="border rounded-lg bg-white shadow h-full hover:border-primary-500 text-black mt-4 p-4">
         <div className="flex justify-between">
           <div className="max-w-md">
             <div>

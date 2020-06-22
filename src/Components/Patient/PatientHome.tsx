@@ -250,7 +250,7 @@ export const PatientHome = (props: any) => {
         />
       )}
       <PageTitle title={`Covid Suspect Details`} />
-      <div className="border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black mt-4 p-4">
+      <div className="border rounded-lg bg-white shadow h-full hover:border-primary-500 text-black mt-4 p-4">
         <div className="flex justify-between">
           <div className="grid gap-2 grid-cols-1">
             <div className="flex items-baseline">
