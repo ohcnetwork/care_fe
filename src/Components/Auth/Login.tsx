@@ -139,7 +139,7 @@ export const Login = () => {
                 )}
                 <div className="w-full flex justify-between items-center">
                   <a href="/forgot-password"
-                      className="text-gray-700 hover:text-gray-900 md:mr-5">
+                      className="text-gray-600 hover:text-gray-900 md:mr-5">
                     Forgot password?
                   </a>
                   <button className="bg-green-500 btn text-white px-6" onClick={e => handleSubmit(e)}>
