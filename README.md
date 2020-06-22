@@ -1,5 +1,6 @@
 # Coronasafe Care Frontend . 
 [![SonarCloud](https://sonarcloud.io/images/project_badges/sonarcloud-white.svg)](https://sonarcloud.io/dashboard?id=coronasafe_care_fe)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fcoronasafe%2Fcare_fe.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fcoronasafe%2Fcare_fe?ref=badge_shield)
 
 Auto Deployed to https://care.coronasafe.in for Develop Branch. 
 
@@ -42,3 +43,7 @@ Starts a production http-server in local to run the project with Service worker
 The build is minified and the filenames include the hashes.<br />
 Your app is ready to be deployed!
 
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fcoronasafe%2Fcare_fe.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fcoronasafe%2Fcare_fe?ref=badge_large)
