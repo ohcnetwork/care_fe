@@ -11,6 +11,8 @@ Auto Deployed to https://care.coronasafe.in for Develop Branch.
 [![CircleCI](https://circleci.com/gh/coronasafe/care_fe.svg?style=svg)](https://circleci.com/gh/coronasafe/care_fe)
 [![Maintainability](https://api.codeclimate.com/v1/badges/f1438f693aa459805301/maintainability)](https://codeclimate.com/github/coronasafe/care_fe/maintainability)
 
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fcoronasafe%2Fcare_fe.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fcoronasafe%2Fcare_fe?ref=badge_large)
+
 Auto Deployed to https://care.coronasafe.network for Master Branch
 
 Please comment on the issue if you are taking it up and tag pull requests with issues.
