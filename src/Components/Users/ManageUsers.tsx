@@ -119,7 +119,7 @@ export default function ManageUsers(props: any) {
                 <div className="flex py-4 justify-between">
                   <div>
                     <div className="text-gray-500 leading-relaxed">Phone:</div>
-                    <div className="font-semibold">{user.phone_number || "-"}</div>
+                    <a href={`tel:${user.phone_number}`} className="font-semibold">{user.phone_number || "-"}</a>
                   </div>
                 </div>
               </div>
@@ -160,7 +160,10 @@ export default function ManageUsers(props: any) {
 
   return (
     <div>
-      <PageTitle title="User Management" hideBack={true} />
+      <PageTitle 
+        title="User Management" 
+        hideBack={true} 
+        className="mx-3 md:mx-8" />
       {/*<div className="flex flex-col md:flex-row px-4 md:px-8">*/}
       {/*<div className="md:px-4">*/}
       {/*  <div className="text-sm font-semibold mb-2">*/}

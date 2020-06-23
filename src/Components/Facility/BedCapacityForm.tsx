@@ -213,7 +213,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
     return <Loading />;
   }
   return (
-    <div>
+    <div className="px-2">
       <PageTitle title={headerText} />
       <div>
         <Card className="mt-4">
