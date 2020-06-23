@@ -138,7 +138,10 @@ export default function InventoryLog(props: any) {
 
     return (
         <div>
-            <PageTitle title="Inventory Log" hideBack={false} />
+            <PageTitle 
+                title="Inventory Log" 
+                hideBack={false}
+                className="mx-3 md:mx-8" />
             <div className="container mx-auto px-4 sm:px-8">
                 <div className="py-8 ">
                     <h4 >Item: {itemName}</h4>

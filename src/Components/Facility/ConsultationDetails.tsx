@@ -139,9 +139,9 @@ export const ConsultationDetails = (props: any) => {
     }
 
     return (
-        <div>
+        <div className="px-2 pb-2">
             <PageTitle title={`Consultation #${consultationId}`} />
-            <div className="border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black mt-4 p-4">
+            <div className="border rounded-lg bg-white shadow h-full hover:border-primary-500 text-black mt-4 p-4">
                 <div className="flex justify-between">
                     <div className="grid gap-2 grid-cols-1">
                         <div className="capitalize">

@@ -240,7 +240,7 @@ export const PatientHome = (props: any) => {
   }
 
   return (
-    <div className="px-2">
+    <div className="px-2 pb-2">
       {showAlertMessage.show && (
         <AlertDialog
           title={showAlertMessage.title}
@@ -250,7 +250,7 @@ export const PatientHome = (props: any) => {
         />
       )}
       <PageTitle title={`Covid Suspect Details`} />
-      <div className="border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black mt-4 p-4">
+      <div className="border rounded-lg bg-white shadow h-full hover:border-primary-500 text-black mt-4 p-4">
         <div className="flex justify-between">
           <div className="grid gap-2 grid-cols-1">
             <div className="flex items-baseline">
@@ -309,7 +309,7 @@ export const PatientHome = (props: any) => {
           </div>
           <div>
             <span className="font-semibold leading-relaxed">Phone: </span>
-            {patientData.phone_number}
+            <a href={`tel:${patientData.phone_number}`}>{patientData.phone_number || "-"}</a>
           </div>
           <div>
             <span className="font-semibold leading-relaxed">Nationality: </span>
