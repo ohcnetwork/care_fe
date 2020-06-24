@@ -265,6 +265,13 @@ export const PatientHome = (props: any) => {
                   </span>
                 )}
               </div>
+              <div>
+                {patientData.allow_transfer && (
+                    <span className="ml-2 badge badge-pill badge-success">
+                    Transfer Allowed
+                  </span>
+                )}
+              </div>
             </div>
             {patientData.is_medical_worker && (<div>
               <span className="font-semibold leading-relaxed">Medical Worker: </span>
@@ -378,7 +385,17 @@ export const PatientHome = (props: any) => {
             {patientData.number_of_chronic_diseased_dependents}
           </div>)}
         </div>
-
+        <div className="flex-1 mr-2">
+          <Button
+              fullWidth
+              variant="contained"
+              color="secondary"
+              size="small"
+              // onClick={() =>
+              //    
+              // }
+          >Discharge</Button>
+        </div>
         <div className="flex mt-4">
           <div className="flex-1 mr-2">
             <Button

@@ -13,6 +13,7 @@ export interface PatientModel {
     id?: number;
     name?: string;
     age?: number;
+    allow_transfer?: boolean;
     gender?: number;
     phone_number?: string;
     medical_history?: Array<{ disease: string | number; details: string }>;
