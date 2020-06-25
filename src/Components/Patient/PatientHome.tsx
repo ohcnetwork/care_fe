@@ -28,6 +28,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import {TextInputField} from "../Common/HelperInputFields";
+import { validateEmailAddress } from "../../Common/validation";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -107,8 +108,19 @@ export const PatientHome = (props: any) => {
       const errorField = Object.assign({}, errors);
       errorField['dischargeSummaryForm'] = 'email field can not be blank.';
       setErrors(errorField);
+    } else if (!validateEmailAddress(dischargeSummaryState.email)) {
+      const errorField = Object.assign({}, errors);
+      errorField['dischargeSummaryForm'] = 'Please Enter a Valid Email Address';
+      setErrors(errorField);
     } else {
-      dispatch(discharge({ email: dischargeSummaryState.email }, { external_id: patientData.id }));
+      dispatch(discharge({ email: dischargeSummaryState.email }, { external_id: patientData.id }))
+        .then((response: any) => {
+          if (response) {
+            Notification.Success({
+              msg: "We will be sending an email shortly. Please check your inbox."
+            });
+          }
+        })
       setOpen(false);
     }
   }
