@@ -6,7 +6,12 @@ import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { GENDER_TYPES } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getConsultationList, getPatient, getSampleTestList, patchSample } from "../../Redux/actions";
+import {
+  getConsultationList,
+  getPatient,
+  getSampleTestList,
+  patchSample,
+} from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
 import AlertDialog from "../Common/AlertDialog";
 import { Loading } from "../Common/Loading";
@@ -16,12 +21,12 @@ import { ConsultationCard } from "../Facility/ConsultationCard";
 import { ConsultationModel } from "../Facility/models";
 import { PatientModel, SampleTestModel } from "./models";
 import { SampleTestCard } from "./SampleTestCard";
-import TextField from '@material-ui/core/TextField';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import {TextInputField} from "../Common/HelperInputFields";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -184,9 +189,11 @@ export const PatientHome = (props: any) => {
     });
   }
 
-  const handleDischargeSummary = () => {
+  const handleDischargeSummary = (e: any) => {
+    e.preventDefault();
     setOpen(false);
   }
+
   const handleApproval = async () => {
     const { status, sample } = selectedStatus;
     const sampleData = {
@@ -415,23 +422,25 @@ export const PatientHome = (props: any) => {
                  Please enter your email id to receive the discharge summary.
                   Disclaimer: This is an automatically Generated email using your info Captured in Care System
                 </DialogContentText>
-                <TextField
-                    autoFocus
-                    margin="dense"
-                    id="name"
-                    label="Email Address"
+                <TextInputField
                     type="email"
-                    fullWidth
+                    name="email"
+                    label="email"
+                    variant="outlined"
+                    margin="dense"
+                    autoComplete='off'
+                    // InputLabelProps={{ shrink: !!form.email }}
+                    errors={}
                 />
               </DialogContent>
               <DialogActions>
-                <Button onClick={handleDischargeSummary} color="primary">
+                <Button onClick={handleClose} color="primary">
                   load Current Users Email
                 </Button>
-                <Button onClick={handleDischargeSummary} color="primary">
+                <Button onClick={handleClose} color="primary">
                   Cancel
                 </Button>
-                <Button onClick={handleClose} color="primary">
+                <Button onClick={(e) => handleDischargeSummary(e)} color="primary">
                   Download
                 </Button>
               </DialogActions>
