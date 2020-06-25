@@ -458,18 +458,34 @@ export const PatientHome = (props: any) => {
                 // }
             >Discharge</Button>
           </div>
-          <div className="flex-1 ml-2">
-            <Button
-                fullWidth
-                variant="contained"
-                color="secondary"
-                size="small"
-                // // disabled={!consultationListData || !consultationListData.length}
-                // onClick={() =>
-                //     // navigate(`/facility/${facilityId}/patient/${id}/sample-test`)
-                // }
-            >Disable Transfer</Button>
-          </div>
+          { !patientData.allow_transfer &&
+            <div className="flex-1 ml-2">
+              <Button
+                  fullWidth
+                  variant="contained"
+                  color="secondary"
+                  size="small"
+                  // // disabled={!consultationListData || !consultationListData.length}
+                  // onClick={() =>
+                  //     // navigate(`/facility/${facilityId}/patient/${id}/sample-test`)
+                  // }
+              >Allow Transfer</Button>
+            </div>
+          }
+          { patientData.allow_transfer &&
+            <div className="flex-1 ml-2">
+              <Button
+                  fullWidth
+                  variant="contained"
+                  color="primary"
+                  size="small"
+                  // // disabled={!consultationListData || !consultationListData.length}
+                  // onClick={() =>
+                  //     // navigate(`/facility/${facilityId}/patient/${id}/sample-test`)
+                  // }
+              >Disable Transfer</Button>
+            </div>
+          }
         </div>
         <div className="flex mt-4">
           <div className="flex-1 mr-2">
