@@ -3,7 +3,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { navigate } from "hookrouter";
 import moment from "moment";
 import React, { useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { GENDER_TYPES } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
@@ -11,6 +11,8 @@ import {
   getPatient,
   getSampleTestList,
   patchSample,
+  discharge,
+  patchPatient
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
 import AlertDialog from "../Common/AlertDialog";
@@ -27,6 +29,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import {TextInputField} from "../Common/HelperInputFields";
+import { validateEmailAddress } from "../../Common/validation";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -83,6 +86,71 @@ export const PatientHome = (props: any) => {
     title: "",
   });
   const [open, setOpen] = React.useState(false);
+  
+  const state: any = useSelector((state) => state);
+  const { currentUser } = state;
+
+  const initErr: any = {};
+  const [errors, setErrors] = useState(initErr);
+  const initDischargeSummaryForm: { email: string } = {
+    email: "",
+  };
+  const [dischargeSummaryState, setDischargeSummaryForm] = useState(initDischargeSummaryForm);
+  
+  const handleDischargeSummaryFormChange = (e: any) => {
+    const { value } = e.target;
+    
+    const errorField = Object.assign({}, errors);
+    errorField['dischargeSummaryForm'] = null;
+    setErrors(errorField);
+
+    setDischargeSummaryForm({ email: value });
+  }
+
+  const handleDischargeSummarySubmit = () => {
+    if (!dischargeSummaryState.email) {
+      const errorField = Object.assign({}, errors);
+      errorField['dischargeSummaryForm'] = 'email field can not be blank.';
+      setErrors(errorField);
+    } else if (!validateEmailAddress(dischargeSummaryState.email)) {
+      const errorField = Object.assign({}, errors);
+      errorField['dischargeSummaryForm'] = 'Please Enter a Valid Email Address';
+      setErrors(errorField);
+    } else {
+      dispatch(discharge({ email: dischargeSummaryState.email }, { external_id: patientData.id }))
+        .then((response: any) => {
+          if ((response||{}).status === 200) {
+            Notification.Success({
+              msg: "We will be sending an email shortly. Please check your inbox."
+            });
+          }
+        })
+      setOpen(false);
+    }
+  }
+
+  const handlePatientTransfer = (value: boolean) => {
+    let dummyPatientData = Object.assign({}, patientData);
+    dummyPatientData['allow_transfer'] = value;
+
+    dispatch(patchPatient({ 'allow_transfer': value }, { id: patientData.id }))
+      .then((response: any) => {
+        if ((response||{}).status === 200) {
+          let dummyPatientData = Object.assign({}, patientData);
+          dummyPatientData['allow_transfer'] = value;
+          setPatientData(dummyPatientData);
+
+          Notification.Success({
+            msg: "Transfer status updated."
+          });
+        }
+      });
+  }
+
+  const dischargeSummaryFormSetUserEmail = () => {
+    setDischargeSummaryForm({ email: currentUser.data.email });
+  }
+
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -422,6 +490,13 @@ export const PatientHome = (props: any) => {
                  Please enter your email id to receive the discharge summary.
                   Disclaimer: This is an automatically Generated email using your info Captured in Care System
                 </DialogContentText>
+                <div className="flex justify-end">
+                  <a href="#"
+                    className="text-xs"
+                    onClick={dischargeSummaryFormSetUserEmail}>
+                    Fill email input with my email.
+                  </a>
+                </div>
                 <TextInputField
                     type="email"
                     name="email"
@@ -429,19 +504,18 @@ export const PatientHome = (props: any) => {
                     variant="outlined"
                     margin="dense"
                     autoComplete='off'
-                    // InputLabelProps={{ shrink: !!form.email }}
-                    errors={''}
+                    value={dischargeSummaryState.email}
+                    InputLabelProps={{ shrink: !!dischargeSummaryState.email }}
+                    onChange={handleDischargeSummaryFormChange}
+                    errors={errors.dischargeSummaryForm}
                 />
               </DialogContent>
               <DialogActions>
                 <Button onClick={handleClose} color="primary">
-                  load Current Users Email
-                </Button>
-                <Button onClick={handleClose} color="primary">
                   Cancel
                 </Button>
-                <Button onClick={(e) => handleDischargeSummary(e)} color="primary">
-                  Download
+                <Button onClick={handleDischargeSummarySubmit} color="primary">
+                  Submit
                 </Button>
               </DialogActions>
             </Dialog>
@@ -465,10 +539,8 @@ export const PatientHome = (props: any) => {
                   variant="contained"
                   color="secondary"
                   size="small"
-                  // // disabled={!consultationListData || !consultationListData.length}
-                  // onClick={() =>
-                  //     // navigate(`/facility/${facilityId}/patient/${id}/sample-test`)
-                  // }
+                  disabled={!consultationListData || !consultationListData.length}
+                  onClick={() => handlePatientTransfer(true)}
               >Allow Transfer</Button>
             </div>
           }
@@ -479,10 +551,8 @@ export const PatientHome = (props: any) => {
                   variant="contained"
                   color="primary"
                   size="small"
-                  // // disabled={!consultationListData || !consultationListData.length}
-                  // onClick={() =>
-                  //     // navigate(`/facility/${facilityId}/patient/${id}/sample-test`)
-                  // }
+                  disabled={!consultationListData || !consultationListData.length}
+                  onClick={() => handlePatientTransfer(false)}
               >Disable Transfer</Button>
             </div>
           }
