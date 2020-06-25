@@ -295,4 +295,8 @@ export default {
         path: '/api/v1/items',
         method: 'GET',
     },
+    discharge: {
+        path: '/api/v1/patient/{external_id}/discharge_summary/',
+        method: 'POST'
+    }
 }

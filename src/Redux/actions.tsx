@@ -200,3 +200,6 @@ export const getInventorySummary = (facilityId: number, params: object) => {
 export const getItemName = (id: number) => {
     return fireRequest('getItemName', [id], {})
 };
+export const discharge = (params: object, pathParams: object) => {
+    return fireRequest("discharge", [], params, pathParams)
+};

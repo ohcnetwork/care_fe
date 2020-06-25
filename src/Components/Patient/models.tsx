@@ -9,6 +9,10 @@ export interface FlowModel {
     created_by?: number;
 }
 
+export interface DischargeSummaryModel {
+    email?: string;
+}
+
 export interface PatientModel {
     id?: number;
     name?: string;

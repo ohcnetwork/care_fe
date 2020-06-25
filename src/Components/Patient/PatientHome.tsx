@@ -16,6 +16,12 @@ import { ConsultationCard } from "../Facility/ConsultationCard";
 import { ConsultationModel } from "../Facility/models";
 import { PatientModel, SampleTestModel } from "./models";
 import { SampleTestCard } from "./SampleTestCard";
+import TextField from '@material-ui/core/TextField';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -71,7 +77,13 @@ export const PatientHome = (props: any) => {
     message: "",
     title: "",
   });
-
+  const [open, setOpen] = React.useState(false);
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+  const handleClose = () => {
+    setOpen(false);
+  };
   const limit = 5;
 
   const fetchpatient = useCallback(
@@ -172,6 +184,9 @@ export const PatientHome = (props: any) => {
     });
   }
 
+  const handleDischargeSummary = () => {
+    setOpen(false);
+  }
   const handleApproval = async () => {
     const { status, sample } = selectedStatus;
     const sampleData = {
@@ -385,16 +400,55 @@ export const PatientHome = (props: any) => {
             {patientData.number_of_chronic_diseased_dependents}
           </div>)}
         </div>
-        <div className="flex-1 mr-2">
-          <Button
-              fullWidth
-              variant="contained"
-              color="secondary"
-              size="small"
-              // onClick={() =>
-              //    
-              // }
-          >Discharge</Button>
+        <div className="flex mt-4">
+          <div>
+            <Button fullWidth
+                    variant="contained"
+                    color="primary"
+                    size="small" onClick={handleClickOpen}>
+              Discharge Summary
+            </Button>
+            <Dialog open={open} onClose={handleDischargeSummary}>
+              <DialogTitle id="form-dialog-title">Download Discharge Summary</DialogTitle>
+              <DialogContent>
+                <DialogContentText>
+                 Please enter your email id to receive the discharge summary.
+                  Disclaimer: This is an automatically Generated email using your info Captured in Care System
+                </DialogContentText>
+                <TextField
+                    autoFocus
+                    margin="dense"
+                    id="name"
+                    label="Email Address"
+                    type="email"
+                    fullWidth
+                />
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={handleDischargeSummary} color="primary">
+                  load Current Users Email
+                </Button>
+                <Button onClick={handleDischargeSummary} color="primary">
+                  Cancel
+                </Button>
+                <Button onClick={handleClose} color="primary">
+                  Download
+                </Button>
+              </DialogActions>
+            </Dialog>
+          </div>
+          <div className="flex-1 ml-2">
+            <Button
+                fullWidth
+                variant="contained"
+                color="primary"
+                size="small"
+                // // disabled={!consultationListData || !consultationListData.length}
+                // onClick={() =>
+                //     // navigate(`/facility/${facilityId}/patient/${id}/sample-test`)
+                // }
+            >Discharge</Button>
+          </div>
         </div>
         <div className="flex mt-4">
           <div className="flex-1 mr-2">
