@@ -490,6 +490,13 @@ export const PatientHome = (props: any) => {
                  Please enter your email id to receive the discharge summary.
                   Disclaimer: This is an automatically Generated email using your info Captured in Care System
                 </DialogContentText>
+                <div className="flex justify-end">
+                  <a href="#"
+                    className="text-xs"
+                    onClick={dischargeSummaryFormSetUserEmail}>
+                    Fill email input with my email.
+                  </a>
+                </div>
                 <TextInputField
                     type="email"
                     name="email"
@@ -504,14 +511,11 @@ export const PatientHome = (props: any) => {
                 />
               </DialogContent>
               <DialogActions>
-                <Button onClick={dischargeSummaryFormSetUserEmail} color="primary">
-                  load Current Users Email
-                </Button>
                 <Button onClick={handleClose} color="primary">
                   Cancel
                 </Button>
                 <Button onClick={handleDischargeSummarySubmit} color="primary">
-                  Download
+                  Submit
                 </Button>
               </DialogActions>
             </Dialog>
