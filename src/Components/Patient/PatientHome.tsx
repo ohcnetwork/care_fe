@@ -430,7 +430,7 @@ export const PatientHome = (props: any) => {
                     margin="dense"
                     autoComplete='off'
                     // InputLabelProps={{ shrink: !!form.email }}
-                    errors={}
+                    errors={''}
                 />
               </DialogContent>
               <DialogActions>
