@@ -11,6 +11,7 @@ import {
   getPatient,
   getSampleTestList,
   patchSample,
+  discharge,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
 import AlertDialog from "../Common/AlertDialog";
@@ -83,6 +84,35 @@ export const PatientHome = (props: any) => {
     title: "",
   });
   const [open, setOpen] = React.useState(false);
+  
+  const initErr: any = {};
+  const [errors, setErrors] = useState(initErr);
+  const initDischargeSummaryForm: { email: string } = {
+    email: "",
+  };
+  const [dischargeSummaryState, setDischargeSummaryForm] = useState(initDischargeSummaryForm);
+  
+  const handleDischargeSummaryFormChange = (e: any) => {
+    const { value } = e.target;
+    
+    const errorField = Object.assign({}, errors);
+    errorField['dischargeSummaryForm'] = null;
+    setErrors(errorField);
+
+    setDischargeSummaryForm({ email: value });
+  }
+
+  const handleDischargeSummarySubmit = () => {
+    if (!dischargeSummaryState.email) {
+      const errorField = Object.assign({}, errors);
+      errorField['dischargeSummaryForm'] = 'email field can not be blank.';
+      setErrors(errorField);
+    } else {
+      dispatch(discharge({ email: dischargeSummaryState.email }, { external_id: patientData.id }));
+      setOpen(false);
+    }
+  }
+
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -429,8 +459,10 @@ export const PatientHome = (props: any) => {
                     variant="outlined"
                     margin="dense"
                     autoComplete='off'
-                    // InputLabelProps={{ shrink: !!form.email }}
-                    errors={''}
+                    value={dischargeSummaryState.email}
+                    InputLabelProps={{ shrink: !!dischargeSummaryState.email }}
+                    onChange={handleDischargeSummaryFormChange}
+                    errors={errors.dischargeSummaryForm}
                 />
               </DialogContent>
               <DialogActions>
@@ -440,7 +472,7 @@ export const PatientHome = (props: any) => {
                 <Button onClick={handleClose} color="primary">
                   Cancel
                 </Button>
-                <Button onClick={(e) => handleDischargeSummary(e)} color="primary">
+                <Button onClick={handleDischargeSummarySubmit} color="primary">
                   Download
                 </Button>
               </DialogActions>
