@@ -12,6 +12,7 @@ import {
   getSampleTestList,
   patchSample,
   discharge,
+  patchPatient
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
 import AlertDialog from "../Common/AlertDialog";
@@ -118,7 +119,7 @@ export const PatientHome = (props: any) => {
     } else {
       dispatch(discharge({ email: dischargeSummaryState.email }, { external_id: patientData.id }))
         .then((response: any) => {
-          if (response) {
+          if ((response||{}).status === 200) {
             Notification.Success({
               msg: "We will be sending an email shortly. Please check your inbox."
             });
@@ -126,6 +127,24 @@ export const PatientHome = (props: any) => {
         })
       setOpen(false);
     }
+  }
+
+  const handlePatientTransfer = (value: boolean) => {
+    let dummyPatientData = Object.assign({}, patientData);
+    dummyPatientData['allow_transfer'] = value;
+
+    dispatch(patchPatient({ 'allow_transfer': value }, { id: patientData.id }))
+      .then((response: any) => {
+        if ((response||{}).status === 200) {
+          let dummyPatientData = Object.assign({}, patientData);
+          dummyPatientData['allow_transfer'] = value;
+          setPatientData(dummyPatientData);
+
+          Notification.Success({
+            msg: "Transfer status updated."
+          });
+        }
+      });
   }
 
   const dischargeSummaryFormSetUserEmail = () => {
@@ -516,10 +535,8 @@ export const PatientHome = (props: any) => {
                   variant="contained"
                   color="secondary"
                   size="small"
-                  // // disabled={!consultationListData || !consultationListData.length}
-                  // onClick={() =>
-                  //     // navigate(`/facility/${facilityId}/patient/${id}/sample-test`)
-                  // }
+                  disabled={!consultationListData || !consultationListData.length}
+                  onClick={() => handlePatientTransfer(true)}
               >Allow Transfer</Button>
             </div>
           }
@@ -530,10 +547,8 @@ export const PatientHome = (props: any) => {
                   variant="contained"
                   color="primary"
                   size="small"
-                  // // disabled={!consultationListData || !consultationListData.length}
-                  // onClick={() =>
-                  //     // navigate(`/facility/${facilityId}/patient/${id}/sample-test`)
-                  // }
+                  disabled={!consultationListData || !consultationListData.length}
+                  onClick={() => handlePatientTransfer(false)}
               >Disable Transfer</Button>
             </div>
           }
