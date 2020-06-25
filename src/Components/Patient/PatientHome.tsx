@@ -3,7 +3,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { navigate } from "hookrouter";
 import moment from "moment";
 import React, { useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { GENDER_TYPES } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
@@ -86,6 +86,9 @@ export const PatientHome = (props: any) => {
   });
   const [open, setOpen] = React.useState(false);
   
+  const state: any = useSelector((state) => state);
+  const { currentUser } = state;
+
   const initErr: any = {};
   const [errors, setErrors] = useState(initErr);
   const initDischargeSummaryForm: { email: string } = {
@@ -123,6 +126,10 @@ export const PatientHome = (props: any) => {
         })
       setOpen(false);
     }
+  }
+
+  const dischargeSummaryFormSetUserEmail = () => {
+    setDischargeSummaryForm({ email: currentUser.data.email });
   }
 
   const handleClickOpen = () => {
@@ -478,7 +485,7 @@ export const PatientHome = (props: any) => {
                 />
               </DialogContent>
               <DialogActions>
-                <Button onClick={handleClose} color="primary">
+                <Button onClick={dischargeSummaryFormSetUserEmail} color="primary">
                   load Current Users Email
                 </Button>
                 <Button onClick={handleClose} color="primary">
