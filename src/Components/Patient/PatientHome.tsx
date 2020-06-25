@@ -401,7 +401,7 @@ export const PatientHome = (props: any) => {
           </div>)}
         </div>
         <div className="flex mt-4">
-          <div>
+          <div className="flex-1 ml-2">
             <Button fullWidth
                     variant="contained"
                     color="primary"
@@ -448,6 +448,18 @@ export const PatientHome = (props: any) => {
                 //     // navigate(`/facility/${facilityId}/patient/${id}/sample-test`)
                 // }
             >Discharge</Button>
+          </div>
+          <div className="flex-1 ml-2">
+            <Button
+                fullWidth
+                variant="contained"
+                color="secondary"
+                size="small"
+                // // disabled={!consultationListData || !consultationListData.length}
+                // onClick={() =>
+                //     // navigate(`/facility/${facilityId}/patient/${id}/sample-test`)
+                // }
+            >Disable Transfer</Button>
           </div>
         </div>
         <div className="flex mt-4">
