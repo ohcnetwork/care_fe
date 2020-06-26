@@ -409,20 +409,21 @@ export const PatientHome = (props: any) => {
               {patientData.disease_status}
             </div>
           </div>
-
+          {patientData.is_active &&
           <div>
             <div className="mt-2">
               <Button
-                fullWidth
-                variant="contained"
-                color="primary"
-                size="small"
-                onClick={() =>
-                  navigate(`/facility/${facilityId}/patient/${id}/update`)
-                }
+                  fullWidth
+                  variant="contained"
+                  color="primary"
+                  size="small"
+                  onClick={() =>
+                      navigate(`/facility/${facilityId}/patient/${id}/update`)
+                  }
               >Update Details</Button>
             </div>
           </div>
+          }
         </div>
 
         <div className="grid gap-2 grid-cols-1 md:grid-cols-2 mt-2">
@@ -595,7 +596,7 @@ export const PatientHome = (props: any) => {
             </Dialog>
           </div>
           }
-          { !patientData.allow_transfer &&
+          { !patientData.allow_transfer && patientData.is_active &&
             <div className="flex-1 ml-2">
               <Button
                   fullWidth
@@ -607,7 +608,7 @@ export const PatientHome = (props: any) => {
               >Allow Transfer</Button>
             </div>
           }
-          { patientData.allow_transfer &&
+          { patientData.allow_transfer && patientData.is_active  &&
             <div className="flex-1 ml-2">
               <Button
                   fullWidth
@@ -620,31 +621,34 @@ export const PatientHome = (props: any) => {
             </div>
           }
         </div>
-        <div className="flex mt-4">
-          <div className="flex-1 mr-2">
-            <Button
-              fullWidth
-              variant="contained"
-              color="primary"
-              size="small"
-              onClick={() =>
-                navigate(`/facility/${facilityId}/patient/${id}/consultation`)
-              }
-            >Add OP Triage / Consultation</Button>
+        {
+          patientData.is_active &&
+          <div className="flex mt-4">
+            <div className="flex-1 mr-2">
+              <Button
+                  fullWidth
+                  variant="contained"
+                  color="primary"
+                  size="small"
+                  onClick={() =>
+                      navigate(`/facility/${facilityId}/patient/${id}/consultation`)
+                  }
+              >Add OP Triage / Consultation</Button>
+            </div>
+            <div className="flex-1 ml-2">
+              <Button
+                  fullWidth
+                  variant="contained"
+                  color="primary"
+                  size="small"
+                  disabled={!consultationListData || !consultationListData.length}
+                  onClick={() =>
+                      navigate(`/facility/${facilityId}/patient/${id}/sample-test`)
+                  }
+              >Request Sample Test</Button>
+            </div>
           </div>
-          <div className="flex-1 ml-2">
-            <Button
-              fullWidth
-              variant="contained"
-              color="primary"
-              size="small"
-              disabled={!consultationListData || !consultationListData.length}
-              onClick={() =>
-                navigate(`/facility/${facilityId}/patient/${id}/sample-test`)
-              }
-            >Request Sample Test</Button>
-          </div>
-        </div>
+        }
       </div>
 
       <Grid item xs={12}>
