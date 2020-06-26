@@ -128,6 +128,13 @@ export const PatientManager = (props: any) => {
                       </span>
                     )}
                   </div>
+                  <div>
+                    { !patient.allow_transfer && (
+                        <span className="badge badge-pill badge-warning">
+                        Transfer Not allowed
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <div>
                   <span className="font-semibold leading-relaxed">Age: </span>

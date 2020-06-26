@@ -302,5 +302,9 @@ export default {
     discharge: {
         path: '/api/v1/patient/{external_id}/discharge_summary/',
         method: 'POST'
+    },
+    dischargePatient: {
+        path: '/api/v1/patient/{external_id}/discharge_patient/',
+        method: 'POST'
     }
 }

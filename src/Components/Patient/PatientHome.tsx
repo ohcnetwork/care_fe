@@ -12,7 +12,8 @@ import {
   getSampleTestList,
   patchSample,
   discharge,
-  patchPatient
+  patchPatient,
+  dischargePatient
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
 import AlertDialog from "../Common/AlertDialog";
@@ -359,6 +360,13 @@ export const PatientHome = (props: any) => {
                 {patientData.allow_transfer && (
                     <span className="ml-2 badge badge-pill badge-success">
                     Transfer Allowed
+                  </span>
+                )}
+              </div>
+              <div>
+                { !patientData.allow_transfer && (
+                    <span className="ml-2 badge badge-pill badge-warning">
+                    Transfer Not Allowed
                   </span>
                 )}
               </div>

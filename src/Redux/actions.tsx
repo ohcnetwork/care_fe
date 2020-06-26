@@ -206,3 +206,7 @@ export const getItemName = (id: number) => {
 export const discharge = (params: object, pathParams: object) => {
     return fireRequest("discharge", [], params, pathParams)
 };
+
+export const dischargePatient = (params: object, pathParams: object) => {
+    return fireRequest('dischargePatient', [], params, pathParams)
+};
