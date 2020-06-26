@@ -164,6 +164,7 @@ export const PatientHome = (props: any) => {
               msg: "Patient Discharged"
             });
            setOpenDischargeDialog(false);
+           window.location.reload();
           }
         });
   }
@@ -502,6 +503,13 @@ export const PatientHome = (props: any) => {
             <span className="font-semibold leading-relaxed">Ongoing Medications </span>
             {patientData.ongoing_medication}
           </div>)}
+          {
+            patientData.allergies &&
+            <div className="md:col-span-2">
+            <span className="font-semibold leading-relaxed">Allergies:  </span>
+            { patientData.allergies }
+          </div>
+          }
           {!!patientData.number_of_aged_dependents && (<div>
             <span className="font-semibold leading-relaxed">Number Of Aged Dependents (Above 60): </span>
             {patientData.number_of_aged_dependents}
