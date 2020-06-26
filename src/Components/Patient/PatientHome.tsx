@@ -87,7 +87,7 @@ export const PatientHome = (props: any) => {
     title: "",
   });
   const [open, setOpen] = React.useState(false);
-  
+  const [openDischargeDialog, setOpenDischargeDialog] = React.useState(false);
   const state: any = useSelector((state) => state);
   const { currentUser } = state;
 
@@ -145,9 +145,28 @@ export const PatientHome = (props: any) => {
             msg: "Transfer status updated."
           });
         }
-      });
+      }
+      );
   }
 
+  const handlePatientDischarge = (value: boolean) => {
+    let dischargeData = Object.assign({}, patientData);
+    dischargeData['discharge'] = value;
+
+    dispatch(dischargePatient({ 'discharge': value }, { id: patientData.id }))
+        .then((response: any) => {
+          if ((response||{}).status === 200) {
+            let dischargeData = Object.assign({}, patientData);
+            dischargeData['discharge'] = value;
+            setPatientData(dischargeData);
+
+            Notification.Success({
+              msg: "Patient Discharged"
+            });
+           setOpenDischargeDialog(false);
+          }
+        });
+  }
   const dischargeSummaryFormSetUserEmail = () => {
     setDischargeSummaryForm({ email: currentUser.data.email });
   }
@@ -158,6 +177,15 @@ export const PatientHome = (props: any) => {
   const handleClose = () => {
     setOpen(false);
   };
+
+  const handleDischageClickOpen = () => {
+    setOpenDischargeDialog(true);
+  }
+
+  const handleDischargeClose = () => {
+    setOpenDischargeDialog(false);
+  };
+
   const limit = 5;
 
   const fetchpatient = useCallback(
@@ -528,18 +556,37 @@ export const PatientHome = (props: any) => {
               </DialogActions>
             </Dialog>
           </div>
+          { patientData.is_active &&
           <div className="flex-1 ml-2">
-            <Button
-                fullWidth
-                variant="contained"
-                color="primary"
-                size="small"
-                // // disabled={!consultationListData || !consultationListData.length}
-                // onClick={() =>
-                //     // navigate(`/facility/${facilityId}/patient/${id}/sample-test`)
-                // }
-            >Discharge</Button>
+            <Button  fullWidth
+                     variant="contained"
+                     color="primary"
+                     size="small"
+                     onClick={handleDischageClickOpen}>
+              Discharge
+            </Button>
+            <Dialog
+                open={openDischargeDialog}
+                onClose={handleDischargeClose}
+            >
+              <DialogTitle id="alert-dialog-title">Authorize Patient Discharge</DialogTitle>
+              <DialogContent>
+                <DialogContentText id="alert-dialog-description">
+               Please confirm patient Discharge
+                </DialogContentText>
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={handleDischargeClose} color="primary">
+                  Disagree
+                </Button>
+                <Button color="primary"
+                        onClick={ () => handlePatientDischarge(false)} autoFocus>
+                  Agree
+                </Button>
+              </DialogActions>
+            </Dialog>
           </div>
+          }
           { !patientData.allow_transfer &&
             <div className="flex-1 ml-2">
               <Button

@@ -18,6 +18,7 @@ export interface PatientModel {
     name?: string;
     age?: number;
     allow_transfer?: boolean;
+    discharge?: boolean;
     gender?: number;
     phone_number?: string;
     medical_history?: Array<{ disease: string | number; details: string }>;
@@ -31,6 +32,7 @@ export interface PatientModel {
     tele_consultation_history?: Array<any>;
     last_consultation?: { id: number };
     address?: string;
+    allergies?: string;
     pincode?: number;
     contact_with_confirmed_carrier?: boolean;
     contact_with_suspected_carrier?: boolean;

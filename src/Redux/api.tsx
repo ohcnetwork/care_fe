@@ -304,7 +304,7 @@ export default {
         method: 'POST'
     },
     dischargePatient: {
-        path: '/api/v1/patient/{external_id}/discharge_patient/',
+        path: '/api/v1/patient/{id}/discharge_patient/',
         method: 'POST'
     }
 }

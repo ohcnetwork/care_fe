@@ -66,6 +66,7 @@ const initForm: any = {
   district: "",
   local_body: "",
   address: "",
+  allergies: "",
   pincode: "",
   present_health: "",
   contact_with_confirmed_carrier: "false",
@@ -185,6 +186,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             blood_group: res.data.blood_group ? res.data.blood_group : '',
             local_body: res.data.local_body ? res.data.local_body : '',
             medical_history: [],
+            allergies: res.data.allergies ? res.data.allergies : '',
             pincode: res.data.pincode ? res.data.pincode : '',
             ongoing_medication: res.data.ongoing_medication ? res.data.ongoing_medication : '',
             countries_travelled: res.data.countries_travelled,
@@ -363,6 +365,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         countries_travelled: state.form.past_travel ? state.form.countries_travelled : [],
         date_of_return: state.form.past_travel ? state.form.date_of_return : undefined,
         has_SARI: state.form.has_SARI,
+        allergies: state.form.allergies,
         ongoing_medication: state.form.ongoing_medication,
         is_medical_worker: JSON.parse(state.form.is_medical_worker),
         blood_group: state.form.blood_group ? state.form.blood_group : undefined,
@@ -898,6 +901,20 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   />
                 </div>
 
+                <div>
+                  <InputLabel id="allergies_label">Allergies</InputLabel>
+                  <MultilineInputField
+                      rows={2}
+                      name="allergies"
+                      variant="outlined"
+                      margin="dense"
+                      type="text"
+                      placeholder="Optional Information"
+                      value={state.form.allergies}
+                      onChange={handleChange}
+                      errors={state.errors.allergies}
+                  />
+                </div>
                 <div>
                   <InputLabel id="number_of_aged_dependents-label">Number Of Aged Dependents (Above 60)</InputLabel>
                   <TextInputField
