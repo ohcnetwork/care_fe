@@ -114,12 +114,29 @@ export const PatientManager = (props: any) => {
                   <div className="font-bold text-xl capitalize mb-2">
                     {patient.name}
                   </div>
-                  <div>
-                    {patient.is_medical_worker && patient.is_active && (
-                      <span className="badge badge-pill badge-primary">
-                        Medical Worker
-                      </span>
-                    )}
+                  
+                  <div className="flex">
+                    <div>
+                      {patient.is_medical_worker && patient.is_active && (
+                        <span className="badge badge-pill badge-primary mr-2">
+                          Medical Worker
+                        </span>
+                      )}
+                    </div>
+                    <div>
+                      { patient.allow_transfer && (
+                          <span className="badge badge-pill badge-primary mr-2">
+                          Transfer allowed
+                        </span>
+                      )}
+                    </div>
+                    <div>
+                      { !patient.allow_transfer && (
+                          <span className="badge badge-pill badge-warning mr-2">
+                          Transfer Not allowed
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
                 <div>

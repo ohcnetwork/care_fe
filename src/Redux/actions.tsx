@@ -94,6 +94,9 @@ export const getPatient = (pathParam: object) => {
 export const updatePatient = (params: object, pathParam: object) => {
     return fireRequest('updatePatient', [], params, pathParam)
 };
+export const patchPatient = (params: object, pathParam: object) => {
+    return fireRequest('patchPatient', [], params, pathParam)
+};
 export const transferPatient = (params: object, pathParam: object) => {
     return fireRequest('transferPatient', [], params, pathParam)
 }
@@ -199,4 +202,11 @@ export const getInventorySummary = (facilityId: number, params: object) => {
 };
 export const getItemName = (id: number) => {
     return fireRequest('getItemName', [id], {})
+};
+export const discharge = (params: object, pathParams: object) => {
+    return fireRequest("discharge", [], params, pathParams)
+};
+
+export const dischargePatient = (params: object, pathParams: object) => {
+    return fireRequest('dischargePatient', [], params, pathParams)
 };

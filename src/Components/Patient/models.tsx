@@ -9,12 +9,19 @@ export interface FlowModel {
     created_by?: number;
 }
 
+export interface DischargeSummaryModel {
+    email?: string;
+}
+
 export interface PatientModel {
     id?: number;
     name?: string;
     age?: number;
+    allow_transfer?: boolean;
+    discharge?: boolean;
     gender?: number;
     phone_number?: string;
+    allergies?: string;
     medical_history?: Array<{ disease: string | number; details: string }>;
     facility_object?: { id: number; name: string, facility_type?: { id: number; name: string } }
     contact_with_carrier?: boolean;

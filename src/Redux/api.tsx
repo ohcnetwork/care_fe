@@ -198,6 +198,10 @@ export default {
         path: '/api/v1/patient/{id}/',
         method: 'PUT'
     },
+    patchPatient: {
+        path: '/api/v1/patient/{id}/',
+        method: 'PATCH'
+    },
     transferPatient: {
         path: '/api/v1/patient/{id}/transfer/',
         method: 'POST'
@@ -295,4 +299,12 @@ export default {
         path: '/api/v1/items',
         method: 'GET',
     },
+    discharge: {
+        path: '/api/v1/patient/{external_id}/discharge_summary/',
+        method: 'POST'
+    },
+    dischargePatient: {
+        path: '/api/v1/patient/{id}/discharge_patient/',
+        method: 'POST'
+    }
 }
