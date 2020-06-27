@@ -306,7 +306,7 @@ export const ConsultationForm = (props: any) => {
                   />
                 </div>)}
                 <div>
-                  <InputLabel id="existing-medication-label">History of Present Illness</InputLabel>
+                  <InputLabel id="existing-medication-label">History of present illness</InputLabel>
                   <MultilineInputField
                     rows={5}
                     name="existing_medication"
