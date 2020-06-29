@@ -21,7 +21,7 @@
     "@material-ui/pickers": "^3.2.6",
     "@material-ui/styles": "^4.4.1",
     "@material-ui/types": "^5.1.0",
-    "@sentry/browser": "^5.18.0",
+    "@sentry/browser": "^5.18.1",
     "@svgr/webpack": "4.3.2",
     "@tailwindcss/ui": "^0.3.0",
     "@types/hookrouter": "^2.2.1",
