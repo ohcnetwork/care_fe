@@ -27,6 +27,7 @@ import { AddInventoryForm } from "../Components/Facility/AddInventoryForm";
 import { SetInventoryForm } from "../Components/Facility/SetInventoryForm";
 import MinQuantityList from "../Components/Facility/MinQuantityList";
 import { UpdateMinQuantity } from "../Components/Facility/UpdateMinQuantity";
+import UserProfile from "../Components/Users/UserProfile";
 const get = require('lodash.get');
 
 const img =
@@ -38,6 +39,7 @@ const routes = {
   "/": () => <HospitalList />,
   "/users": () => <ManageUsers />,
   "/user/add": () => <UserAdd />,
+  "/user/profile": () => <UserProfile />,
   "/patients": () => <PatientManager />,
   "/patient/:id": ({ id }: any) => <PatientHome id={id} />,
   "/patient/discharge": () => <PatientDischarge />,
@@ -136,6 +138,11 @@ let menus = [
     title: "Users",
     link: "/users",
     icon: "fas fa-user-friends"
+  },
+  {
+    title: "Profile",
+    link: '/user/profile',
+    icon: "fas fa-user-secret"
   }
 ];
 
