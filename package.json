@@ -44,7 +44,7 @@
     "file-loader": "3.0.1",
     "hookrouter": "^1.2.3",
     "html-webpack-plugin": "4.3.0",
-    "libphonenumber-js": "^1.7.50",
+    "libphonenumber-js": "^1.7.54",
     "lodash.debounce": "^4.0.8",
     "lodash.get": "^4.4.2",
     "lodash.isempty": "^4.4.0",
