@@ -38,9 +38,6 @@ export const getFacilities = (params: object) => {
 export const getFacility = (id: number) => {
     return fireRequest('getFacility', [id], {});
 };
-export const readUser = (username: any) => {
-    return fireRequest('readUser', [username], {});
-};
 
 
 // Capacity/Triage/Doctor
@@ -105,12 +102,6 @@ export const getStates = () => {
 }
 
 // District/State/Local body
-export const getDistricts = (pathParam: object) => {
-    return fireRequest("districtsList", [], {}, pathParam)
-}
-export const getLocalBody = (pathParam: object) => {
-    return fireRequest("localBodyList", [], {}, pathParam)
-}
 export const getDistrictByState = (pathParam: object) => {
     return fireRequest("getDistrictByState", [], {}, pathParam)
 }
@@ -129,16 +120,8 @@ export const sampleSearch = (params: object) => {
 export const createSampleTest = (params: object, pathParam: object) => {
     return fireRequest('createSampleTest', [], params, pathParam)
 };
-export const getSampleTest = (id: number, pathParam: object) => {
-    return fireRequest('getSampleTest', [id], {}, pathParam)
-};
-
 export const sampleReport = (pathParam: object) => {
     return fireRequest('sampleReport', [], {}, pathParam)
-};
-
-export const patchSampleTest = (id: number, params: object, pathParam: object) => {
-    return fireRequest('patchSampleTest', [id], params, pathParam)
 };
 export const getTestList = (params: object) => {
     return fireRequest('getTestSampleList', [], params);
@@ -206,7 +189,6 @@ export const getItemName = (id: number) => {
 export const discharge = (params: object, pathParams: object) => {
     return fireRequest("discharge", [], params, pathParams)
 };
-
 export const dischargePatient = (params: object, pathParams: object) => {
     return fireRequest('dischargePatient', [], params, pathParams)
 };

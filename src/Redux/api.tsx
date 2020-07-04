@@ -21,6 +21,7 @@ export default {
         path: '/api/v1/password_reset/confirm/',
         method: 'POST',
     },
+    
     forgotPassword: {
         path: '/api/v1/password_reset/',
         method: 'POST',
@@ -31,9 +32,6 @@ export default {
     },
 
     userList: {
-        path: '/api/v1/users',
-    },
-    readUser: {
         path: '/api/v1/users',
     },
 
@@ -52,6 +50,7 @@ export default {
         path: '/api/v1/users',
         method: 'PATCH'
     },
+
     deleteUser: {
         path: '/api/v1/users',
         method: 'DELETE'
@@ -61,6 +60,7 @@ export default {
         path: "/api/v1/users/add_user/",
         method: 'POST',
     },
+
     searchUser: {
         path: "/api/v1/users/search",
     },
@@ -213,13 +213,6 @@ export default {
         path: '/api/v1/patient/{patientId}/test_sample/',
         method: 'POST',
     },
-    getSampleTest: {
-        path: '/api/v1/patient/{patientId}/test_sample/{id}/',
-    },
-    patchSampleTest: {
-        path: '/api/v1/patient/{patientId}/test_sample/{id}/',
-        method: 'PATCH',
-    },
     sampleReport: {
         path: '/api/v1/patient/{id}/icmr_sample'
     },
@@ -234,9 +227,7 @@ export default {
     },
 
     // Districts
-    districtsList: {
-        path: "/api/v1/district/",
-    },
+
     getDistrict: {
         path: "/api/v1/district/{id}/",
     },
@@ -245,9 +236,6 @@ export default {
     },
 
     // Local Body
-    localBodyList: {
-        path: "/api/v1/local_body/",
-    },
     getLocalBody: {
         path: "/api/v1/local_body/{id}/",
     },
