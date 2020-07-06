@@ -167,6 +167,12 @@ export const ConsultationForm = (props: any) => {
             errors[field] = "Please select the referred to facility";
             invalidForm = true;
           }
+        case "OPconsultation":
+          if(state.form.suggestion === 'OP' && !state.form[field]){
+            errors[field] = "Please enter OP consultation Details";
+            invalidForm = true;
+          }
+
           return;
         default:
           return;
@@ -201,6 +207,7 @@ export const ConsultationForm = (props: any) => {
         patient: patientId,
         facility: facilityId,
         referred_to: state.form.suggestion === 'R' ? state.form.referred_to : undefined,
+        OPconsultation: state.form.suggestion === 'OP' ? state.form.OPconsultation : undefined,
       };
       const res = await dispatchAction(id ? updateConsultation(id, data) : createConsultation(data));
       setIsLoading(false);
@@ -388,7 +395,14 @@ export const ConsultationForm = (props: any) => {
                     setSelected={setFacility}
                     errors={state.errors.referred_to}
                   />
-                </div>}
+                </div>
+                }
+                {state.form.suggestion === 'OP' && <div>
+                  <InputLabel>OP Consultation</InputLabel>
+                  <input className="shadow appearance-none  w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" name="OPconsultation" type="text" placeholder="Enter Detail" onChange={handleChange}></input>
+                  
+                </div>
+                }
 
                 <div className="flex">
                   <div className="flex-1">
