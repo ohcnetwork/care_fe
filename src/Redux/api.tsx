@@ -99,7 +99,7 @@ export default {
     method :"GET"
   },
 
-  getConsultationList: {
+  getConsultationList: 
     path: "/api/v1/consultation/",
   },
   createConsultation: {
