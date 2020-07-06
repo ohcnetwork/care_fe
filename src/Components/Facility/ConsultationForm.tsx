@@ -442,7 +442,7 @@ export const ConsultationForm = (props: any) => {
                       errors={state.errors.admission_date}
                     />
                   </div>
-                  <div className="flex-1">
+              {/* <div className="flex-1">
                     <DateInputField
                       label="Discharge Date"
                       margin="dense"
@@ -451,6 +451,7 @@ export const ConsultationForm = (props: any) => {
                       errors={state.errors.discharge_date}
                     />
                   </div>
+              */}
                 </div>)}
 
               </div>
