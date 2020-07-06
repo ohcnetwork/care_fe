@@ -209,6 +209,7 @@ export const ConsultationForm = (props: any) => {
             errors[field] = "Please select the referred to facility";
             invalidForm = true;
           }
+          return;
         case "OPconsultation":
           if (state.form.suggestion === "OP" && !state.form[field]) {
             errors[field] = "Please enter OP consultation Details";
