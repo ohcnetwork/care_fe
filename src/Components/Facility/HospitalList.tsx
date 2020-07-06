@@ -2,12 +2,14 @@ import { navigate } from "hookrouter";
 import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getFacilities } from "../../Redux/actions";
+import { getFacilities, downloadFacility } from "../../Redux/actions";
 import { Loading } from "../Common/Loading";
 import Pagination from "../Common/Pagination";
 import { FacilityModel } from "./models";
 import { InputSearchBox } from "../Common/SearchBox";
 import PageTitle from "../Common/PageTitle";
+import { CSVLink } from "react-csv";
+
 
 export const HospitalList = () => {
   const dispatchAction: any = useDispatch();
@@ -17,6 +19,8 @@ export const HospitalList = () => {
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [offset, setOffset] = useState(0);
+  const [DownloadFile, setDownloadFile] = useState("");
+
 
   const limit = 14;
 
@@ -37,10 +41,16 @@ export const HospitalList = () => {
 
   useAbortableEffect(
     (status: statusType) => {
+      handleDownload();
       fetchData(status);
     },
     [fetchData]
   );
+
+  const handleDownload = async () => {
+    const res = await dispatchAction(downloadFacility());
+    setDownloadFile(res.data);
+  };
 
   const handlePagination = (page: number, limit: number) => {
     const offset = (page - 1) * limit;
@@ -131,17 +141,30 @@ export const HospitalList = () => {
 
   return (
     <div>
-      <PageTitle 
-        title="Facilities"
-        hideBack={true}
-        className="mx-3 md:mx-8" />
-
-      <div className="ml-3 md:ml-8">
-        <InputSearchBox
-          search={onSearchSuspects}
-          placeholder='Search by Facility / District Name'
-          errors=''
-        />
+      <PageTitle title="Facilities" hideBack={true} className="mx-3 md:mx-8" />
+      <div className="flex flex-row">
+        <div className="ml-3 w-3/4 md:ml-8">
+          <InputSearchBox
+            search={onSearchSuspects}
+            placeholder="Search by Facility / District Name"
+            errors=""
+          />
+        </div>
+        <div className="w-1/4 text-center items-center">
+          <CSVLink
+            data={DownloadFile}
+            filename={"facilities.csv"}
+            target="_blank"
+          >
+            <button
+              type="button"
+              className="inline-flex items-center mr-2 px-1 py-3 ml-1  lg:px-3 border border-green-500 text-sm leading-4 font-medium rounded-md text-green-700 bg-white hover:text-green-500 focus:outline-none focus:border-green-300 focus:shadow-outline-blue active:text-green-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+              onClick={handleDownload}
+            >
+              Download
+            </button>
+          </CSVLink>
+        </div>
       </div>
       <div className="px-3 md:px-8">
         <div className="flex flex-wrap md:-mx-4">{manageFacilities}</div>
