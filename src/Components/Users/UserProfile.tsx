@@ -400,6 +400,21 @@ export default function UserProfile() {
                 <ExpansionPanelDetails>
                     <Typography>
                         Non Editable Settings. (Contact Admin to Change these)
+                        <div className="grid gap-3 grid-cols-1 md:grid-cols-2 mt-1">
+
+                            <div>
+                                <span className="font-semibold leading-relaxed">Local Body:  </span>
+                                {details.local_body?.name || '-'}
+                            </div>
+                            <div>
+                                <span className="font-semibold leading-relaxed">District:  </span>
+                                {details.district_object?.name || '-'}
+                            </div>
+                            <div>
+                                <span className="font-semibold leading-relaxed">State:  </span>
+                                {details.state_object?.name || '-'}
+                            </div>
+                        </div>
                     </Typography>
                 </ExpansionPanelDetails>
             </ExpansionPanel>
