@@ -93,6 +93,11 @@ export default {
       path: "/api/v1/facility",
       method: "DELETE",
     },
+
+    downloadFacility : {
+      path : "/api/v1/facility/?csv",
+      method : "GET",
+    },
   
     getConsultationList: {
       path: "/api/v1/consultation/",
