@@ -38,6 +38,9 @@ export const getFacilities = (params: object) => {
 export const getFacility = (id: number) => {
   return fireRequest("getFacility", [id], {});
 };
+export const downloadFacility = () => {
+  return fireRequest("downloadFacility");
+};
 
 // Capacity/Triage/Doctor
 export const createCapacity = (id: number | undefined, params: object, pathParam: object) => {

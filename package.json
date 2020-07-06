@@ -54,6 +54,7 @@
     "pnotify": "^4.0.1",
     "querystring": "^0.2.0",
     "react": "^16.12.0",
+    "react-csv": "^2.0.3",
     "react-dom": "^16.12.0",
     "react-google-recaptcha": "^2.0.1",
     "react-leaflet-location-picker": "^1.4.2",
