@@ -96,7 +96,7 @@ export default {
 
     downloadFacility : {
       path : "/api/v1/facility/?csv",
-      method :"GET"
+      method : "GET",
     },
   
     getConsultationList: {
