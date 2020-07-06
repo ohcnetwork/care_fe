@@ -39,6 +39,11 @@ export const HospitalList = () => {
     [dispatchAction, offset]
   );
 
+  const handleDownload = async () => {
+    const res = await dispatchAction(downloadFacility());
+    setDownloadFile(res.data);
+  };
+
   useAbortableEffect(
     (status: statusType) => {
       handleDownload();
@@ -46,11 +51,6 @@ export const HospitalList = () => {
     },
     [fetchData]
   );
-
-  const handleDownload = async () => {
-    const res = await dispatchAction(downloadFacility());
-    setDownloadFile(res.data);
-  };
 
   const handlePagination = (page: number, limit: number) => {
     const offset = (page - 1) * limit;

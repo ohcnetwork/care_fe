@@ -40,7 +40,7 @@ export const getFacility = (id: number) => {
 };
 export const downloadFacility = () => {
   return fireRequest("downloadFacility");
-}
+};
 
 // Capacity/Triage/Doctor
 export const createCapacity = (id: number | undefined, params: object, pathParam: object) => {
