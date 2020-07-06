@@ -116,19 +116,20 @@ export const FacilityHome = (props: any) => {
         <td className="border px-4 py-2 text-center">{data.num_patient_referred || "-"}</td>
         <td className="border px-4 py-2">
           <Button
-              className="py-2 mt-2 px-6 bg-white rounded-md border border-grey-500 inline-flex items-center justify-center whitespace-no-wrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300"
-              onClick={() =>
-            navigate(`/facility/${facilityId}/triage/${data.id}`)
-        }>
-          Edit
+            className="py-2 mt-2 px-6 bg-white rounded-md border border-grey-500 inline-flex items-center justify-center whitespace-no-wrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300"
+            onClick={() =>
+              navigate(`/facility/${facilityId}/triage/${data.id}`)
+            }>
+            Edit
         </Button></td>
       </tr>
     );
   });
 
   return (
-    <div className="px-2">
-      <PageTitle title={facilityData.name || "Facility"} />
+    <div className="px-2 pb-2">
+      <PageTitle 
+        title={facilityData.name || "Facility"} />
       <Card className="mt-4">
         <CardContent>
           <Grid
@@ -155,7 +156,7 @@ export const FacilityHome = (props: any) => {
             </Grid>
             <Grid item xs={12} md={5}>
               <Grid container spacing={1} direction="column">
-                <Grid item xs={12} className="w3-center">
+                <Grid item xs={12}>
                   <Button
                     fullWidth
                     variant="contained"
@@ -166,7 +167,7 @@ export const FacilityHome = (props: any) => {
                     Update Facility
                   </Button>
                 </Grid>
-                <Grid item xs={12} className="w3-center">
+                <Grid item xs={12}>
                   <Button
                     fullWidth
                     variant="contained"
@@ -178,7 +179,7 @@ export const FacilityHome = (props: any) => {
                     Add More Bed Types
                   </Button>
                 </Grid>
-                <Grid item xs={12} className="w3-center">
+                <Grid item xs={12}>
                   <Button
                     fullWidth
                     variant="contained"
@@ -192,7 +193,7 @@ export const FacilityHome = (props: any) => {
                     Add More Doctor Types
                   </Button>
                 </Grid>
-                <Grid item xs={12} className="w3-center">
+                <Grid item xs={12}>
                   <Button
                     fullWidth
                     variant="contained"
@@ -203,7 +204,7 @@ export const FacilityHome = (props: any) => {
                     Add Triage
                   </Button>
                 </Grid>
-                <Grid item xs={12} className="w3-center">
+                <Grid item xs={12}>
                   <Button
                     fullWidth
                     variant="contained"
@@ -218,7 +219,7 @@ export const FacilityHome = (props: any) => {
             </Grid>
           </Grid>
           <Grid container style={{ padding: "10px" }} spacing={1}>
-            <Grid item xs={12} md={6} className="w3-center">
+            <Grid item xs={12} md={6}>
               <Button
                 fullWidth
                 variant="contained"
@@ -229,7 +230,7 @@ export const FacilityHome = (props: any) => {
                 Add Details of Covid Suspects
               </Button>
             </Grid>
-            <Grid item xs={12} md={6} className="w3-center">
+            <Grid item xs={12} md={6}>
               <Button
                 fullWidth
                 variant="contained"

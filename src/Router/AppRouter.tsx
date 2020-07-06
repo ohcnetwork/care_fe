@@ -1,13 +1,7 @@
-import { useRedirect, useRoutes } from "hookrouter";
+import { useRedirect, useRoutes, navigate, usePath } from "hookrouter";
 import React, { useEffect, useState } from "react";
-import { navigate, usePath, A } from "hookrouter";
-import { get } from "lodash";
 import { useDispatch, useSelector } from "react-redux";
-import AmbulanceList from "../Components/Ambulance/AmbulanceList";
-import Header from "../Components/Common/Header";
-import { Analytics } from "../Components/Dashboard/Analytics";
 import { BedCapacityForm } from "../Components/Facility/BedCapacityForm";
-import { CareCenterJoinForm } from "../Components/Facility/CareCenterJoinForm";
 import { ConsultationDetails } from "../Components/Facility/ConsultationDetails";
 import { ConsultationForm } from "../Components/Facility/ConsultationForm";
 import { DoctorCapacityForm } from "../Components/Facility/DoctorCapacityForm";
@@ -25,17 +19,16 @@ import { SampleDetails } from "../Components/Patient/SampleDetails";
 import SampleReport from "../Components/Patient/SamplePreview";
 import { SampleTest } from "../Components/Patient/SampleTest";
 import SampleViewAdmin from "../Components/Patient/SampleViewAdmin";
-import { TeleConsultation } from "../Components/Patient/TeleConsultation";
-import { TreatmentForm } from "../Components/Patient/TreatmentForm";
 import ManageUsers from "../Components/Users/ManageUsers";
 import { UserAdd } from "../Components/Users/UserAdd";
-import AmbulanceOnboarding from "../Components/Ambulance/AmbulanceOnboarding";
 import InventoryList from "../Components/Facility/InventoryList";
 import InventoryLog from "../Components/Facility/InventoryLog";
 import { AddInventoryForm } from "../Components/Facility/AddInventoryForm";
 import { SetInventoryForm } from "../Components/Facility/SetInventoryForm";
 import MinQuantityList from "../Components/Facility/MinQuantityList";
 import { UpdateMinQuantity } from "../Components/Facility/UpdateMinQuantity";
+import UserProfile from "../Components/Users/UserProfile";
+const get = require('lodash.get');
 
 const img =
   "https://cdn.coronasafe.network/light-logo.svg";
@@ -46,15 +39,10 @@ const routes = {
   "/": () => <HospitalList />,
   "/users": () => <ManageUsers />,
   "/user/add": () => <UserAdd />,
-  "/join": () => <CareCenterJoinForm />,
-  "/analytics": () => <Analytics />,
-  "/ambulance": () => <AmbulanceList />,
-  "/ambulance/add": () => <AmbulanceOnboarding />,
+  "/user/profile": () => <UserProfile />,
   "/patients": () => <PatientManager />,
   "/patient/:id": ({ id }: any) => <PatientHome id={id} />,
-  "/patient/tele-consult": () => <TeleConsultation />,
   "/patient/discharge": () => <PatientDischarge />,
-  "/patient/treatment": () => <TreatmentForm />,
   "/sample": () => <SampleViewAdmin />,
   "/sample/:id": ({ id }: any) => <SampleDetails id={id} />,
   '/sample/report/:patientId': ({ patientId }: any) => <SampleReport id={patientId} />,
@@ -92,9 +80,6 @@ const routes = {
   ),
   "/facility/:facilityId/patient/:patientId/sample/:id": ({ id }: any) => (
     <SampleDetails id={id} />
-  ),
-  "/facility/:facilityId/patient/:id/treatment": ({ facilityId, id }: any) => (
-    <TreatmentForm facilityId={facilityId} id={id} />
   ),
   "/facility/:facilityId/triage/:id": ({ facilityId, id }: any) => (
     <TriageForm facilityId={facilityId} id={id} />
@@ -153,6 +138,11 @@ let menus = [
     title: "Users",
     link: "/users",
     icon: "fas fa-user-friends"
+  },
+  {
+    title: "Profile",
+    link: '/user/profile',
+    icon: "fas fa-user-secret"
   }
 ];
 
@@ -311,7 +301,7 @@ const AppRouter = () => {
           </a>
         </div>
 
-        <main className="flex-1 relative z-0 overflow-y-auto pb-4 md:py-0 focus:outline-none" >
+        <main className="flex-1 overflow-y-auto pb-4 md:py-0 focus:outline-none" >
           <div className="max-w-7xl mx-auto px-0">
             {pages}
           </div>

@@ -25,12 +25,13 @@ const SessionRouter = () => {
           <div className="mx-auto p-2">
             <img
               className="h-20"
-              src="https://cdn.coronasafe.network/ksdma_logo.png"
+              src="https://cdn.coronasafe.network/ksdma_logo.webp"
               alt="Care Logo"
             />
           </div>
           <div className="max-w-xl text-sm">
-            <a href="https://coronasafe.network/">
+            <a href="https://coronasafe.network/"
+                className="text-gray-600">
               CoronaSafe Network is an open-source public utility designed by a
               multi-disciplinary team of innovators and volunteers who are
               working on a model to support Government efforts with full
@@ -41,7 +42,7 @@ const SessionRouter = () => {
                 href="https://github.com/coronasafe"
                 className="care-secondary-color"
               >
-                (Github)
+               Contribute on Github 
               </a>
             </div>
           </div>

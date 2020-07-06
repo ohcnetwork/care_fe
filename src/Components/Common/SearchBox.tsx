@@ -1,5 +1,5 @@
 import { TextFieldProps } from '@material-ui/core';
-import { debounce } from "lodash";
+const debounce = require('lodash.debounce');
 import React, { useCallback, useState } from 'react';
 
 
@@ -26,7 +26,7 @@ export const InputSearchBox = (props: TextFieldPropsExtended) => {
     };
 
     return (
-        <div className="md:flex sticky top-0 bg-gray-100 border-b border-gray-200">
+        <div className="md:flex sticky top-0 bg-gray-100">
             <div className="relative rounded-md shadow-sm max-w-sm w-full">
                 {state ?
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none cursor-pointer" onClick={clearSearch} >

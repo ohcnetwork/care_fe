@@ -3,10 +3,18 @@ import { makeStyles } from "@material-ui/core/styles";
 import { navigate } from "hookrouter";
 import moment from "moment";
 import React, { useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { GENDER_TYPES } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getConsultationList, getPatient, getSampleTestList, patchSample } from "../../Redux/actions";
+import {
+  getConsultationList,
+  getPatient,
+  getSampleTestList,
+  patchSample,
+  discharge,
+  patchPatient,
+  dischargePatient
+} from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
 import AlertDialog from "../Common/AlertDialog";
 import { Loading } from "../Common/Loading";
@@ -16,6 +24,13 @@ import { ConsultationCard } from "../Facility/ConsultationCard";
 import { ConsultationModel } from "../Facility/models";
 import { PatientModel, SampleTestModel } from "./models";
 import { SampleTestCard } from "./SampleTestCard";
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import {TextInputField} from "../Common/HelperInputFields";
+import { validateEmailAddress } from "../../Common/validation";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -71,6 +86,106 @@ export const PatientHome = (props: any) => {
     message: "",
     title: "",
   });
+  const [open, setOpen] = React.useState(false);
+  const [openDischargeDialog, setOpenDischargeDialog] = React.useState(false);
+  const state: any = useSelector((state) => state);
+  const { currentUser } = state;
+
+  const initErr: any = {};
+  const [errors, setErrors] = useState(initErr);
+  const initDischargeSummaryForm: { email: string } = {
+    email: "",
+  };
+  const [dischargeSummaryState, setDischargeSummaryForm] = useState(initDischargeSummaryForm);
+  
+  const handleDischargeSummaryFormChange = (e: any) => {
+    const { value } = e.target;
+    
+    const errorField = Object.assign({}, errors);
+    errorField['dischargeSummaryForm'] = null;
+    setErrors(errorField);
+
+    setDischargeSummaryForm({ email: value });
+  }
+
+  const handleDischargeSummarySubmit = () => {
+    if (!dischargeSummaryState.email) {
+      const errorField = Object.assign({}, errors);
+      errorField['dischargeSummaryForm'] = 'email field can not be blank.';
+      setErrors(errorField);
+    } else if (!validateEmailAddress(dischargeSummaryState.email)) {
+      const errorField = Object.assign({}, errors);
+      errorField['dischargeSummaryForm'] = 'Please Enter a Valid Email Address';
+      setErrors(errorField);
+    } else {
+      dispatch(discharge({ email: dischargeSummaryState.email }, { external_id: patientData.id }))
+        .then((response: any) => {
+          if ((response||{}).status === 200) {
+            Notification.Success({
+              msg: "We will be sending an email shortly. Please check your inbox."
+            });
+          }
+        })
+      setOpen(false);
+    }
+  }
+
+  const handlePatientTransfer = (value: boolean) => {
+    let dummyPatientData = Object.assign({}, patientData);
+    dummyPatientData['allow_transfer'] = value;
+
+    dispatch(patchPatient({ 'allow_transfer': value }, { id: patientData.id }))
+      .then((response: any) => {
+        if ((response||{}).status === 200) {
+          let dummyPatientData = Object.assign({}, patientData);
+          dummyPatientData['allow_transfer'] = value;
+          setPatientData(dummyPatientData);
+
+          Notification.Success({
+            msg: "Transfer status updated."
+          });
+        }
+      }
+      );
+  }
+
+  const handlePatientDischarge = (value: boolean) => {
+    let dischargeData = Object.assign({}, patientData);
+    dischargeData['discharge'] = value;
+
+    dispatch(dischargePatient({ 'discharge': value }, { id: patientData.id }))
+        .then((response: any) => {
+          if ((response||{}).status === 200) {
+            let dischargeData = Object.assign({}, patientData);
+            dischargeData['discharge'] = value;
+            setPatientData(dischargeData);
+
+            Notification.Success({
+              msg: "Patient Discharged"
+            });
+           setOpenDischargeDialog(false);
+           window.location.reload();
+          }
+        });
+  }
+  const dischargeSummaryFormSetUserEmail = () => {
+    setDischargeSummaryForm({ email: currentUser.data.email });
+  }
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const handleDischageClickOpen = () => {
+    setOpenDischargeDialog(true);
+  }
+
+  const handleDischargeClose = () => {
+    setOpenDischargeDialog(false);
+  };
 
   const limit = 5;
 
@@ -172,6 +287,11 @@ export const PatientHome = (props: any) => {
     });
   }
 
+  const handleDischargeSummary = (e: any) => {
+    e.preventDefault();
+    setOpen(false);
+  }
+
   const handleApproval = async () => {
     const { status, sample } = selectedStatus;
     const sampleData = {
@@ -240,7 +360,7 @@ export const PatientHome = (props: any) => {
   }
 
   return (
-    <div className="px-2">
+    <div className="px-2 pb-2">
       {showAlertMessage.show && (
         <AlertDialog
           title={showAlertMessage.title}
@@ -250,7 +370,7 @@ export const PatientHome = (props: any) => {
         />
       )}
       <PageTitle title={`Covid Suspect Details`} />
-      <div className="border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black mt-4 p-4">
+      <div className="border rounded-lg bg-white shadow h-full hover:border-primary-500 text-black mt-4 p-4">
         <div className="flex justify-between">
           <div className="grid gap-2 grid-cols-1">
             <div className="flex items-baseline">
@@ -265,6 +385,20 @@ export const PatientHome = (props: any) => {
                   </span>
                 )}
               </div>
+              <div>
+                {patientData.allow_transfer && (
+                    <span className="ml-2 badge badge-pill badge-success">
+                    Transfer Allowed
+                  </span>
+                )}
+              </div>
+              <div>
+                { !patientData.allow_transfer && (
+                    <span className="ml-2 badge badge-pill badge-warning">
+                    Transfer Not Allowed
+                  </span>
+                )}
+              </div>
             </div>
             {patientData.is_medical_worker && (<div>
               <span className="font-semibold leading-relaxed">Medical Worker: </span>
@@ -275,20 +409,21 @@ export const PatientHome = (props: any) => {
               {patientData.disease_status}
             </div>
           </div>
-
+          {patientData.is_active &&
           <div>
             <div className="mt-2">
               <Button
-                fullWidth
-                variant="contained"
-                color="primary"
-                size="small"
-                onClick={() =>
-                  navigate(`/facility/${facilityId}/patient/${id}/update`)
-                }
+                  fullWidth
+                  variant="contained"
+                  color="primary"
+                  size="small"
+                  onClick={() =>
+                      navigate(`/facility/${facilityId}/patient/${id}/update`)
+                  }
               >Update Details</Button>
             </div>
           </div>
+          }
         </div>
 
         <div className="grid gap-2 grid-cols-1 md:grid-cols-2 mt-2">
@@ -309,7 +444,7 @@ export const PatientHome = (props: any) => {
           </div>
           <div>
             <span className="font-semibold leading-relaxed">Phone: </span>
-            {patientData.phone_number}
+            <a href={`tel:${patientData.phone_number}`}>{patientData.phone_number || "-"}</a>
           </div>
           <div>
             <span className="font-semibold leading-relaxed">Nationality: </span>
@@ -369,6 +504,13 @@ export const PatientHome = (props: any) => {
             <span className="font-semibold leading-relaxed">Ongoing Medications </span>
             {patientData.ongoing_medication}
           </div>)}
+          {
+            patientData.allergies &&
+            <div className="md:col-span-2">
+            <span className="font-semibold leading-relaxed">Allergies:  </span>
+            { patientData.allergies }
+          </div>
+          }
           {!!patientData.number_of_aged_dependents && (<div>
             <span className="font-semibold leading-relaxed">Number Of Aged Dependents (Above 60): </span>
             {patientData.number_of_aged_dependents}
@@ -378,32 +520,135 @@ export const PatientHome = (props: any) => {
             {patientData.number_of_chronic_diseased_dependents}
           </div>)}
         </div>
-
         <div className="flex mt-4">
-          <div className="flex-1 mr-2">
-            <Button
-              fullWidth
-              variant="contained"
-              color="primary"
-              size="small"
-              onClick={() =>
-                navigate(`/facility/${facilityId}/patient/${id}/consultation`)
-              }
-            >Add OP Triage / Consultation</Button>
-          </div>
           <div className="flex-1 ml-2">
-            <Button
-              fullWidth
-              variant="contained"
-              color="primary"
-              size="small"
-              disabled={!consultationListData || !consultationListData.length}
-              onClick={() =>
-                navigate(`/facility/${facilityId}/patient/${id}/sample-test`)
-              }
-            >Request Sample Test</Button>
+            <Button fullWidth
+                    variant="contained"
+                    color="primary"
+                    size="small" onClick={handleClickOpen}>
+              Discharge Summary
+            </Button>
+            <Dialog open={open} onClose={handleDischargeSummary}>
+              <DialogTitle id="form-dialog-title">Download Discharge Summary</DialogTitle>
+              <DialogContent>
+                <DialogContentText>
+                 Please enter your email id to receive the discharge summary.
+                  Disclaimer: This is an automatically Generated email using your info Captured in Care System
+                </DialogContentText>
+                <div className="flex justify-end">
+                  <a href="#"
+                    className="text-xs"
+                    onClick={dischargeSummaryFormSetUserEmail}>
+                    Fill email input with my email.
+                  </a>
+                </div>
+                <TextInputField
+                    type="email"
+                    name="email"
+                    label="email"
+                    variant="outlined"
+                    margin="dense"
+                    autoComplete='off'
+                    value={dischargeSummaryState.email}
+                    InputLabelProps={{ shrink: !!dischargeSummaryState.email }}
+                    onChange={handleDischargeSummaryFormChange}
+                    errors={errors.dischargeSummaryForm}
+                />
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={handleClose} color="primary">
+                  Cancel
+                </Button>
+                <Button onClick={handleDischargeSummarySubmit} color="primary">
+                  Submit
+                </Button>
+              </DialogActions>
+            </Dialog>
           </div>
+          { patientData.is_active &&
+          <div className="flex-1 ml-2">
+            <Button  fullWidth
+                     variant="contained"
+                     color="primary"
+                     size="small"
+                     onClick={handleDischageClickOpen}>
+              Discharge
+            </Button>
+            <Dialog
+                open={openDischargeDialog}
+                onClose={handleDischargeClose}
+            >
+              <DialogTitle id="alert-dialog-title">Authorize Patient Discharge</DialogTitle>
+              <DialogContent>
+                <DialogContentText id="alert-dialog-description">
+               Please confirm patient Discharge
+                </DialogContentText>
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={handleDischargeClose} color="primary">
+                  Disagree
+                </Button>
+                <Button color="primary"
+                        onClick={ () => handlePatientDischarge(false)} autoFocus>
+                  Agree
+                </Button>
+              </DialogActions>
+            </Dialog>
+          </div>
+          }
+          { !patientData.allow_transfer && patientData.is_active &&
+            <div className="flex-1 ml-2">
+              <Button
+                  fullWidth
+                  variant="contained"
+                  color="secondary"
+                  size="small"
+                  disabled={!consultationListData || !consultationListData.length}
+                  onClick={() => handlePatientTransfer(true)}
+              >Allow Transfer</Button>
+            </div>
+          }
+          { patientData.allow_transfer && patientData.is_active  &&
+            <div className="flex-1 ml-2">
+              <Button
+                  fullWidth
+                  variant="contained"
+                  color="primary"
+                  size="small"
+                  disabled={!consultationListData || !consultationListData.length}
+                  onClick={() => handlePatientTransfer(false)}
+              >Disable Transfer</Button>
+            </div>
+          }
         </div>
+        {
+          patientData.is_active &&
+          <div className="flex mt-4">
+            <div className="flex-1 mr-2">
+              <Button
+                  fullWidth
+                  variant="contained"
+                  color="primary"
+                  size="small"
+                  onClick={() =>
+                      navigate(`/facility/${facilityId}/patient/${id}/consultation`)
+                  }
+              >Add OP Triage / Consultation</Button>
+            </div>
+            <div className="flex-1 ml-2">
+              <Button
+                  fullWidth
+                  variant="contained"
+                  color="primary"
+                  size="small"
+                  disabled={!consultationListData || !consultationListData.length}
+                  onClick={() =>
+                      navigate(`/facility/${facilityId}/patient/${id}/sample-test`)
+                  }
+              >Request Sample Test</Button>
+            </div>
+          </div>
+        }
       </div>
 
       <Grid item xs={12}>
@@ -425,8 +670,8 @@ export const PatientHome = (props: any) => {
               </div>
             </div>
           ) : (
-              <span className="w3-center">
-                <h6 className="w3-text-grey">No Medical History so far</h6>
+              <span className="flex items-center justify-center">
+                <h6 className="text-gray-700">No Medical History so far</h6>
               </span>
             )}
         </div>

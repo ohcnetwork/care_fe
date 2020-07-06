@@ -1,41 +1,18 @@
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { postLogin } from "../../Redux/actions";
-import { A, navigate } from "hookrouter";
-import { makeStyles } from "@material-ui/styles";
+import {  navigate } from "hookrouter";
 import {
-  Box,
-  Button,
-  Card,
   CardActions,
   CardContent,
-  CardHeader,
-  Grid, TextField
+  Grid
 } from "@material-ui/core";
 import { TextInputField } from "../Common/HelperInputFields";
-import { get } from "lodash";
 import { PublicDashboard } from "../Dashboard/PublicDashboard";
 import ReCaptcha from "react-google-recaptcha";
-
-const useStyles = makeStyles(theme => ({
-  formTop: {
-    marginTop: "100px"
-  },
-  pdLogo: {
-    height: "345px",
-    border: "solid 3px white"
-  },
-  logoImg: {
-    objectFit: "contain",
-    height: "8rem"
-  },
-  imgSection: {
-    paddingBottom: "45px"
-  }
-}));
+const get = require('lodash.get');
 
 export const Login = () => {
-  const classes = useStyles();
   const dispatch: any = useDispatch();
   const initForm: any = {
     username: "",
@@ -152,16 +129,19 @@ export const Login = () => {
             <CardActions className="padding16">
               <Grid container justify="center">
                 {isCaptchaEnabled && (
-                  <Grid item className="w3-padding">
+                  <Grid item className="px-8 py-4">
                     <ReCaptcha
                       sitekey={captchaKey}
                       onChange={onCaptchaChange}
                     />
-                    <span className="w3-text-red">{errors.captcha}</span>
+                    <span className="text-red-500">{errors.captcha}</span>
                   </Grid>
                 )}
                 <div className="w-full flex justify-between items-center">
-                  <a href="/forgot-password">Forgot password?</a>
+                  <a href="/forgot-password"
+                      className="text-gray-600 hover:text-gray-900 md:mr-5">
+                    Forgot password?
+                  </a>
                   <button className="bg-green-500 btn text-white px-6" onClick={e => handleSubmit(e)}>
                     Login
                   </button>

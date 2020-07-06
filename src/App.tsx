@@ -8,8 +8,6 @@ import { Loading } from "./Components/Common/Loading";
 import { useAbortableEffect, statusType } from './Common/utils';
 import axios from 'axios';
 
-const img = 'https://coronasafe.network/break-chain.png';
-
 const App: React.FC = () => {
   const dispatch: any = useDispatch();
   const state: any = useSelector(state => state);
@@ -33,7 +31,7 @@ const App: React.FC = () => {
         localStorage.setItem('care_access_token', resp.data.access)
           localStorage.setItem('care_refresh_token', resp.data.refresh);
       }).catch( (ex:any)=> {
-        console.error('Error while refreshing',ex);
+        // console.error('Error while refreshing',ex);
       });
     
   } 

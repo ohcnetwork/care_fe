@@ -7,7 +7,7 @@ import React, { useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { SAMPLE_TEST_STATUS, ROLE_STATUS_MAP, SAMPLE_FLOW_RULES } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getTestList, patchSample } from "../../Redux/actions";
+import {getTestList, patchSample, sampleSearch} from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
@@ -74,6 +74,25 @@ export default function SampleViewAdmin(props: any) {
     setOffset(offset);
   };
 
+  const searchByName = async (searchValue: string) => {
+    setIsLoading(true);
+    const res = await dispatch(sampleSearch({ limit, offset, name: searchValue }));
+    if (res && res.data) {
+      setSample(res.data.results);
+      setTotalCount(res.data.count);
+    }
+    setIsLoading(false);
+  }
+
+  const searchByPhone = async (searchValue: string) => {
+    setIsLoading(true);
+    const res = await dispatch(sampleSearch({ limit, offset, phone_number: encodeURI(searchValue) }));
+    if (res && res.data) {
+      setSample(res.data.results);
+      setTotalCount(res.data.count);
+    }
+    setIsLoading(false);
+  }
   // const handleChange = (e: any) => {
   //   let results = { ...result };
   //   results[e.target.name] = e.target.value;
@@ -255,12 +274,43 @@ export default function SampleViewAdmin(props: any) {
         handleCancel={dismissUpdateStatus}
         userType={userType}
       />)}
-      <PageTitle title="Sample Management system" hideBack={true} />
-      <InputSearchBox
-        search={onSearchDistrictName}
-        placeholder='Search by district'
-        errors=''
-      />
+      <PageTitle 
+        title="Sample Management System" 
+        hideBack={true}
+        className="mx-3 md:mx-8" />
+
+      <div className="flex flex-col md:flex-row px-4 md:px-8">
+        <div>
+          <div className="text-sm font-semibold mb-2">
+            Search by District Name
+          </div>
+          <InputSearchBox
+              search={onSearchDistrictName}
+              placeholder='District Name'
+              errors=''
+          />
+        </div>
+      {/*<div className="md:px-4">*/}
+      {/*  <div className="text-sm font-semibold mb-2">*/}
+      {/*    Search by Name*/}
+      {/*  </div>*/}
+      {/*  <InputSearchBox*/}
+      {/*      search={searchByName}*/}
+      {/*      placeholder='Search by Patient Name'*/}
+      {/*      errors=''*/}
+      {/*  />*/}
+      {/*</div>*/}
+      {/*<div>*/}
+      {/*  <div className="text-sm font-semibold mb-2">*/}
+      {/*    Search by number*/}
+      {/*  </div>*/}
+      {/*  <InputSearchBox*/}
+      {/*      search={searchByPhone}*/}
+      {/*      placeholder='+919876543210'*/}
+      {/*      errors=''*/}
+      {/*  />*/}
+      {/*</div>*/}
+      </div>
       <div className="px-3 md:px-8">
         <div className="flex flex-wrap md:-mx-4">{manageSamples}</div>
       </div>

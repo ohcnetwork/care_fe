@@ -10,12 +10,8 @@ import { CheckboxField, MultilineInputField, SelectField, TextInputField } from 
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 import { SampleTestModel } from "./models";
-
-import ExpansionPanel from '@material-ui/core/ExpansionPanel';
-import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
-import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import Typography from '@material-ui/core/Typography';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import Container from "@material-ui/core/Container";
 import color = Mocha.reporters.Base.color;
 
 const sampleTestTypes = [...SAMPLE_TYPE_CHOICES];
@@ -24,7 +20,7 @@ const icmrCategories = [...ICMR_CATEGORY];
 const initForm: SampleTestModel = {
   isFastTrack: false,
   fast_track: "",
-  notes: "",
+  icmr_label: "",
   atypical_presentation: "",
   diagnosis: "",
   diff_diagnosis: "",
@@ -91,7 +87,7 @@ export const SampleTest = (props: any) => {
             invalidForm = true;
           }
           break;
-        case "notes":
+        case "icmr_label":
           if ( !state.form[field]) {
             errors[field] = "Please specify the label";
             invalidForm = true;
@@ -128,7 +124,7 @@ export const SampleTest = (props: any) => {
       setIsLoading(true);
       const data: SampleTestModel = {
         fast_track: state.form.isFastTrack ? state.form.fast_track : undefined,
-        notes: state.form.notes ? state.form.notes : undefined,
+        icmr_label: state.form.icmr_label ? state.form.icmr_label : undefined,
         facility: facilityId,
         patient: patientId,
         has_ari: state.form.has_ari,
@@ -178,7 +174,7 @@ export const SampleTest = (props: any) => {
   }
 
   return (
-    <div>
+    <div className="px-2 pb-2">
       <PageTitle title={headerText} />
       <div className="mt-4">
         <Card>
@@ -214,25 +210,17 @@ export const SampleTest = (props: any) => {
                 <div>
                   <InputLabel>Label*</InputLabel>
                   <TextInputField
-                      name="notes"
+                      name="icmr_label"
                       variant="outlined"
                       margin="dense"
-                      value={state.form.notes}
+                      value={state.form.icmr_label}
                       onChange={handleChange}
-                      errors={state.errors.notes}
+                      errors={state.errors.icmr_label}
                   />
                 </div>
                 <div>
+                  <Container>
                   <InputLabel> Reference below to know more about ICMR Categories </InputLabel>
-                  <ExpansionPanel>
-                    <ExpansionPanelSummary
-                        expandIcon={<ExpandMoreIcon />}
-                        aria-controls="panel1a-content"
-                        id="panel1a-header"
-                    >
-                      <Typography> ICMR Categories </Typography>
-                    </ExpansionPanelSummary>
-                    <ExpansionPanelDetails>
                       <Typography>
                         <li>
                           Cat 0 - Repeat Sample of Positive Case / Follow Up case
@@ -253,11 +241,10 @@ export const SampleTest = (props: any) => {
                           Cat 5a - Asymptomatic Direct and High Risk contact of confirmed case - family Member
                         </li>
                         <li>
-                          Cat 5b - Asymptomatic Healthcare worker in contact with confimred case without adequete protection
+                          Cat 5b - Asymptomatic Healthcare worker in contact with confirmed case without adequate protection
                         </li>
                       </Typography>
-                    </ExpansionPanelDetails>
-                  </ExpansionPanel>
+                  </Container>
                 </div>
                 <div className="flex items-center">
                   <CheckboxField

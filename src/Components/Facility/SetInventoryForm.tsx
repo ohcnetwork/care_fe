@@ -75,10 +75,11 @@ export const SetInventoryForm = (props: any) => {
 
   useEffect(() => {
     // set the default units according to the item
-    const item = data.find(item => item.id === state.form.id);
+    const item = data.find(item => item.id === Number(state.form.id));
     if (item) {
       dispatch({ type: "set_form", form: { ...state.form, unit: item.default_unit?.name } });
-      setCurrentUnit(item.allowed_units);
+      setCurrentUnit(item.default_unit?.name);
+
     }
   }, [state.form.id])
 
@@ -112,7 +113,8 @@ export const SetInventoryForm = (props: any) => {
     return <Loading />;
   }
 
-  return (<div>
+  return (
+  <div className="px-2 pb-2">
     <PageTitle title="Set Minimum Quantity " />
     <div className="mt-4">
       <Card>
@@ -142,6 +144,17 @@ export const SetInventoryForm = (props: any) => {
                   type="number"
                   value={state.form.quantity}
                   onChange={handleChange}
+                  errors=""
+                />
+              </div>
+              <div >
+                <InputLabel id="inventory_name_label">Unit</InputLabel>
+                <TextInputField
+                  name="id"
+                  variant="standard"
+                  margin="dense"
+                  type="string"
+                  value={currentUnit}
                   errors=""
                 />
               </div>

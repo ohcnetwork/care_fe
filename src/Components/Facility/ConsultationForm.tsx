@@ -259,7 +259,7 @@ export const ConsultationForm = (props: any) => {
   }
 
   return (
-    <div>
+    <div className="px-2 pb-2">
       <PageTitle title={headerText} />
       <div className="mt-4">
         <Card>
@@ -306,7 +306,7 @@ export const ConsultationForm = (props: any) => {
                   />
                 </div>)}
                 <div>
-                  <InputLabel id="existing-medication-label">Medication, if any for the above-mentioned symptoms</InputLabel>
+                  <InputLabel id="existing-medication-label">History of present illness</InputLabel>
                   <MultilineInputField
                     rows={5}
                     name="existing_medication"
@@ -322,7 +322,7 @@ export const ConsultationForm = (props: any) => {
                 </div>
 
                 <div>
-                  <InputLabel id="exam-details-label">Examination Details</InputLabel>
+                  <InputLabel id="exam-details-label">Examination details and Clinical conditions</InputLabel>
                   <MultilineInputField
                     rows={5}
                     name="examination_details"
@@ -442,7 +442,7 @@ export const ConsultationForm = (props: any) => {
                       errors={state.errors.admission_date}
                     />
                   </div>
-                  <div className="flex-1">
+              {/* <div className="flex-1">
                     <DateInputField
                       label="Discharge Date"
                       margin="dense"
@@ -451,6 +451,7 @@ export const ConsultationForm = (props: any) => {
                       errors={state.errors.discharge_date}
                     />
                   </div>
+              */}
                 </div>)}
 
               </div>

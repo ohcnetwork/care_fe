@@ -158,26 +158,74 @@ export const ConsultationDetails = (props: any) => {
     });
   }
 
-  return (
-    <div>
-      <PageTitle title={`Consultation #${consultationId}`} />
-
-      <div className="border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black mt-4 p-4">
-        <div className="mt-2">
-          <Button
-            variant="contained"
-            color="primary"
-            size="small"
-            className="float-right"
-            onClick={() =>
-              navigate(
-                `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/update`
-              )
-            }
-          >
-            Update Details
-          </Button>
+  let roundsList: any;
+  if (isDailyRoundLoading) {
+    roundsList = <CircularProgress size={20} />;
+  } else if (dailyRoundsListData.length === 0) {
+    roundsList = <Typography>No Daily Rounds data is available.</Typography>;
+  } else if (dailyRoundsListData.length > 0) {
+    roundsList = dailyRoundsListData.map((itemData, idx) => {
+      return (
+        <div key={`daily_round_${idx}`} className="w-full mt-4 px-2">
+          <div className="block border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black">
+            <div className="p-4">
+              <Grid container justify="space-between" alignItems="center">
+                <Grid item xs={11} container spacing={1}>
+                  <Grid item xs={6}>
+                    <Typography>
+                      <span className="text-gray-700">Temperature:</span>{" "}
+                      {itemData.temperature}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography>
+                      <span className="text-gray-700">Taken at :</span>{" "}
+                      {itemData.temperature_measured_at
+                        ? moment(itemData.temperature_measured_at).format("lll")
+                        : "-"}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <span className="text-gray-700">
+                        Physical Examination Info:
+                      </span>{" "}
+                      {itemData.physical_examination_info}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <span className="text-gray-700">Other Details:</span>{" "}
+                      {itemData.other_details}
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </Grid>
+              <div className="mt-2">
+                <Button
+                  size="small"
+                  variant="outlined"
+                  fullWidth
+                  onClick={(e) =>
+                    navigate(
+                      `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${itemData.id}`
+                    )
+                  }
+                >
+                  View Daily Rounds Details
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
+      );
+    });
+  }
+
+  return (
+    <div className="px-2 pb-2">
+      <PageTitle title={`Consultation #${consultationId}`} />
+      <div className="border rounded-lg bg-white shadow h-full hover:border-primary-500 text-black mt-4 p-4">
         <div className="flex justify-between">
           <div className="grid gap-2 grid-cols-1">
             <div className="capitalize">
@@ -192,15 +240,21 @@ export const ConsultationDetails = (props: any) => {
             </div>
           </div>
           <div>
-            {/* <Button
-                            fullWidth
-                            variant="contained"
-                            color="primary"
-                            size="small"
-                            onClick={() =>
-                                navigate(`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/update`)
-                            }
-                        >Update Details</Button> */}
+            <div className="mt-2">
+              <Button
+                variant="contained"
+                color="primary"
+                size="small"
+                className="float-right"
+                onClick={() =>
+                  navigate(
+                    `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/update`
+                  )
+                }
+              >
+                Update Details
+              </Button>
+            </div>
           </div>
         </div>
         <div className="grid gap-2 grid-cols-1 md:grid-cols-2 mt-2">

@@ -6,13 +6,13 @@ import { navigate } from "hookrouter";
 import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getAllPatient, getFacilities, searchPatient } from "../../Redux/actions";
+import { getAllPatient, searchPatientFilter } from "../../Redux/actions";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 import Pagination from "../Common/Pagination";
 import { PatientFilter } from "./PatientFilter";
 import { InputSearchBox } from "../Common/SearchBox";
-import { SearchPhone } from "../Common/SearchPhone";
+
 
 const useStyles = makeStyles((theme) => ({
   paginateTopPadding: {
@@ -69,7 +69,7 @@ export const PatientManager = (props: any) => {
 
   const searchByName = async (searchValue: string) => {
     setIsLoading(true);
-    const res = await dispatch(searchPatient({ limit, offset, name: searchValue }));
+    const res = await dispatch(searchPatientFilter({ limit, offset, name: searchValue }));
     if (res && res.data) {
       setData(res.data.results);
       setTotalCount(res.data.count);
@@ -79,7 +79,7 @@ export const PatientManager = (props: any) => {
 
   const searchByPhone = async (searchValue: string) => {
     setIsLoading(true);
-    const res = await dispatch(searchPatient({ limit, offset, phone_number: encodeURI(searchValue) }));
+    const res = await dispatch(searchPatientFilter({ limit, offset, phone_number: encodeURI(searchValue) }));
     if (res && res.data) {
       setData(res.data.results);
       setTotalCount(res.data.count);
@@ -114,17 +114,29 @@ export const PatientManager = (props: any) => {
                   <div className="font-bold text-xl capitalize mb-2">
                     {patient.name}
                   </div>
-                  <div>
-                    {patient.is_medical_worker && patient.is_active && (
-                      <span className="badge badge-pill badge-primary">
-                        Medical Worker
-                      </span>
-                    )}
-                    {!patient.is_active && (
-                      <span className="badge badge-pill badge-dark">
-                        Inactive
-                      </span>
-                    )}
+                  
+                  <div className="flex">
+                    <div>
+                      {patient.is_medical_worker && patient.is_active && (
+                        <span className="badge badge-pill badge-primary mr-2">
+                          Medical Worker
+                        </span>
+                      )}
+                    </div>
+                    <div>
+                      { patient.allow_transfer && (
+                          <span className="badge badge-pill badge-primary mr-2">
+                          Transfer allowed
+                        </span>
+                      )}
+                    </div>
+                    <div>
+                      { !patient.allow_transfer && (
+                          <span className="badge badge-pill badge-warning mr-2">
+                          Transfer Not allowed
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
                 <div>
@@ -204,7 +216,11 @@ export const PatientManager = (props: any) => {
 
   return (
     <div>
-      <PageTitle title="Covid Suspects" hideBack={!facilityId} />
+      <PageTitle 
+        title="Covid Suspects" 
+        hideBack={!facilityId}
+        className="mx-3 md:mx-8" />
+
       <div className="flex flex-col md:flex-row px-4 md:px-8">
         <div>
           <div className="text-sm font-semibold">Filter by Status</div>
@@ -224,7 +240,7 @@ export const PatientManager = (props: any) => {
           <div className="text-sm font-semibold mb-2">
             Search by number
           </div>
-          <SearchPhone
+          <InputSearchBox
             search={searchByPhone}
             placeholder='+919876543210'
             errors=''

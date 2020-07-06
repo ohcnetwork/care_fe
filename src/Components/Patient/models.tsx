@@ -9,12 +9,19 @@ export interface FlowModel {
     created_by?: number;
 }
 
+export interface DischargeSummaryModel {
+    email?: string;
+}
+
 export interface PatientModel {
     id?: number;
     name?: string;
     age?: number;
+    allow_transfer?: boolean;
+    discharge?: boolean;
     gender?: number;
     phone_number?: string;
+    allergies?: string;
     medical_history?: Array<{ disease: string | number; details: string }>;
     facility_object?: { id: number; name: string, facility_type?: { id: number; name: string } }
     contact_with_carrier?: boolean;
@@ -64,7 +71,7 @@ export interface SampleTestModel {
     status?: string;
     result?: string;
     icmr_category?: string;
-    notes?: string;
+    icmr_label?: string;
     date_of_sample?: string;
     date_of_result?: string;
     consultation?: number;
@@ -100,11 +107,11 @@ export interface SampleReportModel {
         state_name?: string;
     }
     specimen_details?: {
+        created_date?: string;
         sample_type?: string;
         collection_type?: string;
-        collection_date?: string;
         icmr_category?: string;
-        label?: string;
+        icmr_label?: string;
         is_repeated_sample?: boolean;
         lab_name?: string;
         lab_pincode?: string;
@@ -143,6 +150,7 @@ export interface SampleReportModel {
         hospital_phone_number?: string;
         hospital_name?: string;
         doctor_name?: string;
+        hospital_pincode?: string;
     }
 }
 

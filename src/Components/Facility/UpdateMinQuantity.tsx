@@ -1,14 +1,13 @@
 import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
-import React, { useCallback, useReducer, useState, useEffect } from "react";
+import React, { useCallback, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getItemName, updateMinQuantity } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import { SelectField, TextInputField } from "../Common/HelperInputFields";
+import { TextInputField } from "../Common/HelperInputFields";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
-import { InventoryItemsModel } from "./models";
 
 const initForm = {
     id: "",
@@ -103,7 +102,8 @@ export const UpdateMinQuantity = (props: any) => {
         return <Loading />;
     }
 
-    return (<div>
+    return (
+    <div className="px-2 pb-2">
         <PageTitle title="Update Minimum Quantity " hideBack={false} />
         <div className="mt-4">
             <Card>

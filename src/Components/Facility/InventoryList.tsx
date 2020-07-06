@@ -50,16 +50,6 @@ export default function InventoryList(props: any) {
         setOffset(offset);
     };
 
-    // const onSearchSuspects = async (searchValue: string) => {
-    //     setIsLoading(true);
-    //     const res = await dispatchAction(getFacilities({ limit, offset, search_text: searchValue }));
-    //     if (res && res.data) {
-    //       setData(res.data.results);
-    //       setTotalCount(res.data.count);
-    //     }
-    //     setIsLoading(false);
-    // }
-
     let inventoryList: any = [];
     if (inventory && inventory.length) {
         inventoryList = inventory.map((inventoryItem: any) => (
@@ -139,7 +129,10 @@ export default function InventoryList(props: any) {
 
     return (
         <div>
-            <PageTitle title="Inventory Summary" hideBack={false} />
+            <PageTitle 
+                title="Inventory Summary" 
+                hideBack={false}
+                className="mx-3 md:mx-8" />
             <div className="container mx-auto px-4 sm:px-8">
                 <div className="py-4 md:py-8">
                     <div className="flex flex-col md:flex-row items-center">
