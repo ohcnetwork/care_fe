@@ -98,8 +98,8 @@ export default {
     path : "/api/v1/facility/?csv",
     method :"GET"
   },
-
-  getConsultationList: 
+  
+  getConsultationList: {
     path: "/api/v1/consultation/",
   },
   createConsultation: {
