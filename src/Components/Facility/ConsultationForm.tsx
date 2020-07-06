@@ -57,6 +57,7 @@ const initForm: any = {
   examination_details: "",
   existing_medication: "",
   prescribed_medication: "",
+  consultation_notes:"",
 };
 
 const initError = Object.assign(
@@ -257,7 +258,7 @@ export const ConsultationForm = (props: any) => {
         facility: facilityId,
         referred_to:
           state.form.suggestion === "R" ? state.form.referred_to : undefined,
-        OPconsultation:
+        consultation_notes:
           state.form.suggestion === "OP"
             ? state.form.OPconsultation
             : undefined,
