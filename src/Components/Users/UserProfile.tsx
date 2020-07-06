@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useReducer } from 'react';
+import PageTitle from '../Common/PageTitle'
 import { InputLabel, Button } from '@material-ui/core';
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
@@ -220,7 +221,12 @@ export default function UserProfile() {
     };
 
     return (
+
         <div className={classes.root}>
+            <PageTitle
+                title="Profile Management"
+                hideBack={true}
+                className="mx-3 md:mx-8" />
             <ExpansionPanel expanded={expanded === 'gSetting'} onChange={handleChange('gSetting')}>
                 <ExpansionPanelSummary
                     expandIcon={<ExpandMoreIcon />}
