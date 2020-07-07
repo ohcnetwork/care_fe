@@ -271,7 +271,7 @@ export const PatientManager = (props: any) => {
         {/*      Download Patient List*/}
         {/*    </button>*/}
         {/*  </CSVLink>*/}
-        </div>
+        {/*</div>*/}
       </div>
       <div className="px-3 md:px-8">
         <div className="flex flex-wrap md:-mx-4">{managePatients}</div>
