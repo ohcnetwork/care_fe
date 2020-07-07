@@ -1,13 +1,6 @@
 import React, { useState, useCallback, useReducer } from 'react';
-import PageTitle from '../Common/PageTitle'
 import { InputLabel, Button } from '@material-ui/core';
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
-import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
-import ExpansionPanel from '@material-ui/core/ExpansionPanel';
-import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
-import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
-import Typography from '@material-ui/core/Typography';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { GENDER_TYPES } from "../../Common/constants";
 import { useDispatch, useSelector } from "react-redux";
@@ -17,22 +10,7 @@ import { parsePhoneNumberFromString } from 'libphonenumber-js';
 import { validateEmailAddress } from "../../Common/validation";
 import * as Notification from "../../Utils/Notifications.js";
 
-const useStyles = makeStyles((theme: Theme) =>
-    createStyles({
-        root: {
-            width: '100%',
-        },
-        heading: {
-            fontSize: theme.typography.pxToRem(15),
-            flexBasis: '33.33%',
-            flexShrink: 0,
-        },
-        secondaryHeading: {
-            fontSize: theme.typography.pxToRem(15),
-            color: theme.palette.text.secondary,
-        },
-    }),
-);
+
 const initForm: any = {
     first_name: "",
     last_name: "",
@@ -69,13 +47,12 @@ const editFormReducer = (states = initialState, action: any) => {
 };
 export default function UserProfile() {
     const [states, dispatch] = useReducer(editFormReducer, initialState);
-    const classes = useStyles();
+
     const state: any = useSelector(state => state);
     const { currentUser } = state;
     const username = currentUser.data.username;
 
     const [showEdit, setShowEdit] = React.useState<boolean | false>(false);
-    const [expanded, setExpanded] = React.useState<string | false>(false);
 
     const [isLoading, setIsLoading] = useState(false);
     const dispatchAction: any = useDispatch();
@@ -123,12 +100,6 @@ export default function UserProfile() {
         },
         [fetchData]
     );
-
-
-    const handleChange = (panel: string) =>
-        (event: React.ChangeEvent<{}>, isExpanded: boolean) => {
-            setExpanded(isExpanded ? panel : false);
-        };
 
     const handleChangeInput = (e: any) => {
         let form = { ...states.form };
@@ -218,8 +189,8 @@ export default function UserProfile() {
 
     return (
 
-        <div className={classes.root}>
-            <div className="md:mt-20 mt-10">
+        <div >
+            <div className="md:p-20 p-10">
                 <div className="md:grid md:grid-cols-3 md:gap-6">
                     <div className="md:col-span-1">
                         <div className="px-4 sm:px-0">
@@ -240,7 +211,7 @@ export default function UserProfile() {
                                     <div className="sm:col-span-1">
                                         <dt className="text-sm leading-5 font-medium text-gray-500">
                                             Username
-                        </dt>
+                                        </dt>
                                         <dd className="mt-1 text-sm leading-5 text-gray-900">
                                             {details.username || '-'}
                                         </dd>
@@ -249,7 +220,7 @@ export default function UserProfile() {
                                         <dt className="text-sm leading-5 font-medium text-gray-500">
 
                                             Contact No
-                        </dt>
+                                        </dt>
                                         <dd className="mt-1 text-sm leading-5 text-gray-900">
                                             {details.phone_number || '-'}
                                         </dd>
@@ -257,7 +228,7 @@ export default function UserProfile() {
                                     <div className="sm:col-span-1">
                                         <dt className="text-sm leading-5 font-medium text-gray-500">
                                             Email address
-                        </dt>
+                                        </dt>
                                         <dd className="mt-1 text-sm leading-5 text-gray-900">
                                             {details.email || '-'}
                                         </dd>
@@ -265,7 +236,7 @@ export default function UserProfile() {
                                     <div className="sm:col-span-1">
                                         <dt className="text-sm leading-5 font-medium text-gray-500">
                                             First Name
-                        </dt>
+                                        </dt>
                                         <dd className="mt-1 text-sm leading-5 text-gray-900">
                                             {details.first_name || '-'}
                                         </dd>
@@ -273,7 +244,7 @@ export default function UserProfile() {
                                     <div className="sm:col-span-1">
                                         <dt className="text-sm leading-5 font-medium text-gray-500">
                                             Last Name
-                        </dt>
+                                        </dt>
                                         <dd className="mt-1 text-sm leading-5 text-gray-900">
                                             {details.last_name || '-'}
                                         </dd>
@@ -281,7 +252,7 @@ export default function UserProfile() {
                                     <div className="sm:col-span-1">
                                         <dt className="text-sm leading-5 font-medium text-gray-500">
                                             Age
-                        </dt>
+                                        </dt>
                                         <dd className="mt-1 text-sm leading-5 text-gray-900">
                                             {details.age || '-'}
                                         </dd>
@@ -289,7 +260,7 @@ export default function UserProfile() {
                                     <div className="sm:col-span-1">
                                         <dt className="text-sm leading-5 font-medium text-gray-500">
                                             Gender
-                        </dt>
+                                        </dt>
                                         <dd className="mt-1 text-sm leading-5 text-gray-900">
                                             {details.gender || '-'}
                                         </dd>
@@ -297,7 +268,7 @@ export default function UserProfile() {
                                     <div className="sm:col-span-1">
                                         <dt className="text-sm leading-5 font-medium text-gray-500">
                                             Local Body
-                        </dt>
+                                        </dt>
                                         <dd className="mt-1 text-sm leading-5 text-gray-900">
                                             {details.local_body?.name || '-'}
                                         </dd>
@@ -305,7 +276,7 @@ export default function UserProfile() {
                                     <div className="sm:col-span-1">
                                         <dt className="text-sm leading-5 font-medium text-gray-500">
                                             District
-                        </dt>
+                                        </dt>
                                         <dd className="mt-1 text-sm leading-5 text-gray-900">
                                             {details.district_object?.name || '-'}
                                         </dd>
@@ -313,7 +284,7 @@ export default function UserProfile() {
                                     <div className="sm:col-span-1">
                                         <dt className="text-sm leading-5 font-medium text-gray-500">
                                             State
-                        </dt>
+                                        </dt>
                                         <dd className="mt-1 text-sm leading-5 text-gray-900">
                                             {details.state_object?.name || '-'}
                                         </dd>
