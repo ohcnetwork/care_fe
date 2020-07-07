@@ -279,7 +279,7 @@ export const ConsultationForm = (props: any) => {
             msg: "Consultation created successfully",
           });
         }
-        navigate(`/facility/${facilityId}/patient/${patientId}`)
+        navigate(`/facility/${facilityId}/patient/${patientId}`);
       }
     }
   };
