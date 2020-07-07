@@ -119,6 +119,7 @@ export const CONSULTATION_SUGGESTION = [
   { id: "HI", text: "Home Isolation" },
   { id: "A", text: "Admission" },
   { id: "R", text: "Refer to another Hospital" },
+  { id: "OP", text: "OP Consultation"}
 ];
 
 export const ADMITTED_TO = [
