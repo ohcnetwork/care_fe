@@ -199,3 +199,11 @@ export const discharge = (params: object, pathParams: object) => {
 export const dischargePatient = (params: object, pathParams: object) => {
   return fireRequest("dischargePatient", [], params, pathParams);
 };
+
+//Profile
+export const getUserDetails = (username: string) => {
+  return fireRequest("getUserDetails", [username]);
+};
+export const updateUserDetails = (username: string, data: object) => {
+  return fireRequest("updateUserDetails", [username], data);
+};
