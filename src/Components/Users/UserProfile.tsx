@@ -67,10 +67,6 @@ const editFormReducer = (states = initialState, action: any) => {
             return states;
     }
 };
-const goBack = () => {
-    window.history.go(-1);
-};
-
 export default function UserProfile() {
     const [states, dispatch] = useReducer(editFormReducer, initialState);
     const classes = useStyles();
@@ -161,14 +157,14 @@ export default function UserProfile() {
                     }
                     return;
                 case "phone_number":
-                    const phoneNumber = parsePhoneNumberFromString(state.form[field]);
+                    const phoneNumber = parsePhoneNumberFromString(states.form[field]);
                     if (!states.form[field] || !phoneNumber?.isPossible()) {
                         errors[field] = "Please enter valid phone number";
                         invalidForm = true;
                     }
                     return;
                 case "email":
-                    if (!states.form[field] || validateEmailAddress(states.form[field])) {
+                    if (states.form[field] && !validateEmailAddress(states.form[field])) {
                         errors[field] = "Enter a valid email address";
                         invalidForm = true;
                     }
@@ -184,39 +180,39 @@ export default function UserProfile() {
 
     const handleValueChange = (phoneNo: any, name: string) => {
         if (phoneNo && parsePhoneNumberFromString(phoneNo)?.isPossible()) {
-            const query = {
-                phone_number: parsePhoneNumberFromString(phoneNo)?.format('E.164')
-            };
-            const form = { ...states.form };
-            form[name] = phoneNo;
-            dispatch({ type: "set_form", form });
+        const form = { ...states.form };
+        form[name] = phoneNo;
+        dispatch({ type: "set_form", form });
         }
     };
 
 
     const handleSubmit = async (e: any) => {
         e.preventDefault();
-        setIsLoading(true);
-        const data = {
-            username: username,
-            first_name: states.form.first_name,
-            last_name: states.form.last_name,
-            email: states.form.email,
-            phone_number: parsePhoneNumberFromString(state.form.phone_number)?.format('E.164'),
-            gender: Number(states.form.gender),
-            age: states.form.age,
+        const validForm = validateForm();
+        if (validForm) {
+            setIsLoading(true);
+            const data = {
+                username: username,
+                first_name: states.form.first_name,
+                last_name: states.form.last_name,
+                email: states.form.email,
+                phone_number: parsePhoneNumberFromString(states.form.phone_number)?.format('E.164'),
+                gender: Number(states.form.gender),
+                age: states.form.age,
 
 
-        };
-        const res = await dispatchAction(
-            updateUserDetails(username, data)
-        );
-        setIsLoading(false);
-        if (res && res.data) {
-            Notification.Success({
-                msg: "Details updated successfully"
-            });
-            goBack();
+            };
+            const res = await dispatchAction(
+                updateUserDetails(username, data)
+            );
+            setIsLoading(false);
+            if (res && res.data) {
+                Notification.Success({
+                    msg: "Details updated successfully"
+                });
+                window.location.reload();
+            }
         }
     };
 
@@ -293,7 +289,7 @@ export default function UserProfile() {
                 >
                     <Typography className={classes.heading}>Advanced settings</Typography>
                     <Typography className={classes.secondaryHeading}>
-                        Password , Contact Number etc..
+                        Email , Contact Number etc..
                     </Typography>
                 </ExpansionPanelSummary>
                 <ExpansionPanelDetails>
@@ -400,6 +396,8 @@ export default function UserProfile() {
                 <ExpansionPanelDetails>
                     <Typography>
                         Non Editable Settings. (Contact Admin to Change these)
+
+                        
                         <div className="grid gap-3 grid-cols-1 md:grid-cols-2 mt-1">
 
                             <div>
