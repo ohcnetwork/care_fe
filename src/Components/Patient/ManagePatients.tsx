@@ -60,13 +60,8 @@ export const PatientManager = (props: any) => {
     [diseaseStatus, dispatch, facilityId, offset]
   );
 
-  const handleDownload = async () => {
-    const res = await dispatch(downloadPatients());
-    setDownloadFile(res.data);
-  };
   useAbortableEffect(
     (status: statusType) => {
-      handleDownload();
       fetchData(status);
     },
     [fetchData]
@@ -103,6 +98,11 @@ export const PatientManager = (props: any) => {
     setOffset(0);
     setCurrentPage(1);
   }
+
+  const handleDownload = async () => {
+    const res = await dispatch(downloadPatients());
+    setDownloadFile(res.data);
+  };
 
   let patientList: any[] = [];
   if (data && data.length) {
