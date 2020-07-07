@@ -552,17 +552,6 @@ export const ConsultationForm = (props: any) => {
                         errors={state.errors.admission_date}
                       />
                     </div>
-                    <div className="flex-1">
-                      <DateInputField
-                        label="Discharge Date"
-                        margin="dense"
-                        value={state.form.discharge_date}
-                        onChange={(date) =>
-                          handleDateChange(date, "discharge_date")
-                        }
-                        errors={state.errors.discharge_date}
-                      />
-                    </div>
                   </div>
                 )}
               </div>
