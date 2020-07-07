@@ -4,14 +4,19 @@ import { makeStyles } from "@material-ui/core/styles";
 import WarningRoundedIcon from "@material-ui/icons/WarningRounded";
 import { navigate } from "hookrouter";
 import React, { useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
+import {useDispatch} from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getAllPatient, searchPatientFilter } from "../../Redux/actions";
+import {downloadPatients, getAllPatient, searchPatientFilter} from "../../Redux/actions";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 import Pagination from "../Common/Pagination";
 import { PatientFilter } from "./PatientFilter";
 import { InputSearchBox } from "../Common/SearchBox";
+import { CSVLink } from "react-csv";
+import moment from 'moment';
+
+
+const now = moment().format('DD-MM-YYYY:hh:mm:ss');
 
 
 const useStyles = makeStyles((theme) => ({
@@ -35,7 +40,7 @@ export const PatientManager = (props: any) => {
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [offset, setOffset] = useState(0);
-
+  const [DownloadFile, setDownloadFile] = useState("");
   const limit = 14;
 
   const fetchData = useCallback(
@@ -54,8 +59,14 @@ export const PatientManager = (props: any) => {
     },
     [diseaseStatus, dispatch, facilityId, offset]
   );
+
+  const handleDownload = async () => {
+    const res = await dispatch(downloadPatients());
+    setDownloadFile(res.data);
+  };
   useAbortableEffect(
     (status: statusType) => {
+      handleDownload();
       fetchData(status);
     },
     [fetchData]
@@ -245,6 +256,21 @@ export const PatientManager = (props: any) => {
             placeholder='+919876543210'
             errors=''
           />
+        </div>
+        <div className="w-1/4 text-center items-center">
+          <CSVLink
+              data={DownloadFile}
+              filename={ `patients-${now}.csv` }
+              target="_blank"
+          >
+            <button
+                type="button"
+                className="inline-flex items-center mr-2 px-1 py-3 ml-1  lg:px-3 border border-green-500 text-sm leading-4 font-medium rounded-md text-green-700 bg-white hover:text-green-500 focus:outline-none focus:border-green-300 focus:shadow-outline-blue active:text-green-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                onClick={handleDownload}
+            >
+              Download Patient List
+            </button>
+          </CSVLink>
         </div>
       </div>
       <div className="px-3 md:px-8">

@@ -94,6 +94,15 @@ export default {
     method: "DELETE",
   },
 
+  downloadFacility: {
+    path: "/api/v1/facility/?csv",
+    method: "GET",
+  },
+
+  downloadPatients: {
+    path: "/api/v1/patient/?csv",
+    method: 'GET'
+  },
   getConsultationList: {
     path: "/api/v1/consultation/",
   },
@@ -291,7 +300,6 @@ export default {
     path: "/api/v1/patient/{id}/discharge_patient/",
     method: "POST",
   },
-
   //Profile
   getUserDetails: {
     path: "/api/v1/users/",
@@ -300,5 +308,6 @@ export default {
   updateUserDetails: {
     path: "/api/v1/users/",
     method: "PUT",
-  }
+  },
 };
+

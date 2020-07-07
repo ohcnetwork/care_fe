@@ -6,6 +6,7 @@ const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 let googleKey = "6LdvxuQUAAAAADDWVflgBqyHGfq-xmvNJaToM0pN";
 const CopyPlugin = require("copy-webpack-plugin");
 const WorkboxPlugin = require("workbox-webpack-plugin");
+const MomentLocalesPlugin = require('moment-locales-webpack-plugin');
 
 module.exports = (env, argv) => {
   const mode = argv.mode || "development";
@@ -115,7 +116,7 @@ module.exports = (env, argv) => {
         mode: "production",
       }),
       new webpack.HotModuleReplacementPlugin(),
-      new webpack.ContextReplacementPlugin(/moment[/\\]locale$/, /en/),
+      new MomentLocalesPlugin(),
       new MiniCssExtractPlugin({
         filename: isDev
           ? "css/[name][hash].bundle.css"
