@@ -25,7 +25,9 @@ export const ConsultationCard = (props: ConsultationProps) => {
             <Grid item xs={5}>
               <Typography>
                 <span className="text-gray-700">Updated on: </span>
-                {itemData.created_date ? moment(itemData.created_date).format("lll") : "-"}
+                {itemData.created_date
+                  ? moment(itemData.created_date).format("lll")
+                  : "-"}
               </Typography>
             </Grid>
             <Grid item xs={7}>
@@ -57,19 +59,44 @@ export const ConsultationCard = (props: ConsultationProps) => {
               </Grid>
             )}
           </Grid>
-          <div className="mt-4 flex justify-between w-full">            
-            <button className="px-4 py-2 shadow border bg-white rounded-md border border-grey-500 whitespace-no-wrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300 text-center"
-              onClick={() => navigate(`/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/`)}>
+          <div className="mt-4 flex flex-wrap justify-between w-full">
+            <button
+              className="px-4 py-2 shadow border bg-white rounded-md border border-grey-500 whitespace-no-wrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300 text-center"
+              onClick={() =>
+                navigate(
+                  `/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/`
+                )
+              }
+            >
               View Consultation / Daily Rounds Details
             </button>
-            {isLastConsultation && (<button className="mr-4 px-4 py-2 shadow border bg-white rounded-md border border-grey-500 whitespace-no-wrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300 text-center"
-              onClick={
-                () => navigate(`/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/daily-rounds`)}>
-              Add Daily Rounds
-            </button>)}
+            {isLastConsultation && (
+              <button
+                className="mr-1 px-4 py-2 shadow border bg-white rounded-md border border-grey-500 whitespace-no-wrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300 text-center"
+                onClick={() =>
+                  navigate(
+                    `/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/update`
+                  )
+                }
+              >
+                Update Consultation Details
+              </button>
+            )}
+            {isLastConsultation && (
+              <button
+                className="mr-4 px-4 py-2 shadow border bg-white rounded-md border border-grey-500 whitespace-no-wrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300 text-center"
+                onClick={() =>
+                  navigate(
+                    `/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/daily-rounds`
+                  )
+                }
+              >
+                Add Daily Rounds
+              </button>
+            )}
           </div>
         </Grid>
       </CardContent>
-    </div >
+    </div>
   );
 };
