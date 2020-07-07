@@ -135,7 +135,7 @@ export default function UserProfile() {
         };
 
     const handleChangeInput = (e: any) => {
-        let form = { ...state.form };
+        let form = { ...states.form };
         form[e.target.name] = e.target.value;
         dispatch({ type: "set_form", form });
     };
@@ -187,7 +187,7 @@ export default function UserProfile() {
             const query = {
                 phone_number: parsePhoneNumberFromString(phoneNo)?.format('E.164')
             };
-            const form = { ...state.form };
+            const form = { ...states.form };
             form[name] = phoneNo;
             dispatch({ type: "set_form", form });
         }
