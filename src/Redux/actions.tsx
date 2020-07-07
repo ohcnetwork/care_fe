@@ -41,7 +41,9 @@ export const getFacility = (id: number) => {
 export const downloadFacility = () => {
   return fireRequest("downloadFacility");
 };
-
+export const downloadPatients = () => {
+  return fireRequest('downloadPatients');
+};
 // Capacity/Triage/Doctor
 export const createCapacity = (id: number | undefined, params: object, pathParam: object) => {
   return id ? fireRequest("updateCapacity", [id], params, pathParam) : fireRequest("createCapacity", [], params, pathParam);

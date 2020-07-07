@@ -98,7 +98,11 @@ export default {
       path : "/api/v1/facility/?csv",
       method : "GET",
     },
-  
+
+    downloadPatients : {
+        path: "/api/v1/patient/?csv",
+        method: 'GET'
+    },
     getConsultationList: {
       path: "/api/v1/consultation/",
     },
