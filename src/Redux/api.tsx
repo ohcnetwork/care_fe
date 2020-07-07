@@ -302,7 +302,7 @@ export default {
   },
   //Profile
   getUserDetails: {
-    path: "/api/v1/users/",
+    path: "/api/v1/users",
     method: "GET",
   },
   updateUserDetails: {
