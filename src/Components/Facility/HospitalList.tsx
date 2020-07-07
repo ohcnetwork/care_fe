@@ -98,7 +98,7 @@ export const HospitalList = () => {
                   </div>
                   <span className="inline-flex rounded-md shadow-sm">
                     <button type="button" className="inline-flex items-center px-3 py-2 border border-green-500 text-sm leading-4 font-medium rounded-md text-green-700 bg-white hover:text-green-500 focus:outline-none focus:border-green-300 focus:shadow-outline-blue active:text-green-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
-                        onClick={() => navigate(`/facility/${facility.id}`)}>
+                      onClick={() => navigate(`/facility/${facility.id}`)}>
                       View Facility
                     </button>
                   </span>
@@ -161,7 +161,7 @@ export const HospitalList = () => {
           >
             <button
               type="button"
-              className="inline-flex items-center mr-2 px-1 py-3 ml-1  lg:px-3 border border-green-500 text-sm leading-4 font-medium rounded-md text-green-700 bg-white hover:text-green-500 focus:outline-none focus:border-green-300 focus:shadow-outline-blue active:text-green-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+              className="inline-flex items-center mr-2 px-1 py-3 ml-1  lg:px-3 border border-green-500 text-sm leading-4 font-medium rounded-md text-green-700 hover:bg-green-600 hover:text-white bg-white focus:outline-none focus:border-green-300 focus:shadow-outline-blue active:text-green-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
               onClick={handleDownload}
             >
               Download Facility List
