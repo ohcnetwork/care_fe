@@ -28,7 +28,7 @@ import { SetInventoryForm } from "../Components/Facility/SetInventoryForm";
 import MinQuantityList from "../Components/Facility/MinQuantityList";
 import { UpdateMinQuantity } from "../Components/Facility/UpdateMinQuantity";
 const get = require('lodash.get');
-
+import UserProfile from "../Components/Users/UserProfile";
 const img =
   "https://cdn.coronasafe.network/light-logo.svg";
 const logoBlack =
@@ -38,6 +38,7 @@ const routes = {
   "/": () => <HospitalList />,
   "/users": () => <ManageUsers />,
   "/user/add": () => <UserAdd />,
+  "/user/profile" : () => <UserProfile/>,
   "/patients": () => <PatientManager />,
   "/patient/:id": ({ id }: any) => <PatientHome id={id} />,
   "/patient/discharge": () => <PatientDischarge />,
@@ -136,6 +137,11 @@ let menus = [
     title: "Users",
     link: "/users",
     icon: "fas fa-user-friends"
+  },
+  {
+    title: "Profile",
+    link: '/user/profile',
+    icon: "fas fa-user-secret"
   }
 ];
 
