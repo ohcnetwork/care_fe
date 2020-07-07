@@ -157,8 +157,6 @@ export const ConsultationDetails = (props: any) => {
       );
     });
   }
-
-  let roundsList: any;
   if (isDailyRoundLoading) {
     roundsList = <CircularProgress size={20} />;
   } else if (dailyRoundsListData.length === 0) {
