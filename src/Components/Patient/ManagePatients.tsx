@@ -4,7 +4,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import WarningRoundedIcon from "@material-ui/icons/WarningRounded";
 import { navigate } from "hookrouter";
 import React, { useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
+import {useDispatch} from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {downloadPatients, getAllPatient, searchPatientFilter} from "../../Redux/actions";
 import { Loading } from "../Common/Loading";
@@ -13,6 +13,11 @@ import Pagination from "../Common/Pagination";
 import { PatientFilter } from "./PatientFilter";
 import { InputSearchBox } from "../Common/SearchBox";
 import { CSVLink } from "react-csv";
+import moment from 'moment';
+
+
+const now = moment().format('DD-MM-YYYY:hh:mm:ss');
+
 
 const useStyles = makeStyles((theme) => ({
   paginateTopPadding: {
@@ -255,7 +260,7 @@ export const PatientManager = (props: any) => {
         <div className="w-1/4 text-center items-center">
           <CSVLink
               data={DownloadFile}
-              filename={"patients.csv"}
+              filename={ `patients-${now}.csv` }
               target="_blank"
           >
             <button

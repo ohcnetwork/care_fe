@@ -9,7 +9,10 @@ import { FacilityModel } from "./models";
 import { InputSearchBox } from "../Common/SearchBox";
 import PageTitle from "../Common/PageTitle";
 import { CSVLink } from "react-csv";
+import moment from 'moment';
 
+
+const now = moment().format('DD-MM-YYYY:hh:mm:ss');
 
 export const HospitalList = () => {
   const dispatchAction: any = useDispatch();
@@ -153,7 +156,7 @@ export const HospitalList = () => {
         <div className="w-1/4 text-center items-center">
           <CSVLink
             data={DownloadFile}
-            filename={"facilities.csv"}
+            filename={`facilities-${now}.csv`}
             target="_blank"
           >
             <button
