@@ -60,13 +60,8 @@ export const PatientManager = (props: any) => {
     [diseaseStatus, dispatch, facilityId, offset]
   );
 
-  const handleDownload = async () => {
-    const res = await dispatch(downloadPatients());
-    setDownloadFile(res.data);
-  };
   useAbortableEffect(
     (status: statusType) => {
-      handleDownload();
       fetchData(status);
     },
     [fetchData]
@@ -103,6 +98,11 @@ export const PatientManager = (props: any) => {
     setOffset(0);
     setCurrentPage(1);
   }
+
+  const handleDownload = async () => {
+    const res = await dispatch(downloadPatients());
+    setDownloadFile(res.data);
+  };
 
   let patientList: any[] = [];
   if (data && data.length) {
@@ -257,21 +257,21 @@ export const PatientManager = (props: any) => {
             errors=''
           />
         </div>
-        <div className="w-1/4 text-center items-center">
-          <CSVLink
-              data={DownloadFile}
-              filename={ `patients-${now}.csv` }
-              target="_blank"
-          >
-            <button
-                type="button"
-                className="inline-flex items-center mr-2 px-1 py-3 ml-1  lg:px-3 border border-green-500 text-sm leading-4 font-medium rounded-md text-green-700 bg-white hover:text-green-500 focus:outline-none focus:border-green-300 focus:shadow-outline-blue active:text-green-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
-                onClick={handleDownload}
-            >
-              Download Patient List
-            </button>
-          </CSVLink>
-        </div>
+        {/*<div className="w-1/4 text-center items-center">*/}
+        {/*  <CSVLink*/}
+        {/*      data={DownloadFile}*/}
+        {/*      filename={ `patients-${now}.csv` }*/}
+        {/*      target="_blank"*/}
+        {/*  >*/}
+        {/*    <button*/}
+        {/*        type="button"*/}
+        {/*        className="inline-flex items-center mr-2 px-1 py-3 ml-1  lg:px-3 border border-green-500 text-sm leading-4 font-medium rounded-md text-green-700 bg-white hover:text-green-500 focus:outline-none focus:border-green-300 focus:shadow-outline-blue active:text-green-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"*/}
+        {/*        onClick={handleDownload}*/}
+        {/*    >*/}
+        {/*      Download Patient List*/}
+        {/*    </button>*/}
+        {/*  </CSVLink>*/}
+        {/*</div>*/}
       </div>
       <div className="px-3 md:px-8">
         <div className="flex flex-wrap md:-mx-4">{managePatients}</div>
