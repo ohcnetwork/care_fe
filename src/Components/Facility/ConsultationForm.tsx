@@ -38,6 +38,7 @@ import {
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 import { FacilityModel } from "./models";
+import {navigate} from "hookrouter";
 
 const initForm: any = {
   hasSymptom: false,
@@ -278,7 +279,7 @@ export const ConsultationForm = (props: any) => {
             msg: "Consultation created successfully",
           });
         }
-        goBack();
+        navigate(`/facility/${facilityId}/patient/${patientId}`);
       }
     }
   };

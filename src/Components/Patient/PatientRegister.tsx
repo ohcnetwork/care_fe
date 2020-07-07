@@ -387,7 +387,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             message: `Please note down patient name: ${state.form.name} and patient ID: ${res.data.id}`,
             title: "Patient Added Successfully"
           });
-          navigate(`/facility/${facilityId}/patient/${res.data.id}`);
+          navigate(`/facility/${facilityId}/patient/${res.data.id}/consultation`)
         } else {
           Notification.Success({
             msg: "Patient updated successfully"
