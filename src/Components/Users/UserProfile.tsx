@@ -12,12 +12,12 @@ import * as Notification from "../../Utils/Notifications.js";
 
 
 const initForm: any = {
-    first_name: "",
-    last_name: "",
+    firstName: "",
+    lastName: "",
     age: "",
     gender: "",
     email: "",
-    phone_number: "",
+    phoneNumber: "",
 };
 
 const initError = Object.assign({}, ...Object.keys(initForm).map(k => ({ [k]: "" })));
@@ -77,12 +77,12 @@ export default function UserProfile() {
                 if (res && res.data) {
                     setDetails(res.data);
                     const formData: any = {
-                        first_name: res.data.first_name,
-                        last_name: res.data.last_name,
+                        firstName: res.data.first_name,
+                        lastName: res.data.last_name,
                         age: res.data.age,
-                        gender: res.data.gender,
+                        gender: genderTypes.filter(el => { return el.text === res.data.gender })[0].id,
                         email: res.data.email,
-                        phone_number: res.data.phone_number,
+                        phoneNumber: res.data.phone_number,
                     };
                     dispatch({
                         type: "set_form",
@@ -113,8 +113,8 @@ export default function UserProfile() {
         let invalidForm = false;
         Object.keys(states.form).forEach((field, i) => {
             switch (field) {
-                case "first_name":
-                case "last_name":
+                case "firstName":
+                case "lastName":
                 case "gender":
                     if (!states.form[field]) {
                         errors[field] = "Field is required";
@@ -127,7 +127,7 @@ export default function UserProfile() {
                         invalidForm = true;
                     }
                     return;
-                case "phone_number":
+                case "phoneNumber":
                     const phoneNumber = parsePhoneNumberFromString(states.form[field]);
                     if (!states.form[field] || !phoneNumber?.isPossible()) {
                         errors[field] = "Please enter valid phone number";
@@ -165,10 +165,10 @@ export default function UserProfile() {
             setIsLoading(true);
             const data = {
                 username: username,
-                first_name: states.form.first_name,
-                last_name: states.form.last_name,
+                first_name: states.form.firstName,
+                last_name: states.form.lastName,
                 email: states.form.email,
-                phone_number: parsePhoneNumberFromString(states.form.phone_number)?.format('E.164'),
+                phone_number: parsePhoneNumberFromString(states.form.phoneNumber)?.format('E.164'),
                 gender: Number(states.form.gender),
                 age: states.form.age,
 
@@ -182,7 +182,8 @@ export default function UserProfile() {
                 Notification.Success({
                     msg: "Details updated successfully"
                 });
-                window.location.reload();
+                setDetails({ ...details, first_name: states.form.firstName, last_name: states.form.lastName, age: states.form.age, gender: genderTypes.filter(el => { return el.id === Number(states.form.gender) })[0].text, email: states.form.email, phone_number: states.form.phoneNumber });
+                setShowEdit(false);
             }
         }
     };
@@ -300,30 +301,30 @@ export default function UserProfile() {
                                     <div className="px-4 py-5 bg-white sm:p-6">
                                         <div className="grid grid-cols-6 gap-6">
                                             <div className="col-span-6 sm:col-span-3">
-                                                <label htmlFor="first_name" className="block text-sm font-medium leading-5 text-gray-700">First name</label>
+                                                <label htmlFor="firstName" className="block text-sm font-medium leading-5 text-gray-700">First name</label>
                                                 <TextInputField
-                                                    name="first_name"
+                                                    name="firstName"
                                                     variant="outlined"
                                                     margin="dense"
                                                     type="text"
                                                     className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
-                                                    value={states.form.first_name}
+                                                    value={states.form.firstName}
                                                     onChange={handleChangeInput}
-                                                    errors={states.errors.first_name}
+                                                    errors={states.errors.firstName}
                                                 />
                                             </div>
 
                                             <div className="col-span-6 sm:col-span-3">
-                                                <label htmlFor="last_name" className="block text-sm font-medium leading-5 text-gray-700">Last name</label>
+                                                <label htmlFor="lastName" className="block text-sm font-medium leading-5 text-gray-700">Last name</label>
                                                 <TextInputField
-                                                    name="last_name"
+                                                    name="lastName"
                                                     variant="outlined"
                                                     margin="dense"
                                                     className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
                                                     type="text"
-                                                    value={states.form.last_name}
+                                                    value={states.form.lastName}
                                                     onChange={handleChangeInput}
-                                                    errors={states.errors.last_name}
+                                                    errors={states.errors.lastName}
                                                 />
                                             </div>
 
@@ -356,11 +357,11 @@ export default function UserProfile() {
                                             <div className="col-span-6 sm:col-span-3">
                                                 <PhoneNumberField
                                                     label="Phone Number*"
-                                                    value={states.form.phone_number}
+                                                    value={states.form.phoneNumber}
                                                     onChange={(value: any) => [
-                                                        handleValueChange(value, 'phone_number')
+                                                        handleValueChange(value, 'phoneNumber')
                                                     ]}
-                                                    errors={states.errors.phone_number}
+                                                    errors={states.errors.phoneNumber}
                                                 />
                                             </div>
                                             <div className="col-span-6 sm:col-span-3">
