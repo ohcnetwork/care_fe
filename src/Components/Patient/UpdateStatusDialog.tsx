@@ -67,7 +67,7 @@ const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
     const status = String(sample.status) as keyof typeof SAMPLE_FLOW_RULES;
     const validStatusChoices = statusChoices
         .filter(i => status && statusFlow[status] && statusFlow[status].includes(i.text))
-        .filter(i => roleStatusMap[userType] && roleStatusMap[userType].includes(i.text))
+        // .filter(i => roleStatusMap[userType] && roleStatusMap[userType].includes(i.text))
 
     const newStatusChoices = [
         {

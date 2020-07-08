@@ -149,7 +149,7 @@ export default function SampleViewAdmin(props: any) {
       const statusText = SAMPLE_TEST_STATUS.find(i => i.text === status)?.desc;
       const validStatusChoices = statusChoices
         .filter(i => status && statusFlow[status] && statusFlow[status].includes(i.text))
-        .filter(i => roleStatusMap[userType] && roleStatusMap[userType].includes(i.text))
+        // .filter(i => roleStatusMap[userType] && roleStatusMap[userType].includes(i.text))
       return (
         <div key={`usr_${item.id}`} className="w-full md:w-1/2 mt-6 md:px-4">
           <div
