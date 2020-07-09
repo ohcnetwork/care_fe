@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { getUserDetails, updateUserDetails } from "../../Redux/actions";
 import { PhoneNumberField, SelectField, TextInputField } from "../Common/HelperInputFields";
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
-import { validateEmailAddress } from "../../Common/validation";
+import { validateEmailAddress, phonePreg } from "../../Common/validation";
 import * as Notification from "../../Utils/Notifications.js";
 
 
@@ -128,8 +128,8 @@ export default function UserProfile() {
                     }
                     return;
                 case "phoneNumber":
-                    const phoneNumber = parsePhoneNumberFromString(states.form[field]);
-                    if (!states.form[field] || !phoneNumber?.isPossible()) {
+                    const phoneNumber = parsePhoneNumberFromString(states.form[field])?.number;
+                    if (!states.form[field] || !phonePreg(String(phoneNumber))) {
                         errors[field] = "Please enter valid phone number";
                         invalidForm = true;
                     }
@@ -171,8 +171,6 @@ export default function UserProfile() {
                 phone_number: parsePhoneNumberFromString(states.form.phoneNumber)?.format('E.164'),
                 gender: Number(states.form.gender),
                 age: states.form.age,
-
-
             };
             const res = await dispatchAction(
                 updateUserDetails(username, data)
