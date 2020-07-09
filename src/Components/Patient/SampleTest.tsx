@@ -84,7 +84,7 @@ export const SampleTest = (props: any) => {
 
   const fetchFacilityName = useCallback(
     async (status: statusType) => {
-      const facility_type = 950;
+      const facility_type = 9;
       const FacilityNameList = await dispatchAction(
         getFacilities({ facility_type })
       );
