@@ -2,7 +2,13 @@ import { navigate } from "hookrouter";
 import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getFacilities, downloadFacility } from "../../Redux/actions";
+import {
+  getFacilities,
+  downloadFacility,
+  downloadFacilityCapacity,
+  downloadFacilityDoctors,
+  downloadFacilityTriage
+} from "../../Redux/actions";
 import { Loading } from "../Common/Loading";
 import Pagination from "../Common/Pagination";
 import { FacilityModel } from "./models";
@@ -10,11 +16,28 @@ import { InputSearchBox } from "../Common/SearchBox";
 import PageTitle from "../Common/PageTitle";
 import { CSVLink } from "react-csv";
 import moment from 'moment';
+import { Theme, createStyles, makeStyles } from '@material-ui/core/styles';
+import Accordion from '@material-ui/core/Accordion';
+import AccordionSummary from '@material-ui/core/AccordionSummary';
+import AccordionDetails from '@material-ui/core/AccordionDetails';
+import Typography from '@material-ui/core/Typography';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
-
+const useStyles = makeStyles((theme: Theme) =>
+    createStyles({
+      root: {
+        width: '100%',
+      },
+      heading: {
+        fontSize: theme.typography.pxToRem(15),
+        fontWeight: theme.typography.fontWeightRegular,
+      },
+    }),
+);
 const now = moment().format('DD-MM-YYYY:hh:mm:ss');
 
 export const HospitalList = () => {
+  const classes = useStyles();
   const dispatchAction: any = useDispatch();
   const [data, setData] = useState<Array<FacilityModel>>([]);
   let manageFacilities: any = null;
@@ -23,7 +46,9 @@ export const HospitalList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [offset, setOffset] = useState(0);
   const [DownloadFile, setDownloadFile] = useState("");
-
+  const [capacityDownloadFile, setCapacityDownloadFile] = useState("");
+  const [doctorsDownloadFile, setDoctorsDownloadFile] = useState("");
+  const [triageDownloadFile, setTriageDownloadFile] = useState("");
 
   const limit = 14;
 
@@ -47,9 +72,27 @@ export const HospitalList = () => {
     setDownloadFile(res.data);
   };
 
+  const handleCapacityDownload = async () => {
+    const cap = await dispatchAction(downloadFacilityCapacity());
+    setCapacityDownloadFile(cap.data);
+  };
+
+  const handleDoctorsDownload = async () => {
+    const doc = await dispatchAction(downloadFacilityDoctors());
+    setDoctorsDownloadFile(doc.data);
+  };
+
+  const handleTriageDownload = async () => {
+    const tri = await dispatchAction(downloadFacilityTriage());
+    setTriageDownloadFile(tri.data);
+  };
+
   useAbortableEffect(
     (status: statusType) => {
       handleDownload();
+      handleCapacityDownload();
+      handleDoctorsDownload();
+      handleTriageDownload();
       fetchData(status);
     },
     [fetchData]
@@ -153,20 +196,78 @@ export const HospitalList = () => {
             errors=""
           />
         </div>
-        <div className="w-1/4 text-center items-center">
-          <CSVLink
-            data={DownloadFile}
-            filename={`facilities-${now}.csv`}
-            target="_blank"
+        <div className={classes.root}>
+        <Accordion>
+          <AccordionSummary
+              expandIcon={<ExpandMoreIcon />}
+              aria-controls="panel1a-content"
+              id="panel1a-header"
           >
-            <button
-              type="button"
-              className="inline-flex items-center mr-2 px-1 py-3 ml-1  lg:px-3 border border-green-500 text-sm leading-4 font-medium rounded-md text-green-700 hover:bg-green-600 hover:text-white bg-white focus:outline-none focus:border-green-300 focus:shadow-outline-blue active:text-green-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
-              onClick={handleDownload}
-            >
-              Download Facility List
-            </button>
-          </CSVLink>
+            <Typography className={classes.heading}>Downloads</Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <div className="w-1/4 text-center items-center">
+              <CSVLink
+                  data={DownloadFile}
+                  filename={`facilities-${now}.csv`}
+                  target="_blank"
+              >
+                <button
+                    type="button"
+                    className="inline-flex items-center mr-2 px-1 py-3 ml-1  lg:px-3 border border-green-500 text-sm leading-4 font-medium rounded-md text-green-700 hover:bg-green-600 hover:text-white bg-white focus:outline-none focus:border-green-300 focus:shadow-outline-blue active:text-green-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                    onClick={handleDownload}
+                >
+                  Download Facility List
+                </button>
+              </CSVLink>
+            </div>
+            <div className="w-1/4 text-center items-center">
+              <CSVLink
+                  data={capacityDownloadFile}
+                  filename={`facility-capacity-${now}.csv`}
+                  target="_blank"
+              >
+                <button
+                    type="button"
+                    className="inline-flex items-center mr-2 px-1 py-3 ml-1  lg:px-3 border border-green-500 text-sm leading-4 font-medium rounded-md text-green-700 hover:bg-green-600 hover:text-white bg-white focus:outline-none focus:border-green-300 focus:shadow-outline-blue active:text-green-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                    onClick={handleCapacityDownload}
+                >
+                  Download Facility Capacity List
+                </button>
+              </CSVLink>
+            </div>
+            <div className="w-1/4 text-center items-center">
+              <CSVLink
+                  data={doctorsDownloadFile}
+                  filename={`facility-doctors-${now}.csv`}
+                  target="_blank"
+              >
+                <button
+                    type="button"
+                    className="inline-flex items-center mr-2 px-1 py-3 ml-1  lg:px-3 border border-green-500 text-sm leading-4 font-medium rounded-md text-green-700 hover:bg-green-600 hover:text-white bg-white focus:outline-none focus:border-green-300 focus:shadow-outline-blue active:text-green-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                    onClick={handleDoctorsDownload}
+                >
+                  Download Facility Doctors List
+                </button>
+              </CSVLink>
+            </div>
+            <div className="w-1/4 text-center items-center">
+              <CSVLink
+                  data={triageDownloadFile}
+                  filename={`facility-triage-${now}.csv`}
+                  target="_blank"
+              >
+                <button
+                    type="button"
+                    className="inline-flex items-center mr-2 px-1 py-3 ml-1  lg:px-3 border border-green-500 text-sm leading-4 font-medium rounded-md text-green-700 hover:bg-green-600 hover:text-white bg-white focus:outline-none focus:border-green-300 focus:shadow-outline-blue active:text-green-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                    onClick={handleTriageDownload}
+                >
+                  Download Facility Triage Data
+                </button>
+              </CSVLink>
+            </div>
+          </AccordionDetails>
+        </Accordion>
         </div>
       </div>
       <div className="px-3 md:px-8">

@@ -88,7 +88,7 @@ export default {
     path: "/api/v1/facility",
     method: "PATCH",
   },
-
+// Download Api
   deleteFacility: {
     path: "/api/v1/facility",
     method: "DELETE",
@@ -96,6 +96,19 @@ export default {
 
   downloadFacility: {
     path: "/api/v1/facility/?csv",
+    method: "GET",
+  },
+  downloadFacilityCapacity: {
+    path: "/api/v1/facility/?csv&capacity",
+    method: "GET",
+  },
+  downloadFacilityDoctors: {
+    path: "/api/v1/facility/?csv&doctors",
+    method: "GET",
+  },
+
+  downloadFacilityTriage: {
+    path: "/api/v1/facility/?csv&triage",
     method: "GET",
   },
 

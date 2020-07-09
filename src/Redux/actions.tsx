@@ -38,9 +38,24 @@ export const getFacilities = (params: object) => {
 export const getFacility = (id: number) => {
   return fireRequest('getFacility', [id], {});
 };
+
+// Download Actions
 export const downloadFacility = () => {
   return fireRequest('downloadFacility');
 };
+
+export const downloadFacilityCapacity = () => {
+  return fireRequest('downloadFacilityCapacity');
+};
+
+export const downloadFacilityDoctors = () => {
+  return fireRequest('downloadFacilityDoctors');
+};
+
+export const downloadFacilityTriage = () => {
+  return fireRequest('downloadFacilityTriage');
+};
+
 export const downloadPatients = () => {
   return fireRequest('downloadPatients');
 };
