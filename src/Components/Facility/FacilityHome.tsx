@@ -4,7 +4,12 @@ import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { BED_TYPES, DOCTOR_SPECIALIZATION } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getFacility, getTriageInfo, listCapacity, listDoctor } from "../../Redux/actions";
+import {
+  getFacility,
+  getTriageInfo,
+  listCapacity,
+  listDoctor
+} from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
@@ -19,6 +24,8 @@ export const FacilityHome = (props: any) => {
   const [capacityData, setCapacityData] = useState<Array<CapacityModal>>([]);
   const [doctorData, setDoctorData] = useState<Array<DoctorModal>>([]);
   const [isLoading, setIsLoading] = useState(false);
+
+
   const [patientStatsData, setPatientStatsData] = useState<
     Array<PatientStatsModel>
   >([]);
@@ -64,6 +71,8 @@ export const FacilityHome = (props: any) => {
     },
     [dispatch, facilityId]
   );
+
+
 
   useAbortableEffect(
     (status: statusType) => {
