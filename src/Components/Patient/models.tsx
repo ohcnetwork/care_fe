@@ -63,7 +63,7 @@ export interface SampleTestModel {
   atypical_presentation?: string;
   diagnosis?: string;
   diff_diagnosis?: string;
-
+  testing_facility?: string;
   doctor_name?: string;
   etiology_identified?: string;
   has_ari?: boolean;

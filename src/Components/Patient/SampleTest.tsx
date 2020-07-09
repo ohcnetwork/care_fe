@@ -18,7 +18,6 @@ import PageTitle from "../Common/PageTitle";
 import { SampleTestModel, FacilityNameModel } from "./models";
 import Typography from "@material-ui/core/Typography";
 import Container from "@material-ui/core/Container";
-// import color = Mocha.reporters.Base.color;
 
 const sampleTestTypes = [...SAMPLE_TYPE_CHOICES];
 const icmrCategories = [...ICMR_CATEGORY];
@@ -31,6 +30,7 @@ const initForm: SampleTestModel = {
   diagnosis: "",
   diff_diagnosis: "",
   doctor_name: "",
+  testing_facility: "",
   etiology_identified: "",
   has_ari: false,
   has_sari: false,
@@ -50,7 +50,6 @@ const initialState = {
   form: { ...initForm },
   errors: { ...initError },
 };
-// const initialFacilityName = [{ id: 0, name: "Choose Facility Name" }];
 
 const sampleTestFormReducer = (state = initialState, action: any) => {
   switch (action.type) {
@@ -85,15 +84,21 @@ export const SampleTest = (props: any) => {
 
   const fetchFacilityName = useCallback(
     async (status: statusType) => {
-      const facility_type = 2;
+      const facility_type = 950;
       const FacilityNameList = await dispatchAction(
         getFacilities({ facility_type })
       );
       console.log(FacilityNameList.data.results);
       if (!status.aborted && FacilityNameList.data.results) {
-        setFacilityName([FacilityNameList.data.results]);
+        setFacilityName([...FacilityNameList.data.results]);
+        dispatch({
+          type: "set_form",
+          form: {
+            ...state.form,
+            testing_facility: FacilityNameList.data.results[0]?.id,
+          },
+        });
       }
-      console.log(facilityName);
     },
     [dispatchAction]
   );
@@ -103,14 +108,6 @@ export const SampleTest = (props: any) => {
     },
     [dispatch, fetchFacilityName]
   );
-
-  // useEffect(() => {
-  //   const FacilityNameList = await dispatchAction(getFacilities({}));
-  //   if (FacilityNameList && FacilityNameList.data) {
-  //     console.log(FacilityNameList.data);
-  //     setFacilityName([...initialFacilityName, ...FacilityNameList.data]);
-  //   }
-  // }, [dispatchAction]);
 
   const validateForm = () => {
     let errors = { ...initError };
@@ -147,15 +144,12 @@ export const SampleTest = (props: any) => {
             invalidForm = true;
           }
           break;
-        // case "facility_name":
-        //   if (
-        //     state.form.facility_name === "Choose Facility Name" &&
-        //     !Number(state.form[field])
-        //   ) {
-        //     errors[field] = "Please choose the Facility Name";
-        //     invalidForm = true;
-        //   }
-        //   break;
+        case "testing_facility":
+          if (!state.form[field]) {
+            errors[field] = "Please Choose a testing facility";
+            invalidForm = true;
+          }
+          break;
         default:
           return;
       }
@@ -189,6 +183,7 @@ export const SampleTest = (props: any) => {
         diff_diagnosis: state.form.diff_diagnosis
           ? state.form.diff_diagnosis
           : undefined,
+        testing_facility: state.form.testing_facility,
         doctor_name: state.form.doctor_name
           ? state.form.doctor_name
           : undefined,
@@ -234,6 +229,8 @@ export const SampleTest = (props: any) => {
   if (isLoading) {
     return <Loading />;
   }
+
+  console.log(facilityName);
 
   return (
     <div className="px-2 pb-2">
@@ -361,17 +358,17 @@ export const SampleTest = (props: any) => {
 
               <div className="mt-2 w-1/3 ">
                 <SelectField
-                  name="facility_name"
+                  name="testing_facility"
                   variant="outlined"
                   margin="dense"
-                  value={state.form.facility_name}
+                  value={state.form.testing_facility}
                   options={facilityName.map((e) => {
                     return { id: e.id, name: e.name };
                   })}
                   optionValue="name"
                   optionKey="id"
                   onChange={handleChange}
-                  errors={state.errors.facility_name}
+                  errors={state.errors.testing_facility}
                 />
               </div>
               <div className="mt-4 grid gap-4 grid-cols-1 md:grid-cols-2">
