@@ -89,10 +89,6 @@ export const HospitalList = () => {
 
   useAbortableEffect(
     (status: statusType) => {
-      handleDownload();
-      handleCapacityDownload();
-      handleDoctorsDownload();
-      handleTriageDownload();
       fetchData(status);
     },
     [fetchData]
