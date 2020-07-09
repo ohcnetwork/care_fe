@@ -1,7 +1,7 @@
 import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { navigate } from "hookrouter";
-import React, { useReducer, useCallback, useState, useEffect } from "react";
+import React, { useReducer, useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { SAMPLE_TYPE_CHOICES, ICMR_CATEGORY } from "../../Common/constants";
 import { createSampleTest, getFacilities } from "../../Redux/actions";
@@ -88,7 +88,6 @@ export const SampleTest = (props: any) => {
       const FacilityNameList = await dispatchAction(
         getFacilities({ facility_type })
       );
-      console.log(FacilityNameList.data.results);
       if (!status.aborted && FacilityNameList.data.results) {
         setFacilityName([...FacilityNameList.data.results]);
         dispatch({
@@ -229,9 +228,6 @@ export const SampleTest = (props: any) => {
   if (isLoading) {
     return <Loading />;
   }
-
-  console.log(facilityName);
-
   return (
     <div className="px-2 pb-2">
       <PageTitle title={headerText} />
@@ -262,11 +258,7 @@ export const SampleTest = (props: any) => {
                     optionArray={true}
                     value={state.form.icmr_category}
                     options={icmrCategories}
-                    onChange={(e) => [
-                      console.log("onchange"),
-                      handleChange(e),
-                      // fetchFacilityName(String(e.target.value)),
-                    ]}
+                    onChange={handleChange}
                     errors={state.errors.icmr_category}
                   />
                 </div>
@@ -284,8 +276,7 @@ export const SampleTest = (props: any) => {
                 <div>
                   <Container>
                     <InputLabel>
-                      {" "}
-                      Reference below to know more about ICMR Categories{" "}
+                      Reference below to know more about ICMR Categories
                     </InputLabel>
                     <Typography>
                       <li>
