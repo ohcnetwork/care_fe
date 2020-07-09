@@ -70,29 +70,29 @@ export const HospitalList = () => {
   const handleDownload = async () => {
     const res = await dispatchAction(downloadFacility());
     setDownloadFile(res.data);
+    document.getElementById("facilityDownloader")?.click();
   };
 
   const handleCapacityDownload = async () => {
     const cap = await dispatchAction(downloadFacilityCapacity());
     setCapacityDownloadFile(cap.data);
+    document.getElementById("capacityDownloader")?.click();
   };
 
   const handleDoctorsDownload = async () => {
     const doc = await dispatchAction(downloadFacilityDoctors());
     setDoctorsDownloadFile(doc.data);
+    document.getElementById("doctorsDownloader")?.click();
   };
 
   const handleTriageDownload = async () => {
     const tri = await dispatchAction(downloadFacilityTriage());
     setTriageDownloadFile(tri.data);
+    document.getElementById("triageDownloader")?.click();
   };
 
   useAbortableEffect(
     (status: statusType) => {
-      handleDownload();
-      handleCapacityDownload();
-      handleDoctorsDownload();
-      handleTriageDownload();
       fetchData(status);
     },
     [fetchData]
@@ -211,60 +211,68 @@ export const HospitalList = () => {
                   data={DownloadFile}
                   filename={`facilities-${now}.csv`}
                   target="_blank"
+                  className="hidden"
+                  id="facilityDownloader"
               >
-                <button
+              </CSVLink>
+              <button
                     type="button"
                     className="inline-flex items-center mr-2 px-1 py-3 ml-1  lg:px-3 border border-green-500 text-sm leading-4 font-medium rounded-md text-green-700 hover:bg-green-600 hover:text-white bg-white focus:outline-none focus:border-green-300 focus:shadow-outline-blue active:text-green-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
                     onClick={handleDownload}
                 >
                   Download Facility List
-                </button>
-              </CSVLink>
+              </button>
             </div>
             <div className="w-1/4 text-center items-center">
               <CSVLink
                   data={capacityDownloadFile}
                   filename={`facility-capacity-${now}.csv`}
+                  className="hidden"
+                  id="capacityDownloader"
                   target="_blank"
               >
-                <button
+              </CSVLink>
+              <button
                     type="button"
                     className="inline-flex items-center mr-2 px-1 py-3 ml-1  lg:px-3 border border-green-500 text-sm leading-4 font-medium rounded-md text-green-700 hover:bg-green-600 hover:text-white bg-white focus:outline-none focus:border-green-300 focus:shadow-outline-blue active:text-green-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
                     onClick={handleCapacityDownload}
                 >
                   Download Facility Capacity List
-                </button>
-              </CSVLink>
+              </button>
             </div>
             <div className="w-1/4 text-center items-center">
               <CSVLink
                   data={doctorsDownloadFile}
                   filename={`facility-doctors-${now}.csv`}
                   target="_blank"
+                  className="hidden"
+                  id="doctorsDownloader"
               >
-                <button
+              </CSVLink>
+              <button
                     type="button"
                     className="inline-flex items-center mr-2 px-1 py-3 ml-1  lg:px-3 border border-green-500 text-sm leading-4 font-medium rounded-md text-green-700 hover:bg-green-600 hover:text-white bg-white focus:outline-none focus:border-green-300 focus:shadow-outline-blue active:text-green-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
                     onClick={handleDoctorsDownload}
-                >
+              >
                   Download Facility Doctors List
-                </button>
-              </CSVLink>
+              </button>
             </div>
             <div className="w-1/4 text-center items-center">
               <CSVLink
                   data={triageDownloadFile}
                   filename={`facility-triage-${now}.csv`}
                   target="_blank"
+                  className="hidden"
+                  id="triageDownloader"
               >
-                <button
+              </CSVLink>
+              <button
                     type="button"
                     className="inline-flex items-center mr-2 px-1 py-3 ml-1  lg:px-3 border border-green-500 text-sm leading-4 font-medium rounded-md text-green-700 hover:bg-green-600 hover:text-white bg-white focus:outline-none focus:border-green-300 focus:shadow-outline-blue active:text-green-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
                     onClick={handleTriageDownload}
-                >
+              >
                   Download Facility Triage Data
-                </button>
-              </CSVLink>
+              </button>
             </div>
           </AccordionDetails>
         </Accordion>
