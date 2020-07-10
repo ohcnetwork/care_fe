@@ -4,7 +4,7 @@ import { navigate } from "hookrouter";
 import React, { useReducer, useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { SAMPLE_TYPE_CHOICES, ICMR_CATEGORY } from "../../Common/constants";
-import { createSampleTest, getFacilities } from "../../Redux/actions";
+import { createSampleTest, getAllFacilities } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
@@ -86,7 +86,7 @@ export const SampleTest = (props: any) => {
     async (status: statusType) => {
       const facility_type = 950;
       const FacilityNameList = await dispatchAction(
-        getFacilities({ facility_type })
+        getAllFacilities({ facility_type })
       );
       if (!status.aborted && FacilityNameList.data.results) {
         setFacilityName([...FacilityNameList.data.results]);
