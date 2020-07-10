@@ -10,12 +10,7 @@ import {
   downloadFacilityDoctors,
   downloadFacilityTriage,
 } from "../../Redux/actions";
-import {
-  CheckboxField,
-  MultilineInputField,
-  SelectField,
-  TextInputField,
-} from "../Common/HelperInputFields";
+import { SelectField } from "../Common/HelperInputFields";
 import { InputLabel } from "@material-ui/core";
 import { Loading } from "../Common/Loading";
 import Pagination from "../Common/Pagination";
