@@ -237,7 +237,7 @@ export default {
     method: "POST",
   },
   sampleReport: {
-    path: "/api/v1/patient/{id}/icmr_sample",
+    path: "/api/v1/patient/{id}/test_sample/{sampleId}/icmr_sample",
   },
 
   // States

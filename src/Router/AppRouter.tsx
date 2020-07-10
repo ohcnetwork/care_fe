@@ -44,7 +44,7 @@ const routes = {
   "/patient/discharge": () => <PatientDischarge />,
   "/sample": () => <SampleViewAdmin />,
   "/sample/:id": ({ id }: any) => <SampleDetails id={id} />,
-  '/sample/report/:patientId': ({ patientId }: any) => <SampleReport id={patientId} />,
+  '/patient/:patientId/test_sample/:sampleId/icmr_sample': ({ patientId , sampleId}: any) => <SampleReport id={patientId} sampleId={sampleId} />,
   "/facility": () => <HospitalList />,
   "/facility/create": () => <FacilityCreate />,
   "/facility/:facilityId/update": ({ facilityId }: any) => (

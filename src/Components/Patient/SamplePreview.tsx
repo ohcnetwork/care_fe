@@ -77,12 +77,13 @@ const useStyles = makeStyles({
 const coronasafeLogo = 'https://cdn.coronasafe.network/coronaSafeLogo.webp';
 
 interface samplePreviewProps {
-    id: number;
+    id: string;
+    sampleId: string;
 }
 export default function SampleReport(props: samplePreviewProps) {
     const classes = useStyles();
     const dispatch: any = useDispatch();
-    const { id } = props;
+    const { id, sampleId } = props;
     const [isLoading, setIsLoading] = useState(false);
     const [sampleData, setSampleData] = useState<SampleReportModel>({});
     let report: any = null;
@@ -91,7 +92,7 @@ export default function SampleReport(props: samplePreviewProps) {
     const fetchData = useCallback(
         async (status: statusType) => {
             setIsLoading(true);
-            const res: any = await dispatch(sampleReport({ id }));
+            const res: any = await dispatch(sampleReport(id, sampleId));
 
             if (!status.aborted) {
                 if (res && res.data) {
