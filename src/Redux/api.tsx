@@ -88,6 +88,11 @@ export default {
     path: "/api/v1/facility",
     method: "PATCH",
   },
+
+  getAllFacilitiesList:{
+    path: "/api/v1/getallfacilities",
+  },
+
 // Download Api
   deleteFacility: {
     path: "/api/v1/facility",

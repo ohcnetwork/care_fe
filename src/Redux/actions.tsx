@@ -38,6 +38,9 @@ export const getFacilities = (params: object) => {
 export const getFacility = (id: number) => {
   return fireRequest('getFacility', [id], {});
 };
+export const getAllFacilities = (params: object) => {
+  return fireRequest('getAllFacilitiesList', [], params);
+};
 
 // Download Actions
 export const downloadFacility = () => {
