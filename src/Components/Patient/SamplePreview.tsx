@@ -153,10 +153,15 @@ export default function SampleReport(props: samplePreviewProps) {
                         <Box display="flex" flexDirection="row" justifyContent="center"
                             className={`${classes.mainHeader} ${classes.borderRight} ${classes.borderLeft} ${classes.borderTop} ${classes.cellTBPadding}`}>
                             <Typography component="h6" variant="h6">
-                                Sample Id : {id}
+                                Sample Id : {sampleId}
                             </Typography>
                         </Box>
-
+                        <Box display="flex" flexDirection="row" justifyContent="center"
+                             className={`${classes.mainHeader} ${classes.borderRight} ${classes.borderLeft} ${classes.borderTop} ${classes.cellTBPadding}`}>
+                            <Typography component="h6" variant="h6">
+                                Patient Id : {id}
+                            </Typography>
+                        </Box>
                         <div style={{ border: "solid 5px black" }}>
                             <Box display="flex" flexDirection="row" justifyContent="center"
                                 className={`${classes.subHeader} ${classes.borderRight} ${classes.borderLeft} ${classes.borderBottom} ${classes.cellTBPadding}`}>
@@ -753,7 +758,7 @@ export default function SampleReport(props: samplePreviewProps) {
                                 </Box>
                                 <Box width="69%" className={`${classes.cellTBPadding}`}>
                                     <Typography className={`${classes.cellText}`}>
-                                        {sampleData && sampleData.medical_conditions && sampleData.medical_conditions.medical_conditions && !!sampleData.medical_conditions.medical_conditions.length && sampleData.medical_conditions.medical_conditions.join(', ')}
+                                        {sampleData && sampleData.medical_conditions && sampleData.medical_conditions.medical_conditions_list && !!sampleData.medical_conditions.medical_conditions_list.length && sampleData.medical_conditions.medical_conditions_list.join(', ')}
                                     </Typography>
                                 </Box>
                                 {/* </Box> */}

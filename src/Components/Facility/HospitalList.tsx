@@ -292,28 +292,36 @@ export const HospitalList = () => {
                     target="_blank"
                     className="hidden"
                     id="facilityDownloader"
-                  ></CSVLink>
+                  >
+
+                  </CSVLink>
                   <CSVLink
                     data={capacityDownloadFile}
                     filename={`facility-capacity-${now}.csv`}
                     className="hidden"
                     id="capacityDownloader"
                     target="_blank"
-                  ></CSVLink>
+                  >
+
+                  </CSVLink>
                   <CSVLink
                     data={doctorsDownloadFile}
                     filename={`facility-doctors-${now}.csv`}
                     target="_blank"
                     className="hidden"
                     id="doctorsDownloader"
-                  ></CSVLink>
+                  >
+
+                  </CSVLink>
                   <CSVLink
                     data={triageDownloadFile}
                     filename={`facility-triage-${now}.csv`}
                     target="_blank"
                     className="hidden"
                     id="triageDownloader"
-                  ></CSVLink>
+                  >
+
+                  </CSVLink>
                 </div>
               </AccordionDetails>
             </Accordion>
