@@ -14,6 +14,13 @@ export const USER_TYPES: Array<String> = [
   "StateAdmin"
 ];
 
+export const DOWNLOAD_TYPES: Array<String> = [
+  "Facility List",
+  "Facility Capacity List",
+  "Facility Doctors List",
+  "Facility Triage Data",
+];
+
 export const DISTRICT_CHOICES: Array<OptionsType> = [
   { id: 1, text: "Thiruvananthapuram" },
   { id: 2, text: "Kollam" },
