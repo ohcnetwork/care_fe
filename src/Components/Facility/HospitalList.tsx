@@ -265,7 +265,7 @@ export const HospitalList = () => {
                       }}
                     />
                     <button
-                      className="bg-green-600 px-2 ml-2 my-2  rounded"
+                      className="bg-green-600 hover:shadow-md px-2 ml-2 my-2  rounded"
                       onClick={handleDownloader}
                     >
                       <svg
