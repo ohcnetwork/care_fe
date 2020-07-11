@@ -75,7 +75,7 @@
   },
   "scripts": {
     "prebuild": "npm run generate-build-meta",
-    "start": "webpack-dev-server -p --mode=development",
+    "start": "webpack-dev-server -p --open --mode=development",
     "start:Dev": "NODE_ENV=production http-server dist",
     "build": "NODE_ENV=production ./node_modules/.bin/webpack -p --mode=production",
     "generate-build-meta": "node ./build-scripts/generate-build-version.js"
