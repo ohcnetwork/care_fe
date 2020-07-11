@@ -9,7 +9,7 @@ import { PhoneNumberField, SelectField, TextInputField } from "../Common/HelperI
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
 import { validateEmailAddress, phonePreg } from "../../Common/validation";
 import * as Notification from "../../Utils/Notifications.js";
-import { checkIfLatestBundle } from '../../Utils/build-meta-info'
+import { checkIfLatestBundle } from '../../Utils/build-meta-info';
 
 const initForm: any = {
     firstName: "",
