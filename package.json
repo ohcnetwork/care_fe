@@ -70,12 +70,15 @@
     "save": "^2.4.0",
     "tailwindcss": "^1.4.5",
     "tslib": "^2.0.0",
-    "typescript": "^3.9.6"
+    "typescript": "^3.9.6",
+    "uuid": "^8.2.0"
   },
   "scripts": {
-    "start": "webpack-dev-server -p --open --mode=development",
+    "prebuild": "npm run generate-build-meta",
+    "start": "webpack-dev-server -p --mode=development",
     "start:Dev": "NODE_ENV=production http-server dist",
-    "build": "NODE_ENV=production ./node_modules/.bin/webpack -p --mode=production"
+    "build": "NODE_ENV=production ./node_modules/.bin/webpack -p --mode=production",
+    "generate-build-meta": "node ./build-scripts/generate-build-version.js"
   },
   "eslintConfig": {
     "extends": "react-app"

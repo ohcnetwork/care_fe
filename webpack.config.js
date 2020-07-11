@@ -103,17 +103,16 @@ module.exports = (env, argv) => {
             from: "public/robots.txt",
             to: "robots.txt",
           },
+          {
+            from: "public/build-meta.json",
+            to: "build-meta.json",
+          }
         ],
       }),
       new CleanWebpackPlugin(),
       new HtmlWebpackPlugin({
         template: path.resolve(__dirname, "src", "index.html"),
         title: "Coronasafe Care",
-      }),
-      new WorkboxPlugin.GenerateSW({
-        skipWaiting: true,
-        maximumFileSizeToCacheInBytes: 4194304,
-        mode: "production",
       }),
       new webpack.HotModuleReplacementPlugin(),
       new MomentLocalesPlugin(),
@@ -122,6 +121,12 @@ module.exports = (env, argv) => {
           ? "css/[name][hash].bundle.css"
           : "css/[name][hash].prod.bundle.css",
       }),
+      new WorkboxPlugin.GenerateSW({
+        clientsClaim: true,
+        skipWaiting: true,
+        maximumFileSizeToCacheInBytes: 4194304,
+        exclude: ['build-meta.json', /\.map$/]
+      })
     ],
   };
 };
