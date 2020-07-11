@@ -77,12 +77,13 @@ const useStyles = makeStyles({
 const coronasafeLogo = 'https://cdn.coronasafe.network/coronaSafeLogo.webp';
 
 interface samplePreviewProps {
-    id: number;
+    id: string;
+    sampleId: string;
 }
 export default function SampleReport(props: samplePreviewProps) {
     const classes = useStyles();
     const dispatch: any = useDispatch();
-    const { id } = props;
+    const { id, sampleId } = props;
     const [isLoading, setIsLoading] = useState(false);
     const [sampleData, setSampleData] = useState<SampleReportModel>({});
     let report: any = null;
@@ -91,7 +92,7 @@ export default function SampleReport(props: samplePreviewProps) {
     const fetchData = useCallback(
         async (status: statusType) => {
             setIsLoading(true);
-            const res: any = await dispatch(sampleReport({ id }));
+            const res: any = await dispatch(sampleReport(id, sampleId));
 
             if (!status.aborted) {
                 if (res && res.data) {
@@ -152,10 +153,15 @@ export default function SampleReport(props: samplePreviewProps) {
                         <Box display="flex" flexDirection="row" justifyContent="center"
                             className={`${classes.mainHeader} ${classes.borderRight} ${classes.borderLeft} ${classes.borderTop} ${classes.cellTBPadding}`}>
                             <Typography component="h6" variant="h6">
-                                Sample Id : {id}
+                                Sample Id : {sampleId}
                             </Typography>
                         </Box>
-
+                        <Box display="flex" flexDirection="row" justifyContent="center"
+                             className={`${classes.mainHeader} ${classes.borderRight} ${classes.borderLeft} ${classes.borderTop} ${classes.cellTBPadding}`}>
+                            <Typography component="h6" variant="h6">
+                                Patient Id : {id}
+                            </Typography>
+                        </Box>
                         <div style={{ border: "solid 5px black" }}>
                             <Box display="flex" flexDirection="row" justifyContent="center"
                                 className={`${classes.subHeader} ${classes.borderRight} ${classes.borderLeft} ${classes.borderBottom} ${classes.cellTBPadding}`}>
@@ -752,7 +758,7 @@ export default function SampleReport(props: samplePreviewProps) {
                                 </Box>
                                 <Box width="69%" className={`${classes.cellTBPadding}`}>
                                     <Typography className={`${classes.cellText}`}>
-                                        {sampleData && sampleData.medical_conditions && sampleData.medical_conditions.medical_conditions && !!sampleData.medical_conditions.medical_conditions.length && sampleData.medical_conditions.medical_conditions.join(', ')}
+                                        {sampleData && sampleData.medical_conditions && sampleData.medical_conditions.medical_conditions_list && !!sampleData.medical_conditions.medical_conditions_list.length && sampleData.medical_conditions.medical_conditions_list.join(', ')}
                                     </Typography>
                                 </Box>
                                 {/* </Box> */}

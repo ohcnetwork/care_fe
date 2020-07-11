@@ -149,7 +149,7 @@ export interface SampleReportModel {
     symptoms?: Array<any>;
     has_sari?: boolean;
     has_ari?: boolean;
-    medical_conditions?: Array<any>;
+    medical_conditions_list?: Array<any>;
     hospitalization_date?: string;
     diagnosis?: string;
     diff_diagnosis?: string;
