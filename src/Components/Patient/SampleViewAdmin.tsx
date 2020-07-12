@@ -149,7 +149,7 @@ export default function SampleViewAdmin(props: any) {
       const statusText = SAMPLE_TEST_STATUS.find(i => i.text === status)?.desc;
       const validStatusChoices = statusChoices
         .filter(i => status && statusFlow[status] && statusFlow[status].includes(i.text))
-        .filter(i => roleStatusMap[userType] && roleStatusMap[userType].includes(i.text))
+        // .filter(i => roleStatusMap[userType] && roleStatusMap[userType].includes(i.text))
       return (
         <div key={`usr_${item.id}`} className="w-full md:w-1/2 mt-6 md:px-4">
           <div
@@ -218,7 +218,7 @@ export default function SampleViewAdmin(props: any) {
                 </div>)}
                 <div className="mt-2">
                   <button
-                    onClick={(e) => navigate(`/sample/report/${item.patient}`)}
+                    onClick={(e) => navigate(`/patient/${item.patient}/test_sample/${item.id}/icmr_sample`)}
                     className="w-full text-sm bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow text-center"
                   >View Sample Report</button>
                 </div>

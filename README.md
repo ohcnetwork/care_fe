@@ -4,8 +4,8 @@
 ![Anchore Container Scan](https://github.com/coronasafe/care_fe/workflows/Anchore%20Container%20Scan/badge.svg)
 ![Code scanning - action](https://github.com/coronasafe/care_fe/workflows/Code%20scanning%20-%20action/badge.svg)
 ![OSSAR](https://github.com/coronasafe/care_fe/workflows/OSSAR/badge.svg)
-
-
+![Staging Release](https://github.com/coronasafe/care_fe/workflows/CARE%20Develop%20Registry/badge.svg)
+![Production Release](https://github.com/coronasafe/care_fe/workflows/Production%20Release/badge.svg)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/200482ab117e4b5397ff3f5ae5719aa2)](https://www.codacy.com/gh/coronasafe/care_fe?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=coronasafe/care_fe&amp;utm_campaign=Badge_Grade) 
 [![CircleCI](https://circleci.com/gh/coronasafe/care_fe.svg?style=svg)](https://circleci.com/gh/coronasafe/care_fe)
 [![Maintainability](https://api.codeclimate.com/v1/badges/f1438f693aa459805301/maintainability)](https://codeclimate.com/github/coronasafe/care_fe/maintainability)

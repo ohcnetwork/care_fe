@@ -44,7 +44,7 @@ const routes = {
   "/patient/discharge": () => <PatientDischarge />,
   "/sample": () => <SampleViewAdmin />,
   "/sample/:id": ({ id }: any) => <SampleDetails id={id} />,
-  '/sample/report/:patientId': ({ patientId }: any) => <SampleReport id={patientId} />,
+  '/patient/:patientId/test_sample/:sampleId/icmr_sample': ({ patientId , sampleId}: any) => <SampleReport id={patientId} sampleId={sampleId} />,
   "/facility": () => <HospitalList />,
   "/facility/create": () => <FacilityCreate />,
   "/facility/:facilityId/update": ({ facilityId }: any) => (
@@ -159,6 +159,7 @@ const AppRouter = () => {
     "data.last_name",
     ""
   )}`;
+  document.getElementById("pages")?.scrollTo(0,0);
 
   return (
     <div className="h-screen flex overflow-hidden bg-gray-100">
@@ -300,7 +301,7 @@ const AppRouter = () => {
           </a>
         </div>
 
-        <main className="flex-1 overflow-y-auto pb-4 md:py-0 focus:outline-none" >
+        <main id="pages" className="flex-1 overflow-y-auto pb-4 md:py-0 focus:outline-none" >
           <div className="max-w-7xl mx-auto px-0">
             {pages}
           </div>

@@ -89,6 +89,11 @@ export default {
     method: "PATCH",
   },
 
+  getAllFacilitiesList:{
+    path: "/api/v1/getallfacilities",
+  },
+
+// Download Api
   deleteFacility: {
     path: "/api/v1/facility",
     method: "DELETE",
@@ -96,6 +101,19 @@ export default {
 
   downloadFacility: {
     path: "/api/v1/facility/?csv",
+    method: "GET",
+  },
+  downloadFacilityCapacity: {
+    path: "/api/v1/facility/?csv&capacity",
+    method: "GET",
+  },
+  downloadFacilityDoctors: {
+    path: "/api/v1/facility/?csv&doctors",
+    method: "GET",
+  },
+
+  downloadFacilityTriage: {
+    path: "/api/v1/facility/?csv&triage",
     method: "GET",
   },
 
@@ -219,7 +237,7 @@ export default {
     method: "POST",
   },
   sampleReport: {
-    path: "/api/v1/patient/{id}/icmr_sample",
+    path: "/api/v1/patient/{id}/test_sample/{sampleId}/icmr_sample",
   },
 
   // States

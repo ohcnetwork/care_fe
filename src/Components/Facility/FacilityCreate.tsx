@@ -9,7 +9,7 @@ import React, { useCallback, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
 import { FACILITY_TYPES } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { validateLocationCoordinates } from "../../Common/validation";
+import { validateLocationCoordinates, phonePreg } from "../../Common/validation";
 import { createFacility, getDistrictByState, getFacility, getLocalbodyByDistrict, getStates, updateFacility } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { MultilineInputField, PhoneNumberField, SelectField, TextInputField } from "../Common/HelperInputFields";
@@ -237,7 +237,7 @@ export const FacilityCreate = (props: FacilityProps) => {
           return;
         case "phone_number":
           const phoneNumber = parsePhoneNumberFromString(state.form[field]);
-          if (!state.form[field] || !phoneNumber?.isPossible()) {
+          if (!state.form[field] || !phoneNumber?.isPossible() || !phonePreg(String(phoneNumber?.number))) {
             errors[field] = "Please enter valid phone number";
             invalidForm = true;
           }
@@ -433,8 +433,8 @@ export const FacilityCreate = (props: FacilityProps) => {
                 />
               </div>
               <div>
-              <InputLabel id="name-label">Pincode*</InputLabel>
-              <TextInputField
+                <InputLabel id="name-label">Pincode*</InputLabel>
+                <TextInputField
                   name="pincode"
                   variant="outlined"
                   margin="dense"
@@ -442,8 +442,8 @@ export const FacilityCreate = (props: FacilityProps) => {
                   value={state.form.pincode}
                   onChange={handleChange}
                   errors={state.errors.pincode}
-              />
-            </div>
+                />
+              </div>
               <div>
                 <PhoneNumberField
                   label="Emergency Contact Number"

@@ -7,17 +7,17 @@ import { useDispatch, useSelector } from "react-redux";
 import { getUserDetails, updateUserDetails } from "../../Redux/actions";
 import { PhoneNumberField, SelectField, TextInputField } from "../Common/HelperInputFields";
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
-import { validateEmailAddress } from "../../Common/validation";
+import { validateEmailAddress, phonePreg } from "../../Common/validation";
 import * as Notification from "../../Utils/Notifications.js";
-
+import { checkIfLatestBundle } from '../../Utils/build-meta-info';
 
 const initForm: any = {
-    first_name: "",
-    last_name: "",
+    firstName: "",
+    lastName: "",
     age: "",
     gender: "",
     email: "",
-    phone_number: "",
+    phoneNumber: "",
 };
 
 const initError = Object.assign({}, ...Object.keys(initForm).map(k => ({ [k]: "" })));
@@ -53,6 +53,7 @@ export default function UserProfile() {
     const username = currentUser.data.username;
 
     const [showEdit, setShowEdit] = React.useState<boolean | false>(false);
+    const [updateBtnText, setUpdateBtnText] = React.useState<string>("Update");
 
     const [isLoading, setIsLoading] = useState(false);
     const dispatchAction: any = useDispatch();
@@ -77,12 +78,12 @@ export default function UserProfile() {
                 if (res && res.data) {
                     setDetails(res.data);
                     const formData: any = {
-                        first_name: res.data.first_name,
-                        last_name: res.data.last_name,
+                        firstName: res.data.first_name,
+                        lastName: res.data.last_name,
                         age: res.data.age,
-                        gender: res.data.gender,
+                        gender: genderTypes.filter(el => { return el.text === res.data.gender })[0].id,
                         email: res.data.email,
-                        phone_number: res.data.phone_number,
+                        phoneNumber: res.data.phone_number,
                     };
                     dispatch({
                         type: "set_form",
@@ -113,8 +114,8 @@ export default function UserProfile() {
         let invalidForm = false;
         Object.keys(states.form).forEach((field, i) => {
             switch (field) {
-                case "first_name":
-                case "last_name":
+                case "firstName":
+                case "lastName":
                 case "gender":
                     if (!states.form[field]) {
                         errors[field] = "Field is required";
@@ -127,9 +128,9 @@ export default function UserProfile() {
                         invalidForm = true;
                     }
                     return;
-                case "phone_number":
-                    const phoneNumber = parsePhoneNumberFromString(states.form[field]);
-                    if (!states.form[field] || !phoneNumber?.isPossible()) {
+                case "phoneNumber":
+                    const phoneNumber = parsePhoneNumberFromString(states.form[field])?.number;
+                    if (!states.form[field] || !phonePreg(String(phoneNumber))) {
                         errors[field] = "Please enter valid phone number";
                         invalidForm = true;
                     }
@@ -165,14 +166,12 @@ export default function UserProfile() {
             setIsLoading(true);
             const data = {
                 username: username,
-                first_name: states.form.first_name,
-                last_name: states.form.last_name,
+                first_name: states.form.firstName,
+                last_name: states.form.lastName,
                 email: states.form.email,
-                phone_number: parsePhoneNumberFromString(states.form.phone_number)?.format('E.164'),
+                phone_number: parsePhoneNumberFromString(states.form.phoneNumber)?.format('E.164'),
                 gender: Number(states.form.gender),
                 age: states.form.age,
-
-
             };
             const res = await dispatchAction(
                 updateUserDetails(username, data)
@@ -182,14 +181,39 @@ export default function UserProfile() {
                 Notification.Success({
                     msg: "Details updated successfully"
                 });
-                window.location.reload();
+                setDetails({ ...details, first_name: states.form.firstName, last_name: states.form.lastName, age: states.form.age, gender: genderTypes.filter(el => { return el.id === Number(states.form.gender) })[0].text, email: states.form.email, phone_number: states.form.phoneNumber });
+                setShowEdit(false);
             }
         }
     };
 
-    return (
+    const checkForNewBuildVersion = async () => {
 
-        <div >
+        let [isLatestBundle, newVersion] = await checkIfLatestBundle();
+
+        if (!isLatestBundle) {
+            setUpdateBtnText("updating...");
+            localStorage.setItem('build_meta_version', newVersion);
+
+            if ('caches' in window) {
+                // Service worker cache should be cleared with caches.delete()
+                caches.keys().then(names => {
+                    for (const name of names) {
+                        caches.delete(name);
+                    }
+
+                    window.location.reload(true);
+                });
+            }
+        } else {
+            setUpdateBtnText("You already have the latest version!")
+
+            setTimeout(() => setUpdateBtnText("Update"), 1000);
+        }
+    }
+
+    return (
+        <div>
             <div className="md:p-20 p-10">
                 <div className="md:grid md:grid-cols-3 md:gap-6">
                     <div className="md:col-span-1">
@@ -259,6 +283,28 @@ export default function UserProfile() {
                                     </div>
                                     <div className="sm:col-span-1">
                                         <dt className="text-sm leading-5 font-medium text-gray-500">
+                                            Verification Status
+                                        </dt>
+                                        { details.verified &&
+                                        <dd className="mt-1 badge badge-pill badge-primary text-sm leading-5 text-gray-900">
+                                            Verified
+                                        </dd> }
+                                        { !details.verified &&
+                                        <dd className="mt-1 text-sm leading-5 text-gray-900">
+                                            Not Verified
+                                        </dd>
+                                        }
+                                    </div>
+                                    <div className="sm:col-span-1">
+                                        <dt className="text-sm leading-5 font-medium text-gray-500">
+                                            Access Level
+                                        </dt>
+                                        <dd className="mt-1 badge badge-pill badge-primary text-sm leading-5 text-gray-900">
+                                            {details.user_type || '-'}
+                                        </dd>
+                                    </div>
+                                    <div className="sm:col-span-1">
+                                        <dt className="text-sm leading-5 font-medium text-gray-500">
                                             Gender
                                         </dt>
                                         <dd className="mt-1 text-sm leading-5 text-gray-900">
@@ -300,30 +346,30 @@ export default function UserProfile() {
                                     <div className="px-4 py-5 bg-white sm:p-6">
                                         <div className="grid grid-cols-6 gap-6">
                                             <div className="col-span-6 sm:col-span-3">
-                                                <label htmlFor="first_name" className="block text-sm font-medium leading-5 text-gray-700">First name</label>
+                                                <label htmlFor="firstName" className="block text-sm font-medium leading-5 text-gray-700">First name</label>
                                                 <TextInputField
-                                                    name="first_name"
+                                                    name="firstName"
                                                     variant="outlined"
                                                     margin="dense"
                                                     type="text"
                                                     className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
-                                                    value={states.form.first_name}
+                                                    value={states.form.firstName}
                                                     onChange={handleChangeInput}
-                                                    errors={states.errors.first_name}
+                                                    errors={states.errors.firstName}
                                                 />
                                             </div>
 
                                             <div className="col-span-6 sm:col-span-3">
-                                                <label htmlFor="last_name" className="block text-sm font-medium leading-5 text-gray-700">Last name</label>
+                                                <label htmlFor="lastName" className="block text-sm font-medium leading-5 text-gray-700">Last name</label>
                                                 <TextInputField
-                                                    name="last_name"
+                                                    name="lastName"
                                                     variant="outlined"
                                                     margin="dense"
                                                     className="mt-1 form-input block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
                                                     type="text"
-                                                    value={states.form.last_name}
+                                                    value={states.form.lastName}
                                                     onChange={handleChangeInput}
-                                                    errors={states.errors.last_name}
+                                                    errors={states.errors.lastName}
                                                 />
                                             </div>
 
@@ -356,11 +402,11 @@ export default function UserProfile() {
                                             <div className="col-span-6 sm:col-span-3">
                                                 <PhoneNumberField
                                                     label="Phone Number*"
-                                                    value={states.form.phone_number}
+                                                    value={states.form.phoneNumber}
                                                     onChange={(value: any) => [
-                                                        handleValueChange(value, 'phone_number')
+                                                        handleValueChange(value, 'phoneNumber')
                                                     ]}
-                                                    errors={states.errors.phone_number}
+                                                    errors={states.errors.phoneNumber}
                                                 />
                                             </div>
                                             <div className="col-span-6 sm:col-span-3">
@@ -391,6 +437,19 @@ export default function UserProfile() {
                             </form>}
                     </div>
                 </div>
+            
+
+                <div className="mt-10">
+                    <div className="text-lg font-medium leading-6 text-gray-900">
+                        Check for software updates
+                        <p className="mt-1 text-sm leading-5 text-gray-600">Click the update button to see if you have the latest "care" version.</p>
+                    </div>
+                    <button className="bg-white text-sm hover:bg-gray-100 text-gray-800 py-2 px-4 border border-gray-400 rounded shadow text-center outline-none mt-3"
+                        onClick={() => checkForNewBuildVersion()}>
+                        {updateBtnText}
+                    </button>
+                </div>
+
             </div>
         </div>
     );

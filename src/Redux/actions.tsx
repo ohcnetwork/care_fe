@@ -38,9 +38,27 @@ export const getFacilities = (params: object) => {
 export const getFacility = (id: number) => {
   return fireRequest('getFacility', [id], {});
 };
+export const getAllFacilities = (params: object) => {
+  return fireRequest('getAllFacilitiesList', [], params);
+};
+
+// Download Actions
 export const downloadFacility = () => {
   return fireRequest('downloadFacility');
 };
+
+export const downloadFacilityCapacity = () => {
+  return fireRequest('downloadFacilityCapacity');
+};
+
+export const downloadFacilityDoctors = () => {
+  return fireRequest('downloadFacilityDoctors');
+};
+
+export const downloadFacilityTriage = () => {
+  return fireRequest('downloadFacilityTriage');
+};
+
 export const downloadPatients = () => {
   return fireRequest('downloadPatients');
 };
@@ -124,8 +142,8 @@ export const sampleSearch = (params: object) => {
 export const createSampleTest = (params: object, pathParam: object) => {
   return fireRequest('createSampleTest', [], params, pathParam);
 };
-export const sampleReport = (pathParam: object) => {
-  return fireRequest('sampleReport', [], {}, pathParam);
+export const sampleReport = (id: string, sampleId: string) => {
+  return fireRequest('sampleReport', [], {}, {id, sampleId});
 };
 export const getTestList = (params: object) => {
   return fireRequest('getTestSampleList', [], params);
