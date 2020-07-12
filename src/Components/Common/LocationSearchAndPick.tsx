@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import LocationPicker from "react-leaflet-location-picker";
 import Popover from '@material-ui/core/Popover';
-import axios from 'axios';
+const axios = require('axios');
 import { makeStyles } from "@material-ui/styles";
-import { TextInputField } from "../Common/HelperInputFields"
+import { TextInputField } from "./HelperInputFields"
 
 const DEFAULT_MARKER_RADIUS = 100;
 const KEYS = {
