@@ -34,7 +34,7 @@ module.exports = (env, argv) => {
         cacheGroups: {
           commons: {
             test: /[\\/]node_modules[\\/]/,
-            name: "vendors",
+            name: false,
             chunks: "all",
           },
         },
