@@ -5,11 +5,11 @@ import React, { useCallback, useEffect, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
 import { DOCTOR_SPECIALIZATION } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { Loading } from "../../Components/Common/Loading";
+import { Loading } from "../Common/Loading";
 import { createDoctor, getDoctor, listDoctor } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { ErrorHelperText, NativeSelectField, TextInputField } from "../Common/HelperInputFields";
-import PageTitle from "../Common/PageTitle";
+import { PageTitle } from "../Common/PageTitle";
 import { DoctorModal, OptionsType } from "./models";
 
 interface DoctorCapacityProps extends DoctorModal {

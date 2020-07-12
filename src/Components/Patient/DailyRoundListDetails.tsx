@@ -7,7 +7,7 @@ import { CURRENT_HEALTH_CHANGE, PATIENT_CATEGORY, SYMPTOM_CHOICES } from "../../
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getConsultationDailyRoundsDetails } from "../../Redux/actions";
 import { Loading } from "../Common/Loading";
-import PageTitle from "../Common/PageTitle";
+import {PageTitle} from "../Common/PageTitle";
 import { DailyRoundsModel } from "./models";
 
 const symptomChoices = [...SYMPTOM_CHOICES];

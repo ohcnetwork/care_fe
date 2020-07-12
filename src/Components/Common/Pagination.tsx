@@ -8,7 +8,7 @@ interface PaginationProps {
     cPage: number;
 
 };
-const Pagination = (props: PaginationProps) => {
+export const Pagination = (props: PaginationProps) => {
     const { data, onChange } = props;
     const [rowsPerPage, setRowsPerPage] = useState(3);
     const [currentPage, setCurrentPage] = useState(1);
@@ -148,4 +148,3 @@ const Pagination = (props: PaginationProps) => {
     );
 }
 
-export default Pagination;

@@ -8,7 +8,7 @@ interface PageTitleProps {
     className?: string;
 }
 
-const PageTitle = (props: PageTitleProps) => {
+export const PageTitle = (props: PageTitleProps) => {
     const { title, hideBack, backUrl, className='' } = props;
     const goBack = () => {
         if (backUrl) {
@@ -30,5 +30,3 @@ const PageTitle = (props: PageTitleProps) => {
         </div>
     )
 };
-
-export default PageTitle;

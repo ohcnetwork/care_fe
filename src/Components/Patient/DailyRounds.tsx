@@ -9,7 +9,7 @@ import { createDailyReport, getConsultationDailyRoundsDetails, updateDailyReport
 import * as Notification from "../../Utils/Notifications";
 import { CheckboxField, DateTimeFiled, ErrorHelperText, MultilineInputField, MultiSelectField, SelectField, TextInputField } from "../Common/HelperInputFields";
 import { Loading } from "../Common/Loading";
-import PageTitle from "../Common/PageTitle";
+import {PageTitle} from "../Common/PageTitle";
 
 const initForm: any = {
     otherSymptom: false,

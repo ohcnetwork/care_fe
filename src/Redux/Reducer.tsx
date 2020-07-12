@@ -1,6 +1,6 @@
 import { actions } from './fireRequest';
 
-const reducer = (state = {}, changeAction: any) => {
+export const reducer = (state = {}, changeAction: any) => {
     switch (changeAction.type) {
         case actions.FETCH_REQUEST: {
             const obj: any = Object.assign({}, state);
@@ -39,4 +39,3 @@ const reducer = (state = {}, changeAction: any) => {
             return state;
     }
 };
-export default reducer;

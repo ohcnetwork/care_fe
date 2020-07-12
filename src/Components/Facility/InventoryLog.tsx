@@ -1,10 +1,10 @@
 import React, { useState, useCallback } from 'react'
-import PageTitle from '../Common/PageTitle'
+import {PageTitle} from '../Common/PageTitle'
 import { Loading } from "../Common/Loading";
 import { useDispatch } from "react-redux";
 import { getInventoryLog } from '../../Redux/actions';
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import Pagination from "../Common/Pagination";
+import { Pagination } from "../Common/Pagination";
 import moment from "moment";
 
 export default function InventoryLog(props: any) {

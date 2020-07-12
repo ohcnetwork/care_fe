@@ -7,7 +7,7 @@ import { getItemName, updateMinQuantity } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { TextInputField } from "../Common/HelperInputFields";
 import { Loading } from "../Common/Loading";
-import PageTitle from "../Common/PageTitle";
+import {PageTitle} from "../Common/PageTitle";
 
 const initForm = {
     id: "",

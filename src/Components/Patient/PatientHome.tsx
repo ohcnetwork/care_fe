@@ -18,8 +18,8 @@ import {
 import * as Notification from "../../Utils/Notifications";
 import AlertDialog from "../Common/AlertDialog";
 import { Loading } from "../Common/Loading";
-import PageTitle from "../Common/PageTitle";
-import Pagination from "../Common/Pagination";
+import {PageTitle} from "../Common/PageTitle";
+import {Pagination} from "../Common/Pagination";
 import { ConsultationCard } from "../Facility/ConsultationCard";
 import { ConsultationModel } from "../Facility/models";
 import { PatientModel, SampleTestModel } from "./models";

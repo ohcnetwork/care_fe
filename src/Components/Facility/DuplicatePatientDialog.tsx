@@ -2,7 +2,6 @@ import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Paper, FormC
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import { WithStyles, withStyles } from '@material-ui/styles';
 import React, { useState } from 'react';
-import { CheckboxField } from '../Common/HelperInputFields';
 import { VirtualizedTable } from '../Common/VirtualizedTable';
 import { DupPatientModel } from './models';
 

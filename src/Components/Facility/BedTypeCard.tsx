@@ -1,6 +1,4 @@
 import React from "react";
-import { Grid, Typography, Button } from "@material-ui/core";
-import { makeStyles } from "@material-ui/styles";
 import { CapacityModal } from "./models";
 import { navigate } from "hookrouter";
 import { BED_TYPES } from "../../Common/constants";
@@ -9,17 +7,7 @@ interface BedTypeProps extends CapacityModal {
   facilityId: number;
 }
 
-const useStyles = makeStyles({
-  marginBottom: {
-    marginBottom: 5
-  },
-  countText: {
-    fontSize: "2.25rem"
-  }
-});
-
-const BedTypeCard = (props: BedTypeProps) => {
-  const classes = useStyles();
+export const BedTypeCard = (props: BedTypeProps) => {
   const bed = BED_TYPES.find(i => i.id === props.room_type);
   const roomType = bed ? bed.text : "Unknown";
   return (
@@ -44,5 +32,3 @@ const BedTypeCard = (props: BedTypeProps) => {
     </div>
   );
 };
-
-export default BedTypeCard;

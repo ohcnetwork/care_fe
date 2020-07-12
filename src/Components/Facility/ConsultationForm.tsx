@@ -36,9 +36,9 @@ import {
   TextInputField,
 } from "../Common/HelperInputFields";
 import { Loading } from "../Common/Loading";
-import PageTitle from "../Common/PageTitle";
+import { PageTitle } from "../Common/PageTitle";
 import { FacilityModel } from "./models";
-import {navigate} from "hookrouter";
+import { navigate } from "hookrouter";
 
 const initForm: any = {
   hasSymptom: false,

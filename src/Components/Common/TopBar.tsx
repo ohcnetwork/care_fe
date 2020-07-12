@@ -2,7 +2,7 @@ import React from "react";
 
 const img =
   "https://cdn.coronasafe.network/black-logo.svg";
-const TopBar = () => {
+export const TopBar = () => {
   return (
     <div className="bg-white shadow-md">
       <div className="max-w-6xl mx-auto py-4 px-2">
@@ -16,4 +16,3 @@ const TopBar = () => {
   );
 };
 
-export default TopBar;

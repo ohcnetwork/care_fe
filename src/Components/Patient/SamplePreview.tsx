@@ -761,19 +761,6 @@ export default function SampleReport(props: samplePreviewProps) {
                                         {sampleData && sampleData.medical_conditions && sampleData.medical_conditions.medical_conditions_list && !!sampleData.medical_conditions.medical_conditions_list.length && sampleData.medical_conditions.medical_conditions_list.join(', ')}
                                     </Typography>
                                 </Box>
-                                {/* </Box> */}
-                                {/*<Box width="50%" display="flex" flexDirection="row" className={`${classes.borderRight}`}>*/}
-                                {/*    <Box width="65%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>*/}
-                                {/*        <Typography className={`${classes.cellTitle} ${classes.marginRight10}`}>*/}
-                                {/*            Immuno Compromised Conditions*/}
-                                {/*        </Typography>*/}
-                                {/*    </Box>*/}
-                                {/*    <Box width="35%" className={`${classes.cellTBPadding}`}>*/}
-                                {/*        <Typography className={`${classes.cellText}`}>*/}
-                                {/*            {sampleData && sampleData.medical_conditions && sampleData.medical_conditions.has_sari}*/}
-                                {/*        </Typography>*/}
-                                {/*    </Box>*/}
-                                {/*</Box>*/}
                             </Box>
 
 
@@ -884,20 +871,7 @@ export default function SampleReport(props: samplePreviewProps) {
                                         {sampleData && sampleData.medical_conditions && sampleData.medical_conditions.diagnosis}
                                     </Typography>
                                 </Box>
-                                {/* </Box> */}
-                                {/*<Box width="50%" display="flex" flexDirection="row"*/}
-                                {/*     className={`${classes.borderRight} ${classes.borderLeft}`}>*/}
-                                {/*    <Box width="65%" className={`${classes.borderRight} ${classes.cellTBPadding}`}>*/}
-                                {/*        <Typography className={`${classes.cellTitle} ${classes.marginRight10}`}>*/}
-                                {/*            Outcome Date*/}
-                                {/*        </Typography>*/}
-                                {/*    </Box>*/}
-                                {/*    <Box width="35%" className={`${classes.cellTBPadding}`}>*/}
-                                {/*        <Typography className={`${classes.cellText}`}>*/}
-                                {/*            20-01-2020*/}
-                                {/*        </Typography>*/}
-                                {/*    </Box>*/}
-                                {/*</Box>*/}
+
                             </Box>
 
                             <Box display="flex" flexDirection="row" className={`${classes.borderBottom}`}>

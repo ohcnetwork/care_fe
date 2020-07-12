@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import SessionRouter from './Router/SessionRouter';
-import AppRouter from './Router/AppRouter';
+import { SessionRouter } from './Router/SessionRouter';
+import { AppRouter } from './Router/AppRouter';
 import { useDispatch, useSelector } from 'react-redux';
 import { getCurrentUser } from './Redux/actions';
-import './App.scss';
+require('./App.scss');
 import { Loading } from "./Components/Common/Loading";
 import { useAbortableEffect, statusType } from './Common/utils';
-import axios from 'axios';
+const axios = require('axios');
 
 const App: React.FC = () => {
   const dispatch: any = useDispatch();

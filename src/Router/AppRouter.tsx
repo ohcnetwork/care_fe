@@ -1,6 +1,6 @@
 import { useRedirect, useRoutes, navigate, usePath } from "hookrouter";
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import React, { useState } from "react";
+import {  useSelector } from "react-redux";
 import { BedCapacityForm } from "../Components/Facility/BedCapacityForm";
 import { ConsultationDetails } from "../Components/Facility/ConsultationDetails";
 import { ConsultationForm } from "../Components/Facility/ConsultationForm";
@@ -146,7 +146,7 @@ let menus = [
 ];
 
 
-const AppRouter = () => {
+export const AppRouter = () => {
   useRedirect("/", "/facility");
   const pages = useRoutes(routes);
   const path = usePath();
@@ -311,5 +311,3 @@ const AppRouter = () => {
 
   );
 };
-
-export default AppRouter;

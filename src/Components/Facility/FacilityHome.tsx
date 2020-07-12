@@ -12,9 +12,9 @@ import {
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { Loading } from "../Common/Loading";
-import PageTitle from "../Common/PageTitle";
-import BedTypeCard from "./BedTypeCard";
-import DoctorsCountCard from "./DoctorsCountCard";
+import { PageTitle } from "../Common/PageTitle";
+import { BedTypeCard } from "./BedTypeCard";
+import { DoctorsCountCard } from "./DoctorsCountCard";
 import { CapacityModal, DoctorModal, FacilityModel, PatientStatsModel } from "./models";
 
 export const FacilityHome = (props: any) => {

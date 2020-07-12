@@ -8,7 +8,7 @@ import { createTriageForm, getTriageDetails } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { DateInputField, TextInputField } from "../Common/HelperInputFields";
 import { Loading } from "../Common/Loading";
-import PageTitle from "../Common/PageTitle";
+import {PageTitle} from "../Common/PageTitle";
 import { PatientStatsModel } from "./models";
 
 interface triageFormProps extends PatientStatsModel {

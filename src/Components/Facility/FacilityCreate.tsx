@@ -2,7 +2,6 @@ import { Button, Card, CardContent, CircularProgress, InputLabel, IconButton } f
 import Popover from "@material-ui/core/Popover";
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import MyLocationIcon from "@material-ui/icons/MyLocation";
-import { makeStyles } from "@material-ui/styles";
 import { navigate } from "hookrouter";
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
 import React, { useCallback, useReducer, useState } from "react";
@@ -15,7 +14,7 @@ import * as Notification from "../../Utils/Notifications.js";
 import { MultilineInputField, PhoneNumberField, SelectField, TextInputField } from "../Common/HelperInputFields";
 import { Loading } from "../Common/Loading";
 import { LocationSearchAndPick } from "../Common/LocationSearchAndPick";
-import PageTitle from "../Common/PageTitle";
+import { PageTitle } from "../Common/PageTitle";
 
 const DEFAULT_MAP_LOCATION = [10.038394700000001, 76.5074145180173]; // Ernakulam
 

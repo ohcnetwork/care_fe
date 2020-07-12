@@ -5,7 +5,7 @@ import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { Loading } from "../Common/Loading";
 import { getTestSample } from "../../Redux/actions";
-import PageTitle from "../Common/PageTitle";
+import {PageTitle} from "../Common/PageTitle";
 import { FlowModel, SampleTestModel } from "./models";
 
 interface SampleDetailsProps {

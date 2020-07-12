@@ -7,7 +7,7 @@ import { getItems, postInventory } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { SelectField, TextInputField } from "../Common/HelperInputFields";
 import { Loading } from "../Common/Loading";
-import PageTitle from "../Common/PageTitle";
+import { PageTitle } from "../Common/PageTitle";
 import { InventoryItemsModel } from "./models";
 
 const initForm = {

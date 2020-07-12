@@ -8,7 +8,7 @@ import { DISTRICT_CHOICES, GENDER_TYPES } from "../../Common/constants";
 import { validateEmailAddress } from "../../Common/validation";
 import { signupUser } from "../../Redux/actions";
 import { PhoneNumberField, TextInputField } from "../Common/HelperInputFields";
-import PageTitle from "../Common/PageTitle";
+import {PageTitle} from "../Common/PageTitle";
 
 const optionalFields = [
   "first_name",

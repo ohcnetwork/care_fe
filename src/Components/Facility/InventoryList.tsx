@@ -1,12 +1,12 @@
 import React, { useState, useCallback } from 'react'
-import PageTitle from '../Common/PageTitle'
+import {PageTitle} from '../Common/PageTitle'
 import { Button } from "@material-ui/core";
 import { navigate } from "hookrouter";
 import { useDispatch } from "react-redux";
 import { Loading } from "../Common/Loading";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getInventorySummary } from '../../Redux/actions';
-import Pagination from "../Common/Pagination";
+import {Pagination} from "../Common/Pagination";
 
 
 export default function InventoryList(props: any) {

@@ -1,7 +1,7 @@
-import axios from 'axios';
-import api from './api';
-import * as Notification from '../Utils/Notifications.js';
-import querystring from 'querystring';
+const axios = require('axios');
+const api = require('./api');
+const Notification = require('../Utils/Notifications.js')
+const querystring = require('querystring');
 const requestMap: any = api;
 export const actions = {
     FETCH_REQUEST: 'FETCH_REQUEST',

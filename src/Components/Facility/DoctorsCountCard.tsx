@@ -1,6 +1,4 @@
 import React from "react";
-import { Grid, Typography, Button } from "@material-ui/core";
-import { makeStyles } from "@material-ui/styles";
 import { navigate } from "hookrouter";
 import { DoctorModal } from "./models";
 import { DOCTOR_SPECIALIZATION } from "../../Common/constants";
@@ -9,14 +7,7 @@ interface DoctorsCountProps extends DoctorModal {
   facilityId: number;
 }
 
-const useStyles = makeStyles({
-  countText: {
-    fontSize: "2.25rem"
-  }
-});
-
-const DoctorsCountCard = (props: DoctorsCountProps) => {
-  const classes = useStyles();
+export const DoctorsCountCard = (props: DoctorsCountProps) => {
   const specialization = DOCTOR_SPECIALIZATION.find(i => i.id === props.area);
   const area = specialization ? specialization.text : "Unknown";
   return (
@@ -37,4 +28,3 @@ const DoctorsCountCard = (props: DoctorsCountProps) => {
   );
 };
 
-export default DoctorsCountCard;

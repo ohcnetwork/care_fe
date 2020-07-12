@@ -1,7 +1,7 @@
 import React from "react";
 import {ForgotPassword, Login, Register, ResetPassword} from "../Components/Auth";
 import { useRoutes } from "hookrouter";
-import TopBar from "../Components/Common/TopBar";
+import { TopBar } from "../Components/Common/TopBar";
 import { PublicDashboard } from "../Components/Dashboard/PublicDashboard";
 
 const routes = {
@@ -13,7 +13,7 @@ const routes = {
   "/password_reset/:token": ({ token }: any) => <ResetPassword token={token} />,
 };
 
-const SessionRouter = () => {
+export const SessionRouter = () => {
   const content = useRoutes(routes) || <Login />;
   return (
     <div className="bg-green-100">
@@ -52,4 +52,3 @@ const SessionRouter = () => {
   );
 };
 
-export default SessionRouter;

@@ -3,9 +3,9 @@ import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getMinQuantity } from "../../Redux/actions";
 import { Loading } from "../Common/Loading";
-import PageTitle from "../Common/PageTitle";
-import Pagination from "../Common/Pagination";
-import { Button, ButtonBase } from "@material-ui/core";
+import {PageTitle} from "../Common/PageTitle";
+import {Pagination} from "../Common/Pagination";
+import { Button } from "@material-ui/core";
 import { navigate } from "hookrouter";
 
 export default function MinQuantityList(props: any) {
