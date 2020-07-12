@@ -9,7 +9,7 @@ import { PhoneNumberField, SelectField, TextInputField } from "../Common/HelperI
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
 import { validateEmailAddress, phonePreg } from "../../Common/validation";
 import * as Notification from "../../Utils/Notifications.js";
-
+import { checkIfLatestBundle } from '../../Utils/build-meta-info';
 
 const initForm: any = {
     firstName: "",
@@ -53,6 +53,7 @@ export default function UserProfile() {
     const username = currentUser.data.username;
 
     const [showEdit, setShowEdit] = React.useState<boolean | false>(false);
+    const [updateBtnText, setUpdateBtnText] = React.useState<string>("Update");
 
     const [isLoading, setIsLoading] = useState(false);
     const dispatchAction: any = useDispatch();
@@ -186,9 +187,33 @@ export default function UserProfile() {
         }
     };
 
-    return (
+    const checkForNewBuildVersion = async () => {
 
-        <div >
+        let [isLatestBundle, newVersion] = await checkIfLatestBundle();
+
+        if (!isLatestBundle) {
+            setUpdateBtnText("updating...");
+            localStorage.setItem('build_meta_version', newVersion);
+
+            if ('caches' in window) {
+                // Service worker cache should be cleared with caches.delete()
+                caches.keys().then(names => {
+                    for (const name of names) {
+                        caches.delete(name);
+                    }
+
+                    window.location.reload(true);
+                });
+            }
+        } else {
+            setUpdateBtnText("You already have the latest version!")
+
+            setTimeout(() => setUpdateBtnText("Update"), 1000);
+        }
+    }
+
+    return (
+        <div>
             <div className="md:p-20 p-10">
                 <div className="md:grid md:grid-cols-3 md:gap-6">
                     <div className="md:col-span-1">
@@ -412,6 +437,19 @@ export default function UserProfile() {
                             </form>}
                     </div>
                 </div>
+            
+
+                <div className="mt-10">
+                    <div className="text-lg font-medium leading-6 text-gray-900">
+                        Check for software updates
+                        <p className="mt-1 text-sm leading-5 text-gray-600">Click the update button to see if you have the latest "care" version.</p>
+                    </div>
+                    <button className="bg-white text-sm hover:bg-gray-100 text-gray-800 py-2 px-4 border border-gray-400 rounded shadow text-center outline-none mt-3"
+                        onClick={() => checkForNewBuildVersion()}>
+                        {updateBtnText}
+                    </button>
+                </div>
+
             </div>
         </div>
     );
