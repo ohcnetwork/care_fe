@@ -104,8 +104,10 @@ module.exports = (env, argv) => {
             to: "robots.txt",
           },
           {
+            // build meata contains version no for latest build. check "generate-build-meta" package script
             from: "public/build-meta.json",
             to: "build-meta.json",
+            noErrorOnMissing: isDev
           }
         ],
       }),
