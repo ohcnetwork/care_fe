@@ -29,15 +29,17 @@ module.exports = (env, argv) => {
     },
     optimization: {
       moduleIds: "hashed",
-      runtimeChunk: "single",
       splitChunks: {
         cacheGroups: {
           commons: {
             test: /[\\/]node_modules[\\/]/,
-            name: "vendors",
+            name: false,
             chunks: "all",
           },
         },
+      },
+      runtimeChunk: {
+        name: entrypoint => `runtime-${entrypoint.name}`,
       },
     },
     devtool: isDev ? "source-map" : "none",
