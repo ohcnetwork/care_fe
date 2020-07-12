@@ -1,8 +1,9 @@
-import PNotify from "pnotify/dist/es/PNotify";
-import "pnotify/dist/PNotifyBrightTheme.css";
+import { alert } from '@pnotify/core';
+import '@pnotify/core/dist/PNotify.css';
+import '@pnotify/core/dist/BrightTheme.css';
 
 const notify = (text, type) => {
-    const notification = PNotify.alert({
+    const notification = alert({
         type: type,
         text: text,
         styling: "brighttheme",
