@@ -30,12 +30,28 @@ module.exports = (env, argv) => {
     optimization: {
       moduleIds: "hashed",
       splitChunks: {
+        chunks: 'async',
+        minSize: 30000,
+        minChunks: 3,
+        maxSize: 0,
+        maxAsyncRequests: 6,
+        maxInitialRequests: 4,
+        automaticNameDelimiter: '~',
         cacheGroups: {
           commons: {
             test: /[\\/]node_modules[\\/]/,
-            name: false,
+            name(module, chunks, cacheGroupKey) {
+              const moduleFileName = module.identifier().split('/').reduceRight(item => item);
+              const allChunksNames = chunks.map((item) => item.name).join('~');
+              return `${cacheGroupKey}-${allChunksNames}-${moduleFileName}`;
+            },
             chunks: "all",
           },
+          default: {
+            minChunks: 5,
+            priority: -10,
+            reuseExistingChunk: true
+          }
         },
       },
       runtimeChunk: {
@@ -132,6 +148,6 @@ module.exports = (env, argv) => {
         exclude: ['build-meta.json', /\.map$/]
       })
     ],
-    performance: false
+    // performance: false
   };
 };
