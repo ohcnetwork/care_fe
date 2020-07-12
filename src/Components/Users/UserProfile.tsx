@@ -258,6 +258,28 @@ export default function UserProfile() {
                                     </div>
                                     <div className="sm:col-span-1">
                                         <dt className="text-sm leading-5 font-medium text-gray-500">
+                                            Verification Status
+                                        </dt>
+                                        { details.verified &&
+                                        <dd className="mt-1 badge badge-pill badge-primary text-sm leading-5 text-gray-900">
+                                            Verified
+                                        </dd> }
+                                        { !details.verified &&
+                                        <dd className="mt-1 text-sm leading-5 text-gray-900">
+                                            Not Verified
+                                        </dd>
+                                        }
+                                    </div>
+                                    <div className="sm:col-span-1">
+                                        <dt className="text-sm leading-5 font-medium text-gray-500">
+                                            Access Level
+                                        </dt>
+                                        <dd className="mt-1 badge badge-pill badge-primary text-sm leading-5 text-gray-900">
+                                            {details.user_type || '-'}
+                                        </dd>
+                                    </div>
+                                    <div className="sm:col-span-1">
+                                        <dt className="text-sm leading-5 font-medium text-gray-500">
                                             Gender
                                         </dt>
                                         <dd className="mt-1 text-sm leading-5 text-gray-900">
