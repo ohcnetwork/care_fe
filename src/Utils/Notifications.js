@@ -7,6 +7,8 @@ const notify = (text, type) => {
         type: type,
         text: text,
         styling: "brighttheme",
+        mode: 'light',
+        sticker: false,
         buttons: {
             closer: false,
             sticker: false
