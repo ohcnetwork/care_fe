@@ -130,5 +130,6 @@ module.exports = (env, argv) => {
         exclude: ['build-meta.json', /\.map$/]
       })
     ],
+    performance: false
   };
 };
