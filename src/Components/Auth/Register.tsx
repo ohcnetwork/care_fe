@@ -56,7 +56,7 @@ export const Register = () => {
   const [errors, setErrors] = useState(initErr);
   const [isCaptchaEnabled, setCaptcha] = useState(false);
 
-  const captchaKey = process.env.GOOGLE_KEY ? process.env.GOOGLE_KEY : "";
+  const captchaKey = '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI';
 
   const validateForm = () => {
     const oldError: any = {};
