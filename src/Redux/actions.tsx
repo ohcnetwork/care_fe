@@ -35,11 +35,12 @@ export const getUserList = (params: object) => {
 export const getFacilities = (params: object) => {
   return fireRequest('listFacility', [], params);
 };
-export const getFacility = (id: number) => {
-  return fireRequest('getFacility', [id], {});
-};
 export const getAllFacilities = (params: object) => {
   return fireRequest('getAllFacilitiesList', [], params);
+};
+
+export const getFacility = (id: number) => {
+  return fireRequest('getFacility', [id], {});
 };
 
 // Download Actions
