@@ -188,6 +188,7 @@ export const DISEASE_STATUS = [
 ];
 
 export const BLOOD_GROUPS = [
+    "UNK",
   "A+",
   "A-",
   "B+",
