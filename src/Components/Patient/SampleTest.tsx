@@ -352,7 +352,7 @@ export const SampleTest = (props: any) => {
                   name="testing_facility"
                   variant="outlined"
                   margin="dense"
-                  value={state.form.testing_facility}
+                  value={state.form.testing_facility || ''}
                   options={facilityName.map((e) => {
                     return { id: e.id, name: e.name };
                   })}
