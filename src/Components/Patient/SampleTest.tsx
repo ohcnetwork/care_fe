@@ -143,12 +143,12 @@ export const SampleTest = (props: any) => {
             invalidForm = true;
           }
           break;
-        case "testing_facility":
-          if (!state.form[field]) {
-            errors[field] = "Please Choose a testing facility";
-            invalidForm = true;
-          }
-          break;
+        // case "testing_facility":
+        //   if (!state.form[field]) {
+        //     errors[field] = "Please Choose a testing facility";
+        //     invalidForm = true;
+        //   }
+        //   break;
         default:
           return;
       }
@@ -352,7 +352,7 @@ export const SampleTest = (props: any) => {
                   name="testing_facility"
                   variant="outlined"
                   margin="dense"
-                  value={state.form.testing_facility}
+                  value={state.form.testing_facility || ''}
                   options={facilityName.map((e) => {
                     return { id: e.id, name: e.name };
                   })}

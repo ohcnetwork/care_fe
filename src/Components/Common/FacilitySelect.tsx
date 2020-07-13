@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
-import { getFacilities } from "../../Redux/actions";
+import { getAllFacilities } from "../../Redux/actions";
 import { AutoCompleteAsyncField } from "../Common/HelperInputFields";
 import { FacilityModel } from "../Facility/models";
 const debounce = require('lodash.debounce');
@@ -39,7 +39,7 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
     const onFacilitySearch = useCallback(debounce(async (text: string) => {
         if (text) {
             const params = { limit: 50, offset: 0, search_text: text, all: searchAll };
-            const res = await dispatchAction(getFacilities(params));
+            const res = await dispatchAction(getAllFacilities(params));
             if (res && res.data) {
                 setFacilityList(res.data.results);
             }

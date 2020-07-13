@@ -7,7 +7,8 @@ let googleKey = "6LdvxuQUAAAAADDWVflgBqyHGfq-xmvNJaToM0pN";
 const CopyPlugin = require("copy-webpack-plugin");
 const WorkboxPlugin = require("workbox-webpack-plugin");
 const MomentLocalesPlugin = require('moment-locales-webpack-plugin');
-
+const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
+const safePostCssParser = require('postcss-safe-parser');
 module.exports = (env, argv) => {
   const mode = argv.mode || "development";
   const isDev = mode !== "production";
@@ -29,15 +30,17 @@ module.exports = (env, argv) => {
     },
     optimization: {
       moduleIds: "hashed",
-      runtimeChunk: "single",
       splitChunks: {
         cacheGroups: {
           commons: {
             test: /[\\/]node_modules[\\/]/,
-            name: "vendors",
+            name: false,
             chunks: "all",
           },
         },
+      },
+      runtimeChunk: {
+        name: entrypoint => `runtime-${entrypoint.name}`,
       },
     },
     devtool: isDev ? "source-map" : "none",
@@ -115,7 +118,29 @@ module.exports = (env, argv) => {
       new HtmlWebpackPlugin({
         template: path.resolve(__dirname, "src", "index.html"),
         title: "Coronasafe Care",
+        minify: {
+          removeComments: true,
+          collapseWhitespace: true,
+          removeRedundantAttributes: true,
+          useShortDoctype: true,
+          removeEmptyAttributes: true,
+          removeStyleLinkTypeAttributes: true,
+          keepClosingSlash: true,
+          minifyJS: true,
+          minifyCSS: true,
+          minifyURLs: true,
+        },
       }),
+      new OptimizeCssAssetsPlugin({
+        cssProcessorOptions: {
+          parser: safePostCssParser,
+          map: false
+        },
+        cssProcessorPluginOptions: {
+          preset: ['default', { minifyFontValues: { removeQuotes: false } }],
+        },
+      }),
+
       new webpack.HotModuleReplacementPlugin(),
       new MomentLocalesPlugin(),
       new MiniCssExtractPlugin({
@@ -130,5 +155,7 @@ module.exports = (env, argv) => {
         exclude: ['build-meta.json', /\.map$/]
       })
     ],
+    performance: false,
   };
+
 };
