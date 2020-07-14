@@ -23,7 +23,7 @@
     "@material-ui/types": "^5.1.0",
     "@sentry/browser": "^5.19.1",
     "@svgr/webpack": "^4.3.2",
-    "@tailwindcss/ui": "^0.3.0",
+    "@tailwindcss/ui": "^0.3.1",
     "@types/hookrouter": "^2.2.1",
     "@types/lodash": "^4.14.157",
     "@types/node": "^12.12.48",
