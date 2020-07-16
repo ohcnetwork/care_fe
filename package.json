@@ -14,6 +14,7 @@
   "license": "MIT",
   "dependencies": {
     "@babel/core": "^7.6.0",
+    "@coronasafe/prescription-builder": "^0.1.11",
     "@date-io/date-fns": "^1.3.11",
     "@material-ui/core": "^4.11.0",
     "@material-ui/icons": "^4.4.1",
@@ -62,6 +63,7 @@
     "react-redux": "^7.1.1",
     "react-scripts": "^3.4.1",
     "react-virtualized": "^9.21.2",
+    "reason-react": "^0.9.1",
     "redux": "^4.0.4",
     "redux-thunk": "^2.3.0",
     "resolve": "1.12.0",
@@ -73,9 +75,11 @@
     "uuid": "^8.2.0"
   },
   "scripts": {
-    "prebuild": "npm run generate-build-meta",
-    "start": "webpack-dev-server -p --open --mode=development",
+    "prebuild": "npm run re:build && npm run generate-build-meta",
+    "start": "npm run re:build && webpack-dev-server -p --open --mode=development",
     "start:Dev": "NODE_ENV=production http-server dist",
+    "re:build": "bsb -make-world -clean-world",
+    "re:watch": "bsb -make-world -clean-world -w",
     "build": "NODE_ENV=production ./node_modules/.bin/webpack -p --mode=production",
     "generate-build-meta": "node ./build-scripts/generate-build-version.js",
     "test": "snyk test"
@@ -107,6 +111,7 @@
     "@types/jest": "^24.9.1",
     "@types/mocha": "^5.2.7",
     "autoprefixer": "^9.8.4",
+    "bs-platform": "^8.0.3",
     "concurrently": "^5.1.0",
     "copy-webpack-plugin": "^6.0.3",
     "css-loader": "^2.1.1",
