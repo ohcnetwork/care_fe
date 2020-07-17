@@ -7,7 +7,7 @@ import React, { useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { SAMPLE_TEST_STATUS, ROLE_STATUS_MAP, SAMPLE_FLOW_RULES } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import {getTestList, patchSample, sampleSearch} from "../../Redux/actions";
+import { getTestList, patchSample, sampleSearch } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
@@ -149,7 +149,7 @@ export default function SampleViewAdmin(props: any) {
       const statusText = SAMPLE_TEST_STATUS.find(i => i.text === status)?.desc;
       const validStatusChoices = statusChoices
         .filter(i => status && statusFlow[status] && statusFlow[status].includes(i.text))
-        // .filter(i => roleStatusMap[userType] && roleStatusMap[userType].includes(i.text))
+      // .filter(i => roleStatusMap[userType] && roleStatusMap[userType].includes(i.text))
       return (
         <div key={`usr_${item.id}`} className="w-full md:w-1/2 mt-6 md:px-4">
           <div
@@ -274,42 +274,56 @@ export default function SampleViewAdmin(props: any) {
         handleCancel={dismissUpdateStatus}
         userType={userType}
       />)}
-      <PageTitle 
-        title="Sample Management System" 
+      <PageTitle
+        title="Sample Management System"
         hideBack={true}
         className="mx-3 md:mx-8" />
-
-      <div className="flex flex-col md:flex-row px-4 md:px-8">
-        <div>
-          <div className="text-sm font-semibold mb-2">
-            Search by District Name
+      <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3 m-4 md:px-4">
+        <div className="bg-white overflow-hidden shadow rounded-lg">
+          <div className="px-4 py-5 sm:p-6">
+            <dl>
+              <dt className="text-sm leading-5 font-medium text-gray-500 truncate">
+                Total Samples Taken
+              </dt>
+              <dd className="mt-4 text-5xl leading-9 font-semibold text-gray-900">
+                {totalCount}
+              </dd>
+            </dl>
           </div>
-          <InputSearchBox
+        </div>
+
+        <div >
+          <div>
+            <div className="text-sm font-semibold mb-2">
+              Search by District Name
+          </div>
+            <InputSearchBox
               search={onSearchDistrictName}
               placeholder='District Name'
               errors=''
-          />
+            />
+          </div>
         </div>
-      {/*<div className="md:px-4">*/}
-      {/*  <div className="text-sm font-semibold mb-2">*/}
-      {/*    Search by Name*/}
-      {/*  </div>*/}
-      {/*  <InputSearchBox*/}
-      {/*      search={searchByName}*/}
-      {/*      placeholder='Search by Patient Name'*/}
-      {/*      errors=''*/}
-      {/*  />*/}
-      {/*</div>*/}
-      {/*<div>*/}
-      {/*  <div className="text-sm font-semibold mb-2">*/}
-      {/*    Search by number*/}
-      {/*  </div>*/}
-      {/*  <InputSearchBox*/}
-      {/*      search={searchByPhone}*/}
-      {/*      placeholder='+919876543210'*/}
-      {/*      errors=''*/}
-      {/*  />*/}
-      {/*</div>*/}
+        {/*<div className="md:px-4">*/}
+        {/*  <div className="text-sm font-semibold mb-2">*/}
+        {/*    Search by Name*/}
+        {/*  </div>*/}
+        {/*  <InputSearchBox*/}
+        {/*      search={searchByName}*/}
+        {/*      placeholder='Search by Patient Name'*/}
+        {/*      errors=''*/}
+        {/*  />*/}
+        {/*</div>*/}
+        {/*<div>*/}
+        {/*  <div className="text-sm font-semibold mb-2">*/}
+        {/*    Search by number*/}
+        {/*  </div>*/}
+        {/*  <InputSearchBox*/}
+        {/*      search={searchByPhone}*/}
+        {/*      placeholder='+919876543210'*/}
+        {/*      errors=''*/}
+        {/*  />*/}
+        {/*</div>*/}
       </div>
       <div className="px-3 md:px-8">
         <div className="flex flex-wrap md:-mx-4">{manageSamples}</div>
