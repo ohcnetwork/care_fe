@@ -31,3 +31,9 @@ build
 stats.json
 
 public/build-meta.json
+
+
+# Reason React
+/lib/bs/**
+.merlin
+*.bs.js

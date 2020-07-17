@@ -4,9 +4,9 @@ import { makeStyles } from "@material-ui/core/styles";
 import WarningRoundedIcon from "@material-ui/icons/WarningRounded";
 import { navigate } from "hookrouter";
 import React, { useCallback, useState } from "react";
-import {useDispatch} from "react-redux";
+import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import {downloadPatients, getAllPatient, searchPatientFilter} from "../../Redux/actions";
+import { downloadPatients, getAllPatient, searchPatientFilter } from "../../Redux/actions";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 import Pagination from "../Common/Pagination";
@@ -65,7 +65,7 @@ export const PatientManager = (props: any) => {
     setDownloadFile(res.data);
     document.getElementById("downloadlink")?.click();
   };
-  
+
   useAbortableEffect(
     (status: statusType) => {
       fetchData(status);
@@ -115,7 +115,7 @@ export const PatientManager = (props: any) => {
         <div key={`usr_${patient.id}`} className="w-full md:w-1/2 mt-6 md:px-4">
           <div
             onClick={() => navigate(patientUrl)}
-            className={`overflow-hidden shadow block border rounded-lg bg-white h-full cursor-pointer hover:border-primary-500
+            className={`overflow-hidden shadow rounded-lg bg-white h-full cursor-pointer hover:border-primary-500
             ${patient.disease_status === 'POSITIVE' ? "border-red-700 bg-red-100" :
                 ['NEGATIVE', 'RECOVERY', 'RECOVERED'].indexOf(patient.disease_status) >= 0 ? "border-green-700 bg-green-100" : ""}
             `}
@@ -126,7 +126,7 @@ export const PatientManager = (props: any) => {
                   <div className="font-bold text-xl capitalize mb-2">
                     {patient.name}
                   </div>
-                  
+
                   <div className="flex">
                     <div>
                       {patient.is_medical_worker && patient.is_active && (
@@ -136,15 +136,15 @@ export const PatientManager = (props: any) => {
                       )}
                     </div>
                     <div>
-                      { patient.allow_transfer && (
-                          <span className="badge badge-pill badge-primary mr-2">
+                      {patient.allow_transfer && (
+                        <span className="badge badge-pill badge-primary mr-2">
                           Transfer allowed
                         </span>
                       )}
                     </div>
                     <div>
-                      { !patient.allow_transfer && (
-                          <span className="badge badge-pill badge-warning mr-2">
+                      {!patient.allow_transfer && (
+                        <span className="badge badge-pill badge-warning mr-2">
                           Transfer Not allowed
                         </span>
                       )}
@@ -228,52 +228,67 @@ export const PatientManager = (props: any) => {
 
   return (
     <div>
-      <PageTitle 
-        title="Covid Suspects" 
+      <PageTitle
+        title="Covid Suspects"
         hideBack={!facilityId}
-        className="mx-3 md:mx-8" />
-
-      <div className="flex flex-col md:flex-row px-4 md:px-8">
-        <div>
-          <div className="text-sm font-semibold">Filter by Status</div>
-          <PatientFilter filter={handleFilter} />
-        </div>
-        <div className="md:px-4">
-          <div className="text-sm font-semibold mb-2">
-            Search by Name
+        className="mt-4 mx-2 md:mx-8" />
+      <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3 m-4 md:px-4">
+        <div className="bg-white overflow-hidden shadow rounded-lg">
+          <div className="px-4 py-5 sm:p-6">
+            <dl>
+              <dt className="text-sm leading-5 font-medium text-gray-500 truncate">
+                Total Suspects
+              </dt>
+              <dd className="mt-4 text-5xl leading-9 font-semibold text-gray-900">
+                {totalCount}
+              </dd>
+            </dl>
           </div>
-          <InputSearchBox
-            search={searchByName}
-            placeholder='Search by Patient Name'
-            errors=''
-          />
         </div>
         <div>
-          <div className="text-sm font-semibold mb-2">
-            Search by number
+          <div>
+            <div className="text-sm font-semibold mb-2">
+              Search by Name
           </div>
-          <InputSearchBox
-            search={searchByPhone}
-            placeholder='+919876543210'
-            errors=''
-          />
+            <InputSearchBox
+              search={searchByName}
+              placeholder='Search by Patient Name'
+              errors=''
+            />
+          </div>
+          <div>
+            <div className="text-sm font-semibold mt-2">
+              Search by number
+          </div>
+            <InputSearchBox
+              search={searchByPhone}
+              placeholder='+919876543210'
+              errors=''
+            />
+          </div>
         </div>
-        <div className="w-1/4 text-center items-center">
-          <button
+        <div className="flex flex-col justify-between">
+          <div>
+            <div className="text-sm font-semibold">Filter by Status</div>
+            <PatientFilter filter={handleFilter} />
+          </div>
+          <div className="mt-2">
+            <button
               type="button"
               className="inline-flex items-center mt-1 md:mt-0 lg:mt-0 px-1 py-2 ml-1  lg:px-3 border border-green-500 text-sm leading-4 font-medium rounded-md text-green-700 bg-white hover:text-green-500 focus:outline-none focus:border-green-300 focus:shadow-outline-blue active:text-green-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
               onClick={handleDownload}
-          >
-            Download Patient List
+            >
+              Download Patient List
           </button>
-          <CSVLink
-            id="downloadlink"
-            className="hidden"
-            data={DownloadFile}
-            filename={ `patients-${now}.csv` }
-            target="_blank"
-          >
-          </CSVLink>
+            <CSVLink
+              id="downloadlink"
+              className="hidden"
+              data={DownloadFile}
+              filename={`patients-${now}.csv`}
+              target="_blank"
+            >
+            </CSVLink>
+          </div>
         </div>
       </div>
       <div className="px-3 md:px-8">
