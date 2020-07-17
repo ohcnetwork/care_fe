@@ -1,13 +1,13 @@
 import React, { useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import {getUserList, searchUser} from "../../Redux/actions";
+import { getUserList, searchUser } from "../../Redux/actions";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 import Pagination from "../Common/Pagination";
 import { navigate } from "hookrouter";
 import { USER_TYPES } from "../../Common/constants";
-import {InputSearchBox} from "../Common/SearchBox";
+import { InputSearchBox } from "../Common/SearchBox";
 
 export default function ManageUsers(props: any) {
   const dispatch: any = useDispatch();
@@ -160,9 +160,9 @@ export default function ManageUsers(props: any) {
 
   return (
     <div>
-      <PageTitle 
-        title="User Management" 
-        hideBack={true} 
+      <PageTitle
+        title="User Management"
+        hideBack={true}
         className="mx-3 md:mx-8" />
       {/*<div className="flex flex-col md:flex-row px-4 md:px-8">*/}
       {/*<div className="md:px-4">*/}
@@ -186,6 +186,20 @@ export default function ManageUsers(props: any) {
       {/*  />*/}
       {/*</div>*/}
       {/*</div>*/}
+      <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3 m-4 md:px-4">
+        <div className="bg-white overflow-hidden shadow rounded-lg">
+          <div className="px-4 py-5 sm:p-6">
+            <dl>
+              <dt className="text-sm leading-5 font-medium text-gray-500 truncate">
+                Total Users
+              </dt>
+              <dd className="mt-4 text-5xl leading-9 font-semibold text-gray-900">
+                {totalCount}
+              </dd>
+            </dl>
+          </div>
+        </div>
+      </div>
       <div className="px-3 md:px-8">
         <div>
           {manageUsers}

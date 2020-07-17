@@ -115,7 +115,7 @@ export const PatientManager = (props: any) => {
         <div key={`usr_${patient.id}`} className="w-full md:w-1/2 mt-6 md:px-4">
           <div
             onClick={() => navigate(patientUrl)}
-            className={`overflow-hidden shadow block border rounded-lg bg-white h-full cursor-pointer hover:border-primary-500
+            className={`overflow-hidden shadow rounded-lg bg-white h-full cursor-pointer hover:border-primary-500
             ${patient.disease_status === 'POSITIVE' ? "border-red-700 bg-red-100" :
                 ['NEGATIVE', 'RECOVERY', 'RECOVERED'].indexOf(patient.disease_status) >= 0 ? "border-green-700 bg-green-100" : ""}
             `}
@@ -246,7 +246,7 @@ export const PatientManager = (props: any) => {
           </div>
         </div>
         <div>
-          <div >
+          <div>
             <div className="text-sm font-semibold mb-2">
               Search by Name
           </div>
