@@ -105,9 +105,14 @@ module.exports = (env, argv) => {
           {
             from: "public/robots.txt",
             to: "robots.txt",
-          },{
+          },
+          {
             from: "public/favicon.ico",
             to: "favicon.ico",
+          },
+          {
+            from: "public/contribute.json",
+            to: "contribute.json",
           },
           {
             // build meata contains version no for latest build. check "generate-build-meta" package script
