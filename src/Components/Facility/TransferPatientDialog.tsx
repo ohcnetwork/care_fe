@@ -126,7 +126,7 @@ const TransferPatientDialog = (props: Props & WithStyles<typeof styles>) => {
                 Notification.Success({
                     msg: `Patient ${res.data.patient} transferred successfully`
                 });
-                navigate(`/facility/${res.data.facility}/patient/${res.data.patient}`);
+                navigate(`/facility/${res.data.id}/patient/${res.data.patient}`);
             }
         }
     };
