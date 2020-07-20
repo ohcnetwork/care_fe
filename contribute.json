@@ -1,0 +1,27 @@
+{
+  "name": "Care",
+  "description": "Care is a single point to link Hospitals,Corona Care Centers and Volunteers to the unified Corona Safe Network",
+  "repository": {
+    "url": "https://github.com/coronasafe/care_fe",
+    "license": "MIT"
+  },
+  "participate": {
+    "home": "https://volunteer.coronasafe.network",
+    "docs": "https://knowledge.coronasafe.network"
+  },
+  "bugs": {
+    "list": "https://github.com/coronasafe/care_fe/issues",
+    "report": "https://github.com/coronasafe/care_fe/issues/new/choose"
+  },
+  "urls": {
+    "prod": "https://care.coronasafe.network",
+    "stage": "https://care.coronasafe.in"
+  },
+  "keywords": [
+    "javascript",
+    "typescript",
+    "reason-react",
+    "React",
+    "Docker"
+  ]
+}
