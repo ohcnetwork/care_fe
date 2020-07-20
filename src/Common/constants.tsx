@@ -140,6 +140,7 @@ export const ADMITTED_TO = [
 ];
 
 export const PATIENT_CATEGORY = [
+  { id: "ASYMPTOMATIC", text: "ASYM (ASYMPTOMATIC) "},
   { id: "Category-A", text: "Mild (Category A)" },
   { id: "Category-B", text: "Moderate (Category B)" },
   { id: "Category-C", text: "Severe (Category C)" }
