@@ -7,9 +7,24 @@
     "type": "git",
     "url": "git@github.com:coronasafe/care_fe.git"
   },
+  "bugs": {
+    "url": "https://support.coronasafe.network",
+    "email": "info@coronasafe.network"
+  },
+  "contributors": [
+    "coronasafe Contributors"
+  ],
+  "homepage": "https://care.coronasafe.in",
   "main": "./src/index.tsx",
   "keywords": [
-    "Cops"
+    "Coronasafe",
+    "care",
+    "react",
+    "reason-react",
+    "tailwind",
+    "pwa",
+    "material-ui",
+    "typescritps"
   ],
   "author": "Coronsafe Care Contributors",
   "license": "MIT",
