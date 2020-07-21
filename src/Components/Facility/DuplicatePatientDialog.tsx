@@ -52,11 +52,12 @@ const DuplicatePatientDialog = (props: Props & WithStyles<typeof styles>) => {
                 paper: classes.paper,
             }}
         >
-            <DialogTitle id="test-sample-title">Possible Duplicate Entry!</DialogTitle>
+            <DialogTitle className=" font-semibold text-3xl" id="font-semibold text-3xl">Patent Record Found</DialogTitle>
             <DialogContent>
                 <div className="grid gap-4 grid-cols-1">
                     <div>
-                        <p className="leading-relaxed">The following suspect's / patient's are having the Phone Number <span className="font-bold">{patientList[0].phone_number}</span>:</p>
+                        <p className="leading-relaxed text-sm">Please transfer / Admit the patient record to your facility by selecting the patient from the following
+                        list of suspect's registered with <span className="font-bold">{patientList[0].phone_number}</span> </p>
                     </div>
                     <div>
                         <Paper variant="outlined" style={{ height: 200, width: '100%' }}>
@@ -76,16 +77,22 @@ const DuplicatePatientDialog = (props: Props & WithStyles<typeof styles>) => {
                             style={{ padding: "0px 5px" }}
                         >
                             <Box display="flex" flexDirection="column">
-                                <FormControlLabel
-                                    value="close"
-                                    control={<Radio />}
-                                    label="I confirm that the suspect / patient is different from the above list"
-                                />
+
                                 <FormControlLabel
                                     value="transfer"
                                     control={<Radio />}
-                                    label="I want to transfer the suspect / patient to my facility"
+                                    className="bg-green-500 text-white mb-2"
+                                    label="Admit the patient record to your facility by adding the date of birth"
                                 />
+                                <FormControlLabel
+                                    value="close"
+                                    control={<Radio />}
+                                    className="bg-red-500 text-white mb-2"
+                                    label="I confirm that the suspect / patient i want to create is not on the list."
+                                />
+                                <p>
+                                    Please contact your district care coordinator or the shifting facility or the patient if you are not sure about the date of birth of the patient you want to admit.
+                                </p>
                             </Box>
                         </RadioGroup>
                         {/* <CheckboxField
