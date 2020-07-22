@@ -38,7 +38,7 @@
     "@material-ui/pickers": "^3.2.10",
     "@material-ui/styles": "^4.10.0",
     "@material-ui/types": "^5.1.0",
-    "@sentry/browser": "^5.19.2",
+    "@sentry/browser": "^5.20.0",
     "@svgr/webpack": "^5.4.0",
     "@tailwindcss/ui": "^0.4.0",
     "@types/hookrouter": "^2.2.2",
