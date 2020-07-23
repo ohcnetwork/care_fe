@@ -71,6 +71,17 @@ export const FACILITY_TYPES: Array<OptionsType> = [
   { id: 1300, text: "Shifting Centre"}
 ];
 
+export const SHIFTING_CHOICES: Array<OptionsType> = [
+  { id: 10, text: "PENDING"},
+  { id: 20, text: "APPROVED"},
+  { id: 30, text: "REJECTED"},
+  { id: 40, text: "DESTINATION APPROVED"},
+  { id: 50, text: "DESTINATION REJECTED"},
+  { id: 60, text: "AWAITING TRANSPORTATION"},
+  { id: 70, text: "TRANSFER IN PROGRESS"},
+  { id: 80, text: "COMPLETED"},
+];
+
 export const BED_TYPES: Array<OptionsType> = [
   { id: 1, text: "Normal" },
   { id: 2, text: "Hostel" },
