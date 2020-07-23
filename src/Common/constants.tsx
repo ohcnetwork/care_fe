@@ -67,7 +67,8 @@ export const FACILITY_TYPES: Array<OptionsType> = [
   { id: 870, text: "Govt Medical College Hospitals"},
   { id: 950, text: 'Corona Testing Labs'},
   { id: 1000, text: "Corona Care Centre"},
-  { id: 1100, text: "First Line Treatment Centre"}
+  { id: 1100, text: "First Line Treatment Centre"},
+  { id: 1300, text: "Shifting Centre"}
 ];
 
 export const BED_TYPES: Array<OptionsType> = [
