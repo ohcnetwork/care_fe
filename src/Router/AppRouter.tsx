@@ -27,8 +27,9 @@ import { AddInventoryForm } from "../Components/Facility/AddInventoryForm";
 import { SetInventoryForm } from "../Components/Facility/SetInventoryForm";
 import MinQuantityList from "../Components/Facility/MinQuantityList";
 import { UpdateMinQuantity } from "../Components/Facility/UpdateMinQuantity";
-const get = require('lodash.get');
+import { ShiftCreate } from '../Components/Patient/ShiftCreate';
 import UserProfile from "../Components/Users/UserProfile";
+const get = require('lodash.get');
 const img =
   "https://cdn.coronasafe.network/light-logo.svg";
 const logoBlack =
@@ -106,6 +107,9 @@ const routes = {
   ),
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily-rounds/:id": ({ facilityId, patientId, consultationId, id }: any) => (
     <DailyRoundListDetails facilityId={facilityId} patientId={patientId} consultationId={consultationId} id={id} />
+  ),
+  "/facility/:facilityId/patient/:patientId/shift/new": ({ facilityId, patientId, id }: any) => (
+    <ShiftCreate facilityId={facilityId} patientId={patientId} />
   ),
   "/facility/:facilityId/inventory": ({ facilityId }: any) => (<InventoryList facilityId={facilityId} />),
   "/facility/:facilityId/inventory/add": ({ facilityId }: any) => (<AddInventoryForm facilityId={facilityId} />),

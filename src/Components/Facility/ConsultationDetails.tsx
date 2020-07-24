@@ -237,7 +237,7 @@ export const ConsultationDetails = (props: any) => {
               {consultationData.facility_name || "-"}
             </div>
           </div>
-          <div>
+          <div className="flex flex-col">
             <div className="mt-2">
               <Button
                 variant="contained"
@@ -251,6 +251,22 @@ export const ConsultationDetails = (props: any) => {
                 }
               >
                 Update Details
+              </Button>
+            </div>
+
+            <div className="mt-2">
+              <Button
+                variant="contained"
+                color="primary"
+                size="small"
+                className="float-right"
+                onClick={() =>
+                  navigate(
+                    `/facility/${facilityId}/patient/${patientId}/shift/new`
+                  )
+                }
+              >
+                SHIFT PATIENT
               </Button>
             </div>
           </div>

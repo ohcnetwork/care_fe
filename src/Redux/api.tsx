@@ -327,4 +327,9 @@ export default {
     path: "/api/v1/users",
     method: "PUT",
   },
+  //Shift
+  createShift: {
+    path: "/api/v1/shift/",
+    method: "POST",
+  }
 };
