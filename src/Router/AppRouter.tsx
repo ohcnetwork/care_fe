@@ -29,6 +29,8 @@ import MinQuantityList from "../Components/Facility/MinQuantityList";
 import { UpdateMinQuantity } from "../Components/Facility/UpdateMinQuantity";
 import { ShiftCreate } from '../Components/Patient/ShiftCreate';
 import UserProfile from "../Components/Users/UserProfile";
+import ListView from "../Components/Shifting/ListView";
+
 const get = require('lodash.get');
 const img =
   "https://cdn.coronasafe.network/light-logo.svg";
@@ -117,6 +119,8 @@ const routes = {
   "/facility/:facilityId/inventory/:inventoryId": ({ facilityId, inventoryId }: any) => (<InventoryLog facilityId={facilityId} inventoryId={inventoryId} />),
   "/facility/:facilityId/inventory/min_quantity/list": ({ facilityId }: any) => (<MinQuantityList facilityId={facilityId} />),
   "/facility/:facilityId/inventory/:inventoryId/update/:itemId": ({ facilityId, inventoryId, itemId }: any) => (<UpdateMinQuantity facilityId={facilityId} inventoryId={inventoryId} itemId={itemId} />),
+
+  "/shifting": () => <ListView />
 };
 
 
@@ -146,6 +150,11 @@ let menus = [
     title: "Profile",
     link: '/user/profile',
     icon: "fas fa-user-secret"
+  },
+  {
+    title: "Shifting",
+    link: '/shifting',
+    icon: "fas fa-ambulance"
   }
 ];
 
