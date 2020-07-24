@@ -118,7 +118,9 @@ export const fireRequest = (
                 // 4xx Errors
                 if (error.response.status > 400 &&
                     error.response.status < 500) {
-                    if (error.response.data && error.response.data.detail) {
+                    if (error.response.status === 429) {
+                        return error.response;
+                    } else if (error.response.data && error.response.data.detail) {
                         Notification.Error({
                             msg: error.response.data.detail
                         });
