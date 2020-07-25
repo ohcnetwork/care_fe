@@ -23,7 +23,7 @@ export const Login = () => {
   const [errors, setErrors] = useState(initErr);
   const [isCaptchaEnabled, setCaptcha] = useState(false);
 
-  const captchaKey = '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI';
+  const captchaKey = '6LdvxuQUAAAAADDWVflgBqyHGfq-xmvNJaToM0pN';
 
   const handleChange = (e: any) => {
     const { value, name } = e.target;
