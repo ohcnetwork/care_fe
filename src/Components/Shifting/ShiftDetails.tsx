@@ -3,11 +3,17 @@ import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getShiftDetails } from "../../Redux/actions";
+import { getShiftDetails, deleteShiftRecord } from "../../Redux/actions";
 import { navigate } from "hookrouter";
 import Button from "@material-ui/core/Button";
 import { GENDER_TYPES } from "../../Common/constants";
 import moment from "moment";
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import * as Notification from "../../Utils/Notifications.js";
 
 export default function ShiftDetails(props: any) {
   
@@ -15,6 +21,8 @@ export default function ShiftDetails(props: any) {
   let initialData: any = {};
   const [data, setData] = useState(initialData);
   const [isLoading, setIsLoading] = useState(true);
+
+  const [openDeleteShiftDialog, setOpenDeleteShiftDialog] = React.useState(false);
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -38,6 +46,17 @@ export default function ShiftDetails(props: any) {
     },
     [fetchData]
   );
+
+  const handleShiftDelete = async () => {
+    setOpenDeleteShiftDialog(true);
+
+    let res = await dispatch( deleteShiftRecord(props.id) )
+    if (res.status >= 200) {
+      Notification.Success({ msg: "Shifting record has been deleted successfully." });
+    }
+
+    navigate(`/shifting`)
+  }
 
   const showPatientCard = (patientData: any) => {
     const patientGender = GENDER_TYPES.find(i => i.id === patientData.gender)?.text;
@@ -267,9 +286,30 @@ export default function ShiftDetails(props: any) {
                 variant="contained"
                 color="secondary"
                 size="small"
-                onClick={() => navigate(`/`)}>
+                onClick={() => setOpenDeleteShiftDialog(true)}>
               Delete Record
             </Button>
+
+            <Dialog
+                open={openDeleteShiftDialog}
+                onClose={() => setOpenDeleteShiftDialog(false)}>
+              <DialogTitle id="alert-dialog-title">Authorize shift delete</DialogTitle>
+              <DialogContent>
+                <DialogContentText id="alert-dialog-description">
+                  Are you sure you want to delete this record?
+                </DialogContentText>
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={() => setOpenDeleteShiftDialog(false)} color="primary">
+                  No
+                </Button>
+                <Button color="primary"
+                        onClick={handleShiftDelete} autoFocus>
+                  Yes
+                </Button>
+              </DialogActions>
+            </Dialog>
+
           </div>
         </div>
       </div>
