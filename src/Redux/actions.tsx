@@ -232,3 +232,6 @@ export const updateUserDetails = (username: string, data: object) => {
 export const createShift = (params: object) => {
   return fireRequest('createShift', [], params);
 };
+export const getShiftRequests = (params: object) => {
+  return fireRequest('getShiftRequests', [], params);
+};

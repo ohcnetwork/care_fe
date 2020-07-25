@@ -331,5 +331,9 @@ export default {
   createShift: {
     path: "/api/v1/shift/",
     method: "POST",
+  },
+  getShiftRequests: {
+    path: "/api/v1/shift",
+    method: "GET",
   }
 };

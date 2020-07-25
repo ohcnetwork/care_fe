@@ -30,45 +30,48 @@ export default function ListFilter(props: any) {
       <div className="font-light text-md">
         Filter By:
       </div>
-      <div className="flex overflow-scroll">
+      <div className="flex flex-wrap gap-2">
         <div className="w-64 flex-none">
-          <span className="font-semibold">Origin facility</span>
-          <div className="-mt-3">
+          <span className="text-sm font-semibold">Origin facility</span>
+          <div className="">
             <FacilitySelect
               multiple={false}
               name="orgin_facility"
               selected={filter.orgin_facility_ref}
               setSelected={(obj) => setFacility(obj, 'orgin_facility')}
+              className="shifting-page-filter-dropdown"
               errors={''}/>
           </div>
         </div>
 
-        <div className="w-64 ml-3 flex-none">
-          <span className="font-semibold">Shifting approving facility</span>
-          <div className="-mt-3">
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">Shifting approving facility</span>
+          <div className="">
             <FacilitySelect
               multiple={false}
               name="shifting_approving_facility"
               selected={filter.shifting_approving_facility_ref}
               setSelected={(obj) => setFacility(obj, 'shifting_approving_facility')}
+              className="shifting-page-filter-dropdown"
               errors={''}/>
           </div>
         </div>
 
-        <div className="w-64 ml-3 flex-none">
-          <span className="font-semibold">Assigned facility</span>
-          <div className="-mt-3">
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">Assigned facility</span>
+          <div className="">
             <FacilitySelect
               multiple={false}
               name="assigned_facility"
               selected={filter.assigned_facility_ref}
               setSelected={(obj) => setFacility(obj, 'assigned_facility')}
+              className="shifting-page-filter-dropdown"
               errors={''}/>
           </div>
         </div>
 
-        <div className="w-64 ml-3 flex-none">
-          <span className="font-semibold">Status</span>
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">Status</span>
           <SelectField
                 name="status"
                 variant="outlined"
@@ -80,8 +83,8 @@ export default function ListFilter(props: any) {
                 className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"/>
         </div>
 
-        <div className="w-64 ml-3 flex-none">
-          <span className="font-semibold">Is emergency case</span>
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">Is emergency case</span>
           <SelectField
                 name="emergency"
                 variant="outlined"
@@ -93,8 +96,8 @@ export default function ListFilter(props: any) {
                 className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"/>
         </div>
 
-        <div className="w-64 ml-3 flex-none">
-          <span className="font-semibold">Is upshift case</span>
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">Is upshift case</span>
           <SelectField
                 name="is_up_shift"
                 variant="outlined"
