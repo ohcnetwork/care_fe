@@ -7,6 +7,7 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getShiftRequests } from "../../Redux/actions";
 import Pagination from "../Common/Pagination";
 import Button from "@material-ui/core/Button";
+import { navigate } from "hookrouter";
 
 const limit = 15;
 
@@ -49,7 +50,6 @@ export default function ListView(props: any) {
 
   const filterOnChange = (filterData : any) => {
     setFilter(filterData);
-    console.log(filterData);
   }
 
   const fetchData = useCallback(
@@ -61,7 +61,6 @@ export default function ListView(props: any) {
       if (!status.aborted) {
         if (res && res.data) {
           setData(res.data.results);
-          console.log(res.data.results);
           setTotalCount(res.data.count);
         }
         setIsLoading(false);
@@ -93,8 +92,8 @@ export default function ListView(props: any) {
       let patientList: any[] = [];
       patientList = data.map((shift: any, idx: number) => {
         return (
-          <div key={`shift_${shift.id}`} className="flex-1">
-            <div className="overflow-hidden shadow rounded-lg bg-white h-full cursor-pointer hover:border-primary-500">
+          <div key={`shift_${shift.id}`} className="w-1/2 mt-2">
+            <div className="overflow-hidden shadow rounded-lg bg-white h-full cursor-pointer hover:border-primary-500 mx-2">
               <div className="px-6 py-4 h-full flex flex-col justify-between">
                 <div>
                   <div className="flex justify-between">
@@ -132,7 +131,8 @@ export default function ListView(props: any) {
                   </div>
                 </div>
                 <div className="mt-2">
-                  <Button size="small" variant="outlined" fullWidth>
+                  <Button size="small" variant="outlined" fullWidth
+                      onClick={e => navigate(`/shifting/${shift.external_id}`)}>
                     View All Details
                   </Button>
                 </div>
@@ -142,10 +142,11 @@ export default function ListView(props: any) {
         );
       });
       return (
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap -mx-2">
           {patientList}
+
           {totalCount > limit && (
-          <div className="mt-4 flex w-full justify-center">
+          <div className="mt-2 flex w-full justify-center">
             <Pagination
               cPage={currentPage}
               defaultPerPage={limit}
