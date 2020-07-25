@@ -117,7 +117,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
             setIsLoading(true);
 
             const data = {
-                status: 'PENDING',
+                status: state.form.status,
                 orgin_facility: state.form.orgin_facility_object?.id,
                 shifting_approving_facility: state.form?.shifting_approving_facility_object?.id,
                 assigned_facility: state.form?.assigned_facility_object?.id,

@@ -50,7 +50,7 @@ export default function ShiftDetails(props: any) {
   const handleShiftDelete = async () => {
     setOpenDeleteShiftDialog(true);
 
-    let res = await dispatch( deleteShiftRecord(props.id) )
+    let res = await dispatch( deleteShiftRecord(props.id) );
     if (res.status >= 200) {
       Notification.Success({ msg: "Shifting record has been deleted successfully." });
     }
@@ -237,7 +237,7 @@ export default function ShiftDetails(props: any) {
         <div className="grid gap-2 grid-cols-1 md:grid-cols-2">
           <div>
               <span className="font-semibold leading-relaxed">Status: </span>
-               {data.status}
+                <span className="badge badge-pill badge-primary py-1 px-2">{data.status}</span>
             </div>
             <div>
               <span className="font-semibold leading-relaxed">Orgin facility: </span>

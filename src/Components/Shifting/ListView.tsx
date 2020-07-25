@@ -12,7 +12,7 @@ import { navigate } from "hookrouter";
 const limit = 15;
 
 const initialFilterData = {
-  status: '10',
+  status: 'Show All',
   facility: '',
   orgin_facility: '',
   shifting_approving_facility: '',
@@ -25,7 +25,7 @@ const initialFilterData = {
 
 const formatFilter = (filter: any) => {
  let filterData = {
-      status: filter.status,
+      status: filter.status === 'Show All' ? null : filter.status,
       facility: '',
       orgin_facility: filter.orgin_facility,
       shifting_approving_facility: filter.shifting_approving_facility,
@@ -93,7 +93,7 @@ export default function ListView(props: any) {
       patientList = data.map((shift: any, idx: number) => {
         return (
           <div key={`shift_${shift.id}`} className="w-1/2 mt-2">
-            <div className="overflow-hidden shadow rounded-lg bg-white h-full cursor-pointer hover:border-primary-500 mx-2">
+            <div className="overflow-hidden shadow rounded-lg bg-white h-full mx-2">
               <div className="px-6 py-4 h-full flex flex-col justify-between">
                 <div>
                   <div className="flex justify-between">
@@ -143,6 +143,13 @@ export default function ListView(props: any) {
       });
       return (
         <div className="flex flex-wrap -mx-2">
+
+          {!patientList.length && (
+            <div className="flex-1 flex items-center justify-center h-64">
+              No records found.
+            </div>
+          )}
+
           {patientList}
 
           {totalCount > limit && (
