@@ -130,13 +130,14 @@ export const ShiftCreate = (props: patientShiftProps) => {
             setIsLoading(false);
 
             if (res && res.data) {
-                dispatch({ type: "set_form", form: initForm });
+                await dispatch({ type: "set_form", form: initForm });
                 Notification.Success({
                     msg: "Shift request created successfully",
                 });
+
+                navigate(`/shifting/${res.data.id}`);
             }
 
-            navigate(`/facility/${props.facilityId}/patient/${props.patientId}`);
         }
     }
 
@@ -234,7 +235,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
                         />
                     </div>
 
-                    <div className="col-span-2">
+                    <div className="md:col-span-2">
                         <InputLabel>
                             Reason for shift
                         </InputLabel>
@@ -251,7 +252,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
                         />
                     </div>
 
-                    <div className="col-span-2">
+                    <div className="md:col-span-2">
                         <InputLabel>
                             Any other comments
                         </InputLabel>
@@ -268,7 +269,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
                         />
                     </div>
 
-                    <div className="col-span-2 flex justify-between mt-4">
+                    <div className="md:col-span-2 flex justify-between mt-4">
                         <Button
                                 color="default"
                                 variant="contained"

@@ -178,7 +178,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
             <Card>
                 <CardContent>
                 <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
-                    <div className="col-span-2">
+                    <div className="md:col-span-2">
 
                         <InputLabel>Status</InputLabel>
                         <SelectField
@@ -274,7 +274,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                         />
                     </div>
 
-                    <div className="col-span-2">
+                    <div className="md:col-span-2">
                         <InputLabel>
                             Reason for shift
                         </InputLabel>
@@ -291,7 +291,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                         />
                     </div>
 
-                    <div className="col-span-2">
+                    <div className="md:col-span-2">
                         <InputLabel>
                             Any other comments
                         </InputLabel>
@@ -308,7 +308,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                         />
                     </div>
 
-                    <div className="col-span-2 flex justify-between mt-4">
+                    <div className="md:col-span-2 flex justify-between mt-4">
                         <Button
                                 color="default"
                                 variant="contained"

@@ -4,7 +4,7 @@ import PageTitle from "../Common/PageTitle";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getShiftDetails, deleteShiftRecord } from "../../Redux/actions";
-import { navigate } from "hookrouter";
+import { navigate, A } from "hookrouter";
 import Button from "@material-ui/core/Button";
 import { GENDER_TYPES } from "../../Common/constants";
 import moment from "moment";
@@ -66,7 +66,9 @@ export default function ShiftDetails(props: any) {
         <div className="grid gap-2 grid-cols-1 md:grid-cols-2 mt-2">
           <div>
             <span className="font-semibold leading-relaxed">Name: </span>
-            {patientData.name}
+            <A href={`/patient/${patientData.id}`}>
+              {patientData.name}
+            </A>
           </div>
           {patientData.is_medical_worker && (
             <div>
@@ -215,7 +217,9 @@ export default function ShiftDetails(props: any) {
             <div className="flex items-baseline">
               <div>
                 <span className="font-semibold leading-relaxed">Parient name: </span>
-                {data.patient_object?.name}
+                <A href={`/patient/${data.patient_object?.id}`}>
+                  {data.patient_object?.name}
+                </A>
               </div>
             </div>
           </div>

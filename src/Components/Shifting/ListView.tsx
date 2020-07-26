@@ -92,7 +92,7 @@ export default function ListView(props: any) {
       let patientList: any[] = [];
       patientList = data.map((shift: any, idx: number) => {
         return (
-          <div key={`shift_${shift.id}`} className="w-1/2 mt-2">
+          <div key={`shift_${shift.id}`} className="w-full md:w-1/2 mt-2">
             <div className="overflow-hidden shadow rounded-lg bg-white h-full mx-2">
               <div className="px-6 py-4 h-full flex flex-col justify-between">
                 <div>
