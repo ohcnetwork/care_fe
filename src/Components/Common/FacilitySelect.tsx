@@ -8,6 +8,7 @@ interface FacilitySelectProps {
     name: string;
     margin?: string;
     errors: string;
+    className?: string;
     searchAll?: boolean;
     multiple?: boolean;
     selected: FacilityModel | FacilityModel[] | null;
@@ -15,7 +16,7 @@ interface FacilitySelectProps {
 }
 
 export const FacilitySelect = (props: FacilitySelectProps) => {
-    const { name, multiple, selected, setSelected, margin, errors, searchAll } = props;
+    const { name, multiple, selected, setSelected, margin, errors, searchAll, className = ''  } = props;
     const dispatchAction: any = useDispatch();
     const [facilityLoading, isFacilityLoading] = useState(false);
     const [hasSearchText, setHasSearchText] = useState(false);
@@ -69,5 +70,6 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
         getOptionLabel={(option: any) => option.name + (option.district_object ? `, ${option.district_object.name}` : '')}
         filterOptions={(options: FacilityModel[]) => options}
         errors={errors}
+        className={className}
     />);
 };
