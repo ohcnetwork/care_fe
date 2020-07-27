@@ -345,7 +345,7 @@ export default {
     method: "GET",
   },
   getShiftDetails: {
-    path: "/api/v1/shift/",
+    path: "/api/v1/shift",
     method: "GET",
   }
 };
