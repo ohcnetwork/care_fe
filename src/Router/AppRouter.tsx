@@ -148,6 +148,11 @@ let menus = [
     icon: "fas fa-cog"
   },
   {
+    title: "Shifting",
+    link: '/shifting',
+    icon: "fas fa-ambulance"
+  },
+  {
     title: "Users",
     link: "/users",
     icon: "fas fa-user-friends"
@@ -156,11 +161,6 @@ let menus = [
     title: "Profile",
     link: '/user/profile',
     icon: "fas fa-user-secret"
-  },
-  {
-    title: "Shifting",
-    link: '/shifting',
-    icon: "fas fa-ambulance"
   }
 ];
 
