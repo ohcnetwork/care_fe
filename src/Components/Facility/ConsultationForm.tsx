@@ -62,7 +62,7 @@ const initForm: any = {
   existing_medication: "",
   prescribed_medication: "",
   consultation_notes:"",
-  prescriptions: {}
+  discharge_advice: {}
 };
 
 const initError = Object.assign(
@@ -122,7 +122,7 @@ export const ConsultationForm = (props: any) => {
   const dispatchAction: any = useDispatch();
   const { facilityId, patientId, id } = props;
   const [state, dispatch] = useReducer(consultationFormReducer, initialState);
-  const [prescription, setPrescription] = useState<Prescription_t[]>([]);
+  const [dischargeAdvice, setDischargeAdvice] = useState<Prescription_t[]>([]);
   const [
     selectedFacility,
     setSelectedFacility,
@@ -260,7 +260,7 @@ export const ConsultationForm = (props: any) => {
         prescribed_medication: state.form.prescribed_medication,
         admission_date: state.form.admission_date,
         discharge_date: state.form.discharge_date,
-        prescriptions: prescription,
+        discharge_advice: dischargeAdvice,
         patient: patientId,
         facility: facilityId,
         referred_to:
@@ -427,7 +427,7 @@ export const ConsultationForm = (props: any) => {
 
                 <div>
                   <InputLabel id="prescribed-medication-label">
-                    Prescribed Medication
+                   Treatment Given
                   </InputLabel>
                   <MultilineInputField
                     rows={5}
@@ -563,7 +563,7 @@ export const ConsultationForm = (props: any) => {
               </div>
 
               <div>
-                <PrescriptionBuilder prescriptions={prescription} setPrescriptions={setPrescription} />
+                <PrescriptionBuilder prescriptions={dischargeAdvice} setPrescriptions={setdischargeAdvice} />
               </div>
 
               {/*<div>*/}
