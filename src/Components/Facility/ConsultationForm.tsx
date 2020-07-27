@@ -40,6 +40,9 @@ import PageTitle from "../Common/PageTitle";
 import { FacilityModel } from "./models";
 import {navigate} from "hookrouter";
 
+import { make as PrescriptionBuilder } from "../Common/PrescriptionBuilder.gen";
+import {t as Prescription_t} from '@coronasafe/prescription-builder/src/Types/Prescription__Prescription.gen';
+
 const initForm: any = {
   hasSymptom: false,
   otherSymptom: false,
@@ -59,6 +62,7 @@ const initForm: any = {
   existing_medication: "",
   prescribed_medication: "",
   consultation_notes:"",
+  prescriptions: {}
 };
 
 const initError = Object.assign(
@@ -118,6 +122,7 @@ export const ConsultationForm = (props: any) => {
   const dispatchAction: any = useDispatch();
   const { facilityId, patientId, id } = props;
   const [state, dispatch] = useReducer(consultationFormReducer, initialState);
+  const [prescription, setPrescription] = useState<Prescription_t[]>([]);
   const [
     selectedFacility,
     setSelectedFacility,
@@ -255,6 +260,7 @@ export const ConsultationForm = (props: any) => {
         prescribed_medication: state.form.prescribed_medication,
         admission_date: state.form.admission_date,
         discharge_date: state.form.discharge_date,
+        prescriptions: prescription,
         patient: patientId,
         facility: facilityId,
         referred_to:
@@ -438,7 +444,6 @@ export const ConsultationForm = (props: any) => {
                     errors={state.errors.prescribed_medication}
                   />
                 </div>
-
                 <div className="flex-1">
                   <InputLabel id="category-label">Category</InputLabel>
                   <SelectField
@@ -555,6 +560,10 @@ export const ConsultationForm = (props: any) => {
                     </div>
                   </div>
                 )}
+              </div>
+
+              <div>
+                <PrescriptionBuilder prescriptions={prescription} setPrescriptions={setPrescription} />
               </div>
 
               {/*<div>*/}
