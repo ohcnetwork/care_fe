@@ -62,7 +62,7 @@ const initForm: any = {
   existing_medication: "",
   prescribed_medication: "",
   consultation_notes:"",
-  discharge_advice: {}
+  discharge_advice: []
 };
 
 const initError = Object.assign(
@@ -140,6 +140,7 @@ export const ConsultationForm = (props: any) => {
     async (status: statusType) => {
       setIsLoading(true);
       const res = await dispatchAction(getConsultation(id));
+      setDischargeAdvice(res && res.data && res.data.discharge_advice);
       if (!status.aborted) {
         if (res && res.data) {
           const formData = {
@@ -563,7 +564,7 @@ export const ConsultationForm = (props: any) => {
               </div>
 
               <div>
-                <PrescriptionBuilder prescriptions={dischargeAdvice} setPrescriptions={setdischargeAdvice} />
+                <PrescriptionBuilder prescriptions={dischargeAdvice} setPrescriptions={setDischargeAdvice} />
               </div>
 
               {/*<div>*/}
