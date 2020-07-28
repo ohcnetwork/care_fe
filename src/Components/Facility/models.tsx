@@ -61,6 +61,7 @@ export interface ConsultationModel {
   symptoms?: Array<number>;
   symptoms_text?: string;
   symptoms_onset_date?: string;
+  consultation_notes?: string;
 }
 export interface PatientStatsModel {
   id?: number;

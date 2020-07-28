@@ -160,6 +160,7 @@ export const ConsultationForm = (props: any) => {
             admitted: res.data.admitted ? String(res.data.admitted) : "false",
             admitted_to: res.data.admitted_to ? res.data.admitted_to : "",
             category: res.data.category ? res.data.category : "",
+            OPconsultation: res.data.consultation_notes
           };
           dispatch({ type: "set_form", form: formData });
         } else {
@@ -270,10 +271,7 @@ export const ConsultationForm = (props: any) => {
         facility: facilityId,
         referred_to:
           state.form.suggestion === "R" ? state.form.referred_to : undefined,
-        consultation_notes:
-          state.form.suggestion === "OP"
-            ? state.form.OPconsultation
-            : undefined,
+        consultation_notes: state.form.OPconsultation
       };
       const res = await dispatchAction(
         id ? updateConsultation(id, data) : createConsultation(data)
@@ -338,7 +336,7 @@ export const ConsultationForm = (props: any) => {
   }
 
   return (
-    <div className="px-2 pb-2">
+    <div className="px-2 pb-2 max-w-3xl mx-auto">
       <PageTitle title={headerText} />
       <div className="mt-4">
         <Card>
@@ -490,22 +488,6 @@ export const ConsultationForm = (props: any) => {
                     />
                   </div>
                 )}
-                {state.form.suggestion === "OP" && (
-                  <div>
-                    <InputLabel>OP Consultation</InputLabel>
-                    <TextInputField
-                      name="OPconsultation"
-                      type="text"
-                      placeholder="Enter Detail"
-                      variant="outlined"
-                      InputLabelProps={{ shrink: !!state.form.OPconsultation }}
-                      value={state.form.OPconsultation}
-                      onChange={handleChange}
-                      errors={state.errors.OPconsultation}
-                    />
-                  </div>
-                )}
-
                 <div className="flex">
                   <div className="flex-1">
                     <InputLabel id="admitted-label">Admitted</InputLabel>
@@ -568,7 +550,26 @@ export const ConsultationForm = (props: any) => {
                 )}
               </div>
 
-              <div>
+              <div className="mt-4">
+                <InputLabel>Advice</InputLabel>
+                <MultilineInputField
+                  rows={5}
+                  className="mt-2"
+                  name="OPconsultation"
+                  variant="outlined"
+                  margin="dense"
+                  type="text"
+                  placeholder="Information optional"
+                  InputLabelProps={{
+                    shrink: !!state.form.OPconsultation,
+                  }}
+                  value={state.form.OPconsultation}
+                  onChange={handleChange}
+                  errors={state.errors.OPconsultation}
+                />
+              </div>
+              <div className="mt-4">
+                <InputLabel>Medication</InputLabel>
                 <PrescriptionBuilder prescriptions={dischargeAdvice} setPrescriptions={setDischargeAdvice} />
               </div>
 

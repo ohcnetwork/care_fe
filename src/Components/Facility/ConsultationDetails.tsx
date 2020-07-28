@@ -336,36 +336,51 @@ export const ConsultationDetails = (props: any) => {
           )}
         </div>
       </div>
-      <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
-        <div className="px-4 py-5 sm:p-6">
-          <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-            Existing Medication:{" "}
-          </h3>
-          <div className="mt-2">
-            {consultationData.existing_medication || "-"}
+      {consultationData.existing_medication &&
+        <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
+          <div className="px-4 py-5 sm:p-6">
+            <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+              Existing Medication:{" "}
+            </h3>
+            <div className="mt-2">
+              {consultationData.existing_medication || "-"}
+            </div>
           </div>
         </div>
-      </div>
-      <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
-        <div className="px-4 py-5 sm:p-6">
-          <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-            Examination details and Clinical conditions:{" "}
-          </h3>
-          <div className="mt-2">
-            {consultationData.examination_details || "-"}
+      }
+      {consultationData.examination_details &&
+        <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
+          <div className="px-4 py-5 sm:p-6">
+            <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+              Examination details and Clinical conditions:{" "}
+            </h3>
+            <div className="mt-2">
+              {consultationData.examination_details || "-"}
+            </div>
           </div>
-        </div>
-      </div>
-      <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
-        <div className="px-4 py-5 sm:p-6">
-          <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-            Treatment Summary
+        </div>}
+      {consultationData.prescribed_medication &&
+        <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
+          <div className="px-4 py-5 sm:p-6">
+            <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+              Treatment Summary
           </h3>
-          <div className="mt-2">
-            {consultationData.prescribed_medication || "-"}
+            <div className="mt-2">
+              {consultationData.prescribed_medication || "-"}
+            </div>
           </div>
-        </div>
-      </div>
+        </div>}
+      {consultationData.consultation_notes &&
+        <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
+          <div className="px-4 py-5 sm:p-6">
+            <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+              Advice
+          </h3>
+            <div className="mt-2">
+              {consultationData.consultation_notes || "-"}
+            </div>
+          </div>
+        </div>}
       <div>
         <PageTitle title="Daily Rounds" hideBack={true} />
         <div className="flex flex-wrap mt-4">
