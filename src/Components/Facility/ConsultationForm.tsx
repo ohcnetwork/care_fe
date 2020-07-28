@@ -38,10 +38,10 @@ import {
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 import { FacilityModel } from "./models";
-import {navigate} from "hookrouter";
+import { navigate } from "hookrouter";
 
 import { make as PrescriptionBuilder } from "../Common/PrescriptionBuilder.gen";
-import {t as Prescription_t} from '@coronasafe/prescription-builder/src/Types/Prescription__Prescription.gen';
+import { t as Prescription_t } from '@coronasafe/prescription-builder/src/Types/Prescription__Prescription.gen';
 
 const initForm: any = {
   hasSymptom: false,
@@ -61,7 +61,7 @@ const initForm: any = {
   examination_details: "",
   existing_medication: "",
   prescribed_medication: "",
-  consultation_notes:"",
+  consultation_notes: "",
   discharge_advice: []
 };
 
@@ -140,7 +140,11 @@ export const ConsultationForm = (props: any) => {
     async (status: statusType) => {
       setIsLoading(true);
       const res = await dispatchAction(getConsultation(id));
-      setDischargeAdvice(res && res.data && res.data.discharge_advice);
+      if (res && res.data && res.data.discharge_advice && Object.keys(res.data.discharge_advice).length != 0) {
+        console.log("here")
+        setDischargeAdvice(res && res.data && res.data.discharge_advice);
+      }
+
       if (!status.aborted) {
         if (res && res.data) {
           const formData = {
@@ -428,7 +432,7 @@ export const ConsultationForm = (props: any) => {
 
                 <div>
                   <InputLabel id="prescribed-medication-label">
-                   Treatment Given
+                    Treatment Summary
                   </InputLabel>
                   <MultilineInputField
                     rows={5}
@@ -549,6 +553,7 @@ export const ConsultationForm = (props: any) => {
                   <div className="flex">
                     <div className="flex-1">
                       <DateInputField
+                        id="admission_date"
                         label="Admission Date"
                         margin="dense"
                         value={state.form.admission_date}

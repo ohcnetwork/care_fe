@@ -228,7 +228,7 @@ export const ConsultationDetails = (props: any) => {
           <div className="grid gap-2 grid-cols-1">
             <div className="capitalize">
               <span className="font-semibold leading-relaxed">
-                Suggestion:{" "}
+                Decision after OP Triage/Consultation:{" "}
               </span>
               {consultationData.suggestion_text?.toLocaleLowerCase()}
             </div>
@@ -334,22 +334,34 @@ export const ConsultationDetails = (props: any) => {
               {consultationData.other_symptoms}
             </div>
           )}
-          <div className="md:col-span-2">
-            <span className="font-semibold leading-relaxed">
-              Existing Medication:{" "}
-            </span>
+        </div>
+      </div>
+      <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
+        <div className="px-4 py-5 sm:p-6">
+          <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+            Existing Medication:{" "}
+          </h3>
+          <div className="mt-2">
             {consultationData.existing_medication || "-"}
           </div>
-          <div className="md:col-span-2">
-            <span className="font-semibold leading-relaxed">
-              Examination Details:{" "}
-            </span>
+        </div>
+      </div>
+      <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
+        <div className="px-4 py-5 sm:p-6">
+          <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+            Examination details and Clinical conditions:{" "}
+          </h3>
+          <div className="mt-2">
             {consultationData.examination_details || "-"}
           </div>
-          <div className="md:col-span-2">
-            <span className="font-semibold leading-relaxed">
-              Prescribed Medication:{" "}
-            </span>
+        </div>
+      </div>
+      <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
+        <div className="px-4 py-5 sm:p-6">
+          <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+            Treatment Summary
+          </h3>
+          <div className="mt-2">
             {consultationData.prescribed_medication || "-"}
           </div>
         </div>
