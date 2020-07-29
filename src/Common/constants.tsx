@@ -52,8 +52,8 @@ export const FACILITY_TYPES: Array<OptionsType> = [
   { id: 5, text: "Hotel" },
   { id: 6, text: "Lodge" },
   { id: 7, text: "TeleMedicine" },
-  { id: 8, text: 'Govt Hospital'},
-  { id: 9, text: 'Labs'},
+  { id: 8, text: 'Govt Hospital' },
+  { id: 9, text: 'Labs' },
   { id: 800, text: "Primary Health Centres" },
   { id: 801, text: "24x7 Public Health Centres" },
   { id: 802, text: "Family Health Centres" },
@@ -64,22 +64,22 @@ export const FACILITY_TYPES: Array<OptionsType> = [
   { id: 840, text: "Women and Child Health Centres" },
   { id: 850, text: "General hospitals" },
   { id: 860, text: "District Hospitals" },
-  { id: 870, text: "Govt Medical College Hospitals"},
-  { id: 950, text: 'Corona Testing Labs'},
-  { id: 1000, text: "Corona Care Centre"},
-  { id: 1100, text: "First Line Treatment Centre"},
-  { id: 1300, text: "Shifting Centre"}
+  { id: 870, text: "Govt Medical College Hospitals" },
+  { id: 950, text: 'Corona Testing Labs' },
+  { id: 1000, text: "Corona Care Centre" },
+  { id: 1100, text: "First Line Treatment Centre" },
+  { id: 1300, text: "Shifting Centre" }
 ];
 
 export const SHIFTING_CHOICES: Array<OptionsType> = [
-  { id: 10, text: "PENDING"},
-  { id: 20, text: "APPROVED"},
-  { id: 30, text: "REJECTED"},
-  { id: 40, text: "DESTINATION APPROVED"},
-  { id: 50, text: "DESTINATION REJECTED"},
-  { id: 60, text: "AWAITING TRANSPORTATION"},
-  { id: 70, text: "TRANSFER IN PROGRESS"},
-  { id: 80, text: "COMPLETED"},
+  { id: 10, text: "PENDING" },
+  { id: 20, text: "APPROVED" },
+  { id: 30, text: "REJECTED" },
+  { id: 40, text: "DESTINATION APPROVED" },
+  { id: 50, text: "DESTINATION REJECTED" },
+  { id: 60, text: "AWAITING TRANSPORTATION" },
+  { id: 70, text: "TRANSFER IN PROGRESS" },
+  { id: 80, text: "COMPLETED" },
 ];
 
 export const BED_TYPES: Array<OptionsType> = [
@@ -142,7 +142,7 @@ export const CONSULTATION_SUGGESTION = [
   { id: "HI", text: "Home Isolation" },
   { id: "A", text: "Admission" },
   { id: "R", text: "Refer to another Hospital" },
-  { id: "OP", text: "OP Consultation"}
+  { id: "OP", text: "OP Consultation" }
 ];
 
 export const ADMITTED_TO = [
@@ -152,7 +152,7 @@ export const ADMITTED_TO = [
 ];
 
 export const PATIENT_CATEGORY = [
-  { id: "ASYMPTOMATIC", text: "ASYM (ASYMPTOMATIC) "},
+  { id: "ASYMPTOMATIC", text: "ASYM (ASYMPTOMATIC) " },
   { id: "Category-A", text: "Mild (Category A)" },
   { id: "Category-B", text: "Moderate (Category B)" },
   { id: "Category-C", text: "Severe (Category C)" }
@@ -178,7 +178,7 @@ export const SAMPLE_TEST_STATUS = [
 
 export const SAMPLE_FLOW_RULES = {
   REQUEST_SUBMITTED: ["APPROVED", "DENIED",],
-  APPROVED: ["SENT_TO_COLLECTON_CENTRE"],
+  APPROVED: ["SENT_TO_COLLECTON_CENTRE", "RECEIVED_AND_FORWARED", "RECEIVED_AT_LAB", "COMPLETED"],
   DENIED: ["REQUEST_SUBMITTED"],
   SENT_TO_COLLECTON_CENTRE: ["RECEIVED_AND_FORWARED", "RECEIVED_AT_LAB", "COMPLETED"],
   RECEIVED_AND_FORWARED: ["RECEIVED_AT_LAB", "COMPLETED"],
@@ -201,7 +201,7 @@ export const DISEASE_STATUS = [
 ];
 
 export const BLOOD_GROUPS = [
-    "UNK",
+  "UNK",
   "A+",
   "A-",
   "B+",
@@ -223,12 +223,12 @@ export const SAMPLE_TYPE_CHOICES = [
 ];
 
 export const ICMR_CATEGORY = [
-    "Cat 0",
-    "Cat 1",
-    "Cat 2",
-    "Cat 3",
-    "Cat 4",
-    "Cat 5a",
-    "Cat 5b",
+  "Cat 0",
+  "Cat 1",
+  "Cat 2",
+  "Cat 3",
+  "Cat 4",
+  "Cat 5a",
+  "Cat 5b",
 
 ]
