@@ -11,12 +11,13 @@ interface FacilitySelectProps {
     className?: string;
     searchAll?: boolean;
     multiple?: boolean;
+    facilityType?: number;
     selected: FacilityModel | FacilityModel[] | null;
     setSelected: (selected: FacilityModel | FacilityModel[] | null) => void;
 }
 
 export const FacilitySelect = (props: FacilitySelectProps) => {
-    const { name, multiple, selected, setSelected, margin, errors, searchAll, className = ''  } = props;
+    const { name, multiple, selected, setSelected, margin, errors, searchAll, className = '', facilityType } = props;
     const dispatchAction: any = useDispatch();
     const [facilityLoading, isFacilityLoading] = useState(false);
     const [hasSearchText, setHasSearchText] = useState(false);
@@ -39,7 +40,7 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
 
     const onFacilitySearch = useCallback(debounce(async (text: string) => {
         if (text) {
-            const params = { limit: 50, offset: 0, search_text: text, all: searchAll };
+            const params = { limit: 50, offset: 0, search_text: text, all: searchAll, facility_type: facilityType };
             const res = await dispatchAction(getAllFacilities(params));
             if (res && res.data) {
                 setFacilityList(res.data.results);
