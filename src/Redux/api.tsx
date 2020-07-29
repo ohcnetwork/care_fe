@@ -327,4 +327,25 @@ export default {
     path: "/api/v1/users",
     method: "PUT",
   },
+  //Shift
+  createShift: {
+    path: "/api/v1/shift/",
+    method: "POST",
+  },
+  updateShift: {
+    path: "/api/v1/shift",
+    method: "PUT",  
+  },
+  deleteShiftRecord: {
+    path: "/api/v1/shift",
+    method: "DELETE",  
+  },
+  getShiftRequests: {
+    path: "/api/v1/shift",
+    method: "GET",
+  },
+  getShiftDetails: {
+    path: "/api/v1/shift",
+    method: "GET",
+  }
 };

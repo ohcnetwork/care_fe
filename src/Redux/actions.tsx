@@ -226,3 +226,21 @@ export const getUserDetails = (username: string) => {
 export const updateUserDetails = (username: string, data: object) => {
   return fireRequest('updateUserDetails', [username], data);
 };
+
+
+//Shift
+export const createShift = (params: object) => {
+  return fireRequest('createShift', [], params);
+};
+export const updateShift = (id: string, params: object) => {
+  return fireRequest('updateShift', [id], params);
+};
+export const deleteShiftRecord = (id: string) => {
+  return fireRequest('deleteShiftRecord', [id], {});
+};
+export const getShiftRequests = (params: object) => {
+  return fireRequest('getShiftRequests', [], params);
+};
+export const getShiftDetails = (id: string) => {
+  return fireRequest('getShiftDetails', [id], {});
+};
