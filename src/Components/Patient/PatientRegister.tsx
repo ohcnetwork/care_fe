@@ -322,6 +322,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             errors[field] = "Please select a blood group";
             invalidForm = true;
           }
+          return;
         default:
           return;
       }
