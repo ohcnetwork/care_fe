@@ -317,6 +317,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             }
           }
           return;
+        case "blood_group":
+          if(!state.form[field]) {
+            errors[field] = "Please select a blood group";
+            invalidForm = true;
+          }
         default:
           return;
       }
