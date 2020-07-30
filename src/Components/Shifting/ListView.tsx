@@ -11,7 +11,7 @@ import { navigate } from "hookrouter";
 
 import { SHIFTING_CHOICES } from "../../Common/constants";
 
-const limit = 15;
+const limit = 100;
 
 const initialFilterData = {
   status: 'Show All',
@@ -80,96 +80,105 @@ export default function ListView(props: any) {
     [fetchData]
   );
 
-  const handlePagination = (page: number, limit: number) => {
-    const offset = (page - 1) * limit;
-    setCurrentPage(page);
-    let filterData = { ...filter }
-    filter['offset'] = offset;
+  // const loadMore = (page: number, limit: number) => {
+  //   const offset = (page - 1) * limit;
+  //   setCurrentPage(page);
+  //   let filterData = { ...filter }
+  //   filter['offset'] = offset;
 
-    filterOnChange(filterData);
-  };
+  //   filterOnChange(filterData);
+  // };
 
-  const shiftingList = () => {
-    if (isLoading) {
-      return <Loading />
-    } else {
-      let patientList: any[] = [];
-      patientList = data.map((shift: any, idx: number) => {
-        return (
-          <div key={`shift_${shift.id}`} className="w-full md:w-1/2 mt-2">
-            <div className="overflow-hidden shadow rounded-lg bg-white h-full mx-2">
-              <div className="px-6 py-4 h-full flex flex-col justify-between">
-                <div>
-                  <div className="flex justify-between">
-                    <div className="font-bold text-xl capitalize mb-2">
-                      {shift.patient_object.name}
-                    </div>
+  // const handlePagination = (page: number, limit: number) => {
+  //   const offset = (page - 1) * limit;
+  //   setCurrentPage(page);
+  //   let filterData = { ...filter }
+  //   filter['offset'] = offset;
+
+  //   filterOnChange(filterData);
+  // };
+
+  // const shiftingList = () => {
+  //   if (isLoading) {
+  //     return <Loading />
+  //   } else {
+  //     let patientList: any[] = [];
+  //     patientList = data.map((shift: any, idx: number) => {
+  //       return (
+  //         <div key={`shift_${shift.id}`} className="w-full md:w-1/2 mt-2">
+  //           <div className="overflow-hidden shadow rounded-lg bg-white h-full mx-2">
+  //             <div className="px-6 py-4 h-full flex flex-col justify-between">
+  //               <div>
+  //                 <div className="flex justify-between">
+  //                   <div className="font-bold text-xl capitalize mb-2">
+  //                     {shift.patient_object.name}
+  //                   </div>
   
-                    <div className="flex">
-                      <div>
-                        <span className="badge badge-pill badge-primary mx-2">
-                          {shift.status}
-                        </span>
-                      </div>
-                      <div>
-                        {shift.emergency && (
-                          <span className="badge badge-pill badge-warning mr-2">
-                            emergency
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
+  //                   <div className="flex">
+  //                     <div>
+  //                       <span className="badge badge-pill badge-primary mx-2">
+  //                         {shift.status}
+  //                       </span>
+  //                     </div>
+  //                     <div>
+  //                       {shift.emergency && (
+  //                         <span className="badge badge-pill badge-warning mr-2">
+  //                           emergency
+  //                         </span>
+  //                       )}
+  //                     </div>
+  //                   </div>
+  //                 </div>
                   
-                  <div>
-                    <span className="font-semibold leading-relaxed">Orgin facility: </span>
-                    {(shift.orgin_facility_object||{}).name}
-                  </div>
-                  <div>
-                    <span className="font-semibold leading-relaxed">Shifting approving facility: </span>
-                    {(shift.shifting_approving_facility_object||{}).name}
-                  </div>
-                  <div>
-                    <span className="font-semibold leading-relaxed">Assigned facility: </span>
-                    {(shift.assigned_facility_object||{}).name}
-                  </div>
-                </div>
-                <div className="mt-2">
-                  <Button size="small" variant="outlined" fullWidth
-                      onClick={e => navigate(`/shifting/${shift.external_id}`)}>
-                    View All Details
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-      });
-      return (
-        <div className="flex flex-wrap -mx-2">
+  //                 <div>
+  //                   <span className="font-semibold leading-relaxed">Orgin facility: </span>
+  //                   {(shift.orgin_facility_object||{}).name}
+  //                 </div>
+  //                 <div>
+  //                   <span className="font-semibold leading-relaxed">Shifting approving facility: </span>
+  //                   {(shift.shifting_approving_facility_object||{}).name}
+  //                 </div>
+  //                 <div>
+  //                   <span className="font-semibold leading-relaxed">Assigned facility: </span>
+  //                   {(shift.assigned_facility_object||{}).name}
+  //                 </div>
+  //               </div>
+  //               <div className="mt-2">
+  //                 <Button size="small" variant="outlined" fullWidth
+  //                     onClick={e => navigate(`/shifting/${shift.external_id}`)}>
+  //                   View All Details
+  //                 </Button>
+  //               </div>
+  //             </div>
+  //           </div>
+  //         </div>
+  //       );
+  //     });
+  //     return (
+  //       <div className="flex flex-wrap -mx-2">
 
-          {!patientList.length && (
-            <div className="flex-1 flex items-center justify-center h-64">
-              No records found.
-            </div>
-          )}
+  //         {!patientList.length && (
+  //           <div className="flex-1 flex items-center justify-center h-64">
+  //             No records found.
+  //           </div>
+  //         )}
 
-          {patientList}
+  //         {patientList}
 
-          {totalCount > limit && (
-          <div className="mt-2 flex w-full justify-center">
-            <Pagination
-              cPage={currentPage}
-              defaultPerPage={limit}
-              data={{ totalCount }}
-              onChange={handlePagination}
-            />
-          </div>
-        )}
-        </div>
-      )
-    }
-  }
+  //         {totalCount > limit && (
+  //         <div className="mt-2 flex w-full justify-center">
+  //           <Pagination
+  //             cPage={currentPage}
+  //             defaultPerPage={limit}
+  //             data={{ totalCount }}
+  //             onChange={handlePagination}
+  //           />
+  //         </div>
+  //       )}
+  //       </div>
+  //     )
+  //   }
+  // }
 
   let patientFilter = (filter:string) => data.filter(({status}) => {console.log(status + " " + filter); return status===filter}).map((shift: any, idx: number) => {
     return (
@@ -224,8 +233,8 @@ export default function ListView(props: any) {
           filter={filter}
           onChange={filterOnChange}/>
 
-        <div className="flex mt-4 pb-8 flex-1 items-start overflow-x-scroll">
-          {shiftStatusOptions.map(board=>
+        <div className="flex mt-4 pb-2 flex-1 items-start overflow-x-scroll">
+          {isLoading ? <Loading /> : shiftStatusOptions.map(board=>
             <div className="rounded-md bg-gray-200 flex-shrink-0 w-1/3 p-2 pb-4 mr-3 h-full overflow-y-auto">
               <div className="flex justify-between py-1">
                   <h3 className="text-sm">{board}</h3>
