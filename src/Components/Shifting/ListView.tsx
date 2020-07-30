@@ -217,7 +217,7 @@ export default function ListView(props: any) {
   });
 
   return (
-    <div className="flex flex-col min-h-screen px-2 md:px-8 pb-2">
+    <div className="flex flex-col h-screen px-2 md:px-8 pb-2">
         <PageTitle title={"Shifting"} hideBack={true} />
 
         <ListFilter
@@ -226,7 +226,7 @@ export default function ListView(props: any) {
 
         <div className="flex mt-4 pb-8 flex-1 items-start overflow-x-scroll">
           {shiftStatusOptions.map(board=>
-            <div className="rounded-md bg-gray-200 flex-shrink-0 w-1/3 p-2 pb-4 mr-3">
+            <div className="rounded-md bg-gray-200 flex-shrink-0 w-1/3 p-2 pb-4 mr-3 h-full overflow-y-auto">
               <div className="flex justify-between py-1">
                   <h3 className="text-sm">{board}</h3>
                   <svg className="h-4 fill-current text-grey-dark cursor-pointer" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5 10a1.999 1.999 0 1 0 0 4 1.999 1.999 0 1 0 0-4zm7 0a1.999 1.999 0 1 0 0 4 1.999 1.999 0 1 0 0-4zm7 0a1.999 1.999 0 1 0 0 4 1.999 1.999 0 1 0 0-4z"/></svg>
