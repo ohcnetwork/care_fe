@@ -95,7 +95,7 @@ export const PatientManager = (props: any) => {
     async (status: statusType) => {
       setIsLoading(true);
       const res = await dispatch(
-        getAllPatient({ facility: facilityId, limit, offset, disease_status: diseaseStatus })
+        getAllPatient({ facility: facilityId, limit, offset, disease_status: diseaseStatus})
       );
       if (!status.aborted) {
         if (res && res.data) {
@@ -107,8 +107,30 @@ export const PatientManager = (props: any) => {
     },
     [diseaseStatus, dispatch, facilityId, offset]
   );
-  const handleChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+
+
+  
+  const handleChange = async (event: React.ChangeEvent<{}>, newValue: number) => {
     setValue(newValue);
+    if (newValue === 0) {
+      const res = await dispatch(
+          getAllPatient({ facility: facilityId, limit, offset, disease_status: diseaseStatus })
+      );
+      if (res && res.data) {
+        setData(res.data.results);
+        setTotalCount(res.data.count);
+      }
+      setIsLoading(false);
+    } else {
+      const res = await dispatch(
+          getAllPatient({ facility: facilityId, limit, offset, disease_status: diseaseStatus, is_active:false  })
+      );
+        if (res && res.data) {
+          setData(res.data.results);
+          setTotalCount(res.data.count);
+        }
+        setIsLoading(false);
+    }
   };
 
   const handleChangeIndex = (index: number) => {
