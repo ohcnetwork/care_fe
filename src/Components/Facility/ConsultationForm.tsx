@@ -38,7 +38,10 @@ import {
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 import { FacilityModel } from "./models";
-import {navigate} from "hookrouter";
+import { navigate } from "hookrouter";
+
+import { make as PrescriptionBuilder } from "../Common/PrescriptionBuilder.gen";
+import { t as Prescription_t } from '@coronasafe/prescription-builder/src/Types/Prescription__Prescription.gen';
 
 const initForm: any = {
   hasSymptom: false,
@@ -58,7 +61,8 @@ const initForm: any = {
   examination_details: "",
   existing_medication: "",
   prescribed_medication: "",
-  consultation_notes:"",
+  consultation_notes: "",
+  discharge_advice: []
 };
 
 const initError = Object.assign(
@@ -118,6 +122,7 @@ export const ConsultationForm = (props: any) => {
   const dispatchAction: any = useDispatch();
   const { facilityId, patientId, id } = props;
   const [state, dispatch] = useReducer(consultationFormReducer, initialState);
+  const [dischargeAdvice, setDischargeAdvice] = useState<Prescription_t[]>([]);
   const [
     selectedFacility,
     setSelectedFacility,
@@ -135,6 +140,11 @@ export const ConsultationForm = (props: any) => {
     async (status: statusType) => {
       setIsLoading(true);
       const res = await dispatchAction(getConsultation(id));
+      if (res && res.data && res.data.discharge_advice && Object.keys(res.data.discharge_advice).length != 0) {
+        console.log("here")
+        setDischargeAdvice(res && res.data && res.data.discharge_advice);
+      }
+
       if (!status.aborted) {
         if (res && res.data) {
           const formData = {
@@ -150,6 +160,7 @@ export const ConsultationForm = (props: any) => {
             admitted: res.data.admitted ? String(res.data.admitted) : "false",
             admitted_to: res.data.admitted_to ? res.data.admitted_to : "",
             category: res.data.category ? res.data.category : "",
+            OPconsultation: res.data.consultation_notes
           };
           dispatch({ type: "set_form", form: formData });
         } else {
@@ -255,14 +266,12 @@ export const ConsultationForm = (props: any) => {
         prescribed_medication: state.form.prescribed_medication,
         admission_date: state.form.admission_date,
         discharge_date: state.form.discharge_date,
+        discharge_advice: dischargeAdvice,
         patient: patientId,
         facility: facilityId,
         referred_to:
           state.form.suggestion === "R" ? state.form.referred_to : undefined,
-        consultation_notes:
-          state.form.suggestion === "OP"
-            ? state.form.OPconsultation
-            : undefined,
+        consultation_notes: state.form.OPconsultation
       };
       const res = await dispatchAction(
         id ? updateConsultation(id, data) : createConsultation(data)
@@ -327,7 +336,7 @@ export const ConsultationForm = (props: any) => {
   }
 
   return (
-    <div className="px-2 pb-2">
+    <div className="px-2 pb-2 max-w-3xl mx-auto">
       <PageTitle title={headerText} />
       <div className="mt-4">
         <Card>
@@ -421,7 +430,7 @@ export const ConsultationForm = (props: any) => {
 
                 <div>
                   <InputLabel id="prescribed-medication-label">
-                    Prescribed Medication
+                    Treatment Summary
                   </InputLabel>
                   <MultilineInputField
                     rows={5}
@@ -438,7 +447,6 @@ export const ConsultationForm = (props: any) => {
                     errors={state.errors.prescribed_medication}
                   />
                 </div>
-
                 <div className="flex-1">
                   <InputLabel id="category-label">Category</InputLabel>
                   <SelectField
@@ -480,22 +488,6 @@ export const ConsultationForm = (props: any) => {
                     />
                   </div>
                 )}
-                {state.form.suggestion === "OP" && (
-                  <div>
-                    <InputLabel>OP Consultation</InputLabel>
-                    <TextInputField
-                      name="OPconsultation"
-                      type="text"
-                      placeholder="Enter Detail"
-                      variant="outlined"
-                      InputLabelProps={{ shrink: !!state.form.OPconsultation }}
-                      value={state.form.OPconsultation}
-                      onChange={handleChange}
-                      errors={state.errors.OPconsultation}
-                    />
-                  </div>
-                )}
-
                 <div className="flex">
                   <div className="flex-1">
                     <InputLabel id="admitted-label">Admitted</InputLabel>
@@ -543,6 +535,7 @@ export const ConsultationForm = (props: any) => {
                   <div className="flex">
                     <div className="flex-1">
                       <DateInputField
+                        id="admission_date"
                         label="Admission Date"
                         margin="dense"
                         value={state.form.admission_date}
@@ -555,6 +548,29 @@ export const ConsultationForm = (props: any) => {
                     </div>
                   </div>
                 )}
+              </div>
+
+              <div className="mt-4">
+                <InputLabel>Advice</InputLabel>
+                <MultilineInputField
+                  rows={5}
+                  className="mt-2"
+                  name="OPconsultation"
+                  variant="outlined"
+                  margin="dense"
+                  type="text"
+                  placeholder="Information optional"
+                  InputLabelProps={{
+                    shrink: !!state.form.OPconsultation,
+                  }}
+                  value={state.form.OPconsultation}
+                  onChange={handleChange}
+                  errors={state.errors.OPconsultation}
+                />
+              </div>
+              <div className="mt-4">
+                <InputLabel>Medication</InputLabel>
+                <PrescriptionBuilder prescriptions={dischargeAdvice} setPrescriptions={setDischargeAdvice} />
               </div>
 
               {/*<div>*/}

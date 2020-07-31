@@ -3,7 +3,6 @@ const webpack = require("webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
-let googleKey = "6LdvxuQUAAAAADDWVflgBqyHGfq-xmvNJaToM0pN";
 const CopyPlugin = require("copy-webpack-plugin");
 const WorkboxPlugin = require("workbox-webpack-plugin");
 const MomentLocalesPlugin = require('moment-locales-webpack-plugin');
@@ -14,8 +13,7 @@ module.exports = (env, argv) => {
   const isDev = mode !== "production";
   const app = ["./src/index.tsx"];
   if (isDev) {
-    app.push("webpack-dev-server/client");
-    googleKey = "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI";
+    app.push("webpack-dev-server/client")
   }
   return {
     entry: {
@@ -93,9 +91,6 @@ module.exports = (env, argv) => {
       ],
     },
     plugins: [
-      new webpack.DefinePlugin({
-        "process.env.GOOGLE_KEY": JSON.stringify(googleKey),
-      }),
       new CopyPlugin({
         patterns: [
           {
@@ -105,6 +100,14 @@ module.exports = (env, argv) => {
           {
             from: "public/robots.txt",
             to: "robots.txt",
+          },
+          {
+            from: "public/favicon.ico",
+            to: "favicon.ico",
+          },
+          {
+            from: "public/contribute.json",
+            to: "contribute.json",
           },
           {
             // build meata contains version no for latest build. check "generate-build-meta" package script

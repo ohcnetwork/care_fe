@@ -228,7 +228,7 @@ export const ConsultationDetails = (props: any) => {
           <div className="grid gap-2 grid-cols-1">
             <div className="capitalize">
               <span className="font-semibold leading-relaxed">
-                Suggestion:{" "}
+                Decision after OP Triage/Consultation:{" "}
               </span>
               {consultationData.suggestion_text?.toLocaleLowerCase()}
             </div>
@@ -237,7 +237,7 @@ export const ConsultationDetails = (props: any) => {
               {consultationData.facility_name || "-"}
             </div>
           </div>
-          <div>
+          <div className="flex flex-col">
             <div className="mt-2">
               <Button
                 variant="contained"
@@ -251,6 +251,22 @@ export const ConsultationDetails = (props: any) => {
                 }
               >
                 Update Details
+              </Button>
+            </div>
+
+            <div className="mt-2">
+              <Button
+                variant="contained"
+                color="primary"
+                size="small"
+                className="float-right"
+                onClick={() =>
+                  navigate(
+                    `/facility/${facilityId}/patient/${patientId}/shift/new`
+                  )
+                }
+              >
+                SHIFT PATIENT
               </Button>
             </div>
           </div>
@@ -318,26 +334,53 @@ export const ConsultationDetails = (props: any) => {
               {consultationData.other_symptoms}
             </div>
           )}
-          <div className="md:col-span-2">
-            <span className="font-semibold leading-relaxed">
-              Existing Medication:{" "}
-            </span>
-            {consultationData.existing_medication || "-"}
-          </div>
-          <div className="md:col-span-2">
-            <span className="font-semibold leading-relaxed">
-              Examination Details:{" "}
-            </span>
-            {consultationData.examination_details || "-"}
-          </div>
-          <div className="md:col-span-2">
-            <span className="font-semibold leading-relaxed">
-              Prescribed Medication:{" "}
-            </span>
-            {consultationData.prescribed_medication || "-"}
-          </div>
         </div>
       </div>
+      {consultationData.existing_medication &&
+        <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
+          <div className="px-4 py-5 sm:p-6">
+            <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+              Existing Medication:{" "}
+            </h3>
+            <div className="mt-2">
+              {consultationData.existing_medication || "-"}
+            </div>
+          </div>
+        </div>
+      }
+      {consultationData.examination_details &&
+        <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
+          <div className="px-4 py-5 sm:p-6">
+            <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+              Examination details and Clinical conditions:{" "}
+            </h3>
+            <div className="mt-2">
+              {consultationData.examination_details || "-"}
+            </div>
+          </div>
+        </div>}
+      {consultationData.prescribed_medication &&
+        <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
+          <div className="px-4 py-5 sm:p-6">
+            <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+              Treatment Summary
+          </h3>
+            <div className="mt-2">
+              {consultationData.prescribed_medication || "-"}
+            </div>
+          </div>
+        </div>}
+      {consultationData.consultation_notes &&
+        <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
+          <div className="px-4 py-5 sm:p-6">
+            <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+              Advice
+          </h3>
+            <div className="mt-2">
+              {consultationData.consultation_notes || "-"}
+            </div>
+          </div>
+        </div>}
       <div>
         <PageTitle title="Daily Rounds" hideBack={true} />
         <div className="flex flex-wrap mt-4">

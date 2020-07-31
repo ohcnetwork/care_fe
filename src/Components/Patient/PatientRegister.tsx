@@ -317,6 +317,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             }
           }
           return;
+        case "blood_group":
+          if(!state.form[field]) {
+            errors[field] = "Please select a blood group";
+            invalidForm = true;
+          }
+          return;
         default:
           return;
       }
@@ -528,6 +534,13 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           <CardContent>
 
             <form onSubmit={e => handleSubmit(e)}>
+              <div className="bg-red-100 text-red-800 p-2 rounded-lg shadow mb-4 mt-2 font-semibold text-xs">
+
+                <div className="text-xl font-bold">
+                  Please enter the correct date of birth for the patient
+                </div>
+                Each patient in the system is uniquely identifiable by the number and date of birth. Adding incorrect date of birth can result in duplication of patient records.
+              </div>
               <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
                 <div>
                   <PhoneNumberField
@@ -552,6 +565,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     openTo="year"
                     disableFuture={true}
                   />
+
                 </div>
 
                 <div>
@@ -721,13 +735,13 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                 <div>
                   <InputLabel id="name-label">Pincode*</InputLabel>
                   <TextInputField
-                      name="pincode"
-                      variant="outlined"
-                      margin="dense"
-                      type="text"
-                      value={state.form.pincode}
-                      onChange={handleChange}
-                      errors={state.errors.pincode}
+                    name="pincode"
+                    variant="outlined"
+                    margin="dense"
+                    type="text"
+                    value={state.form.pincode}
+                    onChange={handleChange}
+                    errors={state.errors.pincode}
                   />
                 </div>
 
@@ -865,7 +879,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     Any medical history? (Optional Information)
                   </InputLabel>
                   <div className="grid grid-cols-1 md:grid-cols-2">
-                    {medicalHistoryTypes.map(i => {
+                    { medicalHistoryTypes.map(i => {
                       return renderMedicalHistory(i.id, i.text);
                     })}
                   </div>
@@ -904,15 +918,15 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                 <div>
                   <InputLabel id="allergies_label">Allergies</InputLabel>
                   <MultilineInputField
-                      rows={2}
-                      name="allergies"
-                      variant="outlined"
-                      margin="dense"
-                      type="text"
-                      placeholder="Optional Information"
-                      value={state.form.allergies}
-                      onChange={handleChange}
-                      errors={state.errors.allergies}
+                    rows={2}
+                    name="allergies"
+                    variant="outlined"
+                    margin="dense"
+                    type="text"
+                    placeholder="Optional Information"
+                    value={state.form.allergies}
+                    onChange={handleChange}
+                    errors={state.errors.allergies}
                   />
                 </div>
                 <div>

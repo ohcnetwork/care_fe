@@ -27,8 +27,13 @@ import { AddInventoryForm } from "../Components/Facility/AddInventoryForm";
 import { SetInventoryForm } from "../Components/Facility/SetInventoryForm";
 import MinQuantityList from "../Components/Facility/MinQuantityList";
 import { UpdateMinQuantity } from "../Components/Facility/UpdateMinQuantity";
-const get = require('lodash.get');
+import { ShiftCreate } from '../Components/Patient/ShiftCreate';
 import UserProfile from "../Components/Users/UserProfile";
+import ListView from "../Components/Shifting/ListView";
+import ShiftDetails from "../Components/Shifting/ShiftDetails";
+import { ShiftDetailsUpdate } from "../Components/Shifting/ShiftDetailsUpdate";
+
+const get = require('lodash.get');
 const img =
   "https://cdn.coronasafe.network/light-logo.svg";
 const logoBlack =
@@ -107,12 +112,21 @@ const routes = {
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily-rounds/:id": ({ facilityId, patientId, consultationId, id }: any) => (
     <DailyRoundListDetails facilityId={facilityId} patientId={patientId} consultationId={consultationId} id={id} />
   ),
+  "/facility/:facilityId/patient/:patientId/shift/new": ({ facilityId, patientId, id }: any) => (
+    <ShiftCreate facilityId={facilityId} patientId={patientId} />
+  ),
   "/facility/:facilityId/inventory": ({ facilityId }: any) => (<InventoryList facilityId={facilityId} />),
   "/facility/:facilityId/inventory/add": ({ facilityId }: any) => (<AddInventoryForm facilityId={facilityId} />),
   "/facility/:facilityId/inventory/min_quantity/set": ({ facilityId }: any) => (<SetInventoryForm facilityId={facilityId} />),
   "/facility/:facilityId/inventory/:inventoryId": ({ facilityId, inventoryId }: any) => (<InventoryLog facilityId={facilityId} inventoryId={inventoryId} />),
   "/facility/:facilityId/inventory/min_quantity/list": ({ facilityId }: any) => (<MinQuantityList facilityId={facilityId} />),
   "/facility/:facilityId/inventory/:inventoryId/update/:itemId": ({ facilityId, inventoryId, itemId }: any) => (<UpdateMinQuantity facilityId={facilityId} inventoryId={inventoryId} itemId={itemId} />),
+
+  "/shifting": () => <ListView />,
+  "/shifting/:id": ({ id }: any) => <ShiftDetails id={id} />,
+  "/shifting/:id/update": ({ id }: any) => (
+    <ShiftDetailsUpdate id={id} />
+  ),
 };
 
 
@@ -132,6 +146,11 @@ let menus = [
     title: "Sample Test",
     link: "/sample",
     icon: "fas fa-cog"
+  },
+  {
+    title: "Shifting",
+    link: '/shifting',
+    icon: "fas fa-ambulance"
   },
   {
     title: "Users",
