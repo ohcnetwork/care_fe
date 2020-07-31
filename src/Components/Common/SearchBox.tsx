@@ -1,8 +1,7 @@
-import { TextFieldProps } from '@material-ui/core';
-const debounce = require('lodash.debounce');
+
 import React, { useCallback, useState } from 'react';
-
-
+import { TextFieldProps } from '@material-ui/core';
+import debounce from 'lodash/debounce';
 
 type TextFieldPropsExtended = TextFieldProps & { errors: string, search: (value: string) => void }
 
@@ -40,7 +39,9 @@ export const InputSearchBox = (props: TextFieldPropsExtended) => {
                         </span>
                     </div>
                 }
-                <input name="search" type="text" value={state} placeholder={placeholder} onChange={handleKeyDown} className="form-input block w-full pl-8 pr-3 sm:text-sm sm:leading-5" />
+                <input name="search" type="text" value={state} 
+                    placeholder={placeholder} onChange={handleKeyDown} 
+                    className="form-input block w-full pl-8 pr-3 sm:text-sm sm:leading-5" />
             </div>
         </div>
     )

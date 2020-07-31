@@ -1,8 +1,8 @@
 import Button from "@material-ui/core/Button";
 import Grid from "@material-ui/core/Grid";
 import WarningRoundedIcon from "@material-ui/icons/WarningRounded";
-import { navigate } from "hookrouter";
-import React, { useCallback, useState } from "react";
+import { navigate, useQueryParams } from "hookrouter";
+import React, { useCallback, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { downloadPatients, getAllPatient, searchPatientFilter } from "../../Redux/actions";
@@ -32,19 +32,19 @@ function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
 
   return (
-      <div
-          role="tabpanel"
-          hidden={value !== index}
-          id={`full-width-tabpanel-${index}`}
-          aria-labelledby={`full-width-tab-${index}`}
-          {...other}
-      >
-        {value === index && (
-            <Box p={3}>
-              <Typography>{children}</Typography>
-            </Box>
-        )}
-      </div>
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`full-width-tabpanel-${index}`}
+      aria-labelledby={`full-width-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box p={3}>
+          <Typography>{children}</Typography>
+        </Box>
+      )}
+    </div>
   );
 }
 
@@ -79,106 +79,86 @@ export const PatientManager = (props: any) => {
   const classes = useStyles();
   const classesTab = useStylesTab();
   const theme = useTheme();
-  const [value, setValue] = React.useState(0);
   const dispatch: any = useDispatch();
-  const initialData: any[] = [];
-  const [data, setData] = useState(initialData);
-  const [diseaseStatus, setDiseaseStatus] = useState('');
-  let managePatients: any = null;
+
+  const [qParams, setQueryParams] = useQueryParams();
+  const [data, setData] = useState([]);
+
   const [isLoading, setIsLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [offset, setOffset] = useState(0);
   const [DownloadFile, setDownloadFile] = useState("");
+
   const limit = 14;
-  const fetchData = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const res = await dispatch(
-        getAllPatient({ facility: facilityId, limit, offset, disease_status: diseaseStatus})
-      );
-      if (!status.aborted) {
-        if (res && res.data) {
-          setData(res.data.results);
-          setTotalCount(res.data.count);
-        }
-        setIsLoading(false);
-      }
-    },
-    [diseaseStatus, dispatch, facilityId, offset]
-  );
+  const tabValue = parseInt(`${qParams.tab === undefined ? 0 : qParams.tab}`);
+  let managePatients: any = null;
 
+  console.log(qParams,tabValue);
 
-  
-  const handleChange = async (event: React.ChangeEvent<{}>, newValue: number) => {
-    setValue(newValue);
-    if (newValue === 0) {
-      const res = await dispatch(
-          getAllPatient({ facility: facilityId, limit, offset, disease_status: diseaseStatus, is_active: 'True' })
-      );
-      if (res && res.data) {
-        setData(res.data.results);
-        setTotalCount(res.data.count);
-      }
-      setIsLoading(false);
-    } else {
-      const res = await dispatch(
-          getAllPatient({ facility: facilityId, limit, offset, disease_status: diseaseStatus, is_active: 'False'  })
-      );
-        if (res && res.data) {
-          setData(res.data.results);
-          setTotalCount(res.data.count);
-        }
-        setIsLoading(false);
+  const getParams = (extra = {}) => {
+
+    let is_active = 'True';
+    if (qParams.tab == 1) {
+      is_active = 'False';
     }
-  };
 
-  const handleChangeIndex = (index: number) => {
-    setValue(index);
-  };
+    const offset = (qParams.page ? qParams.page -1 :  0) * limit;
+    const params = Object.assign(extra, {
+      facility: facilityId,
+      offset,
+      limit,
+      is_active
+    }, qParams);
+    delete params.tab;
+    delete params.page; 
+    return params;
+  }
+
+
   const handleDownload = async () => {
     const res = await dispatch(downloadPatients());
     setDownloadFile(res.data);
     document.getElementById("downloadlink")?.click();
   };
 
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(status);
-    },
-    [fetchData]
-  );
+  useEffect(() => {
+    setIsLoading(true);
+    dispatch(searchPatientFilter(getParams()))
+      .then((res: any) => {
+        if (res && res.data) {
+          setData(res.data.results);
+          setTotalCount(res.data.count);
+        }
+        setIsLoading(false);
+      })
+  }, [qParams, dispatch]);
 
-  const handlePagination = (page: number, limit: number) => {
-    const offset = (page - 1) * limit;
-    setCurrentPage(page);
-    setOffset(offset);
+  const handleTabChange = async (event: React.ChangeEvent<{}>, newValue: number) => {
+
+    console.log('Tab  changed', newValue);
+    setQueryParams({ ...qParams, tab: newValue }, true);
   };
 
-  const searchByName = async (searchValue: string) => {
-    setIsLoading(true);
-    const res = await dispatch(searchPatientFilter({ limit, offset, name: searchValue }));
-    if (res && res.data) {
-      setData(res.data.results);
-      setTotalCount(res.data.count);
-    }
-    setIsLoading(false);
+  const handleTabIndexChange = (index: number) => {
+    console.log('Tab Index changed',index);
+    setQueryParams({ ...qParams, tab: index, page:1 }, true);
+  };
+
+  const handlePagination = (page: number, limit: number) => {
+    setQueryParams({ ...qParams, page, limit }, true);
+  };
+
+  const searchByName = (searchValue: string) => {
+    setQueryParams({ ...qParams, name: searchValue, page:1 }, true);
   }
 
-  const searchByPhone = async (searchValue: string) => {
-    setIsLoading(true);
-    const res = await dispatch(searchPatientFilter({ limit, offset, phone_number: encodeURI(searchValue) }));
-    if (res && res.data) {
-      setData(res.data.results);
-      setTotalCount(res.data.count);
-    }
-    setIsLoading(false);
+  const searchByPhone = (searchValue: string) => {
+    const nParams = { ...qParams, phone_number: searchValue, page: 1 };
+    console.log('nparams' ,qParams,nParams);
+    setQueryParams(nParams, true);
   }
 
-  const handleFilter = async (diseaseStatus: string) => {
-    setDiseaseStatus(diseaseStatus);
-    setOffset(0);
-    setCurrentPage(1);
+  const handleFilter = (diseaseStatus: string) => {
+    setQueryParams({ ...qParams, disease_status: diseaseStatus, page:1 }, true);
   }
 
   let patientList: any[] = [];
@@ -286,7 +266,7 @@ export const PatientManager = (props: any) => {
         {totalCount > limit && (
           <div className="mt-4 flex w-full justify-center">
             <Pagination
-              cPage={currentPage}
+              cPage={qParams.page}
               defaultPerPage={limit}
               data={{ totalCount }}
               onChange={handlePagination}
@@ -374,29 +354,29 @@ export const PatientManager = (props: any) => {
       <div className={classesTab.root}>
         <AppBar position="static" color="default">
           <Tabs
-              value={value}
-              onChange={handleChange}
-              indicatorColor="primary"
-              textColor="primary"
-              variant="fullWidth"
-              aria-label="full width tabs example"
+            value={tabValue}
+            onChange={handleTabChange}
+            indicatorColor="primary"
+            textColor="primary"
+            variant="fullWidth"
+            aria-label="full width tabs example"
           >
-            <Tab label="Live" {...a11yProps(0)}/>
+            <Tab label="Live" {...a11yProps(0)} />
             <Tab label="Discharged" {...a11yProps(1)} />
           </Tabs>
         </AppBar>
         <SwipeableViews
-            axis={theme.direction === 'rtl' ? 'x-reverse' : 'x'}
-            index={value}
-            onChangeIndex={handleChangeIndex}
+          axis={theme.direction === 'rtl' ? 'x-reverse' : 'x'}
+          index={tabValue}
+          onChangeIndex={handleTabIndexChange}
         >
 
-          <TabPanel value={value} index={0} dir={theme.direction}>
+          <TabPanel value={tabValue} index={0} dir={theme.direction}>
             <div className="px-3 md:px-8">
               <div className="flex flex-wrap md:-mx-4">{managePatients}</div>
             </div>
           </TabPanel>
-          <TabPanel value={value} index={1} dir={theme.direction}>
+          <TabPanel value={tabValue} index={1} dir={theme.direction}>
             <div className="px-3 md:px-8">
               <div className="flex flex-wrap md:-mx-4">{managePatients}</div>
             </div>
