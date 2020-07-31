@@ -104,7 +104,10 @@ export const MEDICAL_HISTORY_CHOICES: Array<OptionsType> = [
   { id: 2, text: "Diabetes" },
   { id: 3, text: "Heart Disease" },
   { id: 4, text: "HyperTension" },
-  { id: 5, text: "Kidney Diseases" }
+  { id: 5, text: "Kidney Diseases" },
+  { id: 6, text: "Lung Diseases/Asthma"},
+  { id: 7, text: "Cancer"},
+  { id: 8, text: "OTHER"}
 ];
 
 export const SYMPTOM_CHOICES: Array<OptionsType> = [
