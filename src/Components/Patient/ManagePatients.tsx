@@ -359,7 +359,7 @@ export const PatientManager = (props: any) => {
               variant="fullWidth"
               aria-label="full width tabs example"
           >
-            <Tab label="Live" {...a11yProps(1)}/>
+            <Tab label="Live" {...a11yProps(0)}/>
             <Tab label="Discharged" {...a11yProps(1)} />
           </Tabs>
         </AppBar>
