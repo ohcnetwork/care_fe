@@ -114,7 +114,7 @@ export const PatientManager = (props: any) => {
     setValue(newValue);
     if (newValue === 0) {
       const res = await dispatch(
-          getAllPatient({ facility: facilityId, limit, offset, disease_status: diseaseStatus, is_active: True })
+          getAllPatient({ facility: facilityId, limit, offset, disease_status: diseaseStatus, is_active: 'True' })
       );
       if (res && res.data) {
         setData(res.data.results);
@@ -123,7 +123,7 @@ export const PatientManager = (props: any) => {
       setIsLoading(false);
     } else {
       const res = await dispatch(
-          getAllPatient({ facility: facilityId, limit, offset, disease_status: diseaseStatus, is_active: False  })
+          getAllPatient({ facility: facilityId, limit, offset, disease_status: diseaseStatus, is_active: 'False'  })
       );
         if (res && res.data) {
           setData(res.data.results);
