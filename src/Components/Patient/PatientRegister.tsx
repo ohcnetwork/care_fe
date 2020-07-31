@@ -487,7 +487,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               variant="outlined"
               margin="dense"
               type="text"
-              value={state.form.textField}
+              value={state.form[textField]}
               onChange={handleChange}
               errors={state.errors[textField]}
             />
