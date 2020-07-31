@@ -19,7 +19,7 @@ const Pagination = (props: PaginationProps) => {
                 setRowsPerPage(props.defaultPerPage);
             }
             if (props.cPage) {
-                setCurrentPage(props.cPage);
+                setCurrentPage(parseInt(`${props.cPage}`));
             }
         }
     }, [props]);
