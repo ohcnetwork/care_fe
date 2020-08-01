@@ -15,11 +15,9 @@ import { CSVLink } from "react-csv";
 import moment from 'moment';
 import SwipeableViews from 'react-swipeable-views';
 import { makeStyles, Theme, useTheme } from '@material-ui/core/styles';
-import AppBar from '@material-ui/core/AppBar';
-import Tabs from '@material-ui/core/Tabs';
-import Tab from '@material-ui/core/Tab';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
+import NavTabs from '../Common/NavTabs';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -132,7 +130,7 @@ export const PatientManager = (props: any) => {
       })
   }, [qParams, dispatch]);
 
-  const handleTabChange = async (event: React.ChangeEvent<{}>, newValue: number) => {
+  const handleTabChange = async (newValue: number) => {
 
     console.log('Tab  changed', newValue);
     setQueryParams({ ...qParams, tab: newValue }, true);
@@ -352,7 +350,12 @@ export const PatientManager = (props: any) => {
         </div>
       </div>
       <div className={classesTab.root}>
-        <AppBar position="static" color="default">
+        <NavTabs
+          onChange={handleTabChange}
+          options={[{value:0, label:"Live"}, {value:1, label:"Discharged"}]}
+          active={tabValue}
+        />
+        {/* <AppBar position="static" color="default">
           <Tabs
             value={tabValue}
             onChange={handleTabChange}
@@ -364,7 +367,7 @@ export const PatientManager = (props: any) => {
             <Tab label="Live" {...a11yProps(0)} />
             <Tab label="Discharged" {...a11yProps(1)} />
           </Tabs>
-        </AppBar>
+        </AppBar> */}
         <SwipeableViews
           axis={theme.direction === 'rtl' ? 'x-reverse' : 'x'}
           index={tabValue}
