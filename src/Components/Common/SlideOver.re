@@ -16,7 +16,7 @@ let make = (~show, ~setShow, ~children) => {
             >
             <div className="absolute inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={_=>setShow(false)}></div>
             </Transition>
-            <section className="absolute inset-y-0 pl-16 max-w-full right-0 flex">
+            <section className="absolute inset-y-0 max-w-full right-0 flex">
                 <Transition
                     enter="transform transition ease-in-out duration-500 sm:duration-700"
                     enterFrom="translate-x-full"
