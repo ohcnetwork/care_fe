@@ -70,7 +70,7 @@ export default function ListFilter(props: any) {
           </div>
         </div>
 
-        <div className="w-64 flex-none">
+        {/* <div className="w-64 flex-none">
           <span className="text-sm font-semibold">Status</span>
           <SelectField
                 name="status"
@@ -81,7 +81,7 @@ export default function ListFilter(props: any) {
                 options={shiftStatusOptions}
                 onChange={handleChange}
                 className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"/>
-        </div>
+        </div> */}
 
         <div className="w-64 flex-none">
           <span className="text-sm font-semibold">Is emergency case</span>
