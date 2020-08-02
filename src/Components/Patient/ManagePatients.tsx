@@ -2,10 +2,9 @@ import Button from "@material-ui/core/Button";
 import Grid from "@material-ui/core/Grid";
 import WarningRoundedIcon from "@material-ui/icons/WarningRounded";
 import { navigate, useQueryParams } from "hookrouter";
-import React, { useCallback, useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import { downloadPatients, getAllPatient, searchPatientFilter } from "../../Redux/actions";
+import React, {  useState, useEffect } from "react";
+import { useDispatch } from "react-redux"; 
+import { downloadPatients, searchPatientFilter } from "../../Redux/actions";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 import Pagination from "../Common/Pagination";
@@ -15,11 +14,9 @@ import { CSVLink } from "react-csv";
 import moment from 'moment';
 import SwipeableViews from 'react-swipeable-views';
 import { makeStyles, Theme, useTheme } from '@material-ui/core/styles';
-import AppBar from '@material-ui/core/AppBar';
-import Tabs from '@material-ui/core/Tabs';
-import Tab from '@material-ui/core/Tab';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
+import NavTabs from '../Common/NavTabs';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -95,7 +92,7 @@ export const PatientManager = (props: any) => {
   const tabValue = qParams.is_active === 'False' ? 1 : 0;
 
   let managePatients: any = null;
-  console.log('new render : ', qParams);
+  console.log('new render : ', qParams,tabValue);
   const handleDownload = async () => {
     const res = await dispatch(downloadPatients());
     setDownloadFile(res.data);
@@ -120,14 +117,14 @@ export const PatientManager = (props: any) => {
         setIsLoading(false);
       })
   }, [qParams, dispatch]);
-
+ 
   const updateQuery = (params:any) => {
     const nParams = Object.assign({}, qParams, params); 
     setQueryParams(nParams,true);
   }
-
-
-  const handleTabChange = async (event: React.ChangeEvent<{}>, tab: number) => { 
+ 
+  const handleTabChange = async (tab: number) => {
+ 
     updateQuery({
       is_active: tab ? 'False' : 'True',
       page: 1,
@@ -355,7 +352,12 @@ export const PatientManager = (props: any) => {
         </div>
       </div>
       <div className={classesTab.root}>
-        <AppBar position="static" color="default">
+        <NavTabs
+          onChange={handleTabChange}
+          options={[{value:0, label:"Live"}, {value:1, label:"Discharged"}]}
+          active={tabValue}
+        />
+        {/* <AppBar position="static" color="default">
           <Tabs
             value={tabValue}
             onChange={handleTabChange}
@@ -367,7 +369,7 @@ export const PatientManager = (props: any) => {
             <Tab label="Live" {...a11yProps(0)} />
             <Tab label="Discharged" {...a11yProps(1)} />
           </Tabs>
-        </AppBar>
+        </AppBar> */}
         <SwipeableViews
           axis={theme.direction === 'rtl' ? 'x-reverse' : 'x'}
           index={tabValue}
