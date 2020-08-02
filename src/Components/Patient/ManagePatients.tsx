@@ -74,6 +74,10 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+
+const RESULT_LIMIT = 14;
+
+
 export const PatientManager = (props: any) => {
   const { facilityId } = props;
   const classes = useStyles();
@@ -81,39 +85,17 @@ export const PatientManager = (props: any) => {
   const theme = useTheme();
   const dispatch: any = useDispatch();
 
-  const [qParams, setQueryParams] = useQueryParams();
-  const [data, setData] = useState([]);
 
+  const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [DownloadFile, setDownloadFile] = useState("");
+  const [qParams, setQueryParams] = useQueryParams();
 
-  const limit = 14;
-  const tabValue = parseInt(`${qParams.tab === undefined ? 0 : qParams.tab}`);
+  const tabValue = qParams.is_active === 'False' ? 1 : 0;
+
   let managePatients: any = null;
-
-  console.log(qParams,tabValue);
-
-  const getParams = (extra = {}) => {
-
-    let is_active = 'True';
-    if (qParams.tab == 1) {
-      is_active = 'False';
-    }
-
-    const offset = (qParams.page ? qParams.page -1 :  0) * limit;
-    const params = Object.assign(extra, {
-      facility: facilityId,
-      offset,
-      limit,
-      is_active
-    }, qParams);
-    delete params.tab;
-    delete params.page; 
-    return params;
-  }
-
-
+  console.log('new render : ', qParams);
   const handleDownload = async () => {
     const res = await dispatch(downloadPatients());
     setDownloadFile(res.data);
@@ -122,43 +104,62 @@ export const PatientManager = (props: any) => {
 
   useEffect(() => {
     setIsLoading(true);
-    dispatch(searchPatientFilter(getParams()))
+    const offset = (qParams.page ? qParams.page - 1 : 0) * RESULT_LIMIT;
+    const params = Object.assign({
+      offset,
+    }, qParams);
+
+    dispatch(searchPatientFilter(params))
       .then((res: any) => {
         if (res && res.data) {
           setData(res.data.results);
           setTotalCount(res.data.count);
         }
         setIsLoading(false);
+      }).catch((ex: any) => {
+        setIsLoading(false);
       })
   }, [qParams, dispatch]);
 
-  const handleTabChange = async (event: React.ChangeEvent<{}>, newValue: number) => {
+  const updateQuery = (params:any) => {
+    const nParams = Object.assign({}, qParams, params); 
+    setQueryParams(nParams,true);
+  }
 
-    console.log('Tab  changed', newValue);
-    setQueryParams({ ...qParams, tab: newValue }, true);
+
+  const handleTabChange = async (event: React.ChangeEvent<{}>, tab: number) => { 
+    updateQuery({
+      is_active: tab ? 'False' : 'True',
+      page: 1,
+      name: '',
+      disease_status:'',
+      phone_number: ''
+    });
   };
 
-  const handleTabIndexChange = (index: number) => {
-    console.log('Tab Index changed',index);
-    setQueryParams({ ...qParams, tab: index, page:1 }, true);
+  const handleTabIndexChange = (tab: number) => { 
+    updateQuery({
+      is_active: tab === 0 ? 'True' : 'False',
+      page: 1,
+      name: '',
+      phone_number: ''
+    });
   };
 
   const handlePagination = (page: number, limit: number) => {
-    setQueryParams({ ...qParams, page, limit }, true);
+    updateQuery({ page, limit });
   };
 
-  const searchByName = (searchValue: string) => {
-    setQueryParams({ ...qParams, name: searchValue, page:1 }, true);
+  const searchByName = (value: string) => { 
+    updateQuery({ name: value, page: 1 });
   }
 
-  const searchByPhone = (searchValue: string) => {
-    const nParams = { ...qParams, phone_number: searchValue, page: 1 };
-    console.log('nparams' ,qParams,nParams);
-    setQueryParams(nParams, true);
+  const searchByPhone = (value: string) => {
+    updateQuery({ phone_number: value, page: 1 });
   }
 
-  const handleFilter = (diseaseStatus: string) => {
-    setQueryParams({ ...qParams, disease_status: diseaseStatus, page:1 }, true);
+  const handleFilter = (value: string) => {
+    updateQuery({ disease_status: value, page: 1 });
   }
 
   let patientList: any[] = [];
@@ -263,11 +264,11 @@ export const PatientManager = (props: any) => {
     managePatients = (
       <>
         {patientList}
-        {totalCount > limit && (
+        {totalCount > RESULT_LIMIT && (
           <div className="mt-4 flex w-full justify-center">
             <Pagination
               cPage={qParams.page}
-              defaultPerPage={limit}
+              defaultPerPage={RESULT_LIMIT}
               data={{ totalCount }}
               onChange={handlePagination}
             />
@@ -312,6 +313,7 @@ export const PatientManager = (props: any) => {
           </div>
             <InputSearchBox
               search={searchByName}
+              value={qParams.name}
               placeholder='Search by Patient Name'
               errors=''
             />
@@ -322,6 +324,7 @@ export const PatientManager = (props: any) => {
           </div>
             <InputSearchBox
               search={searchByPhone}
+              value={qParams.phone_number}
               placeholder='+919876543210'
               errors=''
             />
@@ -330,7 +333,7 @@ export const PatientManager = (props: any) => {
         <div className="flex flex-col justify-between">
           <div>
             <div className="text-sm font-semibold">Filter by Status</div>
-            <PatientFilter filter={handleFilter} />
+            <PatientFilter filter={handleFilter} value={qParams.disease_status} />
           </div>
           <div className="mt-2">
             <button
@@ -368,7 +371,6 @@ export const PatientManager = (props: any) => {
         <SwipeableViews
           axis={theme.direction === 'rtl' ? 'x-reverse' : 'x'}
           index={tabValue}
-          onChangeIndex={handleTabIndexChange}
         >
 
           <TabPanel value={tabValue} index={0} dir={theme.direction}>

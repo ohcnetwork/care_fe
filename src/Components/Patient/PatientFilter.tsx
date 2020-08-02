@@ -1,17 +1,16 @@
-import React, { useState } from 'react';
+import React  from 'react';
 import { DISEASE_STATUS } from "../../Common/constants";
 import { SelectField } from "../Common/HelperInputFields";
 
 const diseaseStatusOptions = ['Show All', ...DISEASE_STATUS];
 
-type PatientFilterProps = { filter: (value: string) => void }
+type PatientFilterProps = { filter: (value: string) => void ,value : string }
 
 export const PatientFilter = (props: PatientFilterProps) => {
-    const [diseaseStatus, setDiseaseStatus] = useState('Show All');
-    const { filter } = props;
 
-    const handleChange = (event: any) => {
-        setDiseaseStatus(event.target.value)
+    const { filter, value = 'Show All' } = props; 
+    
+    const handleChange = (event: any) => { 
         const filterVal = event.target.value !== 'Show All' ? event.target.value : '';
         filter(filterVal);
     };
@@ -24,7 +23,7 @@ export const PatientFilter = (props: PatientFilterProps) => {
                     variant="outlined"
                     margin="dense"
                     optionArray={true}
-                    value={diseaseStatus}
+                    value={value}
                     options={diseaseStatusOptions}
                     onChange={(value: any) => handleChange(value)}
                     className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
