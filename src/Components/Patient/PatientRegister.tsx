@@ -493,7 +493,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               variant="outlined"
               margin="dense"
               type="text"
-              value={state.form.textField}
+              value={state.form[textField]}
               onChange={handleChange}
               errors={state.errors[textField]}
             />
@@ -879,7 +879,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     Any medical history? (Optional Information)
                   </InputLabel>
                   <div className="grid grid-cols-1 md:grid-cols-2">
-                    {medicalHistoryTypes.map(i => {
+                    { medicalHistoryTypes.map(i => {
                       return renderMedicalHistory(i.id, i.text);
                     })}
                   </div>

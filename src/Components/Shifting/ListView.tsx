@@ -9,7 +9,11 @@ import Pagination from "../Common/Pagination";
 import Button from "@material-ui/core/Button";
 import { navigate } from "hookrouter";
 
-const limit = 15;
+import { SHIFTING_CHOICES } from "../../Common/constants";
+
+import { make as SlideOver } from "../Common/SlideOver.gen";
+
+const limit = 100;
 
 const initialFilterData = {
   status: 'Show All',
@@ -39,14 +43,21 @@ const formatFilter = (filter: any) => {
  return filterData;
 }
 
+const shiftStatusOptions = SHIFTING_CHOICES.map(obj => obj.text);
+
+const COMPLETED = ["COMPLETED","REJECTED","DESTINATION REJECTED"];
+const ACTIVE = shiftStatusOptions.filter(option => !COMPLETED.includes(option))
+
 export default function ListView(props: any) {
 
   const dispatch: any = useDispatch();
   const [filter, setFilter] = useState(initialFilterData);
+  const [boardFilter, setBoardFilter] = useState(ACTIVE);
   const [data, setData] = useState([]);
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
 
   const filterOnChange = (filterData : any) => {
     setFilter(filterData);
@@ -77,107 +88,123 @@ export default function ListView(props: any) {
   );
 
   const handlePagination = (page: number, limit: number) => {
+    console.log("Paginating to " + page)
     const offset = (page - 1) * limit;
     setCurrentPage(page);
     let filterData = { ...filter }
-    filter['offset'] = offset;
+    filterData['offset'] = offset;
 
     filterOnChange(filterData);
   };
 
-  const shiftingList = () => {
-    if (isLoading) {
-      return <Loading />
-    } else {
-      let patientList: any[] = [];
-      patientList = data.map((shift: any, idx: number) => {
-        return (
-          <div key={`shift_${shift.id}`} className="w-full md:w-1/2 mt-2">
-            <div className="overflow-hidden shadow rounded-lg bg-white h-full mx-2">
-              <div className="px-6 py-4 h-full flex flex-col justify-between">
-                <div>
-                  <div className="flex justify-between">
-                    <div className="font-bold text-xl capitalize mb-2">
-                      {shift.patient_object.name}
-                    </div>
-  
-                    <div className="flex">
-                      <div>
-                        <span className="badge badge-pill badge-primary mx-2">
-                          {shift.status}
-                        </span>
-                      </div>
-                      <div>
-                        {shift.emergency && (
-                          <span className="badge badge-pill badge-warning mr-2">
-                            emergency
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <span className="font-semibold leading-relaxed">Orgin facility: </span>
-                    {(shift.orgin_facility_object||{}).name}
-                  </div>
-                  <div>
-                    <span className="font-semibold leading-relaxed">Shifting approving facility: </span>
-                    {(shift.shifting_approving_facility_object||{}).name}
-                  </div>
-                  <div>
-                    <span className="font-semibold leading-relaxed">Assigned facility: </span>
-                    {(shift.assigned_facility_object||{}).name}
-                  </div>
+  let patientFilter = (filter:string) => data.filter(({status}) => status===filter).map((shift: any, idx: number) => {
+    return (
+      <div key={`shift_${shift.id}`} className="w-full mt-2">
+        <div className="overflow-hidden shadow rounded-lg bg-white h-full mx-2">
+          <div className="px-6 py-4 h-full flex flex-col justify-between">
+            <div>
+              <div className="flex justify-between">
+                <div className="font-bold text-xl capitalize mb-2">
+                  {shift.patient_object.name}
                 </div>
-                <div className="mt-2">
-                  <Button size="small" variant="outlined" fullWidth
-                      onClick={e => navigate(`/shifting/${shift.external_id}`)}>
-                    View All Details
-                  </Button>
+
+                <div>
+                  {shift.emergency && (
+                    <span className="badge badge-pill badge-warning mr-2">
+                      emergency
+                    </span>
+                  )}
                 </div>
               </div>
+              
+              <div>
+                <span className="font-semibold leading-relaxed">Orgin facility: </span>
+                {(shift.orgin_facility_object||{}).name}
+              </div>
+              <div>
+                <span className="font-semibold leading-relaxed">Shifting approving facility: </span>
+                {(shift.shifting_approving_facility_object||{}).name}
+              </div>
+              <div>
+                <span className="font-semibold leading-relaxed">Assigned facility: </span>
+                {(shift.assigned_facility_object||{}).name}
+              </div>
+            </div>
+            <div className="mt-2">
+              <Button size="small" variant="outlined" fullWidth
+                  onClick={e => navigate(`/shifting/${shift.external_id}`)}>
+                View All Details
+              </Button>
             </div>
           </div>
-        );
-      });
-      return (
-        <div className="flex flex-wrap -mx-2">
-
-          {!patientList.length && (
-            <div className="flex-1 flex items-center justify-center h-64">
-              No records found.
-            </div>
-          )}
-
-          {patientList}
-
-          {totalCount > limit && (
-          <div className="mt-2 flex w-full justify-center">
-            <Pagination
-              cPage={currentPage}
-              defaultPerPage={limit}
-              data={{ totalCount }}
-              onChange={handlePagination}
-            />
-          </div>
-        )}
         </div>
-      )
-    }
-  }
+      </div>
+    );
+  });
 
   return (
-    <div className="mx-3 md:mx-8 mb-2">
-        <PageTitle title={"Shifting"} hideBack={true} />
+    <div className="flex flex-col h-screen px-2 md:px-8 pb-2">
 
-        <ListFilter
-          filter={filter}
-          onChange={filterOnChange}/>
+        <div className="flex items-end justify-between">
+          <PageTitle title={"Shifting"} hideBack={true} />
 
-        <div className="mt-4">
-          {shiftingList()}
+          <div className="bg-gray-200 text-sm text-gray-500 leading-none border-2 border-gray-200 rounded-full inline-flex">
+            <button 
+              className={"flex leading-none border-2 border-gray-200 rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-blue-400 focus:text-blue-400 rounded-r-full px-4 py-2"
+              + (boardFilter === ACTIVE ? " bg-white text-gray-800" : " bg-gray-200 text-sm text-gray-500")} 
+              onClick={_=>setBoardFilter(ACTIVE)}
+            >
+              <span>Active</span>
+            </button>
+            <button 
+              className={"flex leading-none border-2 border-gray-200 rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-blue-400 focus:text-blue-400 rounded-r-full px-4 py-2"
+              + (boardFilter === COMPLETED ? " bg-white text-gray-800" : " bg-gray-200 text-sm text-gray-500")} 
+              onClick={_=>setBoardFilter(COMPLETED)}>
+              <span>Completed</span>
+            </button>
+          </div>
+          <div className="flex items-start gap-2">
+            <button 
+              className={"flex leading-none border-2 border-gray-200 rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-blue-400 focus:text-blue-400 rounded-r-full px-4 py-2"
+              + (showFilters ? " bg-white text-gray-800" : " bg-gray-200 text-sm text-gray-500")} 
+              onClick={_=>setShowFilters(show=>!show)}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="fill-current w-4 h-4 mr-2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+              <span>Filters</span>
+            </button>
+
+            {totalCount > limit && (
+              <div className="flex w-full justify-center -mb-2">
+                <Pagination
+                  cPage={currentPage}
+                  defaultPerPage={limit}
+                  data={{ totalCount }}
+                  onChange={handlePagination}
+                />
+              </div>
+            )}
+          </div>
         </div>
+
+        <div className="flex mt-4 pb-2 flex-1 items-start overflow-x-scroll">
+          {isLoading ? <Loading /> : boardFilter.map(board=>
+            <div className="rounded-md bg-gray-200 flex-shrink-0 w-3/4 md:w-1/2 lg:w-1/3 p-2 pb-4 mr-3 h-full overflow-y-auto">
+              <div className="flex justify-between py-1">
+                  <h3 className="text-sm">{board}</h3>
+                  <svg className="h-4 fill-current text-grey-dark cursor-pointer" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5 10a1.999 1.999 0 1 0 0 4 1.999 1.999 0 1 0 0-4zm7 0a1.999 1.999 0 1 0 0 4 1.999 1.999 0 1 0 0-4zm7 0a1.999 1.999 0 1 0 0 4 1.999 1.999 0 1 0 0-4z"/></svg>
+              </div>
+              <div className="text-sm mt-2">
+                  {patientFilter(board)}
+              </div>
+            </div>
+          )}
+        </div>
+      <SlideOver show={showFilters} setShow={setShowFilters}>
+        <div className="bg-white h-screen p-4">
+          <ListFilter
+            filter={filter}
+            onChange={filterOnChange}/>
+        </div>
+      </SlideOver>
     </div>
   )
 }

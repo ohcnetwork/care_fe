@@ -1,12 +1,10 @@
 import Button from "@material-ui/core/Button";
 import Grid from "@material-ui/core/Grid";
-import { makeStyles } from "@material-ui/core/styles";
 import WarningRoundedIcon from "@material-ui/icons/WarningRounded";
-import { navigate } from "hookrouter";
-import React, { useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import { downloadPatients, getAllPatient, searchPatientFilter } from "../../Redux/actions";
+import { navigate, useQueryParams } from "hookrouter";
+import React, {  useState, useEffect } from "react";
+import { useDispatch } from "react-redux"; 
+import { downloadPatients, searchPatientFilter } from "../../Redux/actions";
 import { Loading } from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 import Pagination from "../Common/Pagination";
@@ -14,7 +12,52 @@ import { PatientFilter } from "./PatientFilter";
 import { InputSearchBox } from "../Common/SearchBox";
 import { CSVLink } from "react-csv";
 import moment from 'moment';
+import SwipeableViews from 'react-swipeable-views';
+import { makeStyles, Theme, useTheme } from '@material-ui/core/styles';
+import Typography from '@material-ui/core/Typography';
+import Box from '@material-ui/core/Box';
+import NavTabs from '../Common/NavTabs';
 
+interface TabPanelProps {
+  children?: React.ReactNode;
+  dir?: string;
+  index: any;
+  value: any;
+}
+
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`full-width-tabpanel-${index}`}
+      aria-labelledby={`full-width-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box p={3}>
+          <Typography>{children}</Typography>
+        </Box>
+      )}
+    </div>
+  );
+}
+
+function a11yProps(index: any) {
+  return {
+    id: `full-width-tab-${index}`,
+    'aria-controls': `full-width-tabpanel-${index}`,
+  };
+}
+
+const useStylesTab = makeStyles((theme: Theme) => ({
+  root: {
+    flexGrow: 1,
+    backgroundColor: theme.palette.background.paper
+  },
+}));
 
 const now = moment().format('DD-MM-YYYY:hh:mm:ss');
 
@@ -28,81 +71,92 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+
+const RESULT_LIMIT = 14;
+
+
 export const PatientManager = (props: any) => {
   const { facilityId } = props;
   const classes = useStyles();
+  const classesTab = useStylesTab();
+  const theme = useTheme();
   const dispatch: any = useDispatch();
-  const initialData: any[] = [];
-  const [data, setData] = useState(initialData);
-  const [diseaseStatus, setDiseaseStatus] = useState('');
-  let managePatients: any = null;
+
+
+  const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [offset, setOffset] = useState(0);
   const [DownloadFile, setDownloadFile] = useState("");
-  const limit = 14;
+  const [qParams, setQueryParams] = useQueryParams();
 
-  const fetchData = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const res = await dispatch(
-        getAllPatient({ facility: facilityId, limit, offset, disease_status: diseaseStatus })
-      );
-      if (!status.aborted) {
-        if (res && res.data) {
-          setData(res.data.results);
-          setTotalCount(res.data.count);
-        }
-        setIsLoading(false);
-      }
-    },
-    [diseaseStatus, dispatch, facilityId, offset]
-  );
+  const tabValue = qParams.is_active === 'False' ? 1 : 0;
 
+  let managePatients: any = null;
+  console.log('new render : ', qParams,tabValue);
   const handleDownload = async () => {
     const res = await dispatch(downloadPatients());
     setDownloadFile(res.data);
     document.getElementById("downloadlink")?.click();
   };
 
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(status);
-    },
-    [fetchData]
-  );
+  useEffect(() => {
+    setIsLoading(true);
+    const offset = (qParams.page ? qParams.page - 1 : 0) * RESULT_LIMIT;
+    const params = Object.assign({
+      offset,
+    }, qParams);
 
-  const handlePagination = (page: number, limit: number) => {
-    const offset = (page - 1) * limit;
-    setCurrentPage(page);
-    setOffset(offset);
+    dispatch(searchPatientFilter(params))
+      .then((res: any) => {
+        if (res && res.data) {
+          setData(res.data.results);
+          setTotalCount(res.data.count);
+        }
+        setIsLoading(false);
+      }).catch((ex: any) => {
+        setIsLoading(false);
+      })
+  }, [qParams, dispatch]);
+ 
+  const updateQuery = (params:any) => {
+    const nParams = Object.assign({}, qParams, params); 
+    setQueryParams(nParams,true);
+  }
+ 
+  const handleTabChange = async (tab: number) => {
+ 
+    updateQuery({
+      is_active: tab ? 'False' : 'True',
+      page: 1,
+      name: '',
+      disease_status:'',
+      phone_number: ''
+    });
   };
 
-  const searchByName = async (searchValue: string) => {
-    setIsLoading(true);
-    const res = await dispatch(searchPatientFilter({ limit, offset, name: searchValue }));
-    if (res && res.data) {
-      setData(res.data.results);
-      setTotalCount(res.data.count);
-    }
-    setIsLoading(false);
+  const handleTabIndexChange = (tab: number) => { 
+    updateQuery({
+      is_active: tab === 0 ? 'True' : 'False',
+      page: 1,
+      name: '',
+      phone_number: ''
+    });
+  };
+
+  const handlePagination = (page: number, limit: number) => {
+    updateQuery({ page, limit });
+  };
+
+  const searchByName = (value: string) => { 
+    updateQuery({ name: value, page: 1 });
   }
 
-  const searchByPhone = async (searchValue: string) => {
-    setIsLoading(true);
-    const res = await dispatch(searchPatientFilter({ limit, offset, phone_number: encodeURI(searchValue) }));
-    if (res && res.data) {
-      setData(res.data.results);
-      setTotalCount(res.data.count);
-    }
-    setIsLoading(false);
+  const searchByPhone = (value: string) => {
+    updateQuery({ phone_number: value, page: 1 });
   }
 
-  const handleFilter = async (diseaseStatus: string) => {
-    setDiseaseStatus(diseaseStatus);
-    setOffset(0);
-    setCurrentPage(1);
+  const handleFilter = (value: string) => {
+    updateQuery({ disease_status: value, page: 1 });
   }
 
   let patientList: any[] = [];
@@ -164,7 +218,9 @@ export const PatientManager = (props: any) => {
                     <span className="font-semibold leading-relaxed">
                       Contact with confirmed carrier
                     </span>
-                    <WarningRoundedIcon className="text-red-500"></WarningRoundedIcon>
+                    <WarningRoundedIcon className="text-red-500">
+
+                    </WarningRoundedIcon>
                   </div>
                 )}
                 {patient.contact_with_suspected_carrier &&
@@ -173,7 +229,9 @@ export const PatientManager = (props: any) => {
                       <span className="font-semibold leading-relaxed">
                         Contact with suspected carrier
                       </span>
-                      <WarningRoundedIcon className="text-yellow-500"></WarningRoundedIcon>
+                      <WarningRoundedIcon className="text-yellow-500">
+
+                      </WarningRoundedIcon>
                     </div>
                   )}
                 <div>
@@ -203,11 +261,11 @@ export const PatientManager = (props: any) => {
     managePatients = (
       <>
         {patientList}
-        {totalCount > limit && (
+        {totalCount > RESULT_LIMIT && (
           <div className="mt-4 flex w-full justify-center">
             <Pagination
-              cPage={currentPage}
-              defaultPerPage={limit}
+              cPage={qParams.page}
+              defaultPerPage={RESULT_LIMIT}
               data={{ totalCount }}
               onChange={handlePagination}
             />
@@ -252,6 +310,7 @@ export const PatientManager = (props: any) => {
           </div>
             <InputSearchBox
               search={searchByName}
+              value={qParams.name}
               placeholder='Search by Patient Name'
               errors=''
             />
@@ -262,6 +321,7 @@ export const PatientManager = (props: any) => {
           </div>
             <InputSearchBox
               search={searchByPhone}
+              value={qParams.phone_number}
               placeholder='+919876543210'
               errors=''
             />
@@ -270,7 +330,7 @@ export const PatientManager = (props: any) => {
         <div className="flex flex-col justify-between">
           <div>
             <div className="text-sm font-semibold">Filter by Status</div>
-            <PatientFilter filter={handleFilter} />
+            <PatientFilter filter={handleFilter} value={qParams.disease_status} />
           </div>
           <div className="mt-2">
             <button
@@ -291,9 +351,43 @@ export const PatientManager = (props: any) => {
           </div>
         </div>
       </div>
-      <div className="px-3 md:px-8">
-        <div className="flex flex-wrap md:-mx-4">{managePatients}</div>
+      <div className={classesTab.root}>
+        <NavTabs
+          onChange={handleTabChange}
+          options={[{value:0, label:"Live"}, {value:1, label:"Discharged"}]}
+          active={tabValue}
+        />
+        {/* <AppBar position="static" color="default">
+          <Tabs
+            value={tabValue}
+            onChange={handleTabChange}
+            indicatorColor="primary"
+            textColor="primary"
+            variant="fullWidth"
+            aria-label="full width tabs example"
+          >
+            <Tab label="Live" {...a11yProps(0)} />
+            <Tab label="Discharged" {...a11yProps(1)} />
+          </Tabs>
+        </AppBar> */}
+        <SwipeableViews
+          axis={theme.direction === 'rtl' ? 'x-reverse' : 'x'}
+          index={tabValue}
+        >
+
+          <TabPanel value={tabValue} index={0} dir={theme.direction}>
+            <div className="px-3 md:px-8">
+              <div className="flex flex-wrap md:-mx-4">{managePatients}</div>
+            </div>
+          </TabPanel>
+          <TabPanel value={tabValue} index={1} dir={theme.direction}>
+            <div className="px-3 md:px-8">
+              <div className="flex flex-wrap md:-mx-4">{managePatients}</div>
+            </div>
+          </TabPanel>
+        </SwipeableViews>
       </div>
+
     </div>
   );
 };
