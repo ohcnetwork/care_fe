@@ -70,6 +70,7 @@
     "moment": "^2.27.0",
     "moment-locales-webpack-plugin": "^1.2.0",
     "node-sass": "^4.14.1",
+    "postcss-safe-parser": "^4.0.2",
     "querystring": "^0.2.0",
     "react": "^16.13.1",
     "react-csv": "^2.0.3",
