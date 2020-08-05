@@ -13,6 +13,7 @@ import {SHIFTING_CHOICES} from "../../Common/constants";
 
 import {make as SlideOver} from "../Common/SlideOver.gen";
 import {InputSearchBox} from "../Common/SearchBox";
+import moment from "moment";
 
 const limit = 100;
 
@@ -137,6 +138,12 @@ export default function ListView() {
                 <span className="font-semibold leading-relaxed">Assigned facility: </span>
                 {(shift.assigned_facility_object||{}).name}
               </div>
+                <div>
+                    <span className="font-semibold leading-relaxed"> Last Modified:  </span>
+                    <span className="badge badge-pill badge-primary py-1 px-2">
+                        { moment(shift.modified_date).format('LLL') || "--" }
+                    </span>
+                </div>
             </div>
             <div className="mt-2">
               <Button size="small" variant="outlined" fullWidth
@@ -197,7 +204,7 @@ export default function ListView() {
               <span>Filters</span>
             </button>
 
-            {totalCount > limit && (
+            { totalCount > limit && (
               <div className="flex w-full justify-center -mb-2">
                 <Pagination
                   cPage={currentPage}
