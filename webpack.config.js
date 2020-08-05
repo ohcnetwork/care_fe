@@ -8,6 +8,7 @@ const WorkboxPlugin = require("workbox-webpack-plugin");
 const MomentLocalesPlugin = require('moment-locales-webpack-plugin');
 const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const safePostCssParser = require('postcss-safe-parser');
+
 module.exports = (env, argv) => {
   const mode = argv.mode || "development";
   const isDev = mode !== "production";
