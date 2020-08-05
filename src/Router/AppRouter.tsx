@@ -1,6 +1,6 @@
 import { useRedirect, useRoutes, navigate, usePath } from "hookrouter";
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import React, { useState } from "react";
+import {  useSelector } from "react-redux";
 import { BedCapacityForm } from "../Components/Facility/BedCapacityForm";
 import { ConsultationDetails } from "../Components/Facility/ConsultationDetails";
 import { ConsultationForm } from "../Components/Facility/ConsultationForm";
@@ -12,7 +12,6 @@ import { TriageForm } from "../Components/Facility/TriageForm";
 import { DailyRoundListDetails } from "../Components/Patient/DailyRoundListDetails";
 import { DailyRounds } from "../Components/Patient/DailyRounds";
 import { PatientManager } from "../Components/Patient/ManagePatients";
-import { PatientDischarge } from "../Components/Patient/PatientDischarge";
 import { PatientHome } from "../Components/Patient/PatientHome";
 import { PatientRegister } from "../Components/Patient/PatientRegister";
 import { SampleDetails } from "../Components/Patient/SampleDetails";
@@ -46,7 +45,6 @@ const routes = {
   "/user/profile" : () => <UserProfile/>,
   "/patients": () => <PatientManager />,
   "/patient/:id": ({ id }: any) => <PatientHome id={id} />,
-  "/patient/discharge": () => <PatientDischarge />,
   "/sample": () => <SampleViewAdmin />,
   "/sample/:id": ({ id }: any) => <SampleDetails id={id} />,
   '/patient/:patientId/test_sample/:sampleId/icmr_sample': ({ patientId , sampleId}: any) => <SampleReport id={patientId} sampleId={sampleId} />,

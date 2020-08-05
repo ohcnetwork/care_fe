@@ -1,17 +1,17 @@
-import React, { useState, useCallback } from "react";
-import { Loading } from "../Common/Loading";
+import React, {useCallback, useState} from "react";
+import {Loading} from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 import ListFilter from "./ListFilter";
-import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import {getShiftRequests, sampleSearch} from "../../Redux/actions";
+import {useDispatch} from "react-redux";
+import {statusType, useAbortableEffect} from "../../Common/utils";
+import {getShiftRequests} from "../../Redux/actions";
 import Pagination from "../Common/Pagination";
 import Button from "@material-ui/core/Button";
-import { navigate } from "hookrouter";
+import {navigate} from "hookrouter";
 
-import { SHIFTING_CHOICES } from "../../Common/constants";
+import {SHIFTING_CHOICES} from "../../Common/constants";
 
-import { make as SlideOver } from "../Common/SlideOver.gen";
+import {make as SlideOver} from "../Common/SlideOver.gen";
 import {InputSearchBox} from "../Common/SearchBox";
 
 const limit = 100;
@@ -29,19 +29,17 @@ const initialFilterData = {
 }
 
 const formatFilter = (filter: any) => {
- let filterData = {
-      status: filter.status === 'Show All' ? null : filter.status,
-      facility: '',
-      orgin_facility: filter.orgin_facility,
-      shifting_approving_facility: filter.shifting_approving_facility,
-      assigned_facility: filter.assigned_facility,
-      emergency: (filter.emergency && filter.emergency) === '--' ? '' : (filter.emergency === 'yes' ? 'true' : 'false'),
-      is_up_shift: (filter.is_up_shift && filter.is_up_shift) === '--' ? '' : (filter.is_up_shift === 'yes' ? 'true' : 'false'),
-      limit: limit,
-      offset: filter.offset
+    return {
+     status: filter.status === 'Show All' ? null : filter.status,
+     facility: '',
+     orgin_facility: filter.orgin_facility,
+     shifting_approving_facility: filter.shifting_approving_facility,
+     assigned_facility: filter.assigned_facility,
+     emergency: (filter.emergency && filter.emergency) === '--' ? '' : (filter.emergency === 'yes' ? 'true' : 'false'),
+     is_up_shift: (filter.is_up_shift && filter.is_up_shift) === '--' ? '' : (filter.is_up_shift === 'yes' ? 'true' : 'false'),
+     limit: limit,
+     offset: filter.offset
  };
-
- return filterData;
 }
 
 const shiftStatusOptions = SHIFTING_CHOICES.map(obj => obj.text);
@@ -49,7 +47,7 @@ const shiftStatusOptions = SHIFTING_CHOICES.map(obj => obj.text);
 const COMPLETED = ["COMPLETED","REJECTED","DESTINATION REJECTED"];
 const ACTIVE = shiftStatusOptions.filter(option => !COMPLETED.includes(option))
 
-export default function ListView(props: any) {
+export default function ListView() {
 
   const dispatch: any = useDispatch();
   const [filter, setFilter] = useState(initialFilterData);
@@ -142,7 +140,7 @@ export default function ListView(props: any) {
             </div>
             <div className="mt-2">
               <Button size="small" variant="outlined" fullWidth
-                  onClick={e => navigate(`/shifting/${shift.external_id}`)}>
+                  onClick={ () => navigate(`/shifting/${shift.external_id}`)}>
                 View All Details
               </Button>
             </div>
@@ -186,7 +184,16 @@ export default function ListView(props: any) {
               className={"flex leading-none border-2 border-gray-200 rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-blue-400 focus:text-blue-400 rounded-r-full px-4 py-2"
               + (showFilters ? " bg-white text-gray-800" : " bg-gray-200 text-sm text-gray-500")} 
               onClick={_=>setShowFilters(show=>!show)}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="fill-current w-4 h-4 mr-2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="fill-current w-4 h-4 mr-2">
+                  <line x1="8" y1="6" x2="21" y2="6">
+
+                  </line>
+                  <line x1="8" y1="12" x2="21" y2="12"> </line>
+                  <line x1="8" y1="18" x2="21" y2="18"> </line>
+                  <line x1="3" y1="6" x2="3.01" y2="6"> </line>
+                  <line x1="3" y1="12" x2="3.01" y2="12"> </line>
+                  <line x1="3" y1="18" x2="3.01" y2="18"> </line>
+              </svg>
               <span>Filters</span>
             </button>
 
