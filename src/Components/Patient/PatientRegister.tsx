@@ -75,7 +75,6 @@ const initForm: any = {
   date_of_return: null,
   past_travel: false,
   countries_travelled: [],
-  has_SARI: false,
   is_antenatal: "false",
   prescribed_medication: false,
   ongoing_medication: "",
@@ -373,7 +372,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         past_travel: state.form.past_travel,
         countries_travelled: state.form.past_travel ? state.form.countries_travelled : [],
         date_of_return: state.form.past_travel ? state.form.date_of_return : undefined,
-        has_SARI: state.form.has_SARI,
         allergies: state.form.allergies,
         ongoing_medication: state.form.ongoing_medication,
         is_medical_worker: JSON.parse(state.form.is_medical_worker),
@@ -896,15 +894,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               </div>
 
               <div className="grid gap-4 grid-cols-1 md:grid-cols-2 mt-4">
-
-                <div className="md:col-span-2">
-                  <CheckboxField
-                    checked={state.form.has_SARI}
-                    onChange={handleCheckboxFieldChange}
-                    name="has_SARI"
-                    label="Does the person have SARI (Severe Acute Respiratory illness)?"
-                  />
-                </div>
 
                 <div className="md:col-span-2">
                   <InputLabel id="med-history-label">
