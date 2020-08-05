@@ -533,7 +533,11 @@ export const PatientHome = (props: any) => {
               <DialogContent>
                 <DialogContentText>
                  Please enter your email id to receive the discharge summary.
-                  Disclaimer: This is an automatically Generated email using your info Captured in Care System
+                  Disclaimer: This is an automatically Generated email using your info Captured in Care System.
+                  <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
+                       role="alert">
+                    <strong className="block sm:inline font-bold">Please check your email id before continuing. We cannot deliver the email if the email id is invalid</strong>
+                  </div>
                 </DialogContentText>
                 <div className="flex justify-end">
                   <a href="#"
