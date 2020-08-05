@@ -476,6 +476,14 @@ export const PatientHome = (props: any) => {
             <span className="font-semibold leading-relaxed">Address: </span>
             {patientData.address || '-'}
           </div>
+
+          { patientData.is_antenatal &&
+            <div>
+              <span className="font-semibold leading-relaxed"> Is pregnant </span>
+              {patientData.is_antenatal ? <span className="badge badge-pill badge-danger">Yes</span> :
+                  <span className="badge badge-pill badge-warning">No</span>}
+            </div>
+          }
           <div>
             <span className="font-semibold leading-relaxed">Contact with confirmed carrier: </span>
             {patientData.contact_with_confirmed_carrier ? <span className="badge badge-pill badge-warning">Yes</span> : <span className="badge badge-pill badge-secondary">No</span>}

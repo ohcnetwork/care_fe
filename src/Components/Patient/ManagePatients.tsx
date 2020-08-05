@@ -188,6 +188,14 @@ export const PatientManager = (props: any) => {
                         </span>
                       )}
                     </div>
+                    {
+                      patient.is_antenatal && patient.is_active &&
+                    <div>
+                          <span className="badge badge-pill badge-danger mr-2">
+                          Pregnant Patient
+                        </span>
+                    </div>
+                    }
                     <div>
                       {patient.allow_transfer && (
                         <span className="badge badge-pill badge-primary mr-2">

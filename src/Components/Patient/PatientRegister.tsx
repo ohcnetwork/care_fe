@@ -76,6 +76,7 @@ const initForm: any = {
   past_travel: false,
   countries_travelled: [],
   has_SARI: false,
+  is_antenatal: "false",
   prescribed_medication: false,
   ongoing_medication: "",
   is_medical_worker: "false",
@@ -186,6 +187,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             blood_group: res.data.blood_group ? res.data.blood_group : '',
             local_body: res.data.local_body ? res.data.local_body : '',
             medical_history: [],
+            is_antenatal: res.data.is_antenatal ? res.data.is_antenatal : 'false',
             allergies: res.data.allergies ? res.data.allergies : '',
             pincode: res.data.pincode ? res.data.pincode : '',
             ongoing_medication: res.data.ongoing_medication ? res.data.ongoing_medication : '',
@@ -358,6 +360,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         pincode: state.form.pincode,
         gender: Number(state.form.gender),
         nationality: state.form.nationality,
+        is_antenatal: state.form.is_antenatal,
         passport_no: state.form.nationality !== "India" ? state.form.passport_no : undefined,
         state: state.form.nationality === "India" ? state.form.state : undefined,
         district: state.form.nationality === "India" ? state.form.district : undefined,
@@ -865,6 +868,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               </div>
 
               <div className="grid gap-4 grid-cols-1 md:grid-cols-2 mt-4">
+
                 <div className="md:col-span-2">
                   <CheckboxField
                     checked={state.form.has_SARI}
@@ -873,7 +877,17 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     label="Does the person have SARI (Severe Acute Respiratory illness)?"
                   />
                 </div>
-
+                {
+                  state.form.gender === 2 &&
+                  <div className="md:col-span-2">
+                    <CheckboxField
+                        checked={state.form.is_antenatal}
+                        onChange={handleCheckboxFieldChange}
+                        name="is_antenatal"
+                        label="Is Antenatal?"
+                    />
+                  </div>
+                }
                 <div className="md:col-span-2">
                   <InputLabel id="med-history-label">
                     Any medical history? (Optional Information)
