@@ -159,12 +159,9 @@ export default function ListView(props: any) {
           <PageTitle title={"Shifting"} hideBack={true} />
 
             <div className="md:px-4">
-                <div className="text-sm font-semibold mb-2">
-                    Search by Name
-                </div>
                 <InputSearchBox
                     search={searchByName}
-                    placeholder='Search by Patient Name'
+                    placeholder='Patient Name'
                     errors=''
                 />
             </div>

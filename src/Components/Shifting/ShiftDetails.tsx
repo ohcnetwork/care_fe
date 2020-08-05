@@ -77,7 +77,7 @@ export default function ShiftDetails(props: any) {
             </div>)}
             <div>
               <span className="font-semibold leading-relaxed">Disease Status: </span>
-              {patientData.disease_status}
+              <span className="badge badge-pill badge-warning">{patientData.disease_status}</span>
             </div>
           <div>
             <span className="font-semibold leading-relaxed">Facility: </span>
@@ -256,12 +256,12 @@ export default function ShiftDetails(props: any) {
             {data.assigned_facility_object?.name || "--"}
           </div>
           <div>
-            <span className="font-semibold leading-relaxed">Is emergency: </span>
-            {data.emergency? "yes" : "no"}
+            <span className="font-semibold leading-relaxed"> Is emergency: </span>
+            <span className="badge badge-pill badge-danger py-1 px-2"> {data.emergency? "yes" : "no"}</span>
           </div>
           <div>
             <span className="font-semibold leading-relaxed">Is up shift: </span>
-            {data.is_up_shift? "yes" : "no"}
+            <span className="badge badge-pill badge-warning py-1 px-2"> {data.is_up_shift? "yes" : "no"}</span>
           </div>
           <div>
             <span className="font-semibold leading-relaxed">Vehicle preference: </span>
@@ -280,6 +280,16 @@ export default function ShiftDetails(props: any) {
             <div className="ml-2">
               {data.comments || "--"}
             </div>
+          </div>
+
+          <div>
+            <span className="font-semibold leading-relaxed"> Record Created at : </span>
+            { moment(data.created_date).format("LLL") || "--"}
+          </div>
+
+          <div>
+            <span className="font-semibold leading-relaxed"> Last Updated on : </span>
+            { moment(data.modified_date).format("LLL") || "--"}
           </div>
         </div>
 
