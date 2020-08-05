@@ -88,7 +88,6 @@ export default function ListView(props: any) {
   );
 
   const handlePagination = (page: number, limit: number) => {
-    console.log("Paginating to " + page)
     const offset = (page - 1) * limit;
     setCurrentPage(page);
     let filterData = { ...filter }

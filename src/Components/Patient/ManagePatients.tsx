@@ -92,7 +92,6 @@ export const PatientManager = (props: any) => {
   const tabValue = qParams.is_active === 'False' ? 1 : 0;
 
   let managePatients: any = null;
-  console.log('new render : ', qParams,tabValue);
   const handleDownload = async () => {
     const res = await dispatch(downloadPatients());
     setDownloadFile(res.data);

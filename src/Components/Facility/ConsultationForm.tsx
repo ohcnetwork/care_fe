@@ -141,7 +141,6 @@ export const ConsultationForm = (props: any) => {
       setIsLoading(true);
       const res = await dispatchAction(getConsultation(id));
       if (res && res.data && res.data.discharge_advice && Object.keys(res.data.discharge_advice).length != 0) {
-        console.log("here")
         setDischargeAdvice(res && res.data && res.data.discharge_advice);
       }
 
