@@ -4,7 +4,7 @@ import PageTitle from "../Common/PageTitle";
 import ListFilter from "./ListFilter";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getShiftRequests } from "../../Redux/actions";
+import {getShiftRequests, sampleSearch} from "../../Redux/actions";
 import Pagination from "../Common/Pagination";
 import Button from "@material-ui/core/Button";
 import { navigate } from "hookrouter";
@@ -12,6 +12,7 @@ import { navigate } from "hookrouter";
 import { SHIFTING_CHOICES } from "../../Common/constants";
 
 import { make as SlideOver } from "../Common/SlideOver.gen";
+import {InputSearchBox} from "../Common/SearchBox";
 
 const limit = 100;
 
@@ -87,6 +88,16 @@ export default function ListView(props: any) {
     [fetchData]
   );
 
+    const searchByName = async (searchValue: string) => {
+        setIsLoading(true);
+        const res = await dispatch(getShiftRequests({ limit, offset: 0, patient_name: searchValue }));
+        if (res && res.data) {
+            setData(res.data.results);
+            setTotalCount(res.data.count);
+        }
+        setIsLoading(false);
+    }
+
   const handlePagination = (page: number, limit: number) => {
     const offset = (page - 1) * limit;
     setCurrentPage(page);
@@ -147,6 +158,17 @@ export default function ListView(props: any) {
         <div className="flex items-end justify-between">
           <PageTitle title={"Shifting"} hideBack={true} />
 
+            <div className="md:px-4">
+                <div className="text-sm font-semibold mb-2">
+                    Search by Name
+                </div>
+                <InputSearchBox
+                    search={searchByName}
+                    placeholder='Search by Patient Name'
+                    errors=''
+                />
+            </div>
+
           <div className="bg-gray-200 text-sm text-gray-500 leading-none border-2 border-gray-200 rounded-full inline-flex">
             <button 
               className={"flex leading-none border-2 border-gray-200 rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-blue-400 focus:text-blue-400 rounded-r-full px-4 py-2"
@@ -197,6 +219,9 @@ export default function ListView(props: any) {
             </div>
           )}
         </div>
+
+
+
       <SlideOver show={showFilters} setShow={setShowFilters}>
         <div className="bg-white h-screen p-4">
           <ListFilter
