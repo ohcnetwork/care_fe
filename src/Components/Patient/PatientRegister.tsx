@@ -762,7 +762,35 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     errors={state.errors.blood_group}
                   />
                 </div>
+
+                {
+                  state.form.gender === '2' &&
+                <div>
+                  <InputLabel id="is_antenatal">Is antenatal ? </InputLabel>
+                  <RadioGroup
+                      aria-label="is_antenatal"
+                      name="is_antenatal"
+                      value={state.form.is_antenatal}
+                      onChange={handleChange}
+                      style={{padding: "0px 5px"}}
+                  >
+                    <Box display="flex" flexDirection="row">
+                      <FormControlLabel
+                          value="true"
+                          control={<Radio/>}
+                          label="Yes"
+                      />
+                      <FormControlLabel
+                          value="false"
+                          control={<Radio/>}
+                          label="No"
+                      />
+                    </Box>
+                  </RadioGroup>
+                </div>
+                }
               </div>
+
 
               <div className="grid gap-4 grid-cols-1 md:grid-cols-2 mt-4">
                 <div>
@@ -877,17 +905,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     label="Does the person have SARI (Severe Acute Respiratory illness)?"
                   />
                 </div>
-                {
-                  state.form.gender === 2 &&
-                  <div className="md:col-span-2">
-                    <CheckboxField
-                        checked={state.form.is_antenatal}
-                        onChange={handleCheckboxFieldChange}
-                        name="is_antenatal"
-                        label="Is Antenatal?"
-                    />
-                  </div>
-                }
+
                 <div className="md:col-span-2">
                   <InputLabel id="med-history-label">
                     Any medical history? (Optional Information)
