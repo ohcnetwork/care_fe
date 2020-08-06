@@ -58,7 +58,7 @@ module.exports = (env, argv) => {
         name: entrypoint => `runtime-${entrypoint.name}`,
       },
     },
-    devtool: isDev ? "source-map" : "none",
+    devtool: isDev ? "eval-cheap-module-source-map" : "none",
     mode,
     resolve: {
       extensions: [".js", ".jsx", ".json", ".ts", ".tsx", ".manifest"],
