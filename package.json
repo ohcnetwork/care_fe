@@ -96,7 +96,7 @@
   },
   "scripts": {
     "prebuild": "npm run re:build && npm run generate-build-meta",
-    "start": "npm run re:build && webpack-dev-server -p --mode=development",
+    "start": "npm run re:build && webpack-dev-server -p --open --mode=development",
     "start:Dev": "NODE_ENV=production http-server dist",
     "re:build": "bsb -make-world -clean-world",
     "re:watch": "bsb -make-world -clean-world -w",

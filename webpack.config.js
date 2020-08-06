@@ -39,7 +39,6 @@ module.exports = (env, argv) => {
     },
     output: {
       path: path.resolve(__dirname, "dist"),
-      pathinfo: false,
       filename: isDev ? "js/bundle.[hash].js" : "js/bundle.prod.[hash].js",
       chunkFilename: "[name].[chunkhash].chunk.js",
       publicPath: "/",
@@ -87,9 +86,6 @@ module.exports = (env, argv) => {
             path.resolve(__dirname, 'node_modules/@coronasafe')
           ],
           loader: "ts-loader",
-          options: {
-            transpileOnly: true
-          }
         },
         {
           enforce: "pre",
