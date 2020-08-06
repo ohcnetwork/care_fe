@@ -82,7 +82,10 @@ module.exports = (env, argv) => {
       rules: [
         {
           test: /\.(ts|tsx)$/,
-          include: path.resolve(__dirname, 'src'),
+          include: [
+            path.resolve(__dirname, 'src'),
+            path.resolve(__dirname, 'node_modules/@coronasafe')
+          ],
           loader: "ts-loader",
           options: {
             transpileOnly: true
