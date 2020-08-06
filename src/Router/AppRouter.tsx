@@ -143,7 +143,7 @@ let menus = [
   {
     title: "Sample Test",
     link: "/sample",
-    icon: "fas fa-cog"
+    icon: "fas fa-medkit"
   },
   {
     title: "Shifting",
