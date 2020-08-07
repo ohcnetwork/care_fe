@@ -38,4 +38,18 @@
 <script src="https://kit.fontawesome.com/7ef943e539.js"
         integrity="sha384-eoEIP4kL867FWM1D0Gem6jxjxMlsD5jiBy1lo9hB45B9e6PLQZ96UxgVowiBgMxx"
         crossorigin="anonymous"></script>
+<script>
+  (function(d,t) {
+    var BASE_URL = "https://chat.coronasafe.network";
+    var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+    g.src= BASE_URL + "/packs/js/sdk.js";
+    s.parentNode.insertBefore(g,s);
+    g.onload=function(){
+      window.chatwootSDK.run({
+        websiteToken: '6Nx7gdp7fTJdM4qGkJEoxveM',
+        baseUrl: BASE_URL
+      })
+    }
+  })(document,"script");
+</script>
 </html>
