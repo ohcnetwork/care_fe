@@ -1,6 +1,6 @@
 import { useRedirect, useRoutes, navigate, usePath } from "hookrouter";
-import React, { useState } from "react";
-import {  useSelector } from "react-redux";
+import React, { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import { BedCapacityForm } from "../Components/Facility/BedCapacityForm";
 import { ConsultationDetails } from "../Components/Facility/ConsultationDetails";
 import { ConsultationForm } from "../Components/Facility/ConsultationForm";
@@ -42,12 +42,12 @@ const routes = {
   "/": () => <HospitalList />,
   "/users": () => <ManageUsers />,
   "/user/add": () => <UserAdd />,
-  "/user/profile" : () => <UserProfile/>,
+  "/user/profile": () => <UserProfile />,
   "/patients": () => <PatientManager />,
   "/patient/:id": ({ id }: any) => <PatientHome id={id} />,
   "/sample": () => <SampleViewAdmin />,
   "/sample/:id": ({ id }: any) => <SampleDetails id={id} />,
-  '/patient/:patientId/test_sample/:sampleId/icmr_sample': ({ patientId , sampleId}: any) => <SampleReport id={patientId} sampleId={sampleId} />,
+  '/patient/:patientId/test_sample/:sampleId/icmr_sample': ({ patientId, sampleId }: any) => <SampleReport id={patientId} sampleId={sampleId} />,
   "/facility": () => <HospitalList />,
   "/facility/create": () => <FacilityCreate />,
   "/facility/:facilityId/update": ({ facilityId }: any) => (
@@ -162,7 +162,6 @@ let menus = [
   }
 ];
 
-
 const AppRouter = () => {
   useRedirect("/", "/facility");
   const pages = useRoutes(routes);
@@ -176,7 +175,10 @@ const AppRouter = () => {
     "data.last_name",
     ""
   )}`;
-  document.getElementById("pages")?.scrollTo(0,0);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [path]);
+  // document.getElementById("pages")?.scrollTo(0,0);
 
   return (
     <div className="h-screen flex overflow-hidden bg-gray-100">

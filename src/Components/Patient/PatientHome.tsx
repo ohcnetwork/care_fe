@@ -529,7 +529,7 @@ export const PatientHome = (props: any) => {
           </div>)}
         </div>
         <div className="flex mt-4">
-          <div className="flex-1 ml-2">
+          <div className="flex-1">
             <Button fullWidth
                     variant="contained"
                     color="primary"
