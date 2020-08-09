@@ -100,9 +100,9 @@ export const PatientManager = (props: any) => {
 
   useEffect(() => {
     setIsLoading(true);
-    const offset = (qParams.page ? qParams.page - 1 : 0) * RESULT_LIMIT;
     const params = Object.assign({
-      offset,
+      facility: facilityId,
+      offset: (qParams.page ? qParams.page - 1 : 0) * RESULT_LIMIT
     }, qParams);
 
     dispatch(searchPatientFilter(params))
@@ -115,7 +115,7 @@ export const PatientManager = (props: any) => {
       }).catch((ex: any) => {
         setIsLoading(false);
       })
-  }, [qParams, dispatch]);
+  }, [qParams, dispatch, facilityId]);
  
   const updateQuery = (params:any) => {
     const nParams = Object.assign({}, qParams, params); 
