@@ -406,7 +406,7 @@ export const PatientHome = (props: any) => {
             </div>)}
             <div>
               <span className="font-semibold leading-relaxed">Disease Status: </span>
-              {patientData.disease_status}
+              <span className="badge badge-pill badge-danger">{patientData.disease_status}</span>
             </div>
           </div>
           {patientData.is_active &&

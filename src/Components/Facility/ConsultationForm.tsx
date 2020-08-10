@@ -58,10 +58,13 @@ const initForm: any = {
   admission_date: null,
   discharge_date: null,
   referred_to: "",
+  diagnosis: "",
+  verified_by: "",
   examination_details: "",
   existing_medication: "",
   prescribed_medication: "",
   consultation_notes: "",
+  ip_no: "",
   discharge_advice: []
 };
 
@@ -159,6 +162,9 @@ export const ConsultationForm = (props: any) => {
             admitted: res.data.admitted ? String(res.data.admitted) : "false",
             admitted_to: res.data.admitted_to ? res.data.admitted_to : "",
             category: res.data.category ? res.data.category : "",
+            ip_no: res.data.ip_no ? res.data.ip_no : "",
+            diagnosis: res.data.diagnosis ? res.data.diagnosis : "",
+            verified_by: res.data.verified_by ? res.data.verified_by : "",
             OPconsultation: res.data.consultation_notes
           };
           dispatch({ type: "set_form", form: formData });
@@ -265,6 +271,9 @@ export const ConsultationForm = (props: any) => {
         prescribed_medication: state.form.prescribed_medication,
         admission_date: state.form.admission_date,
         discharge_date: state.form.discharge_date,
+        ip_no: state.form.ip_no,
+        diagnosis: state.form.diagnosis,
+        verified_by: state.form.verified_by,
         discharge_advice: dischargeAdvice,
         patient: patientId,
         facility: facilityId,
@@ -572,19 +581,58 @@ export const ConsultationForm = (props: any) => {
                 <PrescriptionBuilder prescriptions={dischargeAdvice} setPrescriptions={setDischargeAdvice} />
               </div>
 
-              {/*<div>*/}
-              {/*    <InputLabel id="refered-label">Referred To Facility</InputLabel>*/}
-              {/*    <TextInputField*/}
-              {/*        name="referred_to"*/}
-              {/*        variant="outlined"*/}
-              {/*        margin="dense"*/}
-              {/*        type="number"*/}
-              {/*        InputLabelProps={{ shrink: !!state.form.referred_to}}*/}
-              {/*        value={state.form.referred_to}*/}
-              {/*        onChange={handleChange}*/}
-              {/*        errors={state.errors.referred_to}*/}
-              {/*    />*/}
-              {/*</div>*/}
+              <div>
+                  <InputLabel id="refered-label">IP number</InputLabel>
+                  <TextInputField
+                      name="ip_no"
+                      variant="outlined"
+                      margin="dense"
+                      type="string"
+                      InputLabelProps={{ shrink: !!state.form.ip_no}}
+                      value={state.form.ip_no}
+                      onChange={handleChange}
+                      errors={state.errors.ip_no}
+                  />
+              </div>
+              <div>
+                <InputLabel id="exam-details-label">
+                  Verified By
+                </InputLabel>
+                <MultilineInputField
+                    rows={3}
+                    name="verified_by"
+                    variant="outlined"
+                    margin="dense"
+                    type="text"
+                    placeholder="Attending Doctors Name and Designation"
+                    InputLabelProps={{
+                      shrink: !!state.form.verified_by,
+                    }}
+                    value={state.form.verified_by}
+                    onChange={handleChange}
+                    errors={state.errors.verified_by}
+                />
+              </div>
+              <div>
+                <InputLabel id="exam-details-label">
+                  Diagnosis
+                </InputLabel>
+                <MultilineInputField
+                    rows={5}
+                    name="diagnosis"
+                    variant="outlined"
+                    margin="dense"
+                    type="text"
+                    placeholder="Information optional"
+                    InputLabelProps={{
+                      shrink: !!state.form.diagnosis,
+                    }}
+                    value={state.form.diagnosis}
+                    onChange={handleChange}
+                    errors={state.errors.diagnosis}
+                />
+              </div>
+
 
               <div className="mt-4 flex justify-between">
                 <Button
