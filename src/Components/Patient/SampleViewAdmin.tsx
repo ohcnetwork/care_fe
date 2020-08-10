@@ -76,7 +76,7 @@ export default function SampleViewAdmin(props: any) {
 
   const searchByName = async (searchValue: string) => {
     setIsLoading(true);
-    const res = await dispatch(sampleSearch({ limit, offset, name: searchValue }));
+    const res = await dispatch(sampleSearch({ limit, offset, patient_name: searchValue }));
     if (res && res.data) {
       setSample(res.data.results);
       setTotalCount(res.data.count);
@@ -84,15 +84,15 @@ export default function SampleViewAdmin(props: any) {
     setIsLoading(false);
   }
 
-  const searchByPhone = async (searchValue: string) => {
-    setIsLoading(true);
-    const res = await dispatch(sampleSearch({ limit, offset, phone_number: encodeURI(searchValue) }));
-    if (res && res.data) {
-      setSample(res.data.results);
-      setTotalCount(res.data.count);
-    }
-    setIsLoading(false);
-  }
+  // const searchByPhone = async (searchValue: string) => {
+  //   setIsLoading(true);
+  //   const res = await dispatch(sampleSearch({ limit, offset, phone_number: encodeURI(searchValue) }));
+  //   if (res && res.data) {
+  //     setSample(res.data.results);
+  //     setTotalCount(res.data.count);
+  //   }
+  //   setIsLoading(false);
+  // }
   // const handleChange = (e: any) => {
   //   let results = { ...result };
   //   results[e.target.name] = e.target.value;
@@ -304,16 +304,16 @@ export default function SampleViewAdmin(props: any) {
             />
           </div>
         </div>
-        {/*<div className="md:px-4">*/}
-        {/*  <div className="text-sm font-semibold mb-2">*/}
-        {/*    Search by Name*/}
-        {/*  </div>*/}
-        {/*  <InputSearchBox*/}
-        {/*      search={searchByName}*/}
-        {/*      placeholder='Search by Patient Name'*/}
-        {/*      errors=''*/}
-        {/*  />*/}
-        {/*</div>*/}
+        <div className="md:px-4">
+          <div className="text-sm font-semibold mb-2">
+            Search by Name
+          </div>
+          <InputSearchBox
+              search={searchByName}
+              placeholder='Search by Patient Name'
+              errors=''
+          />
+        </div>
         {/*<div>*/}
         {/*  <div className="text-sm font-semibold mb-2">*/}
         {/*    Search by number*/}

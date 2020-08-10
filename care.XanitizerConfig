@@ -1,0 +1,641 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<TaintAnalysis version="1.1">
+    
+  <ConfigItems>
+        
+    <!--      
+      Framework simulation might in rare cases generate wrong code (since it is complex); in such cases it is possible to edit this wrong code by hand and thus correct it, but normally, this corrected code is overwritten on the next analysis run. By setting this flag to 'true' no new simulation code is generated and therefore the existing generation code is not overridden.
+       This setting serves only as a workaround. Please report erroneous simulation code to the Xanitizer support team and do not forget to remove this setting when there is a fix available.
+    -->
+        
+    <WS_SuppressFrameworkSimulationCodeGeneration value="false"/>
+      
+    
+    <!--      
+      Framework simulation might in rare cases generate wrong code (since it is complex); in such cases it is possible to switch to simpler code generation algorithms, which sometimes might not generate the problem, and often are also good enough for the analysis. By setting this flag to 'true', these simpler algorithms are used instead of the more complicated ones.
+       This setting serves only as a workaround. Please report erroneous simulation code to the Xanitizer support team and do not forget to remove this setting when there is a fix available.
+    -->
+        
+    <WS_AvoidComplicatedFrameworkSimulationCodeGeneration value="false"/>
+      
+    
+    <!--      
+      A time-out value, in seconds, specifying for which duration Xanitizer searches for view names used in Spring MVC. The usage of this limit prevents the analysis from getting tied up by the string search in scenarios where for the dataflow analysis, a large part of the search space would have to be visited.
+      The default value is 60 seconds.
+    -->
+        
+    <FR_TimeoutForMvcViewNameSearch value="60"/>
+      
+    
+    <!--      
+      A time-out value, in seconds, specifying for which duration Xanitizer searches for assignments to model maps in Spring MVC. The usage of this limit prevents the analysis from getting tied up by the string search in scenarios where for the dataflow analysis, a large part of the search space would have to be visited.
+      The default value is 60 seconds.
+    -->
+        
+    <FR_TimeoutForMvcModelValueAssignmentSearch value="60"/>
+      
+    
+    <!--      
+      While a call graph is being constructed, it can occur that a method is called on an object (receiver) for which the heap analysis did not determine a value. In this case, the call graph normally does not contain a called method for this location.
+      But since the heap model cannot normally be assumed to be complete in the simulation, Xanitizer allows to extend the call graph heuristically.
+      The default strategy (a) (IF_EMPTY) is to generate synthetically heap elements for all concrete workspace subtypes of the declared type in the call location, but only if the set of heap model elements the respective pointer points to is empty.
+       Variants are:
+      (b) (NEVER) to never extend the call graph heuristically,
+      (c) (ALWAYS) to always extend it (i.e., also when the described set of heap model elements is not empty), and
+      (d) (IF_EMPTY_EXTENDING_ONLY_WITH_WORKSPACE_METHODS) to only extend the call graph if the set is empty, but only with methods that are declared in the workspace.
+    -->
+        
+    <CG_ExtendCallgraphHeuristically value="IF_EMPTY"/>
+      
+    
+    <!--      
+      When the call graph is extended heuristically, Xanitizer can either use all concrete types that are assignment compatible with the type at the location at the method call, or it can restrict itself only to types for which constructor invocations are found in the code.  The latter alternative reduces the number of false alarms, but if instances are created by reflection rather than by direct constructor invocation in the application, the heuristics will not use the respective types for extending the callgraph.
+      The default value is 'false'.
+    -->
+        
+    <CG_UseOnlyConstructedClassesForHeuristicCallgraphExtension value="false"/>
+      
+    
+    <!--      
+      Call graph construction can need much memory and time.  When this timeout is reached before the call graph construction has terminated regularly, the call graph construction is stopped, and the analysis continues with the partial call graph constructed up to that point in time.  Note that this means that some vulnerabilites might be missed that might have been found with a more complete call graph.
+      0 means: disabling timeout for call graph computation.
+      Default value is 3600 seconds.
+    -->
+        
+    <CG_TimeoutForCallgraphComputation value="3600"/>
+      
+    
+    <!--      
+      A huge call graph can lead to memory problems or very long running times.  This limit can be used in order to limit the number of nodes that the created call graph will have.  If the limit is reached, an issue is generated, because the analysis might miss problems that it might have found w/o the limit, but the analysis is performed nevertheless.
+      0 means: disabling limit for number of call graph nodes.
+      Default value is 0.
+    -->
+        
+    <CG_CallgraphNodeCountLimit value="0"/>
+      
+    
+    <!--      
+      The number of threads running in parallel during the security analysis.
+      0 means the available number of processor cores on the system, a negative number means: use so many threads *less* than the number of processor cores on the system (or 1, if the result is not positive)
+      This system contains 4 processor cores.
+      A higher number of parallel threads requires more main memory for the security analysis. Only increase the number of threads if you are sure that your available memory is sufficient.
+      Default value is 1.
+    -->
+        
+    <RAPS_NumberOfThreads value="1"/>
+      
+    
+    <!--      
+      The maximal number of taint sources to be used per problem type.
+      Keeping this number small will shorten the run time of the taint analysis, but might loose results, since the tainted data starting from some of the taint sources will not be followed.
+      If more taint sources have been found for some problem type than this limit specifies, an issue is generated, so you notice if some taint sources have been disregared. In this case, increasing this limit might lead to more findings.
+      0 means: no limit.
+      Default is 500.
+    -->
+        
+    <RA_MaximalNumberOfSourcesOfAProblemToProcess value="500"/>
+      
+    
+    <!--      
+      The maximal number of findings reported per problem type.
+      A large number of findings is often hard to review. But for completeness you can increase the value to see all the detected findings. If more findings have been found for some problem type than this limit specifies, an issue is generated, so you notice if you will miss some findings.
+      0 means: no limit.
+      Default is 1000.
+    -->
+        
+    <PD_MaximalNumberOfFindingsOfAProblemType value="1000"/>
+      
+    
+    <!--      
+      In data flow reachability computation, specify how many taint sources are combined for a single job that is processed at once.
+      0 means: all taint sources of a single problem type are processed together in one job.This is the fastest way to get a security analysis executed but it might require more dynamic memory.
+      1 means: for each single taint source, a single job is started.
+      Any number n larger than 1 means: the taint sources for each single problem type are split into subsets with n elements, and for each such subset, a single job is started. If the number of sources is not divisible by n, the last generated job has less than n sources.
+      The default value is 100.
+      
+      If you receive 'out-of-memory' error messages, a high percentage of garbage collection or if you experience data losses due to a time-out of reachability computation it is recommended to reduce this job size. Please be aware that small job sizes with high time limit settings could lead to an overlong analysis duration. Therefore adjust reachability job size and time limit always together.
+    -->
+        
+    <RA_NumberOfSourcesOfAProblemToProcessAtOnce value="100"/>
+      
+    
+    <!--      
+      A reached-values computation is conducted when some problem type requires that the receiver of some method call stems from some given taint source. An example are XSS problem types: writing a tainted value to a stream is a problem if the stream leads to the browser.  In order to detect this, Xanitizer performs a dataflow analysis starting from methods that determine streams that lead back to the browser.
+      This parameter can be used to limit the time used for this specific dataflow analysis.
+      0 means: disabling timeout for reached values computation.
+      Default value is 300 seconds.
+    -->
+        
+    <RA_TimeoutForReachedValuesComputation value="300"/>
+      
+    
+    <!--      
+      A data flow reachability computation is conducted for some set of taint sources, in which it is checked which taint sinks can be reached by and of these taint sources. This time limit applies to such a reachability search. Even if this time limit is reached before a reachability search has been completed, there might be some taint sinks that have been reached with respect to this specific sources. For other sources, the analysis will continue.
+      Setting a time limit in conjunction with reachability job size can be used to avoid a very long overall analysis duration which might be caused by individual, overlong reachability searches. Therefore adjust reachability job size and time limit always together.
+      0 means: disabling timeout for data flow reachability computation.
+      Default value is 300 seconds.
+    -->
+        
+    <RA_TimeoutForDataflowReachabilityComputation value="300"/>
+      
+    
+    <!--      
+      Phi instructions are used in Xanitizer to model data flows where different values from different control flows are combined into one common value. During computation of retroactive taint implications, normally one would expect that also phi instructions should be considered, since if one value is tainted retroactively, also another one that is phi-related to the first one should be tainted.
+    -->
+        
+    <RA_DoPhiProcessingWhileComputingRetroactiveTaintImplications value="false"/>
+      
+    
+    <!--      
+      Toggles if control flow into 'catch' blocks should be included in the analysis. Note that by not entering catch blocks, Xanitizer might miss some taint paths; but in some projects, the taint flow via catch blocks leads to many false alarms, in which case this flag should be switched off.
+      Default value is 'YES'.
+    -->
+        
+    <RA_AnalyseCaughtExceptions value="true"/>
+      
+    
+    <!--      
+      Xanitizer can generate informational issues for detected taint sanitizers, taint sources and taint sinks. Even issues for non-tainting sources (i.e. sources whose data does not reach a taint sink) and non-tainted sinks (i.e. taint sinks that are not reached by tainted data) are generated.
+      In general, these issues are not of interest for a security analysis. But if you suspect an error in the analysis results it might help to collect these issues to understand why there is no taint flow.Default value is 'NO'.
+    -->
+        
+    <RA_CreateIssuesForTaintRelevantMethods value="false"/>
+      
+    
+    <!--      
+      It can be defined with every map-like accessor kind if non-constant keys should be ignored for it. If this flag is TRUE or FALSE, it overrides the setting at the map-like accessor kind accordingly. This allows to override the settings for all map-like accessors at once. If this flag has the value NO_VALUE, the settings at the map-like accessor kinds are in force.
+      The default is 'TRUE'; this should produce considerably shorter analysis duration and avoid many false positives, but might potentially overlook some true positives.
+    -->
+        
+    <RA_GloballyIgnoreAllNonConstantMapLikeAccessorKeys value="TRUE"/>
+      
+    
+    <!--      
+      There are several strategies how to handle tainted values in the Xanitizer heap simulation. In a comprehensive approach once some heap element has been tainted, this taint will never disappear again. This is because one heap element in the Xanitizer model represents many heap elements in reality, and even when the taint would vanish in one heap element in reality, it might exist further on in others. On the other hand this could lead in some situations to false alarms; 
+      Thus, this flag can be set to 'true' in order to remove the taint from heap element when it is detected that a non-tainted datum is overriding it. This approach reduces the number of potential false alarms, but possibly also increases the number of missed true problems.
+      The default is 'false', in order to reduce the danger of overlooking true positives. Switch to 'true' if you have many false positive findings in your result which are caused by tainted heap facts, that are not tainted anymore in reality.
+    -->
+        
+    <RA_TaintOnHeapCanVanish value="false"/>
+      
+    
+    <!--      
+      During data flow analysis, when a tainted datum travels in the system, Xanitizer checks at taint sink locations whether the datum matches the argument specified at the taint sink.  If it does, a taint sink has been reached by the taint flow.
+      However sometimes the datum itself is not tainted but the represented data object internally aggregates other data values and objects which might be tainted. They are located on the simulated heap and it must be checked whether there are tainted heap elements that are potentially recursively aggregated in the main object. The parameter number specifies how many hierarchical steps through the heap are checked by Xanitizer in this scenario. A value of 0 means that no heap content is checked. Large values mean that search time for matches increases.
+      The default value is 2.
+    -->
+        
+    <RA_MaxHeapIndirectionsForSinkMatching value="2"/>
+      
+    
+    <!--      
+      When a setter is called on an object with a tainted argument, normally its byte code is processed in order to see where the taint flows. If there is no byte code for the method, or the method is a system method, the normal semantics is to taint the whole receiver. This can lead to false alarms, since if one setter writes a tainted datum, all non-void methods return a tainted datum, not just the getter corresponding to the setter, deliver tainted return values. This might lead to many false alarms.
+      If this flag is 'true', Xanitizer uses a special semantics for getter and setter methods for which the byte code is not analyzed: Specialized taint is generated for such a setter, that can only be read by the corresponding getter. This can reduce the number of false alarms, but in the case that the tainted content written by a setter is being read from the object not by the corresponding getter but in some other way, for example by the toString() method, this will be missed.
+      The default valus is 'true'.
+    -->
+        
+    <RA_ApplySpecialGetterSetterSemantics value="true"/>
+      
+    
+    <!--      
+      Each end of a data flow can be declared to be a taint sink for a taint flow problem (by using the taint sink kind with name "End of Data Flow"). This kind of taint sink is typically required when searching for resource leaks. Because searching a taint path until 'end of data flow'  requires more memory than usual, the part of the call graph that is visited for such a search is reduced: only methods are visited that can be reached, from some method containing a taint source, within a maximum number of the method call depth. This is the number of invoked methods the path is passing either backward or forward when starting from the taint source.
+       A larger number means that more taint sanitizers (sanitizing a resource leak e.g. by invoking the close() method) might be found, but it increases memory requirements and running time for the problem.
+      The value 0 indicates that there is no limit for the call depth. The default value is 5.
+    -->
+        
+    <RA_CallGraphSearchLimitIfEndsOfDataflowsAreSinks value="5"/>
+      
+    
+    <!--      
+      Max. method call depth in a path.
+      This configuration value allows to reduce time and memory consumption during analysis by setting a small number for the method call depth. Only methods are visited that can be reached, from some method containing a taint source, within a maximum number of the method call depth. This is the number of invoked methods the path is passing either backward or forward when starting from the taint source.
+      This limit is used for taint flow problems with all kinds of sources and sinks except 'end of data flow' taint sinks.
+       A larger number means that longer taint paths might be found, but the longer they are, the more likely they are false positives.
+      The value 0 indicates that there is no limit for the call depth. The default value is 15.
+    -->
+        
+    <RA_GeneralCallGraphSearchLimit value="15"/>
+      
+    
+    <!--      
+      If a trust zone is defined for a problem type, the taint sinks should normally be located in the trust zone. If a taint sink outside a trust zone is found, a warning is generated for it. But if trust zones are used in a project in a different way, this can generate a lot of spurious warnings. This flag can be used to switch off these warnings.
+      The default value is 'true'
+    -->
+        
+    <RAGenerateWarningsForSinksOutsideOfTrustZones value="true"/>
+      
+    
+    <!--      
+      The maximum number of tainted data flow paths that are searched between a taint source and taint sink pair.
+      By default the shortest path is detected but there might be different paths as well.
+      A path is regarded as different, if the taint flows through at least one different method or a different sequence of methods.
+      Taint flow through different parts of the same method body are only searched if the separate configuration flag 'PS_LookForSeveralPathsInsideMethods' is set to true and an insufficient number of different paths with different sets of methods could be found.
+      Increasing the number of paths to search for might have a considerable impact on the time and memory consumption of the security analysis.
+      Default value is 1.
+    -->
+        
+    <PS_PathsPerEndpoint value="1"/>
+      
+    
+    <!--      
+      This flag is only relevant when the configuration of 'Number of paths per source/sink pair' is set to a number larger 1. When looking for several paths per source/sink pair, one can configure with this flag if for paths inside the same method, several variants should be looked for. Normally, this is less interesting than looking globally for path variants and consumes additional analysis time.
+      Default value is 'false'.
+    -->
+        
+    <PS_LookForSeveralPathsInsideMethods value="false"/>
+      
+    
+    <!--      
+      Xanitizer filters out found taint paths if they exceed the max number of method path segments; this makes sense since very long paths (a) need a lot of memory, and (b) they often are false alarms.
+      Default value is 50; specifying 0 means that there is no maximal path segment count.
+    -->
+        
+    <PS_MaximalMethodPathSegmentCountInPath value="50"/>
+      
+    
+    <!--      
+      For every source or taint data sink combination, where the taint reaches the sink from the source, Xanitizer looks for callers before checking if there is a path. If this time limit is reached before the caller search has been completed, the result is limited to those callers which have been found up to that moment.
+       Setting a time limit can be used to avoid a very long overall analysis duration at the cost that some of the data flow paths potentially remain unidentified.
+      Default value is 120 seconds.
+    -->
+        
+    <PS_TimeoutForCallerSearch value="120"/>
+      
+    
+    <!--      
+      For every pair of a tainted source and a taint sink combination that has been detected during reachability computation, the data flow paths are determined which connect the two. This time limit applies to the path search for one single source/sink pair only. If this time limit is reached before a path search has been completed, the result is limited to those paths of the related source/sink pair which have been found up to that moment. Analysis for other source/sink pairs is not affected and will just continue.
+       Setting a time limit can be used to avoid a very long overall analysis duration at the cost that some of the data flow paths potentially remain unidentified.
+      Default value is 120 seconds.
+    -->
+        
+    <PS_TimeoutForPathFinding value="120"/>
+      
+    
+    <!--      
+      If a reachability analysis job reaches a very large number of taint sinks, the path search can take extraordinarily long time.
+      This configuration parameter can be used to limit the number of taint sink combinations that are used from the result. If there are more, the rest is dropped, and a warning is generated in the issues.
+      A number of 0 means: no limit.
+      The default value is 10000.
+    -->
+        
+    <PS_MaxTaintDataSinkCombinationsToUsePerJob value="10000"/>
+      
+    
+    <!--      
+      The report template file that is used to generate the finding details report. The default value is the standard location in the Xanitizer installation.
+    -->
+        
+    <RP_FindingDetailsReportTemplate value="${INSTALL_DIR}/reporting/reportdesign/xanitizer_finding_details.rptdesign"/>
+      
+    
+    <!--      
+      The report template file that is used to generate the finding list report. The default value is the standard location in the Xanitizer installation.
+    -->
+        
+    <RP_FindingListReportTemplate value="${INSTALL_DIR}/reporting/reportdesign/xanitizer_findings_list.rptdesign"/>
+      
+    
+    <!--      
+      The report template file that is used to generate the overview report. The default value is the standard location in the Xanitizer installation.
+    -->
+        
+    <RP_OverviewReportTemplate value="${INSTALL_DIR}/reporting/reportdesign/xanitizer_overview.rptdesign"/>
+      
+    
+    <!--      
+      Freemaker templates contain escaping functions for HTML, JSON, Javascript and other contexts that are used to esacpe a string that is entered by the rendering engine. By default, outputs of strings that are escaped in this way are not registered as potential taint sinks. However it is possible that an applied escaping is not the correct one for the local context in the template file (i.e. a HTML escaping does not sanitize a string that is entered into a Javascript code). For such locations the registration as a taint sink would be appropriate.
+      Setting this flag to 'false' will switch off the sanitizing effect of all Freemarker escaping functions; note that this leads to more findings including potentially false positives because also locations are affected where the escaping in fact is correct.
+      The default value is 'true'.
+    -->
+        
+    <FR_HonorQuotingFunctionsInFreemarkerCode value="true"/>
+      
+    
+    <!--      
+      Java Server Faces simulation looks at setters and getters of managed beans and defines taint sources and taint sinks for these.  By default, all setters are registered as taint sources, and all getters are registered as as taint sinks.
+      Setting this flag to 'true' means that XHTML template files are looked up, EL code is collected in these files, and properties are determined that are used in EL code used for transferring user input into some bean via a setter, or for transferring program output via a getter in a non-escaping context.  Only getters and setters for which such a property is found are then declared are taint sinks and taint sources.
+      The default value is 'true'.
+    -->
+        
+    <FR_FilterJsfSourcesAndSinksByElInTemplates value="true"/>
+      
+    
+    <!--      
+      When JSP files are found, they are converted to Java code and compiled to byte code. Xanitizer uses Tomcat's Jasper for the first step.
+      Xanitizer comes with several versions of the Tomcat libraries that can be used.
+      The default value is version 8.5.*. For compatibility reasons with older jsp files it might be necessary to switch to an earlier tomcat version.
+    -->
+        
+    <WS_TomcatVersionForJspProcessing value="V9_0"/>
+      
+    
+    <!--      
+      If a target of a RequestDispatcher.forward, RequestDispatcher.include or JspRuntimeLibrary.include is not a constant, it can not be determined which JSP template is invoked. This flag configures if in this case the control moves to all or to non JSP templates.
+      The default value is 'false'.
+    -->
+        
+    <FR_DispatchToAllJspsIfTargetNotResolvable value="false"/>
+      
+    
+    <!--      
+      By default, Xanitizer uses NodeJS to compile Angular and TypeScript projects. This could be a potential risk if someone has manipulated the 'ng' or the 'tsc' script or is simply not necessary if you have already compiled the project on your own. In this case you can disable this behaviour.
+    -->
+        
+    <JavaScript_ALLOW_XANITIZER_COMPILATION value="YES"/>
+      
+    
+    <!--      
+      The npm audit APIs can be used to report on known vulnerable node.js libraries. This requires an Internet connection and so has to be allowed explicitly.
+    -->
+        
+    <JavaScript_NODE_AUDIT value="true"/>
+      
+    
+    <!--      
+      Number of seconds that the JavaScript taint analysis runs maximally (zero means: unlimited)
+    -->
+        
+    <JavaScript_TAINT_ANALYSIS_TIMEOUT value="3600"/>
+      
+    
+    <!--      
+      Extra arguments that will be supplied to the JVM, split at spaces
+    -->
+        
+    <JavaScript_JVM_ARGS value="-Xmx4000m"/>
+      
+    
+    <!--      
+      Number of JavaScript files to be processed in one run (zero means: unlimited)
+    -->
+        
+    <JavaScript_BATCH_SIZE value="1000"/>
+      
+    
+    <!--      
+      Matcher for JavaScript files, consisting of a semicolon-separated list of patterns. Patterns starting with '+' are inclusion patterns, and '-' marks exclusion patterns. In a pattern, wildcards '**', '*' and '?' can be used, directory separators are '/', and directories to be matched end in '/'.
+      
+      This matcher describes both workspace and library JavaScript files.
+    -->
+        
+    <JavaScript_FILE_MATCHER value="+**.js;+**.mjs;"/>
+      
+    
+    <!--      
+      Matcher for files configuring the TypeScript compiler, consisting of a semicolon-separated list of patterns. Patterns starting with '+' are inclusion patterns, and '-' marks exclusion patterns. In a pattern, wildcards '**', '*' and '?' can be used, directory separators are '/', and directories to be matched end in '/'.
+      
+      This matcher describes both workspace and library files.
+    -->
+        
+    <JavaScript_TSCONFIG_JSON_FILE_MATCHER value="+**/tsconfig.json;"/>
+      
+    
+    <!--      
+      Matcher for files to be considered as JavaScript workspace, consisting of a semicolon-separated list of patterns. Patterns starting with '+' are inclusion patterns, and '-' marks exclusion patterns. In a pattern, wildcards '**', '*' and '?' can be used, directory separators are '/', and directories to be matched end in '/'.
+      
+      Note that the base set of files are defined by the "JavaScript files" matcher, this file matcher is applied to files matched by the other to check if it is a workspace file or not.
+    -->
+        
+    <JavaScript_WORKSPACE_FILE_MATCHER value="+**;&#10;-**/node_modules/**;&#10;-**/bower_components/**;&#10;-**/jspm_packages/**;&#10;-**/lib/**;&#10;-**/sdk/**;&#10;-**/dist/**;&#10;-**/target/**;&#10;-**.min.js;&#10;-**/polyfills*.js;&#10;-**/runtime*.js;&#10;-**/styles*.js;&#10;-**/vendor*.js;&#10;"/>
+      
+    
+    <!--      
+      JavaScript analysis has to compile TypeScript and Angular projects; for this, a NodeJS executable is needed. This is normally searched along the PATH environment variable. If this field is not empty, it must contain the absolute path to the node executable to be used, which means that this only works on machines where the node executable is located at this spot.
+    -->
+        
+    <JavaScript_NODE_EXE_PATH value="/usr/local/bin/node"/>
+      
+  </ConfigItems>
+    
+  
+  
+  <!--    
+    Configuration of problem types, taint sources, taint sinks, taint sanitizers, etc. usually is defined implicitly (via files in the Xanitizer installation), but in addition to the standard ones they can also be defined locally, i.e. project-specific, in the project's config file. These configuration elements are used for the definition of project-specific problem configuration.
+  -->
+    
+  <PD_LocalProblemDefinitions version="1.0">
+    <!--Cf. chapter 'Extra Information for Method Patterns' for description of method pattern attributes-->
+    <StartMethods kind="StartMethod:MyStartMethods" presentationName="My Start Methods">
+      <Description>
+        <![CDATA[You can add your project-specific start methods here. Do not forget to edit or delete the sample entry.]]>
+      </Description>
+      <!--    
+    Method pattern, for matching method invocations or method definitions.
+  -->
+            
+      <Method alsoInSubclasses="true" restrictToWorkspace="false">
+        void sample.package.path.ExampleClass.dummyMethod()
+      </Method>
+    </StartMethods>
+  </PD_LocalProblemDefinitions>
+    
+  
+  <!--    
+    Specifies all problem types which should be set 'active' for this analysis, i.e. during security analysis Xanitizer searches for findings of the specified problem types only.By skipping uninteresting problem types the duration of the analysis can be reduced considerably.
+    Sample usage:
+    <PD_ProblemType name="ci:SQLInjection"/>
+      Attribute 'name': Problem type name.
+  -->
+    
+  <PD_ProblemType name="GWT:RegexSearch:JSNI"/>
+  <PD_ProblemType name="GWT:SpecialMethodCall:JSONParserCallingJSEval"/>
+  <PD_ProblemType name="LiteralStringsInVariablesSearch:password"/>
+  <PD_ProblemType name="LiteralStringsInVariablesSearch:username"/>
+  <PD_ProblemType name="OWASPDependencyCheck"/>
+  <PD_ProblemType name="RegexSearch:PasswordInConfigFile"/>
+  <PD_ProblemType name="RegexSearch:SystemReferenceToFileInXMLFile"/>
+  <PD_ProblemType name="SpecialMethodCall:AppliedClassLoading"/>
+  <PD_ProblemType name="SpecialMethodCall:AppliedDNSResolution"/>
+  <PD_ProblemType name="SpecialMethodCall:AppliedPrivilegedAction"/>
+  <PD_ProblemType name="SpecialMethodCall:AppliedReflection"/>
+  <PD_ProblemType name="SpecialMethodCall:Deserialization:UnsafeDeserializationConfiguration"/>
+  <PD_ProblemType name="SpecialMethodCall:EncryptionUsedInProject"/>
+  <PD_ProblemType name="SpecialMethodCall:EncryptionUsedInProjectWOProvider"/>
+  <PD_ProblemType name="SpecialMethodCall:JNICall"/>
+  <PD_ProblemType name="SpecialMethodCall:JavaServletFindAndInclude"/>
+  <PD_ProblemType name="SpecialMethodCall:PrintStackTrace"/>
+  <PD_ProblemType name="SpecialMethodCall:java.util.Random"/>
+  <PD_ProblemType name="SpotBugs"/>
+  <PD_ProblemType name="XPathSearch:directoryBrowsingEnabled"/>
+  <PD_ProblemType name="XPathSearch:exceptionTypeJavaLangThrowableMissing"/>
+  <PD_ProblemType name="XPathSearch:sessionConfigMissing"/>
+  <PD_ProblemType name="XPathSearch:sessionConfigWOHttpOnlyAndSecureInCookieConfig"/>
+  <PD_ProblemType name="XPathSearch:sessionConfigWOTrackingModeCookieConfig"/>
+  <PD_ProblemType name="XPathSearch:sessionTimeout"/>
+  <PD_ProblemType name="XPathSearch:sessionTimeoutNotConfigured"/>
+  <PD_ProblemType name="XPathSearch:useHttpOnly"/>
+  <PD_ProblemType name="ci:CodeInclusion"/>
+  <PD_ProblemType name="ci:CodeInjection"/>
+  <PD_ProblemType name="ci:CommandInjection"/>
+  <PD_ProblemType name="ci:LDAPInjection"/>
+  <PD_ProblemType name="ci:LogInjection"/>
+  <PD_ProblemType name="ci:OSCommandInjection"/>
+  <PD_ProblemType name="ci:ReflectionInjection"/>
+  <PD_ProblemType name="ci:SQLInjection"/>
+  <PD_ProblemType name="ci:XPathInjection"/>
+  <PD_ProblemType name="com.rigsit.xanitizer.plugins.frameworks.freemarker.FreemarkerOnSpringMVCFrameworkAnalysis.ExposeRequestAttributesToFreemarker"/>
+  <PD_ProblemType name="com.rigsit.xanitizer.plugins.frameworks.gwt.GWTFrameworkAnalysis.UnusedRPCMethods"/>
+  <PD_ProblemType name="com.rigsit.xanitizer.plugins.languages.js.JavaScriptLanguagePlugin/jsTaint/BufferCallWithNoAssert"/>
+  <PD_ProblemType name="com.rigsit.xanitizer.plugins.languages.js.JavaScriptLanguagePlugin/jsTaint/BypassAngularSecurityMethods"/>
+  <PD_ProblemType name="com.rigsit.xanitizer.plugins.languages.js.JavaScriptLanguagePlugin/jsTaint/ClientSideXSS"/>
+  <PD_ProblemType name="com.rigsit.xanitizer.plugins.languages.js.JavaScriptLanguagePlugin/jsTaint/CommandInjection"/>
+  <PD_ProblemType name="com.rigsit.xanitizer.plugins.languages.js.JavaScriptLanguagePlugin/jsTaint/CommandInjectionSinks"/>
+  <PD_ProblemType name="com.rigsit.xanitizer.plugins.languages.js.JavaScriptLanguagePlugin/jsTaint/DisableMoustacheEscape"/>
+  <PD_ProblemType name="com.rigsit.xanitizer.plugins.languages.js.JavaScriptLanguagePlugin/jsTaint/NewBufferWithNumberArg"/>
+  <PD_ProblemType name="com.rigsit.xanitizer.plugins.languages.js.JavaScriptLanguagePlugin/jsTaint/NoMethodOverrideAfterCsrf"/>
+  <PD_ProblemType name="com.rigsit.xanitizer.plugins.languages.js.JavaScriptLanguagePlugin/jsTaint/ObjectInjection"/>
+  <PD_ProblemType name="com.rigsit.xanitizer.plugins.languages.js.JavaScriptLanguagePlugin/jsTaint/PathTraversal"/>
+  <PD_ProblemType name="com.rigsit.xanitizer.plugins.languages.js.JavaScriptLanguagePlugin/jsTaint/PossibleCrossSiteCheckCircumvention"/>
+  <PD_ProblemType name="com.rigsit.xanitizer.plugins.languages.js.JavaScriptLanguagePlugin/jsTaint/PseudoRandomBytes"/>
+  <PD_ProblemType name="com.rigsit.xanitizer.plugins.languages.js.JavaScriptLanguagePlugin/jsTaint/RegExpInjection"/>
+  <PD_ProblemType name="com.rigsit.xanitizer.plugins.languages.js.JavaScriptLanguagePlugin/jsTaint/RegExpUnsafe"/>
+  <PD_ProblemType name="com.rigsit.xanitizer.plugins.languages.js.JavaScriptLanguagePlugin/jsTaint/RequireNonLiteral"/>
+  <PD_ProblemType name="com.rigsit.xanitizer.plugins.languages.js.JavaScriptLanguagePlugin/jsTaint/SQLInjection"/>
+  <PD_ProblemType name="com.rigsit.xanitizer.plugins.languages.js.JavaScriptLanguagePlugin/jsTaint/StoredXSS"/>
+  <PD_ProblemType name="com.rigsit.xanitizer.plugins.languages.js.JavaScriptLanguagePlugin/jsTaint/TimingAttack"/>
+  <PD_ProblemType name="cook:HttpOnlyCookie"/>
+  <PD_ProblemType name="cook:UnsecuredCookie"/>
+  <PD_ProblemType name="hcc:Hard-CodedCredentials:CredentialsAsMethodParameter"/>
+  <PD_ProblemType name="hcc:Hard-CodedCredentials:CryptographicKeyAsMethodParameter"/>
+  <PD_ProblemType name="hcc:Hard-CodedCredentials:PasswordAsMethodParameter"/>
+  <PD_ProblemType name="id:InsecureDeserializationFromDb"/>
+  <PD_ProblemType name="id:InsecureDeserializationFromRequest"/>
+  <PD_ProblemType name="idor:InsecureDirectObjectReferences"/>
+  <PD_ProblemType name="internallyDefined:XMLChecker"/>
+  <PD_ProblemType name="pl:PrivacyLeak"/>
+  <PD_ProblemType name="protocolCheckProblemType:AES_BothEncryptionAndDecryption"/>
+  <PD_ProblemType name="protocolCheckProblemType:AES_Decryption"/>
+  <PD_ProblemType name="protocolCheckProblemType:AES_Encryption"/>
+  <PD_ProblemType name="protocolCheckProblemType:CryptographicHashing"/>
+  <PD_ProblemType name="protocolCheckProblemType:InitializationVectorConstruction"/>
+  <PD_ProblemType name="protocolCheckProblemType:OnlyAllowedCryptoAlgorithms"/>
+  <PD_ProblemType name="protocolCheckProblemType:OnlyAllowedHashAlgorithms"/>
+  <PD_ProblemType name="protocolCheckProblemType:PBE"/>
+  <PD_ProblemType name="protocolCheckProblemType:RSA_BothEncryptionAndDecryption"/>
+  <PD_ProblemType name="protocolCheckProblemType:RSA_Decryption"/>
+  <PD_ProblemType name="protocolCheckProblemType:RSA_Encryption"/>
+  <PD_ProblemType name="protocolCheckProblemType:SecureRandomNumberConstruction"/>
+  <PD_ProblemType name="protocolCheckProblemType:SecureRandomNumberGeneratorConstruction"/>
+  <PD_ProblemType name="protocolCheckProblemType:SecureXMLProcessing"/>
+  <PD_ProblemType name="protocolCheckProblemType:SignatureSigning"/>
+  <PD_ProblemType name="protocolCheckProblemType:SignatureVerifying"/>
+  <PD_ProblemType name="protocolCheckProblemType:XMLExternalDTDs"/>
+  <PD_ProblemType name="pt:PathTraversal"/>
+  <PD_ProblemType name="rhi:ResponseHeaderInjection"/>
+  <PD_ProblemType name="rl:IOStreamResourceLeak"/>
+  <PD_ProblemType name="rl:SocketResourceLeak"/>
+  <PD_ProblemType name="ssl:SpecialMethodCall:SSL/TLSValidation"/>
+  <PD_ProblemType name="ssl:SpecialMethodOverwriting:SSL/TLSValidation"/>
+  <PD_ProblemType name="tbv:TrustBoundaryViolationSession"/>
+  <PD_ProblemType name="ufdt:UploadofFilewithDangerousType"/>
+  <PD_ProblemType name="xss:URLRedirectAbuse"/>
+  <PD_ProblemType name="xss:XSSFromDb"/>
+  <PD_ProblemType name="xss:XSSFromDbUnrendered"/>
+  <PD_ProblemType name="xss:XSSFromRequest"/>
+  <PD_ProblemType name="xss:XSSFromRequestUnrendered"/>
+  <PD_ProblemType name="xxe:DisallowDoc"/>
+  <PD_ProblemType name="xxe:GeneralEntities"/>
+  <PD_ProblemType name="xxe:ParamEntities"/>
+    
+  
+  <!--    
+    Pattern-based definition of classes that are entirely excluded from the analysis (not even considered as library classes). This reduces the complete amount of classes to handle with and hence could save memory consumption of the tool. 
+    CAUTION: Be very careful with this feature. Many classes of the libraries and the project are required in some part of the analysis even if they are not belonging to the specified workspace. When in doubt, do not exclude a class entirely.
+    Sample usage:
+    <WS_ClassesToBeExcludedEntirely positivePattern="javax.swing.**" />
+      Attribute 'positivePattern': A name matching a positive pattern will be included, if it does not match a negative pattern.
+    The following wildcard characters are supported: 
+    ? means any single character
+    * means any sequence of characters not containing a path separator character like '.' or '/'
+    ** means any sequence of characters, also including path separators
+      Attribute 'negativePattern': A name matching a negative pattern will not be included, even if it does match a positive pattern.
+    The same wildcard characters as with positive pattern are supported
+  -->
+    
+  <WS_ClassesToBeExcludedEntirely positivePattern="com.sun.**"/>
+  <WS_ClassesToBeExcludedEntirely positivePattern="java.applet.**"/>
+  <WS_ClassesToBeExcludedEntirely positivePattern="java.awt.**"/>
+  <WS_ClassesToBeExcludedEntirely positivePattern="javafx.**"/>
+  <WS_ClassesToBeExcludedEntirely positivePattern="javax.swing.**"/>
+  <WS_ClassesToBeExcludedEntirely positivePattern="org.omg.**"/>
+  <WS_ClassesToBeExcludedEntirely positivePattern="sun.**"/>
+  <WS_ClassesToBeExcludedEntirely negativePattern="com.sun.faces.**"/>
+  <WS_ClassesToBeExcludedEntirely negativePattern="com.sun.net.ssl.**"/>
+  <WS_ClassesToBeExcludedEntirely negativePattern="java.awt.datatransfer.Transferable"/>
+  <WS_ClassesToBeExcludedEntirely negativePattern="sun.misc.JavaSecurityAccess"/>
+  <WS_ClassesToBeExcludedEntirely negativePattern="sun.misc.JavaSecurityProtectionDomainAccess"/>
+  <WS_ClassesToBeExcludedEntirely negativePattern="sun.misc.JavaSecurityProtectionDomainAccess$ProtectionDomainCache"/>
+  <WS_ClassesToBeExcludedEntirely negativePattern="sun.security.**"/>
+    
+  
+  <!--    
+    Search path elements define the entire scope of input data to be considered during a security analysis. This includes workspace, external libraries and various types of resources; there are different kinds of search paths, including Java class directories, Java source directories, and Java archives.
+    Sample usage:
+    <WS_SearchPathElement kind="JAVA_CLASS_DIR" path="WEB-INF/classes"/>
+    <WS_SearchPathElement kind="JAVA_JAR" path="WEB-INF/lib/axis-1.2.jar "/>
+      Attribute 'kind': Kind of a search path element.
+      Attribute 'path': Filesystem path of a search path element.
+  -->
+    
+  <WS_SearchPathElement kind="JavaScript/javascript base dir" path="."/>
+    
+  
+  <!--    
+    Resource patterns further tailor the set of workspace resource files which is basically determined by the configured search paths. 
+    Resource files are registered in the Xanitizer workspace if 
+      (a) the file is located directly in a search path of kind XML_DIR or EXTRA_RESOURCES_DIR and matches these patterns
+      (b) or some framework simulation automatically picks up a resource file anywhere from the file system, and it matches these patterns.
+    CAUTION: Be careful with the exclusion of jsp, ftl files and certain xml files as they are required by framework simulation due to case b.
+    *.java, *.class are usually always excluded as they are not treated as resources but separately as Java package code content.
+    Default settings:
+    <WS_Resources positivePattern="**" />
+    <WS_Resources negativePattern="**/*.java" />
+    <WS_Resources negativePattern="**/*.class" />
+    <WS_Resources negativePattern="**/*.png" />
+    <WS_Resources negativePattern="**/*.gif" />
+    <WS_Resources negativePattern="**/*.jpg" />
+      Attribute 'positivePattern': A name matching a positive pattern will be included, if it does not match a negative pattern.
+    The following wildcard characters are supported: 
+    ? means any single character
+    * means any sequence of characters not containing a path separator character like '.' or '/'
+    ** means any sequence of characters, also including path separators
+      Attribute 'negativePattern': A name matching a negative pattern will not be included, even if it does match a positive pattern.
+    The same wildcard characters as with positive pattern are supported
+  -->
+    
+  <WS_Resources positivePattern="**"/>
+  <WS_Resources negativePattern="${MAVEN_REPOSITORY}**"/>
+  <WS_Resources negativePattern="**.zip"/>
+  <WS_Resources negativePattern="**Xanitizer-Findings-List.xml"/>
+  <WS_Resources negativePattern="**sonar-project.properties"/>
+    
+  
+  <!--    
+    Some system libraries are implicitly used during an analysis; they are taken from the Xanitizer installation. If instead of this, the user wants to supply other instances of such system libraries, the implicitly used ones must be suppressed by use of this configuration element.
+    Default setting:
+    			<WS_SuppressedSystemLibrary>lib/jfxrt.jar</WS_SuppressedSystemLibrary>
+    			<WS_SuppressedSystemLibrary>lib/jfr.jar</WS_SuppressedSystemLibrary>
+  -->
+    
+  <WS_SuppressedSystemLibrary>lib/jfxrt.jar</WS_SuppressedSystemLibrary>
+  <WS_SuppressedSystemLibrary>lib/jfr.jar</WS_SuppressedSystemLibrary>
+    
+  
+  <!--    
+    Patterns for specifying all the frameworks which should be simulated in this analyis project.
+    Default settings:
+    <FR_FrameworksToBeAnalyzed positivePattern="**" />
+    <FR_FrameworksToBeAnalyzed negativePattern="Hibernate"/>
+      Attribute 'positivePattern': A name matching a positive pattern will be included, if it does not match a negative pattern.
+    The following wildcard characters are supported: 
+    ? means any single character
+    * means any sequence of characters not containing a path separator character like '.' or '/'
+    ** means any sequence of characters, also including path separators
+      Attribute 'negativePattern': A name matching a negative pattern will not be included, even if it does match a positive pattern.
+    The same wildcard characters as with positive pattern are supported
+  -->
+    
+  <FR_FrameworksToBeAnalyzed positivePattern="**"/>
+  <FR_FrameworksToBeAnalyzed negativePattern="BasicGenericFrameworkSupport"/>
+  <FR_FrameworksToBeAnalyzed negativePattern="Hibernate"/>
+</TaintAnalysis>

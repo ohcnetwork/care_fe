@@ -406,7 +406,7 @@ export const PatientHome = (props: any) => {
             </div>)}
             <div>
               <span className="font-semibold leading-relaxed">Disease Status: </span>
-              {patientData.disease_status}
+              <span className="badge badge-pill badge-danger">{patientData.disease_status}</span>
             </div>
           </div>
           {patientData.is_active &&
@@ -476,6 +476,14 @@ export const PatientHome = (props: any) => {
             <span className="font-semibold leading-relaxed">Address: </span>
             {patientData.address || '-'}
           </div>
+
+          { patientData.is_antenatal &&
+            <div>
+              <span className="font-semibold leading-relaxed"> Is pregnant </span>
+              {patientData.is_antenatal ? <span className="badge badge-pill badge-danger">Yes</span> :
+                  <span className="badge badge-pill badge-warning">No</span>}
+            </div>
+          }
           <div>
             <span className="font-semibold leading-relaxed">Contact with confirmed carrier: </span>
             {patientData.contact_with_confirmed_carrier ? <span className="badge badge-pill badge-warning">Yes</span> : <span className="badge badge-pill badge-secondary">No</span>}
@@ -488,10 +496,10 @@ export const PatientHome = (props: any) => {
             <span className="font-semibold leading-relaxed">Estimated contact date: </span>
             {moment(patientData.estimated_contact_date).format("LL")}
           </div>)}
-          <div className="md:col-span-2">
-            <span className="font-semibold leading-relaxed">Has SARI (Severe Acute Respiratory illness)?: </span>
-            {patientData.has_SARI ? <span className="badge badge-pill badge-warning">Yes</span> : <span className="badge badge-pill badge-secondary">No</span>}
-          </div>
+          {/*<div className="md:col-span-2">*/}
+          {/*  <span className="font-semibold leading-relaxed">Has SARI (Severe Acute Respiratory illness)?: </span>*/}
+          {/*  {patientData.has_SARI ? <span className="badge badge-pill badge-warning">Yes</span> : <span className="badge badge-pill badge-secondary">No</span>}*/}
+          {/*</div>*/}
           <div className="md:col-span-2">
             <span className="font-semibold leading-relaxed">Domestic/international Travel (within last 28 days): </span>
             {patientData.past_travel ? <span className="badge badge-pill badge-warning">Yes</span> : <span className="badge badge-pill badge-secondary">No</span>}
@@ -521,7 +529,7 @@ export const PatientHome = (props: any) => {
           </div>)}
         </div>
         <div className="flex mt-4">
-          <div className="flex-1 ml-2">
+          <div className="flex-1">
             <Button fullWidth
                     variant="contained"
                     color="primary"
@@ -533,7 +541,11 @@ export const PatientHome = (props: any) => {
               <DialogContent>
                 <DialogContentText>
                  Please enter your email id to receive the discharge summary.
-                  Disclaimer: This is an automatically Generated email using your info Captured in Care System
+                  Disclaimer: This is an automatically Generated email using your info Captured in Care System.
+                  <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
+                       role="alert">
+                    <strong className="block sm:inline font-bold">Please check your email id before continuing. We cannot deliver the email if the email id is invalid</strong>
+                  </div>
                 </DialogContentText>
                 <div className="flex justify-end">
                   <a href="#"

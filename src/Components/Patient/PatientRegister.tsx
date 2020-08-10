@@ -75,7 +75,7 @@ const initForm: any = {
   date_of_return: null,
   past_travel: false,
   countries_travelled: [],
-  has_SARI: false,
+  is_antenatal: "false",
   prescribed_medication: false,
   ongoing_medication: "",
   is_medical_worker: "false",
@@ -186,6 +186,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             blood_group: res.data.blood_group ? res.data.blood_group : '',
             local_body: res.data.local_body ? res.data.local_body : '',
             medical_history: [],
+            is_antenatal: res.data.is_antenatal ? res.data.is_antenatal : 'false',
             allergies: res.data.allergies ? res.data.allergies : '',
             pincode: res.data.pincode ? res.data.pincode : '',
             ongoing_medication: res.data.ongoing_medication ? res.data.ongoing_medication : '',
@@ -358,6 +359,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         pincode: state.form.pincode,
         gender: Number(state.form.gender),
         nationality: state.form.nationality,
+        is_antenatal: state.form.is_antenatal,
         passport_no: state.form.nationality !== "India" ? state.form.passport_no : undefined,
         state: state.form.nationality === "India" ? state.form.state : undefined,
         district: state.form.nationality === "India" ? state.form.district : undefined,
@@ -370,7 +372,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         past_travel: state.form.past_travel,
         countries_travelled: state.form.past_travel ? state.form.countries_travelled : [],
         date_of_return: state.form.past_travel ? state.form.date_of_return : undefined,
-        has_SARI: state.form.has_SARI,
         allergies: state.form.allergies,
         ongoing_medication: state.form.ongoing_medication,
         is_medical_worker: JSON.parse(state.form.is_medical_worker),
@@ -759,7 +760,35 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     errors={state.errors.blood_group}
                   />
                 </div>
+
+                {
+                  state.form.gender === '2' &&
+                <div>
+                  <InputLabel id="is_antenatal">Is antenatal ? </InputLabel>
+                  <RadioGroup
+                      aria-label="is_antenatal"
+                      name="is_antenatal"
+                      value={state.form.is_antenatal}
+                      onChange={handleChange}
+                      style={{padding: "0px 5px"}}
+                  >
+                    <Box display="flex" flexDirection="row">
+                      <FormControlLabel
+                          value="true"
+                          control={<Radio/>}
+                          label="Yes"
+                      />
+                      <FormControlLabel
+                          value="false"
+                          control={<Radio/>}
+                          label="No"
+                      />
+                    </Box>
+                  </RadioGroup>
+                </div>
+                }
               </div>
+
 
               <div className="grid gap-4 grid-cols-1 md:grid-cols-2 mt-4">
                 <div>
@@ -865,14 +894,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               </div>
 
               <div className="grid gap-4 grid-cols-1 md:grid-cols-2 mt-4">
-                <div className="md:col-span-2">
-                  <CheckboxField
-                    checked={state.form.has_SARI}
-                    onChange={handleCheckboxFieldChange}
-                    name="has_SARI"
-                    label="Does the person have SARI (Severe Acute Respiratory illness)?"
-                  />
-                </div>
 
                 <div className="md:col-span-2">
                   <InputLabel id="med-history-label">

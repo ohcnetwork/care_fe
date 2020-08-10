@@ -57,6 +57,9 @@ export interface ConsultationModel {
   prescribed_medication?: string;
   referred_to?: number | null;
   suggestion?: string;
+  ip_no?: string;
+  diagnosis?: string;
+  verified_by?:string;
   suggestion_text?: string;
   symptoms?: Array<number>;
   symptoms_text?: string;

@@ -7,7 +7,11 @@ export interface OptionsType {
 }
 
 export const USER_TYPES: Array<String> = [
+    "Pharmacist",
+    "Volunteer",
   "Staff",
+    "Doctor",
+    "Reserved",
   "DistrictLabAdmin",
   "DistrictAdmin",
   "StateLabAdmin",

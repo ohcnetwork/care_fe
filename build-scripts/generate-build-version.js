@@ -17,10 +17,8 @@ fs.writeFile(
   { flag: 'w+', encoding: 'utf8' },
   err => {
     if (err) {
-      console.log('An error occured while writing JSON Object to meta.json');
       return console.log(err);
     }
-    console.log('build-meta.json file has been saved with latest version number');
     return null;
   }
 );

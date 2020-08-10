@@ -274,7 +274,7 @@ export const ConsultationDetails = (props: any) => {
         <div className="grid gap-2 grid-cols-1 md:grid-cols-2 mt-2">
           <div className="md:col-span-2">
             <span className="font-semibold leading-relaxed">Category: </span>
-            {consultationData.category || "-"}
+            <span className="badge badge-pill badge-warning"> {consultationData.category || "-"}</span>
           </div>
           <div>
             <span className="font-semibold leading-relaxed">Updated on: </span>
@@ -292,7 +292,7 @@ export const ConsultationDetails = (props: any) => {
                 <span className="font-semibold leading-relaxed">
                   Admitted To:{" "}
                 </span>
-                {consultationData.admitted_to || "-"}
+                <span className="badge badge-pill badge-warning"> {consultationData.admitted_to || "-"}</span>
               </div>
               <div>
                 <span className="font-semibold leading-relaxed">
@@ -334,6 +334,32 @@ export const ConsultationDetails = (props: any) => {
               {consultationData.other_symptoms}
             </div>
           )}
+          { consultationData.ip_no && (
+              <div className="md:col-span-2 capitalize">
+              <span className="font-semibold leading-relaxed">
+                IP number:{" "}
+              </span>
+                <span className="badge badge-pill badge-primary">{consultationData.ip_no}</span>
+              </div>
+          )}
+          { consultationData.diagnosis && (
+              <div className="md:col-span-2 capitalize">
+              <span className="font-semibold leading-relaxed">
+                Diagnosis:{" "}
+              </span>
+                {consultationData.diagnosis}
+              </div>
+          )}
+          { consultationData.verified_by && (
+              <div className="md:col-span-2 capitalize">
+              <span className="font-semibold leading-relaxed">
+                Verified By :{" "}
+              </span>
+                <span className="badge badge-pill badge-primary">{consultationData.verified_by}</span>
+              </div>
+          )}
+
+
         </div>
       </div>
       {consultationData.existing_medication &&

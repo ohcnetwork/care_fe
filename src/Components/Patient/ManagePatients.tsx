@@ -45,13 +45,6 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
-function a11yProps(index: any) {
-  return {
-    id: `full-width-tab-${index}`,
-    'aria-controls': `full-width-tabpanel-${index}`,
-  };
-}
-
 const useStylesTab = makeStyles((theme: Theme) => ({
   root: {
     flexGrow: 1,
@@ -92,7 +85,6 @@ export const PatientManager = (props: any) => {
   const tabValue = qParams.is_active === 'False' ? 1 : 0;
 
   let managePatients: any = null;
-  console.log('new render : ', qParams,tabValue);
   const handleDownload = async () => {
     const res = await dispatch(downloadPatients());
     setDownloadFile(res.data);
@@ -101,9 +93,9 @@ export const PatientManager = (props: any) => {
 
   useEffect(() => {
     setIsLoading(true);
-    const offset = (qParams.page ? qParams.page - 1 : 0) * RESULT_LIMIT;
     const params = Object.assign({
-      offset,
+      facility: facilityId,
+      offset: (qParams.page ? qParams.page - 1 : 0) * RESULT_LIMIT
     }, qParams);
 
     dispatch(searchPatientFilter(params))
@@ -116,7 +108,7 @@ export const PatientManager = (props: any) => {
       }).catch((ex: any) => {
         setIsLoading(false);
       })
-  }, [qParams, dispatch]);
+  }, [qParams, dispatch, facilityId]);
  
   const updateQuery = (params:any) => {
     const nParams = Object.assign({}, qParams, params); 
@@ -130,15 +122,6 @@ export const PatientManager = (props: any) => {
       page: 1,
       name: '',
       disease_status:'',
-      phone_number: ''
-    });
-  };
-
-  const handleTabIndexChange = (tab: number) => { 
-    updateQuery({
-      is_active: tab === 0 ? 'True' : 'False',
-      page: 1,
-      name: '',
       phone_number: ''
     });
   };
@@ -189,6 +172,14 @@ export const PatientManager = (props: any) => {
                         </span>
                       )}
                     </div>
+                    {
+                      patient.is_antenatal && patient.is_active &&
+                    <div>
+                          <span className="badge badge-pill badge-danger mr-2">
+                          Pregnant Patient
+                        </span>
+                    </div>
+                    }
                     <div>
                       {patient.allow_transfer && (
                         <span className="badge badge-pill badge-primary mr-2">
@@ -335,7 +326,11 @@ export const PatientManager = (props: any) => {
           <div className="mt-2">
             <button
               type="button"
-              className="inline-flex items-center mt-1 md:mt-0 lg:mt-0 px-1 py-2 ml-1  lg:px-3 border border-green-500 text-sm leading-4 font-medium rounded-md text-green-700 bg-white hover:text-green-500 focus:outline-none focus:border-green-300 focus:shadow-outline-blue active:text-green-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+              className="inline-flex items-center mt-1 md:mt-0 lg:mt-0 px-1 py-2 ml-1  lg:px-3 border border-green-500
+               text-sm leading-4 font-medium rounded-md text-green-700 bg-white hover:text-green-500
+               focus:outline-none focus:border-green-300 focus:shadow-outline-blue active:text-green-800
+               active:bg-gray-50 transition
+               ease-in-out duration-150 hover:shadow"
               onClick={handleDownload}
             >
               Download Patient List
@@ -357,19 +352,6 @@ export const PatientManager = (props: any) => {
           options={[{value:0, label:"Live"}, {value:1, label:"Discharged"}]}
           active={tabValue}
         />
-        {/* <AppBar position="static" color="default">
-          <Tabs
-            value={tabValue}
-            onChange={handleTabChange}
-            indicatorColor="primary"
-            textColor="primary"
-            variant="fullWidth"
-            aria-label="full width tabs example"
-          >
-            <Tab label="Live" {...a11yProps(0)} />
-            <Tab label="Discharged" {...a11yProps(1)} />
-          </Tabs>
-        </AppBar> */}
         <SwipeableViews
           axis={theme.direction === 'rtl' ? 'x-reverse' : 'x'}
           index={tabValue}

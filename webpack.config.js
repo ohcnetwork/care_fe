@@ -8,6 +8,23 @@ const WorkboxPlugin = require("workbox-webpack-plugin");
 const MomentLocalesPlugin = require('moment-locales-webpack-plugin');
 const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const safePostCssParser = require('postcss-safe-parser');
+
+
+const prodPlugins = (isDev) => {
+  if (isDev) {
+    return [];
+  }
+
+  return [
+    new WorkboxPlugin.GenerateSW({
+      clientsClaim: true,
+      skipWaiting: true,
+      maximumFileSizeToCacheInBytes: 7340032,
+      exclude: ['build-meta.json', /\.map$/]
+    })
+  ]
+}
+
 module.exports = (env, argv) => {
   const mode = argv.mode || "development";
   const isDev = mode !== "production";
@@ -28,7 +45,7 @@ module.exports = (env, argv) => {
     },
     optimization: {
       moduleIds: "hashed",
-      splitChunks: {
+      splitChunks: isDev? false : {
         cacheGroups: {
           commons: {
             test: /[\\/]node_modules[\\/]/,
@@ -41,7 +58,7 @@ module.exports = (env, argv) => {
         name: entrypoint => `runtime-${entrypoint.name}`,
       },
     },
-    devtool: isDev ? "source-map" : "none",
+    devtool: isDev ? "eval-cheap-module-source-map" : "none",
     mode,
     resolve: {
       extensions: [".js", ".jsx", ".json", ".ts", ".tsx", ".manifest"],
@@ -64,6 +81,10 @@ module.exports = (env, argv) => {
       rules: [
         {
           test: /\.(ts|tsx)$/,
+          include: [
+            path.resolve(__dirname, 'src'),
+            path.resolve(__dirname, 'node_modules/@coronasafe')
+          ],
           loader: "ts-loader",
         },
         {
@@ -121,7 +142,7 @@ module.exports = (env, argv) => {
       new HtmlWebpackPlugin({
         template: path.resolve(__dirname, "src", "index.html"),
         title: "Coronasafe Care",
-        minify: {
+        minify: isDev ? false : {
           removeComments: true,
           collapseWhitespace: true,
           removeRedundantAttributes: true,
@@ -151,12 +172,7 @@ module.exports = (env, argv) => {
           ? "css/[name][hash].bundle.css"
           : "css/[name][hash].prod.bundle.css",
       }),
-      new WorkboxPlugin.GenerateSW({
-        clientsClaim: true,
-        skipWaiting: true,
-        maximumFileSizeToCacheInBytes: 4194304,
-        exclude: ['build-meta.json', /\.map$/]
-      })
+      ...prodPlugins(isDev)
     ],
     performance: false,
   };
