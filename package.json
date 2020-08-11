@@ -82,7 +82,7 @@
     "react-scripts": "^3.4.1",
     "react-swipeable-views": "^0.13.9",
     "react-transition-group": "^4.4.1",
-    "react-virtualized": "^9.22.0",
+    "react-virtualized": "^9.22.2",
     "reason-react": "^0.9.1",
     "redux": "^4.0.5",
     "redux-thunk": "^2.3.0",
