@@ -1,6 +1,7 @@
 import React, {useCallback, useState} from "react";
 import {Loading} from "../Common/Loading";
-import PageTitle from "../Common/PageTitle";
+import loadable from '@loadable/component';
+const PageTitle = loadable( () => import("../Common/PageTitle"));
 import ListFilter from "./ListFilter";
 import {useDispatch} from "react-redux";
 import {statusType, useAbortableEffect} from "../../Common/utils";

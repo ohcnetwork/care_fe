@@ -1,5 +1,6 @@
 import React, { useReducer, useState, useCallback } from "react";
-import PageTitle from "../Common/PageTitle";
+import loadable from '@loadable/component';
+const PageTitle = loadable( () => import("../Common/PageTitle"));
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { TextInputField, MultilineInputField, ErrorHelperText } from "../Common/HelperInputFields";
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';

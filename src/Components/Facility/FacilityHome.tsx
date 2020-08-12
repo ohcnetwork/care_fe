@@ -2,6 +2,7 @@ import { Button, Card, CardContent, Grid, Typography } from "@material-ui/core";
 import { navigate } from "hookrouter";
 import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
+import loadable from '@loadable/component';
 import { BED_TYPES, DOCTOR_SPECIALIZATION } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
@@ -12,7 +13,7 @@ import {
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { Loading } from "../Common/Loading";
-import PageTitle from "../Common/PageTitle";
+const PageTitle = loadable( () => import("../Common/PageTitle"));
 import BedTypeCard from "./BedTypeCard";
 import DoctorsCountCard from "./DoctorsCountCard";
 import { CapacityModal, DoctorModal, FacilityModel, PatientStatsModel } from "./models";
@@ -276,7 +277,7 @@ export const FacilityHome = (props: any) => {
                       Advised Home Quarantine
                     </th>
                     <th className="border px-4 py-2">Suspects Isolated</th>
-                    <th className="border px-4 py-2">Reffered</th>
+                    <th className="border px-4 py-2">Referred</th>
                     <th className="border px-4 py-2">Actions</th>
                   </tr>
                 </thead>

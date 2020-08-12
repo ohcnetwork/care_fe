@@ -4,8 +4,9 @@ import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { Loading } from "../Common/Loading";
+import loadable from '@loadable/component';
 import { getTestSample } from "../../Redux/actions";
-import PageTitle from "../Common/PageTitle";
+const PageTitle = loadable( () => import("../Common/PageTitle"));
 import { FlowModel, SampleTestModel } from "./models";
 
 interface SampleDetailsProps {

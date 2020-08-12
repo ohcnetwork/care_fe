@@ -1,4 +1,5 @@
 import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
+import loadable from '@loadable/component';
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import React, { useCallback, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -7,7 +8,7 @@ import { getItemName, updateMinQuantity } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { TextInputField } from "../Common/HelperInputFields";
 import { Loading } from "../Common/Loading";
-import PageTitle from "../Common/PageTitle";
+const PageTitle = loadable( () => import("../Common/PageTitle"));
 
 const initForm = {
     id: "",

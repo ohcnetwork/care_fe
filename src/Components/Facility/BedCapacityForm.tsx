@@ -1,6 +1,7 @@
 import { Button, Card, CardActions, CardContent, InputLabel } from "@material-ui/core";
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import { navigate } from "hookrouter";
+import loadable from '@loadable/component';
 import React, { useCallback, useEffect, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
 import { BED_TYPES } from "../../Common/constants";
@@ -9,7 +10,7 @@ import { Loading } from "../../Components/Common/Loading";
 import { createCapacity, getCapacity, listCapacity } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { ErrorHelperText, NativeSelectField, TextInputField } from "../Common/HelperInputFields";
-import PageTitle from "../Common/PageTitle";
+const PageTitle = loadable( () => import("../Common/PageTitle"));
 import { CapacityModal, OptionsType } from "./models";
 
 interface BedCapacityProps extends CapacityModal {

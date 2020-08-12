@@ -5,6 +5,7 @@ import moment from "moment";
 import React, { useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { GENDER_TYPES } from "../../Common/constants";
+import loadable from '@loadable/component';
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   getConsultationList,
@@ -18,7 +19,7 @@ import {
 import * as Notification from "../../Utils/Notifications";
 import AlertDialog from "../Common/AlertDialog";
 import { Loading } from "../Common/Loading";
-import PageTitle from "../Common/PageTitle";
+const PageTitle = loadable( () => import("../Common/PageTitle"));
 import Pagination from "../Common/Pagination";
 import { ConsultationCard } from "../Facility/ConsultationCard";
 import { ConsultationModel } from "../Facility/models";

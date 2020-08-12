@@ -1,6 +1,7 @@
 import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { navigate } from "hookrouter";
+import loadable from '@loadable/component';
 import React, { useReducer, useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { SAMPLE_TYPE_CHOICES, ICMR_CATEGORY } from "../../Common/constants";
@@ -14,7 +15,7 @@ import {
   TextInputField,
 } from "../Common/HelperInputFields";
 import { Loading } from "../Common/Loading";
-import PageTitle from "../Common/PageTitle";
+const PageTitle = loadable( () => import("../Common/PageTitle"));
 import { SampleTestModel, FacilityNameModel } from "./models";
 import Typography from "@material-ui/core/Typography";
 import Container from "@material-ui/core/Container";

@@ -1,4 +1,5 @@
 import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
+import loadable from '@loadable/component';
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import moment from 'moment';
 import React, { useCallback, useReducer, useState } from "react";
@@ -8,7 +9,7 @@ import { createTriageForm, getTriageDetails } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { DateInputField, TextInputField } from "../Common/HelperInputFields";
 import { Loading } from "../Common/Loading";
-import PageTitle from "../Common/PageTitle";
+const PageTitle = loadable( () => import("../Common/PageTitle"));
 import { PatientStatsModel } from "./models";
 
 interface triageFormProps extends PatientStatsModel {

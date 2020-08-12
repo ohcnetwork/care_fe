@@ -1,5 +1,6 @@
-import React, { useState, useCallback } from 'react'
-import PageTitle from '../Common/PageTitle'
+import React, { useState, useCallback } from 'react';
+import loadable from '@loadable/component';
+const PageTitle = loadable( () => import("../Common/PageTitle"));
 import { Loading } from "../Common/Loading";
 import { useDispatch } from "react-redux";
 import { getInventoryLog } from '../../Redux/actions';

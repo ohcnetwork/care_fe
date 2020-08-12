@@ -35,8 +35,9 @@ import {
   SelectField,
   TextInputField,
 } from "../Common/HelperInputFields";
+import loadable from '@loadable/component';
 import { Loading } from "../Common/Loading";
-import PageTitle from "../Common/PageTitle";
+const PageTitle = loadable( () => import("../Common/PageTitle"));
 import { FacilityModel } from "./models";
 import { navigate } from "hookrouter";
 

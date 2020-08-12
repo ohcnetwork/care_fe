@@ -10,13 +10,14 @@ import {
   downloadFacilityDoctors,
   downloadFacilityTriage,
 } from "../../Redux/actions";
+import loadable from '@loadable/component';
 import { SelectField } from "../Common/HelperInputFields";
 import { InputLabel } from "@material-ui/core";
 import { Loading } from "../Common/Loading";
 import Pagination from "../Common/Pagination";
 import { FacilityModel } from "./models";
 import { InputSearchBox } from "../Common/SearchBox";
-import PageTitle from "../Common/PageTitle";
+const PageTitle = loadable( () => import("../Common/PageTitle"));
 import { CSVLink } from "react-csv";
 import moment from "moment";
 import { Theme, createStyles, makeStyles } from "@material-ui/core/styles";

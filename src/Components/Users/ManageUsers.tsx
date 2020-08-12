@@ -1,9 +1,10 @@
 import React, { useCallback, useState } from "react";
+import loadable from '@loadable/component';
 import { useDispatch, useSelector } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getUserList, searchUser } from "../../Redux/actions";
 import { Loading } from "../Common/Loading";
-import PageTitle from "../Common/PageTitle";
+const PageTitle = loadable( () => import("../Common/PageTitle"));
 import Pagination from "../Common/Pagination";
 import { navigate } from "hookrouter";
 import { USER_TYPES } from "../../Common/constants";
