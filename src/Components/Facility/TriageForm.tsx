@@ -208,7 +208,7 @@ export const TriageForm = (props: triageFormProps) => {
                 />
               </div>
               <div>
-                <InputLabel id="num-patients-isolation-label">Patients in Isolation</InputLabel>
+                <InputLabel id="num-patients-isolation-label">Suspected Isolated</InputLabel>
                 <TextInputField
                   name="num_patients_isolation"
                   variant="outlined"
