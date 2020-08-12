@@ -7,7 +7,7 @@ import { useDispatch } from "react-redux";
 import { CURRENT_HEALTH_CHANGE, PATIENT_CATEGORY, SYMPTOM_CHOICES } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getConsultationDailyRoundsDetails } from "../../Redux/actions";
-import { Loading } from "../Common/Loading";
+const Loading = loadable( () => import("../Common/Loading"));
 const PageTitle = loadable( () => import("../Common/PageTitle"));
 import { DailyRoundsModel } from "./models";
 

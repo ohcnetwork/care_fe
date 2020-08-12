@@ -7,7 +7,7 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getItems, postInventory } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { SelectField, TextInputField } from "../Common/HelperInputFields";
-import { Loading } from "../Common/Loading";
+const Loading = loadable( () => import("../Common/Loading"));
 import { InventoryItemsModel } from "./models";
 const PageTitle = loadable( () => import("../Common/PageTitle"));
 

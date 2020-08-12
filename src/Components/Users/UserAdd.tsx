@@ -13,7 +13,7 @@ import { addUser, getDistrictByState, getLocalbodyByDistrict, getStates } from "
 import * as Notification from "../../Utils/Notifications.js";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { DateInputField, PhoneNumberField, SelectField, TextInputField } from "../Common/HelperInputFields";
-import { Loading } from "../Common/Loading";
+const Loading = loadable( () => import("../Common/Loading"));
 const PageTitle = loadable( () => import("../Common/PageTitle"));
 import { FacilityModel } from "../Facility/models";
 

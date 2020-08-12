@@ -12,7 +12,7 @@ import {
   listDoctor
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import { Loading } from "../Common/Loading";
+const Loading = loadable( () => import("../Common/Loading"));
 const PageTitle = loadable( () => import("../Common/PageTitle"));
 import BedTypeCard from "./BedTypeCard";
 import DoctorsCountCard from "./DoctorsCountCard";

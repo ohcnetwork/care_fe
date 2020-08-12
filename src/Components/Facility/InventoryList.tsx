@@ -4,7 +4,7 @@ const PageTitle = loadable( () => import("../Common/PageTitle"));
 import { Button } from "@material-ui/core";
 import { navigate } from "hookrouter";
 import { useDispatch } from "react-redux";
-import { Loading } from "../Common/Loading";
+const Loading = loadable( () => import("../Common/Loading"));
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getInventorySummary } from '../../Redux/actions';
 import Pagination from "../Common/Pagination";

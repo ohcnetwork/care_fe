@@ -8,7 +8,7 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 import { createTriageForm, getTriageDetails } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { DateInputField, TextInputField } from "../Common/HelperInputFields";
-import { Loading } from "../Common/Loading";
+const Loading = loadable( () => import("../Common/Loading"));
 const PageTitle = loadable( () => import("../Common/PageTitle"));
 import { PatientStatsModel } from "./models";
 

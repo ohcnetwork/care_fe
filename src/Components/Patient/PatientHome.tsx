@@ -18,7 +18,7 @@ import {
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
 import AlertDialog from "../Common/AlertDialog";
-import { Loading } from "../Common/Loading";
+const Loading = loadable( () => import("../Common/Loading"));
 const PageTitle = loadable( () => import("../Common/PageTitle"));
 import Pagination from "../Common/Pagination";
 import { ConsultationCard } from "../Facility/ConsultationCard";

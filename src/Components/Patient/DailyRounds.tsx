@@ -8,8 +8,7 @@ import { CURRENT_HEALTH_CHANGE, PATIENT_CATEGORY, SYMPTOM_CHOICES } from "../../
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { createDailyReport, getConsultationDailyRoundsDetails, updateDailyReport } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
-import { CheckboxField, DateTimeFiled, ErrorHelperText, MultilineInputField, MultiSelectField, SelectField, TextInputField } from "../Common/HelperInputFields";
-import { Loading } from "../Common/Loading";
+const Loading = loadable( () => import("../Common/Loading"));
 const PageTitle = loadable( () => import("../Common/PageTitle"));
 
 const initForm: any = {

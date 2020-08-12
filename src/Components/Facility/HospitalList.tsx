@@ -13,7 +13,7 @@ import {
 import loadable from '@loadable/component';
 import { SelectField } from "../Common/HelperInputFields";
 import { InputLabel } from "@material-ui/core";
-import { Loading } from "../Common/Loading";
+const Loading = loadable( () => import("../Common/Loading"));
 import Pagination from "../Common/Pagination";
 import { FacilityModel } from "./models";
 import { InputSearchBox } from "../Common/SearchBox";

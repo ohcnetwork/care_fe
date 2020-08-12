@@ -4,7 +4,7 @@ const PageTitle = loadable( () => import("../Common/PageTitle"));
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { TextInputField, MultilineInputField, ErrorHelperText } from "../Common/HelperInputFields";
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
-import { Loading } from "../Common/Loading";
+const Loading = loadable( () => import("../Common/Loading"));
 import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
 import {navigate} from "hookrouter";

@@ -1,10 +1,10 @@
 import { Card, CardContent } from "@material-ui/core";
 import moment from "moment";
+import loadable from '@loadable/component';
 import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { Loading } from "../Common/Loading";
-import loadable from '@loadable/component';
+const Loading = loadable( () => import("../Common/Loading"));
 import { getTestSample } from "../../Redux/actions";
 const PageTitle = loadable( () => import("../Common/PageTitle"));
 import { FlowModel, SampleTestModel } from "./models";

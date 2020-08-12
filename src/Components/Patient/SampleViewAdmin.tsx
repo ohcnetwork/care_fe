@@ -10,7 +10,7 @@ import { SAMPLE_TEST_STATUS, ROLE_STATUS_MAP, SAMPLE_FLOW_RULES } from "../../Co
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getTestList, patchSample, sampleSearch } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
-import { Loading } from "../Common/Loading";
+const Loading = loadable( () => import("../Common/Loading"));
 const PageTitle = loadable( () => import("../Common/PageTitle"));
 import Pagination from "../Common/Pagination";
 import { SampleTestModel } from "./models";

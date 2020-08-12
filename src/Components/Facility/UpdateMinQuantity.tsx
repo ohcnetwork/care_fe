@@ -7,7 +7,7 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getItemName, updateMinQuantity } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { TextInputField } from "../Common/HelperInputFields";
-import { Loading } from "../Common/Loading";
+const Loading = loadable( () => import("../Common/Loading"));
 const PageTitle = loadable( () => import("../Common/PageTitle"));
 
 const initForm = {

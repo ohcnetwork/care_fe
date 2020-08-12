@@ -14,7 +14,7 @@ import { validateLocationCoordinates, phonePreg } from "../../Common/validation"
 import { createFacility, getDistrictByState, getFacility, getLocalbodyByDistrict, getStates, updateFacility } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { MultilineInputField, PhoneNumberField, SelectField, TextInputField } from "../Common/HelperInputFields";
-import { Loading } from "../Common/Loading";
+const Loading = loadable( () => import("../Common/Loading"));
 import { LocationSearchAndPick } from "../Common/LocationSearchAndPick";
 const PageTitle = loadable( () => import("../Common/PageTitle"));
 

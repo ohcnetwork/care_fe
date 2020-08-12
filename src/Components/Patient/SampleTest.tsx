@@ -14,7 +14,7 @@ import {
   SelectField,
   TextInputField,
 } from "../Common/HelperInputFields";
-import { Loading } from "../Common/Loading";
+const Loading = loadable( () => import("../Common/Loading"));
 const PageTitle = loadable( () => import("../Common/PageTitle"));
 import { SampleTestModel, FacilityNameModel } from "./models";
 import Typography from "@material-ui/core/Typography";

@@ -14,7 +14,7 @@ import { createPatient, getDistrictByState, getLocalbodyByDistrict, getPatient, 
 import * as Notification from "../../Utils/Notifications.js";
 import AlertDialog from "../Common/AlertDialog";
 import { AutoCompleteMultiField, CheckboxField, DateInputField, MultilineInputField, PhoneNumberField, SelectField, TextInputField } from "../Common/HelperInputFields";
-import { Loading } from "../Common/Loading";
+const Loading = loadable( () => import("../Common/Loading"));
 const PageTitle = loadable( () => import("../Common/PageTitle"));
 import DuplicatePatientDialog from "../Facility/DuplicatePatientDialog";
 import { DupPatientModel } from "../Facility/models";

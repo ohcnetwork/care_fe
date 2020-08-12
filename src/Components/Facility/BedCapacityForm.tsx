@@ -6,7 +6,7 @@ import React, { useCallback, useEffect, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
 import { BED_TYPES } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { Loading } from "../../Components/Common/Loading";
+const Loading = loadable( () => import("../../Components/Common/Loading"));
 import { createCapacity, getCapacity, listCapacity } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { ErrorHelperText, NativeSelectField, TextInputField } from "../Common/HelperInputFields";

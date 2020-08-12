@@ -6,7 +6,7 @@ import loadable from '@loadable/component';
 import React, {  useState, useEffect } from "react";
 import { useDispatch } from "react-redux"; 
 import { downloadPatients, searchPatientFilter } from "../../Redux/actions";
-import { Loading } from "../Common/Loading";
+const Loading = loadable( () => import("../Common/Loading"));
 const PageTitle = loadable( () => import("../Common/PageTitle"));
 import Pagination from "../Common/Pagination";
 import { PatientFilter } from "./PatientFilter";
