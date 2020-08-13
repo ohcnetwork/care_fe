@@ -81,7 +81,7 @@
     "react-leaflet-location-picker": "^1.4.2",
     "react-phone-input-2": "^2.13.7",
     "react-redux": "^7.2.1",
-    "react-scripts": "^3.4.1",
+    "react-scripts": "^3.4.3",
     "react-swipeable-views": "^0.13.9",
     "react-transition-group": "^4.4.1",
     "react-virtualized": "^9.22.0",
