@@ -23,6 +23,7 @@ const initForm: any = {
   num_patients_home_quarantine: "",
   num_patients_isolation: "",
   num_patient_referred: "",
+  num_patient_confirmed_positive: ""
 };
 
 const initialState = {
@@ -77,6 +78,7 @@ export const TriageForm = (props: triageFormProps) => {
               num_patients_home_quarantine: res.data.num_patients_home_quarantine,
               num_patients_isolation: res.data.num_patients_isolation,
               num_patient_referred: res.data.num_patient_referred,
+              num_patient_confirmed_positive: res.data.num_patient_confirmed_positive
             }
           });
         }
@@ -127,6 +129,7 @@ export const TriageForm = (props: triageFormProps) => {
         num_patients_home_quarantine: Number(state.form.num_patients_home_quarantine),
         num_patients_isolation: Number(state.form.num_patients_isolation),
         num_patient_referred: Number(state.form.num_patient_referred),
+        num_patient_confirmed_positive: Number(state.form.num_patient_confirmed_positive)
       };
 
       const res = await dispatchAction(createTriageForm(data, { facilityId }));
@@ -231,6 +234,19 @@ export const TriageForm = (props: triageFormProps) => {
                   value={state.form.num_patient_referred}
                   onChange={handleChange}
                   errors={state.errors.num_patient_referred}
+                />
+              </div>
+              <div>
+                <InputLabel id="num-patient-referred-label">Confirmed Positive</InputLabel>
+                <TextInputField
+                    name="num_patient_confirmed_positive"
+                    variant="outlined"
+                    margin="dense"
+                    type="number"
+                    InputLabelProps={{ shrink: !!state.form.num_patient_confirmed_positive }}
+                    value={state.form.num_patient_confirmed_positive}
+                    onChange={handleChange}
+                    errors={state.errors.num_patient_confirmed_positive}
                 />
               </div>
             </div>

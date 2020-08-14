@@ -74,6 +74,7 @@ export interface PatientStatsModel {
   num_patients_isolation?: number;
   num_patient_referred?: number;
   entry_date?: number;
+  num_patient_confirmed_positive?: number;
 }
 
 export interface DupPatientModel {
