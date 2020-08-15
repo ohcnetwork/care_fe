@@ -6,13 +6,13 @@ import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getConsultation, getDailyReport } from "../../Redux/actions";
-import { Loading } from "../Common/Loading";
-import PageTitle from "../Common/PageTitle";
+import loadable from '@loadable/component';
 import Pagination from "../Common/Pagination";
 import { ConsultationModel } from "./models";
 import { DailyRoundsModel } from "../Patient/models";
 import { PATIENT_CATEGORY, SYMPTOM_CHOICES } from "../../Common/constants";
-
+const Loading = loadable( () => import("../Common/Loading"));
+const PageTitle = loadable( () => import("../Common/PageTitle"));
 const symptomChoices = [...SYMPTOM_CHOICES];
 const patientCategoryChoices = [...PATIENT_CATEGORY];
 

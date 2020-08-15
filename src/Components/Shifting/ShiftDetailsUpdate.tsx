@@ -1,9 +1,10 @@
 import React, { useReducer, useState, useCallback } from "react";
-import PageTitle from "../Common/PageTitle";
+import loadable from '@loadable/component';
+const PageTitle = loadable( () => import("../Common/PageTitle"));
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { TextInputField, MultilineInputField, ErrorHelperText } from "../Common/HelperInputFields";
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
-import { Loading } from "../Common/Loading";
+const Loading = loadable( () => import("../Common/Loading"));
 import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
 import {navigate} from "hookrouter";

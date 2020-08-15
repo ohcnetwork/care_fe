@@ -1,7 +1,7 @@
 import React from 'react';
 import { Grid } from "@material-ui/core";
 const img = 'https://cdn.coronasafe.network/break-chain.webp';
-export const Loading = () => {
+const Loading = () => {
     return (
         <Grid container>
             <Grid item xs={12} sm={12} md={12} lg={12} style={{ display: 'flex' }}>
@@ -16,3 +16,4 @@ export const Loading = () => {
         </Grid>
     )
 };
+export default Loading;

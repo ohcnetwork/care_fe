@@ -2,6 +2,7 @@ import { Button, Card, CardContent, Grid, Typography } from "@material-ui/core";
 import { navigate } from "hookrouter";
 import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
+import loadable from '@loadable/component';
 import { BED_TYPES, DOCTOR_SPECIALIZATION } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
@@ -11,8 +12,8 @@ import {
   listDoctor
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import { Loading } from "../Common/Loading";
-import PageTitle from "../Common/PageTitle";
+const Loading = loadable( () => import("../Common/Loading"));
+const PageTitle = loadable( () => import("../Common/PageTitle"));
 import BedTypeCard from "./BedTypeCard";
 import DoctorsCountCard from "./DoctorsCountCard";
 import { CapacityModal, DoctorModal, FacilityModel, PatientStatsModel } from "./models";

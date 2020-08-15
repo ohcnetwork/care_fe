@@ -1,9 +1,10 @@
 import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
+import loadable from '@loadable/component';
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getMinQuantity } from "../../Redux/actions";
-import { Loading } from "../Common/Loading";
-import PageTitle from "../Common/PageTitle";
+const Loading = loadable( () => import("../Common/Loading"));
+const PageTitle = loadable( () => import("../Common/PageTitle"));
 import Pagination from "../Common/Pagination";
 import { Button, ButtonBase } from "@material-ui/core";
 import { navigate } from "hookrouter";

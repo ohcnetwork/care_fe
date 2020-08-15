@@ -1,15 +1,16 @@
 import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import { navigate } from 'hookrouter';
+import loadable from '@loadable/component';
 import React, { useCallback, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
 import { CURRENT_HEALTH_CHANGE, PATIENT_CATEGORY, SYMPTOM_CHOICES } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
+import { CheckboxField, MultilineInputField, SelectField, TextInputField, ErrorHelperText, DateTimeFiled, MultiSelectField } from "../Common/HelperInputFields";
 import { createDailyReport, getConsultationDailyRoundsDetails, updateDailyReport } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
-import { CheckboxField, DateTimeFiled, ErrorHelperText, MultilineInputField, MultiSelectField, SelectField, TextInputField } from "../Common/HelperInputFields";
-import { Loading } from "../Common/Loading";
-import PageTitle from "../Common/PageTitle";
+const Loading = loadable( () => import("../Common/Loading"));
+const PageTitle = loadable( () => import("../Common/PageTitle"));
 
 const initForm: any = {
     otherSymptom: false,

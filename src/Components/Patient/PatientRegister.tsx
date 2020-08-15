@@ -3,6 +3,7 @@ import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import { navigate } from "hookrouter";
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
 import moment from "moment";
+import loadable from '@loadable/component';
 import React, { useCallback, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
 import { BLOOD_GROUPS, DISEASE_STATUS, GENDER_TYPES, MEDICAL_HISTORY_CHOICES } from "../../Common/constants";
@@ -13,12 +14,12 @@ import { createPatient, getDistrictByState, getLocalbodyByDistrict, getPatient, 
 import * as Notification from "../../Utils/Notifications.js";
 import AlertDialog from "../Common/AlertDialog";
 import { AutoCompleteMultiField, CheckboxField, DateInputField, MultilineInputField, PhoneNumberField, SelectField, TextInputField } from "../Common/HelperInputFields";
-import { Loading } from "../Common/Loading";
-import PageTitle from "../Common/PageTitle";
 import DuplicatePatientDialog from "../Facility/DuplicatePatientDialog";
 import { DupPatientModel } from "../Facility/models";
 import { PatientModel } from "./models";
 import TransferPatientDialog from "../Facility/TransferPatientDialog";
+const Loading = loadable( () => import("../Common/Loading"));
+const PageTitle = loadable( () => import("../Common/PageTitle"));
 const debounce = require('lodash.debounce');
 
 const placesList = countryList.concat(statesList.filter((i: string) => i !== 'Kerala'));
