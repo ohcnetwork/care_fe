@@ -1,3 +1,4 @@
+import loadable from '@loadable/component';
 import { Button, Card, CardActions, CardContent, FormControl, Grid, InputLabel, MenuItem, Select } from "@material-ui/core";
 import { makeStyles, Theme } from "@material-ui/core/styles";
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
@@ -8,7 +9,8 @@ import { DISTRICT_CHOICES, GENDER_TYPES } from "../../Common/constants";
 import { validateEmailAddress } from "../../Common/validation";
 import { signupUser } from "../../Redux/actions";
 import { PhoneNumberField, TextInputField } from "../Common/HelperInputFields";
-import PageTitle from "../Common/PageTitle";
+const PageTitle = loadable( () => import("../Common/PageTitle"));
+
 
 const optionalFields = [
   "first_name",

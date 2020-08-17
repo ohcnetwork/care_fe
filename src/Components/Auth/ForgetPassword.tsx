@@ -1,11 +1,12 @@
 import { Button,  CardActions, CardContent } from '@material-ui/core';
 import { A } from 'hookrouter';
+import loadable from '@loadable/component';
 import React, {  useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { postForgotPassword } from '../../Redux/actions';
 import { TextInputField } from '../Common/HelperInputFields';
 import * as Notification from "../../Utils/Notifications.js";
-import { Loading } from "../Common/Loading";
+const Loading = loadable( () => import("../Common/Loading"));
 
 export const ForgotPassword = () => {
     const dispatch: any = useDispatch();

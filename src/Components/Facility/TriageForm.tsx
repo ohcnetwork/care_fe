@@ -1,4 +1,5 @@
 import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
+import loadable from '@loadable/component';
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import moment from 'moment';
 import React, { useCallback, useReducer, useState } from "react";
@@ -7,8 +8,8 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 import { createTriageForm, getTriageDetails } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { DateInputField, TextInputField } from "../Common/HelperInputFields";
-import { Loading } from "../Common/Loading";
-import PageTitle from "../Common/PageTitle";
+const Loading = loadable( () => import("../Common/Loading"));
+const PageTitle = loadable( () => import("../Common/PageTitle"));
 import { PatientStatsModel } from "./models";
 
 interface triageFormProps extends PatientStatsModel {
@@ -23,6 +24,7 @@ const initForm: any = {
   num_patients_home_quarantine: "",
   num_patients_isolation: "",
   num_patient_referred: "",
+  num_patient_confirmed_positive: ""
 };
 
 const initialState = {
@@ -77,6 +79,7 @@ export const TriageForm = (props: triageFormProps) => {
               num_patients_home_quarantine: res.data.num_patients_home_quarantine,
               num_patients_isolation: res.data.num_patients_isolation,
               num_patient_referred: res.data.num_patient_referred,
+              num_patient_confirmed_positive: res.data.num_patient_confirmed_positive
             }
           });
         }
@@ -127,6 +130,7 @@ export const TriageForm = (props: triageFormProps) => {
         num_patients_home_quarantine: Number(state.form.num_patients_home_quarantine),
         num_patients_isolation: Number(state.form.num_patients_isolation),
         num_patient_referred: Number(state.form.num_patient_referred),
+        num_patient_confirmed_positive: Number(state.form.num_patient_confirmed_positive)
       };
 
       const res = await dispatchAction(createTriageForm(data, { facilityId }));
@@ -208,7 +212,7 @@ export const TriageForm = (props: triageFormProps) => {
                 />
               </div>
               <div>
-                <InputLabel id="num-patients-isolation-label">Patients in Isolation</InputLabel>
+                <InputLabel id="num-patients-isolation-label">Suspected Isolated</InputLabel>
                 <TextInputField
                   name="num_patients_isolation"
                   variant="outlined"
@@ -231,6 +235,19 @@ export const TriageForm = (props: triageFormProps) => {
                   value={state.form.num_patient_referred}
                   onChange={handleChange}
                   errors={state.errors.num_patient_referred}
+                />
+              </div>
+              <div>
+                <InputLabel id="num-patient-referred-label">Confirmed Positive</InputLabel>
+                <TextInputField
+                    name="num_patient_confirmed_positive"
+                    variant="outlined"
+                    margin="dense"
+                    type="number"
+                    InputLabelProps={{ shrink: !!state.form.num_patient_confirmed_positive }}
+                    value={state.form.num_patient_confirmed_positive}
+                    onChange={handleChange}
+                    errors={state.errors.num_patient_confirmed_positive}
                 />
               </div>
             </div>

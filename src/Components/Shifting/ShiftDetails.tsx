@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from "react";
-import { Loading } from "../Common/Loading";
-import PageTitle from "../Common/PageTitle";
+import loadable from '@loadable/component';
+const Loading = loadable( () => import("../Common/Loading"));
+const PageTitle = loadable( () => import("../Common/PageTitle"));
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getShiftDetails, deleteShiftRecord } from "../../Redux/actions";

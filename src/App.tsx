@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import loadable from '@loadable/component';
 import SessionRouter from './Router/SessionRouter';
 import AppRouter from './Router/AppRouter';
 import { useDispatch, useSelector } from 'react-redux';
 import { getCurrentUser } from './Redux/actions';
 import './App.scss';
-import { Loading } from "./Components/Common/Loading";
+const Loading = loadable( () => import("./Components/Common/Loading"));
 import { useAbortableEffect, statusType } from './Common/utils';
 import axios from 'axios';
 

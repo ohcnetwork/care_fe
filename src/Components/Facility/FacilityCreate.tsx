@@ -4,6 +4,7 @@ import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import MyLocationIcon from "@material-ui/icons/MyLocation";
 import { makeStyles } from "@material-ui/styles";
 import { navigate } from "hookrouter";
+import loadable from '@loadable/component';
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
 import React, { useCallback, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -13,9 +14,9 @@ import { validateLocationCoordinates, phonePreg } from "../../Common/validation"
 import { createFacility, getDistrictByState, getFacility, getLocalbodyByDistrict, getStates, updateFacility } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { MultilineInputField, PhoneNumberField, SelectField, TextInputField } from "../Common/HelperInputFields";
-import { Loading } from "../Common/Loading";
+const Loading = loadable( () => import("../Common/Loading"));
 import { LocationSearchAndPick } from "../Common/LocationSearchAndPick";
-import PageTitle from "../Common/PageTitle";
+const PageTitle = loadable( () => import("../Common/PageTitle"));
 
 const DEFAULT_MAP_LOCATION = [10.038394700000001, 76.5074145180173]; // Ernakulam
 

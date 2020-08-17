@@ -2,6 +2,7 @@ import { Button, Card, CardContent, Grid, Typography } from "@material-ui/core";
 import { navigate } from "hookrouter";
 import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
+import loadable from '@loadable/component';
 import { BED_TYPES, DOCTOR_SPECIALIZATION } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
@@ -11,8 +12,8 @@ import {
   listDoctor
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import { Loading } from "../Common/Loading";
-import PageTitle from "../Common/PageTitle";
+const Loading = loadable( () => import("../Common/Loading"));
+const PageTitle = loadable( () => import("../Common/PageTitle"));
 import BedTypeCard from "./BedTypeCard";
 import DoctorsCountCard from "./DoctorsCountCard";
 import { CapacityModal, DoctorModal, FacilityModel, PatientStatsModel } from "./models";
@@ -123,6 +124,7 @@ export const FacilityHome = (props: any) => {
           {data.num_patients_isolation || "-"}
         </td>
         <td className="border px-4 py-2 text-center">{data.num_patient_referred || "-"}</td>
+        <td className="border px-4 py-2 text-center">{data.num_patient_confirmed_positive || "-"}</td>
         <td className="border px-4 py-2">
           <Button
             className="py-2 mt-2 px-6 bg-white rounded-md border border-grey-500 inline-flex items-center justify-center whitespace-no-wrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300"
@@ -275,8 +277,9 @@ export const FacilityHome = (props: any) => {
                     <th className="border px-4 py-2">
                       Advised Home Quarantine
                     </th>
-                    <th className="border px-4 py-2">Under Isolation</th>
-                    <th className="border px-4 py-2">Reffered</th>
+                    <th className="border px-4 py-2">Suspects Isolated</th>
+                    <th className="border px-4 py-2">Referred</th>
+                    <th className="border px-4 py-2">Confirmed Possitives</th>
                     <th className="border px-4 py-2">Actions</th>
                   </tr>
                 </thead>
