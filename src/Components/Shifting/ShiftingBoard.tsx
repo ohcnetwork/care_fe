@@ -15,7 +15,7 @@ import { make as SlideOver } from "../Common/SlideOver.gen";
 import { InputSearchBox } from "../Common/SearchBox";
 import moment from "moment";
 
-const limit = 10;
+const limit = 5;
 
 const formatFilter = (filter: any) => {
   return {
@@ -42,7 +42,7 @@ export default function ListView({ board, filterProp } : boardProps) {
   const dispatch: any = useDispatch();
   const [filter, setFilter] = useState(filterProp);
   const [data, setData] = useState<any[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
+  const [totalCount, setTotalCount] = useState();
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -54,6 +54,7 @@ export default function ListView({ board, filterProp } : boardProps) {
     setFilter(filterProp)
   }, [filterProp])
   useEffect(() => {
+      setIsLoading(true);
       dispatch(getShiftRequests(formatFilter({...filterProp, status:board}), board)).then((res: any) => {
         if (res && res.data) {
           setData(res.data.results);
@@ -73,6 +74,7 @@ export default function ListView({ board, filterProp } : boardProps) {
       if (res && res.data) {
         setData(data => [...data, ...res.data.results]);
         setTotalCount(res.data.count);
+        setCurrentPage(1)
       }
       setIsLoading(false);
     });
@@ -157,8 +159,8 @@ export default function ListView({ board, filterProp } : boardProps) {
         </svg>
       </div>
       <div className="text-sm mt-2 pb-2 flex flex-col">
-        { data?.length > 0 && totalCount !== 0 ? patientFilter(board) : <p className="mx-auto p-4">{totalCount === 0 ? "No Patients to Show":"Loading"}</p>}
-        { data?.length < totalCount &&
+        { isLoading ? <p className="mx-auto p-4">Loading</p>:data?.length > 0 ? patientFilter(board) : <p className="mx-auto p-4">No Patients to Show</p>}
+        { !isLoading && data?.length < (totalCount || 0) &&
         <button onClick={_=>handlePagination(currentPage + 1, limit)} className="mx-auto my-4 p-2 px-4 bg-gray-100 rounded-md hover:bg-white">More...</button>}
       </div>
     </div>
