@@ -19,7 +19,7 @@ import loadable from '@loadable/component';
 const Loading = loadable( () => import("../Common/Loading"));
 const PageTitle = loadable( () => import("../Common/PageTitle"));
 
-const limit = 10;
+const limit = 30;
 
 const initialFilterData = {
   status: 'Show All',
@@ -33,22 +33,6 @@ const initialFilterData = {
   patient_name: '',
   offset: 0
 }
-
-const formatFilter = (filter: any) => {
-    return {
-     status: filter.status === 'Show All' ? null : filter.status,
-     facility: '',
-     orgin_facility: filter.orgin_facility,
-     shifting_approving_facility: filter.shifting_approving_facility,
-     assigned_facility: filter.assigned_facility,
-     emergency: (filter.emergency && filter.emergency) === '--' ? '' : (filter.emergency === 'yes' ? 'true' : 'false'),
-     is_up_shift: (filter.is_up_shift && filter.is_up_shift) === '--' ? '' : (filter.is_up_shift === 'yes' ? 'true' : 'false'),
-     limit: limit,
-     offset: filter.offset,
-     patient_name: filter.patient_name || undefined
- };
-}
-
 const shiftStatusOptions = SHIFTING_CHOICES.map(obj => obj.text);
 
 const COMPLETED = ["COMPLETED","REJECTED","DESTINATION REJECTED"];
@@ -58,8 +42,6 @@ export default function ListView() {
 
   const [filter, setFilter] = useState(initialFilterData);
   const [boardFilter, setBoardFilter] = useState(ACTIVE);
-  const [totalCount, setTotalCount] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 

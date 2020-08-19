@@ -15,7 +15,7 @@ import { make as SlideOver } from "../Common/SlideOver.gen";
 import { InputSearchBox } from "../Common/SearchBox";
 import moment from "moment";
 
-const limit = 5;
+const limit = 30;
 
 const formatFilter = (filter: any) => {
   return {
@@ -149,7 +149,7 @@ export default function ListView({ board, filterProp } : boardProps) {
   return (
     <div className="rounded-md bg-gray-200 flex-shrink-0 w-3/4 md:w-1/2 lg:w-1/3 p-2 pb-4 mr-3 h-full overflow-y-auto">
       <div className="flex justify-between py-1">
-        <h3 className="text-sm">{board}</h3>
+        <h3 className="text-sm flex">{board}<p className="mx-2 px-2 rounded-full bg-gray-400">{totalCount || "-"}</p></h3>
         <svg
           className="h-4 fill-current text-grey-dark cursor-pointer"
           xmlns="http://www.w3.org/2000/svg"
