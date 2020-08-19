@@ -44,15 +44,15 @@ export const fetchResponseSuccess = (key: string, data: any) => {
 };
 
 export const fireRequest = (
-    key: string, path: any = [], params: any = {}, pathParam?: any
+    key: string, path: any = [], params: any = {}, pathParam?: any, altKey?: string
 ) => {
     return (dispatch: any) => {
         ;
         // cancel previous api call
-        if (isRunning[key]) {
-            isRunning[key].cancel();
+        if (isRunning[altKey ? altKey : key]) {
+            isRunning[altKey ? altKey : key].cancel();
         }
-        isRunning[key] = axios.CancelToken.source();
+        isRunning[altKey ? altKey : key] = axios.CancelToken.source();
         // get api url / method
         const request = Object.assign({}, requestMap[key]);
         if (path.length > 0) {
@@ -84,7 +84,7 @@ export const fireRequest = (
         dispatch(fetchDataRequest(key));
         return axiosApiCall[request.method.toLowerCase()](request.path, {
             ...params,
-            cancelToken: isRunning[key].token
+            cancelToken: isRunning[altKey? altKey : key].token
         }).then((response: any) => {
             dispatch(fetchResponseSuccess(key, response.data));
             return response;
