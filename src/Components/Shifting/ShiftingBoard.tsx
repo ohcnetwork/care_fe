@@ -54,9 +54,7 @@ export default function ListView({ board, filterProp } : boardProps) {
     setFilter(filterProp)
   }, [filterProp])
   useEffect(() => {
-      console.log("Fetching:" + board)
       dispatch(getShiftRequests(formatFilter({...filterProp, status:board}), board)).then((res: any) => {
-        console.log("Received:" + board)
         if (res && res.data) {
           setData(res.data.results);
           setTotalCount(res.data.count);
