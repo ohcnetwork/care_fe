@@ -238,8 +238,8 @@ export const updateShift = (id: string, params: object) => {
 export const deleteShiftRecord = (id: string) => {
   return fireRequest('deleteShiftRecord', [id], {});
 };
-export const getShiftRequests = (params: object) => {
-  return fireRequest('getShiftRequests', [], params);
+export const getShiftRequests = (params: object, key: string) => {
+  return fireRequest(`getShiftRequests`, [], params, null, key);
 };
 export const getShiftDetails = (id: string) => {
   return fireRequest('getShiftDetails', [id], {});
