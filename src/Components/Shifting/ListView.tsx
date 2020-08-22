@@ -40,8 +40,7 @@ export default function ListView() {
   }
 
   return (
-    <div className="flex flex-col h-screen px-2 md:px-8 pb-2">
-
+    <div className="flex flex-col h-screen px-2 pb-2">
       <div className="flex items-end justify-between">
         <PageTitle title={"Shifting"} hideBack={true} />
 
