@@ -145,7 +145,7 @@ export default function ListView({ board, filterProp }: boardProps) {
       );
   }
   return (
-    <div className="rounded-md bg-gray-200 flex-shrink-0 w-full md:w-1/2 lg:w-1/3 xl:w-1/4 p-2 pb-4 mr-3 h-full overflow-y-auto">
+    <div className="rounded-md bg-gray-200 flex-shrink-0 w-3/4 md:w-1/2 lg:w-1/3 xl:w-1/4 p-2 pb-4 mr-3 h-full overflow-y-auto">
       <div className="flex justify-between py-1">
         <h3 className="text-sm flex">{board}
           <span className="rounded-lg ml-2 bg-gray-700 text-white px-2">

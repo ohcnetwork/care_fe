@@ -179,7 +179,7 @@ export const FacilityHome = (props: any) => {
         </div>
         <div>
           <button
-            className="btn-primary btn mt-2 mr-2"
+            className="btn-primary btn mt-2 mr-2 w-full md:w-auto"
             onClick={() => navigate(`/facility/${facilityId}/patient`)}
           >
             <i className="fas fa-plus text-white mr-2">
@@ -188,7 +188,7 @@ export const FacilityHome = (props: any) => {
             </button>
 
           <button
-            className="btn-primary btn mt-2 mr-2"
+            className="btn-primary btn mt-2 mr-2 w-full md:w-auto"
             onClick={() => navigate(`/facility/${facilityId}/patients`)}
           >
             <i className="fas fa-user-injured text-white mr-2">
@@ -202,7 +202,7 @@ export const FacilityHome = (props: any) => {
               Total Capacity
             </div>
             <button
-              className="btn-primary btn"
+              className="btn-primary btn w-full md:w-auto"
               onClick={() => navigate(`/facility/${facilityId}/bed`)}
               disabled={capacityList.length === BED_TYPES.length}
             >
@@ -219,7 +219,7 @@ export const FacilityHome = (props: any) => {
               Doctors List
             </div>
             <button
-              className="btn-primary btn"
+              className="btn-primary btn w-full md:w-auto"
               onClick={() => navigate(`/facility/${facilityId}/doctor`)}
               disabled={
                 doctorList.length === DOCTOR_SPECIALIZATION.length
@@ -240,7 +240,7 @@ export const FacilityHome = (props: any) => {
               Corona Triage
             </div>
             <button
-              className="btn-primary btn"
+              className="btn-primary btn w-full md:w-auto"
               onClick={() => navigate(`/facility/${facilityId}/triage`)}
             >
               <i className="fas fa-notes-medical text-white mr-2">
