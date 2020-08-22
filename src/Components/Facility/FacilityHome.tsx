@@ -12,8 +12,8 @@ import {
   listDoctor
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-const Loading = loadable( () => import("../Common/Loading"));
-const PageTitle = loadable( () => import("../Common/PageTitle"));
+const Loading = loadable(() => import("../Common/Loading"));
+const PageTitle = loadable(() => import("../Common/PageTitle"));
 import BedTypeCard from "./BedTypeCard";
 import DoctorsCountCard from "./DoctorsCountCard";
 import { CapacityModal, DoctorModal, FacilityModel, PatientStatsModel } from "./models";
@@ -73,8 +73,6 @@ export const FacilityHome = (props: any) => {
     [dispatch, facilityId]
   );
 
-
-
   useAbortableEffect(
     (status: statusType) => {
       fetchData(status);
@@ -126,169 +124,150 @@ export const FacilityHome = (props: any) => {
         <td className="border px-4 py-2 text-center">{data.num_patient_referred || "-"}</td>
         <td className="border px-4 py-2 text-center">{data.num_patient_confirmed_positive || "-"}</td>
         <td className="border px-4 py-2">
-          <Button
-            className="py-2 mt-2 px-6 bg-white rounded-md border border-grey-500 inline-flex items-center justify-center whitespace-no-wrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300"
+          <button
+            className="btn btn-default"
             onClick={() =>
               navigate(`/facility/${facilityId}/triage/${data.id}`)
             }>
             Edit
-        </Button></td>
+        </button></td>
       </tr>
     );
   });
 
   return (
     <div className="px-2 pb-2">
-      <PageTitle 
+      <PageTitle
         title={facilityData.name || "Facility"} />
-      <Card className="mt-4">
-        <CardContent>
-          <Grid
-            container
-            style={{ padding: "10px", marginBottom: "5px" }}
-            spacing={2}
+      <div className="bg-white rounded-lg md:p-6 p-3 shadow">
+        <div className="md:flex justify-between">
+          <div>
+            <Typography
+              style={{ textTransform: "capitalize" }}
+              variant="h6"
+              component="h6"
+            >
+              {facilityData.name}
+            </Typography>
+            <Typography>Address : {facilityData.address}</Typography>
+            <Typography>Phone : {facilityData.phone_number}</Typography>
+            <Typography>
+              District : {facilityData?.district_object?.name}
+            </Typography>
+            <Typography>
+              Oxygen Capacity :{` ${facilityData.oxygen_capacity} Litres`}
+            </Typography>
+          </div>
+          <div className="flex flex-col">
+            <button
+              className="btn-primary btn"
+              onClick={() => navigate(`/facility/${facilityId}/update`)}
+            >
+              <i className="fas fa-pencil-alt text-white mr-2">
+              </i>
+              Update Facility
+            </button>
+            <button
+              className="btn-primary btn mt-2"
+              onClick={() => navigate(`/facility/${facilityId}/inventory`)}
+            >
+              <i className="fas fa-dolly-flatbed text-white mr-2">
+              </i>
+              Inventory Management
+            </button>
+          </div>
+        </div>
+        <div>
+          <button
+            className="btn-primary btn mt-2 mr-2 w-full md:w-auto"
+            onClick={() => navigate(`/facility/${facilityId}/patient`)}
           >
-            <Grid item xs={12} md={7}>
-              <Typography
-                style={{ textTransform: "capitalize" }}
-                variant="h6"
-                component="h6"
-              >
-                {facilityData.name}
-              </Typography>
-              <Typography>Address : {facilityData.address}</Typography>
-              <Typography>Phone : {facilityData.phone_number}</Typography>
-              <Typography>
-                District : {facilityData?.district_object?.name}
-              </Typography>
-              <Typography>
-                Oxygen Capacity :{` ${facilityData.oxygen_capacity} Litres`}
-              </Typography>
-            </Grid>
-            <Grid item xs={12} md={5}>
-              <Grid container spacing={1} direction="column">
-                <Grid item xs={12}>
-                  <Button
-                    fullWidth
-                    variant="contained"
-                    color="primary"
-                    size="small"
-                    onClick={() => navigate(`/facility/${facilityId}/update`)}
-                  >
-                    Update Facility
-                  </Button>
-                </Grid>
-                <Grid item xs={12}>
-                  <Button
-                    fullWidth
-                    variant="contained"
-                    color="primary"
-                    size="small"
-                    onClick={() => navigate(`/facility/${facilityId}/bed`)}
-                    disabled={capacityList.length === BED_TYPES.length}
-                  >
-                    Add More Bed Types
-                  </Button>
-                </Grid>
-                <Grid item xs={12}>
-                  <Button
-                    fullWidth
-                    variant="contained"
-                    color="primary"
-                    size="small"
-                    onClick={() => navigate(`/facility/${facilityId}/doctor`)}
-                    disabled={
-                      doctorList.length === DOCTOR_SPECIALIZATION.length
-                    }
-                  >
-                    Add More Doctor Types
-                  </Button>
-                </Grid>
-                <Grid item xs={12}>
-                  <Button
-                    fullWidth
-                    variant="contained"
-                    color="primary"
-                    size="small"
-                    onClick={() => navigate(`/facility/${facilityId}/triage`)}
-                  >
-                    Add Triage
-                  </Button>
-                </Grid>
-                <Grid item xs={12}>
-                  <Button
-                    fullWidth
-                    variant="contained"
-                    color="primary"
-                    size="small"
-                    onClick={() => navigate(`/facility/${facilityId}/inventory`)}
-                  >
-                    Inventory Management
-                  </Button>
-                </Grid>
-              </Grid>
-            </Grid>
-          </Grid>
-          <Grid container style={{ padding: "10px" }} spacing={1}>
-            <Grid item xs={12} md={6}>
-              <Button
-                fullWidth
-                variant="contained"
-                color="primary"
-                size="small"
-                onClick={() => navigate(`/facility/${facilityId}/patient`)}
-              >
-                Add Details of Covid Suspects
-              </Button>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Button
-                fullWidth
-                variant="contained"
-                color="primary"
-                size="small"
-                onClick={() => navigate(`/facility/${facilityId}/patients`)}
-              >
-                View Suspects / Patients
-              </Button>
-            </Grid>
-          </Grid>
+            <i className="fas fa-plus text-white mr-2">
+            </i>
+            Add Details of Covid Suspects
+            </button>
 
-          <div className="mt-4">
-            <div className="font-semibold text-xl border-b-2">
+          <button
+            className="btn-primary btn mt-2 mr-2 w-full md:w-auto"
+            onClick={() => navigate(`/facility/${facilityId}/patients`)}
+          >
+            <i className="fas fa-user-injured text-white mr-2">
+            </i>
+            View Suspects / Patients
+          </button>
+        </div>
+        <div className="mt-4">
+          <div className="md:flex justify-between  md:border-b md:pb-2">
+            <div className="font-semibold text-xl">
               Total Capacity
             </div>
-            <div className="mt-4 flex flex-wrap">{capacityList}</div>
+            <button
+              className="btn-primary btn w-full md:w-auto"
+              onClick={() => navigate(`/facility/${facilityId}/bed`)}
+              disabled={capacityList.length === BED_TYPES.length}
+            >
+              <i className="fas fa-bed text-white mr-2">
+              </i>
+              Add More Bed Types
+              </button>
           </div>
-          <div className="mt-4">
-            <div className="font-semibold text-xl border-b-2">Doctors List</div>
-            <div className="mt-4 flex flex-wrap">{doctorList}</div>
+          <div className="mt-4 flex flex-wrap">{capacityList}</div>
+        </div>
+        <div className="mt-4">
+          <div className="md:flex justify-between  md:border-b md:pb-2">
+            <div className="font-semibold text-xl">
+              Doctors List
+            </div>
+            <button
+              className="btn-primary btn w-full md:w-auto"
+              onClick={() => navigate(`/facility/${facilityId}/doctor`)}
+              disabled={
+                doctorList.length === DOCTOR_SPECIALIZATION.length
+              }
+            >
+              <i className="fas fa-user-md text-white mr-2">
+              </i>
+              Add Doctor Types
+              </button>
           </div>
-          <div className="-my-2 py-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 mt-4">
-            <div className="font-semibold text-xl border-b-2">
+          <div className="mt-4 flex flex-wrap">
+            {doctorList}
+          </div>
+        </div>
+        <div className="-my-2 py-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 mt-4">
+          <div className="md:flex justify-between  md:border-b md:pb-2">
+            <div className="font-semibold text-xl">
               Corona Triage
             </div>
-            <div className="align-middle inline-block min-w-full shadow overflow-hidden sm:rounded-lg border-b border-gray-200 mt-4">
-              <table className="min-w-full border-2 rounded overflow-hidden">
-                <thead>
-                  <tr className="white border">
-                    <th className="border px-4 py-2">Date</th>
-                    <th className="border px-4 py-2">Total Triaged</th>
-                    <th className="border px-4 py-2">
-                      Advised Home Quarantine
-                    </th>
-                    <th className="border px-4 py-2">Suspects Isolated</th>
-                    <th className="border px-4 py-2">Referred</th>
-                    <th className="border px-4 py-2">Confirmed Possitives</th>
-                    <th className="border px-4 py-2">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>{stats}</tbody>
-              </table>
-            </div>
+            <button
+              className="btn-primary btn w-full md:w-auto"
+              onClick={() => navigate(`/facility/${facilityId}/triage`)}
+            >
+              <i className="fas fa-notes-medical text-white mr-2">
+              </i>
+              Add Triage
+              </button>
           </div>
-        </CardContent>
-      </Card>
+          <div className="align-middle inline-block min-w-full shadow overflow-hidden sm:rounded-lg border-b border-gray-200 mt-4">
+            <table className="min-w-full border-2 rounded overflow-hidden">
+              <thead>
+                <tr className="white border">
+                  <th className="border px-4 py-2">Date</th>
+                  <th className="border px-4 py-2">Total Triaged</th>
+                  <th className="border px-4 py-2">
+                    Advised Home Quarantine
+                    </th>
+                  <th className="border px-4 py-2">Suspects Isolated</th>
+                  <th className="border px-4 py-2">Referred</th>
+                  <th className="border px-4 py-2">Confirmed Possitives</th>
+                  <th className="border px-4 py-2">Actions</th>
+                </tr>
+              </thead>
+              <tbody>{stats}</tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

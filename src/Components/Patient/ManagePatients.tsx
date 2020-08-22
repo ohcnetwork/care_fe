@@ -3,11 +3,11 @@ import Grid from "@material-ui/core/Grid";
 import WarningRoundedIcon from "@material-ui/icons/WarningRounded";
 import { navigate, useQueryParams } from "hookrouter";
 import loadable from '@loadable/component';
-import React, {  useState, useEffect } from "react";
-import { useDispatch } from "react-redux"; 
+import React, { useState, useEffect } from "react";
+import { useDispatch } from "react-redux";
 import { downloadPatients, searchPatientFilter } from "../../Redux/actions";
-const Loading = loadable( () => import("../Common/Loading"));
-const PageTitle = loadable( () => import("../Common/PageTitle"));
+const Loading = loadable(() => import("../Common/Loading"));
+const PageTitle = loadable(() => import("../Common/PageTitle"));
 import Pagination from "../Common/Pagination";
 import { PatientFilter } from "./PatientFilter";
 import { InputSearchBox } from "../Common/SearchBox";
@@ -46,6 +46,15 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
+function Badge(props: { color: string, icon: string, text: string }) {
+  return (
+    <span className="m-1 inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-gray-50 text-gray-700" title={props.text}>
+      <i className={"mr-2 text-md text-" + props.color + "-500 fas fa-" + props.icon}></i>
+      {props.text}
+    </span>
+  )
+}
+
 const useStylesTab = makeStyles((theme: Theme) => ({
   root: {
     flexGrow: 1,
@@ -66,7 +75,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 
-const RESULT_LIMIT = 14;
+const RESULT_LIMIT = 30;
 
 
 export const PatientManager = (props: any) => {
@@ -110,19 +119,19 @@ export const PatientManager = (props: any) => {
         setIsLoading(false);
       })
   }, [qParams, dispatch, facilityId]);
- 
-  const updateQuery = (params:any) => {
-    const nParams = Object.assign({}, qParams, params); 
-    setQueryParams(nParams,true);
+
+  const updateQuery = (params: any) => {
+    const nParams = Object.assign({}, qParams, params);
+    setQueryParams(nParams, true);
   }
- 
+
   const handleTabChange = async (tab: number) => {
- 
+
     updateQuery({
       is_active: tab ? 'False' : 'True',
       page: 1,
       name: '',
-      disease_status:'',
+      disease_status: '',
       phone_number: ''
     });
   };
@@ -131,7 +140,7 @@ export const PatientManager = (props: any) => {
     updateQuery({ page, limit });
   };
 
-  const searchByName = (value: string) => { 
+  const searchByName = (value: string) => {
     updateQuery({ name: value, page: 1 });
   }
 
@@ -150,99 +159,55 @@ export const PatientManager = (props: any) => {
         ? `/facility/${patient.facility}/patient/${patient.id}`
         : `/patient/${patient.id}`;
       return (
-        <div key={`usr_${patient.id}`} className="w-full md:w-1/2 mt-6 md:px-4">
-          <div
-            onClick={() => navigate(patientUrl)}
-            className={`overflow-hidden shadow rounded-lg bg-white h-full cursor-pointer hover:border-primary-500
-            ${patient.disease_status === 'POSITIVE' ? "border-red-700 bg-red-100" :
-                ['NEGATIVE', 'RECOVERY', 'RECOVERED'].indexOf(patient.disease_status) >= 0 ? "border-green-700 bg-green-100" : ""}
-            `}
-          >
-            <div className="px-6 py-4 h-full flex flex-col justify-between">
-              <div>
-                <div className="flex justify-between">
-                  <div className="font-bold text-xl capitalize mb-2">
-                    {patient.name}
-                  </div>
-
-                  <div className="flex">
-                    <div>
-                      {patient.is_medical_worker && patient.is_active && (
-                        <span className="badge badge-pill badge-primary mr-2">
-                          Medical Worker
-                        </span>
-                      )}
-                    </div>
-                    {
-                      patient.is_antenatal && patient.is_active &&
-                    <div>
-                          <span className="badge badge-pill badge-danger mr-2">
-                          Pregnant Patient
-                        </span>
-                    </div>
-                    }
-                    <div>
-                      {patient.allow_transfer && (
-                        <span className="badge badge-pill badge-primary mr-2">
-                          Transfer allowed
-                        </span>
-                      )}
-                    </div>
-                    <div>
-                      {!patient.allow_transfer && (
-                        <span className="badge badge-pill badge-warning mr-2">
-                          Transfer Not allowed
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                <div>
-                  <span className="font-semibold leading-relaxed">Age: </span>
-                  {patient.age}
-                </div>
-                {patient.facility_object && (<div>
-                  <span className="font-semibold leading-relaxed">Facility: </span>
-                  {patient.facility_object.name}
-                </div>)}
-                {patient.contact_with_confirmed_carrier && (
-                  <div className="flex">
-                    <span className="font-semibold leading-relaxed">
-                      Contact with confirmed carrier
-                    </span>
-                    <WarningRoundedIcon className="text-red-500">
-
-                    </WarningRoundedIcon>
-                  </div>
-                )}
-                {patient.contact_with_suspected_carrier &&
-                  !patient.contact_with_confirmed_carrier && (
-                    <div className="flex">
-                      <span className="font-semibold leading-relaxed">
-                        Contact with suspected carrier
-                      </span>
-                      <WarningRoundedIcon className="text-yellow-500">
-
-                      </WarningRoundedIcon>
-                    </div>
-                  )}
-                <div>
-                  {patient.countries_travelled && !!patient.countries_travelled.length && (<>
-                    <span className="font-semibold leading-relaxed">
-                      Travel History:{" "}
-                    </span>
-                    {Array.isArray(patient.countries_travelled) ? patient.countries_travelled.join(", ") : patient.countries_travelled.split(',').join(', ')}
-                  </>)}
-                </div>
-              </div>
-              <div className="mt-2">
-                <Button size="small" variant="outlined" fullWidth>
-                  View Patient Details
-                </Button>
+        <div
+          key={`usr_${patient.id}`}
+          onClick={() => navigate(patientUrl)}
+          className="w-full pb-2 cursor-pointer border-b md:flex justify-between items-center mb-3"
+        >
+          <div className="px-4 md:w-1/2">
+            <div className="md:flex justify-between w-full">
+              <div className="text-xl font-semibold capitalize">
+                {patient.name} -   {patient.age}
               </div>
             </div>
+            {patient.facility_object &&
+              <div className="font-normal text-sm">
+                {patient.facility_object.name}
+              </div>
+            }
           </div>
-        </div>
+          <div className="md:flex">
+            <div className="md:flex flex-wrap justify-end">
+              {patient.allow_transfer ?
+                <Badge color="yellow" icon="unlock" text="Transfer Allowed" />
+                : <Badge color="green" icon="lock" text="Transfer Blocked" />}
+              {patient.disease_status === 'POSITIVE' && (
+                <Badge color="red" icon="radiation" text="Positive" />
+              )}
+              {['NEGATIVE', 'RECOVERY', 'RECOVERED'].indexOf(patient.disease_status) >= 0 && (
+                <Badge color="green" icon="smile-beam" text={patient.disease_status} />
+              )}
+              {
+                patient.is_antenatal && patient.is_active &&
+                <Badge color="blue" icon="baby-carriage" text="Antenatal" />
+              }
+              {patient.is_medical_worker && patient.is_active && (
+                <Badge color="blue" icon="user-md" text="Medical Worker" />
+              )}
+              {patient.contact_with_confirmed_carrier && (
+                <Badge color="red" icon="exclamation-triangle" text="Contact with confirmed carrier" />
+              )}
+              {patient.contact_with_suspected_carrier && (
+                <Badge color="yellow" icon="exclamation-triangle" text="Contact with suspected carrier" />
+              )}
+            </div>
+            <div className="px-2">
+              <Button size="small" variant="outlined" fullWidth>
+                Details
+            </Button>
+            </div>
+          </div>
+        </div >
       );
     });
   }
@@ -279,15 +244,15 @@ export const PatientManager = (props: any) => {
   return (
     <div>
       <PageTitle
-        title="Covid Suspects"
+        title="Patients"
         hideBack={!facilityId}
-        className="mt-4 mx-2 md:mx-8" />
-      <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3 m-4 md:px-4">
+        className="mt-4" />
+      <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3 my-4 px-2 md:px-0">
         <div className="bg-white overflow-hidden shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">
             <dl>
               <dt className="text-sm leading-5 font-medium text-gray-500 truncate">
-                Total Suspects
+                Total Patients
               </dt>
               <dd className="mt-4 text-5xl leading-9 font-semibold text-gray-900">
                 {totalCount}
@@ -350,7 +315,7 @@ export const PatientManager = (props: any) => {
       <div className={classesTab.root}>
         <NavTabs
           onChange={handleTabChange}
-          options={[{value:0, label:"Live"}, {value:1, label:"Discharged"}]}
+          options={[{ value: 0, label: "Live" }, { value: 1, label: "Discharged" }]}
           active={tabValue}
         />
         <SwipeableViews
@@ -359,14 +324,10 @@ export const PatientManager = (props: any) => {
         >
 
           <TabPanel value={tabValue} index={0} dir={theme.direction}>
-            <div className="px-3 md:px-8">
-              <div className="flex flex-wrap md:-mx-4">{managePatients}</div>
-            </div>
+            <div className="flex flex-wrap md:-mx-4">{managePatients}</div>
           </TabPanel>
           <TabPanel value={tabValue} index={1} dir={theme.direction}>
-            <div className="px-3 md:px-8">
-              <div className="flex flex-wrap md:-mx-4">{managePatients}</div>
-            </div>
+            <div className="flex flex-wrap md:-mx-4">{managePatients}</div>
           </TabPanel>
         </SwipeableViews>
       </div>
