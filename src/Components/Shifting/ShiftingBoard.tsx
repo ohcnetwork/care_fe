@@ -93,7 +93,7 @@ export default function ListView({ board, filterProp }: boardProps) {
                   <div className="sm:col-span-1">
                     <dt className="text-sm leading-5 font-medium text-gray-500">
                       <i className="fas fa-plane-departure mr-2"></i>
-                      Orgin facility
+                      Origin facility
                   </dt>
                     <dd className="font-bold text-sm leading-5 text-gray-900">
                       {(shift.orgin_facility_object || {}).name}
