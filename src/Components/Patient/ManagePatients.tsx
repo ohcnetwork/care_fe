@@ -166,13 +166,15 @@ export const PatientManager = (props: any) => {
         >
           <div className="px-4 md:w-1/2">
             <div className="md:flex justify-between w-full">
-              <div className="text-xl font-semibold capitalize mb-2">
+              <div className="text-xl font-semibold capitalize">
                 {patient.name} -   {patient.age}
               </div>
             </div>
-            {patient.facility_object && (<div>
-              {patient.facility_object.name}
-            </div>)}
+            {patient.facility_object &&
+              <div className="font-normal text-sm">
+                {patient.facility_object.name}
+              </div>
+            }
           </div>
           <div className="md:flex">
             <div className="md:flex flex-wrap justify-end">
@@ -205,7 +207,7 @@ export const PatientManager = (props: any) => {
             </Button>
             </div>
           </div>
-        </div>
+        </div >
       );
     });
   }
