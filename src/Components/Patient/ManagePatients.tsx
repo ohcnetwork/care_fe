@@ -164,16 +164,18 @@ export const PatientManager = (props: any) => {
           onClick={() => navigate(patientUrl)}
           className="w-full pb-2 cursor-pointer border-b md:flex justify-between items-center mb-3"
         >
-          <div className="px-4 w-full md:border-r md:mr-4">
+          <div className="px-4 md-w-1/2">
             <div className="md:flex justify-between w-full">
-              <div className="text-xl capitalize mb-2">
+              <div className="text-xl font-semibold capitalize mb-2">
                 {patient.name} -   {patient.age}
               </div>
-              {patient.facility_object && (<div>
-                {patient.facility_object.name}
-              </div>)}
             </div>
-            <div className="md:flex">
+            {patient.facility_object && (<div>
+              {patient.facility_object.name}
+            </div>)}
+          </div>
+          <div className="md:flex">
+            <div className="md:flex flex-wrap">
               <div>
                 {patient.allow_transfer ? (
                   <Badge color="yellow" icon="unlock" text="Transfer Allowed" />
@@ -212,11 +214,11 @@ export const PatientManager = (props: any) => {
                 )}
               </div>
             </div>
-          </div>
-          <div className="px-2">
-            <Button size="small" variant="outlined" fullWidth>
-              Details
+            <div className="px-2">
+              <Button size="small" variant="outlined" fullWidth>
+                Details
             </Button>
+            </div>
           </div>
         </div>
       );
@@ -258,7 +260,7 @@ export const PatientManager = (props: any) => {
         title="Patients"
         hideBack={!facilityId}
         className="mt-4" />
-      <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3 my-4">
+      <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3 my-4 px-2 md:px-0">
         <div className="bg-white overflow-hidden shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">
             <dl>
