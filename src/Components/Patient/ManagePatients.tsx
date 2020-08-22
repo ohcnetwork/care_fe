@@ -164,7 +164,7 @@ export const PatientManager = (props: any) => {
           onClick={() => navigate(patientUrl)}
           className="w-full pb-2 cursor-pointer border-b md:flex justify-between items-center mb-3"
         >
-          <div className="px-4 md-w-1/2">
+          <div className="px-4 md:w-1/2">
             <div className="md:flex justify-between w-full">
               <div className="text-xl font-semibold capitalize mb-2">
                 {patient.name} -   {patient.age}
@@ -175,44 +175,29 @@ export const PatientManager = (props: any) => {
             </div>)}
           </div>
           <div className="md:flex">
-            <div className="md:flex flex-wrap">
-              <div>
-                {patient.allow_transfer ? (
-                  <Badge color="yellow" icon="unlock" text="Transfer Allowed" />
-                ) : <Badge color="green" icon="lock" text="Transfer Blocked" />}
-              </div>
-              <div>
-                {patient.disease_status === 'POSITIVE' && (
-                  <Badge color="red" icon="radiation" text="Positive" />
-                )}
-              </div>
-              <div>
-                {['NEGATIVE', 'RECOVERY', 'RECOVERED'].indexOf(patient.disease_status) >= 0 && (
-                  <Badge color="green" icon="smile-beam" text={patient.disease_status} />
-                )}
-              </div>
+            <div className="md:flex flex-wrap justify-end">
+              {patient.allow_transfer ?
+                <Badge color="yellow" icon="unlock" text="Transfer Allowed" />
+                : <Badge color="green" icon="lock" text="Transfer Blocked" />}
+              {patient.disease_status === 'POSITIVE' && (
+                <Badge color="red" icon="radiation" text="Positive" />
+              )}
+              {['NEGATIVE', 'RECOVERY', 'RECOVERED'].indexOf(patient.disease_status) >= 0 && (
+                <Badge color="green" icon="smile-beam" text={patient.disease_status} />
+              )}
               {
                 patient.is_antenatal && patient.is_active &&
-                <div>
-                  <span className="badge badge-pill badge-danger mr-2">
-                    Pregnant Patient
-                        </span>
-                </div>
+                <Badge color="blue" icon="baby-carriage" text="Antenatal" />
               }
               {patient.is_medical_worker && patient.is_active && (
                 <Badge color="blue" icon="user-md" text="Medical Worker" />
               )}
-              <div>
-                {patient.contact_with_confirmed_carrier && (
-                  <Badge color="red" icon="exclamation-triangle" text="Contact with confirmed carrier" />
-
-                )}
-              </div>
-              <div>
-                {patient.contact_with_suspected_carrier && (
-                  <Badge color="yellow" icon="exclamation-triangle" text="Contact with suspected carrier" />
-                )}
-              </div>
+              {patient.contact_with_confirmed_carrier && (
+                <Badge color="red" icon="exclamation-triangle" text="Contact with confirmed carrier" />
+              )}
+              {patient.contact_with_suspected_carrier && (
+                <Badge color="yellow" icon="exclamation-triangle" text="Contact with suspected carrier" />
+              )}
             </div>
             <div className="px-2">
               <Button size="small" variant="outlined" fullWidth>
