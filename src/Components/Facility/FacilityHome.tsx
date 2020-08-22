@@ -12,8 +12,8 @@ import {
   listDoctor
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-const Loading = loadable( () => import("../Common/Loading"));
-const PageTitle = loadable( () => import("../Common/PageTitle"));
+const Loading = loadable(() => import("../Common/Loading"));
+const PageTitle = loadable(() => import("../Common/PageTitle"));
 import BedTypeCard from "./BedTypeCard";
 import DoctorsCountCard from "./DoctorsCountCard";
 import { CapacityModal, DoctorModal, FacilityModel, PatientStatsModel } from "./models";
@@ -139,7 +139,7 @@ export const FacilityHome = (props: any) => {
 
   return (
     <div className="px-2 pb-2">
-      <PageTitle 
+      <PageTitle
         title={facilityData.name || "Facility"} />
       <Card className="mt-4">
         <CardContent>
@@ -255,17 +255,19 @@ export const FacilityHome = (props: any) => {
           </Grid>
 
           <div className="mt-4">
-            <div className="font-semibold text-xl border-b-2">
+            <div className="font-semibold text-xl border-b-2 pb-2">
               Total Capacity
             </div>
             <div className="mt-4 flex flex-wrap">{capacityList}</div>
           </div>
           <div className="mt-4">
-            <div className="font-semibold text-xl border-b-2">Doctors List</div>
-            <div className="mt-4 flex flex-wrap">{doctorList}</div>
+            <div className="font-semibold text-xl border-b-2 pb-2">Doctors List</div>
+            <div className="mt-4 flex flex-wrap">
+              {doctorList}
+            </div>
           </div>
           <div className="-my-2 py-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 mt-4">
-            <div className="font-semibold text-xl border-b-2">
+            <div className="font-semibold text-xl border-b-2 pb-2">
               Corona Triage
             </div>
             <div className="align-middle inline-block min-w-full shadow overflow-hidden sm:rounded-lg border-b border-gray-200 mt-4">
