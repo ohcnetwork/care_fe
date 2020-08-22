@@ -113,16 +113,16 @@ export const FacilityHome = (props: any) => {
   let stats = patientStatsData.map((data: PatientStatsModel, index) => {
     return (
       <tr className="border" key={index}>
-        <td className="border px-4 py-2 whitespace-no-wrap">{data.entry_date || "-"}</td>
-        <td className="border px-4 py-2 text-center">{data.num_patients_visited || "-"}</td>
+        <td className="border px-4 py-2 whitespace-no-wrap">{data.entry_date || "0"}</td>
+        <td className="border px-4 py-2 text-center">{data.num_patients_visited || "0"}</td>
         <td className="border px-4 py-2 text-center">
-          {data.num_patients_home_quarantine || "-"}
+          {data.num_patients_home_quarantine || "0"}
         </td>
         <td className="border px-4 py-2 text-center">
-          {data.num_patients_isolation || "-"}
+          {data.num_patients_isolation || "0"}
         </td>
-        <td className="border px-4 py-2 text-center">{data.num_patient_referred || "-"}</td>
-        <td className="border px-4 py-2 text-center">{data.num_patient_confirmed_positive || "-"}</td>
+        <td className="border px-4 py-2 text-center">{data.num_patient_referred || "0"}</td>
+        <td className="border px-4 py-2 text-center">{data.num_patient_confirmed_positive || "0"}</td>
         <td className="border px-4 py-2">
           <button
             className="btn btn-default"
