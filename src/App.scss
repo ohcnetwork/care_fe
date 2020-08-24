@@ -272,6 +272,18 @@ $border: #28a745;
   }
 }
 
+.form-input{
+  padding-top: 6px;
+  padding-bottom: 6px;
+  width: 100%;
+  border-radius: 4px;
+  height: 38px;
+  &:focus {
+    border-color: $border !important;
+    box-shadow: 0 0 0 1px $border !important;
+  }
+}
+
 .shifting-page-filter-dropdown {
   .MuiFormControl-root {
     @apply mt-2;

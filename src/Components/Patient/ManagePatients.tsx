@@ -11,11 +11,11 @@ import { CSVLink } from "react-csv";
 import { useDispatch } from "react-redux";
 import SwipeableViews from 'react-swipeable-views';
 import { getAllPatient } from "../../Redux/actions";
+import { PhoneNumberField } from '../Common/HelperInputFields';
 import NavTabs from '../Common/NavTabs';
 import Pagination from "../Common/Pagination";
 import { InputSearchBox } from "../Common/SearchBox";
 import { PatientFilter } from "./PatientFilter";
-import { PhoneNumberField } from '../Common/HelperInputFields';
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -106,6 +106,15 @@ export const PatientManager = (props: any) => {
       document.getElementById("downloadlink")?.click();
     }
   };
+
+  useEffect(() => {
+    setQueryParams({
+      page: 1,
+      name: '',
+      disease_status: '',
+      phone_number: '+91'
+    });
+  }, [setQueryParams])
 
   useEffect(() => {
     setIsLoading(true);
