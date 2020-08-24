@@ -1,23 +1,22 @@
+import loadable from '@loadable/component';
+import Box from '@material-ui/core/Box';
 import Button from "@material-ui/core/Button";
 import Grid from "@material-ui/core/Grid";
-import WarningRoundedIcon from "@material-ui/icons/WarningRounded";
-import { navigate, useQueryParams } from "hookrouter";
-import loadable from '@loadable/component';
-import React, { useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
-import { downloadPatients, searchPatientFilter } from "../../Redux/actions";
-const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
-import Pagination from "../Common/Pagination";
-import { PatientFilter } from "./PatientFilter";
-import { InputSearchBox } from "../Common/SearchBox";
-import { CSVLink } from "react-csv";
-import moment from 'moment';
-import SwipeableViews from 'react-swipeable-views';
 import { makeStyles, Theme, useTheme } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
-import Box from '@material-ui/core/Box';
+import { navigate, useQueryParams } from "hookrouter";
+import moment from 'moment';
+import React, { useEffect, useState } from "react";
+import { CSVLink } from "react-csv";
+import { useDispatch } from "react-redux";
+import SwipeableViews from 'react-swipeable-views';
+import { getAllPatient } from "../../Redux/actions";
 import NavTabs from '../Common/NavTabs';
+import Pagination from "../Common/Pagination";
+import { InputSearchBox } from "../Common/SearchBox";
+import { PatientFilter } from "./PatientFilter";
+const Loading = loadable(() => import("../Common/Loading"));
+const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -96,9 +95,15 @@ export const PatientManager = (props: any) => {
 
   let managePatients: any = null;
   const handleDownload = async () => {
-    const res = await dispatch(downloadPatients());
-    setDownloadFile(res.data);
-    document.getElementById("downloadlink")?.click();
+    const params = {
+      csv: true,
+      facility: facilityId,
+    };
+    const res = await dispatch(getAllPatient(params))
+    if (res && res.data) {
+      setDownloadFile(res.data);
+      document.getElementById("downloadlink")?.click();
+    }
   };
 
   useEffect(() => {
@@ -108,14 +113,14 @@ export const PatientManager = (props: any) => {
       offset: (qParams.page ? qParams.page - 1 : 0) * RESULT_LIMIT
     }, qParams);
 
-    dispatch(searchPatientFilter(params))
+    dispatch(getAllPatient(params))
       .then((res: any) => {
         if (res && res.data) {
           setData(res.data.results);
           setTotalCount(res.data.count);
         }
         setIsLoading(false);
-      }).catch((ex: any) => {
+      }).catch(() => {
         setIsLoading(false);
       })
   }, [qParams, dispatch, facilityId]);

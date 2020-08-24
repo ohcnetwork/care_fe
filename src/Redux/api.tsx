@@ -204,9 +204,6 @@ export default {
   searchPatient: {
     path: "/api/v1/patient/search",
   },
-  searchPatientFilter: {
-    path: "/api/v1/patient",
-  },
   patientList: {
     path: "/api/v1/patient",
   },
