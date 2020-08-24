@@ -11,6 +11,7 @@ import { CSVLink } from "react-csv";
 import { useDispatch } from "react-redux";
 import SwipeableViews from 'react-swipeable-views';
 import { getAllPatient } from "../../Redux/actions";
+import { PhoneNumberField } from '../Common/HelperInputFields';
 import NavTabs from '../Common/NavTabs';
 import Pagination from "../Common/Pagination";
 import { InputSearchBox } from "../Common/SearchBox";
@@ -107,11 +108,22 @@ export const PatientManager = (props: any) => {
   };
 
   useEffect(() => {
+    setQueryParams({
+      page: 1,
+      name: '',
+      disease_status: '',
+      phone_number: '+91'
+    });
+  }, [setQueryParams])
+
+  useEffect(() => {
     setIsLoading(true);
-    const params = Object.assign({
+    const params = {
+      ...qParams,
+      phone_number: qParams.phone_number && qParams.phone_number.split(' ').length > 1 ? qParams.phone_number.replace(/[\s()-]+/gi, '') : "",
       facility: facilityId,
       offset: (qParams.page ? qParams.page - 1 : 0) * RESULT_LIMIT
-    }, qParams);
+    };
 
     dispatch(getAllPatient(params))
       .then((res: any) => {
@@ -133,11 +145,9 @@ export const PatientManager = (props: any) => {
   const handleTabChange = async (tab: number) => {
 
     updateQuery({
+      ...qParams,
       is_active: tab ? 'False' : 'True',
       page: 1,
-      name: '',
-      disease_status: '',
-      phone_number: ''
     });
   };
 
@@ -281,11 +291,10 @@ export const PatientManager = (props: any) => {
             <div className="text-sm font-semibold mt-2">
               Search by number
           </div>
-            <InputSearchBox
-              search={searchByPhone}
+            <PhoneNumberField
               value={qParams.phone_number}
-              placeholder='+919876543210'
-              errors=''
+              onChange={searchByPhone}
+              errors=""
             />
           </div>
         </div>
@@ -294,7 +303,7 @@ export const PatientManager = (props: any) => {
             <div className="text-sm font-semibold">Filter by Status</div>
             <PatientFilter filter={handleFilter} value={qParams.disease_status} />
           </div>
-          <div className="mt-2">
+          <div className="mb-2">
             <button
               type="button"
               className="inline-flex items-center mt-1 md:mt-0 lg:mt-0 px-1 py-2 ml-1  lg:px-3 border border-green-500
