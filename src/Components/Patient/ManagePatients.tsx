@@ -183,7 +183,7 @@ export const PatientManager = (props: any) => {
         >
           <div className="px-4 md:w-1/2">
             <div className="md:flex justify-between w-full">
-              <div className="text-xl font-semibold capitalize">
+              <div className="text-xl font-normal capitalize">
                 {patient.name} -   {patient.age}
               </div>
             </div>
@@ -259,7 +259,7 @@ export const PatientManager = (props: any) => {
   }
 
   return (
-    <div>
+    <div className="px-6">
       <PageTitle
         title="Patients"
         hideBack={!facilityId}
