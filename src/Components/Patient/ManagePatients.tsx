@@ -99,6 +99,8 @@ export const PatientManager = (props: any) => {
     const params = {
       csv: true,
       facility: facilityId,
+      disease_status: qParams.disease_status
+
     };
     const res = await dispatch(getAllPatient(params))
     if (res && res.data) {
