@@ -1,23 +1,23 @@
+import loadable from '@loadable/component';
+import Box from '@material-ui/core/Box';
 import Button from "@material-ui/core/Button";
 import Grid from "@material-ui/core/Grid";
-import WarningRoundedIcon from "@material-ui/icons/WarningRounded";
-import { navigate, useQueryParams } from "hookrouter";
-import loadable from '@loadable/component';
-import React, { useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
-import { downloadPatients, searchPatientFilter } from "../../Redux/actions";
-const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
-import Pagination from "../Common/Pagination";
-import { PatientFilter } from "./PatientFilter";
-import { InputSearchBox } from "../Common/SearchBox";
-import { CSVLink } from "react-csv";
-import moment from 'moment';
-import SwipeableViews from 'react-swipeable-views';
 import { makeStyles, Theme, useTheme } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
-import Box from '@material-ui/core/Box';
+import { navigate, useQueryParams } from "hookrouter";
+import moment from 'moment';
+import React, { useEffect, useState } from "react";
+import { CSVLink } from "react-csv";
+import { useDispatch } from "react-redux";
+import SwipeableViews from 'react-swipeable-views';
+import { getAllPatient } from "../../Redux/actions";
+import { PhoneNumberField } from '../Common/HelperInputFields';
 import NavTabs from '../Common/NavTabs';
+import Pagination from "../Common/Pagination";
+import { InputSearchBox } from "../Common/SearchBox";
+import { PatientFilter } from "./PatientFilter";
+const Loading = loadable(() => import("../Common/Loading"));
+const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -96,26 +96,45 @@ export const PatientManager = (props: any) => {
 
   let managePatients: any = null;
   const handleDownload = async () => {
-    const res = await dispatch(downloadPatients());
-    setDownloadFile(res.data);
-    document.getElementById("downloadlink")?.click();
+    const params = {
+      csv: true,
+      facility: facilityId,
+      disease_status: qParams.disease_status
+
+    };
+    const res = await dispatch(getAllPatient(params))
+    if (res && res.data) {
+      setDownloadFile(res.data);
+      document.getElementById("downloadlink")?.click();
+    }
   };
 
   useEffect(() => {
+    setQueryParams({
+      page: 1,
+      name: '',
+      disease_status: '',
+      phone_number: '+91'
+    });
+  }, [setQueryParams])
+
+  useEffect(() => {
     setIsLoading(true);
-    const params = Object.assign({
+    const params = {
+      ...qParams,
+      phone_number: qParams.phone_number && qParams.phone_number.split(' ').length > 1 ? qParams.phone_number.replace(/[\s()-]+/gi, '') : "",
       facility: facilityId,
       offset: (qParams.page ? qParams.page - 1 : 0) * RESULT_LIMIT
-    }, qParams);
+    };
 
-    dispatch(searchPatientFilter(params))
+    dispatch(getAllPatient(params))
       .then((res: any) => {
         if (res && res.data) {
           setData(res.data.results);
           setTotalCount(res.data.count);
         }
         setIsLoading(false);
-      }).catch((ex: any) => {
+      }).catch(() => {
         setIsLoading(false);
       })
   }, [qParams, dispatch, facilityId]);
@@ -128,11 +147,9 @@ export const PatientManager = (props: any) => {
   const handleTabChange = async (tab: number) => {
 
     updateQuery({
+      ...qParams,
       is_active: tab ? 'False' : 'True',
       page: 1,
-      name: '',
-      disease_status: '',
-      phone_number: ''
     });
   };
 
@@ -166,7 +183,7 @@ export const PatientManager = (props: any) => {
         >
           <div className="px-4 md:w-1/2">
             <div className="md:flex justify-between w-full">
-              <div className="text-xl font-semibold capitalize">
+              <div className="text-xl font-normal capitalize">
                 {patient.name} -   {patient.age}
               </div>
             </div>
@@ -235,14 +252,14 @@ export const PatientManager = (props: any) => {
     managePatients = (
       <Grid item xs={12} md={12} className={classes.displayFlex}>
         <Grid container justify="center" alignItems="center">
-          <h5> No Covid Suspects Found</h5>
+          <h5> No Patients Found</h5>
         </Grid>
       </Grid>
     );
   }
 
   return (
-    <div>
+    <div className="px-6">
       <PageTitle
         title="Patients"
         hideBack={!facilityId}
@@ -276,11 +293,10 @@ export const PatientManager = (props: any) => {
             <div className="text-sm font-semibold mt-2">
               Search by number
           </div>
-            <InputSearchBox
-              search={searchByPhone}
+            <PhoneNumberField
               value={qParams.phone_number}
-              placeholder='+919876543210'
-              errors=''
+              onChange={searchByPhone}
+              errors=""
             />
           </div>
         </div>
@@ -289,7 +305,7 @@ export const PatientManager = (props: any) => {
             <div className="text-sm font-semibold">Filter by Status</div>
             <PatientFilter filter={handleFilter} value={qParams.disease_status} />
           </div>
-          <div className="mt-2">
+          <div className="mb-2">
             <button
               type="button"
               className="inline-flex items-center mt-1 md:mt-0 lg:mt-0 px-1 py-2 ml-1  lg:px-3 border border-green-500

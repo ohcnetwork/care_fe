@@ -40,11 +40,9 @@ export default function ListView() {
   }
 
   return (
-    <div className="flex flex-col h-screen px-2 md:px-8 pb-2">
-
+    <div className="flex flex-col h-screen px-2 pb-2">
       <div className="flex items-end justify-between">
         <PageTitle title={"Shifting"} hideBack={true} />
-
         <div className="md:px-4">
           <InputSearchBox
             search={query => filterOnChange({ ...filter, patient_name: query })}
@@ -52,7 +50,6 @@ export default function ListView() {
             errors=''
           />
         </div>
-
         <div className="bg-gray-200 text-sm text-gray-500 leading-none border-2 border-gray-200 rounded-full inline-flex">
           <button
             className={"flex leading-none border-2 border-gray-200 rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-blue-400 focus:text-blue-400 rounded-r-full px-4 py-2"
@@ -74,9 +71,7 @@ export default function ListView() {
               + (showFilters ? " bg-white text-gray-800" : " bg-gray-200 text-sm text-gray-500")}
             onClick={_ => setShowFilters(show => !show)}>
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="fill-current w-4 h-4 mr-2">
-              <line x1="8" y1="6" x2="21" y2="6">
-
-              </line>
+              <line x1="8" y1="6" x2="21" y2="6"></line>
               <line x1="8" y1="12" x2="21" y2="12"> </line>
               <line x1="8" y1="18" x2="21" y2="18"> </line>
               <line x1="3" y1="6" x2="3.01" y2="6"> </line>
@@ -87,15 +82,11 @@ export default function ListView() {
           </button>
         </div>
       </div>
-
       <div className="flex mt-4 pb-2 flex-1 items-start overflow-x-scroll">
         {isLoading ? <Loading /> : boardFilter.map(board =>
           <ShiftingBoard filterProp={filter} board={board} />
         )}
       </div>
-
-
-
       <SlideOver show={showFilters} setShow={setShowFilters}>
         <div className="bg-white h-screen p-4">
           <ListFilter

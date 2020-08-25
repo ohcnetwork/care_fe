@@ -75,7 +75,7 @@ export default function ListView({ board, filterProp }: boardProps) {
     return data
       .filter(({ status }) => status === filter)
       .map((shift: any, idx: number) =>
-        <div key={`shift_${shift.id}`} className="w-full mt-2">
+        <div key={`shift_${shift.id}`} className="w-full mt-2 ">
           <div className="overflow-hidden shadow rounded-lg bg-white h-full mx-2">
             <div className="p-4 h-full flex flex-col justify-between">
               <div>
@@ -93,7 +93,7 @@ export default function ListView({ board, filterProp }: boardProps) {
                   <div className="sm:col-span-1">
                     <dt className="text-sm leading-5 font-medium text-gray-500">
                       <i className="fas fa-plane-departure mr-2"></i>
-                      Orgin facility
+                      Origin facility
                   </dt>
                     <dd className="font-bold text-sm leading-5 text-gray-900">
                       {(shift.orgin_facility_object || {}).name}
@@ -145,33 +145,29 @@ export default function ListView({ board, filterProp }: boardProps) {
       );
   }
   return (
-    <div className="rounded-md bg-gray-200 flex-shrink-0 w-3/4 md:w-1/2 lg:w-1/3 xl:w-1/4 p-2 pb-4 mr-3 h-full overflow-y-auto">
-      <div className="flex justify-between py-1">
+    <div className="bg-gray-200 py-2 mr-2 flex-shrink-0 w-3/4 md:w-1/2 lg:w-1/3 xl:w-1/4 pb-4 h-full overflow-y-auto rounded-md">
+      <div className="flex justify-between p-4 rounded mx-2 bg-white shadow">
         <h3 className="text-sm flex">{board}
-          <span className="rounded-lg ml-2 bg-gray-700 text-white px-2">
-            {totalCount || "0"}
-          </span>
         </h3>
-        <svg
-          className="h-4 fill-current text-grey-dark cursor-pointer"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-        >
-          <path d="M5 10a1.999 1.999 0 1 0 0 4 1.999 1.999 0 1 0 0-4zm7 0a1.999 1.999 0 1 0 0 4 1.999 1.999 0 1 0 0-4zm7 0a1.999 1.999 0 1 0 0 4 1.999 1.999 0 1 0 0-4z" />
-        </svg>
+        <span className="rounded-lg ml-2 bg-gray-700 text-white px-2">
+          {totalCount || "0"}
+        </span>
       </div>
       <div className="text-sm mt-2 pb-2 flex flex-col">
-        {isLoading ? <div className="border border-gray-300 bg-white shadow rounded-md p-4 max-w-sm w-full mx-auto">
-          <div className="animate-pulse flex space-x-4 ">
-            <div className="flex-1 space-y-4 py-1">
-              <div className="h-4 bg-gray-400 rounded w-3/4"></div>
-              <div className="space-y-2">
-                <div className="h-4 bg-gray-400 rounded"></div>
-                <div className="h-4 bg-gray-400 rounded w-5/6"></div>
+        {isLoading ?
+          <div className="m-1">
+            <div className="border border-gray-300 bg-white shadow rounded-md p-4 max-w-sm w-full mx-auto">
+              <div className="animate-pulse flex space-x-4 ">
+                <div className="flex-1 space-y-4 py-1">
+                  <div className="h-4 bg-gray-400 rounded w-3/4"></div>
+                  <div className="space-y-2">
+                    <div className="h-4 bg-gray-400 rounded"></div>
+                    <div className="h-4 bg-gray-400 rounded w-5/6"></div>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </div> : data?.length > 0 ? patientFilter(board) : <p className="mx-auto p-4">No Patients to Show</p>}
+          </div> : data?.length > 0 ? patientFilter(board) : <p className="mx-auto p-4">No Patients to Show</p>}
         {!isLoading && data?.length < (totalCount || 0) &&
           <button onClick={_ => handlePagination(currentPage + 1, limit)} className="mx-auto my-4 p-2 px-4 bg-gray-100 rounded-md hover:bg-white">More...</button>}
       </div>
