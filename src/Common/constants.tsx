@@ -239,5 +239,14 @@ export const ICMR_CATEGORY = [
   "Cat 4",
   "Cat 5a",
   "Cat 5b",
+]
 
+export const TELEMEDICINE_ACTIONS = [
+  {id: 10, text: 'PENDING', desc: "Pending"},
+  {id: 30, text: 'SPECIALIST_REQUIRED', desc: "Specialist Required"},
+  {id: 40, text: 'PLAN_FOR_HOME_CARE', desc: "Plan for Home Care"},
+  {id: 50, text: 'FOLLOW_UP_NOT_REQUIRED', desc: "Follow Up Not Required"},
+  {id: 60, text: 'COMPLETE', desc: "Complete"},
+  {id: 70, text: 'REVIEW', desc: "Review"},
+  {id: 80, text: 'NOT_REACHABLE', desc: "Not Reachable"}
 ]

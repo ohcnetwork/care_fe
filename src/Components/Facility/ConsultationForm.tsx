@@ -17,6 +17,7 @@ import {
   CONSULTATION_SUGGESTION,
   PATIENT_CATEGORY,
   SYMPTOM_CHOICES,
+  TELEMEDICINE_ACTIONS
 } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
@@ -35,14 +36,16 @@ import {
   SelectField,
   TextInputField,
 } from "../Common/HelperInputFields";
-import loadable from '@loadable/component';
-const Loading = loadable( () => import("../Common/Loading"));
-const PageTitle = loadable( () => import("../Common/PageTitle"));
+
 import { FacilityModel } from "./models";
 import { navigate } from "hookrouter";
 
 import { make as PrescriptionBuilder } from "../Common/PrescriptionBuilder.gen";
 import { t as Prescription_t } from '@coronasafe/prescription-builder/src/Types/Prescription__Prescription.gen';
+
+import loadable from '@loadable/component';
+const Loading = loadable( () => import("../Common/Loading"));
+const PageTitle = loadable( () => import("../Common/PageTitle"));
 
 const initForm: any = {
   hasSymptom: false,
@@ -66,7 +69,8 @@ const initForm: any = {
   prescribed_medication: "",
   consultation_notes: "",
   ip_no: "",
-  discharge_advice: []
+  discharge_advice: [],
+  is_telemedicine: "false"
 };
 
 const initError = Object.assign(
@@ -166,7 +170,8 @@ export const ConsultationForm = (props: any) => {
             ip_no: res.data.ip_no ? res.data.ip_no : "",
             diagnosis: res.data.diagnosis ? res.data.diagnosis : "",
             verified_by: res.data.verified_by ? res.data.verified_by : "",
-            OPconsultation: res.data.consultation_notes
+            OPconsultation: res.data.consultation_notes,
+            is_telemedicine: `${res.data.is_telemedicine}`
           };
           dispatch({ type: "set_form", form: formData });
         } else {
@@ -280,7 +285,10 @@ export const ConsultationForm = (props: any) => {
         facility: facilityId,
         referred_to:
           state.form.suggestion === "R" ? state.form.referred_to : undefined,
-        consultation_notes: state.form.OPconsultation
+        consultation_notes: state.form.OPconsultation,
+        is_telemedicine: state.form.is_telemedicine,
+        action: state.form.action,
+        review_time: state.form.review_time
       };
       const res = await dispatchAction(
         id ? updateConsultation(id, data) : createConsultation(data)
@@ -633,8 +641,69 @@ export const ConsultationForm = (props: any) => {
                     errors={state.errors.diagnosis}
                 />
               </div>
+              {/* Telemedicine Fields */}
+              <div className="flex">
+                <div className="flex-1">
+                  <InputLabel id="admitted-label">Telemedicine</InputLabel>
+                  <RadioGroup
+                    aria-label="covid"
+                    name="is_telemedicine"
+                    value={state.form.is_telemedicine}
+                    onChange={handleChange}
+                    style={{ padding: "0px 5px" }}
+                  >
+                    <Box display="flex" flexDirection="row">
+                      <FormControlLabel
+                        value="true"
+                        control={<Radio />}
+                        label="Yes"
+                      />
+                      <FormControlLabel
+                        value="false"
+                        control={<Radio />}
+                        label="No"
+                      />
+                    </Box>
+                  </RadioGroup>
+                  <ErrorHelperText error={state.errors.is_telemedicine} />
+                </div>
 
-
+                {JSON.parse(state.form.is_telemedicine) && (
+                  <div className="flex-1">
+                    <InputLabel id="review_time-label">Review Time</InputLabel>
+                    <TextInputField
+                        name="review_time"
+                        variant="outlined"
+                        margin="dense"
+                        type="number"
+                        InputLabelProps={{ shrink: !! state.form.review_time}}
+                        value={state.form.review_time}
+                        onChange={handleChange}
+                        errors={state.errors.review_time}
+                    />
+                  </div>
+                )}
+              </div>
+              {JSON.parse(state.form.is_telemedicine) &&
+              <div>
+                <InputLabel
+                  id="action-label"
+                  style={{ fontWeight: "bold", fontSize: "18px" }}
+                >
+                  Action
+                </InputLabel>
+                <NativeSelectField
+                  name="action"
+                  variant="outlined"
+                  value={state.form.action}
+                  optionKey="text"
+                  optionValue="desc"
+                  options={TELEMEDICINE_ACTIONS}
+                  onChange={handleChange}
+                />
+                <ErrorHelperText error={state.errors.action} />
+              </div>}
+              {/* End of Telemedicine fields */}
               <div className="mt-4 flex justify-between">
                 <Button
                   color="default"
