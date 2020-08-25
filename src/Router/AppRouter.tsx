@@ -136,7 +136,7 @@ let menus = [
     icon: "fas fa-hospital"
   },
   {
-    title: 'Patients / Suspects',
+    title: 'Patients',
     link: '/patients',
     icon: "fas fa-user-injured"
   },

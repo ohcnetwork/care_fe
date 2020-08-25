@@ -252,7 +252,7 @@ export const PatientManager = (props: any) => {
     managePatients = (
       <Grid item xs={12} md={12} className={classes.displayFlex}>
         <Grid container justify="center" alignItems="center">
-          <h5> No Covid Suspects Found</h5>
+          <h5> No Patients Found</h5>
         </Grid>
       </Grid>
     );
