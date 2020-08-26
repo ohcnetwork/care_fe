@@ -56,7 +56,7 @@
     "@types/react-swipeable-views": "^0.13.0",
     "@types/react-virtualized": "^9.21.10",
     "@typescript-eslint/eslint-plugin": "^3.8.0",
-    "@typescript-eslint/parser": "^3.8.0",
+    "@typescript-eslint/parser": "^3.10.1",
     "axios": "^0.19.2",
     "clean-webpack-plugin": "^3.0.0",
     "css-loader": "^4.2.1",
