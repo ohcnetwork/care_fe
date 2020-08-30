@@ -317,6 +317,16 @@ export const ConsultationForm = (props: any) => {
     dispatch({ type: "set_form", form });
   };
 
+  const handleDecisionChange = (e: any) => {
+    const form = { ...state.form };
+    const { name, value } = e.target;
+    form[name] = value;
+    if (value === 'A') {
+      form.admitted = "true";
+    }
+    dispatch({ type: "set_form", form });
+  };
+
   const handleSymptomChange = (e: any, child?: any) => {
     const form = { ...state.form };
     const { value } = e?.target;
@@ -488,7 +498,7 @@ export const ConsultationForm = (props: any) => {
                     variant="outlined"
                     value={state.form.suggestion}
                     options={suggestionTypes}
-                    onChange={handleChange}
+                    onChange={handleDecisionChange}
                   />
                   <ErrorHelperText error={state.errors.suggestion} />
                 </div>
