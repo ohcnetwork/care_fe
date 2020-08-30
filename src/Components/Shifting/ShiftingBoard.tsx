@@ -92,6 +92,24 @@ export default function ListView({ board, filterProp }: boardProps) {
                 <dl className="grid grid-cols-1 col-gap-1 row-gap-2 sm:grid-cols-1">
                   <div className="sm:col-span-1">
                     <dt className="text-sm leading-5 font-medium text-gray-500">
+                      <i className="fas fa-birthday-cake mr-2"/>
+                      Date of Birth
+                    </dt>
+                    <dd className="font-bold text-sm leading-5 text-gray-900">
+                      { moment(shift.patient_object.date_of_birth).format('DD/MM/YYYY') || ''}
+                    </dd>
+                  </div>
+                  <div className="sm:col-span-1">
+                    <dt className="text-sm leading-5 font-medium text-gray-500">
+                      <i className="fas fa-mobile mr-2"/>
+                      Phone Number
+                    </dt>
+                    <dd className="font-bold text-sm leading-5 text-gray-900">
+                      {shift.patient_object.phone_number || ''}
+                    </dd>
+                  </div>
+                  <div className="sm:col-span-1">
+                    <dt className="text-sm leading-5 font-medium text-gray-500">
                       <i className="fas fa-plane-departure mr-2"></i>
                       Origin facility
                   </dt>

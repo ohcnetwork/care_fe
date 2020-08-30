@@ -1,7 +1,5 @@
 import React, { useState, useCallback } from "react";
 import loadable from '@loadable/component';
-const Loading = loadable( () => import("../Common/Loading"));
-const PageTitle = loadable( () => import("../Common/PageTitle"));
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getShiftDetails, deleteShiftRecord } from "../../Redux/actions";
@@ -15,6 +13,8 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import * as Notification from "../../Utils/Notifications.js";
+const Loading = loadable( () => import("../Common/Loading"));
+const PageTitle = loadable( () => import("../Common/PageTitle"));
 
 export default function ShiftDetails(props: any) {
   
