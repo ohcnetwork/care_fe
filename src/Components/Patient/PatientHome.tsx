@@ -18,8 +18,6 @@ import {
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
 import AlertDialog from "../Common/AlertDialog";
-const Loading = loadable( () => import("../Common/Loading"));
-const PageTitle = loadable( () => import("../Common/PageTitle"));
 import Pagination from "../Common/Pagination";
 import { ConsultationCard } from "../Facility/ConsultationCard";
 import { ConsultationModel } from "../Facility/models";
@@ -32,6 +30,8 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import {TextInputField} from "../Common/HelperInputFields";
 import { validateEmailAddress } from "../../Common/validation";
+const Loading = loadable( () => import("../Common/Loading"));
+const PageTitle = loadable( () => import("../Common/PageTitle"));
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -471,6 +471,10 @@ export const PatientHome = (props: any) => {
             <div>
               <span className="font-semibold leading-relaxed">Local Body: </span>
               {patientData.local_body_object?.name || '-'}
+            </div>
+            <div>
+              <span className="font-semibold leading-relaxed">Ward : </span>
+              { patientData.ward || '-'}
             </div>
           </>)}
           <div>

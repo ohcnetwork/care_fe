@@ -66,6 +66,7 @@ const initForm: any = {
   state: "",
   district: "",
   local_body: "",
+  ward:"",
   address: "",
   allergies: "",
   pincode: "",
@@ -186,6 +187,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             district: res.data.district ? res.data.district : '',
             blood_group: res.data.blood_group ? res.data.blood_group : '',
             local_body: res.data.local_body ? res.data.local_body : '',
+            ward: res.data.ward ? res.data.ward : '',
             medical_history: [],
             is_antenatal: res.data.is_antenatal ? res.data.is_antenatal : 'false',
             allergies: res.data.allergies ? res.data.allergies : '',
@@ -280,6 +282,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             invalidForm = true;
           }
           return;
+        case "ward":
+          if (!state.form[field]) {
+            errors[field] = "Please enter ward number";
+            invalidForm = true;
+          }
+          return;
         case "state":
           if (state.form.nationality === "India" && !Number(state.form[field])) {
             errors[field] = "Please enter the state";
@@ -365,6 +373,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         state: state.form.nationality === "India" ? state.form.state : undefined,
         district: state.form.nationality === "India" ? state.form.district : undefined,
         local_body: state.form.nationality === "India" ? state.form.local_body : undefined,
+        ward: state.form.ward,
         address: state.form.address ? state.form.address : undefined,
         present_health: state.form.present_health ? state.form.present_health : undefined,
         contact_with_confirmed_carrier: JSON.parse(state.form.contact_with_confirmed_carrier),
@@ -759,6 +768,18 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     options={bloodGroups}
                     onChange={handleChange}
                     errors={state.errors.blood_group}
+                  />
+                </div>
+                <div>
+                  <InputLabel id="name-label">Ward*</InputLabel>
+                  <TextInputField
+                      name="ward"
+                      variant="outlined"
+                      margin="dense"
+                      type="text"
+                      value={state.form.ward}
+                      onChange={handleChange}
+                      errors={state.errors.ward}
                   />
                 </div>
 

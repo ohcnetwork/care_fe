@@ -4,6 +4,7 @@ import Button from "@material-ui/core/Button";
 import Grid from "@material-ui/core/Grid";
 import { makeStyles, Theme, useTheme } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
+import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 import { navigate, useQueryParams } from "hookrouter";
 import moment from 'moment';
 import React, { useEffect, useState } from "react";
@@ -95,19 +96,27 @@ export const PatientManager = (props: any) => {
   const tabValue = qParams.is_active === 'False' ? 1 : 0;
 
   let managePatients: any = null;
-  const handleDownload = async () => {
-    const params = {
+  const handleDownload = async (isFiltered: boolean) => {
+    const params = isFiltered ? {
+      disease_status: qParams.disease_status,
+      is_active: qParams.is_active
+    } : {};
+    const res = await dispatch(getAllPatient({
+      ...params,
       csv: true,
-      facility: facilityId,
-      disease_status: qParams.disease_status
-
-    };
-    const res = await dispatch(getAllPatient(params))
+      facility: facilityId
+    }))
     if (res && res.data) {
       setDownloadFile(res.data);
       document.getElementById("downloadlink")?.click();
     }
   };
+  const handleDownloadAll = async () => {
+    await handleDownload(false)
+  }
+  const handleDownloadFiltered = async () => {
+    await handleDownload(true)
+  }
 
   useEffect(() => {
     setQueryParams({
@@ -264,7 +273,16 @@ export const PatientManager = (props: any) => {
         title="Patients"
         hideBack={!facilityId}
         className="mt-4" />
-      <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3 my-4 px-2 md:px-0">
+      <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3 my-4 px-2 md:px-0 relative">
+        <div className="title-text">
+          <Button
+            color="primary"
+            onClick={handleDownloadAll}
+            size="small"
+            startIcon={<ArrowDownwardIcon>download</ArrowDownwardIcon>}>
+            All Patients
+          </Button>
+        </div>
         <div className="bg-white overflow-hidden shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">
             <dl>
@@ -306,17 +324,15 @@ export const PatientManager = (props: any) => {
             <PatientFilter filter={handleFilter} value={qParams.disease_status} />
           </div>
           <div className="mb-2">
-            <button
-              type="button"
-              className="inline-flex items-center mt-1 md:mt-0 lg:mt-0 px-1 py-2 ml-1  lg:px-3 border border-green-500
-               text-sm leading-4 font-medium rounded-md text-green-700 bg-white hover:text-green-500
-               focus:outline-none focus:border-green-300 focus:shadow-outline-blue active:text-green-800
-               active:bg-gray-50 transition
-               ease-in-out duration-150 hover:shadow"
-              onClick={handleDownload}
+            <Button
+              variant="outlined"
+              color="primary"
+              className="bg-white"
+              onClick={handleDownloadFiltered}
+              startIcon={<ArrowDownwardIcon>download</ArrowDownwardIcon>}
             >
-              Download Patient List
-          </button>
+              {tabValue === 0 ? 'Live' : 'Discharged'} List
+              </Button>
             <CSVLink
               id="downloadlink"
               className="hidden"
