@@ -158,6 +158,8 @@ export const ADMITTED_TO = [
   "Isolation Room",
   "ICU",
   "ICU with Ventilator",
+    "Gynaecology Ward",
+    "Paediatric Ward"
 ];
 
 export const PATIENT_CATEGORY = [
