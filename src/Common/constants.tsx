@@ -204,8 +204,8 @@ export const ROLE_STATUS_MAP = {
 };
 
 export const DISEASE_STATUS = [
-  "SUSPECTED",
   "POSITIVE",
+  "SUSPECTED",
   "NEGATIVE",
   "RECOVERY",
   "RECOVERED",
