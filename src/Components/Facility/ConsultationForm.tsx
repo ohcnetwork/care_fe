@@ -45,10 +45,6 @@ import { FacilityModel } from "./models";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
-import loadable from '@loadable/component';
-const Loading = loadable( () => import("../Common/Loading"));
-const PageTitle = loadable( () => import("../Common/PageTitle"));
-
 const initForm: any = {
   hasSymptom: false,
   otherSymptom: false,
