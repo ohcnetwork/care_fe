@@ -99,13 +99,13 @@ export const PatientManager = (props: any) => {
   const handleDownload = async (isFiltered: boolean) => {
     const params = isFiltered ? {
       disease_status: qParams.disease_status,
-      is_active: qParams.is_active
+      is_active: qParams.is_active || 'True'
     } : {};
     const res = await dispatch(getAllPatient({
       ...params,
       csv: true,
       facility: facilityId
-    }))
+    }, 'downloadPatients'))
     if (res && res.data) {
       setDownloadFile(res.data);
       document.getElementById("downloadlink")?.click();
@@ -136,7 +136,7 @@ export const PatientManager = (props: any) => {
       offset: (qParams.page ? qParams.page - 1 : 0) * RESULT_LIMIT
     };
 
-    dispatch(getAllPatient(params))
+    dispatch(getAllPatient(params, 'listPatients'))
       .then((res: any) => {
         if (res && res.data) {
           setData(res.data.results);
@@ -323,7 +323,7 @@ export const PatientManager = (props: any) => {
             <div className="text-sm font-semibold">Filter by Status</div>
             <PatientFilter filter={handleFilter} value={qParams.disease_status} />
           </div>
-          <div className="mb-2">
+          <div className="mb-1">
             <Button
               variant="outlined"
               color="primary"

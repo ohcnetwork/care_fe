@@ -99,8 +99,8 @@ export const searchPatient = (params: object) => {
 export const searchUser = (params: object) => {
   return fireRequest('searchUser', [], params);
 };
-export const getAllPatient = (params: object) => {
-  return fireRequest('patientList', [], params);
+export const getAllPatient = (params: object, altKey: string) => {
+  return fireRequest('patientList', [], params, null, altKey);
 };
 export const createPatient = (params: object) => {
   return fireRequest('addPatient', [], params);
