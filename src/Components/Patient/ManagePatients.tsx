@@ -99,7 +99,7 @@ export const PatientManager = (props: any) => {
   const handleDownload = async (isFiltered: boolean) => {
     const params = isFiltered ? {
       disease_status: qParams.disease_status,
-      is_active: qParams.is_active
+      is_active: qParams.is_active || 'True'
     } : {};
     const res = await dispatch(getAllPatient({
       ...params,
