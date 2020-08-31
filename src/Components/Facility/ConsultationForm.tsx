@@ -1,3 +1,5 @@
+import { t as Prescription_t } from '@coronasafe/prescription-builder/src/Types/Prescription__Prescription.gen';
+import loadable from '@loadable/component';
 import {
   Box,
   Button,
@@ -6,9 +8,10 @@ import {
   FormControlLabel,
   InputLabel,
   Radio,
-  RadioGroup,
+  RadioGroup
 } from "@material-ui/core";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
+import { navigate } from "hookrouter";
 import moment from "moment";
 import React, { useCallback, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -23,7 +26,7 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   createConsultation,
   getConsultation,
-  updateConsultation,
+  updateConsultation
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { FacilitySelect } from "../Common/FacilitySelect";
@@ -34,14 +37,13 @@ import {
   MultiSelectField,
   NativeSelectField,
   SelectField,
-  TextInputField,
+  TextInputField
 } from "../Common/HelperInputFields";
-
-import { FacilityModel } from "./models";
-import { navigate } from "hookrouter";
-
 import { make as PrescriptionBuilder } from "../Common/PrescriptionBuilder.gen";
-import { t as Prescription_t } from '@coronasafe/prescription-builder/src/Types/Prescription__Prescription.gen';
+import { FacilityModel } from "./models";
+
+const Loading = loadable(() => import("../Common/Loading"));
+const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 import loadable from '@loadable/component';
 const Loading = loadable( () => import("../Common/Loading"));
@@ -59,7 +61,7 @@ const initForm: any = {
   admitted: "false",
   admitted_to: "",
   category: "",
-  admission_date: null,
+  admission_date: new Date(),
   discharge_date: null,
   referred_to: "",
   diagnosis: "",
@@ -260,22 +262,16 @@ export const ConsultationForm = (props: any) => {
       setIsLoading(true);
       const data = {
         symptoms: state.form.symptoms,
-        other_symptoms: state.form.otherSymptom
-          ? state.form.other_symptoms
-          : undefined,
-        symptoms_onset_date: state.form.hasSymptom
-          ? state.form.symptoms_onset_date
-          : undefined,
+        other_symptoms: state.form.otherSymptom ? state.form.other_symptoms : undefined,
+        symptoms_onset_date: state.form.hasSymptom ? state.form.symptoms_onset_date : undefined,
         suggestion: state.form.suggestion,
         admitted: JSON.parse(state.form.admitted),
-        admitted_to: JSON.parse(state.form.admitted)
-          ? state.form.admitted_to
-          : undefined,
+        admitted_to: JSON.parse(state.form.admitted) ? state.form.admitted_to : undefined,
+        admission_date: JSON.parse(state.form.admitted) ? state.form.admission_date : undefined,
         category: state.form.category,
         examination_details: state.form.examination_details,
         existing_medication: state.form.existing_medication,
         prescribed_medication: state.form.prescribed_medication,
-        admission_date: state.form.admission_date,
         discharge_date: state.form.discharge_date,
         ip_no: state.form.ip_no,
         diagnosis: state.form.diagnosis,
@@ -283,8 +279,7 @@ export const ConsultationForm = (props: any) => {
         discharge_advice: dischargeAdvice,
         patient: patientId,
         facility: facilityId,
-        referred_to:
-          state.form.suggestion === "R" ? state.form.referred_to : undefined,
+        referred_to: state.form.suggestion === "R" ? state.form.referred_to : undefined,
         consultation_notes: state.form.OPconsultation,
         is_telemedicine: state.form.is_telemedicine,
         action: state.form.action,
@@ -314,6 +309,16 @@ export const ConsultationForm = (props: any) => {
     const form = { ...state.form };
     const { name, value } = e.target;
     form[name] = value;
+    dispatch({ type: "set_form", form });
+  };
+
+  const handleDecisionChange = (e: any) => {
+    const form = { ...state.form };
+    const { name, value } = e.target;
+    form[name] = value;
+    if (value === 'A') {
+      form.admitted = "true";
+    }
     dispatch({ type: "set_form", form });
   };
 
@@ -488,7 +493,7 @@ export const ConsultationForm = (props: any) => {
                     variant="outlined"
                     value={state.form.suggestion}
                     options={suggestionTypes}
-                    onChange={handleChange}
+                    onChange={handleDecisionChange}
                   />
                   <ErrorHelperText error={state.errors.suggestion} />
                 </div>
@@ -591,35 +596,35 @@ export const ConsultationForm = (props: any) => {
               </div>
 
               <div>
-                  <InputLabel id="refered-label">IP number</InputLabel>
-                  <TextInputField
-                      name="ip_no"
-                      variant="outlined"
-                      margin="dense"
-                      type="string"
-                      InputLabelProps={{ shrink: !!state.form.ip_no}}
-                      value={state.form.ip_no}
-                      onChange={handleChange}
-                      errors={state.errors.ip_no}
-                  />
+                <InputLabel id="refered-label">IP number</InputLabel>
+                <TextInputField
+                  name="ip_no"
+                  variant="outlined"
+                  margin="dense"
+                  type="string"
+                  InputLabelProps={{ shrink: !!state.form.ip_no }}
+                  value={state.form.ip_no}
+                  onChange={handleChange}
+                  errors={state.errors.ip_no}
+                />
               </div>
               <div>
                 <InputLabel id="exam-details-label">
                   Verified By
                 </InputLabel>
                 <MultilineInputField
-                    rows={3}
-                    name="verified_by"
-                    variant="outlined"
-                    margin="dense"
-                    type="text"
-                    placeholder="Attending Doctors Name and Designation"
-                    InputLabelProps={{
-                      shrink: !!state.form.verified_by,
-                    }}
-                    value={state.form.verified_by}
-                    onChange={handleChange}
-                    errors={state.errors.verified_by}
+                  rows={3}
+                  name="verified_by"
+                  variant="outlined"
+                  margin="dense"
+                  type="text"
+                  placeholder="Attending Doctors Name and Designation"
+                  InputLabelProps={{
+                    shrink: !!state.form.verified_by,
+                  }}
+                  value={state.form.verified_by}
+                  onChange={handleChange}
+                  errors={state.errors.verified_by}
                 />
               </div>
               <div>
@@ -627,18 +632,18 @@ export const ConsultationForm = (props: any) => {
                   Diagnosis
                 </InputLabel>
                 <MultilineInputField
-                    rows={5}
-                    name="diagnosis"
-                    variant="outlined"
-                    margin="dense"
-                    type="text"
-                    placeholder="Information optional"
-                    InputLabelProps={{
-                      shrink: !!state.form.diagnosis,
-                    }}
-                    value={state.form.diagnosis}
-                    onChange={handleChange}
-                    errors={state.errors.diagnosis}
+                  rows={5}
+                  name="diagnosis"
+                  variant="outlined"
+                  margin="dense"
+                  type="text"
+                  placeholder="Information optional"
+                  InputLabelProps={{
+                    shrink: !!state.form.diagnosis,
+                  }}
+                  value={state.form.diagnosis}
+                  onChange={handleChange}
+                  errors={state.errors.diagnosis}
                 />
               </div>
               {/* Telemedicine Fields */}
@@ -672,37 +677,37 @@ export const ConsultationForm = (props: any) => {
                   <div className="flex-1">
                     <InputLabel id="review_time-label">Review Time</InputLabel>
                     <TextInputField
-                        name="review_time"
-                        variant="outlined"
-                        margin="dense"
-                        type="number"
-                        InputLabelProps={{ shrink: !! state.form.review_time}}
-                        value={state.form.review_time}
-                        onChange={handleChange}
-                        errors={state.errors.review_time}
+                      name="review_time"
+                      variant="outlined"
+                      margin="dense"
+                      type="number"
+                      InputLabelProps={{ shrink: !!state.form.review_time }}
+                      value={state.form.review_time}
+                      onChange={handleChange}
+                      errors={state.errors.review_time}
                     />
                   </div>
                 )}
               </div>
               {JSON.parse(state.form.is_telemedicine) &&
-              <div>
-                <InputLabel
-                  id="action-label"
-                  style={{ fontWeight: "bold", fontSize: "18px" }}
-                >
-                  Action
+                <div>
+                  <InputLabel
+                    id="action-label"
+                    style={{ fontWeight: "bold", fontSize: "18px" }}
+                  >
+                    Action
                 </InputLabel>
-                <NativeSelectField
-                  name="action"
-                  variant="outlined"
-                  value={state.form.action}
-                  optionKey="text"
-                  optionValue="desc"
-                  options={TELEMEDICINE_ACTIONS}
-                  onChange={handleChange}
-                />
-                <ErrorHelperText error={state.errors.action} />
-              </div>}
+                  <NativeSelectField
+                    name="action"
+                    variant="outlined"
+                    value={state.form.action}
+                    optionKey="text"
+                    optionValue="desc"
+                    options={TELEMEDICINE_ACTIONS}
+                    onChange={handleChange}
+                  />
+                  <ErrorHelperText error={state.errors.action} />
+                </div>}
               {/* End of Telemedicine fields */}
               <div className="mt-4 flex justify-between">
                 <Button
