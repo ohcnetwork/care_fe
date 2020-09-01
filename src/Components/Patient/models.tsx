@@ -14,6 +14,7 @@ export interface DischargeSummaryModel {
 }
 
 export interface PatientModel {
+    test_id?: string;
   id?: number;
   name?: string;
   age?: number;

@@ -42,6 +42,7 @@ export interface OptionsType {
 export interface ConsultationModel {
   admission_date?: string;
   admitted?: boolean;
+  test_id?: string;
   admitted_to?: string;
   category?: string;
   created_date?: string;
