@@ -344,5 +344,13 @@ export default {
   getShiftDetails: {
     path: "/api/v1/shift",
     method: "GET",
+  },
+  completeTransfer: {
+    path: "/api/v1/shift/{externalId}/transfer/",
+    method: "POST",
+  },
+  downloadShiftRequests: {
+    path: "/api/v1/shift/?csv=1",
+    method: "GET",
   }
 };
