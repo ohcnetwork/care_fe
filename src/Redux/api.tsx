@@ -350,7 +350,7 @@ export default {
     method: "POST",
   },
   downloadShiftRequests: {
-    path: "/api/v1/shift/?csv=1",
+    path: "/api/v1/shift/",
     method: "GET",
   }
 };

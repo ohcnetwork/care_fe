@@ -11,7 +11,7 @@ import GetAppIcon from '@material-ui/icons/GetApp';
 
 const limit = 30;
 
-const formatFilter = (filter: any) => {
+const formatFilter = (filter: any, csv: boolean = false) => {
   return {
     status: filter.status === 'Show All' ? null : filter.status,
     facility: '',
@@ -71,7 +71,7 @@ export default function ListView({ board, filterProp }: boardProps) {
     });
   }
   const triggerDownload = async () => {
-    const res = await dispatch(downloadShiftRequests(formatFilter({ ...filterProp, status: board })));
+    const res = await dispatch(downloadShiftRequests({...formatFilter({ ...filterProp, status: board }), csv:1}));
     setDownloadFile(res.data);
     document.getElementById("shiftRequestsDownloader")?.click();
   }
