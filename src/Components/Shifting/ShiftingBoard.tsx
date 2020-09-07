@@ -73,7 +73,7 @@ export default function ListView({ board, filterProp }: boardProps) {
   const triggerDownload = async () => {
     const res = await dispatch(downloadShiftRequests({...formatFilter({ ...filterProp, status: board }), csv:1}));
     setDownloadFile(res.data);
-    document.getElementById("shiftRequestsDownloader")?.click();
+    document.getElementById(`shiftRequests-${board}`)?.click();
   }
   useEffect(() => {
     setFilter(filterProp)
@@ -89,7 +89,6 @@ export default function ListView({ board, filterProp }: boardProps) {
     setCurrentPage(page);
     setIsLoading(loading => reduceLoading("MORE", loading));
     dispatch(getShiftRequests(formatFilter({ ...filterProp, status: board, offset: offset }), board)).then((res: any) => {
-      console.log("Received:" + board)
       if (res && res.data) {
         setData(data => [...data, ...res.data.results]);
         setTotalCount(res.data.count);
@@ -271,10 +270,10 @@ export default function ListView({ board, filterProp }: boardProps) {
       </div>
       <CSVLink
         data={downloadFile}
-        filename={`shift-requests-${now}.csv`}
+        filename={`shift-requests-${board}-${now}.csv`}
         target="_blank"
         className="hidden"
-        id="shiftRequestsDownloader"
+        id={`shiftRequests-${board}`}
       />
     </div>
   );
