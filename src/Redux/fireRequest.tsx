@@ -84,7 +84,7 @@ export const fireRequest = (
         dispatch(fetchDataRequest(key));
         return axiosApiCall[request.method.toLowerCase()](request.path, {
             ...params,
-            cancelToken: isRunning[altKey? altKey : key].token
+            cancelToken: isRunning[altKey ? altKey : key].token
         }).then((response: any) => {
             dispatch(fetchResponseSuccess(key, response.data));
             return response;
@@ -92,13 +92,13 @@ export const fireRequest = (
             dispatch(fetchDataRequestError(key, error));
 
             if (error.response) {
-                
+
                 // temporarily don't show invalid phone number error on duplicate patient check
                 if (error.response.status === 400 && key === "searchPatient") {
                     return;
                 }
 
-                // currentUser is ignored because on the first page load 
+                // currentUser is ignored because on the first page load
                 // 403 error is displayed for invalid credential.
                 if (error.response.status === 403 && key === "currentUser") {
                     if (localStorage.getItem('care_access_token')) {
@@ -108,7 +108,7 @@ export const fireRequest = (
                 }
 
                 // 400 Bad Request Error
-                if (error.response.status === 400) {
+                if (error.response.status === 400 || 406) {
                     Notification.BadRequest({
                         errs: error.response.data
                     });
