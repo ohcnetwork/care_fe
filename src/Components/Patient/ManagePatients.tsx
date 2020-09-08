@@ -188,7 +188,7 @@ export const PatientManager = (props: any) => {
         <div
           key={`usr_${patient.id}`}
           onClick={() => navigate(patientUrl)}
-          className="w-full pb-2 cursor-pointer border-b md:flex justify-between items-center mb-3"
+          className={"w-full pb-2 cursor-pointer border-b md:flex justify-between items-center mb-3 " + (patient.disease_status == "POSITIVE" ? "bg-red-100" : "")}
         >
           <div className="px-4 md:w-1/2">
             <div className="md:flex justify-between w-full">
@@ -231,9 +231,9 @@ export const PatientManager = (props: any) => {
               )}
             </div>
             <div className="px-2">
-              <Button size="small" variant="outlined" fullWidth>
+              <div className="btn btn-default">
                 Details
-            </Button>
+              </div>
             </div>
           </div>
         </div >
