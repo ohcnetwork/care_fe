@@ -33,14 +33,14 @@ interface boardProps {
 
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
-const reduceLoading = (action:string, current:any) => {
+const reduceLoading = (action: string, current: any) => {
   switch (action) {
-    case "MORE" : 
-      return {...current, more: true}
-    case "BOARD" : 
-      return {...current, board: true}
-    case "COMPLETE" : 
-      return {board: false, more: false}
+    case "MORE":
+      return { ...current, more: true }
+    case "BOARD":
+      return { ...current, board: true }
+    case "COMPLETE":
+      return { board: false, more: false }
 
   }
 }
@@ -53,8 +53,8 @@ export default function ListView({ board, filterProp }: boardProps) {
   const [downloadFile, setDownloadFile] = useState("");
   const [totalCount, setTotalCount] = useState();
   const [currentPage, setCurrentPage] = useState(1);
-  const [isLoading, setIsLoading] = useState({board: false, more: false});
-  const [modalFor, setModalFor] = useState({externalId: undefined, loading: false});
+  const [isLoading, setIsLoading] = useState({ board: false, more: false });
+  const [modalFor, setModalFor] = useState({ externalId: undefined, loading: false });
 
 
   const filterOnChange = (filterData: any) => {
@@ -71,7 +71,7 @@ export default function ListView({ board, filterProp }: boardProps) {
     });
   }
   const triggerDownload = async () => {
-    const res = await dispatch(downloadShiftRequests({...formatFilter({ ...filterProp, status: board }), csv:1}));
+    const res = await dispatch(downloadShiftRequests({ ...formatFilter({ ...filterProp, status: board }), csv: 1 }));
     setDownloadFile(res.data);
     document.getElementById(`shiftRequests-${board}`)?.click();
   }
@@ -99,10 +99,10 @@ export default function ListView({ board, filterProp }: boardProps) {
   };
 
   const handleTransferComplete = () => {
-    setModalFor({...modalFor, loading: true}); 
-    dispatch(completeTransfer({externalId: modalFor}))
+    setModalFor({ ...modalFor, loading: true });
+    dispatch(completeTransfer({ externalId: modalFor }))
       .then(() => {
-        setModalFor({externalId: undefined, loading: false})
+        setModalFor({ externalId: undefined, loading: false })
         fetchData();
       });
   }
@@ -118,7 +118,7 @@ export default function ListView({ board, filterProp }: boardProps) {
               <div>
                 <div className="flex justify-between">
                   <div className="font-bold text-xl capitalize mb-2">
-                    {shift.patient_object.name}
+                    {shift.patient_object.name} - {shift.patient_object.age}
                   </div>
                   <div>
                     {shift.emergency && (
@@ -129,16 +129,16 @@ export default function ListView({ board, filterProp }: boardProps) {
                 <dl className="grid grid-cols-1 col-gap-1 row-gap-2 sm:grid-cols-1">
                   <div className="sm:col-span-1">
                     <dt className="text-sm leading-5 font-medium text-gray-500">
-                      <i className="fas fa-birthday-cake mr-2"/>
+                      <i className="fas fa-birthday-cake mr-2" />
                       Date of Birth
                     </dt>
                     <dd className="font-bold text-sm leading-5 text-gray-900">
-                      { moment(shift.patient_object.date_of_birth).format('DD/MM/YYYY') || ''}
+                      {moment(shift.patient_object.date_of_birth).format('DD/MM/YYYY') || ''}
                     </dd>
                   </div>
                   <div className="sm:col-span-1">
                     <dt className="text-sm leading-5 font-medium text-gray-500">
-                      <i className="fas fa-mobile mr-2"/>
+                      <i className="fas fa-mobile mr-2" />
                       Phone Number
                     </dt>
                     <dd className="font-bold text-sm leading-5 text-gray-900">
@@ -194,35 +194,35 @@ export default function ListView({ board, filterProp }: boardProps) {
                   View All Details
                 </Button>
               </div>
-              { filter === "TRANSFER IN PROGRESS" &&
-              <div className="mt-2">
-                <Button
-                  size="small"
-                  variant="outlined"
-                  fullWidth
-                  onClick={() => setModalFor(shift.external_id)}
-                >
-                  TRANSFER TO RECEIVING FACILITY 
+              {filter === "TRANSFER IN PROGRESS" &&
+                <div className="mt-2">
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    fullWidth
+                    onClick={() => setModalFor(shift.external_id)}
+                  >
+                    TRANSFER TO RECEIVING FACILITY
                 </Button>
 
-                <Modal
-                  open={modalFor === shift.external_id}
-                  onClose={_=>setModalFor({externalId: undefined, loading: false})}
-                >
-                  <div className="h-screen w-full absolute flex items-center justify-center bg-modal">
-                    <div className="bg-white rounded shadow p-8 m-4 max-w-sm max-h-full text-center">
+                  <Modal
+                    open={modalFor === shift.external_id}
+                    onClose={_ => setModalFor({ externalId: undefined, loading: false })}
+                  >
+                    <div className="h-screen w-full absolute flex items-center justify-center bg-modal">
+                      <div className="bg-white rounded shadow p-8 m-4 max-w-sm max-h-full text-center">
                         <div className="mb-4">
-                            <h1 className="text-2xl">Confirm Transfer Complete!</h1>
+                          <h1 className="text-2xl">Confirm Transfer Complete!</h1>
                         </div>
                         <div className="mb-8">
-                            <p>Are you sure you want to mark this transfer as complete? The Origin facility will no longer have access to this patient</p>
+                          <p>Are you sure you want to mark this transfer as complete? The Origin facility will no longer have access to this patient</p>
                         </div>
                         <div className="flex gap-2 justify-center">
                           <Button
                             size="small"
                             variant="outlined"
                             fullWidth
-                            onClick={() =>{ setModalFor({externalId: undefined, loading: false})}}
+                            onClick={() => { setModalFor({ externalId: undefined, loading: false }) }}
                           >Cancel</Button>
                           <Button
                             size="small"
@@ -231,10 +231,10 @@ export default function ListView({ board, filterProp }: boardProps) {
                             onClick={handleTransferComplete}
                           >Confirm</Button>
                         </div>
+                      </div>
                     </div>
-                  </div>
-                </Modal>
-              </div>}
+                  </Modal>
+                </div>}
             </div>
           </div>
         </div>
@@ -266,7 +266,7 @@ export default function ListView({ board, filterProp }: boardProps) {
           </div> : data?.length > 0 ? patientFilter(board) : <p className="mx-auto p-4">No Patients to Show</p>}
         {!isLoading.board && data?.length < (totalCount || 0) &&
           (isLoading.more ? <div className="mx-auto my-4 p-2 px-4 bg-gray-100 rounded-md hover:bg-white">Loading</div> :
-          <button onClick={_ => handlePagination(currentPage + 1, limit)} className="mx-auto my-4 p-2 px-4 bg-gray-100 rounded-md hover:bg-white">More...</button>)}
+            <button onClick={_ => handlePagination(currentPage + 1, limit)} className="mx-auto my-4 p-2 px-4 bg-gray-100 rounded-md hover:bg-white">More...</button>)}
       </div>
       <CSVLink
         data={downloadFile}
