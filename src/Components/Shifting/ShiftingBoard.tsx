@@ -1,6 +1,6 @@
-import React, { useCallback, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { getShiftRequests, transferPatient, completeTransfer, downloadShiftRequests } from "../../Redux/actions";
+import { getShiftRequests, completeTransfer, downloadShiftRequests } from "../../Redux/actions";
 import Button from "@material-ui/core/Button";
 import { navigate } from "hookrouter";
 import moment from "moment";
@@ -11,24 +11,10 @@ import GetAppIcon from '@material-ui/icons/GetApp';
 
 const limit = 30;
 
-const formatFilter = (filter: any, csv: boolean = false) => {
-  return {
-    status: filter.status === 'Show All' ? null : filter.status,
-    facility: '',
-    orgin_facility: filter.orgin_facility,
-    shifting_approving_facility: filter.shifting_approving_facility,
-    assigned_facility: filter.assigned_facility,
-    emergency: (filter.emergency && filter.emergency) === '--' ? '' : (filter.emergency === 'yes' ? 'true' : 'false'),
-    is_up_shift: (filter.is_up_shift && filter.is_up_shift) === '--' ? '' : (filter.is_up_shift === 'yes' ? 'true' : 'false'),
-    limit: limit,
-    offset: filter.offset,
-    patient_name: filter.patient_name || undefined
-  };
-}
-
 interface boardProps {
   board: string,
-  filterProp: any
+  filterProp: any,
+  formatFilter: any
 }
 
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
@@ -45,7 +31,7 @@ const reduceLoading = (action: string, current: any) => {
   }
 }
 
-export default function ListView({ board, filterProp }: boardProps) {
+export default function ListView({ board, filterProp, formatFilter }: boardProps) {
 
   const dispatch: any = useDispatch();
   const [filter, setFilter] = useState(filterProp);

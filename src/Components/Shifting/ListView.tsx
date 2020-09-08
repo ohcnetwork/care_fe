@@ -4,7 +4,13 @@ import ShiftingBoard from "./ShiftingBoard";
 import { SHIFTING_CHOICES } from "../../Common/constants";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import { InputSearchBox } from "../Common/SearchBox";
+import { downloadShiftRequests } from "../../Redux/actions";
 import loadable from '@loadable/component';
+import { CSVLink } from 'react-csv';
+import { useDispatch } from "react-redux";
+import moment from "moment";
+
+import GetAppIcon from '@material-ui/icons/GetApp';
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -21,17 +27,41 @@ const initialFilterData = {
   is_up_shift: '--',
   limit: limit,
   patient_name: '',
+  // X_before: '',
+  // X_after: '',
   offset: 0
 }
+
+const formatFilter = (filter: any, csv: boolean = false) => {
+  return {
+    status: filter.status === 'Show All' ? null : filter.status,
+    facility: '',
+    orgin_facility: filter.orgin_facility,
+    shifting_approving_facility: filter.shifting_approving_facility,
+    assigned_facility: filter.assigned_facility,
+    emergency: (filter.emergency && filter.emergency) === '--' ? '' : (filter.emergency === 'yes' ? 'true' : 'false'),
+    is_up_shift: (filter.is_up_shift && filter.is_up_shift) === '--' ? '' : (filter.is_up_shift === 'yes' ? 'true' : 'false'),
+    limit: limit,
+    offset: filter.offset,
+    patient_name: filter.patient_name || undefined,
+    // X_before: filter.X_before || undefined,
+    // X_after: filter.X_after || undefined
+  };
+}
+
 const shiftStatusOptions = SHIFTING_CHOICES.map(obj => obj.text);
 
 const COMPLETED = ["COMPLETED", "REJECTED", "DESTINATION REJECTED"];
 const ACTIVE = shiftStatusOptions.filter(option => !COMPLETED.includes(option))
 
+const now = moment().format("DD-MM-YYYY:hh:mm:ss");
+
 export default function ListView() {
 
+  const dispatch: any = useDispatch();
   const [filter, setFilter] = useState(initialFilterData);
   const [boardFilter, setBoardFilter] = useState(ACTIVE);
+  const [downloadFile, setDownloadFile] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
@@ -39,10 +69,20 @@ export default function ListView() {
     setFilter(filterData);
   }
 
+  const triggerDownload = async () => {
+    const res = await dispatch(downloadShiftRequests({...formatFilter(filter), csv:1}));
+    setDownloadFile(res.data);
+    document.getElementById(`shiftRequests-ALL`)?.click();
+  }
+
   return (
     <div className="flex flex-col h-screen px-2 pb-2">
       <div className="flex items-end justify-between">
-        <PageTitle title={"Shifting"} hideBack={true} />
+        <div className="flex items-center">
+          <PageTitle title={"Shifting"} hideBack={true} />
+          <GetAppIcon className="cursor-pointer mt-4" onClick={triggerDownload} />
+        </div>
+        
         <div className="md:px-4">
           <InputSearchBox
             search={query => filterOnChange({ ...filter, patient_name: query })}
@@ -84,9 +124,16 @@ export default function ListView() {
       </div>
       <div className="flex mt-4 pb-2 flex-1 items-start overflow-x-scroll">
         {isLoading ? <Loading /> : boardFilter.map(board =>
-          <ShiftingBoard filterProp={filter} board={board} />
+          <ShiftingBoard filterProp={filter} board={board} formatFilter={formatFilter}/>
         )}
       </div>
+      <CSVLink
+        data={downloadFile}
+        filename={`shift-requests--${now}.csv`}
+        target="_blank"
+        className="hidden"
+        id={`shiftRequests-ALL`}
+      />
       <SlideOver show={showFilters} setShow={setShowFilters}>
         <div className="bg-white h-screen p-4">
           <ListFilter
