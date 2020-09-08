@@ -1,57 +1,71 @@
-import React, { useCallback, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { getShiftRequests } from "../../Redux/actions";
+import { getShiftRequests, completeTransfer, downloadShiftRequests } from "../../Redux/actions";
 import Button from "@material-ui/core/Button";
 import { navigate } from "hookrouter";
 import moment from "moment";
+import { Modal } from '@material-ui/core';
+import { CSVLink } from 'react-csv';
+
+import GetAppIcon from '@material-ui/icons/GetApp';
 
 const limit = 30;
 
-const formatFilter = (filter: any) => {
-  return {
-    status: filter.status === 'Show All' ? null : filter.status,
-    facility: '',
-    orgin_facility: filter.orgin_facility,
-    shifting_approving_facility: filter.shifting_approving_facility,
-    assigned_facility: filter.assigned_facility,
-    emergency: (filter.emergency && filter.emergency) === '--' ? '' : (filter.emergency === 'yes' ? 'true' : 'false'),
-    is_up_shift: (filter.is_up_shift && filter.is_up_shift) === '--' ? '' : (filter.is_up_shift === 'yes' ? 'true' : 'false'),
-    limit: limit,
-    offset: filter.offset,
-    patient_name: filter.patient_name || undefined
-  };
-}
-
 interface boardProps {
   board: string,
-  filterProp: any
+  filterProp: any,
+  formatFilter: any
 }
 
-export default function ListView({ board, filterProp }: boardProps) {
+const now = moment().format("DD-MM-YYYY:hh:mm:ss");
+
+const reduceLoading = (action: string, current: any) => {
+  switch (action) {
+    case "MORE":
+      return { ...current, more: true }
+    case "BOARD":
+      return { ...current, board: true }
+    case "COMPLETE":
+      return { board: false, more: false }
+
+  }
+}
+
+export default function ListView({ board, filterProp, formatFilter }: boardProps) {
 
   const dispatch: any = useDispatch();
   const [filter, setFilter] = useState(filterProp);
   const [data, setData] = useState<any[]>([]);
+  const [downloadFile, setDownloadFile] = useState("");
   const [totalCount, setTotalCount] = useState();
   const [currentPage, setCurrentPage] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState({ board: false, more: false });
+  const [modalFor, setModalFor] = useState({ externalId: undefined, loading: false });
 
 
   const filterOnChange = (filterData: any) => {
     setFilter(filterData);
   }
-  useEffect(() => {
-    setFilter(filterProp)
-  }, [filterProp])
-  useEffect(() => {
-    setIsLoading(true);
+  const fetchData = () => {
+    setIsLoading(loading => reduceLoading("BOARD", loading));
     dispatch(getShiftRequests(formatFilter({ ...filterProp, status: board }), board)).then((res: any) => {
       if (res && res.data) {
         setData(res.data.results);
         setTotalCount(res.data.count);
       }
-      setIsLoading(false);
+      setIsLoading(loading => reduceLoading("COMPLETE", loading));
     });
+  }
+  const triggerDownload = async () => {
+    const res = await dispatch(downloadShiftRequests({ ...formatFilter({ ...filterProp, status: board }), csv: 1 }));
+    setDownloadFile(res.data);
+    document.getElementById(`shiftRequests-${board}`)?.click();
+  }
+  useEffect(() => {
+    setFilter(filterProp)
+  }, [filterProp])
+  useEffect(() => {
+    fetchData();
   },
     [board, dispatch, filter, filterProp]
   );
@@ -59,16 +73,25 @@ export default function ListView({ board, filterProp }: boardProps) {
   const handlePagination = (page: number, limit: number) => {
     const offset = (page - 1) * limit;
     setCurrentPage(page);
+    setIsLoading(loading => reduceLoading("MORE", loading));
     dispatch(getShiftRequests(formatFilter({ ...filterProp, status: board, offset: offset }), board)).then((res: any) => {
-      console.log("Received:" + board)
       if (res && res.data) {
         setData(data => [...data, ...res.data.results]);
         setTotalCount(res.data.count);
         setCurrentPage(1)
       }
-      setIsLoading(false);
+      setIsLoading(loading => reduceLoading("COMPLETE", loading));
     });
   };
+
+  const handleTransferComplete = () => {
+    setModalFor({ ...modalFor, loading: true });
+    dispatch(completeTransfer({ externalId: modalFor }))
+      .then(() => {
+        setModalFor({ externalId: undefined, loading: false })
+        fetchData();
+      });
+  }
 
   let patientFilter = (filter: string) => {
     console.log("Re-Rendering")
@@ -77,11 +100,11 @@ export default function ListView({ board, filterProp }: boardProps) {
       .map((shift: any, idx: number) =>
         <div key={`shift_${shift.id}`} className="w-full mt-2 ">
           <div className="overflow-hidden shadow rounded-lg bg-white h-full mx-2">
-            <div className="p-4 h-full flex flex-col justify-between">
+            <div className={"p-4 h-full flex flex-col justify-between " + (shift.patient_object.disease_status == "POSITIVE" ? "bg-red-50" : "")}>
               <div>
                 <div className="flex justify-between">
                   <div className="font-bold text-xl capitalize mb-2">
-                    {shift.patient_object.name}
+                    {shift.patient_object.name} - {shift.patient_object.age}
                   </div>
                   <div>
                     {shift.emergency && (
@@ -92,16 +115,16 @@ export default function ListView({ board, filterProp }: boardProps) {
                 <dl className="grid grid-cols-1 col-gap-1 row-gap-2 sm:grid-cols-1">
                   <div className="sm:col-span-1">
                     <dt className="text-sm leading-5 font-medium text-gray-500">
-                      <i className="fas fa-birthday-cake mr-2"/>
+                      <i className="fas fa-birthday-cake mr-2" />
                       Date of Birth
                     </dt>
                     <dd className="font-bold text-sm leading-5 text-gray-900">
-                      { moment(shift.patient_object.date_of_birth).format('DD/MM/YYYY') || ''}
+                      {moment(shift.patient_object.date_of_birth).format('DD/MM/YYYY') || ''}
                     </dd>
                   </div>
                   <div className="sm:col-span-1">
                     <dt className="text-sm leading-5 font-medium text-gray-500">
-                      <i className="fas fa-mobile mr-2"/>
+                      <i className="fas fa-mobile mr-2" />
                       Phone Number
                     </dt>
                     <dd className="font-bold text-sm leading-5 text-gray-900">
@@ -155,24 +178,65 @@ export default function ListView({ board, filterProp }: boardProps) {
                   onClick={() => navigate(`/shifting/${shift.external_id}`)}
                 >
                   View All Details
-                  </Button>
+                </Button>
               </div>
+              {filter === "TRANSFER IN PROGRESS" &&
+                <div className="mt-2">
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    fullWidth
+                    onClick={() => setModalFor(shift.external_id)}
+                  >
+                    TRANSFER TO RECEIVING FACILITY
+                </Button>
+
+                  <Modal
+                    open={modalFor === shift.external_id}
+                    onClose={_ => setModalFor({ externalId: undefined, loading: false })}
+                  >
+                    <div className="h-screen w-full absolute flex items-center justify-center bg-modal">
+                      <div className="bg-white rounded shadow p-8 m-4 max-w-sm max-h-full text-center">
+                        <div className="mb-4">
+                          <h1 className="text-2xl">Confirm Transfer Complete!</h1>
+                        </div>
+                        <div className="mb-8">
+                          <p>Are you sure you want to mark this transfer as complete? The Origin facility will no longer have access to this patient</p>
+                        </div>
+                        <div className="flex gap-2 justify-center">
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            fullWidth
+                            onClick={() => { setModalFor({ externalId: undefined, loading: false }) }}
+                          >Cancel</Button>
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            fullWidth
+                            onClick={handleTransferComplete}
+                          >Confirm</Button>
+                        </div>
+                      </div>
+                    </div>
+                  </Modal>
+                </div>}
             </div>
           </div>
-        </div>
+        </div >
       );
   }
   return (
     <div className="bg-gray-200 py-2 mr-2 flex-shrink-0 w-3/4 md:w-1/2 lg:w-1/3 xl:w-1/4 pb-4 h-full overflow-y-auto rounded-md">
-      <div className="flex justify-between p-4 rounded mx-2 bg-white shadow">
-        <h3 className="text-sm flex">{board}
+      <div className="flex justify-between p-4 rounded mx-2 bg-white shadow items-center">
+        <h3 className="text-sm flex">{board} <GetAppIcon className="cursor-pointer" onClick={triggerDownload} />
         </h3>
         <span className="rounded-lg ml-2 bg-gray-700 text-white px-2">
           {totalCount || "0"}
         </span>
       </div>
       <div className="text-sm mt-2 pb-2 flex flex-col">
-        {isLoading ?
+        {isLoading.board ?
           <div className="m-1">
             <div className="border border-gray-300 bg-white shadow rounded-md p-4 max-w-sm w-full mx-auto">
               <div className="animate-pulse flex space-x-4 ">
@@ -186,9 +250,17 @@ export default function ListView({ board, filterProp }: boardProps) {
               </div>
             </div>
           </div> : data?.length > 0 ? patientFilter(board) : <p className="mx-auto p-4">No Patients to Show</p>}
-        {!isLoading && data?.length < (totalCount || 0) &&
-          <button onClick={_ => handlePagination(currentPage + 1, limit)} className="mx-auto my-4 p-2 px-4 bg-gray-100 rounded-md hover:bg-white">More...</button>}
+        {!isLoading.board && data?.length < (totalCount || 0) &&
+          (isLoading.more ? <div className="mx-auto my-4 p-2 px-4 bg-gray-100 rounded-md hover:bg-white">Loading</div> :
+            <button onClick={_ => handlePagination(currentPage + 1, limit)} className="mx-auto my-4 p-2 px-4 bg-gray-100 rounded-md hover:bg-white">More...</button>)}
       </div>
+      <CSVLink
+        data={downloadFile}
+        filename={`shift-requests-${board}-${now}.csv`}
+        target="_blank"
+        className="hidden"
+        id={`shiftRequests-${board}`}
+      />
     </div>
   );
 }

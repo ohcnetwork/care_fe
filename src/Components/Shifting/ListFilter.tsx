@@ -1,6 +1,6 @@
 import React from "react";
 import { FacilitySelect } from "../Common/FacilitySelect";
-import { SelectField } from "../Common/HelperInputFields";
+import { SelectField, DateTimeFiled } from "../Common/HelperInputFields";
 import { SHIFTING_CHOICES } from "../../Common/constants";
 
 const shiftStatusOptions = ['Show All', ...SHIFTING_CHOICES.map(obj => obj.text)];
@@ -108,6 +108,18 @@ export default function ListFilter(props: any) {
                 onChange={handleChange}
                 className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"/>
         </div>
+
+        {/* <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">Is upshift case</span>
+          <DateTimeFiled
+                name="X_before"
+                inputVariant="outlined"
+                margin="dense"
+                errors=""
+                value={filter.X_before}
+                onChange={date => handleChange({target: {name: "X_before", value: date}})}
+                className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"/>
+        </div>         */}
       </div>
     </div>
   )

@@ -241,3 +241,9 @@ export const getShiftRequests = (params: object, key: string) => {
 export const getShiftDetails = (id: string) => {
   return fireRequest('getShiftDetails', [id], {});
 };
+export const completeTransfer = (pathParams:object) => {
+  return fireRequest('completeTransfer', [], {}, pathParams);
+};
+export const downloadShiftRequests = (params: object) => {
+  return fireRequest('downloadShiftRequests', [], params);
+};

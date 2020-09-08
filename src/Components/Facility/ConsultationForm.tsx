@@ -62,6 +62,7 @@ const initForm: any = {
   referred_to: "",
   diagnosis: "",
   verified_by: "",
+  test_id: "",
   examination_details: "",
   existing_medication: "",
   prescribed_medication: "",
@@ -166,6 +167,7 @@ export const ConsultationForm = (props: any) => {
             admitted_to: res.data.admitted_to ? res.data.admitted_to : "",
             category: res.data.category ? res.data.category : "",
             ip_no: res.data.ip_no ? res.data.ip_no : "",
+            test_id: res.data.test_id ? res.data.test_id : "",
             diagnosis: res.data.diagnosis ? res.data.diagnosis : "",
             verified_by: res.data.verified_by ? res.data.verified_by : "",
             OPconsultation: res.data.consultation_notes,
@@ -275,6 +277,7 @@ export const ConsultationForm = (props: any) => {
         discharge_advice: dischargeAdvice,
         patient: patientId,
         facility: facilityId,
+        test_id: state.form.test_id,
         referred_to: state.form.suggestion === "R" ? state.form.referred_to : undefined,
         consultation_notes: state.form.OPconsultation,
         is_telemedicine: state.form.is_telemedicine,
@@ -602,6 +605,19 @@ export const ConsultationForm = (props: any) => {
                   value={state.form.ip_no}
                   onChange={handleChange}
                   errors={state.errors.ip_no}
+                />
+              </div>
+              <div>
+                <InputLabel id="refered-label">State Test ID</InputLabel>
+                <TextInputField
+                  name="test_id"
+                  variant="outlined"
+                  margin="dense"
+                  type="string"
+                  InputLabelProps={{ shrink: !!state.form.test_id }}
+                  value={state.form.test_id}
+                  onChange={handleChange}
+                  errors={state.errors.test_id}
                 />
               </div>
               <div>

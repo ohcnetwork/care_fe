@@ -14,6 +14,7 @@ export interface DischargeSummaryModel {
 }
 
 export interface PatientModel {
+  test_id?: string;
   id?: number;
   name?: string;
   age?: number;
@@ -21,6 +22,7 @@ export interface PatientModel {
   discharge?: boolean;
   gender?: number;
   phone_number?: string;
+  emergency_phone_number?: string;
   allergies?: string;
   medical_history?: Array<{ disease: string | number; details: string }>;
   facility_object?: {
@@ -32,6 +34,7 @@ export interface PatientModel {
   medical_history_details?: string;
   is_active?: boolean;
   is_antenatal?: boolean;
+  is_migrant_worker?: boolean;
   ward?: string;
   local_body_object?: { id: number; name: string };
   district_object?: { id: number; name: string };
