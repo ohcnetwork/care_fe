@@ -114,7 +114,7 @@ export default function ListView({ board, filterProp }: boardProps) {
       .map((shift: any, idx: number) =>
         <div key={`shift_${shift.id}`} className="w-full mt-2 ">
           <div className="overflow-hidden shadow rounded-lg bg-white h-full mx-2">
-            <div className={"p-4 h-full flex flex-col justify-between " + (shift.patient_object.disease_status == "POSITIVE" ? "bg-red-100" : "")}>
+            <div className={"p-4 h-full flex flex-col justify-between " + (shift.patient_object.disease_status == "POSITIVE" ? "bg-red-50" : "")}>
               <div>
                 <div className="flex justify-between">
                   <div className="font-bold text-xl capitalize mb-2">
