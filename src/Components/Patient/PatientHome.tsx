@@ -494,6 +494,10 @@ export const PatientHome = (props: any) => {
             </div>
           }
           <div>
+            <span className="font-semibold leading-relaxed">Guest worker: </span>
+            {patientData.is_migrant_worker ? <span className="badge badge-pill badge-warning">Yes</span> : <span className="badge badge-pill badge-secondary">No</span>}
+          </div>
+          <div>
             <span className="font-semibold leading-relaxed">Contact with confirmed carrier: </span>
             {patientData.contact_with_confirmed_carrier ? <span className="badge badge-pill badge-warning">Yes</span> : <span className="badge badge-pill badge-secondary">No</span>}
           </div>

@@ -72,6 +72,7 @@ const initForm: any = {
   present_health: "",
   contact_with_confirmed_carrier: "false",
   contact_with_suspected_carrier: "false",
+  is_migrant_worker: "false",
   estimated_contact_date: null,
   date_of_return: null,
   past_travel: false,
@@ -196,6 +197,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             is_medical_worker: res.data.is_medical_worker ? String(res.data.is_medical_worker) : 'false',
             contact_with_confirmed_carrier: res.data.contact_with_confirmed_carrier ? String(res.data.contact_with_confirmed_carrier) : 'false',
             contact_with_suspected_carrier: res.data.contact_with_suspected_carrier ? String(res.data.contact_with_suspected_carrier) : 'false',
+            is_migrant_worker: res.data.is_migrant_worker ? String(res.data.is_migrant_worker) : 'false',
             number_of_aged_dependents: Number(res.data.number_of_aged_dependents) ? Number(res.data.number_of_aged_dependents) : '',
             number_of_chronic_diseased_dependents: Number(res.data.number_of_chronic_diseased_dependents) ? Number(res.data.number_of_chronic_diseased_dependents) : '',
           };
@@ -376,6 +378,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         gender: Number(state.form.gender),
         nationality: state.form.nationality,
         is_antenatal: state.form.is_antenatal,
+        is_migrant_worker: state.form.is_migrant_worker,
         passport_no: state.form.nationality !== "India" ? state.form.passport_no : undefined,
         state: state.form.nationality === "India" ? state.form.state : undefined,
         district: state.form.nationality === "India" ? state.form.district : undefined,
@@ -799,7 +802,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     errors={state.errors.emergency_phone_number}
                   />
                 </div>
+              </div>
 
+
+              <div className="grid gap-4 grid-cols-1 md:grid-cols-2 mt-4">
                 {
                   state.form.gender === '2' &&
                   <div>
@@ -826,10 +832,32 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     </RadioGroup>
                   </div>
                 }
-              </div>
+                <div>
+                  <InputLabel id="is_migrant_worker">
+                    Is a Guest workers?
+                  </InputLabel>
+                  <RadioGroup
+                    aria-label="is_migrant_worker"
+                    name="is_migrant_worker"
+                    value={state.form.is_migrant_worker}
+                    onChange={handleChange}
+                    style={{ padding: "0px 5px" }}
+                  >
+                    <Box display="flex" flexDirection="row">
+                      <FormControlLabel
+                        value="true"
+                        control={<Radio />}
+                        label="Yes"
+                      />
+                      <FormControlLabel
+                        value="false"
+                        control={<Radio />}
+                        label="No"
+                      />
+                    </Box>
+                  </RadioGroup>
+                </div>
 
-
-              <div className="grid gap-4 grid-cols-1 md:grid-cols-2 mt-4">
                 <div>
                   <InputLabel id="contact_with_confirmed_carrier">
                     Contact with confirmed Covid patient?

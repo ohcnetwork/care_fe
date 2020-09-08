@@ -34,6 +34,7 @@ export interface PatientModel {
   medical_history_details?: string;
   is_active?: boolean;
   is_antenatal?: boolean;
+  is_migrant_worker?: boolean;
   ward?: string;
   local_body_object?: { id: number; name: string };
   district_object?: { id: number; name: string };
