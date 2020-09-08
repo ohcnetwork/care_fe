@@ -485,6 +485,10 @@ export const PatientHome = (props: any) => {
             <span className="font-semibold leading-relaxed">Emergency Contact number: </span>
             <a href={`tel:${patientData.emergency_phone_number}`}>{patientData.emergency_phone_number || "-"}</a>
           </div>
+          <div>
+            <span className="font-semibold leading-relaxed">Pincode: </span>
+            {patientData.pincode || '-'}
+          </div>
 
           {patientData.is_antenatal &&
             <div>

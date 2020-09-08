@@ -277,12 +277,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             invalidForm = true;
           }
           return;
-        case "pincode":
-          if (!state.form[field]) {
-            errors[field] = "Please enter pincode";
-            invalidForm = true;
-          }
-          return;
         case "ward":
           if (!state.form[field]) {
             errors[field] = "Please enter ward number";
@@ -374,7 +368,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         date_of_birth: moment(state.form.date_of_birth).format('YYYY-MM-DD'),
         disease_status: state.form.disease_status,
         name: state.form.name,
-        pincode: state.form.pincode,
+        pincode: state.form.pincode ? state.form.pincode : undefined,
         gender: Number(state.form.gender),
         nationality: state.form.nationality,
         is_antenatal: state.form.is_antenatal,
@@ -754,7 +748,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   />
                 </div>
                 <div>
-                  <InputLabel id="name-label">Pincode*</InputLabel>
+                  <InputLabel id="name-label">Pincode</InputLabel>
                   <TextInputField
                     name="pincode"
                     variant="outlined"
