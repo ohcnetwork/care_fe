@@ -257,7 +257,7 @@ export const FacilityHome = (props: any) => {
                     </th>
                   <th className="border px-4 py-2">Suspects Isolated</th>
                   <th className="border px-4 py-2">Referred</th>
-                  <th className="border px-4 py-2">Confirmed Possitives</th>
+                  <th className="border px-4 py-2">Confirmed positives</th>
                   <th className="border px-4 py-2">Actions</th>
                 </tr>
               </thead>
