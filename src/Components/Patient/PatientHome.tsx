@@ -28,10 +28,10 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import {TextInputField} from "../Common/HelperInputFields";
+import { TextInputField } from "../Common/HelperInputFields";
 import { validateEmailAddress } from "../../Common/validation";
-const Loading = loadable( () => import("../Common/Loading"));
-const PageTitle = loadable( () => import("../Common/PageTitle"));
+const Loading = loadable(() => import("../Common/Loading"));
+const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -98,10 +98,10 @@ export const PatientHome = (props: any) => {
     email: "",
   };
   const [dischargeSummaryState, setDischargeSummaryForm] = useState(initDischargeSummaryForm);
-  
+
   const handleDischargeSummaryFormChange = (e: any) => {
     const { value } = e.target;
-    
+
     const errorField = Object.assign({}, errors);
     errorField['dischargeSummaryForm'] = null;
     setErrors(errorField);
@@ -121,7 +121,7 @@ export const PatientHome = (props: any) => {
     } else {
       dispatch(discharge({ email: dischargeSummaryState.email }, { external_id: patientData.id }))
         .then((response: any) => {
-          if ((response||{}).status === 200) {
+          if ((response || {}).status === 200) {
             Notification.Success({
               msg: "We will be sending an email shortly. Please check your inbox."
             });
@@ -137,7 +137,7 @@ export const PatientHome = (props: any) => {
 
     dispatch(patchPatient({ 'allow_transfer': value }, { id: patientData.id }))
       .then((response: any) => {
-        if ((response||{}).status === 200) {
+        if ((response || {}).status === 200) {
           let dummyPatientData = Object.assign({}, patientData);
           dummyPatientData['allow_transfer'] = value;
           setPatientData(dummyPatientData);
@@ -155,19 +155,19 @@ export const PatientHome = (props: any) => {
     dischargeData['discharge'] = value;
 
     dispatch(dischargePatient({ 'discharge': value }, { id: patientData.id }))
-        .then((response: any) => {
-          if ((response||{}).status === 200) {
-            let dischargeData = Object.assign({}, patientData);
-            dischargeData['discharge'] = value;
-            setPatientData(dischargeData);
+      .then((response: any) => {
+        if ((response || {}).status === 200) {
+          let dischargeData = Object.assign({}, patientData);
+          dischargeData['discharge'] = value;
+          setPatientData(dischargeData);
 
-            Notification.Success({
-              msg: "Patient Discharged"
-            });
-           setOpenDischargeDialog(false);
-           window.location.reload();
-          }
-        });
+          Notification.Success({
+            msg: "Patient Discharged"
+          });
+          setOpenDischargeDialog(false);
+          window.location.reload();
+        }
+      });
   }
   const dischargeSummaryFormSetUserEmail = () => {
     setDischargeSummaryForm({ email: currentUser.data.email });
@@ -388,14 +388,14 @@ export const PatientHome = (props: any) => {
               </div>
               <div>
                 {patientData.allow_transfer && (
-                    <span className="ml-2 badge badge-pill badge-success">
+                  <span className="ml-2 badge badge-pill badge-success">
                     Transfer Allowed
                   </span>
                 )}
               </div>
               <div>
-                { !patientData.allow_transfer && (
-                    <span className="ml-2 badge badge-pill badge-warning">
+                {!patientData.allow_transfer && (
+                  <span className="ml-2 badge badge-pill badge-warning">
                     Transfer Not Allowed
                   </span>
                 )}
@@ -411,19 +411,19 @@ export const PatientHome = (props: any) => {
             </div>
           </div>
           {patientData.is_active &&
-          <div>
-            <div className="mt-2">
-              <Button
+            <div>
+              <div className="mt-2">
+                <Button
                   fullWidth
                   variant="contained"
                   color="primary"
                   size="small"
                   onClick={() =>
-                      navigate(`/facility/${facilityId}/patient/${id}/update`)
+                    navigate(`/facility/${facilityId}/patient/${id}/update`)
                   }
-              >Update Details</Button>
+                >Update Details</Button>
+              </div>
             </div>
-          </div>
           }
         </div>
 
@@ -474,19 +474,23 @@ export const PatientHome = (props: any) => {
             </div>
             <div>
               <span className="font-semibold leading-relaxed">Ward : </span>
-              { patientData.ward || '-'}
+              {patientData.ward || '-'}
             </div>
           </>)}
           <div>
             <span className="font-semibold leading-relaxed">Address: </span>
             {patientData.address || '-'}
           </div>
+          <div>
+            <span className="font-semibold leading-relaxed">Emergency Contact number: </span>
+            <a href={`tel:${patientData.emergency_phone_number}`}>{patientData.emergency_phone_number || "-"}</a>
+          </div>
 
-          { patientData.is_antenatal &&
+          {patientData.is_antenatal &&
             <div>
               <span className="font-semibold leading-relaxed"> Is pregnant </span>
               {patientData.is_antenatal ? <span className="badge badge-pill badge-danger">Yes</span> :
-                  <span className="badge badge-pill badge-warning">No</span>}
+                <span className="badge badge-pill badge-warning">No</span>}
             </div>
           }
           <div>
@@ -520,9 +524,9 @@ export const PatientHome = (props: any) => {
           {
             patientData.allergies &&
             <div className="md:col-span-2">
-            <span className="font-semibold leading-relaxed">Allergies:  </span>
-            { patientData.allergies }
-          </div>
+              <span className="font-semibold leading-relaxed">Allergies:  </span>
+              {patientData.allergies}
+            </div>
           }
           {!!patientData.number_of_aged_dependents && (<div>
             <span className="font-semibold leading-relaxed">Number Of Aged Dependents (Above 60): </span>
@@ -536,19 +540,19 @@ export const PatientHome = (props: any) => {
         <div className="flex mt-4">
           <div className="flex-1">
             <Button fullWidth
-                    variant="contained"
-                    color="primary"
-                    size="small" onClick={handleClickOpen}>
+              variant="contained"
+              color="primary"
+              size="small" onClick={handleClickOpen}>
               Discharge Summary
             </Button>
             <Dialog open={open} onClose={handleDischargeSummary}>
               <DialogTitle id="form-dialog-title">Download Discharge Summary</DialogTitle>
               <DialogContent>
                 <DialogContentText>
-                 Please enter your email id to receive the discharge summary.
+                  Please enter your email id to receive the discharge summary.
                   Disclaimer: This is an automatically Generated email using your info Captured in Care System.
                   <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
-                       role="alert">
+                    role="alert">
                     <strong className="block sm:inline font-bold">Please check your email id before continuing. We cannot deliver the email if the email id is invalid</strong>
                   </div>
                 </DialogContentText>
@@ -560,16 +564,16 @@ export const PatientHome = (props: any) => {
                   </a>
                 </div>
                 <TextInputField
-                    type="email"
-                    name="email"
-                    label="email"
-                    variant="outlined"
-                    margin="dense"
-                    autoComplete='off'
-                    value={dischargeSummaryState.email}
-                    InputLabelProps={{ shrink: !!dischargeSummaryState.email }}
-                    onChange={handleDischargeSummaryFormChange}
-                    errors={errors.dischargeSummaryForm}
+                  type="email"
+                  name="email"
+                  label="email"
+                  variant="outlined"
+                  margin="dense"
+                  autoComplete='off'
+                  value={dischargeSummaryState.email}
+                  InputLabelProps={{ shrink: !!dischargeSummaryState.email }}
+                  onChange={handleDischargeSummaryFormChange}
+                  errors={errors.dischargeSummaryForm}
                 />
               </DialogContent>
               <DialogActions>
@@ -582,58 +586,58 @@ export const PatientHome = (props: any) => {
               </DialogActions>
             </Dialog>
           </div>
-          { patientData.is_active &&
-          <div className="flex-1 ml-2">
-            <Button  fullWidth
-                     variant="contained"
-                     color="primary"
-                     size="small"
-                     onClick={handleDischageClickOpen}>
-              Discharge
+          {patientData.is_active &&
+            <div className="flex-1 ml-2">
+              <Button fullWidth
+                variant="contained"
+                color="primary"
+                size="small"
+                onClick={handleDischageClickOpen}>
+                Discharge
             </Button>
-            <Dialog
+              <Dialog
                 open={openDischargeDialog}
                 onClose={handleDischargeClose}
-            >
-              <DialogTitle id="alert-dialog-title">Authorize Patient Discharge</DialogTitle>
-              <DialogContent>
-                <DialogContentText id="alert-dialog-description">
-               Please confirm patient Discharge
+              >
+                <DialogTitle id="alert-dialog-title">Authorize Patient Discharge</DialogTitle>
+                <DialogContent>
+                  <DialogContentText id="alert-dialog-description">
+                    Please confirm patient Discharge
                 </DialogContentText>
-              </DialogContent>
-              <DialogActions>
-                <Button onClick={handleDischargeClose} color="primary">
-                  Disagree
+                </DialogContent>
+                <DialogActions>
+                  <Button onClick={handleDischargeClose} color="primary">
+                    Disagree
                 </Button>
-                <Button color="primary"
-                        onClick={ () => handlePatientDischarge(false)} autoFocus>
-                  Agree
+                  <Button color="primary"
+                    onClick={() => handlePatientDischarge(false)} autoFocus>
+                    Agree
                 </Button>
-              </DialogActions>
-            </Dialog>
-          </div>
+                </DialogActions>
+              </Dialog>
+            </div>
           }
-          { !patientData.allow_transfer && patientData.is_active &&
+          {!patientData.allow_transfer && patientData.is_active &&
             <div className="flex-1 ml-2">
               <Button
-                  fullWidth
-                  variant="contained"
-                  color="secondary"
-                  size="small"
-                  disabled={!consultationListData || !consultationListData.length}
-                  onClick={() => handlePatientTransfer(true)}
+                fullWidth
+                variant="contained"
+                color="secondary"
+                size="small"
+                disabled={!consultationListData || !consultationListData.length}
+                onClick={() => handlePatientTransfer(true)}
               >Allow Transfer</Button>
             </div>
           }
-          { patientData.allow_transfer && patientData.is_active  &&
+          {patientData.allow_transfer && patientData.is_active &&
             <div className="flex-1 ml-2">
               <Button
-                  fullWidth
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  disabled={!consultationListData || !consultationListData.length}
-                  onClick={() => handlePatientTransfer(false)}
+                fullWidth
+                variant="contained"
+                color="primary"
+                size="small"
+                disabled={!consultationListData || !consultationListData.length}
+                onClick={() => handlePatientTransfer(false)}
               >Disable Transfer</Button>
             </div>
           }
@@ -643,25 +647,25 @@ export const PatientHome = (props: any) => {
           <div className="flex mt-4">
             <div className="flex-1 mr-2">
               <Button
-                  fullWidth
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  onClick={() =>
-                      navigate(`/facility/${facilityId}/patient/${id}/consultation`)
-                  }
+                fullWidth
+                variant="contained"
+                color="primary"
+                size="small"
+                onClick={() =>
+                  navigate(`/facility/${facilityId}/patient/${id}/consultation`)
+                }
               >Add OP Triage / Consultation</Button>
             </div>
             <div className="flex-1 ml-2">
               <Button
-                  fullWidth
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  disabled={!consultationListData || !consultationListData.length}
-                  onClick={() =>
-                      navigate(`/facility/${facilityId}/patient/${id}/sample-test`)
-                  }
+                fullWidth
+                variant="contained"
+                color="primary"
+                size="small"
+                disabled={!consultationListData || !consultationListData.length}
+                onClick={() =>
+                  navigate(`/facility/${facilityId}/patient/${id}/sample-test`)
+                }
               >Request Sample Test</Button>
             </div>
           </div>

@@ -55,6 +55,7 @@ const initForm: any = {
   age: "",
   gender: "",
   phone_number: "",
+  emergency_phone_number: "",
   blood_group: "",
   disease_status: diseaseStatus[0],
   date_of_birth: null,
@@ -305,6 +306,13 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             invalidForm = true;
           }
           return;
+        case "emergency_phone_number":
+          const emergency_phone_number = parsePhoneNumberFromString(state.form[field]);
+          if (!state.form[field] || !emergency_phone_number?.isPossible()) {
+            errors[field] = "Please enter valid phone number";
+            invalidForm = true;
+          }
+          return;
         case "countries_travelled":
           if (state.form.past_travel && !state.form[field].length) {
             errors[field] = "Please enter the list of countries visited";
@@ -360,6 +368,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       }
       const data = {
         phone_number: parsePhoneNumberFromString(state.form.phone_number)?.format('E.164'),
+        emergency_phone_number: parsePhoneNumberFromString(state.form.emergency_phone_number)?.format('E.164'),
         date_of_birth: moment(state.form.date_of_birth).format('YYYY-MM-DD'),
         disease_status: state.form.disease_status,
         name: state.form.name,
@@ -778,6 +787,16 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     value={state.form.ward}
                     onChange={handleChange}
                     errors={state.errors.ward}
+                  />
+                </div>
+                <div>
+                  <PhoneNumberField
+                    label="Emergency contact number*"
+                    value={state.form.emergency_phone_number}
+                    onChange={(value: any) => [
+                      handleValueChange(value, 'emergency_phone_number'),
+                    ]}
+                    errors={state.errors.emergency_phone_number}
                   />
                 </div>
 
