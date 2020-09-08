@@ -608,16 +608,16 @@ export const ConsultationForm = (props: any) => {
                 />
               </div>
               <div>
-                <InputLabel id="refered-label">Test ID *</InputLabel>
+                <InputLabel id="refered-label">State Test ID</InputLabel>
                 <TextInputField
-                    name="test_id"
-                    variant="outlined"
-                    margin="dense"
-                    type="string"
-                    InputLabelProps={{ shrink: !!state.form.test_id }}
-                    value={state.form.test_id}
-                    onChange={handleChange}
-                    errors={state.errors.test_id}
+                  name="test_id"
+                  variant="outlined"
+                  margin="dense"
+                  type="string"
+                  InputLabelProps={{ shrink: !!state.form.test_id }}
+                  value={state.form.test_id}
+                  onChange={handleChange}
+                  errors={state.errors.test_id}
                 />
               </div>
               <div>
