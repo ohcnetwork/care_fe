@@ -748,18 +748,17 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   />
                 </div>
                 <div>
-                  <InputLabel id="name-label">Pincode</InputLabel>
+                  <InputLabel id="name-label">Ward/Division of respective LSGI*</InputLabel>
                   <TextInputField
-                    name="pincode"
+                    name="ward"
                     variant="outlined"
                     margin="dense"
                     type="text"
-                    value={state.form.pincode}
+                    value={state.form.ward}
                     onChange={handleChange}
-                    errors={state.errors.pincode}
+                    errors={state.errors.ward}
                   />
                 </div>
-
                 <div>
                   <InputLabel id="blood_group-label">Blood Group</InputLabel>
                   <SelectField
@@ -775,15 +774,15 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   />
                 </div>
                 <div>
-                  <InputLabel id="name-label">Ward*</InputLabel>
+                  <InputLabel id="name-label">Pincode</InputLabel>
                   <TextInputField
-                    name="ward"
+                    name="pincode"
                     variant="outlined"
                     margin="dense"
                     type="text"
-                    value={state.form.ward}
+                    value={state.form.pincode}
                     onChange={handleChange}
-                    errors={state.errors.ward}
+                    errors={state.errors.pincode}
                   />
                 </div>
                 <div>

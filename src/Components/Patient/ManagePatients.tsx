@@ -231,7 +231,7 @@ export const PatientManager = (props: any) => {
               )}
             </div>
             <div className="px-2">
-              <div className="btn btn-default">
+              <div className="btn btn-default bg-white">
                 Details
               </div>
             </div>
