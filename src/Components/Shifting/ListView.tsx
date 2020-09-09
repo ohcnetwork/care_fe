@@ -27,8 +27,11 @@ const initialFilterData = {
   is_up_shift: '--',
   limit: limit,
   patient_name: '',
-  // X_before: '',
-  // X_after: '',
+  created_date_before: null,
+  created_date_after: null,
+  modified_date_before: null,
+  modified_date_after: null,
+  patient_phone_number: '',
   offset: 0
 }
 
@@ -44,8 +47,11 @@ const formatFilter = (filter: any, csv: boolean = false) => {
     limit: limit,
     offset: filter.offset,
     patient_name: filter.patient_name || undefined,
-    // X_before: filter.X_before || undefined,
-    // X_after: filter.X_after || undefined
+    created_date_before: (filter.created_date_before && moment(filter.created_date_before).format('YYYY-MM-DD')) || undefined,
+    created_date_after: (filter.created_date_after && moment(filter.created_date_after).format('YYYY-MM-DD')) || undefined,
+    modified_date_before: (filter.modified_date_before && moment(filter.modified_date_before).format('YYYY-MM-DD')) || undefined,
+    modified_date_after: (filter.modified_date_after && moment(filter.modified_date_after).format('YYYY-MM-DD')) || undefined,
+    patient_phone_number: filter.patient_phone_number || undefined
   };
 }
 
