@@ -7,15 +7,18 @@ export interface OptionsType {
 }
 
 export const USER_TYPES: Array<String> = [
-    "Pharmacist",
-    "Volunteer",
+  "Volunteer",
+  "Pharmacist",
   "Staff",
-    "Doctor",
-    "Reserved",
-  "DistrictLabAdmin",
+  "StaffReadOnly",
+  "Doctor",
   "DistrictAdmin",
+  "DistrictReadOnlyAdmin",
+  "DistrictLabAdmin",
   "StateLabAdmin",
-  "StateAdmin"
+  "StateAdmin",
+  "StateReadOnlyAdmin",
+  "Reserved",
 ];
 
 export const DOWNLOAD_TYPES: Array<String> = [
@@ -72,7 +75,7 @@ export const FACILITY_TYPES: Array<OptionsType> = [
   { id: 950, text: 'Corona Testing Labs' },
   { id: 1000, text: "Corona Care Centre" },
   { id: 1100, text: "First Line Treatment Centre" },
-  { id: 1200, text: "Second Line Treatment Center"},
+  { id: 1200, text: "Second Line Treatment Center" },
   { id: 1300, text: "Shifting Centre" }
 ];
 
@@ -110,9 +113,9 @@ export const MEDICAL_HISTORY_CHOICES: Array<OptionsType> = [
   { id: 3, text: "Heart Disease" },
   { id: 4, text: "HyperTension" },
   { id: 5, text: "Kidney Diseases" },
-  { id: 6, text: "Lung Diseases/Asthma"},
-  { id: 7, text: "Cancer"},
-  { id: 8, text: "OTHER"}
+  { id: 6, text: "Lung Diseases/Asthma" },
+  { id: 7, text: "Cancer" },
+  { id: 8, text: "OTHER" }
 ];
 
 export const SYMPTOM_CHOICES: Array<OptionsType> = [
@@ -152,15 +155,15 @@ export const CONSULTATION_SUGGESTION = [
   { id: "A", text: "Admission" },
   { id: "R", text: "Refer to another Hospital" },
   { id: "OP", text: "OP Consultation" },
-  { id: "DC", text: "Domiciliary Care"}
+  { id: "DC", text: "Domiciliary Care" }
 ];
 
 export const ADMITTED_TO = [
   "Isolation Room",
   "ICU",
   "ICU with Ventilator",
-    "Gynaecology Ward",
-    "Paediatric Ward"
+  "Gynaecology Ward",
+  "Paediatric Ward"
 ];
 
 export const PATIENT_CATEGORY = [
@@ -245,11 +248,11 @@ export const ICMR_CATEGORY = [
 ]
 
 export const TELEMEDICINE_ACTIONS = [
-  {id: 10, text: 'PENDING', desc: "Pending"},
-  {id: 30, text: 'SPECIALIST_REQUIRED', desc: "Specialist Required"},
-  {id: 40, text: 'PLAN_FOR_HOME_CARE', desc: "Plan for Home Care"},
-  {id: 50, text: 'FOLLOW_UP_NOT_REQUIRED', desc: "Follow Up Not Required"},
-  {id: 60, text: 'COMPLETE', desc: "Complete"},
-  {id: 70, text: 'REVIEW', desc: "Review"},
-  {id: 80, text: 'NOT_REACHABLE', desc: "Not Reachable"}
+  { id: 10, text: 'PENDING', desc: "Pending" },
+  { id: 30, text: 'SPECIALIST_REQUIRED', desc: "Specialist Required" },
+  { id: 40, text: 'PLAN_FOR_HOME_CARE', desc: "Plan for Home Care" },
+  { id: 50, text: 'FOLLOW_UP_NOT_REQUIRED', desc: "Follow Up Not Required" },
+  { id: 60, text: 'COMPLETE', desc: "Complete" },
+  { id: 70, text: 'REVIEW', desc: "Review" },
+  { id: 80, text: 'NOT_REACHABLE', desc: "Not Reachable" }
 ]
