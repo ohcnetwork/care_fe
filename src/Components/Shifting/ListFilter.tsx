@@ -109,7 +109,7 @@ export default function ListFilter(props: any) {
                 className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"/>
         </div>
         <div className="w-64 flex-none">
-          <span className="text-sm font-semibold">Created Date Before</span>
+          <span className="text-sm font-semibold">Patient Phone Number</span>
           <TextInputField
                 name="patient_phone_number"
                 variant="outlined"
@@ -121,7 +121,7 @@ export default function ListFilter(props: any) {
         </div>  
 
         <div className="w-64 flex-none">
-          <span className="text-sm font-semibold">Patient Phone Number</span>
+          <span className="text-sm font-semibold">Created Date Before</span>
           <DateInputField
                 name="created_date_before"
                 inputVariant="outlined"
