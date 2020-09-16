@@ -266,13 +266,13 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           }
           return;
         case "local_body":
-          if (!state.form[field]) {
+          if (state.form.nationality === "India" && !state.form[field]) {
             errors[field] = "Please select local body";
             invalidForm = true;
           }
           return;
         case "district":
-          if (!state.form[field]) {
+          if (state.form.nationality === "India" && !state.form[field]) {
             errors[field] = "Please select district";
             invalidForm = true;
           }
