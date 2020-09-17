@@ -31,7 +31,7 @@ export default {
   },
 
   userList: {
-    path: "/api/v1/users/",
+    path: "/api/v1/users",
   },
 
   createUser: {
@@ -61,13 +61,13 @@ export default {
   },
 
   searchUser: {
-    path: "/api/v1/users/search/",
+    path: "/api/v1/users/search",
   },
 
   // Facility Endpoints
 
   listFacility: {
-    path: "/api/v1/facility/",
+    path: "/api/v1/facility",
   },
 
   createFacility: {
@@ -76,7 +76,7 @@ export default {
   },
 
   getFacility: {
-    path: "/api/v1/facility/",
+    path: "/api/v1/facility",
   },
 
   updateFacility: {
@@ -90,7 +90,7 @@ export default {
   },
 
   getAllFacilitiesList:{
-    path: "/api/v1/getallfacilities/",
+    path: "/api/v1/getallfacilities",
   },
 
 // Download Api
@@ -129,7 +129,7 @@ export default {
     method: "POST",
   },
   getConsultation: {
-    path: "/api/v1/consultation/",
+    path: "/api/v1/consultation",
   },
   updateConsultation: {
     path: "/api/v1/consultation/",
@@ -152,7 +152,7 @@ export default {
     method: "PUT",
   },
   getDailyReports: {
-    path: "/api/v1/consultation/{consultationId}/daily_rounds/",
+    path: "/api/v1/consultation/{consultationId}/daily_rounds",
   },
 
   // Hospital Beds
@@ -167,11 +167,11 @@ export default {
   },
 
   getCapacity: {
-    path: "/api/v1/facility/{facilityId}/capacity/",
+    path: "/api/v1/facility/{facilityId}/capacity",
   },
 
   getDoctor: {
-    path: "/api/v1/facility/{facilityId}/hospital_doctor/",
+    path: "/api/v1/facility/{facilityId}/hospital_doctor",
   },
 
   updateCapacity: {
@@ -190,7 +190,7 @@ export default {
     method: "POST",
   },
   getTriage: {
-    path: "/api/v1/facility/{facilityId}/patient_stats/",
+    path: "/api/v1/facility/{facilityId}/patient_stats",
   },
 
   // //Care Center
