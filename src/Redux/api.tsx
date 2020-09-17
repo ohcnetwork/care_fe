@@ -7,12 +7,12 @@ export default {
   },
 
   token_refresh: {
-    path: "/api/v1/auth/token/refresh/",
+    path: "/api/v1/auth/token/refresh",
     method: "POST",
   },
 
   token_verify: {
-    path: "/api/v1/auth/token/verify/",
+    path: "/api/v1/auth/token/verify",
     method: "POST",
   },
 
@@ -27,11 +27,11 @@ export default {
   },
   // User Endpoints
   currentUser: {
-    path: "/api/v1/users/getcurrentuser/",
+    path: "/api/v1/users/getcurrentuser",
   },
 
   userList: {
-    path: "/api/v1/users/",
+    path: "/api/v1/users",
   },
 
   createUser: {
@@ -41,17 +41,17 @@ export default {
   },
 
   updateUser: {
-    path: "/api/v1/users/",
+    path: "/api/v1/users",
     method: "PUT",
   },
 
   partialUpdateUser: {
-    path: "/api/v1/users/",
+    path: "/api/v1/users",
     method: "PATCH",
   },
 
   deleteUser: {
-    path: "/api/v1/users/",
+    path: "/api/v1/users",
     method: "DELETE",
   },
 
@@ -61,13 +61,13 @@ export default {
   },
 
   searchUser: {
-    path: "/api/v1/users/search/",
+    path: "/api/v1/users/search",
   },
 
   // Facility Endpoints
 
   listFacility: {
-    path: "/api/v1/facility/",
+    path: "/api/v1/facility",
   },
 
   createFacility: {
@@ -76,26 +76,26 @@ export default {
   },
 
   getFacility: {
-    path: "/api/v1/facility/",
+    path: "/api/v1/facility",
   },
 
   updateFacility: {
-    path: "/api/v1/facility/",
+    path: "/api/v1/facility",
     method: "PUT",
   },
 
   partialUpdateFacility: {
-    path: "/api/v1/facility/",
+    path: "/api/v1/facility",
     method: "PATCH",
   },
 
   getAllFacilitiesList:{
-    path: "/api/v1/getallfacilities/",
+    path: "/api/v1/getallfacilities",
   },
 
 // Download Api
   deleteFacility: {
-    path: "/api/v1/facility/",
+    path: "/api/v1/facility",
     method: "DELETE",
   },
 
@@ -129,10 +129,10 @@ export default {
     method: "POST",
   },
   getConsultation: {
-    path: "/api/v1/consultation/",
+    path: "/api/v1/consultation",
   },
   updateConsultation: {
-    path: "/api/v1/consultation/",
+    path: "/api/v1/consultation",
     method: "PUT",
   },
   partialUpdateConsultation: {
@@ -152,7 +152,7 @@ export default {
     method: "PUT",
   },
   getDailyReports: {
-    path: "/api/v1/consultation/{consultationId}/daily_rounds/",
+    path: "/api/v1/consultation/{consultationId}/daily_rounds",
   },
 
   // Hospital Beds
@@ -167,20 +167,20 @@ export default {
   },
 
   getCapacity: {
-    path: "/api/v1/facility/{facilityId}/capacity/",
+    path: "/api/v1/facility/{facilityId}/capacity",
   },
 
   getDoctor: {
-    path: "/api/v1/facility/{facilityId}/hospital_doctor/",
+    path: "/api/v1/facility/{facilityId}/hospital_doctor",
   },
 
   updateCapacity: {
-    path: "/api/v1/facility/{facilityId}/capacity/",
+    path: "/api/v1/facility/{facilityId}/capacity",
     method: "PUT",
   },
 
   updateDoctor: {
-    path: "/api/v1/facility/{facilityId}/hospital_doctor/",
+    path: "/api/v1/facility/{facilityId}/hospital_doctor",
     method: "PUT",
   },
 
@@ -190,7 +190,7 @@ export default {
     method: "POST",
   },
   getTriage: {
-    path: "/api/v1/facility/{facilityId}/patient_stats/",
+    path: "/api/v1/facility/{facilityId}/patient_stats",
   },
 
   // //Care Center
@@ -202,10 +202,10 @@ export default {
   // Patient
 
   searchPatient: {
-    path: "/api/v1/patient/search/",
+    path: "/api/v1/patient/search",
   },
   patientList: {
-    path: "/api/v1/patient/",
+    path: "/api/v1/patient",
   },
   addPatient: {
     path: "/api/v1/patient/",
@@ -234,7 +234,7 @@ export default {
     method: "POST",
   },
   sampleReport: {
-    path: "/api/v1/patient/{id}/test_sample/{sampleId}/icmr_sample/",
+    path: "/api/v1/patient/{id}/test_sample/{sampleId}/icmr_sample",
   },
 
   // States
@@ -265,14 +265,14 @@ export default {
 
   // Sample Test
   getTestSampleList: {
-    path: "/api/v1/test_sample/",
+    path: "/api/v1/test_sample",
   },
   getTestSample: {
-    path: "/api/v1/test_sample/",
+    path: "/api/v1/test_sample",
     method: "POST",
   },
   patchSample: {
-    path: "/api/v1/test_sample/",
+    path: "/api/v1/test_sample",
     method: "PATCH",
   },
 
@@ -285,26 +285,26 @@ export default {
     method: "POST",
   },
   getInventoryLog: {
-    path: "/api/v1/facility/",
+    path: "/api/v1/facility",
   },
   setMinQuantity: {
     path: "/api/v1/facility/{facilityId}/min_quantity/",
     method: "POST",
   },
   getMinQuantity: {
-    path: "/api/v1/facility/",
+    path: "/api/v1/facility",
     method: "GET",
   },
   updateMinQuantity: {
-    path: "/api/v1/facility/{facilityId}/min_quantity/{inventoryId}/",
+    path: "/api/v1/facility/{facilityId}/min_quantity/{inventoryId}",
     method: "PATCH",
   },
   getInventorySummary: {
-    path: "/api/v1/facility/",
+    path: "/api/v1/facility",
     method: "GET",
   },
   getItemName: {
-    path: "/api/v1/items/",
+    path: "/api/v1/items",
     method: "GET",
   },
   discharge: {
@@ -317,11 +317,11 @@ export default {
   },
   //Profile
   getUserDetails: {
-    path: "/api/v1/users/",
+    path: "/api/v1/users",
     method: "GET",
   },
   updateUserDetails: {
-    path: "/api/v1/users/",
+    path: "/api/v1/users",
     method: "PUT",
   },
   //Shift
@@ -330,19 +330,19 @@ export default {
     method: "POST",
   },
   updateShift: {
-    path: "/api/v1/shift/",
-    method: "PUT",  
+    path: "/api/v1/shift",
+    method: "PUT",
   },
   deleteShiftRecord: {
-    path: "/api/v1/shift/",
-    method: "DELETE",  
+    path: "/api/v1/shift",
+    method: "DELETE",
   },
   getShiftRequests: {
-    path: "/api/v1/shift/",
+    path: "/api/v1/shift",
     method: "GET",
   },
   getShiftDetails: {
-    path: "/api/v1/shift/",
+    path: "/api/v1/shift",
     method: "GET",
   },
   completeTransfer: {
