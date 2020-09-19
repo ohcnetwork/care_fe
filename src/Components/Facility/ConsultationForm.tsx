@@ -203,6 +203,12 @@ export const ConsultationForm = (props: any) => {
             invalidForm = true;
           }
           return;
+        case "category":
+          if (!state.form[field] || !state.form[field].length) {
+            errors[field] = "Please select the category";
+            invalidForm = true;
+          }
+          return;
         case "suggestion":
           if (!state.form[field]) {
             errors[field] = "Please enter the decision";
@@ -469,7 +475,7 @@ export const ConsultationForm = (props: any) => {
                   />
                 </div>
                 <div className="flex-1">
-                  <InputLabel id="category-label">Category</InputLabel>
+                  <InputLabel id="category-label">Category *</InputLabel>
                   <SelectField
                     name="category"
                     variant="standard"
