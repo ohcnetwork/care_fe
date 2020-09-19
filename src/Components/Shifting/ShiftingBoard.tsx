@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { getShiftRequests, completeTransfer, downloadShiftRequests } from "../../Redux/actions";
 import Button from "@material-ui/core/Button";
-import { navigate } from "hookrouter";
+import { A } from "hookrouter";
 import moment from "moment";
 import { Modal } from '@material-ui/core';
 import { CSVLink } from 'react-csv';
@@ -114,71 +114,55 @@ export default function ListView({ board, filterProp, formatFilter }: boardProps
                 </div>
                 <dl className="grid grid-cols-1 col-gap-1 row-gap-2 sm:grid-cols-1">
                   <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
-                      <i className="fas fa-birthday-cake mr-2" />
-                      Date of Birth
-                    </dt>
-                    <dd className="font-bold text-sm leading-5 text-gray-900">
-                      {moment(shift.patient_object.date_of_birth).format('DD/MM/YYYY') || ''}
-                    </dd>
-                  </div>
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
+                    <dt title="Phone Number" className="text-sm leading-5 font-medium text-gray-500 flex items-center">
                       <i className="fas fa-mobile mr-2" />
-                      Phone Number
+                      <dd className="font-bold text-sm leading-5 text-gray-900">
+                        {shift.patient_object.phone_number || ''}
+                      </dd>
                     </dt>
-                    <dd className="font-bold text-sm leading-5 text-gray-900">
-                      {shift.patient_object.phone_number || ''}
-                    </dd>
+
                   </div>
                   <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
+                    <dt title=" Origin facility" className="text-sm leading-5 font-medium text-gray-500 flex items-center">
                       <i className="fas fa-plane-departure mr-2"></i>
-                      Origin facility
-                  </dt>
-                    <dd className="font-bold text-sm leading-5 text-gray-900">
-                      {(shift.orgin_facility_object || {}).name}
-                    </dd>
+                      <dd className="font-bold text-sm leading-5 text-gray-900">
+                        {(shift.orgin_facility_object || {}).name}
+                      </dd>
+                    </dt>
                   </div>
                   <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
+                    <dt title="Shifting approving facility" className="text-sm leading-5 font-medium text-gray-500 flex items-center">
                       <i className="fas fa-user-check mr-2"></i>
-                      Shifting approving facility
-                  </dt>
-                    <dd className="font-bold text-sm leading-5 text-gray-900">
-                      {(shift.shifting_approving_facility_object || {}).name}
-                    </dd>
+                      <dd className="font-bold text-sm leading-5 text-gray-900">
+                        {(shift.shifting_approving_facility_object || {}).name}
+                      </dd>
+                    </dt>
                   </div>
                   <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
+                    <dt title=" Assigned facility" className="text-sm leading-5 font-medium text-gray-500 flex items-center">
                       <i className="fas fa-plane-arrival mr-2"></i>
-                      Assigned facility
-                  </dt>
-                    <dd className="font-bold text-sm leading-5 text-gray-900">
-                      {(shift.assigned_facility_object || {}).name}
-                    </dd>
+
+                      <dd className="font-bold text-sm leading-5 text-gray-900">
+                        {(shift.assigned_facility_object || {}).name || "Yet to be decided"}
+                      </dd>
+                    </dt>
                   </div>
 
                   <div className="sm:col-span-1">
-                    <dt className="text-sm leading-5 font-medium text-gray-500">
+                    <dt title="  Last Modified" className="text-sm leading-5 font-medium text-gray-500 flex items-center">
                       <i className="fas fa-stopwatch mr-2"></i>
-                      Last Modified
-                  </dt>
-                    <dd className="font-bold text-sm leading-5 text-gray-900">
-                      {moment(shift.modified_date).format("LLL") || "--"}
-                    </dd>
+                      <dd className="font-bold text-sm leading-5 text-gray-900">
+                        {moment(shift.modified_date).format("LLL") || "--"}
+                      </dd>
+                    </dt>
+
                   </div>
                 </dl>
               </div>
               <div className="mt-2">
-                <Button
-                  size="small"
-                  variant="outlined"
-                  fullWidth
-                  onClick={() => navigate(`/shifting/${shift.external_id}`)}
-                >
-                  View All Details
-                </Button>
+                <A href={`/shifting/${shift.external_id}`} className="btn btn-default w-full">
+                  All Details
+                </A>
               </div>
               {filter === "TRANSFER IN PROGRESS" &&
                 <div className="mt-2">
@@ -190,7 +174,6 @@ export default function ListView({ board, filterProp, formatFilter }: boardProps
                   >
                     TRANSFER TO RECEIVING FACILITY
                 </Button>
-
                   <Modal
                     open={modalFor === shift.external_id}
                     onClose={_ => setModalFor({ externalId: undefined, loading: false })}
@@ -231,7 +214,7 @@ export default function ListView({ board, filterProp, formatFilter }: boardProps
       <div className="flex justify-between p-4 rounded mx-2 bg-white shadow items-center">
         <h3 className="text-sm flex">{board} <GetAppIcon className="cursor-pointer" onClick={triggerDownload} />
         </h3>
-        <span className="rounded-lg ml-2 bg-gray-700 text-white px-2">
+        <span className="rounded-lg ml-2 bg-green-500 text-white px-2">
           {totalCount || "0"}
         </span>
       </div>
