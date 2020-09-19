@@ -78,8 +78,8 @@ export const DailyRounds = (props: any) => {
     const [state, dispatch] = useReducer(DailyRoundsFormReducer, initialState);
     const [isLoading, setIsLoading] = useState(false);
 
-    const headerText = (!id) ? "Add Daily Rounds" : "Edit Daily Rounds";
-    const buttonText = (!id) ? "Save Daily Round" : "Update Daily Round";
+    const headerText = (!id) ? "Add Consultation Update" : "Edit Consultation Update";
+    const buttonText = (!id) ? "Save Consultation Update" : "Update Consultation Updates";
 
     const fetchpatient = useCallback(
         async (status: statusType) => {
@@ -160,12 +160,12 @@ export const DailyRounds = (props: any) => {
                 dispatch({ type: "set_form", form: initForm });
                 if (id) {
                     Notification.Success({
-                        msg: "Daily round details updated successfully"
+                        msg: "Consultation Updates details updated successfully"
                     });
                     goBack();
                 } else {
                     Notification.Success({
-                        msg: "Daily round details created successfully"
+                        msg: "Consultation Updates details created successfully"
                     });
                     navigate(`/facility/${facilityId}/patient/${patientId}`);
                 }

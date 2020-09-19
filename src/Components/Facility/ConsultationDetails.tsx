@@ -98,7 +98,7 @@ export const ConsultationDetails = (props: any) => {
   if (isDailyRoundLoading) {
     roundsList = <CircularProgress size={20} />;
   } else if (dailyRoundsListData.length === 0) {
-    roundsList = <Typography>No Daily Rounds data is available.</Typography>;
+    roundsList = <Typography>No Consultation Update data is available.</Typography>;
   } else if (dailyRoundsListData.length > 0) {
     roundsList = dailyRoundsListData.map((itemData, idx) => {
       return (
@@ -148,7 +148,7 @@ export const ConsultationDetails = (props: any) => {
                     )
                   }
                 >
-                  View Daily Rounds Details
+                  View Consultation Update Details
                 </Button>
               </div>
             </div>
@@ -160,7 +160,7 @@ export const ConsultationDetails = (props: any) => {
   if (isDailyRoundLoading) {
     roundsList = <CircularProgress size={20} />;
   } else if (dailyRoundsListData.length === 0) {
-    roundsList = <Typography>No Daily Rounds data is available.</Typography>;
+    roundsList = <Typography>No Consultation Update data is available.</Typography>;
   } else if (dailyRoundsListData.length > 0) {
     roundsList = dailyRoundsListData.map((itemData, idx) => {
       return (
@@ -210,7 +210,7 @@ export const ConsultationDetails = (props: any) => {
                     )
                   }
                 >
-                  View Daily Rounds Details
+                  View Consultation Update Details
                 </Button>
               </div>
             </div>
@@ -408,7 +408,7 @@ export const ConsultationDetails = (props: any) => {
           </div>
         </div>}
       <div>
-        <PageTitle title="Daily Rounds" hideBack={true} />
+        <PageTitle title="Consultation Update" hideBack={true} />
         <div className="flex flex-wrap mt-4">
           {roundsList}
           {!isDailyRoundLoading && totalCount > limit && (
