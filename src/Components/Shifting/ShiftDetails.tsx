@@ -407,7 +407,7 @@ export default function ShiftDetails(props: any) {
             <PageTitle title={"Shifting details"} />
             <div>
               <button onClick={_ => setIsPrintMode(true)} className="bg-white btn btn-primary">
-                <i className="fas fa-letter mr-2"></i> Referral Letter
+                <i className="fas fa-file-alt mr-2"></i> Referral Letter
               </button>
             </div>
           </div>
@@ -462,6 +462,10 @@ export default function ShiftDetails(props: any) {
               <div>
                 <span className="font-semibold leading-relaxed">Is up shift: </span>
                 <span className="badge badge-pill badge-warning py-1 px-2"> {data.is_up_shift ? "yes" : "no"}</span>
+              </div>
+              <div>
+                <span className="font-semibold leading-relaxed">Karunya Arogya Suraksha Padhathi: </span>
+                <span className="badge badge-pill badge-warning py-1 px-2"> {data.is_kasp ? "yes" : "no"}</span>
               </div>
               <div>
                 <span className="font-semibold leading-relaxed">Vehicle preference: </span>

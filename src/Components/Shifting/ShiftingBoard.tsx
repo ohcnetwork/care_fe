@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { getShiftRequests, completeTransfer, downloadShiftRequests } from "../../Redux/actions";
 import Button from "@material-ui/core/Button";
-import { A } from "hookrouter";
+import { navigate } from "hookrouter";
 import moment from "moment";
 import { Modal } from '@material-ui/core';
 import { CSVLink } from 'react-csv';
@@ -165,8 +165,11 @@ export default function ListView({ board, filterProp, formatFilter }: boardProps
                   </div>
                 </dl>
               </div>
-              <div className="mt-2">
-                <a href={`/shifting/${shift.external_id}`} className="btn btn-default w-full" target="_blank" rel="noopener noreferrer">
+              <div className="mt-2 flex">
+                <button onClick={_ => navigate(`/shifting/${shift.external_id}`)} className="btn btn-default bg-white mr-2" >
+                  <i className="fas fa-eye mr-2" /> View
+                </button>
+                <a href={`/shifting/${shift.external_id}`} className="btn btn-default w-full bg-white mr-2" target="_blank" rel="noopener noreferrer">
                   <i className="fas fa-external-link-alt mr-2" /> All Details
                 </a>
               </div>
