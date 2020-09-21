@@ -37,6 +37,7 @@ export interface PatientModel {
   is_migrant_worker?: boolean;
   ward?: string;
   local_body_object?: { id: number; name: string };
+  ward_object?: { id: number, name: string, number: number }
   district_object?: { id: number; name: string };
   state_object?: { id: number; name: string };
   tele_consultation_history?: Array<any>;
@@ -58,6 +59,9 @@ export interface PatientModel {
   nationality?: string;
   passport_no?: string;
   disease_status?: string;
+  test_type?: string;
+  date_of_test?: string;
+  srf_id?: string;
   date_of_birth?: string;
   blood_group?: string;
   number_of_aged_dependents?: number;

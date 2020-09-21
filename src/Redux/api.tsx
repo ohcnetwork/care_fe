@@ -89,11 +89,11 @@ export default {
     method: "PATCH",
   },
 
-  getAllFacilitiesList:{
+  getAllFacilitiesList: {
     path: "/api/v1/getallfacilities",
   },
 
-// Download Api
+  // Download Api
   deleteFacility: {
     path: "/api/v1/facility",
     method: "DELETE",
@@ -263,6 +263,13 @@ export default {
     path: "/api/v1/district/{id}/local_bodies/",
   },
 
+  // ward
+  getWard: {
+    path: "/api/v1/ward/{id}/",
+  },
+  getWardByLocalBody: {
+    path: "/api/v1/ward/?local_body={id}",
+  },
   // Sample Test
   getTestSampleList: {
     path: "/api/v1/test_sample",
