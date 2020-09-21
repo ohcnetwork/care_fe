@@ -28,6 +28,14 @@ export const DOWNLOAD_TYPES: Array<String> = [
   "Facility Triage Data",
 ];
 
+export const TEST_TYPE_CHOICES: Array<OptionsType> = [
+  { id: 10, text: "UNK" },
+  { id: 20, text: "ANTIGEN" },
+  { id: 30, text: "RTPCR" },
+  { id: 40, text: "CBNAT" },
+  { id: 50, text: "TRUNAT" },
+];
+
 export const DISTRICT_CHOICES: Array<OptionsType> = [
   { id: 1, text: "Thiruvananthapuram" },
   { id: 2, text: "Kollam" },
