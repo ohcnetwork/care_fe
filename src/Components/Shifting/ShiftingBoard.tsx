@@ -153,7 +153,15 @@ export default function ListView({ board, filterProp, formatFilter }: boardProps
                         {moment(shift.modified_date).format("LLL") || "--"}
                       </dd>
                     </dt>
+                  </div>
 
+                  <div className="sm:col-span-1">
+                    <dt title="Patient Address" className="text-sm leading-5 font-medium text-gray-500 flex items-center">
+                      <i className="fas fa-home mr-2"></i>
+                      <dd className="font-bold text-sm leading-5 text-gray-900">
+                        {shift.patient_object.address || "--"}
+                      </dd>
+                    </dt>
                   </div>
                 </dl>
               </div>
