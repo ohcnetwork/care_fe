@@ -89,11 +89,11 @@ export default {
     method: "PATCH",
   },
 
-  getAllFacilitiesList:{
+  getAllFacilitiesList: {
     path: "/api/v1/getallfacilities",
   },
 
-// Download Api
+  // Download Api
   deleteFacility: {
     path: "/api/v1/facility",
     method: "DELETE",
@@ -119,7 +119,7 @@ export default {
 
   downloadPatients: {
     path: "/api/v1/patient/?csv",
-    method: 'GET'
+    method: "GET",
   },
   getConsultationList: {
     path: "/api/v1/consultation/",
@@ -263,6 +263,14 @@ export default {
     path: "/api/v1/district/{id}/local_bodies/",
   },
 
+  //Ward
+  getWard: {
+    path: "/api/v1/ward/{id}/",
+  },
+  getWardByLocalBody: {
+    path: "/api/v1/ward/?local_body={id}",
+  },
+
   // Sample Test
   getTestSampleList: {
     path: "/api/v1/test_sample",
@@ -352,5 +360,5 @@ export default {
   downloadShiftRequests: {
     path: "/api/v1/shift/",
     method: "GET",
-  }
+  },
 };
