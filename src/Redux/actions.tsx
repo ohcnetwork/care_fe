@@ -143,6 +143,9 @@ export const getLocalbodyByDistrict = (pathParam: object) => {
 export const getWardByLocalBody = (pathParam: object) => {
   return fireRequest("getWardByLocalBody", [], {}, pathParam);
 };
+export const getWardByLocalBody = (pathParam: object) => {
+  return fireRequest("getWardByLocalBody", [], {}, pathParam);
+};
 
 // Sample Test
 export const getSampleTestList = (params: object, pathParam: object) => {
@@ -260,8 +263,8 @@ export const getShiftDetails = (id: string) => {
   return fireRequest("getShiftDetails", [id], {});
 };
 export const completeTransfer = (pathParams: object) => {
-  return fireRequest("completeTransfer", [], {}, pathParams);
+  return fireRequest('completeTransfer', [], {}, pathParams);
 };
 export const downloadShiftRequests = (params: object) => {
-  return fireRequest("downloadShiftRequests", [], params);
+  return fireRequest('downloadShiftRequests', [], params);
 };

@@ -215,6 +215,10 @@ export const DISEASE_STATUS = [
   "EXPIRED",
 ];
 
+export const TEST_TYPE = [
+  "UNK", "ANTIGEN", "RTPCR", "CBNAT", "TRUNAT"
+];
+
 export const BLOOD_GROUPS = [
   "UNK",
   "A+",

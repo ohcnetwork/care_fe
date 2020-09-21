@@ -262,8 +262,8 @@ export default {
   getLocalbodyByDistrict: {
     path: "/api/v1/district/{id}/local_bodies/",
   },
-
-  //Ward
+  
+  // ward
   getWard: {
     path: "/api/v1/ward/{id}/",
   },

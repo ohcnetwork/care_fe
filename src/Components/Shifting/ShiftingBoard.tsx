@@ -6,7 +6,6 @@ import { A } from "hookrouter";
 import moment from "moment";
 import { Modal } from '@material-ui/core';
 import { CSVLink } from 'react-csv';
-
 import GetAppIcon from '@material-ui/icons/GetApp';
 
 const limit = 30;
@@ -94,7 +93,6 @@ export default function ListView({ board, filterProp, formatFilter }: boardProps
   }
 
   let patientFilter = (filter: string) => {
-    console.log("Re-Rendering")
     return data
       .filter(({ status }) => status === filter)
       .map((shift: any, idx: number) =>
@@ -155,14 +153,22 @@ export default function ListView({ board, filterProp, formatFilter }: boardProps
                         {moment(shift.modified_date).format("LLL") || "--"}
                       </dd>
                     </dt>
+                  </div>
 
+                  <div className="sm:col-span-1">
+                    <dt title="Patient Address" className="text-sm leading-5 font-medium text-gray-500 flex items-center">
+                      <i className="fas fa-home mr-2"></i>
+                      <dd className="font-bold text-sm leading-5 text-gray-900">
+                        {shift.patient_object.address || "--"}
+                      </dd>
+                    </dt>
                   </div>
                 </dl>
               </div>
               <div className="mt-2">
-                <A href={`/shifting/${shift.external_id}`} className="btn btn-default w-full">
-                  All Details
-                </A>
+                <a href={`/shifting/${shift.external_id}`} className="btn btn-default w-full" target="_blank" rel="noopener noreferrer">
+                  <i className="fas fa-external-link-alt mr-2" /> All Details
+                </a>
               </div>
               {filter === "TRANSFER IN PROGRESS" &&
                 <div className="mt-2">

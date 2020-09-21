@@ -426,7 +426,20 @@ export const PatientHome = (props: any) => {
             </div>
           }
         </div>
-
+        <div className="md:flex justify-between bg-gray-100 p-4 ">
+          <div>
+            <span className="font-semibold leading-relaxed">SRF ID: </span>
+            {patientData.srf_id && patientData.srf_id || '-'}
+          </div>
+          <div>
+            <span className="font-semibold leading-relaxed">Test Type: </span>
+            {patientData.test_type && patientData.test_type || '-'}
+          </div>
+          <div>
+            <span className="font-semibold leading-relaxed">Date of Test: </span>
+            {patientData.date_of_test && moment(patientData.date_of_test).format("LL") || '-'}
+          </div>
+        </div>
         <div className="grid gap-2 grid-cols-1 md:grid-cols-2 mt-2">
           <div>
             <span className="font-semibold leading-relaxed">Facility: </span>
@@ -474,7 +487,7 @@ export const PatientHome = (props: any) => {
             </div>
             <div>
               <span className="font-semibold leading-relaxed">Ward : </span>
-              {patientData.ward || '-'}
+              {patientData.ward_object && patientData.ward_object.name || '-'}
             </div>
           </>)}
           <div>

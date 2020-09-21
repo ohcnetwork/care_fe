@@ -12,18 +12,18 @@ export default function ListFilter(props: any) {
     const filterData: any = { ...filter };
     filterData[`${name}_ref`] = selected;
     filterData[name] = (selected || {}).id;
-    
+
     onChange(filterData);
   };
 
   const handleChange = (event: any) => {
     let { name, value } = event.target;
-    
+
     const filterData: any = { ...filter };
     filterData[name] = value;
 
     onChange(filterData);
-};
+  };
 
   return (
     <div className="mt-2">
@@ -40,7 +40,7 @@ export default function ListFilter(props: any) {
               selected={filter.orgin_facility_ref}
               setSelected={(obj) => setFacility(obj, 'orgin_facility')}
               className="shifting-page-filter-dropdown"
-              errors={''}/>
+              errors={''} />
           </div>
         </div>
 
@@ -53,7 +53,7 @@ export default function ListFilter(props: any) {
               selected={filter.shifting_approving_facility_ref}
               setSelected={(obj) => setFacility(obj, 'shifting_approving_facility')}
               className="shifting-page-filter-dropdown"
-              errors={''}/>
+              errors={''} />
           </div>
         </div>
 
@@ -66,7 +66,7 @@ export default function ListFilter(props: any) {
               selected={filter.assigned_facility_ref}
               setSelected={(obj) => setFacility(obj, 'assigned_facility')}
               className="shifting-page-filter-dropdown"
-              errors={''}/>
+              errors={''} />
           </div>
         </div>
 
@@ -86,85 +86,89 @@ export default function ListFilter(props: any) {
         <div className="w-64 flex-none">
           <span className="text-sm font-semibold">Is emergency case</span>
           <SelectField
-                name="emergency"
-                variant="outlined"
-                margin="dense"
-                optionArray={true}
-                value={filter.emergency}
-                options={['--','yes', 'no']}
-                onChange={handleChange}
-                className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"/>
+            name="emergency"
+            variant="outlined"
+            margin="dense"
+            optionArray={true}
+            value={filter.emergency}
+            options={['--', 'yes', 'no']}
+            onChange={handleChange}
+            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9" />
         </div>
 
         <div className="w-64 flex-none">
           <span className="text-sm font-semibold">Is upshift case</span>
           <SelectField
-                name="is_up_shift"
-                variant="outlined"
-                margin="dense"
-                optionArray={true}
-                value={filter.is_up_shift}
-                options={['--','yes', 'no']}
-                onChange={handleChange}
-                className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"/>
+            name="is_up_shift"
+            variant="outlined"
+            margin="dense"
+            optionArray={true}
+            value={filter.is_up_shift}
+            options={['--', 'yes', 'no']}
+            onChange={handleChange}
+            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9" />
         </div>
         <div className="w-64 flex-none">
           <span className="text-sm font-semibold">Patient Phone Number</span>
           <TextInputField
-                name="patient_phone_number"
-                variant="outlined"
-                margin="dense"
-                errors=""
-                value={filter.patient_phone_number}
-                onChange={handleChange}
-              />
-        </div>  
+            name="patient_phone_number"
+            variant="outlined"
+            margin="dense"
+            errors=""
+            value={filter.patient_phone_number}
+            onChange={handleChange}
+          />
+        </div>
 
         <div className="w-64 flex-none">
           <span className="text-sm font-semibold">Created Date Before</span>
           <DateInputField
-                name="created_date_before"
-                inputVariant="outlined"
-                margin="dense"
-                errors=""
-                value={filter.created_date_before}
-                onChange={date => handleChange({target: {name: "created_date_before", value: date}})}
-                className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"/>
-        </div>   
+            id="created_date_before"
+            name="created_date_before"
+            inputVariant="outlined"
+            margin="dense"
+            errors=""
+            value={filter.created_date_before}
+            onChange={date => handleChange({ target: { name: "created_date_before", value: date } })}
+            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9" />
+        </div>
         <div className="w-64 flex-none">
           <span className="text-sm font-semibold">Created Date After</span>
           <DateInputField
-                name="created_date_after"
-                inputVariant="outlined"
-                margin="dense"
-                errors=""
-                value={filter.created_date_after}
-                onChange={date => handleChange({target: {name: "created_date_after", value: date}})}
-                className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"/>
-        </div>        
+            id="created_date_after"
+            name="created_date_after"
+            inputVariant="outlined"
+            margin="dense"
+            errors=""
+            value={filter.created_date_after}
+            onChange={date => handleChange({ target: { name: "created_date_after", value: date } })}
+            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9" />
+        </div>
 
         <div className="w-64 flex-none">
           <span className="text-sm font-semibold">Modified Date Before</span>
           <DateInputField
-                name="modified_date_before"
-                inputVariant="outlined"
-                margin="dense"
-                errors=""
-                value={filter.modified_date_before}
-                onChange={date => handleChange({target: {name: "modified_date_before", value: date}})}
-                className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"/>
-        </div>   
+            id="modified_date_before"
+            name="modified_date_before"
+            inputVariant="outlined"
+            margin="dense"
+            errors=""
+            value={filter.modified_date_before}
+            onChange={date => handleChange({ target: { name: "modified_date_before", value: date } })}
+            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9" />
+        </div>
         <div className="w-64 flex-none">
           <span className="text-sm font-semibold">Modified Date After</span>
           <DateInputField
-                name="modified_date_after"
-                inputVariant="outlined"
-                margin="dense"
-                errors=""
-                value={filter.modified_date_after}
-                onChange={date => handleChange({target: {name: "modified_date_after", value: date}})}
-                className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"/>
-        </div>        
+            id="modified_date_after"
+            name="modified_date_after"
+            inputVariant="outlined"
+            margin="dense"
+            errors=""
+            value={filter.modified_date_after}
+            onChange={date => handleChange({ target: { name: "modified_date_after", value: date } })}
+            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9" />
+        </div>
       </div>
     </div>
   )
