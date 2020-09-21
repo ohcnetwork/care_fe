@@ -176,11 +176,7 @@ export const FacilityCreate = (props: FacilityProps) => {
       if (facilityId) {
         setIsLoading(true);
         const res = await dispatchAction(getFacility(facilityId));
-        console.log("res", res);
         if (!status.aborted && res.data) {
-          console.log("ward", res.data.ward);
-          console.log("district", res.data.district);
-
           const formData = {
             facility_type: res.data.facility_type,
             name: res.data.name,
@@ -201,7 +197,7 @@ export const FacilityCreate = (props: FacilityProps) => {
           Promise.all([
             fetchDistricts(res.data.state),
             fetchLocalBody(res.data.district),
-            fetchWards(res.data.ward),
+            fetchWards(res.data.local_body),
           ]);
         } else {
           navigate(`/facility/${facilityId}`);
@@ -273,14 +269,22 @@ export const FacilityCreate = (props: FacilityProps) => {
     Object.keys(state.form).forEach((field) => {
       switch (field) {
         case "name":
-        case "district":
         case "address":
-        case "state":
           if (!state.form[field]) {
             errors[field] = "Field is required";
             invalidForm = true;
           }
           return;
+
+        case "district":
+        case "state":
+        case "local_body":
+        case "ward":
+          if (!state.form[field]) {
+            errors[field] = "Field is required";
+            invalidForm = true;
+          }
+
         case "pincode":
           if (!Number(state.form[field])) {
             errors[field] = "Field is required";
@@ -326,8 +330,6 @@ export const FacilityCreate = (props: FacilityProps) => {
     const validated = validateForm();
     if (validated) {
       setIsLoading(true);
-      console.log("dis", state.form.district);
-      console.log(state.form.ward);
       const data = {
         facility_type: state.form.facility_type,
         name: state.form.name,
@@ -466,7 +468,7 @@ export const FacilityCreate = (props: FacilityProps) => {
               </div>
 
               <div className="md:col-span-2">
-                <InputLabel id="local_body-label">Localbody</InputLabel>
+                <InputLabel id="local_body-label">Localbody*</InputLabel>
                 {isLocalbodyLoading ? (
                   <CircularProgress size={20} />
                 ) : (
@@ -486,7 +488,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                 )}
               </div>
               <div className="md:col-span-2">
-                <InputLabel id="ward-label">Ward</InputLabel>
+                <InputLabel id="ward-label">Ward*</InputLabel>
                 {isWardLoading ? (
                   <CircularProgress size={20} />
                 ) : (
