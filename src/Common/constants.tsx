@@ -169,7 +169,10 @@ export const CONSULTATION_SUGGESTION = [
 export const ADMITTED_TO = [
   "Isolation Room",
   "ICU",
-  "ICU with Ventilator",
+  "ICU with Non Invasive Ventilator",
+  "ICU with Oxygen Support",
+  "ICU with Invasive Ventilator",
+  "Home Isolation",
   "Gynaecology Ward",
   "Paediatric Ward"
 ];
