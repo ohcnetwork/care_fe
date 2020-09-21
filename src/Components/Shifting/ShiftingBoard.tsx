@@ -8,6 +8,7 @@ import { Modal } from '@material-ui/core';
 import { CSVLink } from 'react-csv';
 
 import GetAppIcon from '@material-ui/icons/GetApp';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 
 const limit = 30;
 
@@ -160,9 +161,9 @@ export default function ListView({ board, filterProp, formatFilter }: boardProps
                 </dl>
               </div>
               <div className="mt-2">
-                <A href={`/shifting/${shift.external_id}`} className="btn btn-default w-full">
-                  All Details
-                </A>
+                <a href={`/shifting/${shift.external_id}`} className="btn btn-default w-full" target="_blank" rel="noopener noreferrer">
+                  <OpenInNewIcon /> All Details
+                </a>
               </div>
               {filter === "TRANSFER IN PROGRESS" &&
                 <div className="mt-2">
