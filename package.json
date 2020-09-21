@@ -63,7 +63,7 @@
     "date-fns": "^2.15.0",
     "file-loader": "6.0.0",
     "hookrouter": "^1.2.3",
-    "html-webpack-plugin": "^4.3.0",
+    "html-webpack-plugin": "^4.4.1",
     "libphonenumber-js": "^1.7.56",
     "lodash.debounce": "^4.0.8",
     "lodash.get": "^4.4.2",
