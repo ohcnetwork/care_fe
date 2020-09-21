@@ -364,7 +364,7 @@ export const ConsultationForm = (props: any) => {
 
   return (
     <div className="px-2 pb-2 max-w-3xl mx-auto">
-      <PageTitle title={headerText} />
+      <PageTitle title={headerText} hideBack={true} />
       <div className="mt-4">
         <Card>
           <form onSubmit={(e) => handleSubmit(e)}>
@@ -732,7 +732,7 @@ export const ConsultationForm = (props: any) => {
                   color="default"
                   variant="contained"
                   type="button"
-                  onClick={goBack}
+                  onClick={_ => navigate(`/facility/${facilityId}/patient/${patientId}`)}
                 >
                   Cancel{" "}
                 </Button>
@@ -753,6 +753,6 @@ export const ConsultationForm = (props: any) => {
           </form>
         </Card>
       </div>
-    </div>
+    </div >
   );
 };
