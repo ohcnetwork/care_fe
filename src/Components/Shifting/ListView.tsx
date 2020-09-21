@@ -88,9 +88,8 @@ export default function ListView() {
       </span>
     )
   };
-
   const appliedFilters = formatFilter(filter);
-  console.log(appliedFilters)
+
   return (
     <div className="flex flex-col h-screen px-2 pb-2">
       <div className="flex items-end justify-between">
@@ -147,6 +146,9 @@ export default function ListView() {
         {badge("Modified Before", appliedFilters.modified_date_before)}
         {badge("Created Before", appliedFilters.created_date_before)}
         {badge("Created After", appliedFilters.created_date_after)}
+        {badge("Filtered By", appliedFilters.assigned_facility && "Assigned Facility")}
+        {badge("Filtered By", appliedFilters.orgin_facility && "Origin Facility")}
+        {badge("Filtered By", appliedFilters.shifting_approving_facility && "Shifting Approving Facility")}
       </div>
       <div className="flex mt-4 pb-2 flex-1 items-start overflow-x-scroll">
         {isLoading ? <Loading /> : boardFilter.map(board =>
@@ -161,7 +163,11 @@ export default function ListView() {
         id={`shiftRequests-ALL`}
       />
       <SlideOver show={showFilters} setShow={setShowFilters}>
-        <div className="bg-white h-screen p-4">
+        <div className="bg-white min-h-screen p-4">
+          <button className="btn btn-default">
+            <i className="fas fa-times mr-2" />
+            Close
+          </button>
           <ListFilter
             filter={filter}
             onChange={filterOnChange} />

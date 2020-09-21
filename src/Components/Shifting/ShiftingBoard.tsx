@@ -6,9 +6,7 @@ import { A } from "hookrouter";
 import moment from "moment";
 import { Modal } from '@material-ui/core';
 import { CSVLink } from 'react-csv';
-
 import GetAppIcon from '@material-ui/icons/GetApp';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 
 const limit = 30;
 
@@ -95,7 +93,6 @@ export default function ListView({ board, filterProp, formatFilter }: boardProps
   }
 
   let patientFilter = (filter: string) => {
-    console.log("Re-Rendering")
     return data
       .filter(({ status }) => status === filter)
       .map((shift: any, idx: number) =>
@@ -162,7 +159,7 @@ export default function ListView({ board, filterProp, formatFilter }: boardProps
               </div>
               <div className="mt-2">
                 <a href={`/shifting/${shift.external_id}`} className="btn btn-default w-full" target="_blank" rel="noopener noreferrer">
-                  <OpenInNewIcon /> All Details
+                  <i className="fas fa-external-link-alt mr-2" /> All Details
                 </a>
               </div>
               {filter === "TRANSFER IN PROGRESS" &&
