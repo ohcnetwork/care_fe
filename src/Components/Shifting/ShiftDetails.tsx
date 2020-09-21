@@ -225,6 +225,7 @@ export default function ShiftDetails(props: any) {
 
   const printData = (data: any) => {
     const patientData = data.patient_object
+    const consultation = data.patient.last_consultation
     const patientGender = GENDER_TYPES.find(i => i.id === patientData.gender)?.text;
     const testType = TEST_TYPE_CHOICES.find(i => i.id === patientData.test_type)?.text;
 
@@ -297,11 +298,11 @@ export default function ShiftDetails(props: any) {
           <div className="mt-2 flex justify-between">
             <div>
               <span className="font-semibold leading-relaxed">Date of Admission: </span>
-              {moment(patientData.last_consultation.created_date).format("LL") || '-'}
+              {moment(consultation.created_date).format("LL") || '-'}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">OP/IP No: </span>
-              {patientData.last_consultation.ip_no || '-'}
+              {consultation.ip_no || '-'}
             </div>
           </div>
           <div className="mt-2 flex justify-between">
@@ -318,21 +319,21 @@ export default function ShiftDetails(props: any) {
           <div className="mt-2 flex justify-between">
             <div>
               <span className="font-semibold leading-relaxed">Diagnosis: </span>
-              {patientData.last_consultation.diagnosis || '-'}
+              {consultation.diagnosis || '-'}
             </div>
           </div>
 
-          <div className="mt-2 flex justify-between">
+          {/* <div className="mt-2 flex justify-between">
             <div>
               <span className="font-semibold leading-relaxed">Comorbidities (if any): </span>
-              {patientData.last_consultation.diagnosis || '-'}
+              {consultation.diagnosis || '-'}
             </div>
-          </div>
+          </div> */}
 
           <div className="mt-6 flex justify-between">
             <div>
               <span className="font-semibold leading-relaxed"> Covid-19 Clinical Category as per Govt. of Kerala guideline (A/B/C): </span>
-              {patientData.last_consultation.category || '-'}
+              {consultation.category || '-'}
             </div>
           </div>
 
@@ -352,7 +353,7 @@ export default function ShiftDetails(props: any) {
           <div className="mt-2 flex justify-between">
             <div>
               <span className="font-semibold leading-relaxed">Treatment Summary: </span>
-              {patientData.last_consultation.prescribed_medication || '-'}
+              {consultation.prescribed_medication || '-'}
             </div>
           </div>
           <div className="mt-6 flex justify-between">
