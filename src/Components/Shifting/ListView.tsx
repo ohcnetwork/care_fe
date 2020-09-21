@@ -164,7 +164,7 @@ export default function ListView() {
       />
       <SlideOver show={showFilters} setShow={setShowFilters}>
         <div className="bg-white min-h-screen p-4">
-          <button className="btn btn-default">
+          <button className="btn btn-default" onClick={_ => setShowFilters(false)}>
             <i className="fas fa-times mr-2" />
             Close
           </button>
