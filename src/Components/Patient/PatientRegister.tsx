@@ -279,6 +279,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     let invalidForm = false;
     Object.keys(state.form).forEach((field, i) => {
       switch (field) {
+        case "address":
         case "name":
         case "gender":
           if (!state.form[field]) {
@@ -810,7 +811,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     variant="outlined"
                     margin="dense"
                     type="text"
-                    placeholder="Optional Information"
+                    placeholder="Enter the address"
                     value={state.form.address}
                     onChange={handleChange}
                     errors={state.errors.address}
@@ -837,7 +838,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
                 </div>
                 <div>
-                  <InputLabel id="blood_group-label">Blood Group</InputLabel>
+                  <InputLabel id="blood_group-label">Blood Group*</InputLabel>
                   <SelectField
                     name="blood_group"
                     variant="outlined"

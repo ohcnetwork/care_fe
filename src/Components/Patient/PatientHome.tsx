@@ -448,13 +448,14 @@ export const PatientHome = (props: any) => {
           {patientData.date_of_birth ? (<div>
             <span className="font-semibold leading-relaxed">Date of birth: </span>
             {patientData.date_of_birth}
-          </div>) : (<div>
-            <span className="font-semibold leading-relaxed">Age: </span>
-            {patientData.age}
-          </div>)}
+          </div>) : (null)}
           <div>
             <span className="font-semibold leading-relaxed">Gender: </span>
             {patientGender}
+          </div>
+          <div>
+            <span className="font-semibold leading-relaxed">Age: </span>
+            {patientData.age}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">Phone: </span>
