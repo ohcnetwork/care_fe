@@ -101,8 +101,8 @@ const initialState = {
 const initialStates = [{ id: 0, name: "Choose State *" }];
 const initialDistricts = [{ id: 0, name: "Choose District" }];
 const selectStates = [{ id: 0, name: "Please select your state" }];
-const initialLocalbodies = [{ id: 0, name: "Choose Localbody" }];
-const initialWard = [{ id: 0, name: "Choose Ward" }];
+const initialLocalbodies = [{ id: 0, name: "Choose Localbody", number: 0 }];
+const initialWard = [{ id: 0, name: "Choose Ward", number: 0 }];
 const selectDistrict = [{ id: 0, name: "Please select your district" }];
 
 const patientFormReducer = (state = initialState, action: any) => {
@@ -213,7 +213,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             district: res.data.district ? res.data.district : '',
             blood_group: res.data.blood_group ? res.data.blood_group : '',
             local_body: res.data.local_body ? res.data.local_body : '',
-            ward: res.data.ward ? res.data.ward : '',
+            ward: res.data.ward_object ? res.data.ward : initialWard,
             medical_history: [],
             is_antenatal: res.data.is_antenatal ? res.data.is_antenatal : 'false',
             allergies: res.data.allergies ? res.data.allergies : '',
@@ -249,7 +249,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         setIsLoading(false);
       }
     },
-    [dispatchAction, fetchDistricts, fetchLocalBody, id]
+    [dispatchAction, fetchDistricts, fetchLocalBody, fetchWards, id]
   );
 
   const fetchStates = useCallback(
@@ -786,7 +786,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           value={state.form.local_body}
                           options={localBody}
                           optionValue="name"
-                          onChange={handleChange}
+                          onChange={e => [handleChange(e), fetchWards(String(e.target.value))]}
                           errors={state.errors.local_body}
                         />
                       )}
@@ -828,8 +828,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           name="ward"
                           variant="outlined"
                           margin="dense"
-                          value={state.form.ward}
-                          options={ward}
+                          options={ward.sort((a, b) => a.number - b.number).map((e) => { return { id: e.id, name: e.number + ": " + e.name } })}
                           optionValue="name"
                           onChange={handleChange}
                           errors={state.errors.local_body}
