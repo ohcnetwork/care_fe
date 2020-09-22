@@ -1,13 +1,12 @@
 import React, { useReducer, useState } from "react";
 import loadable from '@loadable/component';
-const PageTitle = loadable( () => import("../Common/PageTitle"));
 import { FacilitySelect } from "../Common/FacilitySelect";
-import { TextInputField, MultilineInputField, ErrorHelperText } from "../Common/HelperInputFields";
+import { TextInputField, MultilineInputField, ErrorHelperText, PhoneNumberField } from "../Common/HelperInputFields";
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
-const Loading = loadable( () => import("../Common/Loading"));
 import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
 import { navigate } from "hookrouter";
+import { parsePhoneNumberFromString } from 'libphonenumber-js';
 import {
     Card,
     CardContent,
@@ -18,10 +17,13 @@ import {
     FormControlLabel,
     Button
 } from "@material-ui/core";
+import { phonePreg } from "../../Common/validation";
 
 import {
     createShift,
 } from "../../Redux/actions";
+const PageTitle = loadable(() => import("../Common/PageTitle"));
+const Loading = loadable(() => import("../Common/Loading"));
 
 interface patientShiftProps {
     facilityId: number,
@@ -36,11 +38,20 @@ const initForm: any = {
     reason: "",
     vehicle_preference: "",
     comments: "",
+    refering_facility_contact_name: "",
+    refering_facility_contact_number: ""
 };
 
 const requiredFields: any = {
     shifting_approving_facility: {
-        errorText: 'Shifting approving facility can not be empty.'
+        errorText: 'Name of the referring facility'
+    },
+    refering_facility_contact_name: {
+        errorText: 'Name of contact of the referring facility'
+    },
+    refering_facility_contact_number: {
+        errorText: 'Phone number of contact of the referring facility',
+        invalidText: 'Please enter valid phone number'
     }
 }
 
@@ -85,14 +96,27 @@ export const ShiftCreate = (props: patientShiftProps) => {
         let errors = { ...initError };
         let isInvalidForm = false;
         Object.keys(requiredFields).forEach((field) => {
-            if (!state.form[field] || !state.form[field].length) {
-                errors[field] = requiredFields[field].errorText;
-                isInvalidForm = true;
+            switch (field) {
+                case "refering_facility_contact_number":
+                    const phoneNumber = parsePhoneNumberFromString(state.form[field]);
+                    if (!state.form[field]) {
+                        errors[field] = requiredFields[field].errorText;
+                        isInvalidForm = true;
+                    } else if(!phoneNumber?.isPossible() || !phonePreg(String(phoneNumber?.number))) {
+                        errors[field] = requiredFields[field].invalidText;
+                        isInvalidForm = true;
+                    }
+                    return;
+                default:
+                    if (!state.form[field]) {
+                        errors[field] = requiredFields[field].errorText;
+                        isInvalidForm = true;
+                    }
             }
         });
 
         dispatch({ type: "set_error", errors });
-        return isInvalidForm;
+        return !isInvalidForm;
     };
 
     const handleChange = (e: any) => {
@@ -102,12 +126,11 @@ export const ShiftCreate = (props: patientShiftProps) => {
         dispatch({ type: "set_form", form });
     };
 
-    const setFacility = (selected: any, name: string) => {
+    const handleValueChange = (value: any, name: string) => {
         const form = { ...state.form };
-        form[name] = selected;
+        form[name] = value;
         dispatch({ type: "set_form", form });
     };
-
 
     const handleSubmit = async (e: any) => {
         const validForm = validateForm();
@@ -126,6 +149,8 @@ export const ShiftCreate = (props: patientShiftProps) => {
                 reason: state.form.reason,
                 vehicle_preference: state.form.vehicle_preference,
                 comments: state.form.comments,
+                refering_facility_contact_name: state.form.refering_facility_contact_name,
+                refering_facility_contact_number: parsePhoneNumberFromString(state.form.refering_facility_contact_number)?.format('E.164'),
             }
 
             const res = await dispatchAction(createShift(data));
@@ -155,13 +180,36 @@ export const ShiftCreate = (props: patientShiftProps) => {
                     <CardContent>
                         <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
                             <div>
-                                <InputLabel>Name of shifting approving facility</InputLabel>
+                                <InputLabel>Contact person name*</InputLabel>
+                                <TextInputField
+                                    fullWidth
+                                    name="refering_facility_contact_name"
+                                    variant="outlined"
+                                    margin="dense"
+                                    value={state.form.refering_facility_contact_name}
+                                    onChange={handleChange}
+                                    errors={state.errors.refering_facility_contact_name}
+                                />
+                            </div>
+
+                            <div>
+                                <PhoneNumberField
+                                    label="Contact person phone*"
+                                    onlyIndia={true}
+                                    value={state.form.refering_facility_contact_number}
+                                    onChange={(value: any) => handleValueChange(value, 'refering_facility_contact_number')}
+                                    errors={state.errors.refering_facility_contact_number}
+                                />
+                            </div>
+
+                            <div>
+                                <InputLabel>Name of shifting approving facility*</InputLabel>
                                 <FacilitySelect
                                     multiple={false}
                                     facilityType={1300}
                                     name="shifting_approving_facility"
                                     selected={state.form.shifting_approving_facility}
-                                    setSelected={(obj) => setFacility(obj, 'shifting_approving_facility')}
+                                    setSelected={(value: any) => handleValueChange(value, 'shifting_approving_facility')}
                                     errors={state.errors.shifting_approving_facility}
                                 />
                             </div>
@@ -172,7 +220,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
                                     multiple={false}
                                     name="assigned_facility"
                                     selected={state.form.assigned_facility}
-                                    setSelected={(obj) => setFacility(obj, 'assigned_facility')}
+                                    setSelected={(value: any) => handleValueChange(value, 'assigned_facility')}
                                     errors={state.errors.assigned_facility}
                                 />
                             </div>
