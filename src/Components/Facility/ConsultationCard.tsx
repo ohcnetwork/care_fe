@@ -68,7 +68,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
                 )
               }
             >
-              View Consultation / Daily Rounds Details
+              View Consultation / Consultation Updates
             </button>
             {isLastConsultation && (
               <button
@@ -91,7 +91,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
                   )
                 }
               >
-                Add Daily Rounds
+                Add Consultation Updates
               </button>
             )}
           </div>

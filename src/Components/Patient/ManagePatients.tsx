@@ -6,6 +6,7 @@ import { makeStyles, Theme, useTheme } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 import { navigate, useQueryParams } from "hookrouter";
+import { parsePhoneNumberFromString } from 'libphonenumber-js';
 import moment from 'moment';
 import React, { useEffect, useState } from "react";
 import { CSVLink } from "react-csv";
@@ -131,7 +132,7 @@ export const PatientManager = (props: any) => {
     setIsLoading(true);
     const params = {
       ...qParams,
-      phone_number: qParams.phone_number && qParams.phone_number.split(' ').length > 1 ? qParams.phone_number.replace(/[\s()-]+/gi, '') : "",
+      phone_number: parsePhoneNumberFromString(qParams.phone_number)?.format('E.164'),
       facility: facilityId,
       offset: (qParams.page ? qParams.page - 1 : 0) * RESULT_LIMIT
     };
@@ -317,6 +318,7 @@ export const PatientManager = (props: any) => {
             <PhoneNumberField
               value={qParams.phone_number}
               onChange={searchByPhone}
+              turnOffAutoFormat={true}
               errors=""
             />
           </div>

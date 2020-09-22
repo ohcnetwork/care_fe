@@ -27,8 +27,11 @@ const initialFilterData = {
   is_up_shift: '--',
   limit: limit,
   patient_name: '',
-  // X_before: '',
-  // X_after: '',
+  created_date_before: null,
+  created_date_after: null,
+  modified_date_before: null,
+  modified_date_after: null,
+  patient_phone_number: '',
   offset: 0
 }
 
@@ -44,8 +47,11 @@ const formatFilter = (filter: any, csv: boolean = false) => {
     limit: limit,
     offset: filter.offset,
     patient_name: filter.patient_name || undefined,
-    // X_before: filter.X_before || undefined,
-    // X_after: filter.X_after || undefined
+    created_date_before: (filter.created_date_before && moment(filter.created_date_before).format('YYYY-MM-DD')) || undefined,
+    created_date_after: (filter.created_date_after && moment(filter.created_date_after).format('YYYY-MM-DD')) || undefined,
+    modified_date_before: (filter.modified_date_before && moment(filter.modified_date_before).format('YYYY-MM-DD')) || undefined,
+    modified_date_after: (filter.modified_date_after && moment(filter.modified_date_after).format('YYYY-MM-DD')) || undefined,
+    patient_phone_number: filter.patient_phone_number || undefined
   };
 }
 
@@ -67,10 +73,25 @@ export default function ListView() {
 
   const filterOnChange = (filterData: any) => {
     setFilter(filterData);
-  }
+  };
+
+  const applyFilter = (filterData: any) => {
+    setFilter(filterData);
+    setShowFilters(false);
+  };
+
+  const badge = (key: string, value: any) => {
+    return (
+      value && <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
+        {key}{": "}{value}
+      </span>
+    )
+  };
+
+  const appliedFilters = formatFilter(filter);
 
   const triggerDownload = async () => {
-    const res = await dispatch(downloadShiftRequests({...formatFilter(filter), csv:1}));
+    const res = await dispatch(downloadShiftRequests({ ...formatFilter(filter), csv: 1 }));
     setDownloadFile(res.data);
     document.getElementById(`shiftRequests-ALL`)?.click();
   }
@@ -82,7 +103,6 @@ export default function ListView() {
           <PageTitle title={"Shifting"} hideBack={true} />
           <GetAppIcon className="cursor-pointer mt-4" onClick={triggerDownload} />
         </div>
-        
         <div className="md:px-4">
           <InputSearchBox
             search={query => filterOnChange({ ...filter, patient_name: query })}
@@ -122,9 +142,22 @@ export default function ListView() {
           </button>
         </div>
       </div>
+      <div className="flex space-x-2 mt-2">
+        {badge("Emergency", appliedFilters.emergency)}
+        {badge("Up Shift", appliedFilters.is_up_shift)}
+        {badge("Phone Number", appliedFilters.patient_phone_number)}
+        {badge("Patient Name", appliedFilters.patient_name)}
+        {badge("Modified After", appliedFilters.modified_date_after)}
+        {badge("Modified Before", appliedFilters.modified_date_before)}
+        {badge("Created Before", appliedFilters.created_date_before)}
+        {badge("Created After", appliedFilters.created_date_after)}
+        {badge("Filtered By", appliedFilters.assigned_facility && "Assigned Facility")}
+        {badge("Filtered By", appliedFilters.orgin_facility && "Origin Facility")}
+        {badge("Filtered By", appliedFilters.shifting_approving_facility && "Shifting Approving Facility")}
+      </div>
       <div className="flex mt-4 pb-2 flex-1 items-start overflow-x-scroll">
         {isLoading ? <Loading /> : boardFilter.map(board =>
-          <ShiftingBoard filterProp={filter} board={board} formatFilter={formatFilter}/>
+          <ShiftingBoard filterProp={filter} board={board} formatFilter={formatFilter} />
         )}
       </div>
       <CSVLink
@@ -135,12 +168,14 @@ export default function ListView() {
         id={`shiftRequests-ALL`}
       />
       <SlideOver show={showFilters} setShow={setShowFilters}>
-        <div className="bg-white h-screen p-4">
+        <div className="bg-white min-h-screen p-4">
           <ListFilter
             filter={filter}
-            onChange={filterOnChange} />
+            onChange={applyFilter}
+            closeFilter={() => setShowFilters(false)} />
         </div>
       </SlideOver>
+
     </div>
   )
 }

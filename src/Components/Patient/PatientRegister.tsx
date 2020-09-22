@@ -6,11 +6,11 @@ import moment from "moment";
 import loadable from '@loadable/component';
 import React, { useCallback, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
-import { BLOOD_GROUPS, DISEASE_STATUS, GENDER_TYPES, MEDICAL_HISTORY_CHOICES } from "../../Common/constants";
+import { BLOOD_GROUPS, DISEASE_STATUS, GENDER_TYPES, MEDICAL_HISTORY_CHOICES, TEST_TYPE } from "../../Common/constants";
 import countryList from "../../Common/static/countries.json";
 import statesList from "../../Common/static/states.json";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { createPatient, getDistrictByState, getLocalbodyByDistrict, getPatient, getStates, searchPatient, updatePatient } from "../../Redux/actions";
+import { createPatient, getDistrictByState, getLocalbodyByDistrict, getPatient, getStates, searchPatient, updatePatient, getWardByLocalBody } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import AlertDialog from "../Common/AlertDialog";
 import { AutoCompleteMultiField, CheckboxField, DateInputField, MultilineInputField, PhoneNumberField, SelectField, TextInputField } from "../Common/HelperInputFields";
@@ -50,6 +50,8 @@ const diseaseStatus = [...DISEASE_STATUS];
 
 const bloodGroups = [...BLOOD_GROUPS];
 
+const testType = [...TEST_TYPE];
+
 const initForm: any = {
   name: "",
   age: "",
@@ -78,6 +80,9 @@ const initForm: any = {
   past_travel: false,
   countries_travelled: [],
   is_antenatal: "false",
+  date_of_test: false,
+  srf_id: "",
+  test_type: testType[0],
   prescribed_medication: false,
   ongoing_medication: "",
   is_medical_worker: "false",
@@ -96,7 +101,8 @@ const initialState = {
 const initialStates = [{ id: 0, name: "Choose State *" }];
 const initialDistricts = [{ id: 0, name: "Choose District" }];
 const selectStates = [{ id: 0, name: "Please select your state" }];
-const initialLocalbodies = [{ id: 0, name: "Choose Localbody" }];
+const initialLocalbodies = [{ id: 0, name: "Choose Localbody", number: 0 }];
+const initialWard = [{ id: 0, name: "Choose Ward", number: 0 }];
 const selectDistrict = [{ id: 0, name: "Please select your district" }];
 
 const patientFormReducer = (state = initialState, action: any) => {
@@ -135,9 +141,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   const [isStateLoading, setIsStateLoading] = useState(false);
   const [isDistrictLoading, setIsDistrictLoading] = useState(false);
   const [isLocalbodyLoading, setIsLocalbodyLoading] = useState(false);
+  const [isWardLoading, setIsWardLoading] = useState(false);
   const [states, setStates] = useState(initialStates);
   const [districts, setDistricts] = useState(selectStates);
   const [localBody, setLocalBody] = useState(selectDistrict);
+  const [ward, setWard] = useState(initialLocalbodies);
   const [statusDialog, setStatusDialog] = useState<{ show?: boolean; transfer?: boolean; patientList: Array<DupPatientModel> }>({ patientList: [] });
 
   const headerText = !id ? "Add Details of Covid Suspect / Patient" : "Update Covid Suspect / Patient Details";
@@ -173,6 +181,24 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     [dispatchAction]
   );
 
+
+  const fetchWards = useCallback(
+    async (id: string) => {
+      if (Number(id) > 0) {
+        setIsWardLoading(true);
+        const wardList = await dispatchAction(
+          getWardByLocalBody({ id })
+        );
+        setIsWardLoading(false);
+        setWard([...initialWard, ...wardList.data.results]);
+      } else {
+        setWard(initialLocalbodies);
+      }
+    },
+    [dispatchAction]
+  );
+
+
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
@@ -187,7 +213,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             district: res.data.district ? res.data.district : '',
             blood_group: res.data.blood_group ? res.data.blood_group : '',
             local_body: res.data.local_body ? res.data.local_body : '',
-            ward: res.data.ward ? res.data.ward : '',
+            ward: res.data.ward_object ? res.data.ward : initialWard,
             medical_history: [],
             is_antenatal: res.data.is_antenatal ? res.data.is_antenatal : 'false',
             allergies: res.data.allergies ? res.data.allergies : '',
@@ -214,7 +240,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           });
           Promise.all([
             fetchDistricts(res.data.state),
-            fetchLocalBody(res.data.district)
+            fetchLocalBody(res.data.district),
+            fetchWards(res.data.local_body)
           ]);
         } else {
           goBack();
@@ -222,7 +249,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         setIsLoading(false);
       }
     },
-    [dispatchAction, fetchDistricts, fetchLocalBody, id]
+    [dispatchAction, fetchDistricts, fetchLocalBody, fetchWards, id]
   );
 
   const fetchStates = useCallback(
@@ -252,6 +279,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     let invalidForm = false;
     Object.keys(state.form).forEach((field, i) => {
       switch (field) {
+        case "address":
         case "name":
         case "gender":
           if (!state.form[field]) {
@@ -266,21 +294,20 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           }
           return;
         case "local_body":
-          if (!state.form[field]) {
+          if (state.form.nationality === "India" && !state.form[field]) {
             errors[field] = "Please select local body";
             invalidForm = true;
           }
           return;
-        case "district":
-          if (!state.form[field]) {
-            errors[field] = "Please select district";
+        case "ward":
+          if (state.form.nationality === "India" && !state.form[field]) {
+            errors[field] = "Please select ward";
             invalidForm = true;
           }
           return;
-        case "ward":
-          if (!state.form[field]) {
-            errors[field] = "Please enter ward number";
-            invalidForm = true;
+        case "district":
+          if (state.form.nationality === "India" && !state.form[field]) {
+            errors[field] = "Please select district";
           }
           return;
         case "state":
@@ -367,6 +394,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         emergency_phone_number: parsePhoneNumberFromString(state.form.emergency_phone_number)?.format('E.164'),
         date_of_birth: moment(state.form.date_of_birth).format('YYYY-MM-DD'),
         disease_status: state.form.disease_status,
+        date_of_test: state.form.date_of_test ? state.form.date_of_test : undefined,
+        srf_id: state.form.srf_id,
+        test_type: state.form.test_type,
         name: state.form.name,
         pincode: state.form.pincode ? state.form.pincode : undefined,
         gender: Number(state.form.gender),
@@ -611,6 +641,46 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                 </div>
 
                 <div>
+                  <InputLabel id="test_type-label">Test Type*</InputLabel>
+                  <SelectField
+                    name="test_type"
+                    variant="outlined"
+                    margin="dense"
+                    optionArray={true}
+                    value={state.form.test_type}
+                    options={testType}
+                    onChange={handleChange}
+                    errors={state.errors.test_type}
+                  />
+                </div>
+                <div>
+                  <InputLabel id="srf_id-label">SRF Id*</InputLabel>
+                  <TextInputField
+                    name="srf_id"
+                    variant="outlined"
+                    margin="dense"
+                    type="text"
+                    value={state.form.srf_id}
+                    onChange={handleChange}
+                    errors={state.errors.name}
+                  />
+                </div>
+                <div>
+
+                  <DateInputField
+                    fullWidth={true}
+                    label="Date of Sampel Given"
+                    value={state.form.date_of_test}
+                    onChange={date => handleDateChange(date, "date_of_test")}
+                    errors={state.errors.date_of_test}
+                    inputVariant="outlined"
+                    margin="dense"
+                    disableFuture={true}
+                  />
+                </div>
+
+
+                <div>
                   <InputLabel id="gender-label">Gender*</InputLabel>
                   <SelectField
                     name="gender"
@@ -716,7 +786,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           value={state.form.local_body}
                           options={localBody}
                           optionValue="name"
-                          onChange={handleChange}
+                          onChange={e => [handleChange(e), fetchWards(String(e.target.value))]}
                           errors={state.errors.local_body}
                         />
                       )}
@@ -741,26 +811,34 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     variant="outlined"
                     margin="dense"
                     type="text"
-                    placeholder="Optional Information"
+                    placeholder="Enter the address"
                     value={state.form.address}
                     onChange={handleChange}
                     errors={state.errors.address}
                   />
                 </div>
                 <div>
-                  <InputLabel id="name-label">Ward/Division of respective LSGI*</InputLabel>
-                  <TextInputField
-                    name="ward"
-                    variant="outlined"
-                    margin="dense"
-                    type="text"
-                    value={state.form.ward}
-                    onChange={handleChange}
-                    errors={state.errors.ward}
-                  />
+
+                  <div>
+                    <InputLabel id="ward-label">Ward/Division of respective LSGI*</InputLabel>
+                    {isLocalbodyLoading ? (
+                      <CircularProgress size={20} />
+                    ) : (
+                        <SelectField
+                          name="ward"
+                          variant="outlined"
+                          margin="dense"
+                          options={ward.sort((a, b) => a.number - b.number).map((e) => { return { id: e.id, name: e.number + ": " + e.name } })}
+                          optionValue="name"
+                          onChange={handleChange}
+                          errors={state.errors.local_body}
+                        />
+                      )}
+                  </div>
+
                 </div>
                 <div>
-                  <InputLabel id="blood_group-label">Blood Group</InputLabel>
+                  <InputLabel id="blood_group-label">Blood Group*</InputLabel>
                   <SelectField
                     name="blood_group"
                     variant="outlined"
@@ -796,7 +874,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   />
                 </div>
               </div>
-
 
               <div className="grid gap-4 grid-cols-1 md:grid-cols-2 mt-4">
                 {
@@ -1058,7 +1135,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             </form>
           </CardContent>
         </Card>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 };

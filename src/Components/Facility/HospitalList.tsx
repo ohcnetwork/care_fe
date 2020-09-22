@@ -10,14 +10,14 @@ import {
   downloadFacilityDoctors,
   downloadFacilityTriage,
 } from "../../Redux/actions";
-import loadable from '@loadable/component';
+import loadable from "@loadable/component";
 import { SelectField } from "../Common/HelperInputFields";
 import { InputLabel } from "@material-ui/core";
-const Loading = loadable( () => import("../Common/Loading"));
+const Loading = loadable(() => import("../Common/Loading"));
 import Pagination from "../Common/Pagination";
 import { FacilityModel } from "./models";
 import { InputSearchBox } from "../Common/SearchBox";
-const PageTitle = loadable( () => import("../Common/PageTitle"));
+const PageTitle = loadable(() => import("../Common/PageTitle"));
 import { CSVLink } from "react-csv";
 import moment from "moment";
 import { Theme, createStyles, makeStyles } from "@material-ui/core/styles";
@@ -154,12 +154,23 @@ export const HospitalList = () => {
                 <div className="font-black text-2xl capitalize mt-2">
                   {facility.name}
                 </div>
-                <div className="mt-2">
-                  <div className="text-gray-500 leading-relaxed font-light">
-                    District:
+                <div className="mt-2 flex justify-between">
+                  <div className="flex flex-col">
+                    <div className="text-gray-500 leading-relaxed font-light">
+                      Location:
+                    </div>
+                    <div className="font-semibold">
+                      {facility.local_body_object?.name}
+                    </div>
                   </div>
-                  <div className="font-semibold">
-                    {facility.district_object?.name}
+
+                  <div className="flex flex-col">
+                    <div className="text-gray-500 leading-relaxed font-light">
+                      Ward:
+                    </div>
+                    <div className="font-semibold">
+                      {facility.ward_object?.name}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -293,36 +304,28 @@ export const HospitalList = () => {
                     target="_blank"
                     className="hidden"
                     id="facilityDownloader"
-                  >
-
-                  </CSVLink>
+                  ></CSVLink>
                   <CSVLink
                     data={capacityDownloadFile}
                     filename={`facility-capacity-${now}.csv`}
                     className="hidden"
                     id="capacityDownloader"
                     target="_blank"
-                  >
-
-                  </CSVLink>
+                  ></CSVLink>
                   <CSVLink
                     data={doctorsDownloadFile}
                     filename={`facility-doctors-${now}.csv`}
                     target="_blank"
                     className="hidden"
                     id="doctorsDownloader"
-                  >
-
-                  </CSVLink>
+                  ></CSVLink>
                   <CSVLink
                     data={triageDownloadFile}
                     filename={`facility-triage-${now}.csv`}
                     target="_blank"
                     className="hidden"
                     id="triageDownloader"
-                  >
-
-                  </CSVLink>
+                  ></CSVLink>
                 </div>
               </AccordionDetails>
             </Accordion>

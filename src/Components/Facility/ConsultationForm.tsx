@@ -203,6 +203,12 @@ export const ConsultationForm = (props: any) => {
             invalidForm = true;
           }
           return;
+        case "category":
+          if (!state.form[field] || !state.form[field].length) {
+            errors[field] = "Please select the category";
+            invalidForm = true;
+          }
+          return;
         case "suggestion":
           if (!state.form[field]) {
             errors[field] = "Please enter the decision";
@@ -358,7 +364,7 @@ export const ConsultationForm = (props: any) => {
 
   return (
     <div className="px-2 pb-2 max-w-3xl mx-auto">
-      <PageTitle title={headerText} />
+      <PageTitle title={headerText} hideBack={true} />
       <div className="mt-4">
         <Card>
           <form onSubmit={(e) => handleSubmit(e)}>
@@ -469,7 +475,7 @@ export const ConsultationForm = (props: any) => {
                   />
                 </div>
                 <div className="flex-1">
-                  <InputLabel id="category-label">Category</InputLabel>
+                  <InputLabel id="category-label">Category *</InputLabel>
                   <SelectField
                     name="category"
                     variant="standard"
@@ -726,7 +732,7 @@ export const ConsultationForm = (props: any) => {
                   color="default"
                   variant="contained"
                   type="button"
-                  onClick={goBack}
+                  onClick={_ => navigate(`/facility/${facilityId}/patient/${patientId}`)}
                 >
                   Cancel{" "}
                 </Button>
@@ -747,6 +753,6 @@ export const ConsultationForm = (props: any) => {
           </form>
         </Card>
       </div>
-    </div>
+    </div >
   );
 };

@@ -405,7 +405,7 @@ export const AutoCompleteAsyncField = (props: any) => {
 }
 
 export const PhoneNumberField = (props: any) => {
-    const { label, placeholder, errors, onChange, onlyIndia, value } = props;
+    const { label, placeholder, errors, onChange, onlyIndia, value, turnOffAutoFormat } = props;
     const countryRestriction = !!onlyIndia ? { onlyCountries: ['in'] } : {};
     const onChangeHandler = debounce(onChange, 500);
     const handleChange = (value: string, data: ICountryData | {}, event: ChangeEvent<HTMLInputElement>, formattedValue: string) => {
@@ -419,6 +419,7 @@ export const PhoneNumberField = (props: any) => {
             placeholder={placeholder}
             onChange={handleChange}
             country="in"
+            autoFormat={!turnOffAutoFormat}
             {...countryRestriction}
         />
         <ErrorHelperText error={errors} />

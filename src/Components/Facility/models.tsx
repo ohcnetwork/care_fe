@@ -18,6 +18,12 @@ export interface FacilityModel {
   };
   district_object?: { id: number; name: string; state: number };
   state_object?: { id: number; name: string };
+  ward_object?: {
+    id: number;
+    name: string;
+    number: number;
+    local_body: number;
+  };
 }
 
 export interface CapacityModal {
@@ -60,7 +66,7 @@ export interface ConsultationModel {
   suggestion?: string;
   ip_no?: string;
   diagnosis?: string;
-  verified_by?:string;
+  verified_by?: string;
   suggestion_text?: string;
   symptoms?: Array<number>;
   symptoms_text?: string;
@@ -83,7 +89,7 @@ export interface DupPatientModel {
   gender: string;
   phone_number: string;
   patient_id: number;
-  name: string
+  name: string;
   date_of_birth: string;
   year_of_birth: number;
   state_id: number;
@@ -97,8 +103,10 @@ export interface InventoryItemsModel {
     id: number;
     name: string;
   };
-  allowed_units?: [{
-    id: number;
-    name: string;
-  }];
+  allowed_units?: [
+    {
+      id: number;
+      name: string;
+    }
+  ];
 }

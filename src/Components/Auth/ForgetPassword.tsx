@@ -45,6 +45,7 @@ export const ForgotPassword = () => {
                 hasError = true;
                 err[key] = 'This field is required';
             }
+
         });
         if (hasError) {
             setErrors(err);

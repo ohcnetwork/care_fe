@@ -1,22 +1,45 @@
-import { Button, Card, CardContent, CircularProgress, InputLabel, IconButton } from "@material-ui/core";
+import {
+  Button,
+  Card,
+  CardContent,
+  CircularProgress,
+  InputLabel,
+  IconButton,
+} from "@material-ui/core";
 import Popover from "@material-ui/core/Popover";
-import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
+import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import MyLocationIcon from "@material-ui/icons/MyLocation";
 import { makeStyles } from "@material-ui/styles";
 import { navigate } from "hookrouter";
-import loadable from '@loadable/component';
-import { parsePhoneNumberFromString } from 'libphonenumber-js';
+import loadable from "@loadable/component";
+import { parsePhoneNumberFromString } from "libphonenumber-js";
 import React, { useCallback, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
 import { FACILITY_TYPES } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { validateLocationCoordinates, phonePreg } from "../../Common/validation";
-import { createFacility, getDistrictByState, getFacility, getLocalbodyByDistrict, getStates, updateFacility } from "../../Redux/actions";
+import {
+  validateLocationCoordinates,
+  phonePreg,
+} from "../../Common/validation";
+import {
+  createFacility,
+  getDistrictByState,
+  getFacility,
+  getLocalbodyByDistrict,
+  getStates,
+  updateFacility,
+  getWardByLocalBody,
+} from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import { MultilineInputField, PhoneNumberField, SelectField, TextInputField } from "../Common/HelperInputFields";
-const Loading = loadable( () => import("../Common/Loading"));
+import {
+  MultilineInputField,
+  PhoneNumberField,
+  SelectField,
+  TextInputField,
+} from "../Common/HelperInputFields";
+const Loading = loadable(() => import("../Common/Loading"));
 import { LocationSearchAndPick } from "../Common/LocationSearchAndPick";
-const PageTitle = loadable( () => import("../Common/PageTitle"));
+const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 const DEFAULT_MAP_LOCATION = [10.038394700000001, 76.5074145180173]; // Ernakulam
 
@@ -24,12 +47,14 @@ interface FacilityProps {
   facilityId?: number;
 }
 
-const facilityTypes = [...FACILITY_TYPES.map(i => i.text)];
+const facilityTypes = [...FACILITY_TYPES.map((i) => i.text)];
 const initialStates = [{ id: 0, name: "Choose State *" }];
 const initialDistricts = [{ id: 0, name: "Choose District" }];
 const selectStates = [{ id: 0, name: "Please select your state" }];
 const initialLocalbodies = [{ id: 0, name: "Choose Localbody" }];
 const selectDistrict = [{ id: 0, name: "Please select your district" }];
+const selectLocalBody = [{ id: 0, name: "Please select your Local Body", number: 0 }];
+const initialWards = [{ id: 0, name: "Choose Ward", number: 0 }];
 
 const initForm: any = {
   facility_type: "2",
@@ -37,19 +62,23 @@ const initForm: any = {
   state: "",
   district: "",
   local_body: "",
+  ward: "",
   address: "",
   phone_number: "",
   latitude: "",
   longitude: "",
   pincode: "",
-  oxygen_capacity: ""
+  oxygen_capacity: "",
 };
 
-const initError = Object.assign({}, ...Object.keys(initForm).map(k => ({ [k]: "" })));
+const initError = Object.assign(
+  {},
+  ...Object.keys(initForm).map((k) => ({ [k]: "" }))
+);
 
 const initialState = {
   form: { ...initForm },
-  errors: { ...initError }
+  errors: { ...initError },
 };
 
 const facility_create_reducer = (state = initialState, action: any) => {
@@ -57,13 +86,13 @@ const facility_create_reducer = (state = initialState, action: any) => {
     case "set_form": {
       return {
         ...state,
-        form: action.form
+        form: action.form,
       };
     }
     case "set_error": {
       return {
         ...state,
-        errors: action.errors
+        errors: action.errors,
       };
     }
     default:
@@ -84,9 +113,11 @@ export const FacilityCreate = (props: FacilityProps) => {
   const [isStateLoading, setIsStateLoading] = useState(false);
   const [isDistrictLoading, setIsDistrictLoading] = useState(false);
   const [isLocalbodyLoading, setIsLocalbodyLoading] = useState(false);
+  const [isWardLoading, setIsWardLoading] = useState(false);
   const [states, setStates] = useState(initialStates);
   const [districts, setDistricts] = useState(selectStates);
   const [localBody, setLocalBody] = useState(selectDistrict);
+  const [ward, setWard] = useState(selectLocalBody);
 
   const [anchorEl, setAnchorEl] = React.useState<
     (EventTarget & Element) | null
@@ -126,6 +157,20 @@ export const FacilityCreate = (props: FacilityProps) => {
     [dispatchAction]
   );
 
+  const fetchWards = useCallback(
+    async (id: string) => {
+      if (Number(id) > 0) {
+        setIsWardLoading(true);
+        const wardList = await dispatchAction(getWardByLocalBody({ id }));
+        setIsWardLoading(false);
+        setWard([...initialWards, ...wardList.data.results]);
+      } else {
+        setWard(selectLocalBody);
+      }
+    },
+    [dispatchAction]
+  );
+
   const fetchData = useCallback(
     async (status: statusType) => {
       if (facilityId) {
@@ -138,6 +183,7 @@ export const FacilityCreate = (props: FacilityProps) => {
             state: res.data.state ? res.data.state : "",
             district: res.data.district ? res.data.district : "",
             local_body: res.data.local_body ? res.data.local_body : "",
+            ward: res.data.ward_object ? res.data.ward_object : initialWards,
             address: res.data.address,
             pincode: res.data.pincode,
             phone_number: res.data.phone_number,
@@ -145,12 +191,13 @@ export const FacilityCreate = (props: FacilityProps) => {
             longitude: res.data.location ? res.data.location.longitude : "",
             oxygen_capacity: res.data.oxygen_capacity
               ? res.data.oxygen_capacity
-              : ""
+              : "",
           };
           dispatch({ type: "set_form", form: formData });
           Promise.all([
             fetchDistricts(res.data.state),
-            fetchLocalBody(res.data.district)
+            fetchLocalBody(res.data.district),
+            fetchWards(res.data.local_body),
           ]);
         } else {
           navigate(`/facility/${facilityId}`);
@@ -158,7 +205,7 @@ export const FacilityCreate = (props: FacilityProps) => {
         setIsLoading(false);
       }
     },
-    [dispatchAction, facilityId, fetchDistricts, fetchLocalBody]
+    [dispatchAction, facilityId, fetchDistricts, fetchLocalBody, fetchWards]
   );
 
   const fetchStates = useCallback(
@@ -197,10 +244,10 @@ export const FacilityCreate = (props: FacilityProps) => {
 
   const handleClickLocationPicker = (event: React.MouseEvent) => {
     if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(position => {
+      navigator.geolocation.getCurrentPosition((position) => {
         setMapLoadLocation([
           position.coords.latitude,
-          position.coords.longitude
+          position.coords.longitude,
         ]);
         const form = { ...state.form };
         form["latitude"] = position.coords.latitude;
@@ -219,17 +266,25 @@ export const FacilityCreate = (props: FacilityProps) => {
   const validateForm = () => {
     let errors = { ...initError };
     let invalidForm = false;
-    Object.keys(state.form).forEach(field => {
+    Object.keys(state.form).forEach((field) => {
       switch (field) {
         case "name":
-        case "district":
         case "address":
-        case "state":
           if (!state.form[field]) {
             errors[field] = "Field is required";
             invalidForm = true;
           }
           return;
+
+        case "district":
+        case "state":
+        case "local_body":
+        case "ward":
+          if (!state.form[field]) {
+            errors[field] = "Field is required";
+            invalidForm = true;
+          }
+
         case "pincode":
           if (!Number(state.form[field])) {
             errors[field] = "Field is required";
@@ -238,14 +293,22 @@ export const FacilityCreate = (props: FacilityProps) => {
           return;
         case "phone_number":
           const phoneNumber = parsePhoneNumberFromString(state.form[field]);
-          if (!state.form[field] || !phoneNumber?.isPossible() || !phonePreg(String(phoneNumber?.number))) {
+          if (
+            !state.form[field] ||
+            !phoneNumber?.isPossible() ||
+            !phonePreg(String(phoneNumber?.number))
+          ) {
             errors[field] = "Please enter valid phone number";
             invalidForm = true;
           }
           return;
         case "latitude":
         case "longitude":
-          if (!!state.form.latitude && !!state.form.longitude && !validateLocationCoordinates(state.form[field])) {
+          if (
+            !!state.form.latitude &&
+            !!state.form.longitude &&
+            !validateLocationCoordinates(state.form[field])
+          ) {
             errors[field] = "Please enter valid coordinates";
             invalidForm = true;
           }
@@ -275,17 +338,20 @@ export const FacilityCreate = (props: FacilityProps) => {
         address: state.form.address,
         pincode: state.form.pincode,
         local_body: state.form.local_body,
+        ward: state.form.ward,
         location:
           state.form.latitude && state.form.longitude
             ? {
               latitude: Number(state.form.latitude),
-              longitude: Number(state.form.longitude)
+              longitude: Number(state.form.longitude),
             }
             : undefined,
-        phone_number: parsePhoneNumberFromString(state.form.phone_number)?.format('E.164'),
+        phone_number: parsePhoneNumberFromString(
+          state.form.phone_number
+        )?.format("E.164"),
         oxygen_capacity: state.form.oxygen_capacity
           ? Number(state.form.oxygen_capacity)
-          : 0
+          : 0,
       };
       const res = await dispatchAction(
         facilityId ? updateFacility(facilityId, data) : createFacility(data)
@@ -295,12 +361,12 @@ export const FacilityCreate = (props: FacilityProps) => {
         dispatch({ type: "set_form", form: initForm });
         if (!facilityId) {
           Notification.Success({
-            msg: "Facility added successfully"
+            msg: "Facility added successfully",
           });
           navigate(`/facility/${id}/bed`);
         } else {
           Notification.Success({
-            msg: "Facility updated successfully"
+            msg: "Facility updated successfully",
           });
           navigate(`/facility/${facilityId}`);
         }
@@ -329,9 +395,8 @@ export const FacilityCreate = (props: FacilityProps) => {
       <PageTitle title={headerText} />
       <Card className="mt-4">
         <CardContent>
-          <form onSubmit={e => handleSubmit(e)}>
+          <form onSubmit={(e) => handleSubmit(e)}>
             <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
-
               <div>
                 <InputLabel id="facility_type-label">Facility Type*</InputLabel>
                 <SelectField
@@ -372,9 +437,9 @@ export const FacilityCreate = (props: FacilityProps) => {
                       value={state.form.state}
                       options={states}
                       optionValue="name"
-                      onChange={e => [
+                      onChange={(e) => [
                         handleChange(e),
-                        fetchDistricts(String(e.target.value))
+                        fetchDistricts(String(e.target.value)),
                       ]}
                       errors={state.errors.state}
                     />
@@ -393,9 +458,9 @@ export const FacilityCreate = (props: FacilityProps) => {
                       value={state.form.district}
                       options={districts}
                       optionValue="name"
-                      onChange={e => [
+                      onChange={(e) => [
                         handleChange(e),
-                        fetchLocalBody(String(e.target.value))
+                        fetchLocalBody(String(e.target.value)),
                       ]}
                       errors={state.errors.district}
                     />
@@ -403,7 +468,7 @@ export const FacilityCreate = (props: FacilityProps) => {
               </div>
 
               <div className="md:col-span-2">
-                <InputLabel id="local_body-label">Localbody</InputLabel>
+                <InputLabel id="local_body-label">Localbody*</InputLabel>
                 {isLocalbodyLoading ? (
                   <CircularProgress size={20} />
                 ) : (
@@ -414,8 +479,28 @@ export const FacilityCreate = (props: FacilityProps) => {
                       value={state.form.local_body}
                       options={localBody}
                       optionValue="name"
-                      onChange={handleChange}
+                      onChange={(e) => [
+                        handleChange(e),
+                        fetchWards(String(e.target.value)),
+                      ]}
                       errors={state.errors.local_body}
+                    />
+                  )}
+              </div>
+              <div className="md:col-span-2">
+                <InputLabel id="ward-label">Ward*</InputLabel>
+                {isWardLoading ? (
+                  <CircularProgress size={20} />
+                ) : (
+                    <SelectField
+                      name="ward"
+                      variant="outlined"
+                      margin="dense"
+                      value={state.form.ward}
+                      options={ward.sort((a, b) => a.number - b.number).map((e) => { return { id: e.id, name: e.number + ": " + e.name } })}
+                      optionValue="name"
+                      onChange={handleChange}
+                      errors={state.errors.ward}
                     />
                   )}
               </div>
@@ -449,13 +534,17 @@ export const FacilityCreate = (props: FacilityProps) => {
                 <PhoneNumberField
                   label="Emergency Contact Number"
                   value={state.form.phone_number}
-                  onChange={(value: any) => handleValueChange(value, 'phone_number')}
+                  onChange={(value: any) =>
+                    handleValueChange(value, "phone_number")
+                  }
                   errors={state.errors.phone_number}
                   onlyIndia={true}
                 />
               </div>
               <div>
-                <InputLabel id="name-label">Oxygen Capacity in liters</InputLabel>
+                <InputLabel id="name-label">
+                  Oxygen Capacity in liters
+                </InputLabel>
                 <TextInputField
                   name="oxygen_capacity"
                   type="number"
@@ -481,9 +570,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                   errors={state.errors.latitude}
                 />
               </div>
-              <div
-                className="pt-4"
-              >
+              <div className="pt-4">
                 <IconButton onClick={handleClickLocationPicker}>
                   <MyLocationIcon />
                 </IconButton>
@@ -493,12 +580,12 @@ export const FacilityCreate = (props: FacilityProps) => {
                   anchorEl={anchorEl}
                   onClose={handleClose}
                   anchorOrigin={{
-                    vertical: 'top',
-                    horizontal: 'left',
+                    vertical: "top",
+                    horizontal: "left",
                   }}
                   transformOrigin={{
-                    vertical: 'top',
-                    horizontal: 'left',
+                    vertical: "top",
+                    horizontal: "left",
                   }}
                 >
                   <LocationSearchAndPick
@@ -522,22 +609,22 @@ export const FacilityCreate = (props: FacilityProps) => {
                 />
               </div>
             </div>
-            <div
-              className="flex justify-between mt-4"
-            >
-              <Button
-                color="default"
-                variant="contained"
-                onClick={goBack}
-              >Cancel</Button>
+            <div className="flex justify-between mt-4">
+              <Button color="default" variant="contained" onClick={goBack}>
+                Cancel
+              </Button>
               <Button
                 color="primary"
                 variant="contained"
                 type="submit"
                 style={{ marginLeft: "auto" }}
-                onClick={e => handleSubmit(e)}
-                startIcon={<CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>}
-              >{buttonText}</Button>
+                onClick={(e) => handleSubmit(e)}
+                startIcon={
+                  <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
+                }
+              >
+                {buttonText}
+              </Button>
             </div>
           </form>
         </CardContent>
