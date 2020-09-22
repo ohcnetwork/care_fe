@@ -457,6 +457,14 @@ export default function ShiftDetails(props: any) {
                 {data.assigned_facility_object?.name || "--"}
               </div>
               <div>
+                <span className="font-semibold leading-relaxed">Contact person name: </span>
+                {data.refering_facility_contact_name || "--"}
+              </div>
+              <div>
+                <span className="font-semibold leading-relaxed">Contact person number: </span>
+                {data.refering_facility_contact_number ? <a href={`tel:${data.refering_facility_contact_number }`}>{data.refering_facility_contact_number}</a> : '--'}
+              </div>
+              <div>
                 <span className="font-semibold leading-relaxed"> Is emergency: </span>
                 <span className="badge badge-pill badge-danger py-1 px-2"> {data.emergency ? "yes" : "no"}</span>
               </div>
