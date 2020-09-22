@@ -1,6 +1,18 @@
-import { alert } from '@pnotify/core';
+import { alert, Stack } from '@pnotify/core';
 import '@pnotify/core/dist/PNotify.css';
 import '@pnotify/core/dist/BrightTheme.css';
+
+const notifyStack = new Stack({
+    dir1: 'down',
+    dir2: 'left',
+    firstpos1: 25,
+    firstpos2: 25,
+    modal: false,
+    maxOpen: 3,
+    maxStrategy: 'close',
+    maxClosureCausesWait: false,
+    push: 'top'
+});
 
 const notify = (text, type) => {
     const notification = alert({
@@ -17,12 +29,33 @@ const notify = (text, type) => {
             Desktop: {
                 desktop: true
             }
-        }
+        },
+        stack: notifyStack
     });
     notification.refs.elem.addEventListener("click", () => {
         notification.close();
     });
 };
+
+const notifyError = (error) => {
+    let errorMsg = '';
+    if (error.detail) {
+        notify(error.detail, 'error');
+        return;
+    }
+    for (let [key, value] of Object.entries(error)) {
+        if (Array.isArray(value)) {
+            const uniques = [...new Set(value)];
+            errorMsg +=`${key} - ${uniques.join(', ')}`
+        } else if(typeof value === "string") {
+            errorMsg += `${key} - ${value}`;
+        } else {
+            errorMsg += `${key} - Bad Request`
+        }
+        errorMsg += '\n';
+    }
+    notify(errorMsg, 'error');
+}
 
 /** Success message handler */
 export const Success = ({ msg }) => {
@@ -37,8 +70,9 @@ export const Error = ({ msg }) => {
 /** 400 Bad Request handler */
 export const BadRequest = ({ errs }) => {
 
-    for (let [key, value] of Object.entries(errs)) {
-        const errorMsg = typeof value === "string" ? `${key} - ${value}` : Array.isArray(value) ? `${key} - ${value.join(', ')}` : `Bad Request - ${key}`;
-        notify(errorMsg, 'error')
+    if (Array.isArray(errs)) {
+        errs.forEach(error => notifyError(error));
+    } else {
+        notifyError(errs);
     }
 };
