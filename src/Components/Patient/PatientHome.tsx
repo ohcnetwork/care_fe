@@ -129,7 +129,9 @@ export const PatientHome = (props: any) => {
   const [preDischargeForm, setPreDischargeForm] = useState(initPreDischargeForm);
 
   const handlePreDischargeFormChange = (key:string, event: any) => {
-    setPreDischargeForm({ donatePlasma: event.target.value as donatePlasmaOptionType });
+    if (key === 'donatePlasma') {
+      setPreDischargeForm({ donatePlasma: event.target.value as donatePlasmaOptionType });
+    }
   };
 
   const handleDischargeSummarySubmit = () => {
