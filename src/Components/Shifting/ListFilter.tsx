@@ -1,19 +1,21 @@
-import React from "react";
+import React, { useState } from "react";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { SelectField, DateInputField, TextInputField } from "../Common/HelperInputFields";
-import { SHIFTING_CHOICES } from "../../Common/constants";
+import moment from "moment";
+// import { SHIFTING_CHOICES } from "../../Common/constants";
 
-const shiftStatusOptions = ['Show All', ...SHIFTING_CHOICES.map(obj => obj.text)];
+// const shiftStatusOptions = ['Show All', ...SHIFTING_CHOICES.map(obj => obj.text)];
 
 export default function ListFilter(props: any) {
-  let { filter, onChange } = props;
+  let { filter, onChange, closeFilter } = props;
+  const [filterState, setFilterState] = useState(filter);
 
   const setFacility = (selected: any, name: string) => {
     const filterData: any = { ...filter };
     filterData[`${name}_ref`] = selected;
     filterData[name] = (selected || {}).id;
 
-    onChange(filterData);
+    setFilterState(filterData);
   };
 
   const handleChange = (event: any) => {
@@ -22,12 +24,38 @@ export default function ListFilter(props: any) {
     const filterData: any = { ...filter };
     filterData[name] = value;
 
-    onChange(filterData);
+    setFilterState(filterData);
+  };
+
+  const applyFilter = () => {
+    const {
+      created_date_before,
+      created_date_after,
+      modified_date_before,
+      modified_date_after,
+      ...others
+    } = filterState;
+    const data = {
+      ...others,
+      created_date_before: created_date_before && moment(created_date_before).isValid() ? created_date_before : null,
+      created_date_after: created_date_after && moment(created_date_after).isValid() ? created_date_after : null,
+      modified_date_before: modified_date_before && moment(modified_date_before).isValid() ? modified_date_before : null,
+      modified_date_after: modified_date_after && moment(modified_date_after).isValid() ? modified_date_after : null,
+    }
+    onChange(data);
   };
 
   return (
-    <div className="mt-2">
-      <div className="font-light text-md">
+    <div>
+      <div className="flex justify-between">
+        <button className="btn btn-default" onClick={closeFilter}>
+          <i className="fas fa-times mr-2" />Cancel
+        </button>
+          <button className="btn btn-primary" onClick={applyFilter}>
+            <i className="fas fa-check mr-2" />Apply
+        </button>
+      </div>
+      <div className="font-light text-md mt-2">
         Filter By:
       </div>
       <div className="flex flex-wrap gap-2">
@@ -37,7 +65,7 @@ export default function ListFilter(props: any) {
             <FacilitySelect
               multiple={false}
               name="orgin_facility"
-              selected={filter.orgin_facility_ref}
+              selected={filterState.orgin_facility_ref}
               setSelected={(obj) => setFacility(obj, 'orgin_facility')}
               className="shifting-page-filter-dropdown"
               errors={''} />
@@ -50,7 +78,7 @@ export default function ListFilter(props: any) {
             <FacilitySelect
               multiple={false}
               name="shifting_approving_facility"
-              selected={filter.shifting_approving_facility_ref}
+              selected={filterState.shifting_approving_facility_ref}
               setSelected={(obj) => setFacility(obj, 'shifting_approving_facility')}
               className="shifting-page-filter-dropdown"
               errors={''} />
@@ -63,7 +91,7 @@ export default function ListFilter(props: any) {
             <FacilitySelect
               multiple={false}
               name="assigned_facility"
-              selected={filter.assigned_facility_ref}
+              selected={filterState.assigned_facility_ref}
               setSelected={(obj) => setFacility(obj, 'assigned_facility')}
               className="shifting-page-filter-dropdown"
               errors={''} />
@@ -77,7 +105,7 @@ export default function ListFilter(props: any) {
                 variant="outlined"
                 margin="dense"
                 optionArray={true}
-                value={filter.status}
+                value={filterState.status}
                 options={shiftStatusOptions}
                 onChange={handleChange}
                 className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"/>
@@ -90,7 +118,7 @@ export default function ListFilter(props: any) {
             variant="outlined"
             margin="dense"
             optionArray={true}
-            value={filter.emergency}
+            value={filterState.emergency}
             options={['--', 'yes', 'no']}
             onChange={handleChange}
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9" />
@@ -103,7 +131,7 @@ export default function ListFilter(props: any) {
             variant="outlined"
             margin="dense"
             optionArray={true}
-            value={filter.is_up_shift}
+            value={filterState.is_up_shift}
             options={['--', 'yes', 'no']}
             onChange={handleChange}
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9" />
@@ -115,7 +143,7 @@ export default function ListFilter(props: any) {
             variant="outlined"
             margin="dense"
             errors=""
-            value={filter.patient_phone_number}
+            value={filterState.patient_phone_number}
             onChange={handleChange}
           />
         </div>
@@ -128,7 +156,7 @@ export default function ListFilter(props: any) {
             inputVariant="outlined"
             margin="dense"
             errors=""
-            value={filter.created_date_before}
+            value={filterState.created_date_before}
             onChange={date => handleChange({ target: { name: "created_date_before", value: date } })}
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9" />
         </div>
@@ -140,7 +168,7 @@ export default function ListFilter(props: any) {
             inputVariant="outlined"
             margin="dense"
             errors=""
-            value={filter.created_date_after}
+            value={filterState.created_date_after}
             onChange={date => handleChange({ target: { name: "created_date_after", value: date } })}
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9" />
         </div>
@@ -153,7 +181,7 @@ export default function ListFilter(props: any) {
             inputVariant="outlined"
             margin="dense"
             errors=""
-            value={filter.modified_date_before}
+            value={filterState.modified_date_before}
             onChange={date => handleChange({ target: { name: "modified_date_before", value: date } })}
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9" />
         </div>
@@ -165,7 +193,7 @@ export default function ListFilter(props: any) {
             inputVariant="outlined"
             margin="dense"
             errors=""
-            value={filter.modified_date_after}
+            value={filterState.modified_date_after}
             onChange={date => handleChange({ target: { name: "modified_date_after", value: date } })}
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9" />
         </div>

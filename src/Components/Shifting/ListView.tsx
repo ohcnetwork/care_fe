@@ -73,7 +73,12 @@ export default function ListView() {
 
   const filterOnChange = (filterData: any) => {
     setFilter(filterData);
-  }
+  };
+
+  const applyFilter  = (filterData: any) => {
+    setFilter(filterData);
+    setShowFilters(false);
+  };
 
   const triggerDownload = async () => {
     const res = await dispatch(downloadShiftRequests({ ...formatFilter(filter), csv: 1 }));
@@ -164,13 +169,10 @@ export default function ListView() {
       />
       <SlideOver show={showFilters} setShow={setShowFilters}>
         <div className="bg-white min-h-screen p-4">
-          <button className="btn btn-default" onClick={_ => setShowFilters(false)}>
-            <i className="fas fa-times mr-2" />
-            Close
-          </button>
           <ListFilter
             filter={filter}
-            onChange={filterOnChange} />
+            onChange={applyFilter} 
+            closeFilter={() => setShowFilters(false)}/>
         </div>
       </SlideOver>
 
