@@ -11,7 +11,7 @@ export default function ListFilter(props: any) {
   const [filterState, setFilterState] = useState(filter);
 
   const setFacility = (selected: any, name: string) => {
-    const filterData: any = { ...filter };
+    const filterData: any = { ...filterState };
     filterData[`${name}_ref`] = selected;
     filterData[name] = (selected || {}).id;
 
@@ -21,7 +21,7 @@ export default function ListFilter(props: any) {
   const handleChange = (event: any) => {
     let { name, value } = event.target;
 
-    const filterData: any = { ...filter };
+    const filterData: any = { ...filterState };
     filterData[name] = value;
 
     setFilterState(filterData);
