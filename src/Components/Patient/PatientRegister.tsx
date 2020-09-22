@@ -641,7 +641,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                 </div>
 
                 <div>
-                  <InputLabel id="test_type-label">Test Type*</InputLabel>
+                  <InputLabel id="test_type-label">Test Type</InputLabel>
                   <SelectField
                     name="test_type"
                     variant="outlined"
@@ -654,7 +654,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   />
                 </div>
                 <div>
-                  <InputLabel id="srf_id-label">SRF Id*</InputLabel>
+                  <InputLabel id="srf_id-label">SRF Id</InputLabel>
                   <TextInputField
                     name="srf_id"
                     variant="outlined"
