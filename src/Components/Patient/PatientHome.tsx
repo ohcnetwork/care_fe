@@ -30,8 +30,15 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import { TextInputField } from "../Common/HelperInputFields";
 import { validateEmailAddress } from "../../Common/validation";
+import Radio from '@material-ui/core/Radio';
+import RadioGroup from '@material-ui/core/RadioGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormLabel from '@material-ui/core/FormLabel';
+import FormControl from '@material-ui/core/FormControl';
+
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
+
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -63,6 +70,11 @@ const useStyles = makeStyles(theme => ({
     paddingTop: "50px"
   },
 }));
+
+type donatePlasmaOptionType = null | "yes" | "no" | "not-fit";
+interface preDischargeFormInterface {
+  donatePlasma: donatePlasmaOptionType;
+};
 
 export const PatientHome = (props: any) => {
   const { facilityId, id } = props;
@@ -97,6 +109,7 @@ export const PatientHome = (props: any) => {
   const initDischargeSummaryForm: { email: string } = {
     email: "",
   };
+
   const [dischargeSummaryState, setDischargeSummaryForm] = useState(initDischargeSummaryForm);
 
   const handleDischargeSummaryFormChange = (e: any) => {
@@ -108,6 +121,16 @@ export const PatientHome = (props: any) => {
 
     setDischargeSummaryForm({ email: value });
   }
+
+  const initPreDischargeForm: preDischargeFormInterface = {
+    donatePlasma: null
+  };
+
+  const [preDischargeForm, setPreDischargeForm] = useState(initPreDischargeForm);
+
+  const handlePreDischargeFormChange = (key:string, event: any) => {
+    setPreDischargeForm({ donatePlasma: event.target.value as donatePlasmaOptionType });
+  };
 
   const handleDischargeSummarySubmit = () => {
     if (!dischargeSummaryState.email) {
@@ -154,9 +177,15 @@ export const PatientHome = (props: any) => {
     let dischargeData = Object.assign({}, patientData);
     dischargeData['discharge'] = value;
 
-    dispatch(dischargePatient({ 'discharge': value }, { id: patientData.id }))
+    
+    Promise.all([
+      // using preDischargeForm form data to update patient data
+      dispatch(patchPatient(formatPreDischargeFormData(preDischargeForm), { id: patientData.id })),
+      // discharge call
+      dispatch(dischargePatient({ 'discharge': value }, { id: patientData.id }))
+    ])
       .then((response: any) => {
-        if ((response || {}).status === 200) {
+        if (((response||[])[1])?.status === 200) {
           let dischargeData = Object.assign({}, patientData);
           dischargeData['discharge'] = value;
           setPatientData(dischargeData);
@@ -169,6 +198,26 @@ export const PatientHome = (props: any) => {
         }
       });
   }
+
+  const formatPreDischargeFormData = (preDischargeForm: preDischargeFormInterface) => {
+    let data: any = {};
+
+    let donatePlasma = preDischargeForm.donatePlasma;
+    if (donatePlasma) {
+      if(donatePlasma === 'yes') {
+        data['will_donate_blood'] = true;
+        data['fit_for_blood_donation'] = true;
+      } else if (donatePlasma === 'no') {
+        data['will_donate_blood'] = false;
+      } else if (donatePlasma === 'not-fit') {
+        data['will_donate_blood'] = true;
+        data['fit_for_blood_donation'] = false;
+      }
+    }
+
+    return data;
+  }
+
   const dischargeSummaryFormSetUserEmail = () => {
     setDischargeSummaryForm({ email: currentUser.data.email });
   }
@@ -618,22 +667,31 @@ export const PatientHome = (props: any) => {
                 Discharge
             </Button>
               <Dialog
+                maxWidth={'md'}
                 open={openDischargeDialog}
-                onClose={handleDischargeClose}
-              >
-                <DialogTitle id="alert-dialog-title">Authorize Patient Discharge</DialogTitle>
-                <DialogContent>
-                  <DialogContentText id="alert-dialog-description">
-                    Please confirm patient Discharge
-                </DialogContentText>
+                onClose={handleDischargeClose}>
+                <DialogTitle className="flex justify-center">
+                  Before we discharge {patientData.name}
+                </DialogTitle>
+                <DialogContent className="px-20">
+                  <FormControl component="fieldset">
+                    <FormLabel component="legend" className="flex justify-center w-full">
+                      Is the patient willing to donate blood for Plasma?
+                    </FormLabel>
+                    <RadioGroup className="flex-row gap-15 mt-4" name="blood-donate" value={preDischargeForm.donatePlasma} onChange={(event) => handlePreDischargeFormChange('donatePlasma', event)}>
+                      <FormControlLabel value="yes" control={<Radio />} label="Yes" className="mr-0"/>
+                      <FormControlLabel value="no" control={<Radio />} label="No" className="mr-0"/>
+                      <FormControlLabel value="not-fit" control={<Radio />} label="Not fit for donation currently" className="w-48 mr-0"/>
+                    </RadioGroup>
+                  </FormControl>
                 </DialogContent>
-                <DialogActions>
-                  <Button onClick={handleDischargeClose} color="primary">
-                    Disagree
+                <DialogActions className="flex justify-between mt-5 px-5 border-t">
+                  <Button onClick={handleDischargeClose}>
+                    Cancel
                 </Button>
                   <Button color="primary"
                     onClick={() => handlePatientDischarge(false)} autoFocus>
-                    Agree
+                    Proceed with Discharge
                 </Button>
                 </DialogActions>
               </Dialog>

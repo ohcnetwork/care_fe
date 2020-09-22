@@ -66,6 +66,8 @@ export interface PatientModel {
   blood_group?: string;
   number_of_aged_dependents?: number;
   number_of_chronic_diseased_dependents?: number;
+  will_donate_blood?: boolean;
+  fit_for_blood_donation?: boolean;
 }
 
 export interface SampleTestModel {
