@@ -2,9 +2,6 @@ import React, { useState } from "react";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { SelectField, DateInputField, TextInputField } from "../Common/HelperInputFields";
 import moment from "moment";
-// import { SHIFTING_CHOICES } from "../../Common/constants";
-
-// const shiftStatusOptions = ['Show All', ...SHIFTING_CHOICES.map(obj => obj.text)];
 
 export default function ListFilter(props: any) {
   let { filter, onChange, closeFilter } = props;
@@ -51,8 +48,8 @@ export default function ListFilter(props: any) {
         <button className="btn btn-default" onClick={closeFilter}>
           <i className="fas fa-times mr-2" />Cancel
         </button>
-          <button className="btn btn-primary" onClick={applyFilter}>
-            <i className="fas fa-check mr-2" />Apply
+        <button className="btn btn-primary" onClick={applyFilter}>
+          <i className="fas fa-check mr-2" />Apply
         </button>
       </div>
       <div className="font-light text-md mt-2">
@@ -197,6 +194,18 @@ export default function ListFilter(props: any) {
             onChange={date => handleChange({ target: { name: "modified_date_after", value: date } })}
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9" />
         </div>
+
+        {/* <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">Is upshift case</span>
+          <DateTimeFiled
+                name="X_before"
+                inputVariant="outlined"
+                margin="dense"
+                errors=""
+                value={filter.X_before}
+                onChange={date => handleChange({target: {name: "X_before", value: date}})}
+                className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"/>
+        </div>         */}
       </div>
     </div>
   )

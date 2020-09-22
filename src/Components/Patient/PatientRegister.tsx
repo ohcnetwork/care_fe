@@ -307,7 +307,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         case "district":
           if (state.form.nationality === "India" && !state.form[field]) {
             errors[field] = "Please select district";
-            invalidForm = true;
           }
           return;
         case "state":
@@ -875,7 +874,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                 </div>
               </div>
 
-
               <div className="grid gap-4 grid-cols-1 md:grid-cols-2 mt-4">
                 {
                   state.form.gender === '2' &&
@@ -1136,7 +1134,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             </form>
           </CardContent>
         </Card>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 };

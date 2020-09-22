@@ -75,16 +75,10 @@ export default function ListView() {
     setFilter(filterData);
   };
 
-  const applyFilter  = (filterData: any) => {
+  const applyFilter = (filterData: any) => {
     setFilter(filterData);
     setShowFilters(false);
   };
-
-  const triggerDownload = async () => {
-    const res = await dispatch(downloadShiftRequests({ ...formatFilter(filter), csv: 1 }));
-    setDownloadFile(res.data);
-    document.getElementById(`shiftRequests-ALL`)?.click();
-  }
 
   const badge = (key: string, value: any) => {
     return (
@@ -93,7 +87,14 @@ export default function ListView() {
       </span>
     )
   };
+
   const appliedFilters = formatFilter(filter);
+
+  const triggerDownload = async () => {
+    const res = await dispatch(downloadShiftRequests({ ...formatFilter(filter), csv: 1 }));
+    setDownloadFile(res.data);
+    document.getElementById(`shiftRequests-ALL`)?.click();
+  }
 
   return (
     <div className="flex flex-col h-screen px-2 pb-2">
@@ -102,7 +103,6 @@ export default function ListView() {
           <PageTitle title={"Shifting"} hideBack={true} />
           <GetAppIcon className="cursor-pointer mt-4" onClick={triggerDownload} />
         </div>
-
         <div className="md:px-4">
           <InputSearchBox
             search={query => filterOnChange({ ...filter, patient_name: query })}
@@ -171,8 +171,8 @@ export default function ListView() {
         <div className="bg-white min-h-screen p-4">
           <ListFilter
             filter={filter}
-            onChange={applyFilter} 
-            closeFilter={() => setShowFilters(false)}/>
+            onChange={applyFilter}
+            closeFilter={() => setShowFilters(false)} />
         </div>
       </SlideOver>
 

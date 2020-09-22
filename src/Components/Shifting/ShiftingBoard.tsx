@@ -118,7 +118,6 @@ export default function ListView({ board, filterProp, formatFilter }: boardProps
                         {shift.patient_object.phone_number || ''}
                       </dd>
                     </dt>
-
                   </div>
                   <div className="sm:col-span-1">
                     <dt title=" Origin facility" className="text-sm leading-5 font-medium text-gray-500 flex items-center">
@@ -165,6 +164,7 @@ export default function ListView({ board, filterProp, formatFilter }: boardProps
                   </div>
                 </dl>
               </div>
+
               <div className="mt-2 flex">
                 <button onClick={_ => navigate(`/shifting/${shift.external_id}`)} className="btn btn-default bg-white mr-2" >
                   <i className="fas fa-eye mr-2" /> View
@@ -172,6 +172,8 @@ export default function ListView({ board, filterProp, formatFilter }: boardProps
                 <a href={`/shifting/${shift.external_id}`} className="btn btn-default w-full bg-white mr-2" target="_blank" rel="noopener noreferrer">
                   <i className="fas fa-external-link-alt mr-2" /> All Details
                 </a>
+
+
               </div>
               {filter === "TRANSFER IN PROGRESS" &&
                 <div className="mt-2">
@@ -183,6 +185,7 @@ export default function ListView({ board, filterProp, formatFilter }: boardProps
                   >
                     TRANSFER TO RECEIVING FACILITY
                 </Button>
+
                   <Modal
                     open={modalFor === shift.external_id}
                     onClose={_ => setModalFor({ externalId: undefined, loading: false })}
@@ -214,7 +217,7 @@ export default function ListView({ board, filterProp, formatFilter }: boardProps
                   </Modal>
                 </div>}
             </div>
-          </div>
+          </div >
         </div >
       );
   }
