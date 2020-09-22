@@ -126,7 +126,7 @@ export const fireRequest = (
                         });
                     } else {
                         Notification.Error({
-                            msg: 'Something went Wrong...!'
+                            msg: 'Something went wrong...!'
                         });
                     }
                     return;
@@ -135,7 +135,7 @@ export const fireRequest = (
                 // 5xx Errors
                 if (error.response.status >= 500 && error.response.status <= 599) {
                     Notification.Error({
-                        msg: 'Something went Wrong...!'
+                        msg: 'Something went wrong...!'
                     });
                     return;
                 }

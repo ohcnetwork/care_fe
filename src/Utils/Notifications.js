@@ -39,20 +39,22 @@ const notify = (text, type) => {
 
 const notifyError = (error) => {
     let errorMsg = '';
-    if (error.detail) {
-        notify(error.detail, 'error');
-        return;
-    }
-    for (let [key, value] of Object.entries(error)) {
-        if (Array.isArray(value)) {
-            const uniques = [...new Set(value)];
-            errorMsg +=`${key} - ${uniques.join(', ')}`
-        } else if(typeof value === "string") {
-            errorMsg += `${key} - ${value}`;
-        } else {
-            errorMsg += `${key} - Bad Request`
+    if (typeof error === 'string' || !error) {
+        errorMsg = !error || error.length > 100 ? 'Something went wrong...!' : error;
+    } else if (error.detail) {
+        errorMsg = error.detail;
+    } else {
+        for (let [key, value] of Object.entries(error)) {
+            if (Array.isArray(value)) {
+                const uniques = [...new Set(value)];
+                errorMsg +=`${key} - ${uniques.splice(0, 5).join(', ')}`
+            } else if(typeof value === "string") {
+                errorMsg += `${key} - ${value}`;
+            } else {
+                errorMsg += `${key} - Bad Request`
+            }
+            errorMsg += '\n';
         }
-        errorMsg += '\n';
     }
     notify(errorMsg, 'error');
 }
@@ -71,7 +73,7 @@ export const Error = ({ msg }) => {
 export const BadRequest = ({ errs }) => {
 
     if (Array.isArray(errs)) {
-        errs.forEach(error => notifyError(error));
+        errs.splice(0, 5).forEach(error => notifyError(error));
     } else {
         notifyError(errs);
     }
