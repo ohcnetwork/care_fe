@@ -108,7 +108,7 @@ export const fireRequest = (
                 }
 
                 // 400 Bad Request Error
-                if (error.response.status === 400 || 406) {
+                if (error.response.status === 400 || error.response.status === 406) {
                     Notification.BadRequest({
                         errs: error.response.data
                     });

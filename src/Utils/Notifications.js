@@ -71,7 +71,7 @@ export const Error = ({ msg }) => {
 export const BadRequest = ({ errs }) => {
 
     if (Array.isArray(errs)) {
-        errs.splice(0,3).forEach(error => notifyError(error));
+        errs.forEach(error => notifyError(error));
     } else {
         notifyError(errs);
     }
