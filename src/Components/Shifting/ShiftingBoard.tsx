@@ -71,13 +71,13 @@ export default function ListView({ board, filterProp, formatFilter }: boardProps
 
   const handlePagination = (page: number, limit: number) => {
     const offset = (page - 1) * limit;
+    // console.log(`${currentPage} of ${(totalCount || 0)/limit} to ${page}`)
     setCurrentPage(page);
     setIsLoading(loading => reduceLoading("MORE", loading));
     dispatch(getShiftRequests(formatFilter({ ...filterProp, status: board, offset: offset }), board)).then((res: any) => {
       if (res && res.data) {
         setData(data => [...data, ...res.data.results]);
         setTotalCount(res.data.count);
-        setCurrentPage(1)
       }
       setIsLoading(loading => reduceLoading("COMPLETE", loading));
     });
