@@ -18,6 +18,7 @@ import NavTabs from '../Common/NavTabs';
 import Pagination from "../Common/Pagination";
 import { InputSearchBox } from "../Common/SearchBox";
 import { PatientFilter } from "./PatientFilter";
+import { TELEMEDICINE_ACTIONS } from "../../Common/constants";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -50,7 +51,7 @@ function TabPanel(props: TabPanelProps) {
 
 function Badge(props: { color: string, icon: string, text: string }) {
   return (
-    <span className="m-1 inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-gray-50 text-gray-700" title={props.text}>
+    <span className="m-1 inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-gray-100 text-gray-700" title={props.text}>
       <i className={"mr-2 text-md text-" + props.color + "-500 fas fa-" + props.icon}></i>
       {props.text}
     </span>
@@ -194,7 +195,10 @@ export const PatientManager = (props: any) => {
           <div className="px-4 md:w-1/2">
             <div className="md:flex justify-between w-full">
               <div className="text-xl font-normal capitalize">
-                {patient.name} -   {patient.age}
+                {patient.name} - {patient.age}
+                {
+                  patient.action && patient.action != 10 && <span className="font-semibold ml-2">- {TELEMEDICINE_ACTIONS.find(i => i.id === patient.action)?.desc}</span>
+                }
               </div>
             </div>
             {patient.facility_object &&
@@ -203,6 +207,13 @@ export const PatientManager = (props: any) => {
                 <span className="text-xs ml-2">
                   Updated at: {moment(patient.modified_date).format("lll")}
                 </span>
+                {
+                  patient.review_time &&
+                  <span className={"m-1 inline-flex items-center px-3 py-1 rounded-full text-xs leading-4 font-semibold " + (moment().isBefore(patient.review_time) ? " bg-gray-100" : "rounded p-1 bg-red-400 text-white")}>
+                    <i className="mr-2 text-md fas fa-clock"></i>
+                    {(moment().isBefore(patient.review_time) ? "Review at: " : "Review Missed: ") + moment(patient.review_time).format("lll")}
+                  </span>
+                }
               </div>
             }
           </div>

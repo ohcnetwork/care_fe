@@ -128,7 +128,7 @@ export const PatientHome = (props: any) => {
 
   const [preDischargeForm, setPreDischargeForm] = useState(initPreDischargeForm);
 
-  const handlePreDischargeFormChange = (key:string, event: any) => {
+  const handlePreDischargeFormChange = (key: string, event: any) => {
     if (key === 'donatePlasma') {
       setPreDischargeForm({ donatePlasma: event.target.value as donatePlasmaOptionType });
     }
@@ -179,7 +179,7 @@ export const PatientHome = (props: any) => {
     let dischargeData = Object.assign({}, patientData);
     dischargeData['discharge'] = value;
 
-    
+
     Promise.all([
       // using preDischargeForm form data to update patient data
       dispatch(patchPatient(formatPreDischargeFormData(preDischargeForm), { id: patientData.id })),
@@ -187,7 +187,7 @@ export const PatientHome = (props: any) => {
       dispatch(dischargePatient({ 'discharge': value }, { id: patientData.id }))
     ])
       .then((response: any) => {
-        if (((response||[])[1])?.status === 200) {
+        if (((response || [])[1])?.status === 200) {
           let dischargeData = Object.assign({}, patientData);
           dischargeData['discharge'] = value;
           setPatientData(dischargeData);
@@ -206,7 +206,7 @@ export const PatientHome = (props: any) => {
 
     let donatePlasma = preDischargeForm.donatePlasma;
     if (donatePlasma) {
-      if(donatePlasma === 'yes') {
+      if (donatePlasma === 'yes') {
         data['will_donate_blood'] = true;
         data['fit_for_blood_donation'] = true;
       } else if (donatePlasma === 'no') {
@@ -425,11 +425,17 @@ export const PatientHome = (props: any) => {
       <div className="border rounded-lg bg-white shadow h-full hover:border-primary-500 text-black mt-4 p-4">
         <div className="flex justify-between">
           <div className="grid gap-2 grid-cols-1">
+            {patientData.review_time &&
+              <div className={"mt-2 inline-flex items-center px-3 py-1 rounded-full text-xs leading-4 font-semibold " + (moment().isBefore(patientData.review_time) ? " bg-gray-100" : "rounded p-1 bg-red-400 text-white")}>
+                <i className="mr-2 text-md fas fa-clock"></i>
+                {(moment().isBefore(patientData.review_time) ? "Review at: " : "Review Missed: ") + moment(patientData.review_time).format("lll")}
+              </div>}
             <div className="flex items-baseline">
-              <div>
+              <div className="mt-1">
                 <span className="font-semibold leading-relaxed">Name: </span>
                 {patientData.name}
               </div>
+
               <div>
                 {!patientData.is_active && (
                   <span className="ml-2 badge badge-pill badge-dark">
@@ -477,7 +483,7 @@ export const PatientHome = (props: any) => {
             </div>
           }
         </div>
-        <div className="md:flex justify-between bg-gray-100 p-4 ">
+        <div className="md:flex justify-between bg-gray-100 py-2 ">
           <div>
             <span className="font-semibold leading-relaxed">SRF ID: </span>
             {patientData.srf_id && patientData.srf_id || '-'}
@@ -681,9 +687,9 @@ export const PatientHome = (props: any) => {
                       Is the patient willing to donate blood for Plasma?
                     </FormLabel>
                     <RadioGroup className="flex-row gap-15 mt-4" name="blood-donate" value={preDischargeForm.donatePlasma} onChange={(event) => handlePreDischargeFormChange('donatePlasma', event)}>
-                      <FormControlLabel value="yes" control={<Radio />} label="Yes" className="mr-0"/>
-                      <FormControlLabel value="no" control={<Radio />} label="No" className="mr-0"/>
-                      <FormControlLabel value="not-fit" control={<Radio />} label="Not fit for donation currently" className="w-48 mr-0"/>
+                      <FormControlLabel value="yes" control={<Radio />} label="Yes" className="mr-0" />
+                      <FormControlLabel value="no" control={<Radio />} label="No" className="mr-0" />
+                      <FormControlLabel value="not-fit" control={<Radio />} label="Not fit for donation currently" className="w-48 mr-0" />
                     </RadioGroup>
                   </FormControl>
                 </DialogContent>

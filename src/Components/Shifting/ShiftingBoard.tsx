@@ -147,9 +147,11 @@ export default function ListView({ board, filterProp, formatFilter }: boardProps
                   </div>
 
                   <div className="sm:col-span-1">
-                    <dt title="  Last Modified" className="text-sm leading-5 font-medium text-gray-500 flex items-center">
+
+                    <dt title="  Last Modified" className={
+                      "text-sm leading-5 font-medium flex items-center " + (moment().subtract(2, 'hours').isBefore(shift.modified_date) ? "text-gray-900" : "rounded p-1 bg-red-400 text-white")}>
                       <i className="fas fa-stopwatch mr-2"></i>
-                      <dd className="font-bold text-sm leading-5 text-gray-900">
+                      <dd className="font-bold text-sm leading-5">
                         {moment(shift.modified_date).format("LLL") || "--"}
                       </dd>
                     </dt>
