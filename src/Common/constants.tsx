@@ -1,4 +1,3 @@
-
 export interface OptionsType {
   id: number;
   text: string;
@@ -12,8 +11,8 @@ export const USER_TYPES: Array<String> = [
   "Staff",
   "StaffReadOnly",
   "Doctor",
-  "DistrictAdmin",
   "DistrictReadOnlyAdmin",
+  "DistrictAdmin",
   "DistrictLabAdmin",
   "StateLabAdmin",
   "StateAdmin",
@@ -50,13 +49,13 @@ export const DISTRICT_CHOICES: Array<OptionsType> = [
   { id: 11, text: "Kozhikode" },
   { id: 12, text: "Wayanad" },
   { id: 13, text: "Kannur" },
-  { id: 14, text: "Kasaragod" }
+  { id: 14, text: "Kasaragod" },
 ];
 
 export const VEHICLE_TYPES: Array<OptionsType> = [
   { id: 1, text: "Basic" },
   { id: 2, text: "Cardiac" },
-  { id: 3, text: "Hearse" }
+  { id: 3, text: "Hearse" },
 ];
 
 export const FACILITY_TYPES: Array<OptionsType> = [
@@ -67,8 +66,8 @@ export const FACILITY_TYPES: Array<OptionsType> = [
   { id: 5, text: "Hotel" },
   { id: 6, text: "Lodge" },
   { id: 7, text: "TeleMedicine" },
-  { id: 8, text: 'Govt Hospital' },
-  { id: 9, text: 'Labs' },
+  { id: 8, text: "Govt Hospital" },
+  { id: 9, text: "Labs" },
   { id: 800, text: "Primary Health Centres" },
   { id: 801, text: "24x7 Public Health Centres" },
   { id: 802, text: "Family Health Centres" },
@@ -80,11 +79,11 @@ export const FACILITY_TYPES: Array<OptionsType> = [
   { id: 850, text: "General hospitals" },
   { id: 860, text: "District Hospitals" },
   { id: 870, text: "Govt Medical College Hospitals" },
-  { id: 950, text: 'Corona Testing Labs' },
+  { id: 950, text: "Corona Testing Labs" },
   { id: 1000, text: "Corona Care Centre" },
   { id: 1100, text: "First Line Treatment Centre" },
   { id: 1200, text: "Second Line Treatment Center" },
-  { id: 1300, text: "Shifting Centre" }
+  { id: 1300, text: "Shifting Centre" },
 ];
 
 export const SHIFTING_CHOICES: Array<OptionsType> = [
@@ -104,7 +103,7 @@ export const BED_TYPES: Array<OptionsType> = [
   { id: 3, text: "Single Room with Attached Bathroom" },
   { id: 10, text: "ICU" },
   { id: 20, text: "Ventilator" },
-  { id: 30, text: "Covid Beds" }
+  { id: 30, text: "Covid Beds" },
 ];
 
 export const DOCTOR_SPECIALIZATION: Array<OptionsType> = [
@@ -112,7 +111,7 @@ export const DOCTOR_SPECIALIZATION: Array<OptionsType> = [
   { id: 2, text: "Pulmonology" },
   { id: 3, text: "Critical Care" },
   { id: 4, text: "Paediatrics" },
-  { id: 5, text: "Other Speciality" }
+  { id: 5, text: "Other Speciality" },
 ];
 
 export const MEDICAL_HISTORY_CHOICES: Array<OptionsType> = [
@@ -123,7 +122,7 @@ export const MEDICAL_HISTORY_CHOICES: Array<OptionsType> = [
   { id: 5, text: "Kidney Diseases" },
   { id: 6, text: "Lung Diseases/Asthma" },
   { id: 7, text: "Cancer" },
-  { id: 8, text: "OTHER" }
+  { id: 8, text: "OTHER" },
 ];
 
 export const SYMPTOM_CHOICES: Array<OptionsType> = [
@@ -148,7 +147,7 @@ export const SYMPTOM_CHOICES: Array<OptionsType> = [
 export const GENDER_TYPES: Array<OptionsType> = [
   { id: 1, text: "Male" },
   { id: 2, text: "Female" },
-  { id: 3, text: "Other" }
+  { id: 3, text: "Other" },
 ];
 
 export const SAMPLE_TEST_RESULT = [
@@ -163,7 +162,7 @@ export const CONSULTATION_SUGGESTION = [
   { id: "A", text: "Admission" },
   { id: "R", text: "Refer to another Hospital" },
   { id: "OP", text: "OP Consultation" },
-  { id: "DC", text: "Domiciliary Care" }
+  { id: "DC", text: "Domiciliary Care" },
 ];
 
 export const ADMITTED_TO = [
@@ -174,47 +173,72 @@ export const ADMITTED_TO = [
   "ICU with Invasive Ventilator",
   "Home Isolation",
   "Gynaecology Ward",
-  "Paediatric Ward"
+  "Paediatric Ward",
 ];
 
 export const PATIENT_CATEGORY = [
   { id: "ASYMPTOMATIC", text: "ASYM (ASYMPTOMATIC) " },
   { id: "Category-A", text: "Mild (Category A)" },
   { id: "Category-B", text: "Moderate (Category B)" },
-  { id: "Category-C", text: "Severe (Category C)" }
+  { id: "Category-C", text: "Severe (Category C)" },
 ];
 
 export const CURRENT_HEALTH_CHANGE = [
-  { id: 0, text: 'NO DATA', desc: '', },
-  { id: 3, text: 'STATUS QUO', desc: 'No Change' },
-  { id: 4, text: 'BETTER', desc: 'Better' },
-  { id: 2, text: 'WORSE', desc: 'Worse' },
-  { id: 1, text: 'REQUIRES VENTILATOR', desc: 'Requires Ventilator' },
+  { id: 0, text: "NO DATA", desc: "" },
+  { id: 3, text: "STATUS QUO", desc: "No Change" },
+  { id: 4, text: "BETTER", desc: "Better" },
+  { id: 2, text: "WORSE", desc: "Worse" },
+  { id: 1, text: "REQUIRES VENTILATOR", desc: "Requires Ventilator" },
 ];
 
 export const SAMPLE_TEST_STATUS = [
   { id: 1, text: "REQUEST_SUBMITTED", desc: "Request Submitted" },
   { id: 2, text: "APPROVED", desc: "Approved for Sample Collection" },
   { id: 3, text: "DENIED", desc: "Request Denied" },
-  { id: 4, text: "SENT_TO_COLLECTON_CENTRE", desc: "Sample taken and sent to collection centre" },
+  {
+    id: 4,
+    text: "SENT_TO_COLLECTON_CENTRE",
+    desc: "Sample taken and sent to collection centre",
+  },
   { id: 5, text: "RECEIVED_AND_FORWARED", desc: "Received And Forwarded" },
   { id: 6, text: "RECEIVED_AT_LAB", desc: "Received At Lab" },
   { id: 7, text: "COMPLETED", desc: "Test Completed" },
 ];
 
 export const SAMPLE_FLOW_RULES = {
-  REQUEST_SUBMITTED: ["APPROVED", "DENIED",],
-  APPROVED: ["SENT_TO_COLLECTON_CENTRE", "RECEIVED_AND_FORWARED", "RECEIVED_AT_LAB", "COMPLETED"],
+  REQUEST_SUBMITTED: ["APPROVED", "DENIED"],
+  APPROVED: [
+    "SENT_TO_COLLECTON_CENTRE",
+    "RECEIVED_AND_FORWARED",
+    "RECEIVED_AT_LAB",
+    "COMPLETED",
+  ],
   DENIED: ["REQUEST_SUBMITTED"],
-  SENT_TO_COLLECTON_CENTRE: ["RECEIVED_AND_FORWARED", "RECEIVED_AT_LAB", "COMPLETED"],
+  SENT_TO_COLLECTON_CENTRE: [
+    "RECEIVED_AND_FORWARED",
+    "RECEIVED_AT_LAB",
+    "COMPLETED",
+  ],
   RECEIVED_AND_FORWARED: ["RECEIVED_AT_LAB", "COMPLETED"],
   RECEIVED_AT_LAB: ["COMPLETED"],
 };
 
 export const ROLE_STATUS_MAP = {
   Staff: ["SENT_TO_COLLECTON_CENTRE"],
-  DistrictAdmin: ["APPROVED", "DENIED", "SENT_TO_COLLECTON_CENTRE", "RECEIVED_AND_FORWARED"],
-  StateLabAdmin: ["APPROVED", "DENIED", "SENT_TO_COLLECTON_CENTRE", "RECEIVED_AND_FORWARED", "RECEIVED_AT_LAB", "COMPLETED"],
+  DistrictAdmin: [
+    "APPROVED",
+    "DENIED",
+    "SENT_TO_COLLECTON_CENTRE",
+    "RECEIVED_AND_FORWARED",
+  ],
+  StateLabAdmin: [
+    "APPROVED",
+    "DENIED",
+    "SENT_TO_COLLECTON_CENTRE",
+    "RECEIVED_AND_FORWARED",
+    "RECEIVED_AT_LAB",
+    "COMPLETED",
+  ],
 };
 
 export const DISEASE_STATUS = [
@@ -226,9 +250,7 @@ export const DISEASE_STATUS = [
   "EXPIRED",
 ];
 
-export const TEST_TYPE = [
-  "UNK", "ANTIGEN", "RTPCR", "CBNAT", "TRUNAT"
-];
+export const TEST_TYPE = ["UNK", "ANTIGEN", "RTPCR", "CBNAT", "TRUNAT"];
 
 export const BLOOD_GROUPS = [
   "UNK",
@@ -260,14 +282,14 @@ export const ICMR_CATEGORY = [
   "Cat 4",
   "Cat 5a",
   "Cat 5b",
-]
+];
 
 export const TELEMEDICINE_ACTIONS = [
-  { id: 10, text: 'PENDING', desc: "Pending" },
-  { id: 30, text: 'SPECIALIST_REQUIRED', desc: "Specialist Required" },
-  { id: 40, text: 'PLAN_FOR_HOME_CARE', desc: "Plan for Home Care" },
-  { id: 50, text: 'FOLLOW_UP_NOT_REQUIRED', desc: "Follow Up Not Required" },
-  { id: 60, text: 'COMPLETE', desc: "Complete" },
-  { id: 70, text: 'REVIEW', desc: "Review" },
-  { id: 80, text: 'NOT_REACHABLE', desc: "Not Reachable" }
-]
+  { id: 10, text: "PENDING", desc: "Pending" },
+  { id: 30, text: "SPECIALIST_REQUIRED", desc: "Specialist Required" },
+  { id: 40, text: "PLAN_FOR_HOME_CARE", desc: "Plan for Home Care" },
+  { id: 50, text: "FOLLOW_UP_NOT_REQUIRED", desc: "Follow Up Not Required" },
+  { id: 60, text: "COMPLETE", desc: "Complete" },
+  { id: 70, text: "REVIEW", desc: "Review" },
+  { id: 80, text: "NOT_REACHABLE", desc: "Not Reachable" },
+];

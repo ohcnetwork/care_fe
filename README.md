@@ -13,8 +13,10 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/200482ab117e4b5397ff3f5ae5719aa2)](https://www.codacy.com/gh/coronasafe/care_fe?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=coronasafe/care_fe&amp;utm_campaign=Badge_Grade) 
 [![CircleCI](https://circleci.com/gh/coronasafe/care_fe.svg?style=svg)](https://circleci.com/gh/coronasafe/care_fe)
 [![Maintainability](https://api.codeclimate.com/v1/badges/f1438f693aa459805301/maintainability)](https://codeclimate.com/github/coronasafe/care_fe/maintainability)
+[![DepShield Badge](https://depshield.sonatype.org/badges/coronasafe/care_fe/depshield.svg)](https://depshield.github.io)
 
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fcoronasafe%2Fcare_fe.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fcoronasafe%2Fcare_fe?ref=badge_large)
+
 
 Auto Deployed to https://care.coronasafe.in for Develop Branch. 
 
