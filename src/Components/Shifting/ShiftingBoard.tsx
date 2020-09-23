@@ -51,6 +51,7 @@ export default function ListView({ board, filterProp, formatFilter }: boardProps
       if (res && res.data) {
         setData(res.data.results);
         setTotalCount(res.data.count);
+        setCurrentPage(1);
       }
       setIsLoading(loading => reduceLoading("COMPLETE", loading));
     });
