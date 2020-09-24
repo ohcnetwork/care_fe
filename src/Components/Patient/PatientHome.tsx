@@ -465,11 +465,28 @@ export const PatientHome = (props: any) => {
       <div className="border rounded-lg bg-white shadow h-full hover:border-primary-500 text-black mt-4 p-4">
         <div className="flex justify-between">
           <div className="grid gap-2 grid-cols-1">
+            {patientData.review_time && (
+              <div
+                className={
+                  "mt-2 inline-flex items-center px-3 py-1 rounded-full text-xs leading-4 font-semibold " +
+                  (moment().isBefore(patientData.review_time)
+                    ? " bg-gray-100"
+                    : "rounded p-1 bg-red-400 text-white")
+                }
+              >
+                <i className="mr-2 text-md fas fa-clock"></i>
+                {(moment().isBefore(patientData.review_time)
+                  ? "Review at: "
+                  : "Review Missed: ") +
+                  moment(patientData.review_time).format("lll")}
+              </div>
+            )}
             <div className="flex items-baseline">
-              <div>
+              <div className="mt-1">
                 <span className="font-semibold leading-relaxed">Name: </span>
                 {patientData.name}
               </div>
+
               <div>
                 {!patientData.is_active && (
                   <span className="ml-2 badge badge-pill badge-dark">
@@ -527,7 +544,7 @@ export const PatientHome = (props: any) => {
             </div>
           )}
         </div>
-        <div className="md:flex justify-between bg-gray-100 p-4 ">
+        <div className="md:flex justify-between bg-gray-100 py-2 ">
           <div>
             <span className="font-semibold leading-relaxed">SRF ID: </span>
             {(patientData.srf_id && patientData.srf_id) || "-"}
