@@ -1,4 +1,4 @@
-import { navigate } from "raviger";
+import { navigate, useQueryParams } from "raviger";
 import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -41,6 +41,7 @@ const useStyles = makeStyles((theme: Theme) =>
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
 export const HospitalList = () => {
+  const [qParams, setQueryParams] = useQueryParams();
   const classes = useStyles();
   const dispatchAction: any = useDispatch();
   const [data, setData] = useState<Array<FacilityModel>>([]);
@@ -60,7 +61,8 @@ export const HospitalList = () => {
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const res = await dispatchAction(getFacilities({ limit, offset }));
+      const params = qParams.search ? { limit, offset, search_text: qParams.search } : { limit, offset };
+      const res = await dispatchAction(getFacilities(params));
       if (!status.aborted) {
         if (res && res.data) {
           setData(res.data.results);
@@ -69,8 +71,19 @@ export const HospitalList = () => {
         setIsLoading(false);
       }
     },
-    [dispatchAction, offset]
+    [dispatchAction, offset, qParams.search]
   );
+
+  useAbortableEffect(
+    (status: statusType) => {
+      fetchData(status);
+    },
+    [fetchData]
+  );
+
+  const onSearchSuspects = (search: string) => {
+    setQueryParams({ search }, true);
+  };
 
   const handleDownload = async () => {
     const res = await dispatchAction(downloadFacility());
@@ -113,28 +126,10 @@ export const HospitalList = () => {
     }
   };
 
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(status);
-    },
-    [fetchData]
-  );
-
   const handlePagination = (page: number, limit: number) => {
     const offset = (page - 1) * limit;
     setCurrentPage(page);
     setOffset(offset);
-  };
-  const onSearchSuspects = async (searchValue: string) => {
-    setIsLoading(true);
-    const res = await dispatchAction(
-      getFacilities({ limit, offset, search_text: searchValue })
-    );
-    if (res && res.data) {
-      setData(res.data.results);
-      setTotalCount(res.data.count);
-    }
-    setIsLoading(false);
   };
 
   let facilityList: any[] = [];
@@ -245,6 +240,7 @@ export const HospitalList = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2">
         <div className="ml-3 w-3/4 md:ml-8">
           <InputSearchBox
+            value={qParams.search}
             search={onSearchSuspects}
             placeholder="Search by Facility / District Name"
             errors=""
