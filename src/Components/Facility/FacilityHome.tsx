@@ -164,7 +164,15 @@ export const FacilityHome = (props: any) => {
             <Typography>
               Local Body : {facilityData?.local_body_object?.name}
             </Typography>
-            <Typography>Ward : {facilityData?.ward_object?.name}</Typography>
+
+            {facilityData?.ward_object && (
+              <Typography>
+                Ward :
+                {facilityData?.ward_object?.number +
+                  ", " +
+                  facilityData?.ward_object?.name}
+              </Typography>
+            )}
             <Typography>
               Oxygen Capacity :{` ${facilityData.oxygen_capacity} Litres`}
             </Typography>
