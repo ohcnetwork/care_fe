@@ -33,7 +33,6 @@ const reduceLoading = (action: string, current: any) => {
 export default function ListView({ board, filterProp, formatFilter }: boardProps) {
 
   const dispatch: any = useDispatch();
-  const [filter, setFilter] = useState(filterProp);
   const [data, setData] = useState<any[]>([]);
   const [downloadFile, setDownloadFile] = useState("");
   const [totalCount, setTotalCount] = useState();
@@ -41,10 +40,6 @@ export default function ListView({ board, filterProp, formatFilter }: boardProps
   const [isLoading, setIsLoading] = useState({ board: false, more: false });
   const [modalFor, setModalFor] = useState({ externalId: undefined, loading: false });
 
-
-  const filterOnChange = (filterData: any) => {
-    setFilter(filterData);
-  }
   const fetchData = () => {
     setIsLoading(loading => reduceLoading("BOARD", loading));
     dispatch(getShiftRequests(formatFilter({ ...filterProp, status: board }), board)).then((res: any) => {
@@ -61,13 +56,11 @@ export default function ListView({ board, filterProp, formatFilter }: boardProps
     setDownloadFile(res.data);
     document.getElementById(`shiftRequests-${board}`)?.click();
   }
-  useEffect(() => {
-    setFilter(filterProp)
-  }, [filterProp])
+  
   useEffect(() => {
     fetchData();
   },
-    [board, dispatch, filter, filterProp]
+    [board, dispatch, filterProp.facility, filterProp.orgin_facility, filterProp.shifting_approving_facility, filterProp.assigned_facility, filterProp.emergency, filterProp.is_up_shift, filterProp.patient_name, filterProp.created_date_before, filterProp.created_date_after, filterProp.modified_date_before, filterProp.modified_date_after, filterProp.patient_phone_number]
   );
 
   const handlePagination = (page: number, limit: number) => {

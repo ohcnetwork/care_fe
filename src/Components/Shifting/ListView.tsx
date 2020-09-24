@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useQueryParams } from 'raviger';
 import ListFilter from "./ListFilter";
 import ShiftingBoard from "./ShiftingBoard";
 import { SHIFTING_CHOICES } from "../../Common/constants";
@@ -63,20 +64,25 @@ const ACTIVE = shiftStatusOptions.filter(option => !COMPLETED.includes(option))
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
 export default function ListView() {
-
+  const [qParams, setQueryParams] = useQueryParams();
   const dispatch: any = useDispatch();
-  const [filter, setFilter] = useState(initialFilterData);
   const [boardFilter, setBoardFilter] = useState(ACTIVE);
   const [downloadFile, setDownloadFile] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
+  const updateQuery = (params: any) => {
+    const nParams = Object.assign(initialFilterData, qParams, params);
+    setQueryParams(nParams, true);
+  }
+
+
   const filterOnChange = (filterData: any) => {
-    setFilter(filterData);
+    updateQuery(filterData);
   };
 
   const applyFilter = (filterData: any) => {
-    setFilter(filterData);
+    updateQuery(filterData);
     setShowFilters(false);
   };
 
@@ -88,10 +94,10 @@ export default function ListView() {
     )
   };
 
-  const appliedFilters = formatFilter(filter);
+  const appliedFilters = formatFilter(qParams);
 
   const triggerDownload = async () => {
-    const res = await dispatch(downloadShiftRequests({ ...formatFilter(filter), csv: 1 }));
+    const res = await dispatch(downloadShiftRequests({ ...formatFilter(qParams), csv: 1 }));
     setDownloadFile(res.data);
     document.getElementById(`shiftRequests-ALL`)?.click();
   }
@@ -105,7 +111,7 @@ export default function ListView() {
         </div>
         <div className="md:px-4">
           <InputSearchBox
-            search={query => filterOnChange({ ...filter, patient_name: query })}
+            search={query => filterOnChange({ ...qParams, patient_name: query })}
             placeholder='Patient Name'
             errors=''
           />
@@ -157,7 +163,7 @@ export default function ListView() {
       </div>
       <div className="flex mt-4 pb-2 flex-1 items-start overflow-x-scroll">
         {isLoading ? <Loading /> : boardFilter.map(board =>
-          <ShiftingBoard filterProp={filter} board={board} formatFilter={formatFilter} />
+          <ShiftingBoard filterProp={qParams} board={board} formatFilter={formatFilter} />
         )}
       </div>
       <CSVLink
@@ -170,7 +176,7 @@ export default function ListView() {
       <SlideOver show={showFilters} setShow={setShowFilters}>
         <div className="bg-white min-h-screen p-4">
           <ListFilter
-            filter={filter}
+            filter={qParams}
             onChange={applyFilter}
             closeFilter={() => setShowFilters(false)} />
         </div>
