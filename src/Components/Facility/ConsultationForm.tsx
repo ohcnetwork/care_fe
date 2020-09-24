@@ -170,6 +170,7 @@ export const ConsultationForm = (props: any) => {
             test_id: res.data.test_id ? res.data.test_id : "",
             diagnosis: res.data.diagnosis ? res.data.diagnosis : "",
             verified_by: res.data.verified_by ? res.data.verified_by : "",
+            action: res.data.action ? res.data.action : "",
             OPconsultation: res.data.consultation_notes,
             is_telemedicine: `${res.data.is_telemedicine}`
           };
@@ -693,7 +694,7 @@ export const ConsultationForm = (props: any) => {
 
                 {JSON.parse(state.form.is_telemedicine) && (
                   <div className="flex-1">
-                    <InputLabel id="review_time-label">Review Time</InputLabel>
+                    <InputLabel id="review_time-label">Review After (In Minutes)</InputLabel>
                     <TextInputField
                       name="review_time"
                       variant="outlined"

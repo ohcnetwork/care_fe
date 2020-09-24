@@ -19,7 +19,10 @@ export const ConsultationCard = (props: ConsultationProps) => {
             <Grid item xs={7}>
               <Typography>
                 <span className="text-gray-700">Facility: </span>
-                {itemData.facility_name}
+                {itemData.facility_name}            {
+                  itemData.is_telemedicine &&
+                  <span className="ml-2">(Telemedicine)</span>
+                }
               </Typography>
             </Grid>
             <Grid item xs={5}>
@@ -59,6 +62,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
               </Grid>
             )}
           </Grid>
+
           <div className="mt-4 flex flex-wrap justify-between w-full">
             <button
               className="px-4 py-2 shadow border bg-white rounded-md border border-grey-500 whitespace-no-wrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300 text-center"
