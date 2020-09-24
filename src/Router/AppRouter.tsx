@@ -212,7 +212,7 @@ const AppRouter = () => {
                     return (
                       <a
                         key={item.title}
-                        onClick={() => navigate(item.link)}
+                        onClick={() => navigate(item.link, true)}
                         className={selectedClasses}
                       >
                         <i className={item.icon + (url.includes(parts && parts[1]) ? " text-white" : " text-green-400") + " mr-3 text-md group-hover:text-green-300 group-focus:text-green-300 transition ease-in-out duration-150"}>
