@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import loadable from '@loadable/component';
 const PageTitle = loadable( () => import("../Common/PageTitle"));
 import { Button } from "@material-ui/core";
-import { navigate } from "hookrouter";
+import { navigate } from "raviger";
 import { useDispatch } from "react-redux";
 const Loading = loadable( () => import("../Common/Loading"));
 import { statusType, useAbortableEffect } from "../../Common/utils";

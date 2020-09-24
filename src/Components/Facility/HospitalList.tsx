@@ -1,4 +1,4 @@
-import { navigate } from "hookrouter";
+import { navigate } from "raviger";
 import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -13,11 +13,9 @@ import {
 import loadable from "@loadable/component";
 import { SelectField } from "../Common/HelperInputFields";
 import { InputLabel } from "@material-ui/core";
-const Loading = loadable(() => import("../Common/Loading"));
 import Pagination from "../Common/Pagination";
 import { FacilityModel } from "./models";
 import { InputSearchBox } from "../Common/SearchBox";
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 import { CSVLink } from "react-csv";
 import moment from "moment";
 import { Theme, createStyles, makeStyles } from "@material-ui/core/styles";
@@ -26,6 +24,8 @@ import AccordionSummary from "@material-ui/core/AccordionSummary";
 import AccordionDetails from "@material-ui/core/AccordionDetails";
 import Typography from "@material-ui/core/Typography";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+const Loading = loadable(() => import("../Common/Loading"));
+const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({

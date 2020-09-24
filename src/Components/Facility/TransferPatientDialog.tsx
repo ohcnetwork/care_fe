@@ -1,7 +1,7 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, InputLabel } from '@material-ui/core';
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import { WithStyles, withStyles } from '@material-ui/styles';
-import { navigate } from "hookrouter";
+import { navigate } from "raviger";
 import moment from "moment";
 import React, { useReducer, useState } from 'react';
 import { useDispatch } from 'react-redux';

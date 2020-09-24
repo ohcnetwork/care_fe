@@ -1,7 +1,7 @@
 import { Grid } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import WarningRoundedIcon from "@material-ui/icons/WarningRounded";
-import { navigate } from "hookrouter";
+import { navigate } from "raviger";
 import moment from "moment";
 import loadable from '@loadable/component';
 import React, { useCallback, useState } from "react";
@@ -10,12 +10,12 @@ import { SAMPLE_TEST_STATUS, ROLE_STATUS_MAP, SAMPLE_FLOW_RULES } from "../../Co
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getTestList, patchSample, sampleSearch } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
-const Loading = loadable( () => import("../Common/Loading"));
-const PageTitle = loadable( () => import("../Common/PageTitle"));
 import Pagination from "../Common/Pagination";
 import { SampleTestModel } from "./models";
 import { InputSearchBox } from "../Common/SearchBox";
 import UpdateStatusDialog from "./UpdateStatusDialog";
+const Loading = loadable( () => import("../Common/Loading"));
+const PageTitle = loadable( () => import("../Common/PageTitle"));
 
 const useStyles = makeStyles((theme) => ({
   paginateTopPadding: {

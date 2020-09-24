@@ -1,5 +1,5 @@
 import { Button, CardContent } from "@material-ui/core";
-import { navigate } from "hookrouter";
+import { navigate } from "raviger";
 import moment from "moment";
 import React, { useState } from "react";
 import { SampleTestModel } from "./models";

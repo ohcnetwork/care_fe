@@ -5,7 +5,7 @@ import Grid from "@material-ui/core/Grid";
 import { makeStyles, Theme, useTheme } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
-import { navigate, useQueryParams } from "hookrouter";
+import { navigate, useQueryParams } from 'raviger';
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
 import moment from 'moment';
 import React, { useEffect, useState } from "react";

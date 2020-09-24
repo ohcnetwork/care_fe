@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { getShiftRequests, completeTransfer, downloadShiftRequests } from "../../Redux/actions";
 import Button from "@material-ui/core/Button";
-import { navigate } from "hookrouter";
+import { navigate } from "raviger";
 import moment from "moment";
 import { Modal } from '@material-ui/core';
 import { CSVLink } from 'react-csv';

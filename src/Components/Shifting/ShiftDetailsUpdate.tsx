@@ -7,7 +7,7 @@ import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 const Loading = loadable(() => import("../Common/Loading"));
 import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
-import { navigate } from "hookrouter";
+import { navigate } from "raviger";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getShiftDetails, updateShift } from "../../Redux/actions";
 import { SelectField } from "../Common/HelperInputFields";

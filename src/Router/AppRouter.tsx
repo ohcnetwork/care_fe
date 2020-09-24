@@ -1,4 +1,4 @@
-import { useRedirect, useRoutes, navigate, usePath } from "hookrouter";
+import { useRedirect, useRoutes, navigate, usePath } from "raviger";
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { BedCapacityForm } from "../Components/Facility/BedCapacityForm";
