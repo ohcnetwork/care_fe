@@ -1,10 +1,10 @@
 import { Grid } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import WarningRoundedIcon from "@material-ui/icons/WarningRounded";
-import { navigate } from "raviger";
+import { navigate, useQueryParams } from "raviger";
 import moment from "moment";
 import loadable from '@loadable/component';
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { SAMPLE_TEST_STATUS, ROLE_STATUS_MAP, SAMPLE_FLOW_RULES } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -17,12 +17,6 @@ import UpdateStatusDialog from "./UpdateStatusDialog";
 const Loading = loadable( () => import("../Common/Loading"));
 const PageTitle = loadable( () => import("../Common/PageTitle"));
 
-const useStyles = makeStyles((theme) => ({
-  paginateTopPadding: {
-    paddingTop: "50px",
-  },
-}));
-
 const statusChoices = [...SAMPLE_TEST_STATUS];
 
 const statusFlow = { ...SAMPLE_FLOW_RULES };
@@ -30,7 +24,7 @@ const statusFlow = { ...SAMPLE_FLOW_RULES };
 const roleStatusMap = { ...ROLE_STATUS_MAP };
 
 export default function SampleViewAdmin(props: any) {
-  const classes = useStyles();
+  const [qParams, setQueryParams] = useQueryParams();
   const dispatch: any = useDispatch();
   const initialData: any[] = [];
   let manageSamples: any = null;
@@ -50,7 +44,12 @@ export default function SampleViewAdmin(props: any) {
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const res = await dispatch(getTestList({ limit, offset }));
+      const res = await dispatch(getTestList({ 
+        limit, 
+        offset,
+        patient_name: qParams.patient_name || undefined,
+        district_name: qParams.district_name || undefined,
+      }));
       if (!status.aborted) {
         if (res && res.data) {
           setSample(res.data.results);
@@ -59,7 +58,7 @@ export default function SampleViewAdmin(props: any) {
         setIsLoading(false);
       }
     },
-    [dispatch, offset]
+    [dispatch, offset, qParams.district_name, qParams.patient_name]
   );
 
   useAbortableEffect(
@@ -69,21 +68,25 @@ export default function SampleViewAdmin(props: any) {
     [fetchData, fetchFlag]
   );
 
+  const updateQuery = (params: any) => {
+    const nParams = Object.assign({}, qParams, params);
+    setQueryParams(nParams, true);
+  }
+
   const handlePagination = (page: number, limit: number) => {
     const offset = (page - 1) * limit;
     setCurrentPage(page);
     setOffset(offset);
   };
 
-  const searchByName = async (searchValue: string) => {
-    setIsLoading(true);
-    const res = await dispatch(sampleSearch({ limit, offset, patient_name: searchValue }));
-    if (res && res.data) {
-      setSample(res.data.results);
-      setTotalCount(res.data.count);
-    }
-    setIsLoading(false);
-  }
+  const searchByName = async (patient_name: string) => {
+    updateQuery({ patient_name, page: 1 });
+  };
+
+  const searchByDistrict = async (district_name: string) => {
+    updateQuery({ district_name, page: 1 });
+  };
+
 
   // const searchByPhone = async (searchValue: string) => {
   //   setIsLoading(true);
@@ -133,15 +136,6 @@ export default function SampleViewAdmin(props: any) {
       sample: {},
     });
   };
-  const onSearchDistrictName = async (searchValue: string) => {
-    setIsLoading(true);
-    const res = await dispatch(getTestList({ limit, offset, district_name: searchValue }));
-    if (res && res.data) {
-      setSample(res.data.results);
-      setTotalCount(res.data.count);
-    }
-    setIsLoading(false);
-  }
 
   let sampleList: any[] = [];
   if (sample && sample.length) {
@@ -299,7 +293,8 @@ export default function SampleViewAdmin(props: any) {
               Search by District Name
           </div>
             <InputSearchBox
-              search={onSearchDistrictName}
+              value={qParams.district_name}
+              search={searchByDistrict}
               placeholder='District Name'
               errors=''
             />
@@ -310,6 +305,7 @@ export default function SampleViewAdmin(props: any) {
             Search by Name
           </div>
           <InputSearchBox
+              value={qParams.patient_name}
               search={searchByName}
               placeholder='Search by Patient Name'
               errors=''
