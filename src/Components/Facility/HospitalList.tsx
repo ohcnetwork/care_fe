@@ -168,9 +168,14 @@ export const HospitalList = () => {
                     <div className="text-gray-500 leading-relaxed font-light">
                       Ward:
                     </div>
-                    <div className="font-semibold">
-                      {facility.ward_object?.name}
-                    </div>
+
+                    {facility.ward_object && (
+                      <div className="font-semibold">
+                        {facility.ward_object?.number +
+                          ", " +
+                          facility.ward_object?.name || "-"}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
