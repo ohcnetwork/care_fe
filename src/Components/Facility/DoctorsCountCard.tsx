@@ -1,5 +1,5 @@
 import React from "react";
-import { navigate } from "hookrouter";
+import { navigate } from "raviger";
 import { DoctorModal } from "./models";
 import { DOCTOR_SPECIALIZATION } from "../../Common/constants";
 

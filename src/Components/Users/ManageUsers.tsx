@@ -3,12 +3,12 @@ import loadable from '@loadable/component';
 import { useDispatch, useSelector } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getUserList, searchUser } from "../../Redux/actions";
-const Loading = loadable( () => import("../Common/Loading"));
-const PageTitle = loadable( () => import("../Common/PageTitle"));
 import Pagination from "../Common/Pagination";
-import { navigate } from "hookrouter";
+import { navigate } from "raviger";
 import { USER_TYPES } from "../../Common/constants";
 import { InputSearchBox } from "../Common/SearchBox";
+const Loading = loadable( () => import("../Common/Loading"));
+const PageTitle = loadable( () => import("../Common/PageTitle"));
 
 export default function ManageUsers(props: any) {
   const dispatch: any = useDispatch();

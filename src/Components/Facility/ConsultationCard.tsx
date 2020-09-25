@@ -1,5 +1,5 @@
 import { CardContent, Grid, Typography } from "@material-ui/core";
-import { navigate } from "hookrouter";
+import { navigate } from "raviger";
 import moment from "moment";
 import React from "react";
 import { ConsultationModel } from "./models";

@@ -39,8 +39,8 @@ export const getAllFacilities = (params: object) => {
   return fireRequest("getAllFacilitiesList", [], params);
 };
 
-export const getFacility = (id: number) => {
-  return fireRequest("getFacility", [id], {});
+export const getFacility = (id: number, key?: string) => {
+  return fireRequest("getFacility", [id], {}, null, key);
 };
 
 // Download Actions

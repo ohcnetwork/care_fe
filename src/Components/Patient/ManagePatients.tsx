@@ -5,7 +5,7 @@ import Grid from "@material-ui/core/Grid";
 import { makeStyles, Theme, useTheme } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
-import { navigate, useQueryParams } from "hookrouter";
+import { navigate, useQueryParams } from 'raviger';
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
 import moment from 'moment';
 import React, { useEffect, useState } from "react";
@@ -121,19 +121,12 @@ export const PatientManager = (props: any) => {
   }
 
   useEffect(() => {
-    setQueryParams({
-      page: 1,
-      name: '',
-      disease_status: '',
-      phone_number: '+91'
-    });
-  }, [setQueryParams])
-
-  useEffect(() => {
     setIsLoading(true);
     const params = {
-      ...qParams,
-      phone_number: parsePhoneNumberFromString(qParams.phone_number)?.format('E.164'),
+      page: qParams.page || 1,
+      name: qParams.name || undefined,
+      disease_status: qParams.disease_status || undefined,
+      phone_number: qParams.phone_number ? parsePhoneNumberFromString(qParams.phone_number)?.format('E.164') : undefined,
       facility: facilityId,
       offset: (qParams.page ? qParams.page - 1 : 0) * RESULT_LIMIT
     };
@@ -148,7 +141,7 @@ export const PatientManager = (props: any) => {
       }).catch(() => {
         setIsLoading(false);
       })
-  }, [qParams, dispatch, facilityId]);
+  }, [dispatch, facilityId, qParams.disease_status, qParams.name, qParams.page, qParams.phone_number]);
 
   const updateQuery = (params: any) => {
     const nParams = Object.assign({}, qParams, params);

@@ -1,6 +1,6 @@
 import { Button, CircularProgress, Grid, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { navigate } from "hookrouter";
+import { navigate } from "raviger";
 import moment from "moment";
 import React, { useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";

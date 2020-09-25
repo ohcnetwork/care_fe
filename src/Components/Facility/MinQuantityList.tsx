@@ -7,7 +7,7 @@ const Loading = loadable( () => import("../Common/Loading"));
 const PageTitle = loadable( () => import("../Common/PageTitle"));
 import Pagination from "../Common/Pagination";
 import { Button, ButtonBase } from "@material-ui/core";
-import { navigate } from "hookrouter";
+import { navigate } from "raviger";
 
 export default function MinQuantityList(props: any) {
     const { facilityId }: any = props;

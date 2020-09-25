@@ -1,6 +1,6 @@
 import React from "react";
 import { CapacityModal } from "./models";
-import { navigate } from "hookrouter";
+import { navigate } from "raviger";
 import { BED_TYPES } from "../../Common/constants";
 
 interface BedTypeProps extends CapacityModal {

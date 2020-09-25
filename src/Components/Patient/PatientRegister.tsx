@@ -1,6 +1,6 @@
 import { Box, Button, Card, CardContent, CircularProgress, FormControlLabel, InputLabel, Radio, RadioGroup } from "@material-ui/core";
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
-import { navigate } from "hookrouter";
+import { navigate } from "raviger";
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
 import moment from "moment";
 import loadable from '@loadable/component';

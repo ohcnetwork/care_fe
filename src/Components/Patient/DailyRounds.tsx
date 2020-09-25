@@ -1,6 +1,6 @@
 import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
-import { navigate } from 'hookrouter';
+import { navigate } from 'raviger';
 import loadable from '@loadable/component';
 import React, { useCallback, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";

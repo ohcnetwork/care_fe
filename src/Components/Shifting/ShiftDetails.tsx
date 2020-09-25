@@ -3,7 +3,7 @@ import loadable from '@loadable/component';
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getShiftDetails, deleteShiftRecord } from "../../Redux/actions";
-import { navigate, A } from "hookrouter";
+import { navigate, Link } from "raviger";
 import Button from "@material-ui/core/Button";
 import QRCode from "qrcode.react";
 import { GENDER_TYPES, TEST_TYPE_CHOICES } from "../../Common/constants";
@@ -70,9 +70,9 @@ export default function ShiftDetails(props: any) {
         <div className="grid gap-2 grid-cols-1 md:grid-cols-2 mt-2">
           <div>
             <span className="font-semibold leading-relaxed">Name: </span>
-            <A href={`/patient/${patientData.id}`}>
+            <Link href={`/patient/${patientData.id}`}>
               {patientData.name}
-            </A>
+            </Link>
           </div>
           {patientData.is_medical_worker && (
             <div>
@@ -418,9 +418,9 @@ export default function ShiftDetails(props: any) {
                 <div className="flex items-baseline">
                   <div>
                     <span className="font-semibold leading-relaxed">Parient name: </span>
-                    <A href={`/patient/${data.patient_object?.id}`}>
+                    <Link href={`/patient/${data.patient_object?.id}`}>
                       {data.patient_object?.name}
-                    </A>
+                    </Link>
                   </div>
                 </div>
               </div>
