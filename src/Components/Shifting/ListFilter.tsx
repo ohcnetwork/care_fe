@@ -4,6 +4,7 @@ import { SelectField, DateInputField, TextInputField } from "../Common/HelperInp
 import moment from "moment";
 import { getFacility } from '../../Redux/actions';
 import { useDispatch } from 'react-redux';
+import { CircularProgress } from '@material-ui/core';
 
 function useMergeState(initialState: any) {
   const [state, setState] = useState(initialState);
@@ -13,6 +14,9 @@ function useMergeState(initialState: any) {
 
 export default function ListFilter(props: any) {
   let { filter, onChange, closeFilter } = props;
+  const [isOriginLoading, setOriginLoading] = useState(false);
+  const [isShiftingLoading, setShiftingLoading] = useState(false);
+  const [isAssignedLoading, setAssignedLoading] = useState(false);
   const [filterState, setFilterState] = useMergeState({
     orgin_facility: filter.orgin_facility || '',
     orgin_facility_ref: null,
@@ -32,23 +36,13 @@ export default function ListFilter(props: any) {
 
   useEffect(() => {
     async function fetchData() {
-      if (filter.assigned_facility) {
-        const res = await dispatch(getFacility(filter.assigned_facility, 'assigned_facility'))
-        if (res && res.data) {
-          setFilterState({ assigned_facility_ref: res.data });
-        }
-      }
-    }
-    fetchData();
-  }, [dispatch]);
-
-  useEffect(() => {
-    async function fetchData() {
       if (filter.orgin_facility) {
+        setOriginLoading(true);
         const res = await dispatch(getFacility(filter.orgin_facility, 'orgin_facility'))
         if (res && res.data) {
           setFilterState({ orgin_facility_ref: res.data });
         }
+        setOriginLoading(false);
       }
     }
     fetchData();
@@ -57,10 +51,26 @@ export default function ListFilter(props: any) {
   useEffect(() => {
     async function fetchData() {
       if (filter.shifting_approving_facility) {
+        setShiftingLoading(true);
         const res = await dispatch(getFacility(filter.shifting_approving_facility, 'shifting_approving_facility'))
         if (res && res.data) {
           setFilterState({ shifting_approving_facility_ref: res.data });
         }
+        setShiftingLoading(false);
+      }
+    }
+    fetchData();
+  }, [dispatch]);
+
+  useEffect(() => {
+    async function fetchData() {
+      if (filter.assigned_facility) {
+        setAssignedLoading(true);
+        const res = await dispatch(getFacility(filter.assigned_facility, 'assigned_facility'))
+        if (res && res.data) {
+          setFilterState({ assigned_facility_ref: res.data });
+        }
+        setAssignedLoading(false);
       }
     }
     fetchData();
@@ -128,39 +138,51 @@ export default function ListFilter(props: any) {
         <div className="w-64 flex-none">
           <span className="text-sm font-semibold">Origin facility</span>
           <div className="">
-            <FacilitySelect
-              multiple={false}
-              name="orgin_facility"
-              selected={filterState.orgin_facility_ref}
-              setSelected={(obj) => setFacility(obj, 'orgin_facility')}
-              className="shifting-page-filter-dropdown"
-              errors={''} />
+            {isOriginLoading ? (
+              <CircularProgress size={20} />
+            ) : (
+                <FacilitySelect
+                  multiple={false}
+                  name="orgin_facility"
+                  selected={filterState.orgin_facility_ref}
+                  setSelected={(obj) => setFacility(obj, 'orgin_facility')}
+                  className="shifting-page-filter-dropdown"
+                  errors={''} />
+              )}
           </div>
         </div>
 
         <div className="w-64 flex-none">
           <span className="text-sm font-semibold">Shifting approving facility</span>
           <div className="">
-            <FacilitySelect
-              multiple={false}
-              name="shifting_approving_facility"
-              selected={filterState.shifting_approving_facility_ref}
-              setSelected={(obj) => setFacility(obj, 'shifting_approving_facility')}
-              className="shifting-page-filter-dropdown"
-              errors={''} />
+            {isShiftingLoading ? (
+              <CircularProgress size={20} />
+            ) : (
+                <FacilitySelect
+                  multiple={false}
+                  name="shifting_approving_facility"
+                  selected={filterState.shifting_approving_facility_ref}
+                  setSelected={(obj) => setFacility(obj, 'shifting_approving_facility')}
+                  className="shifting-page-filter-dropdown"
+                  errors={''} />
+              )}
           </div>
         </div>
 
         <div className="w-64 flex-none">
           <span className="text-sm font-semibold">Assigned facility</span>
           <div className="">
-            <FacilitySelect
-              multiple={false}
-              name="assigned_facility"
-              selected={filterState.assigned_facility_ref}
-              setSelected={(obj) => setFacility(obj, 'assigned_facility')}
-              className="shifting-page-filter-dropdown"
-              errors={''} />
+            {isAssignedLoading ? (
+              <CircularProgress size={20} />
+            ) : (
+                <FacilitySelect
+                  multiple={false}
+                  name="assigned_facility"
+                  selected={filterState.assigned_facility_ref}
+                  setSelected={(obj) => setFacility(obj, 'assigned_facility')}
+                  className="shifting-page-filter-dropdown"
+                  errors={''} />
+              )}
           </div>
         </div>
 
