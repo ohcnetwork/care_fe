@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useQueryParams } from 'raviger';
 import ListFilter from "./ListFilter";
 import ShiftingBoard from "./ShiftingBoard";
 import { SHIFTING_CHOICES } from "../../Common/constants";
@@ -35,22 +36,23 @@ const initialFilterData = {
   offset: 0
 }
 
-const formatFilter = (filter: any, csv: boolean = false) => {
+const formatFilter = (params: any) => {
+  const filter = { ...initialFilterData, ...params };
   return {
     status: filter.status === 'Show All' ? null : filter.status,
     facility: '',
-    orgin_facility: filter.orgin_facility,
-    shifting_approving_facility: filter.shifting_approving_facility,
-    assigned_facility: filter.assigned_facility,
+    orgin_facility: filter.orgin_facility || undefined,
+    shifting_approving_facility: filter.shifting_approving_facility || undefined,
+    assigned_facility: filter.assigned_facility || undefined,
     emergency: (filter.emergency && filter.emergency) === '--' ? '' : (filter.emergency === 'yes' ? 'true' : 'false'),
     is_up_shift: (filter.is_up_shift && filter.is_up_shift) === '--' ? '' : (filter.is_up_shift === 'yes' ? 'true' : 'false'),
     limit: limit,
     offset: filter.offset,
     patient_name: filter.patient_name || undefined,
-    created_date_before: (filter.created_date_before && moment(filter.created_date_before).format('YYYY-MM-DD')) || undefined,
-    created_date_after: (filter.created_date_after && moment(filter.created_date_after).format('YYYY-MM-DD')) || undefined,
-    modified_date_before: (filter.modified_date_before && moment(filter.modified_date_before).format('YYYY-MM-DD')) || undefined,
-    modified_date_after: (filter.modified_date_after && moment(filter.modified_date_after).format('YYYY-MM-DD')) || undefined,
+    created_date_before: filter.created_date_before || undefined,
+    created_date_after: filter.created_date_after || undefined,
+    modified_date_before: filter.modified_date_before || undefined,
+    modified_date_after: filter.modified_date_after || undefined,
     patient_phone_number: filter.patient_phone_number || undefined
   };
 }
@@ -63,20 +65,27 @@ const ACTIVE = shiftStatusOptions.filter(option => !COMPLETED.includes(option))
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
 export default function ListView() {
-
+  const [qParams, setQueryParams] = useQueryParams();
   const dispatch: any = useDispatch();
-  const [filter, setFilter] = useState(initialFilterData);
   const [boardFilter, setBoardFilter] = useState(ACTIVE);
   const [downloadFile, setDownloadFile] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
-  const filterOnChange = (filterData: any) => {
-    setFilter(filterData);
+  const updateQuery = (filter: any) => {
+    // prevent empty filters from cluttering the url
+    const nParams = Object.keys(filter).reduce((a, k) => filter[k] && filter[k] !== '--' ? Object.assign(a, { [k]: filter[k] }) : a, {});
+    setQueryParams(nParams, true);
+  }
+
+  const searchbyName = (patient_name: string) => {
+    const filter = { ...qParams, patient_name };
+    updateQuery(filter);
   };
 
-  const applyFilter = (filterData: any) => {
-    setFilter(filterData);
+  const applyFilter = (data: any) => {
+    const filter = { ...qParams, ...data };
+    updateQuery(filter);
     setShowFilters(false);
   };
 
@@ -88,10 +97,10 @@ export default function ListView() {
     )
   };
 
-  const appliedFilters = formatFilter(filter);
+  const appliedFilters = formatFilter(qParams);
 
   const triggerDownload = async () => {
-    const res = await dispatch(downloadShiftRequests({ ...formatFilter(filter), csv: 1 }));
+    const res = await dispatch(downloadShiftRequests({ ...formatFilter(qParams), csv: 1 }));
     setDownloadFile(res.data);
     document.getElementById(`shiftRequests-ALL`)?.click();
   }
@@ -105,7 +114,8 @@ export default function ListView() {
         </div>
         <div className="md:px-4">
           <InputSearchBox
-            search={query => filterOnChange({ ...filter, patient_name: query })}
+            value={qParams.patient_name}
+            search={searchbyName}
             placeholder='Patient Name'
             errors=''
           />
@@ -143,8 +153,8 @@ export default function ListView() {
         </div>
       </div>
       <div className="flex space-x-2 mt-2">
-        {badge("Emergency", appliedFilters.emergency)}
-        {badge("Up Shift", appliedFilters.is_up_shift)}
+        {badge("Emergency", appliedFilters.emergency === 'true' ? 'yes' : appliedFilters.emergency === 'false' ? 'no' : undefined)}
+        {badge("Up Shift", appliedFilters.is_up_shift === 'true' ? 'yes' : appliedFilters.is_up_shift === 'false' ? 'no' : undefined)}
         {badge("Phone Number", appliedFilters.patient_phone_number)}
         {badge("Patient Name", appliedFilters.patient_name)}
         {badge("Modified After", appliedFilters.modified_date_after)}
@@ -157,7 +167,7 @@ export default function ListView() {
       </div>
       <div className="flex mt-4 pb-2 flex-1 items-start overflow-x-scroll">
         {isLoading ? <Loading /> : boardFilter.map(board =>
-          <ShiftingBoard filterProp={filter} board={board} formatFilter={formatFilter} />
+          <ShiftingBoard filterProp={qParams} board={board} formatFilter={formatFilter} />
         )}
       </div>
       <CSVLink
@@ -170,7 +180,7 @@ export default function ListView() {
       <SlideOver show={showFilters} setShow={setShowFilters}>
         <div className="bg-white min-h-screen p-4">
           <ListFilter
-            filter={filter}
+            filter={qParams}
             onChange={applyFilter}
             closeFilter={() => setShowFilters(false)} />
         </div>

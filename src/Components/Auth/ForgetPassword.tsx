@@ -1,5 +1,5 @@
 import { Button,  CardActions, CardContent } from '@material-ui/core';
-import { A } from 'hookrouter';
+import { Link } from 'raviger';
 import loadable from '@loadable/component';
 import React, {  useState } from 'react';
 import { useDispatch } from 'react-redux';
@@ -113,7 +113,7 @@ export const ForgotPassword = () => {
                                 </Button>
                     </CardActions>
                     <CardContent className="alignCenter">
-                        Already a member? <A href="/login">Login</A>
+                        Already a member? <Link href="/login">Login</Link>
                     </CardContent>
                 </form>
             </div>

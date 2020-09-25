@@ -1,7 +1,7 @@
 import { Button, Card, CardContent, CircularProgress, InputLabel } from "@material-ui/core";
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import loadable from '@loadable/component';
-import { navigate } from "hookrouter";
+import { navigate } from "raviger";
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
 import moment from "moment";
 import React, { useCallback, useReducer, useState } from "react";

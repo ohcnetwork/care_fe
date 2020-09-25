@@ -11,7 +11,7 @@ import {
   RadioGroup
 } from "@material-ui/core";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
-import { navigate } from "hookrouter";
+import { navigate } from "raviger";
 import moment from "moment";
 import React, { useCallback, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";

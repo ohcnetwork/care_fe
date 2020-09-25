@@ -1,5 +1,5 @@
 import { Button, Card, CardContent, Grid, Typography } from "@material-ui/core";
-import { navigate } from "hookrouter";
+import { navigate } from "raviger";
 import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import loadable from "@loadable/component";

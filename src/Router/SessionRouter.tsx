@@ -1,9 +1,9 @@
 import React from "react";
 import loadable from '@loadable/component';
 import {ForgotPassword, Login, Register, ResetPassword} from "../Components/Auth";
-import { useRoutes } from "hookrouter";
-const TopBar = loadable( () => import("../Components/Common/TopBar"));
+import { useRoutes } from "raviger";
 import { PublicDashboard } from "../Components/Dashboard/PublicDashboard";
+const TopBar = loadable( () => import("../Components/Common/TopBar"));
 
 
 const routes = {

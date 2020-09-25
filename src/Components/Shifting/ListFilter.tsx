@@ -1,11 +1,80 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { SelectField, DateInputField, TextInputField } from "../Common/HelperInputFields";
 import moment from "moment";
+import { getFacility } from '../../Redux/actions';
+import { useDispatch } from 'react-redux';
+import { CircularProgress } from '@material-ui/core';
+
+function useMergeState(initialState: any) {
+  const [state, setState] = useState(initialState);
+  const setMergedState = (newState: any) => setState((prevState: any) => Object.assign({}, prevState, newState));
+  return [state, setMergedState];
+}
 
 export default function ListFilter(props: any) {
   let { filter, onChange, closeFilter } = props;
-  const [filterState, setFilterState] = useState(filter);
+  const [isOriginLoading, setOriginLoading] = useState(false);
+  const [isShiftingLoading, setShiftingLoading] = useState(false);
+  const [isAssignedLoading, setAssignedLoading] = useState(false);
+  const [filterState, setFilterState] = useMergeState({
+    orgin_facility: filter.orgin_facility || '',
+    orgin_facility_ref: null,
+    shifting_approving_facility: filter.shifting_approving_facility || '',
+    shifting_approving_facility_ref: null,
+    assigned_facility: filter.assigned_facility || '',
+    assigned_facility_ref: null,
+    emergency: filter.emergency || '--',
+    is_up_shift: filter.is_up_shift || '--',
+    created_date_before: filter.created_date_before || null,
+    created_date_after: filter.created_date_after || null,
+    modified_date_before: filter.modified_date_before || null,
+    modified_date_after: filter.modified_date_after || null,
+    patient_phone_number: filter.patient_phone_number || '',
+  });
+  const dispatch: any = useDispatch();
+
+  useEffect(() => {
+    async function fetchData() {
+      if (filter.orgin_facility) {
+        setOriginLoading(true);
+        const res = await dispatch(getFacility(filter.orgin_facility, 'orgin_facility'))
+        if (res && res.data) {
+          setFilterState({ orgin_facility_ref: res.data });
+        }
+        setOriginLoading(false);
+      }
+    }
+    fetchData();
+  }, [dispatch]);
+
+  useEffect(() => {
+    async function fetchData() {
+      if (filter.shifting_approving_facility) {
+        setShiftingLoading(true);
+        const res = await dispatch(getFacility(filter.shifting_approving_facility, 'shifting_approving_facility'))
+        if (res && res.data) {
+          setFilterState({ shifting_approving_facility_ref: res.data });
+        }
+        setShiftingLoading(false);
+      }
+    }
+    fetchData();
+  }, [dispatch]);
+
+  useEffect(() => {
+    async function fetchData() {
+      if (filter.assigned_facility) {
+        setAssignedLoading(true);
+        const res = await dispatch(getFacility(filter.assigned_facility, 'assigned_facility'))
+        if (res && res.data) {
+          setFilterState({ assigned_facility_ref: res.data });
+        }
+        setAssignedLoading(false);
+      }
+    }
+    fetchData();
+  }, [dispatch]);
 
   const setFacility = (selected: any, name: string) => {
     const filterData: any = { ...filterState };
@@ -26,18 +95,28 @@ export default function ListFilter(props: any) {
 
   const applyFilter = () => {
     const {
+      orgin_facility,
+      shifting_approving_facility,
+      assigned_facility,
+      emergency,
+      is_up_shift,
+      patient_phone_number,
       created_date_before,
       created_date_after,
       modified_date_before,
       modified_date_after,
-      ...others
     } = filterState;
     const data = {
-      ...others,
-      created_date_before: created_date_before && moment(created_date_before).isValid() ? created_date_before : null,
-      created_date_after: created_date_after && moment(created_date_after).isValid() ? created_date_after : null,
-      modified_date_before: modified_date_before && moment(modified_date_before).isValid() ? modified_date_before : null,
-      modified_date_after: modified_date_after && moment(modified_date_after).isValid() ? modified_date_after : null,
+      orgin_facility: orgin_facility || '',
+      shifting_approving_facility: shifting_approving_facility || '',
+      assigned_facility: assigned_facility || '',
+      emergency: emergency || '',
+      is_up_shift: is_up_shift || '',
+      patient_phone_number: patient_phone_number || '',
+      created_date_before: created_date_before && moment(created_date_before).isValid() ? moment(filter.created_date_before).format('YYYY-MM-DD') : '',
+      created_date_after: created_date_after && moment(created_date_after).isValid() ? moment(filter.created_date_after).format('YYYY-MM-DD') : '',
+      modified_date_before: modified_date_before && moment(modified_date_before).isValid() ? moment(filter.modified_date_before).format('YYYY-MM-DD') : '',
+      modified_date_after: modified_date_after && moment(modified_date_after).isValid() ? moment(filter.modified_date_after).format('YYYY-MM-DD') : '',
     }
     onChange(data);
   };
@@ -59,39 +138,51 @@ export default function ListFilter(props: any) {
         <div className="w-64 flex-none">
           <span className="text-sm font-semibold">Origin facility</span>
           <div className="">
-            <FacilitySelect
-              multiple={false}
-              name="orgin_facility"
-              selected={filterState.orgin_facility_ref}
-              setSelected={(obj) => setFacility(obj, 'orgin_facility')}
-              className="shifting-page-filter-dropdown"
-              errors={''} />
+            {isOriginLoading ? (
+              <CircularProgress size={20} />
+            ) : (
+                <FacilitySelect
+                  multiple={false}
+                  name="orgin_facility"
+                  selected={filterState.orgin_facility_ref}
+                  setSelected={(obj) => setFacility(obj, 'orgin_facility')}
+                  className="shifting-page-filter-dropdown"
+                  errors={''} />
+              )}
           </div>
         </div>
 
         <div className="w-64 flex-none">
           <span className="text-sm font-semibold">Shifting approving facility</span>
           <div className="">
-            <FacilitySelect
-              multiple={false}
-              name="shifting_approving_facility"
-              selected={filterState.shifting_approving_facility_ref}
-              setSelected={(obj) => setFacility(obj, 'shifting_approving_facility')}
-              className="shifting-page-filter-dropdown"
-              errors={''} />
+            {isShiftingLoading ? (
+              <CircularProgress size={20} />
+            ) : (
+                <FacilitySelect
+                  multiple={false}
+                  name="shifting_approving_facility"
+                  selected={filterState.shifting_approving_facility_ref}
+                  setSelected={(obj) => setFacility(obj, 'shifting_approving_facility')}
+                  className="shifting-page-filter-dropdown"
+                  errors={''} />
+              )}
           </div>
         </div>
 
         <div className="w-64 flex-none">
           <span className="text-sm font-semibold">Assigned facility</span>
           <div className="">
-            <FacilitySelect
-              multiple={false}
-              name="assigned_facility"
-              selected={filterState.assigned_facility_ref}
-              setSelected={(obj) => setFacility(obj, 'assigned_facility')}
-              className="shifting-page-filter-dropdown"
-              errors={''} />
+            {isAssignedLoading ? (
+              <CircularProgress size={20} />
+            ) : (
+                <FacilitySelect
+                  multiple={false}
+                  name="assigned_facility"
+                  selected={filterState.assigned_facility_ref}
+                  setSelected={(obj) => setFacility(obj, 'assigned_facility')}
+                  className="shifting-page-filter-dropdown"
+                  errors={''} />
+              )}
           </div>
         </div>
 
