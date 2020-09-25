@@ -1,10 +1,10 @@
-import { Button, CircularProgress, Grid, Typography } from "@material-ui/core";
+import { Button, CircularProgress, Grid, Typography, Select, MenuItem, InputLabel } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { navigate } from "hookrouter";
 import moment from "moment";
-import React, { useCallback, useState } from "react";
+import React, { Fragment, useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { GENDER_TYPES } from "../../Common/constants";
+import { GENDER_TYPES, DISEASE_STATUS } from "../../Common/constants";
 import loadable from "@loadable/component";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
@@ -28,7 +28,7 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import { TextInputField } from "../Common/HelperInputFields";
+import { TextInputField, DateInputField } from "../Common/HelperInputFields";
 import { validateEmailAddress } from "../../Common/validation";
 import Radio from "@material-ui/core/Radio";
 import RadioGroup from "@material-ui/core/RadioGroup";
@@ -72,7 +72,10 @@ const useStyles = makeStyles((theme) => ({
 
 type donatePlasmaOptionType = null | "yes" | "no" | "not-fit";
 interface preDischargeFormInterface {
-  donatePlasma: donatePlasmaOptionType;
+  donatePlasma: donatePlasmaOptionType,
+  disease_status?: string,
+  srf_id?: string,
+  date_of_test?: string
 }
 
 export const PatientHome = (props: any) => {
@@ -131,7 +134,7 @@ export const PatientHome = (props: any) => {
   };
 
   const initPreDischargeForm: preDischargeFormInterface = {
-    donatePlasma: null,
+    donatePlasma: null
   };
 
   const [preDischargeForm, setPreDischargeForm] = useState(
@@ -139,9 +142,15 @@ export const PatientHome = (props: any) => {
   );
 
   const handlePreDischargeFormChange = (key: string, event: any) => {
-    if (key === "donatePlasma") {
+    if(key === 'date_of_test') {
       setPreDischargeForm({
-        donatePlasma: event.target.value as donatePlasmaOptionType,
+        ...preDischargeForm,
+        date_of_test: event,
+      });
+    } else {
+      setPreDischargeForm({
+        ...preDischargeForm,
+        [key]: event.target.value,
       });
     }
   };
@@ -223,9 +232,9 @@ export const PatientHome = (props: any) => {
   const formatPreDischargeFormData = (
     preDischargeForm: preDischargeFormInterface
   ) => {
-    let data: any = {};
-
+    let data: any = { ...preDischargeForm };
     let donatePlasma = preDischargeForm.donatePlasma;
+
     if (donatePlasma) {
       if (donatePlasma === "yes") {
         data["will_donate_blood"] = true;
@@ -237,7 +246,8 @@ export const PatientHome = (props: any) => {
         data["fit_for_blood_donation"] = false;
       }
     }
-
+    
+    delete data.donatePlasma;
     return data;
   };
 
@@ -828,26 +838,23 @@ export const PatientHome = (props: any) => {
                 size="small"
                 onClick={handleDischageClickOpen}
               >
-                Discharge
+                Discharge from CARE
               </Button>
               <Dialog
                 maxWidth={"md"}
                 open={openDischargeDialog}
                 onClose={handleDischargeClose}
               >
-                <DialogTitle className="flex justify-center">
+                <DialogTitle className="flex justify-center bg-green-100">
                   Before we discharge {patientData.name}
                 </DialogTitle>
                 <DialogContent className="px-20">
-                  <FormControl component="fieldset">
-                    <FormLabel
-                      component="legend"
-                      className="flex justify-center w-full"
-                    >
+                  <FormControl variant='outlined'>
+                    <label className="flex justify-center w-full text-gray-900 mt-2">
                       Is the patient willing to donate blood for Plasma?
-                    </FormLabel>
+                    </label>
                     <RadioGroup
-                      className="flex-row gap-15 mt-4"
+                      className="flex-row justify-center gap-15 mt-2 ml-10"
                       name="blood-donate"
                       value={preDischargeForm.donatePlasma}
                       onChange={(event) =>
@@ -873,6 +880,52 @@ export const PatientHome = (props: any) => {
                         className="w-48 mr-0"
                       />
                     </RadioGroup>
+
+                    <div className="flex flex-col items-center">
+                      {patientData.disease_status !== 'NEGATIVE' && (
+                        <Fragment>
+                          <label id="covid-status-pre-form" className="flex justify-center w-full text-gray-900 mb-2 mt-5">
+                            Has the patient's covid status changed? If so, to what?
+                          </label>
+                          <Select
+                            className="h-10"
+                            labelId="covid-status-pre-form"
+                            value={preDischargeForm.disease_status || patientData.disease_status}
+                            onChange={(event) => handlePreDischargeFormChange("disease_status", event)}>
+                              {DISEASE_STATUS.map(value => (<MenuItem value={value}>{value}</MenuItem>))}
+                          </Select>
+                        </Fragment>
+                        )}
+
+                        <label className="flex justify-center w-full mt-5 text-gray-900">
+                          Would you like to update the patient's SRF ID and Test date?
+                        </label>
+
+                        <div className="flex">
+                          <TextInputField
+                            className="flex flex-1 mr-10"
+                            name="srf_id"
+                            variant="outlined"
+                            margin="dense"
+                            type="text"
+                            placeholder="SRF ID"
+                            value={preDischargeForm.srf_id || patientData.srf_id}
+                            onChange={(event) => handlePreDischargeFormChange("srf_id", event)}
+                            errors=''/>
+
+                          <DateInputField
+                            className="flex flex-1 ml-5"
+                            fullWidth={true}
+                            label="Date of test"
+                            value={preDischargeForm.date_of_test || patientData.date_of_test as string}
+                            onChange={(event) => handlePreDischargeFormChange("date_of_test", event)}
+                            inputVariant="outlined"
+                            margin="dense"
+                            disableFuture={true}
+                            errors={''}/>
+                        </div>
+                      </div>
+
                   </FormControl>
                 </DialogContent>
                 <DialogActions className="flex justify-between mt-5 px-5 border-t">

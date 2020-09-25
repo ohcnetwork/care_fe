@@ -669,7 +669,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
                   <DateInputField
                     fullWidth={true}
-                    label="Date of Sampel Given"
+                    label="Date of Sample given"
                     value={state.form.date_of_test}
                     onChange={date => handleDateChange(date, "date_of_test")}
                     errors={state.errors.date_of_test}
