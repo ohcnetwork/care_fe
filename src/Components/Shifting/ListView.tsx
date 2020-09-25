@@ -41,18 +41,18 @@ const formatFilter = (params: any) => {
   return {
     status: filter.status === 'Show All' ? null : filter.status,
     facility: '',
-    orgin_facility: filter.orgin_facility,
-    shifting_approving_facility: filter.shifting_approving_facility,
-    assigned_facility: filter.assigned_facility,
+    orgin_facility: filter.orgin_facility || undefined,
+    shifting_approving_facility: filter.shifting_approving_facility || undefined,
+    assigned_facility: filter.assigned_facility || undefined,
     emergency: (filter.emergency && filter.emergency) === '--' ? '' : (filter.emergency === 'yes' ? 'true' : 'false'),
     is_up_shift: (filter.is_up_shift && filter.is_up_shift) === '--' ? '' : (filter.is_up_shift === 'yes' ? 'true' : 'false'),
     limit: limit,
     offset: filter.offset,
     patient_name: filter.patient_name || undefined,
-    created_date_before: (filter.created_date_before && moment(filter.created_date_before).format('YYYY-MM-DD')) || undefined,
-    created_date_after: (filter.created_date_after && moment(filter.created_date_after).format('YYYY-MM-DD')) || undefined,
-    modified_date_before: (filter.modified_date_before && moment(filter.modified_date_before).format('YYYY-MM-DD')) || undefined,
-    modified_date_after: (filter.modified_date_after && moment(filter.modified_date_after).format('YYYY-MM-DD')) || undefined,
+    created_date_before: filter.created_date_before || undefined,
+    created_date_after: filter.created_date_after || undefined,
+    modified_date_before: filter.modified_date_before || undefined,
+    modified_date_after: filter.modified_date_after || undefined,
     patient_phone_number: filter.patient_phone_number || undefined
   };
 }

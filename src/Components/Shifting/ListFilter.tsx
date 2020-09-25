@@ -103,10 +103,10 @@ export default function ListFilter(props: any) {
       emergency: emergency || '',
       is_up_shift: is_up_shift || '',
       patient_phone_number: patient_phone_number || '',
-      created_date_before: created_date_before && moment(created_date_before).isValid() ? created_date_before : '',
-      created_date_after: created_date_after && moment(created_date_after).isValid() ? created_date_after : '',
-      modified_date_before: modified_date_before && moment(modified_date_before).isValid() ? modified_date_before : '',
-      modified_date_after: modified_date_after && moment(modified_date_after).isValid() ? modified_date_after : '',
+      created_date_before: created_date_before && moment(created_date_before).isValid() ? moment(filter.created_date_before).format('YYYY-MM-DD') : '',
+      created_date_after: created_date_after && moment(created_date_after).isValid() ? moment(filter.created_date_after).format('YYYY-MM-DD') : '',
+      modified_date_before: modified_date_before && moment(modified_date_before).isValid() ? moment(filter.modified_date_before).format('YYYY-MM-DD') : '',
+      modified_date_after: modified_date_after && moment(modified_date_after).isValid() ? moment(filter.modified_date_after).format('YYYY-MM-DD') : '',
     }
     onChange(data);
   };
