@@ -7,9 +7,7 @@ import { useDispatch } from 'react-redux';
 
 function useMergeState(initialState: any) {
   const [state, setState] = useState(initialState);
-  const setMergedState = (newState: any) => 
-    setState((prevState: any) => Object.assign({}, prevState, newState)
-  );
+  const setMergedState = (newState: any) => setState((prevState: any) => Object.assign({}, prevState, newState));
   return [state, setMergedState];
 }
 

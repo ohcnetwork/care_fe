@@ -36,7 +36,8 @@ const initialFilterData = {
   offset: 0
 }
 
-const formatFilter = (filter: any, csv: boolean = false) => {
+const formatFilter = (params: any) => {
+  const filter = { ...initialFilterData, ...params };
   return {
     status: filter.status === 'Show All' ? null : filter.status,
     facility: '',
@@ -71,18 +72,20 @@ export default function ListView() {
   const [isLoading, setIsLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
-  const updateQuery = (params: any) => {
-    const nParams = Object.assign(initialFilterData, qParams, params);
+  const updateQuery = (filter: any) => {
+    // prevent empty filters from cluttering the url
+    const nParams = Object.keys(filter).reduce((a, k) => filter[k] && filter[k] !== '--' ? Object.assign(a, { [k]: filter[k] }) : a, {});
     setQueryParams(nParams, true);
   }
 
-
-  const filterOnChange = (filterData: any) => {
-    updateQuery(filterData);
+  const searchbyName = (patient_name: string) => {
+    const filter = { ...qParams, patient_name };
+    updateQuery(filter);
   };
 
-  const applyFilter = (filterData: any) => {
-    updateQuery(filterData);
+  const applyFilter = (data: any) => {
+    const filter = { ...qParams, ...data };
+    updateQuery(filter);
     setShowFilters(false);
   };
 
@@ -111,7 +114,8 @@ export default function ListView() {
         </div>
         <div className="md:px-4">
           <InputSearchBox
-            search={query => filterOnChange({ ...qParams, patient_name: query })}
+            value={qParams.patient_name}
+            search={searchbyName}
             placeholder='Patient Name'
             errors=''
           />
@@ -149,8 +153,8 @@ export default function ListView() {
         </div>
       </div>
       <div className="flex space-x-2 mt-2">
-        {badge("Emergency", appliedFilters.emergency)}
-        {badge("Up Shift", appliedFilters.is_up_shift)}
+        {badge("Emergency", appliedFilters.emergency === 'true' ? 'yes' : appliedFilters.emergency === 'false' ? 'no' : undefined)}
+        {badge("Up Shift", appliedFilters.is_up_shift === 'true' ? 'yes' : appliedFilters.is_up_shift === 'false' ? 'no' : undefined)}
         {badge("Phone Number", appliedFilters.patient_phone_number)}
         {badge("Patient Name", appliedFilters.patient_name)}
         {badge("Modified After", appliedFilters.modified_date_after)}
