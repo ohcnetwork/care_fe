@@ -56,7 +56,7 @@ export default function ListView({ board, filterProp, formatFilter }: boardProps
     setDownloadFile(res.data);
     document.getElementById(`shiftRequests-${board}`)?.click();
   }
-  
+
   useEffect(() => {
     fetchData();
   },
@@ -162,14 +162,9 @@ export default function ListView({ board, filterProp, formatFilter }: boardProps
               </div>
 
               <div className="mt-2 flex">
-                <button onClick={_ => navigate(`/shifting/${shift.external_id}`)} className="btn btn-default bg-white mr-2" >
-                  <i className="fas fa-eye mr-2" /> View
+                <button onClick={_ => navigate(`/shifting/${shift.external_id}`)} className="btn w-full btn-default bg-white mr-2" >
+                  <i className="fas fa-eye mr-2" /> All Details
                 </button>
-                <a href={`/shifting/${shift.external_id}`} className="btn btn-default w-full bg-white mr-2" target="_blank" rel="noopener noreferrer">
-                  <i className="fas fa-external-link-alt mr-2" /> All Details
-                </a>
-
-
               </div>
               {filter === "TRANSFER IN PROGRESS" &&
                 <div className="mt-2">
