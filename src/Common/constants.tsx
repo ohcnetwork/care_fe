@@ -88,7 +88,7 @@ export const FACILITY_TYPES: Array<OptionsType> = [
 
 export const SHIFTING_CHOICES: Array<OptionsType> = [
   { id: 10, text: "PENDING" },
-  { id: 20, text: "APPROVED" },
+  { id: 20, text: "AWAITING DESTINATION APPROVAL" },
   { id: 30, text: "REJECTED" },
   { id: 40, text: "DESTINATION APPROVED" },
   { id: 50, text: "DESTINATION REJECTED" },
