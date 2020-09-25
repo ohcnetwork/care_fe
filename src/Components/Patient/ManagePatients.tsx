@@ -125,6 +125,7 @@ export const PatientManager = (props: any) => {
     const params = {
       page: qParams.page || 1,
       name: qParams.name || undefined,
+      is_active: qParams.is_active || 'True',
       disease_status: qParams.disease_status || undefined,
       phone_number: qParams.phone_number ? parsePhoneNumberFromString(qParams.phone_number)?.format('E.164') : undefined,
       facility: facilityId,
@@ -141,7 +142,7 @@ export const PatientManager = (props: any) => {
       }).catch(() => {
         setIsLoading(false);
       })
-  }, [dispatch, facilityId, qParams.disease_status, qParams.name, qParams.page, qParams.phone_number]);
+  }, [dispatch, facilityId, qParams.is_active, qParams.disease_status, qParams.name, qParams.page, qParams.phone_number]);
 
   const updateQuery = (params: any) => {
     const nParams = Object.assign({}, qParams, params);
