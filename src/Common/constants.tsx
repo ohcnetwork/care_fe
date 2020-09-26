@@ -31,8 +31,8 @@ export const TEST_TYPE_CHOICES: Array<OptionsType> = [
   { id: 10, text: "UNK" },
   { id: 20, text: "ANTIGEN" },
   { id: 30, text: "RTPCR" },
-  { id: 40, text: "CBNAT" },
-  { id: 50, text: "TRUNAT" },
+  { id: 40, text: "CBNAAT" },
+  { id: 50, text: "TRUENAT" },
 ];
 
 export const DISTRICT_CHOICES: Array<OptionsType> = [
@@ -250,7 +250,7 @@ export const DISEASE_STATUS = [
   "EXPIRED",
 ];
 
-export const TEST_TYPE = ["UNK", "ANTIGEN", "RTPCR", "CBNAT", "TRUNAT"];
+export const TEST_TYPE = ["UNK", "ANTIGEN", "RTPCR", "CBNAAT", "TRUENAT"];
 
 export const BLOOD_GROUPS = [
   "UNK",
