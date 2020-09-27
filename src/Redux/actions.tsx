@@ -273,3 +273,7 @@ export const externalResultList = (params: object, altKey: string) => {
 export const externalResult = (id: string) => {
   return fireRequest("externalResult", [id], {});
 };
+
+export const externalResultUploadCsv = (params: object) => {
+  return fireRequest("externalResultUploadCsv", [], { params });
+};

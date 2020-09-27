@@ -33,6 +33,7 @@ import ShiftDetails from "../Components/Shifting/ShiftDetails";
 import { ShiftDetailsUpdate } from "../Components/Shifting/ShiftDetailsUpdate";
 import ResultList from "../Components/ExternalResult/ResultList";
 import ResultItem from "../Components/ExternalResult/ResultItem";
+import ExternalResultUpload from "../Components/ExternalResult/ExternalResultUpload";
 
 const get = require('lodash.get');
 const img =
@@ -128,6 +129,7 @@ const routes = {
     <ShiftDetailsUpdate id={id} />
   ),
   "/external_results": () => <ResultList />,
+  "/external_results/upload": () => <ExternalResultUpload />,
   "/external_results/:id": ({ id }: any) => <ResultItem id={id} />,
 };
 

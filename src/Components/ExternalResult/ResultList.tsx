@@ -83,11 +83,11 @@ export default function ResultList() {
       const resultUrl = `/external_results/${result.id}`;
       return (
         <tr key={`usr_${result.id}`} onClick={() => navigate(resultUrl)} className="bg-white">
-          <td className="max-w-0 w-full px-6 py-4 whitespace-no-wrap text-sm leading-5 text-cool-gray-900">
+          <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-cool-gray-900">
             <div className="flex">
-              <a href="#" className="group inline-flex space-x-2 truncate text-sm leading-5">
+              <a href="#" className="group inline-flex space-x-2 text-sm leading-5">
 
-                <p className="text-cool-gray-500 truncate group-hover:text-cool-gray-900 transition ease-in-out duration-150">
+                <p className="text-cool-gray-500 group-hover:text-cool-gray-900 transition ease-in-out duration-150">
                   {result.name} - {result.age} {result.age_in}
                 </p>
               </a>
@@ -96,7 +96,7 @@ export default function ResultList() {
           <td className="px-6 py-4 text-right whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
             <span className="text-cool-gray-900 font-medium">{result.test_type}</span>
           </td>
-          <td className="hidden px-6 py-4 whitespace-no-wrap text-sm leading-5 text-cool-gray-500 md:block">
+          <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium leading-4 bg-blue-100 text-blue-800 capitalize">
               {result.result}
             </span>
@@ -181,9 +181,12 @@ export default function ResultList() {
             />
           </div>
         </div>
-        <div className="flex hidden flex-col justify-between">
+        <div className="flex flex-col justify-between">
           <div>
-            <div className="text-sm font-semibold">Filter by Status</div>
+            {/* <div className="text-sm font-semibold">Filter by Status</div> */}
+            <div className="btn btn-primary" onClick={_ => navigate('external_results/upload')}>
+              Upload List
+            </div>
             {/* <ResultFilter filter={handleFilter} value={qParams.disease_status} /> */}
           </div>
         </div>
@@ -198,7 +201,7 @@ export default function ResultList() {
               <th className="px-6 py-3 bg-cool-gray-50 text-right text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
                 Test Type
               </th>
-              <th className="hidden px-6 py-3 bg-cool-gray-50 text-left text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wider md:block">
+              <th className="px-6 py-3 bg-cool-gray-50 text-right text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wide">
                 Status
               </th>
               <th className="px-6 py-3 bg-cool-gray-50 text-right text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">

@@ -244,6 +244,10 @@ export default {
   externalResult: {
     path: "/api/v1/external_result/",
   },
+  externalResultUploadCsv: {
+    path: "/api/v1/external_result/upload_csv",
+    method: "POST",
+  },
 
   // States
   statesList: {
