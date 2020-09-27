@@ -11,6 +11,8 @@ export const USER_TYPES: Array<String> = [
   "Staff",
   "StaffReadOnly",
   "Doctor",
+  "WardAdmin",
+  "LocalBodyAdmin",
   "DistrictReadOnlyAdmin",
   "DistrictAdmin",
   "DistrictLabAdmin",
