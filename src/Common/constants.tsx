@@ -86,6 +86,7 @@ export const FACILITY_TYPES: Array<OptionsType> = [
   { id: 1100, text: "First Line Treatment Centre" },
   { id: 1200, text: "Second Line Treatment Center" },
   { id: 1300, text: "Shifting Centre" },
+  { id: 1400, text: "Covid Management Center" },
 ];
 
 export const SHIFTING_CHOICES: Array<OptionsType> = [
