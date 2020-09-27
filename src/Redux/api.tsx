@@ -237,6 +237,14 @@ export default {
     path: "/api/v1/patient/{id}/test_sample/{sampleId}/icmr_sample",
   },
 
+  // External Results
+  externalResultList: {
+    path: "/api/v1/external_result/",
+  },
+  externalResult: {
+    path: "/api/v1/external_result/",
+  },
+
   // States
   statesList: {
     path: "/api/v1/state/",

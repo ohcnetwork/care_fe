@@ -31,6 +31,8 @@ import UserProfile from "../Components/Users/UserProfile";
 import ListView from "../Components/Shifting/ListView";
 import ShiftDetails from "../Components/Shifting/ShiftDetails";
 import { ShiftDetailsUpdate } from "../Components/Shifting/ShiftDetailsUpdate";
+import ResultList from "../Components/ExternalResult/ResultList";
+import ResultItem from "../Components/ExternalResult/ResultItem";
 
 const get = require('lodash.get');
 const img =
@@ -125,6 +127,8 @@ const routes = {
   "/shifting/:id/update": ({ id }: any) => (
     <ShiftDetailsUpdate id={id} />
   ),
+  "/external_results": () => <ResultList />,
+  "/external_results/:id": ({ id }: any) => <ResultItem id={id} />,
 };
 
 
@@ -149,6 +153,11 @@ let menus = [
     title: "Shifting",
     link: '/shifting',
     icon: "fas fa-ambulance"
+  },
+  {
+    title: "External Results",
+    link: '/external_results',
+    icon: "fas fa-vials"
   },
   {
     title: "Users",
