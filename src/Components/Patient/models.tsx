@@ -37,7 +37,7 @@ export interface PatientModel {
   is_migrant_worker?: boolean;
   ward?: string;
   local_body_object?: { id: number; name: string };
-  ward_object?: { id: number, name: string, number: number }
+  ward_object?: { id: number; name: string; number: number };
   district_object?: { id: number; name: string };
   state_object?: { id: number; name: string };
   tele_consultation_history?: Array<any>;
@@ -51,6 +51,7 @@ export interface PatientModel {
   past_travel?: boolean;
   ongoing_medication?: string;
   countries_travelled?: Array<string> | string;
+  transit_details?: string;
   present_health?: string;
   has_SARI?: boolean;
   local_body?: number;
