@@ -121,6 +121,8 @@ const initForm: any = {
   past_travel: false,
   transit_details: "",
   countries_travelled: [],
+  number_of_primary_contacts: "",
+  number_of_secondary_contacts: "",
   is_antenatal: "false",
   date_of_test: false,
   srf_id: "",
@@ -277,6 +279,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             is_medical_worker: res.data.is_medical_worker
               ? String(res.data.is_medical_worker)
               : "false",
+            number_of_primary_contacts: res.data.number_of_primary_contacts
+              ? res.data.number_of_primary_contacts
+              : "",
+            number_of_secondary_contacts: res.data.number_of_secondary_contacts
+              ? res.data.number_of_secondary_contacts
+              : "",
             contact_with_confirmed_carrier: res.data
               .contact_with_confirmed_carrier
               ? String(res.data.contact_with_confirmed_carrier)
@@ -299,8 +307,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               ? Number(res.data.number_of_chronic_diseased_dependents)
               : "",
           };
-          console.log(formData.transit_details);
-
           res.data.medical_history.forEach((i: any) => {
             const medicalHistory = medicalHistoryTypes.find(
               (j: any) =>
@@ -526,7 +532,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         date_of_return: state.form.past_travel
           ? state.form.date_of_return
           : undefined,
+
         allergies: state.form.allergies,
+        number_of_primary_contacts: state.form.number_of_primary_contacts,
+        number_of_secondary_contacts: state.form.number_of_secondary_contacts,
         ongoing_medication: state.form.ongoing_medication,
         is_medical_worker: JSON.parse(state.form.is_medical_worker),
         blood_group: state.form.blood_group
@@ -1203,6 +1212,34 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     </div>
                   </>
                 )}
+                <div>
+                  <InputLabel id="number_of_primary_contacts-label">
+                    Number Of Primary Contacts
+                  </InputLabel>
+                  <TextInputField
+                    name="number_of_primary_contacts"
+                    variant="outlined"
+                    margin="dense"
+                    type="number"
+                    value={state.form.number_of_primary_contacts}
+                    onChange={handleChange}
+                    errors={state.errors.number_of_primary_contacts}
+                  />
+                </div>
+                <div>
+                  <InputLabel id="number_of_secondary_contacts-label">
+                    Number Of Secondary Contacts
+                  </InputLabel>
+                  <TextInputField
+                    name="number_of_secondary_contacts"
+                    variant="outlined"
+                    margin="dense"
+                    type="number"
+                    value={state.form.number_of_secondary_contacts}
+                    onChange={handleChange}
+                    errors={state.errors.number_of_secondary_contacts}
+                  />
+                </div>
               </div>
 
               <div className="grid gap-4 grid-cols-1 md:grid-cols-2 mt-4">

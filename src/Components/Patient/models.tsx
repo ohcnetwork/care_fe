@@ -52,6 +52,8 @@ export interface PatientModel {
   ongoing_medication?: string;
   countries_travelled?: Array<string> | string;
   transit_details?: string;
+  number_of_primary_contacts?: number;
+  number_of_secondary_contacts?: number;
   present_health?: string;
   has_SARI?: boolean;
   local_body?: number;
