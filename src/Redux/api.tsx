@@ -242,10 +242,10 @@ export default {
     path: "/api/v1/external_result/",
   },
   externalResult: {
-    path: "/api/v1/external_result/",
+    path: "/api/v1/external_result",
   },
   externalResultUploadCsv: {
-    path: "/api/v1/external_result/upload_csv",
+    path: "/api/v1/external_result/upload_csv/",
     method: "POST",
   },
 
