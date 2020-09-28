@@ -7,6 +7,12 @@
   "Scope": "/",
   "start_url": ".",
   "icons": [
+  {
+        "src": "https://cdn.coronasafe.network/care-manifest/images/icons/maskable_icon+(1).png",
+        "sizes": "196x196",
+        "type": "image/png",
+        "purpose": "any maskable"
+      },
     {
       "src": "https://cdn.coronasafe.network/care-manifest/images/icons/icon-72x72.png",
       "sizes": "72x72",
