@@ -39,7 +39,9 @@ export default function ExternalResultUpload() {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = (e: any) => {
+    e.preventDefault();
+
     const valid = validateForm();
     if (!valid) {
       return;
@@ -58,6 +60,7 @@ export default function ExternalResultUpload() {
     });
   };
 
+  console.log(uploadFile)
   return (
     <div className="px-6">
       <PageTitle title="Upload External Results" hideBack className="mt-4" />
