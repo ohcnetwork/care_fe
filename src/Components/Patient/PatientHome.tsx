@@ -1,4 +1,12 @@
-import { Button, CircularProgress, Grid, Typography, Select, MenuItem, InputLabel } from "@material-ui/core";
+import {
+  Button,
+  CircularProgress,
+  Grid,
+  Typography,
+  Select,
+  MenuItem,
+  InputLabel,
+} from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { navigate } from "raviger";
 import moment from "moment";
@@ -72,10 +80,10 @@ const useStyles = makeStyles((theme) => ({
 
 type donatePlasmaOptionType = null | "yes" | "no" | "not-fit";
 interface preDischargeFormInterface {
-  donatePlasma: donatePlasmaOptionType,
-  disease_status?: string,
-  srf_id?: string,
-  date_of_test?: string
+  donatePlasma: donatePlasmaOptionType;
+  disease_status?: string;
+  srf_id?: string;
+  date_of_test?: string;
 }
 
 export const PatientHome = (props: any) => {
@@ -134,7 +142,7 @@ export const PatientHome = (props: any) => {
   };
 
   const initPreDischargeForm: preDischargeFormInterface = {
-    donatePlasma: null
+    donatePlasma: null,
   };
 
   const [preDischargeForm, setPreDischargeForm] = useState(
@@ -142,7 +150,7 @@ export const PatientHome = (props: any) => {
   );
 
   const handlePreDischargeFormChange = (key: string, event: any) => {
-    if(key === 'date_of_test') {
+    if (key === "date_of_test") {
       setPreDischargeForm({
         ...preDischargeForm,
         date_of_test: event,
@@ -246,7 +254,7 @@ export const PatientHome = (props: any) => {
         data["fit_for_blood_donation"] = false;
       }
     }
-    
+
     delete data.donatePlasma;
     return data;
   };
@@ -520,12 +528,26 @@ export const PatientHome = (props: any) => {
               </div>
             </div>
             {patientData.is_medical_worker && (
-              <div>
-                <span className="font-semibold leading-relaxed">
-                  Medical Worker:{" "}
-                </span>
-                <span className="badge badge-pill badge-primary">Yes</span>
-              </div>
+              <>
+                <div>
+                  <span className="font-semibold leading-relaxed">
+                    Medical Worker:{" "}
+                  </span>
+                  <span className="badge badge-pill badge-primary">Yes</span>
+                </div>
+                <div>
+                  <span className="font-semibold leading-relaxed">
+                    Designation of Medical Worker:{" "}
+                  </span>
+                  {patientData.designation_of_health_care_worker || "-"}
+                </div>
+                <div>
+                  <span className="font-semibold leading-relaxed">
+                    Institution of Medical Worker:{" "}
+                  </span>
+                  {patientData.instituion_of_health_care_worker || "-"}
+                </div>
+              </>
             )}
             <div>
               <span className="font-semibold leading-relaxed">
@@ -569,6 +591,14 @@ export const PatientHome = (props: any) => {
             </span>
             {(patientData.date_of_test &&
               moment(patientData.date_of_test).format("LL")) ||
+              "-"}
+          </div>
+          <div>
+            <span className="font-semibold leading-relaxed">
+              Date of Result:{" "}
+            </span>
+            {(patientData.date_of_result &&
+              moment(patientData.date_of_result).format("LL")) ||
               "-"}
           </div>
         </div>
@@ -648,6 +678,10 @@ export const PatientHome = (props: any) => {
             {patientData.address || "-"}
           </div>
           <div>
+            <span className="font-semibold leading-relaxed">Village: </span>
+            {patientData.village || "-"}
+          </div>
+          <div>
             <span className="font-semibold leading-relaxed">
               Emergency Contact number:{" "}
             </span>
@@ -673,6 +707,12 @@ export const PatientHome = (props: any) => {
               )}
             </div>
           )}
+          <div>
+            <span className="font-semibold leading-relaxed">
+              Frontline Worker:{" "}
+            </span>
+            {patientData.frontline_worker || "-"}
+          </div>
           <div>
             <span className="font-semibold leading-relaxed">
               Guest worker:{" "}
@@ -703,6 +743,22 @@ export const PatientHome = (props: any) => {
               <span className="badge badge-pill badge-secondary">No</span>
             )}
           </div>
+          {patientData.number_of_primary_contacts && (
+            <div>
+              <span className="font-semibold leading-relaxed">
+                Number Of Primary Contacts:{" "}
+              </span>
+              {patientData.number_of_primary_contacts}
+            </div>
+          )}
+          {!!patientData.number_of_secondary_contacts && (
+            <div>
+              <span className="font-semibold leading-relaxed">
+                Number Of Secondary Contacts:{" "}
+              </span>
+              {patientData.number_of_secondary_contacts}
+            </div>
+          )}
           {patientData.estimated_contact_date && (
             <div>
               <span className="font-semibold leading-relaxed">
@@ -736,6 +792,14 @@ export const PatientHome = (props: any) => {
                   : patientData.countries_travelled.split(",").join(", ")}
               </div>
             )}
+          {patientData.transit_details && (
+            <div className="md:col-span-2">
+              <span className="font-semibold leading-relaxed">
+                Transit details:{" "}
+              </span>
+              {patientData.transit_details}
+            </div>
+          )}
           {patientData.ongoing_medication && (
             <div className="md:col-span-2">
               <span className="font-semibold leading-relaxed">
@@ -849,7 +913,7 @@ export const PatientHome = (props: any) => {
                   Before we discharge {patientData.name}
                 </DialogTitle>
                 <DialogContent className="px-20">
-                  <FormControl variant='outlined'>
+                  <FormControl variant="outlined">
                     <label className="flex justify-center w-full text-gray-900 mt-2">
                       Is the patient willing to donate blood for Plasma?
                     </label>
@@ -882,50 +946,74 @@ export const PatientHome = (props: any) => {
                     </RadioGroup>
 
                     <div className="flex flex-col items-center">
-                      {patientData.disease_status !== 'NEGATIVE' && (
+                      {patientData.disease_status !== "NEGATIVE" && (
                         <Fragment>
-                          <label id="covid-status-pre-form" className="flex justify-center w-full text-gray-900 mb-2 mt-5">
-                            Has the patient's covid status changed? If so, to what?
+                          <label
+                            id="covid-status-pre-form"
+                            className="flex justify-center w-full text-gray-900 mb-2 mt-5"
+                          >
+                            Has the patient's covid status changed? If so, to
+                            what?
                           </label>
                           <Select
                             className="h-10"
                             labelId="covid-status-pre-form"
-                            value={preDischargeForm.disease_status || patientData.disease_status}
-                            onChange={(event) => handlePreDischargeFormChange("disease_status", event)}>
-                              {DISEASE_STATUS.map(value => (<MenuItem value={value}>{value}</MenuItem>))}
+                            value={
+                              preDischargeForm.disease_status ||
+                              patientData.disease_status
+                            }
+                            onChange={(event) =>
+                              handlePreDischargeFormChange(
+                                "disease_status",
+                                event
+                              )
+                            }
+                          >
+                            {DISEASE_STATUS.map((value) => (
+                              <MenuItem value={value}>{value}</MenuItem>
+                            ))}
                           </Select>
                         </Fragment>
-                        )}
+                      )}
 
-                        <label className="flex justify-center w-full mt-5 text-gray-900">
-                          Would you like to update the patient's SRF ID and Test date?
-                        </label>
+                      <label className="flex justify-center w-full mt-5 text-gray-900">
+                        Would you like to update the patient's SRF ID and Test
+                        date?
+                      </label>
 
-                        <div className="flex">
-                          <TextInputField
-                            className="flex flex-1 mr-10"
-                            name="srf_id"
-                            variant="outlined"
-                            margin="dense"
-                            type="text"
-                            placeholder="SRF ID"
-                            value={preDischargeForm.srf_id || patientData.srf_id}
-                            onChange={(event) => handlePreDischargeFormChange("srf_id", event)}
-                            errors=''/>
+                      <div className="flex">
+                        <TextInputField
+                          className="flex flex-1 mr-10"
+                          name="srf_id"
+                          variant="outlined"
+                          margin="dense"
+                          type="text"
+                          placeholder="SRF ID"
+                          value={preDischargeForm.srf_id || patientData.srf_id}
+                          onChange={(event) =>
+                            handlePreDischargeFormChange("srf_id", event)
+                          }
+                          errors=""
+                        />
 
-                          <DateInputField
-                            className="flex flex-1 ml-5"
-                            fullWidth={true}
-                            label="Date of test"
-                            value={preDischargeForm.date_of_test || patientData.date_of_test as string}
-                            onChange={(event) => handlePreDischargeFormChange("date_of_test", event)}
-                            inputVariant="outlined"
-                            margin="dense"
-                            disableFuture={true}
-                            errors={''}/>
-                        </div>
+                        <DateInputField
+                          className="flex flex-1 ml-5"
+                          fullWidth={true}
+                          label="Date of test"
+                          value={
+                            preDischargeForm.date_of_test ||
+                            (patientData.date_of_test as string)
+                          }
+                          onChange={(event) =>
+                            handlePreDischargeFormChange("date_of_test", event)
+                          }
+                          inputVariant="outlined"
+                          margin="dense"
+                          disableFuture={true}
+                          errors={""}
+                        />
                       </div>
-
+                    </div>
                   </FormControl>
                 </DialogContent>
                 <DialogActions className="flex justify-between mt-5 px-5 border-t">

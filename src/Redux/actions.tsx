@@ -265,3 +265,15 @@ export const completeTransfer = (pathParams: object) => {
 export const downloadShiftRequests = (params: object) => {
   return fireRequest("downloadShiftRequests", [], params);
 };
+
+// External Results
+export const externalResultList = (params: object, altKey: string) => {
+  return fireRequest("externalResultList", [], params, null, altKey);
+};
+export const externalResult = (id: string) => {
+  return fireRequest("externalResult", [id], {});
+};
+
+export const externalResultUploadCsv = (params: object) => {
+  return fireRequest("externalResultUploadCsv", [], { params });
+};

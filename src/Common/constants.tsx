@@ -11,6 +11,8 @@ export const USER_TYPES: Array<String> = [
   "Staff",
   "StaffReadOnly",
   "Doctor",
+  "WardAdmin",
+  "LocalBodyAdmin",
   "DistrictReadOnlyAdmin",
   "DistrictAdmin",
   "DistrictLabAdmin",
@@ -84,6 +86,7 @@ export const FACILITY_TYPES: Array<OptionsType> = [
   { id: 1100, text: "First Line Treatment Centre" },
   { id: 1200, text: "Second Line Treatment Center" },
   { id: 1300, text: "Shifting Centre" },
+  { id: 1400, text: "Covid Management Center" },
 ];
 
 export const SHIFTING_CHOICES: Array<OptionsType> = [
@@ -292,4 +295,45 @@ export const TELEMEDICINE_ACTIONS = [
   { id: 60, text: "COMPLETE", desc: "Complete" },
   { id: 70, text: "REVIEW", desc: "Review" },
   { id: 80, text: "NOT_REACHABLE", desc: "Not Reachable" },
+];
+
+export const FRONTLINE_WORKER = [
+  "NOT APPLICABLE",
+  "HEALTHCARE WORKER",
+  "ELECTED REPRESENTATIVE",
+  "POLICE OFFICER",
+  "REVENUE OFFICIAL",
+  "TEACHER",
+  "FIRE FORCE",
+  "ANGNAWADI WORKER",
+  "KUDUMBASREE",
+  "VOLUNTEER",
+  "SUPERVISOR",
+];
+
+export const DESIGNATION_HEALTH_CARE_WORKER = [
+  "AMBULANCE DRIVER",
+  "ASHA",
+  "ATTENDER",
+  "CLEANING STAFF",
+  "CSSD STAFF",
+  "ANEASTHESIA TECHNICHIAN",
+  "DIALYSIS TECHNICIAN",
+  "DIETICIAN",
+  "DOCTOR",
+  "FIELD STAFF",
+  "LAB ASSISTANT",
+  "LAB TECHNICIAN",
+  "NURSING ASSISTANT",
+  "OFFICE STAFF",
+  "PALLIATIVE NURSE",
+  "PHARMACIST",
+  "PHYSICIAN ASSISTANT",
+  "PHYSIOTHERAPIST",
+  "PSYCHOLOGIST",
+  "RADIOLOGY TECHNICIAN",
+  "SECURITY STAFF",
+  "SONOLOGIST",
+  "STAFF NURSE",
+  "OTHERS",
 ];
