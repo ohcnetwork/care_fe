@@ -37,20 +37,27 @@ export interface PatientModel {
   is_migrant_worker?: boolean;
   ward?: string;
   local_body_object?: { id: number; name: string };
-  ward_object?: { id: number, name: string, number: number }
+  ward_object?: { id: number; name: string; number: number };
   district_object?: { id: number; name: string };
   state_object?: { id: number; name: string };
   tele_consultation_history?: Array<any>;
   last_consultation?: { id: number };
   address?: string;
+  village?: string;
   pincode?: number;
   contact_with_confirmed_carrier?: boolean;
   contact_with_suspected_carrier?: boolean;
   is_medical_worker?: boolean;
+  designation_of_health_care_worker?: string;
+  instituion_of_health_care_worker?: string;
+  frontline_worker?: string;
   estimated_contact_date?: string;
   past_travel?: boolean;
   ongoing_medication?: string;
   countries_travelled?: Array<string> | string;
+  transit_details?: string;
+  number_of_primary_contacts?: number;
+  number_of_secondary_contacts?: number;
   present_health?: string;
   has_SARI?: boolean;
   local_body?: number;
@@ -61,6 +68,7 @@ export interface PatientModel {
   disease_status?: string;
   test_type?: string;
   date_of_test?: string;
+  date_of_result?: string;
   srf_id?: string;
   date_of_birth?: string;
   blood_group?: string;
