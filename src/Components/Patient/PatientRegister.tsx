@@ -136,7 +136,7 @@ const initForm: any = {
   prescribed_medication: false,
   ongoing_medication: "",
   is_medical_worker: "false",
-  designation_of_health_care_worker: designationOfHealthWorkers[0].text,
+  designation_of_health_care_worker: "",
   instituion_of_health_care_worker: "",
   frontline_worker: frontlineWorkers[0],
   number_of_aged_dependents: "",
@@ -560,8 +560,16 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           : undefined,
 
         allergies: state.form.allergies,
-        number_of_primary_contacts: state.form.number_of_primary_contacts,
-        number_of_secondary_contacts: state.form.number_of_secondary_contacts,
+        number_of_primary_contacts: Number(
+          state.form.number_of_primary_contacts
+        )
+          ? Number(state.form.number_of_primary_contacts)
+          : undefined,
+        number_of_secondary_contacts: Number(
+          state.form.number_of_secondary_contacts
+        )
+          ? Number(state.form.number_of_secondary_contacts)
+          : undefined,
         ongoing_medication: state.form.ongoing_medication,
         is_medical_worker: JSON.parse(state.form.is_medical_worker),
         designation_of_health_care_worker:
@@ -918,6 +926,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         name="designation_of_health_care_worker"
                         variant="outlined"
                         margin="dense"
+                        optionArray={true}
                         value={state.form.designation_of_health_care_worker}
                         options={designationOfHealthWorkers}
                         onChange={handleChange}
