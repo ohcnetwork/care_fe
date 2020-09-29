@@ -22,6 +22,8 @@ import {
   GENDER_TYPES,
   MEDICAL_HISTORY_CHOICES,
   TEST_TYPE,
+  FRONTLINE_WORKER,
+  DESIGNATION_HEALTH_CARE_WORKER,
 } from "../../Common/constants";
 import countryList from "../../Common/static/countries.json";
 import statesList from "../../Common/static/states.json";
@@ -92,6 +94,8 @@ const diseaseStatus = [...DISEASE_STATUS];
 const bloodGroups = [...BLOOD_GROUPS];
 
 const testType = [...TEST_TYPE];
+const designationOfHealthWorkers = [...DESIGNATION_HEALTH_CARE_WORKER];
+const frontlineWorkers = [...FRONTLINE_WORKER];
 
 const initForm: any = {
   name: "",
@@ -110,6 +114,7 @@ const initForm: any = {
   local_body: "",
   ward: "",
   address: "",
+  village: "",
   allergies: "",
   pincode: "",
   present_health: "",
@@ -125,11 +130,15 @@ const initForm: any = {
   number_of_secondary_contacts: "",
   is_antenatal: "false",
   date_of_test: false,
+  date_of_result: false,
   srf_id: "",
   test_type: testType[0],
   prescribed_medication: false,
   ongoing_medication: "",
   is_medical_worker: "false",
+  designation_of_health_care_worker: designationOfHealthWorkers[0].text,
+  instituion_of_health_care_worker: "",
+  frontline_worker: frontlineWorkers[0],
   number_of_aged_dependents: "",
   number_of_chronic_diseased_dependents: "",
   ...medicalHistoryChoices,
@@ -263,6 +272,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             blood_group: res.data.blood_group ? res.data.blood_group : "",
             local_body: res.data.local_body ? res.data.local_body : "",
             ward: res.data.ward_object ? res.data.ward : initialWard,
+            village: res.data.village ? res.data.village : "",
             medical_history: [],
             is_antenatal: res.data.is_antenatal
               ? res.data.is_antenatal
@@ -279,6 +289,17 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             is_medical_worker: res.data.is_medical_worker
               ? String(res.data.is_medical_worker)
               : "false",
+            designation_of_health_care_worker: res.data
+              .designation_of_health_care_worker
+              ? res.data.designation_of_health_care_worker
+              : "",
+            instituion_of_health_care_worker: res.data
+              .instituion_of_health_care_worker
+              ? res.data.instituion_of_health_care_worker
+              : "",
+            frontline_worker: res.data.frontline_worker
+              ? res.data.frontline_worker
+              : "",
             number_of_primary_contacts: res.data.number_of_primary_contacts
               ? res.data.number_of_primary_contacts
               : "",
@@ -492,6 +513,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         date_of_test: state.form.date_of_test
           ? state.form.date_of_test
           : undefined,
+
+        date_of_result: state.form.date_of_result
+          ? state.form.date_of_result
+          : undefined,
         srf_id: state.form.srf_id,
         test_type: state.form.test_type,
         name: state.form.name,
@@ -513,6 +538,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             ? state.form.local_body
             : undefined,
         ward: state.form.ward,
+        village: state.form.village,
         address: state.form.address ? state.form.address : undefined,
         present_health: state.form.present_health
           ? state.form.present_health
@@ -538,6 +564,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         number_of_secondary_contacts: state.form.number_of_secondary_contacts,
         ongoing_medication: state.form.ongoing_medication,
         is_medical_worker: JSON.parse(state.form.is_medical_worker),
+        designation_of_health_care_worker:
+          state.form.designation_of_health_care_worker,
+        instituion_of_health_care_worker:
+          state.form.instituion_of_health_care_worker,
+        frontline_worker: state.form.frontline_worker,
         blood_group: state.form.blood_group
           ? state.form.blood_group
           : undefined,
@@ -811,9 +842,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   />
                 </div>
                 <div>
+                  <InputLabel id="date_of_birth-label">
+                    Date of Sample given
+                  </InputLabel>
                   <DateInputField
                     fullWidth={true}
-                    label="Date of Sample given"
                     value={state.form.date_of_test}
                     onChange={(date) => handleDateChange(date, "date_of_test")}
                     errors={state.errors.date_of_test}
@@ -822,7 +855,22 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     disableFuture={true}
                   />
                 </div>
-
+                <div>
+                  <InputLabel id="date_of_birth-label">
+                    Date of Result
+                  </InputLabel>
+                  <DateInputField
+                    fullWidth={true}
+                    value={state.form.date_of_result}
+                    onChange={(date) =>
+                      handleDateChange(date, "date_of_result")
+                    }
+                    errors={state.errors.date_of_result}
+                    inputVariant="outlined"
+                    margin="dense"
+                    disableFuture={true}
+                  />
+                </div>
                 <div>
                   <InputLabel id="gender-label">Gender*</InputLabel>
                   <SelectField
@@ -860,6 +908,53 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   </RadioGroup>
                 </div>
 
+                {state.form.is_medical_worker === "true" && (
+                  <>
+                    <div>
+                      <InputLabel id="designation_of_health_care_worker-label">
+                        Designation of Medical Worker
+                      </InputLabel>
+                      <SelectField
+                        name="designation_of_health_care_worker"
+                        variant="outlined"
+                        margin="dense"
+                        value={state.form.designation_of_health_care_worker}
+                        options={designationOfHealthWorkers}
+                        onChange={handleChange}
+                        errors={state.errors.designation_of_health_care_worker}
+                      />
+                    </div>
+                    <div>
+                      <InputLabel id="institution_of_health_care_worker-label">
+                        Institution of Medical Worker{" "}
+                      </InputLabel>
+                      <TextInputField
+                        name="instituion_of_health_care_worker"
+                        variant="outlined"
+                        margin="dense"
+                        type="text"
+                        value={state.form.instituion_of_health_care_worker}
+                        onChange={handleChange}
+                        errors={state.errors.instituion_of_health_care_worker}
+                      />
+                    </div>
+                  </>
+                )}
+                <div>
+                  <InputLabel id="frontline_worker-label">
+                    Frontline Worker
+                  </InputLabel>
+                  <SelectField
+                    name="frontline_worker"
+                    variant="outlined"
+                    margin="dense"
+                    optionArray={true}
+                    value={state.form.frontline_worker}
+                    options={frontlineWorkers}
+                    onChange={handleChange}
+                    errors={state.errors.frontline_worker}
+                  />
+                </div>
                 <div>
                   <InputLabel id="nationality-label">Nationality*</InputLabel>
                   <SelectField
@@ -970,28 +1065,50 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   />
                 </div>
                 <div>
-                  <div>
-                    <InputLabel id="ward-label">
-                      Ward/Division of respective LSGI*
-                    </InputLabel>
-                    {isLocalbodyLoading ? (
-                      <CircularProgress size={20} />
-                    ) : (
-                      <SelectField
-                        name="ward"
-                        variant="outlined"
-                        margin="dense"
-                        options={ward
-                          .sort((a, b) => a.number - b.number)
-                          .map((e) => {
-                            return { id: e.id, name: e.number + ": " + e.name };
-                          })}
-                        optionValue="name"
-                        onChange={handleChange}
-                        errors={state.errors.local_body}
-                      />
-                    )}
-                  </div>
+                  <InputLabel id="ward-label">
+                    Ward/Division of respective LSGI*
+                  </InputLabel>
+                  {isLocalbodyLoading ? (
+                    <CircularProgress size={20} />
+                  ) : (
+                    <SelectField
+                      name="ward"
+                      variant="outlined"
+                      margin="dense"
+                      options={ward
+                        .sort((a, b) => a.number - b.number)
+                        .map((e) => {
+                          return { id: e.id, name: e.number + ": " + e.name };
+                        })}
+                      optionValue="name"
+                      onChange={handleChange}
+                      errors={state.errors.local_body}
+                    />
+                  )}
+                </div>
+                <div>
+                  <InputLabel id="name-label">Village</InputLabel>
+                  <TextInputField
+                    name="village"
+                    variant="outlined"
+                    margin="dense"
+                    type="text"
+                    value={state.form.village}
+                    onChange={handleChange}
+                    errors={state.errors.village}
+                  />
+                </div>
+                <div>
+                  <InputLabel id="name-label">Pincode</InputLabel>
+                  <TextInputField
+                    name="pincode"
+                    variant="outlined"
+                    margin="dense"
+                    type="text"
+                    value={state.form.pincode}
+                    onChange={handleChange}
+                    errors={state.errors.pincode}
+                  />
                 </div>
                 <div>
                   <InputLabel id="blood_group-label">Blood Group*</InputLabel>
@@ -1005,18 +1122,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     options={bloodGroups}
                     onChange={handleChange}
                     errors={state.errors.blood_group}
-                  />
-                </div>
-                <div>
-                  <InputLabel id="name-label">Pincode</InputLabel>
-                  <TextInputField
-                    name="pincode"
-                    variant="outlined"
-                    margin="dense"
-                    type="text"
-                    value={state.form.pincode}
-                    onChange={handleChange}
-                    errors={state.errors.pincode}
                   />
                 </div>
                 <div>
@@ -1194,12 +1299,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       />
                     </div>
                     <div>
-                      <InputLabel id="transit_details-label">
-                        Date of Arrival*
+                      <InputLabel id="date_of_return-label">
+                        Estimated date of Arrival*
                       </InputLabel>
                       <DateInputField
                         fullWidth={true}
-                        label="Estimated date of Arrival*"
                         value={state.form.date_of_return}
                         onChange={(date) =>
                           handleDateChange(date, "date_of_return")

@@ -528,12 +528,26 @@ export const PatientHome = (props: any) => {
               </div>
             </div>
             {patientData.is_medical_worker && (
-              <div>
-                <span className="font-semibold leading-relaxed">
-                  Medical Worker:{" "}
-                </span>
-                <span className="badge badge-pill badge-primary">Yes</span>
-              </div>
+              <>
+                <div>
+                  <span className="font-semibold leading-relaxed">
+                    Medical Worker:{" "}
+                  </span>
+                  <span className="badge badge-pill badge-primary">Yes</span>
+                </div>
+                <div>
+                  <span className="font-semibold leading-relaxed">
+                    Designation of Medical Worker:{" "}
+                  </span>
+                  {patientData.designation_of_health_care_worker || "-"}
+                </div>
+                <div>
+                  <span className="font-semibold leading-relaxed">
+                    Institution of Medical Worker:{" "}
+                  </span>
+                  {patientData.instituion_of_health_care_worker || "-"}
+                </div>
+              </>
             )}
             <div>
               <span className="font-semibold leading-relaxed">
@@ -577,6 +591,14 @@ export const PatientHome = (props: any) => {
             </span>
             {(patientData.date_of_test &&
               moment(patientData.date_of_test).format("LL")) ||
+              "-"}
+          </div>
+          <div>
+            <span className="font-semibold leading-relaxed">
+              Date of Result:{" "}
+            </span>
+            {(patientData.date_of_result &&
+              moment(patientData.date_of_result).format("LL")) ||
               "-"}
           </div>
         </div>
@@ -656,6 +678,10 @@ export const PatientHome = (props: any) => {
             {patientData.address || "-"}
           </div>
           <div>
+            <span className="font-semibold leading-relaxed">Village: </span>
+            {patientData.village || "-"}
+          </div>
+          <div>
             <span className="font-semibold leading-relaxed">
               Emergency Contact number:{" "}
             </span>
@@ -681,6 +707,12 @@ export const PatientHome = (props: any) => {
               )}
             </div>
           )}
+          <div>
+            <span className="font-semibold leading-relaxed">
+              Frontline Worker:{" "}
+            </span>
+            {patientData.frontline_worker || "-"}
+          </div>
           <div>
             <span className="font-semibold leading-relaxed">
               Guest worker:{" "}
@@ -711,6 +743,22 @@ export const PatientHome = (props: any) => {
               <span className="badge badge-pill badge-secondary">No</span>
             )}
           </div>
+          {patientData.number_of_primary_contacts && (
+            <div>
+              <span className="font-semibold leading-relaxed">
+                Number Of Primary Contacts:{" "}
+              </span>
+              {patientData.number_of_primary_contacts}
+            </div>
+          )}
+          {!!patientData.number_of_secondary_contacts && (
+            <div>
+              <span className="font-semibold leading-relaxed">
+                Number Of Secondary Contacts:{" "}
+              </span>
+              {patientData.number_of_secondary_contacts}
+            </div>
+          )}
           {patientData.estimated_contact_date && (
             <div>
               <span className="font-semibold leading-relaxed">

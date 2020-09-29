@@ -43,10 +43,14 @@ export interface PatientModel {
   tele_consultation_history?: Array<any>;
   last_consultation?: { id: number };
   address?: string;
+  village?: string;
   pincode?: number;
   contact_with_confirmed_carrier?: boolean;
   contact_with_suspected_carrier?: boolean;
   is_medical_worker?: boolean;
+  designation_of_health_care_worker?: string;
+  instituion_of_health_care_worker?: string;
+  frontline_worker?: string;
   estimated_contact_date?: string;
   past_travel?: boolean;
   ongoing_medication?: string;
@@ -64,6 +68,7 @@ export interface PatientModel {
   disease_status?: string;
   test_type?: string;
   date_of_test?: string;
+  date_of_result?: string;
   srf_id?: string;
   date_of_birth?: string;
   blood_group?: string;
