@@ -18,7 +18,7 @@ interface boardProps {
 
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
-const renderBoardTitle = (board: string) => board === "APPROVED" ? "AWAITING DESTINATION APPROVED" : board
+const renderBoardTitle = (board: string) => board === "APPROVED" ? "AWAITING DESTINATION APPROVAL" : board
 
 const reduceLoading = (action: string, current: any) => {
   switch (action) {
