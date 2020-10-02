@@ -180,7 +180,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
                     <CardContent>
                         <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
                             <div>
-                                <InputLabel>Contact person name*</InputLabel>
+                                <InputLabel>Contact person at the facility*</InputLabel>
                                 <TextInputField
                                     fullWidth
                                     name="refering_facility_contact_name"
