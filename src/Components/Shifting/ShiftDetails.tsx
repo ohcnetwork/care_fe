@@ -587,7 +587,7 @@ export default function ShiftDetails(props: { id: string }) {
                 </div>
                 <div>
                   <span className="font-semibold leading-relaxed">
-                    Contact person name:{" "}
+                    Contact person at the facility:{" "}
                   </span>
                   {data.refering_facility_contact_name || "--"}
                 </div>
