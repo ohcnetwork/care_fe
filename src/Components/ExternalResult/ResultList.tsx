@@ -110,7 +110,12 @@ export default function ResultList() {
   }
 
   if (isLoading || !data) {
-    manageResults = <Loading />;
+    manageResults = (
+    <tr className="bg-white"> 
+      <td colSpan={4}>
+        <Loading /> 
+      </td>
+    </tr>);
   } else if (data && data.length) {
     manageResults = (
       <>
@@ -127,8 +132,7 @@ export default function ResultList() {
         )}
       </>
     );
-  }
-  else if (data && data.length === 0) {
+  } else if (data && data.length === 0) {
     manageResults = (
       <Grid item xs={12} md={12}>
         <Grid container justify="center" alignItems="center">
