@@ -41,8 +41,8 @@ export default function ResultItem(props: any) {
   }
 
   return (
-    <div className="mt-4">
-      <PageTitle title={"Result details"} />
+    <div>
+      <PageTitle title={"Result details"}  className="px-6 mb-2"/>
       <div className="mx-3 md:mx-8 mb-10">
         <div className="bg-white shadow overflow-hidden sm:rounded-lg">
           <div className="px-4 py-5 border-b border-gray-200 sm:px-6">
