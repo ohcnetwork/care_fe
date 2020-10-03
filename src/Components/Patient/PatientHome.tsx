@@ -145,6 +145,8 @@ export const PatientHome = (props: any) => {
     donatePlasma: null,
   };
 
+  const [isSendingDischargeApi, setIsSendingDischargeApi] = useState(false);
+
   const [preDischargeForm, setPreDischargeForm] = useState(
     initPreDischargeForm
   );
@@ -209,32 +211,39 @@ export const PatientHome = (props: any) => {
     });
   };
 
-  const handlePatientDischarge = (value: boolean) => {
+  const handlePatientDischarge = async (value: boolean) => {
+    setIsSendingDischargeApi(true);
     let dischargeData = Object.assign({}, patientData);
     dischargeData["discharge"] = value;
 
-    Promise.all([
-      // using preDischargeForm form data to update patient data
-      dispatch(
-        patchPatient(formatPreDischargeFormData(preDischargeForm), {
-          id: patientData.id,
-        })
-      ),
-      // discharge call
-      dispatch(dischargePatient({ discharge: value }, { id: patientData.id })),
-    ]).then((response: any) => {
-      if ((response || [])[1]?.status === 200) {
-        let dischargeData = Object.assign({}, patientData);
-        dischargeData["discharge"] = value;
-        setPatientData(dischargeData);
+    // calling patchPatient and dischargePatient together caused problems check https://github.com/coronasafe/care_fe/issues/758
 
-        Notification.Success({
-          msg: "Patient Discharged",
-        });
-        setOpenDischargeDialog(false);
-        window.location.reload();
-      }
-    });
+    // using preDischargeForm form data to update patient data
+    let preDischargeFormData = formatPreDischargeFormData(preDischargeForm);
+
+    if (Object.keys(preDischargeFormData).length) { // skip calling patient update api if nothing to update
+      await dispatch(
+         patchPatient(preDischargeFormData, {
+           id: patientData.id,
+         })
+       );
+    }
+    // discharge call
+    let dischargeResponse = await dispatch(dischargePatient({ discharge: value }, { id: patientData.id }));
+
+    setIsSendingDischargeApi(false);
+    if (dischargeResponse?.status === 200) {
+      let dischargeData = Object.assign({}, patientData);
+      dischargeData["discharge"] = value;
+      setPatientData(dischargeData);
+
+      Notification.Success({
+        msg: "Patient Discharged",
+      });
+      setOpenDischargeDialog(false);
+      window.location.reload();
+    }
+
   };
 
   const formatPreDischargeFormData = (
@@ -1018,13 +1027,16 @@ export const PatientHome = (props: any) => {
                 </DialogContent>
                 <DialogActions className="flex justify-between mt-5 px-5 border-t">
                   <Button onClick={handleDischargeClose}>Cancel</Button>
-                  <Button
-                    color="primary"
-                    onClick={() => handlePatientDischarge(false)}
-                    autoFocus
-                  >
-                    Proceed with Discharge
-                  </Button>
+                  
+                  {isSendingDischargeApi ? <CircularProgress size={20} /> : (
+                    <Button
+                      color="primary"
+                      onClick={() => handlePatientDischarge(false)}
+                      autoFocus
+                    >
+                      Proceed with Discharge
+                    </Button>
+                  )}
                 </DialogActions>
               </Dialog>
             </div>
