@@ -97,7 +97,7 @@ export const SHIFTING_CHOICES: Array<OptionsType> = [
   { id: 40, text: "DESTINTION APPROVED" },
   { id: 50, text: "DESTINATION REJECTED" },
   { id: 55, text: "TRANSPORTATION TO BE ARRANGED" },
-  { id: 60, text: "PATIENTS TO BE PICKED UP" },
+  { id: 60, text: "PATIENT TO BE PICKED UP" },
   { id: 70, text: "TRANSFER IN PROGRESS" },
   { id: 80, text: "COMPLETED" },
 ];
