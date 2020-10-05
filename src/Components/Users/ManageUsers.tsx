@@ -1,14 +1,19 @@
+/* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { useCallback, useState } from "react";
 import loadable from '@loadable/component';
 import { useDispatch, useSelector } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getUserList, searchUser } from "../../Redux/actions";
+import { addUserFacility, deleteUserFacility, getUserList, getUserListFacility, searchUser } from "../../Redux/actions";
 import Pagination from "../Common/Pagination";
 import { navigate } from "raviger";
 import { USER_TYPES } from "../../Common/constants";
 import { InputSearchBox } from "../Common/SearchBox";
-const Loading = loadable( () => import("../Common/Loading"));
-const PageTitle = loadable( () => import("../Common/PageTitle"));
+import { FacilityModel } from '../Facility/models';
+import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
+import { IconButton } from '@material-ui/core';
+import LinkFacilityDialog from './LinkFacilityDialog';
+const Loading = loadable(() => import("../Common/Loading"));
+const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export default function ManageUsers(props: any) {
   const dispatch: any = useDispatch();
@@ -16,6 +21,7 @@ export default function ManageUsers(props: any) {
   let manageUsers: any = null;
   const [users, setUsers] = useState(initialData);
   const [isLoading, setIsLoading] = useState(false);
+  const [isFacilityLoading, setIsFacilityLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [offset, setOffset] = useState(0);
@@ -26,6 +32,7 @@ export default function ManageUsers(props: any) {
   const userType = currentUser.data.user_type;
   const userIndex = USER_TYPES.indexOf(userType);
   const userTypes = isSuperuser ? [...USER_TYPES] : USER_TYPES.slice(0, userIndex + 1);
+  const [linkFacility, setLinkFacility] = useState<{ show: boolean; username: string }>({ show: false, username: '' });
 
   const limit = userTypes.length ? 13 : 14;
 
@@ -82,6 +89,72 @@ export default function ManageUsers(props: any) {
     Add New User
   </button >);
 
+  const loadFacilities = async (username: string) => {
+    if (isFacilityLoading) {
+      return;
+    }
+    setIsFacilityLoading(true);
+    const res = await dispatch(getUserListFacility(username));
+    if (res && res.data) {
+      console.log(res.data);
+      const updated = users.map(user => {
+        return user.username === username ? {
+          ...user,
+          facilities: res.data,
+        } : user;
+      });
+      setUsers(updated);
+    }
+    setIsFacilityLoading(false);
+  };
+
+  const removeFacility = async (username: string, facility: any) => {
+    console.log(username, facility);
+    setIsFacilityLoading(true);
+    await dispatch(deleteUserFacility(username, String(facility.id)));
+    setIsFacilityLoading(false);
+    loadFacilities(username);
+  }
+
+  const showFacilities = (username: string, facilities: FacilityModel[]) => {
+    if (!facilities || !facilities.length) {
+      return <div className="font-semibold">No Facilites!</div>
+    }
+    return (<>
+      {(facilities.map(facility => (<div className="flex items-center mb-2">
+        <div className="font-semibold">{facility.name}</div>
+        <IconButton size="small" disabled={isFacilityLoading} onClick={() => removeFacility(username, facility)}>
+          <DeleteForeverIcon />
+        </IconButton>
+      </div>)
+      ))}
+      <a onClick={() => showLinkFacility(username)} className={`align-baseline font-bold text-sm ${!isFacilityLoading ? "text-blue-500 hover:text-blue-800" : "text-gray-500"}`} href="#" >Link new facility</a>
+    </>);
+  };
+
+  const addFacility = async (username: string, facility: any) => {
+    console.log(username, facility);
+    hideLinkFacility();
+    setIsFacilityLoading(true);
+    await dispatch(addUserFacility(username, String(facility.id)));
+    setIsFacilityLoading(false);
+    loadFacilities(username);
+  };
+
+  const showLinkFacility = (username: string) => {
+    setLinkFacility({
+      show: true,
+      username,
+    });
+  };
+
+  const hideLinkFacility = () => {
+    setLinkFacility({
+      show: false,
+      username: ''
+    });
+  };
+
   let userList: any[] = [];
   if (users && users.length) {
     userList = users.map((user: any, idx: number) => {
@@ -115,6 +188,15 @@ export default function ManageUsers(props: any) {
                     <div className="text-gray-500 leading-relaxed font-light">District:</div>
                     <div className="font-semibold">{user.district_object.name}</div>
                   </div>)}
+                <div className="mt-2">
+                  <div className="text-gray-500 leading-relaxed font-light">Facilities:</div>
+                  {user.facilities && (showFacilities(user.username, user.facilities))}
+                  {!user.facilities && (
+                    <a onClick={() => loadFacilities(user.username)} className={`inline-block align-baseline font-bold text-sm ${!isFacilityLoading ? "text-blue-500 hover:text-blue-800" : "text-gray-500"}`} href="#">
+                      Click here to show
+                    </a>
+                  )}
+                </div>
               </div>
               <div className="mt-2 bg-gray-50 border-t px-6 py-2">
                 <div className="flex py-4 justify-between">
@@ -161,6 +243,11 @@ export default function ManageUsers(props: any) {
 
   return (
     <div>
+      {linkFacility.show && (<LinkFacilityDialog
+        username={linkFacility.username}
+        handleOk={addFacility}
+        handleCancel={hideLinkFacility}
+      />)}
       <PageTitle
         title="User Management"
         hideBack={true}
