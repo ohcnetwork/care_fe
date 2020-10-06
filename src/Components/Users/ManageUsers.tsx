@@ -116,43 +116,50 @@ export default function ManageUsers(props: any) {
     loadFacilities(username);
   }
 
-  const showFacilities = (username: string, facilities: FacilityModel[]) => {
-    if (!facilities || !facilities.length) {
-      return <div className="font-semibold">No Facilites!</div>
-    }
-    return (<>
-      {(facilities.map(facility => (<div className="flex items-center mb-2">
-        <div className="font-semibold">{facility.name}</div>
-        <IconButton size="small" disabled={isFacilityLoading} onClick={() => removeFacility(username, facility)}>
-          <DeleteForeverIcon />
-        </IconButton>
-      </div>)
-      ))}
-      <a onClick={() => showLinkFacility(username)} className={`align-baseline font-bold text-sm ${!isFacilityLoading ? "text-blue-500 hover:text-blue-800" : "text-gray-500"}`} href="#" >Link new facility</a>
-    </>);
-  };
-
-  const addFacility = async (username: string, facility: any) => {
-    console.log(username, facility);
-    hideLinkFacility();
-    setIsFacilityLoading(true);
-    await dispatch(addUserFacility(username, String(facility.id)));
-    setIsFacilityLoading(false);
-    loadFacilities(username);
-  };
-
-  const showLinkFacility = (username: string) => {
+  const showLinkFacilityModal = (username: string) => {
     setLinkFacility({
       show: true,
       username,
     });
   };
 
-  const hideLinkFacility = () => {
+  const hideLinkFacilityModal = () => {
     setLinkFacility({
       show: false,
       username: ''
     });
+  };
+
+  const showLinkFacility = (username: string) => {
+    return <a onClick={() => showLinkFacilityModal(username)} className={`align-baseline font-bold text-sm ${!isFacilityLoading ? "text-blue-500 hover:text-blue-800" : "text-gray-500"}`} href="#" >Link new facility</a>;
+  };
+
+  const showFacilities = (username: string, facilities: FacilityModel[]) => {
+    if (!facilities || !facilities.length) {
+      return (<>
+        <div className="font-semibold">No Facilities!</div>
+        {showLinkFacility(username)}
+      </>)
+    }
+    return (<>
+      {(facilities.map(facility => (<div className="flex items-center mb-2">
+        <div className="font-semibold">{facility.name}</div>
+        <IconButton size="small" color="secondary" disabled={isFacilityLoading} onClick={() => removeFacility(username, facility)}>
+          <DeleteForeverIcon />
+        </IconButton>
+      </div>)
+      ))}
+      {showLinkFacility(username)}
+    </>);
+  };
+
+  const addFacility = async (username: string, facility: any) => {
+    console.log(username, facility);
+    hideLinkFacilityModal();
+    setIsFacilityLoading(true);
+    await dispatch(addUserFacility(username, String(facility.id)));
+    setIsFacilityLoading(false);
+    loadFacilities(username);
   };
 
   let userList: any[] = [];
@@ -244,7 +251,7 @@ export default function ManageUsers(props: any) {
       {linkFacility.show && (<LinkFacilityDialog
         username={linkFacility.username}
         handleOk={addFacility}
-        handleCancel={hideLinkFacility}
+        handleCancel={hideLinkFacilityModal}
       />)}
       <PageTitle
         title="User Management"
