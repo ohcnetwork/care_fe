@@ -57,3 +57,22 @@ Starts a production http-server in local to run the project with Service worker
 The build is minified and the filenames include the hashes.<br />
 Your app is ready to be deployed!
 
+
+## Staging  
+BE: https://careapi.coronasafe.in/swagger/
+FE: https://care.coronasafe.in/
+
+## Staging Api Credentails for testing
+
+```
+user_id: devdistrictadmin
+pass: Coronasafe@123
+role: District Admin
+```
+
+```
+user_id: devstaff
+pass: Coronasafe@123
+role: Staff
+```
+
