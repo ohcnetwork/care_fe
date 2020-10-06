@@ -188,24 +188,22 @@ export default function ManageUsers(props: any) {
                     <div className="text-gray-500 leading-relaxed font-light">District:</div>
                     <div className="font-semibold">{user.district_object.name}</div>
                   </div>)}
-                <div className="mt-2">
+                {user.username && (<div className="mt-2">
                   <div className="text-gray-500 leading-relaxed font-light">Facilities:</div>
-                  {user.facilities && (showFacilities(user.username, user.facilities))}
-                  {!user.facilities && (
-                    <a onClick={() => loadFacilities(user.username)} className={`inline-block align-baseline font-bold text-sm ${!isFacilityLoading ? "text-blue-500 hover:text-blue-800" : "text-gray-500"}`} href="#">
-                      Click here to show
-                    </a>
-                  )}
-                </div>
+                  {user.facilities && showFacilities(user.username, user.facilities)}
+                  {!user.facilities && <a onClick={() => loadFacilities(user.username)} className={`inline-block align-baseline font-bold text-sm ${!isFacilityLoading ? "text-blue-500 hover:text-blue-800" : "text-gray-500"}`} href="#">
+                    Click here to show
+                  </a>}
+                </div>)}
               </div>
-              <div className="mt-2 bg-gray-50 border-t px-6 py-2">
+              {user.phone_number && (<div className="mt-2 bg-gray-50 border-t px-6 py-2">
                 <div className="flex py-4 justify-between">
                   <div>
                     <div className="text-gray-500 leading-relaxed">Phone:</div>
                     <a href={`tel:${user.phone_number}`} className="font-semibold">{user.phone_number || "-"}</a>
                   </div>
                 </div>
-              </div>
+              </div>)}
             </div>
           </div>
         </div>
