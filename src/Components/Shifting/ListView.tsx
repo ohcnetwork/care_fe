@@ -33,7 +33,8 @@ const initialFilterData = {
   modified_date_before: null,
   modified_date_after: null,
   patient_phone_number: '',
-  offset: 0
+  offset: 0,
+  ordering: null,
 }
 
 const formatFilter = (params: any) => {
@@ -53,7 +54,8 @@ const formatFilter = (params: any) => {
     created_date_after: filter.created_date_after || undefined,
     modified_date_before: filter.modified_date_before || undefined,
     modified_date_after: filter.modified_date_after || undefined,
-    patient_phone_number: filter.patient_phone_number || undefined
+    patient_phone_number: filter.patient_phone_number || undefined,
+    ordering: filter.ordering || undefined,
   };
 }
 
