@@ -52,6 +52,10 @@ const requiredFields: any = {
     refering_facility_contact_number: {
         errorText: 'Phone number of contact of the referring facility',
         invalidText: 'Please enter valid phone number'
+    },
+    reason: {
+        errorText: 'Reason for shifting in mandatory',
+        invalidText: 'Please enter reason for shifting'
     }
 }
 
@@ -102,7 +106,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
                     if (!state.form[field]) {
                         errors[field] = requiredFields[field].errorText;
                         isInvalidForm = true;
-                    } else if(!phoneNumber?.isPossible() || !phonePreg(String(phoneNumber?.number))) {
+                    } else if (!phoneNumber?.isPossible() || !phonePreg(String(phoneNumber?.number))) {
                         errors[field] = requiredFields[field].invalidText;
                         isInvalidForm = true;
                     }
