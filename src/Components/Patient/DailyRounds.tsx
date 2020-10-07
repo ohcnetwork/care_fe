@@ -4,13 +4,13 @@ import { navigate } from 'raviger';
 import loadable from '@loadable/component';
 import React, { useCallback, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
-import { CURRENT_HEALTH_CHANGE, PATIENT_CATEGORY, SYMPTOM_CHOICES } from "../../Common/constants";
+import { CURRENT_HEALTH_CHANGE, PATIENT_CATEGORY, SYMPTOM_CHOICES, TELEMEDICINE_ACTIONS } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { CheckboxField, MultilineInputField, SelectField, TextInputField, ErrorHelperText, DateTimeFiled, MultiSelectField } from "../Common/HelperInputFields";
+import { NativeSelectField, CheckboxField, MultilineInputField, SelectField, TextInputField, ErrorHelperText, DateTimeFiled, MultiSelectField } from "../Common/HelperInputFields";
 import { createDailyReport, getConsultationDailyRoundsDetails, updateDailyReport } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
-const Loading = loadable( () => import("../Common/Loading"));
-const PageTitle = loadable( () => import("../Common/PageTitle"));
+const Loading = loadable(() => import("../Common/Loading"));
+const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 const initForm: any = {
     otherSymptom: false,
@@ -23,6 +23,8 @@ const initForm: any = {
     category: "",
     current_health: 0,
     recommend_discharge: false,
+    actions: null,
+    review_time: 0
 };
 
 const initError = Object.assign({}, ...Object.keys(initForm).map(k => ({ [k]: "" })));
@@ -146,6 +148,8 @@ export const DailyRounds = (props: any) => {
                 patient_category: state.form.category,
                 current_health: state.form.current_health,
                 recommend_discharge: JSON.parse(state.form.recommend_discharge),
+                action: state.form.action,
+                review_time: state.form.review_time
             };
 
             let res;
@@ -208,155 +212,182 @@ export const DailyRounds = (props: any) => {
     }
 
     return (
-    <div className="px-2 pb-2">
-        <PageTitle title={headerText} />
-        <div className="mt-4">
-            <Card>
-                <form onSubmit={e => handleSubmit(e)}>
-                    <CardContent>
-                        <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
-                            <div>
-                                <InputLabel id="temperature-label">Temperature</InputLabel>
-                                <TextInputField
-                                    name="temperature"
-                                    variant="outlined"
-                                    margin="dense"
-                                    type="text"
-                                    InputLabelProps={{ shrink: !!state.form.temperature }}
-                                    value={state.form.temperature}
-                                    onChange={handleChange}
-                                    errors={state.errors.temperature}
-                                />
-                            </div>
-                            <div>
-                                <DateTimeFiled
-                                    label="Temperature Measured At"
-                                    margin="dense"
-                                    disabled={!state.form.temperature}
-                                    value={state.form.temperature_measured_at}
-                                    disableFuture={true}
-                                    showTodayButton={true}
-                                    onChange={date => handleDateChange(date, "temperature_measured_at")}
-                                    errors={state.errors.temperature_measured_at}
-                                />
-                            </div>
-                            <div>
-                                <InputLabel id="physical-examination-info-label">Physical Examination Info</InputLabel>
-                                <MultilineInputField
-                                    rows={5}
-                                    name="physical_examination_info"
-                                    variant="outlined"
-                                    margin="dense"
-                                    type="text"
-                                    InputLabelProps={{ shrink: !!state.form.physical_examination_info }}
-                                    value={state.form.physical_examination_info}
-                                    onChange={handleChange}
-                                    errors={state.errors.physical_examination_info}
-                                />
-                            </div>
+        <div className="px-2 pb-2">
+            <PageTitle title={headerText} />
+            <div className="mt-4">
+                <Card>
+                    <form onSubmit={e => handleSubmit(e)}>
+                        <CardContent>
+                            <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+                                <div>
+                                    <InputLabel id="temperature-label">Temperature</InputLabel>
+                                    <TextInputField
+                                        name="temperature"
+                                        variant="outlined"
+                                        margin="dense"
+                                        type="text"
+                                        InputLabelProps={{ shrink: !!state.form.temperature }}
+                                        value={state.form.temperature}
+                                        onChange={handleChange}
+                                        errors={state.errors.temperature}
+                                    />
+                                </div>
+                                <div>
+                                    <DateTimeFiled
+                                        label="Temperature Measured At"
+                                        margin="dense"
+                                        disabled={!state.form.temperature}
+                                        value={state.form.temperature_measured_at}
+                                        disableFuture={true}
+                                        showTodayButton={true}
+                                        onChange={date => handleDateChange(date, "temperature_measured_at")}
+                                        errors={state.errors.temperature_measured_at}
+                                    />
+                                </div>
+                                <div>
+                                    <InputLabel id="physical-examination-info-label">Physical Examination Info</InputLabel>
+                                    <MultilineInputField
+                                        rows={5}
+                                        name="physical_examination_info"
+                                        variant="outlined"
+                                        margin="dense"
+                                        type="text"
+                                        InputLabelProps={{ shrink: !!state.form.physical_examination_info }}
+                                        value={state.form.physical_examination_info}
+                                        onChange={handleChange}
+                                        errors={state.errors.physical_examination_info}
+                                    />
+                                </div>
 
-                            <div>
-                                <InputLabel id="other-details-label">Other Details</InputLabel>
-                                <MultilineInputField
-                                    rows={5}
-                                    name="other_details"
-                                    variant="outlined"
-                                    margin="dense"
-                                    type="text"
-                                    InputLabelProps={{ shrink: !!state.form.other_details }}
-                                    value={state.form.other_details}
-                                    onChange={handleChange}
-                                    errors={state.errors.other_details}
-                                />
-                            </div>
+                                <div>
+                                    <InputLabel id="other-details-label">Other Details</InputLabel>
+                                    <MultilineInputField
+                                        rows={5}
+                                        name="other_details"
+                                        variant="outlined"
+                                        margin="dense"
+                                        type="text"
+                                        InputLabelProps={{ shrink: !!state.form.other_details }}
+                                        value={state.form.other_details}
+                                        onChange={handleChange}
+                                        errors={state.errors.other_details}
+                                    />
+                                </div>
 
-                            <div className="md:col-span-2">
-                                <InputLabel id="symptoms-label">
-                                    Symptoms
+                                <div className="md:col-span-2">
+                                    <InputLabel id="symptoms-label">
+                                        Symptoms
                                 </InputLabel>
-                                <MultiSelectField
-                                    name="additional_symptoms"
-                                    variant="outlined"
-                                    value={state.form.additional_symptoms}
-                                    options={symptomChoices}
-                                    onChange={handleSymptomChange}
-                                />
-                                <ErrorHelperText error={state.errors.additional_symptoms} />
+                                    <MultiSelectField
+                                        name="additional_symptoms"
+                                        variant="outlined"
+                                        value={state.form.additional_symptoms}
+                                        options={symptomChoices}
+                                        onChange={handleSymptomChange}
+                                    />
+                                    <ErrorHelperText error={state.errors.additional_symptoms} />
+                                </div>
+
+                                {state.form.otherSymptom && (<div className="md:col-span-2">
+                                    <InputLabel id="other-symptoms-label">Other Symptom Details</InputLabel>
+                                    <MultilineInputField
+                                        rows={5}
+                                        name="other_symptoms"
+                                        variant="outlined"
+                                        margin="dense"
+                                        type="text"
+                                        placeholder="Enter the other symptoms here"
+                                        InputLabelProps={{ shrink: !!state.form.other_symptoms }}
+                                        value={state.form.other_symptoms}
+                                        onChange={handleChange}
+                                        errors={state.errors.other_symptoms}
+                                    />
+                                </div>)}
+
+                                <div>
+                                    <InputLabel id="category-label">Category</InputLabel>
+                                    <SelectField
+                                        name="category"
+                                        variant="standard"
+                                        value={state.form.patient_category}
+                                        options={categoryChoices}
+                                        onChange={handleChange}
+                                        errors={state.errors.patient_category}
+                                    />
+                                </div>
+
+                                <div>
+                                    <InputLabel id="current-health-label">Current Health</InputLabel>
+                                    <SelectField
+                                        name="current_health"
+                                        variant="standard"
+                                        value={state.form.current_health}
+                                        options={currentHealthChoices}
+                                        onChange={handleChange}
+                                        optionKey="text"
+                                        optionValue="desc"
+                                        errors={state.errors.current_health}
+                                    />
+                                </div>
+                                <div>
+                                    <label>
+                                        Action
+                                    </label>
+                                    <NativeSelectField
+                                        name="action"
+                                        variant="outlined"
+                                        value={state.form.action}
+                                        optionKey="text"
+                                        optionValue="desc"
+                                        options={TELEMEDICINE_ACTIONS}
+                                        onChange={handleChange}
+                                    />
+                                    <ErrorHelperText error={state.errors.action} />
+                                </div>
+                                <div className="flex-1">
+                                    <InputLabel id="review_time-label">Review After (In Minutes)</InputLabel>
+                                    <TextInputField
+                                        name="review_time"
+                                        variant="outlined"
+                                        margin="dense"
+                                        type="number"
+                                        InputLabelProps={{ shrink: !!state.form.review_time }}
+                                        value={state.form.review_time}
+                                        onChange={handleChange}
+                                        errors={state.errors.review_time}
+                                    />
+                                </div>
+                                <div>
+                                    <CheckboxField
+                                        checked={state.form.recommend_discharge}
+                                        onChange={handleCheckboxFieldChange}
+                                        name="recommend_discharge"
+                                        label="Recommend Discharge"
+                                    />
+                                </div>
                             </div>
 
-                            {state.form.otherSymptom && (<div className="md:col-span-2">
-                                <InputLabel id="other-symptoms-label">Other Symptom Details</InputLabel>
-                                <MultilineInputField
-                                    rows={5}
-                                    name="other_symptoms"
-                                    variant="outlined"
-                                    margin="dense"
-                                    type="text"
-                                    placeholder="Enter the other symptoms here"
-                                    InputLabelProps={{ shrink: !!state.form.other_symptoms }}
-                                    value={state.form.other_symptoms}
-                                    onChange={handleChange}
-                                    errors={state.errors.other_symptoms}
-                                />
-                            </div>)}
-
-                            <div>
-                                <InputLabel id="category-label">Category</InputLabel>
-                                <SelectField
-                                    name="category"
-                                    variant="standard"
-                                    value={state.form.patient_category}
-                                    options={categoryChoices}
-                                    onChange={handleChange}
-                                    errors={state.errors.patient_category}
-                                />
+                            <div className="mt-4 flex justify-between">
+                                <Button
+                                    color="default"
+                                    variant="contained"
+                                    type="button"
+                                    onClick={(e) => goBack()}
+                                >Cancel</Button>
+                                <Button
+                                    color="primary"
+                                    variant="contained"
+                                    type="submit"
+                                    style={{ marginLeft: 'auto' }}
+                                    startIcon={<CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>}
+                                    onClick={(e) => handleSubmit(e)}
+                                >
+                                    {buttonText}
+                                </Button>
                             </div>
-
-                            <div>
-                                <InputLabel id="current-health-label">Current Health</InputLabel>
-                                <SelectField
-                                    name="current_health"
-                                    variant="standard"
-                                    value={state.form.current_health}
-                                    options={currentHealthChoices}
-                                    onChange={handleChange}
-                                    optionKey="text"
-                                    optionValue="desc"
-                                    errors={state.errors.current_health}
-                                />
-                            </div>
-
-                            <div>
-                                <CheckboxField
-                                    checked={state.form.recommend_discharge}
-                                    onChange={handleCheckboxFieldChange}
-                                    name="recommend_discharge"
-                                    label="Recommend Discharge"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="mt-4 flex justify-between">
-                            <Button
-                                color="default"
-                                variant="contained"
-                                type="button"
-                                onClick={(e) => goBack()}
-                            >Cancel</Button>
-                            <Button
-                                color="primary"
-                                variant="contained"
-                                type="submit"
-                                style={{ marginLeft: 'auto' }}
-                                startIcon={<CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>}
-                                onClick={(e) => handleSubmit(e)}
-                            >
-                                {buttonText}
-                            </Button>
-                        </div>
-                    </CardContent>
-                </form>
-            </Card>
-        </div>
-    </div>)
+                        </CardContent>
+                    </form>
+                </Card>
+            </div>
+        </div>)
 };
