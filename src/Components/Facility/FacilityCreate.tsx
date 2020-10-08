@@ -186,7 +186,7 @@ export const FacilityCreate = (props: FacilityProps) => {
             ward: res.data.ward_object ? res.data.ward_object : initialWards,
             address: res.data.address,
             pincode: res.data.pincode,
-            phone_number: res.data.phone_number,
+            phone_number: res.data.phone_number.length == 10 ? "+91" + res.data.phone_number : res.data.phone_number,
             latitude: res.data.location ? res.data.location.latitude : "",
             longitude: res.data.location ? res.data.location.longitude : "",
             oxygen_capacity: res.data.oxygen_capacity

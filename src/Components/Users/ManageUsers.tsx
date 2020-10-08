@@ -64,9 +64,19 @@ export default function ManageUsers(props: any) {
     setOffset(offset);
   };
 
+  const searchByUserName = async (searchValue: string) => {
+    setIsLoading(true);
+    const res = await dispatch(searchUser({ limit, offset, username: searchValue }));
+    if (res && res.data) {
+      setUsers(res.data.results);
+      setTotalCount(res.data.count);
+    }
+    setIsLoading(false);
+  }
+
   const searchByName = async (searchValue: string) => {
     setIsLoading(true);
-    const res = await dispatch(searchUser({ limit, offset, name: searchValue }));
+    const res = await dispatch(searchUser({ limit, offset, first_name: searchValue }));
     if (res && res.data) {
       setUsers(res.data.results);
       setTotalCount(res.data.count);
@@ -257,28 +267,38 @@ export default function ManageUsers(props: any) {
         title="User Management"
         hideBack={true}
         className="mx-3 md:mx-8" />
-      {/*<div className="flex flex-col md:flex-row px-4 md:px-8">*/}
-      {/*<div className="md:px-4">*/}
-      {/*  <div className="text-sm font-semibold mb-2">*/}
-      {/*    Search by Name*/}
-      {/*  </div>*/}
-      {/*  <InputSearchBox*/}
-      {/*      search={searchByName}*/}
-      {/*      placeholder='Search by Name'*/}
-      {/*      errors=''*/}
-      {/*  />*/}
-      {/*</div>*/}
-      {/*<div>*/}
-      {/*  <div className="text-sm font-semibold mb-2">*/}
-      {/*    Search by number*/}
-      {/*  </div>*/}
-      {/*  <InputSearchBox*/}
-      {/*      search={searchByPhone}*/}
-      {/*      placeholder='+919876543210'*/}
-      {/*      errors=''*/}
-      {/*  />*/}
-      {/*</div>*/}
-      {/*</div>*/}
+      <div className="flex flex-col md:flex-row px-4 md:px-8">
+        <div className="md:px-4">
+          <div className="text-sm font-semibold mb-2">
+            Search by User Name
+        </div>
+          <InputSearchBox
+            search={searchByUserName}
+            placeholder='Search by User Name'
+            errors=''
+          />
+        </div>
+        <div className="md:px-4">
+          <div className="text-sm font-semibold mb-2">
+            Search by Name
+        </div>
+          <InputSearchBox
+            search={searchByName}
+            placeholder='Search by First Name'
+            errors=''
+          />
+        </div>
+        <div>
+          <div className="text-sm font-semibold mb-2">
+            Search by number
+        </div>
+          <InputSearchBox
+            search={searchByPhone}
+            placeholder='+919876543210'
+            errors=''
+          />
+        </div>
+      </div>
       <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3 m-4 md:px-4">
         <div className="bg-white overflow-hidden shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">
