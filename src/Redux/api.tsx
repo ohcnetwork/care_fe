@@ -75,7 +75,7 @@ export default {
   },
 
   searchUser: {
-    path: "/api/v1/users/search",
+    path: "/api/v1/users",
   },
 
   // Facility Endpoints
