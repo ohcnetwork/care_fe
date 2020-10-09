@@ -105,6 +105,8 @@ const initForm: any = {
   emergency_phone_number: "",
   blood_group: "",
   disease_status: diseaseStatus[0],
+  is_declared_positive: "false",
+  date_declared_positive: false,
   date_of_birth: null,
   medical_history: [],
   nationality: "India",
@@ -288,6 +290,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               : "",
             is_medical_worker: res.data.is_medical_worker
               ? String(res.data.is_medical_worker)
+              : "false",
+            is_declared_positive: res.data.is_declared_positive
+              ? String(res.data.is_declared_positive)
               : "false",
             designation_of_health_care_worker: res.data
               .designation_of_health_care_worker
@@ -517,6 +522,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         date_of_result: state.form.date_of_result
           ? state.form.date_of_result
           : undefined,
+        date_declared_positive: state.form.date_declared_positive
+          ? state.form.date_declared_positive
+          : undefined,
         srf_id: state.form.srf_id,
         test_type: state.form.test_type,
         name: state.form.name,
@@ -572,6 +580,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           : undefined,
         ongoing_medication: state.form.ongoing_medication,
         is_medical_worker: JSON.parse(state.form.is_medical_worker),
+        is_declared_positive: JSON.parse(state.form.is_declared_positive),
         designation_of_health_care_worker:
           state.form.designation_of_health_care_worker,
         instituion_of_health_care_worker:
@@ -823,7 +832,49 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     errors={state.errors.disease_status}
                   />
                 </div>
-
+                <div>
+                  <InputLabel id="is_declared_positive">
+                    Is patient declared covid postive by state?
+                  </InputLabel>
+                  <RadioGroup
+                    aria-label="is_declared_positive"
+                    name="is_declared_positive"
+                    value={state.form.is_declared_positive}
+                    onChange={handleChange}
+                    style={{ padding: "0px 5px" }}
+                  >
+                    <Box display="flex" flexDirection="row">
+                      <FormControlLabel
+                        value="true"
+                        control={<Radio />}
+                        label="Yes"
+                      />
+                      <FormControlLabel
+                        value="false"
+                        control={<Radio />}
+                        label="No"
+                      />
+                    </Box>
+                  </RadioGroup>
+                </div>
+                {state.form.is_declared_positive === "true" && (
+                  <div>
+                    <InputLabel id="date_declared_positive-label">
+                      Date Patient is Declared Positive
+                    </InputLabel>
+                    <DateInputField
+                      fullWidth={true}
+                      value={state.form.date_declared_positive}
+                      onChange={(date) =>
+                        handleDateChange(date, "date_declared_positive")
+                      }
+                      errors={state.errors.date_declared_positive}
+                      inputVariant="outlined"
+                      margin="dense"
+                      disableFuture={true}
+                    />
+                  </div>
+                )}
                 <div>
                   <InputLabel id="test_type-label">Test Type</InputLabel>
                   <SelectField
@@ -864,7 +915,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   />
                 </div>
                 <div>
-                  <InputLabel id="date_of_birth-label">
+                  <InputLabel id="date_of_result-label">
                     Date of Result
                   </InputLabel>
                   <DateInputField
