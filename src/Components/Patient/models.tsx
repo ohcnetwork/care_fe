@@ -73,6 +73,7 @@ export interface PatientModel {
   date_of_birth?: string;
   blood_group?: string;
   review_time?: string;
+  cluster_name?: string;
   number_of_aged_dependents?: number;
   number_of_chronic_diseased_dependents?: number;
   will_donate_blood?: boolean;

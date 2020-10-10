@@ -696,8 +696,8 @@ export const PatientHome = (props: any) => {
                 <span className="font-semibold leading-relaxed">Ward : </span>
                 {(patientData.ward_object &&
                   patientData.ward_object.number +
-                    ", " +
-                    patientData.ward_object.name) ||
+                  ", " +
+                  patientData.ward_object.name) ||
                   "-"}
               </div>
             </>
@@ -732,8 +732,8 @@ export const PatientHome = (props: any) => {
               {patientData.is_antenatal ? (
                 <span className="badge badge-pill badge-danger">Yes</span>
               ) : (
-                <span className="badge badge-pill badge-warning">No</span>
-              )}
+                  <span className="badge badge-pill badge-warning">No</span>
+                )}
             </div>
           )}
           <div>
@@ -749,8 +749,8 @@ export const PatientHome = (props: any) => {
             {patientData.is_migrant_worker ? (
               <span className="badge badge-pill badge-warning">Yes</span>
             ) : (
-              <span className="badge badge-pill badge-secondary">No</span>
-            )}
+                <span className="badge badge-pill badge-secondary">No</span>
+              )}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">
@@ -759,8 +759,8 @@ export const PatientHome = (props: any) => {
             {patientData.contact_with_confirmed_carrier ? (
               <span className="badge badge-pill badge-warning">Yes</span>
             ) : (
-              <span className="badge badge-pill badge-secondary">No</span>
-            )}
+                <span className="badge badge-pill badge-secondary">No</span>
+              )}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">
@@ -769,8 +769,8 @@ export const PatientHome = (props: any) => {
             {patientData.contact_with_suspected_carrier ? (
               <span className="badge badge-pill badge-warning">Yes</span>
             ) : (
-              <span className="badge badge-pill badge-secondary">No</span>
-            )}
+                <span className="badge badge-pill badge-secondary">No</span>
+              )}
           </div>
           {patientData.number_of_primary_contacts && (
             <div>
@@ -796,6 +796,18 @@ export const PatientHome = (props: any) => {
               {moment(patientData.estimated_contact_date).format("LL")}
             </div>
           )}
+
+          {patientData.cluster_name && (
+            <div>
+              <span className="font-semibold leading-relaxed">
+                Name / Cluster of contact:{" "}
+              </span>
+              {patientData.cluster_name}
+            </div>
+          )}
+
+
+
           {/*<div className="md:col-span-2">*/}
           {/*  <span className="font-semibold leading-relaxed">Has SARI (Severe Acute Respiratory illness)?: </span>*/}
           {/*  {patientData.has_SARI ? <span className="badge badge-pill badge-warning">Yes</span> : <span className="badge badge-pill badge-secondary">No</span>}*/}
@@ -807,8 +819,8 @@ export const PatientHome = (props: any) => {
             {patientData.past_travel ? (
               <span className="badge badge-pill badge-warning">Yes</span>
             ) : (
-              <span className="badge badge-pill badge-secondary">No</span>
-            )}
+                <span className="badge badge-pill badge-secondary">No</span>
+              )}
           </div>
           {patientData.countries_travelled &&
             !!patientData.countries_travelled.length && (
@@ -1049,14 +1061,14 @@ export const PatientHome = (props: any) => {
                   {isSendingDischargeApi ? (
                     <CircularProgress size={20} />
                   ) : (
-                    <Button
-                      color="primary"
-                      onClick={() => handlePatientDischarge(false)}
-                      autoFocus
-                    >
-                      Proceed with Discharge
-                    </Button>
-                  )}
+                      <Button
+                        color="primary"
+                        onClick={() => handlePatientDischarge(false)}
+                        autoFocus
+                      >
+                        Proceed with Discharge
+                      </Button>
+                    )}
                 </DialogActions>
               </Dialog>
             </div>
@@ -1141,10 +1153,10 @@ export const PatientHome = (props: any) => {
               </div>
             </div>
           ) : (
-            <span className="flex items-center justify-center">
-              <h6 className="text-gray-700">No Medical History so far</h6>
-            </span>
-          )}
+              <span className="flex items-center justify-center">
+                <h6 className="text-gray-700">No Medical History so far</h6>
+              </span>
+            )}
         </div>
       </Grid>
 

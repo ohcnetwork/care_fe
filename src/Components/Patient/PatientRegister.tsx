@@ -143,6 +143,7 @@ const initForm: any = {
   frontline_worker: frontlineWorkers[0],
   number_of_aged_dependents: "",
   number_of_chronic_diseased_dependents: "",
+  cluster_name: "",
   ...medicalHistoryChoices,
 };
 
@@ -269,6 +270,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             ...res.data,
             nationality: res.data.nationality ? res.data.nationality : "India",
             gender: res.data.gender ? res.data.gender : "",
+            cluster_name: res.data.cluster_name ? res.data.cluster_name : "",
             state: res.data.state ? res.data.state : "",
             district: res.data.district ? res.data.district : "",
             blood_group: res.data.blood_group ? res.data.blood_group : "",
@@ -473,6 +475,17 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             }
           }
           return;
+        case "cluster_name":
+          if (
+            JSON.parse(state.form.contact_with_confirmed_carrier) ||
+            JSON.parse(state.form.contact_with_suspected_carrier)
+          ) {
+            if (!state.form[field]) {
+              errors[field] = "Please enter the name / cluster of the contact";
+              invalidForm = true;
+            }
+          }
+          return;
         case "blood_group":
           if (!state.form[field]) {
             errors[field] = "Please select a blood group";
@@ -558,6 +571,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           state.form.contact_with_suspected_carrier
         ),
         estimated_contact_date: state.form.estimated_contact_date,
+        cluster_name: state.form.cluster_name,
         past_travel: state.form.past_travel,
         transit_details: state.form.transit_details,
         countries_travelled: state.form.past_travel
@@ -1306,7 +1320,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     <div>
                       <DateInputField
                         fullWidth={true}
-                        label="Esimate date of contact*"
+                        label="Estimate date of contact*"
                         value={state.form.estimated_contact_date}
                         onChange={(date) =>
                           handleDateChange(date, "estimated_contact_date")
@@ -1317,8 +1331,27 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         disableFuture={true}
                       />
                     </div>
+
                   )}
 
+                {(JSON.parse(state.form.contact_with_confirmed_carrier) ||
+                  JSON.parse(state.form.contact_with_suspected_carrier)) && (
+                    <div>
+                      <InputLabel id="cluster_name-label">
+                        Name / Cluster of Contact*
+                      </InputLabel>
+                      <TextInputField
+                        name="cluster_name"
+                        variant="outlined"
+                        margin="dense"
+                        type="text"
+                        placeholder="Name / Cluster of Contact"
+                        value={state.form.cluster_name}
+                        onChange={handleChange}
+                        errors={state.errors.cluster_name}
+                      />
+                    </div>
+                  )}
                 <div className="md:col-span-2">
                   <CheckboxField
                     checked={state.form.past_travel}
