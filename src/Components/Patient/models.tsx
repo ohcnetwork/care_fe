@@ -21,6 +21,8 @@ export interface PatientModel {
   allow_transfer?: boolean;
   discharge?: boolean;
   gender?: number;
+  created_date?: string,
+  modified_date?: string,
   phone_number?: string;
   emergency_phone_number?: string;
   allergies?: string;
@@ -80,6 +82,8 @@ export interface PatientModel {
   fit_for_blood_donation?: boolean;
   date_declared_positive?: string;
   is_declared_positive?: boolean;
+  last_edited?: { first_name?: string; username?: string; last_name?: string };
+  created_by?: { first_name?: string; username?: string; last_name?: string };
 }
 
 export interface SampleTestModel {

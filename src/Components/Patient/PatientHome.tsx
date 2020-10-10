@@ -270,6 +270,15 @@ export const PatientHome = (props: any) => {
     return data;
   };
 
+  function Badge(props: { color: string, icon: string, text: string }) {
+    return (
+      <span className="m-1 inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-gray-100 text-gray-700" title={props.text}>
+        <i className={"mr-2 text-md text-" + props.color + "-500 fas fa-" + props.icon}></i>
+        {props.text}
+      </span>
+    )
+  }
+
   const dischargeSummaryFormSetUserEmail = () => {
     setDischargeSummaryForm({ email: currentUser.data.email });
   };
@@ -496,10 +505,140 @@ export const PatientHome = (props: any) => {
           <div className="md:w-2/3 mx-2">
             <div className="bg-white rounded-lg shadow p-4 h-full">
               <h1 className="font-bold text-3xl"> {patientData.name} - {patientData.age}</h1>
+              <h3 className="font-semibold text-lg">
+                <i className="fas fa-hospital mr-2" ></i>
+                {patientData.facility_object?.name || "-"}
+              </h3>
+              <div className="grid grid-cols-1 gap-x-4 gap-y-2 md:gap-y-8 sm:grid-cols-3 mt-2">
+                <div className="sm:col-span-1">
+                  <div className="text-sm leading-5 font-medium text-gray-500">
+                    Gender, Date of Birth
+                  </div>
+                  <div className="mt-1 text-sm leading-5 text-gray-900">
+                    {patientData?.date_of_birth}, {patientGender}
+                  </div>
+                </div>
+                <div className="sm:col-span-1">
+                  <div className="text-sm leading-5 font-medium text-gray-500">
+                    Phone
+                  </div>
+                  <div className="mt-1 text-sm leading-5 text-gray-900">
+                    <a href={`tel:${patientData.phone_number}`}>
+                      {patientData.phone_number || "-"}
+                    </a>
+                  </div>
+                </div>
+                <div className="sm:col-span-1">
+                  <div className="text-sm leading-5 font-medium text-gray-500">
+                    Emergency Contact
+                  </div>
+                  <div className="mt-1 text-sm leading-5 text-gray-900">
+                    <a href={`tel:${patientData.emergency_phone_number}`}>
+                      {patientData.emergency_phone_number || "-"}
+                    </a>
+                  </div>
+                </div>
+                <div className="sm:col-span-1">
+                  <div className="text-sm leading-5 font-medium text-gray-500">
+                    Blood Group
+                  </div>
+                  <div className="mt-1 text-sm leading-5 text-gray-900">
+                    {patientData.blood_group || "-"}
+                  </div>
+                </div>
+                <div className="sm:col-span-1">
+                  <div className="text-sm leading-5 font-medium text-gray-500">
+                    Blood Group
+                  </div>
+                  <div className="mt-1 text-sm leading-5 text-gray-900">
+                    {patientData.blood_group || "-"}
+                  </div>
+                </div>
+              </div>
+              {patientData.is_antenatal && (
+                <div className="sm:col-span-1">
+                  <div className="text-sm leading-5 font-medium text-gray-500">
+                    Is pregnant
+                </div>
+                  <div className="mt-1 text-sm leading-5 text-gray-900">
+                    Yes
+                </div>
+                </div>
+              )}
+
+
+
+              <div className="flex flex-wrap">
+                {patientData.allow_transfer ?
+                  <Badge color="yellow" icon="unlock" text="Transfer Allowed" />
+                  : <Badge color="green" icon="lock" text="Transfer Blocked" />}
+                {
+                  patientData.is_antenatal && patientData.is_active &&
+                  <Badge color="blue" icon="baby-carriage" text="Antenatal" />
+                }
+                {patientData.is_medical_worker && patientData.is_active && (
+                  <Badge color="blue" icon="user-md" text="Medical Worker" />
+                )}
+                {patientData.contact_with_confirmed_carrier && (
+                  <Badge color="red" icon="exclamation-triangle" text="Contact with confirmed carrier" />
+                )}
+                {patientData.contact_with_suspected_carrier && (
+                  <Badge color="yellow" icon="exclamation-triangle" text="Contact with suspected carrier" />
+                )}
+              </div>
             </div>
+
           </div>
           <div className="md:w-1/3 mx-2">
-            <div id="actions" className="">
+            <div id="actions" className="space-y-2 mt-2">
+              <div className="p-2 bg-white rounded-lg shadow text-center">
+                <div className="flex justify-between">
+                  <div className="w-1/2 border-r-2">
+                    <div className="text-sm leading-5 font-medium text-gray-500">
+                      Disease Status
+                  </div>
+                    <div className="mt-1 text-xl font-semibold leading-5 text-gray-900">
+                      {patientData.disease_status}
+                    </div>
+                  </div>
+                  <div className="w-1/2">
+                    <div className="text-sm leading-5 font-medium text-gray-500">
+                      Status
+                  </div>
+                    <div className="mt-1 text-xl font-semibold leading-5 text-gray-900">
+                      {patientData.is_active ? "Live" : "Discharged"}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="flex justify-between p-2 bg-white rounded-lg shadow px-4">
+                <div className="w-1/2">
+                  <div className="text-sm leading-5 font-medium text-gray-500">
+                    Created
+                  </div>
+                  <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-pre">
+                    <div className="text-sm">
+                      {patientData?.created_by?.first_name} {patientData?.created_by?.last_name}
+                    </div>
+                    <div className="text-xs">
+                      {patientData.created_date && moment(patientData.created_date).format("lll")}
+                    </div>
+                  </div>
+                </div>
+                <div className="w-1/2">
+                  <div className="text-sm leading-5 font-medium text-gray-500">
+                    Last Edited
+                  </div>
+                  <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-pre">
+                    <div className="text-sm">
+                      {patientData?.last_edited?.first_name} {patientData?.last_edited?.last_name}
+                    </div>
+                    <div className="text-xs">
+                      {patientData.modified_date && moment(patientData.modified_date).format("lll")}
+                    </div>
+                  </div>
+                </div>
+              </div>
               <div>
                 <button className="btn btn-primary w-full"
                   disabled={!patientData.is_active}
@@ -511,7 +650,7 @@ export const PatientHome = (props: any) => {
                   Update Details
                 </button>
               </div>
-              <div className="mt-2">
+              <div >
                 <button className="btn btn-primary w-full"
                   disabled={!consultationListData || !consultationListData.length || !patientData.is_active}
                   onClick={() => handlePatientTransfer(!patientData.allow_transfer)}
@@ -563,10 +702,10 @@ export const PatientHome = (props: any) => {
               </div>
               <div className="sm:col-span-1">
                 <div className="text-sm leading-5 font-medium text-gray-500">
-                  State, Country
+                  State, Country - Pincode
                 </div>
                 <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {patientData?.state_object?.name}, {patientData.nationality || "-"}
+                  {patientData?.state_object?.name}, {patientData.nationality || "-"} - {patientData.pincode}
                 </div>
               </div>
             </div>
@@ -626,6 +765,14 @@ export const PatientHome = (props: any) => {
                 </div>
                 <div className="mt-1 text-sm leading-5 text-gray-900">
                   {"Primary: " + (patientData.number_of_primary_contacts || 0) + ", Secondary: " + (patientData.number_of_secondary_contacts || 0)}
+                </div>
+              </div>
+              <div className="sm:col-span-1">
+                <div className="text-sm leading-5 font-medium text-gray-500">
+                  Number of Dependents
+                </div>
+                <div className="mt-1 text-sm leading-5 text-gray-900">
+                  {"Above 60: " + (patientData.number_of_aged_dependents || 0) + ", Chronic Diseased: " + (patientData.number_of_chronic_diseased_dependents || 0)}
                 </div>
               </div>
             </div>
@@ -692,6 +839,22 @@ export const PatientHome = (props: any) => {
             </div>
           </div>
         </section>
+        <section className="md:flex mt-4 space-y-2">
+          <div className="md:w-2/3 mx-2">
+            <div className="bg-white rounded-lg shadow p-4 h-full space-y-2">
+              <div className="border-b border-dashed text-gray-900 font-semibold text-center text-lg pb-2">
+                Medical
+              </div>
+            </div>
+          </div>
+          <div className="md:w-1/3 mx-2">
+            <div className="bg-white rounded-lg shadow p-4 h-full space-y-2">
+              <div className="border-b border-dashed text-gray-900 font-semibold text-center text-lg pb-2">
+                Actions
+              </div>
+            </div>
+          </div>
+        </section>
 
       </div>
       <PageTitle title={`Covid Suspect Details`} />
@@ -715,10 +878,10 @@ export const PatientHome = (props: any) => {
               </div>
             )}
             <div className="flex items-baseline">
-              <div className="mt-1">
+              {/* <div className="mt-1">
                 <span className="font-semibold leading-relaxed">Name: </span>
                 {patientData.name}
-              </div>
+              </div> */}
 
               <div>
                 {!patientData.is_active && (
@@ -727,20 +890,20 @@ export const PatientHome = (props: any) => {
                   </span>
                 )}
               </div>
-              <div>
+              {/* <div>
                 {patientData.allow_transfer && (
                   <span className="ml-2 badge badge-pill badge-success">
                     Transfer Allowed
                   </span>
                 )}
-              </div>
-              <div>
+              </div> */}
+              {/* <div>
                 {!patientData.allow_transfer && (
                   <span className="ml-2 badge badge-pill badge-warning">
                     Transfer Not Allowed
                   </span>
                 )}
-              </div>
+              </div> */}
             </div>
             {/* {patientData.is_medical_worker && (
               <>
@@ -764,14 +927,14 @@ export const PatientHome = (props: any) => {
                 </div>
               </>
             )} */}
-            <div>
+            {/* <div>
               <span className="font-semibold leading-relaxed">
                 Disease Status:{" "}
               </span>
               <span className="badge badge-pill badge-danger">
                 {patientData.disease_status}
               </span>
-            </div>
+            </div> */}
             {/* {patientData.is_declared_positive && (
               <>
                 <div>
@@ -820,7 +983,7 @@ export const PatientHome = (props: any) => {
           </div>
         </div> */}
         <div className="grid gap-2 grid-cols-1 md:grid-cols-2 mt-2">
-          <div>
+          {/* <div>
             <span className="font-semibold leading-relaxed">Facility: </span>
             {patientData.facility_object?.name || "-"}
           </div>
@@ -835,33 +998,33 @@ export const PatientHome = (props: any) => {
           <div>
             <span className="font-semibold leading-relaxed">Gender: </span>
             {patientGender}
-          </div>
+          </div> */}
           {/* <div>
             <span className="font-semibold leading-relaxed">Age: </span>
             {patientData.age}
           </div> */}
-          <div>
+          {/* <div>
             <span className="font-semibold leading-relaxed">Phone: </span>
             <a href={`tel:${patientData.phone_number}`}>
               {patientData.phone_number || "-"}
             </a>
-          </div>
+          </div> */}
           {/* <div>
             <span className="font-semibold leading-relaxed">Nationality: </span>
             {patientData.nationality || "-"}
           </div> */}
-          <div>
+          {/* <div>
             <span className="font-semibold leading-relaxed">Blood Group: </span>
             {patientData.blood_group || "-"}
-          </div>
-          {patientData.nationality !== "India" && (
-            <div>
-              <span className="font-semibold leading-relaxed">
-                Passport Number:{" "}
-              </span>
-              {patientData.passport_no || "-"}
-            </div>
-          )}
+          </div> */}
+          {/* {patientData.nationality !== "India" && (
+            // <div>
+            //   <span className="font-semibold leading-relaxed">
+            //     Passport Number:{" "}
+            //   </span>
+            //   {patientData.passport_no || "-"}
+            // </div>
+          )} */}
           {patientData.nationality === "India" && (
             <>
               {/* <div>
@@ -898,20 +1061,20 @@ export const PatientHome = (props: any) => {
             <span className="font-semibold leading-relaxed">Village: </span>
             {patientData.village || "-"}
           </div> */}
-          <div>
+          {/* <div>
             <span className="font-semibold leading-relaxed">
               Emergency Contact number:{" "}
             </span>
             <a href={`tel:${patientData.emergency_phone_number}`}>
               {patientData.emergency_phone_number || "-"}
             </a>
-          </div>
-          <div>
+          </div> */}
+          {/* <div>
             <span className="font-semibold leading-relaxed">Pincode: </span>
             {patientData.pincode || "-"}
-          </div>
+          </div> */}
 
-          {patientData.is_antenatal && (
+          {/* {patientData.is_antenatal && (
             <div>
               <span className="font-semibold leading-relaxed">
                 {" "}
@@ -923,7 +1086,7 @@ export const PatientHome = (props: any) => {
                   <span className="badge badge-pill badge-warning">No</span>
                 )}
             </div>
-          )}
+          )} */}
           {/* <div>
             <span className="font-semibold leading-relaxed">
               Frontline Worker:{" "}
@@ -940,7 +1103,7 @@ export const PatientHome = (props: any) => {
                 <span className="badge badge-pill badge-secondary">No</span>
               )}
           </div> */}
-          <div>
+          {/* <div>
             <span className="font-semibold leading-relaxed">
               Contact with confirmed carrier:{" "}
             </span>
@@ -959,7 +1122,7 @@ export const PatientHome = (props: any) => {
             ) : (
                 <span className="badge badge-pill badge-secondary">No</span>
               )}
-          </div>
+          </div> */}
           {/* {patientData.number_of_primary_contacts && (
             <div>
               <span className="font-semibold leading-relaxed">
@@ -1043,7 +1206,7 @@ export const PatientHome = (props: any) => {
               {patientData.allergies}
             </div>
           )}
-          {!!patientData.number_of_aged_dependents && (
+          {/* {!!patientData.number_of_aged_dependents && (
             <div>
               <span className="font-semibold leading-relaxed">
                 Number Of Aged Dependents (Above 60):{" "}
@@ -1058,7 +1221,7 @@ export const PatientHome = (props: any) => {
               </span>
               {patientData.number_of_chronic_diseased_dependents}
             </div>
-          )}
+          )} */}
         </div>
         <div className="flex mt-4">
           <div className="flex-1">
