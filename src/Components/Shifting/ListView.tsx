@@ -35,6 +35,7 @@ const initialFilterData = {
   patient_phone_number: '',
   offset: 0,
   ordering: null,
+  is_kasp: '--'
 }
 
 const formatFilter = (params: any) => {
@@ -56,6 +57,7 @@ const formatFilter = (params: any) => {
     modified_date_after: filter.modified_date_after || undefined,
     patient_phone_number: filter.patient_phone_number || undefined,
     ordering: filter.ordering || undefined,
+    is_kasp: (filter.is_kasp && filter.is_kasp) === '--' ? '' : (filter.is_kasp === 'yes' ? 'true' : 'false'),
   };
 }
 
@@ -156,6 +158,7 @@ export default function ListView() {
       </div>
       <div className="flex space-x-2 mt-2">
         {badge("Emergency", appliedFilters.emergency === 'true' ? 'yes' : appliedFilters.emergency === 'false' ? 'no' : undefined)}
+        {badge("Is KASP", appliedFilters.is_kasp === 'true' ? 'yes' : appliedFilters.is_kasp === 'false' ? 'no' : undefined)}
         {badge("Up Shift", appliedFilters.is_up_shift === 'true' ? 'yes' : appliedFilters.is_up_shift === 'false' ? 'no' : undefined)}
         {badge("Phone Number", appliedFilters.patient_phone_number)}
         {badge("Patient Name", appliedFilters.patient_name)}

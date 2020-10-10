@@ -62,7 +62,7 @@ export default function ListView({ board, filterProp, formatFilter }: boardProps
   useEffect(() => {
     fetchData();
   },
-    [board, dispatch, filterProp.facility, filterProp.orgin_facility, filterProp.shifting_approving_facility, filterProp.assigned_facility, filterProp.emergency, filterProp.is_up_shift, filterProp.patient_name, filterProp.created_date_before, filterProp.created_date_after, filterProp.modified_date_before, filterProp.modified_date_after, filterProp.patient_phone_number, filterProp.ordering]
+    [board, dispatch, filterProp.facility, filterProp.orgin_facility, filterProp.shifting_approving_facility, filterProp.assigned_facility, filterProp.emergency, filterProp.is_up_shift, filterProp.patient_name, filterProp.created_date_before, filterProp.created_date_after, filterProp.modified_date_before, filterProp.modified_date_after, filterProp.patient_phone_number, filterProp.ordering, filterProp.is_kasp]
   );
 
   const handlePagination = (page: number, limit: number) => {
