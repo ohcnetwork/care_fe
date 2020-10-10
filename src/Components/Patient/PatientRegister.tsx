@@ -106,7 +106,7 @@ const initForm: any = {
   blood_group: "",
   disease_status: diseaseStatus[0],
   is_declared_positive: "false",
-  date_declared_positive: false,
+  date_declared_positive: new Date(),
   date_of_birth: null,
   medical_history: [],
   nationality: "India",
@@ -131,8 +131,8 @@ const initForm: any = {
   number_of_primary_contacts: "",
   number_of_secondary_contacts: "",
   is_antenatal: "false",
-  date_of_test: false,
-  date_of_result: false,
+  date_of_test: null,
+  date_of_result: null,
   srf_id: "",
   test_type: testType[0],
   prescribed_medication: false,
@@ -273,7 +273,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             district: res.data.district ? res.data.district : "",
             blood_group: res.data.blood_group ? res.data.blood_group : "",
             local_body: res.data.local_body ? res.data.local_body : "",
-            ward: res.data.ward_object ? res.data.ward : initialWard,
+            ward: res.data.ward_object ? res.data.ward_object.id : initialWard,
             village: res.data.village ? res.data.village : "",
             medical_history: [],
             is_antenatal: res.data.is_antenatal
@@ -678,8 +678,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           const duplicateList = !id
             ? res.data.results
             : res.data.results.filter(
-                (item: DupPatientModel) => item.patient_id !== id
-              );
+              (item: DupPatientModel) => item.patient_id !== id
+            );
           if (duplicateList.length) {
             setStatusDialog({
               show: true,
@@ -1036,20 +1036,20 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       {isStateLoading ? (
                         <CircularProgress size={20} />
                       ) : (
-                        <SelectField
-                          name="state"
-                          variant="outlined"
-                          margin="dense"
-                          value={state.form.state}
-                          options={states}
-                          optionValue="name"
-                          onChange={(e) => [
-                            handleChange(e),
-                            fetchDistricts(String(e.target.value)),
-                          ]}
-                          errors={state.errors.state}
-                        />
-                      )}
+                          <SelectField
+                            name="state"
+                            variant="outlined"
+                            margin="dense"
+                            value={state.form.state}
+                            options={states}
+                            optionValue="name"
+                            onChange={(e) => [
+                              handleChange(e),
+                              fetchDistricts(String(e.target.value)),
+                            ]}
+                            errors={state.errors.state}
+                          />
+                        )}
                     </div>
 
                     <div>
@@ -1057,20 +1057,20 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       {isDistrictLoading ? (
                         <CircularProgress size={20} />
                       ) : (
-                        <SelectField
-                          name="district"
-                          variant="outlined"
-                          margin="dense"
-                          value={state.form.district}
-                          options={districts}
-                          optionValue="name"
-                          onChange={(e) => [
-                            handleChange(e),
-                            fetchLocalBody(String(e.target.value)),
-                          ]}
-                          errors={state.errors.district}
-                        />
-                      )}
+                          <SelectField
+                            name="district"
+                            variant="outlined"
+                            margin="dense"
+                            value={state.form.district}
+                            options={districts}
+                            optionValue="name"
+                            onChange={(e) => [
+                              handleChange(e),
+                              fetchLocalBody(String(e.target.value)),
+                            ]}
+                            errors={state.errors.district}
+                          />
+                        )}
                     </div>
 
                     <div>
@@ -1078,37 +1078,37 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       {isLocalbodyLoading ? (
                         <CircularProgress size={20} />
                       ) : (
-                        <SelectField
-                          name="local_body"
-                          variant="outlined"
-                          margin="dense"
-                          value={state.form.local_body}
-                          options={localBody}
-                          optionValue="name"
-                          onChange={(e) => [
-                            handleChange(e),
-                            fetchWards(String(e.target.value)),
-                          ]}
-                          errors={state.errors.local_body}
-                        />
-                      )}
+                          <SelectField
+                            name="local_body"
+                            variant="outlined"
+                            margin="dense"
+                            value={state.form.local_body}
+                            options={localBody}
+                            optionValue="name"
+                            onChange={(e) => [
+                              handleChange(e),
+                              fetchWards(String(e.target.value)),
+                            ]}
+                            errors={state.errors.local_body}
+                          />
+                        )}
                     </div>
                   </>
                 ) : (
-                  <div>
-                    <InputLabel id="passport-label">
-                      Passport Number*
+                    <div>
+                      <InputLabel id="passport-label">
+                        Passport Number*
                     </InputLabel>
-                    <TextInputField
-                      name="passport_no"
-                      variant="outlined"
-                      margin="dense"
-                      value={state.form.passport_no}
-                      onChange={handleChange}
-                      errors={state.errors.passport_no}
-                    />
-                  </div>
-                )}
+                      <TextInputField
+                        name="passport_no"
+                        variant="outlined"
+                        margin="dense"
+                        value={state.form.passport_no}
+                        onChange={handleChange}
+                        errors={state.errors.passport_no}
+                      />
+                    </div>
+                  )}
 
                 <div>
                   <InputLabel id="address-label">Address*</InputLabel>
@@ -1128,23 +1128,24 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   <InputLabel id="ward-label">
                     Ward/Division of respective LSGI*
                   </InputLabel>
-                  {isLocalbodyLoading ? (
+                  {isWardLoading ? (
                     <CircularProgress size={20} />
                   ) : (
-                    <SelectField
-                      name="ward"
-                      variant="outlined"
-                      margin="dense"
-                      options={ward
-                        .sort((a, b) => a.number - b.number)
-                        .map((e) => {
-                          return { id: e.id, name: e.number + ": " + e.name };
-                        })}
-                      optionValue="name"
-                      onChange={handleChange}
-                      errors={state.errors.local_body}
-                    />
-                  )}
+                      <SelectField
+                        name="ward"
+                        variant="outlined"
+                        margin="dense"
+                        options={ward
+                          .sort((a, b) => a.number - b.number)
+                          .map((e) => {
+                            return { id: e.id, name: e.number + ": " + e.name };
+                          })}
+                        value={state.form.ward}
+                        optionValue="name"
+                        onChange={handleChange}
+                        errors={state.errors.ward}
+                      />
+                    )}
                 </div>
                 <div>
                   <InputLabel id="name-label">Village</InputLabel>
@@ -1302,21 +1303,21 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
                 {(JSON.parse(state.form.contact_with_confirmed_carrier) ||
                   JSON.parse(state.form.contact_with_suspected_carrier)) && (
-                  <div>
-                    <DateInputField
-                      fullWidth={true}
-                      label="Esimate date of contact*"
-                      value={state.form.estimated_contact_date}
-                      onChange={(date) =>
-                        handleDateChange(date, "estimated_contact_date")
-                      }
-                      errors={state.errors.estimated_contact_date}
-                      inputVariant="outlined"
-                      margin="dense"
-                      disableFuture={true}
-                    />
-                  </div>
-                )}
+                    <div>
+                      <DateInputField
+                        fullWidth={true}
+                        label="Esimate date of contact*"
+                        value={state.form.estimated_contact_date}
+                        onChange={(date) =>
+                          handleDateChange(date, "estimated_contact_date")
+                        }
+                        errors={state.errors.estimated_contact_date}
+                        inputVariant="outlined"
+                        margin="dense"
+                        disableFuture={true}
+                      />
+                    </div>
+                  )}
 
                 <div className="md:col-span-2">
                   <CheckboxField

@@ -183,7 +183,7 @@ export const FacilityCreate = (props: FacilityProps) => {
             state: res.data.state ? res.data.state : "",
             district: res.data.district ? res.data.district : "",
             local_body: res.data.local_body ? res.data.local_body : "",
-            ward: res.data.ward_object ? res.data.ward_object : initialWards,
+            ward: res.data.ward_object ? res.data.ward_object.id : initialWards,
             address: res.data.address,
             pincode: res.data.pincode,
             phone_number: res.data.phone_number.length == 10 ? "+91" + res.data.phone_number : res.data.phone_number,
@@ -496,8 +496,12 @@ export const FacilityCreate = (props: FacilityProps) => {
                       name="ward"
                       variant="outlined"
                       margin="dense"
+                      options={ward
+                        .sort((a, b) => a.number - b.number)
+                        .map((e) => {
+                          return { id: e.id, name: e.number + ": " + e.name };
+                        })}
                       value={state.form.ward}
-                      options={ward.sort((a, b) => a.number - b.number).map((e) => { return { id: e.id, name: e.number + ": " + e.name } })}
                       optionValue="name"
                       onChange={handleChange}
                       errors={state.errors.ward}
