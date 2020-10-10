@@ -33,13 +33,13 @@ export const getUserList = (params: object) => {
   return fireRequest("userList", [], params);
 };
 export const getUserListFacility = (username: string) => {
-  return fireRequest("userListFacility", [], {}, {username}, username);
+  return fireRequest("userListFacility", [], {}, { username }, username);
 };
 export const addUserFacility = (username: string, facility: string) => {
-  return fireRequest("addUserFacility", [], {facility}, {username});
+  return fireRequest("addUserFacility", [], { facility }, { username });
 };
 export const deleteUserFacility = (username: string, facility: string) => {
-  return fireRequest("deleteUserFacility", [], {data: {facility}}, {username});
+  return fireRequest("deleteUserFacility", [], { data: { facility } }, { username });
 };
 export const getFacilities = (params: object) => {
   return fireRequest("listFacility", [], params);
@@ -49,7 +49,7 @@ export const getAllFacilities = (params: object) => {
 };
 
 export const getFacility = (id: number, key?: string) => {
-  return fireRequest("getFacility", [id], {}, null, key);
+  return fireRequest("getFacility", [], {}, { id: id }, key);
 };
 
 // Download Actions
@@ -246,7 +246,7 @@ export const dischargePatient = (params: object, pathParams: object) => {
 
 //Profile
 export const getUserDetails = (username: string) => {
-  return fireRequest("getUserDetails", [username]);
+  return fireRequest("getUserDetails", [], {}, { username: username });
 };
 export const updateUserDetails = (username: string, data: object) => {
   return fireRequest("updateUserDetails", [username], data);
@@ -262,11 +262,11 @@ export const updateShift = (id: string, params: object) => {
 export const deleteShiftRecord = (id: string) => {
   return fireRequest("deleteShiftRecord", [id], {});
 };
-export const getShiftRequests = (params: object, key: string) => {
-  return fireRequest(`getShiftRequests`, [], params, null, key);
+export const listShiftRequests = (params: object, key: string) => {
+  return fireRequest(`listShiftRequests`, [], params, null, key);
 };
-export const getShiftDetails = (id: string) => {
-  return fireRequest("getShiftDetails", [id], {});
+export const getShiftDetails = (pathParam: object) => {
+  return fireRequest("getShiftDetails", [], {}, pathParam);
 };
 export const completeTransfer = (pathParams: object) => {
   return fireRequest("completeTransfer", [], {}, pathParams);

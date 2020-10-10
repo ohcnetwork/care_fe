@@ -27,11 +27,11 @@ export default {
   },
   // User Endpoints
   currentUser: {
-    path: "/api/v1/users/getcurrentuser",
+    path: "/api/v1/users/getcurrentuser/",
   },
 
   userList: {
-    path: "/api/v1/users",
+    path: "/api/v1/users/",
   },
 
   userListFacility: {
@@ -75,13 +75,13 @@ export default {
   },
 
   searchUser: {
-    path: "/api/v1/users",
+    path: "/api/v1/users/",
   },
 
   // Facility Endpoints
 
   listFacility: {
-    path: "/api/v1/facility",
+    path: "/api/v1/facility/",
   },
 
   createFacility: {
@@ -90,7 +90,7 @@ export default {
   },
 
   getFacility: {
-    path: "/api/v1/facility",
+    path: "/api/v1/facility/{id}",
   },
 
   updateFacility: {
@@ -181,11 +181,11 @@ export default {
   },
 
   getCapacity: {
-    path: "/api/v1/facility/{facilityId}/capacity",
+    path: "/api/v1/facility/{facilityId}/capacity/",
   },
 
   getDoctor: {
-    path: "/api/v1/facility/{facilityId}/hospital_doctor",
+    path: "/api/v1/facility/{facilityId}/hospital_doctor/",
   },
 
   updateCapacity: {
@@ -204,7 +204,7 @@ export default {
     method: "POST",
   },
   getTriage: {
-    path: "/api/v1/facility/{facilityId}/patient_stats",
+    path: "/api/v1/facility/{facilityId}/patient_stats/",
   },
 
   // //Care Center
@@ -219,7 +219,7 @@ export default {
     path: "/api/v1/patient/search",
   },
   patientList: {
-    path: "/api/v1/patient",
+    path: "/api/v1/patient/",
   },
   addPatient: {
     path: "/api/v1/patient/",
@@ -299,7 +299,7 @@ export default {
 
   // Sample Test
   getTestSampleList: {
-    path: "/api/v1/test_sample",
+    path: "/api/v1/test_sample/",
   },
   getTestSample: {
     path: "/api/v1/test_sample",
@@ -351,7 +351,7 @@ export default {
   },
   //Profile
   getUserDetails: {
-    path: "/api/v1/users",
+    path: "/api/v1/users/{username}/",
     method: "GET",
   },
   updateUserDetails: {
@@ -371,13 +371,12 @@ export default {
     path: "/api/v1/shift",
     method: "DELETE",
   },
-  getShiftRequests: {
-    path: "/api/v1/shift",
+  listShiftRequests: {
+    path: "/api/v1/shift/",
     method: "GET",
   },
   getShiftDetails: {
-    path: "/api/v1/shift",
-    method: "GET",
+    path: "/api/v1/shift/{id}/",
   },
   completeTransfer: {
     path: "/api/v1/shift/{externalId}/transfer/",

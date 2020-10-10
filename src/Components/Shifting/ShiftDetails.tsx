@@ -31,7 +31,7 @@ export default function ShiftDetails(props: { id: string }) {
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const res = await dispatch(getShiftDetails(props.id));
+      const res = await dispatch(getShiftDetails({ id: props.id }));
       if (!status.aborted) {
         if (res && res.data) {
           setData(res.data);
