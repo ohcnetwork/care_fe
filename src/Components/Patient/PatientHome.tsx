@@ -490,6 +490,210 @@ export const PatientHome = (props: any) => {
           handleCancel={() => dismissAlert()}
         />
       )}
+
+      <div id="revamp">
+        <section className="md:flex mt-4">
+          <div className="md:w-2/3 mx-2">
+            <div className="bg-white rounded-lg shadow p-4 h-full">
+              <h1 className="font-bold text-3xl"> {patientData.name} - {patientData.age}</h1>
+            </div>
+          </div>
+          <div className="md:w-1/3 mx-2">
+            <div id="actions" className="">
+              <div>
+                <button className="btn btn-primary w-full"
+                  disabled={!patientData.is_active}
+                  onClick={() =>
+                    navigate(`/facility/${facilityId}/patient/${id}/update`)
+                  }
+                >
+                  <i className="fas fa-pencil-alt mr-2" />
+                  Update Details
+                </button>
+              </div>
+              <div className="mt-2">
+                <button className="btn btn-primary w-full"
+                  disabled={!consultationListData || !consultationListData.length || !patientData.is_active}
+                  onClick={() => handlePatientTransfer(!patientData.allow_transfer)}
+                >
+                  <i className="fas fa-lock mr-2" />
+                  {patientData.allow_transfer ? "Disable Transfer" : "Allow Transfer"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section className="md:flex mt-4 space-y-2">
+          <div className="md:w-1/3 mx-2">
+            <div className="bg-white rounded-lg shadow p-4 h-full space-y-2">
+              <div className="border-b border-dashed text-gray-900 font-semibold text-center text-lg pb-2">
+                Location
+              </div>
+              <div className="sm:col-span-1">
+                <div className="text-sm leading-5 font-medium text-gray-500">
+                  Address
+                </div>
+                <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-pre">
+                  {patientData.address || "-"}
+                </div>
+              </div>
+              <div className="sm:col-span-1">
+                <div className="text-sm leading-5 font-medium text-gray-500">
+                  Village
+                </div>
+                <div className="mt-1 text-sm leading-5 text-gray-900">
+                  {patientData.village || "-"}
+                </div>
+              </div>
+              <div className="sm:col-span-1">
+                <div className="text-sm leading-5 font-medium text-gray-500">
+                  Ward
+                </div>
+                <div className="mt-1 text-sm leading-5 text-gray-900">
+                  {(patientData.ward_object && patientData.ward_object.number + ", " + patientData.ward_object.name) || "-"}
+                </div>
+              </div>
+              <div className="sm:col-span-1">
+                <div className="text-sm leading-5 font-medium text-gray-500">
+                  Local Body
+                </div>
+                <div className="mt-1 text-sm leading-5 text-gray-900">
+                  {patientData.local_body_object?.name || "-"}
+                </div>
+              </div>
+              <div className="sm:col-span-1">
+                <div className="text-sm leading-5 font-medium text-gray-500">
+                  State, Country
+                </div>
+                <div className="mt-1 text-sm leading-5 text-gray-900">
+                  {patientData?.state_object?.name}, {patientData.nationality || "-"}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="md:w-1/3 mx-2">
+            <div className="bg-white rounded-lg shadow p-4 h-full space-y-2">
+              <div className="border-b border-dashed text-gray-900 font-semibold text-center text-lg pb-2">
+                Tracing
+              </div>
+              <div className="sm:col-span-1">
+                <div className="text-sm leading-5 font-medium text-gray-500">
+                  Medical Worker
+                </div>
+                <div className="mt-1 text-sm leading-5 text-gray-900 break-all">
+                  {patientData.is_medical_worker ? (
+                    "Yes" +
+                    (patientData.designation_of_health_care_worker ? (", " + patientData.designation_of_health_care_worker) : "") +
+                    (patientData.instituion_of_health_care_worker ? (", " + patientData.instituion_of_health_care_worker) : "")
+                  ) : "No"}
+                </div>
+              </div>
+              <div className="sm:col-span-1">
+                <div className="text-sm leading-5 font-medium text-gray-500">
+                  Frontline Worker
+                </div>
+                <div className="mt-1 text-sm leading-5 text-gray-900">
+                  {patientData.frontline_worker || "-"}
+                </div>
+              </div>
+              <div className="sm:col-span-1">
+                <div className="text-sm leading-5 font-medium text-gray-500">
+                  Guest worker
+                </div>
+                <div className="mt-1 text-sm leading-5 text-gray-900">
+                  {patientData.is_migrant_worker ? "Yes" : "No"}
+                </div>
+              </div>
+              <div className="sm:col-span-1">
+                <div className="text-sm leading-5 font-medium text-gray-500">
+                  Estimated Contact Date
+                </div>
+                <div className="mt-1 text-sm leading-5 text-gray-900">
+                  {patientData.estimated_contact_date ? moment(patientData.estimated_contact_date).format("LL") : ""}
+                </div>
+              </div>
+              <div className="sm:col-span-1">
+                <div className="text-sm leading-5 font-medium text-gray-500">
+                  Contact Name / Cluster
+                </div>
+                <div className="mt-1 text-sm leading-5 text-gray-900">
+                  {patientData.cluster_name}
+                </div>
+              </div>
+              <div className="sm:col-span-1">
+                <div className="text-sm leading-5 font-medium text-gray-500">
+                  Number of Contacts
+                </div>
+                <div className="mt-1 text-sm leading-5 text-gray-900">
+                  {"Primary: " + (patientData.number_of_primary_contacts || 0) + ", Secondary: " + (patientData.number_of_secondary_contacts || 0)}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="md:w-1/3 mx-2">
+            <div className="bg-white rounded-lg shadow p-4 h-full space-y-2">
+              <div className="border-b border-dashed text-gray-900 font-semibold text-center text-lg pb-2">
+                Testing
+              </div>
+              <div className="sm:col-span-1">
+                <div className="text-sm leading-5 font-medium text-gray-500">
+                  SRF ID
+                </div>
+                <div className="mt-1 text-sm leading-5 text-gray-900">
+                  {patientData?.srf_id || "-"}
+                </div>
+              </div>
+              <div className="sm:col-span-1">
+                <div className="text-sm leading-5 font-medium text-gray-500">
+                  Test Type
+                </div>
+                <div className="mt-1 text-sm leading-5 text-gray-900">
+                  {patientData?.test_type || "-"}
+                </div>
+              </div>
+              <div className="sm:col-span-1">
+                <div className="text-sm leading-5 font-medium text-gray-500">
+                  Date of Test
+                </div>
+                <div className="mt-1 text-sm leading-5 text-gray-900">
+                  {(patientData.date_of_test &&
+                    moment(patientData.date_of_test).format("LL")) ||
+                    "-"}
+                </div>
+              </div>
+              <div className="sm:col-span-1">
+                <div className="text-sm leading-5 font-medium text-gray-500">
+                  Date of Result
+                </div>
+                <div className="mt-1 text-sm leading-5 text-gray-900">
+                  {(patientData.date_of_result &&
+                    moment(patientData.date_of_result).format("LL")) ||
+                    "-"}
+                </div>
+              </div>
+              <div className="sm:col-span-1">
+                <div className="text-sm leading-5 font-medium text-gray-500">
+                  Declared Positive
+                </div>
+                <div className="mt-1 text-sm leading-5 text-gray-900">
+                  {(patientData?.is_declared_positive ? "Yes" : "No") || "-"}
+                </div>
+              </div>
+              <div className="sm:col-span-1">
+                <div className="text-sm leading-5 font-medium text-gray-500">
+                  Declared on
+                </div>
+                <div className="mt-1 text-sm leading-5 text-gray-900">
+                  {(patientData.date_declared_positive &&
+                    moment(patientData.date_declared_positive).format("LL")) ||
+                    "-"}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
       <PageTitle title={`Covid Suspect Details`} />
       <div className="border rounded-lg bg-white shadow h-full hover:border-primary-500 text-black mt-4 p-4">
         <div className="flex justify-between">
@@ -538,7 +742,7 @@ export const PatientHome = (props: any) => {
                 )}
               </div>
             </div>
-            {patientData.is_medical_worker && (
+            {/* {patientData.is_medical_worker && (
               <>
                 <div>
                   <span className="font-semibold leading-relaxed">
@@ -559,7 +763,7 @@ export const PatientHome = (props: any) => {
                   {patientData.instituion_of_health_care_worker || "-"}
                 </div>
               </>
-            )}
+            )} */}
             <div>
               <span className="font-semibold leading-relaxed">
                 Disease Status:{" "}
@@ -568,7 +772,7 @@ export const PatientHome = (props: any) => {
                 {patientData.disease_status}
               </span>
             </div>
-            {patientData.is_declared_positive && (
+            {/* {patientData.is_declared_positive && (
               <>
                 <div>
                   <span className="font-semibold leading-relaxed">
@@ -585,27 +789,11 @@ export const PatientHome = (props: any) => {
                     "-"}
                 </div>
               </>
-            )}
+            )} */}
           </div>
-          {patientData.is_active && (
-            <div>
-              <div className="mt-2">
-                <Button
-                  fullWidth
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  onClick={() =>
-                    navigate(`/facility/${facilityId}/patient/${id}/update`)
-                  }
-                >
-                  Update Details
-                </Button>
-              </div>
-            </div>
-          )}
+
         </div>
-        <div className="md:flex justify-between bg-gray-100 py-2 ">
+        {/* <div className="md:flex justify-between bg-gray-100 py-2 ">
           <div>
             <span className="font-semibold leading-relaxed">SRF ID: </span>
             {(patientData.srf_id && patientData.srf_id) || "-"}
@@ -630,7 +818,7 @@ export const PatientHome = (props: any) => {
               moment(patientData.date_of_result).format("LL")) ||
               "-"}
           </div>
-        </div>
+        </div> */}
         <div className="grid gap-2 grid-cols-1 md:grid-cols-2 mt-2">
           <div>
             <span className="font-semibold leading-relaxed">Facility: </span>
@@ -648,20 +836,20 @@ export const PatientHome = (props: any) => {
             <span className="font-semibold leading-relaxed">Gender: </span>
             {patientGender}
           </div>
-          <div>
+          {/* <div>
             <span className="font-semibold leading-relaxed">Age: </span>
             {patientData.age}
-          </div>
+          </div> */}
           <div>
             <span className="font-semibold leading-relaxed">Phone: </span>
             <a href={`tel:${patientData.phone_number}`}>
               {patientData.phone_number || "-"}
             </a>
           </div>
-          <div>
+          {/* <div>
             <span className="font-semibold leading-relaxed">Nationality: </span>
             {patientData.nationality || "-"}
-          </div>
+          </div> */}
           <div>
             <span className="font-semibold leading-relaxed">Blood Group: </span>
             {patientData.blood_group || "-"}
@@ -676,17 +864,17 @@ export const PatientHome = (props: any) => {
           )}
           {patientData.nationality === "India" && (
             <>
-              <div>
+              {/* <div>
                 <span className="font-semibold leading-relaxed">State: </span>
                 {patientData.state_object?.name}
-              </div>
-              <div>
+              </div> */}
+              {/* <div>
                 <span className="font-semibold leading-relaxed">
                   District:{" "}
                 </span>
                 {patientData.district_object?.name || "-"}
-              </div>
-              <div>
+              </div> */}
+              {/* <div>
                 <span className="font-semibold leading-relaxed">
                   Local Body:{" "}
                 </span>
@@ -699,17 +887,17 @@ export const PatientHome = (props: any) => {
                   ", " +
                   patientData.ward_object.name) ||
                   "-"}
-              </div>
+              </div> */}
             </>
           )}
-          <div>
+          {/* <div>
             <span className="font-semibold leading-relaxed">Address: </span>
             {patientData.address || "-"}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">Village: </span>
             {patientData.village || "-"}
-          </div>
+          </div> */}
           <div>
             <span className="font-semibold leading-relaxed">
               Emergency Contact number:{" "}
@@ -736,7 +924,7 @@ export const PatientHome = (props: any) => {
                 )}
             </div>
           )}
-          <div>
+          {/* <div>
             <span className="font-semibold leading-relaxed">
               Frontline Worker:{" "}
             </span>
@@ -751,7 +939,7 @@ export const PatientHome = (props: any) => {
             ) : (
                 <span className="badge badge-pill badge-secondary">No</span>
               )}
-          </div>
+          </div> */}
           <div>
             <span className="font-semibold leading-relaxed">
               Contact with confirmed carrier:{" "}
@@ -772,7 +960,7 @@ export const PatientHome = (props: any) => {
                 <span className="badge badge-pill badge-secondary">No</span>
               )}
           </div>
-          {patientData.number_of_primary_contacts && (
+          {/* {patientData.number_of_primary_contacts && (
             <div>
               <span className="font-semibold leading-relaxed">
                 Number Of Primary Contacts:{" "}
@@ -787,24 +975,24 @@ export const PatientHome = (props: any) => {
               </span>
               {patientData.number_of_secondary_contacts}
             </div>
-          )}
-          {patientData.estimated_contact_date && (
+          )} */}
+          {/* {patientData.estimated_contact_date && (
             <div>
               <span className="font-semibold leading-relaxed">
                 Estimated contact date:{" "}
               </span>
               {moment(patientData.estimated_contact_date).format("LL")}
             </div>
-          )}
+          )} */}
 
-          {patientData.cluster_name && (
+          {/* {patientData.cluster_name && (
             <div>
               <span className="font-semibold leading-relaxed">
                 Name / Cluster of contact:{" "}
               </span>
               {patientData.cluster_name}
             </div>
-          )}
+          )} */}
 
 
 
@@ -1073,34 +1261,7 @@ export const PatientHome = (props: any) => {
               </Dialog>
             </div>
           )}
-          {!patientData.allow_transfer && patientData.is_active && (
-            <div className="flex-1 ml-2">
-              <Button
-                fullWidth
-                variant="contained"
-                color="secondary"
-                size="small"
-                disabled={!consultationListData || !consultationListData.length}
-                onClick={() => handlePatientTransfer(true)}
-              >
-                Allow Transfer
-              </Button>
-            </div>
-          )}
-          {patientData.allow_transfer && patientData.is_active && (
-            <div className="flex-1 ml-2">
-              <Button
-                fullWidth
-                variant="contained"
-                color="primary"
-                size="small"
-                disabled={!consultationListData || !consultationListData.length}
-                onClick={() => handlePatientTransfer(false)}
-              >
-                Disable Transfer
-              </Button>
-            </div>
-          )}
+
         </div>
         {patientData.is_active && (
           <div className="flex mt-4">
