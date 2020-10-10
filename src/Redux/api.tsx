@@ -90,7 +90,7 @@ export default {
   },
 
   getFacility: {
-    path: "/api/v1/facility/{id}",
+    path: "/api/v1/facility/{id}/",
   },
 
   updateFacility: {
