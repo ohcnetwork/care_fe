@@ -221,7 +221,8 @@ export const PatientHome = (props: any) => {
     // using preDischargeForm form data to update patient data
     let preDischargeFormData = formatPreDischargeFormData(preDischargeForm);
 
-    if (Object.keys(preDischargeFormData).length) { // skip calling patient update api if nothing to update
+    if (Object.keys(preDischargeFormData).length) {
+      // skip calling patient update api if nothing to update
       await dispatch(
         patchPatient(preDischargeFormData, {
           id: patientData.id,
@@ -229,7 +230,9 @@ export const PatientHome = (props: any) => {
       );
     }
     // discharge call
-    let dischargeResponse = await dispatch(dischargePatient({ discharge: value }, { id: patientData.id }));
+    let dischargeResponse = await dispatch(
+      dischargePatient({ discharge: value }, { id: patientData.id })
+    );
 
     setIsSendingDischargeApi(false);
     if (dischargeResponse?.status === 200) {
@@ -243,7 +246,6 @@ export const PatientHome = (props: any) => {
       setOpenDischargeDialog(false);
       window.location.reload();
     }
-
   };
 
   const formatPreDischargeFormData = (
@@ -566,6 +568,24 @@ export const PatientHome = (props: any) => {
                 {patientData.disease_status}
               </span>
             </div>
+            {patientData.is_declared_positive && (
+              <>
+                <div>
+                  <span className="font-semibold leading-relaxed">
+                    Is Patient Declared Positive?{" "}
+                  </span>
+                  <span className="badge badge-pill badge-primary">Yes</span>
+                </div>
+                <div>
+                  <span className="font-semibold leading-relaxed">
+                    Date Declared Positive:{" "}
+                  </span>
+                  {(patientData.date_declared_positive &&
+                    moment(patientData.date_declared_positive).format("LL")) ||
+                    "-"}
+                </div>
+              </>
+            )}
           </div>
           {patientData.is_active && (
             <div>
@@ -676,8 +696,8 @@ export const PatientHome = (props: any) => {
                 <span className="font-semibold leading-relaxed">Ward : </span>
                 {(patientData.ward_object &&
                   patientData.ward_object.number +
-                  ", " +
-                  patientData.ward_object.name) ||
+                    ", " +
+                    patientData.ward_object.name) ||
                   "-"}
               </div>
             </>
@@ -712,8 +732,8 @@ export const PatientHome = (props: any) => {
               {patientData.is_antenatal ? (
                 <span className="badge badge-pill badge-danger">Yes</span>
               ) : (
-                  <span className="badge badge-pill badge-warning">No</span>
-                )}
+                <span className="badge badge-pill badge-warning">No</span>
+              )}
             </div>
           )}
           <div>
@@ -729,8 +749,8 @@ export const PatientHome = (props: any) => {
             {patientData.is_migrant_worker ? (
               <span className="badge badge-pill badge-warning">Yes</span>
             ) : (
-                <span className="badge badge-pill badge-secondary">No</span>
-              )}
+              <span className="badge badge-pill badge-secondary">No</span>
+            )}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">
@@ -739,8 +759,8 @@ export const PatientHome = (props: any) => {
             {patientData.contact_with_confirmed_carrier ? (
               <span className="badge badge-pill badge-warning">Yes</span>
             ) : (
-                <span className="badge badge-pill badge-secondary">No</span>
-              )}
+              <span className="badge badge-pill badge-secondary">No</span>
+            )}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">
@@ -749,8 +769,8 @@ export const PatientHome = (props: any) => {
             {patientData.contact_with_suspected_carrier ? (
               <span className="badge badge-pill badge-warning">Yes</span>
             ) : (
-                <span className="badge badge-pill badge-secondary">No</span>
-              )}
+              <span className="badge badge-pill badge-secondary">No</span>
+            )}
           </div>
           {patientData.number_of_primary_contacts && (
             <div>
@@ -787,8 +807,8 @@ export const PatientHome = (props: any) => {
             {patientData.past_travel ? (
               <span className="badge badge-pill badge-warning">Yes</span>
             ) : (
-                <span className="badge badge-pill badge-secondary">No</span>
-              )}
+              <span className="badge badge-pill badge-secondary">No</span>
+            )}
           </div>
           {patientData.countries_travelled &&
             !!patientData.countries_travelled.length && (
@@ -955,7 +975,6 @@ export const PatientHome = (props: any) => {
                     </RadioGroup>
 
                     <div className="flex flex-col items-center">
-
                       <Fragment>
                         <label
                           id="covid-status-pre-form"
@@ -963,7 +982,7 @@ export const PatientHome = (props: any) => {
                         >
                           Has the patient's disease status changed? If so, to
                           what?
-                          </label>
+                        </label>
                         <Select
                           className="h-10"
                           labelId="covid-status-pre-form"
@@ -983,7 +1002,6 @@ export const PatientHome = (props: any) => {
                           ))}
                         </Select>
                       </Fragment>
-
 
                       <label className="flex justify-center w-full mt-5 text-gray-900">
                         Would you like to update the patient's SRF ID and Test
@@ -1028,7 +1046,9 @@ export const PatientHome = (props: any) => {
                 <DialogActions className="flex justify-between mt-5 px-5 border-t">
                   <Button onClick={handleDischargeClose}>Cancel</Button>
 
-                  {isSendingDischargeApi ? <CircularProgress size={20} /> : (
+                  {isSendingDischargeApi ? (
+                    <CircularProgress size={20} />
+                  ) : (
                     <Button
                       color="primary"
                       onClick={() => handlePatientDischarge(false)}
@@ -1121,10 +1141,10 @@ export const PatientHome = (props: any) => {
               </div>
             </div>
           ) : (
-              <span className="flex items-center justify-center">
-                <h6 className="text-gray-700">No Medical History so far</h6>
-              </span>
-            )}
+            <span className="flex items-center justify-center">
+              <h6 className="text-gray-700">No Medical History so far</h6>
+            </span>
+          )}
         </div>
       </Grid>
 

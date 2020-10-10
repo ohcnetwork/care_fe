@@ -77,6 +77,8 @@ export interface PatientModel {
   number_of_chronic_diseased_dependents?: number;
   will_donate_blood?: boolean;
   fit_for_blood_donation?: boolean;
+  date_declared_positive?: string;
+  is_declared_positive?: boolean;
 }
 
 export interface SampleTestModel {
