@@ -448,10 +448,19 @@ export const PatientHome = (props: any) => {
   ) {
     const medHis = patientData.medical_history;
     patientMedHis = medHis.map((item: any, idx: number) => (
-      <tr className="white border" key={`med_his_${idx}`}>
-        <td className="border px-4 py-2">{item.disease}</td>
-        <td className="border px-4 py-2">{item.details}</td>
-      </tr>
+      <div className="sm:col-span-1" key={`med_his_${idx}`}>
+        {
+          (item?.disease != "NO") &&
+          <>
+            <div className="text-sm leading-5 font-medium text-gray-500">
+              {item.disease}
+            </div>
+            <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-pre-wrap">
+              {item.details}
+            </div>
+          </>
+        }
+      </div>
     ));
   }
 
@@ -501,6 +510,7 @@ export const PatientHome = (props: any) => {
       )}
 
       <div id="revamp">
+        <PageTitle title={`Covid Suspect Details`} />
         <section className="md:flex mt-4">
           <div className="md:w-2/3 mx-2">
             <div className="bg-white rounded-lg shadow p-4 h-full">
@@ -546,29 +556,34 @@ export const PatientHome = (props: any) => {
                     {patientData.blood_group || "-"}
                   </div>
                 </div>
-                <div className="sm:col-span-1">
-                  <div className="text-sm leading-5 font-medium text-gray-500">
-                    Blood Group
-                  </div>
-                  <div className="mt-1 text-sm leading-5 text-gray-900">
-                    {patientData.blood_group || "-"}
-                  </div>
-                </div>
+                {
+                  patientData.date_of_return && (
+                    <div className="sm:col-span-1">
+                      <div className="text-sm leading-5 font-medium text-gray-500">
+                        Date of Return
+                      </div>
+                      <div className="mt-1 text-sm leading-5 text-gray-900">
+                        {moment(patientData.date_of_return).format("LL")}
+                      </div>
+                    </div>
+                  )
+                }
+                {patientData.countries_travelled &&
+                  !!patientData.countries_travelled.length && (
+
+                    <div className="sm:col-span-1">
+                      <div className="text-sm leading-5 font-medium text-gray-500">
+                        Countries travelled
+                      </div>
+                      <div className="mt-1 text-sm leading-5 text-gray-900">
+                        {Array.isArray(patientData.countries_travelled)
+                          ? patientData.countries_travelled.join(", ")
+                          : patientData.countries_travelled.split(",").join(", ")}
+                      </div>
+                    </div>
+                  )}
               </div>
-              {patientData.is_antenatal && (
-                <div className="sm:col-span-1">
-                  <div className="text-sm leading-5 font-medium text-gray-500">
-                    Is pregnant
-                </div>
-                  <div className="mt-1 text-sm leading-5 text-gray-900">
-                    Yes
-                </div>
-                </div>
-              )}
-
-
-
-              <div className="flex flex-wrap">
+              <div className="flex flex-wrap mt-2">
                 {patientData.allow_transfer ?
                   <Badge color="yellow" icon="unlock" text="Transfer Allowed" />
                   : <Badge color="green" icon="lock" text="Transfer Blocked" />}
@@ -576,88 +591,107 @@ export const PatientHome = (props: any) => {
                   patientData.is_antenatal && patientData.is_active &&
                   <Badge color="blue" icon="baby-carriage" text="Antenatal" />
                 }
-                {patientData.is_medical_worker && patientData.is_active && (
-                  <Badge color="blue" icon="user-md" text="Medical Worker" />
-                )}
                 {patientData.contact_with_confirmed_carrier && (
                   <Badge color="red" icon="exclamation-triangle" text="Contact with confirmed carrier" />
                 )}
                 {patientData.contact_with_suspected_carrier && (
                   <Badge color="yellow" icon="exclamation-triangle" text="Contact with suspected carrier" />
                 )}
+                {patientData.past_travel && (
+                  <Badge color="yellow" icon="exclamation-triangle" text="Travel (within last 28 days)" />
+                )}
               </div>
             </div>
-
           </div>
           <div className="md:w-1/3 mx-2">
-            <div id="actions" className="space-y-2 mt-2">
-              <div className="p-2 bg-white rounded-lg shadow text-center">
-                <div className="flex justify-between">
-                  <div className="w-1/2 border-r-2">
-                    <div className="text-sm leading-5 font-medium text-gray-500">
-                      Disease Status
+            <div id="actions" className="space-y-2 mt-2 flex-col justify-between flex h-full">
+              <div>
+                {patientData.review_time && (
+                  <div
+                    className={
+                      "mb-2 inline-flex items-center px-3 py-1 rounded-lg text-xs leading-4 font-semibold p-1 bg-red-400 text-white w-full justify-center " +
+                      (moment().isBefore(patientData.review_time)
+                        ? " bg-gray-100"
+                        : " p-1 bg-red-400 text-white")
+                    }
+                  >
+                    <i className="mr-2 text-md fas fa-clock"></i>
+                    {(moment().isBefore(patientData.review_time)
+                      ? "Review at: "
+                      : "Review Missed: ") +
+                      moment(patientData.review_time).format("lll")}
                   </div>
-                    <div className="mt-1 text-xl font-semibold leading-5 text-gray-900">
-                      {patientData.disease_status}
+                )}
+                <div className="p-2 bg-white rounded-lg shadow text-center">
+                  <div className="flex justify-between">
+                    <div className="w-1/2 border-r-2">
+                      <div className="text-sm leading-5 font-medium text-gray-500">
+                        Disease Status
+                      </div>
+                      <div className="mt-1 text-xl font-semibold leading-5 text-gray-900">
+                        {patientData.disease_status}
+                      </div>
+                    </div>
+                    <div className="w-1/2">
+                      <div className="text-sm leading-5 font-medium text-gray-500">
+                        Status
+                      </div>
+                      <div className="mt-1 text-xl font-semibold leading-5 text-gray-900">
+                        {patientData.is_active ? "Live" : "Discharged"}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex justify-between p-2 bg-white rounded-lg shadow px-4 mt-2">
+                  <div className="w-1/2">
+                    <div className="text-sm leading-5 font-medium text-gray-500">
+                      Created
+                  </div>
+                    <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-pre">
+                      <div className="text-sm">
+                        {patientData?.created_by?.first_name} {patientData?.created_by?.last_name}
+                      </div>
+                      <div className="text-xs">
+                        {patientData.created_date && moment(patientData.created_date).format("lll")}
+                      </div>
                     </div>
                   </div>
                   <div className="w-1/2">
                     <div className="text-sm leading-5 font-medium text-gray-500">
-                      Status
+                      Last Edited
                   </div>
-                    <div className="mt-1 text-xl font-semibold leading-5 text-gray-900">
-                      {patientData.is_active ? "Live" : "Discharged"}
+                    <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-pre">
+                      <div className="text-sm">
+                        {patientData?.last_edited?.first_name} {patientData?.last_edited?.last_name}
+                      </div>
+                      <div className="text-xs">
+                        {patientData.modified_date && moment(patientData.modified_date).format("lll")}
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-              <div className="flex justify-between p-2 bg-white rounded-lg shadow px-4">
-                <div className="w-1/2">
-                  <div className="text-sm leading-5 font-medium text-gray-500">
-                    Created
-                  </div>
-                  <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-pre">
-                    <div className="text-sm">
-                      {patientData?.created_by?.first_name} {patientData?.created_by?.last_name}
-                    </div>
-                    <div className="text-xs">
-                      {patientData.created_date && moment(patientData.created_date).format("lll")}
-                    </div>
-                  </div>
-                </div>
-                <div className="w-1/2">
-                  <div className="text-sm leading-5 font-medium text-gray-500">
-                    Last Edited
-                  </div>
-                  <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-pre">
-                    <div className="text-sm">
-                      {patientData?.last_edited?.first_name} {patientData?.last_edited?.last_name}
-                    </div>
-                    <div className="text-xs">
-                      {patientData.modified_date && moment(patientData.modified_date).format("lll")}
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div>
-                <button className="btn btn-primary w-full"
-                  disabled={!patientData.is_active}
-                  onClick={() =>
-                    navigate(`/facility/${facilityId}/patient/${id}/update`)
-                  }
-                >
-                  <i className="fas fa-pencil-alt mr-2" />
+              <div className="space-y-2 py-2">
+                <div>
+                  <button className="btn btn-primary w-full"
+                    disabled={!patientData.is_active}
+                    onClick={() =>
+                      navigate(`/facility/${facilityId}/patient/${id}/update`)
+                    }
+                  >
+                    <i className="fas fa-pencil-alt mr-2" />
                   Update Details
                 </button>
-              </div>
-              <div >
-                <button className="btn btn-primary w-full"
-                  disabled={!consultationListData || !consultationListData.length || !patientData.is_active}
-                  onClick={() => handlePatientTransfer(!patientData.allow_transfer)}
-                >
-                  <i className="fas fa-lock mr-2" />
-                  {patientData.allow_transfer ? "Disable Transfer" : "Allow Transfer"}
-                </button>
+                </div>
+                <div>
+                  <button className="btn btn-primary w-full"
+                    disabled={!consultationListData || !consultationListData.length || !patientData.is_active}
+                    onClick={() => handlePatientTransfer(!patientData.allow_transfer)}
+                  >
+                    <i className="fas fa-lock mr-2" />
+                    {patientData.allow_transfer ? "Disable Transfer" : "Allow Transfer"}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -775,6 +809,18 @@ export const PatientHome = (props: any) => {
                   {"Above 60: " + (patientData.number_of_aged_dependents || 0) + ", Chronic Diseased: " + (patientData.number_of_chronic_diseased_dependents || 0)}
                 </div>
               </div>
+              {
+                patientData.transit_details && (
+                  <div className="sm:col-span-1">
+                    <div className="text-sm leading-5 font-medium text-gray-500">
+                      Transit Details
+                    </div>
+                    <div className="mt-1 text-sm leading-5 text-gray-900">
+                      {patientData.transit_details}
+                    </div>
+                  </div>
+                )
+              }
             </div>
           </div>
           <div className="md:w-1/3 mx-2">
@@ -845,644 +891,257 @@ export const PatientHome = (props: any) => {
               <div className="border-b border-dashed text-gray-900 font-semibold text-center text-lg pb-2">
                 Medical
               </div>
+              <div className="grid grid-cols-1 gap-x-4 gap-y-2 md:gap-y-8 sm:grid-cols-3 mt-2">
+                {patientData.present_health && (
+                  <div className="sm:col-span-1">
+                    <div className="text-sm leading-5 font-medium text-gray-500">
+                      Present Health
+                    </div>
+                    <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-pre-wrap">
+                      {patientData.ongoing_medication}
+                    </div>
+                  </div>
+                )}
+                {patientData.ongoing_medication && (
+                  <div className="sm:col-span-1">
+                    <div className="text-sm leading-5 font-medium text-gray-500">
+                      Ongoing Medications
+                    </div>
+                    <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-pre-wrap">
+                      {patientData.ongoing_medication}
+                    </div>
+                  </div>
+                )}
+                {patientData.allergies && (
+                  <div className="sm:col-span-1">
+                    <div className="text-sm leading-5 font-medium text-gray-500">
+                      Allergies
+                    </div>
+                    <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-pre-wrap">
+                      {patientData.allergies}
+                    </div>
+                  </div>)}
+                {patientData.is_antenatal && (
+                  <div className="sm:col-span-1">
+                    <div className="text-sm leading-5 font-medium text-gray-500">
+                      Is pregnant
+                    </div>
+                    <div className="mt-1 text-sm leading-5 text-gray-900">
+                      Yes
+                    </div>
+                  </div>
+                )}
+                {patientMedHis}
+              </div>
+
+
             </div>
           </div>
           <div className="md:w-1/3 mx-2">
             <div className="bg-white rounded-lg shadow p-4 h-full space-y-2">
-              <div className="border-b border-dashed text-gray-900 font-semibold text-center text-lg pb-2">
-                Actions
+              <div className="border-b border-dashed text-gray-900 font-semibold text-center text-lg space-y-2">
+                <div>
+                  <button className="btn btn-primary w-full" disabled={!patientData.is_active} onClick={() => navigate(`/facility/${facilityId}/patient/${id}/consultation`)}>
+                    Add OP Triage / Consultation
+                  </button>
+                </div>
+                <div>
+                  <button className="btn btn-primary w-full" disabled={!patientData.is_active} onClick={() => navigate(`/facility/${facilityId}/patient/${id}/sample-test`)}>
+                    Request Sample Test
+                  </button>
+                </div>
+                <div>
+                  <button className="btn btn-primary w-full" onClick={handleClickOpen}>
+                    Discharge Summary
+                  </button>
+                </div>
+                <div>
+                  <button className="btn btn-primary w-full" onClick={handleDischageClickOpen} disabled={!patientData.is_active}>
+                    Discharge from CARE
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         </section>
 
       </div>
-      <PageTitle title={`Covid Suspect Details`} />
-      <div className="border rounded-lg bg-white shadow h-full hover:border-primary-500 text-black mt-4 p-4">
-        <div className="flex justify-between">
-          <div className="grid gap-2 grid-cols-1">
-            {patientData.review_time && (
-              <div
-                className={
-                  "mt-2 inline-flex items-center px-3 py-1 rounded-full text-xs leading-4 font-semibold " +
-                  (moment().isBefore(patientData.review_time)
-                    ? " bg-gray-100"
-                    : "rounded p-1 bg-red-400 text-white")
-                }
-              >
-                <i className="mr-2 text-md fas fa-clock"></i>
-                {(moment().isBefore(patientData.review_time)
-                  ? "Review at: "
-                  : "Review Missed: ") +
-                  moment(patientData.review_time).format("lll")}
-              </div>
-            )}
-            <div className="flex items-baseline">
-              {/* <div className="mt-1">
-                <span className="font-semibold leading-relaxed">Name: </span>
-                {patientData.name}
-              </div> */}
-
-              <div>
-                {!patientData.is_active && (
-                  <span className="ml-2 badge badge-pill badge-dark">
-                    Inactive
-                  </span>
-                )}
-              </div>
-              {/* <div>
-                {patientData.allow_transfer && (
-                  <span className="ml-2 badge badge-pill badge-success">
-                    Transfer Allowed
-                  </span>
-                )}
-              </div> */}
-              {/* <div>
-                {!patientData.allow_transfer && (
-                  <span className="ml-2 badge badge-pill badge-warning">
-                    Transfer Not Allowed
-                  </span>
-                )}
-              </div> */}
-            </div>
-            {/* {patientData.is_medical_worker && (
-              <>
-                <div>
-                  <span className="font-semibold leading-relaxed">
-                    Medical Worker:{" "}
-                  </span>
-                  <span className="badge badge-pill badge-primary">Yes</span>
-                </div>
-                <div>
-                  <span className="font-semibold leading-relaxed">
-                    Designation of Medical Worker:{" "}
-                  </span>
-                  {patientData.designation_of_health_care_worker || "-"}
-                </div>
-                <div>
-                  <span className="font-semibold leading-relaxed">
-                    Institution of Medical Worker:{" "}
-                  </span>
-                  {patientData.instituion_of_health_care_worker || "-"}
-                </div>
-              </>
-            )} */}
-            {/* <div>
-              <span className="font-semibold leading-relaxed">
-                Disease Status:{" "}
-              </span>
-              <span className="badge badge-pill badge-danger">
-                {patientData.disease_status}
-              </span>
-            </div> */}
-            {/* {patientData.is_declared_positive && (
-              <>
-                <div>
-                  <span className="font-semibold leading-relaxed">
-                    Is Patient Declared Positive?{" "}
-                  </span>
-                  <span className="badge badge-pill badge-primary">Yes</span>
-                </div>
-                <div>
-                  <span className="font-semibold leading-relaxed">
-                    Date Declared Positive:{" "}
-                  </span>
-                  {(patientData.date_declared_positive &&
-                    moment(patientData.date_declared_positive).format("LL")) ||
-                    "-"}
-                </div>
-              </>
-            )} */}
-          </div>
-
-        </div>
-        {/* <div className="md:flex justify-between bg-gray-100 py-2 ">
-          <div>
-            <span className="font-semibold leading-relaxed">SRF ID: </span>
-            {(patientData.srf_id && patientData.srf_id) || "-"}
-          </div>
-          <div>
-            <span className="font-semibold leading-relaxed">Test Type: </span>
-            {(patientData.test_type && patientData.test_type) || "-"}
-          </div>
-          <div>
-            <span className="font-semibold leading-relaxed">
-              Date of Test:{" "}
-            </span>
-            {(patientData.date_of_test &&
-              moment(patientData.date_of_test).format("LL")) ||
-              "-"}
-          </div>
-          <div>
-            <span className="font-semibold leading-relaxed">
-              Date of Result:{" "}
-            </span>
-            {(patientData.date_of_result &&
-              moment(patientData.date_of_result).format("LL")) ||
-              "-"}
-          </div>
-        </div> */}
-        <div className="grid gap-2 grid-cols-1 md:grid-cols-2 mt-2">
-          {/* <div>
-            <span className="font-semibold leading-relaxed">Facility: </span>
-            {patientData.facility_object?.name || "-"}
-          </div>
-          {patientData.date_of_birth ? (
-            <div>
-              <span className="font-semibold leading-relaxed">
-                Date of birth:{" "}
-              </span>
-              {patientData.date_of_birth}
-            </div>
-          ) : null}
-          <div>
-            <span className="font-semibold leading-relaxed">Gender: </span>
-            {patientGender}
-          </div> */}
-          {/* <div>
-            <span className="font-semibold leading-relaxed">Age: </span>
-            {patientData.age}
-          </div> */}
-          {/* <div>
-            <span className="font-semibold leading-relaxed">Phone: </span>
-            <a href={`tel:${patientData.phone_number}`}>
-              {patientData.phone_number || "-"}
-            </a>
-          </div> */}
-          {/* <div>
-            <span className="font-semibold leading-relaxed">Nationality: </span>
-            {patientData.nationality || "-"}
-          </div> */}
-          {/* <div>
-            <span className="font-semibold leading-relaxed">Blood Group: </span>
-            {patientData.blood_group || "-"}
-          </div> */}
-          {/* {patientData.nationality !== "India" && (
-            // <div>
-            //   <span className="font-semibold leading-relaxed">
-            //     Passport Number:{" "}
-            //   </span>
-            //   {patientData.passport_no || "-"}
-            // </div>
-          )} */}
-          {patientData.nationality === "India" && (
-            <>
-              {/* <div>
-                <span className="font-semibold leading-relaxed">State: </span>
-                {patientData.state_object?.name}
-              </div> */}
-              {/* <div>
-                <span className="font-semibold leading-relaxed">
-                  District:{" "}
-                </span>
-                {patientData.district_object?.name || "-"}
-              </div> */}
-              {/* <div>
-                <span className="font-semibold leading-relaxed">
-                  Local Body:{" "}
-                </span>
-                {patientData.local_body_object?.name || "-"}
-              </div>
-              <div>
-                <span className="font-semibold leading-relaxed">Ward : </span>
-                {(patientData.ward_object &&
-                  patientData.ward_object.number +
-                  ", " +
-                  patientData.ward_object.name) ||
-                  "-"}
-              </div> */}
-            </>
-          )}
-          {/* <div>
-            <span className="font-semibold leading-relaxed">Address: </span>
-            {patientData.address || "-"}
-          </div>
-          <div>
-            <span className="font-semibold leading-relaxed">Village: </span>
-            {patientData.village || "-"}
-          </div> */}
-          {/* <div>
-            <span className="font-semibold leading-relaxed">
-              Emergency Contact number:{" "}
-            </span>
-            <a href={`tel:${patientData.emergency_phone_number}`}>
-              {patientData.emergency_phone_number || "-"}
-            </a>
-          </div> */}
-          {/* <div>
-            <span className="font-semibold leading-relaxed">Pincode: </span>
-            {patientData.pincode || "-"}
-          </div> */}
-
-          {/* {patientData.is_antenatal && (
-            <div>
-              <span className="font-semibold leading-relaxed">
-                {" "}
-                Is pregnant{" "}
-              </span>
-              {patientData.is_antenatal ? (
-                <span className="badge badge-pill badge-danger">Yes</span>
-              ) : (
-                  <span className="badge badge-pill badge-warning">No</span>
-                )}
-            </div>
-          )} */}
-          {/* <div>
-            <span className="font-semibold leading-relaxed">
-              Frontline Worker:{" "}
-            </span>
-            {patientData.frontline_worker || "-"}
-          </div>
-          <div>
-            <span className="font-semibold leading-relaxed">
-              Guest worker:{" "}
-            </span>
-            {patientData.is_migrant_worker ? (
-              <span className="badge badge-pill badge-warning">Yes</span>
-            ) : (
-                <span className="badge badge-pill badge-secondary">No</span>
-              )}
-          </div> */}
-          {/* <div>
-            <span className="font-semibold leading-relaxed">
-              Contact with confirmed carrier:{" "}
-            </span>
-            {patientData.contact_with_confirmed_carrier ? (
-              <span className="badge badge-pill badge-warning">Yes</span>
-            ) : (
-                <span className="badge badge-pill badge-secondary">No</span>
-              )}
-          </div>
-          <div>
-            <span className="font-semibold leading-relaxed">
-              Contact with suspected carrier:{" "}
-            </span>
-            {patientData.contact_with_suspected_carrier ? (
-              <span className="badge badge-pill badge-warning">Yes</span>
-            ) : (
-                <span className="badge badge-pill badge-secondary">No</span>
-              )}
-          </div> */}
-          {/* {patientData.number_of_primary_contacts && (
-            <div>
-              <span className="font-semibold leading-relaxed">
-                Number Of Primary Contacts:{" "}
-              </span>
-              {patientData.number_of_primary_contacts}
-            </div>
-          )}
-          {!!patientData.number_of_secondary_contacts && (
-            <div>
-              <span className="font-semibold leading-relaxed">
-                Number Of Secondary Contacts:{" "}
-              </span>
-              {patientData.number_of_secondary_contacts}
-            </div>
-          )} */}
-          {/* {patientData.estimated_contact_date && (
-            <div>
-              <span className="font-semibold leading-relaxed">
-                Estimated contact date:{" "}
-              </span>
-              {moment(patientData.estimated_contact_date).format("LL")}
-            </div>
-          )} */}
-
-          {/* {patientData.cluster_name && (
-            <div>
-              <span className="font-semibold leading-relaxed">
-                Name / Cluster of contact:{" "}
-              </span>
-              {patientData.cluster_name}
-            </div>
-          )} */}
-
-
-
-          {/*<div className="md:col-span-2">*/}
-          {/*  <span className="font-semibold leading-relaxed">Has SARI (Severe Acute Respiratory illness)?: </span>*/}
-          {/*  {patientData.has_SARI ? <span className="badge badge-pill badge-warning">Yes</span> : <span className="badge badge-pill badge-secondary">No</span>}*/}
-          {/*</div>*/}
-          <div className="md:col-span-2">
-            <span className="font-semibold leading-relaxed">
-              Domestic/international Travel (within last 28 days):{" "}
-            </span>
-            {patientData.past_travel ? (
-              <span className="badge badge-pill badge-warning">Yes</span>
-            ) : (
-                <span className="badge badge-pill badge-secondary">No</span>
-              )}
-          </div>
-          {patientData.countries_travelled &&
-            !!patientData.countries_travelled.length && (
-              <div className="md:col-span-2">
-                <span className="font-semibold leading-relaxed">
-                  Countries travelled:{" "}
-                </span>
-                {Array.isArray(patientData.countries_travelled)
-                  ? patientData.countries_travelled.join(", ")
-                  : patientData.countries_travelled.split(",").join(", ")}
-              </div>
-            )}
-          {patientData.transit_details && (
-            <div className="md:col-span-2">
-              <span className="font-semibold leading-relaxed">
-                Transit details:{" "}
-              </span>
-              {patientData.transit_details}
-            </div>
-          )}
-          {patientData.ongoing_medication && (
-            <div className="md:col-span-2">
-              <span className="font-semibold leading-relaxed">
-                Ongoing Medications{" "}
-              </span>
-              {patientData.ongoing_medication}
-            </div>
-          )}
-          {patientData.allergies && (
-            <div className="md:col-span-2">
-              <span className="font-semibold leading-relaxed">Allergies: </span>
-              {patientData.allergies}
-            </div>
-          )}
-          {/* {!!patientData.number_of_aged_dependents && (
-            <div>
-              <span className="font-semibold leading-relaxed">
-                Number Of Aged Dependents (Above 60):{" "}
-              </span>
-              {patientData.number_of_aged_dependents}
-            </div>
-          )}
-          {!!patientData.number_of_chronic_diseased_dependents && (
-            <div>
-              <span className="font-semibold leading-relaxed">
-                Number Of Chronic Diseased Dependents:{" "}
-              </span>
-              {patientData.number_of_chronic_diseased_dependents}
-            </div>
-          )} */}
-        </div>
-        <div className="flex mt-4">
-          <div className="flex-1">
-            <Button
-              fullWidth
-              variant="contained"
-              color="primary"
-              size="small"
-              onClick={handleClickOpen}
-            >
-              Discharge Summary
-            </Button>
-            <Dialog open={open} onClose={handleDischargeSummary}>
-              <DialogTitle id="form-dialog-title">
-                Download Discharge Summary
+      <Dialog open={open} onClose={handleDischargeSummary}>
+        <DialogTitle id="form-dialog-title">
+          Download Discharge Summary
               </DialogTitle>
-              <DialogContent>
-                <DialogContentText>
-                  Please enter your email id to receive the discharge summary.
-                  Disclaimer: This is an automatically Generated email using
-                  your info Captured in Care System.
+        <DialogContent>
+          <DialogContentText>
+            Please enter your email id to receive the discharge summary.
+            Disclaimer: This is an automatically Generated email using
+            your info Captured in Care System.
                   <div
-                    className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
-                    role="alert"
-                  >
-                    <strong className="block sm:inline font-bold">
-                      Please check your email id before continuing. We cannot
-                      deliver the email if the email id is invalid
+              className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
+              role="alert"
+            >
+              <strong className="block sm:inline font-bold">
+                Please check your email id before continuing. We cannot
+                deliver the email if the email id is invalid
                     </strong>
-                  </div>
-                </DialogContentText>
-                <div className="flex justify-end">
-                  <a
-                    href="#"
-                    className="text-xs"
-                    onClick={dischargeSummaryFormSetUserEmail}
-                  >
-                    Fill email input with my email.
+            </div>
+          </DialogContentText>
+          <div className="flex justify-end">
+            <a
+              href="#"
+              className="text-xs"
+              onClick={dischargeSummaryFormSetUserEmail}
+            >
+              Fill email input with my email.
                   </a>
-                </div>
-                <TextInputField
-                  type="email"
-                  name="email"
-                  label="email"
-                  variant="outlined"
-                  margin="dense"
-                  autoComplete="off"
-                  value={dischargeSummaryState.email}
-                  InputLabelProps={{ shrink: !!dischargeSummaryState.email }}
-                  onChange={handleDischargeSummaryFormChange}
-                  errors={errors.dischargeSummaryForm}
-                />
-              </DialogContent>
-              <DialogActions>
-                <Button onClick={handleClose} color="primary">
-                  Cancel
-                </Button>
-                <Button onClick={handleDischargeSummarySubmit} color="primary">
-                  Submit
-                </Button>
-              </DialogActions>
-            </Dialog>
           </div>
-          {patientData.is_active && (
-            <div className="flex-1 ml-2">
-              <Button
-                fullWidth
-                variant="contained"
-                color="primary"
-                size="small"
-                onClick={handleDischageClickOpen}
-              >
-                Discharge from CARE
-              </Button>
-              <Dialog
-                maxWidth={"md"}
-                open={openDischargeDialog}
-                onClose={handleDischargeClose}
-              >
-                <DialogTitle className="flex justify-center bg-green-100">
-                  Before we discharge {patientData.name}
-                </DialogTitle>
-                <DialogContent className="px-20">
-                  <FormControl variant="outlined">
-                    <label className="flex justify-center w-full text-gray-900 mt-2">
-                      Is the patient willing to donate blood for Plasma?
+          <TextInputField
+            type="email"
+            name="email"
+            label="email"
+            variant="outlined"
+            margin="dense"
+            autoComplete="off"
+            value={dischargeSummaryState.email}
+            InputLabelProps={{ shrink: !!dischargeSummaryState.email }}
+            onChange={handleDischargeSummaryFormChange}
+            errors={errors.dischargeSummaryForm}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} color="primary">
+            Cancel
+                </Button>
+          <Button onClick={handleDischargeSummarySubmit} color="primary">
+            Submit
+                </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        maxWidth={"md"}
+        open={openDischargeDialog}
+        onClose={handleDischargeClose}
+      >
+        <DialogTitle className="flex justify-center bg-green-100">
+          Before we discharge {patientData.name}
+        </DialogTitle>
+        <DialogContent className="px-20">
+          <FormControl variant="outlined">
+            <label className="flex justify-center w-full text-gray-900 mt-2">
+              Is the patient willing to donate blood for Plasma?
                     </label>
-                    <RadioGroup
-                      className="flex-row justify-center gap-15 mt-2 ml-10"
-                      name="blood-donate"
-                      value={preDischargeForm.donatePlasma}
-                      onChange={(event) =>
-                        handlePreDischargeFormChange("donatePlasma", event)
-                      }
-                    >
-                      <FormControlLabel
-                        value="yes"
-                        control={<Radio />}
-                        label="Yes"
-                        className="mr-0"
-                      />
-                      <FormControlLabel
-                        value="no"
-                        control={<Radio />}
-                        label="No"
-                        className="mr-0"
-                      />
-                      <FormControlLabel
-                        value="not-fit"
-                        control={<Radio />}
-                        label="Not fit for donation currently"
-                        className="w-48 mr-0"
-                      />
-                    </RadioGroup>
+            <RadioGroup
+              className="flex-row justify-center gap-15 mt-2 ml-10"
+              name="blood-donate"
+              value={preDischargeForm.donatePlasma}
+              onChange={(event) =>
+                handlePreDischargeFormChange("donatePlasma", event)
+              }
+            >
+              <FormControlLabel
+                value="yes"
+                control={<Radio />}
+                label="Yes"
+                className="mr-0"
+              />
+              <FormControlLabel
+                value="no"
+                control={<Radio />}
+                label="No"
+                className="mr-0"
+              />
+              <FormControlLabel
+                value="not-fit"
+                control={<Radio />}
+                label="Not fit for donation currently"
+                className="w-48 mr-0"
+              />
+            </RadioGroup>
 
-                    <div className="flex flex-col items-center">
-                      <Fragment>
-                        <label
-                          id="covid-status-pre-form"
-                          className="flex justify-center w-full text-gray-900 mb-2 mt-5"
-                        >
-                          Has the patient's disease status changed? If so, to
-                          what?
+            <div className="flex flex-col items-center">
+              <Fragment>
+                <label
+                  id="covid-status-pre-form"
+                  className="flex justify-center w-full text-gray-900 mb-2 mt-5"
+                >
+                  Has the patient's disease status changed? If so, to
+                  what?
                         </label>
-                        <Select
-                          className="h-10"
-                          labelId="covid-status-pre-form"
-                          value={
-                            preDischargeForm.disease_status ||
-                            patientData.disease_status
-                          }
-                          onChange={(event) =>
-                            handlePreDischargeFormChange(
-                              "disease_status",
-                              event
-                            )
-                          }
-                        >
-                          {DISEASE_STATUS.map((value) => (
-                            <MenuItem value={value}>{value}</MenuItem>
-                          ))}
-                        </Select>
-                      </Fragment>
+                <Select
+                  className="h-10"
+                  labelId="covid-status-pre-form"
+                  value={
+                    preDischargeForm.disease_status ||
+                    patientData.disease_status
+                  }
+                  onChange={(event) =>
+                    handlePreDischargeFormChange(
+                      "disease_status",
+                      event
+                    )
+                  }
+                >
+                  {DISEASE_STATUS.map((value) => (
+                    <MenuItem value={value}>{value}</MenuItem>
+                  ))}
+                </Select>
+              </Fragment>
 
-                      <label className="flex justify-center w-full mt-5 text-gray-900">
-                        Would you like to update the patient's SRF ID and Test
-                        date?
+              <label className="flex justify-center w-full mt-5 text-gray-900">
+                Would you like to update the patient's SRF ID and Test
+                date?
                       </label>
 
-                      <div className="flex">
-                        <TextInputField
-                          className="flex flex-1 mr-10"
-                          name="srf_id"
-                          variant="outlined"
-                          margin="dense"
-                          type="text"
-                          placeholder="SRF ID"
-                          value={preDischargeForm.srf_id || patientData.srf_id}
-                          onChange={(event) =>
-                            handlePreDischargeFormChange("srf_id", event)
-                          }
-                          errors=""
-                        />
+              <div className="flex">
+                <TextInputField
+                  className="flex flex-1 mr-10"
+                  name="srf_id"
+                  variant="outlined"
+                  margin="dense"
+                  type="text"
+                  placeholder="SRF ID"
+                  value={preDischargeForm.srf_id || patientData.srf_id}
+                  onChange={(event) =>
+                    handlePreDischargeFormChange("srf_id", event)
+                  }
+                  errors=""
+                />
 
-                        <DateInputField
-                          className="flex flex-1 ml-5"
-                          fullWidth={true}
-                          label="Date of test"
-                          value={
-                            preDischargeForm.date_of_test ||
-                            (patientData.date_of_test as string)
-                          }
-                          onChange={(event) =>
-                            handlePreDischargeFormChange("date_of_test", event)
-                          }
-                          inputVariant="outlined"
-                          margin="dense"
-                          disableFuture={true}
-                          errors={""}
-                        />
-                      </div>
-                    </div>
-                  </FormControl>
-                </DialogContent>
-                <DialogActions className="flex justify-between mt-5 px-5 border-t">
-                  <Button onClick={handleDischargeClose}>Cancel</Button>
-
-                  {isSendingDischargeApi ? (
-                    <CircularProgress size={20} />
-                  ) : (
-                      <Button
-                        color="primary"
-                        onClick={() => handlePatientDischarge(false)}
-                        autoFocus
-                      >
-                        Proceed with Discharge
-                      </Button>
-                    )}
-                </DialogActions>
-              </Dialog>
-            </div>
-          )}
-
-        </div>
-        {patientData.is_active && (
-          <div className="flex mt-4">
-            <div className="flex-1 mr-2">
-              <Button
-                fullWidth
-                variant="contained"
-                color="primary"
-                size="small"
-                onClick={() =>
-                  navigate(`/facility/${facilityId}/patient/${id}/consultation`)
-                }
-              >
-                Add OP Triage / Consultation
-              </Button>
-            </div>
-            <div className="flex-1 ml-2">
-              <Button
-                fullWidth
-                variant="contained"
-                color="primary"
-                size="small"
-                disabled={!consultationListData || !consultationListData.length}
-                onClick={() =>
-                  navigate(`/facility/${facilityId}/patient/${id}/sample-test`)
-                }
-              >
-                Request Sample Test
-              </Button>
-            </div>
-          </div>
-        )}
-      </div>
-
-      <Grid item xs={12}>
-        <PageTitle title="Medical History" hideBack={true} />
-        <div className={classes.details}>
-          {patientMedHis.length > 0 ? (
-            <div className="-my-2 py-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 mt-4">
-              <div className="align-middle inline-block min-w-full shadow overflow-hidden sm:rounded-lg border-b border-gray-200 mt-4">
-                <table className="min-w-full border-2 rounded overflow-hidden bg-white">
-                  <thead>
-                    <tr className="white border">
-                      <th className="border px-4 py-2">Disease</th>
-                      <th className="border px-4 py-2">Details</th>
-                    </tr>
-                  </thead>
-                  <tbody>{patientMedHis}</tbody>
-                </table>
+                <DateInputField
+                  className="flex flex-1 ml-5"
+                  fullWidth={true}
+                  label="Date of test"
+                  value={
+                    preDischargeForm.date_of_test ||
+                    (patientData.date_of_test as string)
+                  }
+                  onChange={(event) =>
+                    handlePreDischargeFormChange("date_of_test", event)
+                  }
+                  inputVariant="outlined"
+                  margin="dense"
+                  disableFuture={true}
+                  errors={""}
+                />
               </div>
             </div>
+          </FormControl>
+        </DialogContent>
+        <DialogActions className="flex justify-between mt-5 px-5 border-t">
+          <Button onClick={handleDischargeClose}>Cancel</Button>
+
+          {isSendingDischargeApi ? (
+            <CircularProgress size={20} />
           ) : (
-              <span className="flex items-center justify-center">
-                <h6 className="text-gray-700">No Medical History so far</h6>
-              </span>
+              <Button
+                color="primary"
+                onClick={() => handlePatientDischarge(false)}
+                autoFocus
+              >
+                Proceed with Discharge
+              </Button>
             )}
-        </div>
-      </Grid>
+        </DialogActions>
+      </Dialog>
 
       <div>
         <PageTitle title="OP Triage / Consultation History" hideBack={true} />
