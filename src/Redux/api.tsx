@@ -34,6 +34,20 @@ export default {
     path: "/api/v1/users",
   },
 
+  userListFacility: {
+    path: "/api/v1/users/{username}/get_facilities",
+  },
+
+  addUserFacility: {
+    path: "/api/v1/users/{username}/add_facility/",
+    method: "PUT",
+  },
+
+  deleteUserFacility: {
+    path: "/api/v1/users/{username}/delete_facility/",
+    method: "DELETE",
+  },
+
   createUser: {
     path: "/api/v1/users/",
     method: "POST",
@@ -61,7 +75,7 @@ export default {
   },
 
   searchUser: {
-    path: "/api/v1/users/search",
+    path: "/api/v1/users",
   },
 
   // Facility Endpoints

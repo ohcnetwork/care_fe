@@ -102,6 +102,13 @@ export const SHIFTING_CHOICES: Array<OptionsType> = [
   { id: 80, text: "COMPLETED" },
 ];
 
+export const SHIFTING_FILTER_ORDER: Array<OptionsType> = [
+  { id: 1, text: "created_date", desc: "ASC Created Date" },
+  { id: 1, text: "-created_date", desc: "DESC Created Date" },
+  { id: 1, text: "modified_date", desc: "ASC Modified Date" },
+  { id: 1, text: "-modified_date", desc: "DESC Modified Date" },
+];
+
 export const BED_TYPES: Array<OptionsType> = [
   { id: 1, text: "Normal" },
   { id: 2, text: "Hostel" },

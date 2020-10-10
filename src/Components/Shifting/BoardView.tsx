@@ -10,7 +10,6 @@ import loadable from '@loadable/component';
 import { CSVLink } from 'react-csv';
 import { useDispatch } from "react-redux";
 import moment from "moment";
-import { navigate } from "raviger";
 
 import GetAppIcon from '@material-ui/icons/GetApp';
 
@@ -34,7 +33,8 @@ const initialFilterData = {
   modified_date_before: null,
   modified_date_after: null,
   patient_phone_number: '',
-  offset: 0
+  offset: 0,
+  ordering: null,
 }
 
 const formatFilter = (params: any) => {
@@ -54,7 +54,8 @@ const formatFilter = (params: any) => {
     created_date_after: filter.created_date_after || undefined,
     modified_date_before: filter.modified_date_before || undefined,
     modified_date_after: filter.modified_date_after || undefined,
-    patient_phone_number: filter.patient_phone_number || undefined
+    patient_phone_number: filter.patient_phone_number || undefined,
+    ordering: filter.ordering || undefined,
   };
 }
 
@@ -123,31 +124,32 @@ export default function BoardView() {
         </div>
         <div className="bg-gray-200 text-sm text-gray-500 leading-none border-2 border-gray-200 rounded-full inline-flex">
           <button
-            className={"flex leading-none border-2 border-gray-200 rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-green-600 focus:text-green-600 rounded-r-full px-4 py-2"
+            className={"flex leading-none border-2 border-gray-200 rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-blue-400 focus:text-blue-400 rounded-r-full px-4 py-2"
               + (boardFilter === ACTIVE ? " bg-white text-gray-800" : " bg-gray-200 text-sm text-gray-500")}
             onClick={_ => setBoardFilter(ACTIVE)}
           >
             <span>Active</span>
           </button>
           <button
-            className={"flex leading-none border-2 border-gray-200 rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-green-600 focus:text-green-600 rounded-r-full px-4 py-2"
+            className={"flex leading-none border-2 border-gray-200 rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-blue-400 focus:text-blue-400 rounded-r-full px-4 py-2"
               + (boardFilter === COMPLETED ? " bg-white text-gray-800" : " bg-gray-200 text-sm text-gray-500")}
             onClick={_ => setBoardFilter(COMPLETED)}>
             <span>Completed</span>
           </button>
         </div>
-        <div>
-          <button className="px-4 py-2 rounded-full border-2 border-gray-200 text-sm bg-white text-gray-800 w-32 leading-none transition-colors duration-300 ease-in focus:outline-none hover:text-green-600 hover:border-gray-400 focus:text-green-600 focus:border-gray-400"
-             onClick={() => navigate("/shifting/list-view")}>
-            <i className="fa fa-list-ul mr-1" aria-hidden="true"></i>
-            List View
-          </button>
-        </div>
         <div className="flex items-start gap-2">
           <button
-            className={"flex leading-none border-2 border-gray-200 bg-white rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-green-600 focus:text-green-600 focus:border-gray-400 hover:border-gray-400 rounded-r-full px-4 py-2 text-sm"}
+            className={"flex leading-none border-2 border-gray-200 rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-blue-400 focus:text-blue-400 rounded-r-full px-4 py-2"
+              + (showFilters ? " bg-white text-gray-800" : " bg-gray-200 text-sm text-gray-500")}
             onClick={_ => setShowFilters(show => !show)}>
-            <i className="fa fa-filter mr-1" aria-hidden="true"></i>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="fill-current w-4 h-4 mr-2">
+              <line x1="8" y1="6" x2="21" y2="6"></line>
+              <line x1="8" y1="12" x2="21" y2="12"> </line>
+              <line x1="8" y1="18" x2="21" y2="18"> </line>
+              <line x1="3" y1="6" x2="3.01" y2="6"> </line>
+              <line x1="3" y1="12" x2="3.01" y2="12"> </line>
+              <line x1="3" y1="18" x2="3.01" y2="18"> </line>
+            </svg>
             <span>Filters</span>
           </button>
         </div>

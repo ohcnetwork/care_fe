@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { SelectField, DateInputField, TextInputField } from "../Common/HelperInputFields";
+import { SHIFTING_FILTER_ORDER } from "../../Common/constants";
 import moment from "moment";
 import { getFacility } from '../../Redux/actions';
 import { useDispatch } from 'react-redux';
@@ -31,6 +32,7 @@ export default function ListFilter(props: any) {
     modified_date_before: filter.modified_date_before || null,
     modified_date_after: filter.modified_date_after || null,
     patient_phone_number: filter.patient_phone_number || '',
+    ordering: filter.ordering || null
   });
   const dispatch: any = useDispatch();
 
@@ -105,6 +107,7 @@ export default function ListFilter(props: any) {
       created_date_after,
       modified_date_before,
       modified_date_after,
+      ordering
     } = filterState;
     const data = {
       orgin_facility: orgin_facility || '',
@@ -117,6 +120,7 @@ export default function ListFilter(props: any) {
       created_date_after: created_date_after && moment(created_date_after).isValid() ? moment(created_date_after).format('YYYY-MM-DD') : '',
       modified_date_before: modified_date_before && moment(modified_date_before).isValid() ? moment(modified_date_before).format('YYYY-MM-DD') : '',
       modified_date_after: modified_date_after && moment(modified_date_after).isValid() ? moment(modified_date_after).format('YYYY-MM-DD') : '',
+      ordering: ordering || '',
     }
     onChange(data);
   };
@@ -198,6 +202,20 @@ export default function ListFilter(props: any) {
                 onChange={handleChange}
                 className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"/>
         </div> */}
+
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">Ordering</span>
+          <SelectField
+            name="ordering"
+            variant="outlined"
+            margin="dense"
+            optionKey="text"
+            optionValue="desc"
+            value={filterState.ordering}
+            options={SHIFTING_FILTER_ORDER}
+            onChange={handleChange}
+            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9" />
+        </div>
 
         <div className="w-64 flex-none">
           <span className="text-sm font-semibold">Is emergency case</span>

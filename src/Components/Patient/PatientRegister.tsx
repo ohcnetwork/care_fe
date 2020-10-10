@@ -105,6 +105,8 @@ const initForm: any = {
   emergency_phone_number: "",
   blood_group: "",
   disease_status: diseaseStatus[0],
+  is_declared_positive: "false",
+  date_declared_positive: new Date(),
   date_of_birth: null,
   medical_history: [],
   nationality: "India",
@@ -129,8 +131,8 @@ const initForm: any = {
   number_of_primary_contacts: "",
   number_of_secondary_contacts: "",
   is_antenatal: "false",
-  date_of_test: false,
-  date_of_result: false,
+  date_of_test: null,
+  date_of_result: null,
   srf_id: "",
   test_type: testType[0],
   prescribed_medication: false,
@@ -141,6 +143,7 @@ const initForm: any = {
   frontline_worker: frontlineWorkers[0],
   number_of_aged_dependents: "",
   number_of_chronic_diseased_dependents: "",
+  cluster_name: "",
   ...medicalHistoryChoices,
 };
 
@@ -267,11 +270,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             ...res.data,
             nationality: res.data.nationality ? res.data.nationality : "India",
             gender: res.data.gender ? res.data.gender : "",
+            cluster_name: res.data.cluster_name ? res.data.cluster_name : "",
             state: res.data.state ? res.data.state : "",
             district: res.data.district ? res.data.district : "",
             blood_group: res.data.blood_group ? res.data.blood_group : "",
             local_body: res.data.local_body ? res.data.local_body : "",
-            ward: res.data.ward_object ? res.data.ward : initialWard,
+            ward: res.data.ward_object ? res.data.ward_object.id : initialWard,
             village: res.data.village ? res.data.village : "",
             medical_history: [],
             is_antenatal: res.data.is_antenatal
@@ -288,6 +292,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               : "",
             is_medical_worker: res.data.is_medical_worker
               ? String(res.data.is_medical_worker)
+              : "false",
+            is_declared_positive: res.data.is_declared_positive
+              ? String(res.data.is_declared_positive)
               : "false",
             designation_of_health_care_worker: res.data
               .designation_of_health_care_worker
@@ -468,6 +475,17 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             }
           }
           return;
+        case "cluster_name":
+          if (
+            JSON.parse(state.form.contact_with_confirmed_carrier) ||
+            JSON.parse(state.form.contact_with_suspected_carrier)
+          ) {
+            if (!state.form[field]) {
+              errors[field] = "Please enter the name / cluster of the contact";
+              invalidForm = true;
+            }
+          }
+          return;
         case "blood_group":
           if (!state.form[field]) {
             errors[field] = "Please select a blood group";
@@ -517,6 +535,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         date_of_result: state.form.date_of_result
           ? state.form.date_of_result
           : undefined,
+        date_declared_positive: state.form.date_declared_positive
+          ? state.form.date_declared_positive
+          : undefined,
         srf_id: state.form.srf_id,
         test_type: state.form.test_type,
         name: state.form.name,
@@ -550,6 +571,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           state.form.contact_with_suspected_carrier
         ),
         estimated_contact_date: state.form.estimated_contact_date,
+        cluster_name: state.form.cluster_name,
         past_travel: state.form.past_travel,
         transit_details: state.form.transit_details,
         countries_travelled: state.form.past_travel
@@ -572,6 +594,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           : undefined,
         ongoing_medication: state.form.ongoing_medication,
         is_medical_worker: JSON.parse(state.form.is_medical_worker),
+        is_declared_positive: JSON.parse(state.form.is_declared_positive),
         designation_of_health_care_worker:
           state.form.designation_of_health_care_worker,
         instituion_of_health_care_worker:
@@ -669,8 +692,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           const duplicateList = !id
             ? res.data.results
             : res.data.results.filter(
-                (item: DupPatientModel) => item.patient_id !== id
-              );
+              (item: DupPatientModel) => item.patient_id !== id
+            );
           if (duplicateList.length) {
             setStatusDialog({
               show: true,
@@ -823,7 +846,49 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     errors={state.errors.disease_status}
                   />
                 </div>
-
+                <div>
+                  <InputLabel id="is_declared_positive">
+                    Is patient declared covid postive by state?
+                  </InputLabel>
+                  <RadioGroup
+                    aria-label="is_declared_positive"
+                    name="is_declared_positive"
+                    value={state.form.is_declared_positive}
+                    onChange={handleChange}
+                    style={{ padding: "0px 5px" }}
+                  >
+                    <Box display="flex" flexDirection="row">
+                      <FormControlLabel
+                        value="true"
+                        control={<Radio />}
+                        label="Yes"
+                      />
+                      <FormControlLabel
+                        value="false"
+                        control={<Radio />}
+                        label="No"
+                      />
+                    </Box>
+                  </RadioGroup>
+                </div>
+                {state.form.is_declared_positive === "true" && (
+                  <div>
+                    <InputLabel id="date_declared_positive-label">
+                      Date Patient is Declared Positive
+                    </InputLabel>
+                    <DateInputField
+                      fullWidth={true}
+                      value={state.form.date_declared_positive}
+                      onChange={(date) =>
+                        handleDateChange(date, "date_declared_positive")
+                      }
+                      errors={state.errors.date_declared_positive}
+                      inputVariant="outlined"
+                      margin="dense"
+                      disableFuture={true}
+                    />
+                  </div>
+                )}
                 <div>
                   <InputLabel id="test_type-label">Test Type</InputLabel>
                   <SelectField
@@ -864,7 +929,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   />
                 </div>
                 <div>
-                  <InputLabel id="date_of_birth-label">
+                  <InputLabel id="date_of_result-label">
                     Date of Result
                   </InputLabel>
                   <DateInputField
@@ -985,20 +1050,20 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       {isStateLoading ? (
                         <CircularProgress size={20} />
                       ) : (
-                        <SelectField
-                          name="state"
-                          variant="outlined"
-                          margin="dense"
-                          value={state.form.state}
-                          options={states}
-                          optionValue="name"
-                          onChange={(e) => [
-                            handleChange(e),
-                            fetchDistricts(String(e.target.value)),
-                          ]}
-                          errors={state.errors.state}
-                        />
-                      )}
+                          <SelectField
+                            name="state"
+                            variant="outlined"
+                            margin="dense"
+                            value={state.form.state}
+                            options={states}
+                            optionValue="name"
+                            onChange={(e) => [
+                              handleChange(e),
+                              fetchDistricts(String(e.target.value)),
+                            ]}
+                            errors={state.errors.state}
+                          />
+                        )}
                     </div>
 
                     <div>
@@ -1006,20 +1071,20 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       {isDistrictLoading ? (
                         <CircularProgress size={20} />
                       ) : (
-                        <SelectField
-                          name="district"
-                          variant="outlined"
-                          margin="dense"
-                          value={state.form.district}
-                          options={districts}
-                          optionValue="name"
-                          onChange={(e) => [
-                            handleChange(e),
-                            fetchLocalBody(String(e.target.value)),
-                          ]}
-                          errors={state.errors.district}
-                        />
-                      )}
+                          <SelectField
+                            name="district"
+                            variant="outlined"
+                            margin="dense"
+                            value={state.form.district}
+                            options={districts}
+                            optionValue="name"
+                            onChange={(e) => [
+                              handleChange(e),
+                              fetchLocalBody(String(e.target.value)),
+                            ]}
+                            errors={state.errors.district}
+                          />
+                        )}
                     </div>
 
                     <div>
@@ -1027,37 +1092,37 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       {isLocalbodyLoading ? (
                         <CircularProgress size={20} />
                       ) : (
-                        <SelectField
-                          name="local_body"
-                          variant="outlined"
-                          margin="dense"
-                          value={state.form.local_body}
-                          options={localBody}
-                          optionValue="name"
-                          onChange={(e) => [
-                            handleChange(e),
-                            fetchWards(String(e.target.value)),
-                          ]}
-                          errors={state.errors.local_body}
-                        />
-                      )}
+                          <SelectField
+                            name="local_body"
+                            variant="outlined"
+                            margin="dense"
+                            value={state.form.local_body}
+                            options={localBody}
+                            optionValue="name"
+                            onChange={(e) => [
+                              handleChange(e),
+                              fetchWards(String(e.target.value)),
+                            ]}
+                            errors={state.errors.local_body}
+                          />
+                        )}
                     </div>
                   </>
                 ) : (
-                  <div>
-                    <InputLabel id="passport-label">
-                      Passport Number*
+                    <div>
+                      <InputLabel id="passport-label">
+                        Passport Number*
                     </InputLabel>
-                    <TextInputField
-                      name="passport_no"
-                      variant="outlined"
-                      margin="dense"
-                      value={state.form.passport_no}
-                      onChange={handleChange}
-                      errors={state.errors.passport_no}
-                    />
-                  </div>
-                )}
+                      <TextInputField
+                        name="passport_no"
+                        variant="outlined"
+                        margin="dense"
+                        value={state.form.passport_no}
+                        onChange={handleChange}
+                        errors={state.errors.passport_no}
+                      />
+                    </div>
+                  )}
 
                 <div>
                   <InputLabel id="address-label">Address*</InputLabel>
@@ -1077,23 +1142,24 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   <InputLabel id="ward-label">
                     Ward/Division of respective LSGI*
                   </InputLabel>
-                  {isLocalbodyLoading ? (
+                  {isWardLoading ? (
                     <CircularProgress size={20} />
                   ) : (
-                    <SelectField
-                      name="ward"
-                      variant="outlined"
-                      margin="dense"
-                      options={ward
-                        .sort((a, b) => a.number - b.number)
-                        .map((e) => {
-                          return { id: e.id, name: e.number + ": " + e.name };
-                        })}
-                      optionValue="name"
-                      onChange={handleChange}
-                      errors={state.errors.local_body}
-                    />
-                  )}
+                      <SelectField
+                        name="ward"
+                        variant="outlined"
+                        margin="dense"
+                        options={ward
+                          .sort((a, b) => a.number - b.number)
+                          .map((e) => {
+                            return { id: e.id, name: e.number + ": " + e.name };
+                          })}
+                        value={state.form.ward}
+                        optionValue="name"
+                        onChange={handleChange}
+                        errors={state.errors.ward}
+                      />
+                    )}
                 </div>
                 <div>
                   <InputLabel id="name-label">Village</InputLabel>
@@ -1251,22 +1317,41 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
                 {(JSON.parse(state.form.contact_with_confirmed_carrier) ||
                   JSON.parse(state.form.contact_with_suspected_carrier)) && (
-                  <div>
-                    <DateInputField
-                      fullWidth={true}
-                      label="Esimate date of contact*"
-                      value={state.form.estimated_contact_date}
-                      onChange={(date) =>
-                        handleDateChange(date, "estimated_contact_date")
-                      }
-                      errors={state.errors.estimated_contact_date}
-                      inputVariant="outlined"
-                      margin="dense"
-                      disableFuture={true}
-                    />
-                  </div>
-                )}
+                    <div>
+                      <DateInputField
+                        fullWidth={true}
+                        label="Estimate date of contact*"
+                        value={state.form.estimated_contact_date}
+                        onChange={(date) =>
+                          handleDateChange(date, "estimated_contact_date")
+                        }
+                        errors={state.errors.estimated_contact_date}
+                        inputVariant="outlined"
+                        margin="dense"
+                        disableFuture={true}
+                      />
+                    </div>
 
+                  )}
+
+                {(JSON.parse(state.form.contact_with_confirmed_carrier) ||
+                  JSON.parse(state.form.contact_with_suspected_carrier)) && (
+                    <div>
+                      <InputLabel id="cluster_name-label">
+                        Name / Cluster of Contact*
+                      </InputLabel>
+                      <TextInputField
+                        name="cluster_name"
+                        variant="outlined"
+                        margin="dense"
+                        type="text"
+                        placeholder="Name / Cluster of Contact"
+                        value={state.form.cluster_name}
+                        onChange={handleChange}
+                        errors={state.errors.cluster_name}
+                      />
+                    </div>
+                  )}
                 <div className="md:col-span-2">
                   <CheckboxField
                     checked={state.form.past_travel}
