@@ -945,6 +945,12 @@ export const PatientHome = (props: any) => {
                     Add OP Triage / Consultation
                   </button>
                 </div>
+
+                <div>
+                  <button className="btn btn-primary w-full" disabled={!patientData.is_active || !(patientData?.last_consultation?.facility == facilityId)} onClick={() => navigate(`/facility/${facilityId}/patient/${id}/shift/new`)}>
+                    SHIFT PATIENT
+                  </button>
+                </div>
                 <div>
                   <button className="btn btn-primary w-full" disabled={!patientData.is_active} onClick={() => navigate(`/facility/${facilityId}/patient/${id}/sample-test`)}>
                     Request Sample Test
