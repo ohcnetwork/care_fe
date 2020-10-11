@@ -28,7 +28,8 @@ import MinQuantityList from "../Components/Facility/MinQuantityList";
 import { UpdateMinQuantity } from "../Components/Facility/UpdateMinQuantity";
 import { ShiftCreate } from '../Components/Patient/ShiftCreate';
 import UserProfile from "../Components/Users/UserProfile";
-import ListView from "../Components/Shifting/ListView";
+import ShiftBoardView from "../Components/Shifting/BoardView";
+import ShiftListView from "../Components/Shifting/ListView";
 import ShiftDetails from "../Components/Shifting/ShiftDetails";
 import { ShiftDetailsUpdate } from "../Components/Shifting/ShiftDetailsUpdate";
 import ResultList from "../Components/ExternalResult/ResultList";
@@ -123,7 +124,9 @@ const routes = {
   "/facility/:facilityId/inventory/min_quantity/list": ({ facilityId }: any) => (<MinQuantityList facilityId={facilityId} />),
   "/facility/:facilityId/inventory/:inventoryId/update/:itemId": ({ facilityId, inventoryId, itemId }: any) => (<UpdateMinQuantity facilityId={facilityId} inventoryId={inventoryId} itemId={itemId} />),
 
-  "/shifting": () => <ListView />,
+  "/shifting": () => localStorage.getItem("defaultShiftView") === 'list' ? <ShiftListView/> : <ShiftBoardView />,
+  "/shifting/board-view": () => <ShiftBoardView />,
+  "/shifting/list-view": () => <ShiftListView />,
   "/shifting/:id": ({ id }: any) => <ShiftDetails id={id} />,
   "/shifting/:id/update": ({ id }: any) => (
     <ShiftDetailsUpdate id={id} />

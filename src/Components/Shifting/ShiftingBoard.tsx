@@ -168,7 +168,7 @@ export default function ListView({ board, filterProp, formatFilter }: boardProps
                   <i className="fas fa-eye mr-2" /> All Details
                 </button>
               </div>
-              {filter === "TRANSFER IN PROGRESS" &&
+              {filter === "TRANSFER IN PROGRESS" && shift.assigned_facility &&
                 <div className="mt-2">
                   <Button
                     size="small"
@@ -237,7 +237,7 @@ export default function ListView({ board, filterProp, formatFilter }: boardProps
                 </div>
               </div>
             </div>
-          </div> : data?.length > 0 ? patientFilter(board) : <p className="mx-auto p-4">No Patients to Show</p>}
+          </div> : data?.length > 0 ? patientFilter(board) : <p className="mx-auto p-4">No patients to show.</p>}
         {!isLoading.board && data?.length < (totalCount || 0) &&
           (isLoading.more ? <div className="mx-auto my-4 p-2 px-4 bg-gray-100 rounded-md hover:bg-white">Loading</div> :
             <button onClick={_ => handlePagination(currentPage + 1, limit)} className="mx-auto my-4 p-2 px-4 bg-gray-100 rounded-md hover:bg-white">More...</button>)}
