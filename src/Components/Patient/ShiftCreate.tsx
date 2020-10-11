@@ -292,8 +292,8 @@ export const ShiftCreate = (props: patientShiftProps) => {
 
                             <div className="md:col-span-2">
                                 <InputLabel>
-                                    Reason for shift
-                        </InputLabel>
+                                    Reason for shift*
+                                </InputLabel>
                                 <MultilineInputField
                                     rows={5}
                                     name="reason"

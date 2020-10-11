@@ -14,8 +14,8 @@ import * as Notification from "../../Utils/Notifications.js";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { DateInputField, PhoneNumberField, SelectField, TextInputField } from "../Common/HelperInputFields";
 import { FacilityModel } from "../Facility/models";
-const Loading = loadable( () => import("../Common/Loading"));
-const PageTitle = loadable( () => import("../Common/PageTitle"));
+const Loading = loadable(() => import("../Common/Loading"));
+const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 const genderTypes = [
   {
@@ -194,8 +194,12 @@ export const UserAdd = (props: UserProps) => {
   );
 
   const handleChange = (e: any) => {
+    const { value, name } = e.target;
     let form = { ...state.form };
-    form[e.target.name] = e.target.value;
+    form[name] = value;
+    if (name === "username") {
+      form[name] = value.toLowerCase();
+    }
     dispatch({ type: "set_form", form });
   };
 

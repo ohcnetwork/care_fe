@@ -43,7 +43,7 @@ export interface PatientModel {
   district_object?: { id: number; name: string };
   state_object?: { id: number; name: string };
   tele_consultation_history?: Array<any>;
-  last_consultation?: { id: number };
+  last_consultation?: { id: number; facility: string; };
   address?: string;
   village?: string;
   pincode?: number;
@@ -75,6 +75,7 @@ export interface PatientModel {
   date_of_birth?: string;
   blood_group?: string;
   review_time?: string;
+  date_of_return?: string;
   cluster_name?: string;
   number_of_aged_dependents?: number;
   number_of_chronic_diseased_dependents?: number;

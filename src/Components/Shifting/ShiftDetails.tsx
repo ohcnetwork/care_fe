@@ -31,7 +31,7 @@ export default function ShiftDetails(props: { id: string }) {
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const res = await dispatch(getShiftDetails(props.id));
+      const res = await dispatch(getShiftDetails({ id: props.id }));
       if (!status.aborted) {
         if (res && res.data) {
           setData(res.data);
@@ -323,7 +323,10 @@ export default function ShiftDetails(props: { id: string }) {
             <span className="font-semibold leading-relaxed mt-4">
               Name of Hospital:{" "}
             </span>
-            {data.orgin_facility_object?.name || "--"}
+            {
+              data.is_kasp ? "District Program Management Supporting Unit" : (data.orgin_facility_object?.name || "--")
+            }
+            {/*  Made static based on #757 */}
           </div>
           <div className="font-bold text-xl text-center mt-6">
             REFERRAL LETTER
@@ -363,7 +366,7 @@ export default function ShiftDetails(props: { id: string }) {
           <div className="text-left mt-2 flex">
             <span className="font-semibold leading-relaxed"> Address: </span>
             <div className="ml-2">
-              <div>{patientData.address || "-"}</div>
+              <div className="whitespace-pre-wrap">{patientData.address || "-"}</div>
               {patientData.nationality === "India" && (
                 <>
                   <div>{patientData.ward_object?.name}</div>
@@ -418,7 +421,6 @@ export default function ShiftDetails(props: { id: string }) {
           <div className="mt-6 flex justify-between">
             <div>
               <span className="font-semibold leading-relaxed">
-                {" "}
                 Covid-19 Clinical Category as per Govt. of Kerala guideline
                 (A/B/C):{" "}
               </span>
@@ -429,7 +431,6 @@ export default function ShiftDetails(props: { id: string }) {
           <div className="mt-2 flex justify-between">
             <div>
               <span className="font-semibold leading-relaxed">
-                {" "}
                 Referred to:{" "}
               </span>
               {data.assigned_facility_object?.name || "--"}
@@ -439,7 +440,6 @@ export default function ShiftDetails(props: { id: string }) {
           <div className="mt-2 flex justify-between">
             <div>
               <span className="font-semibold leading-relaxed">
-                {" "}
                 Reason for referral:{" "}
               </span>
               {data.reason || "--"}

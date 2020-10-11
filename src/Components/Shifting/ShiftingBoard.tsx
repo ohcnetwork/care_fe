@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { getShiftRequests, completeTransfer, downloadShiftRequests } from "../../Redux/actions";
+import { listShiftRequests, completeTransfer, downloadShiftRequests } from "../../Redux/actions";
 import Button from "@material-ui/core/Button";
 import { navigate } from "raviger";
 import moment from "moment";
@@ -44,7 +44,7 @@ export default function ListView({ board, filterProp, formatFilter }: boardProps
 
   const fetchData = () => {
     setIsLoading(loading => reduceLoading("BOARD", loading));
-    dispatch(getShiftRequests(formatFilter({ ...filterProp, status: board }), board)).then((res: any) => {
+    dispatch(listShiftRequests(formatFilter({ ...filterProp, status: board }), board)).then((res: any) => {
       if (res && res.data) {
         setData(res.data.results);
         setTotalCount(res.data.count);
@@ -62,7 +62,7 @@ export default function ListView({ board, filterProp, formatFilter }: boardProps
   useEffect(() => {
     fetchData();
   },
-    [board, dispatch, filterProp.facility, filterProp.orgin_facility, filterProp.shifting_approving_facility, filterProp.assigned_facility, filterProp.emergency, filterProp.is_up_shift, filterProp.patient_name, filterProp.created_date_before, filterProp.created_date_after, filterProp.modified_date_before, filterProp.modified_date_after, filterProp.patient_phone_number, filterProp.ordering]
+    [board, dispatch, filterProp.facility, filterProp.orgin_facility, filterProp.shifting_approving_facility, filterProp.assigned_facility, filterProp.emergency, filterProp.is_up_shift, filterProp.patient_name, filterProp.created_date_before, filterProp.created_date_after, filterProp.modified_date_before, filterProp.modified_date_after, filterProp.patient_phone_number, filterProp.ordering, filterProp.is_kasp]
   );
 
   const handlePagination = (page: number, limit: number) => {
@@ -70,7 +70,7 @@ export default function ListView({ board, filterProp, formatFilter }: boardProps
     // console.log(`${currentPage} of ${(totalCount || 0)/limit} to ${page}`)
     setCurrentPage(page);
     setIsLoading(loading => reduceLoading("MORE", loading));
-    dispatch(getShiftRequests(formatFilter({ ...filterProp, status: board, offset: offset }), board)).then((res: any) => {
+    dispatch(listShiftRequests(formatFilter({ ...filterProp, status: board, offset: offset }), board)).then((res: any) => {
       if (res && res.data) {
         setData(data => [...data, ...res.data.results]);
         setTotalCount(res.data.count);

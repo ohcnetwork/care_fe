@@ -152,7 +152,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
         async (status: statusType) => {
             setIsLoading(true);
             const res = await dispatchAction(
-                getShiftDetails(props.id)
+                getShiftDetails({ props })
             );
             if (!status.aborted) {
                 if (res && res.data) {
@@ -304,8 +304,8 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
 
                             <div className="md:col-span-2">
                                 <InputLabel>
-                                    Reason for shift
-                        </InputLabel>
+                                    Reason for shift*
+                                </InputLabel>
                                 <MultilineInputField
                                     rows={5}
                                     name="reason"
