@@ -110,6 +110,13 @@ export const SHIFTING_FILTER_ORDER: Array<OptionsType> = [
   { id: 1, text: "-modified_date", desc: "DESC Modified Date" },
 ];
 
+export const PATIENT_FILTER_ORDER: Array<OptionsType> = [
+  { id: 1, text: "created_date", desc: "ASC Created Date" },
+  { id: 1, text: "-created_date", desc: "DESC Created Date" },
+  { id: 1, text: "modified_date", desc: "ASC Modified Date" },
+  { id: 1, text: "-modified_date", desc: "DESC Modified Date" },
+];
+
 export const BED_TYPES: Array<OptionsType> = [
   { id: 1, text: "Normal" },
   { id: 2, text: "Hostel" },
@@ -194,6 +201,13 @@ export const PATIENT_CATEGORY = [
   { id: "Category-A", text: "Mild (Category A)" },
   { id: "Category-B", text: "Moderate (Category B)" },
   { id: "Category-C", text: "Severe (Category C)" },
+];
+
+export const PATIENT_FILTER_CATEGORY = [
+  { id: "ASYM", text: "ASYM (ASYMPTOMATIC) " },
+  { id: "Mild", text: "Mild (Category A)" },
+  { id: "Moderate", text: "Moderate (Category B)" },
+  { id: "Severe", text: "Severe (Category C)" },
 ];
 
 export const CURRENT_HEALTH_CHANGE = [
