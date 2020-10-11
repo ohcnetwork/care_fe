@@ -124,7 +124,8 @@ const routes = {
   "/facility/:facilityId/inventory/min_quantity/list": ({ facilityId }: any) => (<MinQuantityList facilityId={facilityId} />),
   "/facility/:facilityId/inventory/:inventoryId/update/:itemId": ({ facilityId, inventoryId, itemId }: any) => (<UpdateMinQuantity facilityId={facilityId} inventoryId={inventoryId} itemId={itemId} />),
 
-  "/shifting": () => <ShiftBoardView />,
+  "/shifting": () => localStorage.getItem("defaultShiftView") === 'list' ? <ShiftListView/> : <ShiftBoardView />,
+  "/shifting/board-view": () => <ShiftBoardView />,
   "/shifting/list-view": () => <ShiftListView />,
   "/shifting/:id": ({ id }: any) => <ShiftDetails id={id} />,
   "/shifting/:id/update": ({ id }: any) => (

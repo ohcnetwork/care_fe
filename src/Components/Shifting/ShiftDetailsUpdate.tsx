@@ -152,7 +152,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
         async (status: statusType) => {
             setIsLoading(true);
             const res = await dispatchAction(
-                getShiftDetails({ props })
+                getShiftDetails({ id: props.id })
             );
             if (!status.aborted) {
                 if (res && res.data) {
