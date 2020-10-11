@@ -142,7 +142,7 @@ export const DailyRounds = (props: any) => {
             const data = {
                 additional_symptoms: state.form.additional_symptoms,
                 other_symptoms: state.form.otherSymptom ? state.form.other_symptoms : undefined,
-                spo2: state.form.spo2? state.form.spo2: undefined,
+                spo2: state.form.spo2 ? state.form.spo2 : undefined,
                 temperature: state.form.temperature ? state.form.temperature : undefined,
                 temperature_measured_at: state.form.temperature ? state.form.temperature_measured_at : undefined,
                 physical_examination_info: state.form.physical_examination_info,
@@ -221,32 +221,7 @@ export const DailyRounds = (props: any) => {
                 <Card>
                     <form onSubmit={e => handleSubmit(e)}>
                         <CardContent>
-                            <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
-                                <div>
-                                    <InputLabel id="temperature-label">Temperature</InputLabel>
-                                    <TextInputField
-                                        name="temperature"
-                                        variant="outlined"
-                                        margin="dense"
-                                        type="text"
-                                        InputLabelProps={{ shrink: !!state.form.temperature }}
-                                        value={state.form.temperature}
-                                        onChange={handleChange}
-                                        errors={state.errors.temperature}
-                                    />
-                                </div>
-                                <div>
-                                    <DateTimeFiled
-                                        label="Temperature Measured At"
-                                        margin="dense"
-                                        disabled={!state.form.temperature}
-                                        value={state.form.temperature_measured_at}
-                                        disableFuture={true}
-                                        showTodayButton={true}
-                                        onChange={date => handleDateChange(date, "temperature_measured_at")}
-                                        errors={state.errors.temperature_measured_at}
-                                    />
-                                </div>
+                            <div className="md:grid gap-4 grid-cols-1 md:grid-cols-2">
                                 <div>
                                     <InputLabel id="spo2-label">SpO2</InputLabel>
                                     <TextInputField
@@ -259,6 +234,33 @@ export const DailyRounds = (props: any) => {
                                         onChange={handleChange}
                                         errors={state.errors.spo2}
                                     />
+                                </div>
+                                <div className="col-span-2 md:flex justify-between">
+                                    <div>
+                                        <InputLabel id="temperature-label">Temperature</InputLabel>
+                                        <TextInputField
+                                            name="temperature"
+                                            variant="outlined"
+                                            margin="dense"
+                                            type="text"
+                                            InputLabelProps={{ shrink: !!state.form.temperature }}
+                                            value={state.form.temperature}
+                                            onChange={handleChange}
+                                            errors={state.errors.temperature}
+                                        />
+                                    </div>
+                                    <div>
+                                        <DateTimeFiled
+                                            label="Temperature Measured At"
+                                            margin="dense"
+                                            disabled={!state.form.temperature}
+                                            value={state.form.temperature_measured_at}
+                                            disableFuture={true}
+                                            showTodayButton={true}
+                                            onChange={date => handleDateChange(date, "temperature_measured_at")}
+                                            errors={state.errors.temperature_measured_at}
+                                        />
+                                    </div>
                                 </div>
                                 <div>
                                     <InputLabel id="physical-examination-info-label">Physical Examination Info</InputLabel>
