@@ -214,6 +214,7 @@ export interface SampleListModel {
 }
 
 export interface DailyRoundsModel {
+  spo2?: string;
   temperature?: string;
   temperature_measured_at?: string;
   physical_examination_info?: string;

@@ -16,6 +16,7 @@ const initForm: any = {
     otherSymptom: false,
     additional_symptoms: [],
     other_symptoms: "",
+    spo2: "",
     temperature: "",
     temperature_measured_at: null,
     physical_examination_info: "",
@@ -92,6 +93,7 @@ export const DailyRounds = (props: any) => {
                     const data = {
                         ...res.data,
                         temperature: Number(res.data.temperature) ? res.data.temperature : '',
+                        spo2: Number(res.data.spo2) ? res.data.spo2 : '',
                     }
                     dispatch({ type: "set_form", form: data });
                 }
@@ -140,6 +142,7 @@ export const DailyRounds = (props: any) => {
             const data = {
                 additional_symptoms: state.form.additional_symptoms,
                 other_symptoms: state.form.otherSymptom ? state.form.other_symptoms : undefined,
+                spo2: state.form.spo2? state.form.spo2: undefined,
                 temperature: state.form.temperature ? state.form.temperature : undefined,
                 temperature_measured_at: state.form.temperature ? state.form.temperature_measured_at : undefined,
                 physical_examination_info: state.form.physical_examination_info,
@@ -242,6 +245,19 @@ export const DailyRounds = (props: any) => {
                                         showTodayButton={true}
                                         onChange={date => handleDateChange(date, "temperature_measured_at")}
                                         errors={state.errors.temperature_measured_at}
+                                    />
+                                </div>
+                                <div>
+                                    <InputLabel id="spo2-label">SpO2</InputLabel>
+                                    <TextInputField
+                                        name="spo2"
+                                        variant="outlined"
+                                        margin="dense"
+                                        type="number"
+                                        InputLabelProps={{ shrink: !!state.form.spo2 }}
+                                        value={state.form.spo2}
+                                        onChange={handleChange}
+                                        errors={state.errors.spo2}
                                     />
                                 </div>
                                 <div>
