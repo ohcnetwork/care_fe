@@ -21,6 +21,8 @@ export interface PatientModel {
   allow_transfer?: boolean;
   discharge?: boolean;
   gender?: number;
+  created_date?: string,
+  modified_date?: string,
   phone_number?: string;
   emergency_phone_number?: string;
   allergies?: string;
@@ -41,7 +43,7 @@ export interface PatientModel {
   district_object?: { id: number; name: string };
   state_object?: { id: number; name: string };
   tele_consultation_history?: Array<any>;
-  last_consultation?: { id: number };
+  last_consultation?: { id: number; facility: string; };
   address?: string;
   village?: string;
   pincode?: number;
@@ -73,10 +75,16 @@ export interface PatientModel {
   date_of_birth?: string;
   blood_group?: string;
   review_time?: string;
+  date_of_return?: string;
+  cluster_name?: string;
   number_of_aged_dependents?: number;
   number_of_chronic_diseased_dependents?: number;
   will_donate_blood?: boolean;
   fit_for_blood_donation?: boolean;
+  date_declared_positive?: string;
+  is_declared_positive?: boolean;
+  last_edited?: { first_name?: string; username?: string; last_name?: string };
+  created_by?: { first_name?: string; username?: string; last_name?: string };
 }
 
 export interface SampleTestModel {
@@ -206,6 +214,7 @@ export interface SampleListModel {
 }
 
 export interface DailyRoundsModel {
+  spo2?: string;
   temperature?: string;
   temperature_measured_at?: string;
   physical_examination_info?: string;

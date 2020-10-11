@@ -11,8 +11,8 @@ import Pagination from "../Common/Pagination";
 import { ConsultationModel } from "./models";
 import { DailyRoundsModel } from "../Patient/models";
 import { PATIENT_CATEGORY, SYMPTOM_CHOICES } from "../../Common/constants";
-const Loading = loadable( () => import("../Common/Loading"));
-const PageTitle = loadable( () => import("../Common/PageTitle"));
+const Loading = loadable(() => import("../Common/Loading"));
+const PageTitle = loadable(() => import("../Common/PageTitle"));
 const symptomChoices = [...SYMPTOM_CHOICES];
 const patientCategoryChoices = [...PATIENT_CATEGORY];
 
@@ -186,6 +186,14 @@ export const ConsultationDetails = (props: any) => {
                   <Grid item xs={12}>
                     <Typography>
                       <span className="text-gray-700">
+                        SpO2:
+                      </span>{" "}
+                      {itemData.spo2}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <span className="text-gray-700">
                         Physical Examination Info:
                       </span>{" "}
                       {itemData.physical_examination_info}
@@ -334,29 +342,29 @@ export const ConsultationDetails = (props: any) => {
               {consultationData.other_symptoms}
             </div>
           )}
-          { consultationData.ip_no && (
-              <div className="md:col-span-2 capitalize">
+          {consultationData.ip_no && (
+            <div className="md:col-span-2 capitalize">
               <span className="font-semibold leading-relaxed">
                 IP number:{" "}
               </span>
-                <span className="badge badge-pill badge-primary">{consultationData.ip_no}</span>
-              </div>
+              <span className="badge badge-pill badge-primary">{consultationData.ip_no}</span>
+            </div>
           )}
-          { consultationData.diagnosis && (
-              <div className="md:col-span-2 capitalize">
+          {consultationData.diagnosis && (
+            <div className="md:col-span-2 capitalize">
               <span className="font-semibold leading-relaxed">
                 Diagnosis:{" "}
               </span>
-                {consultationData.diagnosis}
-              </div>
+              {consultationData.diagnosis}
+            </div>
           )}
-          { consultationData.verified_by && (
-              <div className="md:col-span-2 capitalize">
+          {consultationData.verified_by && (
+            <div className="md:col-span-2 capitalize">
               <span className="font-semibold leading-relaxed">
                 Verified By :{" "}
               </span>
-                <span className="badge badge-pill badge-primary">{consultationData.verified_by}</span>
-              </div>
+              <span className="badge badge-pill badge-primary">{consultationData.verified_by}</span>
+            </div>
           )}
 
 

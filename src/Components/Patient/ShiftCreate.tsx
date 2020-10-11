@@ -1,11 +1,12 @@
 import React, { useReducer, useState } from "react";
 import loadable from '@loadable/component';
 import { FacilitySelect } from "../Common/FacilitySelect";
-import { TextInputField, MultilineInputField, ErrorHelperText, PhoneNumberField } from "../Common/HelperInputFields";
+import { TextInputField, MultilineInputField, ErrorHelperText, PhoneNumberField, SelectField } from "../Common/HelperInputFields";
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
 import { navigate } from "raviger";
+import { FACILITY_TYPES, SHIFTING_VEHICLE_CHOICES } from "../../Common/constants";
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
 import {
     Card,
@@ -39,7 +40,9 @@ const initForm: any = {
     vehicle_preference: "",
     comments: "",
     refering_facility_contact_name: "",
-    refering_facility_contact_number: ""
+    refering_facility_contact_number: "",
+    assigned_facility_type: "",
+    preferred_vehicle_choice: "",
 };
 
 const requiredFields: any = {
@@ -56,6 +59,12 @@ const requiredFields: any = {
     reason: {
         errorText: 'Reason for shifting in mandatory',
         invalidText: 'Please enter reason for shifting'
+    },
+    assigned_facility_type: {
+        errorText: 'Please Select Facility Type'
+    },
+    preferred_vehicle_choice: {
+        errorText: 'Please Preferred Vehicle Type'
     }
 }
 
@@ -153,6 +162,8 @@ export const ShiftCreate = (props: patientShiftProps) => {
                 reason: state.form.reason,
                 vehicle_preference: state.form.vehicle_preference,
                 comments: state.form.comments,
+                assigned_facility_type: state.form.assigned_facility_type,
+                preferred_vehicle_choice: state.form.preferred_vehicle_choice,
                 refering_facility_contact_name: state.form.refering_facility_contact_name,
                 refering_facility_contact_number: parsePhoneNumberFromString(state.form.refering_facility_contact_number)?.format('E.164'),
             }
@@ -171,6 +182,8 @@ export const ShiftCreate = (props: patientShiftProps) => {
 
         }
     }
+    const vehicleOptions = SHIFTING_VEHICLE_CHOICES.map(obj => obj.text);
+    const facilityOptions = FACILITY_TYPES.map(obj => obj.text);
 
     if (isLoading) {
         return <Loading />;
@@ -277,7 +290,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
                                 <ErrorHelperText error={state.errors.is_up_shift} />
                             </div>
 
-                            <div>
+                            {/* <div>
                                 <InputLabel>Vehicle preference</InputLabel>
                                 <TextInputField
                                     fullWidth
@@ -288,12 +301,38 @@ export const ShiftCreate = (props: patientShiftProps) => {
                                     onChange={handleChange}
                                     errors={state.errors.vehicle_preference}
                                 />
+                            </div> */}
+                            <div className="md:col-span-1">
+
+                                <InputLabel>Preferred Vehicle</InputLabel>
+                                <SelectField
+                                    name="preferred_vehicle_choice"
+                                    variant="outlined"
+                                    margin="dense"
+                                    optionArray={true}
+                                    value={state.form.preferred_vehicle_choice}
+                                    options={["", ...vehicleOptions]}
+                                    onChange={handleChange}
+                                    className="bg-white h-14 w-1/3 mt-2 shadow-sm md:text-sm md:leading-5" />
+                            </div>
+                            <div className="md:col-span-1">
+
+                                <InputLabel>Preferred Facility Type</InputLabel>
+                                <SelectField
+                                    name="assigned_facility_type"
+                                    variant="outlined"
+                                    margin="dense"
+                                    optionArray={true}
+                                    value={state.form.assigned_facility_type}
+                                    options={["", ...facilityOptions]}
+                                    onChange={handleChange}
+                                    className="bg-white h-14 w-1/3 mt-2 shadow-sm md:text-sm md:leading-5" />
                             </div>
 
                             <div className="md:col-span-2">
                                 <InputLabel>
-                                    Reason for shift
-                        </InputLabel>
+                                    Reason for shift*
+                                </InputLabel>
                                 <MultilineInputField
                                     rows={5}
                                     name="reason"

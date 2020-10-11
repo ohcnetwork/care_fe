@@ -17,8 +17,10 @@ import { PhoneNumberField } from '../Common/HelperInputFields';
 import NavTabs from '../Common/NavTabs';
 import Pagination from "../Common/Pagination";
 import { InputSearchBox } from "../Common/SearchBox";
-import { PatientFilter } from "./PatientFilter";
 import { TELEMEDICINE_ACTIONS } from "../../Common/constants";
+import { make as SlideOver } from "../Common/SlideOver.gen";
+import PatientFilterV2 from "./PatientFilterV2";
+
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -94,6 +96,7 @@ export const PatientManager = (props: any) => {
   const [totalCount, setTotalCount] = useState(0);
   const [DownloadFile, setDownloadFile] = useState("");
   const [qParams, setQueryParams] = useQueryParams();
+  const [showFilters, setShowFilters] = useState(false);
 
   const tabValue = qParams.is_active === 'False' ? 1 : 0;
 
@@ -128,8 +131,22 @@ export const PatientManager = (props: any) => {
       is_active: qParams.is_active || 'True',
       disease_status: qParams.disease_status || undefined,
       phone_number: qParams.phone_number ? parsePhoneNumberFromString(qParams.phone_number)?.format('E.164') : undefined,
-      facility: facilityId,
-      offset: (qParams.page ? qParams.page - 1 : 0) * RESULT_LIMIT
+      facility: facilityId || qParams.facility,
+      offset: (qParams.page ? qParams.page - 1 : 0) * RESULT_LIMIT,
+      created_date_before: qParams.created_date_before || undefined,
+      created_date_after: qParams.created_date_after || undefined,
+      modified_date_before: qParams.modified_date_before || undefined,
+      modified_date_after: qParams.modified_date_after || undefined,
+      ordering: qParams.ordering || undefined,
+      category: qParams.category || undefined,
+      gender: qParams.gender || undefined,
+      age_min: qParams.age_min || undefined,
+      age_max: qParams.age_max || undefined,
+      last_consultation_admission_date_before: qParams.last_consultation_admission_date_before || undefined,
+      last_consultation_admission_date_after: qParams.last_consultation_admission_date_after || undefined,
+      last_consultation_discharge_date_before: qParams.last_consultation_discharge_date_before || undefined,
+      last_consultation_discharge_date_after: qParams.last_consultation_discharge_date_after || undefined,
+      last_consultation_admitted_to: qParams.last_consultation_admitted_to || undefined,
     };
 
     dispatch(getAllPatient(params, 'listPatients'))
@@ -142,7 +159,8 @@ export const PatientManager = (props: any) => {
       }).catch(() => {
         setIsLoading(false);
       })
-  }, [dispatch, facilityId, qParams.is_active, qParams.disease_status, qParams.name, qParams.page, qParams.phone_number]);
+
+  }, [dispatch, facilityId, qParams.last_consultation_admission_date_before, qParams.last_consultation_admission_date_after, qParams.last_consultation_discharge_date_before, qParams.last_consultation_discharge_date_after, qParams.age_max, qParams.age_min, qParams.last_consultation_admitted_to, qParams.facility, qParams.category, qParams.gender, qParams.ordering, qParams.created_date_before, qParams.created_date_after, qParams.modified_date_before, qParams.modified_date_after, qParams.is_active, qParams.disease_status, qParams.name, qParams.page, qParams.phone_number]);
 
   const updateQuery = (params: any) => {
     const nParams = Object.assign({}, qParams, params);
@@ -173,6 +191,21 @@ export const PatientManager = (props: any) => {
   const handleFilter = (value: string) => {
     updateQuery({ disease_status: value, page: 1 });
   }
+
+  const applyFilter = (data: any) => {
+    const filter = { ...qParams, ...data };
+    updateQuery(filter);
+    setShowFilters(false);
+  };
+
+  const badge = (key: string, value: any) => {
+    return (
+      value && <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
+        {key}{": "}{value}
+      </span>
+    )
+  };
+
 
   let patientList: any[] = [];
   if (data && data.length) {
@@ -289,7 +322,7 @@ export const PatientManager = (props: any) => {
             onClick={handleDownloadAll}
             size="small"
             startIcon={<ArrowDownwardIcon>download</ArrowDownwardIcon>}>
-            All Patients
+            Download All Patients
           </Button>
         </div>
         <div className="bg-white overflow-hidden shadow rounded-lg">
@@ -330,8 +363,21 @@ export const PatientManager = (props: any) => {
         </div>
         <div className="flex flex-col justify-between">
           <div>
-            <div className="text-sm font-semibold">Filter by Status</div>
-            <PatientFilter filter={handleFilter} value={qParams.disease_status} />
+            <div className="flex items-start mb-2">
+              <button
+                className="btn btn-primary-ghost md:mt-7 "
+                onClick={_ => setShowFilters(show => !show)}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="fill-current w-4 h-4 mr-2">
+                  <line x1="8" y1="6" x2="21" y2="6"></line>
+                  <line x1="8" y1="12" x2="21" y2="12"> </line>
+                  <line x1="8" y1="18" x2="21" y2="18"> </line>
+                  <line x1="3" y1="6" x2="3.01" y2="6"> </line>
+                  <line x1="3" y1="12" x2="3.01" y2="12"> </line>
+                  <line x1="3" y1="18" x2="3.01" y2="18"> </line>
+                </svg>
+                <span>Advanced Filters</span>
+              </button>
+            </div>
           </div>
           <div className="mb-1">
             <Button
@@ -341,7 +387,7 @@ export const PatientManager = (props: any) => {
               onClick={handleDownloadFiltered}
               startIcon={<ArrowDownwardIcon>download</ArrowDownwardIcon>}
             >
-              {tabValue === 0 ? 'Live' : 'Discharged'} List
+              Download {tabValue === 0 ? 'Live' : 'Discharged'} List
               </Button>
             <CSVLink
               id="downloadlink"
@@ -353,8 +399,34 @@ export const PatientManager = (props: any) => {
             </CSVLink>
           </div>
         </div>
+        <div className="flex space-x-2 mt-2 flex-wrap w-full col-span-3 space-y-1">
+          {badge("Phone Number", qParams.phone_number)}
+          {badge("Patient Name", qParams.name)}
+          {badge("Modified After", qParams.modified_date_after)}
+          {badge("Modified Before", qParams.modified_date_before)}
+          {badge("Created Before", qParams.created_date_before)}
+          {badge("Created After", qParams.created_date_after)}
+          {badge("Admitted Before", qParams.last_consultation_discharge_date_before)}
+          {badge("Admitted After", qParams.last_consultation_admission_date_after)}
+          {badge("Discharged Before", qParams.last_consultation_discharge_date_before)}
+          {badge("Discharged After", qParams.last_consultation_discharge_date_after)}
+          {badge("Filtered By: Facility", qParams.facility)}
+          {badge("Ordering", qParams.ordering)}
+          {badge("Category", qParams.category)}
+          {badge("Disease Status", qParams.disease_status)}
+          {badge("Gender", qParams.gender)}
+          {badge("Admitted to", qParams.last_consultation_admitted_to)}
+        </div>
       </div>
       <div className={classesTab.root}>
+        <SlideOver show={showFilters} setShow={setShowFilters}>
+          <div className="bg-white min-h-screen p-4">
+            <PatientFilterV2
+              filter={qParams}
+              onChange={applyFilter}
+              closeFilter={() => setShowFilters(false)} />
+          </div>
+        </SlideOver>
         <NavTabs
           onChange={handleTabChange}
           options={[{ value: 0, label: "Live" }, { value: 1, label: "Discharged" }]}

@@ -8,9 +8,8 @@ import { CURRENT_HEALTH_CHANGE, PATIENT_CATEGORY, SYMPTOM_CHOICES } from "../../
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getConsultationDailyRoundsDetails } from "../../Redux/actions";
 import { DailyRoundsModel } from "./models";
-const Loading = loadable( () => import("../Common/Loading"));
-const PageTitle = loadable( () => import("../Common/PageTitle"));
-
+const Loading = loadable(() => import("../Common/Loading"));
+const PageTitle = loadable(() => import("../Common/PageTitle"));
 const symptomChoices = [...SYMPTOM_CHOICES];
 const currentHealthChoices = [...CURRENT_HEALTH_CHANGE];
 const patientCategoryChoices = [...PATIENT_CATEGORY]
@@ -99,6 +98,10 @@ export const DailyRoundListDetails = (props: any) => {
           <div>
             <span className="font-semibold leading-relaxed">Taken at: </span>
             {dailyRoundListDetailsData.temperature_measured_at ? moment(dailyRoundListDetailsData.temperature_measured_at).format('lll') : '-'}
+          </div>
+          <div>
+            <span className="font-semibold leading-relaxed">SpO2: </span>
+            {dailyRoundListDetailsData.spo2 || '-'}
           </div>
           <div className="md:col-span-2 capitalize">
             <span className="font-semibold leading-relaxed">Additional Symptoms: </span>

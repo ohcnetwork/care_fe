@@ -83,6 +83,7 @@ export const FACILITY_TYPES: Array<OptionsType> = [
   { id: 870, text: "Govt Medical College Hospitals" },
   { id: 950, text: "Corona Testing Labs" },
   { id: 1000, text: "Corona Care Centre" },
+  { id: 1010, text: "COVID-19 Domiciliary Care Center" },
   { id: 1100, text: "First Line Treatment Centre" },
   { id: 1200, text: "Second Line Treatment Center" },
   { id: 1300, text: "Shifting Centre" },
@@ -102,11 +103,29 @@ export const SHIFTING_CHOICES: Array<OptionsType> = [
   { id: 80, text: "COMPLETED" },
 ];
 
+export const SHIFTING_VEHICLE_CHOICES: Array<OptionsType> = [
+  { id: 10, text: "D Level Ambulance" },
+  { id: 20, text: "All double chambered Ambulance with EMT" },
+  { id: 30, text: "Ambulance without EMT" },
+  { id: 50, text: "Car" },
+  { id: 50, text: "Auto-rickshaw" },
+];
+
+
 export const SHIFTING_FILTER_ORDER: Array<OptionsType> = [
   { id: 1, text: "created_date", desc: "ASC Created Date" },
-  { id: 1, text: "-created_date", desc: "DESC Created Date" },
-  { id: 1, text: "modified_date", desc: "ASC Modified Date" },
-  { id: 1, text: "-modified_date", desc: "DESC Modified Date" },
+  { id: 2, text: "-created_date", desc: "DESC Created Date" },
+  { id: 3, text: "modified_date", desc: "ASC Modified Date" },
+  { id: 4, text: "-modified_date", desc: "DESC Modified Date" },
+];
+
+export const PATIENT_FILTER_ORDER: Array<OptionsType> = [
+  { id: 1, text: "created_date", desc: "ASC Created Date" },
+  { id: 2, text: "-created_date", desc: "DESC Created Date" },
+  { id: 3, text: "modified_date", desc: "ASC Modified Date" },
+  { id: 4, text: "-modified_date", desc: "DESC Modified Date" },
+  { id: 5, text: "review_time", desc: "ASC Review Time" },
+  { id: 6, text: "-review_time", desc: "DESC Review Time" },
 ];
 
 export const BED_TYPES: Array<OptionsType> = [
@@ -116,6 +135,8 @@ export const BED_TYPES: Array<OptionsType> = [
   { id: 10, text: "ICU" },
   { id: 20, text: "Ventilator" },
   { id: 30, text: "Covid Beds" },
+  { id: 40, text: "KASP Beds" },
+  { id: 50, text: "KASP ICU beds" },
 ];
 
 export const DOCTOR_SPECIALIZATION: Array<OptionsType> = [
@@ -188,11 +209,30 @@ export const ADMITTED_TO = [
   "Paediatric Ward",
 ];
 
+export const PATIENT_FILTER_ADMITTED_TO = [
+  { id: "0", text: "Not admitted" },
+  { id: "1", text: "Isolation Room" },
+  { id: "2", text: "ICU" },
+  { id: "3", text: "ICU with Non Invasive Ventilator" },
+  { id: "4", text: "ICU with Oxygen Support" },
+  { id: "5", text: "ICU with Invasive Ventilator" },
+  { id: "20", text: "Home Isolation" },
+  { id: "30", text: "Gynaecology Ward" },
+  { id: "40", text: "Paediatric Ward" },
+];
+
 export const PATIENT_CATEGORY = [
   { id: "ASYMPTOMATIC", text: "ASYM (ASYMPTOMATIC) " },
   { id: "Category-A", text: "Mild (Category A)" },
   { id: "Category-B", text: "Moderate (Category B)" },
   { id: "Category-C", text: "Severe (Category C)" },
+];
+
+export const PATIENT_FILTER_CATEGORY = [
+  { id: "ASYM", text: "ASYM (ASYMPTOMATIC) " },
+  { id: "Mild", text: "Mild (Category A)" },
+  { id: "Moderate", text: "Moderate (Category B)" },
+  { id: "Severe", text: "Severe (Category C)" },
 ];
 
 export const CURRENT_HEALTH_CHANGE = [

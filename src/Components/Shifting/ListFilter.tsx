@@ -6,12 +6,16 @@ import moment from "moment";
 import { getFacility } from '../../Redux/actions';
 import { useDispatch } from 'react-redux';
 import { CircularProgress } from '@material-ui/core';
+import { SHIFTING_CHOICES } from "../../Common/constants";
 
 function useMergeState(initialState: any) {
   const [state, setState] = useState(initialState);
   const setMergedState = (newState: any) => setState((prevState: any) => Object.assign({}, prevState, newState));
   return [state, setMergedState];
 }
+
+const shiftStatusOptions = SHIFTING_CHOICES.map(obj => obj.text);
+
 
 export default function ListFilter(props: any) {
   let { filter, onChange, closeFilter } = props;
@@ -32,7 +36,9 @@ export default function ListFilter(props: any) {
     modified_date_before: filter.modified_date_before || null,
     modified_date_after: filter.modified_date_after || null,
     patient_phone_number: filter.patient_phone_number || '',
-    ordering: filter.ordering || null
+    ordering: filter.ordering || null,
+    is_kasp: filter.is_kasp || '--',
+    status: filter.status || null
   });
   const dispatch: any = useDispatch();
 
@@ -107,7 +113,9 @@ export default function ListFilter(props: any) {
       created_date_after,
       modified_date_before,
       modified_date_after,
-      ordering
+      ordering,
+      is_kasp,
+      status
     } = filterState;
     const data = {
       orgin_facility: orgin_facility || '',
@@ -121,6 +129,8 @@ export default function ListFilter(props: any) {
       modified_date_before: modified_date_before && moment(modified_date_before).isValid() ? moment(modified_date_before).format('YYYY-MM-DD') : '',
       modified_date_after: modified_date_after && moment(modified_date_after).isValid() ? moment(modified_date_after).format('YYYY-MM-DD') : '',
       ordering: ordering || '',
+      is_kasp: is_kasp || '',
+      status: status || '',
     }
     onChange(data);
   };
@@ -139,6 +149,20 @@ export default function ListFilter(props: any) {
         Filter By:
       </div>
       <div className="flex flex-wrap gap-2">
+      {props.showShiftingStatus && (
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">Status</span>
+          <SelectField
+            name="status"
+            variant="outlined"
+            margin="dense"
+            optionArray={true}
+            value={filterState.status}
+            options={['--', ...shiftStatusOptions]}
+            onChange={handleChange}
+            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9" />
+        </div>
+      )}
         <div className="w-64 flex-none">
           <span className="text-sm font-semibold">Origin facility</span>
           <div className="">
@@ -225,6 +249,19 @@ export default function ListFilter(props: any) {
             margin="dense"
             optionArray={true}
             value={filterState.emergency}
+            options={['--', 'yes', 'no']}
+            onChange={handleChange}
+            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9" />
+        </div>
+
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">Is KASP</span>
+          <SelectField
+            name="is_kasp"
+            variant="outlined"
+            margin="dense"
+            optionArray={true}
+            value={filterState.is_kasp}
             options={['--', 'yes', 'no']}
             onChange={handleChange}
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9" />
