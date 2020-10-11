@@ -119,6 +119,19 @@ export default function PatientFilterV2(props: any) {
           <i className="fas fa-check mr-2" />Apply
         </button>
       </div>
+      <div className="w-64 flex-none mt-2">
+        <span className="text-sm font-semibold">Ordering</span>
+        <SelectField
+          name="ordering"
+          variant="outlined"
+          margin="dense"
+          optionKey="text"
+          optionValue="desc"
+          value={filterState.ordering}
+          options={[{ desc: "Select", text: '' }, ...PATIENT_FILTER_ORDER]}
+          onChange={handleChange}
+          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9" />
+      </div>
       <div className="font-light text-md mt-2">
         Filter By:
       </div>
@@ -189,19 +202,6 @@ export default function PatientFilterV2(props: any) {
             onChange={handleChange}
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
           />
-        </div>
-        <div className="w-64 flex-none">
-          <span className="text-sm font-semibold">Ordering</span>
-          <SelectField
-            name="ordering"
-            variant="outlined"
-            margin="dense"
-            optionKey="text"
-            optionValue="desc"
-            value={filterState.ordering}
-            options={[{ desc: "Select", text: '' }, ...PATIENT_FILTER_ORDER]}
-            onChange={handleChange}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9" />
         </div>
         <div className="w-64 flex-none">
           <span className="text-sm font-semibold">Created Date Before</span>

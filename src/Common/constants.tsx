@@ -126,6 +126,8 @@ export const BED_TYPES: Array<OptionsType> = [
   { id: 10, text: "ICU" },
   { id: 20, text: "Ventilator" },
   { id: 30, text: "Covid Beds" },
+  { id: 40, text: "KASP Beds" },
+  { id: 50, text: "KASP ICU beds" },
 ];
 
 export const DOCTOR_SPECIALIZATION: Array<OptionsType> = [
