@@ -196,6 +196,18 @@ export const ADMITTED_TO = [
   "Paediatric Ward",
 ];
 
+export const PATIENT_FILTER_ADMITTED_TO = [
+  { id: "0", text: "Not admitted" },
+  { id: "1", text: "Isolation Room" },
+  { id: "2", text: "ICU" },
+  { id: "3", text: "ICU with Non Invasive Ventilator" },
+  { id: "4", text: "ICU with Oxygen Support" },
+  { id: "5", text: "ICU with Invasive Ventilator" },
+  { id: "20", text: "Home Isolation" },
+  { id: "30", text: "Gynaecology Ward" },
+  { id: "40", text: "Paediatric Ward" },
+];
+
 export const PATIENT_CATEGORY = [
   { id: "ASYMPTOMATIC", text: "ASYM (ASYMPTOMATIC) " },
   { id: "Category-A", text: "Mild (Category A)" },

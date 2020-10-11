@@ -139,7 +139,14 @@ export const PatientManager = (props: any) => {
       modified_date_after: qParams.modified_date_after || undefined,
       ordering: qParams.ordering || undefined,
       category: qParams.category || undefined,
-      gender: qParams.gender || undefined
+      gender: qParams.gender || undefined,
+      age_min: qParams.age_min || undefined,
+      age_max: qParams.age_max || undefined,
+      last_consultation_admission_date_before: qParams.last_consultation_admission_date_before || undefined,
+      last_consultation_admission_date_after: qParams.last_consultation_admission_date_after || undefined,
+      last_consultation_discharge_date_before: qParams.last_consultation_discharge_date_before || undefined,
+      last_consultation_discharge_date_after: qParams.last_consultation_discharge_date_after || undefined,
+      last_consultation_admitted_to: qParams.last_consultation_admitted_to || undefined,
     };
 
     dispatch(getAllPatient(params, 'listPatients'))
@@ -152,7 +159,8 @@ export const PatientManager = (props: any) => {
       }).catch(() => {
         setIsLoading(false);
       })
-  }, [dispatch, facilityId, qParams.facility, qParams.category, qParams.gender, qParams.ordering, qParams.created_date_before, qParams.created_date_after, qParams.modified_date_before, qParams.modified_date_after, qParams.is_active, qParams.disease_status, qParams.name, qParams.page, qParams.phone_number]);
+
+  }, [dispatch, facilityId, qParams.last_consultation_admission_date_before, qParams.last_consultation_admission_date_after, qParams.last_consultation_discharge_date_before, qParams.last_consultation_discharge_date_after, qParams.age_max, qParams.age_min, qParams.last_consultation_admitted_to, qParams.facility, qParams.category, qParams.gender, qParams.ordering, qParams.created_date_before, qParams.created_date_after, qParams.modified_date_before, qParams.modified_date_after, qParams.is_active, qParams.disease_status, qParams.name, qParams.page, qParams.phone_number]);
 
   const updateQuery = (params: any) => {
     const nParams = Object.assign({}, qParams, params);
@@ -188,6 +196,14 @@ export const PatientManager = (props: any) => {
     const filter = { ...qParams, ...data };
     updateQuery(filter);
     setShowFilters(false);
+  };
+
+  const badge = (key: string, value: any) => {
+    return (
+      value && <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
+        {key}{": "}{value}
+      </span>
+    )
   };
 
 
@@ -383,7 +399,24 @@ export const PatientManager = (props: any) => {
             </CSVLink>
           </div>
         </div>
-
+        <div className="flex space-x-2 mt-2 flex-wrap w-full col-span-3 space-y-1">
+          {badge("Phone Number", qParams.phone_number)}
+          {badge("Patient Name", qParams.name)}
+          {badge("Modified After", qParams.modified_date_after)}
+          {badge("Modified Before", qParams.modified_date_before)}
+          {badge("Created Before", qParams.created_date_before)}
+          {badge("Created After", qParams.created_date_after)}
+          {badge("Admitted Before", qParams.last_consultation_discharge_date_before)}
+          {badge("Admitted After", qParams.last_consultation_admission_date_after)}
+          {badge("Discharged Before", qParams.last_consultation_discharge_date_before)}
+          {badge("Discharged After", qParams.last_consultation_discharge_date_after)}
+          {badge("Filtered By: Facility", qParams.facility)}
+          {badge("Ordering", qParams.ordering)}
+          {badge("Category", qParams.category)}
+          {badge("Disease Status", qParams.disease_status)}
+          {badge("Gender", qParams.gender)}
+          {badge("Admitted to", qParams.last_consultation_admitted_to)}
+        </div>
       </div>
       <div className={classesTab.root}>
         <SlideOver show={showFilters} setShow={setShowFilters}>

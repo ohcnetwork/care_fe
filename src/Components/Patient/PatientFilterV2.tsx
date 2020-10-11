@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { SelectField, DateInputField, TextInputField } from "../Common/HelperInputFields";
-import { PATIENT_FILTER_ORDER, GENDER_TYPES, DISEASE_STATUS, PATIENT_FILTER_CATEGORY } from "../../Common/constants";
+import { PATIENT_FILTER_ORDER, GENDER_TYPES, DISEASE_STATUS, PATIENT_FILTER_CATEGORY, PATIENT_FILTER_ADMITTED_TO } from "../../Common/constants";
 import moment from "moment";
 import { getFacility } from '../../Redux/actions';
 import { useDispatch } from 'react-redux';
@@ -27,6 +27,13 @@ export default function PatientFilterV2(props: any) {
     category: filter.category || null,
     gender: filter.gender || null,
     disease_status: filter.disease_status || null,
+    age_min: filter.age_min || null,
+    age_max: filter.age_max || null,
+    last_consultation_admission_date_before: filter.last_consultation_admission_date_before || null,
+    last_consultation_admission_date_after: filter.last_consultation_admission_date_after || null,
+    last_consultation_discharge_date_before: filter.last_consultation_discharge_date_before || null,
+    last_consultation_discharge_date_after: filter.last_consultation_discharge_date_after || null,
+    last_consultation_admitted_to: filter.last_consultation_admitted_to || null,
   });
   const dispatch: any = useDispatch();
 
@@ -71,7 +78,15 @@ export default function PatientFilterV2(props: any) {
       ordering,
       category,
       gender,
-      disease_status
+      disease_status,
+      age_min,
+      age_max,
+      last_consultation_admission_date_before,
+      last_consultation_admission_date_after,
+      last_consultation_discharge_date_before,
+      last_consultation_discharge_date_after,
+      last_consultation_admitted_to,
+
     } = filterState;
     const data = {
       facility: facility || '',
@@ -79,10 +94,17 @@ export default function PatientFilterV2(props: any) {
       created_date_after: created_date_after && moment(created_date_after).isValid() ? moment(created_date_after).format('YYYY-MM-DD') : '',
       modified_date_before: modified_date_before && moment(modified_date_before).isValid() ? moment(modified_date_before).format('YYYY-MM-DD') : '',
       modified_date_after: modified_date_after && moment(modified_date_after).isValid() ? moment(modified_date_after).format('YYYY-MM-DD') : '',
+      last_consultation_admission_date_before: last_consultation_admission_date_before && moment(last_consultation_admission_date_before).isValid() ? moment(last_consultation_admission_date_before).format('YYYY-MM-DD') : '',
+      last_consultation_admission_date_after: last_consultation_admission_date_after && moment(last_consultation_admission_date_after).isValid() ? moment(last_consultation_admission_date_after).format('YYYY-MM-DD') : '',
+      last_consultation_discharge_date_before: last_consultation_discharge_date_before && moment(last_consultation_discharge_date_before).isValid() ? moment(last_consultation_discharge_date_before).format('YYYY-MM-DD') : '',
+      last_consultation_discharge_date_after: last_consultation_discharge_date_after && moment(last_consultation_discharge_date_after).isValid() ? moment(last_consultation_discharge_date_after).format('YYYY-MM-DD') : '',
       ordering: ordering || '',
       category: category || '',
       gender: gender || '',
       disease_status: disease_status || '',
+      age_min: age_min || '',
+      age_max: age_max || '',
+      last_consultation_admitted_to: last_consultation_admitted_to || '',
     }
     onChange(data);
   };
@@ -117,7 +139,7 @@ export default function PatientFilterV2(props: any) {
               )}
           </div>
         </div>
-        {/* <div className="w-64 flex-none">
+        <div className="w-64 flex-none">
           <span className="text-sm font-semibold">Gender</span>
           <SelectField
             name="gender"
@@ -128,7 +150,7 @@ export default function PatientFilterV2(props: any) {
             onChange={handleChange}
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
           />
-        </div> */}
+        </div>
 
         <div className="w-64 flex-none">
           <span className="text-sm font-semibold">Category</span>
@@ -152,6 +174,18 @@ export default function PatientFilterV2(props: any) {
             optionArray={true}
             value={filterState.disease_status}
             options={['Show All', ...DISEASE_STATUS]}
+            onChange={handleChange}
+            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+          />
+        </div>
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">Last Admitted to</span>
+          <SelectField
+            name="last_consultation_admitted_to"
+            variant="outlined"
+            margin="dense"
+            value={filterState.last_consultation_admitted_to}
+            options={[{ id: '', text: 'Show All' }, ...PATIENT_FILTER_ADMITTED_TO]}
             onChange={handleChange}
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
           />
@@ -218,6 +252,78 @@ export default function PatientFilterV2(props: any) {
             onChange={date => handleChange({ target: { name: "modified_date_after", value: date } })}
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9" />
         </div>
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">Admitted Before</span>
+          <DateInputField
+            id="last_consultation_admission_date_before"
+            name="last_consultation_admission_date_before"
+            inputVariant="outlined"
+            margin="dense"
+            errors=""
+            value={filterState.last_consultation_admission_date_before}
+            onChange={date => handleChange({ target: { name: "last_consultation_admission_date_before", value: date } })}
+            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9" />
+        </div>
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">Admitted After</span>
+          <DateInputField
+            id="last_consultation_admission_date_after"
+            name="last_consultation_admission_date_after"
+            inputVariant="outlined"
+            margin="dense"
+            errors=""
+            value={filterState.last_consultation_admission_date_after}
+            onChange={date => handleChange({ target: { name: "last_consultation_admission_date_after", value: date } })}
+            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9" />
+        </div>
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">Discharge Before</span>
+          <DateInputField
+            id="last_consultation_discharge_date_before"
+            name="last_consultation_discharge_date_before"
+            inputVariant="outlined"
+            margin="dense"
+            errors=""
+            value={filterState.last_consultation_discharge_date_before}
+            onChange={date => handleChange({ target: { name: "last_consultation_discharge_date_before", value: date } })}
+            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9" />
+        </div>
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">Discharge After</span>
+          <DateInputField
+            id="last_consultation_discharge_date_after"
+            name="last_consultation_discharge_date_after"
+            inputVariant="outlined"
+            margin="dense"
+            errors=""
+            value={filterState.last_consultation_discharge_date_after}
+            onChange={date => handleChange({ target: { name: "last_consultation_discharge_date_after", value: date } })}
+            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9" />
+        </div>
+        {/* <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">Age</span>
+          <div className="flex justify-between">
+            <TextInputField
+              id="age_min"
+              name="age_min"
+              variant="outlined"
+              margin="dense"
+              errors=""
+              value={filterState.age_min}
+              onChange={handleChange}
+              className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 w-1/2" />
+            <TextInputField
+              id="age_max"
+              name="age_max"
+              variant="outlined"
+              margin="dense"
+              errors=""
+              value={filterState.age_max}
+              onChange={handleChange}
+              className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 W-1/2" />
+          </div>
+        </div> */}
+
       </div>
     </div>
   )
