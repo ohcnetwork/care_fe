@@ -11,7 +11,7 @@ import { navigate } from "raviger";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getShiftDetails, updateShift } from "../../Redux/actions";
 import { SelectField } from "../Common/HelperInputFields";
-import { SHIFTING_CHOICES } from "../../Common/constants";
+import { SHIFTING_CHOICES, FACILITY_TYPES, SHIFTING_VEHICLE_CHOICES } from "../../Common/constants";
 
 import {
     Card,
@@ -40,11 +40,19 @@ const initForm: any = {
     reason: "",
     vehicle_preference: "",
     comments: "",
+    assigned_facility_type: "",
+    preferred_vehicle_choice: "",
 };
 
 const requiredFields: any = {
     shifting_approving_facility_object: {
         errorText: 'Shifting approving facility can not be empty.'
+    },
+    assigned_facility_type: {
+        errorText: 'Please Select Facility Type'
+    },
+    preferred_vehicle_choice: {
+        errorText: 'Please Preferred Vehicle Type'
     }
 }
 
@@ -131,6 +139,8 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                 reason: state.form.reason,
                 vehicle_preference: state.form.vehicle_preference,
                 comments: state.form.comments,
+                assigned_facility_type: state.form.assigned_facility_type,
+                preferred_vehicle_choice: state.form.preferred_vehicle_choice,
             }
 
             const res = await dispatchAction(updateShift(props.id, data));
@@ -152,7 +162,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
         async (status: statusType) => {
             setIsLoading(true);
             const res = await dispatchAction(
-                getShiftDetails({ props })
+                getShiftDetails({ id: props.id })
             );
             if (!status.aborted) {
                 if (res && res.data) {
@@ -170,6 +180,9 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
         },
         [fetchData]
     );
+
+    const vehicleOptions = SHIFTING_VEHICLE_CHOICES.map(obj => obj.text);
+    const facilityOptions = FACILITY_TYPES.map(obj => obj.text);
 
     if (isLoading) {
         return <Loading />;
@@ -288,7 +301,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                                 </RadioGroup>
                                 <ErrorHelperText error={state.errors.is_up_shift} />
                             </div>
-
+                            {/*
                             <div>
                                 <InputLabel>Vehicle preference</InputLabel>
                                 <TextInputField
@@ -300,7 +313,34 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                                     onChange={handleChange}
                                     errors={state.errors.vehicle_preference}
                                 />
+                            </div> */}
+                            <div className="md:col-span-1">
+
+                                <InputLabel>Preferred Vehicle</InputLabel>
+                                <SelectField
+                                    name="preferred_vehicle_choice"
+                                    variant="outlined"
+                                    margin="dense"
+                                    optionArray={true}
+                                    value={state.form.preferred_vehicle_choice}
+                                    options={["", ...vehicleOptions]}
+                                    onChange={handleChange}
+                                    className="bg-white h-14 w-1/3 mt-2 shadow-sm md:text-sm md:leading-5" />
                             </div>
+                            <div className="md:col-span-1">
+
+                                <InputLabel>Preferred Facility Type</InputLabel>
+                                <SelectField
+                                    name="assigned_facility_type"
+                                    variant="outlined"
+                                    margin="dense"
+                                    optionArray={true}
+                                    value={state.form.assigned_facility_type}
+                                    options={["", ...facilityOptions]}
+                                    onChange={handleChange}
+                                    className="bg-white h-14 w-1/3 mt-2 shadow-sm md:text-sm md:leading-5" />
+                            </div>
+
 
                             <div className="md:col-span-2">
                                 <InputLabel>

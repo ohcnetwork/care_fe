@@ -103,6 +103,15 @@ export const SHIFTING_CHOICES: Array<OptionsType> = [
   { id: 80, text: "COMPLETED" },
 ];
 
+export const SHIFTING_VEHICLE_CHOICES: Array<OptionsType> = [
+  { id: 10, text: "D Level Ambulance" },
+  { id: 20, text: "All double chambered Ambulance with EMT" },
+  { id: 30, text: "Ambulance without EMT" },
+  { id: 50, text: "Car" },
+  { id: 50, text: "Auto-rickshaw" },
+];
+
+
 export const SHIFTING_FILTER_ORDER: Array<OptionsType> = [
   { id: 1, text: "created_date", desc: "ASC Created Date" },
   { id: 2, text: "-created_date", desc: "DESC Created Date" },

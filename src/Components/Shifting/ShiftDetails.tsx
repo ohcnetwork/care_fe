@@ -635,7 +635,13 @@ export default function ShiftDetails(props: { id: string }) {
                   <span className="font-semibold leading-relaxed">
                     Vehicle preference:{" "}
                   </span>
-                  {data.vehicle_preference || "--"}
+                  {data.vehicle_preference || data.preferred_vehicle_choice}
+                </div>
+                <div>
+                  <span className="font-semibold leading-relaxed">
+                    Facility preference:{" "}
+                  </span>
+                  {data.assigned_facility_type || "--"}
                 </div>
 
                 <div className="md:row-span-2 md:col-span-2">
