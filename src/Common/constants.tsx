@@ -105,16 +105,18 @@ export const SHIFTING_CHOICES: Array<OptionsType> = [
 
 export const SHIFTING_FILTER_ORDER: Array<OptionsType> = [
   { id: 1, text: "created_date", desc: "ASC Created Date" },
-  { id: 1, text: "-created_date", desc: "DESC Created Date" },
-  { id: 1, text: "modified_date", desc: "ASC Modified Date" },
-  { id: 1, text: "-modified_date", desc: "DESC Modified Date" },
+  { id: 2, text: "-created_date", desc: "DESC Created Date" },
+  { id: 3, text: "modified_date", desc: "ASC Modified Date" },
+  { id: 4, text: "-modified_date", desc: "DESC Modified Date" },
 ];
 
 export const PATIENT_FILTER_ORDER: Array<OptionsType> = [
   { id: 1, text: "created_date", desc: "ASC Created Date" },
-  { id: 1, text: "-created_date", desc: "DESC Created Date" },
-  { id: 1, text: "modified_date", desc: "ASC Modified Date" },
-  { id: 1, text: "-modified_date", desc: "DESC Modified Date" },
+  { id: 2, text: "-created_date", desc: "DESC Created Date" },
+  { id: 3, text: "modified_date", desc: "ASC Modified Date" },
+  { id: 4, text: "-modified_date", desc: "DESC Modified Date" },
+  { id: 5, text: "review_time", desc: "ASC Review Time" },
+  { id: 6, text: "-review_time", desc: "DESC Review Time" },
 ];
 
 export const BED_TYPES: Array<OptionsType> = [
