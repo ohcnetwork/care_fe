@@ -6,11 +6,11 @@ import React, { useCallback, useEffect, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
 import { BED_TYPES } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-const Loading = loadable( () => import("../../Components/Common/Loading"));
-import { createCapacity, getCapacity, listCapacity } from "../../Redux/actions";
+const Loading = loadable(() => import("../../Components/Common/Loading"));
+import { createCapacity, getCapacity, getCapacityBed } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { ErrorHelperText, NativeSelectField, TextInputField } from "../Common/HelperInputFields";
-const PageTitle = loadable( () => import("../Common/PageTitle"));
+const PageTitle = loadable(() => import("../Common/PageTitle"));
 import { CapacityModal, OptionsType } from "./models";
 
 interface BedCapacityProps extends CapacityModal {
@@ -82,7 +82,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
       if (!id) {
         // Add Form functionality
         const capacityRes = await dispatchAction(
-          listCapacity({}, { facilityId })
+          getCapacityBed({ facility_id: facilityId })
         );
         if (!status.aborted) {
           if (capacityRes && capacityRes.data) {

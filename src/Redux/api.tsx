@@ -184,6 +184,10 @@ export default {
     path: "/api/v1/facility/{facilityId}/capacity/",
   },
 
+  getCapacityBed: {
+    path: "/api/v1/facility/{facilityId}/capacity/{bed_id}/",
+  },
+
   getDoctor: {
     path: "/api/v1/facility/{facilityId}/hospital_doctor/",
   },
