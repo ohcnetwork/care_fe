@@ -7,7 +7,7 @@ import { useDispatch } from "react-redux";
 import { BED_TYPES } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 const Loading = loadable(() => import("../../Components/Common/Loading"));
-import { createCapacity, getCapacity, getCapacityBed } from "../../Redux/actions";
+import { createCapacity, getCapacity, listCapacity, getCapacityBed } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { ErrorHelperText, NativeSelectField, TextInputField } from "../Common/HelperInputFields";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -82,7 +82,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
       if (!id) {
         // Add Form functionality
         const capacityRes = await dispatchAction(
-          getCapacityBed({ facility_id: facilityId })
+          listCapacity({}, { facilityId })
         );
         if (!status.aborted) {
           if (capacityRes && capacityRes.data) {
@@ -107,7 +107,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
         }
       } else {
         // Edit Form functionality
-        const res = await dispatchAction(getCapacity(id, { facilityId }));
+        const res = await dispatchAction(getCapacityBed({ facilityId: facilityId, bed_id: id }));
         if (res && res.data) {
           dispatch({
             type: "set_form",

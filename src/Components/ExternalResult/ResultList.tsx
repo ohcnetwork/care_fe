@@ -111,11 +111,11 @@ export default function ResultList() {
 
   if (isLoading || !data) {
     manageResults = (
-    <tr className="bg-white"> 
-      <td colSpan={4}>
-        <Loading /> 
-      </td>
-    </tr>);
+      <tr className="bg-white">
+        <td colSpan={4}>
+          <Loading />
+        </td>
+      </tr>);
   } else if (data && data.length) {
     manageResults = (
       <>
@@ -148,7 +148,7 @@ export default function ResultList() {
         title="Results"
         hideBack={true}
         className="mt-4" />
-      <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3 my-4 px-2 md:px-0 relative">
+      <div className="mt-5 md:grid grid-cols-1 gap-5 sm:grid-cols-3 my-4 px-2 md:px-0 relative">
         <div className="bg-white overflow-hidden shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">
             <dl>
