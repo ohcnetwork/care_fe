@@ -6,11 +6,11 @@ import React, { useCallback, useEffect, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
 import { DOCTOR_SPECIALIZATION } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-const Loading = loadable( () => import("../../Components/Common/Loading"));
+const Loading = loadable(() => import("../../Components/Common/Loading"));
 import { createDoctor, getDoctor, listDoctor } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { ErrorHelperText, NativeSelectField, TextInputField } from "../Common/HelperInputFields";
-const PageTitle = loadable( () => import("../Common/PageTitle"));
+const PageTitle = loadable(() => import("../Common/PageTitle"));
 import { DoctorModal, OptionsType } from "./models";
 
 interface DoctorCapacityProps extends DoctorModal {
@@ -108,7 +108,7 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
         }
       } else {
         // Edit Form functionality
-        const res = await dispatchAction(getDoctor(id, { facilityId }));
+        const res = await dispatchAction(getDoctor({ facilityId: facilityId, id: id }));
         if (res && res.data) {
           dispatch({
             type: "set_form",

@@ -188,8 +188,11 @@ export default {
     path: "/api/v1/facility/{facilityId}/capacity/{bed_id}/",
   },
 
-  getDoctor: {
+  listDoctor: {
     path: "/api/v1/facility/{facilityId}/hospital_doctor/",
+  },
+  getDoctor: {
+    path: "/api/v1/facility/{facilityId}/hospital_doctor/{id}/",
   },
 
   updateCapacity: {
@@ -209,6 +212,10 @@ export default {
   },
   getTriage: {
     path: "/api/v1/facility/{facilityId}/patient_stats/",
+  },
+
+  getTriageDetails: {
+    path: "/api/v1/facility/{facilityId}/patient_stats/{id}/",
   },
 
   // //Care Center
