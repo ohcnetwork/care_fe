@@ -97,14 +97,14 @@ export const createTriageForm = (params: object, pathParam: object) => {
 export const getTriageInfo = (pathParam: object) => {
   return fireRequest("getTriage", [], {}, pathParam);
 };
-export const getTriageDetails = (id: number, pathParam: object) => {
-  return fireRequest("getTriage", [id], {}, pathParam);
+export const getTriageDetails = (pathParam: object) => {
+  return fireRequest("getTriageDetails", [], {}, pathParam);
 };
 export const listCapacity = (params: object, pathParam: object) => {
   return fireRequest("getCapacity", [], params, pathParam);
 };
 export const listDoctor = (params: object, pathParam: object) => {
-  return fireRequest("getDoctor", [], params, pathParam);
+  return fireRequest("listDoctor", [], params, pathParam);
 };
 export const getCapacity = (id: number, pathParam: object) => {
   return fireRequest("getCapacity", [id], {}, pathParam);
@@ -114,8 +114,8 @@ export const getCapacityBed = (pathParam: object) => {
   return fireRequest("getCapacityBed", [], {}, pathParam);
 };
 
-export const getDoctor = (id: number, pathParam: object) => {
-  return fireRequest("getDoctor", [id], {}, pathParam);
+export const getDoctor = (pathParam: object) => {
+  return fireRequest("getDoctor", [], {}, pathParam);
 };
 
 //Patient

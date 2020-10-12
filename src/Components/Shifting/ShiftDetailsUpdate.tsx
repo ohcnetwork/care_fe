@@ -316,7 +316,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                             </div> */}
                             <div className="md:col-span-1">
 
-                                <InputLabel>Preferred Vehicle</InputLabel>
+                                <InputLabel>Preferred Vehicle*</InputLabel>
                                 <SelectField
                                     name="preferred_vehicle_choice"
                                     variant="outlined"
@@ -329,7 +329,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                             </div>
                             <div className="md:col-span-1">
 
-                                <InputLabel>Preferred Facility Type</InputLabel>
+                                <InputLabel>Preferred Facility Type*</InputLabel>
                                 <SelectField
                                     name="assigned_facility_type"
                                     variant="outlined"
