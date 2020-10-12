@@ -109,6 +109,11 @@ export const listDoctor = (params: object, pathParam: object) => {
 export const getCapacity = (id: number, pathParam: object) => {
   return fireRequest("getCapacity", [id], {}, pathParam);
 };
+
+export const getCapacityBed = (pathParam: object) => {
+  return fireRequest("getCapacityBed", [], {}, pathParam);
+};
+
 export const getDoctor = (id: number, pathParam: object) => {
   return fireRequest("getDoctor", [id], {}, pathParam);
 };
