@@ -228,7 +228,7 @@ export const ConsultationDetails = (props: any) => {
           <div className="grid gap-2 grid-cols-1">
             <div className="capitalize">
               <span className="font-semibold leading-relaxed">
-                Decision after OP Triage/Consultation:{" "}
+                Decision after Consultation:{" "}
               </span>
               {consultationData.suggestion_text?.toLocaleLowerCase()}
             </div>

@@ -451,9 +451,7 @@ export const PatientHome = (props: any) => {
   if (isConsultationLoading) {
     consultationList = <CircularProgress size={20} />;
   } else if (consultationListData.length === 0) {
-    consultationList = (
-      <Typography>No OP Triage / Consultation available.</Typography>
-    );
+    consultationList = <Typography>No Consultation available.</Typography>;
   } else if (consultationListData.length > 0) {
     consultationList = consultationListData.map((itemData, idx) => (
       <ConsultationCard
@@ -1102,7 +1100,7 @@ export const PatientHome = (props: any) => {
                   navigate(`/facility/${facilityId}/patient/${id}/consultation`)
                 }
               >
-                Add OP Triage / Consultation
+                Add Consultation
               </Button>
             </div>
             <div className="flex-1 ml-2">
@@ -1149,7 +1147,7 @@ export const PatientHome = (props: any) => {
       </Grid>
 
       <div>
-        <PageTitle title="OP Triage / Consultation History" hideBack={true} />
+        <PageTitle title="Consultation History" hideBack={true} />
         {consultationList}
         {!isConsultationLoading && totalConsultationCount > limit && (
           <div className="mt-4 flex w-full justify-center">
