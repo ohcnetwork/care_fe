@@ -1076,8 +1076,7 @@ export const PatientHome = (props: any) => {
                   className="h-10"
                   labelId="covid-status-pre-form"
                   value={
-                    preDischargeForm.disease_status ||
-                    patientData.disease_status
+                    preDischargeForm.disease_status
                   }
                   onChange={(event) =>
                     handlePreDischargeFormChange(
@@ -1142,6 +1141,7 @@ export const PatientHome = (props: any) => {
                 color="primary"
                 onClick={() => handlePatientDischarge(false)}
                 autoFocus
+                disabled={preDischargeForm.disease_status ? false : true}
               >
                 Proceed with Discharge
               </Button>
