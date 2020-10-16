@@ -609,7 +609,7 @@ export const PatientHome = (props: any) => {
                 {patientData.review_time && (
                   <div
                     className={
-                      "mb-2 inline-flex items-center px-3 py-1 rounded-lg text-xs leading-4 font-semibold p-1 bg-red-400 text-white w-full justify-center " +
+                      "mb-2 inline-flex items-center px-3 py-1 rounded-lg text-xs leading-4 font-semibold p-1 w-full justify-center " +
                       (moment().isBefore(patientData.review_time)
                         ? " bg-gray-100"
                         : " p-1 bg-red-400 text-white")

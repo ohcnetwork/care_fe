@@ -20,7 +20,8 @@ import {
   CONSULTATION_SUGGESTION,
   PATIENT_CATEGORY,
   SYMPTOM_CHOICES,
-  TELEMEDICINE_ACTIONS
+  TELEMEDICINE_ACTIONS,
+  REVIEW_AT_CHOICES
 } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
@@ -693,14 +694,12 @@ export const ConsultationForm = (props: any) => {
 
                 {JSON.parse(state.form.is_telemedicine) && (
                   <div className="flex-1">
-                    <InputLabel id="review_time-label">Review After (In Minutes)</InputLabel>
-                    <TextInputField
+                    <InputLabel id="review_time-label">Review After </InputLabel>
+                    <SelectField
                       name="review_time"
-                      variant="outlined"
-                      margin="dense"
-                      type="number"
-                      InputLabelProps={{ shrink: !!state.form.review_time }}
+                      variant="standard"
                       value={state.form.review_time}
+                      options={[{ id: "", text: "select" }, ...REVIEW_AT_CHOICES]}
                       onChange={handleChange}
                       errors={state.errors.review_time}
                     />

@@ -4,7 +4,7 @@ import { navigate } from 'raviger';
 import loadable from '@loadable/component';
 import React, { useCallback, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
-import { CURRENT_HEALTH_CHANGE, PATIENT_CATEGORY, SYMPTOM_CHOICES, TELEMEDICINE_ACTIONS } from "../../Common/constants";
+import { CURRENT_HEALTH_CHANGE, PATIENT_CATEGORY, SYMPTOM_CHOICES, TELEMEDICINE_ACTIONS, REVIEW_AT_CHOICES } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { NativeSelectField, CheckboxField, MultilineInputField, SelectField, TextInputField, ErrorHelperText, DateTimeFiled, MultiSelectField } from "../Common/HelperInputFields";
 import { createDailyReport, getConsultationDailyRoundsDetails, updateDailyReport } from "../../Redux/actions";
@@ -363,14 +363,13 @@ export const DailyRounds = (props: any) => {
                                     <ErrorHelperText error={state.errors.action} />
                                 </div>
                                 <div className="flex-1">
-                                    <InputLabel id="review_time-label">Review After (In Minutes)</InputLabel>
-                                    <TextInputField
+
+                                    <InputLabel id="review_time-label">Review After </InputLabel>
+                                    <SelectField
                                         name="review_time"
-                                        variant="outlined"
-                                        margin="dense"
-                                        type="number"
-                                        InputLabelProps={{ shrink: !!state.form.review_time }}
+                                        variant="standard"
                                         value={state.form.review_time}
+                                        options={[{ id: "", text: "select" }, ...REVIEW_AT_CHOICES]}
                                         onChange={handleChange}
                                         errors={state.errors.review_time}
                                     />
