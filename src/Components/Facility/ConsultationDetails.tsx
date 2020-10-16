@@ -183,12 +183,20 @@ export const ConsultationDetails = (props: any) => {
                         : "-"}
                     </Typography>
                   </Grid>
-                  <Grid item xs={12}>
+                  <Grid item xs={6}>
                     <Typography>
                       <span className="text-gray-700">
                         SpO2:
                       </span>{" "}
                       {itemData.spo2}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography>
+                      <span className="text-gray-700">
+                        Admitted To:
+                      </span>{" "}
+                      {itemData.admitted_to || "-"}
                     </Typography>
                   </Grid>
                   <Grid item xs={12}>

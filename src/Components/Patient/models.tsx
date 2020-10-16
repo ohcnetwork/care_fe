@@ -225,6 +225,7 @@ export interface DailyRoundsModel {
   current_health?: string;
   id?: number;
   other_symptoms?: string;
+  admitted_to?: string;
   patient_category?: string;
   recommend_discharge?: boolean;
 }

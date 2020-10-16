@@ -107,6 +107,10 @@ export const DailyRoundListDetails = (props: any) => {
             <span className="font-semibold leading-relaxed">Additional Symptoms: </span>
             {dailyRoundListDetailsData.additional_symptoms_text || '-'}
           </div>
+          <div className="md:col-span-2 capitalize">
+            <span className="font-semibold leading-relaxed">Admitted To *: </span>
+            {dailyRoundListDetailsData.admitted_to || '-'}
+          </div>
           <div className="md:col-span-2">
             <span className="font-semibold leading-relaxed">Physical Examination Info: </span>
             {dailyRoundListDetailsData.physical_examination_info || '-'}
