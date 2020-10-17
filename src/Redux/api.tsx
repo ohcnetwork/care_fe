@@ -78,6 +78,10 @@ export default {
     path: "/api/v1/users/",
   },
 
+  getOnlineDoctors: {
+    path: "/api/v1/users/?user_type=Doctor&ordering=-last_login",
+  },
+
   // Facility Endpoints
 
   listFacility: {
@@ -105,6 +109,10 @@ export default {
 
   getAllFacilitiesList: {
     path: "/api/v1/getallfacilities",
+  },
+
+  getFacilityUsers: {
+    path: "/api/v1/facility/{facility_id}/get_users/",
   },
 
   // Download Api
@@ -369,6 +377,7 @@ export default {
     path: "/api/v1/users",
     method: "PUT",
   },
+
   //Shift
   createShift: {
     path: "/api/v1/shift/",

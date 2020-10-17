@@ -528,6 +528,19 @@ export default function ShiftDetails(props: { id: string }) {
               </button>
               </div>
             </div>
+            {
+              data.assigned_to_object && <div className="relative rounded-lg shadow bg-green-200">
+                <div className="max-w-screen-xl mx-auto py-3 px-3 sm:px-6 lg:px-8">
+                  <div className="pr-16 sm:text-center sm:px-16">
+                    <p className="font-bold text-green-800">
+                      <span className="inline">
+                        Assigned to: {data.assigned_to_object.first_name} {data.assigned_to_object.last_name} - {data.assigned_to_object.user_type}
+                      </span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            }
             <div className="border rounded-lg bg-white shadow h-full text-black mt-4 p-4">
               <div className="flex justify-between">
                 <div className="grid gap-2 grid-cols-1">

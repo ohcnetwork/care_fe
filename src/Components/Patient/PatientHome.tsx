@@ -511,6 +511,19 @@ export const PatientHome = (props: any) => {
 
       <div id="revamp">
         <PageTitle title={`Covid Suspect Details`} />
+        {
+          patientData?.last_consultation?.assigned_to_object && <div className="relative rounded-lg shadow bg-green-200 mt-2">
+            <div className="max-w-screen-xl mx-auto py-3 px-3 sm:px-6 lg:px-8">
+              <div className="pr-16 sm:text-center sm:px-16">
+                <p className="font-bold text-green-800">
+                  <span className="inline">
+                    Assigned to: {patientData.last_consultation.assigned_to_object.first_name} {patientData.last_consultation.assigned_to_object.last_name}
+                  </span>
+                </p>
+              </div>
+            </div>
+          </div>
+        }
         <section className="md:flex mt-4">
           <div className="md:w-2/3 mx-2">
             <div className="bg-white rounded-lg shadow p-4 h-full">

@@ -42,6 +42,7 @@ import {
 } from "../Common/HelperInputFields";
 import { make as PrescriptionBuilder } from "../Common/PrescriptionBuilder.gen";
 import { FacilityModel } from "./models";
+import { OnlineDoctorsSelect } from "../Common/OnlineDoctorsSelect";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -70,7 +71,8 @@ const initForm: any = {
   consultation_notes: "",
   ip_no: "",
   discharge_advice: [],
-  is_telemedicine: "false"
+  is_telemedicine: "false",
+  assigned_to: "",
 };
 
 const initError = Object.assign(
@@ -172,7 +174,8 @@ export const ConsultationForm = (props: any) => {
             diagnosis: res.data.diagnosis ? res.data.diagnosis : "",
             verified_by: res.data.verified_by ? res.data.verified_by : "",
             OPconsultation: res.data.consultation_notes,
-            is_telemedicine: `${res.data.is_telemedicine}`
+            is_telemedicine: `${res.data.is_telemedicine}`,
+            assigned_to: res.data.assigned_to || ""
           };
           dispatch({ type: "set_form", form: formData });
         } else {
@@ -289,7 +292,8 @@ export const ConsultationForm = (props: any) => {
         consultation_notes: state.form.OPconsultation,
         is_telemedicine: state.form.is_telemedicine,
         action: state.form.action,
-        review_time: state.form.review_time
+        review_time: state.form.review_time,
+        assigned_to: state.form.assigned_to,
       };
       const res = await dispatchAction(
         id ? updateConsultation(id, data) : createConsultation(data)
@@ -350,6 +354,12 @@ export const ConsultationForm = (props: any) => {
       form[key] = date;
       dispatch({ type: "set_form", form });
     }
+  };
+
+  const handleOnSelect = (id: string) => {
+    const form = { ...state.form };
+    form['assigned_to'] = id;
+    dispatch({ type: "set_form", form });
   };
 
   const setFacility = (selected: FacilityModel | FacilityModel[] | null) => {
@@ -705,6 +715,9 @@ export const ConsultationForm = (props: any) => {
                     />
                   </div>
                 )}
+              </div>
+              <div className="md:col-span-1">
+                <OnlineDoctorsSelect userId={state.form.assigned_to} onSelect={handleOnSelect} />
               </div>
               {JSON.parse(state.form.is_telemedicine) &&
                 <div>
