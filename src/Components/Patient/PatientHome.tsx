@@ -470,7 +470,7 @@ export const PatientHome = (props: any) => {
     consultationList = <CircularProgress size={20} />;
   } else if (consultationListData.length === 0) {
     consultationList = (
-      <Typography>No OP Triage / Consultation available.</Typography>
+      <Typography>No Consultation available.</Typography>
     );
   } else if (consultationListData.length > 0) {
     consultationList = consultationListData.map((itemData, idx) => (
@@ -955,7 +955,7 @@ export const PatientHome = (props: any) => {
               <div className="border-b border-dashed text-gray-900 font-semibold text-center text-lg space-y-2">
                 <div>
                   <button className="btn btn-primary w-full" disabled={!patientData.is_active} onClick={() => navigate(`/facility/${facilityId}/patient/${id}/consultation`)}>
-                    Add OP Triage / Consultation
+                    Add Consultation
                   </button>
                 </div>
 
@@ -1163,7 +1163,7 @@ export const PatientHome = (props: any) => {
       </Dialog>
 
       <div>
-        <PageTitle title="OP Triage / Consultation History" hideBack={true} />
+        <PageTitle title="Consultation History" hideBack={true} />
         {consultationList}
         {!isConsultationLoading && totalConsultationCount > limit && (
           <div className="mt-4 flex w-full justify-center">

@@ -140,11 +140,11 @@ export const ConsultationForm = (props: any) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const headerText = !id
-    ? "OP Triage / Consultation"
-    : "Edit OP Triage / Consultation";
+    ? "Consultation"
+    : "Edit Consultation";
   const buttonText = !id
-    ? "Add OP Triage / Consultation"
-    : "Update OP Triage / Consultation";
+    ? "Add Consultation"
+    : "Update Consultation";
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -502,7 +502,7 @@ export const ConsultationForm = (props: any) => {
                     id="suggestion-label"
                     style={{ fontWeight: "bold", fontSize: "18px" }}
                   >
-                    Decision after OP Triage/Consultation
+                    Decision after Consultation
                   </InputLabel>
                   <NativeSelectField
                     name="suggestion"
