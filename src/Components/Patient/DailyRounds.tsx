@@ -4,13 +4,14 @@ import { navigate } from 'raviger';
 import loadable from '@loadable/component';
 import React, { useCallback, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
-import { CURRENT_HEALTH_CHANGE, PATIENT_CATEGORY, SYMPTOM_CHOICES, TELEMEDICINE_ACTIONS } from "../../Common/constants";
+import { CURRENT_HEALTH_CHANGE, PATIENT_CATEGORY, SYMPTOM_CHOICES, TELEMEDICINE_ACTIONS, REVIEW_AT_CHOICES, ADMITTED_TO } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { NativeSelectField, CheckboxField, MultilineInputField, SelectField, TextInputField, ErrorHelperText, DateTimeFiled, MultiSelectField } from "../Common/HelperInputFields";
 import { createDailyReport, getConsultationDailyRoundsDetails, updateDailyReport } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
+const admittedToChoices = ["Select", ...ADMITTED_TO];
 
 const initForm: any = {
     otherSymptom: false,
@@ -25,7 +26,8 @@ const initForm: any = {
     current_health: 0,
     recommend_discharge: false,
     actions: null,
-    review_time: 0
+    review_time: 0,
+    admitted_to: "",
 };
 
 const initError = Object.assign({}, ...Object.keys(initForm).map(k => ({ [k]: "" })));
@@ -92,6 +94,7 @@ export const DailyRounds = (props: any) => {
                 if (res && res.data) {
                     const data = {
                         ...res.data,
+                        admitted_to: res.data.admitted_to ? res.data.admitted_to : 'Select',
                         temperature: Number(res.data.temperature) ? res.data.temperature : '',
                         spo2: Number(res.data.spo2) ? res.data.spo2 : '',
                     }
@@ -143,6 +146,7 @@ export const DailyRounds = (props: any) => {
                 additional_symptoms: state.form.additional_symptoms,
                 other_symptoms: state.form.otherSymptom ? state.form.other_symptoms : undefined,
                 spo2: state.form.spo2 ? state.form.spo2 : undefined,
+                admitted_to: (state.form.admitted == 'Select' ? undefined : state.form.admitted_to) || undefined,
                 temperature: state.form.temperature ? state.form.temperature : undefined,
                 temperature_measured_at: state.form.temperature ? state.form.temperature_measured_at : undefined,
                 physical_examination_info: state.form.physical_examination_info,
@@ -347,6 +351,21 @@ export const DailyRounds = (props: any) => {
                                         errors={state.errors.current_health}
                                     />
                                 </div>
+
+                                <div className="flex-1">
+                                    <SelectField
+                                        optionArray={true}
+                                        name="admitted_to"
+                                        variant="standard"
+                                        value={state.form.admitted_to}
+                                        options={admittedToChoices}
+                                        onChange={handleChange}
+                                        label="Admitted To*"
+                                        labelId="admitted-to-label"
+                                        errors={state.errors.admitted_to}
+                                    />
+                                </div>
+
                                 <div>
                                     <label>
                                         Action
@@ -363,14 +382,13 @@ export const DailyRounds = (props: any) => {
                                     <ErrorHelperText error={state.errors.action} />
                                 </div>
                                 <div className="flex-1">
-                                    <InputLabel id="review_time-label">Review After (In Minutes)</InputLabel>
-                                    <TextInputField
+
+                                    <InputLabel id="review_time-label">Review After </InputLabel>
+                                    <SelectField
                                         name="review_time"
-                                        variant="outlined"
-                                        margin="dense"
-                                        type="number"
-                                        InputLabelProps={{ shrink: !!state.form.review_time }}
+                                        variant="standard"
                                         value={state.form.review_time}
+                                        options={[{ id: "", text: "select" }, ...REVIEW_AT_CHOICES]}
                                         onChange={handleChange}
                                         errors={state.errors.review_time}
                                     />

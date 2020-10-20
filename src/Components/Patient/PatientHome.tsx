@@ -470,7 +470,7 @@ export const PatientHome = (props: any) => {
     consultationList = <CircularProgress size={20} />;
   } else if (consultationListData.length === 0) {
     consultationList = (
-      <Typography>No OP Triage / Consultation available.</Typography>
+      <Typography>No Consultation available.</Typography>
     );
   } else if (consultationListData.length > 0) {
     consultationList = consultationListData.map((itemData, idx) => (
@@ -511,6 +511,19 @@ export const PatientHome = (props: any) => {
 
       <div id="revamp">
         <PageTitle title={`Covid Suspect Details`} />
+        {
+          patientData?.last_consultation?.assigned_to_object && <div className="relative rounded-lg shadow bg-green-200 mt-2">
+            <div className="max-w-screen-xl mx-auto py-3 px-3 sm:px-6 lg:px-8">
+              <div className="pr-16 sm:text-center sm:px-16">
+                <p className="font-bold text-green-800">
+                  <span className="inline">
+                    Assigned to: {patientData.last_consultation.assigned_to_object.first_name} {patientData.last_consultation.assigned_to_object.last_name}
+                  </span>
+                </p>
+              </div>
+            </div>
+          </div>
+        }
         <section className="md:flex mt-4">
           <div className="md:w-2/3 mx-2">
             <div className="bg-white rounded-lg shadow p-4 h-full">
@@ -609,7 +622,7 @@ export const PatientHome = (props: any) => {
                 {patientData.review_time && (
                   <div
                     className={
-                      "mb-2 inline-flex items-center px-3 py-1 rounded-lg text-xs leading-4 font-semibold p-1 bg-red-400 text-white w-full justify-center " +
+                      "mb-2 inline-flex items-center px-3 py-1 rounded-lg text-xs leading-4 font-semibold p-1 w-full justify-center " +
                       (moment().isBefore(patientData.review_time)
                         ? " bg-gray-100"
                         : " p-1 bg-red-400 text-white")
@@ -942,7 +955,7 @@ export const PatientHome = (props: any) => {
               <div className="border-b border-dashed text-gray-900 font-semibold text-center text-lg space-y-2">
                 <div>
                   <button className="btn btn-primary w-full" disabled={!patientData.is_active} onClick={() => navigate(`/facility/${facilityId}/patient/${id}/consultation`)}>
-                    Add OP Triage / Consultation
+                    Add Consultation
                   </button>
                 </div>
 
@@ -1076,8 +1089,7 @@ export const PatientHome = (props: any) => {
                   className="h-10"
                   labelId="covid-status-pre-form"
                   value={
-                    preDischargeForm.disease_status ||
-                    patientData.disease_status
+                    preDischargeForm.disease_status
                   }
                   onChange={(event) =>
                     handlePreDischargeFormChange(
@@ -1142,6 +1154,7 @@ export const PatientHome = (props: any) => {
                 color="primary"
                 onClick={() => handlePatientDischarge(false)}
                 autoFocus
+                disabled={preDischargeForm.disease_status ? false : true}
               >
                 Proceed with Discharge
               </Button>
@@ -1150,7 +1163,7 @@ export const PatientHome = (props: any) => {
       </Dialog>
 
       <div>
-        <PageTitle title="OP Triage / Consultation History" hideBack={true} />
+        <PageTitle title="Consultation History" hideBack={true} />
         {consultationList}
         {!isConsultationLoading && totalConsultationCount > limit && (
           <div className="mt-4 flex w-full justify-center">

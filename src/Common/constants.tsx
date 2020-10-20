@@ -158,6 +158,20 @@ export const MEDICAL_HISTORY_CHOICES: Array<OptionsType> = [
   { id: 8, text: "OTHER" },
 ];
 
+export const REVIEW_AT_CHOICES: Array<OptionsType> = [
+  { id: 30, text: "30 minutes" },
+  { id: 60, text: "1 hour" },
+  { id: 120, text: "2 hours" },
+  { id: 180, text: "3 hours" },
+  { id: 240, text: "4 hours" },
+  { id: 300, text: "6 hours" },
+  { id: 480, text: "8 hours" },
+  { id: 720, text: "12 hours" },
+  { id: 1440, text: "24 hours" },
+  { id: 2160, text: "36 hours" },
+  { id: 2880, text: "48 hours" },
+];
+
 export const SYMPTOM_CHOICES: Array<OptionsType> = [
   { id: 1, text: "ASYMPTOMATIC" },
   { id: 2, text: "FEVER" },

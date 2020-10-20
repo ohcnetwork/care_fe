@@ -183,12 +183,20 @@ export const ConsultationDetails = (props: any) => {
                         : "-"}
                     </Typography>
                   </Grid>
-                  <Grid item xs={12}>
+                  <Grid item xs={6}>
                     <Typography>
                       <span className="text-gray-700">
                         SpO2:
                       </span>{" "}
                       {itemData.spo2}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography>
+                      <span className="text-gray-700">
+                        Admitted To:
+                      </span>{" "}
+                      {itemData.admitted_to || "-"}
                     </Typography>
                   </Grid>
                   <Grid item xs={12}>
@@ -236,7 +244,7 @@ export const ConsultationDetails = (props: any) => {
           <div className="grid gap-2 grid-cols-1">
             <div className="capitalize">
               <span className="font-semibold leading-relaxed">
-                Decision after OP Triage/Consultation:{" "}
+                Decision after Consultation:{" "}
               </span>
               {consultationData.suggestion_text?.toLocaleLowerCase()}
             </div>

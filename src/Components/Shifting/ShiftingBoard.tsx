@@ -160,6 +160,14 @@ export default function ListView({ board, filterProp, formatFilter }: boardProps
                       </dd>
                     </dt>
                   </div>
+                  {shift.assigned_to_object && <div className="sm:col-span-1">
+                    <dt title="Assigned to" className="text-sm leading-5 font-medium text-gray-500 flex items-center">
+                      <i className="fas fa-user mr-2"></i>
+                      <dd className="font-bold text-sm leading-5 text-gray-900">
+                        {shift.assigned_to_object.first_name} {shift.assigned_to_object.last_name} - {shift.assigned_to_object.user_type}
+                      </dd>
+                    </dt>
+                  </div>}
                 </dl>
               </div>
 

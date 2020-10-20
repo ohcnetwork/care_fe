@@ -20,7 +20,8 @@ import {
   CONSULTATION_SUGGESTION,
   PATIENT_CATEGORY,
   SYMPTOM_CHOICES,
-  TELEMEDICINE_ACTIONS
+  TELEMEDICINE_ACTIONS,
+  REVIEW_AT_CHOICES
 } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
@@ -41,6 +42,7 @@ import {
 } from "../Common/HelperInputFields";
 import { make as PrescriptionBuilder } from "../Common/PrescriptionBuilder.gen";
 import { FacilityModel } from "./models";
+import { OnlineDoctorsSelect } from "../Common/OnlineDoctorsSelect";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -69,7 +71,8 @@ const initForm: any = {
   consultation_notes: "",
   ip_no: "",
   discharge_advice: [],
-  is_telemedicine: "false"
+  is_telemedicine: "false",
+  assigned_to: "",
 };
 
 const initError = Object.assign(
@@ -137,11 +140,11 @@ export const ConsultationForm = (props: any) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const headerText = !id
-    ? "OP Triage / Consultation"
-    : "Edit OP Triage / Consultation";
+    ? "Consultation"
+    : "Edit Consultation";
   const buttonText = !id
-    ? "Add OP Triage / Consultation"
-    : "Update OP Triage / Consultation";
+    ? "Add Consultation"
+    : "Update Consultation";
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -171,7 +174,8 @@ export const ConsultationForm = (props: any) => {
             diagnosis: res.data.diagnosis ? res.data.diagnosis : "",
             verified_by: res.data.verified_by ? res.data.verified_by : "",
             OPconsultation: res.data.consultation_notes,
-            is_telemedicine: `${res.data.is_telemedicine}`
+            is_telemedicine: `${res.data.is_telemedicine}`,
+            assigned_to: res.data.assigned_to || ""
           };
           dispatch({ type: "set_form", form: formData });
         } else {
@@ -288,7 +292,8 @@ export const ConsultationForm = (props: any) => {
         consultation_notes: state.form.OPconsultation,
         is_telemedicine: state.form.is_telemedicine,
         action: state.form.action,
-        review_time: state.form.review_time
+        review_time: state.form.review_time,
+        assigned_to: state.form.assigned_to,
       };
       const res = await dispatchAction(
         id ? updateConsultation(id, data) : createConsultation(data)
@@ -349,6 +354,12 @@ export const ConsultationForm = (props: any) => {
       form[key] = date;
       dispatch({ type: "set_form", form });
     }
+  };
+
+  const handleOnSelect = (id: string) => {
+    const form = { ...state.form };
+    form['assigned_to'] = id;
+    dispatch({ type: "set_form", form });
   };
 
   const setFacility = (selected: FacilityModel | FacilityModel[] | null) => {
@@ -491,7 +502,7 @@ export const ConsultationForm = (props: any) => {
                     id="suggestion-label"
                     style={{ fontWeight: "bold", fontSize: "18px" }}
                   >
-                    Decision after OP Triage/Consultation
+                    Decision after Consultation
                   </InputLabel>
                   <NativeSelectField
                     name="suggestion"
@@ -693,19 +704,20 @@ export const ConsultationForm = (props: any) => {
 
                 {JSON.parse(state.form.is_telemedicine) && (
                   <div className="flex-1">
-                    <InputLabel id="review_time-label">Review After (In Minutes)</InputLabel>
-                    <TextInputField
+                    <InputLabel id="review_time-label">Review After </InputLabel>
+                    <SelectField
                       name="review_time"
-                      variant="outlined"
-                      margin="dense"
-                      type="number"
-                      InputLabelProps={{ shrink: !!state.form.review_time }}
+                      variant="standard"
                       value={state.form.review_time}
+                      options={[{ id: "", text: "select" }, ...REVIEW_AT_CHOICES]}
                       onChange={handleChange}
                       errors={state.errors.review_time}
                     />
                   </div>
                 )}
+              </div>
+              <div className="md:col-span-1">
+                <OnlineDoctorsSelect userId={state.form.assigned_to} onSelect={handleOnSelect} />
               </div>
               {JSON.parse(state.form.is_telemedicine) &&
                 <div>

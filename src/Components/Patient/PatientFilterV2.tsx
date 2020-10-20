@@ -6,6 +6,7 @@ import moment from "moment";
 import { getFacility } from '../../Redux/actions';
 import { useDispatch } from 'react-redux';
 import { CircularProgress } from '@material-ui/core';
+import { navigate } from 'raviger';
 
 function useMergeState(initialState: any) {
   const [state, setState] = useState(initialState);
@@ -34,6 +35,7 @@ export default function PatientFilterV2(props: any) {
     last_consultation_discharge_date_before: filter.last_consultation_discharge_date_before || null,
     last_consultation_discharge_date_after: filter.last_consultation_discharge_date_after || null,
     last_consultation_admitted_to: filter.last_consultation_admitted_to || null,
+    srf_id: filter.srf_id || null,
   });
   const dispatch: any = useDispatch();
 
@@ -86,6 +88,7 @@ export default function PatientFilterV2(props: any) {
       last_consultation_discharge_date_before,
       last_consultation_discharge_date_after,
       last_consultation_admitted_to,
+      srf_id,
 
     } = filterState;
     const data = {
@@ -101,10 +104,11 @@ export default function PatientFilterV2(props: any) {
       ordering: ordering || '',
       category: category || '',
       gender: gender || '',
-      disease_status: disease_status || '',
+      disease_status: (disease_status == 'Show All' ? '' : disease_status) || '',
       age_min: age_min || '',
       age_max: age_max || '',
       last_consultation_admitted_to: last_consultation_admitted_to || '',
+      srf_id: srf_id || '',
     }
     onChange(data);
   };
@@ -114,6 +118,9 @@ export default function PatientFilterV2(props: any) {
       <div className="flex justify-between">
         <button className="btn btn-default" onClick={closeFilter}>
           <i className="fas fa-times mr-2" />Cancel
+        </button>
+        <button className="btn btn-default" onClick={_ => { navigate("/patients") }}>
+          <i className="fas fa-times mr-2" />Clear Filter
         </button>
         <button className="btn btn-primary" onClick={applyFilter}>
           <i className="fas fa-check mr-2" />Apply
@@ -300,7 +307,7 @@ export default function PatientFilterV2(props: any) {
             onChange={date => handleChange({ target: { name: "last_consultation_discharge_date_after", value: date } })}
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9" />
         </div>
-        {/* <div className="w-64 flex-none">
+        <div className="w-64 flex-none">
           <span className="text-sm font-semibold">Age</span>
           <div className="flex justify-between">
             <TextInputField
@@ -311,7 +318,8 @@ export default function PatientFilterV2(props: any) {
               errors=""
               value={filterState.age_min}
               onChange={handleChange}
-              className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 w-1/2" />
+              label="Min Age"
+              className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 mr-1" />
             <TextInputField
               id="age_max"
               name="age_max"
@@ -320,9 +328,25 @@ export default function PatientFilterV2(props: any) {
               errors=""
               value={filterState.age_max}
               onChange={handleChange}
-              className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 W-1/2" />
+              label="Max Age"
+              className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9" />
           </div>
-        </div> */}
+        </div>
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">SRF ID</span>
+          <div className="flex justify-between">
+            <TextInputField
+              id="srf_id"
+              name="srf_id"
+              variant="outlined"
+              margin="dense"
+              errors=""
+              value={filterState.srf_id}
+              onChange={handleChange}
+              label="Srf id"
+              className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 mr-1" />
+          </div>
+        </div>
 
       </div>
     </div>

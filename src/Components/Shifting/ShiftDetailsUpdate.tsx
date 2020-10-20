@@ -12,6 +12,7 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getShiftDetails, updateShift } from "../../Redux/actions";
 import { SelectField } from "../Common/HelperInputFields";
 import { SHIFTING_CHOICES, FACILITY_TYPES, SHIFTING_VEHICLE_CHOICES } from "../../Common/constants";
+import { UserSelect } from "../Common/UserSelect";
 
 import {
     Card,
@@ -42,6 +43,7 @@ const initForm: any = {
     comments: "",
     assigned_facility_type: "",
     preferred_vehicle_choice: "",
+    assigned_to: ""
 };
 
 const requiredFields: any = {
@@ -114,6 +116,12 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
         dispatch({ type: "set_form", form });
     };
 
+    const handleOnSelect = (id: string) => {
+        const form = { ...state.form };
+        form['assigned_to'] = id;
+        dispatch({ type: "set_form", form });
+    };
+
     const setFacility = (selected: any, name: string) => {
         const form = { ...state.form };
         form[name] = selected;
@@ -141,6 +149,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                 comments: state.form.comments,
                 assigned_facility_type: state.form.assigned_facility_type,
                 preferred_vehicle_choice: state.form.preferred_vehicle_choice,
+                assigned_to: state.form.assigned_to,
             }
 
             const res = await dispatchAction(updateShift(props.id, data));
@@ -195,8 +204,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                 <Card>
                     <CardContent>
                         <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
-                            <div className="md:col-span-2">
-
+                            <div className="md:col-span-1">
                                 <InputLabel>Status</InputLabel>
                                 <SelectField
                                     name="status"
@@ -207,6 +215,9 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                                     options={shiftStatusOptions}
                                     onChange={handleChange}
                                     className="bg-white h-14 w-1/3 mt-2 shadow-sm md:text-sm md:leading-5" />
+                            </div>
+                            <div className="md:col-span-1">
+                                <UserSelect userId={state.form.assigned_to} onSelect={handleOnSelect} facilityId={state.form.shifting_approving_facility_object.id} />
                             </div>
                             <div>
                                 <InputLabel>Name of shifting approving facility</InputLabel>

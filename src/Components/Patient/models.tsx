@@ -13,6 +13,13 @@ export interface DischargeSummaryModel {
   email?: string;
 }
 
+export interface AssignedToObjectModel {
+  first_name: string;
+  last_name: string;
+  last_login?: string;
+  user_type: string;
+}
+
 export interface PatientModel {
   test_id?: string;
   id?: number;
@@ -43,7 +50,7 @@ export interface PatientModel {
   district_object?: { id: number; name: string };
   state_object?: { id: number; name: string };
   tele_consultation_history?: Array<any>;
-  last_consultation?: { id: number; facility: string; };
+  last_consultation?: { id: number; facility: string; assigned_to_object?: AssignedToObjectModel };
   address?: string;
   village?: string;
   pincode?: number;
@@ -225,6 +232,7 @@ export interface DailyRoundsModel {
   current_health?: string;
   id?: number;
   other_symptoms?: string;
+  admitted_to?: string;
   patient_category?: string;
   recommend_discharge?: boolean;
 }
