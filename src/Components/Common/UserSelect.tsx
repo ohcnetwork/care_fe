@@ -53,7 +53,7 @@ export const UserSelect = (props: any) => {
                   >
                   </span>
                   <span className="block truncate">
-                    {selectedUser ? selectedUser.first_name + ' ' + selectedUser.last_name : "Assign a Doctor"}
+                    {selectedUser ? selectedUser.first_name + ' ' + selectedUser.last_name : "Assign a Shifting Staff"}
                   </span>
                 </div>
                 <div className="btn btn-default" onClick={_ => { onSelect('') }}> Clear</div>
