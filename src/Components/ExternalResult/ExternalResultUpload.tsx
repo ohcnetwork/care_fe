@@ -34,9 +34,10 @@ export default function ExternalResultUpload() {
     if (valid) {
       setErrors({})
       dispatch(externalResultUploadCsv(data)).then((resp: any) => {
-        const res = resp && resp.data;
-        if (res && (res.status === '202')) {
-          navigate('/external_results/')
+        console.log(resp)
+        console.log(resp.status)
+        if (resp && resp.status === 202) {
+          navigate('/external_results')
         } else {
           setErrors(resp.data)
         }
