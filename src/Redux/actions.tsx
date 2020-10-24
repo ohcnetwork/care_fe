@@ -297,3 +297,7 @@ export const externalResult = (id: string) => {
 export const externalResultUploadCsv = (params: object) => {
   return fireRequest("externalResultUploadCsv", [], params);
 };
+
+export const deleteExternalResult = (id: string) => {
+  return fireRequest("deleteExternalResult", [id], {});
+};

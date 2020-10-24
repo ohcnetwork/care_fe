@@ -2,14 +2,14 @@ import React, { useState, useCallback } from "react";
 import loadable from "@loadable/component";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { externalResult } from "../../Redux/actions";
-import moment from "moment";
+import { externalResult, deleteExternalResult } from "../../Redux/actions";
+import * as Notification from "../../Utils/Notifications.js";
+import { navigate } from "raviger";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export default function ResultItem(props: any) {
-  console.log("hola")
   const dispatch: any = useDispatch();
   let initialData: any = {};
   const [data, setData] = useState(initialData);
@@ -29,6 +29,17 @@ export default function ResultItem(props: any) {
     [props.id, dispatch]
   );
 
+  const handleDelete = async () => {
+    let res = await dispatch(deleteExternalResult(props.id));
+    if (res.status >= 200) {
+      Notification.Success({
+        msg: "Record has been deleted successfully.",
+      });
+    }
+
+    navigate(`/external_results`);
+  };
+
   useAbortableEffect(
     (status: statusType) => {
       fetchData(status);
@@ -42,9 +53,15 @@ export default function ResultItem(props: any) {
 
   return (
     <div>
-      <PageTitle title={"Result details"}  className="px-6 mb-2"/>
-      <div className="mx-3 md:mx-8 mb-10">
-        <div className="bg-white shadow overflow-hidden sm:rounded-lg">
+      <PageTitle title={"Result details"} className="px-6 mb-2" />
+
+      <div className="mx-3 md:mx-8 mb-10 mt-4">
+        <div className="flex justify-end ">
+          <button className="btn btn-danger" onClick={() => handleDelete()}>
+            Delete Record
+      </button>
+        </div>
+        <div className="bg-white shadow overflow-hidden sm:rounded-lg mt-4">
           <div className="px-4 py-5 border-b border-gray-200 sm:px-6">
             <h3 className="text-lg leading-6 font-medium text-gray-900">
               {data.name} - {data.age} {data.age_in}  | {data.result}
@@ -123,7 +140,7 @@ export default function ResultItem(props: any) {
                   Sample collection date
                  </dt>
                 <dd className="mt-1 text-sm leading-5 text-gray-900 sm:mt-0 sm:col-span-2">
-                  {moment(data.sample_collection_date).format("lll")}
+                  {data.sample_collection_date || "-"}
                 </dd>
               </div>
               <div className="mt-8 sm:mt-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:border-t sm:border-gray-200 sm:px-6 sm:py-5">
@@ -131,7 +148,7 @@ export default function ResultItem(props: any) {
                   Result Date
                  </dt>
                 <dd className="mt-1 text-sm leading-5 text-gray-900 sm:mt-0 sm:col-span-2">
-                  {moment(data.result_date).format("lll")}
+                  {data.result_date || "-"}
                 </dd>
               </div>
               <div className="mt-8 sm:mt-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:border-t sm:border-gray-200 sm:px-6 sm:py-5">
@@ -140,6 +157,23 @@ export default function ResultItem(props: any) {
                  </dt>
                 <dd className="mt-1 text-sm leading-5 text-gray-900 sm:mt-0 sm:col-span-2">
                   {data.result}
+                </dd>
+              </div>
+              <div className="mt-8 sm:mt-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:border-t sm:border-gray-200 sm:px-6 sm:py-5">
+                <dt className="text-sm leading-5 font-medium text-gray-500">
+                  Source
+                 </dt>
+                <dd className="mt-1 text-sm leading-5 text-gray-900 sm:mt-0 sm:col-span-2">
+                  {data.source}
+                </dd>
+              </div>
+
+              <div className="mt-8 sm:mt-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:border-t sm:border-gray-200 sm:px-6 sm:py-5">
+                <dt className="text-sm leading-5 font-medium text-gray-500">
+                  Patient Category
+                 </dt>
+                <dd className="mt-1 text-sm leading-5 text-gray-900 sm:mt-0 sm:col-span-2">
+                  {data.patient_category}
                 </dd>
               </div>
             </dl>

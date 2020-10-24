@@ -12,11 +12,9 @@ export default function ExternalResultUpload() {
   const dispatch: any = useDispatch();
   const [uploadFile, setUploadFile] = useState("");
   const [csvData, setCsvData] = useState(new Array<any>());
-  const [errors, setErrors] = useState(new Array<any>());
-  // useState<any>({});
+  const [errors, setErrors] = useState<any>({});
   const handleForce = (data: any, fileInfo: any) => {
     setCsvData(data)
-    console.log(data, fileInfo)
   };
 
   const papaparseOptions = {
@@ -26,10 +24,6 @@ export default function ExternalResultUpload() {
     transformHeader: (header: string) => header.toLowerCase().replace(/\W/g, "_")
   };
 
-
-
-
-
   const handleSubmit = (e: any) => {
     e.preventDefault();
     const valid = true
@@ -38,16 +32,15 @@ export default function ExternalResultUpload() {
     }
 
     if (valid) {
+      setErrors({})
       dispatch(externalResultUploadCsv(data)).then((resp: any) => {
-
         const res = resp && resp.data;
-        if (res && res.status === 'OK') {
-          console.log(res.data)
+        if (res && (res.status === '202')) {
+          navigate('/external_results/')
         } else {
-          setErrors(Object.values(resp.data))
+          setErrors(resp.data)
         }
       });
-
     }
   };
 
@@ -65,18 +58,17 @@ export default function ExternalResultUpload() {
                 <div className="text-center">
                   <CSVReader
                     cssClass="react-csv-input"
-                    label="Select CSV with secret Death Star statistics"
+                    label="Select a CSV file in the specified format"
                     onFileLoaded={handleForce}
                     parserOptions={papaparseOptions}
                   />
-
+                  <a className="mt-2 text-xs font-light" href="https://docs.google.com/spreadsheets/d/17VfgryA6OYSYgtQZeXU9mp7kNvLySeEawvnLBO_1nuE/edit?usp=sharing" target="blank">
+                    Sample Format
+                  </a>
                 </div>
               </div>
             </div>
           </div>
-
-
-
           <div className=" bg-white rounded shadow">
             {
               csvData.map((data: any, index: number) => {
@@ -96,9 +88,7 @@ export default function ExternalResultUpload() {
                           Object.keys(errors[index + 1]).map((data: any, index: number) => {
                             return (
                               <div key={index}>
-                                {data} - {errors[index + 1][data]}
-
-
+                                {data} - {errors[index + 1] && errors[index + 1][data]}
                               </div>);
                           })
                         }

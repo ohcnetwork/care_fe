@@ -102,7 +102,7 @@ export default function ResultList() {
             </span>
           </td>
           <td className="px-6 py-4 text-right whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
-            {moment(result.result_date).format("lll")}
+            {result.result_date || "-"}
           </td>
         </tr >
       );

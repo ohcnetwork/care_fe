@@ -282,6 +282,11 @@ export default {
     method: "POST",
   },
 
+  deleteExternalResult: {
+    path: "/api/v1/external_result",
+    method: "DELETE",
+  },
+
   // States
   statesList: {
     path: "/api/v1/state/",
