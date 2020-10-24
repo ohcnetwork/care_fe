@@ -79,12 +79,11 @@ export default function ListView({ board, filterProp, formatFilter }: boardProps
     });
   };
 
-  const handleTransferComplete = () => {
+  const handleTransferComplete = (shift: any) => {
     setModalFor({ ...modalFor, loading: true });
     dispatch(completeTransfer({ externalId: modalFor }))
       .then(() => {
-        setModalFor({ externalId: undefined, loading: false })
-        fetchData();
+        navigate(`/facility/${shift.assigned_facility}/patient/${shift.patient}/consultation`);
       });
   }
 
@@ -198,6 +197,7 @@ export default function ListView({ board, filterProp, formatFilter }: boardProps
                         </div>
                         <div className="mb-8">
                           <p>Are you sure you want to mark this transfer as complete? The Origin facility will no longer have access to this patient</p>
+                          <p className="mt-2 text-yellow-600">Note: You will be redirected to create consultation form. Please complete the form to finish the transfer process</p>
                         </div>
                         <div className="flex gap-2 justify-center">
                           <Button
@@ -210,7 +210,7 @@ export default function ListView({ board, filterProp, formatFilter }: boardProps
                             size="small"
                             variant="outlined"
                             fullWidth
-                            onClick={handleTransferComplete}
+                            onClick={_ => handleTransferComplete(shift)}
                           >Confirm</Button>
                         </div>
                       </div>

@@ -524,6 +524,25 @@ export const PatientHome = (props: any) => {
             </div>
           </div>
         }
+        {
+          (patientData?.facility != patientData?.last_consultation?.facility) && <div className="relative mt-2">
+            <div className="max-w-screen-xl mx-auto py-3 px-3 sm:px-6 lg:px-8 rounded-lg shadow bg-red-200 ">
+              <div className="text-center">
+                <p className="font-bold text-red-800">
+                  <i className="fas fa-exclamation-triangle mr-2"></i>
+                  <span className="inline">
+                    You have not created a consultation for the patient in  <strong>{patientData.facility_object?.name || "-"} </strong>
+                  </span>
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center mt-4">
+              <button className="btn btn-primary w-full" disabled={!patientData.is_active} onClick={() => navigate(`/facility/${facilityId}/patient/${id}/consultation`)}>
+                Create Consultation
+              </button>
+            </div>
+          </div>
+        }
         <section className="md:flex mt-4">
           <div className="md:w-2/3 mx-2">
             <div className="bg-white rounded-lg shadow p-4 h-full">
@@ -965,17 +984,17 @@ export const PatientHome = (props: any) => {
                   </button>
                 </div>
                 <div>
-                  <button className="btn btn-primary w-full" disabled={!patientData.is_active} onClick={() => navigate(`/facility/${facilityId}/patient/${id}/sample-test`)}>
+                  <button className="btn btn-primary w-full" disabled={!patientData.is_active || !(patientData?.last_consultation?.facility == facilityId)} onClick={() => navigate(`/facility/${facilityId}/patient/${id}/sample-test`)}>
                     Request Sample Test
                   </button>
                 </div>
                 <div>
-                  <button className="btn btn-primary w-full" onClick={handleClickOpen}>
+                  <button className="btn btn-primary w-full" onClick={handleClickOpen} disabled={!patientData.is_active || !(patientData?.last_consultation?.facility == facilityId)}>
                     Discharge Summary
                   </button>
                 </div>
                 <div>
-                  <button className="btn btn-primary w-full" onClick={handleDischageClickOpen} disabled={!patientData.is_active}>
+                  <button className="btn btn-primary w-full" onClick={handleDischageClickOpen} disabled={!patientData.is_active || !(patientData?.last_consultation?.facility == facilityId)}>
                     Discharge from CARE
                   </button>
                 </div>
