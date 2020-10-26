@@ -30,6 +30,7 @@ export interface PatientModel {
   gender?: number;
   created_date?: string,
   modified_date?: string,
+  facility?: string,
   phone_number?: string;
   emergency_phone_number?: string;
   allergies?: string;

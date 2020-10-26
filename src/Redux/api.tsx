@@ -278,8 +278,13 @@ export default {
     path: "/api/v1/external_result",
   },
   externalResultUploadCsv: {
-    path: "/api/v1/external_result/upload_csv/",
+    path: "/api/v1/external_result/bulk_upsert/",
     method: "POST",
+  },
+
+  deleteExternalResult: {
+    path: "/api/v1/external_result",
+    method: "DELETE",
   },
 
   // States

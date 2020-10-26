@@ -112,7 +112,7 @@ export const fireRequest = (
                     Notification.BadRequest({
                         errs: error.response.data
                     });
-                    return;
+                    return error.response;
                 }
 
                 // 4xx Errors
