@@ -377,7 +377,7 @@ export const ConsultationForm = (props: any) => {
     <div className="px-2 pb-2 max-w-3xl mx-auto">
       <PageTitle title={headerText} />
       <div className="mt-4">
-        <Card>
+        <div className="bg-white rounded shadow">
           <form onSubmit={(e) => handleSubmit(e)}>
             <CardContent>
               <div className="grid gap-4 grid-cols-1">
@@ -763,7 +763,7 @@ export const ConsultationForm = (props: any) => {
               </div>
             </CardContent>
           </form>
-        </Card>
+        </div>
       </div>
     </div >
   );

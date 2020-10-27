@@ -60,11 +60,11 @@ export const OnlineDoctorsSelect = (props: any) => {
               </span>
             </button>
           </span>
-          {isExpanded && <div className="absolute mt-1 w-full rounded-md bg-white shadow-lg z-40">
-            <ul role="listbox" aria-labelledby="listbox-label" aria-activedescendant="listbox-item-3" className="max-h-60 rounded-md py-1 text-base leading-6 shadow-xs overflow-auto focus:outline-none sm:text-sm sm:leading-5">
+          {isExpanded &&
+            <div role="listbox" aria-labelledby="listbox-label" aria-activedescendant="listbox-item-3" className="multiselect-dropdown__search-dropdown w-full absolute border border-gray-400 bg-white mt-1 rounded-lg shadow-lg px-4 py-2 z-50">
               {
                 state.users.map((user: any) => {
-                  return <li onClick={_ => { setIsExpanded(false); onSelect(user.id) }} id="listbox-item-0" role="option" className="text-gray-900 cursor-default select-none relative py-2 pl-3 pr-9">
+                  return <button onClick={_ => { setIsExpanded(false); onSelect(user.id) }} id="listbox-item-0" role="option" className="flex text-xs py-1 items-center w-full hover:bg-gray-200 focus:outline-none focus:bg-gray-200">
                     <div className="flex items-center space-x-3">
                       <span aria-label="Online" className={"flex-shrink-0 inline-block h-2 w-2 rounded-full " + (moment().subtract(5, 'minutes').isBefore(user.last_login) ? "bg-green-400" : "bg-gray-300")}></span>
                       <span className="font-normal block truncate">
@@ -76,11 +76,11 @@ export const OnlineDoctorsSelect = (props: any) => {
                         <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                       </svg>
                     </span>}
-                  </li>
+                  </button>
                 })
               }
-            </ul>
-          </div>}
+            </div>
+          }
         </div>
       </div>
     </div >)
