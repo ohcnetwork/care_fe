@@ -989,7 +989,7 @@ export const PatientHome = (props: any) => {
                   </button>
                 </div>
                 <div>
-                  <button className="btn btn-primary w-full" onClick={handleClickOpen} disabled={!patientData.is_active || !(patientData?.last_consultation?.facility == facilityId)}>
+                  <button className="btn btn-primary w-full" onClick={handleClickOpen}>
                     Discharge Summary
                   </button>
                 </div>
