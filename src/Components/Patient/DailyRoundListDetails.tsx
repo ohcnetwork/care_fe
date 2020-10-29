@@ -23,7 +23,7 @@ export const DailyRoundListDetails = (props: any) => {
   const fetchpatient = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const res = await dispatch(getConsultationDailyRoundsDetails(id, { consultationId }));
+      const res = await dispatch(getConsultationDailyRoundsDetails({ consultationId, id }));
       if (!status.aborted) {
         if (res && res.data) {
           const currentHealth = currentHealthChoices.find(i => i.text === res.data.current_health);

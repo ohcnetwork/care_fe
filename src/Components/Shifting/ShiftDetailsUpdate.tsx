@@ -155,13 +155,16 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
             const res = await dispatchAction(updateShift(props.id, data));
             setIsLoading(false);
 
-            if (res && res.data) {
+
+            if (res && res.status == 200 && res.data) {
                 dispatch({ type: "set_form", form: res.data });
                 Notification.Success({
                     msg: "Shift request updated successfully",
                 });
 
                 navigate(`/shifting/${props.id}`)
+            } else {
+                setIsLoading(false);
             }
 
         }
@@ -217,7 +220,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                                     className="bg-white h-14 w-1/3 mt-2 shadow-sm md:text-sm md:leading-5" />
                             </div>
                             <div className="md:col-span-1">
-                                <UserSelect userId={state.form.assigned_to} onSelect={handleOnSelect} facilityId={state.form.shifting_approving_facility_object.id} />
+                                <UserSelect userId={state.form.assigned_to} onSelect={handleOnSelect} facilityId={state.form?.shifting_approving_facility_object?.id} />
                             </div>
                             <div>
                                 <InputLabel>Name of shifting approving facility</InputLabel>
