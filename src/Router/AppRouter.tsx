@@ -124,7 +124,7 @@ const routes = {
   "/facility/:facilityId/inventory/min_quantity/list": ({ facilityId }: any) => (<MinQuantityList facilityId={facilityId} />),
   "/facility/:facilityId/inventory/:inventoryId/update/:itemId": ({ facilityId, inventoryId, itemId }: any) => (<UpdateMinQuantity facilityId={facilityId} inventoryId={inventoryId} itemId={itemId} />),
 
-  "/shifting": () => localStorage.getItem("defaultShiftView") === 'list' ? <ShiftListView/> : <ShiftBoardView />,
+  "/shifting": () => localStorage.getItem("defaultShiftView") === 'list' ? <ShiftListView /> : <ShiftBoardView />,
   "/shifting/board-view": () => <ShiftBoardView />,
   "/shifting/list-view": () => <ShiftListView />,
   "/shifting/:id": ({ id }: any) => <ShiftDetails id={id} />,
@@ -235,6 +235,15 @@ const AppRouter = () => {
                       </a>
                     );
                   })}
+                  <a
+                    key="dashboard"
+                    href="http://dashboard.coronasafe.network/"
+                    className="mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-green-300 rounded-md hover:text-white hover:bg-green-700 focus:outline-none focus:bg-green-900 transition ease-in-out duration-150"
+                  >
+                    <i className="fas fa-tachometer-alt text-green-400 mr-3 text-md group-hover:text-green-300 group-focus:text-green-300 transition ease-in-out duration-150">
+                    </i>
+                        Dashboard
+                  </a>
                 </nav>
               </div>
               <div className="flex-shrink-0 flex border-t border-green-700 p-4">
@@ -294,6 +303,16 @@ const AppRouter = () => {
                   </button>
                 );
               })}
+              <a
+                key="dashboard"
+                href="http://dashboard.coronasafe.network/"
+                target="_blank"
+                className="mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-green-300 rounded-md hover:text-white hover:bg-green-700 focus:outline-none focus:bg-green-900 transition ease-in-out duration-150"
+              >
+                <i className="fas fa-tachometer-alt text-green-400 mr-3 text-md group-hover:text-green-300 group-focus:text-green-300 transition ease-in-out duration-150">
+                </i>
+                Dashboard
+              </a>
             </nav>
           </div>
           <div className="flex-shrink-0 flex border-t border-green-700 p-4">

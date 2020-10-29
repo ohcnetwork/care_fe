@@ -151,7 +151,7 @@ export default {
     method: "POST",
   },
   getConsultation: {
-    path: "/api/v1/consultation",
+    path: "/api/v1/consultation/{id}/",
   },
   updateConsultation: {
     path: "/api/v1/consultation",
@@ -174,8 +174,13 @@ export default {
     method: "PUT",
   },
   getDailyReports: {
-    path: "/api/v1/consultation/{consultationId}/daily_rounds",
+    path: "/api/v1/consultation/{consultationId}/daily_rounds/",
   },
+
+  getDailyReport: {
+    path: "/api/v1/consultation/{consultationId}/daily_rounds/{id}/",
+  },
+
 
   // Hospital Beds
   createCapacity: {
@@ -303,6 +308,9 @@ export default {
   },
   getDistrictByState: {
     path: "/api/v1/state/{id}/districts/",
+  },
+  getAllLocalBody: {
+    path: "/api/v1/district/{id}/get_all_local_body/",
   },
 
   // Local Body

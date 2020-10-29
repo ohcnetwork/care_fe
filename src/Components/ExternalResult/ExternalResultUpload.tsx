@@ -1,21 +1,51 @@
 import loadable from "@loadable/component";
 import { navigate } from "raviger";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { externalResultUploadCsv } from "../../Redux/actions";
+import { statusType, useAbortableEffect } from "../../Common/utils";
+import { externalResultUploadCsv, getAllLocalBody } from "../../Redux/actions";
 import CSVReader from "react-csv-reader";
+import {
+  MultilineInputField,
+  PhoneNumberField,
+  SelectField,
+  TextInputField,
+} from "../Common/HelperInputFields";
+import { ExternalResultLocalbodySelector } from "./ExternalResultLocalbodySelector";
+import StateManager from 'react-select';
 const get = require('lodash.get');
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
+
 
 export default function ExternalResultUpload() {
   const dispatch: any = useDispatch();
   const [uploadFile, setUploadFile] = useState("");
   const [csvData, setCsvData] = useState(new Array<any>());
   const [errors, setErrors] = useState<any>({});
+  const initalState = { loading: false, lsgs: new Array<any>() }
+  const [state, setState] = useState(initalState)
   const handleForce = (data: any, fileInfo: any) => {
     setCsvData(data)
   };
+
+  // const fetchLSG = useCallback(
+  //   async (status: statusType) => {
+  //     setState({ ...state, loading: true });
+  //     let id = 7
+  //     const res = await dispatch(getAllLocalBody({ id }));
+  //     if (!status.aborted) {
+  //       if (res && res.data) {
+  //         setState({ loading: false, lsgs: res.data.results });
+  //       }
+  //     }
+  //   },
+  //   [dispatch]
+  // );
+
+  // useAbortableEffect((status: statusType) => {
+  //   fetchLSG(status);
+  // }, []);
 
   const papaparseOptions = {
     header: true,
@@ -96,6 +126,11 @@ export default function ExternalResultUpload() {
                       </div>
                       }
                     </div>
+                    {/* <div>
+                      {
+                        !state.loading && <ExternalResultLocalbodySelector lsgs={state.lsgs} />
+                      }
+                    </div> */}
                   </div>);
               })
             }

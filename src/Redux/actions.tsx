@@ -164,6 +164,10 @@ export const getWardByLocalBody = (pathParam: object) => {
   return fireRequest("getWardByLocalBody", [], {}, pathParam);
 };
 
+export const getAllLocalBody = (pathParam: object) => {
+  return fireRequest("getAllLocalBody", [], {}, pathParam);
+};
+
 // Sample Test
 export const getSampleTestList = (params: object, pathParam: object) => {
   return fireRequest("sampleTestList", [], params, pathParam);
@@ -199,11 +203,8 @@ export const updateDailyReport = (params: object, pathParam: object) => {
 export const getDailyReport = (params: object, pathParam: object) => {
   return fireRequest("getDailyReports", [], params, pathParam);
 };
-export const getConsultationDailyRoundsDetails = (
-  id: number,
-  pathParam: object
-) => {
-  return fireRequest("getDailyReports", [id], {}, pathParam);
+export const getConsultationDailyRoundsDetails = (pathParam: object) => {
+  return fireRequest("getDailyReport", [], {}, pathParam);
 };
 
 // Consultation
@@ -214,7 +215,7 @@ export const getConsultationList = (params: object) => {
   return fireRequest("getConsultationList", [], params);
 };
 export const getConsultation = (id: number) => {
-  return fireRequest("getConsultation", [id], {});
+  return fireRequest("getConsultation", [], {}, { id: id });
 };
 export const updateConsultation = (id: number, params: object) => {
   return fireRequest("updateConsultation", [id], params);

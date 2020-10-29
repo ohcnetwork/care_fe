@@ -89,7 +89,7 @@ export const DailyRounds = (props: any) => {
     const fetchpatient = useCallback(
         async (status: statusType) => {
             setIsLoading(true);
-            const res = await dispatchAction(getConsultationDailyRoundsDetails(id, { consultationId }));
+            const res = await dispatchAction(getConsultationDailyRoundsDetails({ consultationId }));
             if (!status.aborted) {
                 if (res && res.data) {
                     const data = {
@@ -167,7 +167,7 @@ export const DailyRounds = (props: any) => {
             }
 
             setIsLoading(false);
-            if (res && res.data) {
+            if (res && res.data && (res.status == 201 || res.status == 200)) {
                 dispatch({ type: "set_form", form: initForm });
                 if (id) {
                     Notification.Success({
@@ -180,6 +180,9 @@ export const DailyRounds = (props: any) => {
                     });
                     navigate(`/facility/${facilityId}/patient/${patientId}`);
                 }
+            }
+            else {
+                setIsLoading(false);
             }
         }
     };
