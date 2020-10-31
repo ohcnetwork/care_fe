@@ -142,7 +142,7 @@ export default function ListFilter(props: any) {
         <button className="btn btn-default" onClick={closeFilter}>
           <i className="fas fa-times mr-2" />Cancel
         </button>
-        <Link href="/shifting" className="btn btn-default hover:text-gray-900" onClick={applyFilter}>
+        <Link href="/shifting" className="btn btn-default hover:text-gray-900">
           <i className="fas fa-times mr-2" />Clear Filters
         </Link>
         <button className="btn btn-primary" onClick={applyFilter}>
