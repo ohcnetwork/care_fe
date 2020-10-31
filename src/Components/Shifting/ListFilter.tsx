@@ -7,7 +7,7 @@ import { getFacility } from '../../Redux/actions';
 import { useDispatch } from 'react-redux';
 import { CircularProgress } from '@material-ui/core';
 import { SHIFTING_CHOICES } from "../../Common/constants";
-import { Link } from "raviger";
+import { Link } from 'raviger';
 
 function useMergeState(initialState: any) {
   const [state, setState] = useState(initialState);
@@ -142,7 +142,7 @@ export default function ListFilter(props: any) {
         <button className="btn btn-default" onClick={closeFilter}>
           <i className="fas fa-times mr-2" />Cancel
         </button>
-        <Link href="/shifting" className="btn btn-default hover:text-gray-900">
+        <Link href='/shifting' className='btn btn-default hover:text-gray-900'>
           <i className="fas fa-times mr-2" />Clear Filters
         </Link>
         <button className="btn btn-primary" onClick={applyFilter}>
