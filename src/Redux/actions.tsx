@@ -39,7 +39,12 @@ export const addUserFacility = (username: string, facility: string) => {
   return fireRequest("addUserFacility", [], { facility }, { username });
 };
 export const deleteUserFacility = (username: string, facility: string) => {
-  return fireRequest("deleteUserFacility", [], { data: { facility } }, { username });
+  return fireRequest(
+    "deleteUserFacility",
+    [],
+    { data: { facility } },
+    { username }
+  );
 };
 export const getFacilities = (params: object) => {
   return fireRequest("listFacility", [], params);
@@ -54,10 +59,10 @@ export const getFacility = (id: number, key?: string) => {
 
 export const getFacilityUsers = (id: string) => {
   return fireRequest("getFacilityUsers", [], {}, { facility_id: id });
-}
+};
 export const getOnlineDoctors = () => {
   return fireRequest("getOnlineDoctors", [], {}, {});
-}
+};
 // Download Actions
 export const downloadFacility = () => {
   return fireRequest("downloadFacility");
@@ -162,6 +167,9 @@ export const getLocalbodyByDistrict = (pathParam: object) => {
 };
 export const getWardByLocalBody = (pathParam: object) => {
   return fireRequest("getWardByLocalBody", [], {}, pathParam);
+};
+export const getWards = (params: object) => {
+  return fireRequest("getWards", [], params);
 };
 
 export const getAllLocalBody = (pathParam: object) => {
