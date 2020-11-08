@@ -1,61 +1,62 @@
 import React, { useEffect, useState } from "react";
-import { SelectField } from "../Common/HelperInputFields";
-import { DISTRICT_CHOICES } from "../../Common/constants";
-import { getWards } from "../../Redux/actions";
-import { useDispatch } from "react-redux";
+import { AutoCompleteAsyncField } from "../Common/HelperInputFields";
+import { getAllLocalBody } from "../../Redux/actions";
+import { useDispatch, useSelector } from "react-redux";
 import { Link } from "raviger";
-
-function useMergeState(initialState: any) {
-  const [state, setState] = useState(initialState);
-  const setMergedState = (newState: any) =>
-    setState((prevState: any) => Object.assign({}, prevState, newState));
-  return [state, setMergedState];
-}
 
 export default function ListFilter(props: any) {
   let { filter, onChange, closeFilter } = props;
-  const [wardList, setwardList] = useState([]);
-  const [filterState, setFilterState] = useMergeState({
-    districts: filter.districts || "",
-  });
-  const [wards, setWards] = useState(filter.wards || "");
-  const dispatch: any = useDispatch();
+  const [wardList, setWardList] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleChange = (event: any) => {
-    let { name, value } = event.target;
-    const filterData: any = { ...filterState };
-    filterData[name] = value;
-    setFilterState(filterData);
+  const [wards, setWards] = useState<any[]>([]);
+  const dispatch: any = useDispatch();
+  const state: any = useSelector((state) => state);
+  const { currentUser } = state;
+  const handleWardChange = (value: any) => {
+    setWards(value);
   };
 
   const applyFilter = () => {
-    const { districts } = filterState;
+    let selectedWardIds = wards.map(function (obj) {
+      return obj.id;
+    });
     const data = {
-      wards: wards && wards !== "--" ? wards : "",
-      districts: districts && districts !== "0" ? districts : undefined,
+      wards: selectedWardIds.length ? selectedWardIds : undefined,
     };
-
     onChange(data);
   };
 
   useEffect(() => {
     async function getWardList() {
-      const params = {
-        district: filterState.districts,
-        limit: 500,
-      };
-      const res = await dispatch(getWards(params));
-      setwardList(res?.data?.results || []);
+      const id: number = currentUser.data.district;
+      const res = await dispatch(getAllLocalBody({ id }));
+      let allWards: any[] = [];
+      res?.data?.forEach((local: any) => {
+        if (local.wards) {
+          local.wards.forEach((ward: any) => {
+            allWards = [
+              ...allWards,
+              { id: ward.id, name: ward.name, panchayath: local.name },
+            ];
+          });
+        }
+      });
+      allWards.sort(function (a: any, b: any) {
+        return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
+      });
+      setWardList(allWards || []);
+      const filteredWard = filter?.wards?.split(",").map(Number);
+      let selectedWards: any =
+        filteredWard && allWards
+          ? allWards.filter(({ id }: { id: number }) => {
+              return filteredWard.includes(id);
+            })
+          : [];
+      setWards(selectedWards);
+      setLoading(false);
     }
-    if (filterState.districts) getWardList();
-    else {
-      setwardList([]);
-    }
-    setWards("");
-  }, [filterState.districts]);
-
-  useEffect(() => {
-    setWards(filter.wards || "");
+    getWardList();
   }, []);
 
   return (
@@ -80,33 +81,23 @@ export default function ListFilter(props: any) {
       <div className="font-light text-md mt-2">Filter By:</div>
       <div className="flex flex-wrap gap-2">
         <div className="w-64 flex-none">
-          <span className="text-sm font-semibold">District</span>
-          <SelectField
-            name="districts"
-            variant="outlined"
-            margin="dense"
-            optionKey="id"
-            optionValue="text"
-            value={filterState.districts}
-            options={[{ id: 0, text: "--" }, ...DISTRICT_CHOICES]}
-            onChange={handleChange}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-          />
-        </div>
-        <div className="w-64 flex-none">
           <span className="text-sm font-semibold">Ward</span>
-          <SelectField
+          <AutoCompleteAsyncField
+            multiple={true}
             name="wards"
+            options={wardList}
+            label="Ward"
             variant="outlined"
-            margin="dense"
-            optionKey="id"
-            optionValue="name"
+            placeholder="Select wards"
+            loading={loading}
+            freeSolo={false}
             value={wards}
-            options={[{ name: "--" }, ...wardList]}
-            onChange={(event: any) => {
-              setWards(event.target.value);
-            }}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+            renderOption={(option: any) => <div>{option.name}</div>}
+            getOptionSelected={(option: any, value: any) =>
+              option.id === value.id
+            }
+            getOptionLabel={(option: any) => option.name}
+            onChange={(e: object, value: any) => handleWardChange(value)}
           />
         </div>
       </div>

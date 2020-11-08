@@ -10,6 +10,10 @@ import Pagination from "../Common/Pagination";
 import { InputSearchBox } from "../Common/SearchBox";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import ListFilter from "./ListFilter";
+import moment from "moment";
+import { CSVLink } from "react-csv";
+import { externalResultFormatter } from "./Commons";
+import GetAppIcon from "@material-ui/icons/GetApp";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -31,13 +35,14 @@ function Badge(props: { color: string; icon: string; text: string }) {
 }
 
 const RESULT_LIMIT = 30;
+const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
 export default function ResultList() {
   const dispatch: any = useDispatch();
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
-  const [DownloadFile, setDownloadFile] = useState("");
+  const [downloadFile, setDownloadFile] = useState("");
   const [qParams, setQueryParams] = useQueryParams();
   const [showFilters, setShowFilters] = useState(false);
 
@@ -48,10 +53,9 @@ export default function ResultList() {
     const params = {
       page: qParams.page || 1,
       name: qParams.name || undefined,
-      phone_number: qParams.phone_number
-        ? parsePhoneNumberFromString(qParams.phone_number)?.format("E.164")
+      mobile_number: qParams.mobile_number
+        ? parsePhoneNumberFromString(qParams.mobile_number)?.format("E.164")
         : undefined,
-      districts: qParams.districts || undefined,
       wards: qParams.wards || undefined,
       offset: (qParams.page ? qParams.page - 1 : 0) * RESULT_LIMIT,
     };
@@ -71,8 +75,7 @@ export default function ResultList() {
     dispatch,
     qParams.name,
     qParams.page,
-    qParams.phone_number,
-    qParams.districts,
+    qParams.mobile_number,
     qParams.wards,
   ]);
 
@@ -96,7 +99,7 @@ export default function ResultList() {
   };
 
   const searchByPhone = (value: string) => {
-    updateQuery({ phone_number: value, page: 1 });
+    updateQuery({ mobile_number: value, page: 1 });
   };
 
   const handleFilter = (value: string) => {
@@ -107,6 +110,15 @@ export default function ResultList() {
     const filter = { ...qParams, ...data };
     updateQuery(filter);
     setShowFilters(false);
+  };
+
+  const triggerDownload = async () => {
+    const res = await dispatch(
+      externalResultList(qParams, "externalResultList")
+    );
+    let downloadData = externalResultFormatter(res?.data?.results);
+    setDownloadFile(downloadData);
+    document.getElementById(`downloadCSV`)?.click();
   };
 
   let resultList: any[] = [];
@@ -212,7 +224,7 @@ export default function ResultList() {
           <div>
             <div className="text-sm font-semibold mt-2">Search by number</div>
             <PhoneNumberField
-              value={qParams.phone_number}
+              value={qParams.mobile_number}
               onChange={searchByPhone}
               turnOffAutoFormat={true}
               errors=""
@@ -220,13 +232,23 @@ export default function ResultList() {
           </div>
         </div>
         <div className="flex flex-col justify-between">
-          <div
-            className="btn mt-8 ml-auto gap-2 btn-primary"
-            onClick={(_) => navigate("external_results/upload")}
-          >
-            Upload List
+          <div className="flex">
+            <div
+              className="btn mt-8 ml-auto btn-primary"
+              onClick={(_) => navigate("external_results/upload")}
+            >
+              Upload List
+            </div>
+            <div
+              className="btn mt-8 ml-4 gap-2 btn-primary"
+              onClick={triggerDownload}
+            >
+              <span>
+                <GetAppIcon className="cursor-pointer" />
+                Export
+              </span>
+            </div>
           </div>
-
           <div className="flex ml-auto  gap-2">
             <button
               className="flex leading-none border-2 border-gray-200 bg-white rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-green-600 focus:text-green-600 focus:border-gray-400 hover:border-gray-400 rounded-r-full px-4 py-2 text-sm"
@@ -261,6 +283,13 @@ export default function ResultList() {
           </tbody>
         </table>
       </div>
+      <CSVLink
+        data={downloadFile}
+        filename={`external-result--${now}.csv`}
+        target="_blank"
+        className="hidden"
+        id={`downloadCSV`}
+      />
       <SlideOver show={showFilters} setShow={setShowFilters}>
         <div className="bg-white min-h-screen p-4">
           <ListFilter
