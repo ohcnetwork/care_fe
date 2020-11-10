@@ -41,8 +41,10 @@ export const InputSearchBox = (props: TextFieldPropsExtended) => {
     return (
         <div className="md:flex sticky top-0 bg-gray-100">
             <div className="relative rounded-md shadow-sm max-w-sm w-full">
+                <input name="search" type="text" {...inputProps}
+                        className="form-input block w-full pl-8 pr-3 sm:text-sm sm:leading-5" />
                 {searchValue ?
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none cursor-pointer" onClick={clearSearch} >
+                    <div className="absolute inset-y-0 right-2 pl-3 flex items-center cursor-pointer" onClick={clearSearch} >
                         <span className="text-gray-500 sm:text-sm sm:leading-5" >
                             <i className="fas fa-times text-md " ></i>
                         </span>
@@ -53,8 +55,6 @@ export const InputSearchBox = (props: TextFieldPropsExtended) => {
                         </span>
                     </div>
                 }
-                <input name="search" type="text" {...inputProps}
-                    className="form-input block w-full pl-8 pr-3 sm:text-sm sm:leading-5" />
             </div>
         </div>
     )
