@@ -181,7 +181,6 @@ export default {
     path: "/api/v1/consultation/{consultationId}/daily_rounds/{id}/",
   },
 
-
   // Hospital Beds
   createCapacity: {
     path: "/api/v1/facility/{facilityId}/capacity/",
@@ -324,6 +323,9 @@ export default {
   // ward
   getWard: {
     path: "/api/v1/ward/{id}/",
+  },
+  getWards: {
+    path: "/api/v1/ward/",
   },
   getWardByLocalBody: {
     path: "/api/v1/ward/?local_body={id}",
