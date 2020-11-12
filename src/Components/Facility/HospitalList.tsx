@@ -61,7 +61,9 @@ export const HospitalList = () => {
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const params = qParams.search ? { limit, offset, search_text: qParams.search } : { limit, offset };
+      const params = qParams.search
+        ? { limit, offset, search_text: qParams.search }
+        : { limit, offset };
       const res = await dispatchAction(getFacilities(params));
       if (!status.aborted) {
         if (res && res.data) {
@@ -82,7 +84,8 @@ export const HospitalList = () => {
   );
 
   const onSearchSuspects = (search: string) => {
-    setQueryParams({ search }, true);
+    if (search !== "") setQueryParams({ search }, true);
+    else setQueryParams({}, true);
   };
 
   const handleDownload = async () => {
@@ -222,7 +225,13 @@ export const HospitalList = () => {
       </>
     );
   } else if (data && data.length === 0) {
-    manageFacilities = (
+    manageFacilities = qParams?.search ? (
+      <div className="w-full">
+        <div className="p-16 mt-4 text-gray-800 mx-auto text-center whitespace-no-wrap text-sm font-semibold rounded ">
+          No results found
+        </div>
+      </div>
+    ) : (
       <div>
         <div
           className="p-16 mt-4 bg-white shadow rounded-md shadow border border-grey-500 whitespace-no-wrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300"
