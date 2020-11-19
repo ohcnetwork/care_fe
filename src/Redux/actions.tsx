@@ -32,8 +32,8 @@ export const updateFacility = (id: number, params: object) => {
 export const getUserList = (params: object) => {
   return fireRequest("userList", [], params);
 };
-export const getUserListFacility = (username: string) => {
-  return fireRequest("userListFacility", [], {}, { username }, username);
+export const getUserListFacility = (pathParam: object) => {
+  return fireRequest("userListFacility", [], {}, pathParam);
 };
 export const addUserFacility = (username: string, facility: string) => {
   return fireRequest("addUserFacility", [], { facility }, { username });

@@ -104,7 +104,7 @@ export default function ManageUsers(props: any) {
       return;
     }
     setIsFacilityLoading(true);
-    const res = await dispatch(getUserListFacility(username));
+    const res = await dispatch(getUserListFacility({ username }));
     if (res && res.data) {
       console.log(res.data);
       const updated = users.map(user => {

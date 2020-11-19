@@ -35,7 +35,7 @@ export default {
   },
 
   userListFacility: {
-    path: "/api/v1/users/{username}/get_facilities",
+    path: "/api/v1/users/{username}/get_facilities/",
   },
 
   addUserFacility: {

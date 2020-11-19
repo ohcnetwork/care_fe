@@ -171,7 +171,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
             const res = await dispatchAction(createShift(data));
             setIsLoading(false);
 
-            if (res && res.data) {
+            if (res && res.data && (res.status == 201 || res.status == 200)) {
                 await dispatch({ type: "set_form", form: initForm });
                 Notification.Success({
                     msg: "Shift request created successfully",
