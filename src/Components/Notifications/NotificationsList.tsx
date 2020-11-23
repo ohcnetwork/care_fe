@@ -20,6 +20,7 @@ export default function ResultList() {
   const [offset, setOffset] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [reload, setReload] = useState(false);
 
   let manageResults: any = null;
 
@@ -37,24 +38,31 @@ export default function ResultList() {
         setIsLoading(false);
       });
   }, [
-    dispatch,
+    dispatch, reload
   ]);
-
-
-
 
   // const handlePagination = (page: number, limit: number) => {
   //   updateQuery({ page, limit });
   // };
 
+  let resultUrl = (event: string, data: any) => {
+    switch (event) {
+      case 'PATIENT_CREATED':
+        return `/facility/${data.facility}/patient/${data.patient}`;
+      case 'PATIENT_UPDATED':
+        return `/facility/${data.facility}/patient/${data.patient}`;
+      default:
+        return '#';
+    }
+  };
+
   let resultList: any[] = [];
   if (data && data.length) {
     resultList = data.map((result: any, idx: number) => {
-      const resultUrl = `/patients/${result.external_id}`;
       return (
         <div
           key={`usr_${result.id}`}
-          onClick={() => navigate(resultUrl)}
+          onClick={() => navigate(resultUrl(result.event, result.caused_objects))}
           className="relative py-5 px-4 lg:px-8 hover:bg-gray-200 focus:bg-gray-200 transition ease-in-out duration-150 "
         >
           <div className="text-lg font-bold">
@@ -118,12 +126,21 @@ export default function ResultList() {
       </button>
 
       <SlideOver show={showNotifications} setShow={setShowNotifications}>
-        <div className="bg-white h-full p-4">
-          <div className="flex justify-between items-end">
-            <PageTitle title="Notifications" hideBack={true} className="" />
-            <i onClick={_ => setShowNotifications(false)} className="fas fa-times cursor-pointer" />
+        <div className="bg-white h-full">
+          <div className="flex justify-between items-end pt-4 w-full bg-gray-100 border-b sticky top-0 z-30 px-4 lg:px-8 py-3 space-x-2">
+            <div className="font-bold text-xl" >Notifications</div>
+            <div className="">
+              <button onClick={_ => setReload(!reload)} className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0">
+                <i className="fa-fw fas fa-sync cursor-pointer mr-2" /> Reload
+              </button>
+              <button onClick={_ => setShowNotifications(false)} className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0">
+                <i className="fa-fw fas fa-times cursor-pointer mr-2" /> Close
+              </button>
+            </div>
           </div>
-          {manageResults}
+          <div>
+            {manageResults}
+          </div>
         </div>
       </SlideOver>
     </div>
