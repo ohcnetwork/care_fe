@@ -26,19 +26,21 @@ export default function ResultList() {
 
   useEffect(() => {
     setIsLoading(true);
-    dispatch(getNotifications({ offset }))
-      .then((res: any) => {
-        if (res && res.data) {
-          setData(res.data.results);
-          setTotalCount(res.data.count);
-        }
-        setIsLoading(false);
-      })
-      .catch(() => {
-        setIsLoading(false);
-      });
+    if (showNotifications) {
+      dispatch(getNotifications({ offset }))
+        .then((res: any) => {
+          if (res && res.data) {
+            setData(res.data.results);
+            setTotalCount(res.data.count);
+          }
+          setIsLoading(false);
+        })
+        .catch(() => {
+          setIsLoading(false);
+        });
+    }
   }, [
-    dispatch, reload
+    dispatch, reload, showNotifications
   ]);
 
   // const handlePagination = (page: number, limit: number) => {
