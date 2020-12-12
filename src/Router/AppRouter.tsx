@@ -35,6 +35,7 @@ import { ShiftDetailsUpdate } from "../Components/Shifting/ShiftDetailsUpdate";
 import ResultList from "../Components/ExternalResult/ResultList";
 import ResultItem from "../Components/ExternalResult/ResultItem";
 import ExternalResultUpload from "../Components/ExternalResult/ExternalResultUpload";
+import NotificationsList from "../Components/Notifications/NotificationsList";
 
 const get = require('lodash.get');
 const img =
@@ -303,6 +304,7 @@ const AppRouter = () => {
                   </button>
                 );
               })}
+              <NotificationsList />
               <a
                 key="dashboard"
                 href="http://dashboard.coronasafe.network/"

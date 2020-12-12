@@ -421,4 +421,9 @@ export default {
     path: "/api/v1/shift/",
     method: "GET",
   },
+
+  // Notifications List
+  getNotifications: {
+    path: "/api/v1/notification/",
+  },
 };

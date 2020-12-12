@@ -111,7 +111,6 @@ export const SHIFTING_VEHICLE_CHOICES: Array<OptionsType> = [
   { id: 50, text: "Auto-rickshaw" },
 ];
 
-
 export const SHIFTING_FILTER_ORDER: Array<OptionsType> = [
   { id: 1, text: "created_date", desc: "ASC Created Date" },
   { id: 2, text: "-created_date", desc: "DESC Created Date" },
@@ -224,6 +223,7 @@ export const ADMITTED_TO = [
   "ICU with Non Invasive Ventilator",
   "ICU with Oxygen Support",
   "ICU with Invasive Ventilator",
+  "BED WITH OXYGEN SUPPORT",
   "Home Isolation",
   "Gynaecology Ward",
   "Paediatric Ward",
