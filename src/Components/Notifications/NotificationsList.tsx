@@ -55,7 +55,7 @@ export default function ResultList() {
         return `/facility/${data.facility}/patient/${data.patient}`;
       case 'PATIENT_CONSULTATION_CREATED':
         return `/facility/${data.facility}/patient/${data.patient}/consultation/${data.consultation}/`;
-      case 'PATIENT_CONSULTATION_CREATED':
+      case 'PATIENT_CONSULTATION_UPDATED':
         return `/facility/${data.facility}/patient/${data.patient}/consultation/${data.consultation}/`;
       default:
         return '#';
