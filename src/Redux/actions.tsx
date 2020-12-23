@@ -314,3 +314,19 @@ export const deleteExternalResult = (id: string) => {
 export const getNotifications = (params: object) => {
   return fireRequest("getNotifications", [], params);
 };
+
+// FileUpload
+
+export const createUpload = (params: object) => {
+  return fireRequest("createUpload", [], params);
+};
+
+export const viewUpload = (params: object) => {
+  return fireRequest("viewUpload", [], params);
+};
+
+export const retrieveUpload = (params : object ,fileId: string ) => {
+  return fireRequest("retrieveUpload", [], params , {fileId : fileId});
+};
+
+

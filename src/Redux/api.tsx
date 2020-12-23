@@ -426,4 +426,18 @@ export default {
   getNotifications: {
     path: "/api/v1/notification/",
   },
+
+  // FileUpload Create
+  createUpload:{
+    path: "/api/v1/files/",
+    method: "POST",
+  },
+  viewUpload:{
+    path: "/api/v1/files/",
+    method: "GET",
+  },
+  retrieveUpload:{
+    path: "/api/v1/files/{fileId}/",
+    method: "GET",
+  }
 };

@@ -1047,7 +1047,18 @@ export const PatientHome = (props: any) => {
                     Add Consultation
                   </button>
                 </div>
-
+                <div>
+                  <button
+                    className="btn btn-primary w-full"
+                    onClick={() =>
+                      navigate(
+                        `/facility/${facilityId}/patient/${id}/files/`
+                      )
+                    }
+                  >
+                    View/Upload Files
+                  </button>
+                </div>
                 <div>
                   <button
                     className="btn btn-primary w-full"
