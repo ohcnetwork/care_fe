@@ -241,3 +241,12 @@ export interface FacilityNameModel {
   id?: string;
   name?: string;
 }
+
+// File Upload Models 
+
+export interface FileUploadModel {
+  id?: string;
+  name?: string;
+  created_date?: string;
+  uploaded_by?: { username?: string;};
+}
