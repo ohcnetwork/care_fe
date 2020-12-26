@@ -13,6 +13,7 @@ import LinearProgress from "@material-ui/core/LinearProgress";
 import Typography from "@material-ui/core/Typography";
 import Box from "@material-ui/core/Box";
 import GetAppIcon from "@material-ui/icons/GetApp";
+import * as Notification from "../../Utils/Notifications.js";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -49,6 +50,7 @@ export const FileUpload = (props: FileUploadProps) => {
   ]);
   const [uploadStarted, setUploadStarted] = useState<boolean>(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
+  const [reload, setReload] = useState<boolean>(false);
   const [uploadPercent, setUploadPercent] = useState(0);
   const [uploadFileName, setUploadFileName] = useState<string>("");
 
@@ -92,7 +94,7 @@ export const FileUpload = (props: FileUploadProps) => {
     (status: statusType) => {
       fetchData(status);
     },
-    [dispatch, fetchData, id]
+    [dispatch, fetchData, id, reload]
   );
 
   const loadFile = async (id: any) => {
@@ -172,6 +174,11 @@ export const FileUpload = (props: FileUploadProps) => {
       .then((result) => {
         setUploadStarted(false);
         setUploadSuccess(true);
+        setUploadFileName("");
+        setReload(!reload);
+        Notification.Success({
+          msg: "File Uploaded Successfully"
+        });
       })
       .catch((error) => {
         setUploadStarted(false);
@@ -225,22 +232,22 @@ export const FileUpload = (props: FileUploadProps) => {
               {uploadStarted ? (
                 <LinearProgressWithLabel value={uploadPercent} />
               ) : (
-                <div>
-                  <input onChange={onFileChange} type="file" />
-                  <Button
-                    color="primary"
-                    variant="contained"
-                    type="submit"
-                    style={{ marginLeft: "auto", float: "right" }}
-                    startIcon={
-                      <CloudUploadOutlineIcon>save</CloudUploadOutlineIcon>
-                    }
-                    onClick={handleUpload}
-                  >
-                    Upload
+                  <div>
+                    <input onChange={onFileChange} type="file" />
+                    <Button
+                      color="primary"
+                      variant="contained"
+                      type="submit"
+                      style={{ marginLeft: "auto", float: "right" }}
+                      startIcon={
+                        <CloudUploadOutlineIcon>save</CloudUploadOutlineIcon>
+                      }
+                      onClick={handleUpload}
+                    >
+                      Upload
                   </Button>
-                </div>
-              )}
+                  </div>
+                )}
             </div>
           </div>
         </CardContent>
