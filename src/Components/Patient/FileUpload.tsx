@@ -37,6 +37,7 @@ interface FileUploadProps {
   patientId: any;
   facilityId: any;
   consultationId: any;
+  hideBack: boolean;
 }
 
 export const FileUpload = (props: FileUploadProps) => {
@@ -204,8 +205,8 @@ export const FileUpload = (props: FileUploadProps) => {
   };
 
   return (
-    <div className="px-2 pb-2">
-      <PageTitle title={`${UPLOAD_HEADING[type]}`} />
+    <div className="py-2">
+      <PageTitle title={`${UPLOAD_HEADING[type]}`} hideBack />
       <Card className="mt-4">
         <CardContent>
           <div className="md:grid grid-cols-1 ">

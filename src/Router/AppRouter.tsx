@@ -36,7 +36,7 @@ import ResultList from "../Components/ExternalResult/ResultList";
 import ResultItem from "../Components/ExternalResult/ResultItem";
 import ExternalResultUpload from "../Components/ExternalResult/ExternalResultUpload";
 import NotificationsList from "../Components/Notifications/NotificationsList";
-import {FileUpload} from "../Components/Patient/FileUpload";
+import { FileUpload } from "../Components/Patient/FileUpload";
 
 const get = require('lodash.get');
 const img =
@@ -89,8 +89,8 @@ const routes = {
   "/facility/:facilityId/patient/:patientId/sample/:id": ({ id }: any) => (
     <SampleDetails id={id} />
   ),
-  "/facility/:facilityId/patient/:patientId/files/": ({ facilityId , patientId }: any) => (
-    <FileUpload patientId={patientId} facilityId={facilityId} consultationId="" type="PATIENT" />
+  "/facility/:facilityId/patient/:patientId/files/": ({ facilityId, patientId }: any) => (
+    <FileUpload patientId={patientId} facilityId={facilityId} consultationId="" type="PATIENT" hideBack={false} />
   ),
   "/facility/:facilityId/triage/:id": ({ facilityId, id }: any) => (
     <TriageForm facilityId={facilityId} id={id} />
@@ -111,7 +111,7 @@ const routes = {
     <ConsultationDetails facilityId={facilityId} patientId={patientId} consultationId={id} />
   ),
   "/facility/:facilityId/patient/:patientId/consultation/:id/files/": ({ facilityId, patientId, id }: any) => (
-    <FileUpload facilityId={facilityId} patientId={patientId} consultationId={id} type="CONSULTATION" />
+    <FileUpload facilityId={facilityId} patientId={patientId} consultationId={id} type="CONSULTATION" hideBack={false} />
   ),
   "/facility/:facilityId/patient/:patientId/consultation/:id/daily-rounds": ({ facilityId, patientId, id }: any) => (
     <DailyRounds facilityId={facilityId} patientId={patientId} consultationId={id} />
