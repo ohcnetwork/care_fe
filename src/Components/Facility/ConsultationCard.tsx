@@ -84,7 +84,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
             >
               View / Upload Consultation Files
             </button>
-            {isLastConsultation && (
+            {/* {isLastConsultation && (
               <button
                 className="mr-1 px-4 py-2 shadow border bg-white rounded-md border border-grey-500 whitespace-no-wrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300 text-center"
                 onClick={() =>
@@ -95,7 +95,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
               >
                 Update Consultation Details
               </button>
-            )}
+            )} */}
             {isLastConsultation && (
               <button
                 className="mr-4 px-4 py-2 shadow border bg-white rounded-md border border-grey-500 whitespace-no-wrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300 text-center"
