@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { SelectField, DateInputField, TextInputField } from "../Common/HelperInputFields";
-import { PATIENT_FILTER_ORDER, GENDER_TYPES, DISEASE_STATUS, PATIENT_FILTER_CATEGORY, PATIENT_FILTER_ADMITTED_TO } from "../../Common/constants";
+import { PATIENT_FILTER_ORDER, GENDER_TYPES, DISEASE_STATUS, PATIENT_FILTER_CATEGORY, PATIENT_FILTER_ADMITTED_TO, PATIENT_FILTER_DECLARED_STATUS } from "../../Common/constants";
 import moment from "moment";
 import { getFacility } from '../../Redux/actions';
 import { useDispatch } from 'react-redux';
@@ -30,6 +30,9 @@ export default function PatientFilterV2(props: any) {
     disease_status: filter.disease_status || null,
     age_min: filter.age_min || null,
     age_max: filter.age_max || null,
+    is_declared_positive: filter.is_declared_positive || null,
+    date_declared_positive_before: filter.date_declared_positive_before || null,
+   date_declared_positive_after: filter.date_declared_positive_after || null,
     last_consultation_admission_date_before: filter.last_consultation_admission_date_before || null,
     last_consultation_admission_date_after: filter.last_consultation_admission_date_after || null,
     last_consultation_discharge_date_before: filter.last_consultation_discharge_date_before || null,
@@ -81,6 +84,9 @@ export default function PatientFilterV2(props: any) {
       category,
       gender,
       disease_status,
+      is_declared_positive,
+      date_declared_positive_before,
+      date_declared_positive_after,
       age_min,
       age_max,
       last_consultation_admission_date_before,
@@ -105,6 +111,9 @@ export default function PatientFilterV2(props: any) {
       category: category || '',
       gender: gender || '',
       disease_status: (disease_status == 'Show All' ? '' : disease_status) || '',
+      is_declared_positive : is_declared_positive || '',
+      date_declared_positive_before: date_declared_positive_before && moment(date_declared_positive_before).isValid() ? moment(date_declared_positive_before).format('YYYY-MM-DD') : '',
+      date_declared_positive_after: date_declared_positive_after && moment(date_declared_positive_after).isValid() ? moment(date_declared_positive_after).format('YYYY-MM-DD') : '',
       age_min: age_min || '',
       age_max: age_max || '',
       last_consultation_admitted_to: last_consultation_admitted_to || '',
@@ -198,6 +207,45 @@ export default function PatientFilterV2(props: any) {
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
           />
         </div>
+
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">Patient Declared Status</span>
+          <SelectField
+            name="is_declared_positive"
+            variant="outlined"
+            margin="dense"
+            value={filterState.is_declared_positive}
+            options={[{ id: '', text: 'Show All' }, ...PATIENT_FILTER_DECLARED_STATUS]}
+            onChange={handleChange}
+            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+          />
+        </div>
+
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">Declared Positive Before</span>
+          <DateInputField
+            id="date_declared_positive_before"
+            name="date_declared_positive_before"
+            inputVariant="outlined"
+            margin="dense"
+            errors=""
+            value={filterState.date_declared_positive_before}
+            onChange={date => handleChange({ target: { name: "date_declared_positive_before", value: date } })}
+            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9" />
+        </div>
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">Declared Positive After</span>
+          <DateInputField
+            id="date_declared_positive_after"
+            name="date_declared_positive_after"
+            inputVariant="outlined"
+            margin="dense"
+            errors=""
+            value={filterState.date_declared_positive_after}
+            onChange={date => handleChange({ target: { name: "date_declared_positive_after", value: date } })}
+            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9" />
+        </div>
+
         <div className="w-64 flex-none">
           <span className="text-sm font-semibold">Last Admitted to</span>
           <SelectField

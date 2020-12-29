@@ -128,6 +128,11 @@ export const PATIENT_FILTER_ORDER: Array<OptionsType> = [
   { id: 6, text: "-review_time", desc: "DESC Review Time" },
 ];
 
+export const PATIENT_FILTER_DECLARED_STATUS: Array<OptionsType> = [
+  { id: 1, text: "Declared Positive"},
+  { id: 2, text: "Not Declared Positive" },
+]
+
 export const BED_TYPES: Array<OptionsType> = [
   { id: 1, text: "Normal" },
   { id: 2, text: "Hostel" },
