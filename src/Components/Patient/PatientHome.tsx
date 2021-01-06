@@ -627,8 +627,8 @@ export const PatientHome = (props: any) => {
                         {Array.isArray(patientData.countries_travelled)
                           ? patientData.countries_travelled.join(", ")
                           : patientData.countries_travelled
-                              .split(",")
-                              .join(", ")}
+                            .split(",")
+                            .join(", ")}
                       </div>
                     </div>
                   )}
@@ -637,8 +637,8 @@ export const PatientHome = (props: any) => {
                 {patientData.allow_transfer ? (
                   <Badge color="yellow" icon="unlock" text="Transfer Allowed" />
                 ) : (
-                  <Badge color="green" icon="lock" text="Transfer Blocked" />
-                )}
+                    <Badge color="green" icon="lock" text="Transfer Blocked" />
+                  )}
                 {patientData.is_antenatal && patientData.is_active && (
                   <Badge color="blue" icon="baby-carriage" text="Antenatal" />
                 )}
@@ -805,8 +805,8 @@ export const PatientHome = (props: any) => {
                 <div className="mt-1 text-sm leading-5 text-gray-900">
                   {(patientData.ward_object &&
                     patientData.ward_object.number +
-                      ", " +
-                      patientData.ward_object.name) ||
+                    ", " +
+                    patientData.ward_object.name) ||
                     "-"}
                 </div>
               </div>
@@ -841,12 +841,12 @@ export const PatientHome = (props: any) => {
                 <div className="mt-1 text-sm leading-5 text-gray-900 break-all">
                   {patientData.is_medical_worker
                     ? "Yes" +
-                      (patientData.designation_of_health_care_worker
-                        ? ", " + patientData.designation_of_health_care_worker
-                        : "") +
-                      (patientData.instituion_of_health_care_worker
-                        ? ", " + patientData.instituion_of_health_care_worker
-                        : "")
+                    (patientData.designation_of_health_care_worker
+                      ? ", " + patientData.designation_of_health_care_worker
+                      : "") +
+                    (patientData.instituion_of_health_care_worker
+                      ? ", " + patientData.instituion_of_health_care_worker
+                      : "")
                     : "No"}
                 </div>
               </div>
@@ -1047,7 +1047,18 @@ export const PatientHome = (props: any) => {
                     Add Consultation
                   </button>
                 </div>
-
+                <div>
+                  <button
+                    className="btn btn-primary w-full"
+                    onClick={() =>
+                      navigate(
+                        `/facility/${facilityId}/patient/${id}/files/`
+                      )
+                    }
+                  >
+                    View/Upload Patient Files
+                  </button>
+                </div>
                 <div>
                   <button
                     className="btn btn-primary w-full"
@@ -1263,15 +1274,15 @@ export const PatientHome = (props: any) => {
           {isSendingDischargeApi ? (
             <CircularProgress size={20} />
           ) : (
-            <Button
-              color="primary"
-              onClick={() => handlePatientDischarge(false)}
-              autoFocus
-              disabled={preDischargeForm.disease_status ? false : true}
-            >
-              Proceed with Discharge
-            </Button>
-          )}
+              <Button
+                color="primary"
+                onClick={() => handlePatientDischarge(false)}
+                autoFocus
+                disabled={preDischargeForm.disease_status ? false : true}
+              >
+                Proceed with Discharge
+              </Button>
+            )}
         </DialogActions>
       </Dialog>
 
