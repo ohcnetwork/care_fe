@@ -80,6 +80,7 @@ export interface PatientModel {
   date_of_test?: string;
   date_of_result?: string;
   srf_id?: string;
+  covin_id?: string;
   date_of_birth?: string;
   blood_group?: string;
   review_time?: string;

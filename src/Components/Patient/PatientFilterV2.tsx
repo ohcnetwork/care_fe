@@ -36,6 +36,8 @@ export default function PatientFilterV2(props: any) {
     last_consultation_discharge_date_after: filter.last_consultation_discharge_date_after || null,
     last_consultation_admitted_to: filter.last_consultation_admitted_to || null,
     srf_id: filter.srf_id || null,
+    unvaccinated: filter.unvaccinated || null,
+    covin_id: filter.covin_id || null,
   });
   const dispatch: any = useDispatch();
 
@@ -52,6 +54,12 @@ export default function PatientFilterV2(props: any) {
     }
     fetchData();
   }, [dispatch]);
+
+  const UNVACCINATED_FILTER = [
+    { id: "", text: "Show All" },
+    { id: "true", text: "Unvaccinated" },
+    { id: "false", text: "Vaccinated" },
+  ];
 
   const setFacility = (selected: any, name: string) => {
     const filterData: any = { ...filterState };
@@ -88,6 +96,8 @@ export default function PatientFilterV2(props: any) {
       last_consultation_discharge_date_before,
       last_consultation_discharge_date_after,
       last_consultation_admitted_to,
+      unvaccinated,
+      covin_id,
       srf_id,
 
     } = filterState;
@@ -109,6 +119,8 @@ export default function PatientFilterV2(props: any) {
       age_max: age_max || '',
       last_consultation_admitted_to: last_consultation_admitted_to || '',
       srf_id: srf_id || '',
+      unvaccinated: unvaccinated || '',
+      covin_id: covin_id || '',
     }
     onChange(data);
   };
@@ -197,6 +209,33 @@ export default function PatientFilterV2(props: any) {
             onChange={handleChange}
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
           />
+        </div>
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">Vaccinated</span>
+          <SelectField
+            name="unvaccinated"
+            variant="outlined"
+            margin="dense"
+            value={filterState.unvaccinated}
+            options={UNVACCINATED_FILTER}
+            onChange={handleChange}
+            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+          />
+        </div>
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">COVIN ID</span>
+          <div className="flex justify-between">
+            <TextInputField
+              id="covin_id"
+              name="covin_id"
+              variant="outlined"
+              margin="dense"
+              errors=""
+              value={filterState.covin_id}
+              onChange={handleChange}
+              label="covin id"
+              className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 mr-1" />
+          </div>
         </div>
         <div className="w-64 flex-none">
           <span className="text-sm font-semibold">Last Admitted to</span>

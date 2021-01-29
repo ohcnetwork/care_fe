@@ -122,7 +122,9 @@ export const PatientManager = (props: any) => {
     last_consultation_discharge_date_before: qParams.last_consultation_discharge_date_before || undefined,
     last_consultation_discharge_date_after: qParams.last_consultation_discharge_date_after || undefined,
     last_consultation_admitted_to: qParams.last_consultation_admitted_to || undefined,
-    srf_id: qParams.srf_id || undefined
+    srf_id: qParams.srf_id || undefined,
+    unvaccinated: qParams.unvaccinated || undefined,
+    covin_id: qParams.covin_id || undefined
   };
 
   let managePatients: any = null;
@@ -158,7 +160,7 @@ export const PatientManager = (props: any) => {
         setIsLoading(false);
       })
 
-  }, [dispatch, facilityId, qParams.last_consultation_admission_date_before, qParams.last_consultation_admission_date_after, qParams.last_consultation_discharge_date_before, qParams.last_consultation_discharge_date_after, qParams.age_max, qParams.age_min, qParams.last_consultation_admitted_to, qParams.facility, qParams.category, qParams.gender, qParams.ordering, qParams.created_date_before, qParams.created_date_after, qParams.modified_date_before, qParams.modified_date_after, qParams.is_active, qParams.disease_status, qParams.name, qParams.page, qParams.phone_number, qParams.srf_id]);
+  }, [dispatch, facilityId, qParams.last_consultation_admission_date_before, qParams.last_consultation_admission_date_after, qParams.last_consultation_discharge_date_before, qParams.last_consultation_discharge_date_after, qParams.age_max, qParams.age_min, qParams.last_consultation_admitted_to, qParams.facility, qParams.category, qParams.gender, qParams.ordering, qParams.created_date_before, qParams.created_date_after, qParams.modified_date_before, qParams.modified_date_after, qParams.is_active, qParams.disease_status, qParams.name, qParams.page, qParams.phone_number, qParams.srf_id, qParams.covin_id, qParams.unvaccinated]);
 
   const updateQuery = (params: any) => {
     const nParams = Object.assign({}, qParams, params);
@@ -408,6 +410,12 @@ export const PatientManager = (props: any) => {
           {badge("Admitted After", qParams.last_consultation_admission_date_after)}
           {badge("Discharged Before", qParams.last_consultation_discharge_date_before)}
           {badge("Discharged After", qParams.last_consultation_discharge_date_after)}
+          {
+            qParams.unvaccinated && (
+              badge("Vaccination Status", qParams.unvaccinated == "true" ? "Unvaccinated" : "Vaccinated")
+            )
+          }
+          {badge("COVIN ID", qParams.covin_id)}
           {badge("Filtered By: Facility", qParams.facility)}
           {badge("Ordering", qParams.ordering)}
           {badge("Category", qParams.category)}

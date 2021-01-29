@@ -634,6 +634,10 @@ export const PatientHome = (props: any) => {
                   )}
               </div>
               <div className="flex flex-wrap mt-2">
+                {patientData.covin_id && (
+                  <Badge color="blue" icon="check" text="Vaccinated" />
+                )}
+
                 {patientData.allow_transfer ? (
                   <Badge color="yellow" icon="unlock" text="Transfer Allowed" />
                 ) : (
@@ -923,6 +927,16 @@ export const PatientHome = (props: any) => {
               <div className="border-b border-dashed text-gray-900 font-semibold text-center text-lg pb-2">
                 Testing
               </div>
+              {patientData.covin_id && (
+                <div className="sm:col-span-1">
+                  <div className="text-sm leading-5 font-medium text-gray-500">
+                    Vaccinated (COVIN ID)
+                  </div>
+                  <div className="mt-1 text-sm leading-5 text-gray-900">
+                    {patientData?.covin_id || "-"}
+                  </div>
+                </div>
+              )}
               <div className="sm:col-span-1">
                 <div className="text-sm leading-5 font-medium text-gray-500">
                   SRF ID

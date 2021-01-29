@@ -144,6 +144,7 @@ const initForm: any = {
   number_of_aged_dependents: "",
   number_of_chronic_diseased_dependents: "",
   cluster_name: "",
+  covin_id: "",
   ...medicalHistoryChoices,
 };
 
@@ -539,6 +540,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           ? state.form.date_declared_positive
           : undefined,
         srf_id: state.form.srf_id,
+        covin_id: state.form.covin_id,
         test_type: state.form.test_type,
         name: state.form.name,
         pincode: state.form.pincode ? state.form.pincode : undefined,
@@ -889,6 +891,18 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     />
                   </div>
                 )}
+                <div>
+                  <InputLabel id="covin_id-label">COVIN Id (if the patient is vaccinated)</InputLabel>
+                  <TextInputField
+                    name="covin_id"
+                    variant="outlined"
+                    margin="dense"
+                    type="text"
+                    value={state.form.covin_id}
+                    onChange={handleChange}
+                    errors={state.errors.name}
+                  />
+                </div>
                 <div>
                   <InputLabel id="test_type-label">Test Type</InputLabel>
                   <SelectField
