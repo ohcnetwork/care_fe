@@ -71,7 +71,7 @@
     "moment": "^2.29.1",
     "moment-locales-webpack-plugin": "^1.2.0",
     "node-sass": "^4.14.1",
-    "postcss-safe-parser": "^4.0.2",
+    "postcss-safe-parser": "^5.0.2",
     "qrcode.react": "^1.0.1",
     "querystring": "^0.2.0",
     "raviger": "^1.6.0",
