@@ -237,17 +237,19 @@ export interface DailyRoundsModel {
   admitted_to?: string;
   patient_category?: string;
   recommend_discharge?: boolean;
+  created_date?: string;
+  modified_date?: string;
 }
 export interface FacilityNameModel {
   id?: string;
   name?: string;
 }
 
-// File Upload Models 
+// File Upload Models
 
 export interface FileUploadModel {
   id?: string;
   name?: string;
   created_date?: string;
-  uploaded_by?: { username?: string;};
+  uploaded_by?: { username?: string; };
 }
