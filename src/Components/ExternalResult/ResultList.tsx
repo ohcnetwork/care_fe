@@ -57,6 +57,7 @@ export default function ResultList() {
         ? parsePhoneNumberFromString(qParams.mobile_number)?.format("E.164")
         : undefined,
       wards: qParams.wards || undefined,
+      local_bodies: qParams.local_bodies || undefined,
       offset: (qParams.page ? qParams.page - 1 : 0) * RESULT_LIMIT,
     };
 
@@ -77,6 +78,7 @@ export default function ResultList() {
     qParams.page,
     qParams.mobile_number,
     qParams.wards,
+    qParams.local_bodies,
   ]);
 
   const updateQuery = (filter: any) => {
