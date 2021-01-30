@@ -634,7 +634,7 @@ export const PatientHome = (props: any) => {
                   )}
               </div>
               <div className="flex flex-wrap mt-2">
-                {patientData.covin_id && (
+                {patientData.is_vaccinated && (
                   <Badge color="blue" icon="syringe" text="Vaccinated" />
                 )}
 

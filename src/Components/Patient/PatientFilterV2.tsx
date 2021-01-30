@@ -36,7 +36,7 @@ export default function PatientFilterV2(props: any) {
     last_consultation_discharge_date_after: filter.last_consultation_discharge_date_after || null,
     last_consultation_admitted_to: filter.last_consultation_admitted_to || null,
     srf_id: filter.srf_id || null,
-    unvaccinated: filter.unvaccinated || null,
+    is_vaccinated: filter.is_vaccinated || null,
     covin_id: filter.covin_id || null,
   });
   const dispatch: any = useDispatch();
@@ -55,10 +55,10 @@ export default function PatientFilterV2(props: any) {
     fetchData();
   }, [dispatch]);
 
-  const UNVACCINATED_FILTER = [
+  const VACCINATED_FILTER = [
     { id: "", text: "Show All" },
-    { id: "true", text: "Unvaccinated" },
-    { id: "false", text: "Vaccinated" },
+    { id: "false", text: "Unvaccinated" },
+    { id: "true", text: "Vaccinated" },
   ];
 
   const setFacility = (selected: any, name: string) => {
@@ -96,7 +96,7 @@ export default function PatientFilterV2(props: any) {
       last_consultation_discharge_date_before,
       last_consultation_discharge_date_after,
       last_consultation_admitted_to,
-      unvaccinated,
+      is_vaccinated,
       covin_id,
       srf_id,
 
@@ -119,7 +119,7 @@ export default function PatientFilterV2(props: any) {
       age_max: age_max || '',
       last_consultation_admitted_to: last_consultation_admitted_to || '',
       srf_id: srf_id || '',
-      unvaccinated: unvaccinated || '',
+      is_vaccinated: is_vaccinated || '',
       covin_id: covin_id || '',
     }
     onChange(data);
@@ -213,11 +213,11 @@ export default function PatientFilterV2(props: any) {
         <div className="w-64 flex-none">
           <span className="text-sm font-semibold">Vaccinated</span>
           <SelectField
-            name="unvaccinated"
+            name="is_vaccinated"
             variant="outlined"
             margin="dense"
-            value={filterState.unvaccinated}
-            options={UNVACCINATED_FILTER}
+            value={filterState.is_vaccinated}
+            options={VACCINATED_FILTER}
             onChange={handleChange}
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
           />

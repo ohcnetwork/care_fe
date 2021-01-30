@@ -81,6 +81,7 @@ export interface PatientModel {
   date_of_result?: string;
   srf_id?: string;
   covin_id?: string;
+  is_vaccinated?: boolean;
   date_of_birth?: string;
   blood_group?: string;
   review_time?: string;
