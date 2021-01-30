@@ -42,7 +42,7 @@ interface FileUploadProps {
 
 export const FileUpload = (props: FileUploadProps) => {
   const [file, setfile] = useState<File>();
-  const { facilityId, consultationId, patientId, type } = props;
+  const { facilityId, consultationId, patientId, type, hideBack } = props;
   const id = patientId;
   const dispatch: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
@@ -104,6 +104,7 @@ export const FileUpload = (props: FileUploadProps) => {
     window.open(responseData.data.read_signed_url, "_blank");
   };
 
+  console.log(hideBack);
   const renderFileUpload = (item: FileUploadModel) => {
     return (
       <Card className="mt-4" key={item.id}>
@@ -205,8 +206,8 @@ export const FileUpload = (props: FileUploadProps) => {
   };
 
   return (
-    <div className="py-2">
-      <PageTitle title={`${UPLOAD_HEADING[type]}`} hideBack />
+    <div className={(hideBack ? "py-2" : "p-4")}>
+      <PageTitle title={`${UPLOAD_HEADING[type]}`} hideBack={hideBack} />
       <Card className="mt-4">
         <CardContent>
           <div className="md:grid grid-cols-1 ">
