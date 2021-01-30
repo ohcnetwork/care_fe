@@ -54,7 +54,7 @@ export default function ResultList() {
       page: qParams.page || 1,
       name: qParams.name || undefined,
       mobile_number: qParams.mobile_number
-        ? parsePhoneNumberFromString(qParams.mobile_number)?.format("E.164")
+        ? qParams.mobile_number
         : undefined,
       wards: qParams.wards || undefined,
       local_bodies: qParams.local_bodies || undefined,
@@ -225,10 +225,10 @@ export default function ResultList() {
           </div>
           <div>
             <div className="text-sm font-semibold mt-2">Search by number</div>
-            <PhoneNumberField
+            <InputSearchBox
               value={qParams.mobile_number}
-              onChange={searchByPhone}
-              turnOffAutoFormat={true}
+              search={searchByPhone}
+              placeholder="Search by Phone Number"
               errors=""
             />
           </div>
