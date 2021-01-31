@@ -18,7 +18,7 @@ export default function ListFilter(props: any) {
   const [loading, setLoading] = useState(true);
 
   const [wards, setWards] = useState<any[]>([]);
-  const [selectedLsds, setSelectedLsgs] = useState<any[]>([]);
+  const [selectedLsgs, setSelectedLsgs] = useState<any[]>([]);
   const dispatch: any = useDispatch();
   const state: any = useSelector((state) => state);
   const { currentUser } = state;
@@ -57,7 +57,7 @@ export default function ListFilter(props: any) {
       return obj.id;
     });
 
-    let selectedLsgIds = selectedLsds.map(function (obj) {
+    let selectedLsgIds = selectedLsgs.map(function (obj) {
       return obj.id;
     });
 
@@ -104,7 +104,7 @@ export default function ListFilter(props: any) {
           local.wards.forEach((ward: any) => {
             allWards = [
               ...allWards,
-              { id: ward.id, name: ward.name, panchayath: local.name },
+              { id: ward.id, name: ward.number + ": " + ward.name, panchayath: local.name, number: ward.number, local_body_id: local.id },
             ];
           });
         }
@@ -134,6 +134,22 @@ export default function ListFilter(props: any) {
     }
     getWardList();
   }, []);
+
+
+  const filterWards = () => {
+    let selectedLsgIds: any = selectedLsgs.map((e) => {
+      return e.id
+    })
+
+    let selectedwards: any =
+      (selectedLsgIds.length === 0)
+        ? wardList
+        : wardList.filter(({ local_body_id }: { local_body_id: number }) => {
+          return selectedLsgIds.includes(local_body_id);
+        })
+
+    return selectedwards
+  };
 
   return (
     <div>
@@ -167,7 +183,7 @@ export default function ListFilter(props: any) {
             placeholder="Select Local Body"
             loading={loading}
             freeSolo={false}
-            value={selectedLsds}
+            value={selectedLsgs}
             renderOption={(option: any) => <div>{option.name}</div>}
             getOptionSelected={(option: any, value: any) =>
               option.id === value.id
@@ -183,7 +199,7 @@ export default function ListFilter(props: any) {
           <AutoCompleteAsyncField
             multiple={true}
             name="wards"
-            options={wardList}
+            options={filterWards()}
             label="Ward"
             variant="outlined"
             placeholder="Select wards"
