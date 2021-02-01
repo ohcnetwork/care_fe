@@ -145,7 +145,7 @@ const initForm: any = {
   number_of_chronic_diseased_dependents: "",
   cluster_name: "",
   covin_id: "",
-  is_vaccinated: "",
+  is_vaccinated: "false",
   ...medicalHistoryChoices,
 };
 
