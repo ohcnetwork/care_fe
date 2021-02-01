@@ -80,6 +80,8 @@ export interface PatientModel {
   date_of_test?: string;
   date_of_result?: string;
   srf_id?: string;
+  covin_id?: string;
+  is_vaccinated?: boolean;
   date_of_birth?: string;
   blood_group?: string;
   review_time?: string;
@@ -236,17 +238,19 @@ export interface DailyRoundsModel {
   admitted_to?: string;
   patient_category?: string;
   recommend_discharge?: boolean;
+  created_date?: string;
+  modified_date?: string;
 }
 export interface FacilityNameModel {
   id?: string;
   name?: string;
 }
 
-// File Upload Models 
+// File Upload Models
 
 export interface FileUploadModel {
   id?: string;
   name?: string;
   created_date?: string;
-  uploaded_by?: { username?: string;};
+  uploaded_by?: { username?: string; };
 }

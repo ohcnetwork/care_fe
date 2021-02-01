@@ -200,6 +200,26 @@ export const ConsultationDetails = (props: any) => {
                       {itemData.admitted_to || "-"}
                     </Typography>
                   </Grid>
+                  <Grid item xs={6}>
+                    <Typography>
+                      <span className="text-gray-700">
+                        Created At:
+                      </span>{" "}
+                      {itemData.created_date
+                        ? moment(itemData.created_date).format("lll")
+                        : "-"}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography>
+                      <span className="text-gray-700">
+                        Updated At:
+                      </span>{" "}
+                      {itemData.modified_date
+                        ? moment(itemData.modified_date).format("lll")
+                        : "-"}
+                    </Typography>
+                  </Grid>
                   <Grid item xs={12}>
                     <Typography>
                       <span className="text-gray-700">

@@ -144,6 +144,8 @@ const initForm: any = {
   number_of_aged_dependents: "",
   number_of_chronic_diseased_dependents: "",
   cluster_name: "",
+  covin_id: "",
+  is_vaccinated: "",
   ...medicalHistoryChoices,
 };
 
@@ -539,6 +541,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           ? state.form.date_declared_positive
           : undefined,
         srf_id: state.form.srf_id,
+        covin_id: state.form.covin_id,
+        is_vaccinated: state.form.is_vaccinated,
         test_type: state.form.test_type,
         name: state.form.name,
         pincode: state.form.pincode ? state.form.pincode : undefined,
@@ -889,6 +893,48 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     />
                   </div>
                 )}
+
+
+                <div>
+                  <InputLabel id="is_vaccinated">
+                    Is patient Vaccinated?
+                  </InputLabel>
+                  <RadioGroup
+                    aria-label="is_vaccinated"
+                    name="is_vaccinated"
+                    value={state.form.is_vaccinated}
+                    onChange={handleChange}
+                    style={{ padding: "0px 5px" }}
+                  >
+                    <Box display="flex" flexDirection="row">
+                      <FormControlLabel
+                        value="true"
+                        control={<Radio />}
+                        label="Yes"
+                      />
+                      <FormControlLabel
+                        value="false"
+                        control={<Radio />}
+                        label="No"
+                      />
+                    </Box>
+                  </RadioGroup>
+                </div>
+
+                {state.form.is_vaccinated === "true" && (
+                  <div>
+                    <InputLabel id="covin_id-label">COVIN Id (if the patient is vaccinated)</InputLabel>
+                    <TextInputField
+                      name="covin_id"
+                      variant="outlined"
+                      margin="dense"
+                      type="text"
+                      value={state.form.covin_id}
+                      onChange={handleChange}
+                      errors={state.errors.name}
+                    />
+                  </div>)
+                }
                 <div>
                   <InputLabel id="test_type-label">Test Type</InputLabel>
                   <SelectField
