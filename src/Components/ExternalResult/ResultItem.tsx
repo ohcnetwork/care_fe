@@ -18,7 +18,7 @@ export default function ResultItem(props: any) {
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const res = await dispatch(externalResult(props.id));
+      const res = await dispatch(externalResult({ id: props.id }));
       if (!status.aborted) {
         if (res && res.data) {
           setData(res.data);
@@ -68,6 +68,9 @@ export default function ResultItem(props: any) {
             </h3>
             <p className="mt-1 max-w-2xl text-sm leading-5 text-gray-500">
               SRF ID: {data.srf_id}
+            </p>
+            <p className="mt-1 max-w-2xl text-sm leading-5 text-gray-500">
+              Care external results ID: {data.id}
             </p>
           </div>
           <div className="px-4 py-5 sm:p-0">

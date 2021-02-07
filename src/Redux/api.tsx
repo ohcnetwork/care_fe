@@ -279,7 +279,7 @@ export default {
     path: "/api/v1/external_result/",
   },
   externalResult: {
-    path: "/api/v1/external_result",
+    path: "/api/v1/external_result/{id}/",
   },
   externalResultUploadCsv: {
     path: "/api/v1/external_result/bulk_upsert/",
@@ -428,15 +428,15 @@ export default {
   },
 
   // FileUpload Create
-  createUpload:{
+  createUpload: {
     path: "/api/v1/files/",
     method: "POST",
   },
-  viewUpload:{
+  viewUpload: {
     path: "/api/v1/files/",
     method: "GET",
   },
-  retrieveUpload:{
+  retrieveUpload: {
     path: "/api/v1/files/{fileId}/",
     method: "GET",
   }
