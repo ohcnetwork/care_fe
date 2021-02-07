@@ -299,10 +299,10 @@ export const downloadShiftRequests = (params: object) => {
 export const externalResultList = (params: object, altKey: string) => {
   return fireRequest("externalResultList", [], params, null, altKey);
 };
-export const externalResult = (id: string) => {
-  return fireRequest("externalResult", [id], {});
-};
 
+export const externalResult = (pathParam: object) => {
+  return fireRequest("externalResult", [], {}, pathParam);
+}
 export const externalResultUploadCsv = (params: object) => {
   return fireRequest("externalResultUploadCsv", [], params);
 };
@@ -325,8 +325,6 @@ export const viewUpload = (params: object) => {
   return fireRequest("viewUpload", [], params);
 };
 
-export const retrieveUpload = (params : object ,fileId: string ) => {
-  return fireRequest("retrieveUpload", [], params , {fileId : fileId});
+export const retrieveUpload = (params: object, fileId: string) => {
+  return fireRequest("retrieveUpload", [], params, { fileId: fileId });
 };
-
-
