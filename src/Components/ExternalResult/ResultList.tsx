@@ -128,10 +128,9 @@ export default function ResultList() {
 
   const triggerDownload = async () => {
     const res = await dispatch(
-      externalResultList(qParams, "externalResultList")
+      externalResultList({ ...qParams, csv: true }, "externalResultList")
     );
-    let downloadData = externalResultFormatter(res?.data?.results);
-    setDownloadFile(downloadData);
+    setDownloadFile(res?.data);
     document.getElementById(`downloadCSV`)?.click();
   };
 
