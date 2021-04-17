@@ -37,6 +37,7 @@ import ResultItem from "../Components/ExternalResult/ResultItem";
 import ExternalResultUpload from "../Components/ExternalResult/ExternalResultUpload";
 import NotificationsList from "../Components/Notifications/NotificationsList";
 import { FileUpload } from "../Components/Patient/FileUpload";
+import Investigation from "../Components/Facility/Investigations";
 
 const get = require('lodash.get');
 const img =
@@ -142,6 +143,7 @@ const routes = {
   "/external_results": () => <ResultList />,
   "/external_results/upload": () => <ExternalResultUpload />,
   "/external_results/:id": ({ id }: any) => <ResultItem id={id} />,
+  "/investigations":()=><Investigation />
 };
 
 
