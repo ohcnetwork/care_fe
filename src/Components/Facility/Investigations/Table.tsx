@@ -77,13 +77,13 @@ const TestRow = ({ data, value, onChange }: any) => {
         {data.unit || "---"}
       </TableCell>
       <TableCell className={className.tableCell} align="right">
-        {data.min || "---"}
+        {data.min_value || "---"}
       </TableCell>
       <TableCell className={className.tableCell} align="right">
-        {data.max || "---"}
+        {data.max_value || "---"}
       </TableCell>
       <TableCell className={className.tableCell} align="right">
-        {data.ideal || "---"}
+        {data.ideal_value || "---"}
       </TableCell>
     </StyledTableRow>
   );
@@ -141,10 +141,13 @@ export const TestTable = ({ title, data, state, dispatch }: any) => {
                 return (
                   <TestRow
                     data={t}
-                    key={t.id}
-                    value={state[t.id].value}
+                    key={t.external_id}
+                    value={state[t.external_id] && state[t.external_id].value}
                     onChange={(e: { target: { value: any } }) =>
-                      handleValueChange(e.target.value, `${t.id}.value`)
+                      handleValueChange(
+                        e.target.value,
+                        `${t.external_id}.value`
+                      )
                     }
                   />
                 );
