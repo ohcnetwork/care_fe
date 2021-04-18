@@ -10,6 +10,7 @@ import {
 import * as Notification from "../../../Utils/Notifications.js";
 import { navigate } from "raviger";
 import loadable from "@loadable/component";
+import { couldStartTrivia } from "typescript";
 const Loading = loadable(() => import("../../Common/Loading"));
 const PageTitle = loadable(() => import("../../Common/PageTitle"));
 
@@ -107,7 +108,21 @@ const Investigation = (props: {
 
   const handleGroupSelect = (e: any, child?: any) => {
     const { value } = e?.target;
+
+    let investigationsArray = value.map((group_id: string) => {
+      return listOfInvestigations(group_id, investigations);
+    });
+
+    let flatInvestigations = investigationsArray.flat();
+    let form: any = {};
+
+    flatInvestigations.forEach(
+      (i: InvestigationType) =>
+        (form[i.external_id] = { value: state.form[i.external_id]?.value })
+    );
+
     setSelectedGroup(value);
+    setState({ type: "set_form", form });
   };
 
   const handleSubmit = async (e: any) => {
@@ -124,19 +139,17 @@ const Investigation = (props: {
         return d;
       });
 
-      console.log({ investigations: data });
       const res = await dispatch(
         createInvestigation({ investigations: data }, props.consultationId)
       );
 
-      if (res && res.status === 200 && res.data) {
+      if (res && res.status === 201 && res.data) {
         setSaving(false);
-        console.log(data);
         Notification.Success({
-          msg: "Shift request updated successfully",
+          msg: "Investigation created successfully!",
         });
         navigate(
-          `/facility/${props.facilityId}/patient/${props.patientId}/consultation/${props.consultationId}`
+          `/facility/${props.facilityId}/patient/${props.patientId}/consultation/${props.consultationId}/`
         );
       } else {
         setSaving(false);

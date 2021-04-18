@@ -11,6 +11,7 @@ import {
   Typography,
   Box,
 } from "@material-ui/core";
+import { SelectField } from "../../Common/HelperInputFields";
 import { createStyles, makeStyles, withStyles } from "@material-ui/styles";
 import React from "react";
 import { useState } from "react";
@@ -21,26 +22,6 @@ const useStyle = makeStyles((theme: Theme) => ({
   tableCell: {
     paddingTop: 0,
     paddingBottom: 0,
-  },
-  inputField: {
-    // minHeight: 44,
-    borderRadius: 0,
-    borderLeft: "1px solid #ddd",
-    borderRight: "1px solid #ddd",
-    borderTop: "0 solid #ddd",
-    borderBottom: "0 solid #ddd",
-    fontSize: "1rem",
-    padding: "0.5rem",
-    maxWidth: 128,
-    height: "100%",
-    textAlign: "right",
-    "&:hover": {
-      backgroundColor: "#f7f7f7",
-    },
-    "&::placeholder": {
-      color: "#bababa",
-      textAlign: "center",
-    },
   },
 }));
 
@@ -59,19 +40,34 @@ const StyledTableRow = withStyles((theme: Theme) =>
 
 const TestRow = ({ data, value, onChange }: any) => {
   const className = useStyle();
-  const inputType = data.type === "float" ? "number" : "string";
+  const inputType = data.investigation_type === "Float" ? "number" : "string";
   return (
     <StyledTableRow>
       <TableCell className={className.tableCell}>{data.name}</TableCell>
       <TableCell className={className.tableCell} align="right">
-        <input
-          className={className.inputField}
-          value={value}
-          onChange={onChange}
-          type={inputType}
-          step="any"
-          placeholder="Enter value"
-        />
+        {data.investigation_type === "Choice" ? (
+          <SelectField
+            name="preferred_vehicle_choice"
+            variant="outlined"
+            margin="dense"
+            optionArray={true}
+            value={value}
+            options={data.choices.split(",")}
+            onChange={onChange}
+            className={"bg-white border-l border-r border-gray-400"}
+          />
+        ) : (
+          <input
+            className={
+              "w-full px-4 h-12 text-right text-sm border-l border-r border-gray-400"
+            }
+            value={value}
+            onChange={onChange}
+            type={inputType}
+            step="any"
+            placeholder="Enter value"
+          />
+        )}
       </TableCell>
       <TableCell className={className.tableCell} align="left">
         {data.unit || "---"}
