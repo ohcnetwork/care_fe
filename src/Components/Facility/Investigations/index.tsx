@@ -124,8 +124,9 @@ const Investigation = (props: {
         return d;
       });
 
+      console.log({ investigations: data });
       const res = await dispatch(
-        createInvestigation(data, props.consultationId)
+        createInvestigation({ investigations: data }, props.consultationId)
       );
 
       if (res && res.status === 200 && res.data) {
