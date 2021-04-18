@@ -454,4 +454,8 @@ export default {
     path: "/api/v1/consultation/{consultation_external_id}/investigation/",
     method: "POST",
   },
+  getInvestigationSessions: {
+    path: "/api/v1/consultation/{consultation_external_id}/investigation/get_sessions/",
+    method: "GET",
+  },
 };

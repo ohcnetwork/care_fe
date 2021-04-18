@@ -301,6 +301,21 @@ export const ConsultationDetails = (props: any) => {
                 Create Investigation
               </Button>
             </div>
+            <div className="mt-2">
+              <Button
+                variant="contained"
+                color="primary"
+                size="small"
+                className="float-right"
+                onClick={() =>
+                  navigate(
+                    `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/investigationSessions`
+                  )
+                }
+              >
+                View Investigations
+              </Button>
+            </div>
 
             <div className="mt-2">
               <Button

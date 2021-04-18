@@ -347,3 +347,7 @@ export const createInvestigation = (
     consultation_external_id: consultation_external_id,
   });
 };
+
+export const getInvestigationSessions = (params: object) => {
+  return fireRequest("getInvestigationSessions", [], params);
+};
