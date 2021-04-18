@@ -458,4 +458,8 @@ export default {
     path: "/api/v1/consultation/{consultation_external_id}/investigation/get_sessions/",
     method: "GET",
   },
+  getInvestigation: {
+    path: "/api/v1/consultation/{consultation_external_id}/investigation/",
+    method: "GET",
+  },
 };

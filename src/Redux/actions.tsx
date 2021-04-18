@@ -348,6 +348,20 @@ export const createInvestigation = (
   });
 };
 
-export const getInvestigationSessions = (params: object) => {
-  return fireRequest("getInvestigationSessions", [], params);
+export const getInvestigationSessions = (
+  params: object,
+  consultation_external_id: string
+) => {
+  return fireRequest("getInvestigationSessions", [], params, {
+    consultation_external_id: consultation_external_id,
+  });
+};
+
+export const getInvestigation = (
+  params: object,
+  consultation_external_id: string
+) => {
+  return fireRequest("getInvestigation", [], params, {
+    consultation_external_id: consultation_external_id,
+  });
 };
