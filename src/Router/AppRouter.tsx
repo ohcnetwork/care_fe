@@ -38,6 +38,7 @@ import ExternalResultUpload from "../Components/ExternalResult/ExternalResultUpl
 import NotificationsList from "../Components/Notifications/NotificationsList";
 import { FileUpload } from "../Components/Patient/FileUpload";
 import Investigation from "../Components/Facility/Investigations";
+import ViewInvestigations from "../Components/Facility/Investigations/ViewInvestigations";
 
 const get = require("lodash.get");
 const img = "https://cdn.coronasafe.network/light-logo.svg";
@@ -159,6 +160,11 @@ const routes = {
       patientId={patientId}
     />
   ),
+  "/facility/:facilityId/patient/:patientId/consultation/:id/investigationSessions": ({
+    _facilityId,
+    _patientId,
+    id,
+  }: any) => <ViewInvestigations consultationId={id} />,
   "/facility/:facilityId/patient/:patientId/consultation/:id/daily-rounds": ({
     facilityId,
     patientId,
