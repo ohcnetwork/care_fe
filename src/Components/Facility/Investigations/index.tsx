@@ -1,16 +1,12 @@
-import React, { useReducer, useState, useEffect } from "react";
-import { MultiSelectField } from "../../Common/HelperInputFields";
-import { TestTable } from "./Table";
-import { useDispatch } from "react-redux";
-import {
-  listInvestigations,
-  listInvestigationGroups,
-  createInvestigation,
-} from "../../../Redux/actions";
+import React, {useEffect, useReducer, useState} from "react";
+import {MultiSelectField} from "../../Common/HelperInputFields";
+import {TestTable} from "./Table";
+import {useDispatch} from "react-redux";
+import {createInvestigation, listInvestigationGroups, listInvestigations,} from "../../../Redux/actions";
 import * as Notification from "../../../Utils/Notifications.js";
-import { navigate } from "raviger";
+import {navigate} from "raviger";
 import loadable from "@loadable/component";
-import { couldStartTrivia } from "typescript";
+
 const Loading = loadable(() => import("../../Common/Loading"));
 const PageTitle = loadable(() => import("../../Common/PageTitle"));
 
@@ -140,13 +136,12 @@ const Investigation = (props: {
 
       const keys = Object.keys(state.form);
       const data = keys.map((k) => {
-        const d = {
+        return {
           investigation: k,
           value: state.form[k]?.value,
           notes: state.form[k]?.notes,
           session: session,
         };
-        return d;
       });
 
       const res = await dispatch(
