@@ -118,7 +118,16 @@ const Investigation = (props: {
 
     flatInvestigations.forEach(
       (i: InvestigationType) =>
-        (form[i.external_id] = { value: state.form[i.external_id]?.value })
+        (form[i.external_id] =
+          i.investigation_type === "Float"
+            ? {
+                value: state.form[i.external_id]?.value,
+                investigation_type: i.investigation_type,
+              }
+            : {
+                notes: state.form[i.external_id]?.notes,
+                investigation_type: i.investigation_type,
+              })
     );
 
     setSelectedGroup(value);
@@ -134,6 +143,7 @@ const Investigation = (props: {
         const d = {
           investigation: k,
           value: state.form[k]?.value,
+          notes: state.form[k]?.notes,
           session: session,
         };
         return d;

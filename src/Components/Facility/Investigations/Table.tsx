@@ -52,7 +52,7 @@ const TestRow = ({ data, value, onChange }: any) => {
             margin="dense"
             optionArray={true}
             value={value}
-            options={data.choices.split(",")}
+            options={["Unselected", ...data.choices.split(",")]}
             onChange={onChange}
             className={"bg-white border-l border-r border-gray-400"}
           />
@@ -142,7 +142,9 @@ export const TestTable = ({ title, data, state, dispatch }: any) => {
                     onChange={(e: { target: { value: any } }) =>
                       handleValueChange(
                         e.target.value,
-                        `${t.external_id}.value`
+                        `${t.external_id}.${
+                          t.investigation_type === "Float" ? "value" : "notes"
+                        }`
                       )
                     }
                   />
