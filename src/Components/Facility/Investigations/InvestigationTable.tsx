@@ -46,9 +46,9 @@ const TestRow = ({ data }: any) => {
         {data.investigation_object.name}
       </TableCell>
       <TableCell className={tableClass} align="right">
-        {data.investigation_object.investigation_type === "Choice"
-          ? data.notes
-          : data.value}
+        {data.investigation_object.investigation_type === "Float"
+          ? data.value
+          : data.notes}
       </TableCell>
       <TableCell className={tableClass} align="left">
         {data.investigation_object.unit || "---"}
