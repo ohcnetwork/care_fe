@@ -26,7 +26,7 @@ export default function ViewInvestigations(props: any) {
       );
       if (!status.aborted) {
         if (res && res.data) {
-          setInvestigationData(res.data);
+          setInvestigationData(res.data.reverse());
         }
         setIsLoading(false);
       }

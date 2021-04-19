@@ -8,7 +8,6 @@ import {
   TableBody,
   Theme,
   InputLabel,
-  Typography,
   Box,
 } from "@material-ui/core";
 import { createStyles, makeStyles, withStyles } from "@material-ui/styles";
@@ -38,25 +37,29 @@ const StyledTableRow = withStyles((theme: Theme) =>
 
 const TestRow = ({ data }: any) => {
   const className = useStyle();
-  const inputType = data.investigation_type === "Float" ? "number" : "string";
+
+  const tableClass = "px-4 h-12 text-sm border-l border-r border-gray-400";
+
   return (
     <StyledTableRow>
-      <TableCell className={className.tableCell}>
+      <TableCell className={tableClass}>
         {data.investigation_object.name}
       </TableCell>
-      <TableCell className={className.tableCell} align="right">
-        {data.value}
+      <TableCell className={tableClass} align="right">
+        {data.investigation_object.investigation_type === "Choice"
+          ? data.notes
+          : data.value}
       </TableCell>
-      <TableCell className={className.tableCell} align="left">
+      <TableCell className={tableClass} align="left">
         {data.investigation_object.unit || "---"}
       </TableCell>
-      <TableCell className={className.tableCell} align="right">
+      <TableCell className={tableClass} align="right">
         {data.investigation_object.min_value || "---"}
       </TableCell>
-      <TableCell className={className.tableCell} align="right">
+      <TableCell className={tableClass} align="right">
         {data.investigation_object.max_value || "---"}
       </TableCell>
-      <TableCell className={className.tableCell} align="right">
+      <TableCell className={tableClass} align="right">
         {data.investigation_object.ideal_value || "---"}
       </TableCell>
     </StyledTableRow>
@@ -70,8 +73,9 @@ export const InvestigationTable = ({ title, data }: any) => {
 
   const filterTests = data.filter((i: any) => {
     const result = !(
-      String(i.investigation_object.name).toLowerCase().search(searchFilter) ===
-      -1
+      String(i.investigation_object.name)
+        .toLowerCase()
+        .search(searchFilter.toLowerCase()) === -1
     );
     return result;
   });

@@ -91,7 +91,9 @@ export const TestTable = ({ title, data, state, dispatch }: any) => {
   const [searchFilter, setSearchFilter] = useState("");
 
   const filterTests = data.filter((i: any) => {
-    const result = !(String(i.name).toLowerCase().search(searchFilter) === -1);
+    const result = !(
+      String(i.name).toLowerCase().search(searchFilter.toLowerCase()) === -1
+    );
     return result;
   });
 

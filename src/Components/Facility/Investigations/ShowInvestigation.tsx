@@ -17,7 +17,7 @@ export default function ShowInvestigation(props: any) {
     async (status: statusType) => {
       setIsLoading(true);
       const res = await dispatchAction(
-        getInvestigation({ sessionId }, consultationId)
+        getInvestigation({ session: sessionId }, consultationId)
       );
       if (!status.aborted) {
         if (res && res.data) {
@@ -50,7 +50,6 @@ export default function ShowInvestigation(props: any) {
           data={investigationData}
         />
       )}
-      ;
     </div>
   );
 }
