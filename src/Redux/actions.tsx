@@ -302,7 +302,7 @@ export const externalResultList = (params: object, altKey: string) => {
 
 export const externalResult = (pathParam: object) => {
   return fireRequest("externalResult", [], {}, pathParam);
-}
+};
 export const externalResultUploadCsv = (params: object) => {
   return fireRequest("externalResultUploadCsv", [], params);
 };
@@ -327,4 +327,41 @@ export const viewUpload = (params: object) => {
 
 export const retrieveUpload = (params: object, fileId: string) => {
   return fireRequest("retrieveUpload", [], params, { fileId: fileId });
+};
+
+// Investigation
+
+export const listInvestigations = (params: object) => {
+  return fireRequest("listInvestigations", [], params);
+};
+
+export const listInvestigationGroups = (params: object) => {
+  return fireRequest("listInvestigationGroups", [], params);
+};
+
+export const createInvestigation = (
+  params: object,
+  consultation_external_id: string
+) => {
+  return fireRequest("createInvestigation", [], params, {
+    consultation_external_id: consultation_external_id,
+  });
+};
+
+export const getInvestigationSessions = (
+  params: object,
+  consultation_external_id: string
+) => {
+  return fireRequest("getInvestigationSessions", [], params, {
+    consultation_external_id: consultation_external_id,
+  });
+};
+
+export const getInvestigation = (
+  params: object,
+  consultation_external_id: string
+) => {
+  return fireRequest("getInvestigation", [], params, {
+    consultation_external_id: consultation_external_id,
+  });
 };

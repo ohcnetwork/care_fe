@@ -6,7 +6,7 @@ import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getConsultation, getDailyReport } from "../../Redux/actions";
-import loadable from '@loadable/component';
+import loadable from "@loadable/component";
 import Pagination from "../Common/Pagination";
 import { ConsultationModel } from "./models";
 import { DailyRoundsModel } from "../Patient/models";
@@ -99,7 +99,9 @@ export const ConsultationDetails = (props: any) => {
   if (isDailyRoundLoading) {
     roundsList = <CircularProgress size={20} />;
   } else if (dailyRoundsListData.length === 0) {
-    roundsList = <Typography>No Consultation Update data is available.</Typography>;
+    roundsList = (
+      <Typography>No Consultation Update data is available.</Typography>
+    );
   } else if (dailyRoundsListData.length > 0) {
     roundsList = dailyRoundsListData.map((itemData, idx) => {
       return (
@@ -161,7 +163,9 @@ export const ConsultationDetails = (props: any) => {
   if (isDailyRoundLoading) {
     roundsList = <CircularProgress size={20} />;
   } else if (dailyRoundsListData.length === 0) {
-    roundsList = <Typography>No Consultation Update data is available.</Typography>;
+    roundsList = (
+      <Typography>No Consultation Update data is available.</Typography>
+    );
   } else if (dailyRoundsListData.length > 0) {
     roundsList = dailyRoundsListData.map((itemData, idx) => {
       return (
@@ -186,25 +190,19 @@ export const ConsultationDetails = (props: any) => {
                   </Grid>
                   <Grid item xs={6}>
                     <Typography>
-                      <span className="text-gray-700">
-                        SpO2:
-                      </span>{" "}
+                      <span className="text-gray-700">SpO2:</span>{" "}
                       {itemData.spo2}
                     </Typography>
                   </Grid>
                   <Grid item xs={6}>
                     <Typography>
-                      <span className="text-gray-700">
-                        Admitted To:
-                      </span>{" "}
+                      <span className="text-gray-700">Admitted To:</span>{" "}
                       {itemData.admitted_to || "-"}
                     </Typography>
                   </Grid>
                   <Grid item xs={6}>
                     <Typography>
-                      <span className="text-gray-700">
-                        Created At:
-                      </span>{" "}
+                      <span className="text-gray-700">Created At:</span>{" "}
                       {itemData.created_date
                         ? moment(itemData.created_date).format("lll")
                         : "-"}
@@ -212,9 +210,7 @@ export const ConsultationDetails = (props: any) => {
                   </Grid>
                   <Grid item xs={6}>
                     <Typography>
-                      <span className="text-gray-700">
-                        Updated At:
-                      </span>{" "}
+                      <span className="text-gray-700">Updated At:</span>{" "}
                       {itemData.modified_date
                         ? moment(itemData.modified_date).format("lll")
                         : "-"}
@@ -290,6 +286,36 @@ export const ConsultationDetails = (props: any) => {
                 Update Details
               </Button>
             </div>
+            <div className="mt-2">
+              <Button
+                variant="contained"
+                color="primary"
+                size="small"
+                className="float-right"
+                onClick={() =>
+                  navigate(
+                    `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/investigation/`
+                  )
+                }
+              >
+                Create Investigation
+              </Button>
+            </div>
+            <div className="mt-2">
+              <Button
+                variant="contained"
+                color="primary"
+                size="small"
+                className="float-right"
+                onClick={() =>
+                  navigate(
+                    `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/investigationSessions`
+                  )
+                }
+              >
+                View Investigations
+              </Button>
+            </div>
 
             <div className="mt-2">
               <Button
@@ -311,7 +337,10 @@ export const ConsultationDetails = (props: any) => {
         <div className="grid gap-2 grid-cols-1 md:grid-cols-2 mt-2">
           <div className="md:col-span-2">
             <span className="font-semibold leading-relaxed">Category: </span>
-            <span className="badge badge-pill badge-warning"> {consultationData.category || "-"}</span>
+            <span className="badge badge-pill badge-warning">
+              {" "}
+              {consultationData.category || "-"}
+            </span>
           </div>
           <div>
             <span className="font-semibold leading-relaxed">Updated on: </span>
@@ -329,7 +358,10 @@ export const ConsultationDetails = (props: any) => {
                 <span className="font-semibold leading-relaxed">
                   Admitted To:{" "}
                 </span>
-                <span className="badge badge-pill badge-warning"> {consultationData.admitted_to || "-"}</span>
+                <span className="badge badge-pill badge-warning">
+                  {" "}
+                  {consultationData.admitted_to || "-"}
+                </span>
               </div>
               <div>
                 <span className="font-semibold leading-relaxed">
@@ -373,17 +405,15 @@ export const ConsultationDetails = (props: any) => {
           )}
           {consultationData.ip_no && (
             <div className="md:col-span-2 capitalize">
-              <span className="font-semibold leading-relaxed">
-                IP number:{" "}
+              <span className="font-semibold leading-relaxed">IP number: </span>
+              <span className="badge badge-pill badge-primary">
+                {consultationData.ip_no}
               </span>
-              <span className="badge badge-pill badge-primary">{consultationData.ip_no}</span>
             </div>
           )}
           {consultationData.diagnosis && (
             <div className="md:col-span-2 capitalize">
-              <span className="font-semibold leading-relaxed">
-                Diagnosis:{" "}
-              </span>
+              <span className="font-semibold leading-relaxed">Diagnosis: </span>
               {consultationData.diagnosis}
             </div>
           )}
@@ -392,14 +422,14 @@ export const ConsultationDetails = (props: any) => {
               <span className="font-semibold leading-relaxed">
                 Verified By :{" "}
               </span>
-              <span className="badge badge-pill badge-primary">{consultationData.verified_by}</span>
+              <span className="badge badge-pill badge-primary">
+                {consultationData.verified_by}
+              </span>
             </div>
           )}
-
-
         </div>
       </div>
-      {consultationData.existing_medication &&
+      {consultationData.existing_medication && (
         <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
           <div className="px-4 py-5 sm:p-6">
             <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
@@ -410,8 +440,8 @@ export const ConsultationDetails = (props: any) => {
             </div>
           </div>
         </div>
-      }
-      {consultationData.examination_details &&
+      )}
+      {consultationData.examination_details && (
         <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
           <div className="px-4 py-5 sm:p-6">
             <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
@@ -421,29 +451,32 @@ export const ConsultationDetails = (props: any) => {
               {consultationData.examination_details || "-"}
             </div>
           </div>
-        </div>}
-      {consultationData.prescribed_medication &&
+        </div>
+      )}
+      {consultationData.prescribed_medication && (
         <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
           <div className="px-4 py-5 sm:p-6">
             <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
               Treatment Summary
-          </h3>
+            </h3>
             <div className="mt-2">
               {consultationData.prescribed_medication || "-"}
             </div>
           </div>
-        </div>}
-      {consultationData.consultation_notes &&
+        </div>
+      )}
+      {consultationData.consultation_notes && (
         <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
           <div className="px-4 py-5 sm:p-6">
             <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
               Advice
-          </h3>
+            </h3>
             <div className="mt-2">
               {consultationData.consultation_notes || "-"}
             </div>
           </div>
-        </div>}
+        </div>
+      )}
       <div>
         <PageTitle title="Consultation Update" hideBack={true} />
         <div className="flex flex-wrap mt-4">
@@ -461,7 +494,13 @@ export const ConsultationDetails = (props: any) => {
         </div>
       </div>
       <div>
-        <FileUpload facilityId={facilityId} patientId={patientId} consultationId={consultationId} type="CONSULTATION" hideBack={true} />
+        <FileUpload
+          facilityId={facilityId}
+          patientId={patientId}
+          consultationId={consultationId}
+          type="CONSULTATION"
+          hideBack={true}
+        />
       </div>
     </div>
   );

@@ -439,5 +439,27 @@ export default {
   retrieveUpload: {
     path: "/api/v1/files/{fileId}/",
     method: "GET",
-  }
+  },
+
+  // Investigation
+  listInvestigations: {
+    path: "/api/v1/investigation/",
+    method: "GET",
+  },
+  listInvestigationGroups: {
+    path: "/api/v1/investigation/group",
+    method: "GET",
+  },
+  createInvestigation: {
+    path: "/api/v1/consultation/{consultation_external_id}/investigation/",
+    method: "POST",
+  },
+  getInvestigationSessions: {
+    path: "/api/v1/consultation/{consultation_external_id}/investigation/get_sessions/",
+    method: "GET",
+  },
+  getInvestigation: {
+    path: "/api/v1/consultation/{consultation_external_id}/investigation/",
+    method: "GET",
+  },
 };
