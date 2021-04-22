@@ -299,14 +299,69 @@ export const downloadShiftRequests = (params: object) => {
 export const externalResultList = (params: object, altKey: string) => {
   return fireRequest("externalResultList", [], params, null, altKey);
 };
-export const externalResult = (id: string) => {
-  return fireRequest("externalResult", [id], {});
-};
 
+export const externalResult = (pathParam: object) => {
+  return fireRequest("externalResult", [], {}, pathParam);
+};
 export const externalResultUploadCsv = (params: object) => {
   return fireRequest("externalResultUploadCsv", [], params);
 };
 
 export const deleteExternalResult = (id: string) => {
   return fireRequest("deleteExternalResult", [id], {});
+};
+// Notifications
+export const getNotifications = (params: object) => {
+  return fireRequest("getNotifications", [], params);
+};
+
+// FileUpload
+
+export const createUpload = (params: object) => {
+  return fireRequest("createUpload", [], params);
+};
+
+export const viewUpload = (params: object) => {
+  return fireRequest("viewUpload", [], params);
+};
+
+export const retrieveUpload = (params: object, fileId: string) => {
+  return fireRequest("retrieveUpload", [], params, { fileId: fileId });
+};
+
+// Investigation
+
+export const listInvestigations = (params: object) => {
+  return fireRequest("listInvestigations", [], params);
+};
+
+export const listInvestigationGroups = (params: object) => {
+  return fireRequest("listInvestigationGroups", [], params);
+};
+
+export const createInvestigation = (
+  params: object,
+  consultation_external_id: string
+) => {
+  return fireRequest("createInvestigation", [], params, {
+    consultation_external_id: consultation_external_id,
+  });
+};
+
+export const getInvestigationSessions = (
+  params: object,
+  consultation_external_id: string
+) => {
+  return fireRequest("getInvestigationSessions", [], params, {
+    consultation_external_id: consultation_external_id,
+  });
+};
+
+export const getInvestigation = (
+  params: object,
+  consultation_external_id: string
+) => {
+  return fireRequest("getInvestigation", [], params, {
+    consultation_external_id: consultation_external_id,
+  });
 };

@@ -270,13 +270,20 @@ export const PatientHome = (props: any) => {
     return data;
   };
 
-  function Badge(props: { color: string, icon: string, text: string }) {
+  function Badge(props: { color: string; icon: string; text: string }) {
     return (
-      <span className="m-1 inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-gray-100 text-gray-700" title={props.text}>
-        <i className={"mr-2 text-md text-" + props.color + "-500 fas fa-" + props.icon}></i>
+      <span
+        className="m-1 inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-gray-100 text-gray-700"
+        title={props.text}
+      >
+        <i
+          className={
+            "mr-2 text-md text-" + props.color + "-500 fas fa-" + props.icon
+          }
+        ></i>
         {props.text}
       </span>
-    )
+    );
   }
 
   const dischargeSummaryFormSetUserEmail = () => {
@@ -449,8 +456,7 @@ export const PatientHome = (props: any) => {
     const medHis = patientData.medical_history;
     patientMedHis = medHis.map((item: any, idx: number) => (
       <div className="sm:col-span-1" key={`med_his_${idx}`}>
-        {
-          (item?.disease != "NO") &&
+        {item?.disease != "NO" && (
           <>
             <div className="text-sm leading-5 font-medium text-gray-500">
               {item.disease}
@@ -459,7 +465,7 @@ export const PatientHome = (props: any) => {
               {item.details}
             </div>
           </>
-        }
+        )}
       </div>
     ));
   }
@@ -469,9 +475,7 @@ export const PatientHome = (props: any) => {
   if (isConsultationLoading) {
     consultationList = <CircularProgress size={20} />;
   } else if (consultationListData.length === 0) {
-    consultationList = (
-      <Typography>No Consultation available.</Typography>
-    );
+    consultationList = <Typography>No Consultation available.</Typography>;
   } else if (consultationListData.length > 0) {
     consultationList = consultationListData.map((itemData, idx) => (
       <ConsultationCard
@@ -511,44 +515,59 @@ export const PatientHome = (props: any) => {
 
       <div id="revamp">
         <PageTitle title={`Covid Suspect Details`} />
-        {
-          patientData?.last_consultation?.assigned_to_object && <div className="relative rounded-lg shadow bg-green-200 mt-2">
+        {patientData?.last_consultation?.assigned_to_object && (
+          <div className="relative rounded-lg shadow bg-green-200 mt-2">
             <div className="max-w-screen-xl mx-auto py-3 px-3 sm:px-6 lg:px-8">
               <div className="pr-16 sm:text-center sm:px-16">
                 <p className="font-bold text-green-800">
                   <span className="inline">
-                    Assigned to: {patientData.last_consultation.assigned_to_object.first_name} {patientData.last_consultation.assigned_to_object.last_name}
+                    Assigned to:{" "}
+                    {
+                      patientData.last_consultation.assigned_to_object
+                        .first_name
+                    }{" "}
+                    {patientData.last_consultation.assigned_to_object.last_name}
                   </span>
                 </p>
               </div>
             </div>
           </div>
-        }
-        {
-          (patientData?.facility != patientData?.last_consultation?.facility) && <div className="relative mt-2">
+        )}
+        {patientData?.facility != patientData?.last_consultation?.facility && (
+          <div className="relative mt-2">
             <div className="max-w-screen-xl mx-auto py-3 px-3 sm:px-6 lg:px-8 rounded-lg shadow bg-red-200 ">
               <div className="text-center">
                 <p className="font-bold text-red-800">
                   <i className="fas fa-exclamation-triangle mr-2"></i>
                   <span className="inline">
-                    You have not created a consultation for the patient in  <strong>{patientData.facility_object?.name || "-"} </strong>
+                    You have not created a consultation for the patient in{" "}
+                    <strong>{patientData.facility_object?.name || "-"} </strong>
                   </span>
                 </p>
               </div>
             </div>
             <div className="flex items-center mt-4">
-              <button className="btn btn-primary w-full" disabled={!patientData.is_active} onClick={() => navigate(`/facility/${facilityId}/patient/${id}/consultation`)}>
+              <button
+                className="btn btn-primary w-full"
+                disabled={!patientData.is_active}
+                onClick={() =>
+                  navigate(`/facility/${facilityId}/patient/${id}/consultation`)
+                }
+              >
                 Create Consultation
               </button>
             </div>
           </div>
-        }
+        )}
         <section className="md:flex mt-4">
           <div className="md:w-2/3 mx-2">
             <div className="bg-white rounded-lg shadow p-4 h-full">
-              <h1 className="font-bold text-3xl"> {patientData.name} - {patientData.age}</h1>
+              <h1 className="font-bold text-3xl">
+                {" "}
+                {patientData.name} - {patientData.age}
+              </h1>
               <h3 className="font-semibold text-lg">
-                <i className="fas fa-hospital mr-2" ></i>
+                <i className="fas fa-hospital mr-2"></i>
                 {patientData.facility_object?.name || "-"}
               </h3>
               <div className="grid grid-cols-1 gap-x-4 gap-y-2 md:gap-y-8 sm:grid-cols-3 mt-2">
@@ -588,21 +607,18 @@ export const PatientHome = (props: any) => {
                     {patientData.blood_group || "-"}
                   </div>
                 </div>
-                {
-                  patientData.date_of_return && (
-                    <div className="sm:col-span-1">
-                      <div className="text-sm leading-5 font-medium text-gray-500">
-                        Date of Return
-                      </div>
-                      <div className="mt-1 text-sm leading-5 text-gray-900">
-                        {moment(patientData.date_of_return).format("LL")}
-                      </div>
+                {patientData.date_of_return && (
+                  <div className="sm:col-span-1">
+                    <div className="text-sm leading-5 font-medium text-gray-500">
+                      Date of Return
                     </div>
-                  )
-                }
+                    <div className="mt-1 text-sm leading-5 text-gray-900">
+                      {moment(patientData.date_of_return).format("LL")}
+                    </div>
+                  </div>
+                )}
                 {patientData.countries_travelled &&
                   !!patientData.countries_travelled.length && (
-
                     <div className="sm:col-span-1">
                       <div className="text-sm leading-5 font-medium text-gray-500">
                         Countries travelled
@@ -610,33 +626,55 @@ export const PatientHome = (props: any) => {
                       <div className="mt-1 text-sm leading-5 text-gray-900">
                         {Array.isArray(patientData.countries_travelled)
                           ? patientData.countries_travelled.join(", ")
-                          : patientData.countries_travelled.split(",").join(", ")}
+                          : patientData.countries_travelled
+                            .split(",")
+                            .join(", ")}
                       </div>
                     </div>
                   )}
               </div>
               <div className="flex flex-wrap mt-2">
-                {patientData.allow_transfer ?
+                {patientData.is_vaccinated && (
+                  <Badge color="blue" icon="syringe" text="Vaccinated" />
+                )}
+
+                {patientData.allow_transfer ? (
                   <Badge color="yellow" icon="unlock" text="Transfer Allowed" />
-                  : <Badge color="green" icon="lock" text="Transfer Blocked" />}
-                {
-                  patientData.is_antenatal && patientData.is_active &&
+                ) : (
+                    <Badge color="green" icon="lock" text="Transfer Blocked" />
+                  )}
+                {patientData.is_antenatal && patientData.is_active && (
                   <Badge color="blue" icon="baby-carriage" text="Antenatal" />
-                }
+                )}
                 {patientData.contact_with_confirmed_carrier && (
-                  <Badge color="red" icon="exclamation-triangle" text="Contact with confirmed carrier" />
+                  <Badge
+                    color="red"
+                    icon="exclamation-triangle"
+                    text="Contact with confirmed carrier"
+                  />
                 )}
                 {patientData.contact_with_suspected_carrier && (
-                  <Badge color="yellow" icon="exclamation-triangle" text="Contact with suspected carrier" />
+                  <Badge
+                    color="yellow"
+                    icon="exclamation-triangle"
+                    text="Contact with suspected carrier"
+                  />
                 )}
                 {patientData.past_travel && (
-                  <Badge color="yellow" icon="exclamation-triangle" text="Travel (within last 28 days)" />
+                  <Badge
+                    color="yellow"
+                    icon="exclamation-triangle"
+                    text="Travel (within last 28 days)"
+                  />
                 )}
               </div>
             </div>
           </div>
           <div className="md:w-1/3 mx-2">
-            <div id="actions" className="space-y-2 mt-2 flex-col justify-between flex h-full">
+            <div
+              id="actions"
+              className="space-y-2 mt-2 flex-col justify-between flex h-full"
+            >
               <div>
                 {patientData.review_time && (
                   <div
@@ -678,26 +716,30 @@ export const PatientHome = (props: any) => {
                   <div className="w-1/2">
                     <div className="text-sm leading-5 font-medium text-gray-500">
                       Created
-                  </div>
+                    </div>
                     <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-pre">
                       <div className="text-sm">
-                        {patientData?.created_by?.first_name} {patientData?.created_by?.last_name}
+                        {patientData?.created_by?.first_name}{" "}
+                        {patientData?.created_by?.last_name}
                       </div>
                       <div className="text-xs">
-                        {patientData.created_date && moment(patientData.created_date).format("lll")}
+                        {patientData.created_date &&
+                          moment(patientData.created_date).format("lll")}
                       </div>
                     </div>
                   </div>
                   <div className="w-1/2">
                     <div className="text-sm leading-5 font-medium text-gray-500">
                       Last Edited
-                  </div>
+                    </div>
                     <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-pre">
                       <div className="text-sm">
-                        {patientData?.last_edited?.first_name} {patientData?.last_edited?.last_name}
+                        {patientData?.last_edited?.first_name}{" "}
+                        {patientData?.last_edited?.last_name}
                       </div>
                       <div className="text-xs">
-                        {patientData.modified_date && moment(patientData.modified_date).format("lll")}
+                        {patientData.modified_date &&
+                          moment(patientData.modified_date).format("lll")}
                       </div>
                     </div>
                   </div>
@@ -705,23 +747,33 @@ export const PatientHome = (props: any) => {
               </div>
               <div className="space-y-2 py-2">
                 <div>
-                  <button className="btn btn-primary w-full"
+                  <button
+                    className="btn btn-primary w-full"
                     disabled={!patientData.is_active}
                     onClick={() =>
                       navigate(`/facility/${facilityId}/patient/${id}/update`)
                     }
                   >
                     <i className="fas fa-pencil-alt mr-2" />
-                  Update Details
-                </button>
+                    Update Details
+                  </button>
                 </div>
                 <div>
-                  <button className="btn btn-primary w-full"
-                    disabled={!consultationListData || !consultationListData.length || !patientData.is_active}
-                    onClick={() => handlePatientTransfer(!patientData.allow_transfer)}
+                  <button
+                    className="btn btn-primary w-full"
+                    disabled={
+                      !consultationListData ||
+                      !consultationListData.length ||
+                      !patientData.is_active
+                    }
+                    onClick={() =>
+                      handlePatientTransfer(!patientData.allow_transfer)
+                    }
                   >
                     <i className="fas fa-lock mr-2" />
-                    {patientData.allow_transfer ? "Disable Transfer" : "Allow Transfer"}
+                    {patientData.allow_transfer
+                      ? "Disable Transfer"
+                      : "Allow Transfer"}
                   </button>
                 </div>
               </div>
@@ -738,7 +790,7 @@ export const PatientHome = (props: any) => {
                 <div className="text-sm leading-5 font-medium text-gray-500">
                   Address
                 </div>
-                <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-pre">
+                <div className="mt-1 text-sm leading-5 whitespace-normal text-gray-900 break-words">
                   {patientData.address || "-"}
                 </div>
               </div>
@@ -755,7 +807,11 @@ export const PatientHome = (props: any) => {
                   Ward
                 </div>
                 <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {(patientData.ward_object && patientData.ward_object.number + ", " + patientData.ward_object.name) || "-"}
+                  {(patientData.ward_object &&
+                    patientData.ward_object.number +
+                    ", " +
+                    patientData.ward_object.name) ||
+                    "-"}
                 </div>
               </div>
               <div className="sm:col-span-1">
@@ -771,7 +827,8 @@ export const PatientHome = (props: any) => {
                   State, Country - Pincode
                 </div>
                 <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {patientData?.state_object?.name}, {patientData.nationality || "-"} - {patientData.pincode}
+                  {patientData?.state_object?.name},{" "}
+                  {patientData.nationality || "-"} - {patientData.pincode}
                 </div>
               </div>
             </div>
@@ -786,11 +843,15 @@ export const PatientHome = (props: any) => {
                   Medical Worker
                 </div>
                 <div className="mt-1 text-sm leading-5 text-gray-900 break-all">
-                  {patientData.is_medical_worker ? (
-                    "Yes" +
-                    (patientData.designation_of_health_care_worker ? (", " + patientData.designation_of_health_care_worker) : "") +
-                    (patientData.instituion_of_health_care_worker ? (", " + patientData.instituion_of_health_care_worker) : "")
-                  ) : "No"}
+                  {patientData.is_medical_worker
+                    ? "Yes" +
+                    (patientData.designation_of_health_care_worker
+                      ? ", " + patientData.designation_of_health_care_worker
+                      : "") +
+                    (patientData.instituion_of_health_care_worker
+                      ? ", " + patientData.instituion_of_health_care_worker
+                      : "")
+                    : "No"}
                 </div>
               </div>
               <div className="sm:col-span-1">
@@ -814,7 +875,9 @@ export const PatientHome = (props: any) => {
                   Estimated Contact Date
                 </div>
                 <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {patientData.estimated_contact_date ? moment(patientData.estimated_contact_date).format("LL") : ""}
+                  {patientData.estimated_contact_date
+                    ? moment(patientData.estimated_contact_date).format("LL")
+                    : ""}
                 </div>
               </div>
               <div className="sm:col-span-1">
@@ -830,7 +893,10 @@ export const PatientHome = (props: any) => {
                   Number of Contacts
                 </div>
                 <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {"Primary: " + (patientData.number_of_primary_contacts || 0) + ", Secondary: " + (patientData.number_of_secondary_contacts || 0)}
+                  {"Primary: " +
+                    (patientData.number_of_primary_contacts || 0) +
+                    ", Secondary: " +
+                    (patientData.number_of_secondary_contacts || 0)}
                 </div>
               </div>
               <div className="sm:col-span-1">
@@ -838,21 +904,22 @@ export const PatientHome = (props: any) => {
                   Number of Dependents
                 </div>
                 <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {"Above 60: " + (patientData.number_of_aged_dependents || 0) + ", Chronic Diseased: " + (patientData.number_of_chronic_diseased_dependents || 0)}
+                  {"Above 60: " +
+                    (patientData.number_of_aged_dependents || 0) +
+                    ", Chronic Diseased: " +
+                    (patientData.number_of_chronic_diseased_dependents || 0)}
                 </div>
               </div>
-              {
-                patientData.transit_details && (
-                  <div className="sm:col-span-1">
-                    <div className="text-sm leading-5 font-medium text-gray-500">
-                      Transit Details
-                    </div>
-                    <div className="mt-1 text-sm leading-5 text-gray-900">
-                      {patientData.transit_details}
-                    </div>
+              {patientData.transit_details && (
+                <div className="sm:col-span-1">
+                  <div className="text-sm leading-5 font-medium text-gray-500">
+                    Transit Details
                   </div>
-                )
-              }
+                  <div className="mt-1 text-sm leading-5 text-gray-900">
+                    {patientData.transit_details}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
           <div className="md:w-1/3 mx-2">
@@ -860,6 +927,16 @@ export const PatientHome = (props: any) => {
               <div className="border-b border-dashed text-gray-900 font-semibold text-center text-lg pb-2">
                 Testing
               </div>
+              {patientData.covin_id && (
+                <div className="sm:col-span-1">
+                  <div className="text-sm leading-5 font-medium text-gray-500">
+                    Vaccinated (COVIN ID)
+                  </div>
+                  <div className="mt-1 text-sm leading-5 text-gray-900">
+                    {patientData?.covin_id || "-"}
+                  </div>
+                </div>
+              )}
               <div className="sm:col-span-1">
                 <div className="text-sm leading-5 font-medium text-gray-500">
                   SRF ID
@@ -952,7 +1029,8 @@ export const PatientHome = (props: any) => {
                     <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-pre-wrap">
                       {patientData.allergies}
                     </div>
-                  </div>)}
+                  </div>
+                )}
                 {patientData.is_antenatal && (
                   <div className="sm:col-span-1">
                     <div className="text-sm leading-5 font-medium text-gray-500">
@@ -965,36 +1043,85 @@ export const PatientHome = (props: any) => {
                 )}
                 {patientMedHis}
               </div>
-
-
             </div>
           </div>
           <div className="md:w-1/3 mx-2">
             <div className="bg-white rounded-lg shadow p-4 h-full space-y-2">
               <div className="border-b border-dashed text-gray-900 font-semibold text-center text-lg space-y-2">
                 <div>
-                  <button className="btn btn-primary w-full" disabled={!patientData.is_active} onClick={() => navigate(`/facility/${facilityId}/patient/${id}/consultation`)}>
+                  <button
+                    className="btn btn-primary w-full"
+                    disabled={!patientData.is_active}
+                    onClick={() =>
+                      navigate(
+                        `/facility/${facilityId}/patient/${id}/consultation`
+                      )
+                    }
+                  >
                     Add Consultation
                   </button>
                 </div>
-
                 <div>
-                  <button className="btn btn-primary w-full" disabled={!patientData.is_active || !(patientData?.last_consultation?.facility == facilityId)} onClick={() => navigate(`/facility/${facilityId}/patient/${id}/shift/new`)}>
+                  <button
+                    className="btn btn-primary w-full"
+                    onClick={() =>
+                      navigate(
+                        `/facility/${facilityId}/patient/${id}/files/`
+                      )
+                    }
+                  >
+                    View/Upload Patient Files
+                  </button>
+                </div>
+                <div>
+                  <button
+                    className="btn btn-primary w-full"
+                    disabled={
+                      !patientData.is_active ||
+                      !(patientData?.last_consultation?.facility == facilityId)
+                    }
+                    onClick={() =>
+                      navigate(
+                        `/facility/${facilityId}/patient/${id}/shift/new`
+                      )
+                    }
+                  >
                     SHIFT PATIENT
                   </button>
                 </div>
                 <div>
-                  <button className="btn btn-primary w-full" disabled={!patientData.is_active || !(patientData?.last_consultation?.facility == facilityId)} onClick={() => navigate(`/facility/${facilityId}/patient/${id}/sample-test`)}>
+                  <button
+                    className="btn btn-primary w-full"
+                    disabled={
+                      !patientData.is_active ||
+                      !(patientData?.last_consultation?.facility == facilityId)
+                    }
+                    onClick={() =>
+                      navigate(
+                        `/facility/${facilityId}/patient/${id}/sample-test`
+                      )
+                    }
+                  >
                     Request Sample Test
                   </button>
                 </div>
                 <div>
-                  <button className="btn btn-primary w-full" onClick={handleClickOpen}>
+                  <button
+                    className="btn btn-primary w-full"
+                    onClick={handleClickOpen}
+                  >
                     Discharge Summary
                   </button>
                 </div>
                 <div>
-                  <button className="btn btn-primary w-full" onClick={handleDischageClickOpen} disabled={!patientData.is_active || !(patientData?.last_consultation?.facility == facilityId)}>
+                  <button
+                    className="btn btn-primary w-full"
+                    onClick={handleDischageClickOpen}
+                    disabled={
+                      !patientData.is_active ||
+                      !(patientData?.last_consultation?.facility == facilityId)
+                    }
+                  >
                     Discharge from CARE
                   </button>
                 </div>
@@ -1002,25 +1129,24 @@ export const PatientHome = (props: any) => {
             </div>
           </div>
         </section>
-
       </div>
       <Dialog open={open} onClose={handleDischargeSummary}>
         <DialogTitle id="form-dialog-title">
           Download Discharge Summary
-              </DialogTitle>
+        </DialogTitle>
         <DialogContent>
           <DialogContentText>
             Please enter your email id to receive the discharge summary.
-            Disclaimer: This is an automatically Generated email using
-            your info Captured in Care System.
-                  <div
+            Disclaimer: This is an automatically Generated email using your info
+            Captured in Care System.
+            <div
               className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
               role="alert"
             >
               <strong className="block sm:inline font-bold">
-                Please check your email id before continuing. We cannot
-                deliver the email if the email id is invalid
-                    </strong>
+                Please check your email id before continuing. We cannot deliver
+                the email if the email id is invalid
+              </strong>
             </div>
           </DialogContentText>
           <div className="flex justify-end">
@@ -1030,7 +1156,7 @@ export const PatientHome = (props: any) => {
               onClick={dischargeSummaryFormSetUserEmail}
             >
               Fill email input with my email.
-                  </a>
+            </a>
           </div>
           <TextInputField
             type="email"
@@ -1048,10 +1174,10 @@ export const PatientHome = (props: any) => {
         <DialogActions>
           <Button onClick={handleClose} color="primary">
             Cancel
-                </Button>
+          </Button>
           <Button onClick={handleDischargeSummarySubmit} color="primary">
             Submit
-                </Button>
+          </Button>
         </DialogActions>
       </Dialog>
       <Dialog
@@ -1066,7 +1192,7 @@ export const PatientHome = (props: any) => {
           <FormControl variant="outlined">
             <label className="flex justify-center w-full text-gray-900 mt-2">
               Is the patient willing to donate blood for Plasma?
-                    </label>
+            </label>
             <RadioGroup
               className="flex-row justify-center gap-15 mt-2 ml-10"
               name="blood-donate"
@@ -1101,20 +1227,14 @@ export const PatientHome = (props: any) => {
                   id="covid-status-pre-form"
                   className="flex justify-center w-full text-gray-900 mb-2 mt-5"
                 >
-                  Has the patient's disease status changed? If so, to
-                  what?
-                        </label>
+                  Has the patient's disease status changed? If so, to what?
+                </label>
                 <Select
                   className="h-10"
                   labelId="covid-status-pre-form"
-                  value={
-                    preDischargeForm.disease_status
-                  }
+                  value={preDischargeForm.disease_status}
                   onChange={(event) =>
-                    handlePreDischargeFormChange(
-                      "disease_status",
-                      event
-                    )
+                    handlePreDischargeFormChange("disease_status", event)
                   }
                 >
                   {DISEASE_STATUS.map((value) => (
@@ -1124,9 +1244,8 @@ export const PatientHome = (props: any) => {
               </Fragment>
 
               <label className="flex justify-center w-full mt-5 text-gray-900">
-                Would you like to update the patient's SRF ID and Test
-                date?
-                      </label>
+                Would you like to update the patient's SRF ID and Test date?
+              </label>
 
               <div className="flex">
                 <TextInputField

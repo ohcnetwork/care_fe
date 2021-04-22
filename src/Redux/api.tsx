@@ -279,7 +279,7 @@ export default {
     path: "/api/v1/external_result/",
   },
   externalResult: {
-    path: "/api/v1/external_result",
+    path: "/api/v1/external_result/{id}/",
   },
   externalResultUploadCsv: {
     path: "/api/v1/external_result/bulk_upsert/",
@@ -419,6 +419,47 @@ export default {
   },
   downloadShiftRequests: {
     path: "/api/v1/shift/",
+    method: "GET",
+  },
+
+  // Notifications List
+  getNotifications: {
+    path: "/api/v1/notification/",
+  },
+
+  // FileUpload Create
+  createUpload: {
+    path: "/api/v1/files/",
+    method: "POST",
+  },
+  viewUpload: {
+    path: "/api/v1/files/",
+    method: "GET",
+  },
+  retrieveUpload: {
+    path: "/api/v1/files/{fileId}/",
+    method: "GET",
+  },
+
+  // Investigation
+  listInvestigations: {
+    path: "/api/v1/investigation/",
+    method: "GET",
+  },
+  listInvestigationGroups: {
+    path: "/api/v1/investigation/group",
+    method: "GET",
+  },
+  createInvestigation: {
+    path: "/api/v1/consultation/{consultation_external_id}/investigation/",
+    method: "POST",
+  },
+  getInvestigationSessions: {
+    path: "/api/v1/consultation/{consultation_external_id}/investigation/get_sessions/",
+    method: "GET",
+  },
+  getInvestigation: {
+    path: "/api/v1/consultation/{consultation_external_id}/investigation/",
     method: "GET",
   },
 };

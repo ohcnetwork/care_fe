@@ -54,9 +54,16 @@ export default function ResultList() {
       page: qParams.page || 1,
       name: qParams.name || undefined,
       mobile_number: qParams.mobile_number
-        ? parsePhoneNumberFromString(qParams.mobile_number)?.format("E.164")
+        ? qParams.mobile_number
         : undefined,
       wards: qParams.wards || undefined,
+      local_bodies: qParams.local_bodies || undefined,
+      created_date_before: qParams.created_date_before || undefined,
+      created_date_after: qParams.created_date_after || undefined,
+      result_date_before: qParams.result_date_before || undefined,
+      result_date_after: qParams.result_date_after || undefined,
+      sample_collection_date_after: qParams.sample_collection_date_after || undefined,
+      sample_collection_date_before: qParams.sample_collection_date_before || undefined,
       offset: (qParams.page ? qParams.page - 1 : 0) * RESULT_LIMIT,
     };
 
@@ -77,6 +84,13 @@ export default function ResultList() {
     qParams.page,
     qParams.mobile_number,
     qParams.wards,
+    qParams.created_date_before,
+    qParams.created_date_after,
+    qParams.result_date_before,
+    qParams.result_date_after,
+    qParams.sample_collection_date_after,
+    qParams.sample_collection_date_before,
+    qParams.local_bodies,
   ]);
 
   const updateQuery = (filter: any) => {
@@ -114,10 +128,9 @@ export default function ResultList() {
 
   const triggerDownload = async () => {
     const res = await dispatch(
-      externalResultList(qParams, "externalResultList")
+      externalResultList({ ...qParams, csv: true }, "externalResultList")
     );
-    let downloadData = externalResultFormatter(res?.data?.results);
-    setDownloadFile(downloadData);
+    setDownloadFile(res?.data);
     document.getElementById(`downloadCSV`)?.click();
   };
 
@@ -223,10 +236,10 @@ export default function ResultList() {
           </div>
           <div>
             <div className="text-sm font-semibold mt-2">Search by number</div>
-            <PhoneNumberField
+            <InputSearchBox
               value={qParams.mobile_number}
-              onChange={searchByPhone}
-              turnOffAutoFormat={true}
+              search={searchByPhone}
+              placeholder="Search by Phone Number"
               errors=""
             />
           </div>

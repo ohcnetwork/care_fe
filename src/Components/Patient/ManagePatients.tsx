@@ -125,17 +125,14 @@ export const PatientManager = (props: any) => {
     date_declared_positive_after: qParams.date_declared_positive_after || undefined,
     age_min: qParams.age_min || undefined,
     age_max: qParams.age_max || undefined,
-    last_consultation_admission_date_before:
-      qParams.last_consultation_admission_date_before || undefined,
-    last_consultation_admission_date_after:
-      qParams.last_consultation_admission_date_after || undefined,
-    last_consultation_discharge_date_before:
-      qParams.last_consultation_discharge_date_before || undefined,
-    last_consultation_discharge_date_after:
-      qParams.last_consultation_discharge_date_after || undefined,
-    last_consultation_admitted_to:
-      qParams.last_consultation_admitted_to || undefined,
+    last_consultation_admission_date_before: qParams.last_consultation_admission_date_before || undefined,
+    last_consultation_admission_date_after: qParams.last_consultation_admission_date_after || undefined,
+    last_consultation_discharge_date_before: qParams.last_consultation_discharge_date_before || undefined,
+    last_consultation_discharge_date_after: qParams.last_consultation_discharge_date_after || undefined,
+    last_consultation_admitted_to: qParams.last_consultation_admitted_to || undefined,
     srf_id: qParams.srf_id || undefined,
+    is_vaccinated: qParams.is_vaccinated || undefined,
+    covin_id: qParams.covin_id || undefined
   };
 
   let managePatients: any = null;
@@ -204,7 +201,6 @@ export const PatientManager = (props: any) => {
     qParams.phone_number,
     qParams.srf_id,
   ]);
-
   const updateQuery = (params: any) => {
     const nParams = Object.assign({}, qParams, params);
     setQueryParams(nParams, true);
@@ -496,22 +492,16 @@ export const PatientManager = (props: any) => {
           {badge("Modified Before", qParams.modified_date_before)}
           {badge("Created Before", qParams.created_date_before)}
           {badge("Created After", qParams.created_date_after)}
-          {badge(
-            "Admitted Before",
-            qParams.last_consultation_discharge_date_before
-          )}
-          {badge(
-            "Admitted After",
-            qParams.last_consultation_admission_date_after
-          )}
-          {badge(
-            "Discharged Before",
-            qParams.last_consultation_discharge_date_before
-          )}
-          {badge(
-            "Discharged After",
-            qParams.last_consultation_discharge_date_after
-          )}
+          {badge("Admitted Before", qParams.last_consultation_discharge_date_before)}
+          {badge("Admitted After", qParams.last_consultation_admission_date_after)}
+          {badge("Discharged Before", qParams.last_consultation_discharge_date_before)}
+          {badge("Discharged After", qParams.last_consultation_discharge_date_after)}
+          {
+            qParams.is_vaccinated && (
+              badge("Vaccination Status", qParams.is_vaccinated == "true" ? "Vaccinated" : "Unvaccinated")
+            )
+          }
+          {badge("COVIN ID", qParams.covin_id)}
           {badge("Filtered By: Facility", qParams.facility)}
           {badge("Ordering", qParams.ordering)}
           {badge("Category", qParams.category)}
