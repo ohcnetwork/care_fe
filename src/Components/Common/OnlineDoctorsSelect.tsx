@@ -48,7 +48,7 @@ export const OnlineDoctorsSelect = (props: any) => {
                   >
                   </span>
                   <span className="block truncate">
-                    {selectedDoctor ? selectedDoctor.first_name + ' ' + selectedDoctor.last_name : "Assign a Shifting Staff"}
+                    {selectedDoctor ? selectedDoctor.first_name + ' ' + selectedDoctor.last_name : "Assign a doctor"}
                   </span>
                 </div>
                 <div className="btn btn-default" onClick={_ => { onSelect('') }}> Clear</div>
