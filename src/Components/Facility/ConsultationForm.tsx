@@ -266,6 +266,9 @@ export const ConsultationForm = (props: any) => {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     const validForm = validateForm();
+    if (state.form.is_telemedicine === "false"){
+      state.form.action = "PENDING";
+    }
     if (validForm) {
       setIsLoading(true);
       const data = {
