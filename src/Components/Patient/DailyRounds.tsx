@@ -302,7 +302,7 @@ export const DailyRounds = (props: any) => {
                                 <div className="md:col-span-2">
                                     <InputLabel id="symptoms-label">
                                         Symptoms
-                                </InputLabel>
+                                    </InputLabel>
                                     <MultiSelectField
                                         name="additional_symptoms"
                                         variant="outlined"
