@@ -86,7 +86,7 @@ export default function PatientFilterV2(props: any) {
   };
 
   const handleChange = (event: any) => {
-    let { name, value } = event.target;
+    const { name, value } = event.target;
 
     const filterData: any = { ...filterState };
     filterData[name] = value;
@@ -95,7 +95,7 @@ export default function PatientFilterV2(props: any) {
   };
 
   const handleMultiSelectChange = (event: any) => {
-    let { name, value } = event.target;
+    const { name, value } = event.target;
 
     const filterData: any = { ...filterState };
     filterData[name] = [...value];

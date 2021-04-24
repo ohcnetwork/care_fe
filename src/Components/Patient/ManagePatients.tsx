@@ -160,7 +160,31 @@ export const PatientManager = (props: any) => {
         setIsLoading(false);
       })
 
-  }, [dispatch, facilityId, qParams.last_consultation_admission_date_before, qParams.last_consultation_admission_date_after, qParams.last_consultation_discharge_date_before, qParams.last_consultation_discharge_date_after, qParams.age_max, qParams.age_min, qParams.last_consultation_admitted_to_list, qParams.facility, qParams.category, qParams.gender, qParams.ordering, qParams.created_date_before, qParams.created_date_after, qParams.modified_date_before, qParams.modified_date_after, qParams.is_active, qParams.disease_status, qParams.name, qParams.page, qParams.phone_number, qParams.srf_id, qParams.covin_id, qParams.is_vaccinated]);
+  },[ dispatch,
+      facilityId,
+      qParams.last_consultation_admission_date_before,
+      qParams.last_consultation_admission_date_after,
+      qParams.last_consultation_discharge_date_before,
+      qParams.last_consultation_discharge_date_after,
+      qParams.age_max, qParams.age_min,
+      qParams.last_consultation_admitted_to_list,
+      qParams.facility,
+      qParams.category,
+      qParams.gender,
+      qParams.ordering,
+      qParams.created_date_before,
+      qParams.created_date_after,
+      qParams.modified_date_before,
+      qParams.modified_date_after,
+      qParams.is_active,
+      qParams.disease_status,
+      qParams.name,
+      qParams.page,
+      qParams.phone_number,
+      qParams.srf_id,
+      qParams.covin_id,
+      qParams.is_vaccinated ]
+  );
 
   const updateQuery = (params: any) => {
     const nParams = Object.assign({}, qParams, params);
