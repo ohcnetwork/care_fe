@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect } from "react";
+import { OptionsType } from "./constants";
 
 export interface statusType { 
   aborted?: boolean 
@@ -22,4 +23,18 @@ export const useAbortableEffect = (effect: Function, dependencies: Array<any>) =
         }
       };
     }, [...dependencies]);
-  }
+};
+
+export const parseOptionId: (
+  options: OptionsType[],
+  id: string | string[]
+) => string = (options, id) => {
+  const textArray = options
+    .filter((option) => {
+      return id instanceof Array
+        ? id.map((i) => String(i)).includes(String(option.id))
+        : String(option.id) === String(id);
+    })
+    .map((option) => option.text);
+  return textArray.join(", ");
+};

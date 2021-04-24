@@ -17,9 +17,10 @@ import { PhoneNumberField } from '../Common/HelperInputFields';
 import NavTabs from '../Common/NavTabs';
 import Pagination from "../Common/Pagination";
 import { InputSearchBox } from "../Common/SearchBox";
-import { TELEMEDICINE_ACTIONS } from "../../Common/constants";
+import { ADMITTED_TO, GENDER_TYPES, TELEMEDICINE_ACTIONS } from "../../Common/constants";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import PatientFilterV2 from "./PatientFilterV2";
+import { parseOptionId } from '../../Common/utils';
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -444,8 +445,8 @@ export const PatientManager = (props: any) => {
           {badge("Ordering", qParams.ordering)}
           {badge("Category", qParams.category)}
           {badge("Disease Status", qParams.disease_status)}
-          {badge("Gender", qParams.gender)}
-          {badge("Admitted to", qParams.last_consultation_admitted_to_list)}
+          {badge("Gender", parseOptionId(GENDER_TYPES, qParams.gender))}
+          {badge("Admitted to", ADMITTED_TO[qParams.last_consultation_admitted_to])}
           {badge("Age min", qParams.age_min)}
           {badge("Age max", qParams.age_max)}
           {badge("SRF ID", qParams.srf_id)}

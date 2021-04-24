@@ -14,14 +14,14 @@ const initialState = {
   form: {},
 };
 
-interface Group {
+export interface Group {
   external_id: string;
   name: string;
 }
 
-type InvestigationValueType = "Float" | "Choice" | "String";
+export type InvestigationValueType = "Float" | "Choice" | "String";
 
-interface InvestigationType {
+export interface InvestigationType {
   investigation_type: InvestigationValueType;
   max_value?: number;
   min_value?: number;

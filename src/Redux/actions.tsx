@@ -331,8 +331,11 @@ export const retrieveUpload = (params: object, fileId: string) => {
 
 // Investigation
 
-export const listInvestigations = (params: object) => {
-  return fireRequest("listInvestigations", [], params);
+export const listInvestigations = (
+  params: object,
+  altKey = "listInvestigations"
+) => {
+  return fireRequest("listInvestigations", [], params, null, altKey);
 };
 
 export const listInvestigationGroups = (params: object) => {
@@ -363,5 +366,14 @@ export const getInvestigation = (
 ) => {
   return fireRequest("getInvestigation", [], params, {
     consultation_external_id: consultation_external_id,
+  });
+};
+
+export const getPatientInvestigation = (
+  params: object,
+  patient_external_id: string
+) => {
+  return fireRequest("getPatientInvestigation", [], params, {
+    patient_external_id: patient_external_id,
   });
 };

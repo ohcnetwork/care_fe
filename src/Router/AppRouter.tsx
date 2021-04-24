@@ -40,6 +40,7 @@ import { FileUpload } from "../Components/Patient/FileUpload";
 import Investigation from "../Components/Facility/Investigations";
 import ViewInvestigations from "../Components/Facility/Investigations/ViewInvestigations";
 import ShowInvestigation from "../Components/Facility/Investigations/ShowInvestigation";
+import InvestigationReports from "../Components/Facility/Investigations/Reports";
 
 const get = require("lodash.get");
 const img = "https://cdn.coronasafe.network/light-logo.svg";
@@ -52,6 +53,9 @@ const routes = {
   "/user/profile": () => <UserProfile />,
   "/patients": () => <PatientManager />,
   "/patient/:id": ({ id }: any) => <PatientHome id={id} />,
+  "/patient/:id/investigation_reports": ({ id }: any) => (
+    <InvestigationReports id={id} />
+  ),
   "/sample": () => <SampleViewAdmin />,
   "/sample/:id": ({ id }: any) => <SampleDetails id={id} />,
   "/patient/:patientId/test_sample/:sampleId/icmr_sample": ({
