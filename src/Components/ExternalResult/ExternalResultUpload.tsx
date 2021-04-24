@@ -141,7 +141,7 @@ export default function ExternalResultUpload() {
 
           </div>
           <div className="mt-2">
-            <button disabled={loading ? true : false} className="btn btn-primary" onClick={handleSubmit}>
+            <button disabled={loading} className="btn btn-primary" onClick={handleSubmit}>
               Save
               </button>
           </div>
