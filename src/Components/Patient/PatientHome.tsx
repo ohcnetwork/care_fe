@@ -382,7 +382,6 @@ export const PatientHome = (props: any) => {
 
   const fetchActiveShiftingData = useCallback(
     async (status: statusType) => {
-      // console.log(patientData.phone_number, patientData)
       const shiftingRes = await dispatch(
         listShiftRequests({ patient: id }, "shift-list-call")
       );
@@ -401,7 +400,7 @@ export const PatientHome = (props: any) => {
         }
       }
     },
-    [dispatch, patientData]
+    [dispatch, id]
   )
 
   useAbortableEffect(
@@ -609,7 +608,7 @@ export const PatientHome = (props: any) => {
             </div>
           </div>
         )}
-        <section className="md:flex mt-4 h-full">
+        <section className="md:flex items-center mt-4 space-y-2">
           <div className={activeShiftingData.length ? "md:w-1/2 mx-2 h-full":"md:w-2/3 mx-2 h-full"}>
             <div className="bg-white rounded-lg shadow p-4 h-full">
               <h1 className="font-bold text-3xl">
@@ -725,7 +724,6 @@ export const PatientHome = (props: any) => {
             activeShiftingData.map((shift: any) => (
               <div key={`shift_${shift.id}`}>
                 <div className="overflow-hidden shadow rounded-lg bg-white h-full">
-
                   <div
                     className={
                       "p-4 h-full flex flex-col justify-between " +
@@ -1215,7 +1213,7 @@ export const PatientHome = (props: any) => {
           </div>
         </section>
         <section className="md:flex mt-4 space-y-2">
-          <div className="md:w-/3 mx-2">
+          <div className="md:w-2/3 mx-2">
             <div className="bg-white rounded-lg shadow p-4 h-full space-y-2">
               <div className="border-b border-dashed text-gray-900 font-semibold text-center text-lg pb-2">
                 Medical
