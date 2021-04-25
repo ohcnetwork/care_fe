@@ -22,6 +22,8 @@ import moment from "moment";
 const useStyle = makeStyles((theme: Theme) => ({
   tableCell: {
     fontSize: "1.1rem",
+    maxWidth: 150,
+    minWidth: 150,
     // padding: theme.spacing(1.5, 2),
   },
   inputField: {
@@ -90,7 +92,6 @@ const ReportRow = ({ data, name, min, max }: any) => {
                     color: rowColor[color]?.text || "black",
                   }
                 : {}),
-              maxWidth: 50,
             }}
           >
             {(d?.value && Math.round((d.value + Number.EPSILON) * 100) / 100) ||
@@ -98,18 +99,10 @@ const ReportRow = ({ data, name, min, max }: any) => {
           </TableCell>
         );
       })}
-      <TableCell
-        className={className.tableCell}
-        align="center"
-        style={{ maxWidth: 50 }}
-      >
+      <TableCell className={className.tableCell} align="center">
         {min || "---"}
       </TableCell>
-      <TableCell
-        className={className.tableCell}
-        align="center"
-        style={{ maxWidth: 50 }}
-      >
+      <TableCell className={className.tableCell} align="center">
         {max || "---"}
       </TableCell>
     </StyledTableRow>
@@ -178,7 +171,6 @@ const ReportTable: React.FC<ReportTableProps> = ({
                   style={{
                     backgroundColor: "#4B5563",
                     color: "#F9FAFB",
-                    maxWidth: 50,
                   }}
                 >
                   {moment(session.session_created_date).format(
@@ -186,10 +178,16 @@ const ReportTable: React.FC<ReportTableProps> = ({
                   )}
                 </TableCell>
               ))}
-              <TableCell style={{ maxWidth: 50 }} align="center">
+              <TableCell
+                align="center"
+                style={{ maxWidth: 150, minWidth: 150 }}
+              >
                 Min
               </TableCell>
-              <TableCell style={{ maxWidth: 50 }} align="center">
+              <TableCell
+                align="center"
+                style={{ maxWidth: 150, minWidth: 150 }}
+              >
                 Max
               </TableCell>
             </TableRow>
