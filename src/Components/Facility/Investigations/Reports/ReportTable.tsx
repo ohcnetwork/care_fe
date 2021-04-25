@@ -22,10 +22,10 @@ import moment from "moment";
 const useStyle = makeStyles((theme: Theme) => ({
   tableCell: {
     fontSize: "1.1rem",
-    // padding: theme.spacing(1.5, 2),
+    maxWidth: 150,
+    minWidth: 150,
   },
   inputField: {
-    // minHeight: 44,
     borderRadius: 0,
     borderLeft: "1px solid #ddd",
     borderRight: "1px solid #ddd",
@@ -65,12 +65,7 @@ const ReportRow = ({ data, name, min, max }: any) => {
 
   return (
     <StyledTableRow>
-      <TableCell
-        className={className.tableCell}
-        align="right"
-        size="medium"
-        width="20%"
-      >
+      <TableCell className={className.tableCell} align="right" size="medium">
         {name}
       </TableCell>
       {data.map((d: any) => {
@@ -90,7 +85,6 @@ const ReportRow = ({ data, name, min, max }: any) => {
                     color: rowColor[color]?.text || "black",
                   }
                 : {}),
-              maxWidth: 50,
             }}
           >
             {(d?.value && Math.round((d.value + Number.EPSILON) * 100) / 100) ||
@@ -98,18 +92,10 @@ const ReportRow = ({ data, name, min, max }: any) => {
           </TableCell>
         );
       })}
-      <TableCell
-        className={className.tableCell}
-        align="center"
-        style={{ maxWidth: 50 }}
-      >
+      <TableCell className={className.tableCell} align="center">
         {min || "---"}
       </TableCell>
-      <TableCell
-        className={className.tableCell}
-        align="center"
-        style={{ maxWidth: 50 }}
-      >
+      <TableCell className={className.tableCell} align="center">
         {max || "---"}
       </TableCell>
     </StyledTableRow>
@@ -125,6 +111,7 @@ const ReportTable: React.FC<ReportTableProps> = ({
   title,
   investigationData,
 }) => {
+  const className = useStyle();
   const { data, sessions } = tranformData(investigationData);
   const [searchFilter, setSearchFilter] = useState("");
   const filterTests = data.filter((i) => {
@@ -178,7 +165,6 @@ const ReportTable: React.FC<ReportTableProps> = ({
                   style={{
                     backgroundColor: "#4B5563",
                     color: "#F9FAFB",
-                    maxWidth: 50,
                   }}
                 >
                   {moment(session.session_created_date).format(
@@ -186,10 +172,10 @@ const ReportTable: React.FC<ReportTableProps> = ({
                   )}
                 </TableCell>
               ))}
-              <TableCell style={{ maxWidth: 50 }} align="center">
+              <TableCell align="center" className={className.tableCell}>
                 Min
               </TableCell>
-              <TableCell style={{ maxWidth: 50 }} align="center">
+              <TableCell align="center" className={className.tableCell}>
                 Max
               </TableCell>
             </TableRow>

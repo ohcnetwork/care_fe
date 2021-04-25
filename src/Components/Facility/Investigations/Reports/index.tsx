@@ -16,6 +16,10 @@ import Autocomplete from "@material-ui/lab/Autocomplete";
 import { InputLabel, makeStyles, CircularProgress } from "@material-ui/core";
 import { InvestigationResponse } from "./types";
 import ReportTable from "./ReportTable";
+import Pagination from "../../../Common/Pagination";
+import { useQueryParams } from "raviger";
+
+const RESULT_PER_PAGE = 15;
 
 const useStyle = makeStyles({
   button: {
@@ -99,7 +103,7 @@ const InvestigationReports = ({ id }: any) => {
     investigationReportsReducer,
     initialState
   );
-
+  const [qParams, setQueryParams] = useQueryParams();
   const {
     investigationGroups,
     investigations,
@@ -109,15 +113,19 @@ const InvestigationReports = ({ id }: any) => {
     selectedInvestigations,
   } = state as InitialState;
 
-  const fetchInvestigationsData = () => {
+  const fetchInvestigationsData = (page = qParams.page) => {
     dispatch({
       type: "set_loading",
       payload: { ...isLoading, tableData: true },
     });
 
-    const investigationsParams = selectedInvestigations.length
-      ? selectedInvestigations.map((i) => i.external_id).join(",")
-      : investigations.map((i) => i.external_id).join(",");
+    const pageStart = ((page || 1) - 1) * RESULT_PER_PAGE;
+    const investigationsParams = (selectedInvestigations.length
+      ? selectedInvestigations.map((i) => i.external_id)
+      : investigations.map((i) => i.external_id)
+    )
+      .slice(pageStart, pageStart + RESULT_PER_PAGE)
+      .join(",");
 
     dispatchAction(
       getPatientInvestigation(
@@ -195,12 +203,35 @@ const InvestigationReports = ({ id }: any) => {
   });
 
   const handleGroupSelect = (e: any) => {
+    dispatch({ type: "set_investigations", payload: [] });
+    dispatch({ type: "set_selected_investigations", payload: [] });
+    dispatch({ type: "set_loading", payload: initialState.isLoading });
     dispatch({ type: "set_selected_group", payload: e.target.value });
   };
 
   useEffect(() => {
     fetchInvestigationGroups.current();
   }, []);
+
+  const updateQuery = (filter: any) => {
+    const nParams = Object.keys(filter).reduce(
+      (a, k) =>
+        filter[k] && filter[k] !== "--"
+          ? Object.assign(a, { [k]: filter[k] })
+          : a,
+      {}
+    );
+    setQueryParams(nParams, true);
+  };
+
+  const handlePagination = (page: number, limit: number) => {
+    updateQuery({ page });
+    fetchInvestigationsData();
+  };
+  const handleGenerateReports = (e: any) => {
+    updateQuery({ page: 1 });
+    fetchInvestigationsData(1);
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4">
@@ -275,7 +306,7 @@ const InvestigationReports = ({ id }: any) => {
               </div>
 
               <Button
-                onClick={() => fetchInvestigationsData()}
+                onClick={handleGenerateReports}
                 disabled={!selectedGroup.length}
                 variant="contained"
                 color="primary"
@@ -290,10 +321,21 @@ const InvestigationReports = ({ id }: any) => {
               <CircularProgress className={className.button} />
             )}
             {!!investigtaionTableData.length && !isLoading.tableData && (
-              <ReportTable
-                investigationData={investigtaionTableData}
-                title="Report"
-              />
+              <>
+                <ReportTable
+                  investigationData={investigtaionTableData}
+                  title="Report"
+                />
+                <Pagination
+                  cPage={qParams.page || 1}
+                  data={{
+                    totalCount:
+                      selectedInvestigations.length || investigations.length,
+                  }}
+                  defaultPerPage={RESULT_PER_PAGE}
+                  onChange={handlePagination}
+                />
+              </>
             )}
           </section>
         </>
