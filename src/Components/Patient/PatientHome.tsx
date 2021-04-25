@@ -1,11 +1,9 @@
 import {
   Button,
   CircularProgress,
-  Grid,
   Typography,
   Select,
   MenuItem,
-  InputLabel,
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { navigate } from "raviger";
@@ -43,10 +41,8 @@ import { validateEmailAddress } from "../../Common/validation";
 import Radio from "@material-ui/core/Radio";
 import RadioGroup from "@material-ui/core/RadioGroup";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
-import FormLabel from "@material-ui/core/FormLabel";
 import Modal from "@material-ui/core/Modal";
 import FormControl from "@material-ui/core/FormControl";
-import { formatFilter } from "../Shifting/Commons";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
