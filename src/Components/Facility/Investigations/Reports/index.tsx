@@ -127,8 +127,6 @@ const InvestigationReports = ({ id }: any) => {
       .slice(pageStart, pageStart + RESULT_PER_PAGE)
       .join(",");
 
-    console.log(pageStart, investigationsParams);
-
     dispatchAction(
       getPatientInvestigation(
         {

@@ -24,10 +24,8 @@ const useStyle = makeStyles((theme: Theme) => ({
     fontSize: "1.1rem",
     maxWidth: 150,
     minWidth: 150,
-    // padding: theme.spacing(1.5, 2),
   },
   inputField: {
-    // minHeight: 44,
     borderRadius: 0,
     borderLeft: "1px solid #ddd",
     borderRight: "1px solid #ddd",
@@ -67,12 +65,7 @@ const ReportRow = ({ data, name, min, max }: any) => {
 
   return (
     <StyledTableRow>
-      <TableCell
-        className={className.tableCell}
-        align="right"
-        size="medium"
-        width="20%"
-      >
+      <TableCell className={className.tableCell} align="right" size="medium">
         {name}
       </TableCell>
       {data.map((d: any) => {
@@ -118,6 +111,7 @@ const ReportTable: React.FC<ReportTableProps> = ({
   title,
   investigationData,
 }) => {
+  const className = useStyle();
   const { data, sessions } = tranformData(investigationData);
   const [searchFilter, setSearchFilter] = useState("");
   const filterTests = data.filter((i) => {
@@ -178,16 +172,10 @@ const ReportTable: React.FC<ReportTableProps> = ({
                   )}
                 </TableCell>
               ))}
-              <TableCell
-                align="center"
-                style={{ maxWidth: 150, minWidth: 150 }}
-              >
+              <TableCell align="center" className={className.tableCell}>
                 Min
               </TableCell>
-              <TableCell
-                align="center"
-                style={{ maxWidth: 150, minWidth: 150 }}
-              >
+              <TableCell align="center" className={className.tableCell}>
                 Max
               </TableCell>
             </TableRow>
