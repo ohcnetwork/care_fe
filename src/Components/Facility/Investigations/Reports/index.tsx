@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useReducer } from "react";
+import React, { useCallback, useEffect, useReducer, useState } from "react";
 import { useRef } from "react";
 import { useDispatch } from "react-redux";
 import { Group, InvestigationType } from "..";
@@ -103,7 +103,8 @@ const InvestigationReports = ({ id }: any) => {
     investigationReportsReducer,
     initialState
   );
-  const [qParams, setQueryParams] = useQueryParams();
+  const [page, setPage] = useState(1);
+  // const [qParams, setQueryParams] = useQueryParams();
   const {
     investigationGroups,
     investigations,
@@ -112,14 +113,16 @@ const InvestigationReports = ({ id }: any) => {
     selectedGroup,
     selectedInvestigations,
   } = state as InitialState;
-
-  const fetchInvestigationsData = (page = qParams.page) => {
+  console.log({
+    investigations: investigations.length,
+  });
+  const fetchInvestigationsData = (onSuccess: Function, curPage = 1) => {
     dispatch({
       type: "set_loading",
       payload: { ...isLoading, tableData: true },
     });
 
-    const pageStart = ((page || 1) - 1) * RESULT_PER_PAGE;
+    const pageStart = ((curPage || 1) - 1) * RESULT_PER_PAGE;
     const investigationsParams = (selectedInvestigations.length
       ? selectedInvestigations.map((i) => i.external_id)
       : investigations.map((i) => i.external_id)
@@ -136,16 +139,12 @@ const InvestigationReports = ({ id }: any) => {
       )
     ).then((res: any) => {
       if (res?.data?.results) {
-        dispatch({
-          type: "set_investigtaion_table_data",
-          payload: res.data.results,
-        });
-
+        onSuccess(res.data);
+        setPage(curPage + 1);
         dispatch({
           type: "set_loading",
           payload: { ...isLoading, tableData: false },
         });
-        document.getElementById("reports_section")?.scrollIntoView();
       }
     });
   };
@@ -204,6 +203,7 @@ const InvestigationReports = ({ id }: any) => {
 
   const handleGroupSelect = (e: any) => {
     dispatch({ type: "set_investigations", payload: [] });
+    dispatch({ type: "set_investigtaion_table_data", payload: [] });
     dispatch({ type: "set_selected_investigations", payload: [] });
     dispatch({ type: "set_loading", payload: initialState.isLoading });
     dispatch({ type: "set_selected_group", payload: e.target.value });
@@ -213,26 +213,44 @@ const InvestigationReports = ({ id }: any) => {
     fetchInvestigationGroups.current();
   }, []);
 
-  const updateQuery = (filter: any) => {
-    const nParams = Object.keys(filter).reduce(
-      (a, k) =>
-        filter[k] && filter[k] !== "--"
-          ? Object.assign(a, { [k]: filter[k] })
-          : a,
-      {}
-    );
-    setQueryParams(nParams, true);
-  };
+  // const updateQuery = (filter: any) => {
+  //   const nParams = Object.keys(filter).reduce(
+  //     (a, k) =>
+  //       filter[k] && filter[k] !== "--"
+  //         ? Object.assign(a, { [k]: filter[k] })
+  //         : a,
+  //     {}
+  //   );
+  //   // setQueryParams(nParams, true);
+  // };
 
-  const handlePagination = (page: number, limit: number) => {
-    updateQuery({ page });
-    fetchInvestigationsData();
+  const handleLoadMore = (e: any) => {
+    console.log({ page });
+    const onSuccess = (data: any) => {
+      dispatch({
+        type: "set_investigtaion_table_data",
+        payload: [...state.investigtaionTableData, ...data.results],
+      });
+    };
+    fetchInvestigationsData(onSuccess, page);
   };
   const handleGenerateReports = (e: any) => {
-    updateQuery({ page: 1 });
-    fetchInvestigationsData(1);
+    // updateQuery({ page: 1 });
+    const onSuccess = (data: any) => {
+      dispatch({
+        type: "set_investigtaion_table_data",
+        payload: data.results,
+      });
+      document.getElementById("reports_section")?.scrollIntoView();
+    };
+    fetchInvestigationsData(onSuccess, 1);
   };
 
+  const totalPage = Math.ceil(
+    (selectedInvestigations.length || investigations.length) / RESULT_PER_PAGE
+  );
+  const loadMoreDisabled = page - 1 >= totalPage;
+  console.log({ page, totalPage, loadMoreDisabled });
   return (
     <div className="max-w-7xl mx-auto px-4">
       <PageTitle title={"Investigation Reports"} />
@@ -317,16 +335,27 @@ const InvestigationReports = ({ id }: any) => {
             </>
           )}
           <section id="reports_section">
-            {!!isLoading.tableData && (
-              <CircularProgress className={className.button} />
-            )}
-            {!!investigtaionTableData.length && !isLoading.tableData && (
+            {!!investigtaionTableData.length && (
               <>
                 <ReportTable
                   investigationData={investigtaionTableData}
                   title="Report"
                 />
-                <Pagination
+                {!loadMoreDisabled && (
+                  <Button
+                    disabled={loadMoreDisabled}
+                    onClick={handleLoadMore}
+                    className={className.button}
+                    variant="contained"
+                    color="primary"
+                    fullWidth
+                    size="large"
+                  >
+                    Load More
+                  </Button>
+                )}
+
+                {/* <Pagination
                   cPage={qParams.page || 1}
                   data={{
                     totalCount:
@@ -334,8 +363,11 @@ const InvestigationReports = ({ id }: any) => {
                   }}
                   defaultPerPage={RESULT_PER_PAGE}
                   onChange={handlePagination}
-                />
+                /> */}
               </>
+            )}
+            {!!isLoading.tableData && (
+              <CircularProgress className={className.button} />
             )}
           </section>
         </>
