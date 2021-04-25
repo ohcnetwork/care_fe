@@ -907,7 +907,7 @@ export const PatientHome = (props: any) => {
                 )}
                 <div className="p-2 bg-white rounded-lg shadow text-center">
                   <div className="flex justify-between">
-                    <div className="w-1/2 border-r-2">
+                    <div className="w-1/2 border-r-2 truncate">
                       <div className="text-sm leading-5 font-medium text-gray-500">
                         Disease Status
                       </div>
@@ -915,7 +915,7 @@ export const PatientHome = (props: any) => {
                         {patientData.disease_status}
                       </div>
                     </div>
-                    <div className="w-1/2">
+                    <div className="w-1/2 truncate">
                       <div className="text-sm leading-5 font-medium text-gray-500">
                         Status
                       </div>
@@ -925,8 +925,8 @@ export const PatientHome = (props: any) => {
                     </div>
                   </div>
                 </div>
-                <div className="flex justify-between p-2 bg-white rounded-lg shadow px-4 mt-2">
-                  <div className="w-1/2">
+                <div className="flex justify-between p-2 bg-white rounded-lg shadow text-center px-4 mt-2">
+                  <div className="w-1/2 border-r-2 truncate">
                     <div className="text-sm leading-5 font-medium text-gray-500">
                       Created
                     </div>
@@ -941,7 +941,7 @@ export const PatientHome = (props: any) => {
                       </div>
                     </div>
                   </div>
-                  <div className="w-1/2">
+                  <div className="w-1/2 truncate">
                     <div className="text-sm leading-5 font-medium text-gray-500">
                       Last Edited
                     </div>
