@@ -387,12 +387,9 @@ export const PatientHome = (props: any) => {
           shiftingRes.data &&
           shiftingRes.data.results
         ) {
-          const activeShiftingRes: any[] = shiftingRes.data.results.filter((result: any) => (
-            result.status !== "COMPLETED" &&
-            result.status !== "REJECTED" &&
-            result.status !== "DESTINATION REJECTED"
-          ));
+          const activeShiftingRes: any[] = shiftingRes.data.results
           setActiveShiftingData(activeShiftingRes);
+          console.log(shiftingRes);
         }
       }
     },
@@ -604,8 +601,8 @@ export const PatientHome = (props: any) => {
             </div>
           </div>
         )}
-        <section className="md:flex items-center mt-4 space-y-2">
-          <div className={activeShiftingData.length ? "md:w-1/2 mx-2 h-full":"md:w-2/3 mx-2 h-full"}>
+      <section className="md:flex items-center mt-4 space-y-2">
+          <div className="md:w-2/3 mx-2 h-full">
             <div className="bg-white rounded-lg shadow p-4 h-full">
               <h1 className="font-bold text-3xl">
                 {" "}
@@ -715,10 +712,124 @@ export const PatientHome = (props: any) => {
               </div>
             </div>
           </div>
-          <div className={activeShiftingData.length ? "md:w-1/4 mx-2 h-full":"md:w-0 mx-2 h-full"}>
+          <div className="md:w-1/3 mx-2 h-full">
+            <div
+              id="actions"
+              className="space-y-2 flex-col justify-between flex h-full"
+            >
+              <div>
+                {patientData.review_time && (
+                  <div
+                    className={
+                      "mb-2 inline-flex items-center px-3 py-1 rounded-lg text-xs leading-4 font-semibold p-1 w-full justify-center " +
+                      (moment().isBefore(patientData.review_time)
+                        ? " bg-gray-100"
+                        : " p-1 bg-red-400 text-white")
+                    }
+                  >
+                    <i className="mr-2 text-md fas fa-clock"></i>
+                    {(moment().isBefore(patientData.review_time)
+                      ? "Review at: "
+                      : "Review Missed: ") +
+                      moment(patientData.review_time).format("lll")}
+                  </div>
+                )}
+                <div className="p-2 bg-white rounded-lg shadow text-center">
+                  <div className="flex justify-between">
+                    <div className="w-1/2 border-r-2 truncate">
+                      <div className="text-sm leading-5 font-medium text-gray-500">
+                        Disease Status
+                      </div>
+                      <div className="mt-1 text-xl font-semibold leading-5 text-gray-900">
+                        {patientData.disease_status}
+                      </div>
+                    </div>
+                    <div className="w-1/2 truncate">
+                      <div className="text-sm leading-5 font-medium text-gray-500">
+                        Status
+                      </div>
+                      <div className="mt-1 text-xl font-semibold leading-5 text-gray-900">
+                        {patientData.is_active ? "Live" : "Discharged"}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex justify-between p-2 bg-white rounded-lg shadow text-center px-4 mt-2">
+                  <div className="w-1/2 border-r-2 truncate">
+                    <div className="text-sm leading-5 font-medium text-gray-500">
+                      Created
+                    </div>
+                    <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-pre">
+                      <div className="text-sm">
+                        {patientData?.created_by?.first_name}{" "}
+                        {patientData?.created_by?.last_name}
+                      </div>
+                      <div className="text-xs">
+                        {patientData.created_date &&
+                          moment(patientData.created_date).format("lll")}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="w-1/2 truncate">
+                    <div className="text-sm leading-5 font-medium text-gray-500">
+                      Last Edited
+                    </div>
+                    <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-pre">
+                      <div className="text-sm">
+                        {patientData?.last_edited?.first_name}{" "}
+                        {patientData?.last_edited?.last_name}
+                      </div>
+                      <div className="text-xs">
+                        {patientData.modified_date &&
+                          moment(patientData.modified_date).format("lll")}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-2 py-2">
+                <div>
+                  <button
+                    className="btn btn-primary w-full"
+                    disabled={!patientData.is_active}
+                    onClick={() =>
+                      navigate(`/facility/${facilityId}/patient/${id}/update`)
+                    }
+                  >
+                    <i className="fas fa-pencil-alt mr-2" />
+                    Update Details
+                  </button>
+                </div>
+                <div>
+                  <button
+                    className="btn btn-primary w-full"
+                    disabled={
+                      !consultationListData ||
+                      !consultationListData.length ||
+                      !patientData.is_active
+                    }
+                    onClick={() =>
+                      handlePatientTransfer(!patientData.allow_transfer)
+                    }
+                  >
+                    <i className="fas fa-lock mr-2" />
+                    {patientData.allow_transfer
+                      ? "Disable Transfer"
+                      : "Allow Transfer"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      <section className=" bg-white rounded-lg shadow p-4 h-full space-y-2 text-gray-100 mt-4">
+      <div className="border-b border-dashed text-gray-900 font-semibold text-left text-lg pb-2">
+          Shifting
+      </div>
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {
             activeShiftingData.map((shift: any) => (
-              <div key={`shift_${shift.id}`}>
+              <div key={`shift_${shift.id}`} className="mx-2 ">
                 <div className="overflow-hidden shadow rounded-lg bg-white h-full">
                   <div
                     className={
@@ -728,9 +839,7 @@ export const PatientHome = (props: any) => {
                         : "")
                     }
                   >
-                  <div className="border-b border-dashed text-gray-900 font-semibold text-center text-lg pb-2">
-                    Shifting
-                  </div>
+
                     <div>
                       <div className="flex justify-between mt-1">
                         <div>
@@ -882,115 +991,6 @@ export const PatientHome = (props: any) => {
               </div>
             ))
           }
-          </div>
-          <div className={activeShiftingData.length ? "md:w-1/4 mx-2 h-full":"md:w-1/3 mx-2 h-full"}>
-            <div
-              id="actions"
-              className="space-y-2 flex-col justify-between flex h-full"
-            >
-              <div>
-                {patientData.review_time && (
-                  <div
-                    className={
-                      "mb-2 inline-flex items-center px-3 py-1 rounded-lg text-xs leading-4 font-semibold p-1 w-full justify-center " +
-                      (moment().isBefore(patientData.review_time)
-                        ? " bg-gray-100"
-                        : " p-1 bg-red-400 text-white")
-                    }
-                  >
-                    <i className="mr-2 text-md fas fa-clock"></i>
-                    {(moment().isBefore(patientData.review_time)
-                      ? "Review at: "
-                      : "Review Missed: ") +
-                      moment(patientData.review_time).format("lll")}
-                  </div>
-                )}
-                <div className="p-2 bg-white rounded-lg shadow text-center">
-                  <div className="flex justify-between">
-                    <div className="w-1/2 border-r-2 truncate">
-                      <div className="text-sm leading-5 font-medium text-gray-500">
-                        Disease Status
-                      </div>
-                      <div className="mt-1 text-xl font-semibold leading-5 text-gray-900">
-                        {patientData.disease_status}
-                      </div>
-                    </div>
-                    <div className="w-1/2 truncate">
-                      <div className="text-sm leading-5 font-medium text-gray-500">
-                        Status
-                      </div>
-                      <div className="mt-1 text-xl font-semibold leading-5 text-gray-900">
-                        {patientData.is_active ? "Live" : "Discharged"}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex justify-between p-2 bg-white rounded-lg shadow text-center px-4 mt-2">
-                  <div className="w-1/2 border-r-2 truncate">
-                    <div className="text-sm leading-5 font-medium text-gray-500">
-                      Created
-                    </div>
-                    <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-pre">
-                      <div className="text-sm">
-                        {patientData?.created_by?.first_name}{" "}
-                        {patientData?.created_by?.last_name}
-                      </div>
-                      <div className="text-xs">
-                        {patientData.created_date &&
-                          moment(patientData.created_date).format("lll")}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="w-1/2 truncate">
-                    <div className="text-sm leading-5 font-medium text-gray-500">
-                      Last Edited
-                    </div>
-                    <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-pre">
-                      <div className="text-sm">
-                        {patientData?.last_edited?.first_name}{" "}
-                        {patientData?.last_edited?.last_name}
-                      </div>
-                      <div className="text-xs">
-                        {patientData.modified_date &&
-                          moment(patientData.modified_date).format("lll")}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="space-y-2 py-2">
-                <div>
-                  <button
-                    className="btn btn-primary w-full"
-                    disabled={!patientData.is_active}
-                    onClick={() =>
-                      navigate(`/facility/${facilityId}/patient/${id}/update`)
-                    }
-                  >
-                    <i className="fas fa-pencil-alt mr-2" />
-                    Update Details
-                  </button>
-                </div>
-                <div>
-                  <button
-                    className="btn btn-primary w-full"
-                    disabled={
-                      !consultationListData ||
-                      !consultationListData.length ||
-                      !patientData.is_active
-                    }
-                    onClick={() =>
-                      handlePatientTransfer(!patientData.allow_transfer)
-                    }
-                  >
-                    <i className="fas fa-lock mr-2" />
-                    {patientData.allow_transfer
-                      ? "Disable Transfer"
-                      : "Allow Transfer"}
-                  </button>
-                </div>
-              </div>
-            </div>
           </div>
         </section>
 
