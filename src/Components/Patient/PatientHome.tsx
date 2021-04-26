@@ -43,6 +43,8 @@ import RadioGroup from "@material-ui/core/RadioGroup";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Modal from "@material-ui/core/Modal";
 import FormControl from "@material-ui/core/FormControl";
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -90,6 +92,8 @@ export const PatientHome = (props: any) => {
   const { facilityId, id } = props;
   const classes = useStyles();
   const dispatch: any = useDispatch();
+  const [showShifts, setShowShifts] = useState(false);
+  const [isShiftClicked, setIsShiftClicked] = useState(false);
   const [patientData, setPatientData] = useState<PatientModel>({});
   const [consultationListData, setConsultationListData] = useState<
     Array<ConsultationModel>
@@ -376,11 +380,12 @@ export const PatientHome = (props: any) => {
     [dispatch, id, sampleListOffset]
   );
 
+
   const fetchActiveShiftingData = useCallback(
     async (status: statusType) => {
-      const shiftingRes = await dispatch(
+      const shiftingRes = isShiftClicked ? await dispatch(
         listShiftRequests({ patient: id }, "shift-list-call")
-      );
+      ): activeShiftingData;
       if (!status.aborted) {
         if (
           shiftingRes &&
@@ -389,11 +394,10 @@ export const PatientHome = (props: any) => {
         ) {
           const activeShiftingRes: any[] = shiftingRes.data.results
           setActiveShiftingData(activeShiftingRes);
-          console.log(shiftingRes);
         }
       }
     },
-    [dispatch, id]
+    [dispatch, id, isShiftClicked]
   )
 
   useAbortableEffect(
@@ -823,11 +827,17 @@ export const PatientHome = (props: any) => {
           </div>
         </section>
       <section className=" bg-white rounded-lg shadow p-4 h-full space-y-2 text-gray-100 mt-4">
-      <div className="border-b border-dashed text-gray-900 font-semibold text-left text-lg pb-2">
+      <div className= "flex justify-between border-b border-dashed text-gray-900 font-semibold text-left text-lg pb-2"
+       onClick={() => {setShowShifts(!showShifts)
+        setIsShiftClicked(true)}}
+      >
+        <div>
           Shifting
+        </div>
+        {showShifts ? <ExpandLessIcon/>:<ExpandMoreIcon/>}
       </div>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {
+        <div className={showShifts ? activeShiftingData.length ? "grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3": "" : "hidden"}>
+          { activeShiftingData.length ?
             activeShiftingData.map((shift: any) => (
               <div key={`shift_${shift.id}`} className="mx-2 ">
                 <div className="overflow-hidden shadow rounded-lg bg-white h-full">
@@ -989,7 +999,8 @@ export const PatientHome = (props: any) => {
                   </div>
                 </div>
               </div>
-            ))
+            )):
+           <div className=" text-center text-gray-500">No Shifting Records!</div>
           }
           </div>
         </section>
