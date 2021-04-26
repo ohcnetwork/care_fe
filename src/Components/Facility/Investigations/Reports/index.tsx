@@ -9,15 +9,13 @@ import {
 } from "../../../../Redux/actions";
 import { MultiSelectField } from "../../../Common/HelperInputFields";
 import PageTitle from "../../../Common/PageTitle";
-import { Button, Checkbox, TextField } from "@material-ui/core";
+import { Button, ButtonGroup, Checkbox, TextField } from "@material-ui/core";
 import Loading from "../../../Common/Loading";
 import _ from "lodash";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import { InputLabel, makeStyles, CircularProgress } from "@material-ui/core";
 import { InvestigationResponse } from "./types";
 import ReportTable from "./ReportTable";
-import Pagination from "../../../Common/Pagination";
-import { useQueryParams } from "raviger";
 
 const RESULT_PER_PAGE = 15;
 
@@ -99,12 +97,15 @@ const investigationReportsReducer = (state = initialState, action: any) => {
 const InvestigationReports = ({ id }: any) => {
   const className = useStyle();
   const dispatchAction: any = useDispatch();
+  const [page, setPage] = useState(1);
+  const [sessionPage, setSessionPage] = useState(1);
+  const [isNextSessionDisabled, setIsNextSessionDisabled] = useState(false);
+  const [isLoadMoreDisabled, setIsLoadMoreDisabled] = useState(false);
   const [state, dispatch] = useReducer(
     investigationReportsReducer,
     initialState
   );
-  const [page, setPage] = useState(1);
-  // const [qParams, setQueryParams] = useQueryParams();
+
   const {
     investigationGroups,
     investigations,
@@ -113,41 +114,43 @@ const InvestigationReports = ({ id }: any) => {
     selectedGroup,
     selectedInvestigations,
   } = state as InitialState;
-  console.log({
-    investigations: investigations.length,
-  });
-  const fetchInvestigationsData = (onSuccess: Function, curPage = 1) => {
-    dispatch({
-      type: "set_loading",
-      payload: { ...isLoading, tableData: true },
-    });
 
-    const pageStart = ((curPage || 1) - 1) * RESULT_PER_PAGE;
-    const investigationsParams = (selectedInvestigations.length
-      ? selectedInvestigations.map((i) => i.external_id)
-      : investigations.map((i) => i.external_id)
-    )
-      .slice(pageStart, pageStart + RESULT_PER_PAGE)
-      .join(",");
+  const fetchInvestigationsData = useCallback(
+    (onSuccess: Function, curPage = 1, curSessionPage = 1) => {
+      dispatch({
+        type: "set_loading",
+        payload: { ...isLoading, tableData: true },
+      });
 
-    dispatchAction(
-      getPatientInvestigation(
-        {
-          investigations: investigationsParams,
-        },
-        id
+      const pageStart = ((curPage || 1) - 1) * RESULT_PER_PAGE;
+      const investigationsParams = (selectedInvestigations.length
+        ? selectedInvestigations.map((i) => i.external_id)
+        : investigations.map((i) => i.external_id)
       )
-    ).then((res: any) => {
-      if (res?.data?.results) {
-        onSuccess(res.data);
-        setPage(curPage + 1);
-        dispatch({
-          type: "set_loading",
-          payload: { ...isLoading, tableData: false },
-        });
-      }
-    });
-  };
+        .slice(pageStart, pageStart + RESULT_PER_PAGE)
+        .join(",");
+
+      dispatchAction(
+        getPatientInvestigation(
+          {
+            investigations: investigationsParams,
+            session_page: curSessionPage,
+          },
+          id
+        )
+      ).then((res: any) => {
+        if (res?.data?.results) {
+          onSuccess(res.data);
+          setPage(curPage + 1);
+          dispatch({
+            type: "set_loading",
+            payload: { ...isLoading, tableData: false },
+          });
+        }
+      });
+    },
+    [dispatchAction, id, investigations, isLoading, selectedInvestigations]
+  );
 
   const fetchInvestigation = useCallback(async () => {
     dispatch({
@@ -213,44 +216,65 @@ const InvestigationReports = ({ id }: any) => {
     fetchInvestigationGroups.current();
   }, []);
 
-  // const updateQuery = (filter: any) => {
-  //   const nParams = Object.keys(filter).reduce(
-  //     (a, k) =>
-  //       filter[k] && filter[k] !== "--"
-  //         ? Object.assign(a, { [k]: filter[k] })
-  //         : a,
-  //     {}
-  //   );
-  //   // setQueryParams(nParams, true);
-  // };
-
   const handleLoadMore = (e: any) => {
-    console.log({ page });
     const onSuccess = (data: any) => {
       dispatch({
         type: "set_investigtaion_table_data",
         payload: [...state.investigtaionTableData, ...data.results],
       });
     };
-    fetchInvestigationsData(onSuccess, page);
+
+    fetchInvestigationsData(onSuccess, page, sessionPage);
   };
-  const handleGenerateReports = (e: any) => {
-    // updateQuery({ page: 1 });
-    const onSuccess = (data: any) => {
-      dispatch({
-        type: "set_investigtaion_table_data",
-        payload: data.results,
-      });
-      document.getElementById("reports_section")?.scrollIntoView();
-    };
-    fetchInvestigationsData(onSuccess, 1);
-  };
+
+  const handleGenerateReports = useCallback(
+    (curSessionPage = 1) => {
+      const onSuccess = (data: any) => {
+        if (curSessionPage > 1 && !data.results.length) {
+          setSessionPage(curSessionPage - 1);
+          setIsNextSessionDisabled(true);
+          setIsLoadMoreDisabled(true);
+        } else {
+          setIsNextSessionDisabled(false);
+          setIsLoadMoreDisabled(false);
+          dispatch({
+            type: "set_investigtaion_table_data",
+            payload: data.results,
+          });
+        }
+
+        document.getElementById("reports_section")?.scrollIntoView();
+      };
+
+      fetchInvestigationsData(onSuccess, 1, curSessionPage);
+    },
+    [fetchInvestigationsData]
+  );
 
   const totalPage = Math.ceil(
     (selectedInvestigations.length || investigations.length) / RESULT_PER_PAGE
   );
-  const loadMoreDisabled = page - 1 >= totalPage;
-  console.log({ page, totalPage, loadMoreDisabled });
+
+  const handleSessionPage = (go: "NEXT" | "PREV") => {
+    const count = go === "NEXT" ? sessionPage + 1 : sessionPage - 1;
+    setSessionPage(count);
+    handleGenerateReports(count);
+  };
+
+  const loadMoreDisabled =
+    page - 1 >= totalPage || isLoading.tableData || isLoadMoreDisabled;
+  const getTestDisabled =
+    !selectedGroup.length ||
+    isLoading.tableData ||
+    isLoading.investigationLoading ||
+    isLoading.investigationGroupLoading;
+  const generateReportDisabled =
+    !selectedGroup.length ||
+    isLoading.tableData ||
+    isLoading.investigationLoading;
+  const prevSessionDisabled = sessionPage <= 1 || isLoading.tableData;
+  const nextSessionDisabled = isNextSessionDisabled || isLoading.tableData;
+
   return (
     <div className="max-w-7xl mx-auto px-4">
       <PageTitle title={"Investigation Reports"} />
@@ -273,7 +297,7 @@ const InvestigationReports = ({ id }: any) => {
           {!isLoading.investigationLoading && (
             <Button
               onClick={() => fetchInvestigation()}
-              disabled={!selectedGroup.length}
+              disabled={getTestDisabled}
               variant="contained"
               color="primary"
               className={className.button}
@@ -324,8 +348,11 @@ const InvestigationReports = ({ id }: any) => {
               </div>
 
               <Button
-                onClick={handleGenerateReports}
-                disabled={!selectedGroup.length}
+                onClick={() => {
+                  setSessionPage(1);
+                  handleGenerateReports(1);
+                }}
+                disabled={generateReportDisabled}
                 variant="contained"
                 color="primary"
                 className={className.button}
@@ -337,10 +364,33 @@ const InvestigationReports = ({ id }: any) => {
           <section id="reports_section">
             {!!investigtaionTableData.length && (
               <>
+                <ButtonGroup
+                  disableElevation
+                  variant="outlined"
+                  color="primary"
+                  className={className.button}
+                >
+                  <Button
+                    onClick={() => handleSessionPage("PREV")}
+                    disabled={prevSessionDisabled}
+                  >
+                    {isLoading.tableData ? "Loading..." : "Prev Sessions"}
+                  </Button>
+                  <Button
+                    onClick={() => handleSessionPage("NEXT")}
+                    disabled={nextSessionDisabled}
+                  >
+                    {isLoading.tableData ? "Loading..." : "Next Sessions"}
+                  </Button>
+                </ButtonGroup>
                 <ReportTable
                   investigationData={investigtaionTableData}
                   title="Report"
                 />
+                {!!isLoading.tableData && (
+                  <CircularProgress className={className.button} />
+                )}
+
                 {!loadMoreDisabled && (
                   <Button
                     disabled={loadMoreDisabled}
@@ -354,20 +404,7 @@ const InvestigationReports = ({ id }: any) => {
                     Load More
                   </Button>
                 )}
-
-                {/* <Pagination
-                  cPage={qParams.page || 1}
-                  data={{
-                    totalCount:
-                      selectedInvestigations.length || investigations.length,
-                  }}
-                  defaultPerPage={RESULT_PER_PAGE}
-                  onChange={handlePagination}
-                /> */}
               </>
-            )}
-            {!!isLoading.tableData && (
-              <CircularProgress className={className.button} />
             )}
           </section>
         </>

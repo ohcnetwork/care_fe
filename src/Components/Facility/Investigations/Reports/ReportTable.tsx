@@ -7,15 +7,12 @@ import {
   TableRow,
   TableBody,
   Theme,
-  InputLabel,
   Typography,
   Box,
 } from "@material-ui/core";
 import { createStyles, makeStyles, withStyles } from "@material-ui/styles";
 import React from "react";
-import { useState } from "react";
 import { getColorIndex, rowColor, tranformData } from "./utils";
-import { TextInputField } from "../../../Common/HelperInputFields";
 import { InvestigationResponse } from "./types";
 import moment from "moment";
 
@@ -113,15 +110,6 @@ const ReportTable: React.FC<ReportTableProps> = ({
 }) => {
   const className = useStyle();
   const { data, sessions } = tranformData(investigationData);
-  console.log({ tableRows: data.length });
-  // const [searchFilter, setSearchFilter] = useState("");
-  // const filterTests = data.filter((i) => {
-  //   const result = !(
-  //     String(i.investigation_object.name).toLowerCase().search(searchFilter) ===
-  //     -1
-  //   );
-  //   return result;
-  // });
 
   return (
     <Box padding="1rem" margin="1rem 0">
