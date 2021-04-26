@@ -723,7 +723,7 @@ export const PatientHome = (props: any) => {
                   <div
                     className={
                       "p-4 h-full flex flex-col justify-between " +
-                      (shift.patient_object.disease_status == "POSITIVE"
+                      (shift.patient_object.disease_status === "POSITIVE"
                         ? "bg-red-50"
                         : "")
                     }
@@ -760,7 +760,7 @@ export const PatientHome = (props: any) => {
                           >
                             <i className="fas fa-plane-departure mr-2"></i>
                             <dd className="font-bold text-sm leading-5 text-gray-900">
-                              {(shift.orgin_facility_object || {}).name}
+                              {(shift.orgin_facility_object || {})?.name}
                             </dd>
                           </dt>
                         </div>
@@ -771,7 +771,7 @@ export const PatientHome = (props: any) => {
                           >
                             <i className="fas fa-user-check mr-2"></i>
                             <dd className="font-bold text-sm leading-5 text-gray-900">
-                              {(shift.shifting_approving_facility_object || {}).name}
+                              {(shift.shifting_approving_facility_object || {})?.name}
                             </dd>
                           </dt>
                         </div>
@@ -783,7 +783,7 @@ export const PatientHome = (props: any) => {
                             <i className="fas fa-plane-arrival mr-2"></i>
 
                             <dd className="font-bold text-sm leading-5 text-gray-900">
-                              {(shift.assigned_facility_object || {}).name ||
+                              {(shift.assigned_facility_object || {})?.name ||
                                 "Yet to be decided"}
                             </dd>
                           </dt>
