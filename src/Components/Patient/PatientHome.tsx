@@ -94,6 +94,7 @@ export const PatientHome = (props: any) => {
   const dispatch: any = useDispatch();
   const [showShifts, setShowShifts] = useState(false);
   const [isShiftClicked, setIsShiftClicked] = useState(false);
+  const [isShiftDataLoaded, setIsShiftDataLoaded] = useState(false);
   const [patientData, setPatientData] = useState<PatientModel>({});
   const [consultationListData, setConsultationListData] = useState<
     Array<ConsultationModel>
@@ -386,6 +387,7 @@ export const PatientHome = (props: any) => {
       const shiftingRes = isShiftClicked ? await dispatch(
         listShiftRequests({ patient: id }, "shift-list-call")
       ): activeShiftingData;
+      setIsShiftDataLoaded(isShiftClicked)
       if (!status.aborted) {
         if (
           shiftingRes &&
@@ -1000,7 +1002,8 @@ export const PatientHome = (props: any) => {
                 </div>
               </div>
             )):
-           <div className=" text-center text-gray-500">No Shifting Records!</div>
+           <div className=" text-center text-gray-500">{isShiftDataLoaded ? "No Shifting Records!": "Loading..."}</div>
+
           }
           </div>
         </section>
