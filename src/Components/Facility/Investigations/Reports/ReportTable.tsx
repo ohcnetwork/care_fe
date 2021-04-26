@@ -7,15 +7,12 @@ import {
   TableRow,
   TableBody,
   Theme,
-  InputLabel,
   Typography,
   Box,
 } from "@material-ui/core";
 import { createStyles, makeStyles, withStyles } from "@material-ui/styles";
 import React from "react";
-import { useState } from "react";
 import { getColorIndex, rowColor, tranformData } from "./utils";
-import { TextInputField } from "../../../Common/HelperInputFields";
 import { InvestigationResponse } from "./types";
 import moment from "moment";
 
@@ -113,14 +110,6 @@ const ReportTable: React.FC<ReportTableProps> = ({
 }) => {
   const className = useStyle();
   const { data, sessions } = tranformData(investigationData);
-  const [searchFilter, setSearchFilter] = useState("");
-  const filterTests = data.filter((i) => {
-    const result = !(
-      String(i.investigation_object.name).toLowerCase().search(searchFilter) ===
-      -1
-    );
-    return result;
-  });
 
   return (
     <Box padding="1rem" margin="1rem 0">
@@ -143,17 +132,17 @@ const ReportTable: React.FC<ReportTableProps> = ({
           Above Ideal
         </span>
       </div>
-      <InputLabel>Search Test</InputLabel>
+      {/* <InputLabel>Search Test</InputLabel>
       <TextInputField
         value={searchFilter}
         placeholder="Search test"
         errors=""
         variant="outlined"
         margin="dense"
-        onChange={(e) => setSearchFilter(e.target.value)}
-      />
+        onChange={(e) => setSearchFilter(e.target.value)} 
+      />*/}
       <br />
-      <TableContainer component={Paper} style={{ maxHeight: "90vh" }}>
+      <TableContainer component={Paper}>
         <Table aria-label="simple table" stickyHeader>
           <TableHead>
             <TableRow>
@@ -181,8 +170,10 @@ const ReportTable: React.FC<ReportTableProps> = ({
             </TableRow>
           </TableHead>
           <TableBody>
-            {filterTests.length > 0 ? (
-              filterTests.map((t: any) => {
+            {/* {filterTests.length > 0 ? (
+              filterTests */}
+            {data.length > 0 ? (
+              data.map((t: any) => {
                 return (
                   <ReportRow
                     data={t.sessionValues}
