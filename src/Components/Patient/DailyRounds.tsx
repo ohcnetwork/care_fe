@@ -1,5 +1,5 @@
 import { t as Prescription_t } from '@coronasafe/prescription-builder/src/Types/Prescription__Prescription.gen';
-import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
+import { Button, CardContent, InputLabel } from "@material-ui/core";
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import { navigate } from 'raviger';
 import loadable from '@loadable/component';
@@ -94,7 +94,7 @@ export const DailyRounds = (props: any) => {
         async (status: statusType) => {
             setIsLoading(true);
             const res = await dispatchAction(getConsultationDailyRoundsDetails({ consultationId, id }));
-            if (res && res.data && res.data.medication_given && Object.keys(res.data.medication_given).length != 0) {
+            if (res && res.data && res.data.medication_given && Object.keys(res.data.medication_given).length !== 0) {
                 setPrescriptions(res && res.data && res.data.medication_given);
             }
 
