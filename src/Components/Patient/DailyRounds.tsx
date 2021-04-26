@@ -1,4 +1,5 @@
-import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
+import { t as Prescription_t } from '@coronasafe/prescription-builder/src/Types/Prescription__Prescription.gen';
+import { Button, CardContent, InputLabel } from "@material-ui/core";
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import { navigate } from 'raviger';
 import loadable from '@loadable/component';
@@ -8,6 +9,7 @@ import { CURRENT_HEALTH_CHANGE, PATIENT_CATEGORY, SYMPTOM_CHOICES, TELEMEDICINE_
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { NativeSelectField, CheckboxField, MultilineInputField, SelectField, TextInputField, ErrorHelperText, DateTimeFiled, MultiSelectField } from "../Common/HelperInputFields";
 import { createDailyReport, getConsultationDailyRoundsDetails, updateDailyReport } from "../../Redux/actions";
+import { make as PrescriptionBuilder } from "../Common/PrescriptionBuilder.gen";
 import * as Notification from "../../Utils/Notifications";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -28,6 +30,7 @@ const initForm: any = {
     actions: null,
     review_time: 0,
     admitted_to: "",
+    medication_given: [],
 };
 
 const initError = Object.assign({}, ...Object.keys(initForm).map(k => ({ [k]: "" })));
@@ -81,6 +84,7 @@ export const DailyRounds = (props: any) => {
     const dispatchAction: any = useDispatch();
     const { facilityId, patientId, consultationId, id } = props;
     const [state, dispatch] = useReducer(DailyRoundsFormReducer, initialState);
+    const [prescriptions, setPrescriptions] = useState<Prescription_t[]>([]);
     const [isLoading, setIsLoading] = useState(false);
 
     const headerText = (!id) ? "Add Consultation Update" : "Edit Consultation Update";
@@ -90,6 +94,10 @@ export const DailyRounds = (props: any) => {
         async (status: statusType) => {
             setIsLoading(true);
             const res = await dispatchAction(getConsultationDailyRoundsDetails({ consultationId, id }));
+            if (res && res.data && res.data.medication_given && Object.keys(res.data.medication_given).length !== 0) {
+                setPrescriptions(res && res.data && res.data.medication_given);
+            }
+
             if (!status.aborted) {
                 if (res && res.data) {
                     const data = {
@@ -156,7 +164,8 @@ export const DailyRounds = (props: any) => {
                 current_health: state.form.current_health,
                 recommend_discharge: JSON.parse(state.form.recommend_discharge),
                 action: state.form.action,
-                review_time: state.form.review_time
+                review_time: state.form.review_time,
+                medication_given: prescriptions,
             };
 
             let res;
@@ -222,10 +231,10 @@ export const DailyRounds = (props: any) => {
     }
 
     return (
-        <div className="px-2 pb-2">
+        <div className="px-2 pb-2 max-w-3xl mx-auto">
             <PageTitle title={headerText} />
             <div className="mt-4">
-                <Card>
+                <div className="bg-white rounded shadow">
                     <form onSubmit={e => handleSubmit(e)}>
                         <CardContent>
                             <div className="md:grid gap-4 grid-cols-1 md:grid-cols-2">
@@ -356,6 +365,7 @@ export const DailyRounds = (props: any) => {
                                 </div>
 
                                 <div className="flex-1">
+                                <InputLabel id="admitted-to-label">Admitted To * </InputLabel>
                                     <SelectField
                                         optionArray={true}
                                         name="admitted_to"
@@ -363,16 +373,12 @@ export const DailyRounds = (props: any) => {
                                         value={state.form.admitted_to}
                                         options={admittedToChoices}
                                         onChange={handleChange}
-                                        label="Admitted To*"
-                                        labelId="admitted-to-label"
                                         errors={state.errors.admitted_to}
                                     />
                                 </div>
 
-                                <div>
-                                    <label>
-                                        Action
-                                    </label>
+                                <div className="flex-1">
+                                    <InputLabel id="action-label">Action </InputLabel>
                                     <NativeSelectField
                                         name="action"
                                         variant="outlined"
@@ -384,6 +390,14 @@ export const DailyRounds = (props: any) => {
                                     />
                                     <ErrorHelperText error={state.errors.action} />
                                 </div>
+                            </div>
+
+                            <div className="my-4">
+                                <InputLabel>Medication</InputLabel>
+                                <PrescriptionBuilder prescriptions={prescriptions} setPrescriptions={setPrescriptions} />
+                            </div>
+
+                            <div className="md:grid gap-4 grid-cols-1 md:grid-cols-2">
                                 <div className="flex-1">
 
                                     <InputLabel id="review_time-label">Review After </InputLabel>
@@ -426,7 +440,7 @@ export const DailyRounds = (props: any) => {
                             </div>
                         </CardContent>
                     </form>
-                </Card>
+                </div>
             </div>
         </div>)
 };
