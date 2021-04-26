@@ -82,7 +82,7 @@
     "react-google-recaptcha": "^2.1.0",
     "react-leaflet-location-picker": "^1.4.2",
     "react-phone-input-2": "^2.13.9",
-    "react-redux": "^7.2.2",
+    "react-redux": "^7.2.4",
     "react-scripts": "^3.4.3",
     "react-swipeable-views": "^0.13.9",
     "react-transition-group": "^4.4.1",
