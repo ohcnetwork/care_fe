@@ -318,7 +318,6 @@ export const DISEASE_STATUS = [
   "POSITIVE",
   "SUSPECTED",
   "NEGATIVE",
-  "RECOVERY",
   "RECOVERED",
   "EXPIRED",
 ];
