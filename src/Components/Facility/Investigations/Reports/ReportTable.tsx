@@ -176,7 +176,6 @@ const ReportTable: React.FC<ReportTableProps> = ({
               filterTests */}
             {data.length > 0 ? (
               data.map((t: any) => {
-                console.log({ t });
                 return (
                   <ReportRow
                     data={t.sessionValues}
