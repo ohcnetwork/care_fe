@@ -5,6 +5,7 @@ export const tranformData = _.memoize((data: InvestigationResponse) => {
   const sessions = _.chain(data)
     .map((value) => value.session_object)
     .uniqBy("session_external_id")
+    .orderBy("session_created_date", "desc")
     .value();
   const groupByInvestigation = _.chain(data)
     .groupBy("investigation_object.external_id")
@@ -22,6 +23,7 @@ export const tranformData = _.memoize((data: InvestigationResponse) => {
           min: val.investigation_object.min_value,
           max: val.investigation_object.max_value,
           value: val.value,
+          notes: val.notes,
         };
       }
     });

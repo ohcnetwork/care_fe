@@ -84,7 +84,9 @@ const ReportRow = ({ data, name, min, max }: any) => {
                 : {}),
             }}
           >
-            {(d?.value && Math.round((d.value + Number.EPSILON) * 100) / 100) ||
+            {d?.notes ||
+              (d?.value &&
+                Math.round((d.value + Number.EPSILON) * 100) / 100) ||
               "---"}
           </TableCell>
         );
@@ -174,6 +176,7 @@ const ReportTable: React.FC<ReportTableProps> = ({
               filterTests */}
             {data.length > 0 ? (
               data.map((t: any) => {
+                console.log({ t });
                 return (
                   <ReportRow
                     data={t.sessionValues}
