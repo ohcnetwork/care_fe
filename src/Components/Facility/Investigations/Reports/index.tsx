@@ -330,7 +330,10 @@ const InvestigationReports = ({ id }: any) => {
                   )}
                   renderInput={(params) => (
                     <>
-                      <InputLabel>Select Investingations</InputLabel>
+                      <InputLabel>
+                        Select Investigations (all investigations will be
+                        selected by default)
+                      </InputLabel>
                       <TextField
                         margin="dense"
                         {...params}
