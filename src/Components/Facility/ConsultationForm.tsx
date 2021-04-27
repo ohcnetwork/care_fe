@@ -72,6 +72,7 @@ const initForm: any = {
   ip_no: "",
   discharge_advice: [],
   is_telemedicine: "false",
+  action: "PENDING",
   assigned_to: "",
 };
 
@@ -321,6 +322,16 @@ export const ConsultationForm = (props: any) => {
     form[name] = value;
     dispatch({ type: "set_form", form });
   };
+
+  const handleTelemedicineChange = (e: any) => {
+    const form = { ...state.form };
+    const { name, value } = e.target;
+    form[name] = value;
+    if (value === "false"){
+      form.action = "PENDING";
+    }
+    dispatch({ type: "set_form", form });
+  }
 
   const handleDecisionChange = (e: any) => {
     const form = { ...state.form };
@@ -683,7 +694,7 @@ export const ConsultationForm = (props: any) => {
                     aria-label="covid"
                     name="is_telemedicine"
                     value={state.form.is_telemedicine}
-                    onChange={handleChange}
+                    onChange={handleTelemedicineChange}
                     style={{ padding: "0px 5px" }}
                   >
                     <Box display="flex" flexDirection="row">

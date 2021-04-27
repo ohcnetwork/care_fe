@@ -1,11 +1,9 @@
 import {
   Button,
   CircularProgress,
-  Grid,
   Typography,
   Select,
   MenuItem,
-  InputLabel,
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { navigate } from "raviger";
@@ -17,12 +15,14 @@ import loadable from "@loadable/component";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   getConsultationList,
+  listShiftRequests,
   getPatient,
   getSampleTestList,
   patchSample,
   discharge,
   patchPatient,
   dischargePatient,
+  completeTransfer,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
 import AlertDialog from "../Common/AlertDialog";
@@ -41,8 +41,10 @@ import { validateEmailAddress } from "../../Common/validation";
 import Radio from "@material-ui/core/Radio";
 import RadioGroup from "@material-ui/core/RadioGroup";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
-import FormLabel from "@material-ui/core/FormLabel";
+import Modal from "@material-ui/core/Modal";
 import FormControl from "@material-ui/core/FormControl";
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -90,6 +92,9 @@ export const PatientHome = (props: any) => {
   const { facilityId, id } = props;
   const classes = useStyles();
   const dispatch: any = useDispatch();
+  const [showShifts, setShowShifts] = useState(false);
+  const [isShiftClicked, setIsShiftClicked] = useState(false);
+  const [isShiftDataLoaded, setIsShiftDataLoaded] = useState(false);
   const [patientData, setPatientData] = useState<PatientModel>({});
   const [consultationListData, setConsultationListData] = useState<
     Array<ConsultationModel>
@@ -97,6 +102,7 @@ export const PatientHome = (props: any) => {
   const [sampleListData, setSampleListData] = useState<Array<SampleTestModel>>(
     []
   );
+  const [activeShiftingData, setActiveShiftingData] = useState<Array<any>>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [totalConsultationCount, setTotalConsultationCount] = useState(0);
   const [currentConsultationPage, setCurrentConsultationPage] = useState(1);
@@ -115,6 +121,10 @@ export const PatientHome = (props: any) => {
     show: false,
     message: "",
     title: "",
+  });
+  const [modalFor, setModalFor] = useState({
+    externalId: undefined,
+    loading: false,
   });
   const [open, setOpen] = React.useState(false);
   const [openDischargeDialog, setOpenDischargeDialog] = React.useState(false);
@@ -139,6 +149,15 @@ export const PatientHome = (props: any) => {
     setErrors(errorField);
 
     setDischargeSummaryForm({ email: value });
+  };
+
+  const handleTransferComplete = (shift: any) => {
+    setModalFor({ ...modalFor, loading: true });
+    dispatch(completeTransfer({ externalId: modalFor })).then(() => {
+      navigate(
+        `/facility/${shift.assigned_facility}/patient/${shift.patient}/consultation`
+      );
+    });
   };
 
   const initPreDischargeForm: preDischargeFormInterface = {
@@ -362,6 +381,27 @@ export const PatientHome = (props: any) => {
     [dispatch, id, sampleListOffset]
   );
 
+
+  const fetchActiveShiftingData = useCallback(
+    async (status: statusType) => {
+      const shiftingRes = isShiftClicked ? await dispatch(
+        listShiftRequests({ patient: id }, "shift-list-call")
+      ): activeShiftingData;
+      setIsShiftDataLoaded(isShiftClicked)
+      if (!status.aborted) {
+        if (
+          shiftingRes &&
+          shiftingRes.data &&
+          shiftingRes.data.results
+        ) {
+          const activeShiftingRes: any[] = shiftingRes.data.results
+          setActiveShiftingData(activeShiftingRes);
+        }
+      }
+    },
+    [dispatch, id, isShiftClicked]
+  )
+
   useAbortableEffect(
     (status: statusType) => {
       fetchpatient(status);
@@ -381,6 +421,13 @@ export const PatientHome = (props: any) => {
       fetchSampleTest(status);
     },
     [dispatch, fetchSampleTest, sampleFlag]
+  );
+
+  useAbortableEffect(
+    (status: statusType) => {
+      fetchActiveShiftingData(status);
+    },
+    [dispatch, fetchActiveShiftingData]
   );
 
   const handleConsultationPagination = (page: number, limit: number) => {
@@ -502,6 +549,7 @@ export const PatientHome = (props: any) => {
     ));
   }
 
+
   return (
     <div className="px-2 pb-2">
       {showAlertMessage.show && (
@@ -559,8 +607,8 @@ export const PatientHome = (props: any) => {
             </div>
           </div>
         )}
-        <section className="md:flex mt-4">
-          <div className="md:w-2/3 mx-2">
+      <section className="md:flex items-center mt-4 space-y-2">
+          <div className="md:w-2/3 mx-2 h-full">
             <div className="bg-white rounded-lg shadow p-4 h-full">
               <h1 className="font-bold text-3xl">
                 {" "}
@@ -634,8 +682,10 @@ export const PatientHome = (props: any) => {
                   )}
               </div>
               <div className="flex flex-wrap mt-2">
-                {patientData.is_vaccinated && (
+                {patientData.is_vaccinated ? (
                   <Badge color="blue" icon="syringe" text="Vaccinated" />
+                ) : (
+                  <Badge color="yellow" icon="exclamation-triangle" text="Not Vaccinated" />
                 )}
 
                 {patientData.allow_transfer ? (
@@ -670,10 +720,10 @@ export const PatientHome = (props: any) => {
               </div>
             </div>
           </div>
-          <div className="md:w-1/3 mx-2">
+          <div className="md:w-1/3 mx-2 h-full">
             <div
               id="actions"
-              className="space-y-2 mt-2 flex-col justify-between flex h-full"
+              className="space-y-2 flex-col justify-between flex h-full"
             >
               <div>
                 {patientData.review_time && (
@@ -694,7 +744,7 @@ export const PatientHome = (props: any) => {
                 )}
                 <div className="p-2 bg-white rounded-lg shadow text-center">
                   <div className="flex justify-between">
-                    <div className="w-1/2 border-r-2">
+                    <div className="w-1/2 border-r-2 truncate">
                       <div className="text-sm leading-5 font-medium text-gray-500">
                         Disease Status
                       </div>
@@ -702,7 +752,7 @@ export const PatientHome = (props: any) => {
                         {patientData.disease_status}
                       </div>
                     </div>
-                    <div className="w-1/2">
+                    <div className="w-1/2 truncate">
                       <div className="text-sm leading-5 font-medium text-gray-500">
                         Status
                       </div>
@@ -712,8 +762,8 @@ export const PatientHome = (props: any) => {
                     </div>
                   </div>
                 </div>
-                <div className="flex justify-between p-2 bg-white rounded-lg shadow px-4 mt-2">
-                  <div className="w-1/2">
+                <div className="flex justify-between p-2 bg-white rounded-lg shadow text-center px-4 mt-2">
+                  <div className="w-1/2 border-r-2 truncate">
                     <div className="text-sm leading-5 font-medium text-gray-500">
                       Created
                     </div>
@@ -728,7 +778,7 @@ export const PatientHome = (props: any) => {
                       </div>
                     </div>
                   </div>
-                  <div className="w-1/2">
+                  <div className="w-1/2 truncate">
                     <div className="text-sm leading-5 font-medium text-gray-500">
                       Last Edited
                     </div>
@@ -780,6 +830,186 @@ export const PatientHome = (props: any) => {
             </div>
           </div>
         </section>
+      <section className=" bg-white rounded-lg shadow p-4 h-full space-y-2 text-gray-100 mt-4">
+      <div className= "flex justify-between border-b border-dashed text-gray-900 font-semibold text-left text-lg pb-2"
+       onClick={() => {setShowShifts(!showShifts)
+        setIsShiftClicked(true)}}
+      >
+        <div>
+          Shifting
+        </div>
+        {showShifts ? <ExpandLessIcon/>:<ExpandMoreIcon/>}
+      </div>
+        <div className={showShifts ? activeShiftingData.length ? "grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3": "" : "hidden"}>
+          { activeShiftingData.length ?
+            activeShiftingData.map((shift: any) => (
+              <div key={`shift_${shift.id}`} className="mx-2 ">
+                <div className="overflow-hidden shadow rounded-lg bg-white h-full">
+                  <div
+                    className={
+                      "p-4 h-full flex flex-col justify-between " +
+                      (shift.patient_object.disease_status === "POSITIVE"
+                        ? "bg-red-50"
+                        : "")
+                    }
+                  >
+
+                    <div>
+                      <div className="flex justify-between mt-1">
+                        <div>
+                          {shift.emergency && (
+                            <span className="flex-shrink-0 inline-block px-2 py-0.5 text-red-800 text-xs leading-4 font-medium bg-red-100 rounded-full">
+                              Emergency
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <dl className="grid grid-cols-1 col-gap-1 row-gap-2 sm:grid-cols-1">
+                        <div className="sm:col-span-1">
+                          <dt
+                            title="Shifting status"
+                            className="text-sm leading-5 font-medium text-gray-500 flex items-center"
+                          >
+                            <i className="fas fa-truck mr-2" />
+                            <dd className="font-bold text-sm leading-5 text-gray-900">
+                              {shift.status}
+                            </dd>
+                          </dt>
+                        </div>
+                        <div className="sm:col-span-1">
+                          <dt
+                            title=" Origin facility"
+                            className="text-sm leading-5 font-medium text-gray-500 flex items-center"
+                          >
+                            <i className="fas fa-plane-departure mr-2"></i>
+                            <dd className="font-bold text-sm leading-5 text-gray-900">
+                              {(shift.orgin_facility_object || {})?.name}
+                            </dd>
+                          </dt>
+                        </div>
+                        <div className="sm:col-span-1">
+                          <dt
+                            title="Shifting approving facility"
+                            className="text-sm leading-5 font-medium text-gray-500 flex items-center"
+                          >
+                            <i className="fas fa-user-check mr-2"></i>
+                            <dd className="font-bold text-sm leading-5 text-gray-900">
+                              {(shift.shifting_approving_facility_object || {})?.name}
+                            </dd>
+                          </dt>
+                        </div>
+                        <div className="sm:col-span-1">
+                          <dt
+                            title=" Assigned facility"
+                            className="text-sm leading-5 font-medium text-gray-500 flex items-center"
+                          >
+                            <i className="fas fa-plane-arrival mr-2"></i>
+
+                            <dd className="font-bold text-sm leading-5 text-gray-900">
+                              {(shift.assigned_facility_object || {})?.name ||
+                                "Yet to be decided"}
+                            </dd>
+                          </dt>
+                        </div>
+
+                        <div className="sm:col-span-1">
+                          <dt
+                            title="  Last Modified"
+                            className={
+                              "text-sm leading-5 font-medium flex items-center " +
+                              (moment()
+                                .subtract(2, "hours")
+                                .isBefore(shift.modified_date)
+                                ? "text-gray-900"
+                                : "rounded p-1 bg-red-400 text-white")
+                            }
+                          >
+                            <i className="fas fa-stopwatch mr-2"></i>
+                            <dd className="font-bold text-sm leading-5">
+                              {moment(shift.modified_date).format("LLL") || "--"}
+                            </dd>
+                          </dt>
+                        </div>
+                      </dl>
+                    </div>
+                    <div className="mt-2 flex">
+                      <button
+                        onClick={(_) => navigate(`/shifting/${shift.external_id}`)}
+                        className="btn w-full btn-default bg-white mr-2"
+                      >
+                        <i className="fas fa-eye mr-2" /> All Details
+                      </button>
+                    </div>
+                    {shift.status === "TRANSFER IN PROGRESS" &&
+                      shift.assigned_facility && (
+                        <div className="mt-2">
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            fullWidth
+                            onClick={() => setModalFor(shift.external_id)}
+                          >
+                            TRANSFER TO RECEIVING FACILITY
+                          </Button>
+
+                          <Modal
+                            open={modalFor === shift.external_id}
+                            onClose={(_) =>
+                              setModalFor({ externalId: undefined, loading: false })
+                            }
+                          >
+                            <div className="h-screen w-full absolute flex items-center justify-center bg-modal">
+                              <div className="bg-white rounded shadow p-8 m-4 max-w-sm max-h-full text-center">
+                                <div className="mb-4">
+                                  <h1 className="text-2xl">
+                                    Confirm Transfer Complete!
+                                  </h1>
+                                </div>
+                                <div className="mb-8">
+                                  <p>
+                                    Are you sure you want to mark this transfer as
+                                    complete? The Origin facility will no longer have
+                                    access to this patient
+                                  </p>
+                                </div>
+                                <div className="flex gap-2 justify-center">
+                                  <Button
+                                    size="small"
+                                    variant="outlined"
+                                    fullWidth
+                                    onClick={() => {
+                                      setModalFor({
+                                        externalId: undefined,
+                                        loading: false,
+                                      });
+                                    }}
+                                  >
+                                    Cancel
+                                  </Button>
+                                  <Button
+                                    size="small"
+                                    variant="outlined"
+                                    fullWidth
+                                    onClick={(_) => handleTransferComplete(shift)}
+                                  >
+                                    Confirm
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          </Modal>
+                        </div>
+                      )}
+                  </div>
+                </div>
+              </div>
+            )):
+           <div className=" text-center text-gray-500">{isShiftDataLoaded ? "No Shifting Records!": "Loading..."}</div>
+
+          }
+          </div>
+        </section>
+
         <section className="md:flex mt-4 space-y-2">
           <div className="md:w-1/3 mx-2">
             <div className="bg-white rounded-lg shadow p-4 h-full space-y-2">

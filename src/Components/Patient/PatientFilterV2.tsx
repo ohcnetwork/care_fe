@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import {
   SelectField,
+  MultiSelectField,
   DateInputField,
   TextInputField,
 } from "../Common/HelperInputFields";
@@ -49,7 +50,7 @@ export default function PatientFilterV2(props: any) {
       filter.last_consultation_discharge_date_before || null,
     last_consultation_discharge_date_after:
       filter.last_consultation_discharge_date_after || null,
-    last_consultation_admitted_to: filter.last_consultation_admitted_to || null,
+    last_consultation_admitted_to_list: filter.last_consultation_admitted_to_list ? filter.last_consultation_admitted_to_list.split(",") : [],
     srf_id: filter.srf_id || null,
     is_vaccinated: filter.is_vaccinated || null,
     covin_id: filter.covin_id || null,
@@ -85,13 +86,22 @@ export default function PatientFilterV2(props: any) {
   };
 
   const handleChange = (event: any) => {
-    let { name, value } = event.target;
+    const { name, value } = event.target;
 
     const filterData: any = { ...filterState };
     filterData[name] = value;
 
     setFilterState(filterData);
   };
+
+  const handleMultiSelectChange = (event: any) => {
+    const { name, value } = event.target;
+
+    const filterData: any = { ...filterState };
+    filterData[name] = [...value];
+
+    setFilterState(filterData);
+  }
 
   const applyFilter = () => {
     const {
@@ -110,7 +120,7 @@ export default function PatientFilterV2(props: any) {
       last_consultation_admission_date_after,
       last_consultation_discharge_date_before,
       last_consultation_discharge_date_after,
-      last_consultation_admitted_to,
+      last_consultation_admitted_to_list,
       is_vaccinated,
       covin_id,
       srf_id,
@@ -160,7 +170,7 @@ export default function PatientFilterV2(props: any) {
         (disease_status == "Show All" ? "" : disease_status) || "",
       age_min: age_min || "",
       age_max: age_max || "",
-      last_consultation_admitted_to: last_consultation_admitted_to || "",
+      last_consultation_admitted_to_list: last_consultation_admitted_to_list || [],
       srf_id: srf_id || "",
       is_vaccinated: is_vaccinated || "",
       covin_id: covin_id || "",
@@ -293,17 +303,12 @@ export default function PatientFilterV2(props: any) {
           <span className="text-sm font-semibold">
             Last Admitted to (Bed Type)
           </span>
-          <SelectField
-            name="last_consultation_admitted_to"
+          <MultiSelectField
+            name="last_consultation_admitted_to_list"
             variant="outlined"
-            margin="dense"
-            value={filterState.last_consultation_admitted_to}
-            options={[
-              { id: "", text: "Show All" },
-              ...PATIENT_FILTER_ADMITTED_TO,
-            ]}
-            onChange={handleChange}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+            value={filterState.last_consultation_admitted_to_list}
+            options={[ ...PATIENT_FILTER_ADMITTED_TO ]}
+            onChange={handleMultiSelectChange}
           />
         </div>
         <div className="w-64 flex-none">
