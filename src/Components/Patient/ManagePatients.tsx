@@ -17,9 +17,10 @@ import { PhoneNumberField } from '../Common/HelperInputFields';
 import NavTabs from '../Common/NavTabs';
 import Pagination from "../Common/Pagination";
 import { InputSearchBox } from "../Common/SearchBox";
-import { TELEMEDICINE_ACTIONS } from "../../Common/constants";
+import { ADMITTED_TO, GENDER_TYPES, TELEMEDICINE_ACTIONS } from "../../Common/constants";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import PatientFilterV2 from "./PatientFilterV2";
+import { parseOptionId } from '../../Common/utils';
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -121,7 +122,7 @@ export const PatientManager = (props: any) => {
     last_consultation_admission_date_after: qParams.last_consultation_admission_date_after || undefined,
     last_consultation_discharge_date_before: qParams.last_consultation_discharge_date_before || undefined,
     last_consultation_discharge_date_after: qParams.last_consultation_discharge_date_after || undefined,
-    last_consultation_admitted_to: qParams.last_consultation_admitted_to || undefined,
+    last_consultation_admitted_to_list: qParams.last_consultation_admitted_to_list || undefined,
     srf_id: qParams.srf_id || undefined,
     is_vaccinated: qParams.is_vaccinated || undefined,
     covin_id: qParams.covin_id || undefined
@@ -160,7 +161,31 @@ export const PatientManager = (props: any) => {
         setIsLoading(false);
       })
 
-  }, [dispatch, facilityId, qParams.last_consultation_admission_date_before, qParams.last_consultation_admission_date_after, qParams.last_consultation_discharge_date_before, qParams.last_consultation_discharge_date_after, qParams.age_max, qParams.age_min, qParams.last_consultation_admitted_to, qParams.facility, qParams.category, qParams.gender, qParams.ordering, qParams.created_date_before, qParams.created_date_after, qParams.modified_date_before, qParams.modified_date_after, qParams.is_active, qParams.disease_status, qParams.name, qParams.page, qParams.phone_number, qParams.srf_id, qParams.covin_id, qParams.is_vaccinated]);
+  },[ dispatch,
+      facilityId,
+      qParams.last_consultation_admission_date_before,
+      qParams.last_consultation_admission_date_after,
+      qParams.last_consultation_discharge_date_before,
+      qParams.last_consultation_discharge_date_after,
+      qParams.age_max, qParams.age_min,
+      qParams.last_consultation_admitted_to_list,
+      qParams.facility,
+      qParams.category,
+      qParams.gender,
+      qParams.ordering,
+      qParams.created_date_before,
+      qParams.created_date_after,
+      qParams.modified_date_before,
+      qParams.modified_date_after,
+      qParams.is_active,
+      qParams.disease_status,
+      qParams.name,
+      qParams.page,
+      qParams.phone_number,
+      qParams.srf_id,
+      qParams.covin_id,
+      qParams.is_vaccinated ]
+  );
 
   const updateQuery = (params: any) => {
     const nParams = Object.assign({}, qParams, params);
@@ -420,8 +445,8 @@ export const PatientManager = (props: any) => {
           {badge("Ordering", qParams.ordering)}
           {badge("Category", qParams.category)}
           {badge("Disease Status", qParams.disease_status)}
-          {badge("Gender", qParams.gender)}
-          {badge("Admitted to", qParams.last_consultation_admitted_to)}
+          {badge("Gender", parseOptionId(GENDER_TYPES, qParams.gender))}
+          {badge("Admitted to", ADMITTED_TO[qParams.last_consultation_admitted_to])}
           {badge("Age min", qParams.age_min)}
           {badge("Age max", qParams.age_max)}
           {badge("SRF ID", qParams.srf_id)}

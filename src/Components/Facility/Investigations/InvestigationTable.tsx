@@ -14,6 +14,7 @@ import { createStyles, makeStyles, withStyles } from "@material-ui/styles";
 import React from "react";
 import { useState } from "react";
 import { TextInputField } from "../../Common/HelperInputFields";
+import { getColorIndex, rowColor } from "./Reports/utils";
 
 const useStyle = makeStyles((theme: Theme) => ({
   tableCell: {
@@ -39,16 +40,33 @@ const TestRow = ({ data }: any) => {
   const className = useStyle();
 
   const tableClass = "px-4 h-12 text-sm border-l border-r border-gray-400";
+  const color = getColorIndex({
+    min: data.investigation_object.min_value,
+    max: data.investigation_object.max_value,
+    value: data?.value,
+  });
 
   return (
     <StyledTableRow>
       <TableCell className={tableClass}>
         {data.investigation_object.name}
       </TableCell>
-      <TableCell className={tableClass} align="right">
-        {data.investigation_object.investigation_type === "Float"
-          ? data.value
-          : data.notes}
+      <TableCell
+        className={tableClass}
+        align="right"
+        style={{
+          ...(color >= 0
+            ? {
+                backgroundColor: rowColor[color]?.color || "white",
+                color: rowColor[color]?.text || "black",
+              }
+            : {}),
+        }}
+      >
+        {data?.notes ||
+          (data?.value &&
+            Math.round((data.value + Number.EPSILON) * 100) / 100) ||
+          "---"}
       </TableCell>
       <TableCell className={tableClass} align="left">
         {data.investigation_object.unit || "---"}
