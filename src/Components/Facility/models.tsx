@@ -73,6 +73,7 @@ export interface ConsultationModel {
   symptoms_onset_date?: string;
   consultation_notes?: string;
   is_telemedicine?: boolean;
+  discharge_advice?: any;
 }
 export interface PatientStatsModel {
   id?: number;
