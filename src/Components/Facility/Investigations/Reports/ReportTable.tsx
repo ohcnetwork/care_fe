@@ -76,6 +76,7 @@ const ReportRow = ({ data, name, min, max }: any) => {
             className={className.tableCell}
             align="center"
             style={{
+              wordBreak: "break-all",
               ...(color >= 0
                 ? {
                     backgroundColor: rowColor[color]?.color || "white",
