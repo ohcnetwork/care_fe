@@ -123,6 +123,19 @@ export const DailyRoundListDetails = (props: any) => {
             <span className="font-semibold leading-relaxed">Other Details: </span>
             {dailyRoundListDetailsData.other_details || '-'}
           </div>
+          <div className="md:col-span-2">
+            <span className="font-semibold leading-relaxed">Medication: </span>
+            {dailyRoundListDetailsData.medication_given && dailyRoundListDetailsData.medication_given.length ?
+              <ul className="divide-y divide-gray-200">
+                  {dailyRoundListDetailsData.medication_given.map((med) => (
+                    <li className="py-4 flex">
+                      <p className="text-sm font-medium">{ med.medicine }</p>
+                      <p className="text-sm text-gray-900 ml-2">Dosage:{ med.dosage } - { med.days } days </p>
+                  </li>
+                  ))}
+              </ul>
+            : "No prescribed medication"}
+          </div>
           <div>
             <span className="font-semibold leading-relaxed">Recommend Discharge: </span>
             {dailyRoundListDetailsData.recommend_discharge ? <span className="badge badge-pill badge-warning">Yes</span> : <span className="badge badge-pill badge-secondary">No</span>}
