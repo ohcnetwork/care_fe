@@ -5,6 +5,10 @@ import {
   CircularProgress,
   InputLabel,
   IconButton,
+  RadioGroup,
+  FormControlLabel,
+  Box,
+  Radio,
 } from "@material-ui/core";
 import Popover from "@material-ui/core/Popover";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
@@ -63,6 +67,7 @@ const initForm: any = {
   district: "",
   local_body: "",
   ward: "",
+  kasp_empanelled: "false",
   address: "",
   phone_number: "",
   latitude: "",
@@ -184,6 +189,9 @@ export const FacilityCreate = (props: FacilityProps) => {
             district: res.data.district ? res.data.district : "",
             local_body: res.data.local_body ? res.data.local_body : "",
             ward: res.data.ward_object ? res.data.ward_object.id : initialWards,
+            kasp_empanelled: res.data.kasp_empanelled
+              ? String(res.data.kasp_empanelled)
+              : "false",
             address: res.data.address,
             pincode: res.data.pincode,
             phone_number: res.data.phone_number.length == 10 ? "+91" + res.data.phone_number : res.data.phone_number,
@@ -339,6 +347,7 @@ export const FacilityCreate = (props: FacilityProps) => {
         pincode: state.form.pincode,
         local_body: state.form.local_body,
         ward: state.form.ward,
+        kasp_empanelled: JSON.parse(state.form.kasp_empanelled),
         location:
           state.form.latitude && state.form.longitude
             ? {
@@ -430,20 +439,20 @@ export const FacilityCreate = (props: FacilityProps) => {
                 {isStateLoading ? (
                   <CircularProgress size={20} />
                 ) : (
-                    <SelectField
-                      name="state"
-                      variant="outlined"
-                      margin="dense"
-                      value={state.form.state}
-                      options={states}
-                      optionValue="name"
-                      onChange={(e) => [
-                        handleChange(e),
-                        fetchDistricts(String(e.target.value)),
-                      ]}
-                      errors={state.errors.state}
-                    />
-                  )}
+                  <SelectField
+                    name="state"
+                    variant="outlined"
+                    margin="dense"
+                    value={state.form.state}
+                    options={states}
+                    optionValue="name"
+                    onChange={(e) => [
+                      handleChange(e),
+                      fetchDistricts(String(e.target.value)),
+                    ]}
+                    errors={state.errors.state}
+                  />
+                )}
               </div>
 
               <div>
@@ -451,20 +460,20 @@ export const FacilityCreate = (props: FacilityProps) => {
                 {isDistrictLoading ? (
                   <CircularProgress size={20} />
                 ) : (
-                    <SelectField
-                      name="district"
-                      variant="outlined"
-                      margin="dense"
-                      value={state.form.district}
-                      options={districts}
-                      optionValue="name"
-                      onChange={(e) => [
-                        handleChange(e),
-                        fetchLocalBody(String(e.target.value)),
-                      ]}
-                      errors={state.errors.district}
-                    />
-                  )}
+                  <SelectField
+                    name="district"
+                    variant="outlined"
+                    margin="dense"
+                    value={state.form.district}
+                    options={districts}
+                    optionValue="name"
+                    onChange={(e) => [
+                      handleChange(e),
+                      fetchLocalBody(String(e.target.value)),
+                    ]}
+                    errors={state.errors.district}
+                  />
+                )}
               </div>
 
               <div className="md:col-span-2">
@@ -472,41 +481,41 @@ export const FacilityCreate = (props: FacilityProps) => {
                 {isLocalbodyLoading ? (
                   <CircularProgress size={20} />
                 ) : (
-                    <SelectField
-                      name="local_body"
-                      variant="outlined"
-                      margin="dense"
-                      value={state.form.local_body}
-                      options={localBody}
-                      optionValue="name"
-                      onChange={(e) => [
-                        handleChange(e),
-                        fetchWards(String(e.target.value)),
-                      ]}
-                      errors={state.errors.local_body}
-                    />
-                  )}
+                  <SelectField
+                    name="local_body"
+                    variant="outlined"
+                    margin="dense"
+                    value={state.form.local_body}
+                    options={localBody}
+                    optionValue="name"
+                    onChange={(e) => [
+                      handleChange(e),
+                      fetchWards(String(e.target.value)),
+                    ]}
+                    errors={state.errors.local_body}
+                  />
+                )}
               </div>
               <div className="md:col-span-2">
                 <InputLabel id="ward-label">Ward*</InputLabel>
                 {isWardLoading ? (
                   <CircularProgress size={20} />
                 ) : (
-                    <SelectField
-                      name="ward"
-                      variant="outlined"
-                      margin="dense"
-                      options={ward
-                        .sort((a, b) => a.number - b.number)
-                        .map((e) => {
-                          return { id: e.id, name: e.number + ": " + e.name };
-                        })}
-                      value={state.form.ward}
-                      optionValue="name"
-                      onChange={handleChange}
-                      errors={state.errors.ward}
-                    />
-                  )}
+                  <SelectField
+                    name="ward"
+                    variant="outlined"
+                    margin="dense"
+                    options={ward
+                      .sort((a, b) => a.number - b.number)
+                      .map((e) => {
+                        return { id: e.id, name: e.number + ": " + e.name };
+                      })}
+                    value={state.form.ward}
+                    optionValue="name"
+                    onChange={handleChange}
+                    errors={state.errors.ward}
+                  />
+                )}
               </div>
 
               <div className="md:col-span-2">
@@ -558,6 +567,32 @@ export const FacilityCreate = (props: FacilityProps) => {
                   onChange={handleChange}
                   errors={state.errors.oxygen_capacity}
                 />
+              </div>
+
+              <div>
+                <InputLabel id="kasp_empanelled">
+                  Is this facility KASP empanelled?
+                </InputLabel>
+                <RadioGroup
+                  aria-label="kasp_empanelled"
+                  name="kasp_empanelled"
+                  value={state.form.kasp_empanelled}
+                  onChange={handleChange}
+                  style={{ padding: "0px 5px" }}
+                >
+                  <Box display="flex" flexDirection="row">
+                    <FormControlLabel
+                      value="true"
+                      control={<Radio />}
+                      label="Yes"
+                    />
+                    <FormControlLabel
+                      value="false"
+                      control={<Radio />}
+                      label="No"
+                    />
+                  </Box>
+                </RadioGroup>
               </div>
             </div>
             <div className="flex items-center mt-4 -mx-2">

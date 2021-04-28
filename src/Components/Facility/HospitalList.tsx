@@ -62,8 +62,9 @@ export const HospitalList = () => {
     async (status: statusType) => {
       setIsLoading(true);
       const params = qParams.search
-        ? { limit, offset, search_text: qParams.search }
-        : { limit, offset };
+        ? { limit, offset, search_text: qParams.search, kasp_empanelled: qParams.kasp_empanelled }
+        : { limit, offset, kasp_empanelled: qParams.kasp_empanelled };
+
       const res = await dispatchAction(getFacilities(params));
       if (!status.aborted) {
         if (res && res.data) {
@@ -73,7 +74,7 @@ export const HospitalList = () => {
         setIsLoading(false);
       }
     },
-    [dispatchAction, offset, qParams.search]
+    [dispatchAction, offset, qParams.search, qParams.kasp_empanelled]
   );
 
   useAbortableEffect(
@@ -85,8 +86,12 @@ export const HospitalList = () => {
 
   const onSearchSuspects = (search: string) => {
     if (search !== "") setQueryParams({ search }, true);
-    else setQueryParams({}, true);
+    else setQueryParams({ kasp_empanelled: qParams.kasp_empanelled }, true);
   };
+
+  const onKaspChange = (value: string) => {
+    setQueryParams({ "kasp_empanelled": value, search: qParams.search ? qParams.search : '' }, true);
+  }
 
   const handleDownload = async () => {
     const res = await dispatchAction(downloadFacility());
@@ -135,6 +140,12 @@ export const HospitalList = () => {
     setOffset(offset);
   };
 
+  const kaspOptionValues = [
+    { "id": "", "text": "Not Selected" },
+    { "id": "true", "text": "Yes" },
+    { "id": "false", "text": "No" }
+  ]
+
   let facilityList: any[] = [];
   if (data && data.length) {
     facilityList = data.map((facility: any, idx: number) => {
@@ -146,9 +157,15 @@ export const HospitalList = () => {
           <div className="block rounded-lg bg-white shadow h-full hover:border-primary-500 overflow-hidden">
             <div className="h-full flex flex-col justify-between">
               <div className="px-6 py-4">
-                <div className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800">
+                <div className="inline-flex items-center px-2.5 py-0.5 mr-4 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800">
                   {facility.facility_type}
                 </div>
+                {facility.kasp_empanelled && (
+                  <div className="mt-2 inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-yellow-100 text-yellow-800">
+                    KASP
+                  </div>
+                )
+                }
                 <div className="font-black text-2xl capitalize mt-2">
                   {facility.name}
                 </div>
@@ -255,6 +272,7 @@ export const HospitalList = () => {
             errors=""
           />
         </div>
+
         <div className={classes.root}>
           <div>
             <Accordion className="lg:w-1/2 mt-2 lg:mt-0 md:mt-0 w-3/4 m-0 m-auto">
@@ -342,6 +360,22 @@ export const HospitalList = () => {
           </div>
         </div>
       </div>
+
+      <div className="mx-8 my-2 w-1/3">
+        <InputLabel id="kasp_empanelled">
+          KASP empanelled
+        </InputLabel>
+        <SelectField
+          name="facility_type"
+          variant="outlined"
+          margin="dense"
+          value={qParams.kasp_empanelled}
+          options={kaspOptionValues}
+          onChange={(e) => onKaspChange(e.target.value)}
+          errors=""
+        />
+      </div>
+
       <div className="px-3 md:px-8">
         <div className="flex flex-wrap md:-mx-4">{manageFacilities}</div>
       </div>

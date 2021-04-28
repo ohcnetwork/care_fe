@@ -231,6 +231,7 @@ export interface DailyRoundsModel {
   other_details?: string;
   consultation?: number;
   additional_symptoms?: Array<number>;
+  medication_given?: Array<any>;
   additional_symptoms_text?: string;
   current_health?: string;
   id?: number;
