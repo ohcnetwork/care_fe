@@ -148,7 +148,7 @@ const initForm: any = {
   covin_id: "",
   is_vaccinated: "false",
   number_of_doses: 0,
-  vaccine_name: "CoviShield",
+  vaccine_name: null,
   ...medicalHistoryChoices,
 };
 
@@ -280,7 +280,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     }
   };
 
-  const vaccineNames = ["CoviShield", "Covaxin"];
+  const vaccineNames = ["Select", "CoviShield", "Covaxin"];
 
   const fetchExtResultData = async (e: any) => {
     e.preventDefault();
@@ -600,7 +600,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         covin_id: state.form.covin_id,
         is_vaccinated: state.form.is_vaccinated,
         number_of_doses: Number(state.form.number_of_doses),
-        vaccine_name: state.form.vaccine_name,
+        vaccine_name: state.form.vaccine_name && state.form.vaccine_name !== 'Select'
+          ? state.form.vaccine_name : null,
         test_type: state.form.test_type,
         name: state.form.name,
         pincode: state.form.pincode ? state.form.pincode : undefined,
