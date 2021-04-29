@@ -6,16 +6,15 @@ import {
   TableHead,
   TableRow,
   TableBody,
-  Theme,
   InputLabel,
   Box,
+  Button,
+  TableRowProps,
 } from "@material-ui/core";
 import { createStyles, makeStyles, withStyles } from "@material-ui/styles";
 import React from "react";
 import { useState } from "react";
 import { SelectField, TextInputField } from "../../Common/HelperInputFields";
-import { getColorIndex, rowColor } from "./Reports/utils";
-import Checkbox from "@material-ui/core/Checkbox";
 import _ from "lodash";
 
 const useStyle = makeStyles(() => ({
@@ -38,52 +37,31 @@ const StyledTableRow = withStyles(() =>
   })
 )(TableRow);
 
-const TestRow = ({ data, onChange }: any) => {
-  const [isChecked, setIsChecked] = useState(false);
+const TestRow = ({ data, onChange, showForm, value, isChanged }: any) => {
   const tableClass = `h-12 text-sm border-l border-r border-gray-400 px-2`;
-  const color = getColorIndex({
-    min: data.investigation_object.min_value,
-    max: data.investigation_object.max_value,
-    value: data?.value,
-  });
-  const testValue =
-    data?.notes ||
-    (data?.value && Math.round((data.value + Number.EPSILON) * 100) / 100);
+  const testValue = value;
 
   const inputType =
     data?.investigation_object?.investigation_type === "Float"
       ? "number"
       : "string";
   return (
-    <StyledTableRow>
-      <TableCell className={tableClass}>
-        <Checkbox
-          checked={isChecked}
-          onChange={(e) => setIsChecked(e.target.checked)}
-          color="primary"
-        />
-      </TableCell>
+    <StyledTableRow className={isChanged ? "bg-green-300" : ""}>
       <TableCell className={tableClass}>
         {data?.investigation_object?.name || "---"}
       </TableCell>
       <TableCell
         className={`h-12 text-sm border-l border-r border-gray-400 ${
-          isChecked ? "p-0" : "px-2"
+          showForm ? "p-0" : "px-2"
         } `}
         align="right"
         style={{
           padding: 0,
           minWidth: 150,
           maxWidth: 150,
-          ...(color >= 0
-            ? {
-                backgroundColor: rowColor[color]?.color || "white",
-                color: rowColor[color]?.text || "black",
-              }
-            : {}),
         }}
       >
-        {isChecked ? (
+        {showForm ? (
           data.investigation_type === "Choice" ? (
             <SelectField
               name="preferred_vehicle_choice"
@@ -105,15 +83,6 @@ const TestRow = ({ data, onChange }: any) => {
               type={inputType}
               step="any"
               placeholder="Enter value"
-              autoFocus
-              style={{
-                ...(color >= 0
-                  ? {
-                      backgroundColor: rowColor[color]?.color || "white",
-                      color: rowColor[color]?.text || "black",
-                    }
-                  : {}),
-              }}
             />
           )
         ) : (
@@ -123,10 +92,10 @@ const TestRow = ({ data, onChange }: any) => {
       <TableCell className={tableClass} align="left">
         {data.investigation_object.unit || "---"}
       </TableCell>
-      <TableCell className={tableClass} align="right">
+      <TableCell className={tableClass} align="center">
         {data.investigation_object.min_value || "---"}
       </TableCell>
-      <TableCell className={tableClass} align="right">
+      <TableCell className={tableClass} align="center">
         {data.investigation_object.max_value || "---"}
       </TableCell>
       <TableCell className={tableClass} align="right">
@@ -136,9 +105,16 @@ const TestRow = ({ data, onChange }: any) => {
   );
 };
 
-export const InvestigationTable = ({ title, data, handleValueChange }: any) => {
+export const InvestigationTable = ({
+  title,
+  data,
+  handleValueChange,
+  changedFields,
+  handleUpdateCancel,
+}: any) => {
+  console.log({ data, handleValueChange, changedFields });
   const [searchFilter, setSearchFilter] = useState("");
-
+  const [showForm, setShowForm] = useState(false);
   const filterTests = Object.values(data).filter((i: any) => {
     const result = !(
       String(i.investigation_object.name)
@@ -150,8 +126,33 @@ export const InvestigationTable = ({ title, data, handleValueChange }: any) => {
 
   return (
     <Box padding="1rem" margin="1rem 0">
-      {title && <div className="font-bold text-xl">{title}</div>}
-      <br />
+      <div className="flex items-center justify-between mb">
+        {title && <div className="font-bold text-xl">{title}</div>}
+        <div>
+          <Button
+            variant={showForm ? "outlined" : "contained"}
+            color="primary"
+            onClick={() => {
+              showForm && handleUpdateCancel();
+              setShowForm((prev) => !prev);
+            }}
+          >
+            {!showForm && <i className="fas fa-pencil-alt mr-2" />}
+            {showForm ? "Cancel" : "Update Details"}
+          </Button>
+          {showForm && (
+            <Button
+              variant={"contained"}
+              color="primary"
+              onClick={() => {}}
+              className="ml-2"
+            >
+              Save
+            </Button>
+          )}
+        </div>
+      </div>
+
       <InputLabel>Search Test</InputLabel>
       <TextInputField
         value={searchFilter}
@@ -166,7 +167,6 @@ export const InvestigationTable = ({ title, data, handleValueChange }: any) => {
         <Table aria-label="simple table" size="small">
           <TableHead>
             <TableRow>
-              <TableCell>&nbsp;</TableCell>
               <TableCell>Name</TableCell>
               <TableCell align="right">value</TableCell>
               <TableCell align="left">Unit</TableCell>
@@ -178,10 +178,18 @@ export const InvestigationTable = ({ title, data, handleValueChange }: any) => {
           <TableBody>
             {filterTests.length > 0 ? (
               filterTests.map((t: any) => {
+                const value =
+                  changedFields[t.id]?.notes ||
+                  changedFields[t.id]?.value ||
+                  null;
+                const isChanged = changedFields[t.id]?.initialValue !== value;
                 return (
                   <TestRow
                     data={t}
                     key={t.id}
+                    showForm={showForm}
+                    value={value}
+                    isChanged={isChanged}
                     onChange={(e: { target: { value: any } }) => {
                       const { target, value } =
                         t?.investigation_object?.investigation_type === "Float"

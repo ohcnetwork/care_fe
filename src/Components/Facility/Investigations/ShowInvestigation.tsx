@@ -9,15 +9,22 @@ import _ from "lodash";
 const Loading = loadable(() => import("../../Common/Loading"));
 
 const initialState = {
-  form: {},
+  changedFields: {},
+  initialValues: {},
 };
 
 const updateFormReducer = (state = initialState, action: any) => {
   switch (action.type) {
-    case "set_form": {
+    case "set_changed_fields": {
       return {
         ...state,
-        form: action.form,
+        changedFields: action.changedFields,
+      };
+    }
+    case "set_initial_values": {
+      return {
+        ...state,
+        initialValues: action.initialValues,
       };
     }
     default:
@@ -43,7 +50,25 @@ export default function ShowInvestigation(props: any) {
             (acc: any, cur: { id: any }) => ({ ...acc, [cur.id]: cur }),
             {}
           );
-          dispatch({ type: "set_form", form: valueMap });
+
+          const changedValues = res.data.results.reduce(
+            (acc: any, cur: any) => ({
+              ...acc,
+              [cur.id]: {
+                id: cur?.id,
+                initialValue: cur?.notes || cur?.value || null,
+                value: cur?.value || null,
+                notes: cur?.notes || null,
+              },
+            }),
+            {}
+          );
+
+          dispatch({ type: "set_initial_values", initialValues: valueMap });
+          dispatch({
+            type: "set_changed_fields",
+            changedFields: changedValues,
+          });
         }
         setIsLoading(false);
       }
@@ -57,13 +82,39 @@ export default function ShowInvestigation(props: any) {
     [fetchData]
   );
   const handleValueChange = (value: any, name: string) => {
-    const form = { ...state.form };
-    _.set(form, name, value);
-    dispatch({ type: "set_form", form });
+    const changedFields = { ...state.changedFields };
+    _.set(changedFields, name, value);
+    dispatch({ type: "set_changed_fields", changedFields });
   };
 
-  const handleSubmit = () => {};
+  const handleSubmit = () => {
+    const data = Object.values(state.changedFields)
+      .filter(
+        (field: any) =>
+          field?.initialValue !== (field?.notes || Number(field?.value) || null)
+      )
+      .map((field: any) => ({
+        id: field?.id,
+        value: field?.value,
+        notes: field?.notes,
+      }));
+    console.log(data);
+  };
   // console.log(state.form);
+
+  const handleUpdateCancel = useCallback(() => {
+    const changedValues = _.chain(state.initialValues)
+      .map((val: any, key: string) => ({
+        id: val?.id,
+        initialValue: val?.notes || val?.value || null,
+        value: val?.value || null,
+        notes: val?.notes || null,
+      }))
+      .reduce((acc: any, cur: any) => ({ ...acc, [cur.id]: cur }), {})
+      .value();
+    dispatch({ type: "set_changed_fields", changedFields: changedValues });
+  }, [state.initialValues]);
+
   return (
     <div className="max-w-7xl mx-auto px-4">
       <PageTitle
@@ -76,8 +127,10 @@ export default function ShowInvestigation(props: any) {
       ) : (
         <InvestigationTable
           title={`ID: ${sessionId}`}
-          data={state.form}
+          data={state.initialValues}
+          changedFields={state.changedFields}
           handleValueChange={handleValueChange}
+          handleUpdateCancel={handleUpdateCancel}
         />
       )}
     </div>
