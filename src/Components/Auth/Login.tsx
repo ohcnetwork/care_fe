@@ -10,6 +10,8 @@ import {
 import { TextInputField } from "../Common/HelperInputFields";
 import { PublicDashboard } from "../Dashboard/PublicDashboard";
 import ReCaptcha from "react-google-recaptcha";
+import VisibilityIcon from '@material-ui/icons/Visibility';
+import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 const get = require('lodash.get');
 
 export const Login = () => {
@@ -22,6 +24,8 @@ export const Login = () => {
   const [form, setForm] = useState(initForm);
   const [errors, setErrors] = useState(initErr);
   const [isCaptchaEnabled, setCaptcha] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
 
   const captchaKey = '6LdvxuQUAAAAADDWVflgBqyHGfq-xmvNJaToM0pN';
 
@@ -76,8 +80,10 @@ export const Login = () => {
         if (res && statusCode === 429) {
           setCaptcha(true);
         } else if (res && statusCode === 200) {
-          localStorage.setItem("care_access_token", res.access);
-          localStorage.setItem("care_refresh_token", res.refresh);
+          if(rememberMe) {
+            localStorage.setItem("care_access_token", res.access);
+            localStorage.setItem("care_refresh_token", res.refresh);
+          }
           navigate("/facility");
           window.location.reload();
         }
@@ -113,18 +119,22 @@ export const Login = () => {
                 onChange={handleChange}
                 errors={errors.username}
               />
-              <TextInputField
-                type="password"
-                name="password"
-                label="Password"
-                variant="outlined"
-                margin="dense"
-                autoComplete='off'
-                InputLabelProps={{ shrink: !!form.password }}
-                value={form.password}
-                onChange={handleChange}
-                errors={errors.password}
-              />
+              <div className="relative w-full">
+                <TextInputField
+                  className="w-full bg-gray-400"
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  label="Password"
+                  variant="outlined"
+                  margin="dense"
+                  autoComplete='off'
+                  InputLabelProps={{ shrink: !!form.password }}
+                  value={form.password}
+                  onChange={handleChange}
+                  errors={errors.password}
+                />
+                {showPassword ? <VisibilityIcon onClick={() => setShowPassword(!showPassword)} className="absolute right-2 top-4" /> : <VisibilityOffIcon onClick={() => setShowPassword(!showPassword)} className="absolute right-2 top-4" />}
+              </div>
             </CardContent>
             <CardActions className="padding16">
               <Grid container justify="center">
@@ -137,15 +147,21 @@ export const Login = () => {
                     <span className="text-red-500">{errors.captcha}</span>
                   </Grid>
                 )}
-                <div className="w-full flex justify-between items-center">
+
+                <div className="w-full flex justify-between items-center px-4 pb-4">
+                  <div onClick={() => setRememberMe(!rememberMe)} className="flex items-center">
+                    <input type="checkbox" className="form-checkbox h-4 w-4 text-green-500 focus:border-green-600 border-gray-600" checked={rememberMe} />
+                    <p className="text-sm text-green-400 hover:text-green-500 ml-2">Remember me</p>
+                  </div>
                   <a href="/forgot-password"
-                      className="text-gray-600 hover:text-gray-900 md:mr-5">
+                      className="text-sm text-green-400 hover:text-green-500">
                     Forgot password?
                   </a>
-                  <button className="bg-green-500 btn text-white px-6" onClick={e => handleSubmit(e)}>
-                    Login
-                  </button>
                 </div>
+
+                <button className="w-full bg-green-500 btn text-white" onClick={e => handleSubmit(e)}>
+                  Login
+                </button>
               </Grid>
             </CardActions>
           </form>
