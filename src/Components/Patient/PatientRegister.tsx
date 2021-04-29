@@ -147,6 +147,8 @@ const initForm: any = {
   cluster_name: "",
   covin_id: "",
   is_vaccinated: "false",
+  number_of_doses: 0,
+  vaccine_name: "CoviShield",
   ...medicalHistoryChoices,
 };
 
@@ -277,6 +279,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         return defaultValue;
     }
   };
+
+  const vaccineNames = ["CoviShield", "Covaxin"];
 
   const fetchExtResultData = async (e: any) => {
     e.preventDefault();
@@ -595,6 +599,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         srf_id: state.form.srf_id,
         covin_id: state.form.covin_id,
         is_vaccinated: state.form.is_vaccinated,
+        number_of_doses: Number(state.form.number_of_doses),
+        vaccine_name: state.form.vaccine_name,
         test_type: state.form.test_type,
         name: state.form.name,
         pincode: state.form.pincode ? state.form.pincode : undefined,
@@ -1014,6 +1020,40 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         />
                       </div>)
                     }
+
+                    {state.form.is_vaccinated === "true" && (
+                      <div>
+                        <InputLabel id="doses-label">
+                          Number of doses *
+                      </InputLabel>
+                        <TextInputField
+                          name="number_of_doses"
+                          type="number"
+                          variant="outlined"
+                          margin="dense"
+                          value={state.form.number_of_doses}
+                          onChange={handleChange}
+                          errors={state.errors.number_of_doses}
+                        />
+                      </div>
+                    )}
+
+                    {state.form.is_vaccinated === "true" && (
+                      <div>
+                        <InputLabel id="vaccine-name-label">Vaccine Name *</InputLabel>
+                        <SelectField
+                          name="vaccine_name"
+                          variant="outlined"
+                          margin="dense"
+                          optionArray={true}
+                          value={state.form.vaccine_name}
+                          options={vaccineNames}
+                          onChange={handleChange}
+                          errors={state.errors.vaccine_name}
+                        />
+                      </div>)
+                    }
+
                     <div>
                       <InputLabel id="test_type-label">Test Type</InputLabel>
                       <SelectField
@@ -1175,20 +1215,20 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           {isStateLoading ? (
                             <CircularProgress size={20} />
                           ) : (
-                              <SelectField
-                                name="state"
-                                variant="outlined"
-                                margin="dense"
-                                value={state.form.state}
-                                options={states}
-                                optionValue="name"
-                                onChange={(e) => [
-                                  handleChange(e),
-                                  fetchDistricts(String(e.target.value)),
-                                ]}
-                                errors={state.errors.state}
-                              />
-                            )}
+                            <SelectField
+                              name="state"
+                              variant="outlined"
+                              margin="dense"
+                              value={state.form.state}
+                              options={states}
+                              optionValue="name"
+                              onChange={(e) => [
+                                handleChange(e),
+                                fetchDistricts(String(e.target.value)),
+                              ]}
+                              errors={state.errors.state}
+                            />
+                          )}
                         </div>
 
                         <div>
@@ -1196,20 +1236,20 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           {isDistrictLoading ? (
                             <CircularProgress size={20} />
                           ) : (
-                              <SelectField
-                                name="district"
-                                variant="outlined"
-                                margin="dense"
-                                value={state.form.district}
-                                options={districts}
-                                optionValue="name"
-                                onChange={(e) => [
-                                  handleChange(e),
-                                  fetchLocalBody(String(e.target.value)),
-                                ]}
-                                errors={state.errors.district}
-                              />
-                            )}
+                            <SelectField
+                              name="district"
+                              variant="outlined"
+                              margin="dense"
+                              value={state.form.district}
+                              options={districts}
+                              optionValue="name"
+                              onChange={(e) => [
+                                handleChange(e),
+                                fetchLocalBody(String(e.target.value)),
+                              ]}
+                              errors={state.errors.district}
+                            />
+                          )}
                         </div>
 
                         <div>
@@ -1217,37 +1257,37 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           {isLocalbodyLoading ? (
                             <CircularProgress size={20} />
                           ) : (
-                              <SelectField
-                                name="local_body"
-                                variant="outlined"
-                                margin="dense"
-                                value={state.form.local_body}
-                                options={localBody}
-                                optionValue="name"
-                                onChange={(e) => [
-                                  handleChange(e),
-                                  fetchWards(String(e.target.value)),
-                                ]}
-                                errors={state.errors.local_body}
-                              />
-                            )}
+                            <SelectField
+                              name="local_body"
+                              variant="outlined"
+                              margin="dense"
+                              value={state.form.local_body}
+                              options={localBody}
+                              optionValue="name"
+                              onChange={(e) => [
+                                handleChange(e),
+                                fetchWards(String(e.target.value)),
+                              ]}
+                              errors={state.errors.local_body}
+                            />
+                          )}
                         </div>
                       </>
                     ) : (
-                        <div>
-                          <InputLabel id="passport-label">
-                            Passport Number*
+                      <div>
+                        <InputLabel id="passport-label">
+                          Passport Number*
                     </InputLabel>
-                          <TextInputField
-                            name="passport_no"
-                            variant="outlined"
-                            margin="dense"
-                            value={state.form.passport_no}
-                            onChange={handleChange}
-                            errors={state.errors.passport_no}
-                          />
-                        </div>
-                      )}
+                        <TextInputField
+                          name="passport_no"
+                          variant="outlined"
+                          margin="dense"
+                          value={state.form.passport_no}
+                          onChange={handleChange}
+                          errors={state.errors.passport_no}
+                        />
+                      </div>
+                    )}
 
                     <div>
                       <InputLabel id="address-label">Address*</InputLabel>
@@ -1270,21 +1310,21 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       {isWardLoading ? (
                         <CircularProgress size={20} />
                       ) : (
-                          <SelectField
-                            name="ward"
-                            variant="outlined"
-                            margin="dense"
-                            options={ward
-                              .sort((a, b) => a.number - b.number)
-                              .map((e) => {
-                                return { id: e.id, name: e.number + ": " + e.name };
-                              })}
-                            value={state.form.ward}
-                            optionValue="name"
-                            onChange={handleChange}
-                            errors={state.errors.ward}
-                          />
-                        )}
+                        <SelectField
+                          name="ward"
+                          variant="outlined"
+                          margin="dense"
+                          options={ward
+                            .sort((a, b) => a.number - b.number)
+                            .map((e) => {
+                              return { id: e.id, name: e.number + ": " + e.name };
+                            })}
+                          value={state.form.ward}
+                          optionValue="name"
+                          onChange={handleChange}
+                          errors={state.errors.ward}
+                        />
+                      )}
                     </div>
                     <div>
                       <InputLabel id="name-label">Village</InputLabel>
