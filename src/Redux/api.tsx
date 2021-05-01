@@ -308,6 +308,9 @@ export default {
   getDistrictByState: {
     path: "/api/v1/state/{id}/districts/",
   },
+  getDistrictByName: {
+    path: "/api/v1/district/"
+  },
   getAllLocalBody: {
     path: "/api/v1/district/{id}/get_all_local_body/",
   },
@@ -319,6 +322,10 @@ export default {
   getLocalbodyByDistrict: {
     path: "/api/v1/district/{id}/local_bodies/",
   },
+  getLocalbodyByName: {
+    path: "/api/v1/local_body/",
+  },
+
 
   // ward
   getWard: {
