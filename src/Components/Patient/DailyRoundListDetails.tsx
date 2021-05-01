@@ -38,6 +38,7 @@ export const DailyRoundListDetails = (props: any) => {
           const currentHealth = currentHealthChoices.find(
             (i) => i.text === res.data.current_health
           );
+
           const data: DailyRoundsModel = {
             ...res.data,
             temperature: Number(res.data.temperature)
@@ -45,7 +46,9 @@ export const DailyRoundListDetails = (props: any) => {
               : "",
             additional_symptoms_text: "",
             medication_given:
-              res.data.medication_given === {} ? [] : res.data.medication_given,
+              Object.keys(res.data.medication_given).length === 0
+                ? []
+                : res.data.medication_given,
             patient_category:
               patientCategoryChoices.find(
                 (i) => i.id === res.data.patient_category
