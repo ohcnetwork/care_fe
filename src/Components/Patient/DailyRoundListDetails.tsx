@@ -44,6 +44,8 @@ export const DailyRoundListDetails = (props: any) => {
               ? res.data.temperature
               : "",
             additional_symptoms_text: "",
+            medication_given:
+              res.data.medication_given === {} ? [] : res.data.medication_given,
             patient_category:
               patientCategoryChoices.find(
                 (i) => i.id === res.data.patient_category
