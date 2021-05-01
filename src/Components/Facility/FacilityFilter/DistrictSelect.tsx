@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react'
 import { useDispatch } from "react-redux";
-import { getDistrictByName, getStates, getStatesByText } from '../../../Redux/actions';
+import { getDistrictByName, getStates } from '../../../Redux/actions';
 import { AutoCompleteAsyncField } from '../../Common/HelperInputFields';
 import { StateModel } from './StateSelect';
 const debounce = require('lodash.debounce');
