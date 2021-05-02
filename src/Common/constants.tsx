@@ -325,6 +325,8 @@ export const DISEASE_STATUS = [
 
 export const TEST_TYPE = ["UNK", "ANTIGEN", "RTPCR", "CBNAAT", "TRUENAT"];
 
+export const VACCINES = ["CoviShield", "Covaxin"];
+
 export const BLOOD_GROUPS = [
   "UNK",
   "A+",
