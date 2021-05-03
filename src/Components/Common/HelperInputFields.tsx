@@ -96,7 +96,7 @@ export const TextInputField = (props: TextFieldPropsExtended) => {
             return
         }
         if (type === 'number' && event.target.value) {
-            event.target.value = event.target.value.replace(/\D/, '');
+            event.target.value = event.target.value.replace(/(?!\.)\D/, '');
         }
         onChange(event);
     }
