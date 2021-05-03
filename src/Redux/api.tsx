@@ -311,13 +311,16 @@ export default {
   getAllLocalBodyByDistrict: {
     path: "/api/v1/district/{id}/get_all_local_body/",
   },
+  getLocalbodyByDistrict: {
+    path: "/api/v1/district/{id}/local_bodies/",
+  },
 
   // Local Body
   getLocalBody: {
     path: "/api/v1/local_body/{id}/",
   },
-  getLocalbodyByDistrict: {
-    path: "/api/v1/district/{id}/local_bodies/",
+  getAllLocalBody: {
+    path: "/api/v1/local_body/"
   },
 
   // ward

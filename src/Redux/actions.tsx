@@ -176,6 +176,14 @@ export const getAllLocalBodyByDistrict = (pathParam: object) => {
   return fireRequest("getAllLocalBodyByDistrict", [], {}, pathParam);
 };
 
+// Local Body
+export const getLocalBody = (pathParam: object) => {
+  return fireRequest("getLocalBody", [], {}, pathParam);
+};
+export const getAllLocalBody = (params: object) => {
+  return fireRequest("getAllLocalBody", [], params);
+};
+
 // Sample Test
 export const getSampleTestList = (params: object, pathParam: object) => {
   return fireRequest("sampleTestList", [], params, pathParam);
