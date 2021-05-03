@@ -90,12 +90,15 @@ interface OptionsProps {
 
 export const TextInputField = (props: TextFieldPropsExtended) => {
     const { onChange, type, errors, onKeyDown } = props;
-    const inputType = type === 'number' ? 'text' : type;
+    const inputType = type === 'number' || type === 'float' ? 'text' : type;
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (typeof onChange !== 'function') {
             return
         }
         if (type === 'number' && event.target.value) {
+            event.target.value = event.target.value.replace(/\D/, '');
+        }
+        if (type === 'float' && event.target.value) {
             event.target.value = event.target.value.replace(/(?!\.)\D/, '');
         }
         onChange(event);
