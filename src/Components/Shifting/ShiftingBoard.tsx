@@ -159,6 +159,7 @@ export default function ListView({ board, filterProp, formatFilter }: boardProps
                       </dd>
                     </dt>
                   </div>
+
                   {shift.assigned_to_object && <div className="sm:col-span-1">
                     <dt title="Assigned to" className="text-sm leading-5 font-medium text-gray-500 flex items-center">
                       <i className="fas fa-user mr-2"></i>
@@ -167,6 +168,15 @@ export default function ListView({ board, filterProp, formatFilter }: boardProps
                       </dd>
                     </dt>
                   </div>}
+
+                  <div className="sm:col-span-1">
+                    <dt title="Patient State" className="text-sm leading-5 font-medium text-gray-500 flex items-center">
+                      <i className="fas fa-thumbtack mr-2"></i>
+                      <dd className="font-bold text-sm leading-5 text-gray-900">
+                        {shift.patient_object.state_object.name || "--"}
+                      </dd>
+                    </dt>
+                  </div>
                 </dl>
               </div>
 
