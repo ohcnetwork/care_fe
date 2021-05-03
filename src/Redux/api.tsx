@@ -308,7 +308,7 @@ export default {
   getDistrictByState: {
     path: "/api/v1/state/{id}/districts/",
   },
-  getAllLocalBody: {
+  getAllLocalBodyByDistrict: {
     path: "/api/v1/district/{id}/get_all_local_body/",
   },
 

@@ -3,7 +3,7 @@ import { navigate } from "raviger";
 import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { externalResultUploadCsv, getAllLocalBody } from "../../Redux/actions";
+import { externalResultUploadCsv, getAllLocalBodyByDistrict } from "../../Redux/actions";
 import CSVReader from "react-csv-reader";
 import {
   MultilineInputField,
@@ -35,7 +35,7 @@ export default function ExternalResultUpload() {
   //   async (status: statusType) => {
   //     setState({ ...state, loading: true });
   //     let id = 7
-  //     const res = await dispatch(getAllLocalBody({ id }));
+  //     const res = await dispatch(getAllLocalBodyByDistrict({ id }));
   //     if (!status.aborted) {
   //       if (res && res.data) {
   //         setState({ loading: false, lsgs: res.data.results });
