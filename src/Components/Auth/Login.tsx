@@ -131,7 +131,7 @@ export const Login = () => {
               />
               <div className="relative w-full">
                 <TextInputField
-                  className="w-full bg-gray-400"
+                  className="w-full"
                   type={showPassword ? "text" : "password"}
                   name="password"
                   label="Password"
