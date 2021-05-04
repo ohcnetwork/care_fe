@@ -155,7 +155,7 @@ export const AddInventoryForm = (props: any) => {
                   name="quantity"
                   variant="outlined"
                   margin="dense"
-                  type="number"
+                  type="float"
                   value={state.form.quantity}
                   onChange={handleChange}
                   errors=""
