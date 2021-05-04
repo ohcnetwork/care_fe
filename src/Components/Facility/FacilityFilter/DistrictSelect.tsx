@@ -2,14 +2,7 @@ import React, { useState, useCallback } from 'react'
 import { useDispatch } from "react-redux";
 import { getDistrictByName, getStates } from '../../../Redux/actions';
 import { AutoCompleteAsyncField } from '../../Common/HelperInputFields';
-import { StateModel } from './StateSelect';
 const debounce = require('lodash.debounce');
-
-export interface DistrictModel {
-    id?: number;
-    name?: string;
-    state?: StateModel;
-}
 
 interface DistrictSelectProps {
     name: string;
@@ -17,7 +10,7 @@ interface DistrictSelectProps {
     className?: string;
     multiple?: boolean;
     searchAll?: boolean;
-    selected: DistrictModel | DistrictModel[] | null;
+    selected: string
     margin?: string
     setSelected: (selected: string) => void;
 }
