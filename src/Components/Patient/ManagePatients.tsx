@@ -186,7 +186,7 @@ export const PatientManager = (props: any) => {
       qParams.srf_id,
       qParams.covin_id,
       qParams.is_vaccinated,
-      qParams.local_bodies ]
+      qParams.lsgBody ]
   );
 
   const updateQuery = (params: any) => {

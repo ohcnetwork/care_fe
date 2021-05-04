@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import {
   SelectField,
@@ -19,6 +19,9 @@ import { getAllLocalBody, getFacility } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { CircularProgress } from "@material-ui/core";
 import { navigate } from "raviger";
+const debounce = require('lodash.debounce');
+
+
 
 function useMergeState(initialState: any) {
   const [state, setState] = useState(initialState);
@@ -33,11 +36,21 @@ export default function PatientFilterV2(props: any) {
   const [lsgBody, setLsgBody] = useState<any[]>([]);
   const [isLsgLoading, setLsgLoading] = useState(false);
   const [selectedLSG, setSelectedLSG] = useState<any[]>([]);
+  const [hasLsgSearchText, setHasLsgSearchText] = useState(false);
 
-  const handleLsgChange = (value: any) => {
-    console.log(value);
-    setSelectedLSG(value);
-  };
+  const handleLsgChange = (current: any) => {
+    if (!current) {
+      setLsgBody([]);
+      setLsgLoading(false);
+      setHasLsgSearchText(false);
+    }
+    setSelectedLSG(current);
+};
+
+  // const handleLsgChange = (value: any) => {
+  //   console.log(value);
+  //   setSelectedLSG(value);
+  // };
 
   const sortByName = (items: any) => {
     items.sort(function (a: any, b: any) {
@@ -47,7 +60,9 @@ export default function PatientFilterV2(props: any) {
 
   const [filterState, setFilterState] = useMergeState({
     facility: filter.facility || "",
+    lsgBody: filter.lsgBody || "",
     facility_ref: null,
+    lsgBody_ref: null,
     created_date_before: filter.created_date_before || null,
     created_date_after: filter.created_date_after || null,
     modified_date_before: filter.modified_date_before || null,
@@ -73,25 +88,33 @@ export default function PatientFilterV2(props: any) {
   });
   const dispatch: any = useDispatch();
 
+
   useEffect(() => {
+    console.log('patient form use effect \n');
+    console.log(`filter.lsgBody`, filter.local_bodies);
+    console.log(`filter.facility`, filter.facility);
     async function fetchData() {
       if (filter.facility) {
         setFacilityLoading(true);
         const res = await dispatch(getFacility(filter.facility, "facility"));
-        const lsgRes = await dispatch(getAllLocalBody({}));
+        console.log(`res`, res);
+        if (res && res.data) {
+          setFilterState({ facility_ref: res.data });
+        }
+        setFacilityLoading(false);
+      }
 
-        console.log(res.data, lsgRes.data)
+      if(filter.lsgBody){
+        const lsgRes = await dispatch(getAllLocalBody({}));
+        console.log(lsgRes.data)
         if (lsgRes?.data) {
           const theRealLSG = lsgRes.data.results.map((obj: any) => ({
             id: obj.id, name: obj.name
           }));
           console.log(theRealLSG);
           setLsgBody(theRealLSG);
+          setFilterState({ lsgBody_ref: theRealLSG || [] });
         }
-        if (res && res.data) {
-          setFilterState({ facility_ref: res.data });
-        }
-        setFacilityLoading(false);
       }
     }
     fetchData();
@@ -129,11 +152,32 @@ export default function PatientFilterV2(props: any) {
     setFilterState(filterData);
   }
 
+  const handleLsgSearch = (e: any) => {
+    setLsgLoading(true);
+    setHasLsgSearchText(!!e.target.value);
+    onLsgSearch(e.target.value);
+}
+
+const onLsgSearch = useCallback(debounce(async (text: string) => {
+    if (text) {
+        // const params = { limit: 50, offset: 0, search_text: text, all: searchAll, facility_type: facilityType };
+        const res = await dispatch(getAllLocalBody({}));
+        if (res && res.data) {
+            setLsgBody(res.data.results);
+        }
+        setLsgLoading(false);
+    } else {
+      setLsgBody([]);
+      setLsgLoading(false);
+    }
+}, 300), []);
+
   const applyFilter = () => {
     const selectedLSGIDs = selectedLSG.map(obj => obj.id);
 
     const {
       facility,
+      lsgBody,
       created_date_before,
       created_date_after,
       modified_date_before,
@@ -154,7 +198,7 @@ export default function PatientFilterV2(props: any) {
       srf_id,
     } = filterState;
     const data = {
-      local_bodies: selectedLSGIDs.length ? selectedLSGIDs : undefined,
+      lsgBody: lsgBody || "",
       facility: facility || "",
       created_date_before:
         created_date_before && moment(created_date_before).isValid()
@@ -251,26 +295,22 @@ export default function PatientFilterV2(props: any) {
               <CircularProgress size={20} />
             ) : (
               <AutoCompleteAsyncField
-                multiple={true}
                 name="local_bodies"
-                options={lsgBody}
-                label="Local Body"
+                multiple={true}
                 variant="outlined"
-                placeholder="Select Local Body"
-                loading={isLsgLoading}
-                freeSolo={false}
                 value={selectedLSG}
-                renderOption={(option: any) => <div>{option.name}</div>}
-                getOptionSelected={(option: any, value: any) =>{
-                  console.log('option selected', option, value)
-                  option.id === value.id
-                }
-                }
-                getOptionLabel={(option: any) => {
-                  console.log('option label', option)
-                  option.name
-                }}
+                options={lsgBody}
+                onSearch={handleLsgSearch}
                 onChange={(e: object, value: any) => handleLsgChange(value)}
+                loading={isLsgLoading}
+                placeholder="Select Local Body"
+                noOptionsText={hasLsgSearchText ? "No LSG found, please try again" : "Start typing to begin search"}
+                renderOption={(option: any) => <div>{option.name}</div>}
+                label="Local Body"
+                freeSolo={false}
+                getOptionSelected={(option: any, value: any) => option.id === value.id
+                }
+                getOptionLabel={(option: any) => option.name }
               />
             )}
           </div>
