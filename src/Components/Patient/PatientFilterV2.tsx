@@ -5,6 +5,7 @@ import {
   MultiSelectField,
   DateInputField,
   TextInputField,
+  AutoCompleteAsyncField,
 } from "../Common/HelperInputFields";
 import {
   PATIENT_FILTER_ORDER,
@@ -14,7 +15,7 @@ import {
   PATIENT_FILTER_ADMITTED_TO,
 } from "../../Common/constants";
 import moment from "moment";
-import { getFacility } from "../../Redux/actions";
+import { getAllLocalBody, getFacility } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { CircularProgress } from "@material-ui/core";
 import { navigate } from "raviger";
@@ -29,6 +30,21 @@ function useMergeState(initialState: any) {
 export default function PatientFilterV2(props: any) {
   let { filter, onChange, closeFilter } = props;
   const [isFacilityLoading, setFacilityLoading] = useState(false);
+  const [lsgBody, setLsgBody] = useState<any[]>([]);
+  const [isLsgLoading, setLsgLoading] = useState(false);
+  const [selectedLSG, setSelectedLSG] = useState<any[]>([]);
+
+  const handleLsgChange = (value: any) => {
+    console.log(value);
+    setSelectedLSG(value);
+  };
+
+  const sortByName = (items: any) => {
+    items.sort(function (a: any, b: any) {
+      return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
+    });
+  };
+
   const [filterState, setFilterState] = useMergeState({
     facility: filter.facility || "",
     facility_ref: null,
@@ -62,6 +78,16 @@ export default function PatientFilterV2(props: any) {
       if (filter.facility) {
         setFacilityLoading(true);
         const res = await dispatch(getFacility(filter.facility, "facility"));
+        const lsgRes = await dispatch(getAllLocalBody({}));
+
+        console.log(res.data, lsgRes.data)
+        if (lsgRes?.data) {
+          const theRealLSG = lsgRes.data.results.map((obj: any) => ({
+            id: obj.id, name: obj.name
+          }));
+          console.log(theRealLSG);
+          setLsgBody(theRealLSG);
+        }
         if (res && res.data) {
           setFilterState({ facility_ref: res.data });
         }
@@ -104,6 +130,8 @@ export default function PatientFilterV2(props: any) {
   }
 
   const applyFilter = () => {
+    const selectedLSGIDs = selectedLSG.map(obj => obj.id);
+
     const {
       facility,
       created_date_before,
@@ -126,6 +154,7 @@ export default function PatientFilterV2(props: any) {
       srf_id,
     } = filterState;
     const data = {
+      local_bodies: selectedLSGIDs.length ? selectedLSGIDs : undefined,
       facility: facility || "",
       created_date_before:
         created_date_before && moment(created_date_before).isValid()
@@ -215,6 +244,37 @@ export default function PatientFilterV2(props: any) {
       </div>
       <div className="font-light text-md mt-2">Filter By:</div>
       <div className="flex flex-wrap gap-2">
+      <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">LSG</span>
+          <div className="">
+            {isLsgLoading ? (
+              <CircularProgress size={20} />
+            ) : (
+              <AutoCompleteAsyncField
+                multiple={true}
+                name="local_bodies"
+                options={lsgBody}
+                label="Local Body"
+                variant="outlined"
+                placeholder="Select Local Body"
+                loading={isLsgLoading}
+                freeSolo={false}
+                value={selectedLSG}
+                renderOption={(option: any) => <div>{option.name}</div>}
+                getOptionSelected={(option: any, value: any) =>{
+                  console.log('option selected', option, value)
+                  option.id === value.id
+                }
+                }
+                getOptionLabel={(option: any) => {
+                  console.log('option label', option)
+                  option.name
+                }}
+                onChange={(e: object, value: any) => handleLsgChange(value)}
+              />
+            )}
+          </div>
+        </div>
         <div className="w-64 flex-none">
           <span className="text-sm font-semibold">Facility</span>
           <div className="">

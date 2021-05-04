@@ -107,6 +107,7 @@ export const PatientManager = (props: any) => {
     is_active: qParams.is_active || 'True',
     disease_status: qParams.disease_status || undefined,
     phone_number: qParams.phone_number ? parsePhoneNumberFromString(qParams.phone_number)?.format('E.164') : undefined,
+    local_bodies: qParams.local_bodies || undefined,
     facility: facilityId || qParams.facility,
     offset: (qParams.page ? qParams.page - 1 : 0) * RESULT_LIMIT,
     created_date_before: qParams.created_date_before || undefined,
@@ -184,7 +185,8 @@ export const PatientManager = (props: any) => {
       qParams.phone_number,
       qParams.srf_id,
       qParams.covin_id,
-      qParams.is_vaccinated ]
+      qParams.is_vaccinated,
+      qParams.local_bodies ]
   );
 
   const updateQuery = (params: any) => {
