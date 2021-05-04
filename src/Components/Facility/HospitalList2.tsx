@@ -211,7 +211,7 @@ export const HospitalList2 = () => {
                 }
 
                 <div className="mb-3">
-                  <FontAwesomeIcon icon={faPhone} className="w-5 transform rotate-90 text-emerald-500" color="emerald-500" />
+                  <FontAwesomeIcon icon={faPhone} className="w-5 transform rotate-90 text-green-500" color="green-500" />
                   {/* <a
                     href={`tel:${facility.phone_number}`}
                     className="font-semibold"
@@ -223,7 +223,7 @@ export const HospitalList2 = () => {
 
                 <div className="grid grid-cols-10 font-semibold">
                   <div>
-                    <FontAwesomeIcon icon={faMapMarkerAlt} className="w-5 text-emerald-500" color="emerald-500" />
+                    <FontAwesomeIcon icon={faMapMarkerAlt} className="w-5 text-green-500" color="green-500" />
                   </div>
                   <div className="col-span-9">
                     {facility.local_body_object?.name}, {facility.district?.name}
@@ -241,7 +241,7 @@ export const HospitalList2 = () => {
                 <div className="mt-2">
                   <button
                     type="button"
-                    className="w-full py-2 border-emerald-500 border-2 text-emerald-500 mt-2 font-bold"
+                    className="w-full py-2 border-green-500 border-2 text-green-500 mt-2 font-bold"
                     onClick={() => navigate(`/facility/${facility.id}`)}
                   >
                     View Details

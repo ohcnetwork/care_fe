@@ -339,7 +339,7 @@ const AppRouter = () => {
             <div className="fixed inset-0">
               <div className="absolute inset-0 bg-gray-600 opacity-75"></div>
             </div>
-            <div className="relative flex-1 flex flex-col max-w-xs w-full pt-5 pb-4 bg-emerald-500">
+            <div className="relative flex-1 flex flex-col max-w-xs w-full pt-5 pb-4 bg-green-500">
               <div className="absolute top-0 right-0 -mr-14 p-1">
                 <button
                   onClick={(_) => setDrawer(false)}
@@ -371,7 +371,7 @@ const AppRouter = () => {
                   {menus.map((item) => {
                     const parts = item.link.split("/");
                     const selectedClasses = url.includes(parts && parts[1])
-                      ? "group flex w-full items-center py-3 text-base leading-5 pl-12 font-medium font-poppins text-emerald-500 bg-white focus:outline-none focus:bg-white transition ease-in-out duration-150"
+                      ? "group flex w-full items-center py-3 text-base leading-5 pl-12 font-medium font-poppins text-green-500 bg-white focus:outline-none focus:bg-white transition ease-in-out duration-150"
                       : "group flex w-full items-center pl-12 py-3 text-base leading-5 font-medium text-white hover:text-white hover:bg-green-700 focus:outline-none focus:bg-green-900 transition ease-in-out duration-150";
                     return (
                       <a
@@ -395,9 +395,9 @@ const AppRouter = () => {
                   <a
                     key="dashboard"
                     href="http://dashboard.coronasafe.network/"
-                    className="group flex w-full items-center px-2 py-3 pl-12 text-base leading-5 font-medium text-emerald-200 hover:bg-green-700 focus:outline-none transition ease-in-out duration-150"
+                    className="group flex w-full items-center px-2 py-3 pl-12 text-base leading-5 font-medium text-green-200 hover:bg-green-700 focus:outline-none transition ease-in-out duration-150"
                   >
-                    <i className="fas fa-tachometer-alt text-emerald-200 mr-3 text-md group-focus:text-green-300 transition ease-in-out duration-150"></i>
+                    <i className="fas fa-tachometer-alt text-green-200 mr-3 text-md group-focus:text-green-300 transition ease-in-out duration-150"></i>
                     Dashboard
                   </a>
                 </nav>
@@ -421,7 +421,7 @@ const AppRouter = () => {
                           navigate("/login");
                           window.location.reload();
                         }}
-                        className="text-md leading-4 font-medium text-emerald-200 transition ease-in-out duration-150"
+                        className="text-md leading-4 font-medium text-green-200 transition ease-in-out duration-150"
                       >
                         Sign Out
                       </p>
@@ -436,18 +436,18 @@ const AppRouter = () => {
       )}
 
       <div className="hidden md:flex md:flex-shrink-0">
-        <div className="flex flex-col w-64 bg-emerald-500 pt-5">
+        <div className="flex flex-col w-64 bg-green-500 pt-5">
           <div className="flex items-center flex-shrink-0 px-10 py-5 mt-3">
             <a href="/">
               <img className="h-8 w-auto" src={img} alt="care logo" />
             </a>
           </div>
           <div className="mt-5 h-0 flex-1 flex flex-col overflow-y-auto">
-            <nav className="flex-1 bg-emerald-500">
+            <nav className="flex-1 bg-green-500">
               {menus.map((item) => {
                 const parts = item.link.split("/");
                 const selectedClasses = url.includes(parts && parts[1])
-                  ? "group flex w-full items-center py-3 text-base leading-5 pl-12 font-medium font-poppins text-emerald-500 bg-white focus:outline-none focus:bg-white transition ease-in-out duration-150"
+                  ? "group flex w-full items-center py-3 text-base leading-5 pl-12 font-medium font-poppins text-green-500 bg-white focus:outline-none focus:bg-white transition ease-in-out duration-150"
                   : "group flex w-full items-center pl-12 py-3 text-base leading-5 font-medium text-white hover:text-white hover:bg-green-700 focus:outline-none focus:bg-green-900 transition ease-in-out duration-150";
                 return (
                   <button
@@ -459,7 +459,7 @@ const AppRouter = () => {
                       className={
                         item.icon +
                         (url.includes(parts && parts[1])
-                          ? " text-emerald-500"
+                          ? " text-green-500"
                           : " text-white") +
                         " mr-3 text-lg group-hover:text-green-300 group-focus:text-green-300 transition ease-in-out duration-150"
                       }
