@@ -24,8 +24,6 @@ import AccordionSummary from "@material-ui/core/AccordionSummary";
 import AccordionDetails from "@material-ui/core/AccordionDetails";
 import Typography from "@material-ui/core/Typography";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import { faSearch, faPhone, faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle")); import SwipeableViews from 'react-swipeable-views';
 import { make as SlideOver } from "../Common/SlideOver.gen";
@@ -211,19 +209,13 @@ export const HospitalList2 = () => {
                 }
 
                 <div className="mb-3">
-                  <FontAwesomeIcon icon={faPhone} className="w-5 transform rotate-90 text-green-500" color="green-500" />
-                  {/* <a
-                    href={`tel:${facility.phone_number}`}
-                    className="font-semibold"
-                  > */}
-                  {/* <a href={`tel:${facility.phone_number}`} className="ml-2"> */}
+                  <i className="fa fa-phone w-5 transform rotate-90 text-green-500" aria-hidden="true"></i>
                   <span className="font-bold text-black"> {facility.phone_number || "-"} </span>
-                  {/* </a> */}
                 </div>
 
                 <div className="grid grid-cols-10 font-semibold">
                   <div>
-                    <FontAwesomeIcon icon={faMapMarkerAlt} className="w-5 text-green-500" color="green-500" />
+                    <i className="fas fa-map-marker-alt w-5 text-green-500"></i>
                   </div>
                   <div className="col-span-9">
                     {facility.local_body_object?.name}, {facility.district?.name}
