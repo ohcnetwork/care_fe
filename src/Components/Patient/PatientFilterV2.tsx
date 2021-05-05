@@ -88,11 +88,12 @@ export default function PatientFilterV2(props: any) {
   });
   const dispatch: any = useDispatch();
 
-
   useEffect(() => {
     console.log('patient form use effect \n');
     console.log(`filter.lsgBody`, filter.local_bodies);
     console.log(`filter.facility`, filter.facility);
+    console.log(`filterState.lsgBody_ref`, filterState.lsgBody_ref);
+    console.log(`filterState.facility_ref`, filterState.facility_ref);
     async function fetchData() {
       if (filter.facility) {
         setFacilityLoading(true);
@@ -110,10 +111,10 @@ export default function PatientFilterV2(props: any) {
         if (lsgRes?.data) {
           const theRealLSG = lsgRes.data.results.map((obj: any) => ({
             id: obj.id, name: obj.name
-          }));
+          }))
           console.log(theRealLSG);
           setLsgBody(theRealLSG);
-          setFilterState({ lsgBody_ref: theRealLSG || [] });
+          setFilterState({ lsgBody_ref: theRealLSG });
         }
       }
     }
@@ -153,10 +154,11 @@ export default function PatientFilterV2(props: any) {
   }
 
   const handleLsgSearch = (e: any) => {
-    setLsgLoading(true);
+    console.log(e.target.value);
+    // setLsgLoading(true);
     setHasLsgSearchText(!!e.target.value);
     onLsgSearch(e.target.value);
-}
+  }
 
 const onLsgSearch = useCallback(debounce(async (text: string) => {
     if (text) {
@@ -164,6 +166,8 @@ const onLsgSearch = useCallback(debounce(async (text: string) => {
         const res = await dispatch(getAllLocalBody({}));
         if (res && res.data) {
             setLsgBody(res.data.results);
+          setFilterState({ lsgBody_ref: res.data.results });
+
         }
         setLsgLoading(false);
     } else {
@@ -173,7 +177,7 @@ const onLsgSearch = useCallback(debounce(async (text: string) => {
 }, 300), []);
 
   const applyFilter = () => {
-    const selectedLSGIDs = selectedLSG.map(obj => obj.id);
+    // const selectedLSGIDs = selectedLSG.map(obj => obj.id);
 
     const {
       facility,
@@ -291,12 +295,12 @@ const onLsgSearch = useCallback(debounce(async (text: string) => {
       <div className="w-64 flex-none">
           <span className="text-sm font-semibold">LSG</span>
           <div className="">
-            {isLsgLoading ? (
+            {(isLsgLoading) ? (
               <CircularProgress size={20} />
             ) : (
               <AutoCompleteAsyncField
                 name="local_bodies"
-                multiple={true}
+                multiple={false}
                 variant="outlined"
                 value={selectedLSG}
                 options={lsgBody}
