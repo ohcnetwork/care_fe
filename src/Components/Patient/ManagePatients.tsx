@@ -452,6 +452,7 @@ export const PatientManager = (props: any) => {
           {badge("Age min", qParams.age_min)}
           {badge("Age max", qParams.age_max)}
           {badge("SRF ID", qParams.srf_id)}
+          {badge("LSG Body", qParams.lsgBody)}
         </div>
       </div>
       <div className={classesTab.root}>
