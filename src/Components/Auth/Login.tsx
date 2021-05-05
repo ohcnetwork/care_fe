@@ -21,7 +21,6 @@ export const Login = () => {
   const [errors, setErrors] = useState(initErr);
   const [isCaptchaEnabled, setCaptcha] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(true);
 
   const captchaKey = "6LdvxuQUAAAAADDWVflgBqyHGfq-xmvNJaToM0pN";
 
@@ -76,10 +75,8 @@ export const Login = () => {
         if (res && statusCode === 429) {
           setCaptcha(true);
         } else if (res && statusCode === 200) {
-          if (rememberMe) {
-            localStorage.setItem("care_access_token", res.access);
-            localStorage.setItem("care_refresh_token", res.refresh);
-          }
+          localStorage.setItem("care_access_token", res.access);
+          localStorage.setItem("care_refresh_token", res.refresh);
           navigate("/facility");
           window.location.reload();
         }
@@ -169,19 +166,6 @@ export const Login = () => {
                 )}
 
                 <div className="w-full flex justify-between items-center px-4 pb-4">
-                  <div
-                    onClick={() => setRememberMe(!rememberMe)}
-                    className="flex items-center"
-                  >
-                    <input
-                      type="checkbox"
-                      className="form-checkbox h-4 w-4 text-green-500 focus:border-green-600 border-gray-600"
-                      checked={rememberMe}
-                    />
-                    <p className="text-sm text-green-400 hover:text-green-500 ml-2">
-                      Remember me
-                    </p>
-                  </div>
                   <a
                     href="/forgot-password"
                     className="text-sm text-green-400 hover:text-green-500"
