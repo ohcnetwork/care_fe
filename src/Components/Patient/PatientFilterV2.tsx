@@ -44,13 +44,18 @@ export default function PatientFilterV2(props: any) {
       setLsgLoading(false);
       setHasLsgSearchText(false);
     }
-    setSelectedLSG(current);
+    setFacility(current, "lsgBody");
 };
 
   // const handleLsgChange = (value: any) => {
   //   console.log(value);
   //   setSelectedLSG(value);
   // };
+
+  useEffect(() => {
+    console.log('lsgBody', lsgBody);
+  }, [lsgBody])
+
 
   const sortByName = (items: any) => {
     items.sort(function (a: any, b: any) {
@@ -107,7 +112,7 @@ export default function PatientFilterV2(props: any) {
 
       if(filter.lsgBody){
         const lsgRes = await dispatch(getAllLocalBody({}));
-        console.log(lsgRes.data)
+        console.log('dispatch', lsgRes.data)
         if (lsgRes?.data) {
           const theRealLSG = lsgRes.data.results.map((obj: any) => ({
             id: obj.id, name: obj.name
@@ -134,6 +139,14 @@ export default function PatientFilterV2(props: any) {
 
     setFilterState(filterData);
   };
+
+  // const setLSG = (selected: any, name: string) => {
+  //   const filterData: any = { ...filterState };
+  //   filterData[`${name}_ref`] = selected;
+  //   filterData[name] = (selected || {}).id;
+
+  //   setFilterState(filterData);
+  // };
 
   const handleChange = (event: any) => {
     const { name, value } = event.target;
@@ -166,7 +179,7 @@ const onLsgSearch = useCallback(debounce(async (text: string) => {
         const res = await dispatch(getAllLocalBody({}));
         if (res && res.data) {
             setLsgBody(res.data.results);
-          setFilterState({ lsgBody_ref: res.data.results });
+          // setFilterState({ lsgBody_ref: res.data.results });
 
         }
         setLsgLoading(false);
@@ -201,6 +214,9 @@ const onLsgSearch = useCallback(debounce(async (text: string) => {
       covin_id,
       srf_id,
     } = filterState;
+    console.log('Apply Filter');
+    console.log(`facility`, facility);
+    console.log(`lsgBody`, lsgBody);
     const data = {
       lsgBody: lsgBody || "",
       facility: facility || "",
@@ -302,7 +318,7 @@ const onLsgSearch = useCallback(debounce(async (text: string) => {
                 name="local_bodies"
                 multiple={false}
                 variant="outlined"
-                value={selectedLSG}
+                value={filterState.lsgBody_ref}
                 options={lsgBody}
                 onSearch={handleLsgSearch}
                 onChange={(e: object, value: any) => handleLsgChange(value)}
@@ -312,8 +328,7 @@ const onLsgSearch = useCallback(debounce(async (text: string) => {
                 renderOption={(option: any) => <div>{option.name}</div>}
                 label="Local Body"
                 freeSolo={false}
-                getOptionSelected={(option: any, value: any) => option.id === value.id
-                }
+                getOptionSelected={(option: any, value: any) => option.id === value.id }
                 getOptionLabel={(option: any) => option.name }
               />
             )}
