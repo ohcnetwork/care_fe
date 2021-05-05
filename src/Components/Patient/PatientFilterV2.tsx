@@ -95,7 +95,7 @@ export default function PatientFilterV2(props: any) {
 
   useEffect(() => {
     console.log('patient form use effect \n');
-    console.log(`filter.lsgBody`, filter.local_bodies);
+    console.log(`filter.lsgBody`, filter.lsgBody, typeof filter.lsgBody);
     console.log(`filter.facility`, filter.facility);
     console.log(`filterState.lsgBody_ref`, filterState.lsgBody_ref);
     console.log(`filterState.facility_ref`, filterState.facility_ref);
@@ -112,14 +112,14 @@ export default function PatientFilterV2(props: any) {
 
       if(filter.lsgBody){
         const lsgRes = await dispatch(getAllLocalBody({}));
-        console.log('dispatch', lsgRes.data)
+        // console.log('dispatch', lsgRes.data)
         if (lsgRes?.data) {
           const theRealLSG = lsgRes.data.results.map((obj: any) => ({
             id: obj.id, name: obj.name
           }))
-          console.log(theRealLSG);
+          console.log('filtered: ', theRealLSG.filter((obj: any) => obj.id == filter.lsgBody)[0]);
           setLsgBody(theRealLSG);
-          setFilterState({ lsgBody_ref: theRealLSG });
+          setFilterState({ lsgBody_ref: theRealLSG.filter((obj: any) => obj.id == filter.lsgBody)[0] });
         }
       }
     }
