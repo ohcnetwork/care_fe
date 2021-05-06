@@ -59,6 +59,7 @@
     "@typescript-eslint/parser": "^3.10.1",
     "axios": "^0.21.1",
     "clean-webpack-plugin": "^3.0.0",
+    "cross-env": "^7.0.3",
     "css-loader": "^4.3.0",
     "date-fns": "^2.16.1",
     "file-loader": "6.0.0",
@@ -101,10 +102,10 @@
   "scripts": {
     "prebuild": "npm run re:build && npm run generate-build-meta",
     "start": "npm run re:build && webpack-dev-server -p --open --mode=development",
-    "start:Dev": "NODE_ENV=production http-server dist",
+    "start:Dev": "cross-env NODE_ENV=production http-server dist",
     "re:build": "bsb -make-world -clean-world",
     "re:watch": "bsb -make-world -clean-world -w",
-    "build": "NODE_ENV=production ./node_modules/.bin/webpack -p --mode=production",
+    "build": "cross-env NODE_ENV=production ./node_modules/.bin/webpack -p --mode=production",
     "generate-build-meta": "node ./build-scripts/generate-build-version.js",
     "test": "snyk test"
   },
