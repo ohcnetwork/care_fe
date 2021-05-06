@@ -21,9 +21,7 @@ import { CircularProgress } from "@material-ui/core";
 import { navigate } from "raviger";
 const debounce = require('lodash.debounce');
 
-
-
-function useMergeState(initialState: any) {
+const useMergeState = (initialState: any) => {
   const [state, setState] = useState(initialState);
   const setMergedState = (newState: any) =>
     setState((prevState: any) => Object.assign({}, prevState, newState));
@@ -35,7 +33,6 @@ export default function PatientFilterV2(props: any) {
   const [isFacilityLoading, setFacilityLoading] = useState(false);
   const [lsgBody, setLsgBody] = useState<any[]>([]);
   const [isLsgLoading, setLsgLoading] = useState(false);
-  const [selectedLSG, setSelectedLSG] = useState<any[]>([]);
   const [hasLsgSearchText, setHasLsgSearchText] = useState(false);
 
   const handleLsgChange = (current: any) => {
@@ -45,22 +42,6 @@ export default function PatientFilterV2(props: any) {
       setHasLsgSearchText(false);
     }
     setFacility(current, "lsgBody");
-};
-
-  // const handleLsgChange = (value: any) => {
-  //   console.log(value);
-  //   setSelectedLSG(value);
-  // };
-
-  useEffect(() => {
-    console.log('lsgBody', lsgBody);
-  }, [lsgBody])
-
-
-  const sortByName = (items: any) => {
-    items.sort(function (a: any, b: any) {
-      return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
-    });
   };
 
   const [filterState, setFilterState] = useMergeState({
@@ -94,16 +75,10 @@ export default function PatientFilterV2(props: any) {
   const dispatch: any = useDispatch();
 
   useEffect(() => {
-    console.log('patient form use effect \n');
-    console.log(`filter.lsgBody`, filter.lsgBody, typeof filter.lsgBody);
-    console.log(`filter.facility`, filter.facility);
-    console.log(`filterState.lsgBody_ref`, filterState.lsgBody_ref);
-    console.log(`filterState.facility_ref`, filterState.facility_ref);
     async function fetchData() {
       if (filter.facility) {
         setFacilityLoading(true);
         const res = await dispatch(getFacility(filter.facility, "facility"));
-        console.log(`res`, res);
         if (res && res.data) {
           setFilterState({ facility_ref: res.data });
         }
@@ -111,16 +86,10 @@ export default function PatientFilterV2(props: any) {
       }
 
       if(filter.lsgBody){
-        const lsgRes = await dispatch(getAllLocalBody({}));
-        // console.log('dispatch', lsgRes.data)
-        if (lsgRes?.data) {
-          const theRealLSG = lsgRes.data.results.map((obj: any) => ({
-            id: obj.id, name: obj.name
-          }))
-          console.log('filtered: ', theRealLSG.filter((obj: any) => obj.id == filter.lsgBody)[0]);
-          setLsgBody(theRealLSG);
-          setFilterState({ lsgBody_ref: theRealLSG.filter((obj: any) => obj.id == filter.lsgBody)[0] });
-        }
+        const { data: lsgRes } = await dispatch(getAllLocalBody({}));
+        const theRealLSG = lsgRes.results.map((obj: any) => ({ id: obj.id, name: obj.name }))
+        setLsgBody(theRealLSG);
+        setFilterState({ lsgBody_ref: theRealLSG.filter((obj: any) => obj.id == filter.lsgBody)[0] });
       }
     }
     fetchData();
@@ -139,14 +108,6 @@ export default function PatientFilterV2(props: any) {
 
     setFilterState(filterData);
   };
-
-  // const setLSG = (selected: any, name: string) => {
-  //   const filterData: any = { ...filterState };
-  //   filterData[`${name}_ref`] = selected;
-  //   filterData[name] = (selected || {}).id;
-
-  //   setFilterState(filterData);
-  // };
 
   const handleChange = (event: any) => {
     const { name, value } = event.target;
@@ -167,22 +128,15 @@ export default function PatientFilterV2(props: any) {
   }
 
   const handleLsgSearch = (e: any) => {
-    console.log(e.target.value);
-    // setLsgLoading(true);
     setHasLsgSearchText(!!e.target.value);
     onLsgSearch(e.target.value);
   }
 
 const onLsgSearch = useCallback(debounce(async (text: string) => {
     if (text) {
-        // const params = { limit: 50, offset: 0, search_text: text, all: searchAll, facility_type: facilityType };
-        const res = await dispatch(getAllLocalBody({}));
-        if (res && res.data) {
-            setLsgBody(res.data.results);
-          // setFilterState({ lsgBody_ref: res.data.results });
-
-        }
-        setLsgLoading(false);
+      const { data } = await dispatch(getAllLocalBody({}));
+      setLsgBody(data.results);
+      setLsgLoading(false);
     } else {
       setLsgBody([]);
       setLsgLoading(false);
@@ -190,8 +144,6 @@ const onLsgSearch = useCallback(debounce(async (text: string) => {
 }, 300), []);
 
   const applyFilter = () => {
-    // const selectedLSGIDs = selectedLSG.map(obj => obj.id);
-
     const {
       facility,
       lsgBody,
@@ -214,9 +166,6 @@ const onLsgSearch = useCallback(debounce(async (text: string) => {
       covin_id,
       srf_id,
     } = filterState;
-    console.log('Apply Filter');
-    console.log(`facility`, facility);
-    console.log(`lsgBody`, lsgBody);
     const data = {
       lsgBody: lsgBody || "",
       facility: facility || "",
