@@ -78,14 +78,12 @@ export default function PatientFilterV2(props: any) {
     async function fetchData() {
       if (filter.facility) {
         setFacilityLoading(true);
-        const res = await dispatch(getFacility(filter.facility, "facility"));
-        if (res && res.data) {
-          setFilterState({ facility_ref: res.data });
-        }
+        const { data: facilityData } = await dispatch(getFacility(filter.facility, "facility"));
+        setFilterState({ facility_ref: facilityData });
         setFacilityLoading(false);
       }
 
-      if(filter.lsgBody){
+      if(filter.lsgBody) {
         const { data: lsgRes } = await dispatch(getAllLocalBody({}));
         const theRealLSG = lsgRes.results.map((obj: any) => ({ id: obj.id, name: obj.name }))
         setLsgBody(theRealLSG);
@@ -132,16 +130,16 @@ export default function PatientFilterV2(props: any) {
     onLsgSearch(e.target.value);
   }
 
-const onLsgSearch = useCallback(debounce(async (text: string) => {
+  const onLsgSearch = useCallback(debounce(async (text: string) => {
     if (text) {
-      const { data } = await dispatch(getAllLocalBody({}));
-      setLsgBody(data.results);
+      const { data: { results: lsgBodies } } = await dispatch(getAllLocalBody({}));
+      setLsgBody(lsgBodies);
       setLsgLoading(false);
     } else {
       setLsgBody([]);
       setLsgLoading(false);
     }
-}, 300), []);
+  }, 300), []);
 
   const applyFilter = () => {
     const {
