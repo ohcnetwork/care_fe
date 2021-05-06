@@ -67,7 +67,6 @@ export default function ListView({ board, filterProp, formatFilter }: boardProps
 
   const handlePagination = (page: number, limit: number) => {
     const offset = (page - 1) * limit;
-    // console.log(`${currentPage} of ${(totalCount || 0)/limit} to ${page}`)
     setCurrentPage(page);
     setIsLoading(loading => reduceLoading("MORE", loading));
     dispatch(listShiftRequests(formatFilter({ ...filterProp, status: board, offset: offset }), board)).then((res: any) => {

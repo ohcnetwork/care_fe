@@ -82,7 +82,6 @@ export const FileUpload = (props: FileUploadProps) => {
       const res = await dispatch(viewUpload(data));
       if (!status.aborted) {
         if (res && res.data) {
-          console.log(res.data);
           setuploadedFiles(res.data.results);
         }
         setIsLoading(false);
@@ -104,7 +103,6 @@ export const FileUpload = (props: FileUploadProps) => {
     window.open(responseData.data.read_signed_url, "_blank");
   };
 
-  console.log(hideBack);
   const renderFileUpload = (item: FileUploadModel) => {
     return (
       <Card className="mt-4" key={item.id}>
