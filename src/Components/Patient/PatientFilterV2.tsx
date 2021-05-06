@@ -84,10 +84,12 @@ export default function PatientFilterV2(props: any) {
       }
 
       if(filter.lsgBody) {
+        setLsgLoading(true);
         const { data: lsgRes } = await dispatch(getAllLocalBody({}));
-        const theRealLSG = lsgRes.results.map((obj: any) => ({ id: obj.id, name: obj.name }))
-        setLsgBody(theRealLSG);
-        setFilterState({ lsgBody_ref: theRealLSG.filter((obj: any) => obj.id == filter.lsgBody)[0] });
+        const lsgBodyData = lsgRes.results.map((obj: any) => ({ id: obj.id, name: obj.name }))
+        setLsgBody(lsgBodyData);
+        setFilterState({ lsgBody_ref: lsgBodyData.filter((obj: any) => obj.id.toString() === filter.lsgBody.toString())[0] });
+        setLsgLoading(false);
       }
     }
     fetchData();
@@ -127,6 +129,7 @@ export default function PatientFilterV2(props: any) {
 
   const handleLsgSearch = (e: any) => {
     setHasLsgSearchText(!!e.target.value);
+    setLsgLoading(true);
     onLsgSearch(e.target.value);
   }
 
@@ -255,14 +258,11 @@ export default function PatientFilterV2(props: any) {
       </div>
       <div className="font-light text-md mt-2">Filter By:</div>
       <div className="flex flex-wrap gap-2">
-      <div className="w-64 flex-none">
-          <span className="text-sm font-semibold">LSG</span>
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">LSG body</span>
           <div className="">
-            {(isLsgLoading) ? (
-              <CircularProgress size={20} />
-            ) : (
               <AutoCompleteAsyncField
-                name="local_bodies"
+                name="lsgBody"
                 multiple={false}
                 variant="outlined"
                 value={filterState.lsgBody_ref}
@@ -270,15 +270,14 @@ export default function PatientFilterV2(props: any) {
                 onSearch={handleLsgSearch}
                 onChange={(e: object, value: any) => handleLsgChange(value)}
                 loading={isLsgLoading}
-                placeholder="Select Local Body"
-                noOptionsText={hasLsgSearchText ? "No LSG found, please try again" : "Start typing to begin search"}
+                placeholder="Search by LSG body name"
+                noOptionsText={hasLsgSearchText ? "No LSG body found, please try again" : "Start typing to begin search"}
                 renderOption={(option: any) => <div>{option.name}</div>}
-                label="Local Body"
                 freeSolo={false}
                 getOptionSelected={(option: any, value: any) => option.id === value.id }
                 getOptionLabel={(option: any) => option.name }
+                className="shifting-page-filter-dropdown"
               />
-            )}
           </div>
         </div>
         <div className="w-64 flex-none">
