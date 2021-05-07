@@ -74,6 +74,9 @@ const initForm: any = {
   longitude: "",
   pincode: "",
   oxygen_capacity: "",
+  type_b_cylinders: "",
+  type_c_cylinders: "",
+  type_d_cylinders: "",
 };
 
 const initError = Object.assign(
@@ -321,6 +324,28 @@ export const FacilityCreate = (props: FacilityProps) => {
             invalidForm = true;
           }
           return;
+
+        case "type_b_cylinders":
+          if (state.form.type_b_cylinders == "") {
+            errors[field] = "Please fill number of type B cylinders";
+            invalidForm = true;
+          }
+          return;
+
+        case "type_c_cylinders":
+          if (state.form.type_c_cylinders == "") {
+            errors[field] = "Please fill number of type C cylinders";
+            invalidForm = true;
+          }
+          return;
+
+        case "type_d_cylinders":
+          if (state.form.type_d_cylinders == "") {
+            errors[field] = "Please fill number of type D cylinders";
+            invalidForm = true;
+          }
+          return;
+
         default:
           return;
       }
@@ -361,6 +386,15 @@ export const FacilityCreate = (props: FacilityProps) => {
         oxygen_capacity: state.form.oxygen_capacity
           ? Number(state.form.oxygen_capacity)
           : 0,
+        type_b_cylinders: state.form.type_b_cylinders
+          ? Number(state.form.type_b_cylinders) :
+          0,
+        type_c_cylinders: state.form.type_c_cylinders
+          ? Number(state.form.type_c_cylinders) :
+          0,
+        type_d_cylinders: state.form.type_d_cylinders
+          ? Number(state.form.type_d_cylinders) :
+          0,
       };
       const res = await dispatchAction(
         facilityId ? updateFacility(facilityId, data) : createFacility(data)
@@ -566,6 +600,51 @@ export const FacilityCreate = (props: FacilityProps) => {
                   value={state.form.oxygen_capacity}
                   onChange={handleChange}
                   errors={state.errors.oxygen_capacity}
+                />
+              </div>
+
+              <div>
+                <InputLabel id="name-label">
+                  B Type Oxygen Cylinders
+                </InputLabel>
+                <TextInputField
+                  name="type_b_cylinders"
+                  type="number"
+                  variant="outlined"
+                  margin="dense"
+                  value={state.form.type_b_cylinders}
+                  onChange={handleChange}
+                  errors={state.errors.type_b_cylinders}
+                />
+              </div>
+
+              <div>
+                <InputLabel id="name-label">
+                  C Type Oxygen Cylinders
+                </InputLabel>
+                <TextInputField
+                  name="type_c_cylinders"
+                  type="number"
+                  variant="outlined"
+                  margin="dense"
+                  value={state.form.type_c_cylinders}
+                  onChange={handleChange}
+                  errors={state.errors.type_c_cylinders}
+                />
+              </div>
+
+              <div>
+                <InputLabel id="name-label">
+                  Jumbo D Type Oxygen Cylinders
+                </InputLabel>
+                <TextInputField
+                  name="type_d_cylinders"
+                  type="number"
+                  variant="outlined"
+                  margin="dense"
+                  value={state.form.type_d_cylinders}
+                  onChange={handleChange}
+                  errors={state.errors.type_d_cylinders}
                 />
               </div>
 
