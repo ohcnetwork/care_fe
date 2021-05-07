@@ -79,6 +79,7 @@ const initForm: any = {
   type_b_cylinders: "",
   type_c_cylinders: "",
   type_d_cylinders: "",
+  expected_oxygen_requirement: "",
 };
 
 const initError = Object.assign(
@@ -208,6 +209,7 @@ export const FacilityCreate = (props: FacilityProps) => {
             type_b_cylinders: res.data.type_b_cylinders,
             type_c_cylinders: res.data.type_c_cylinders,
             type_d_cylinders: res.data.type_d_cylinders,
+            expected_oxygen_requirement: res.data.expected_oxygen_requirement,
             oxygen_capacity: res.data.oxygen_capacity
               ? res.data.oxygen_capacity
               : "",
@@ -334,21 +336,21 @@ export const FacilityCreate = (props: FacilityProps) => {
           return;
 
         case "type_b_cylinders":
-          if (state.form.type_b_cylinders == "") {
+          if (state.form.type_b_cylinders === "") {
             errors[field] = "Please fill number of type B cylinders";
             invalidForm = true;
           }
           return;
 
         case "type_c_cylinders":
-          if (state.form.type_c_cylinders == "") {
+          if (state.form.type_c_cylinders === "") {
             errors[field] = "Please fill number of type C cylinders";
             invalidForm = true;
           }
           return;
 
         case "type_d_cylinders":
-          if (state.form.type_d_cylinders == "") {
+          if (state.form.type_d_cylinders === "") {
             errors[field] = "Please fill number of type D cylinders";
             invalidForm = true;
           }
@@ -402,6 +404,9 @@ export const FacilityCreate = (props: FacilityProps) => {
           : 0,
         type_d_cylinders: state.form.type_d_cylinders
           ? Number(state.form.type_d_cylinders)
+          : 0,
+        expected_oxygen_requirement: state.form.expected_oxygen_requirement
+          ? Number(state.form.expected_oxygen_requirement)
           : 0,
       };
       const res = await dispatchAction(
@@ -649,6 +654,21 @@ export const FacilityCreate = (props: FacilityProps) => {
                   value={state.form.type_d_cylinders}
                   onChange={handleChange}
                   errors={state.errors.type_d_cylinders}
+                />
+              </div>
+
+              <div>
+                <InputLabel id="name-label">
+                  Expected Oxygen Requirement in Litres
+                </InputLabel>
+                <TextInputField
+                  name="expected_oxygen_requirement"
+                  type="number"
+                  variant="outlined"
+                  margin="dense"
+                  value={state.form.expected_oxygen_requirement}
+                  onChange={handleChange}
+                  errors={state.errors.expected_oxygen_requirement}
                 />
               </div>
 

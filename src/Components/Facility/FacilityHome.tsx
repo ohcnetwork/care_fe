@@ -186,6 +186,10 @@ export const FacilityHome = (props: any) => {
               <Typography>
                 Type D :{` ${facilityData.type_d_cylinders} cylinders`}
               </Typography>
+              <Typography>
+                Expected Oxygen Requirement
+                {` ${facilityData.expected_oxygen_requirement} liters`}
+              </Typography>
             </div>
           </div>
           <div className="flex flex-col">
