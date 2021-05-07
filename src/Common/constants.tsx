@@ -406,3 +406,10 @@ export const DESIGNATION_HEALTH_CARE_WORKER = [
   "STAFF NURSE",
   "OTHERS",
 ];
+
+export const BREATHLESSNESS_LEVEL = [
+  "NOT SPECIFIED",
+  "MILD", 
+  "MODERATE", 
+  "SEVERE"
+];
