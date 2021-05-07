@@ -57,7 +57,9 @@ const initialDistricts = [{ id: 0, name: "Choose District" }];
 const selectStates = [{ id: 0, name: "Please select your state" }];
 const initialLocalbodies = [{ id: 0, name: "Choose Localbody" }];
 const selectDistrict = [{ id: 0, name: "Please select your district" }];
-const selectLocalBody = [{ id: 0, name: "Please select your Local Body", number: 0 }];
+const selectLocalBody = [
+  { id: 0, name: "Please select your Local Body", number: 0 },
+];
 const initialWards = [{ id: 0, name: "Choose Ward", number: 0 }];
 
 const initForm: any = {
@@ -197,9 +199,15 @@ export const FacilityCreate = (props: FacilityProps) => {
               : "false",
             address: res.data.address,
             pincode: res.data.pincode,
-            phone_number: res.data.phone_number.length == 10 ? "+91" + res.data.phone_number : res.data.phone_number,
+            phone_number:
+              res.data.phone_number.length == 10
+                ? "+91" + res.data.phone_number
+                : res.data.phone_number,
             latitude: res.data.location ? res.data.location.latitude : "",
             longitude: res.data.location ? res.data.location.longitude : "",
+            type_b_cylinders: res.data.type_b_cylinders,
+            type_c_cylinders: res.data.type_c_cylinders,
+            type_d_cylinders: res.data.type_d_cylinders,
             oxygen_capacity: res.data.oxygen_capacity
               ? res.data.oxygen_capacity
               : "",
@@ -376,9 +384,9 @@ export const FacilityCreate = (props: FacilityProps) => {
         location:
           state.form.latitude && state.form.longitude
             ? {
-              latitude: Number(state.form.latitude),
-              longitude: Number(state.form.longitude),
-            }
+                latitude: Number(state.form.latitude),
+                longitude: Number(state.form.longitude),
+              }
             : undefined,
         phone_number: parsePhoneNumberFromString(
           state.form.phone_number
@@ -387,14 +395,14 @@ export const FacilityCreate = (props: FacilityProps) => {
           ? Number(state.form.oxygen_capacity)
           : 0,
         type_b_cylinders: state.form.type_b_cylinders
-          ? Number(state.form.type_b_cylinders) :
-          0,
+          ? Number(state.form.type_b_cylinders)
+          : 0,
         type_c_cylinders: state.form.type_c_cylinders
-          ? Number(state.form.type_c_cylinders) :
-          0,
+          ? Number(state.form.type_c_cylinders)
+          : 0,
         type_d_cylinders: state.form.type_d_cylinders
-          ? Number(state.form.type_d_cylinders) :
-          0,
+          ? Number(state.form.type_d_cylinders)
+          : 0,
       };
       const res = await dispatchAction(
         facilityId ? updateFacility(facilityId, data) : createFacility(data)
@@ -590,7 +598,7 @@ export const FacilityCreate = (props: FacilityProps) => {
               </div>
               <div>
                 <InputLabel id="name-label">
-                  Oxygen Capacity in liters
+                  Oxygen Tank Capacity in liters
                 </InputLabel>
                 <TextInputField
                   name="oxygen_capacity"
@@ -604,9 +612,7 @@ export const FacilityCreate = (props: FacilityProps) => {
               </div>
 
               <div>
-                <InputLabel id="name-label">
-                  B Type Oxygen Cylinders
-                </InputLabel>
+                <InputLabel id="name-label">B Type Oxygen Cylinders</InputLabel>
                 <TextInputField
                   name="type_b_cylinders"
                   type="number"
@@ -619,9 +625,7 @@ export const FacilityCreate = (props: FacilityProps) => {
               </div>
 
               <div>
-                <InputLabel id="name-label">
-                  C Type Oxygen Cylinders
-                </InputLabel>
+                <InputLabel id="name-label">C Type Oxygen Cylinders</InputLabel>
                 <TextInputField
                   name="type_c_cylinders"
                   type="number"

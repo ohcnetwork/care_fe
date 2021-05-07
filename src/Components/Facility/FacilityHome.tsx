@@ -174,8 +174,19 @@ export const FacilityHome = (props: any) => {
               </Typography>
             )}
             <Typography>
-              Oxygen Capacity :{` ${facilityData.oxygen_capacity} Litres`}
+              Oxygen Tank Capacity :{` ${facilityData.oxygen_capacity} Litres`}
             </Typography>
+            <div>
+              <Typography>
+                Type B :{` ${facilityData.type_b_cylinders} cylinders`}
+              </Typography>
+              <Typography>
+                Type C :{` ${facilityData.type_c_cylinders} cylinders`}
+              </Typography>
+              <Typography>
+                Type D :{` ${facilityData.type_d_cylinders} cylinders`}
+              </Typography>
+            </div>
           </div>
           <div className="flex flex-col">
             <button
