@@ -106,7 +106,6 @@ export default function ManageUsers(props: any) {
     setIsFacilityLoading(true);
     const res = await dispatch(getUserListFacility({ username }));
     if (res && res.data) {
-      console.log(res.data);
       const updated = users.map(user => {
         return user.username === username ? {
           ...user,
@@ -119,7 +118,6 @@ export default function ManageUsers(props: any) {
   };
 
   const removeFacility = async (username: string, facility: any) => {
-    console.log(username, facility);
     setIsFacilityLoading(true);
     await dispatch(deleteUserFacility(username, String(facility.id)));
     setIsFacilityLoading(false);
@@ -164,7 +162,6 @@ export default function ManageUsers(props: any) {
   };
 
   const addFacility = async (username: string, facility: any) => {
-    console.log(username, facility);
     hideLinkFacilityModal();
     setIsFacilityLoading(true);
     await dispatch(addUserFacility(username, String(facility.id)));

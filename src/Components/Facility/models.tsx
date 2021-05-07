@@ -10,6 +10,10 @@ export interface FacilityModel {
   };
   oxygen_capacity?: number;
   phone_number?: string;
+  type_b_cylinders?: number;
+  type_c_cylinders?: number;
+  type_d_cylinders?: number;
+  expected_oxygen_requirement?: number;
   local_body_object?: {
     name: string;
     body_type: number;
