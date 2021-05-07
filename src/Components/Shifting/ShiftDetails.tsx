@@ -660,6 +660,12 @@ export default function ShiftDetails(props: { id: string }) {
                 </span>
                 {data.assigned_facility_type || "--"}
               </div>
+              <div>
+                <span className="font-semibold leading-relaxed">
+                  Severity of Breathlessness:{" "}
+                </span>
+                {data.breathlessness_level || "--"}
+              </div>
 
               <div className="md:row-span-2 md:col-span-2">
                 <div className="font-semibold leading-relaxed">Reason: </div>
