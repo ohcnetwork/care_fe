@@ -19,14 +19,14 @@ import { getAllLocalBody, getFacility } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { CircularProgress } from "@material-ui/core";
 import { navigate } from "raviger";
-const debounce = require('lodash.debounce');
+const debounce = require("lodash.debounce");
 
 const useMergeState = (initialState: any) => {
   const [state, setState] = useState(initialState);
   const setMergedState = (newState: any) =>
     setState((prevState: any) => Object.assign({}, prevState, newState));
   return [state, setMergedState];
-}
+};
 
 export default function PatientFilterV2(props: any) {
   let { filter, onChange, closeFilter } = props;
@@ -67,7 +67,9 @@ export default function PatientFilterV2(props: any) {
       filter.last_consultation_discharge_date_before || null,
     last_consultation_discharge_date_after:
       filter.last_consultation_discharge_date_after || null,
-    last_consultation_admitted_to_list: filter.last_consultation_admitted_to_list ? filter.last_consultation_admitted_to_list.split(",") : [],
+    last_consultation_admitted_to_list: filter.last_consultation_admitted_to_list
+      ? filter.last_consultation_admitted_to_list.split(",")
+      : [],
     srf_id: filter.srf_id || null,
     is_vaccinated: filter.is_vaccinated || null,
     covin_id: filter.covin_id || null,
@@ -78,17 +80,26 @@ export default function PatientFilterV2(props: any) {
     async function fetchData() {
       if (filter.facility) {
         setFacilityLoading(true);
-        const { data: facilityData } = await dispatch(getFacility(filter.facility, "facility"));
+        const { data: facilityData } = await dispatch(
+          getFacility(filter.facility, "facility")
+        );
         setFilterState({ facility_ref: facilityData });
         setFacilityLoading(false);
       }
 
-      if(filter.lsgBody) {
+      if (filter.lsgBody) {
         setLsgLoading(true);
         const { data: lsgRes } = await dispatch(getAllLocalBody({}));
-        const lsgBodyData = lsgRes.results.map((obj: any) => ({ id: obj.id, name: obj.name }))
+        const lsgBodyData = lsgRes.results.map((obj: any) => ({
+          id: obj.id,
+          name: obj.name,
+        }));
         setLsgBody(lsgBodyData);
-        setFilterState({ lsgBody_ref: lsgBodyData.filter((obj: any) => obj.id.toString() === filter.lsgBody.toString())[0] });
+        setFilterState({
+          lsgBody_ref: lsgBodyData.filter(
+            (obj: any) => obj.id.toString() === filter.lsgBody.toString()
+          )[0],
+        });
         setLsgLoading(false);
       }
     }
@@ -125,24 +136,29 @@ export default function PatientFilterV2(props: any) {
     filterData[name] = [...value];
 
     setFilterState(filterData);
-  }
+  };
 
   const handleLsgSearch = (e: any) => {
     setHasLsgSearchText(!!e.target.value);
     setLsgLoading(true);
     onLsgSearch(e.target.value);
-  }
+  };
 
-  const onLsgSearch = useCallback(debounce(async (text: string) => {
-    if (text) {
-      const { data: { results: lsgBodies } } = await dispatch(getAllLocalBody({}));
-      setLsgBody(lsgBodies);
-      setLsgLoading(false);
-    } else {
-      setLsgBody([]);
-      setLsgLoading(false);
-    }
-  }, 300), []);
+  const onLsgSearch = useCallback(
+    debounce(async (text: string) => {
+      if (text) {
+        const {
+          data: { results: lsgBodies },
+        } = await dispatch(getAllLocalBody({ local_body_name: text }));
+        setLsgBody(lsgBodies);
+        setLsgLoading(false);
+      } else {
+        setLsgBody([]);
+        setLsgLoading(false);
+      }
+    }, 300),
+    []
+  );
 
   const applyFilter = () => {
     const {
@@ -213,7 +229,8 @@ export default function PatientFilterV2(props: any) {
         (disease_status == "Show All" ? "" : disease_status) || "",
       age_min: age_min || "",
       age_max: age_max || "",
-      last_consultation_admitted_to_list: last_consultation_admitted_to_list || [],
+      last_consultation_admitted_to_list:
+        last_consultation_admitted_to_list || [],
       srf_id: srf_id || "",
       is_vaccinated: is_vaccinated || "",
       covin_id: covin_id || "",
@@ -261,23 +278,29 @@ export default function PatientFilterV2(props: any) {
         <div className="w-64 flex-none">
           <span className="text-sm font-semibold">LSG body</span>
           <div className="">
-              <AutoCompleteAsyncField
-                name="lsgBody"
-                multiple={false}
-                variant="outlined"
-                value={filterState.lsgBody_ref}
-                options={lsgBody}
-                onSearch={handleLsgSearch}
-                onChange={(e: object, value: any) => handleLsgChange(value)}
-                loading={isLsgLoading}
-                placeholder="Search by LSG body name"
-                noOptionsText={hasLsgSearchText ? "No LSG body found, please try again" : "Start typing to begin search"}
-                renderOption={(option: any) => <div>{option.name}</div>}
-                freeSolo={false}
-                getOptionSelected={(option: any, value: any) => option.id === value.id }
-                getOptionLabel={(option: any) => option.name }
-                className="shifting-page-filter-dropdown"
-              />
+            <AutoCompleteAsyncField
+              name="lsgBody"
+              multiple={false}
+              variant="outlined"
+              value={filterState.lsgBody_ref}
+              options={lsgBody}
+              onSearch={handleLsgSearch}
+              onChange={(e: object, value: any) => handleLsgChange(value)}
+              loading={isLsgLoading}
+              placeholder="Search by LSG body name"
+              noOptionsText={
+                hasLsgSearchText
+                  ? "No LSG body found, please try again"
+                  : "Start typing to begin search"
+              }
+              renderOption={(option: any) => <div>{option.name}</div>}
+              freeSolo={false}
+              getOptionSelected={(option: any, value: any) =>
+                option.id === value.id
+              }
+              getOptionLabel={(option: any) => option.name}
+              className="shifting-page-filter-dropdown"
+            />
           </div>
         </div>
         <div className="w-64 flex-none">
@@ -372,7 +395,7 @@ export default function PatientFilterV2(props: any) {
             name="last_consultation_admitted_to_list"
             variant="outlined"
             value={filterState.last_consultation_admitted_to_list}
-            options={[ ...PATIENT_FILTER_ADMITTED_TO ]}
+            options={[...PATIENT_FILTER_ADMITTED_TO]}
             onChange={handleMultiSelectChange}
           />
         </div>
