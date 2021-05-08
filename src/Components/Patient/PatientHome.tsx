@@ -715,6 +715,13 @@ export const PatientHome = (props: any) => {
                     text="Travel (within last 28 days)"
                   />
                 )}
+                {patientData.last_consultation?.is_telemedicine && (
+                     <Badge
+                    color="purple"
+                    icon="phone"
+                    text="Telemedicine"
+                  />
+                )}
               </div>
             </div>
           </div>

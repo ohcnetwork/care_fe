@@ -4,8 +4,9 @@
 
 import * as React from 'react';
 
-// tslint:disable-next-line:no-var-requires
-const PrescriptionBuilderBS = require('./PrescriptionBuilder.bs');
+// @ts-ignore: Implicit any on import
+import * as PrescriptionBuilderBS__Es6Import from './PrescriptionBuilder.bs';
+const PrescriptionBuilderBS: any = PrescriptionBuilderBS__Es6Import;
 
 import {t as Prescription__Prescription_t} from '@coronasafe/prescription-builder/src/Types/Prescription__Prescription.gen';
 
