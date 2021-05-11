@@ -427,7 +427,7 @@ export const PhoneNumberField = (props: any) => {
             country="in"
             autoFormat={!turnOffAutoFormat}
             {...countryRestriction}
-        /><div className="flex items-center ml-1 mt-1 border border-gray-400 rounded px-4 h-10 cursor-pointer hover:bg-gray-200" onClick={_=>onChangeHandler("+91")}><i className="fas fa-times text-red-600"/></div></div>
+        /><div className="flex items-center ml-1 mt-1 border border-gray-400 rounded px-4 h-10 cursor-pointer hover:bg-gray-200" onClick={_=>onChange("+91")}><i className="fas fa-times text-red-600"/></div></div>
         <ErrorHelperText error={errors} />
     </>)
 }
