@@ -34,7 +34,7 @@ function Badge(props: { color: string; icon: string; text: string }) {
   );
 }
 
-const RESULT_LIMIT = 30;
+const RESULT_LIMIT = 15;
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
 export default function ResultList() {
@@ -53,17 +53,17 @@ export default function ResultList() {
     const params = {
       page: qParams.page || 1,
       name: qParams.name || undefined,
-      mobile_number: qParams.mobile_number
-        ? qParams.mobile_number
-        : undefined,
+      mobile_number: qParams.mobile_number ? qParams.mobile_number : undefined,
       wards: qParams.wards || undefined,
       local_bodies: qParams.local_bodies || undefined,
       created_date_before: qParams.created_date_before || undefined,
       created_date_after: qParams.created_date_after || undefined,
       result_date_before: qParams.result_date_before || undefined,
       result_date_after: qParams.result_date_after || undefined,
-      sample_collection_date_after: qParams.sample_collection_date_after || undefined,
-      sample_collection_date_before: qParams.sample_collection_date_before || undefined,
+      sample_collection_date_after:
+        qParams.sample_collection_date_after || undefined,
+      sample_collection_date_before:
+        qParams.sample_collection_date_before || undefined,
       offset: (qParams.page ? qParams.page - 1 : 0) * RESULT_LIMIT,
     };
 

@@ -81,7 +81,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 
-const RESULT_LIMIT = 30;
+const RESULT_LIMIT = 15;
 
 
 export const PatientManager = (props: any) => {
