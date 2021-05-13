@@ -162,7 +162,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
         assigned_facility_type: state.form.assigned_facility_type,
         preferred_vehicle_choice: state.form.preferred_vehicle_choice,
         assigned_to: state.form.assigned_to,
-        breathlessness_level: state.form.breathlessness_level
+        breathlessness_level: state.form.breathlessness_level,
       };
 
       const res = await dispatchAction(updateShift(props.id, data));
@@ -244,6 +244,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                 <FacilitySelect
                   multiple={false}
                   name="shifting_approving_facility"
+                  facilityType={1300}
                   selected={state.form.shifting_approving_facility_object}
                   setSelected={(obj) =>
                     setFacility(obj, "shifting_approving_facility_object")
