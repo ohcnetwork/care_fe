@@ -19,7 +19,6 @@ export const USER_TYPES: Array<String> = [
   "StateLabAdmin",
   "StateAdmin",
   "StateReadOnlyAdmin",
-  "Reserved",
 ];
 
 export const DOWNLOAD_TYPES: Array<String> = [
@@ -128,11 +127,11 @@ export const PATIENT_FILTER_ORDER: Array<OptionsType> = [
 ];
 
 export const BED_TYPES: Array<OptionsType> = [
-  { id: 1, text: "Normal" },
+  { id: 1, text: "Non-Covid Ordinary Bed" },
   { id: 2, text: "Hostel" },
   { id: 3, text: "Single Room with Attached Bathroom" },
-  { id: 10, text: "ICU" },
-  { id: 20, text: "Ventilator" },
+  { id: 10, text: "Non-Covid ICU" },
+  { id: 20, text: "Non-Covid Ventilator" },
   { id: 30, text: "Covid Beds" },
   { id: 40, text: "KASP Beds" },
   { id: 50, text: "KASP ICU beds" },
@@ -141,7 +140,7 @@ export const BED_TYPES: Array<OptionsType> = [
   { id: 100, text: "Covid Ventilators" },
   { id: 110, text: "Covid ICU" },
   { id: 120, text: "Covid Oxygen beds" },
-  { id: 150, text: "Oxygen beds" },
+  { id: 150, text: "Non-Covid Oxygen beds" },
 ];
 
 export const DOCTOR_SPECIALIZATION: Array<OptionsType> = [
@@ -409,7 +408,7 @@ export const DESIGNATION_HEALTH_CARE_WORKER = [
 
 export const BREATHLESSNESS_LEVEL = [
   "NOT SPECIFIED",
-  "MILD", 
-  "MODERATE", 
-  "SEVERE"
+  "MILD",
+  "MODERATE",
+  "SEVERE",
 ];
