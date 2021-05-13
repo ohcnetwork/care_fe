@@ -24,6 +24,7 @@ import {
   TEST_TYPE,
   FRONTLINE_WORKER,
   DESIGNATION_HEALTH_CARE_WORKER,
+  VACCINES,
 } from "../../Common/constants";
 import countryList from "../../Common/static/countries.json";
 import statesList from "../../Common/static/states.json";
@@ -97,6 +98,7 @@ const bloodGroups = [...BLOOD_GROUPS];
 const testType = [...TEST_TYPE];
 const designationOfHealthWorkers = [...DESIGNATION_HEALTH_CARE_WORKER];
 const frontlineWorkers = [...FRONTLINE_WORKER];
+const vaccines = ["Select", ...VACCINES];
 
 const initForm: any = {
   name: "",
@@ -147,6 +149,8 @@ const initForm: any = {
   cluster_name: "",
   covin_id: "",
   is_vaccinated: "false",
+  number_of_doses: 0,
+  vaccine_name: null,
   ...medicalHistoryChoices,
 };
 
@@ -595,6 +599,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         srf_id: state.form.srf_id,
         covin_id: state.form.covin_id,
         is_vaccinated: state.form.is_vaccinated,
+        number_of_doses: Number(state.form.number_of_doses),
+        vaccine_name:
+          state.form.vaccine_name && state.form.vaccine_name !== "Select"
+            ? state.form.vaccine_name
+            : null,
         test_type: state.form.test_type,
         name: state.form.name,
         pincode: state.form.pincode ? state.form.pincode : undefined,
@@ -1014,6 +1023,42 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         />
                       </div>)
                     }
+
+                  {state.form.is_vaccinated === "true" && (
+                    <div>
+                      <InputLabel id="doses-label">
+                        Number of doses *
+                      </InputLabel>
+                      <TextInputField
+                        name="number_of_doses"
+                        type="number"
+                        variant="outlined"
+                        margin="dense"
+                        value={state.form.number_of_doses}
+                        onChange={handleChange}
+                        errors={state.errors.number_of_doses}
+                      />
+                    </div>
+                  )}
+
+                  {state.form.is_vaccinated === "true" && (
+                    <div>
+                      <InputLabel id="vaccine-name-label">
+                        Vaccine Name *
+                      </InputLabel>
+                      <SelectField
+                        name="vaccine_name"
+                        variant="outlined"
+                        margin="dense"
+                        optionArray={true}
+                        value={state.form.vaccine_name}
+                        options={vaccines}
+                        onChange={handleChange}
+                        errors={state.errors.vaccine_name}
+                      />
+                    </div>
+                  )}
+
                     <div>
                       <InputLabel id="test_type-label">Test Type</InputLabel>
                       <SelectField
