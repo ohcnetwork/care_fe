@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { AutoCompleteAsyncField, DateInputField } from "../Common/HelperInputFields";
-import { getAllLocalBody } from "../../Redux/actions";
+import { getAllLocalBodyByDistrict } from "../../Redux/actions";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "raviger";
 import moment from "moment";
@@ -92,7 +92,7 @@ export default function ListFilter(props: any) {
   useEffect(() => {
     async function getWardList() {
       const id: number = currentUser.data.district;
-      const res = await dispatch(getAllLocalBody({ id }));
+      const res = await dispatch(getAllLocalBodyByDistrict({ id }));
       let allWards: any[] = [];
       let allLsgs: any[] = [];
       res?.data?.forEach((local: any) => {

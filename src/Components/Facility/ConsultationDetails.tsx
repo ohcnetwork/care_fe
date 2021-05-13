@@ -54,6 +54,10 @@ export const ConsultationDetails = (props: any) => {
                 return option ? option.text.toLowerCase() : symptom;
               });
             data.symptoms_text = symptoms.join(", ");
+            data.discharge_advice =
+              Object.keys(res.data.discharge_advice).length === 0
+                ? []
+                : res.data.discharge_advice;
           }
           setConsultationData(data);
         }

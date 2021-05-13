@@ -19,7 +19,6 @@ export const USER_TYPES: Array<String> = [
   "StateLabAdmin",
   "StateAdmin",
   "StateReadOnlyAdmin",
-  "Reserved",
 ];
 
 export const DOWNLOAD_TYPES: Array<String> = [
@@ -318,7 +317,6 @@ export const DISEASE_STATUS = [
   "POSITIVE",
   "SUSPECTED",
   "NEGATIVE",
-  "RECOVERY",
   "RECOVERED",
   "EXPIRED",
 ];
@@ -406,4 +404,11 @@ export const DESIGNATION_HEALTH_CARE_WORKER = [
   "SONOLOGIST",
   "STAFF NURSE",
   "OTHERS",
+];
+
+export const BREATHLESSNESS_LEVEL = [
+  "NOT SPECIFIED",
+  "MILD",
+  "MODERATE",
+  "SEVERE",
 ];

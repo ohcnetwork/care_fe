@@ -38,12 +38,17 @@ export const DailyRoundListDetails = (props: any) => {
           const currentHealth = currentHealthChoices.find(
             (i) => i.text === res.data.current_health
           );
+
           const data: DailyRoundsModel = {
             ...res.data,
             temperature: Number(res.data.temperature)
               ? res.data.temperature
               : "",
             additional_symptoms_text: "",
+            medication_given:
+              Object.keys(res.data.medication_given).length === 0
+                ? []
+                : res.data.medication_given,
             patient_category:
               patientCategoryChoices.find(
                 (i) => i.id === res.data.patient_category
@@ -170,7 +175,7 @@ export const DailyRoundListDetails = (props: any) => {
           </div>
           <div className="md:col-span-2">
             <span className="font-semibold leading-relaxed">Medication: </span>
-            {dailyRoundListDetailsData.medication_given && (
+            {dailyRoundListDetailsData?.medication_given && (
               <div className="mt-4">
                 <div className="flex flex-col">
                   <div className="-my-2 py-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
@@ -190,7 +195,7 @@ export const DailyRoundListDetails = (props: any) => {
                           </tr>
                         </thead>
                         <tbody>
-                          {dailyRoundListDetailsData.medication_given.map(
+                          {dailyRoundListDetailsData?.medication_given?.map(
                             (med) => (
                               <tr className="bg-white">
                                 <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 font-medium text-gray-900">

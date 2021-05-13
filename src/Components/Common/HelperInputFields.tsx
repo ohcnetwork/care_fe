@@ -90,13 +90,16 @@ interface OptionsProps {
 
 export const TextInputField = (props: TextFieldPropsExtended) => {
     const { onChange, type, errors, onKeyDown } = props;
-    const inputType = type === 'number' ? 'text' : type;
+    const inputType = type === 'number' || type === 'float' ? 'text' : type;
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (typeof onChange !== 'function') {
             return
         }
         if (type === 'number' && event.target.value) {
             event.target.value = event.target.value.replace(/\D/, '');
+        }
+        if (type === 'float' && event.target.value) {
+            event.target.value = event.target.value.replace(/(?!\.)\D/, '');
         }
         onChange(event);
     }
@@ -409,11 +412,14 @@ export const PhoneNumberField = (props: any) => {
     const countryRestriction = !!onlyIndia ? { onlyCountries: ['in'] } : {};
     const onChangeHandler = debounce(onChange, 500);
     const handleChange = (value: string, data: ICountryData | {}, event: ChangeEvent<HTMLInputElement>, formattedValue: string) => {
+        console.log("value",value);
+        console.log("data",data);
+        console.log("event",event);
         onChangeHandler(formattedValue);
     }
     return (<>
         {label && <InputLabel>{label}</InputLabel>}
-        <PhoneInput
+        <div className="flex items-center"><PhoneInput
             countryCodeEditable={false}
             value={value}
             placeholder={placeholder}
@@ -421,7 +427,7 @@ export const PhoneNumberField = (props: any) => {
             country="in"
             autoFormat={!turnOffAutoFormat}
             {...countryRestriction}
-        />
+        /><div className="flex items-center ml-1 mt-1 border border-gray-400 rounded px-4 h-10 cursor-pointer hover:bg-gray-200" onClick={_=>onChange("+91")}><i className="fas fa-times text-red-600"/></div></div>
         <ErrorHelperText error={errors} />
     </>)
 }
