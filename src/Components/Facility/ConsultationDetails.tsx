@@ -67,6 +67,8 @@ export const ConsultationDetails = (props: any) => {
     [consultationId, dispatch]
   );
 
+  console.log(consultationData.assigned_to_object)
+
   const fetchDailyRounds = useCallback(
     async (status: statusType) => {
       setIsDailyRoundLoading(true);
@@ -100,6 +102,7 @@ export const ConsultationDetails = (props: any) => {
   }
 
   let roundsList: any;
+
   if (isDailyRoundLoading) {
     roundsList = <CircularProgress size={20} />;
   } else if (dailyRoundsListData.length === 0) {
@@ -108,76 +111,22 @@ export const ConsultationDetails = (props: any) => {
     );
   } else if (dailyRoundsListData.length > 0) {
     roundsList = dailyRoundsListData.map((itemData, idx) => {
+      const telemedicine_doctor_update = itemData.created_by_telemedicine || itemData.last_updated_by_telemedicine
+
       return (
         <div key={`daily_round_${idx}`} className="w-full mt-4 px-2">
-          <div className="block border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black">
+          <div className={`block border rounded-lg ${telemedicine_doctor_update ? "bg-blue-500" : "bg-white"}  shadow h-full cursor-pointer hover:border-primary-500 text-black`}>
             <div className="p-4">
               <Grid container justify="space-between" alignItems="center">
                 <Grid item xs={11} container spacing={1}>
                   <Grid item xs={6}>
                     <Typography>
-                      <span className="w3-text-grey">Temperature:</span>{" "}
-                      {itemData.temperature}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography>
-                      <span className="w3-text-grey">Taken at :</span>{" "}
-                      {itemData.temperature_measured_at
-                        ? moment(itemData.temperature_measured_at).format("lll")
+                      <span className="text-gray-700">Assigned To:</span>{" "}
+                      {(telemedicine_doctor_update && consultationData.assigned_to_object) ?
+                        consultationData.assigned_to_object.first_name + " " + consultationData.assigned_to_object.last_name
                         : "-"}
                     </Typography>
                   </Grid>
-                  <Grid item xs={12}>
-                    <Typography>
-                      <span className="w3-text-grey">
-                        Physical Examination Info:
-                      </span>{" "}
-                      {itemData.physical_examination_info}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Typography>
-                      <span className="w3-text-grey">Other Details:</span>{" "}
-                      {itemData.other_details}
-                    </Typography>
-                  </Grid>
-                </Grid>
-              </Grid>
-              <div className="mt-2">
-                <Button
-                  size="small"
-                  variant="outlined"
-                  fullWidth
-                  onClick={(e) =>
-                    navigate(
-                      `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${itemData.id}`
-                    )
-                  }
-                >
-                  View Consultation Update Details
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      );
-    });
-  }
-  if (isDailyRoundLoading) {
-    roundsList = <CircularProgress size={20} />;
-  } else if (dailyRoundsListData.length === 0) {
-    roundsList = (
-      <Typography>No Consultation Update data is available.</Typography>
-    );
-  } else if (dailyRoundsListData.length > 0) {
-    roundsList = dailyRoundsListData.map((itemData, idx) => {
-      return (
-        <div key={`daily_round_${idx}`} className="w-full mt-4 px-2">
-          <div className="block border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black">
-            <div className="p-4">
-              <Grid container justify="space-between" alignItems="center">
-                <Grid item xs={11} container spacing={1}>
                   <Grid item xs={6}>
                     <Typography>
                       <span className="text-gray-700">Temperature:</span>{" "}

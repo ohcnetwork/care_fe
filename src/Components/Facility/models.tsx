@@ -1,3 +1,5 @@
+import { AssignedToObjectModel } from "../Patient/models";
+
 export interface FacilityModel {
   id?: number;
   name?: string;
@@ -78,6 +80,7 @@ export interface ConsultationModel {
   consultation_notes?: string;
   is_telemedicine?: boolean;
   discharge_advice?: any;
+  assigned_to_object?: AssignedToObjectModel;
 }
 export interface PatientStatsModel {
   id?: number;
