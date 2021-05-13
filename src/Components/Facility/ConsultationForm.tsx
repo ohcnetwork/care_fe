@@ -250,6 +250,11 @@ export const ConsultationForm = (props: any) => {
             errors[field] = "Please enter OP consultation Details";
             invalidForm = true;
           }
+        case "is_telemedicine":
+          if ( state.form.admitted_to === "Home Isolation" && state.form[field] === "false") {
+            errors[field] = "Telemedicine should be `Yes` when Admitted To is Home Isolation";
+            invalidForm = true;
+          }
 
           return;
         default:
