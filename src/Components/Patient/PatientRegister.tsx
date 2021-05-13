@@ -550,6 +550,27 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             invalidForm = true;
           }
           return;
+
+        case "is_vaccinated":
+          console.log("in is vaccinated")
+          console.log(state.form.is_vaccinated)
+          if (state.form.is_vaccinated) {
+            if (
+              Number(state.form.number_of_doses) == 0 ||
+              Number(state.form.number_of_doses) > 2
+            ) {
+              console.log("in right place")
+              errors["number_of_doses"] = "Number of doses is invalid"
+              invalidForm = true;
+            }
+
+            if (state.form.vaccine_name == null) {
+              errors["vaccine_name"] = "Please select vaccine name"
+              invalidForm = true;
+            }
+          }
+          return;
+
         default:
           return;
       }
