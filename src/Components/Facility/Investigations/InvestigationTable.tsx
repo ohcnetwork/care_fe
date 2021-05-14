@@ -62,16 +62,21 @@ const TestRow = ({ data, onChange, showForm, value, isChanged }: any) => {
         }}
       >
         {showForm ? (
-          data.investigation_type === "Choice" ? (
+          data?.investigation_object?.investigation_type === "Choice" ? (
             <SelectField
               name="preferred_vehicle_choice"
               variant="outlined"
               margin="dense"
               optionArray={true}
               value={data?.notes}
-              options={["Unselected", ...data.choices.split(",")]}
+              options={[
+                "Unselected",
+                ...data?.investigation_object?.choices.split(","),
+              ]}
               onChange={onChange}
-              className={"bg-white border-l border-r border-gray-400"}
+              className={
+                "w-full px-4 h-full text-right text-sm border-l border-r border-gray-800 m-0"
+              }
             />
           ) : (
             <input
@@ -111,8 +116,9 @@ export const InvestigationTable = ({
   handleValueChange,
   changedFields,
   handleUpdateCancel,
+  handleSave,
 }: any) => {
-  console.log({ data, handleValueChange, changedFields });
+  // console.log({ data, handleValueChange, changedFields });
   const [searchFilter, setSearchFilter] = useState("");
   const [showForm, setShowForm] = useState(false);
   const filterTests = Object.values(data).filter((i: any) => {
@@ -144,7 +150,7 @@ export const InvestigationTable = ({
             <Button
               variant={"contained"}
               color="primary"
-              onClick={() => {}}
+              onClick={() => handleSave()}
               className="ml-2"
             >
               Save
@@ -178,9 +184,13 @@ export const InvestigationTable = ({
           <TableBody>
             {filterTests.length > 0 ? (
               filterTests.map((t: any) => {
+                // console.log({
+                //   notes: changedFields[t.id]?.notes,
+                //   value: changedFields[t.id]?.value,
+                // });
                 const value =
-                  changedFields[t.id]?.notes ||
-                  changedFields[t.id]?.value ||
+                  changedFields[t.id]?.notes ??
+                  changedFields[t.id]?.value ??
                   null;
                 const isChanged = changedFields[t.id]?.initialValue !== value;
                 return (

@@ -1,11 +1,14 @@
 import React, { useCallback, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
-import { getInvestigation } from "../../../Redux/actions";
+import { editInvestigation, getInvestigation } from "../../../Redux/actions";
 import PageTitle from "../../Common/PageTitle";
 import InvestigationTable from "./InvestigationTable";
 import loadable from "@loadable/component";
 import _ from "lodash";
+import { navigate } from "raviger";
+import * as Notification from "../../../Utils/Notifications.js";
+
 const Loading = loadable(() => import("../../Common/Loading"));
 
 const initialState = {
@@ -87,20 +90,37 @@ export default function ShowInvestigation(props: any) {
     dispatch({ type: "set_changed_fields", changedFields });
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const data = Object.values(state.changedFields)
       .filter(
         (field: any) =>
           field?.initialValue !== (field?.notes || Number(field?.value) || null)
       )
       .map((field: any) => ({
-        id: field?.id,
+        external_id: field?.id,
         value: field?.value,
         notes: field?.notes,
       }));
-    console.log(data);
+
+    if (data.length) {
+      const res = await dispatchAction(
+        editInvestigation({ investigations: data }, consultationId)
+      );
+      if (res && res.status === 204) {
+        Notification.Success({
+          msg: "Investigation Updated successfully!",
+        });
+        navigate(
+          `/facility/${props.facilityId}/patient/${props.patientId}/consultation/${props.consultationId}/`
+        );
+      }
+      return;
+    } else {
+      Notification.Error({
+        msg: "Update at least 1 investigation!",
+      });
+    }
   };
-  // console.log(state.form);
 
   const handleUpdateCancel = useCallback(() => {
     const changedValues = _.chain(state.initialValues)
@@ -131,6 +151,7 @@ export default function ShowInvestigation(props: any) {
           changedFields={state.changedFields}
           handleValueChange={handleValueChange}
           handleUpdateCancel={handleUpdateCancel}
+          handleSave={handleSubmit}
         />
       )}
     </div>
