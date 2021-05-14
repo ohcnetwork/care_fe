@@ -51,7 +51,7 @@ const FacilitiesSelectDialog = (props: Props & WithStyles<typeof styles>) => {
                     onClick={handleOk}
                     color="primary"
                     variant="contained"
-                    disabled={!selectedFacility.name}
+                    disabled={!selectedFacility?.name || !selectedFacility}
                     startIcon={<CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>}
                 >Continue</Button>
             </DialogActions>

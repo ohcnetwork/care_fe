@@ -5,7 +5,7 @@ import { navigate, useQueryParams } from "raviger";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { externalResultList, getFacilities } from "../../Redux/actions";
+import { externalResultList } from "../../Redux/actions";
 import { PhoneNumberField } from "../Common/HelperInputFields";
 import Pagination from "../Common/Pagination";
 import { InputSearchBox } from "../Common/SearchBox";
