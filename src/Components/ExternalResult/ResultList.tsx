@@ -1,10 +1,11 @@
 import loadable from "@loadable/component";
 import Grid from "@material-ui/core/Grid";
+import {Button} from "@material-ui/core";
 import { navigate, useQueryParams } from "raviger";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { externalResultList } from "../../Redux/actions";
+import { externalResultList, getFacilities } from "../../Redux/actions";
 import { PhoneNumberField } from "../Common/HelperInputFields";
 import Pagination from "../Common/Pagination";
 import { InputSearchBox } from "../Common/SearchBox";
@@ -14,6 +15,8 @@ import moment from "moment";
 import { CSVLink } from "react-csv";
 import { externalResultFormatter } from "./Commons";
 import GetAppIcon from "@material-ui/icons/GetApp";
+import FacilitiesSelectDialogue from "./FacilitiesSelectDialogue";
+import { FacilityModel } from "../Facility/models";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -45,6 +48,11 @@ export default function ResultList() {
   const [downloadFile, setDownloadFile] = useState("");
   const [qParams, setQueryParams] = useQueryParams();
   const [showFilters, setShowFilters] = useState(false);
+  const [showDialog, setShowDialog] = useState(false);
+  const [selectedFacility, setSelectedFacility] = useState<FacilityModel>({
+    name: "",
+  })
+  const [resultId, setResultId] = useState(-1)
 
   let manageResults: any = null;
 
@@ -141,10 +149,9 @@ export default function ResultList() {
       return (
         <tr
           key={`usr_${result.id}`}
-          onClick={() => navigate(resultUrl)}
           className="bg-white"
         >
-          <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-cool-gray-900">
+          <td onClick={() => navigate(resultUrl)} className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-cool-gray-900">
             <div className="flex">
               <a
                 href="#"
@@ -169,6 +176,9 @@ export default function ResultList() {
           <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
             {result.result_date || "-"}
           </td>
+          <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
+            <Button variant="outlined" color="primary" onClick={() => {setShowDialog(true); setResultId(result.id)}}>Create</Button>
+          </td>
         </tr>
       );
     });
@@ -177,7 +187,7 @@ export default function ResultList() {
   if (isLoading || !data) {
     manageResults = (
       <tr className="bg-white">
-        <td colSpan={4}>
+        <td colSpan={5}>
           <Loading />
         </td>
       </tr>
@@ -210,6 +220,13 @@ export default function ResultList() {
 
   return (
     <div className="px-6">
+      {showDialog &&
+      <FacilitiesSelectDialogue
+          setSelected={(e) => setSelectedFacility(e)}
+          selectedFacility={selectedFacility}
+          handleOk={() => navigate(`facility/${selectedFacility.id}/patient`, {extId: resultId})}
+          handleCancel={() => setShowDialog(false)}
+      />}
       <PageTitle title="Results" hideBack={true} className="mt-4" />
       <div className="mt-5 md:grid grid-cols-1 gap-5 sm:grid-cols-3 my-4 px-2 md:px-0 relative">
         <div className="bg-white overflow-hidden shadow rounded-lg">
@@ -288,6 +305,9 @@ export default function ResultList() {
               </th>
               <th className="px-6 py-3 bg-cool-gray-50 text-left text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
                 Result Date
+              </th>
+              <th className="px-6 py-3 bg-cool-gray-50 text-left text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
+                Create Patient
               </th>
             </tr>
           </thead>
