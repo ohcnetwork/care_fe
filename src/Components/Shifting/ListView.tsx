@@ -162,7 +162,7 @@ export default function ListView() {
                   )}
                 </div>
               </div>
-              <dl className="grid grid-cols-1 col-gap-1 row-gap-2 sm:grid-cols-1">
+              <dl className="grid grid-cols-1 gap-x-1 row-gap-2 sm:grid-cols-1">
                 <div className="sm:col-span-1">
                   <dt
                     title="Shifting status"
