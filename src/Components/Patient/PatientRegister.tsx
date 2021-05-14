@@ -552,19 +552,18 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           return;
 
         case "is_vaccinated":
-          console.log("in is vaccinated")
-          console.log(state.form.is_vaccinated)
-          if (state.form.is_vaccinated) {
-            if (
-              Number(state.form.number_of_doses) == 0 ||
-              Number(state.form.number_of_doses) > 2
-            ) {
-              console.log("in right place")
+          if (state.form.is_vaccinated === "true") {
+            if(!state.form.covin_id) {
+              errors["covin_id"] = "This field is required!"
+              invalidForm = true;
+            }
+
+            if (Number(state.form.number_of_doses) == 0 || Number(state.form.number_of_doses) > 2) {
               errors["number_of_doses"] = "Number of doses is invalid"
               invalidForm = true;
             }
 
-            if (state.form.vaccine_name == null) {
+            if (state.form.vaccine_name === null || state.form.vaccine_name === "Select") {
               errors["vaccine_name"] = "Please select vaccine name"
               invalidForm = true;
             }
@@ -1007,7 +1006,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     <div>
                       <InputLabel id="is_vaccinated">
                         Is patient Vaccinated?
-                  </InputLabel>
+                      </InputLabel>
                       <RadioGroup
                         aria-label="is_vaccinated"
                         name="is_vaccinated"
@@ -1040,7 +1039,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           type="text"
                           value={state.form.covin_id}
                           onChange={handleChange}
-                          errors={state.errors.name}
+                          errors={state.errors.covin_id}
                         />
                       </div>)
                     }
