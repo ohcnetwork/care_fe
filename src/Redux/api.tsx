@@ -455,8 +455,7 @@ export default {
     method: "POST",
   },
   getInvestigationSessions: {
-    path:
-      "/api/v1/consultation/{consultation_external_id}/investigation/get_sessions/",
+    path: "/api/v1/consultation/{consultation_external_id}/investigation/get_sessions/",
     method: "GET",
   },
   getInvestigation: {
@@ -466,5 +465,9 @@ export default {
   getPatientInvestigation: {
     path: "/api/v1/patient/{patient_external_id}/investigation/",
     method: "GET",
+  },
+  editInvestigation: {
+    path: "/api/v1/consultation/{consultation_external_id}/investigation/batchUpdate/",
+    method: "PUT",
   },
 };
