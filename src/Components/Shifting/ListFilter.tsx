@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { FacilitySelect } from "../Common/FacilitySelect";
+import { UserSelect } from "../Common/UserSelect";
 import { SelectField, DateInputField, TextInputField } from "../Common/HelperInputFields";
 import { SHIFTING_FILTER_ORDER } from "../../Common/constants";
 import moment from "moment";
@@ -23,6 +24,7 @@ export default function ListFilter(props: any) {
   const [isOriginLoading, setOriginLoading] = useState(false);
   const [isShiftingLoading, setShiftingLoading] = useState(false);
   const [isAssignedLoading, setAssignedLoading] = useState(false);
+  const [isAssignedUserLoading, setAssignedUserLoading] = useState(false);
   const [filterState, setFilterState] = useMergeState({
     orgin_facility: filter.orgin_facility || '',
     orgin_facility_ref: null,
@@ -39,7 +41,10 @@ export default function ListFilter(props: any) {
     patient_phone_number: filter.patient_phone_number || '',
     ordering: filter.ordering || null,
     is_kasp: filter.is_kasp || '--',
-    status: filter.status || null
+    status: filter.status || null,
+    assigned_user_facility: filter.assigned_user_facility || '',
+    assigned_user_facility_ref: null,
+    assigned_to: filter.assigned_to || '',
   });
   const dispatch: any = useDispatch();
 
@@ -85,13 +90,36 @@ export default function ListFilter(props: any) {
     fetchData();
   }, [dispatch]);
 
+  useEffect(() => {
+    async function fetchData() {
+      if (filter.assigned_user_facility) {
+        setAssignedUserLoading(true);
+        const res = await dispatch(getFacility(filter.assigned_user_facility, 'assigned_user_facility'))
+        if (res && res.data) {
+          setFilterState({ assigned_user_facility_ref: res.data });
+        }
+        setAssignedUserLoading(false);
+      }
+    }
+    fetchData();
+  }, [dispatch]);
+
   const setFacility = (selected: any, name: string) => {
     const filterData: any = { ...filterState };
     filterData[`${name}_ref`] = selected;
     filterData[name] = (selected || {}).id;
 
+    if(name === "assigned_user_facility") filterData.assigned_to = "";
+
     setFilterState(filterData);
   };
+
+  const setAssignedTo = (userId: string) => {
+    const filterData: any = { ...filterState };
+    filterData.assigned_to = userId;
+
+    setFilterState(filterData);
+  }
 
   const handleChange = (event: any) => {
     let { name, value } = event.target;
@@ -116,7 +144,9 @@ export default function ListFilter(props: any) {
       modified_date_after,
       ordering,
       is_kasp,
-      status
+      status,
+      assigned_user_facility,
+      assigned_to,
     } = filterState;
     const data = {
       orgin_facility: orgin_facility || '',
@@ -132,6 +162,8 @@ export default function ListFilter(props: any) {
       ordering: ordering || '',
       is_kasp: is_kasp || '',
       status: status || '',
+      assigned_user_facility: assigned_user_facility || '',
+      assigned_to: assigned_to || "",
     }
     onChange(data);
   };
@@ -216,6 +248,36 @@ export default function ListFilter(props: any) {
                   errors={''} />
               )}
           </div>
+        </div>
+
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">Assigned to</span>
+          <label id="listbox-label" className="block text-sm leading-5 font-medium text-gray-700">
+            Facility that assigned user belongs
+          </label>
+          <div className="">
+            {isAssignedUserLoading ? (
+              <CircularProgress size={20} />
+            ) : (
+                <FacilitySelect
+                  multiple={false}
+                  name="assigned_user_facility"
+                  selected={filterState.assigned_user_facility_ref}
+                  setSelected={(obj) => setFacility(obj, 'assigned_user_facility')}
+                  className="shifting-page-filter-dropdown"
+                  errors={''} />
+              )}
+          </div>
+
+          {filterState.assigned_user_facility && (
+            <div className="w-64 flex-none">
+              <UserSelect
+                userId={filterState.assigned_to}
+                facilityId={filterState.assigned_user_facility}
+                onSelect={setAssignedTo}
+              />
+            </div>
+          )}
         </div>
 
         {/* <div className="w-64 flex-none">
