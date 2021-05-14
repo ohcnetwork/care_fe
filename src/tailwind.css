@@ -12,7 +12,9 @@ html {
 body {
   font-family: "Open Sans", sans-serif;
   color: #453c52;
-  @apply w-full h-full antialiased;
+  @apply w-full;
+  @apply h-full;
+  @apply antialiased;
 }
 
 h1,
@@ -49,17 +51,30 @@ h6 {
 }
 
 .btn {
-  @apply inline-flex items-center justify-center whitespace-no-wrap text-sm font-semibold py-2 px-4 rounded cursor-pointer;
+  @apply inline-flex;
+  @apply items-center;
+  @apply justify-center;
+  @apply whitespace-no-wrap;
+  @apply text-sm;
+  @apply font-semibold;
+  @apply py-2;
+  @apply px-4;
+  @apply rounded;
+  @apply cursor-pointer;
 }
 
 .btn:focus {
-  @apply outline-none shadow-inner;
+  @apply outline-none;
+  @apply shadow-inner;
 }
 
 /* Button Styles */
 
 .btn-large {
-  @apply py-2 px-5 text-base h-10;
+  @apply py-2;
+  @apply px-5;
+  @apply text-base;
+  @apply h-10;
 }
 
 a {
@@ -90,53 +105,77 @@ button:focus {
 }
 
 .btn {
-  @apply inline-flex items-center justify-center whitespace-no-wrap text-sm font-semibold py-2 px-4 rounded cursor-pointer;
+  @apply inline-flex;
+  @apply items-center;
+  @apply justify-center;
+  @apply whitespace-no-wrap;
+  @apply text-sm;
+  @apply font-semibold;
+  @apply py-2;
+  @apply px-4;
+  @apply rounded;
+  @apply cursor-pointer;
 }
 
 .btn:focus {
-  @apply outline-none shadow-inner;
+  @apply outline-none;
+  @apply shadow-inner;
 }
 
 /* Button Styles */
 
 .btn-default {
-  @apply border text-gray-800;
+  @apply border;
+  @apply text-gray-800;
 }
 
 .btn-default:hover {
-  @apply bg-gray-100 text-gray-600;
+  @apply bg-gray-100;
+  @apply text-gray-600;
 }
 
 .btn-default:focus {
-  @apply bg-gray-400 text-gray-700;
+  @apply bg-gray-400;
+  @apply text-gray-700;
 }
 
 .btn-subtle {
-  @apply bg-gray-200 text-gray-800;
+  @apply bg-gray-200;
+  @apply text-gray-800;
 }
 
 .btn-subtle:hover {
-  @apply bg-gray-300 text-gray-900;
+  @apply bg-gray-300;
+  @apply text-gray-900;
 }
 
 .btn-subtle:focus {
-  @apply bg-gray-400 text-gray-900;
+  @apply bg-gray-400;
+  @apply text-gray-900;
 }
 
 .btn-primary-ghost {
-  @apply bg-white text-green-500 border border-green-500;
+  @apply bg-white;
+  @apply text-green-500;
+  @apply border;
+  @apply border-green-500;
 }
 
 .btn-primary-ghost:hover {
-  @apply bg-green-100 text-green-600 border-green-400;
+  @apply bg-green-100;
+  @apply text-green-600;
+  @apply border-green-400;
 }
 
 .btn-primary-ghost:focus {
-  @apply bg-green-800 text-white border-green-400;
+  @apply bg-green-800;
+  @apply text-white;
+  @apply border-green-400;
 }
 
 .btn-primary {
-  @apply bg-green-500 text-white;
+  @apply bg-green-500;
+  @apply text-white;
   background-image: linear-gradient(
     135deg,
     rgba(56, 161, 105, 1) 0%,
@@ -159,7 +198,8 @@ button:focus {
 }
 
 .btn-warning {
-  @apply bg-yellow-500 text-white;
+  @apply bg-yellow-500;
+  @apply text-white;
   background-image: linear-gradient(
     135deg,
     rgba(237, 137, 54, 1) 0%,
@@ -182,7 +222,8 @@ button:focus {
 }
 
 .btn-danger {
-  @apply bg-red-500 text-white;
+  @apply bg-red-500;
+  @apply text-white;
   background-image: linear-gradient(
     135deg,
     rgba(245, 101, 101, 1) 0%,
@@ -206,7 +247,11 @@ button:focus {
 
 button:disabled,
 .disabled {
-  @apply cursor-not-allowed bg-gray-300 text-gray-500 shadow-none border-transparent;
+  @apply cursor-not-allowed;
+  @apply bg-gray-300;
+  @apply text-gray-500;
+  @apply shadow-none;
+  @apply border-transparent;
   background-image: none;
 }
 
@@ -214,24 +259,39 @@ button:disabled:hover,
 .disabled:hover,
 button:disabled:focus,
 .disabled:focus {
-  @apply bg-gray-300 text-gray-500 border-transparent shadow-none;
+  @apply bg-gray-300;
+  @apply text-gray-500;
+  @apply border-transparent;
+  @apply shadow-none;
   background-image: none;
 }
 
 .btn-small {
-  @apply py-1 px-3 text-xs h-7 leading-normal;
+  @apply py-1;
+  @apply px-3;
+  @apply text-xs;
+  @apply leading-normal;
 }
 
 .btn-normal {
-  @apply py-1 px-4 text-sm h-8;
+  @apply py-1;
+  @apply px-4;
+  @apply text-sm;
+  @apply h-8;
 }
 
 .btn-large {
-  @apply py-2 px-5 text-base h-10;
+  @apply py-2;
+  @apply px-5;
+  @apply text-base;
+  @apply h-10;
 }
 
 .button-xl {
-  @apply py-2 px-6 text-base h-12;
+  @apply py-2;
+  @apply px-6;
+  @apply text-base;
+  @apply h-12;
 }
 @import "tailwindcss/utilities";
 

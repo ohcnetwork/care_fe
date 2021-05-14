@@ -289,7 +289,7 @@ $border: #28a745;
     @apply mt-2;
 
     .MuiInputBase-root {
-      @apply bg-white h-9;
+      @apply bg-white;
 
       input {
         @apply p-0;
