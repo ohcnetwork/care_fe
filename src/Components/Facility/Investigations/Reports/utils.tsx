@@ -1,7 +1,7 @@
 import _ from "lodash";
 import { InvestigationResponse } from "./types";
 
-export const tranformData = _.memoize((data: InvestigationResponse) => {
+export const transformData = _.memoize((data: InvestigationResponse) => {
   const sessions = _.chain(data)
     .map((value) => value.session_object)
     .uniqBy("session_external_id")
