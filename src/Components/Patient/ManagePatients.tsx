@@ -81,7 +81,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 
-const RESULT_LIMIT = 30;
+const RESULT_LIMIT = 15;
 
 
 export const PatientManager = (props: any) => {
@@ -107,6 +107,7 @@ export const PatientManager = (props: any) => {
     is_active: qParams.is_active || 'True',
     disease_status: qParams.disease_status || undefined,
     phone_number: qParams.phone_number ? parsePhoneNumberFromString(qParams.phone_number)?.format('E.164') : undefined,
+    local_body: qParams.lsgBody || undefined,
     facility: facilityId || qParams.facility,
     offset: (qParams.page ? qParams.page - 1 : 0) * RESULT_LIMIT,
     created_date_before: qParams.created_date_before || undefined,
@@ -184,7 +185,8 @@ export const PatientManager = (props: any) => {
       qParams.phone_number,
       qParams.srf_id,
       qParams.covin_id,
-      qParams.is_vaccinated ]
+      qParams.is_vaccinated,
+      qParams.lsgBody ]
   );
 
   const updateQuery = (params: any) => {
@@ -277,7 +279,7 @@ export const PatientManager = (props: any) => {
               {patient.disease_status === 'POSITIVE' && (
                 <Badge color="red" icon="radiation" text="Positive" />
               )}
-              {['NEGATIVE', 'RECOVERY', 'RECOVERED'].indexOf(patient.disease_status) >= 0 && (
+              {['NEGATIVE', 'RECOVERED'].indexOf(patient.disease_status) >= 0 && (
                 <Badge color="green" icon="smile-beam" text={patient.disease_status} />
               )}
               {
@@ -450,6 +452,7 @@ export const PatientManager = (props: any) => {
           {badge("Age min", qParams.age_min)}
           {badge("Age max", qParams.age_max)}
           {badge("SRF ID", qParams.srf_id)}
+          {badge("LSG Body ID", qParams.lsgBody)}
         </div>
       </div>
       <div className={classesTab.root}>

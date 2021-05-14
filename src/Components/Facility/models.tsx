@@ -10,6 +10,13 @@ export interface FacilityModel {
   };
   oxygen_capacity?: number;
   phone_number?: string;
+  type_b_cylinders?: number;
+  type_c_cylinders?: number;
+  type_d_cylinders?: number;
+  expected_type_b_cylinders?: number;
+  expected_type_c_cylinders?: number;
+  expected_type_d_cylinders?: number;
+  expected_oxygen_requirement?: number;
   local_body_object?: {
     name: string;
     body_type: number;
@@ -73,6 +80,7 @@ export interface ConsultationModel {
   symptoms_onset_date?: string;
   consultation_notes?: string;
   is_telemedicine?: boolean;
+  discharge_advice?: any;
 }
 export interface PatientStatsModel {
   id?: number;
