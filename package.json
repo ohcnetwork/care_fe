@@ -64,7 +64,7 @@
     "date-fns": "^2.16.1",
     "file-loader": "6.0.0",
     "html-webpack-plugin": "^4.5.1",
-    "libphonenumber-js": "^1.9.9",
+    "libphonenumber-js": "^1.9.17",
     "lodash.debounce": "^4.0.8",
     "lodash.get": "^4.4.2",
     "lodash.isempty": "^4.4.0",
