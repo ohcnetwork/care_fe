@@ -115,18 +115,21 @@ export const ConsultationDetails = (props: any) => {
 
       return (
         <div key={`daily_round_${idx}`} className="w-full mt-4 px-2">
-          <div className={`block border rounded-lg ${telemedicine_doctor_update ? "bg-blue-500" : "bg-white"}  shadow h-full cursor-pointer hover:border-primary-500 text-black`}>
+          <div className={`block border rounded-lg ${telemedicine_doctor_update ? "bg-purple-200" : "bg-white"}  shadow h-full cursor-pointer hover:border-primary-500 text-black`}>
             <div className="p-4">
               <Grid container justify="space-between" alignItems="center">
                 <Grid item xs={11} container spacing={1}>
-                  <Grid item xs={6}>
-                    <Typography>
-                      <span className="text-gray-700">Assigned To:</span>{" "}
-                      {(telemedicine_doctor_update && consultationData.assigned_to_object) ?
-                        consultationData.assigned_to_object.first_name + " " + consultationData.assigned_to_object.last_name
-                        : "-"}
-                    </Typography>
-                  </Grid>
+                  {telemedicine_doctor_update ?
+
+                    <Grid item xs={6}>
+                      <Typography>
+                        <span className="text-gray-700">Updated by:</span>{" "}
+                        {(telemedicine_doctor_update && consultationData.assigned_to_object) ?
+                          consultationData.assigned_to_object.first_name + " " + consultationData.assigned_to_object.last_name
+                          : "-"}
+                      </Typography>
+                    </Grid>
+                    : null}
                   <Grid item xs={6}>
                     <Typography>
                       <span className="text-gray-700">Temperature:</span>{" "}
@@ -169,6 +172,7 @@ export const ConsultationDetails = (props: any) => {
                         : "-"}
                     </Typography>
                   </Grid>
+
                   <Grid item xs={12}>
                     <Typography>
                       <span className="text-gray-700">
@@ -183,6 +187,7 @@ export const ConsultationDetails = (props: any) => {
                       {itemData.other_details}
                     </Typography>
                   </Grid>
+
                 </Grid>
               </Grid>
               <div className="mt-2">
