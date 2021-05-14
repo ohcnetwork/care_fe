@@ -491,13 +491,13 @@ export const ConsultationDetails = (props: any) => {
                   <tbody>
                     {consultationData.discharge_advice.map((med: any) => (
                       <tr className="bg-white">
-                        <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 font-medium text-gray-900">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 font-medium text-gray-900">
                           {med.medicine}
                         </td>
-                        <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-gray-500">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-500">
                           {med.dosage}
                         </td>
-                        <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-gray-500">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-500">
                           {med.dosage}
                         </td>
                       </tr>

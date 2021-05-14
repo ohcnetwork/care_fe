@@ -244,14 +244,14 @@ export const HospitalList = () => {
   } else if (data && data.length === 0) {
     manageFacilities = qParams?.search ? (
       <div className="w-full">
-        <div className="p-16 mt-4 text-gray-800 mx-auto text-center whitespace-no-wrap text-sm font-semibold rounded ">
+        <div className="p-16 mt-4 text-gray-800 mx-auto text-center whitespace-nowrap text-sm font-semibold rounded ">
           No results found
         </div>
       </div>
     ) : (
       <div>
         <div
-          className="p-16 mt-4 bg-white shadow rounded-md shadow border border-grey-500 whitespace-no-wrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300"
+          className="p-16 mt-4 bg-white shadow rounded-md shadow border border-grey-500 whitespace-nowrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300"
           onClick={() => navigate("/facility/create")}
         >
           Create a new facility

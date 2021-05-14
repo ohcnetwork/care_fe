@@ -61,19 +61,19 @@ export default function InventoryLog(props: any) {
                 <td className="px-5 py-5 border-b border-gray-200 text-sm hover:bg-gray-100">
                     <div className="flex items-center">
                         <div className="ml-3">
-                            <p className="text-gray-900 whitespace-no-wrap">
+                            <p className="text-gray-900 whitespace-nowrap">
                                 {moment(inventoryItem.created_date).format("DD-MM-YYYY hh:mm:ss")}
                             </p>
                         </div>
                     </div>
                 </td>
                 <td className="px-5 py-5 border-b border-gray-200 text-sm hover:bg-gray-100">
-                    <p className="text-gray-900 whitespace-no-wrap lowercase">
+                    <p className="text-gray-900 whitespace-nowrap lowercase">
                         {inventoryItem.quantity} {inventoryItem.item_object?.default_unit?.name}
                     </p>
                 </td>
                 <td className="px-5 py-5 border-b border-gray-200 text-sm hover:bg-gray-100">
-                    <p className="text-gray-900 whitespace-no-wrap lowercase">
+                    <p className="text-gray-900 whitespace-nowrap lowercase">
                         {inventoryItem.is_incoming ? <span className="ml-2 text-green-600">Added Stock</span> : <span className="ml-2 text-red-600">Used Stock</span>}
                     </p>
                 </td>
@@ -84,7 +84,7 @@ export default function InventoryLog(props: any) {
         inventoryList = (
             <tr className="bg-white">
                 <td colSpan={3} className="px-5 py-5 border-b border-gray-200 text-center">
-                    <p className="text-gray-500 whitespace-no-wrap">
+                    <p className="text-gray-500 whitespace-nowrap">
                         No log for this inventory available
                     </p>
                 </td>

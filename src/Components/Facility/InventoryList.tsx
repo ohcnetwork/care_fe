@@ -70,7 +70,7 @@ export default function InventoryList(props: any) {
         <td className="px-5 py-5 border-b border-gray-200 text-sm ">
           <div className="flex items-center">
             <div className="ml-3">
-              <p className="text-gray-900 whitespace-no-wrap">
+              <p className="text-gray-900 whitespace-nowrap">
                 {inventoryItem.item_object?.name}
                 {inventoryItem.is_low && (
                   <span className="ml-2 badge badge badge-danger">
@@ -82,7 +82,7 @@ export default function InventoryList(props: any) {
           </div>
         </td>
         <td className="px-5 py-5 border-b border-gray-200 text-sm ">
-          <p className="text-gray-900 whitespace-no-wrap lowercase">
+          <p className="text-gray-900 whitespace-nowrap lowercase">
             {inventoryItem.quantity}{" "}
             {inventoryItem.item_object?.default_unit?.name}
           </p>
@@ -96,7 +96,7 @@ export default function InventoryList(props: any) {
           colSpan={3}
           className="px-5 py-5 border-b border-gray-200 text-center"
         >
-          <p className="text-gray-500 whitespace-no-wrap">
+          <p className="text-gray-500 whitespace-nowrap">
             No inventory available
           </p>
         </td>

@@ -56,14 +56,14 @@ export default function MinQuantityList(props: any) {
                 <td className="px-5 py-5 border-b border-gray-200 text-sm ">
                     <div className="flex items-center">
                         <div className="ml-3">
-                            <p className="text-gray-900 whitespace-no-wrap">
+                            <p className="text-gray-900 whitespace-nowrap">
                                 {inventoryItem.item_object?.name}
                             </p>
                         </div>
                     </div>
                 </td>
                 <td className="px-5 py-5 border-b border-gray-200 text-sm ">
-                    <p className="text-gray-900 whitespace-no-wrap lowercase">
+                    <p className="text-gray-900 whitespace-nowrap lowercase">
                         {inventoryItem.min_quantity} {inventoryItem.item_object?.default_unit?.name}
                     </p>
                 </td>
@@ -79,7 +79,7 @@ export default function MinQuantityList(props: any) {
         inventoryList = (
             <tr className="bg-white">
                 <td colSpan={3} className="px-5 py-5 border-b border-gray-200 text-center">
-                    <p className="text-gray-500 whitespace-no-wrap">
+                    <p className="text-gray-500 whitespace-nowrap">
                         No item with minimum quantity set
                     </p>
                 </td>

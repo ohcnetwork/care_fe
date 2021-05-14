@@ -144,7 +144,7 @@ export default function ResultList() {
           onClick={() => navigate(resultUrl)}
           className="bg-white"
         >
-          <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-cool-gray-900">
+          <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-cool-gray-900">
             <div className="flex">
               <a
                 href="#"
@@ -156,17 +156,17 @@ export default function ResultList() {
               </a>
             </div>
           </td>
-          <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
+          <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-cool-gray-500">
             <span className="text-cool-gray-900 font-medium">
               {result.test_type}
             </span>
           </td>
-          <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
+          <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-cool-gray-500">
             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium leading-4 bg-blue-100 text-blue-800 capitalize">
               {result.result}
             </span>
           </td>
-          <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
+          <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-cool-gray-500">
             {result.result_date || "-"}
           </td>
         </tr>
