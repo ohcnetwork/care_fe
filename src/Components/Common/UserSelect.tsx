@@ -67,7 +67,7 @@ export const UserSelect = (props: any) => {
           </span>
 
           {isExpanded && <div className="absolute mt-1 w-full rounded-md bg-white shadow-lg z-40">
-            <ul role="listbox" aria-labelledby="listbox-label" aria-activedescendant="listbox-item-3" className="max-h-60 rounded-md py-1 text-base leading-6 shadow-xs overflow-auto focus:outline-none sm:text-sm sm:leading-5">
+            <ul role="listbox" aria-labelledby="listbox-label" aria-activedescendant="listbox-item-3" className="max-h-60 rounded-md py-1 text-base leading-6 ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm sm:leading-5">
               {
                 users.map((user: any) => {
                   return <li onClick={_ => { setIsExpanded(false); onSelect(user.id) }} id="listbox-item-0" role="option" className="text-gray-900 cursor-default select-none relative py-2 pl-3 pr-9">
