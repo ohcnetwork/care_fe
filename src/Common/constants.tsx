@@ -127,20 +127,20 @@ export const PATIENT_FILTER_ORDER: Array<OptionsType> = [
 ];
 
 export const BED_TYPES: Array<OptionsType> = [
-  { id: 1, text: "Non-Covid Ordinary Bed" },
-  { id: 2, text: "Hostel" },
-  { id: 3, text: "Single Room with Attached Bathroom" },
+  { id: 1, text: "Non-Covid Ordinary Beds" },
+  { id: 150, text: "Non-Covid Oxygen beds" },
   { id: 10, text: "Non-Covid ICU (ICU without ventilator)" },
   { id: 20, text: "Non-Covid Ventilator (ICU with ventilator)" },
-  { id: 30, text: "Covid Beds" },
+  { id: 30, text: "Covid Ordinary Beds" },
+  { id: 120, text: "Covid Oxygen beds" },
+  { id: 110, text: "Covid ICU (ICU without ventilator)" },
+  { id: 100, text: "Covid Ventilators (ICU with ventilator)" },
   { id: 40, text: "KASP Beds" },
   { id: 50, text: "KASP ICU beds" },
   { id: 60, text: "KASP Oxygen beds" },
   { id: 70, text: "KASP Ventilator beds" },
-  { id: 100, text: "Covid Ventilators (ICU with ventilator)" },
-  { id: 110, text: "Covid ICU (icu without ventilator)" },
-  { id: 120, text: "Covid Oxygen beds" },
-  { id: 150, text: "Non-Covid Oxygen beds" },
+  { id: 2, text: "Hostel" },
+  { id: 3, text: "Single Room with Attached Bathroom" },
 ];
 
 export const DOCTOR_SPECIALIZATION: Array<OptionsType> = [
