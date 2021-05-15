@@ -119,6 +119,7 @@ export const PatientManager = (props: any) => {
     gender: qParams.gender || undefined,
     age_min: qParams.age_min || undefined,
     age_max: qParams.age_max || undefined,
+    date_of_result: qParams.date_of_result || undefined,
     last_consultation_admission_date_before: qParams.last_consultation_admission_date_before || undefined,
     last_consultation_admission_date_after: qParams.last_consultation_admission_date_after || undefined,
     last_consultation_discharge_date_before: qParams.last_consultation_discharge_date_before || undefined,
