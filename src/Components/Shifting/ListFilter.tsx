@@ -23,23 +23,24 @@ export default function ListFilter(props: any) {
   const [isOriginLoading, setOriginLoading] = useState(false);
   const [isShiftingLoading, setShiftingLoading] = useState(false);
   const [isAssignedLoading, setAssignedLoading] = useState(false);
+  const local = JSON.parse(localStorage.getItem("shift-filters") || "{}");
   const [filterState, setFilterState] = useMergeState({
-    orgin_facility: filter.orgin_facility || '',
+    orgin_facility: filter.orgin_facility || local.orgin_facility || '',
     orgin_facility_ref: null,
-    shifting_approving_facility: filter.shifting_approving_facility || '',
+    shifting_approving_facility: filter.shifting_approving_facility || local.shifting_approving_facility || '',
     shifting_approving_facility_ref: null,
-    assigned_facility: filter.assigned_facility || '',
+    assigned_facility: filter.assigned_facility || local.assigned_facility || '',
     assigned_facility_ref: null,
-    emergency: filter.emergency || '--',
-    is_up_shift: filter.is_up_shift || '--',
-    created_date_before: filter.created_date_before || null,
-    created_date_after: filter.created_date_after || null,
-    modified_date_before: filter.modified_date_before || null,
-    modified_date_after: filter.modified_date_after || null,
-    patient_phone_number: filter.patient_phone_number || '',
-    ordering: filter.ordering || null,
-    is_kasp: filter.is_kasp || '--',
-    status: filter.status || null
+    emergency: filter.emergency || local.emergency || '--',
+    is_up_shift: filter.is_up_shift || local.is_up_shift || '--',
+    created_date_before: filter.created_date_before || local.created_date_before || null,
+    created_date_after: filter.created_date_after || local.created_date_after || null,
+    modified_date_before: filter.modified_date_before || local.modified_date_before || null,
+    modified_date_after: filter.modified_date_after || local.modified_date_after || null,
+    patient_phone_number: filter.patient_phone_number || local.patient_phone_number || '',
+    ordering: filter.ordering || local.ordering || null,
+    is_kasp: filter.is_kasp || local.is_kasp || '--',
+    status: filter.status || local.status || null
   });
   const dispatch: any = useDispatch();
 
@@ -102,6 +103,11 @@ export default function ListFilter(props: any) {
     setFilterState(filterData);
   };
 
+  const clearFilters = () => {
+    localStorage.removeItem("shift-filters");
+    closeFilter();
+  }
+
   const applyFilter = () => {
     const {
       orgin_facility,
@@ -118,6 +124,7 @@ export default function ListFilter(props: any) {
       is_kasp,
       status
     } = filterState;
+    localStorage.setItem("shift-filters", JSON.stringify(filterState));
     const data = {
       orgin_facility: orgin_facility || '',
       shifting_approving_facility: shifting_approving_facility || '',
@@ -142,7 +149,7 @@ export default function ListFilter(props: any) {
         <button className="btn btn-default" onClick={closeFilter}>
           <i className="fas fa-times mr-2" />Cancel
         </button>
-        <Link href='/shifting' className='btn btn-default hover:text-gray-900'>
+        <Link href='/shifting' className='btn btn-default hover:text-gray-900' onClick={clearFilters}>
           <i className="fas fa-times mr-2" />Clear Filters
         </Link>
         <button className="btn btn-primary" onClick={applyFilter}>
