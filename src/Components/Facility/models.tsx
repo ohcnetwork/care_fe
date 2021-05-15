@@ -72,6 +72,8 @@ export interface ConsultationModel {
   referred_to?: number | null;
   suggestion?: string;
   ip_no?: string;
+  is_kasp?: boolean;
+  kasp_enabled_date?: string;
   diagnosis?: string;
   verified_by?: string;
   suggestion_text?: string;
