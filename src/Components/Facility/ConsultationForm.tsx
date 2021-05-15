@@ -65,6 +65,8 @@ const initForm: any = {
   diagnosis: "",
   verified_by: "",
   test_id: "",
+  is_kasp: "false",
+  kasp_enabled_date: null,
   examination_details: "",
   existing_medication: "",
   prescribed_medication: "",
@@ -175,6 +177,7 @@ export const ConsultationForm = (props: any) => {
             verified_by: res.data.verified_by ? res.data.verified_by : "",
             OPconsultation: res.data.consultation_notes,
             is_telemedicine: `${res.data.is_telemedicine}`,
+            is_kasp: `${res.data.is_kasp}`,
             assigned_to: res.data.assigned_to || "",
           };
           dispatch({ type: "set_form", form: formData });
@@ -290,6 +293,8 @@ export const ConsultationForm = (props: any) => {
           ? state.form.admission_date
           : undefined,
         category: state.form.category,
+        is_kasp: state.form.is_kasp,
+        kasp_enabled_date: state.form.is_kasp === "true" ? new Date() : null,
         examination_details: state.form.examination_details,
         existing_medication: state.form.existing_medication,
         prescribed_medication: state.form.prescribed_medication,
@@ -697,6 +702,31 @@ export const ConsultationForm = (props: any) => {
                   onChange={handleChange}
                   errors={state.errors.diagnosis}
                 />
+              </div>
+
+              <div className="flex-1">
+                <InputLabel id="admitted-label">Kasp</InputLabel>
+                <RadioGroup
+                  aria-label="covid"
+                  name="is_kasp"
+                  value={state.form.is_kasp}
+                  onChange={handleTelemedicineChange}
+                  style={{ padding: "0px 5px" }}
+                >
+                  <Box display="flex" flexDirection="row">
+                    <FormControlLabel
+                      value="true"
+                      control={<Radio />}
+                      label="Yes"
+                    />
+                    <FormControlLabel
+                      value="false"
+                      control={<Radio />}
+                      label="No"
+                    />
+                  </Box>
+                </RadioGroup>
+                <ErrorHelperText error={state.errors.is_kasp} />
               </div>
               {/* Telemedicine Fields */}
               <div className="flex">
