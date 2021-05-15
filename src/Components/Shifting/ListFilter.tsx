@@ -275,6 +275,7 @@ export default function ListFilter(props: any) {
                 userId={filterState.assigned_to}
                 facilityId={filterState.assigned_user_facility}
                 onSelect={setAssignedTo}
+                placeholder="Select the Assigned Staff"
               />
             </div>
           )}

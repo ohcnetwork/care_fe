@@ -237,6 +237,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                   facilityId={
                     state.form?.shifting_approving_facility_object?.id
                   }
+                  placeholder="Assign a Shifting Staff"
                 />
               </div>
               <div>
