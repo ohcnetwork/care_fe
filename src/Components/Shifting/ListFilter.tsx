@@ -43,7 +43,7 @@ export default function ListFilter(props: any) {
     patient_phone_number: filter.patient_phone_number || local.patient_phone_number || '',
     ordering: filter.ordering || local.ordering || null,
     is_kasp: filter.is_kasp || local.is_kasp || '--',
-    status: filter.status || local.status || null
+    status: filter.status || local.status || null,
     assigned_user_facility: filter.assigned_user_facility || local.assigned_user_facility || '',
     assigned_user_facility_ref: null,
     assigned_to: filter.assigned_to || local.assigned_to || '',
