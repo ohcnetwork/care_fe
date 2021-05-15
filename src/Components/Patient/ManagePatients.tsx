@@ -383,7 +383,7 @@ export const PatientManager = (props: any) => {
             <PhoneNumberField
               value={qParams.phone_number}
               onChange={searchByPhone}
-              turnOffAutoFormat={true}
+              turnOffAutoFormat={false}
               errors=""
             />
           </div>
@@ -427,7 +427,7 @@ export const PatientManager = (props: any) => {
           </div>
         </div>
         <div className="flex space-x-2 mt-2 flex-wrap w-full col-span-3 space-y-1">
-          {badge("Phone Number", qParams.phone_number)}
+          {qParams.phone_number?.trim().split(" ").length - 1 ? badge("Phone Number", qParams.phone_number) : null}
           {badge("Patient Name", qParams.name)}
           {badge("Modified After", qParams.modified_date_after)}
           {badge("Modified Before", qParams.modified_date_before)}
