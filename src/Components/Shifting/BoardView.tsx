@@ -118,6 +118,7 @@ export default function BoardView() {
         {badge("Modified Before", appliedFilters.modified_date_before)}
         {badge("Created Before", appliedFilters.created_date_before)}
         {badge("Created After", appliedFilters.created_date_after)}
+        {badge("Assigned To", appliedFilters.assigned_to)}
         {badge("Filtered By", appliedFilters.assigned_facility && "Assigned Facility")}
         {badge("Filtered By", appliedFilters.orgin_facility && "Origin Facility")}
         {badge("Filtered By", appliedFilters.shifting_approving_facility && "Shifting Approving Facility")}

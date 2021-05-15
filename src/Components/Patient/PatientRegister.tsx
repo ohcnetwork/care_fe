@@ -10,11 +10,11 @@ import {
   RadioGroup,
 } from "@material-ui/core";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
-import { navigate } from "raviger";
+import { navigate, useQueryParams } from "raviger";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import moment from "moment";
 import loadable from "@loadable/component";
-import React, { useCallback, useReducer, useState } from "react";
+import React, { useCallback, useReducer, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import {
   BLOOD_GROUPS,
@@ -215,6 +215,16 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     transfer?: boolean;
     patientList: Array<DupPatientModel>;
   }>({ patientList: [] });
+  const [{extId}, setQuery] = useQueryParams()
+  console.log(extId)
+
+  useEffect(() => {
+    if(extId)
+      {
+        setCareExtId(extId)
+        fetchExtResultData(null)
+      }
+  }, [careExtId])
 
   const headerText = !id
     ? "Add Details of Covid Suspect / Patient"
@@ -279,7 +289,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   };
 
   const fetchExtResultData = async (e: any) => {
-    e.preventDefault();
+    if(e) e.preventDefault();
     setIsLoading(true);
     const res = await dispatchAction(externalResult({ id: careExtId }));
 
@@ -863,7 +873,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
               <CardContent>
                 <form onSubmit={(e) => handleSubmit(e)}>
-                  <button className="btn btn-primary" onClick={_ => setShowImport(true)}> Import From External Results
+                  <button className="btn btn-primary" onClick={_ => {setShowImport(true); setQuery({extId: ""}, true)}}> Import From External Results
                   </button>
                   <div className="bg-red-100 text-red-800 p-2 rounded-lg shadow mb-4 mt-2 font-semibold text-xs">
                     <div className="text-xl font-bold">
