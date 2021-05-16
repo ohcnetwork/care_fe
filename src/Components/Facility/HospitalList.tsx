@@ -12,7 +12,7 @@ import {
 } from "../../Redux/actions";
 import loadable from "@loadable/component";
 import { SelectField } from "../Common/HelperInputFields";
-import { InputLabel } from "@material-ui/core";
+import { CircularProgress, InputLabel } from "@material-ui/core";
 import Pagination from "../Common/Pagination";
 import { FacilityModel } from "./models";
 import { InputSearchBox } from "../Common/SearchBox";
@@ -25,12 +25,16 @@ import AccordionDetails from "@material-ui/core/AccordionDetails";
 import Typography from "@material-ui/core/Typography";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
+const PageTitle = loadable(() => import("../Common/PageTitle")); import SwipeableViews from 'react-swipeable-views';
+import { make as SlideOver } from "../Common/SlideOver.gen";
+import FacillityFilter from "./FacilityFilter";
+import { FacilitySelect } from "../Common/FacilitySelect";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
       width: "100%",
+      // "grid-column": "span 4 / span 4",
     },
     heading: {
       fontSize: theme.typography.pxToRem(15),
@@ -56,14 +60,32 @@ export const HospitalList = () => {
   const [triageDownloadFile, setTriageDownloadFile] = useState("");
   const downloadTypes = [...DOWNLOAD_TYPES];
   const [downloadSelect, setdownloadSelect] = useState("Facility List");
-  const limit = 14;
+  const [showFilters, setShowFilters] = useState(false)
+  const limit = 15;
 
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
       const params = qParams.search
-        ? { limit, offset, search_text: qParams.search, kasp_empanelled: qParams.kasp_empanelled }
-        : { limit, offset, kasp_empanelled: qParams.kasp_empanelled };
+        ? {
+          limit,
+          offset,
+          search_text: qParams.search,
+          state: qParams.state,
+          district: qParams.district,
+          local_body: qParams.local_body,
+          facility_type: qParams.facility_type,
+          kasp_empanelled: qParams.kasp_empanelled,
+        }
+        : {
+          limit,
+          offset,
+          state: qParams.state,
+          district: qParams.district,
+          local_body: qParams.local_body,
+          facility_type: qParams.facility_type,
+          kasp_empanelled: qParams.kasp_empanelled,
+        };
 
       const res = await dispatchAction(getFacilities(params));
       if (!status.aborted) {
@@ -74,7 +96,16 @@ export const HospitalList = () => {
         setIsLoading(false);
       }
     },
-    [dispatchAction, offset, qParams.search, qParams.kasp_empanelled]
+    [
+      dispatchAction,
+      offset,
+      qParams.search,
+      qParams.kasp_empanelled,
+      qParams.state,
+      qParams.district,
+      qParams.local_body,
+      qParams.facility_type
+    ]
   );
 
   useAbortableEffect(
@@ -88,10 +119,6 @@ export const HospitalList = () => {
     if (search !== "") setQueryParams({ search }, true);
     else setQueryParams({ kasp_empanelled: qParams.kasp_empanelled }, true);
   };
-
-  const onKaspChange = (value: string) => {
-    setQueryParams({ "kasp_empanelled": value, search: qParams.search ? qParams.search : '' }, true);
-  }
 
   const handleDownload = async () => {
     const res = await dispatchAction(downloadFacility());
@@ -115,6 +142,17 @@ export const HospitalList = () => {
     const tri = await dispatchAction(downloadFacilityTriage());
     setTriageDownloadFile(tri.data);
     document.getElementById("triageDownloader")?.click();
+  };
+
+  const updateQuery = (params: any) => {
+    const nParams = Object.assign({}, qParams, params);
+    setQueryParams(nParams, true);
+  }
+
+  const applyFilter = (data: any) => {
+    const filter = { ...qParams, ...data };
+    updateQuery(filter);
+    setShowFilters(false);
   };
 
   const handleDownloader = () => {
@@ -152,12 +190,15 @@ export const HospitalList = () => {
       return (
         <div
           key={`usr_${facility.id}`}
-          className="w-full md:w-1/2 mt-6 md:px-4"
+          className="w-full md:w-1/3 mt-6 md:px-4"
         >
-          <div className="block rounded-lg bg-white shadow h-full hover:border-primary-500 overflow-hidden">
-            <div className="h-full flex flex-col justify-between">
-              <div className="px-6 py-4">
-                <div className="inline-flex items-center px-2.5 py-0.5 mr-4 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800">
+          <div className="block rounded-lg bg-white h-full hover:border-primary-500 overflow-hidden relative">
+            <div className="h-full flex flex-col font-roboto justify-between">
+              <div className="px-6 py-3">
+                <div className="font-black text-2xl font-bold font-poppins capitalize mt-2">
+                  {facility.name}
+                </div>
+                <div className="inline-flex my-3 items-center px-2.5 py-0.5 mr-4 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800">
                   {facility.facility_type}
                 </div>
                 {facility.kasp_empanelled && (
@@ -166,54 +207,37 @@ export const HospitalList = () => {
                   </div>
                 )
                 }
-                <div className="font-black text-2xl capitalize mt-2">
-                  {facility.name}
+
+                <div className="mb-3">
+                  <i className="fa fa-phone w-5 transform rotate-90 text-green-500" aria-hidden="true"></i>
+                  <span className="font-bold text-black"> {facility.phone_number || "-"} </span>
                 </div>
-                <div className="mt-2 flex justify-between">
-                  <div className="flex flex-col">
-                    <div className="text-gray-500 leading-relaxed font-light">
-                      Location:
-                    </div>
-                    <div className="font-semibold">
-                      {facility.local_body_object?.name}
-                    </div>
+
+                <div className="grid grid-cols-10 font-semibold">
+                  <div>
+                    <i className="fas fa-map-marker-alt w-5 text-green-500"></i>
                   </div>
+                  <div className="col-span-9">
+                    {facility.local_body_object?.name}, {facility.district?.name}
 
-                  <div className="flex flex-col">
-                    <div className="text-gray-500 leading-relaxed font-light">
+                    <div className="mt-2">
                       Ward:
+                      {facility.ward_object?.number +
+                        ", " +
+                        facility.ward_object?.name || "-"}
                     </div>
-
-                    {facility.ward_object && (
-                      <div className="font-semibold">
-                        {facility.ward_object?.number +
-                          ", " +
-                          facility.ward_object?.name || "-"}
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>
-              <div className="mt-2 bg-gray-50 border-t px-6 py-2">
-                <div className="flex py-4 justify-between">
-                  <div>
-                    <div className="text-gray-500 leading-relaxed">Phone:</div>
-                    <a
-                      href={`tel:${facility.phone_number}`}
-                      className="font-semibold"
-                    >
-                      {facility.phone_number || "-"}
-                    </a>
-                  </div>
-                  <span className="inline-flex rounded-md shadow-sm">
-                    <button
-                      type="button"
-                      className="inline-flex items-center px-3 py-2 border border-green-500 text-sm leading-4 font-medium rounded-md text-green-700 bg-white hover:text-green-500 focus:outline-none focus:border-green-300 focus:shadow-outline-blue active:text-green-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
-                      onClick={() => navigate(`/facility/${facility.id}`)}
-                    >
-                      View Facility
+              <div className="mb-2 mx-3">
+                <div className="mt-2">
+                  <button
+                    type="button"
+                    className="w-full py-2 border-green-500 border-2 text-green-500 mt-2 font-bold"
+                    onClick={() => navigate(`/facility/${facility.id}`)}
+                  >
+                    View Details
                     </button>
-                  </span>
                 </div>
               </div>
             </div>
@@ -261,21 +285,13 @@ export const HospitalList = () => {
   }
 
   return (
-    <div>
-      <PageTitle title="Facilities" hideBack={true} className="mx-3 md:mx-8" />
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2">
-        <div className="ml-3 w-3/4 md:ml-8">
-          <InputSearchBox
-            value={qParams.search}
-            search={onSearchSuspects}
-            placeholder="Search by Facility / District Name"
-            errors=""
-          />
-        </div>
+    <div className="bg-gray-200">
+      <div className="grid grid-cols-2 mt-10 pl-10 pr-20">
+        <PageTitle title="Facilities" hideBack={true} className="mx-3 font-poppins" />
 
-        <div className={classes.root}>
+        <div className="flex justify-end w-full mt-4">
           <div>
-            <Accordion className="lg:w-1/2 mt-2 lg:mt-0 md:mt-0 w-3/4 m-0 m-auto">
+            <Accordion className="mt-2 lg:mt-0 md:mt-0">
               <AccordionSummary
                 expandIcon={<ExpandMoreIcon />}
                 aria-controls="panel1a-content"
@@ -361,19 +377,46 @@ export const HospitalList = () => {
         </div>
       </div>
 
-      <div className="mx-8 my-2 w-1/3">
-        <InputLabel id="kasp_empanelled">
-          KASP empanelled
-        </InputLabel>
-        <SelectField
-          name="facility_type"
-          variant="outlined"
-          margin="dense"
-          value={qParams.kasp_empanelled}
-          options={kaspOptionValues}
-          onChange={(e) => onKaspChange(e.target.value)}
-          errors=""
-        />
+      <div className="flex mt-5 pl-10 pr-20">
+        <div className="flex-1">
+          <InputSearchBox
+            value={qParams.search}
+            search={onSearchSuspects}
+            placeholder="Search by Facility / District Name"
+            errors=""
+          />
+        </div>
+
+        <div className="flex-1 flex justify-end">
+          <div>
+            <div className="flex items-start mb-2">
+              <button
+                className="btn btn-primary-ghost"
+                onClick={() => setShowFilters(true)}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="fill-current w-4 h-4 mr-2">
+                  <line x1="8" y1="6" x2="21" y2="6"></line>
+                  <line x1="8" y1="12" x2="21" y2="12"> </line>
+                  <line x1="8" y1="18" x2="21" y2="18"> </line>
+                  <line x1="3" y1="6" x2="3.01" y2="6"> </line>
+                  <line x1="3" y1="12" x2="3.01" y2="12"> </line>
+                  <line x1="3" y1="18" x2="3.01" y2="18"> </line>
+                </svg>
+                <span>Advanced Filters</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <SlideOver show={showFilters} setShow={setShowFilters}>
+          <div className="bg-white min-h-screen p-4">
+            <FacillityFilter
+              filter={qParams}
+              onChange={applyFilter}
+              closeFilter={() => setShowFilters(false)} />
+          </div>
+        </SlideOver>
       </div>
 
       <div className="px-3 md:px-8">

@@ -8,7 +8,6 @@ import { DoctorCapacityForm } from "../Components/Facility/DoctorCapacityForm";
 import { FacilityCreate } from "../Components/Facility/FacilityCreate";
 import { FacilityHome } from "../Components/Facility/FacilityHome";
 import { HospitalList } from "../Components/Facility/HospitalList";
-import { HospitalList2 } from "../Components/Facility/HospitalList2";
 import { TriageForm } from "../Components/Facility/TriageForm";
 import { DailyRoundListDetails } from "../Components/Patient/DailyRoundListDetails";
 import { DailyRounds } from "../Components/Patient/DailyRounds";
@@ -48,7 +47,7 @@ const img = "https://cdn.coronasafe.network/light-logo.svg";
 const logoBlack = "https://cdn.coronasafe.network/black-logo.svg";
 
 const routes = {
-  "/": () => <HospitalList2 />,
+  "/": () => <HospitalList />,
   "/users": () => <ManageUsers />,
   "/user/add": () => <UserAdd />,
   "/user/profile": () => <UserProfile />,
@@ -63,7 +62,7 @@ const routes = {
     patientId,
     sampleId,
   }: any) => <SampleReport id={patientId} sampleId={sampleId} />,
-  "/facility": () => <HospitalList2 />,
+  "/facility": () => <HospitalList />,
   "/facility/create": () => <FacilityCreate />,
   "/facility/:facilityId/update": ({ facilityId }: any) => (
     <FacilityCreate facilityId={facilityId} />
