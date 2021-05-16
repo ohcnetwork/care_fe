@@ -73,6 +73,7 @@ export default function PatientFilterV2(props: any) {
       : [],
     srf_id: filter.srf_id || null,
     is_vaccinated: filter.is_vaccinated || null,
+    is_declared_positive: filter.is_declared_positive || null,
     covin_id: filter.covin_id || null,
   });
   const dispatch: any = useDispatch();
@@ -111,6 +112,12 @@ export default function PatientFilterV2(props: any) {
     { id: "", text: "Show All" },
     { id: "false", text: "Unvaccinated" },
     { id: "true", text: "Vaccinated" },
+  ];
+
+  const DECLARED_FILTER = [
+    { id: "", text: "Show All" },
+    { id: "false", text: "Not Declared" },
+    { id: "true", text: "Declared" },
   ];
 
   const setFacility = (selected: any, name: string) => {
@@ -182,6 +189,7 @@ export default function PatientFilterV2(props: any) {
       last_consultation_discharge_date_after,
       last_consultation_admitted_to_list,
       is_vaccinated,
+      is_declared_positive,
       covin_id,
       srf_id,
     } = filterState;
@@ -240,6 +248,7 @@ export default function PatientFilterV2(props: any) {
         last_consultation_admitted_to_list || [],
       srf_id: srf_id || "",
       is_vaccinated: is_vaccinated || "",
+      is_declared_positive: is_declared_positive || "",
       covin_id: covin_id || "",
     };
     onChange(data);
@@ -374,6 +383,18 @@ export default function PatientFilterV2(props: any) {
             margin="dense"
             value={filterState.is_vaccinated}
             options={VACCINATED_FILTER}
+            onChange={handleChange}
+            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+          />
+        </div>
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">Declared</span>
+          <SelectField
+            name="is_declared_positive"
+            variant="outlined"
+            margin="dense"
+            value={filterState.is_declared_positive}
+            options={DECLARED_FILTER}
             onChange={handleChange}
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
           />

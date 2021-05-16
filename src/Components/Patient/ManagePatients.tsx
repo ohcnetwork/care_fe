@@ -127,6 +127,7 @@ export const PatientManager = (props: any) => {
     last_consultation_admitted_to_list: qParams.last_consultation_admitted_to_list || undefined,
     srf_id: qParams.srf_id || undefined,
     is_vaccinated: qParams.is_vaccinated || undefined,
+    is_declared_positive: qParams.is_declared_positive || undefined,
     covin_id: qParams.covin_id || undefined
   };
 
@@ -187,6 +188,7 @@ export const PatientManager = (props: any) => {
       qParams.srf_id,
       qParams.covin_id,
       qParams.is_vaccinated,
+      qParams.is_declared_positive,
       qParams.lsgBody ]
   );
 
@@ -441,6 +443,11 @@ export const PatientManager = (props: any) => {
           {
             qParams.is_vaccinated && (
               badge("Vaccination Status", qParams.is_vaccinated == "true" ? "Vaccinated" : "Unvaccinated")
+            )
+          }
+          {
+            qParams.is_declared_positive && (
+              badge("Declared Status", qParams.is_declared_positive == "true" ? "Declared" : "Not Declared")
             )
           }
           {badge("COVIN ID", qParams.covin_id)}
