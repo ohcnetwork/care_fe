@@ -385,3 +385,11 @@ export const getPatientInvestigation = (
     patient_external_id: patient_external_id,
   });
 };
+export const editInvestigation = (
+  params: object,
+  consultation_external_id: string
+) => {
+  return fireRequest("editInvestigation", [], params, {
+    consultation_external_id: consultation_external_id,
+  });
+};

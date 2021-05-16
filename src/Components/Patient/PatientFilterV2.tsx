@@ -59,6 +59,7 @@ export default function PatientFilterV2(props: any) {
     disease_status: filter.disease_status || null,
     age_min: filter.age_min || null,
     age_max: filter.age_max || null,
+    date_of_result: filter.date_of_result || null,
     last_consultation_admission_date_before:
       filter.last_consultation_admission_date_before || null,
     last_consultation_admission_date_after:
@@ -67,12 +68,14 @@ export default function PatientFilterV2(props: any) {
       filter.last_consultation_discharge_date_before || null,
     last_consultation_discharge_date_after:
       filter.last_consultation_discharge_date_after || null,
-    last_consultation_admitted_to_list: filter.last_consultation_admitted_to_list
-      ? filter.last_consultation_admitted_to_list.split(",")
-      : [],
+    last_consultation_admitted_to_list:
+      filter.last_consultation_admitted_to_list
+        ? filter.last_consultation_admitted_to_list.split(",")
+        : [],
     srf_id: filter.srf_id || null,
     is_vaccinated: filter.is_vaccinated || null,
     covin_id: filter.covin_id || null,
+    is_kasp: filter.is_kasp || null,
   });
   const dispatch: any = useDispatch();
 
@@ -174,6 +177,7 @@ export default function PatientFilterV2(props: any) {
       disease_status,
       age_min,
       age_max,
+      date_of_result,
       last_consultation_admission_date_before,
       last_consultation_admission_date_after,
       last_consultation_discharge_date_before,
@@ -182,6 +186,7 @@ export default function PatientFilterV2(props: any) {
       is_vaccinated,
       covin_id,
       srf_id,
+      is_kasp,
     } = filterState;
     const data = {
       lsgBody: lsgBody || "",
@@ -201,6 +206,10 @@ export default function PatientFilterV2(props: any) {
       modified_date_after:
         modified_date_after && moment(modified_date_after).isValid()
           ? moment(modified_date_after).format("YYYY-MM-DD")
+          : "",
+      date_of_result:
+        date_of_result && moment(date_of_result).isValid()
+          ? moment(date_of_result).format("YYYY-MM-DD")
           : "",
       last_consultation_admission_date_before:
         last_consultation_admission_date_before &&
@@ -234,6 +243,7 @@ export default function PatientFilterV2(props: any) {
       srf_id: srf_id || "",
       is_vaccinated: is_vaccinated || "",
       covin_id: covin_id || "",
+      is_kasp: is_kasp || "",
     };
     onChange(data);
   };
@@ -313,6 +323,7 @@ export default function PatientFilterV2(props: any) {
                 multiple={false}
                 name="facility"
                 selected={filterState.facility_ref}
+                showAll={false}
                 setSelected={(obj) => setFacility(obj, "facility")}
                 className="shifting-page-filter-dropdown"
                 errors={""}
@@ -328,6 +339,23 @@ export default function PatientFilterV2(props: any) {
             margin="dense"
             value={filterState.gender}
             options={[{ id: "", text: "Show All" }, ...GENDER_TYPES]}
+            onChange={handleChange}
+            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+          />
+        </div>
+
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">KASP</span>
+          <SelectField
+            name="is_kasp"
+            variant="outlined"
+            margin="dense"
+            value={filterState.is_kasp}
+            options={[
+              { id: "", text: "Show All" },
+              { id: "true", text: "Show KASP" },
+              { id: "false", text: "Show Non KASP" },
+            ]}
             onChange={handleChange}
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
           />
@@ -397,6 +425,26 @@ export default function PatientFilterV2(props: any) {
             value={filterState.last_consultation_admitted_to_list}
             options={[...PATIENT_FILTER_ADMITTED_TO]}
             onChange={handleMultiSelectChange}
+          />
+        </div>
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">Date of Result</span>
+          <DateInputField
+            id="date_of_result"
+            name="date_of_result"
+            inputVariant="outlined"
+            margin="dense"
+            errors=""
+            value={filterState.date_of_result}
+            onChange={(date) =>
+              handleChange({
+                target: {
+                  name: "date_of_result",
+                  value: date,
+                },
+              })
+            }
+            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
           />
         </div>
         <div className="w-64 flex-none">
