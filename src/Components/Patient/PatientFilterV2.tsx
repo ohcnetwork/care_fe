@@ -75,6 +75,7 @@ export default function PatientFilterV2(props: any) {
     srf_id: filter.srf_id || null,
     is_vaccinated: filter.is_vaccinated || null,
     covin_id: filter.covin_id || null,
+    is_kasp: filter.is_kasp || null,
   });
   const dispatch: any = useDispatch();
 
@@ -185,6 +186,7 @@ export default function PatientFilterV2(props: any) {
       is_vaccinated,
       covin_id,
       srf_id,
+      is_kasp,
     } = filterState;
     const data = {
       lsgBody: lsgBody || "",
@@ -241,6 +243,7 @@ export default function PatientFilterV2(props: any) {
       srf_id: srf_id || "",
       is_vaccinated: is_vaccinated || "",
       covin_id: covin_id || "",
+      is_kasp: is_kasp || "",
     };
     onChange(data);
   };
@@ -336,6 +339,23 @@ export default function PatientFilterV2(props: any) {
             margin="dense"
             value={filterState.gender}
             options={[{ id: "", text: "Show All" }, ...GENDER_TYPES]}
+            onChange={handleChange}
+            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+          />
+        </div>
+
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">KASP</span>
+          <SelectField
+            name="is_kasp"
+            variant="outlined"
+            margin="dense"
+            value={filterState.is_kasp}
+            options={[
+              { id: "", text: "Show All" },
+              { id: "true", text: "Show KASP" },
+              { id: "false", text: "Show Non KASP" },
+            ]}
             onChange={handleChange}
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
           />
