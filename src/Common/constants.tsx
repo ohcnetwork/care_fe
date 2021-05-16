@@ -73,7 +73,7 @@ export const FACILITY_TYPES: Array<OptionsType> = [
   { id: 801, text: "24x7 Public Health Centres" },
   { id: 802, text: "Family Health Centres" },
   { id: 803, text: "Community Health Centres" },
-  { id: 820, text: "Urban Primary Health Centre" },
+  { id: 820, text: "Urban Primary Health Center" },
   { id: 830, text: "Taluk Hospitals" },
   { id: 831, text: "Taluk Headquarters Hospitals" },
   { id: 840, text: "Women and Child Health Centres" },
