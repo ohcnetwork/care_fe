@@ -68,9 +68,10 @@ export default function PatientFilterV2(props: any) {
       filter.last_consultation_discharge_date_before || null,
     last_consultation_discharge_date_after:
       filter.last_consultation_discharge_date_after || null,
-    last_consultation_admitted_to_list: filter.last_consultation_admitted_to_list
-      ? filter.last_consultation_admitted_to_list.split(",")
-      : [],
+    last_consultation_admitted_to_list:
+      filter.last_consultation_admitted_to_list
+        ? filter.last_consultation_admitted_to_list.split(",")
+        : [],
     srf_id: filter.srf_id || null,
     is_vaccinated: filter.is_vaccinated || null,
     covin_id: filter.covin_id || null,
@@ -205,8 +206,7 @@ export default function PatientFilterV2(props: any) {
           ? moment(modified_date_after).format("YYYY-MM-DD")
           : "",
       date_of_result:
-        date_of_result &&
-          moment(date_of_result).isValid()
+        date_of_result && moment(date_of_result).isValid()
           ? moment(date_of_result).format("YYYY-MM-DD")
           : "",
       last_consultation_admission_date_before:
@@ -320,6 +320,7 @@ export default function PatientFilterV2(props: any) {
                 multiple={false}
                 name="facility"
                 selected={filterState.facility_ref}
+                showAll={false}
                 setSelected={(obj) => setFacility(obj, "facility")}
                 className="shifting-page-filter-dropdown"
                 errors={""}
