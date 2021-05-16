@@ -54,6 +54,8 @@ import DuplicatePatientDialog from "../Facility/DuplicatePatientDialog";
 import { DupPatientModel } from "../Facility/models";
 import { PatientModel } from "./models";
 import TransferPatientDialog from "../Facility/TransferPatientDialog";
+import { validatePincode } from "../../Common/validation";
+
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const debounce = require("lodash.debounce");
@@ -491,6 +493,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             !Number(state.form[field])
           ) {
             errors[field] = "Please enter the state";
+            invalidForm = true;
+          }
+          return;
+        case "pincode":
+          if (!validatePincode(state.form[field])) {
+            errors[field] = "Please enter valid pincode";
             invalidForm = true;
           }
           return;
