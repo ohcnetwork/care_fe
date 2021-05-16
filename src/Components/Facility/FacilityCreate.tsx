@@ -24,6 +24,7 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   validateLocationCoordinates,
   phonePreg,
+  validatePincode,
 } from "../../Common/validation";
 import {
   createFacility,
@@ -310,10 +311,11 @@ export const FacilityCreate = (props: FacilityProps) => {
             errors[field] = "Field is required";
             invalidForm = true;
           }
+          return;
 
         case "pincode":
-          if (!Number(state.form[field])) {
-            errors[field] = "Field is required";
+          if (!validatePincode(state.form[field])) {
+            errors[field] = "Please enter valid pincode";
             invalidForm = true;
           }
           return;
