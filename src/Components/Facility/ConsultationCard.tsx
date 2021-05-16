@@ -25,10 +25,10 @@ export const ConsultationCard = (props: ConsultationProps) => {
             <Grid item xs={7}>
               <Typography>
                 <span className="text-gray-700">Facility: </span>
-                {itemData.facility_name}            {
-                  itemData.is_telemedicine &&
+                {itemData.facility_name}{" "}
+                {itemData.is_telemedicine && (
                   <span className="ml-2">(Telemedicine)</span>
-                }
+                )}
               </Typography>
             </Grid>
             <Grid item xs={5}>
@@ -98,18 +98,6 @@ export const ConsultationCard = (props: ConsultationProps) => {
             >
               View / Upload Consultation Files
             </button>
-            {/* {isLastConsultation && (
-              <button
-                className="mr-1 px-4 py-2 shadow border bg-white rounded-md border border-grey-500 whitespace-no-wrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300 text-center"
-                onClick={() =>
-                  navigate(
-                    `/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/update`
-                  )
-                }
-              >
-                Update Consultation Details
-              </button>
-            )} */}
             {isLastConsultation && (
               <button
                 className="mr-4 px-4 py-2 shadow border bg-white rounded-md border border-grey-500 whitespace-no-wrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300 text-center"
