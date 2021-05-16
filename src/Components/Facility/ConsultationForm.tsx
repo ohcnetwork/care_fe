@@ -411,7 +411,7 @@ export const ConsultationForm = (props: any) => {
             <CardContent>
               <div className="grid gap-4 grid-cols-1">
                 <div>
-                  <InputLabel id="symptoms-label">Symptoms</InputLabel>
+                  <InputLabel id="symptoms-label">Symptoms*</InputLabel>
                   <MultiSelectField
                     name="symptoms"
                     variant="outlined"
@@ -445,7 +445,7 @@ export const ConsultationForm = (props: any) => {
                 {state.form.hasSymptom && (
                   <div>
                     <DateInputField
-                      label="Date of onset of the symptoms"
+                      label="Date of onset of the symptoms*"
                       value={state.form.symptoms_onset_date}
                       onChange={(date) =>
                         handleDateChange(date, "symptoms_onset_date")
@@ -531,7 +531,7 @@ export const ConsultationForm = (props: any) => {
                     id="suggestion-label"
                     style={{ fontWeight: "bold", fontSize: "18px" }}
                   >
-                    Decision after Consultation
+                    Decision after Consultation*
                   </InputLabel>
                   <NativeSelectField
                     name="suggestion"
