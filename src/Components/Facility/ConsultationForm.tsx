@@ -307,7 +307,7 @@ export const ConsultationForm = (props: any) => {
         is_telemedicine: state.form.is_telemedicine,
         action: state.form.action,
         review_time: state.form.review_time,
-        assigned_to: state.form.assigned_to,
+        assigned_to: state.form.is_telemedicine === "true" ? state.form.assigned_to : "",
       };
       const res = await dispatchAction(
         id ? updateConsultation(id, data) : createConsultation(data)
@@ -744,12 +744,14 @@ export const ConsultationForm = (props: any) => {
                   </div>
                 )}
               </div>
-              <div className="md:col-span-1">
-                <OnlineDoctorsSelect
-                  userId={state.form.assigned_to}
-                  onSelect={handleOnSelect}
-                />
-              </div>
+              {JSON.parse(state.form.is_telemedicine) && (
+                <div className="md:col-span-1">
+                  <OnlineDoctorsSelect
+                    userId={state.form.assigned_to}
+                    onSelect={handleOnSelect}
+                  />
+                </div>
+              )}
               {JSON.parse(state.form.is_telemedicine) && (
                 <div>
                   <InputLabel
