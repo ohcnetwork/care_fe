@@ -10,7 +10,7 @@ import moment from "moment";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
-const RESULT_LIMIT = 30;
+const RESULT_LIMIT = 15;
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
 export default function ResultList() {

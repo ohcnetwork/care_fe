@@ -246,7 +246,7 @@ export const UserAdd = (props: UserProps) => {
             errors[field] = "Please enter the username";
             invalidForm = true;
           } else if (!validateUsername(state.form[field])) {
-            errors[field] = "Please enter letters, digits and @ . + - _ only";
+            errors[field] = "Please enter letters, digits and @ . + - _ only and username should not end with @, ., +, - or _";
             invalidForm = true;
           }
           return;
@@ -506,20 +506,20 @@ export const UserAdd = (props: UserProps) => {
                 {isStateLoading ? (
                   <CircularProgress size={20} />
                 ) : (
-                    <SelectField
-                      name="state"
-                      variant="outlined"
-                      margin="dense"
-                      value={state.form.state}
-                      options={states}
-                      optionValue="name"
-                      onChange={e => [
-                        handleChange(e),
-                        fetchDistricts(String(e.target.value))
-                      ]}
-                      errors={state.errors.state}
-                    />
-                  )}
+                  <SelectField
+                    name="state"
+                    variant="outlined"
+                    margin="dense"
+                    value={state.form.state}
+                    options={states}
+                    optionValue="name"
+                    onChange={e => [
+                      handleChange(e),
+                      fetchDistricts(String(e.target.value))
+                    ]}
+                    errors={state.errors.state}
+                  />
+                )}
               </div>
 
               <div>
@@ -527,20 +527,20 @@ export const UserAdd = (props: UserProps) => {
                 {isDistrictLoading ? (
                   <CircularProgress size={20} />
                 ) : (
-                    <SelectField
-                      name="district"
-                      variant="outlined"
-                      margin="dense"
-                      value={state.form.district}
-                      options={districts}
-                      optionValue="name"
-                      onChange={e => [
-                        handleChange(e),
-                        fetchLocalBody(String(e.target.value))
-                      ]}
-                      errors={state.errors.district}
-                    />
-                  )}
+                  <SelectField
+                    name="district"
+                    variant="outlined"
+                    margin="dense"
+                    value={state.form.district}
+                    options={districts}
+                    optionValue="name"
+                    onChange={e => [
+                      handleChange(e),
+                      fetchLocalBody(String(e.target.value))
+                    ]}
+                    errors={state.errors.district}
+                  />
+                )}
               </div>
 
               <div>
@@ -548,17 +548,17 @@ export const UserAdd = (props: UserProps) => {
                 {isLocalbodyLoading ? (
                   <CircularProgress size={20} />
                 ) : (
-                    <SelectField
-                      name="local_body"
-                      variant="outlined"
-                      margin="dense"
-                      value={state.form.local_body}
-                      options={localBody}
-                      optionValue="name"
-                      onChange={handleChange}
-                      errors={state.errors.local_body}
-                    />
-                  )}
+                  <SelectField
+                    name="local_body"
+                    variant="outlined"
+                    margin="dense"
+                    value={state.form.local_body}
+                    options={localBody}
+                    optionValue="name"
+                    onChange={handleChange}
+                    errors={state.errors.local_body}
+                  />
+                )}
               </div>
 
             </div>
