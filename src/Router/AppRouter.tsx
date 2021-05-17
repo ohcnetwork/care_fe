@@ -108,6 +108,8 @@ const routes = {
       consultationId=""
       type="PATIENT"
       hideBack={false}
+      audio={false}
+      unspecified={true}
     />
   ),
   "/facility/:facilityId/triage/:id": ({ facilityId, id }: any) => (
@@ -152,6 +154,8 @@ const routes = {
       consultationId={id}
       type="CONSULTATION"
       hideBack={false}
+      audio={true}
+      unspecified={false}
     />
   ),
   "/facility/:facilityId/patient/:patientId/consultation/:id/investigation/": ({

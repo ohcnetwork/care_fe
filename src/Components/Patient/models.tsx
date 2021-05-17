@@ -254,4 +254,5 @@ export interface FileUploadModel {
   name?: string;
   created_date?: string;
   uploaded_by?: { username?: string; };
+  file_category?: string;
 }
