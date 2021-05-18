@@ -316,7 +316,7 @@ export default function UserProfile() {
                                             Local Body
                                         </dt>
                                         <dd className="mt-1 text-sm leading-5 text-gray-900">
-                                            {details.local_body?.name || '-'}
+                                            {details.local_body_object?.name || '-'}
                                         </dd>
                                     </div>
                                     <div className="sm:col-span-1">
