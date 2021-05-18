@@ -115,34 +115,6 @@ export const FileUpload = (props: FileUploadProps) => {
 
 
 
-  // const loadAudioFile = (id: any) => {
-  //   const [audiodata, seturl] = useState(undefined);
-  //   var data = { file_type: type, associating_id: getAssociatedId() };
-
-  //   useEffect(() => {
-  //     const getData = async () => {
-  //       const responseData = await dispatch(retrieveUpload(data, id));
-  //       console.log(responseData);
-  //       seturl(responseData.data.read_signed_url);
-  //     }
-  //     getData();
-  //   }, [])
-
-  //   return url;
-  // };
-
-
-  // const getAudioURLs=()=>{
-  //   const allAudioFiles=uploadedFiles.filter((f)=>f.file_category=="AUDIO");
-  //   const audioURLs: Array<String> = [];
-  //   allAudioFiles.forEach((f)=>
-  //   {
-  //     var url=loadAudioFile(f.id);
-  //     audioURLs.push()
-  //   }
-  //   )
-
-  // }
 
 
   const renderFileUpload = (item: FileUploadModel) => {
@@ -169,28 +141,21 @@ export const FileUpload = (props: FileUploadProps) => {
             </div>
             <div>
               {
-                audio ?
-                  (
-                    null
-                    //<audio src={loadAudioFile(item.id)} controls preload="auto" />
-                  )
-                  :
-                  (
-                    <div>
-                      <Button
-                        color="primary"
-                        variant="contained"
-                        type="submit"
-                        style={{ marginLeft: "auto" }}
-                        startIcon={<GetAppIcon>load</GetAppIcon>}
-                        onClick={() => {
-                          loadFile(item.id);
-                        }}
-                      >
-                        Load File
+                <div>
+                  <Button
+                    color="primary"
+                    variant="contained"
+                    type="submit"
+                    style={{ marginLeft: "auto" }}
+                    startIcon={<GetAppIcon>load</GetAppIcon>}
+                    onClick={() => {
+                      loadFile(item.id);
+                    }}
+                  >
+                    Load File
                     </Button>
-                    </div>
-                  )
+                </div>
+
               }
             </div>
           </div>
@@ -214,9 +179,9 @@ export const FileUpload = (props: FileUploadProps) => {
   const uploadfile = (response: any) => {
     var url = response.data.signed_url;
     var internal_name = response.data.internal_name;
-    const f = audio ? audioBlob : file;
+    const f = file;
     if (f === undefined) return;
-    const newFile = audio ? new File([f], `${internal_name}`, { type: "audio/mpeg" }) : new File([f], `${internal_name}`);
+    const newFile = new File([f], `${internal_name}`);
 
     console.log(newFile);
 
@@ -246,11 +211,11 @@ export const FileUpload = (props: FileUploadProps) => {
   };
 
   const handleUpload = async (e: any) => {
-    const f = audio ? audioBlob : file;
+    const f = file;
     if (f === undefined) return;
-    const category = audio ? "AUDIO" : "UNSPECIFIED";
-    const filename = audio ? Date.now().toString() + ".mp3" : uploadFileName;
-    let name = audio ? "audio" : " ";
+    const category = "UNSPECIFIED";
+    const filename = uploadFileName;
+    let name = f.name;
     setUploadStarted(true);
     setUploadSuccess(false);
     const requestData = {
@@ -271,6 +236,62 @@ export const FileUpload = (props: FileUploadProps) => {
     setAudioBlob(createdBlob);
     console.log("from file upload");
     console.log(audioBlob);
+  };
+
+  const uploadAudiofile = (response: any) => {
+    var url = response.data.signed_url;
+    var internal_name = response.data.internal_name + ".mp3";
+    const f = audioBlob;
+    if (f === undefined) return;
+    const newFile = new File([f], `${internal_name}`, { type: "audio/mpeg" });
+
+    console.log(newFile);
+
+    const config = {
+      onUploadProgress: (progressEvent: any) => {
+        var percentCompleted = Math.round(
+          (progressEvent.loaded * 100) / progressEvent.total
+        );
+        setUploadPercent(percentCompleted);
+      },
+    };
+
+    axios
+      .put(url, newFile, config)
+      .then((result) => {
+        setUploadStarted(false);
+        setUploadSuccess(true);
+        setUploadFileName("");
+        setReload(!reload);
+        Notification.Success({
+          msg: "File Uploaded Successfully"
+        });
+      })
+      .catch((error) => {
+        setUploadStarted(false);
+      });
+  };
+
+  const handleAudioUpload = async (e: any) => {
+    const f = audioBlob;
+    if (f === undefined) return;
+    const category = "AUDIO";
+    const filename = Date.now().toString();
+    let name = "audio";
+    setUploadStarted(true);
+    setUploadSuccess(false);
+    const requestData = {
+      original_name: name,
+      file_type: type,
+      name: filename,
+      associating_id: getAssociatedId(),
+      file_category: category
+    };
+    dispatch(createUpload(requestData))
+      .then(uploadAudiofile)
+      .catch(() => {
+        setUploadStarted(false);
+      });
   };
 
   return (
@@ -295,7 +316,7 @@ export const FileUpload = (props: FileUploadProps) => {
                       startIcon={
                         <CloudUploadOutlineIcon>save</CloudUploadOutlineIcon>
                       }
-                      onClick={handleUpload}
+                      onClick={handleAudioUpload}
                     >
                       Upload
                     </Button>
