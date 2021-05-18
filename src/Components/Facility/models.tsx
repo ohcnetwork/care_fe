@@ -83,6 +83,8 @@ export interface ConsultationModel {
   consultation_notes?: string;
   is_telemedicine?: boolean;
   discharge_advice?: any;
+  created_by?: any;
+  last_edited_by?: any;
 }
 export interface PatientStatsModel {
   id?: number;

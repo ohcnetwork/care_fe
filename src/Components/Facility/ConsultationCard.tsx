@@ -31,14 +31,6 @@ export const ConsultationCard = (props: ConsultationProps) => {
                 )}
               </Typography>
             </Grid>
-            <Grid item xs={5}>
-              <Typography>
-                <span className="text-gray-700">Updated on: </span>
-                {itemData.created_date
-                  ? moment(itemData.created_date).format("lll")
-                  : "-"}
-              </Typography>
-            </Grid>
             <Grid item xs={7}>
               <Typography className="capitalize">
                 <span className="text-gray-700">Suggestion: </span>
@@ -51,7 +43,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
                 {itemData.admitted ? "Yes" : "No"}
               </Typography>
             </Grid>
-            <Grid item xs={5}>
+            <Grid item xs={7}>
               <Typography>
                 <span className="text-gray-700">Kasp Enabled date: </span>
                 {itemData.kasp_enabled_date
@@ -60,7 +52,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
               </Typography>
             </Grid>
             {itemData.admission_date && (
-              <Grid item xs={7}>
+              <Grid item xs={5}>
                 <Typography>
                   <span className="text-gray-700">Admitted on: </span>
                   {moment(itemData.admission_date).format("lll")}
@@ -76,6 +68,11 @@ export const ConsultationCard = (props: ConsultationProps) => {
               </Grid>
             )}
           </Grid>
+          
+          <div className="flex flex-col mt-6">
+            <div className="text-sm text-gray-700">Created on {moment(itemData.created_date).format("lll")} by {`${itemData.created_by.first_name} ${itemData.created_by.last_name} @${itemData.created_by.username} (${itemData.created_by.user_type})`}</div>
+            <div className="text-sm text-gray-700">Last Modified on {moment(itemData.modified_date).format("lll")} by {`${itemData.last_edited_by.first_name} ${itemData.last_edited_by.last_name} @${itemData.last_edited_by.username} (${itemData.last_edited_by.user_type})`}</div>
+          </div>
 
           <div className="mt-4 flex flex-wrap justify-between w-full">
             <button
