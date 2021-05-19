@@ -1382,7 +1382,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       />
                     </div>
                     <div>
-                      <InputLabel id="name-label">Pincode</InputLabel>
+                      <InputLabel id="name-label">Pincode*</InputLabel>
                       <TextInputField
                         name="pincode"
                         variant="outlined"
