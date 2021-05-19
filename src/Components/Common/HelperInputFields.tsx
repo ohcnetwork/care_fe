@@ -412,9 +412,6 @@ export const PhoneNumberField = (props: any) => {
     const countryRestriction = !!onlyIndia ? { onlyCountries: ['in'] } : {};
     const onChangeHandler = debounce(onChange, 500);
     const handleChange = (value: string, data: ICountryData | {}, event: ChangeEvent<HTMLInputElement>, formattedValue: string) => {
-        console.log("value",value);
-        console.log("data",data);
-        console.log("event",event);
         onChangeHandler(formattedValue);
     }
     return (<>

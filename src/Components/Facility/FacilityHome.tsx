@@ -207,6 +207,13 @@ export const FacilityHome = (props: any) => {
               <i className="fas fa-dolly-flatbed text-white mr-2"></i>
               Inventory Management
             </button>
+            <button
+              className="btn-primary btn mt-2"
+              onClick={() => navigate(`/facility/${facilityId}/resource/new`)}
+            >
+              <i className="fas fa-dolly-flatbed text-white mr-2"></i>
+              Resource Request
+            </button>
           </div>
         </div>
         <div>

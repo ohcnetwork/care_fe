@@ -470,4 +470,29 @@ export default {
     path: "/api/v1/patient/{patient_external_id}/investigation/",
     method: "GET",
   },
+  // Resource
+  createResource: {
+    path: "/api/v1/resource/",
+    method: "POST",
+  },
+  updateResource: {
+    path: "/api/v1/resource",
+    method: "PUT",
+  },
+  deleteResourceRecord: {
+    path: "/api/v1/resource",
+    method: "DELETE",
+  },
+  listResourceRequests: {
+    path: "/api/v1/resource/",
+    method: "GET",
+  },
+  getResourceDetails: {
+    path: "/api/v1/resource/{id}/",
+  },
+  downloadResourceRequests: {
+    path: "/api/v1/resource/",
+    method: "GET",
+  },
 };
+
