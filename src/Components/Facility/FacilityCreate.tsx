@@ -24,6 +24,7 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   validateLocationCoordinates,
   phonePreg,
+  validatePincode,
 } from "../../Common/validation";
 import {
   createFacility,
@@ -80,6 +81,9 @@ const initForm: any = {
   type_c_cylinders: "",
   type_d_cylinders: "",
   expected_oxygen_requirement: "",
+  expected_type_b_cylinders: "",
+  expected_type_c_cylinders: "",
+  expected_type_d_cylinders: "",
 };
 
 const initError = Object.assign(
@@ -130,9 +134,8 @@ export const FacilityCreate = (props: FacilityProps) => {
   const [localBody, setLocalBody] = useState(selectDistrict);
   const [ward, setWard] = useState(selectLocalBody);
 
-  const [anchorEl, setAnchorEl] = React.useState<
-    (EventTarget & Element) | null
-  >(null);
+  const [anchorEl, setAnchorEl] =
+    React.useState<(EventTarget & Element) | null>(null);
   const [mapLoadLocation, setMapLoadLocation] = useState(DEFAULT_MAP_LOCATION);
 
   const headerText = !facilityId ? "Create Facility" : "Update Facility";
@@ -209,6 +212,9 @@ export const FacilityCreate = (props: FacilityProps) => {
             type_b_cylinders: res.data.type_b_cylinders,
             type_c_cylinders: res.data.type_c_cylinders,
             type_d_cylinders: res.data.type_d_cylinders,
+            expected_type_b_cylinders: res.data.expected_type_b_cylinders,
+            expected_type_c_cylinders: res.data.expected_type_c_cylinders,
+            expected_type_d_cylinders: res.data.expected_type_d_cylinders,
             expected_oxygen_requirement: res.data.expected_oxygen_requirement,
             oxygen_capacity: res.data.oxygen_capacity
               ? res.data.oxygen_capacity
@@ -305,10 +311,11 @@ export const FacilityCreate = (props: FacilityProps) => {
             errors[field] = "Field is required";
             invalidForm = true;
           }
+          return;
 
         case "pincode":
-          if (!Number(state.form[field])) {
-            errors[field] = "Field is required";
+          if (!validatePincode(state.form[field])) {
+            errors[field] = "Please enter valid pincode";
             invalidForm = true;
           }
           return;
@@ -407,6 +414,17 @@ export const FacilityCreate = (props: FacilityProps) => {
           : 0,
         expected_oxygen_requirement: state.form.expected_oxygen_requirement
           ? Number(state.form.expected_oxygen_requirement)
+          : 0,
+        expected_type_b_cylinders: state.form.expected_type_b_cylinders
+          ? Number(state.form.expected_type_b_cylinders)
+          : 0,
+
+        expected_type_c_cylinders: state.form.expected_type_c_cylinders
+          ? Number(state.form.expected_type_c_cylinders)
+          : 0,
+
+        expected_type_d_cylinders: state.form.expected_type_d_cylinders
+          ? Number(state.form.expected_type_d_cylinders)
           : 0,
       };
       const res = await dispatchAction(
@@ -601,75 +619,129 @@ export const FacilityCreate = (props: FacilityProps) => {
                   onlyIndia={true}
                 />
               </div>
-              <div>
-                <InputLabel id="name-label">
-                  Oxygen Tank Capacity in liters
-                </InputLabel>
-                <TextInputField
-                  name="oxygen_capacity"
-                  type="number"
-                  variant="outlined"
-                  margin="dense"
-                  value={state.form.oxygen_capacity}
-                  onChange={handleChange}
-                  errors={state.errors.oxygen_capacity}
-                />
+
+              <div className="grid grid-cols-2">
+                <div>
+                  <InputLabel id="oxygen_capacity">
+                    Liquid Oxygen Capacity (l)
+                  </InputLabel>
+                  <TextInputField
+                    name="oxygen_capacity"
+                    type="number"
+                    variant="outlined"
+                    margin="dense"
+                    value={state.form.oxygen_capacity}
+                    onChange={handleChange}
+                    errors={state.errors.oxygen_capacity}
+                  />
+                </div>
+                <div>
+                  <InputLabel id="name-label">
+                    Expected Liquid Oxygen (l)
+                  </InputLabel>
+                  <TextInputField
+                    name="expected_oxygen_requirement"
+                    type="number"
+                    variant="outlined"
+                    margin="dense"
+                    value={state.form.expected_oxygen_requirement}
+                    onChange={handleChange}
+                    errors={state.errors.expected_oxygen_requirement}
+                  />
+                </div>
               </div>
 
-              <div>
-                <InputLabel id="name-label">B Type Oxygen Cylinders</InputLabel>
-                <TextInputField
-                  name="type_b_cylinders"
-                  type="number"
-                  variant="outlined"
-                  margin="dense"
-                  value={state.form.type_b_cylinders}
-                  onChange={handleChange}
-                  errors={state.errors.type_b_cylinders}
-                />
+              <div className="grid grid-cols-2">
+                <div>
+                  <InputLabel id="type_b_cylinders">
+                    B Type Cylinders
+                  </InputLabel>
+                  <TextInputField
+                    name="type_b_cylinders"
+                    type="number"
+                    variant="outlined"
+                    margin="dense"
+                    value={state.form.type_b_cylinders}
+                    onChange={handleChange}
+                    errors={state.errors.type_b_cylinders}
+                  />
+                </div>
+                <div>
+                  <InputLabel id="expected_type_b_cylinders">
+                    Expected B Type Cylinders
+                  </InputLabel>
+                  <TextInputField
+                    name="expected_type_b_cylinders"
+                    type="number"
+                    variant="outlined"
+                    margin="dense"
+                    value={state.form.expected_type_b_cylinders}
+                    onChange={handleChange}
+                    errors={state.errors.expected_type_b_cylinders}
+                  />
+                </div>
               </div>
 
-              <div>
-                <InputLabel id="name-label">C Type Oxygen Cylinders</InputLabel>
-                <TextInputField
-                  name="type_c_cylinders"
-                  type="number"
-                  variant="outlined"
-                  margin="dense"
-                  value={state.form.type_c_cylinders}
-                  onChange={handleChange}
-                  errors={state.errors.type_c_cylinders}
-                />
+              <div className="grid grid-cols-2">
+                <div>
+                  <InputLabel id="type_c_cylinders">
+                    C Type Cylinders
+                  </InputLabel>
+                  <TextInputField
+                    name="type_c_cylinders"
+                    type="number"
+                    variant="outlined"
+                    margin="dense"
+                    value={state.form.type_c_cylinders}
+                    onChange={handleChange}
+                    errors={state.errors.type_c_cylinders}
+                  />
+                </div>
+                <div>
+                  <InputLabel id="expected_type_c_cylinders">
+                    Expected C Type Cylinders
+                  </InputLabel>
+                  <TextInputField
+                    name="expected_type_c_cylinders"
+                    type="number"
+                    variant="outlined"
+                    margin="dense"
+                    value={state.form.expected_type_c_cylinders}
+                    onChange={handleChange}
+                    errors={state.errors.expected_type_c_cylinders}
+                  />
+                </div>
               </div>
 
-              <div>
-                <InputLabel id="name-label">
-                  Jumbo D Type Oxygen Cylinders
-                </InputLabel>
-                <TextInputField
-                  name="type_d_cylinders"
-                  type="number"
-                  variant="outlined"
-                  margin="dense"
-                  value={state.form.type_d_cylinders}
-                  onChange={handleChange}
-                  errors={state.errors.type_d_cylinders}
-                />
-              </div>
-
-              <div>
-                <InputLabel id="name-label">
-                  Expected Oxygen Requirement in Litres
-                </InputLabel>
-                <TextInputField
-                  name="expected_oxygen_requirement"
-                  type="number"
-                  variant="outlined"
-                  margin="dense"
-                  value={state.form.expected_oxygen_requirement}
-                  onChange={handleChange}
-                  errors={state.errors.expected_oxygen_requirement}
-                />
+              <div className="grid grid-cols-2">
+                <div>
+                  <InputLabel id="type_d_cylinders">
+                    D Type Cylinders
+                  </InputLabel>
+                  <TextInputField
+                    name="type_d_cylinders"
+                    type="number"
+                    variant="outlined"
+                    margin="dense"
+                    value={state.form.type_d_cylinders}
+                    onChange={handleChange}
+                    errors={state.errors.type_d_cylinders}
+                  />
+                </div>
+                <div>
+                  <InputLabel id="expected_type_d_cylinders">
+                    Expected D Type Cylinders
+                  </InputLabel>
+                  <TextInputField
+                    name="expected_type_d_cylinders"
+                    type="number"
+                    variant="outlined"
+                    margin="dense"
+                    value={state.form.expected_type_d_cylinders}
+                    onChange={handleChange}
+                    errors={state.errors.expected_type_d_cylinders}
+                  />
+                </div>
               </div>
 
               <div>

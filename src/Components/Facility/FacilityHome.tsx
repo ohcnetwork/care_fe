@@ -38,17 +38,13 @@ export const FacilityHome = (props: any) => {
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const [
-        facilityRes,
-        capacityRes,
-        doctorRes,
-        triageRes,
-      ] = await Promise.all([
-        dispatch(getFacility(facilityId)),
-        dispatch(listCapacity({}, { facilityId })),
-        dispatch(listDoctor({}, { facilityId })),
-        dispatch(getTriageInfo({ facilityId })),
-      ]);
+      const [facilityRes, capacityRes, doctorRes, triageRes] =
+        await Promise.all([
+          dispatch(getFacility(facilityId)),
+          dispatch(listCapacity({}, { facilityId })),
+          dispatch(listDoctor({}, { facilityId })),
+          dispatch(getTriageInfo({ facilityId })),
+        ]);
       if (!status.aborted) {
         setIsLoading(false);
         if (!facilityRes.data) {
@@ -173,23 +169,30 @@ export const FacilityHome = (props: any) => {
                   facilityData?.ward_object?.name}
               </Typography>
             )}
-            <Typography>
-              Oxygen Tank Capacity :{` ${facilityData.oxygen_capacity} Litres`}
-            </Typography>
-            <div>
-              <Typography>
-                Type B :{` ${facilityData.type_b_cylinders} cylinders`}
-              </Typography>
-              <Typography>
-                Type C :{` ${facilityData.type_c_cylinders} cylinders`}
-              </Typography>
-              <Typography>
-                Type D :{` ${facilityData.type_d_cylinders} cylinders`}
-              </Typography>
-              <Typography>
-                Expected Oxygen Requirement
-                {` ${facilityData.expected_oxygen_requirement} liters`}
-              </Typography>
+            <div className="grid grid-cols-5">
+              <div className="border"></div>
+              <div className="border font-semibold">Liquid</div>
+              <div className="border font-semibold">B</div>
+              <div className="border font-semibold">C</div>
+              <div className="border font-semibold">D</div>
+              <div className="border font-semibold">Capacity</div>
+              <div className="border">{facilityData.oxygen_capacity}</div>
+              <div className="border">{facilityData.type_b_cylinders}</div>
+              <div className="border">{facilityData.type_c_cylinders}</div>
+              <div className="border">{facilityData.type_d_cylinders}</div>
+              <div className="border font-semibold">Expected</div>
+              <div className="border">
+                {facilityData.expected_oxygen_requirement}
+              </div>
+              <div className="border">
+                {facilityData.expected_type_b_cylinders}
+              </div>
+              <div className="border">
+                {facilityData.expected_type_c_cylinders}
+              </div>
+              <div className="border">
+                {facilityData.expected_type_d_cylinders}
+              </div>
             </div>
           </div>
           <div className="flex flex-col">

@@ -386,6 +386,15 @@ export const getPatientInvestigation = (
   });
 };
 
+export const editInvestigation = (
+  params: object,
+  consultation_external_id: string
+) => {
+  return fireRequest("editInvestigation", [], params, {
+    consultation_external_id: consultation_external_id,
+  });
+};
+
 // Resource 
 export const createResource = (params: object) => {
   return fireRequest("createResource", [], params);
