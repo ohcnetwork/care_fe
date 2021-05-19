@@ -73,10 +73,10 @@ const TestRow = ({ data, value, onChange }: any) => {
         {data.unit || "---"}
       </TableCell>
       <TableCell className={className.tableCell} align="right">
-        {data.min_value || "---"}
+        {data.min_value ?? "---"}
       </TableCell>
       <TableCell className={className.tableCell} align="right">
-        {data.max_value || "---"}
+        {data.max_value ?? "---"}
       </TableCell>
       <TableCell className={className.tableCell} align="right">
         {data.ideal_value || "---"}

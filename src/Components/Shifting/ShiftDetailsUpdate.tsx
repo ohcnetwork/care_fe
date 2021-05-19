@@ -19,6 +19,7 @@ import {
   SHIFTING_CHOICES,
   FACILITY_TYPES,
   SHIFTING_VEHICLE_CHOICES,
+  BREATHLESSNESS_LEVEL,
 } from "../../Common/constants";
 import { UserSelect } from "../Common/UserSelect";
 
@@ -161,6 +162,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
         assigned_facility_type: state.form.assigned_facility_type,
         preferred_vehicle_choice: state.form.preferred_vehicle_choice,
         assigned_to: state.form.assigned_to,
+        breathlessness_level: state.form.breathlessness_level,
       };
 
       const res = await dispatchAction(updateShift(props.id, data));
@@ -202,6 +204,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
 
   const vehicleOptions = SHIFTING_VEHICLE_CHOICES.map((obj) => obj.text);
   const facilityOptions = FACILITY_TYPES.map((obj) => obj.text);
+  const breathlessnessLevels = BREATHLESSNESS_LEVEL;
 
   if (isLoading) {
     return <Loading />;
@@ -234,6 +237,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                   facilityId={
                     state.form?.shifting_approving_facility_object?.id
                   }
+                  placeholder="Assign a Shifting Staff"
                 />
               </div>
               <div>
@@ -241,6 +245,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                 <FacilitySelect
                   multiple={false}
                   name="shifting_approving_facility"
+                  facilityType={1300}
                   selected={state.form.shifting_approving_facility_object}
                   setSelected={(obj) =>
                     setFacility(obj, "shifting_approving_facility_object")
@@ -377,7 +382,19 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                   className="bg-white h-14 w-1/3 mt-2 shadow-sm md:text-sm md:leading-5"
                 />
               </div>
-
+              <div className="md:col-span-1">
+                <InputLabel>Severity of Breathlessness</InputLabel>
+                <SelectField
+                  name="breathlessness_level"
+                  variant="outlined"
+                  margin="dense"
+                  optionArray={true}
+                  value={state.form.breathlessness_level}
+                  options={breathlessnessLevels}
+                  onChange={handleChange}
+                  className="bg-white h-14 w-1/3 mt-2 shadow-sm md:text-sm md:leading-5"
+                />
+              </div>
               <div className="md:col-span-2">
                 <InputLabel>Reason for shift*</InputLabel>
                 <MultilineInputField
