@@ -480,6 +480,8 @@ export const ConsultationDetails = (props: any) => {
           consultationId={consultationId}
           type="CONSULTATION"
           hideBack={true}
+          audio={true}
+          unspecified={true}
         />
       </div>
     </div>
