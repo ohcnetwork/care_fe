@@ -3,7 +3,13 @@ import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
 import moment from "moment";
 import CloudUploadOutlineIcon from "@material-ui/icons/CloudUpload";
 import loadable from "@loadable/component";
-import React, { useCallback, useState, useRef, ChangeEvent, useEffect } from "react";
+import React, {
+  useCallback,
+  useState,
+  useRef,
+  ChangeEvent,
+  useEffect,
+} from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { viewUpload, retrieveUpload, createUpload } from "../../Redux/actions";
@@ -34,9 +40,6 @@ const LinearProgressWithLabel = (props: any) => {
   );
 };
 
-
-
-
 interface FileUploadProps {
   type: string;
   patientId: any;
@@ -50,7 +53,15 @@ interface FileUploadProps {
 export const FileUpload = (props: FileUploadProps) => {
   const [audioBlob, setAudioBlob] = useState<Blob>();
   const [file, setfile] = useState<File>();
-  const { facilityId, consultationId, patientId, type, hideBack, audio, unspecified } = props;
+  const {
+    facilityId,
+    consultationId,
+    patientId,
+    type,
+    hideBack,
+    audio,
+    unspecified,
+  } = props;
   const id = patientId;
   const dispatch: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
@@ -112,41 +123,7 @@ export const FileUpload = (props: FileUploadProps) => {
     console.log(responseData);
   };
 
-
-
-
-  const loadAudioFile = (id: any) => {
-    const [url, seturl] = useState(undefined);
-    var data = { file_type: type, associating_id: getAssociatedId() };
-
-    const getData = async () => {
-      const responseData = await dispatch(retrieveUpload(data, id));
-      console.log(responseData);
-      // seturl(responseData.data.read_signed_url);
-      return responseData.data.read_signed_url;
-    }
-
-    getData().then((url) => seturl(url));
-
-    return url;
-  };
-
-
-  // const getAudioURLs=()=>{
-  //   const allAudioFiles=uploadedFiles.filter((f)=>f.file_category=="AUDIO");
-  //   const audioURLs: Array<String> = [];
-  //   allAudioFiles.forEach((f)=>
-  //   {
-  //     var url=loadAudioFile(f.id);
-  //     audioURLs.push()
-  //   }
-  //   )
-
-  // }
-
-
   const renderFileUpload = (item: FileUploadModel) => {
-
     return (
       <Card className="mt-4" key={item.id}>
         <CardContent>
@@ -169,28 +146,20 @@ export const FileUpload = (props: FileUploadProps) => {
             </div>
             <div>
               {
-                audio ?
-                  (
-                    // null
-                    <audio src={loadAudioFile(item.id)} controls preload="auto" />
-                  )
-                  :
-                  (
-                    <div>
-                      <Button
-                        color="primary"
-                        variant="contained"
-                        type="submit"
-                        style={{ marginLeft: "auto" }}
-                        startIcon={<GetAppIcon>load</GetAppIcon>}
-                        onClick={() => {
-                          loadFile(item.id);
-                        }}
-                      >
-                        Load File
-                    </Button>
-                    </div>
-                  )
+                <div>
+                  <Button
+                    color="primary"
+                    variant="contained"
+                    type="submit"
+                    style={{ marginLeft: "auto" }}
+                    startIcon={<GetAppIcon>load</GetAppIcon>}
+                    onClick={() => {
+                      loadFile(item.id);
+                    }}
+                  >
+                    Load File
+                  </Button>
+                </div>
               }
             </div>
           </div>
@@ -214,9 +183,9 @@ export const FileUpload = (props: FileUploadProps) => {
   const uploadfile = (response: any) => {
     var url = response.data.signed_url;
     var internal_name = response.data.internal_name;
-    const f = audio ? audioBlob : file;
+    const f = file;
     if (f === undefined) return;
-    const newFile = audio ? new File([f], `${internal_name}`, { type: "audio/mpeg" }) : new File([f], `${internal_name}`);
+    const newFile = new File([f], `${internal_name}`);
 
     console.log(newFile);
 
@@ -237,7 +206,7 @@ export const FileUpload = (props: FileUploadProps) => {
         setUploadFileName("");
         setReload(!reload);
         Notification.Success({
-          msg: "File Uploaded Successfully"
+          msg: "File Uploaded Successfully",
         });
       })
       .catch((error) => {
@@ -246,11 +215,11 @@ export const FileUpload = (props: FileUploadProps) => {
   };
 
   const handleUpload = async (e: any) => {
-    const f = audio ? audioBlob : file;
+    const f = file;
     if (f === undefined) return;
-    const category = audio ? "AUDIO" : "UNSPECIFIED";
-    const filename = audio ? Date.now().toString() + ".mp3" : uploadFileName;
-    let name = audio ? "audio" : " ";
+    const category = "UNSPECIFIED";
+    const filename = uploadFileName;
+    let name = f.name;
     setUploadStarted(true);
     setUploadSuccess(false);
     const requestData = {
@@ -258,7 +227,7 @@ export const FileUpload = (props: FileUploadProps) => {
       file_type: type,
       name: filename,
       associating_id: getAssociatedId(),
-      file_category: category
+      file_category: category,
     };
     dispatch(createUpload(requestData))
       .then(uploadfile)
@@ -273,82 +242,136 @@ export const FileUpload = (props: FileUploadProps) => {
     console.log(audioBlob);
   };
 
+  const uploadAudiofile = (response: any) => {
+    var url = response.data.signed_url;
+    var internal_name = response.data.internal_name + ".mp3";
+    const f = audioBlob;
+    if (f === undefined) return;
+    const newFile = new File([f], `${internal_name}`, { type: "audio/mpeg" });
+
+    console.log(newFile);
+
+    const config = {
+      onUploadProgress: (progressEvent: any) => {
+        var percentCompleted = Math.round(
+          (progressEvent.loaded * 100) / progressEvent.total
+        );
+        setUploadPercent(percentCompleted);
+      },
+    };
+
+    axios
+      .put(url, newFile, config)
+      .then((result) => {
+        setUploadStarted(false);
+        setUploadSuccess(true);
+        setUploadFileName("");
+        setReload(!reload);
+        Notification.Success({
+          msg: "File Uploaded Successfully",
+        });
+      })
+      .catch((error) => {
+        setUploadStarted(false);
+      });
+  };
+
+  const handleAudioUpload = async (e: any) => {
+    const f = audioBlob;
+    if (f === undefined) return;
+    const category = "AUDIO";
+    const filename = Date.now().toString();
+    let name = "audio";
+    setUploadStarted(true);
+    setUploadSuccess(false);
+    const requestData = {
+      original_name: name,
+      file_type: type,
+      name: filename,
+      associating_id: getAssociatedId(),
+      file_category: category,
+    };
+    dispatch(createUpload(requestData))
+      .then(uploadAudiofile)
+      .catch(() => {
+        setUploadStarted(false);
+      });
+  };
+
   return (
-    <div className={(hideBack ? "py-2" : "p-4")}>
+    <div className={hideBack ? "py-2" : "p-4"}>
       <PageTitle title={`${UPLOAD_HEADING[type]}`} hideBack={hideBack} />
       <Card className="mt-4">
         <CardContent>
           <div className="md:grid grid-cols-1 ">
-            {
-              audio ?
-                (
-                  <div>
-                    <div>
-                      <h4>Record and Upload Audio File</h4>
-                    </div>
-                    <VoiceRecorder createAudioBlob={createAudioBlob} />
-                    <Button
-                      color="primary"
-                      variant="contained"
-                      type="submit"
-                      style={{ marginLeft: "auto", float: "right" }}
-                      startIcon={
-                        <CloudUploadOutlineIcon>save</CloudUploadOutlineIcon>
-                      }
-                      onClick={handleUpload}
-                    >
-                      Upload
-                    </Button>
-                  </div>
-                ) : (null)
-            }
-            {
-              unspecified ? (
+            {audio ? (
+              <div>
                 <div>
-                  <div>
-                    <h4>Upload New File</h4>
-                  </div>
-                  <div>
-                    <InputLabel id="spo2-label">Enter File Name</InputLabel>
-                    <TextInputField
-                      name="temperature"
-                      variant="outlined"
-                      margin="dense"
-                      type="text"
-                      InputLabelProps={{ shrink: !!uploadFileName }}
-                      value={uploadFileName}
-                      disabled={uploadStarted}
-                      onChange={(e) => {
-                        setUploadFileName(e.target.value);
-                      }}
-                      errors={`${[]}`}
-                    />
-                  </div>
-                  <div className="mt-4">
-                    {uploadStarted ? (
-                      <LinearProgressWithLabel value={uploadPercent} />
-                    ) : (
-                      <div>
-                        <input onChange={onFileChange} type="file" />
-                        <Button
-                          color="primary"
-                          variant="contained"
-                          type="submit"
-                          style={{ marginLeft: "auto", float: "right" }}
-                          startIcon={
-                            <CloudUploadOutlineIcon>save</CloudUploadOutlineIcon>
-                          }
-                          onClick={handleUpload}
-                        >
-                          Upload
-                    </Button>
-                      </div>
-                    )}
-                  </div>
+                  <h4>Record and Upload Audio File</h4>
                 </div>
-              )
-                : (null)
-            }
+                <VoiceRecorder createAudioBlob={createAudioBlob} />
+                <Button
+                  color="primary"
+                  variant="contained"
+                  type="submit"
+                  style={{ marginLeft: "auto", float: "right" }}
+                  startIcon={
+                    <CloudUploadOutlineIcon>save</CloudUploadOutlineIcon>
+                  }
+                  onClick={handleAudioUpload}
+                >
+                  Upload
+                </Button>
+              </div>
+            ) : null}
+            {unspecified ? (
+              <div>
+                <div>
+                  <h4>Upload New File</h4>
+                </div>
+                <div>
+                  <InputLabel id="spo2-label">Enter File Name</InputLabel>
+                  <TextInputField
+                    name="temperature"
+                    variant="outlined"
+                    margin="dense"
+                    type="text"
+                    InputLabelProps={{ shrink: !!uploadFileName }}
+                    value={uploadFileName}
+                    disabled={uploadStarted}
+                    onChange={(e) => {
+                      setUploadFileName(e.target.value);
+                    }}
+                    errors={`${[]}`}
+                  />
+                </div>
+                <div className="mt-4">
+                  {uploadStarted ? (
+                    <LinearProgressWithLabel value={uploadPercent} />
+                  ) : (
+                    <div>
+                      <input
+                        title="changeFile"
+                        onChange={onFileChange}
+                        type="file"
+                      />
+                      <Button
+                        color="primary"
+                        variant="contained"
+                        type="submit"
+                        style={{ marginLeft: "auto", float: "right" }}
+                        startIcon={
+                          <CloudUploadOutlineIcon>save</CloudUploadOutlineIcon>
+                        }
+                        onClick={handleUpload}
+                      >
+                        Upload
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : null}
           </div>
         </CardContent>
       </Card>
