@@ -140,8 +140,6 @@ export const PatientManager = (props: any) => {
     last_consultation_admitted_to_list:
       qParams.last_consultation_admitted_to_list || undefined,
     srf_id: qParams.srf_id || undefined,
-    // is_vaccinated: qParams.is_vaccinated || undefined,
-    // is_vaccinated: qParams.is_vaccinated || undefined,
     number_of_doses: qParams.number_of_doses || undefined,
     covin_id: qParams.covin_id || undefined,
     is_kasp: qParams.is_kasp || undefined,
@@ -173,7 +171,6 @@ export const PatientManager = (props: any) => {
 
   useEffect(() => {
     setIsLoading(true);
-
     dispatch(getAllPatient(params, "listPatients"))
       .then((res: any) => {
         if (res && res.data) {
@@ -210,7 +207,6 @@ export const PatientManager = (props: any) => {
     qParams.phone_number,
     qParams.srf_id,
     qParams.covin_id,
-    // qParams.is_vaccinated,
     qParams.number_of_doses,
     qParams.lsgBody,
     qParams.is_kasp,
@@ -531,14 +527,9 @@ export const PatientManager = (props: any) => {
             "Discharged After",
             qParams.last_consultation_discharge_date_after, "last_consultation_discharge_date_after"
           )}
-          {/* {qParams.is_vaccinated &&
-            badge(
-              "Vaccination Status",
-              qParams.is_vaccinated === "true" ? "Vaccinated" : "Unvaccinated", "is_vaccinated"
-            )} */}
-          {qParams.vaccination_dose && 
+          {qParams.number_of_doses && 
           badge(
-            "Number of Doses",
+            "Number of Vaccination Doses",
             qParams.number_of_doses, "number_of_doses"
           )}
           {qParams.is_kasp &&
