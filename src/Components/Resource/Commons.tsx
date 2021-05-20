@@ -34,7 +34,6 @@ export const formatFilter = (params: any) => {
     modified_date_before: filter.modified_date_before || undefined,
     modified_date_after: filter.modified_date_after || undefined,
     ordering: filter.ordering || undefined,
-    is_: (filter.is_kasp && filter.is_kasp) === '--' ? '' : (filter.is_kasp === 'yes' ? 'true' : 'false'),
   };
 }
 

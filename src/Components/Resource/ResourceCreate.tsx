@@ -220,17 +220,6 @@ export default function ResourceCreate(props: resourceProps) {
                                 />
                             </div>
                             <div>
-                                <InputLabel>What facility would you like to assign to</InputLabel>
-                                <FacilitySelect
-                                    multiple={false}
-                                    name="assigned_facility"
-                                    selected={state.form.assigned_facility}
-                                    setSelected={(value: any) => handleValueChange(value, 'assigned_facility')}
-                                    errors={state.errors.assigned_facility}
-                                />
-                            </div>
-
-                            <div>
                                 <InputLabel>Category</InputLabel>
                                 <SelectField
                                 name="status"
