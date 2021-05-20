@@ -115,21 +115,21 @@ export const FileUpload = (props: FileUploadProps) => {
 
 
 
-  // const loadAudioFile = (id: any) => {
-  //   const [audiodata, seturl] = useState(undefined);
-  //   var data = { file_type: type, associating_id: getAssociatedId() };
+  const loadAudioFile = (id: any) => {
+    const [url, seturl] = useState(undefined);
+    var data = { file_type: type, associating_id: getAssociatedId() };
 
-  //   useEffect(() => {
-  //     const getData = async () => {
-  //       const responseData = await dispatch(retrieveUpload(data, id));
-  //       console.log(responseData);
-  //       seturl(responseData.data.read_signed_url);
-  //     }
-  //     getData();
-  //   }, [])
+    const getData = async () => {
+      const responseData = await dispatch(retrieveUpload(data, id));
+      console.log(responseData);
+      // seturl(responseData.data.read_signed_url);
+      return responseData.data.read_signed_url;
+    }
 
-  //   return url;
-  // };
+    getData().then((url) => seturl(url));
+
+    return url;
+  };
 
 
   // const getAudioURLs=()=>{
@@ -171,8 +171,8 @@ export const FileUpload = (props: FileUploadProps) => {
               {
                 audio ?
                   (
-                    null
-                    //<audio src={loadAudioFile(item.id)} controls preload="auto" />
+                    // null
+                    <audio src={loadAudioFile(item.id)} controls preload="auto" />
                   )
                   :
                   (

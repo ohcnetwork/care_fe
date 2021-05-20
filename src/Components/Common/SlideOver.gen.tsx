@@ -4,9 +4,8 @@
 
 import * as React from 'react';
 
-// @ts-ignore: Implicit any on import
-import * as SlideOverBS__Es6Import from './SlideOver.bs';
-const SlideOverBS: any = SlideOverBS__Es6Import;
+// tslint:disable-next-line:no-var-requires
+const SlideOverBS = require('./SlideOver.bs');
 
 // tslint:disable-next-line:interface-over-type-literal
 export type Props = {
