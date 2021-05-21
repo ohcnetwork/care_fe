@@ -1,5 +1,11 @@
 import axios from "axios";
-import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
+import {
+  Button,
+  Card,
+  CardContent,
+  CircularProgress,
+  InputLabel,
+} from "@material-ui/core";
 import moment from "moment";
 import CloudUploadOutlineIcon from "@material-ui/icons/CloudUpload";
 import loadable from "@loadable/component";
@@ -121,6 +127,7 @@ export const FileUpload = (props: FileUploadProps) => {
     [dispatch, id]
   );
 
+  // Store all audio urls for each audio file
   const audio_urls = (files: any) => {
     let audio_files = files;
     audio_files = audio_files.filter(
@@ -134,10 +141,7 @@ export const FileUpload = (props: FileUploadProps) => {
       for (const x of audio_files) {
         if (x.id) {
           var responseData = await dispatch(retrieveUpload(data, x.id));
-          console.log("Response URL is ", responseData);
-          // window.open(responseData.data.read_signed_url, "_blank");
           all_urls[`${x.id}`] = responseData.data.read_signed_url;
-          console.log("All URLS are ", all_urls);
         }
       }
       seturl(all_urls);
@@ -155,29 +159,11 @@ export const FileUpload = (props: FileUploadProps) => {
   const loadFile = async (id: any) => {
     var data = { file_type: type, associating_id: getAssociatedId() };
     var responseData = await dispatch(retrieveUpload(data, id));
-    // window.open(responseData.data.read_signed_url, "_blank");
+    window.open(responseData.data.read_signed_url, "_blank");
     console.log(responseData);
   };
 
-  const loadAudioFile = (id: any) => {
-    var data = { file_type: type, associating_id: getAssociatedId() };
-
-    const getData = async () => {
-      console.log("Before Response data");
-      const responseData = await dispatch(retrieveUpload(data, id));
-      console.log("Response URL is ", responseData);
-      // seturl(responseData.data.read_signed_url);
-      seturl(responseData.data.read_signed_url);
-    };
-
-    getData().then(() => {
-      console.log("API called");
-      return url;
-    });
-  };
-
   const renderFileUpload = (item: FileUploadModel) => {
-    let audio_id: any = item.id;
     return (
       <Card className="mt-4" key={item.id}>
         <CardContent>
@@ -201,8 +187,14 @@ export const FileUpload = (props: FileUploadProps) => {
             <div>
               {item.file_category === "AUDIO" ? (
                 <div>
-                  {item.id && Object.keys(url).length > 0 && (
-                    <audio src={url[item.id]} controls preload="auto" />
+                  {item.id ? (
+                    Object.keys(url).length > 0 ? (
+                      <audio src={url[item.id]} controls preload="auto" />
+                    ) : (
+                      <CircularProgress />
+                    )
+                  ) : (
+                    <div>File Not found</div>
                   )}
                 </div>
               ) : (
