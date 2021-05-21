@@ -27,7 +27,6 @@ const useRecorder = () => {
     const handleData = e => {
       const url=URL.createObjectURL(e.data);
       setAudioURL(url);
-      console.log(audioURL);
       let blob = new Blob([e.data], {'type': 'audio/mpeg'});
       setNewBlob(blob);
     };
@@ -36,12 +35,10 @@ const useRecorder = () => {
   }, [recorder, isRecording]);
 
   const startRecording = () => {
-    console.log("Starting recording");
     setIsRecording(true);
   };
 
   const stopRecording = () => {
-     console.log("Stopping recording");
     setIsRecording(false);
   };
 

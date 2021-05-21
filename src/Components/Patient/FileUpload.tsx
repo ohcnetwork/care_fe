@@ -118,7 +118,6 @@ export const FileUpload = (props: FileUploadProps) => {
       if (!status.aborted) {
         if (res && res.data) {
           audio_urls(res.data.results);
-          console.log("Results is ", res.data.results);
           setuploadedFiles(res.data.results);
         }
         setIsLoading(false);
@@ -160,7 +159,6 @@ export const FileUpload = (props: FileUploadProps) => {
     var data = { file_type: type, associating_id: getAssociatedId() };
     var responseData = await dispatch(retrieveUpload(data, id));
     window.open(responseData.data.read_signed_url, "_blank");
-    console.log(responseData);
   };
 
   const renderFileUpload = (item: FileUploadModel) => {
@@ -239,8 +237,6 @@ export const FileUpload = (props: FileUploadProps) => {
     if (f === undefined) return;
     const newFile = new File([f], `${internal_name}`);
 
-    console.log(newFile);
-
     const config = {
       onUploadProgress: (progressEvent: any) => {
         var percentCompleted = Math.round(
@@ -290,8 +286,6 @@ export const FileUpload = (props: FileUploadProps) => {
 
   const createAudioBlob = (createdBlob: Blob) => {
     setAudioBlob(createdBlob);
-    console.log("from file upload");
-    console.log(audioBlob);
   };
 
   const uploadAudiofile = (response: any) => {
@@ -300,8 +294,6 @@ export const FileUpload = (props: FileUploadProps) => {
     const f = audioBlob;
     if (f === undefined) return;
     const newFile = new File([f], `${internal_name}`, { type: "audio/mpeg" });
-
-    console.log(newFile);
 
     const config = {
       onUploadProgress: (progressEvent: any) => {
