@@ -151,7 +151,7 @@ const initForm: any = {
   cluster_name: "",
   covin_id: "",
   is_vaccinated: "false",
-  number_of_doses: 0,
+  number_of_doses: "1",
   vaccine_name: null,
   ...medicalHistoryChoices,
 };
@@ -571,11 +571,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
         case "is_vaccinated":
           if (state.form.is_vaccinated === "true") {
-            if (Number(state.form.number_of_doses) == 0 || Number(state.form.number_of_doses) > 2) {
-              errors["number_of_doses"] = "Number of doses is invalid"
-              invalidForm = true;
-            }
-
             if (state.form.vaccine_name === null || state.form.vaccine_name === "Select") {
               errors["vaccine_name"] = "Please select vaccine name"
               invalidForm = true;
@@ -630,11 +625,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           ? state.form.date_declared_positive
           : undefined,
         srf_id: state.form.srf_id,
-        covin_id: state.form.covin_id,
+        covin_id: state.form.is_vaccinated === "true" ? state.form.covin_id : undefined,
         is_vaccinated: state.form.is_vaccinated,
-        number_of_doses: Number(state.form.number_of_doses),
+        number_of_doses: state.form.is_vaccinated === "true" ? Number(state.form.number_of_doses) : Number("0"),
         vaccine_name:
-          state.form.vaccine_name && state.form.vaccine_name !== "Select"
+          state.form.vaccine_name && state.form.vaccine_name !== "Select" && state.form.is_vaccinated === "true"
             ? state.form.vaccine_name
             : null,
         test_type: state.form.test_type,
@@ -1062,16 +1057,27 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       <InputLabel id="doses-label">
                         Number of doses *
                       </InputLabel>
-                      <TextInputField
-                        name="number_of_doses"
-                        type="number"
-                        variant="outlined"
-                        margin="dense"
+                        <RadioGroup
+                          aria-label="number_of_doses"
+                          name="number_of_doses"
                         value={state.form.number_of_doses}
                         onChange={handleChange}
-                        errors={state.errors.number_of_doses}
-                      />
-                    </div>
+                          style={{ padding: "0px 5px" }}
+                        >
+                          <Box display="flex" flexDirection="row">
+                            <FormControlLabel
+                              value="1"
+                              control={<Radio />}
+                              label="1"
+                            />
+                            <FormControlLabel
+                              value="2"
+                              control={<Radio />}
+                              label="2"
+                            />
+                          </Box>
+                        </RadioGroup>
+                      </div>
                   )}
 
                   {state.form.is_vaccinated === "true" && (
