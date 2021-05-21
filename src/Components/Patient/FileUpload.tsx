@@ -12,7 +12,12 @@ import React, {
 } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { viewUpload, retrieveUpload, createUpload } from "../../Redux/actions";
+import {
+  viewUpload,
+  retrieveUpload,
+  createUpload,
+  getUserList,
+} from "../../Redux/actions";
 import { FlowModel, FileUploadModel } from "./models";
 import { TextInputField } from "../Common/HelperInputFields";
 import LinearProgress from "@material-ui/core/LinearProgress";
@@ -50,6 +55,10 @@ interface FileUploadProps {
   unspecified: boolean;
 }
 
+interface AudioURLS {
+  [id: string]: string;
+}
+
 export const FileUpload = (props: FileUploadProps) => {
   const [audioBlob, setAudioBlob] = useState<Blob>();
   const [file, setfile] = useState<File>();
@@ -73,6 +82,7 @@ export const FileUpload = (props: FileUploadProps) => {
   const [reload, setReload] = useState<boolean>(false);
   const [uploadPercent, setUploadPercent] = useState(0);
   const [uploadFileName, setUploadFileName] = useState<string>("");
+  const [url, seturl] = useState<AudioURLS>({});
 
   const UPLOAD_HEADING: { [index: string]: string } = {
     PATIENT: "Upload Patient Files",
@@ -101,6 +111,8 @@ export const FileUpload = (props: FileUploadProps) => {
       const res = await dispatch(viewUpload(data));
       if (!status.aborted) {
         if (res && res.data) {
+          audio_urls(res.data.results);
+          console.log("Results is ", res.data.results);
           setuploadedFiles(res.data.results);
         }
         setIsLoading(false);
@@ -108,6 +120,30 @@ export const FileUpload = (props: FileUploadProps) => {
     },
     [dispatch, id]
   );
+
+  const audio_urls = (files: any) => {
+    let audio_files = files;
+    audio_files = audio_files.filter(
+      (x: FileUploadModel) => x.file_category === "AUDIO"
+    );
+
+    const getURL = async (audio_files: any) => {
+      var data = { file_type: type, associating_id: getAssociatedId() };
+      let all_urls: any = {};
+
+      for (const x of audio_files) {
+        if (x.id) {
+          var responseData = await dispatch(retrieveUpload(data, x.id));
+          console.log("Response URL is ", responseData);
+          // window.open(responseData.data.read_signed_url, "_blank");
+          all_urls[`${x.id}`] = responseData.data.read_signed_url;
+          console.log("All URLS are ", all_urls);
+        }
+      }
+      seturl(all_urls);
+    };
+    getURL(audio_files);
+  };
 
   useAbortableEffect(
     (status: statusType) => {
@@ -119,11 +155,29 @@ export const FileUpload = (props: FileUploadProps) => {
   const loadFile = async (id: any) => {
     var data = { file_type: type, associating_id: getAssociatedId() };
     var responseData = await dispatch(retrieveUpload(data, id));
-    window.open(responseData.data.read_signed_url, "_blank");
+    // window.open(responseData.data.read_signed_url, "_blank");
     console.log(responseData);
   };
 
+  const loadAudioFile = (id: any) => {
+    var data = { file_type: type, associating_id: getAssociatedId() };
+
+    const getData = async () => {
+      console.log("Before Response data");
+      const responseData = await dispatch(retrieveUpload(data, id));
+      console.log("Response URL is ", responseData);
+      // seturl(responseData.data.read_signed_url);
+      seturl(responseData.data.read_signed_url);
+    };
+
+    getData().then(() => {
+      console.log("API called");
+      return url;
+    });
+  };
+
   const renderFileUpload = (item: FileUploadModel) => {
+    let audio_id: any = item.id;
     return (
       <Card className="mt-4" key={item.id}>
         <CardContent>
@@ -145,7 +199,13 @@ export const FileUpload = (props: FileUploadProps) => {
                 : "-"}
             </div>
             <div>
-              {
+              {item.file_category === "AUDIO" ? (
+                <div>
+                  {item.id && Object.keys(url).length > 0 && (
+                    <audio src={url[item.id]} controls preload="auto" />
+                  )}
+                </div>
+              ) : (
                 <div>
                   <Button
                     color="primary"
@@ -160,7 +220,7 @@ export const FileUpload = (props: FileUploadProps) => {
                     Load File
                   </Button>
                 </div>
-              }
+              )}
             </div>
           </div>
         </CardContent>
@@ -318,7 +378,9 @@ export const FileUpload = (props: FileUploadProps) => {
                   startIcon={
                     <CloudUploadOutlineIcon>save</CloudUploadOutlineIcon>
                   }
-                  onClick={handleAudioUpload}
+                  onClick={(e) => {
+                    handleAudioUpload(e);
+                  }}
                 >
                   Upload
                 </Button>
@@ -363,7 +425,9 @@ export const FileUpload = (props: FileUploadProps) => {
                         startIcon={
                           <CloudUploadOutlineIcon>save</CloudUploadOutlineIcon>
                         }
-                        onClick={handleUpload}
+                        onClick={(e) => {
+                          handleUpload(e);
+                        }}
                       >
                         Upload
                       </Button>
@@ -377,7 +441,8 @@ export const FileUpload = (props: FileUploadProps) => {
       </Card>
 
       <PageTitle title={`${VIEW_HEADING[type]}`} hideBack={true} />
-      {uploadedFiles.map((item: FileUploadModel) => renderFileUpload(item))}
+      {uploadedFiles.length > 0 &&
+        uploadedFiles.map((item: FileUploadModel) => renderFileUpload(item))}
     </div>
   );
 };
