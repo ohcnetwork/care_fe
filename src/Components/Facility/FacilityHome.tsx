@@ -38,17 +38,13 @@ export const FacilityHome = (props: any) => {
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const [
-        facilityRes,
-        capacityRes,
-        doctorRes,
-        triageRes,
-      ] = await Promise.all([
-        dispatch(getFacility(facilityId)),
-        dispatch(listCapacity({}, { facilityId })),
-        dispatch(listDoctor({}, { facilityId })),
-        dispatch(getTriageInfo({ facilityId })),
-      ]);
+      const [facilityRes, capacityRes, doctorRes, triageRes] =
+        await Promise.all([
+          dispatch(getFacility(facilityId)),
+          dispatch(listCapacity({}, { facilityId })),
+          dispatch(listDoctor({}, { facilityId })),
+          dispatch(getTriageInfo({ facilityId })),
+        ]);
       if (!status.aborted) {
         setIsLoading(false);
         if (!facilityRes.data) {
@@ -92,10 +88,15 @@ export const FacilityHome = (props: any) => {
   if (!capacityData || !capacityData.length) {
     capacityList = <h5>No Bed Types Found</h5>;
   } else {
-    capacityList = capacityData.map((data: CapacityModal) => {
-      return (
-        <BedTypeCard facilityId={facilityId} key={`bed_${data.id}`} {...data} />
-      );
+    capacityList = BED_TYPES.map((x) => {
+      let res = capacityData.find((data) => {
+        return data.room_type === x.id;
+      });
+      if (res) {
+        return (
+          <BedTypeCard facilityId={facilityId} key={`bed_${res.id}`} {...res} />
+        );
+      }
     });
   }
 
