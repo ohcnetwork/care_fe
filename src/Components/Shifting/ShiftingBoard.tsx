@@ -8,7 +8,7 @@ import { Modal } from '@material-ui/core';
 import { CSVLink } from 'react-csv';
 import GetAppIcon from '@material-ui/icons/GetApp';
 
-const limit = 30;
+const limit = 15;
 
 interface boardProps {
   board: string,
@@ -62,7 +62,7 @@ export default function ListView({ board, filterProp, formatFilter }: boardProps
   useEffect(() => {
     fetchData();
   },
-    [board, dispatch, filterProp.facility, filterProp.orgin_facility, filterProp.shifting_approving_facility, filterProp.assigned_facility, filterProp.emergency, filterProp.is_up_shift, filterProp.patient_name, filterProp.created_date_before, filterProp.created_date_after, filterProp.modified_date_before, filterProp.modified_date_after, filterProp.patient_phone_number, filterProp.ordering, filterProp.is_kasp]
+    [board, dispatch, filterProp.facility, filterProp.orgin_facility, filterProp.shifting_approving_facility, filterProp.assigned_facility, filterProp.emergency, filterProp.is_up_shift, filterProp.patient_name, filterProp.created_date_before, filterProp.created_date_after, filterProp.modified_date_before, filterProp.modified_date_after, filterProp.patient_phone_number, filterProp.ordering, filterProp.is_kasp, filterProp.assigned_user_facility, filterProp.assigned_to]
   );
 
   const handlePagination = (page: number, limit: number) => {

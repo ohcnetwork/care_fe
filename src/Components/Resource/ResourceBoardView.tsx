@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { useQueryParams, navigate } from 'raviger';
 import ListFilter from "./ListFilter";
-import ShiftingBoard from "./ShiftingBoard";
-import { SHIFTING_CHOICES } from "../../Common/constants";
+import ResourceBoard from "./ResourceBoard";
+import { RESOURCE_CHOICES } from "../../Common/constants";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import { InputSearchBox } from "../Common/SearchBox";
-import { downloadShiftRequests } from "../../Redux/actions";
+import { downloadResourceRequests } from "../../Redux/actions";
 import loadable from '@loadable/component';
 import { CSVLink } from 'react-csv';
 import { useDispatch } from "react-redux";
@@ -17,10 +17,11 @@ import { formatFilter, badge } from './Commons';
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
-const shiftStatusOptions = SHIFTING_CHOICES.map(obj => obj.text);
+const resourceStatusOptions = RESOURCE_CHOICES.map(obj => obj.text);
 
-const COMPLETED = ["COMPLETED", "REJECTED", "DESTINATION REJECTED"];
-const ACTIVE = shiftStatusOptions.filter(option => !COMPLETED.includes(option))
+const COMPLETED = ["COMPLETED", "REJECTED"];
+const ACTIVE = resourceStatusOptions.filter(option => !COMPLETED.includes(option))
+console.log("ACTIVE",ACTIVE)
 
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
@@ -40,11 +41,6 @@ export default function BoardView() {
     setQueryParams(nParams, true);
   }
 
-  const searchByName = (patient_name: string) => {
-    const filter = { ...qParams, patient_name };
-    updateQuery(filter);
-  };
-
   const applyFilter = (data: any) => {
     const filter = { ...qParams, ...data };
     updateQuery(filter);
@@ -54,30 +50,22 @@ export default function BoardView() {
   const appliedFilters = formatFilter(qParams);
 
   const triggerDownload = async () => {
-    const res = await dispatch(downloadShiftRequests({ ...formatFilter(qParams), csv: 1 }));
+    const res = await dispatch(downloadResourceRequests({ ...formatFilter(qParams), csv: 1 }));
     setDownloadFile(res.data);
-    document.getElementById(`shiftRequests-ALL`)?.click();
+    document.getElementById(`resourceRequests-ALL`)?.click();
   }
 
   const onListViewBtnClick = () => {
-    navigate("/shifting/list-view", qParams);
-    localStorage.setItem("defaultShiftView", "list");
+    navigate("/resource/list-view", qParams);
+    localStorage.setItem("defaultResourceView", "list");
   }
 
   return (
     <div className="flex flex-col h-screen px-2 pb-2">
       <div className="flex items-end justify-between px-4">
         <div className="flex items-center">
-          <PageTitle title={"Shifting"} hideBack={true} />
+          <PageTitle title={"Resource"} hideBack={true} />
           <GetAppIcon className="cursor-pointer mt-4" onClick={triggerDownload} />
-        </div>
-        <div className="md:px-4">
-          <InputSearchBox
-            value={qParams.patient_name}
-            search={searchByName}
-            placeholder='Patient Name'
-            errors=''
-          />
         </div>
         <div className="bg-gray-200 text-sm text-gray-500 leading-none border-2 border-gray-200 rounded-full inline-flex w-32">
           <button
@@ -110,30 +98,25 @@ export default function BoardView() {
       </div>
       <div className="flex space-x-2 mt-2 ml-2">
         {badge("Emergency", appliedFilters.emergency === 'true' ? 'yes' : appliedFilters.emergency === 'false' ? 'no' : undefined)}
-        {badge("Is KASP", appliedFilters.is_kasp === 'true' ? 'yes' : appliedFilters.is_kasp === 'false' ? 'no' : undefined)}
-        {badge("Up Shift", appliedFilters.is_up_shift === 'true' ? 'yes' : appliedFilters.is_up_shift === 'false' ? 'no' : undefined)}
-        {badge("Phone Number", appliedFilters.patient_phone_number)}
-        {badge("Patient Name", appliedFilters.patient_name)}
         {badge("Modified After", appliedFilters.modified_date_after)}
         {badge("Modified Before", appliedFilters.modified_date_before)}
         {badge("Created Before", appliedFilters.created_date_before)}
         {badge("Created After", appliedFilters.created_date_after)}
-        {badge("Assigned To", appliedFilters.assigned_to)}
         {badge("Filtered By", appliedFilters.assigned_facility && "Assigned Facility")}
         {badge("Filtered By", appliedFilters.orgin_facility && "Origin Facility")}
-        {badge("Filtered By", appliedFilters.shifting_approving_facility && "Shifting Approving Facility")}
+        {badge("Filtered By", appliedFilters.approving_facility && "Resource Approving Facility")}
       </div>
       <div className="flex mt-4 pb-2 flex-1 items-start overflow-x-scroll">
         {isLoading ? <Loading /> : boardFilter.map(board =>
-          <ShiftingBoard filterProp={qParams} board={board} formatFilter={formatFilter} />
+          <ResourceBoard filterProp={qParams} board={board} formatFilter={formatFilter} />
         )}
       </div>
       <CSVLink
         data={downloadFile}
-        filename={`shift-requests--${now}.csv`}
+        filename={`resource-requests--${now}.csv`}
         target="_blank"
         className="hidden"
-        id={`shiftRequests-ALL`}
+        id={`resourceRequests-ALL`}
       />
       <SlideOver show={showFilters} setShow={setShowFilters}>
         <div className="bg-white min-h-screen p-4">

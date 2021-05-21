@@ -12,7 +12,7 @@ import {
 } from "@material-ui/core";
 import { createStyles, makeStyles, withStyles } from "@material-ui/styles";
 import React from "react";
-import { getColorIndex, rowColor, tranformData } from "./utils";
+import { getColorIndex, rowColor, transformData } from "./utils";
 import { InvestigationResponse } from "./types";
 import moment from "moment";
 
@@ -111,7 +111,7 @@ const ReportTable: React.FC<ReportTableProps> = ({
   investigationData,
 }) => {
   const className = useStyle();
-  const { data, sessions } = tranformData(investigationData);
+  const { data, sessions } = transformData(investigationData);
 
   return (
     <Box padding="1rem" margin="1rem 0">

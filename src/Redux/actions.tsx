@@ -385,3 +385,32 @@ export const getPatientInvestigation = (
     patient_external_id: patient_external_id,
   });
 };
+
+export const editInvestigation = (
+  params: object,
+  consultation_external_id: string
+) => {
+  return fireRequest("editInvestigation", [], params, {
+    consultation_external_id: consultation_external_id,
+  });
+};
+
+// Resource 
+export const createResource = (params: object) => {
+  return fireRequest("createResource", [], params);
+};
+export const updateResource = (id: string, params: object) => {
+  return fireRequest("updateResource", [id], params);
+};
+export const deleteResourceRecord = (id: string) => {
+  return fireRequest("deleteResourceRecord", [id], {});
+};
+export const listResourceRequests = (params: object, key: string) => {
+  return fireRequest(`listResourceRequests`, [], params, null, key);
+};
+export const getResourceDetails = (pathParam: object) => {
+  return fireRequest("getResourceDetails", [], {}, pathParam);
+};
+export const downloadResourceRequests = (params: object) => {
+  return fireRequest("downloadResourceRequests", [], params);
+};

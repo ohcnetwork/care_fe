@@ -10,11 +10,11 @@ import {
   RadioGroup,
 } from "@material-ui/core";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
-import { navigate } from "raviger";
+import { navigate, useQueryParams } from "raviger";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import moment from "moment";
 import loadable from "@loadable/component";
-import React, { useCallback, useReducer, useState } from "react";
+import React, { useCallback, useReducer, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import {
   BLOOD_GROUPS,
@@ -24,6 +24,7 @@ import {
   TEST_TYPE,
   FRONTLINE_WORKER,
   DESIGNATION_HEALTH_CARE_WORKER,
+  VACCINES,
 } from "../../Common/constants";
 import countryList from "../../Common/static/countries.json";
 import statesList from "../../Common/static/states.json";
@@ -54,6 +55,8 @@ import DuplicatePatientDialog from "../Facility/DuplicatePatientDialog";
 import { DupPatientModel } from "../Facility/models";
 import { PatientModel } from "./models";
 import TransferPatientDialog from "../Facility/TransferPatientDialog";
+import { validatePincode } from "../../Common/validation";
+
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const debounce = require("lodash.debounce");
@@ -97,6 +100,7 @@ const bloodGroups = [...BLOOD_GROUPS];
 const testType = [...TEST_TYPE];
 const designationOfHealthWorkers = [...DESIGNATION_HEALTH_CARE_WORKER];
 const frontlineWorkers = [...FRONTLINE_WORKER];
+const vaccines = ["Select", ...VACCINES];
 
 const initForm: any = {
   name: "",
@@ -147,6 +151,8 @@ const initForm: any = {
   cluster_name: "",
   covin_id: "",
   is_vaccinated: "false",
+  number_of_doses: 0,
+  vaccine_name: null,
   ...medicalHistoryChoices,
 };
 
@@ -215,6 +221,16 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     transfer?: boolean;
     patientList: Array<DupPatientModel>;
   }>({ patientList: [] });
+  const [{extId}, setQuery] = useQueryParams()
+  console.log(extId)
+
+  useEffect(() => {
+    if(extId)
+      {
+        setCareExtId(extId)
+        fetchExtResultData(null)
+      }
+  }, [careExtId])
 
   const headerText = !id
     ? "Add Details of Covid Suspect / Patient"
@@ -279,7 +295,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   };
 
   const fetchExtResultData = async (e: any) => {
-    e.preventDefault();
+    if(e) e.preventDefault();
     setIsLoading(true);
     const res = await dispatchAction(externalResult({ id: careExtId }));
 
@@ -484,6 +500,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             invalidForm = true;
           }
           return;
+        case "pincode":
+          if (!validatePincode(state.form[field])) {
+            errors[field] = "Please enter valid pincode";
+            invalidForm = true;
+          }
+          return;
         case "passport_no":
           if (state.form.nationality !== "India" && !state.form[field]) {
             errors[field] = "Please enter the passport number";
@@ -546,6 +568,21 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             invalidForm = true;
           }
           return;
+
+        case "is_vaccinated":
+          if (state.form.is_vaccinated === "true") {
+            if (Number(state.form.number_of_doses) == 0 || Number(state.form.number_of_doses) > 2) {
+              errors["number_of_doses"] = "Number of doses is invalid"
+              invalidForm = true;
+            }
+
+            if (state.form.vaccine_name === null || state.form.vaccine_name === "Select") {
+              errors["vaccine_name"] = "Please select vaccine name"
+              invalidForm = true;
+            }
+          }
+          return;
+
         default:
           return;
       }
@@ -595,6 +632,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         srf_id: state.form.srf_id,
         covin_id: state.form.covin_id,
         is_vaccinated: state.form.is_vaccinated,
+        number_of_doses: Number(state.form.number_of_doses),
+        vaccine_name:
+          state.form.vaccine_name && state.form.vaccine_name !== "Select"
+            ? state.form.vaccine_name
+            : null,
         test_type: state.form.test_type,
         name: state.form.name,
         pincode: state.form.pincode ? state.form.pincode : undefined,
@@ -863,7 +905,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
               <CardContent>
                 <form onSubmit={(e) => handleSubmit(e)}>
-                  <button className="btn btn-primary" onClick={_ => setShowImport(true)}> Import From External Results
+                  <button className="btn btn-primary" onClick={_ => {setShowImport(true); setQuery({extId: ""}, true)}}> Import From External Results
                   </button>
                   <div className="bg-red-100 text-red-800 p-2 rounded-lg shadow mb-4 mt-2 font-semibold text-xs">
                     <div className="text-xl font-bold">
@@ -977,7 +1019,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     <div>
                       <InputLabel id="is_vaccinated">
                         Is patient Vaccinated?
-                  </InputLabel>
+                      </InputLabel>
                       <RadioGroup
                         aria-label="is_vaccinated"
                         name="is_vaccinated"
@@ -1002,7 +1044,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
                     {state.form.is_vaccinated === "true" && (
                       <div>
-                        <InputLabel id="covin_id-label">COVIN Id (if the patient is vaccinated)</InputLabel>
+                        <InputLabel id="covin_id-label">COVIN Id</InputLabel>
                         <TextInputField
                           name="covin_id"
                           variant="outlined"
@@ -1010,10 +1052,46 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           type="text"
                           value={state.form.covin_id}
                           onChange={handleChange}
-                          errors={state.errors.name}
+                          errors={state.errors.covin_id}
                         />
                       </div>)
                     }
+
+                  {state.form.is_vaccinated === "true" && (
+                    <div>
+                      <InputLabel id="doses-label">
+                        Number of doses *
+                      </InputLabel>
+                      <TextInputField
+                        name="number_of_doses"
+                        type="number"
+                        variant="outlined"
+                        margin="dense"
+                        value={state.form.number_of_doses}
+                        onChange={handleChange}
+                        errors={state.errors.number_of_doses}
+                      />
+                    </div>
+                  )}
+
+                  {state.form.is_vaccinated === "true" && (
+                    <div>
+                      <InputLabel id="vaccine-name-label">
+                        Vaccine Name *
+                      </InputLabel>
+                      <SelectField
+                        name="vaccine_name"
+                        variant="outlined"
+                        margin="dense"
+                        optionArray={true}
+                        value={state.form.vaccine_name}
+                        options={vaccines}
+                        onChange={handleChange}
+                        errors={state.errors.vaccine_name}
+                      />
+                    </div>
+                  )}
+
                     <div>
                       <InputLabel id="test_type-label">Test Type</InputLabel>
                       <SelectField
@@ -1299,7 +1377,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       />
                     </div>
                     <div>
-                      <InputLabel id="name-label">Pincode</InputLabel>
+                      <InputLabel id="name-label">Pincode*</InputLabel>
                       <TextInputField
                         name="pincode"
                         variant="outlined"
