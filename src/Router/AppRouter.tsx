@@ -32,6 +32,11 @@ import ShiftBoardView from "../Components/Shifting/BoardView";
 import ShiftListView from "../Components/Shifting/ListView";
 import ShiftDetails from "../Components/Shifting/ShiftDetails";
 import { ShiftDetailsUpdate } from "../Components/Shifting/ShiftDetailsUpdate";
+import ResourceCreate from "../Components/Resource/ResourceCreate";
+import ResourceBoardView from "../Components/Resource/ResourceBoardView";
+import ResourceListView from "../Components/Resource/ListView";
+import ResourceDetails from "../Components/Resource/ResourceDetails";
+import { ResourceDetailsUpdate } from "../Components/Resource/ResourceDetailsUpdate";
 import ResultList from "../Components/ExternalResult/ResultList";
 import ResultItem from "../Components/ExternalResult/ResultItem";
 import ExternalResultUpload from "../Components/ExternalResult/ExternalResultUpload";
@@ -70,6 +75,7 @@ const routes = {
   "/facility/:facilityId": ({ facilityId }: any) => (
     <FacilityHome facilityId={facilityId} />
   ),
+  "/facility/:facilityId/resource/new": ({ facilityId } : any) => <ResourceCreate facilityId={facilityId} />,
   "/facility/:facilityId/triage": ({ facilityId }: any) => (
     <TriageForm facilityId={facilityId} />
   ),
@@ -265,10 +271,21 @@ const routes = {
     ) : (
       <ShiftBoardView />
     ),
-  "/shifting/board-view": () => <ShiftBoardView />,
-  "/shifting/list-view": () => <ShiftListView />,
-  "/shifting/:id": ({ id }: any) => <ShiftDetails id={id} />,
-  "/shifting/:id/update": ({ id }: any) => <ShiftDetailsUpdate id={id} />,
+    "/shifting/board-view": () => <ShiftBoardView />,
+    "/shifting/list-view": () => <ShiftListView />,
+    "/shifting/:id": ({ id }: any) => <ShiftDetails id={id} />,
+    "/shifting/:id/update": ({ id }: any) => <ShiftDetailsUpdate id={id} />,
+    "/resource": () =>
+      localStorage.getItem("defaultResourceView") === "list" ? (
+        <ResourceListView />
+      ) : (
+        <ResourceBoardView />
+      ),
+
+    "/resource/board-view": () => <ResourceBoardView />,
+    "/resource/list-view": () => <ResourceListView />,
+    "/resource/:id": ({ id }: any) => <ResourceDetails id={id} />,
+    "/resource/:id/update": ({ id }: any) => <ResourceDetailsUpdate id={id} />,
   "/external_results": () => <ResultList />,
   "/external_results/upload": () => <ExternalResultUpload />,
   "/external_results/:id": ({ id }: any) => <ResultItem id={id} />,
@@ -294,6 +311,11 @@ let menus = [
     title: "Shifting",
     link: "/shifting",
     icon: "fas fa-ambulance",
+  },
+  {
+    title: "Resource",
+    link: "/resource",
+    icon: "fas fa-heartbeat",
   },
   {
     title: "External Results",

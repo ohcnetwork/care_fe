@@ -247,14 +247,21 @@ export const PatientManager = (props: any) => {
     updateQuery(filter);
     setShowFilters(false);
   };
+  const removeFilter = (paramKey: any) => {
+    updateQuery({
+      ...qParams,
+      [paramKey]: ""
+    });
+  }
 
-  const badge = (key: string, value: any) => {
+  const badge = (key: string, value: any, paramKey: string) => {
     return (
       value && (
         <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
-          {key}
-          {": "}
-          {value}
+          {key}{": "}{value}
+          <i className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
+            onClick={(e) => removeFilter(paramKey)}>
+          </i>
         </span>
       )
     );
@@ -498,51 +505,51 @@ export const PatientManager = (props: any) => {
         </div>
         <div className="flex space-x-2 mt-2 flex-wrap w-full col-span-3 space-y-1">
           {qParams.phone_number?.trim().split(" ").length - 1
-            ? badge("Phone Number", qParams.phone_number)
+            ? badge("Phone Number", qParams.phone_number, "phone_number")
             : null}
-          {badge("Patient Name", qParams.name)}
-          {badge("Modified After", qParams.modified_date_after)}
-          {badge("Modified Before", qParams.modified_date_before)}
-          {badge("Created Before", qParams.created_date_before)}
-          {badge("Created After", qParams.created_date_after)}
+          {badge("Patient Name", qParams.name, "name")}
+          {badge("Modified After", qParams.modified_date_after, "modified_date_after")}
+          {badge("Modified Before", qParams.modified_date_before, "modified_date_before")}
+          {badge("Created Before", qParams.created_date_before, "created_date_before")}
+          {badge("Created After", qParams.created_date_after, "created_date_after")}
           {badge(
             "Admitted Before",
-            qParams.last_consultation_discharge_date_before
+            qParams.last_consultation_discharge_date_before, "last_consultation_discharge_date_before"
           )}
           {badge(
             "Admitted After",
-            qParams.last_consultation_admission_date_after
+            qParams.last_consultation_admission_date_after, "last_consultation_admission_date_after"
           )}
           {badge(
             "Discharged Before",
-            qParams.last_consultation_discharge_date_before
+            qParams.last_consultation_discharge_date_before, "last_consultation_discharge_date_before"
           )}
           {badge(
             "Discharged After",
-            qParams.last_consultation_discharge_date_after
+            qParams.last_consultation_discharge_date_after, "last_consultation_discharge_date_after"
           )}
           {qParams.is_vaccinated &&
             badge(
               "Vaccination Status",
-              qParams.is_vaccinated === "true" ? "Vaccinated" : "Unvaccinated"
+              qParams.is_vaccinated === "true" ? "Vaccinated" : "Unvaccinated", "is_vaccinated"
             )}
           {qParams.is_kasp &&
-            badge("KASP", qParams.is_kasp === "true" ? "KASP" : "Non KASP")}
-          {badge("COVIN ID", qParams.covin_id)}
+            badge("KASP", qParams.is_kasp === "true" ? "KASP" : "Non KASP", "is_kasp")}
+          {badge("COVIN ID", qParams.covin_id, "covin_id")}
 
-          {badge("Filtered By: Facility", qParams.facility)}
-          {badge("Ordering", qParams.ordering)}
-          {badge("Category", qParams.category)}
-          {badge("Disease Status", qParams.disease_status)}
-          {badge("Gender", parseOptionId(GENDER_TYPES, qParams.gender))}
+          {badge("Filtered By: Facility", qParams.facility, "facility")}
+          {badge("Ordering", qParams.ordering, "ordering")}
+          {badge("Category", qParams.category, "category")}
+          {badge("Disease Status", qParams.disease_status, "disease_status")}
+          {badge("Gender", parseOptionId(GENDER_TYPES, qParams.gender), "gender")}
           {badge(
             "Admitted to",
-            ADMITTED_TO[qParams.last_consultation_admitted_to]
+            ADMITTED_TO[qParams.last_consultation_admitted_to], "last_consultation_admitted_to"
           )}
-          {badge("Age min", qParams.age_min)}
-          {badge("Age max", qParams.age_max)}
-          {badge("SRF ID", qParams.srf_id)}
-          {badge("LSG Body ID", qParams.lsgBody)}
+          {badge("Age min", qParams.age_min, "age_min")}
+          {badge("Age max", qParams.age_max, "age_max")}
+          {badge("SRF ID", qParams.srf_id, "srf_id")}
+          {badge("LSG Body ID", qParams.lsgBody, "lsgBody")}
         </div>
       </div>
       <div className={classesTab.root}>

@@ -323,6 +323,8 @@ export const DISEASE_STATUS = [
 
 export const TEST_TYPE = ["UNK", "ANTIGEN", "RTPCR", "CBNAAT", "TRUENAT"];
 
+export const VACCINES = ["CoviShield", "Covaxin"];
+
 export const BLOOD_GROUPS = [
   "UNK",
   "A+",
@@ -411,4 +413,23 @@ export const BREATHLESSNESS_LEVEL = [
   "MILD",
   "MODERATE",
   "SEVERE",
+];
+
+export const RESOURCE_CATEGORY_CHOICES = [ "OXYGEN" ];
+
+export const RESOURCE_CHOICES: Array<OptionsType> = [
+  { id: 10, text: "PENDING" },
+  { id: 15, text: "ON HOLD" },
+  { id: 20, text: "APPROVED" },
+  { id: 30, text: "REJECTED" },
+  { id: 55, text: "TRANSPORTATION TO BE ARRANGED" },
+  { id: 70, text: "TRANSFER IN PROGRESS" },
+  { id: 80, text: "COMPLETED" },
+];
+
+export const RESOURCE_FILTER_ORDER: Array<OptionsType> = [
+  { id: 1, text: "created_date", desc: "ASC Created Date" },
+  { id: 2, text: "-created_date", desc: "DESC Created Date" },
+  { id: 3, text: "modified_date", desc: "ASC Modified Date" },
+  { id: 4, text: "-modified_date", desc: "DESC Modified Date" }
 ];
