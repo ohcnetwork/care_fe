@@ -14,6 +14,9 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import * as Notification from "../../Utils/Notifications.js";
+import ReactDOM from 'react-dom';
+import {CopyToClipboard} from 'react-copy-to-clipboard';
+
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -23,7 +26,7 @@ export default function ShiftDetails(props: { id: string }) {
   const [data, setData] = useState(initialData);
   const [isLoading, setIsLoading] = useState(true);
   const [isPrintMode, setIsPrintMode] = useState(false);
-
+  const [isCopied, setIsCopied] = useState(false);
   const [openDeleteShiftDialog, setOpenDeleteShiftDialog] = React.useState(
     false
   );
@@ -61,6 +64,37 @@ export default function ShiftDetails(props: { id: string }) {
 
     navigate(`/shifting`);
   };
+
+  const showCopyToclipBoard = (data: any) => {
+    return(
+      <a href='#'>
+        <CopyToClipboard text ={copyContent(data)}
+          onCopy = {() => setIsCopied(true)}>
+          {isCopied ? (
+            <span className="copied-to-cb">Copied to clipboard</span>
+            ) : (
+            <span className="copy-to-cb"><i className="fas fa-clipboard"></i></span>
+          )}
+        </CopyToClipboard>
+      </a>
+    );
+  };
+
+  const copyContent = (data: any) => {
+    const formattedText = "Disease Status: *" + data?.patient_object?.disease_status + "* \n" +
+                          "Name: "+ data?.patient_object?.name + "\n" +
+                          "Age: "+ data?.patient_object?.age + "\n" +
+                          "Origin facility: "+ data?.orgin_facility_object?.name + "\n" +
+                          "Contact Number: "+ data?.patient_object?.phone_number + "\n" +
+                          "Address: "+ data?.patient_object?.address + "\n" +
+                          "Facility preference: "+ data?.assigned_facility_type + "\n" +
+                          "Reason: "+ data?.reason;            
+    return (formattedText);
+  };
+
+  setTimeout(() => {
+    setIsCopied(false);
+  },5000);
 
   const showPatientCard = (patientData: any) => {
     const patientGender = GENDER_TYPES.find((i) => i.id === patientData.gender)
@@ -771,8 +805,8 @@ export default function ShiftDetails(props: { id: string }) {
             </div>
           </div>
 
-          <h4 className="mt-8">Details of patient</h4>
-
+          <h4 className="mt-8">Details of patient {showCopyToclipBoard(data)}</h4>
+          
           {showPatientCard(data.patient_object)}
 
           <h4 className="mt-8">Details of orgin facility</h4>
