@@ -571,11 +571,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
         case "is_vaccinated":
           if (state.form.is_vaccinated === "true") {
-            if(!state.form.covin_id) {
-              errors["covin_id"] = "This field is required!"
-              invalidForm = true;
-            }
-
             if (Number(state.form.number_of_doses) == 0 || Number(state.form.number_of_doses) > 2) {
               errors["number_of_doses"] = "Number of doses is invalid"
               invalidForm = true;
@@ -1049,7 +1044,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
                     {state.form.is_vaccinated === "true" && (
                       <div>
-                        <InputLabel id="covin_id-label">COVIN Id (if the patient is vaccinated)</InputLabel>
+                        <InputLabel id="covin_id-label">COVIN Id</InputLabel>
                         <TextInputField
                           name="covin_id"
                           variant="outlined"
