@@ -51,7 +51,7 @@ export interface PatientModel {
   district_object?: { id: number; name: string };
   state_object?: { id: number; name: string };
   tele_consultation_history?: Array<any>;
-  last_consultation?: { id: number; facility: string; assigned_to_object?: AssignedToObjectModel };
+  last_consultation?: { id: number; facility: string; assigned_to_object?: AssignedToObjectModel ; is_telemedicine?: boolean };
   address?: string;
   village?: string;
   pincode?: number;
@@ -254,4 +254,5 @@ export interface FileUploadModel {
   name?: string;
   created_date?: string;
   uploaded_by?: { username?: string; };
+  file_category?: string;
 }
