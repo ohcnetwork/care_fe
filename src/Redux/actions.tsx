@@ -1,4 +1,4 @@
-import { fireRequest } from "./fireRequest";
+import { fireRequest, fireRequestForFiles } from "./fireRequest";
 
 // User
 export const postLogin = (params: object) => {
@@ -337,6 +337,10 @@ export const retrieveUpload = (params: object, fileId: string) => {
   return fireRequest("retrieveUpload", [], params, { fileId: fileId });
 };
 
+export const retrieveUploadFilesURL = (params: object, fileId: string) => {
+  return fireRequestForFiles("retrieveUpload", [], params, { fileId: fileId });
+};
+
 // Investigation
 
 export const listInvestigations = (
@@ -395,7 +399,7 @@ export const editInvestigation = (
   });
 };
 
-// Resource 
+// Resource
 export const createResource = (params: object) => {
   return fireRequest("createResource", [], params);
 };

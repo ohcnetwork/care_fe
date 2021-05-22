@@ -21,6 +21,7 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   viewUpload,
   retrieveUpload,
+  retrieveUploadFilesURL,
   createUpload,
   getUserList,
 } from "../../Redux/actions";
@@ -61,7 +62,7 @@ interface FileUploadProps {
   unspecified: boolean;
 }
 
-interface AudioURLS {
+interface URLS {
   [id: string]: string;
 }
 
@@ -88,7 +89,8 @@ export const FileUpload = (props: FileUploadProps) => {
   const [reload, setReload] = useState<boolean>(false);
   const [uploadPercent, setUploadPercent] = useState(0);
   const [uploadFileName, setUploadFileName] = useState<string>("");
-  const [url, seturl] = useState<AudioURLS>({});
+  const [url, seturl] = useState<URLS>({});
+  const [fileUrl, setFileUrl] = useState<URLS>({});
 
   const UPLOAD_HEADING: { [index: string]: string } = {
     PATIENT: "Upload Patient Files",
@@ -159,7 +161,7 @@ export const FileUpload = (props: FileUploadProps) => {
   const loadFile = async (id: any) => {
     var data = { file_type: type, associating_id: getAssociatedId() };
     var responseData = await dispatch(retrieveUpload(data, id));
-    window.open(responseData.data.read_signed_url, "_blank");
+    // window.open(responseData.data.read_signed_url, "_blank");
     console.log(responseData);
   };
 
@@ -211,6 +213,21 @@ export const FileUpload = (props: FileUploadProps) => {
                   >
                     Load File
                   </Button>
+                  <img
+                    src="https://care-patient-staging.s3.amazonaws.com/CONSULTATION/dc7d7046-64c7-4473-afe0-109bd50c14591621660890.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA6Q7JNZ7TQKRIPBF3%2F20210522%2Fap-south-1%2Fs3%2Faws4_request&X-Amz-Date=20210522T065710Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=954bd758ab4706a1e1fd91ae67c98a12901ab0dc76ed132a0da1916c4f286d55"
+                    alt="Sample"
+                  />
+
+                  <div>IFrame tag</div>
+                  <iframe
+                    title="Source Files"
+                    src={
+                      "https://care-patient-staging.s3.amazonaws.com/CONSULTATION/19b79dea-4b58-4fb0-8d8f-3d9b3619823e1621669784.txt?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA6Q7JNZ7TQKRIPBF3%2F20210522%2Fap-south-1%2Fs3%2Faws4_request&X-Amz-Date=20210522T075001Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=6186501e24cbcad72048789ac5261520ee12479a94c03381449c4de8b7837796"
+                    }
+                    className="border-2 border-black"
+                    width="800px"
+                    height="400px"
+                  />
                 </div>
               )}
             </div>
@@ -290,7 +307,6 @@ export const FileUpload = (props: FileUploadProps) => {
 
   const createAudioBlob = (createdBlob: Blob) => {
     setAudioBlob(createdBlob);
-    console.log("from file upload");
     console.log(audioBlob);
   };
 
