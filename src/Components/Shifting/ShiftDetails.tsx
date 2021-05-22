@@ -358,7 +358,6 @@ export default function ShiftDetails(props: { id: string }) {
 
   const printData = (data: any) => {
     const patientData = data.patient_object;
-    console.log("Patient data is ", patientData);
     const consultation = data.patient.last_consultation;
     const patientGender = GENDER_TYPES.find(
       (i) => i.id === patientData.gender
@@ -371,7 +370,10 @@ export default function ShiftDetails(props: { id: string }) {
       <div id="section-to-print" className="print bg-white ">
         <div>
           {data.is_kasp && (
-            <img src="https://cdn.coronasafe.network/header_logo.png" />
+            <img
+              alt="logo"
+              src="https://cdn.coronasafe.network/header_logo.png"
+            />
           )}
         </div>
         <div className="mx-20 p-4">
@@ -440,7 +442,7 @@ export default function ShiftDetails(props: { id: string }) {
               <span className="font-semibold leading-relaxed">
                 Date of Admission:{" "}
               </span>
-              {moment(consultation.created_date).format("LL") || "-"}
+              {moment(consultation.admission_date).format("LL") || "-"}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">OP/IP No: </span>
