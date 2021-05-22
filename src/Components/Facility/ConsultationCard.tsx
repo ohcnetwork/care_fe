@@ -68,7 +68,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
               className="px-4 py-2 shadow border bg-white rounded-md border border-grey-500 whitespace-no-wrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300 text-center"
               onClick={() =>
                 navigate(
-                  `/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/`
+                  `/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/last_consultation/${isLastConsultation}`
                 )
               }
             >

@@ -18,7 +18,7 @@ const symptomChoices = [...SYMPTOM_CHOICES];
 const patientCategoryChoices = [...PATIENT_CATEGORY];
 
 export const ConsultationDetails = (props: any) => {
-  const { facilityId, patientId, consultationId } = props;
+  const { facilityId, patientId, consultationId, isLastConsultation } = props;
   const dispatch: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [isDailyRoundLoading, setIsDailyRoundLoading] = useState(false);
@@ -476,7 +476,20 @@ export const ConsultationDetails = (props: any) => {
         </div>
       )}
       <div>
+
         <PageTitle title="Consultation Update" hideBack={true} />
+        {isLastConsultation && (
+          <button
+            className="mr-4 px-4 py-2 shadow border bg-white rounded-md border border-grey-500 whitespace-no-wrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300 text-center"
+            onClick={() =>
+              navigate(
+                `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds`
+              )
+            }
+          >
+            Add Consultation Updates
+          </button>
+        )}
         <div className="flex flex-wrap mt-4">
           {roundsList}
           {!isDailyRoundLoading && totalCount > limit && (
