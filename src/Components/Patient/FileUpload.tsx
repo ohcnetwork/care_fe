@@ -213,21 +213,29 @@ export const FileUpload = (props: FileUploadProps) => {
                   >
                     Load File
                   </Button>
-                  <img
+                  {/* <img
                     src="https://care-patient-staging.s3.amazonaws.com/CONSULTATION/994419f8-7986-4464-b7d1-92e02163211e1621696030.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA6Q7JNZ7TQKRIPBF3%2F20210522%2Fap-south-1%2Fs3%2Faws4_request&X-Amz-Date=20210522T150921Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=377076f783625ee6f5666add4714f16b02656c7a78e9e0f46aea52ced9bfcdc4"
                     alt="Sample"
-                  />
+                  />*/}
 
-                  <div>IFrame tag</div>
+                  {/* <div>IFrame tag</div>
                   <iframe
                     title="Source Files"
                     src={
-                      "https://care-patient-staging.s3.amazonaws.com/CONSULTATION/df28080a-bd6f-4927-b1ee-c01d574a4dd01621696065.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA6Q7JNZ7TQKRIPBF3%2F20210522%2Fap-south-1%2Fs3%2Faws4_request&X-Amz-Date=20210522T151010Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=ca8f88cbd40697610b51d96188bf1cb3457ea4836747dc79ba7b3b561aa943b2"
+                      "https://care-patient-staging.s3.amazonaws.com/CONSULTATION/33f59954-0590-4407-8e83-07ef461571941621716795.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA6Q7JNZ7TQKRIPBF3%2F20210522%2Fap-south-1%2Fs3%2Faws4_request&X-Amz-Date=20210522T205405Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=6a9fb149e6b67bcd0e7224c3445b21a7d932ff642c76189c6ce96ecb8caa315a"
                     }
                     className="border-2 border-black"
                     width="800px"
                     height="400px"
-                  />
+                  /> */}
+                  {/* <object
+                    aria-label="files"
+                    data={
+                      "https://care-patient-staging.s3.amazonaws.com/CONSULTATION/37a0467f-9167-4999-ba7c-eb7db9dfbc901621715496.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA6Q7JNZ7TQKRIPBF3%2F20210522%2Fap-south-1%2Fs3%2Faws4_request&X-Amz-Date=20210522T203155Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=1e2a4434faf8026ca4b80d85dbb8d9dc3aa693b01307debe2dc95c20868fb432"
+                    }
+                    width="400"
+                    height="600"
+                  ></object> */}
                 </div>
               )}
             </div>
@@ -259,6 +267,10 @@ export const FileUpload = (props: FileUploadProps) => {
     console.log(newFile);
 
     const config = {
+      headers: {
+        "Content-type": "application/pdf",
+        "Content-disposition": "inline",
+      },
       onUploadProgress: (progressEvent: any) => {
         var percentCompleted = Math.round(
           (progressEvent.loaded * 100) / progressEvent.total
@@ -266,7 +278,7 @@ export const FileUpload = (props: FileUploadProps) => {
         setUploadPercent(percentCompleted);
       },
     };
-
+    console.log("Config is ", config);
     axios
       .put(url, newFile, config)
       .then((result) => {
@@ -368,6 +380,15 @@ export const FileUpload = (props: FileUploadProps) => {
 
   return (
     <div className={hideBack ? "py-2" : "p-4"}>
+      <iframe
+        title="Source Files"
+        src={
+          "https://care-patient-staging.s3.amazonaws.com/CONSULTATION/5c698c16-6393-49fb-b7fa-4c896f8e778b1621717076.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA6Q7JNZ7TQKRIPBF3%2F20210522%2Fap-south-1%2Fs3%2Faws4_request&X-Amz-Date=20210522T205819Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=d74915b72a192088f7928a354f452ff18401cd0c018052dd391d85f7cd99ef84"
+        }
+        className="border-2 border-black"
+        width="800px"
+        height="400px"
+      />
       <PageTitle title={`${UPLOAD_HEADING[type]}`} hideBack={hideBack} />
       <Card className="mt-4">
         <CardContent>
