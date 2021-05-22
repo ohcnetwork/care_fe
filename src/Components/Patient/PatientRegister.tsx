@@ -404,6 +404,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             )
               ? Number(res.data.number_of_chronic_diseased_dependents)
               : "",
+            is_vaccinated: String(res.data.is_vaccinated),
+            number_of_doses: res.data.number_of_doses ? String(res.data.number_of_doses) : "1",
+            vaccine_name: res.data.vaccine_name ? res.data.vaccine_name : null,
           };
           res.data.medical_history.forEach((i: any) => {
             const medicalHistory = medicalHistoryTypes.find(
