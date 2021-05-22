@@ -2,7 +2,7 @@ module.exports = {
   important: true,
   theme: {
     extend: {
-       colors: {
+      colors: {
         gray: {
           100: "#FBFAFC",
           200: "#F7F5FA",
@@ -13,9 +13,13 @@ module.exports = {
           700: "#7D728F",
           800: "#6A5F7A",
           900: "#453C52",
-        },
-       },
+        }
       },
+      fontFamily: {
+        'poppins': ['Poppins'],
+        'roboto': ['Roboto']
+      }
+    },
   },
   variants: {},
   plugins: [require("@tailwindcss/ui")],
