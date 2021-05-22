@@ -75,7 +75,9 @@ const routes = {
   "/facility/:facilityId": ({ facilityId }: any) => (
     <FacilityHome facilityId={facilityId} />
   ),
-  "/facility/:facilityId/resource/new": ({ facilityId } : any) => <ResourceCreate facilityId={facilityId} />,
+  "/facility/:facilityId/resource/new": ({ facilityId }: any) => (
+    <ResourceCreate facilityId={facilityId} />
+  ),
   "/facility/:facilityId/triage": ({ facilityId }: any) => (
     <TriageForm facilityId={facilityId} />
   ),
@@ -175,30 +177,23 @@ const routes = {
       patientId={patientId}
     />
   ),
-  "/facility/:facilityId/patient/:patientId/consultation/:id/investigationSessions": ({
-    facilityId,
-    patientId,
-    id,
-  }: any) => (
-    <ViewInvestigations
-      consultationId={id}
-      facilityId={facilityId}
-      patientId={patientId}
-    />
-  ),
-  "/facility/:facilityId/patient/:patientId/consultation/:id/investigation/:sessionId": ({
-    facilityId,
-    patientId,
-    id,
-    sessionId,
-  }: any) => (
-    <ShowInvestigation
-      consultationId={id}
-      facilityId={facilityId}
-      patientId={patientId}
-      sessionId={sessionId}
-    />
-  ),
+  "/facility/:facilityId/patient/:patientId/consultation/:id/investigationSessions":
+    ({ facilityId, patientId, id }: any) => (
+      <ViewInvestigations
+        consultationId={id}
+        facilityId={facilityId}
+        patientId={patientId}
+      />
+    ),
+  "/facility/:facilityId/patient/:patientId/consultation/:id/investigation/:sessionId":
+    ({ facilityId, patientId, id, sessionId }: any) => (
+      <ShowInvestigation
+        consultationId={id}
+        facilityId={facilityId}
+        patientId={patientId}
+        sessionId={sessionId}
+      />
+    ),
   "/facility/:facilityId/patient/:patientId/consultation/:id/daily-rounds": ({
     facilityId,
     patientId,
@@ -210,32 +205,24 @@ const routes = {
       consultationId={id}
     />
   ),
-  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily-rounds/:id/update": ({
-    facilityId,
-    patientId,
-    consultationId,
-    id,
-  }: any) => (
-    <DailyRounds
-      facilityId={facilityId}
-      patientId={patientId}
-      consultationId={consultationId}
-      id={id}
-    />
-  ),
-  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily-rounds/:id": ({
-    facilityId,
-    patientId,
-    consultationId,
-    id,
-  }: any) => (
-    <DailyRoundListDetails
-      facilityId={facilityId}
-      patientId={patientId}
-      consultationId={consultationId}
-      id={id}
-    />
-  ),
+  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily-rounds/:id/update":
+    ({ facilityId, patientId, consultationId, id }: any) => (
+      <DailyRounds
+        facilityId={facilityId}
+        patientId={patientId}
+        consultationId={consultationId}
+        id={id}
+      />
+    ),
+  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily-rounds/:id":
+    ({ facilityId, patientId, consultationId, id }: any) => (
+      <DailyRoundListDetails
+        facilityId={facilityId}
+        patientId={patientId}
+        consultationId={consultationId}
+        id={id}
+      />
+    ),
   "/facility/:facilityId/patient/:patientId/shift/new": ({
     facilityId,
     patientId,
@@ -275,21 +262,21 @@ const routes = {
     ) : (
       <ShiftBoardView />
     ),
-    "/shifting/board-view": () => <ShiftBoardView />,
-    "/shifting/list-view": () => <ShiftListView />,
-    "/shifting/:id": ({ id }: any) => <ShiftDetails id={id} />,
-    "/shifting/:id/update": ({ id }: any) => <ShiftDetailsUpdate id={id} />,
-    "/resource": () =>
-      localStorage.getItem("defaultResourceView") === "list" ? (
-        <ResourceListView />
-      ) : (
-        <ResourceBoardView />
-      ),
+  "/shifting/board-view": () => <ShiftBoardView />,
+  "/shifting/list-view": () => <ShiftListView />,
+  "/shifting/:id": ({ id }: any) => <ShiftDetails id={id} />,
+  "/shifting/:id/update": ({ id }: any) => <ShiftDetailsUpdate id={id} />,
+  "/resource": () =>
+    localStorage.getItem("defaultResourceView") === "list" ? (
+      <ResourceListView />
+    ) : (
+      <ResourceBoardView />
+    ),
 
-    "/resource/board-view": () => <ResourceBoardView />,
-    "/resource/list-view": () => <ResourceListView />,
-    "/resource/:id": ({ id }: any) => <ResourceDetails id={id} />,
-    "/resource/:id/update": ({ id }: any) => <ResourceDetailsUpdate id={id} />,
+  "/resource/board-view": () => <ResourceBoardView />,
+  "/resource/list-view": () => <ResourceListView />,
+  "/resource/:id": ({ id }: any) => <ResourceDetails id={id} />,
+  "/resource/:id/update": ({ id }: any) => <ResourceDetailsUpdate id={id} />,
   "/external_results": () => <ResultList />,
   "/external_results/upload": () => <ExternalResultUpload />,
   "/external_results/:id": ({ id }: any) => <ResultItem id={id} />,
@@ -396,7 +383,7 @@ const AppRouter = () => {
                   {menus.map((item) => {
                     const parts = item.link.split("/");
                     const selectedClasses = url.includes(parts && parts[1])
-                      ? "group flex w-full items-center py-3 text-base leading-5 pl-12 font-medium font-poppins text-green-500 bg-white focus:outline-none focus:bg-white transition ease-in-out duration-150"
+                      ? "group flex w-full items-center py-3 text-base leading-5 pl-12 font-medium  text-green-700 bg-white focus:outline-none focus:bg-white transition ease-in-out duration-150"
                       : "group flex w-full items-center pl-12 py-3 text-base leading-5 font-medium text-white hover:text-white hover:bg-green-700 focus:outline-none focus:bg-green-900 transition ease-in-out duration-150";
                     return (
                       <a
@@ -460,19 +447,19 @@ const AppRouter = () => {
         </div>
       )}
 
-      <div className="hidden md:flex md:flex-shrink-0">
-        <div className="flex flex-col w-64 bg-green-500 pt-5">
+      <div className="hidden md:flex md:flex-shrink-0 bg-gradient-to-r from-green-500 via-green-600 to-green-700">
+        <div className="flex flex-col w-64 pt-5">
           <div className="flex items-center flex-shrink-0 px-10 py-5 mt-3">
             <a href="/">
               <img className="h-8 w-auto" src={img} alt="care logo" />
             </a>
           </div>
           <div className="mt-5 h-0 flex-1 flex flex-col overflow-y-auto">
-            <nav className="flex-1 bg-green-500">
+            <nav className="flex-1  ">
               {menus.map((item) => {
                 const parts = item.link.split("/");
                 const selectedClasses = url.includes(parts && parts[1])
-                  ? "group flex w-full items-center py-3 text-base leading-5 pl-12 font-medium font-poppins text-green-500 bg-white focus:outline-none focus:bg-white transition ease-in-out duration-150"
+                  ? "group flex w-full items-center py-3 text-base leading-5 pl-12 font-medium text-green-700 bg-white focus:outline-none focus:bg-white transition ease-in-out duration-150"
                   : "group flex w-full items-center pl-12 py-3 text-base leading-5 font-medium text-white hover:text-white hover:bg-green-700 focus:outline-none focus:bg-green-900 transition ease-in-out duration-150";
                 return (
                   <button

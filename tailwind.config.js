@@ -13,20 +13,21 @@ module.exports = {
           700: "#7D728F",
           800: "#6A5F7A",
           900: "#453C52",
-        }
+        },
       },
-      fontFamily: {
-        'poppins': ['Poppins'],
-        'roboto': ['Roboto']
-      }
     },
   },
   variants: {},
   plugins: [require("@tailwindcss/ui")],
   purge: {
-    content: ["./src/**/*.html", "./src/**/*.tsx", "./src/**/*.ts", "./src/**/*.js"],
+    content: [
+      "./src/**/*.html",
+      "./src/**/*.tsx",
+      "./src/**/*.ts",
+      "./src/**/*.js",
+    ],
     options: {
       whitelistPatterns: [/^bg-/, /^text-/, /^border-/, /^hover:/],
     },
-  }
+  },
 };

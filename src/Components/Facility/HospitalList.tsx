@@ -25,7 +25,8 @@ import AccordionDetails from "@material-ui/core/AccordionDetails";
 import Typography from "@material-ui/core/Typography";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle")); import SwipeableViews from 'react-swipeable-views';
+const PageTitle = loadable(() => import("../Common/PageTitle"));
+import SwipeableViews from "react-swipeable-views";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import FacillityFilter from "./FacilityFilter";
 import { FacilitySelect } from "../Common/FacilitySelect";
@@ -60,7 +61,7 @@ export const HospitalList = () => {
   const [triageDownloadFile, setTriageDownloadFile] = useState("");
   const downloadTypes = [...DOWNLOAD_TYPES];
   const [downloadSelect, setdownloadSelect] = useState("Facility List");
-  const [showFilters, setShowFilters] = useState(false)
+  const [showFilters, setShowFilters] = useState(false);
   const limit = 15;
 
   const fetchData = useCallback(
@@ -68,24 +69,24 @@ export const HospitalList = () => {
       setIsLoading(true);
       const params = qParams.search
         ? {
-          limit,
-          offset,
-          search_text: qParams.search,
-          state: qParams.state,
-          district: qParams.district,
-          local_body: qParams.local_body,
-          facility_type: qParams.facility_type,
-          kasp_empanelled: qParams.kasp_empanelled,
-        }
+            limit,
+            offset,
+            search_text: qParams.search,
+            state: qParams.state,
+            district: qParams.district,
+            local_body: qParams.local_body,
+            facility_type: qParams.facility_type,
+            kasp_empanelled: qParams.kasp_empanelled,
+          }
         : {
-          limit,
-          offset,
-          state: qParams.state,
-          district: qParams.district,
-          local_body: qParams.local_body,
-          facility_type: qParams.facility_type,
-          kasp_empanelled: qParams.kasp_empanelled,
-        };
+            limit,
+            offset,
+            state: qParams.state,
+            district: qParams.district,
+            local_body: qParams.local_body,
+            facility_type: qParams.facility_type,
+            kasp_empanelled: qParams.kasp_empanelled,
+          };
 
       const res = await dispatchAction(getFacilities(params));
       if (!status.aborted) {
@@ -104,7 +105,7 @@ export const HospitalList = () => {
       qParams.state,
       qParams.district,
       qParams.local_body,
-      qParams.facility_type
+      qParams.facility_type,
     ]
   );
 
@@ -147,7 +148,7 @@ export const HospitalList = () => {
   const updateQuery = (params: any) => {
     const nParams = Object.assign({}, qParams, params);
     setQueryParams(nParams, true);
-  }
+  };
 
   const applyFilter = (data: any) => {
     const filter = { ...qParams, ...data };
@@ -179,10 +180,10 @@ export const HospitalList = () => {
   };
 
   const kaspOptionValues = [
-    { "id": "", "text": "Not Selected" },
-    { "id": "true", "text": "Yes" },
-    { "id": "false", "text": "No" }
-  ]
+    { id: "", text: "Not Selected" },
+    { id: "true", text: "Yes" },
+    { id: "false", text: "No" },
+  ];
 
   let facilityList: any[] = [];
   if (data && data.length) {
@@ -190,54 +191,67 @@ export const HospitalList = () => {
       return (
         <div
           key={`usr_${facility.id}`}
-          className="w-full md:w-1/3 mt-6 md:px-4"
+          className="w-full md:w-1/2 mt-6 md:px-4"
         >
-          <div className="block rounded-lg bg-white h-full hover:border-primary-500 overflow-hidden relative">
-            <div className="h-full flex flex-col font-roboto justify-between">
-              <div className="px-6 py-3">
-                <div className="font-black text-2xl font-bold font-poppins capitalize mt-2">
-                  {facility.name}
-                </div>
-                <div className="inline-flex my-3 items-center px-2.5 py-0.5 mr-4 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800">
+          <div className="block rounded-lg bg-white shadow h-full hover:border-primary-500 overflow-hidden">
+            <div className="h-full flex flex-col justify-between">
+              <div className="px-6 py-4">
+                <div className="inline-flex items-center px-2.5 py-0.5 mr-4 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800">
                   {facility.facility_type}
                 </div>
                 {facility.kasp_empanelled && (
                   <div className="mt-2 inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-yellow-100 text-yellow-800">
                     KASP
                   </div>
-                )
-                }
-
-                <div className="mb-3">
-                  <i className="fa fa-phone w-5 transform rotate-90 text-green-500" aria-hidden="true"></i>
-                  <span className="font-bold text-black"> {facility.phone_number || "-"} </span>
+                )}
+                <div className="font-black text-2xl capitalize mt-2">
+                  {facility.name}
                 </div>
-
-                <div className="grid grid-cols-10 font-semibold">
-                  <div>
-                    <i className="fas fa-map-marker-alt w-5 text-green-500"></i>
-                  </div>
-                  <div className="col-span-9">
-                    {facility.local_body_object?.name}, {facility.district?.name}
-
-                    <div className="mt-2">
-                      Ward:
-                      {facility.ward_object?.number +
-                        ", " +
-                        facility.ward_object?.name || "-"}
+                <div className="mt-2 flex justify-between">
+                  <div className="flex flex-col">
+                    <div className="text-gray-500 leading-relaxed font-light">
+                      Location:
                     </div>
+                    <div className="font-semibold">
+                      {facility.local_body_object?.name}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col">
+                    <div className="text-gray-500 leading-relaxed font-light">
+                      Ward:
+                    </div>
+
+                    {facility.ward_object && (
+                      <div className="font-semibold">
+                        {facility.ward_object?.number +
+                          ", " +
+                          facility.ward_object?.name || "-"}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
-              <div className="mb-2 mx-3">
-                <div className="mt-2">
-                  <button
-                    type="button"
-                    className="w-full py-2 border-green-500 border-2 text-green-500 mt-2 font-bold"
-                    onClick={() => navigate(`/facility/${facility.id}`)}
-                  >
-                    View Details
+              <div className="mt-2 bg-gray-50 border-t px-6 py-2">
+                <div className="flex py-4 justify-between">
+                  <div>
+                    <div className="text-gray-500 leading-relaxed">Phone:</div>
+                    <a
+                      href={`tel:${facility.phone_number}`}
+                      className="font-semibold"
+                    >
+                      {facility.phone_number || "-"}
+                    </a>
+                  </div>
+                  <span className="inline-flex rounded-md shadow-sm">
+                    <button
+                      type="button"
+                      className="inline-flex items-center px-3 py-2 border border-green-500 text-sm leading-4 font-medium rounded-md text-green-700 bg-white hover:text-green-500 focus:outline-none focus:border-green-300 focus:shadow-outline-blue active:text-green-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                      onClick={() => navigate(`/facility/${facility.id}`)}
+                    >
+                      View Facility
                     </button>
+                  </span>
                 </div>
               </div>
             </div>
@@ -285,9 +299,9 @@ export const HospitalList = () => {
   }
 
   return (
-    <div className="bg-gray-200">
-      <div className="grid grid-cols-2 mt-10 pl-10 pr-20">
-        <PageTitle title="Facilities" hideBack={true} className="mx-3 font-poppins" />
+    <div className="px-6">
+      <div className="grid grid-cols-2 ">
+        <PageTitle title="Facilities" hideBack={true} className="mx-3 " />
 
         <div className="flex justify-end w-full mt-4">
           <div>
@@ -377,7 +391,7 @@ export const HospitalList = () => {
         </div>
       </div>
 
-      <div className="flex mt-5 pl-10 pr-20">
+      <div className="flex mt-5">
         <div className="flex-1">
           <InputSearchBox
             value={qParams.search}
@@ -392,14 +406,36 @@ export const HospitalList = () => {
             <div className="flex items-start mb-2">
               <button
                 className="btn btn-primary-ghost"
-                onClick={() => setShowFilters(true)}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="fill-current w-4 h-4 mr-2">
+                onClick={() => setShowFilters(true)}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="fill-current w-4 h-4 mr-2"
+                >
                   <line x1="8" y1="6" x2="21" y2="6"></line>
-                  <line x1="8" y1="12" x2="21" y2="12"> </line>
-                  <line x1="8" y1="18" x2="21" y2="18"> </line>
-                  <line x1="3" y1="6" x2="3.01" y2="6"> </line>
-                  <line x1="3" y1="12" x2="3.01" y2="12"> </line>
-                  <line x1="3" y1="18" x2="3.01" y2="18"> </line>
+                  <line x1="8" y1="12" x2="21" y2="12">
+                    {" "}
+                  </line>
+                  <line x1="8" y1="18" x2="21" y2="18">
+                    {" "}
+                  </line>
+                  <line x1="3" y1="6" x2="3.01" y2="6">
+                    {" "}
+                  </line>
+                  <line x1="3" y1="12" x2="3.01" y2="12">
+                    {" "}
+                  </line>
+                  <line x1="3" y1="18" x2="3.01" y2="18">
+                    {" "}
+                  </line>
                 </svg>
                 <span>Advanced Filters</span>
               </button>
@@ -414,12 +450,13 @@ export const HospitalList = () => {
             <FacillityFilter
               filter={qParams}
               onChange={applyFilter}
-              closeFilter={() => setShowFilters(false)} />
+              closeFilter={() => setShowFilters(false)}
+            />
           </div>
         </SlideOver>
       </div>
 
-      <div className="px-3 md:px-8">
+      <div>
         <div className="flex flex-wrap md:-mx-4">{manageFacilities}</div>
       </div>
     </div>
