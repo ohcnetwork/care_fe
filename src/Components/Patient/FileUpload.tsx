@@ -214,7 +214,7 @@ export const FileUpload = (props: FileUploadProps) => {
                     Load File
                   </Button>
                   <img
-                    src="https://care-patient-staging.s3.amazonaws.com/CONSULTATION/dc7d7046-64c7-4473-afe0-109bd50c14591621660890.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA6Q7JNZ7TQKRIPBF3%2F20210522%2Fap-south-1%2Fs3%2Faws4_request&X-Amz-Date=20210522T065710Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=954bd758ab4706a1e1fd91ae67c98a12901ab0dc76ed132a0da1916c4f286d55"
+                    src="https://care-patient-staging.s3.amazonaws.com/CONSULTATION/994419f8-7986-4464-b7d1-92e02163211e1621696030.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA6Q7JNZ7TQKRIPBF3%2F20210522%2Fap-south-1%2Fs3%2Faws4_request&X-Amz-Date=20210522T150921Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=377076f783625ee6f5666add4714f16b02656c7a78e9e0f46aea52ced9bfcdc4"
                     alt="Sample"
                   />
 
@@ -222,7 +222,7 @@ export const FileUpload = (props: FileUploadProps) => {
                   <iframe
                     title="Source Files"
                     src={
-                      "https://care-patient-staging.s3.amazonaws.com/CONSULTATION/19b79dea-4b58-4fb0-8d8f-3d9b3619823e1621669784.txt?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA6Q7JNZ7TQKRIPBF3%2F20210522%2Fap-south-1%2Fs3%2Faws4_request&X-Amz-Date=20210522T075001Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=6186501e24cbcad72048789ac5261520ee12479a94c03381449c4de8b7837796"
+                      "https://care-patient-staging.s3.amazonaws.com/CONSULTATION/df28080a-bd6f-4927-b1ee-c01d574a4dd01621696065.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA6Q7JNZ7TQKRIPBF3%2F20210522%2Fap-south-1%2Fs3%2Faws4_request&X-Amz-Date=20210522T151010Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=ca8f88cbd40697610b51d96188bf1cb3457ea4836747dc79ba7b3b561aa943b2"
                     }
                     className="border-2 border-black"
                     width="800px"
