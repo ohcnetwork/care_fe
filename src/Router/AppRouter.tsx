@@ -341,7 +341,6 @@ const AppRouter = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [path]);
-  // document.getElementById("pages")?.scrollTo(0,0);
 
   return (
     <div className="h-screen flex overflow-hidden bg-gray-100">
@@ -351,7 +350,7 @@ const AppRouter = () => {
             <div className="fixed inset-0">
               <div className="absolute inset-0 bg-gray-600 opacity-75"></div>
             </div>
-            <div className="relative flex-1 flex flex-col max-w-xs w-full pt-5 pb-4 bg-green-500">
+            <div className="relative flex-1 flex flex-col max-w-xs w-full pt-5 pb-4 bg-green-800">
               <div className="absolute top-0 right-0 -mr-14 p-1">
                 <button
                   onClick={(_) => setDrawer(false)}
@@ -373,7 +372,7 @@ const AppRouter = () => {
                   </svg>
                 </button>
               </div>
-              <div className="flex items-center flex-shrink-0 px-10 py-5 mt-3">
+              <div className="flex-shrink-0 flex items-center px-4">
                 <a href="/">
                   <img className="h-8 w-auto" src={img} alt="care logo" />
                 </a>
@@ -383,8 +382,8 @@ const AppRouter = () => {
                   {menus.map((item) => {
                     const parts = item.link.split("/");
                     const selectedClasses = url.includes(parts && parts[1])
-                      ? "group flex w-full items-center py-3 text-base leading-5 pl-12 font-medium  text-green-700 bg-white focus:outline-none focus:bg-white transition ease-in-out duration-150"
-                      : "group flex w-full items-center pl-12 py-3 text-base leading-5 font-medium text-white hover:text-white hover:bg-green-700 focus:outline-none focus:bg-green-900 transition ease-in-out duration-150";
+                      ? "mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-white rounded-md bg-green-900 focus:outline-none focus:bg-green-900 transition ease-in-out duration-150"
+                      : "mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-green-300 rounded-md hover:text-white hover:bg-green-700 focus:outline-none focus:bg-green-900 transition ease-in-out duration-150";
                     return (
                       <a
                         key={item.title}
@@ -407,9 +406,9 @@ const AppRouter = () => {
                   <a
                     key="dashboard"
                     href="http://dashboard.coronasafe.network/"
-                    className="group flex w-full items-center px-2 py-3 pl-12 text-base leading-5 font-medium text-green-200 hover:bg-green-700 focus:outline-none transition ease-in-out duration-150"
+                    className="mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-green-300 rounded-md hover:text-white hover:bg-green-700 focus:outline-none focus:bg-green-900 transition ease-in-out duration-150"
                   >
-                    <i className="fas fa-tachometer-alt text-green-200 mr-3 text-md group-focus:text-green-300 transition ease-in-out duration-150"></i>
+                    <i className="fas fa-tachometer-alt text-green-400 mr-3 text-md group-hover:text-green-300 group-focus:text-green-300 transition ease-in-out duration-150"></i>
                     Dashboard
                   </a>
                 </nav>
@@ -433,7 +432,7 @@ const AppRouter = () => {
                           navigate("/login");
                           window.location.reload();
                         }}
-                        className="text-md leading-4 font-medium text-green-200 transition ease-in-out duration-150"
+                        className="text-xs leading-4 font-medium text-green-300 group-hover:text-green-100 transition ease-in-out duration-150"
                       >
                         Sign Out
                       </p>
@@ -447,20 +446,20 @@ const AppRouter = () => {
         </div>
       )}
 
-      <div className="hidden md:flex md:flex-shrink-0 bg-gradient-to-r from-green-500 via-green-600 to-green-700">
-        <div className="flex flex-col w-64 pt-5">
-          <div className="flex items-center flex-shrink-0 px-10 py-5 mt-3">
+      <div className="hidden md:flex md:flex-shrink-0">
+        <div className="flex flex-col w-64 bg-green-800 pt-5">
+          <div className="flex items-center flex-shrink-0 px-4">
             <a href="/">
               <img className="h-8 w-auto" src={img} alt="care logo" />
             </a>
           </div>
           <div className="mt-5 h-0 flex-1 flex flex-col overflow-y-auto">
-            <nav className="flex-1  ">
+            <nav className="flex-1 px-2 bg-green-800">
               {menus.map((item) => {
                 const parts = item.link.split("/");
                 const selectedClasses = url.includes(parts && parts[1])
-                  ? "group flex w-full items-center py-3 text-base leading-5 pl-12 font-medium text-green-700 bg-white focus:outline-none focus:bg-white transition ease-in-out duration-150"
-                  : "group flex w-full items-center pl-12 py-3 text-base leading-5 font-medium text-white hover:text-white hover:bg-green-700 focus:outline-none focus:bg-green-900 transition ease-in-out duration-150";
+                  ? "mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-white rounded-md bg-green-900 focus:outline-none focus:bg-green-900 transition ease-in-out duration-150"
+                  : "mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-green-300 rounded-md hover:text-white hover:bg-green-700 focus:outline-none focus:bg-green-900 transition ease-in-out duration-150";
                 return (
                   <button
                     key={item.title}
@@ -471,8 +470,8 @@ const AppRouter = () => {
                       className={
                         item.icon +
                         (url.includes(parts && parts[1])
-                          ? " text-green-500"
-                          : " text-white") +
+                          ? " text-white"
+                          : " text-green-400") +
                         " mr-3 text-lg group-hover:text-green-300 group-focus:text-green-300 transition ease-in-out duration-150"
                       }
                     ></i>
@@ -485,16 +484,16 @@ const AppRouter = () => {
                 key="dashboard"
                 href="http://dashboard.coronasafe.network/"
                 target="_blank"
-                className="group flex w-full items-center px-2 py-3 pl-12 text-base leading-5 font-medium text-white hover:bg-green-700 focus:outline-none focus:bg-green-900 transition ease-in-out duration-150"
+                className="mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-green-300 rounded-md hover:text-white hover:bg-green-700 focus:outline-none focus:bg-green-900 transition ease-in-out duration-150"
               >
-                <i className="fas fa-tachometer-alt text-white mr-3 text-md group-focus:text-green-300 transition ease-in-out duration-150"></i>
+                <i className="fas fa-tachometer-alt text-green-400 mr-3 text-md group-hover:text-green-300 group-focus:text-green-300 transition ease-in-out duration-150"></i>
                 Dashboard
               </a>
             </nav>
           </div>
           <div className="flex-shrink-0 flex border-t border-green-700 p-4">
             <a href="#" className="flex-shrink-0 w-full group block">
-              <div className="flex items-center ml-10">
+              <div className="flex items-center">
                 <div>
                   <div className="rounded-full h-8 w-8 flex items-center bg-white justify-center">
                     <i className="inline-block fas fa-user text-xl text-green-700"></i>
@@ -511,7 +510,7 @@ const AppRouter = () => {
                       navigate("/login");
                       window.location.reload();
                     }}
-                    className="text-md leading-4 font-medium text-white transition ease-in-out duration-150"
+                    className="text-xs leading-4 font-medium text-green-300 group-hover:text-green-100 transition ease-in-out duration-150"
                   >
                     Sign Out
                   </p>
@@ -560,5 +559,4 @@ const AppRouter = () => {
     </div>
   );
 };
-
 export default AppRouter;
