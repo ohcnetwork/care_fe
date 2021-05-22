@@ -365,8 +365,26 @@ export const ConsultationDetails = (props: any) => {
         </div>
 
         <div className="flex flex-col mt-6">
-          <div className="text-sm text-gray-700">Created on {moment(consultationData.created_date).format("lll")} by {`${consultationData.created_by?.first_name} ${consultationData.created_by?.last_name} @${consultationData.created_by?.username} (${consultationData.created_by?.user_type})`}</div>
-          <div className="text-sm text-gray-700">Last Modified on {moment(consultationData.modified_date).format("lll")} by {`${consultationData.last_edited_by?.first_name} ${consultationData.last_edited_by?.last_name} @${consultationData.last_edited_by?.username} (${consultationData.last_edited_by?.user_type})`}</div>
+          <div className="text-sm text-gray-700">
+            Created on {moment(consultationData.created_date).format("lll")}
+            {consultationData.created_by && (
+              <span>
+                by{" "}
+                {`${consultationData.created_by?.first_name} ${consultationData.created_by?.last_name} @${consultationData.created_by?.username} (${consultationData.created_by?.user_type})`}
+              </span>
+            )}
+          </div>
+
+          <div className="text-sm text-gray-700">
+            Last Modified on{" "}
+            {moment(consultationData.modified_date).format("lll")}{" "}
+            {consultationData.last_edited_by && (
+              <span>
+                by{" "}
+                {`${consultationData.last_edited_by?.first_name} ${consultationData.last_edited_by?.last_name} @${consultationData.last_edited_by?.username} (${consultationData.last_edited_by?.user_type})`}
+              </span>
+            )}
+          </div>
         </div>
       </div>
       {consultationData.existing_medication && (
