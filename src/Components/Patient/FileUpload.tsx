@@ -179,7 +179,6 @@ export const FileUpload = (props: FileUploadProps) => {
       if (!status.aborted) {
         if (res && res.data) {
           audio_urls(res.data.results);
-          console.log("Results is ", res.data.results);
           setuploadedFiles(res.data.results);
         }
         setIsLoading(false);
@@ -224,7 +223,6 @@ export const FileUpload = (props: FileUploadProps) => {
     var responseData = await dispatch(retrieveUpload(data, id));
     // window.open(responseData.data.read_signed_url, "_blank");
     setFileUrl(responseData.data.read_signed_url);
-    console.log(responseData);
   };
 
   const renderFileUpload = (item: FileUploadModel) => {
@@ -296,7 +294,6 @@ export const FileUpload = (props: FileUploadProps) => {
     const fileName = e.target.files[0].name;
     const ext: string = fileName.split(".")[1];
     setcontentType(header_content_type[ext]);
-    console.log("File is ", e.target.files[0].name.split(".")[1]);
     return e.target.files[0];
   };
 
@@ -306,8 +303,6 @@ export const FileUpload = (props: FileUploadProps) => {
     const f = file;
     if (f === undefined) return;
     const newFile = new File([f], `${internal_name}`);
-
-    console.log(newFile);
 
     const config = {
       headers: {
@@ -321,7 +316,6 @@ export const FileUpload = (props: FileUploadProps) => {
         setUploadPercent(percentCompleted);
       },
     };
-    console.log("Config is ", config);
     axios
       .put(url, newFile, config)
       .then((result) => {
@@ -343,7 +337,6 @@ export const FileUpload = (props: FileUploadProps) => {
     if (f === undefined) return;
     const category = "UNSPECIFIED";
     const filename = uploadFileName;
-    console.log("Filename is ", filename);
     let name = f.name;
     setUploadStarted(true);
     setUploadSuccess(false);
@@ -363,7 +356,6 @@ export const FileUpload = (props: FileUploadProps) => {
 
   const createAudioBlob = (createdBlob: Blob) => {
     setAudioBlob(createdBlob);
-    console.log(audioBlob);
   };
 
   const uploadAudiofile = (response: any) => {
@@ -372,8 +364,6 @@ export const FileUpload = (props: FileUploadProps) => {
     const f = audioBlob;
     if (f === undefined) return;
     const newFile = new File([f], `${internal_name}`, { type: "audio/mpeg" });
-
-    console.log(newFile);
 
     const config = {
       onUploadProgress: (progressEvent: any) => {
