@@ -33,9 +33,56 @@ import Box from "@material-ui/core/Box";
 import GetAppIcon from "@material-ui/icons/GetApp";
 import * as Notification from "../../Utils/Notifications.js";
 import { VoiceRecorder } from "../../Utils/VoiceRecorder";
+import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
+import Modal from "@material-ui/core/Modal";
+import { Close } from "@material-ui/icons";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
+
+const header_content_type: URLS = {
+  pdf: "application/pdf",
+  txt: "text/plain",
+  jpeg: "image/jpeg",
+  jpg: "image/jpeg",
+  doc: "application/msword",
+  xls: "application/vnd.ms-excel",
+  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  epub: "application/epub+zip",
+  gif: "image/gif",
+  html: "text/html",
+  htm: "text/html",
+  mp4: "video/mp4",
+  png: "image/png",
+  ppt: "application/vnd.ms-powerpoint",
+  pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  svg: "image/svg+xml",
+  xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+};
+
+function getModalStyle() {
+  const top = 100;
+  const left = 100;
+
+  return {
+    top: `${top}%`,
+    left: `${left}%`,
+    transform: `translate(-${top}%, -${left}%)`,
+  };
+}
+
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    paper: {
+      position: "absolute",
+      width: "60%",
+      backgroundColor: theme.palette.background.paper,
+      border: "2px solid #000",
+      boxShadow: theme.shadows[5],
+      padding: theme.spacing(2, 4, 3),
+    },
+  })
+);
 
 const LinearProgressWithLabel = (props: any) => {
   return (
@@ -90,7 +137,11 @@ export const FileUpload = (props: FileUploadProps) => {
   const [uploadPercent, setUploadPercent] = useState(0);
   const [uploadFileName, setUploadFileName] = useState<string>("");
   const [url, seturl] = useState<URLS>({});
-  const [fileUrl, setFileUrl] = useState<URLS>({});
+  const [fileUrl, setFileUrl] = useState("");
+  const [contentType, setcontentType] = useState<string>("");
+  const classes = useStyles();
+  const [modalStyle] = React.useState(getModalStyle);
+  const [open, setOpen] = React.useState(false);
 
   const UPLOAD_HEADING: { [index: string]: string } = {
     PATIENT: "Upload Patient Files",
@@ -99,6 +150,14 @@ export const FileUpload = (props: FileUploadProps) => {
   const VIEW_HEADING: { [index: string]: string } = {
     PATIENT: "View Patient Files",
     CONSULTATION: "View Consultation Files",
+  };
+
+  const handleOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
   };
 
   const getAssociatedId = () => {
@@ -159,9 +218,12 @@ export const FileUpload = (props: FileUploadProps) => {
   );
 
   const loadFile = async (id: any) => {
+    setFileUrl("");
+    handleOpen();
     var data = { file_type: type, associating_id: getAssociatedId() };
     var responseData = await dispatch(retrieveUpload(data, id));
     // window.open(responseData.data.read_signed_url, "_blank");
+    setFileUrl(responseData.data.read_signed_url);
     console.log(responseData);
   };
 
@@ -213,29 +275,6 @@ export const FileUpload = (props: FileUploadProps) => {
                   >
                     Load File
                   </Button>
-                  {/* <img
-                    src="https://care-patient-staging.s3.amazonaws.com/CONSULTATION/994419f8-7986-4464-b7d1-92e02163211e1621696030.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA6Q7JNZ7TQKRIPBF3%2F20210522%2Fap-south-1%2Fs3%2Faws4_request&X-Amz-Date=20210522T150921Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=377076f783625ee6f5666add4714f16b02656c7a78e9e0f46aea52ced9bfcdc4"
-                    alt="Sample"
-                  />*/}
-
-                  {/* <div>IFrame tag</div>
-                  <iframe
-                    title="Source Files"
-                    src={
-                      "https://care-patient-staging.s3.amazonaws.com/CONSULTATION/33f59954-0590-4407-8e83-07ef461571941621716795.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA6Q7JNZ7TQKRIPBF3%2F20210522%2Fap-south-1%2Fs3%2Faws4_request&X-Amz-Date=20210522T205405Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=6a9fb149e6b67bcd0e7224c3445b21a7d932ff642c76189c6ce96ecb8caa315a"
-                    }
-                    className="border-2 border-black"
-                    width="800px"
-                    height="400px"
-                  /> */}
-                  {/* <object
-                    aria-label="files"
-                    data={
-                      "https://care-patient-staging.s3.amazonaws.com/CONSULTATION/37a0467f-9167-4999-ba7c-eb7db9dfbc901621715496.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA6Q7JNZ7TQKRIPBF3%2F20210522%2Fap-south-1%2Fs3%2Faws4_request&X-Amz-Date=20210522T203155Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=1e2a4434faf8026ca4b80d85dbb8d9dc3aa693b01307debe2dc95c20868fb432"
-                    }
-                    width="400"
-                    height="600"
-                  ></object> */}
                 </div>
               )}
             </div>
@@ -254,6 +293,10 @@ export const FileUpload = (props: FileUploadProps) => {
       throw new Error("Error finding e.target.files");
     }
     setfile(e.target.files[0]);
+    const fileName = e.target.files[0].name;
+    const ext: string = fileName.split(".")[1];
+    setcontentType(header_content_type[ext]);
+    console.log("File is ", e.target.files[0].name.split(".")[1]);
     return e.target.files[0];
   };
 
@@ -268,7 +311,7 @@ export const FileUpload = (props: FileUploadProps) => {
 
     const config = {
       headers: {
-        "Content-type": "application/pdf",
+        "Content-type": contentType,
         "Content-disposition": "inline",
       },
       onUploadProgress: (progressEvent: any) => {
@@ -300,6 +343,7 @@ export const FileUpload = (props: FileUploadProps) => {
     if (f === undefined) return;
     const category = "UNSPECIFIED";
     const filename = uploadFileName;
+    console.log("Filename is ", filename);
     let name = f.name;
     setUploadStarted(true);
     setUploadSuccess(false);
@@ -380,15 +424,38 @@ export const FileUpload = (props: FileUploadProps) => {
 
   return (
     <div className={hideBack ? "py-2" : "p-4"}>
-      <iframe
-        title="Source Files"
-        src={
-          "https://care-patient-staging.s3.amazonaws.com/CONSULTATION/e3b87d54-05d3-4597-bd53-d54eeae5b01c1621717977.txt?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA6Q7JNZ7TQKRIPBF3%2F20210522%2Fap-south-1%2Fs3%2Faws4_request&X-Amz-Date=20210522T211304Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=9580c34ed3e07d3bdf99533fb002c23e95926e44dd73701705dc1b321b28b728"
-        }
-        className="border-2 border-black"
-        width="800px"
-        height="400px"
-      />
+      <Modal
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="simple-modal-title"
+        aria-describedby="simple-modal-description"
+      >
+        {fileUrl && fileUrl.length > 0 ? (
+          <>
+            <div className="absolute right-2">
+              <Button
+                color="primary"
+                variant="contained"
+                style={{ marginLeft: "auto" }}
+                startIcon={<Close />}
+                onClick={() => {
+                  handleClose();
+                }}
+              >
+                Close
+              </Button>
+            </div>
+            <iframe
+              title="Source Files"
+              src={fileUrl}
+              className="border-2 border-black bg-white w-4/6 h-5/6 mx-auto my-6"
+            />
+          </>
+        ) : (
+          <CircularProgress />
+        )}
+      </Modal>
+
       <PageTitle title={`${UPLOAD_HEADING[type]}`} hideBack={hideBack} />
       <Card className="mt-4">
         <CardContent>
