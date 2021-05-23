@@ -204,7 +204,6 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
 
   const vehicleOptions = SHIFTING_VEHICLE_CHOICES.map((obj) => obj.text);
   const facilityOptions = FACILITY_TYPES.map((obj) => obj.text);
-  const breathlessnessLevels = BREATHLESSNESS_LEVEL;
 
   if (isLoading) {
     return <Loading />;
@@ -383,14 +382,14 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                 />
               </div>
               <div className="md:col-span-1">
-                <InputLabel>Severity of Breathlessness</InputLabel>
+                <InputLabel>Severity of Breathlessness*</InputLabel>
                 <SelectField
                   name="breathlessness_level"
                   variant="outlined"
                   margin="dense"
                   optionArray={true}
                   value={state.form.breathlessness_level}
-                  options={breathlessnessLevels}
+                  options={BREATHLESSNESS_LEVEL}
                   onChange={handleChange}
                   className="bg-white h-14 w-1/3 mt-2 shadow-sm md:text-sm md:leading-5"
                 />

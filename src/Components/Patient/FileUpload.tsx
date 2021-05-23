@@ -227,11 +227,11 @@ export const FileUpload = (props: FileUploadProps) => {
 
   const renderFileUpload = (item: FileUploadModel) => {
     return (
-      <Card className="mt-4" key={item.id}>
-        <CardContent>
-          <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+      <div className="mt-4 border bg-white shadow rounded-lg p-4" key={item.id}>
+        <div className="grid gap-2 grid-cols-1 md:grid-cols-2">
+          <div>
             <div>
-              <span className="font-semibold leading-relaxed">Name: </span>{" "}
+              <span className="font-semibold leading-relaxed">File Name: </span>{" "}
               {item.name}
             </div>
             <div>
@@ -246,39 +246,39 @@ export const FileUpload = (props: FileUploadProps) => {
                 ? moment(item.created_date).format("lll")
                 : "-"}
             </div>
-            <div>
-              {item.file_category === "AUDIO" ? (
-                <div>
-                  {item.id ? (
-                    Object.keys(url).length > 0 ? (
-                      <audio src={url[item.id]} controls preload="auto" />
-                    ) : (
-                      <CircularProgress />
-                    )
-                  ) : (
-                    <div>File Not found</div>
-                  )}
-                </div>
-              ) : (
-                <div>
-                  <Button
-                    color="primary"
-                    variant="contained"
-                    type="submit"
-                    style={{ marginLeft: "auto" }}
-                    startIcon={<GetAppIcon>load</GetAppIcon>}
-                    onClick={() => {
-                      loadFile(item.id);
-                    }}
-                  >
-                    Load File
-                  </Button>
-                </div>
-              )}
-            </div>
           </div>
-        </CardContent>
-      </Card>
+          <div>
+            {item.file_category === "AUDIO" ? (
+              <div>
+                {item.id ? (
+                  Object.keys(url).length > 0 ? (
+                    <audio src={url[item.id]} controls preload="auto" />
+                  ) : (
+                    <CircularProgress />
+                  )
+                ) : (
+                  <div>File Not found</div>
+                )}
+              </div>
+            ) : (
+              <div>
+                <Button
+                  color="primary"
+                  variant="contained"
+                  type="submit"
+                  style={{ marginLeft: "auto" }}
+                  startIcon={<GetAppIcon>load</GetAppIcon>}
+                  onClick={() => {
+                    loadFile(item.id);
+                  }}
+                >
+                  Load File
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
     );
   };
 
@@ -447,84 +447,85 @@ export const FileUpload = (props: FileUploadProps) => {
       </Modal>
 
       <PageTitle title={`${UPLOAD_HEADING[type]}`} hideBack={hideBack} />
-      <Card className="mt-4">
-        <CardContent>
-          <div className="md:grid grid-cols-1 ">
-            {audio ? (
+      <div className="mt-4">
+        <div className="md:grid grid-cols-2 gap-4">
+          {audio ? (
+            <div className="bg-white border rounded-lg shadow p-4">
               <div>
-                <div>
-                  <h4>Record and Upload Audio File</h4>
-                </div>
-                <VoiceRecorder createAudioBlob={createAudioBlob} />
+                <h4>Record and Upload Audio File</h4>
+              </div>
+              <VoiceRecorder createAudioBlob={createAudioBlob} />
+              {audioBlob && (
                 <Button
                   color="primary"
                   variant="contained"
                   type="submit"
-                  style={{ marginLeft: "auto", float: "right" }}
+                  style={{ marginLeft: "auto", float: "left" }}
                   startIcon={
                     <CloudUploadOutlineIcon>save</CloudUploadOutlineIcon>
                   }
-                  onClick={(e) => {
+                  onClick={(e: any) => {
                     handleAudioUpload(e);
                   }}
                 >
-                  Upload
+                  Save Recording
                 </Button>
-              </div>
-            ) : null}
-            {unspecified ? (
+              )}
+            </div>
+          ) : null}
+          {unspecified ? (
+            <div className="mt-4 md:mt-0 bg-white border rounded-lg shadow p-4">
               <div>
-                <div>
-                  <h4>Upload New File</h4>
-                </div>
-                <div>
-                  <InputLabel id="spo2-label">Enter File Name</InputLabel>
-                  <TextInputField
-                    name="temperature"
-                    variant="outlined"
-                    margin="dense"
-                    type="text"
-                    InputLabelProps={{ shrink: !!uploadFileName }}
-                    value={uploadFileName}
-                    disabled={uploadStarted}
-                    onChange={(e) => {
-                      setUploadFileName(e.target.value);
-                    }}
-                    errors={`${[]}`}
-                  />
-                </div>
-                <div className="mt-4">
-                  {uploadStarted ? (
-                    <LinearProgressWithLabel value={uploadPercent} />
-                  ) : (
-                    <div>
-                      <input
-                        title="changeFile"
-                        onChange={onFileChange}
-                        type="file"
-                      />
+                <h4>Upload New File</h4>
+              </div>
+              <div>
+                <InputLabel id="spo2-label">Enter File Name</InputLabel>
+                <TextInputField
+                  name="temperature"
+                  variant="outlined"
+                  margin="dense"
+                  type="text"
+                  InputLabelProps={{ shrink: !!uploadFileName }}
+                  value={uploadFileName}
+                  disabled={uploadStarted}
+                  onChange={(e: any) => {
+                    setUploadFileName(e.target.value);
+                  }}
+                  errors={`${[]}`}
+                />
+              </div>
+              <div className="mt-4">
+                {uploadStarted ? (
+                  <LinearProgressWithLabel value={uploadPercent} />
+                ) : (
+                  <div className="md:flex justify-between">
+                    <input
+                      title="changeFile"
+                      onChange={onFileChange}
+                      type="file"
+                    />
+                    <div className="mt-2">
                       <Button
                         color="primary"
                         variant="contained"
                         type="submit"
-                        style={{ marginLeft: "auto", float: "right" }}
                         startIcon={
                           <CloudUploadOutlineIcon>save</CloudUploadOutlineIcon>
                         }
-                        onClick={(e) => {
+                        onClick={(e: any) => {
                           handleUpload(e);
                         }}
                       >
                         Upload
                       </Button>
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
-            ) : null}
-          </div>
-        </CardContent>
-      </Card>
+            </div>
+          ) : null}
+        </div>
+      </div>
 
       <PageTitle title={`${VIEW_HEADING[type]}`} hideBack={true} />
       {uploadedFiles.length > 0 &&

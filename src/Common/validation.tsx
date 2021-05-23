@@ -27,7 +27,7 @@ export const getRandomNumbers = (min: number, max: number) => {
 };
 
 export const validateUsername = (username: string) => {
-    const pattern = /^[\w.@+-]+[^.@+-_]$/;
+    const pattern = /^[\w.@+-]+[^.@+_-]$/;
     return pattern.test(username);
 };
 

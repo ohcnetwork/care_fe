@@ -15,10 +15,7 @@ import { navigate } from "raviger";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getResourceDetails, updateResource } from "../../Redux/actions";
 import { SelectField } from "../Common/HelperInputFields";
-import {
-  RESOURCE_CHOICES,
-  FACILITY_TYPES,
-} from "../../Common/constants";
+import { RESOURCE_CHOICES } from "../../Common/constants";
 import { UserSelect } from "../Common/UserSelect";
 
 import {
@@ -141,8 +138,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
         category: "OXYGEN",
         status: state.form.status,
         orgin_facility: state.form.orgin_facility_object?.id,
-        approving_facility:
-          state.form?.approving_facility_object?.id,
+        approving_facility: state.form?.approving_facility_object?.id,
         assigned_facility: state.form?.assigned_facility_object?.id,
         emergency: [true, "true"].includes(state.form.emergency),
         reason: state.form.reason,
@@ -187,8 +183,6 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
     [fetchData]
   );
 
-  const facilityOptions = FACILITY_TYPES.map((obj) => obj.text);
-
   if (isLoading) {
     return <Loading />;
   }
@@ -217,9 +211,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
                 <UserSelect
                   userId={state.form.assigned_to}
                   onSelect={handleOnSelect}
-                  facilityId={
-                    state.form?.approving_facility_object?.id
-                  }
+                  facilityId={state.form?.approving_facility_object?.id}
                 />
               </div>
               <div>
@@ -227,6 +219,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
                 <FacilitySelect
                   multiple={false}
                   name="approving_facility"
+                  facilityType={1500}
                   selected={state.form.approving_facility_object}
                   setSelected={(obj) =>
                     setFacility(obj, "approving_facility_object")
@@ -242,6 +235,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
                 <FacilitySelect
                   multiple={false}
                   name="assigned_facility"
+                  facilityType={1510}
                   selected={state.form.assigned_facility_object}
                   setSelected={(obj) =>
                     setFacility(obj, "assigned_facility_object")
