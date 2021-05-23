@@ -156,6 +156,40 @@ export const HospitalList = () => {
     setShowFilters(false);
   };
 
+  const removeFilter = (paramKey: any) => {
+    updateQuery({
+      ...qParams,
+      [paramKey]: "",
+    });
+  };
+
+  const hasFiltersApplied = (qParams: any) => {
+    return (
+      qParams.state ||
+      qParams.district ||
+      qParams.local_body ||
+      qParams.facility_type ||
+      qParams.kasp_empanelled ||
+      qParams?.search
+    );
+  };
+
+  const badge = (key: string, value: any, paramKey: string) => {
+    return (
+      value && (
+        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
+          {key}
+          {": "}
+          {value}
+          <i
+            className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
+            onClick={(e) => removeFilter(paramKey)}
+          ></i>
+        </span>
+      )
+    );
+  };
+
   const handleDownloader = () => {
     switch (downloadSelect) {
       case "Facility List":
@@ -189,10 +223,7 @@ export const HospitalList = () => {
   if (data && data.length) {
     facilityList = data.map((facility: any, idx: number) => {
       return (
-        <div
-          key={`usr_${facility.id}`}
-          className="w-full md:w-1/2 mt-6 md:px-4"
-        >
+        <div key={`usr_${facility.id}`} className="w-full">
           <div className="block rounded-lg bg-white shadow h-full hover:border-primary-500 overflow-hidden">
             <div className="h-full flex flex-col justify-between">
               <div className="px-6 py-4">
@@ -280,19 +311,21 @@ export const HospitalList = () => {
       </>
     );
   } else if (data && data.length === 0) {
-    manageFacilities = qParams?.search ? (
+    manageFacilities = hasFiltersApplied(qParams) ? (
       <div className="w-full">
-        <div className="p-16 mt-4 text-gray-800 mx-auto text-center whitespace-no-wrap text-sm font-semibold rounded ">
-          No results found
-        </div>
+        <div className="text-3xl mt-4">No Facilities found</div>
       </div>
     ) : (
       <div>
         <div
-          className="p-16 mt-4 bg-white shadow rounded-md shadow border border-grey-500 whitespace-no-wrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300"
+          className="p-16 mt-4 bg-white shadow rounded-md border border-grey-500 whitespace-no-wrap text-sm font-semibold cursor-pointer hover:bg-gray-300 text-center"
           onClick={() => navigate("/facility/create")}
         >
-          Create a new facility
+          <i className="fas fa-plus text-3xl"></i>
+          <div className="mt-2 text-xl">Create a new facility</div>
+          <div className="text-xs mt-1 text-red-700">
+            You should not create duplicate facilities
+          </div>
         </div>
       </div>
     );
@@ -391,7 +424,7 @@ export const HospitalList = () => {
         </div>
       </div>
 
-      <div className="flex mt-5">
+      <div className="md:flex mt-5 space-y-2">
         <div className="flex-1">
           <InputSearchBox
             value={qParams.search}
@@ -455,9 +488,20 @@ export const HospitalList = () => {
           </div>
         </SlideOver>
       </div>
-
+      <div className="flex space-x-2 mt-2 flex-wrap w-full col-span-3 space-y-1">
+        {badge("State", qParams.state, "state")}
+        {badge("District", qParams.district, "district")}
+        {badge("Local Body", qParams.local_body, "local_body")}
+        {badge("Facility Type", qParams.facility_type, "facility_type")}
+        {qParams.kasp_empanelled &&
+          badge(
+            "KASP Empanelled",
+            qParams.kasp_empanelled === "true" ? "KASP" : "Non KASP",
+            "kasp_empanelled"
+          )}
+      </div>
       <div>
-        <div className="flex flex-wrap md:-mx-4">{manageFacilities}</div>
+        <div className="grid md:grid-cols-2 gap-4">{manageFacilities}</div>
       </div>
     </div>
   );
