@@ -229,7 +229,7 @@ export default function ResourceDetails(props: { id: string }) {
             </div>
           </div>
 
-          <div className="flex justify-end mt-4">
+          <div className="flex justify-end mt-4 hidden">
             <div>
               <Button
                 fullWidth
@@ -304,18 +304,25 @@ export default function ResourceDetails(props: { id: string }) {
             </div>
           </div>
         </div>
+        <div className="grid md:grid-cols-3 gap-4 pb-4">
+          <div>
+            <h4 className="mt-8">Orgin Facility</h4>
 
-        <h4 className="mt-8">Details of orgin facility</h4>
+            {showFacilityCard(data.orgin_facility_object)}
+          </div>
+          <div>
+            <h4 className="mt-8">Resource Approving facility</h4>
 
-        {showFacilityCard(data.orgin_facility_object)}
+            {showFacilityCard(data.approving_facility_object)}
+          </div>
+          {data.assigned_facility_object && (
+            <div>
+              <h4 className="mt-8">Request Fulfilling Facility</h4>
 
-        <h4 className="mt-8">Details of assigned facility</h4>
-
-        {showFacilityCard(data.assigned_facility_object)}
-
-        <h4 className="mt-8">Details of resource approving facility</h4>
-
-        {showFacilityCard(data.approving_facility_object)}
+              {showFacilityCard(data.assigned_facility_object)}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
