@@ -38,3 +38,4 @@ public/build-meta.json
 .merlin
 *.bs.js
 *.gen.tsx
+*.gen
