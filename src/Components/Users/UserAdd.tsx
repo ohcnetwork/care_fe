@@ -106,6 +106,7 @@ export const UserAdd = (props: UserProps) => {
 
   const headerText = !userId ? "Add User" : "Update User";
   const buttonText = !userId ? "Save User" : "Update Details";
+  const showLocalbody = !(state.form.user_type === "Staff" || state.form.user_type === "StaffReadOnly");
 
   const fetchDistricts = useCallback(
     async (id: string) => {
@@ -328,7 +329,7 @@ export const UserAdd = (props: UserProps) => {
       };
       const res = await dispatchAction(addUser(data));
       // userId ? updateUser(userId, data) : addUser(data)
-      if (res && res.data) {
+      if (res && res.data && res.status >= 200 && res.status < 300) {
         // const id = res.data.id;
         dispatch({ type: "set_form", form: initForm });
         if (!userId) {
@@ -543,7 +544,7 @@ export const UserAdd = (props: UserProps) => {
                 )}
               </div>
 
-              <div>
+              {showLocalbody && <div>
                 <InputLabel>Localbody</InputLabel>
                 {isLocalbodyLoading ? (
                   <CircularProgress size={20} />
@@ -559,7 +560,7 @@ export const UserAdd = (props: UserProps) => {
                     errors={state.errors.local_body}
                   />
                 )}
-              </div>
+              </div>}
 
             </div>
             <div

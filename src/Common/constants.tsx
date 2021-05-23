@@ -87,6 +87,9 @@ export const FACILITY_TYPES: Array<OptionsType> = [
   { id: 1200, text: "Second Line Treatment Center" },
   { id: 1300, text: "Shifting Centre" },
   { id: 1400, text: "Covid Management Center" },
+  { id: 1500, text: "Request Approving Center" },
+  { id: 1510, text: "Request Fulfilment Center" },
+  { id: 1600, text: "District War Room" },
 ];
 
 export const SHIFTING_CHOICES: Array<OptionsType> = [
@@ -415,7 +418,7 @@ export const BREATHLESSNESS_LEVEL = [
   "SEVERE",
 ];
 
-export const RESOURCE_CATEGORY_CHOICES = [ "OXYGEN" ];
+export const RESOURCE_CATEGORY_CHOICES = ["OXYGEN"];
 
 export const RESOURCE_CHOICES: Array<OptionsType> = [
   { id: 10, text: "PENDING" },
@@ -431,5 +434,5 @@ export const RESOURCE_FILTER_ORDER: Array<OptionsType> = [
   { id: 1, text: "created_date", desc: "ASC Created Date" },
   { id: 2, text: "-created_date", desc: "DESC Created Date" },
   { id: 3, text: "modified_date", desc: "ASC Modified Date" },
-  { id: 4, text: "-modified_date", desc: "DESC Modified Date" }
+  { id: 4, text: "-modified_date", desc: "DESC Modified Date" },
 ];
