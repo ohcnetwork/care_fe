@@ -21,6 +21,7 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   viewUpload,
   retrieveUpload,
+  retrieveUploadFilesURL,
   createUpload,
   getUserList,
 } from "../../Redux/actions";
@@ -32,9 +33,56 @@ import Box from "@material-ui/core/Box";
 import GetAppIcon from "@material-ui/icons/GetApp";
 import * as Notification from "../../Utils/Notifications.js";
 import { VoiceRecorder } from "../../Utils/VoiceRecorder";
+import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
+import Modal from "@material-ui/core/Modal";
+import { Close } from "@material-ui/icons";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
+
+const header_content_type: URLS = {
+  pdf: "application/pdf",
+  txt: "text/plain",
+  jpeg: "image/jpeg",
+  jpg: "image/jpeg",
+  doc: "application/msword",
+  xls: "application/vnd.ms-excel",
+  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  epub: "application/epub+zip",
+  gif: "image/gif",
+  html: "text/html",
+  htm: "text/html",
+  mp4: "video/mp4",
+  png: "image/png",
+  ppt: "application/vnd.ms-powerpoint",
+  pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  svg: "image/svg+xml",
+  xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+};
+
+function getModalStyle() {
+  const top = 100;
+  const left = 100;
+
+  return {
+    top: `${top}%`,
+    left: `${left}%`,
+    transform: `translate(-${top}%, -${left}%)`,
+  };
+}
+
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    paper: {
+      position: "absolute",
+      width: "60%",
+      backgroundColor: theme.palette.background.paper,
+      border: "2px solid #000",
+      boxShadow: theme.shadows[5],
+      padding: theme.spacing(2, 4, 3),
+    },
+  })
+);
 
 const LinearProgressWithLabel = (props: any) => {
   return (
@@ -61,7 +109,7 @@ interface FileUploadProps {
   unspecified: boolean;
 }
 
-interface AudioURLS {
+interface URLS {
   [id: string]: string;
 }
 
@@ -88,7 +136,12 @@ export const FileUpload = (props: FileUploadProps) => {
   const [reload, setReload] = useState<boolean>(false);
   const [uploadPercent, setUploadPercent] = useState(0);
   const [uploadFileName, setUploadFileName] = useState<string>("");
-  const [url, seturl] = useState<AudioURLS>({});
+  const [url, seturl] = useState<URLS>({});
+  const [fileUrl, setFileUrl] = useState("");
+  const [contentType, setcontentType] = useState<string>("");
+  const classes = useStyles();
+  const [modalStyle] = React.useState(getModalStyle);
+  const [open, setOpen] = React.useState(false);
 
   const UPLOAD_HEADING: { [index: string]: string } = {
     PATIENT: "Upload Patient Files",
@@ -97,6 +150,14 @@ export const FileUpload = (props: FileUploadProps) => {
   const VIEW_HEADING: { [index: string]: string } = {
     PATIENT: "View Patient Files",
     CONSULTATION: "View Consultation Files",
+  };
+
+  const handleOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
   };
 
   const getAssociatedId = () => {
@@ -156,9 +217,12 @@ export const FileUpload = (props: FileUploadProps) => {
   );
 
   const loadFile = async (id: any) => {
+    setFileUrl("");
+    handleOpen();
     var data = { file_type: type, associating_id: getAssociatedId() };
     var responseData = await dispatch(retrieveUpload(data, id));
-    window.open(responseData.data.read_signed_url, "_blank");
+    // window.open(responseData.data.read_signed_url, "_blank");
+    setFileUrl(responseData.data.read_signed_url);
   };
 
   const renderFileUpload = (item: FileUploadModel) => {
@@ -227,6 +291,9 @@ export const FileUpload = (props: FileUploadProps) => {
       throw new Error("Error finding e.target.files");
     }
     setfile(e.target.files[0]);
+    const fileName = e.target.files[0].name;
+    const ext: string = fileName.split(".")[1];
+    setcontentType(header_content_type[ext]);
     return e.target.files[0];
   };
 
@@ -238,6 +305,10 @@ export const FileUpload = (props: FileUploadProps) => {
     const newFile = new File([f], `${internal_name}`);
 
     const config = {
+      headers: {
+        "Content-type": contentType,
+        "Content-disposition": "inline",
+      },
       onUploadProgress: (progressEvent: any) => {
         var percentCompleted = Math.round(
           (progressEvent.loaded * 100) / progressEvent.total
@@ -245,7 +316,6 @@ export const FileUpload = (props: FileUploadProps) => {
         setUploadPercent(percentCompleted);
       },
     };
-
     axios
       .put(url, newFile, config)
       .then((result) => {
@@ -344,6 +414,38 @@ export const FileUpload = (props: FileUploadProps) => {
 
   return (
     <div className={hideBack ? "py-2" : "p-4"}>
+      <Modal
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="simple-modal-title"
+        aria-describedby="simple-modal-description"
+      >
+        {fileUrl && fileUrl.length > 0 ? (
+          <>
+            <div className="absolute right-2">
+              <Button
+                color="primary"
+                variant="contained"
+                style={{ marginLeft: "auto" }}
+                startIcon={<Close />}
+                onClick={() => {
+                  handleClose();
+                }}
+              >
+                Close
+              </Button>
+            </div>
+            <iframe
+              title="Source Files"
+              src={fileUrl}
+              className="border-2 border-black bg-white w-4/6 h-5/6 mx-auto my-6"
+            />
+          </>
+        ) : (
+          <CircularProgress />
+        )}
+      </Modal>
+
       <PageTitle title={`${UPLOAD_HEADING[type]}`} hideBack={hideBack} />
       <div className="mt-4">
         <div className="md:grid grid-cols-2 gap-4">
@@ -362,7 +464,7 @@ export const FileUpload = (props: FileUploadProps) => {
                   startIcon={
                     <CloudUploadOutlineIcon>save</CloudUploadOutlineIcon>
                   }
-                  onClick={(e) => {
+                  onClick={(e: any) => {
                     handleAudioUpload(e);
                   }}
                 >
@@ -386,7 +488,7 @@ export const FileUpload = (props: FileUploadProps) => {
                   InputLabelProps={{ shrink: !!uploadFileName }}
                   value={uploadFileName}
                   disabled={uploadStarted}
-                  onChange={(e) => {
+                  onChange={(e: any) => {
                     setUploadFileName(e.target.value);
                   }}
                   errors={`${[]}`}
@@ -410,7 +512,7 @@ export const FileUpload = (props: FileUploadProps) => {
                         startIcon={
                           <CloudUploadOutlineIcon>save</CloudUploadOutlineIcon>
                         }
-                        onClick={(e) => {
+                        onClick={(e: any) => {
                           handleUpload(e);
                         }}
                       >
