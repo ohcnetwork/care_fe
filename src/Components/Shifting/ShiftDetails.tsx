@@ -442,7 +442,9 @@ export default function ShiftDetails(props: { id: string }) {
               <span className="font-semibold leading-relaxed">
                 Date of Admission:{" "}
               </span>
-              {moment(consultation.admission_date).format("LL") || "-"}
+              {moment(
+                consultation.admission_date || consultation.created_date
+              ).format("LL") || "-"}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">OP/IP No: </span>
