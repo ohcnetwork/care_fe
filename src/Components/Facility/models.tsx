@@ -15,6 +15,9 @@ export interface FacilityModel {
   type_b_cylinders?: number;
   type_c_cylinders?: number;
   type_d_cylinders?: number;
+  expected_type_b_cylinders?: number;
+  expected_type_c_cylinders?: number;
+  expected_type_d_cylinders?: number;
   expected_oxygen_requirement?: number;
   local_body_object?: {
     name: string;
@@ -71,6 +74,8 @@ export interface ConsultationModel {
   referred_to?: number | null;
   suggestion?: string;
   ip_no?: string;
+  is_kasp?: boolean;
+  kasp_enabled_date?: string;
   diagnosis?: string;
   verified_by?: string;
   suggestion_text?: string;
@@ -81,6 +86,8 @@ export interface ConsultationModel {
   is_telemedicine?: boolean;
   discharge_advice?: any;
   assigned_to_object?: AssignedToObjectModel;
+  created_by?: any;
+  last_edited_by?: any;
 }
 export interface PatientStatsModel {
   id?: number;

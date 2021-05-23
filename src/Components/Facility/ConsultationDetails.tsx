@@ -31,7 +31,7 @@ export const ConsultationDetails = (props: any) => {
   const [totalCount, setTotalCount] = useState(0);
   const [offset, setOffset] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
-  const limit = 5;
+  const limit = 15;
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -67,7 +67,7 @@ export const ConsultationDetails = (props: any) => {
     [consultationId, dispatch]
   );
 
-  console.log(consultationData.assigned_to_object)
+  console.log(consultationData.assigned_to_object);
 
   const fetchDailyRounds = useCallback(
     async (status: statusType) => {
@@ -111,25 +111,33 @@ export const ConsultationDetails = (props: any) => {
     );
   } else if (dailyRoundsListData.length > 0) {
     roundsList = dailyRoundsListData.map((itemData, idx) => {
-      const telemedicine_doctor_update = itemData.created_by_telemedicine || itemData.last_updated_by_telemedicine
+      const telemedicine_doctor_update =
+        itemData.created_by_telemedicine ||
+        itemData.last_updated_by_telemedicine;
 
       return (
         <div key={`daily_round_${idx}`} className="w-full mt-4 px-2">
-          <div className={`block border rounded-lg ${telemedicine_doctor_update ? "bg-purple-200" : "bg-white"}  shadow h-full cursor-pointer hover:border-primary-500 text-black`}>
+          <div
+            className={`block border rounded-lg ${
+              telemedicine_doctor_update ? "bg-purple-200" : "bg-white"
+            }  shadow h-full cursor-pointer hover:border-primary-500 text-black`}
+          >
             <div className="p-4">
               <Grid container justify="space-between" alignItems="center">
                 <Grid item xs={11} container spacing={1}>
-                  {telemedicine_doctor_update ?
-
+                  {telemedicine_doctor_update ? (
                     <Grid item xs={6}>
                       <Typography>
                         <span className="text-gray-700">Updated by:</span>{" "}
-                        {(telemedicine_doctor_update && consultationData.assigned_to_object) ?
-                          consultationData.assigned_to_object.first_name + " " + consultationData.assigned_to_object.last_name
+                        {telemedicine_doctor_update &&
+                        consultationData.assigned_to_object
+                          ? consultationData.assigned_to_object.first_name +
+                            " " +
+                            consultationData.assigned_to_object.last_name
                           : "-"}
                       </Typography>
                     </Grid>
-                    : null}
+                  ) : null}
                   <Grid item xs={6}>
                     <Typography>
                       <span className="text-gray-700">Temperature:</span>{" "}
@@ -187,7 +195,6 @@ export const ConsultationDetails = (props: any) => {
                       {itemData.other_details}
                     </Typography>
                   </Grid>
-
                 </Grid>
               </Grid>
               <div className="mt-2">
@@ -301,12 +308,6 @@ export const ConsultationDetails = (props: any) => {
             </span>
           </div>
           <div>
-            <span className="font-semibold leading-relaxed">Updated on: </span>
-            {consultationData.created_date
-              ? moment(consultationData.created_date).format("lll")
-              : "-"}
-          </div>
-          <div>
             <span className="font-semibold leading-relaxed">Admitted: </span>
             {consultationData.admitted ? "Yes" : "No"}
           </div>
@@ -385,6 +386,29 @@ export const ConsultationDetails = (props: any) => {
               </span>
             </div>
           )}
+        </div>
+
+        <div className="flex flex-col mt-6">
+          <div className="text-sm text-gray-700">
+            Created on {moment(consultationData.created_date).format("lll")}
+            {consultationData.created_by && (
+              <span>
+                by{" "}
+                {`${consultationData.created_by?.first_name} ${consultationData.created_by?.last_name} @${consultationData.created_by?.username} (${consultationData.created_by?.user_type})`}
+              </span>
+            )}
+          </div>
+
+          <div className="text-sm text-gray-700">
+            Last Modified on{" "}
+            {moment(consultationData.modified_date).format("lll")}{" "}
+            {consultationData.last_edited_by && (
+              <span>
+                by{" "}
+                {`${consultationData.last_edited_by?.first_name} ${consultationData.last_edited_by?.last_name} @${consultationData.last_edited_by?.username} (${consultationData.last_edited_by?.user_type})`}
+              </span>
+            )}
+          </div>
         </div>
       </div>
       {consultationData.existing_medication && (
@@ -476,7 +500,6 @@ export const ConsultationDetails = (props: any) => {
         </div>
       )}
       <div>
-
         <PageTitle title="Consultation Update" hideBack={true} />
         {isLastConsultation && (
           <button
@@ -511,6 +534,8 @@ export const ConsultationDetails = (props: any) => {
           consultationId={consultationId}
           type="CONSULTATION"
           hideBack={true}
+          audio={true}
+          unspecified={true}
         />
       </div>
     </div>

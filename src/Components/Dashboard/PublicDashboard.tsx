@@ -7,8 +7,8 @@ export const PublicDashboard = () => {
         Corona Safe Network
       </h1>
       <div className="text-base md:text-2xl lg:text-xl pt-6 max-w-xl text-white pl-1">
-        Our Goal is to defend the Healthcare system of Kerala from overloading
-        beyond capacity.
+        Our Goal is to defend the Healthcare system from overloading beyond
+        capacity.
       </div>
     </div>
   );
