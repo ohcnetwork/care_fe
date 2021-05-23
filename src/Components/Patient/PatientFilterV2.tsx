@@ -19,6 +19,8 @@ import { getAllLocalBody, getFacility } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { CircularProgress } from "@material-ui/core";
 import { navigate } from "raviger";
+import { DateRangePicker } from "../Common/DateRangePicker";
+
 const debounce = require("lodash.debounce");
 
 const useMergeState = (initialState: any) => {
@@ -248,6 +250,19 @@ export default function PatientFilterV2(props: any) {
     onChange(data);
   };
 
+  const handleDateRangeChange = (
+    startDateId: string,
+    endDateId: string,
+    { startDate, endDate }: any
+  ) => {
+    const filterData: any = { ...filterState };
+    filterData[startDateId] = startDate?.toString();
+    filterData[endDateId] = endDate?.toString();
+
+    setFilterState(filterData);
+    console.log({ startDate, endDate, filterState });
+  };
+
   return (
     <div>
       <div className="flex justify-between">
@@ -445,6 +460,116 @@ export default function PatientFilterV2(props: any) {
               })
             }
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+          />
+        </div>
+        <div className="w-64 flex-none">
+          <DateRangePicker
+            startDate={
+              filterState.created_date_after &&
+              moment(filterState.created_date_after).isValid()
+                ? moment(filterState.created_date_after)
+                : null
+            }
+            endDate={
+              filterState.created_date_before &&
+              moment(filterState.created_date_before).isValid()
+                ? moment(filterState.created_date_before)
+                : null
+            }
+            onChange={(e) =>
+              handleDateRangeChange(
+                "created_date_after",
+                "created_date_before",
+                e
+              )
+            }
+            endDateId={"created_date_before"}
+            startDateId={"created_date_after"}
+            label={"Created Date"}
+            size="small"
+          />
+          <DateRangePicker
+            startDate={
+              filterState.modified_date_after &&
+              moment(filterState.modified_date_after).isValid()
+                ? moment(filterState.modified_date_after)
+                : null
+            }
+            endDate={
+              filterState.modified_date_before &&
+              moment(filterState.modified_date_before).isValid()
+                ? moment(filterState.modified_date_before)
+                : null
+            }
+            onChange={(e) =>
+              handleDateRangeChange(
+                "modified_date_after",
+                "modified_date_before",
+                e
+              )
+            }
+            endDateId={"modified_date_before"}
+            startDateId={"modified_date_after"}
+            label={"Modified Date"}
+            size="small"
+          />
+          <DateRangePicker
+            startDate={
+              filterState.last_consultation_admission_date_after &&
+              moment(
+                filterState.last_consultation_admission_date_after
+              ).isValid()
+                ? moment(filterState.last_consultation_admission_date_after)
+                : null
+            }
+            endDate={
+              filterState.last_consultation_admission_date_before &&
+              moment(
+                filterState.last_consultation_admission_date_before
+              ).isValid()
+                ? moment(filterState.last_consultation_admission_date_before)
+                : null
+            }
+            onChange={(e) =>
+              handleDateRangeChange(
+                "last_consultation_admission_date_after",
+                "last_consultation_admission_date_before",
+                e
+              )
+            }
+            endDateId={"last_consultation_admission_date_before"}
+            startDateId={"last_consultation_admission_date_after"}
+            label={"Admit Date"}
+            size="small"
+          />
+          <DateRangePicker
+            startDate={
+              filterState.last_consultation_discharge_date_after &&
+              moment(
+                filterState.last_consultation_discharge_date_after
+              ).isValid()
+                ? moment(filterState.last_consultation_discharge_date_after)
+                : null
+            }
+            endDate={
+              filterState.last_consultation_discharge_date_before &&
+              moment(
+                filterState.last_consultation_discharge_date_before
+              ).isValid()
+                ? moment(filterState.last_consultation_discharge_date_before)
+                : null
+            }
+            onChange={(e) =>
+              handleDateRangeChange(
+                "last_consultation_discharge_date_after",
+                "last_consultation_discharge_date_before",
+                e
+              )
+            }
+            endDateId={"last_consultation_discharge_date_before"}
+            startDateId={"last_consultation_discharge_date_after"}
+            label={"Discharge Date"}
+            size="small"
           />
         </div>
         <div className="w-64 flex-none">
