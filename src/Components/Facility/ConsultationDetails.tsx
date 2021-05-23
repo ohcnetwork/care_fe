@@ -67,8 +67,6 @@ export const ConsultationDetails = (props: any) => {
     [consultationId, dispatch]
   );
 
-  console.log(consultationData.assigned_to_object);
-
   const fetchDailyRounds = useCallback(
     async (status: statusType) => {
       setIsDailyRoundLoading(true);

@@ -202,7 +202,6 @@ export const fireRequestForFiles = (
     })
       .then((response: any) => {
         dispatch(fetchResponseSuccess(key, response.data));
-        console.log("Response is ", response);
         return response;
       })
       .catch((error: any) => {
