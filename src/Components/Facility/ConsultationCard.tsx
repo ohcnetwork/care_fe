@@ -43,14 +43,16 @@ export const ConsultationCard = (props: ConsultationProps) => {
                 {itemData.admitted ? "Yes" : "No"}
               </Typography>
             </Grid>
-            <Grid item xs={7}>
-              <Typography>
-                <span className="text-gray-700">Kasp Enabled date: </span>
-                {itemData.kasp_enabled_date
-                  ? moment(itemData.kasp_enabled_date).format("lll")
-                  : "-"}
-              </Typography>
-            </Grid>
+            {itemData.kasp_enabled_date && (
+              <Grid item xs={7}>
+                <Typography>
+                  <span className="text-gray-700">Kasp Enabled date: </span>
+                  {itemData.kasp_enabled_date
+                    ? moment(itemData.kasp_enabled_date).format("lll")
+                    : "-"}
+                </Typography>
+              </Grid>
+            )}
             {itemData.admission_date && (
               <Grid item xs={5}>
                 <Typography>
@@ -68,18 +70,36 @@ export const ConsultationCard = (props: ConsultationProps) => {
               </Grid>
             )}
           </Grid>
-          
+
           <div className="flex flex-col mt-6">
-            <div className="text-sm text-gray-700">Created on {moment(itemData.created_date).format("lll")} by {`${itemData.created_by.first_name} ${itemData.created_by.last_name} @${itemData.created_by.username} (${itemData.created_by.user_type})`}</div>
-            <div className="text-sm text-gray-700">Last Modified on {moment(itemData.modified_date).format("lll")} by {`${itemData.last_edited_by.first_name} ${itemData.last_edited_by.last_name} @${itemData.last_edited_by.username} (${itemData.last_edited_by.user_type})`}</div>
+            {
+              <div className="text-sm text-gray-700">
+                Created on {moment(itemData.created_date).format("lll")}
+                {itemData.created_by && (
+                  <span>
+                    by{" "}
+                    {`${itemData.created_by?.first_name} ${itemData.created_by?.last_name} @${itemData.created_by?.username} (${itemData.created_by?.user_type})`}
+                  </span>
+                )}
+              </div>
+            }
+            <div className="text-sm text-gray-700">
+              Last Modified on {moment(itemData.modified_date).format("lll")}{" "}
+              {itemData.last_edited_by && (
+                <span>
+                  by{" "}
+                  {`${itemData.last_edited_by?.first_name} ${itemData.last_edited_by?.last_name} @${itemData.last_edited_by?.username} (${itemData.last_edited_by?.user_type})`}
+                </span>
+              )}
+            </div>
           </div>
 
           <div className="mt-4 flex flex-wrap justify-between w-full">
             <button
-              className="px-4 py-2 shadow border bg-white rounded-md border border-grey-500 whitespace-no-wrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300 text-center"
+              className="px-4 py-2 shadow border bg-white rounded-md border-grey-500 whitespace-no-wrap text-sm font-semibold cursor-pointer hover:bg-gray-300 text-center"
               onClick={() =>
                 navigate(
-                  `/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/`
+                  `/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/last_consultation/${isLastConsultation}`
                 )
               }
             >

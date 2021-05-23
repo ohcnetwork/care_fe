@@ -157,14 +157,24 @@ export const transferPatient = (params: object, pathParam: object) => {
 export const getStates = () => {
   return fireRequest("statesList", []);
 };
+export const getStatesByText = (params: object) => {
+  return fireRequest("statesList", [], params);
+};
 
 // District/State/Local body/ward
 export const getDistrictByState = (pathParam: object) => {
   return fireRequest("getDistrictByState", [], {}, pathParam);
 };
+export const getDistrictByName = (params: object) => {
+  return fireRequest("getDistrictByName", [], params, null);
+};
 export const getLocalbodyByDistrict = (pathParam: object) => {
   return fireRequest("getLocalbodyByDistrict", [], {}, pathParam);
 };
+export const getLocalbodyByName = (params: object) => {
+  return fireRequest("getLocalbodyByName", [], params, null);
+};
+
 export const getWardByLocalBody = (pathParam: object) => {
   return fireRequest("getWardByLocalBody", [], {}, pathParam);
 };
