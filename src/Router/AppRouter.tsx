@@ -46,6 +46,8 @@ import Investigation from "../Components/Facility/Investigations";
 import ViewInvestigations from "../Components/Facility/Investigations/ViewInvestigations";
 import ShowInvestigation from "../Components/Facility/Investigations/ShowInvestigation";
 import InvestigationReports from "../Components/Facility/Investigations/Reports";
+import { withTranslation } from "react-i18next";
+import LanguageSelector from "../Components/Common/LanguageSelector";
 
 const get = require("lodash.get");
 const img = "https://cdn.coronasafe.network/light-logo.svg";
@@ -325,10 +327,11 @@ let menus = [
   },
 ];
 
-const AppRouter = () => {
+const AppRouter = (props: any) => {
   useRedirect("/", "/facility");
   const pages = useRoutes(routes);
   const path = usePath();
+  const { t } = props;
   const url = path.split("/");
   const state: any = useSelector((state) => state);
   const { currentUser } = state;
@@ -399,7 +402,7 @@ const AppRouter = () => {
                             " mr-3 text-md group-hover:text-green-300 group-focus:text-green-300 transition ease-in-out duration-150"
                           }
                         ></i>
-                        {item.title}
+                        {t(item.title)}
                       </a>
                     );
                   })}
@@ -409,7 +412,7 @@ const AppRouter = () => {
                     className="mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-green-300 rounded-md hover:text-white hover:bg-green-700 focus:outline-none focus:bg-green-900 transition ease-in-out duration-150"
                   >
                     <i className="fas fa-tachometer-alt text-green-400 mr-3 text-md group-hover:text-green-300 group-focus:text-green-300 transition ease-in-out duration-150"></i>
-                    Dashboard
+                    {t("Dashboard")}
                   </a>
                 </nav>
               </div>
@@ -434,7 +437,7 @@ const AppRouter = () => {
                         }}
                         className="text-xs leading-4 font-medium text-green-300 group-hover:text-green-100 transition ease-in-out duration-150"
                       >
-                        Sign Out
+                        {t("sign_out")}
                       </p>
                     </div>
                   </div>
@@ -475,7 +478,7 @@ const AppRouter = () => {
                         " mr-3 text-lg group-hover:text-green-300 group-focus:text-green-300 transition ease-in-out duration-150"
                       }
                     ></i>
-                    {item.title}
+                    {t(item.title)}
                   </button>
                 );
               })}
@@ -487,8 +490,9 @@ const AppRouter = () => {
                 className="mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-green-300 rounded-md hover:text-white hover:bg-green-700 focus:outline-none focus:bg-green-900 transition ease-in-out duration-150"
               >
                 <i className="fas fa-tachometer-alt text-green-400 mr-3 text-md group-hover:text-green-300 group-focus:text-green-300 transition ease-in-out duration-150"></i>
-                Dashboard
+                {t("Dashboard")}
               </a>
+              <LanguageSelector className="bg-white" />
             </nav>
           </div>
           <div className="flex-shrink-0 flex border-t border-green-700 p-4">
@@ -512,7 +516,7 @@ const AppRouter = () => {
                     }}
                     className="text-xs leading-4 font-medium text-green-300 group-hover:text-green-100 transition ease-in-out duration-150"
                   >
-                    Sign Out
+                    {t("sign_out")}
                   </p>
                 </div>
               </div>
@@ -559,4 +563,4 @@ const AppRouter = () => {
     </div>
   );
 };
-export default AppRouter;
+export default withTranslation()(AppRouter);
