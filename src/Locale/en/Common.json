@@ -2,5 +2,7 @@
     "coronasafe_network": "CoronaSafe Network",
     "goal": "Our Goal is to defend the Healthcare system from overloading beyond capacity.",
     "something_wrong": "Something went wrong! Try again later!",
-    "field_required": "This field is required"
+    "field_required": "This field is required",
+    "contribute_github": "Contribute on Github",
+    "footer_body": "CoronaSafe Network is an open-source public utility designed by a multi-disciplinary team of innovators and volunteers who are working on a model to support Government efforts with full understanding and support of Government of Kerala."
 }

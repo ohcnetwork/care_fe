@@ -8,6 +8,7 @@ import {
 } from "../Components/Auth";
 import { useRoutes } from "raviger";
 import { PublicDashboard } from "../Components/Dashboard/PublicDashboard";
+import { withTranslation } from "react-i18next";
 const TopBar = loadable(() => import("../Components/Common/TopBar"));
 
 const routes = {
@@ -19,8 +20,9 @@ const routes = {
   "/password_reset/:token": ({ token }: any) => <ResetPassword token={token} />,
 };
 
-const SessionRouter = () => {
+const SessionRouter = (props) => {
   const content = useRoutes(routes) || <Login />;
+  const { t } = props;
   const path =
     content &&
     content.props &&
@@ -46,17 +48,14 @@ const SessionRouter = () => {
           </div>
           <div className="max-w-xl text-sm">
             <a href="https://coronasafe.network/" className="text-gray-600">
-              CoronaSafe Network is an open-source public utility designed by a
-              multi-disciplinary team of innovators and volunteers who are
-              working on a model to support Government efforts with full
-              understanding and support of Government of Kerala.
+              {t("footer_body")}
             </a>
             <div className="mx-auto">
               <a
                 href="https://github.com/coronasafe"
                 className="care-secondary-color"
               >
-                Contribute on Github
+                {t("contribute_github")}
               </a>
             </div>
           </div>
@@ -66,4 +65,4 @@ const SessionRouter = () => {
   );
 };
 
-export default SessionRouter;
+export default withTranslation()(SessionRouter);

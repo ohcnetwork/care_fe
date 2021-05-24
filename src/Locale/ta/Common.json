@@ -2,5 +2,7 @@
   "coronasafe_network": "கொரோனா சேஃப் நெட்வொர்க்",
   "goal": "ஹெல்த்கேர் அமைப்பை திறனை மீறி அதிக சுமைகளில் இருந்து பாதுகாப்பதே எங்கள் குறிக்கோள்.",
   "something_wrong": "ஏதோ தவறு நடந்துவிட்டது! பின்னர் மீண்டும் முயற்சிக்கவும்!",
-  "field_required": "இந்த தகவல் தேவை"
+  "field_required": "இந்த தகவல் தேவை",
+  "contribute_github": "Contribute on Github",
+  "footer_body": "CoronaSafe Network is an open-source public utility designed by a multi-disciplinary team of innovators and volunteers who are working on a model to support Government efforts with full understanding and support of Government of Kerala."
 }
