@@ -75,7 +75,7 @@ export default function PatientFilterV2(props: any) {
         ? filter.last_consultation_admitted_to_list.split(",")
         : [],
     srf_id: filter.srf_id || null,
-    is_vaccinated: filter.is_vaccinated || null,
+    number_of_doses: filter.number_of_doses || null,
     covin_id: filter.covin_id || null,
     is_kasp: filter.is_kasp || null,
   });
@@ -113,10 +113,11 @@ export default function PatientFilterV2(props: any) {
 
   const VACCINATED_FILTER = [
     { id: "", text: "Show All" },
-    { id: "false", text: "Unvaccinated" },
-    { id: "true", text: "Vaccinated" },
+    { id: 0, text: "Unvaccinated" },
+    { id: 1, text: "1st dose only" },
+    { id: 2, text: "Both doses"}
   ];
-
+  
   const setFacility = (selected: any, name: string) => {
     const filterData: any = { ...filterState };
     filterData[`${name}_ref`] = selected;
@@ -185,7 +186,7 @@ export default function PatientFilterV2(props: any) {
       last_consultation_discharge_date_before,
       last_consultation_discharge_date_after,
       last_consultation_admitted_to_list,
-      is_vaccinated,
+      number_of_doses,
       covin_id,
       srf_id,
       is_kasp,
@@ -243,7 +244,7 @@ export default function PatientFilterV2(props: any) {
       last_consultation_admitted_to_list:
         last_consultation_admitted_to_list || [],
       srf_id: srf_id || "",
-      is_vaccinated: is_vaccinated || "",
+      number_of_doses: number_of_doses || "",
       covin_id: covin_id || "",
       is_kasp: is_kasp || "",
     };
@@ -404,10 +405,10 @@ export default function PatientFilterV2(props: any) {
         <div className="w-64 flex-none">
           <span className="text-sm font-semibold">Vaccinated</span>
           <SelectField
-            name="is_vaccinated"
+            name="number_of_doses"
             variant="outlined"
             margin="dense"
-            value={filterState.is_vaccinated}
+            value={filterState.number_of_doses}
             options={VACCINATED_FILTER}
             onChange={handleChange}
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
