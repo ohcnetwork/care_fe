@@ -90,7 +90,6 @@ export const FacilityHome = (props: any) => {
   };
 
   const handleDeleteSubmit = () => {
-    console.log("Hi");
     dispatch(deleteFacility(facilityId));
   };
 
