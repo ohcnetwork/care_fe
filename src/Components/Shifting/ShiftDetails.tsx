@@ -754,7 +754,7 @@ export default function ShiftDetails(props: { id: string }) {
               </div>
             </div>
 
-            <div className="flex justify-end mt-4">
+            <div className="flex justify-end mt-4 hidden">
               <div>
                 <Button
                   fullWidth
