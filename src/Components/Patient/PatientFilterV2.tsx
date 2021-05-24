@@ -19,6 +19,8 @@ import { getAllLocalBody, getFacility } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { CircularProgress } from "@material-ui/core";
 import { navigate } from "raviger";
+import { DateRangePicker, getDate } from "../Common/DateRangePicker";
+
 const debounce = require("lodash.debounce");
 
 const useMergeState = (initialState: any) => {
@@ -249,6 +251,18 @@ export default function PatientFilterV2(props: any) {
     onChange(data);
   };
 
+  const handleDateRangeChange = (
+    startDateId: string,
+    endDateId: string,
+    { startDate, endDate }: any
+  ) => {
+    const filterData: any = { ...filterState };
+    filterData[startDateId] = startDate?.toString();
+    filterData[endDateId] = endDate?.toString();
+
+    setFilterState(filterData);
+  };
+
   return (
     <div>
       <div className="flex justify-between">
@@ -449,154 +463,76 @@ export default function PatientFilterV2(props: any) {
           />
         </div>
         <div className="w-64 flex-none">
-          <span className="text-sm font-semibold">Created Date Before</span>
-          <DateInputField
-            id="created_date_before"
-            name="created_date_before"
-            inputVariant="outlined"
-            margin="dense"
-            errors=""
-            value={filterState.created_date_before}
-            onChange={(date) =>
-              handleChange({
-                target: { name: "created_date_before", value: date },
-              })
+          <DateRangePicker
+            startDate={getDate(filterState.created_date_after)}
+            endDate={getDate(filterState.created_date_before)}
+            onChange={(e) =>
+              handleDateRangeChange(
+                "created_date_after",
+                "created_date_before",
+                e
+              )
             }
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+            endDateId={"created_date_before"}
+            startDateId={"created_date_after"}
+            label={"Created Date"}
+            size="small"
           />
-        </div>
-        <div className="w-64 flex-none">
-          <span className="text-sm font-semibold">Created Date After</span>
-          <DateInputField
-            id="created_date_after"
-            name="created_date_after"
-            inputVariant="outlined"
-            margin="dense"
-            errors=""
-            value={filterState.created_date_after}
-            onChange={(date) =>
-              handleChange({
-                target: { name: "created_date_after", value: date },
-              })
+          <DateRangePicker
+            startDate={getDate(filterState.modified_date_after)}
+            endDate={getDate(filterState.modified_date_before)}
+            onChange={(e) =>
+              handleDateRangeChange(
+                "modified_date_after",
+                "modified_date_before",
+                e
+              )
             }
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+            endDateId={"modified_date_before"}
+            startDateId={"modified_date_after"}
+            label={"Modified Date"}
+            size="small"
+          />
+          <DateRangePicker
+            startDate={getDate(
+              filterState.last_consultation_admission_date_after
+            )}
+            endDate={getDate(
+              filterState.last_consultation_admission_date_before
+            )}
+            onChange={(e) =>
+              handleDateRangeChange(
+                "last_consultation_admission_date_after",
+                "last_consultation_admission_date_before",
+                e
+              )
+            }
+            endDateId={"last_consultation_admission_date_before"}
+            startDateId={"last_consultation_admission_date_after"}
+            label={"Admit Date"}
+            size="small"
+          />
+          <DateRangePicker
+            startDate={getDate(
+              filterState.last_consultation_discharge_date_after
+            )}
+            endDate={getDate(
+              filterState.last_consultation_discharge_date_before
+            )}
+            onChange={(e) =>
+              handleDateRangeChange(
+                "last_consultation_discharge_date_after",
+                "last_consultation_discharge_date_before",
+                e
+              )
+            }
+            endDateId={"last_consultation_discharge_date_before"}
+            startDateId={"last_consultation_discharge_date_after"}
+            label={"Discharge Date"}
+            size="small"
           />
         </div>
 
-        <div className="w-64 flex-none">
-          <span className="text-sm font-semibold">Modified Date Before</span>
-          <DateInputField
-            id="modified_date_before"
-            name="modified_date_before"
-            inputVariant="outlined"
-            margin="dense"
-            errors=""
-            value={filterState.modified_date_before}
-            onChange={(date) =>
-              handleChange({
-                target: { name: "modified_date_before", value: date },
-              })
-            }
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-          />
-        </div>
-        <div className="w-64 flex-none">
-          <span className="text-sm font-semibold">Modified Date After</span>
-          <DateInputField
-            id="modified_date_after"
-            name="modified_date_after"
-            inputVariant="outlined"
-            margin="dense"
-            errors=""
-            value={filterState.modified_date_after}
-            onChange={(date) =>
-              handleChange({
-                target: { name: "modified_date_after", value: date },
-              })
-            }
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-          />
-        </div>
-        <div className="w-64 flex-none">
-          <span className="text-sm font-semibold">Admitted Before</span>
-          <DateInputField
-            id="last_consultation_admission_date_before"
-            name="last_consultation_admission_date_before"
-            inputVariant="outlined"
-            margin="dense"
-            errors=""
-            value={filterState.last_consultation_admission_date_before}
-            onChange={(date) =>
-              handleChange({
-                target: {
-                  name: "last_consultation_admission_date_before",
-                  value: date,
-                },
-              })
-            }
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-          />
-        </div>
-        <div className="w-64 flex-none">
-          <span className="text-sm font-semibold">Admitted After</span>
-          <DateInputField
-            id="last_consultation_admission_date_after"
-            name="last_consultation_admission_date_after"
-            inputVariant="outlined"
-            margin="dense"
-            errors=""
-            value={filterState.last_consultation_admission_date_after}
-            onChange={(date) =>
-              handleChange({
-                target: {
-                  name: "last_consultation_admission_date_after",
-                  value: date,
-                },
-              })
-            }
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-          />
-        </div>
-        <div className="w-64 flex-none">
-          <span className="text-sm font-semibold">Discharge Before</span>
-          <DateInputField
-            id="last_consultation_discharge_date_before"
-            name="last_consultation_discharge_date_before"
-            inputVariant="outlined"
-            margin="dense"
-            errors=""
-            value={filterState.last_consultation_discharge_date_before}
-            onChange={(date) =>
-              handleChange({
-                target: {
-                  name: "last_consultation_discharge_date_before",
-                  value: date,
-                },
-              })
-            }
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-          />
-        </div>
-        <div className="w-64 flex-none">
-          <span className="text-sm font-semibold">Discharge After</span>
-          <DateInputField
-            id="last_consultation_discharge_date_after"
-            name="last_consultation_discharge_date_after"
-            inputVariant="outlined"
-            margin="dense"
-            errors=""
-            value={filterState.last_consultation_discharge_date_after}
-            onChange={(date) =>
-              handleChange({
-                target: {
-                  name: "last_consultation_discharge_date_after",
-                  value: date,
-                },
-              })
-            }
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-          />
-        </div>
         <div className="w-64 flex-none">
           <span className="text-sm font-semibold">Age</span>
           <div className="flex justify-between">

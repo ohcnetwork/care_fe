@@ -13,6 +13,7 @@ import { useDispatch } from "react-redux";
 import { CircularProgress } from "@material-ui/core";
 import { SHIFTING_CHOICES } from "../../Common/constants";
 import { Link } from "raviger";
+import { DateRangePicker, getDate } from "../Common/DateRangePicker";
 
 function useMergeState(initialState: any) {
   const [state, setState] = useState(initialState);
@@ -211,6 +212,18 @@ export default function ListFilter(props: any) {
       assigned_to: assigned_to || "",
     };
     onChange(data);
+  };
+
+  const handleDateRangeChange = (
+    startDateId: string,
+    endDateId: string,
+    { startDate, endDate }: any
+  ) => {
+    const filterData: any = { ...filterState };
+    filterData[startDateId] = startDate?.toString();
+    filterData[endDateId] = endDate?.toString();
+
+    setFilterState(filterData);
   };
 
   return (
@@ -427,75 +440,37 @@ export default function ListFilter(props: any) {
         </div>
 
         <div className="w-64 flex-none">
-          <span className="text-sm font-semibold">Created Date Before</span>
-          <DateInputField
-            id="created_date_before"
-            name="created_date_before"
-            inputVariant="outlined"
-            margin="dense"
-            errors=""
-            value={filterState.created_date_before}
-            onChange={(date) =>
-              handleChange({
-                target: { name: "created_date_before", value: date },
-              })
+          <DateRangePicker
+            startDate={getDate(filterState.created_date_after)}
+            endDate={getDate(filterState.created_date_before)}
+            onChange={(e) =>
+              handleDateRangeChange(
+                "created_date_after",
+                "created_date_before",
+                e
+              )
             }
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+            endDateId={"created_date_before"}
+            startDateId={"created_date_after"}
+            label={"Created Date"}
+            size="small"
+          />
+          <DateRangePicker
+            startDate={getDate(filterState.modified_date_after)}
+            endDate={getDate(filterState.modified_date_before)}
+            onChange={(e) =>
+              handleDateRangeChange(
+                "modified_date_after",
+                "modified_date_before",
+                e
+              )
+            }
+            endDateId={"modified_date_before"}
+            startDateId={"modified_date_after"}
+            label={"Modified Date"}
+            size="small"
           />
         </div>
-        <div className="w-64 flex-none">
-          <span className="text-sm font-semibold">Created Date After</span>
-          <DateInputField
-            id="created_date_after"
-            name="created_date_after"
-            inputVariant="outlined"
-            margin="dense"
-            errors=""
-            value={filterState.created_date_after}
-            onChange={(date) =>
-              handleChange({
-                target: { name: "created_date_after", value: date },
-              })
-            }
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-          />
-        </div>
-
-        <div className="w-64 flex-none">
-          <span className="text-sm font-semibold">Modified Date Before</span>
-          <DateInputField
-            id="modified_date_before"
-            name="modified_date_before"
-            inputVariant="outlined"
-            margin="dense"
-            errors=""
-            value={filterState.modified_date_before}
-            onChange={(date) =>
-              handleChange({
-                target: { name: "modified_date_before", value: date },
-              })
-            }
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-          />
-        </div>
-        <div className="w-64 flex-none">
-          <span className="text-sm font-semibold">Modified Date After</span>
-          <DateInputField
-            id="modified_date_after"
-            name="modified_date_after"
-            inputVariant="outlined"
-            margin="dense"
-            errors=""
-            value={filterState.modified_date_after}
-            onChange={(date) =>
-              handleChange({
-                target: { name: "modified_date_after", value: date },
-              })
-            }
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-          />
-        </div>
-
         {/* <div className="w-64 flex-none">
           <span className="text-sm font-semibold">Is upshift case</span>
           <DateTimeFiled

@@ -14,6 +14,7 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import * as Notification from "../../Utils/Notifications.js";
+import CommentSection from "./CommentSection";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -322,6 +323,10 @@ export default function ResourceDetails(props: { id: string }) {
               {showFacilityCard(data.assigned_facility_object)}
             </div>
           )}
+        </div>
+        <div className="mt-20 w-full">
+          <h4 className="mb-4">Comments</h4>
+          <CommentSection id={props.id} />
         </div>
       </div>
     </div>
