@@ -1,7 +1,13 @@
-## This rule redirects to an external API, signing requests with a secret
+[build]
+publish = "dist/"
+
 [[redirects]]
-  from = "/api/*"
-  to = "https://careapi.coronasafe.in/api/:splat"
-  status = 301
-  force = true # COMMENT: ensure that we always redirect
-  headers = {X-From = "Netlify"}
+from = "/api/*"
+to = "https://careapi.coronasafe.in/api/:splat"
+status = 200
+force = true
+
+[[redirects]]
+from = "/*"
+to = "/index.html"
+status = 200
