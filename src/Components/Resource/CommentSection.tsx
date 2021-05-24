@@ -16,7 +16,7 @@ const CommentSection = (props: CommentSectionProps) => {
   const [commentBox, setCommentBox] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const fetchData = useCallback(
-    async (status: statusType) => {
+    async (status: statusType = {aborted: false}) => {
       setIsLoading(true);
       const res = await dispatch(getResourceComments(props.id));
       if (!status.aborted) {
@@ -38,33 +38,19 @@ const CommentSection = (props: CommentSectionProps) => {
 
   const onSubmitComment = () => {
     const payload = {
-      external_id: props.id,
       comment: commentBox,
     };
     dispatch(addResourceComments(props.id, payload)).then((res: any) => {
       Notification.Success({ msg: "Comment added successfully" });
+      fetchData();
     });
   };
 
   return (
     <div className="w-full flex flex-col">
-      <textarea
-        rows={3}
-        placeholder="Type your comment"
-        className="w-full placeholder-gray-400 font-light p-2 focus:outline-none border  border-gray-300 focus:border-green-500"
-        onChange={(e) => setCommentBox(e.target.value)}
-      />
-      <div className="flex w-full justify-end">
-        <Button
-          onClick={onSubmitComment}
-          className="border border-solid border-green-600 hover:border-green-700 text-green-600 hover:bg-white capitalize my-2 text-sm"
-        >
-          Post Your Comment
-        </Button>
-      </div>
       <div className=" w-full">
         {comments.map((comment: any) => (
-          <div className="flex p-4 bg-white rounded-lg text-gray-800 mt-4 flex-col w-full ">
+          <div className="flex p-4 bg-white rounded-lg text-gray-800 mt-4 flex-col w-full border border-gray-300">
             <div className="flex  w-full ">
               <p className="text-justify">{comment.comment}</p>
             </div>
@@ -84,6 +70,20 @@ const CommentSection = (props: CommentSectionProps) => {
             </div>
           </div>
         ))}
+      </div>
+      <textarea
+        rows={3}
+        placeholder="Type your comment"
+        className="mt-4 border border-gray-500 rounded-lg p-4"
+        onChange={(e) => setCommentBox(e.target.value)}
+      />
+      <div className="flex w-full justify-end">
+        <Button
+          onClick={onSubmitComment}
+          className="border border-solid border-green-600 hover:border-green-700 text-green-600 hover:bg-white capitalize my-2 text-sm"
+        >
+          Post Your Comment
+        </Button>
       </div>
     </div>
   );
