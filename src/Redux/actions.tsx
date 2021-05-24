@@ -29,6 +29,9 @@ export const createFacility = (params: object) => {
 export const updateFacility = (id: number, params: object) => {
   return fireRequest("updateFacility", [id], params);
 };
+export const deleteFacility = (id: number) => {
+  return fireRequest("deleteFacility", [id], {});
+};
 export const getUserList = (params: object) => {
   return fireRequest("userList", [], params);
 };
