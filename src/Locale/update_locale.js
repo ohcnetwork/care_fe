@@ -32,10 +32,13 @@ function compareBothFiles(defaultFile, newFile) {
         const newObj = {}
         const defaultJSON = defaultFile[file]
         const existingJSON = newFile[file]
-        for (const key in defaultJSON) {
-            newObj[key] = existingJSON[key] || defaultJSON[key]
+        if (existingJSON) {
+            for (const key in defaultJSON)
+                newObj[key] = existingJSON[key] || defaultJSON[key]
+            writeFile(`./${lng}/${file}`, JSON.stringify(newObj, null, 2))
         }
-        writeFile(`./${lng}/${file}`, JSON.stringify(newObj, null, 2))
+        else
+            writeFile(`./${lng}/${file}`, JSON.stringify(defaultJSON, null, 2))
         console.log(`Modified: ${file}`)
     }
     writeFile(`./${lng}/index.js`, defaultEntryFile)
