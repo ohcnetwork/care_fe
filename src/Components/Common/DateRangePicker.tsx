@@ -19,6 +19,9 @@ interface IDateRangePickerProps {
   size?: "regular" | "small";
 }
 
+export const getDate = (value: any) =>
+  value && moment(value).isValid() ? moment(value) : null;
+
 export const DateRangePicker: React.FC<IDateRangePickerProps> = ({
   label,
   endDateId = "end_date",

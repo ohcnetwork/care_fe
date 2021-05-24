@@ -317,3 +317,6 @@ $border: #28a745;
     border-color: rgba(0, 0, 0, 0.8);
   }
 }
+.DateRangePicker_picker {
+  z-index: 100000 !important;
+}
