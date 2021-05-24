@@ -36,6 +36,7 @@ import { VoiceRecorder } from "../../Utils/VoiceRecorder";
 import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
 import Modal from "@material-ui/core/Modal";
 import { Close } from "@material-ui/icons";
+import { BrowserClient } from "@sentry/browser";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -142,6 +143,7 @@ export const FileUpload = (props: FileUploadProps) => {
   const classes = useStyles();
   const [modalStyle] = React.useState(getModalStyle);
   const [open, setOpen] = React.useState(false);
+  const [downloadURL, setDownloadURL] = useState<string>();
 
   const UPLOAD_HEADING: { [index: string]: string } = {
     PATIENT: "Upload Patient Files",
@@ -157,6 +159,7 @@ export const FileUpload = (props: FileUploadProps) => {
   };
 
   const handleClose = () => {
+    setDownloadURL("");
     setOpen(false);
   };
 
@@ -222,6 +225,7 @@ export const FileUpload = (props: FileUploadProps) => {
     var data = { file_type: type, associating_id: getAssociatedId() };
     var responseData = await dispatch(retrieveUpload(data, id));
     // window.open(responseData.data.read_signed_url, "_blank");
+    downloadFileUrl(responseData.data.read_signed_url);
     setFileUrl(responseData.data.read_signed_url);
   };
 
@@ -412,6 +416,15 @@ export const FileUpload = (props: FileUploadProps) => {
       });
   };
 
+  // For creating the Download File URL
+  const downloadFileUrl = (url: string) => {
+    fetch(url)
+      .then((res) => res.blob())
+      .then((blob) => {
+        setDownloadURL(URL.createObjectURL(blob));
+      });
+  };
+
   return (
     <div className={hideBack ? "py-2" : "p-4"}>
       <Modal
@@ -422,18 +435,33 @@ export const FileUpload = (props: FileUploadProps) => {
       >
         {fileUrl && fileUrl.length > 0 ? (
           <>
-            <div className="absolute right-2">
-              <Button
-                color="primary"
-                variant="contained"
-                style={{ marginLeft: "auto" }}
-                startIcon={<Close />}
-                onClick={() => {
-                  handleClose();
-                }}
-              >
-                Close
-              </Button>
+            <div className="flex absolute right-2">
+              {downloadURL && downloadURL.length > 0 && (
+                <div>
+                  <a
+                    href={downloadURL}
+                    download
+                    className="text-white p-4 rounded m-2 bg-green-500"
+                  >
+                    <GetAppIcon>load</GetAppIcon>
+                    Download
+                  </a>
+                </div>
+              )}
+
+              <div>
+                <Button
+                  color="primary"
+                  variant="contained"
+                  style={{ marginLeft: "auto" }}
+                  startIcon={<Close />}
+                  onClick={() => {
+                    handleClose();
+                  }}
+                >
+                  Close
+                </Button>
+              </div>
             </div>
             <iframe
               title="Source Files"
@@ -442,7 +470,11 @@ export const FileUpload = (props: FileUploadProps) => {
             />
           </>
         ) : (
-          <CircularProgress />
+          <div className="flex h-screen justify-center items-center">
+            <div className="text-center">
+              <CircularProgress />
+            </div>
+          </div>
         )}
       </Modal>
 
