@@ -1,0 +1,7 @@
+## This rule redirects to an external API, signing requests with a secret
+[[redirects]]
+  from = "/api/*"
+  to = "https://careapi.coronasafe.in/api/:splat"
+  status = 301
+  force = true # COMMENT: ensure that we always redirect
+  headers = {X-From = "Netlify"}
