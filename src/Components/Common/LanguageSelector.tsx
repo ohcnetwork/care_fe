@@ -1,14 +1,10 @@
 import React, { createRef, useEffect } from "react";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { useTranslation } from "react-i18next";
+import { LANGUAGE_NAMES } from "../../Locale/config";
 
 export const LanguageSelector = (props: any) => {
   const { i18n } = useTranslation();
-
-  const LANGUAGE_NAMES: { [key: string]: any } = {
-    en: "English",
-    ta: "தமிழ்",
-  };
 
   useEffect(() => {
     document.documentElement.setAttribute("lang", i18n.language);
@@ -30,7 +26,7 @@ export const LanguageSelector = (props: any) => {
         {...props}
         className={
           className +
-          " py-2 pl-2 pr-8 appearance-none rounded-md shadow-lg cursor-auto"
+          " py-2 pl-2 pr-10 appearance-none rounded-md shadow-lg cursor-auto"
         }
         id="language-selector"
         name="language"
