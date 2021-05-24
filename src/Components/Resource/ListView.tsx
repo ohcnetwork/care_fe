@@ -130,7 +130,7 @@ export default function ListView() {
             <div>
               <div className="flex justify-between">
                 <div className="font-bold text-xl capitalize mb-2">
-                  {resource.reason}
+                  {resource.title}
                 </div>
                 <div>
                   {resource.emergency && (

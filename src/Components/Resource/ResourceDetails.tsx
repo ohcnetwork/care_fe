@@ -120,6 +120,11 @@ export default function ResourceDetails(props: { id: string }) {
         )}
         <div className="border rounded-lg bg-white shadow h-full text-black mt-4 p-4">
           <div className="flex justify-between">
+
+
+            <div className="text-xl font-semibold">
+              {data.title || "--"}
+            </div>
             <div>
               <div className="mt-2">
                 <Button
@@ -146,21 +151,15 @@ export default function ResourceDetails(props: { id: string }) {
             </div>
             <div>
               <span className="font-semibold leading-relaxed">
-                Orgin facility:{" "}
+                Category:{" "}
               </span>
-              {data.orgin_facility_object?.name || "--"}
+              {data.category || "--"}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">
-                Resource approving facility:{" "}
+                Subcategory:{" "}
               </span>
-              {data.approving_facility_object?.name || "--"}
-            </div>
-            <div>
-              <span className="font-semibold leading-relaxed">
-                Assigned facility:{" "}
-              </span>
-              {data.assigned_facility_object?.name || "--"}
+              {data.sub_category || "--"}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">
@@ -190,43 +189,10 @@ export default function ResourceDetails(props: { id: string }) {
                 {data.emergency ? "yes" : "no"}
               </span>
             </div>
-            <div>
-              <span className="font-semibold leading-relaxed">
-                Facility preference:{" "}
-              </span>
-              {data.assigned_facility_type || "--"}
-            </div>
-            <div>
-              <span className="font-semibold leading-relaxed">
-                Severity of Breathlessness:{" "}
-              </span>
-              {data.breathlessness_level || "--"}
-            </div>
 
             <div className="md:row-span-2 md:col-span-2">
               <div className="font-semibold leading-relaxed">Reason: </div>
               <div className="ml-2">{data.reason || "--"}</div>
-            </div>
-
-            <div className="md:row-span-2 md:col-span-2">
-              <div className="font-semibold leading-relaxed">Comments: </div>
-              <div className="ml-2">{data.comments || "--"}</div>
-            </div>
-
-            <div>
-              <span className="font-semibold leading-relaxed">
-                {" "}
-                Record Created at :{" "}
-              </span>
-              {moment(data.created_date).format("LLL") || "--"}
-            </div>
-
-            <div>
-              <span className="font-semibold leading-relaxed">
-                {" "}
-                Last Updated on :{" "}
-              </span>
-              {moment(data.modified_date).format("LLL") || "--"}
             </div>
           </div>
 
