@@ -91,6 +91,7 @@ export const FacilityHome = (props: any) => {
 
   const handleDeleteSubmit = () => {
     dispatch(deleteFacility(facilityId));
+    navigate("/facility");
   };
 
   const state: any = useSelector(state => state);
@@ -255,7 +256,7 @@ export const FacilityHome = (props: any) => {
               <i className="fas fa-dolly-flatbed text-white mr-2"></i>
               Resource Request
             </button>
-            {currentUser.data.user_type === "DistrictAdmin" && <button
+            {(currentUser.data.user_type === "DistrictAdmin" || currentUser.data.user_type === "StateAdmin") && <button
               className="btn-danger btn mt-2"
               onClick={() => setOpenDeleteDialog(true)}
             >
