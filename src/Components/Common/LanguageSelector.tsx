@@ -25,7 +25,7 @@ export const LanguageSelector = (props: any) => {
   const { className } = props;
 
   return (
-    <div className="flex items-center relative">
+    <div className="flex items-center relative w-full">
       <select
         {...props}
         className={
@@ -43,7 +43,7 @@ export const LanguageSelector = (props: any) => {
           </option>
         ))}
       </select>
-      <div className="absolute right-0 mr-1 z-10 h-auto">
+      <div className="absolute right-0 mr-1 z-10 h-auto w-8">
         <ExpandMoreIcon
           className={className}
         />
