@@ -1,4 +1,6 @@
 {
     "coronasafe_network": "CoronaSafe Network",
-    "goal": "Our Goal is to defend the Healthcare system from overloading beyond capacity."
+    "goal": "Our Goal is to defend the Healthcare system from overloading beyond capacity.",
+    "something_wrong": "Something went wrong! Try again later!",
+    "field_required": "This field is required"
 }
