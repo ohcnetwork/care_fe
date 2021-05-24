@@ -15,6 +15,7 @@ import { navigate } from "raviger";
 import {
   FACILITY_TYPES,
   RESOURCE_CATEGORY_CHOICES,
+  RESOURCE_SUBCATEGORIES,
 } from "../../Common/constants";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import {
@@ -39,6 +40,7 @@ interface resourceProps {
 
 const initForm: any = {
   category: "OXYGEN",
+  sub_category: 1000,
   approving_facility: null,
   assigned_facility: null,
   emergency: "false",
@@ -51,6 +53,9 @@ const initForm: any = {
 const requiredFields: any = {
   category: {
     errorText: "Category",
+  },
+  sub_category: {
+    errorText: "Subcategory",
   },
   approving_facility: {
     errorText: "Name of the referring facility",
@@ -163,6 +168,7 @@ export default function ResourceCreate(props: resourceProps) {
       const data = {
         status: "PENDING",
         category: state.form.category,
+        sub_category: state.form.sub_category,
         orgin_facility: props.facilityId,
         approving_facility: (state.form.approving_facility || {}).id,
         assigned_facility: (state.form.assigned_facility || {}).id,
@@ -239,19 +245,7 @@ export default function ResourceCreate(props: resourceProps) {
                   errors={state.errors.approving_facility}
                 />
               </div>
-              <div>
-                <InputLabel>Category</InputLabel>
-                <SelectField
-                  name="status"
-                  variant="outlined"
-                  margin="dense"
-                  optionArray={true}
-                  value={state.form.category}
-                  options={RESOURCE_CATEGORY_CHOICES}
-                  onChange={handleChange}
-                  className="bg-white h-14 w-1/3 mt-2 shadow-sm md:text-sm md:leading-5"
-                />
-              </div>
+             
               <div>
                 <InputLabel>Is this an emergency?</InputLabel>
                 <RadioGroup
@@ -276,7 +270,34 @@ export default function ResourceCreate(props: resourceProps) {
                 </RadioGroup>
                 <ErrorHelperText error={state.errors.emergency} />
               </div>
+ 
+              <div>
+                <InputLabel>Category</InputLabel>
+                <SelectField
+                  name="category"
+                  variant="outlined"
+                  margin="dense"
+                  optionArray={true}
+                  value={state.form.category}
+                  options={RESOURCE_CATEGORY_CHOICES}
+                  onChange={handleChange}
+                  className="bg-white h-14 w-1/3 mt-2 shadow-sm md:text-sm md:leading-5"
+                />
+              </div>
 
+              <div>
+                <InputLabel>Subcategory</InputLabel>
+                <SelectField
+                  name="sub_category"
+                  variant="outlined"
+                  margin="dense"
+                  value={state.form.sub_category}
+                  options={RESOURCE_SUBCATEGORIES}
+                  onChange={handleChange}
+                  className="bg-white h-14 w-1/3 mt-2 shadow-sm md:text-sm md:leading-5"
+                />
+              </div>
+              
               <div className="md:col-span-2">
                 <InputLabel>Request Title*</InputLabel>
                 <TextInputField
