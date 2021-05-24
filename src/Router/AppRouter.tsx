@@ -46,6 +46,7 @@ import Investigation from "../Components/Facility/Investigations";
 import ViewInvestigations from "../Components/Facility/Investigations/ViewInvestigations";
 import ShowInvestigation from "../Components/Facility/Investigations/ShowInvestigation";
 import InvestigationReports from "../Components/Facility/Investigations/Reports";
+import DeathReport from "../Components/DeathReport/DeathReport";
 
 const get = require("lodash.get");
 const img = "https://cdn.coronasafe.network/light-logo.svg";
@@ -140,19 +141,15 @@ const routes = {
   }: any) => (
     <ConsultationForm facilityId={facilityId} patientId={patientId} id={id} />
   ),
-  "/facility/:facilityId/patient/:patientId/consultation/:id/last_consultation/:isLastConsultation": ({
-    facilityId,
-    patientId,
-    id,
-    isLastConsultation
-  }: any) => (
-    <ConsultationDetails
-      facilityId={facilityId}
-      patientId={patientId}
-      consultationId={id}
-      isLastConsultation={isLastConsultation}
-    />
-  ),
+  "/facility/:facilityId/patient/:patientId/consultation/:id/last_consultation/:isLastConsultation":
+    ({ facilityId, patientId, id, isLastConsultation }: any) => (
+      <ConsultationDetails
+        facilityId={facilityId}
+        patientId={patientId}
+        consultationId={id}
+        isLastConsultation={isLastConsultation}
+      />
+    ),
   "/facility/:facilityId/patient/:patientId/consultation/:id/files/": ({
     facilityId,
     patientId,
@@ -282,6 +279,7 @@ const routes = {
   "/external_results": () => <ResultList />,
   "/external_results/upload": () => <ExternalResultUpload />,
   "/external_results/:id": ({ id }: any) => <ResultItem id={id} />,
+  "/death_report/:id": ({ id }: any) => <DeathReport id={id} />,
 };
 
 let menus = [
