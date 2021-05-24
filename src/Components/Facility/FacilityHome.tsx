@@ -94,7 +94,7 @@ export const FacilityHome = (props: any) => {
     navigate("/facility");
   };
 
-  const state: any = useSelector(state => state);
+  const state: any = useSelector((state) => state);
   const { currentUser } = state;
 
   if (isLoading) {
@@ -256,13 +256,16 @@ export const FacilityHome = (props: any) => {
               <i className="fas fa-dolly-flatbed text-white mr-2"></i>
               Resource Request
             </button>
-            {(currentUser.data.user_type === "DistrictAdmin" || currentUser.data.user_type === "StateAdmin") && <button
-              className="btn-danger btn mt-2"
-              onClick={() => setOpenDeleteDialog(true)}
-            >
-              <i className="fas fa-trash text-white mr-2"></i>
-              Delete Facility
-            </button>}
+            {(currentUser.data.user_type === "DistrictAdmin" ||
+              currentUser.data.user_type === "StateAdmin") && (
+              <button
+                className="btn-danger btn mt-2"
+                onClick={() => setOpenDeleteDialog(true)}
+              >
+                <i className="fas fa-trash text-white mr-2"></i>
+                Delete Facility
+              </button>
+            )}
           </div>
         </div>
         <div>
@@ -288,7 +291,6 @@ export const FacilityHome = (props: any) => {
             <button
               className="btn-primary btn w-full md:w-auto"
               onClick={() => navigate(`/facility/${facilityId}/bed`)}
-              disabled={capacityList.length === BED_TYPES.length}
             >
               <i className="fas fa-bed text-white mr-2"></i>
               Add More Bed Types
