@@ -96,7 +96,7 @@ const LoginPage = (props: any) => {
 
   return (
     <div className="flex flex-col md:flex-row h-screen relative">
-      <LanguageSelector />
+      <LanguageSelector className="absolute top-2 right-2 py-3 px-5  md:bg-green-500 md:text-white bg-white rounded-md shadow-lg" />
       <div className="flex flex-col justify-center h-1/2 md:w-1/2 md:h-full bg-green-500">
         <div className="pl-1/5">
           <a href={"/"}>

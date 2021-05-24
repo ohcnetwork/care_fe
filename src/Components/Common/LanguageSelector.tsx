@@ -1,7 +1,7 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 
-export const LanguageSelector = () => {
+export const LanguageSelector = (props: any) => {
   const { i18n } = useTranslation();
 
   const LANGUAGE_NAMES: { [key: string]: any } = {
@@ -18,7 +18,7 @@ export const LanguageSelector = () => {
 
   return (
     <select
-      className="absolute top-2 right-2 py-3 px-5  md:bg-green-500 md:text-white bg-white rounded-md shadow-lg"
+      {...props}
       name="language"
       value={i18n.language}
       onChange={(e: any) => handleLanguage(e.target.value)}
