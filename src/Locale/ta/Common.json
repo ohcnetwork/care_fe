@@ -4,5 +4,12 @@
   "something_wrong": "ஏதோ தவறு நடந்துவிட்டது! பின்னர் மீண்டும் முயற்சிக்கவும்!",
   "contribute_github": "Contribute on Github",
   "footer_body": "CoronaSafe Network is an open-source public utility designed by a multi-disciplinary team of innovators and volunteers who are working on a model to support Government efforts with full understanding and support of Government of Kerala.",
-  "reset": "Reset"
+  "reset": "Reset",
+  "downloads": "Downloads",
+  "download_type": "Download Type",
+  "State": "State",
+  "District": "District",
+  "Local Body": "Local Body",
+  "Location": "Location",
+  "Ward": "Ward"
 }
