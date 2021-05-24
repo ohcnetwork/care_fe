@@ -42,8 +42,8 @@ const initForm: any = {
   approving_facility: null,
   assigned_facility: null,
   emergency: "false",
+  title: "",
   reason: "",
-  comments: "",
   refering_facility_contact_name: "",
   refering_facility_contact_number: "",
 };
@@ -61,6 +61,10 @@ const requiredFields: any = {
   refering_facility_contact_number: {
     errorText: "Phone number of contact of the referring facility",
     invalidText: "Please enter valid phone number",
+  },
+  title: {
+    errorText: "Title for resource request in mandatory",
+    invalidText: "Please enter title for resource request",
   },
   reason: {
     errorText: "Reason for resource request in mandatory",
@@ -163,8 +167,8 @@ export default function ResourceCreate(props: resourceProps) {
         approving_facility: (state.form.approving_facility || {}).id,
         assigned_facility: (state.form.assigned_facility || {}).id,
         emergency: state.form.emergency === "true",
+        title: state.form.title,
         reason: state.form.reason,
-        comments: state.form.comments,
         refering_facility_contact_name:
           state.form.refering_facility_contact_name,
         refering_facility_contact_number: parsePhoneNumberFromString(
@@ -274,6 +278,21 @@ export default function ResourceCreate(props: resourceProps) {
               </div>
 
               <div className="md:col-span-2">
+                <InputLabel>Request Title*</InputLabel>
+                <TextInputField
+                  rows={5}
+                  name="title"
+                  variant="outlined"
+                  margin="dense"
+                  type="text"
+                  placeholder="Type your title here"
+                  value={state.form.title}
+                  onChange={handleChange}
+                  errors={state.errors.title}
+                />
+              </div>
+
+              <div className="md:col-span-2">
                 <InputLabel>Reason for request*</InputLabel>
                 <MultilineInputField
                   rows={5}
@@ -285,21 +304,6 @@ export default function ResourceCreate(props: resourceProps) {
                   value={state.form.reason}
                   onChange={handleChange}
                   errors={state.errors.reason}
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <InputLabel>Any other comments</InputLabel>
-                <MultilineInputField
-                  rows={5}
-                  name="comments"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  placeholder="type any extra comments here"
-                  value={state.form.comments}
-                  onChange={handleChange}
-                  errors={state.errors.comments}
                 />
               </div>
 

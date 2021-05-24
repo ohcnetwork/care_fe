@@ -41,8 +41,8 @@ const initForm: any = {
   approving_facility_object: null,
   assigned_facility_object: null,
   emergency: "false",
+  title: "",
   reason: "",
-  comments: "",
   assigned_facility_type: "",
   assigned_to: "",
 };
@@ -141,8 +141,8 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
         approving_facility: state.form?.approving_facility_object?.id,
         assigned_facility: state.form?.assigned_facility_object?.id,
         emergency: [true, "true"].includes(state.form.emergency),
+        title: state.form.title,
         reason: state.form.reason,
-        comments: state.form.comments,
         assigned_to: state.form.assigned_to,
       };
 
@@ -270,7 +270,22 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
               </div>
 
               <div className="md:col-span-2">
-                <InputLabel>Reason for resource*</InputLabel>
+                <InputLabel>Request Title*</InputLabel>
+                <TextInputField
+                  rows={5}
+                  name="title"
+                  variant="outlined"
+                  margin="dense"
+                  type="text"
+                  placeholder="Type your title here"
+                  value={state.form.title}
+                  onChange={handleChange}
+                  errors={state.errors.title}
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <InputLabel>Reason for resource request*</InputLabel>
                 <MultilineInputField
                   rows={5}
                   name="reason"
@@ -281,21 +296,6 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
                   value={state.form.reason}
                   onChange={handleChange}
                   errors={state.errors.reason}
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <InputLabel>Any other comments</InputLabel>
-                <MultilineInputField
-                  rows={5}
-                  name="comments"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  placeholder="type any extra comments here"
-                  value={state.form.comments}
-                  onChange={handleChange}
-                  errors={state.errors.comments}
                 />
               </div>
 
