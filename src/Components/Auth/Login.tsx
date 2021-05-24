@@ -5,13 +5,14 @@ import { navigate } from "raviger";
 import { CardActions, CardContent, Grid } from "@material-ui/core";
 import { TextInputField } from "../Common/HelperInputFields";
 import { PublicDashboard } from "../Dashboard/PublicDashboard";
-import { useTranslation } from "react-i18next";
+import { withTranslation } from "react-i18next";
 import ReCaptcha from "react-google-recaptcha";
 import VisibilityIcon from "@material-ui/icons/Visibility";
 import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
+import LanguageSelector from "../Common/LanguageSelector";
 const get = require("lodash.get");
 
-export const Login = () => {
+const LoginPage = (props: any) => {
   const dispatch: any = useDispatch();
   const initForm: any = {
     username: "",
@@ -22,8 +23,8 @@ export const Login = () => {
   const [errors, setErrors] = useState(initErr);
   const [isCaptchaEnabled, setCaptcha] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const { t } = useTranslation();
   const captchaKey = "6LdvxuQUAAAAADDWVflgBqyHGfq-xmvNJaToM0pN";
+  const { t } = props;
 
   const handleChange = (e: any) => {
     const { value, name } = e.target;
@@ -94,7 +95,8 @@ export const Login = () => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row h-screen">
+    <div className="flex flex-col md:flex-row h-screen relative">
+      <LanguageSelector />
       <div className="flex flex-col justify-center h-1/2 md:w-1/2 md:h-full bg-green-500">
         <div className="pl-1/5">
           <a href={"/"}>
@@ -189,3 +191,5 @@ export const Login = () => {
     </div>
   );
 };
+
+export const Login = withTranslation()(LoginPage);
