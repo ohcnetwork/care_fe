@@ -20,7 +20,7 @@ const routes = {
   "/password_reset/:token": ({ token }: any) => <ResetPassword token={token} />,
 };
 
-const SessionRouter = (props) => {
+const SessionRouter = (props: any) => {
   const content = useRoutes(routes) || <Login />;
   const { t } = props;
   const path =
