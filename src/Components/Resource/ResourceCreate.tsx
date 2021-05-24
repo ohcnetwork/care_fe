@@ -132,7 +132,7 @@ export default function ResourceCreate(props: resourceProps) {
           }
       }
     });
-    console.log("Form", errors);
+
     dispatch({ type: "set_error", errors });
     return !isInvalidForm;
   };
