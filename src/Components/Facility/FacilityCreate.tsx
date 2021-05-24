@@ -342,27 +342,6 @@ export const FacilityCreate = (props: FacilityProps) => {
           }
           return;
 
-        case "type_b_cylinders":
-          if (state.form.type_b_cylinders === "") {
-            errors[field] = "Please fill number of type B cylinders";
-            invalidForm = true;
-          }
-          return;
-
-        case "type_c_cylinders":
-          if (state.form.type_c_cylinders === "") {
-            errors[field] = "Please fill number of type C cylinders";
-            invalidForm = true;
-          }
-          return;
-
-        case "type_d_cylinders":
-          if (state.form.type_d_cylinders === "") {
-            errors[field] = "Please fill number of type D cylinders";
-            invalidForm = true;
-          }
-          return;
-
         default:
           return;
       }
