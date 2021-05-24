@@ -16,6 +16,7 @@ import Autocomplete from "@material-ui/lab/Autocomplete";
 import { InputLabel, makeStyles, CircularProgress } from "@material-ui/core";
 import { InvestigationResponse } from "./types";
 import ReportTable from "./ReportTable";
+import * as Notification from "../../../../Utils/Notifications";
 
 const RESULT_PER_PAGE = 15;
 
@@ -238,6 +239,12 @@ const InvestigationReports = ({ id }: any) => {
         } else {
           setIsNextSessionDisabled(false);
           setIsLoadMoreDisabled(false);
+
+          if (!data.results.length) {
+            Notification.Error({
+              msg: "No Investigation data available!",
+            });
+          }
           dispatch({
             type: "set_investigation_table_data",
             payload: data.results,

@@ -1,12 +1,16 @@
 import { Button, Card, CardContent, Grid, Typography } from "@material-ui/core";
 import { navigate } from "raviger";
 import React, { useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import loadable from "@loadable/component";
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogTitle from "@material-ui/core/DialogTitle";
 import { BED_TYPES, DOCTOR_SPECIALIZATION } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   getFacility,
+  deleteFacility,
   getTriageInfo,
   listCapacity,
   listDoctor,
@@ -30,6 +34,7 @@ export const FacilityHome = (props: any) => {
   const [capacityData, setCapacityData] = useState<Array<CapacityModal>>([]);
   const [doctorData, setDoctorData] = useState<Array<DoctorModal>>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = React.useState(false);
 
   const [patientStatsData, setPatientStatsData] = useState<
     Array<PatientStatsModel>
@@ -80,6 +85,18 @@ export const FacilityHome = (props: any) => {
     [dispatch, fetchData]
   );
 
+  const handleDeleteClose = () => {
+    setOpenDeleteDialog(false);
+  };
+
+  const handleDeleteSubmit = () => {
+    dispatch(deleteFacility(facilityId));
+    navigate("/facility");
+  };
+
+  const state: any = useSelector(state => state);
+  const { currentUser } = state;
+
   if (isLoading) {
     return <Loading />;
   }
@@ -88,10 +105,15 @@ export const FacilityHome = (props: any) => {
   if (!capacityData || !capacityData.length) {
     capacityList = <h5>No Bed Types Found</h5>;
   } else {
-    capacityList = capacityData.map((data: CapacityModal) => {
-      return (
-        <BedTypeCard facilityId={facilityId} key={`bed_${data.id}`} {...data} />
-      );
+    capacityList = BED_TYPES.map((x) => {
+      let res = capacityData.find((data) => {
+        return data.room_type === x.id;
+      });
+      if (res) {
+        return (
+          <BedTypeCard facilityId={facilityId} key={`bed_${res.id}`} {...res} />
+        );
+      }
     });
   }
 
@@ -148,6 +170,23 @@ export const FacilityHome = (props: any) => {
   return (
     <div className="px-2 pb-2">
       <PageTitle title={facilityData.name || "Facility"} />
+      <Dialog
+        maxWidth={"md"}
+        open={openDeleteDialog}
+        onClose={handleDeleteClose}
+      >
+        <DialogTitle className="flex justify-center bg-green-100">
+          Are you sure you want to delete {facilityData.name || "Facility"}
+        </DialogTitle>
+        <DialogActions>
+          <button onClick={handleDeleteClose} className="btn btn-primary">
+            Cancel
+          </button>
+          <button onClick={handleDeleteSubmit} className="btn btn-danger">
+            Delete
+          </button>
+        </DialogActions>
+      </Dialog>
       <div className="bg-white rounded-lg md:p-6 p-3 shadow">
         <div className="md:flex justify-between">
           <div>
@@ -217,6 +256,13 @@ export const FacilityHome = (props: any) => {
               <i className="fas fa-dolly-flatbed text-white mr-2"></i>
               Resource Request
             </button>
+            {(currentUser.data.user_type === "DistrictAdmin" || currentUser.data.user_type === "StateAdmin") && <button
+              className="btn-danger btn mt-2"
+              onClick={() => setOpenDeleteDialog(true)}
+            >
+              <i className="fas fa-trash text-white mr-2"></i>
+              Delete Facility
+            </button>}
           </div>
         </div>
         <div>

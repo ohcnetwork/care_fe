@@ -43,14 +43,16 @@ export const ConsultationCard = (props: ConsultationProps) => {
                 {itemData.admitted ? "Yes" : "No"}
               </Typography>
             </Grid>
-            <Grid item xs={7}>
-              <Typography>
-                <span className="text-gray-700">Kasp Enabled date: </span>
-                {itemData.kasp_enabled_date
-                  ? moment(itemData.kasp_enabled_date).format("lll")
-                  : "-"}
-              </Typography>
-            </Grid>
+            {itemData.kasp_enabled_date && (
+              <Grid item xs={7}>
+                <Typography>
+                  <span className="text-gray-700">Kasp Enabled date: </span>
+                  {itemData.kasp_enabled_date
+                    ? moment(itemData.kasp_enabled_date).format("lll")
+                    : "-"}
+                </Typography>
+              </Grid>
+            )}
             {itemData.admission_date && (
               <Grid item xs={5}>
                 <Typography>
@@ -97,7 +99,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
               className="px-4 py-2 shadow border bg-white rounded-md border-grey-500 whitespace-no-wrap text-sm font-semibold cursor-pointer hover:bg-gray-300 text-center"
               onClick={() =>
                 navigate(
-                  `/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/`
+                  `/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/last_consultation/${isLastConsultation}`
                 )
               }
             >

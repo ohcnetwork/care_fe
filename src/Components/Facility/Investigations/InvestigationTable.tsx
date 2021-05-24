@@ -118,7 +118,6 @@ export const InvestigationTable = ({
   handleUpdateCancel,
   handleSave,
 }: any) => {
-  // console.log({ data, handleValueChange, changedFields });
   const [searchFilter, setSearchFilter] = useState("");
   const [showForm, setShowForm] = useState(false);
   const filterTests = Object.values(data).filter((i: any) => {
@@ -184,10 +183,6 @@ export const InvestigationTable = ({
           <TableBody>
             {filterTests.length > 0 ? (
               filterTests.map((t: any) => {
-                // console.log({
-                //   notes: changedFields[t.id]?.notes,
-                //   value: changedFields[t.id]?.value,
-                // });
                 const value =
                   changedFields[t.id]?.notes ??
                   changedFields[t.id]?.value ??

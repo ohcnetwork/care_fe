@@ -370,7 +370,10 @@ export default function ShiftDetails(props: { id: string }) {
       <div id="section-to-print" className="print bg-white ">
         <div>
           {data.is_kasp && (
-            <img src="https://cdn.coronasafe.network/header_logo.png" />
+            <img
+              alt="logo"
+              src="https://cdn.coronasafe.network/header_logo.png"
+            />
           )}
         </div>
         <div className="mx-20 p-4">
@@ -439,7 +442,9 @@ export default function ShiftDetails(props: { id: string }) {
               <span className="font-semibold leading-relaxed">
                 Date of Admission:{" "}
               </span>
-              {moment(consultation.created_date).format("LL") || "-"}
+              {moment(
+                consultation.admission_date || consultation.created_date
+              ).format("LL") || "-"}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">OP/IP No: </span>
@@ -749,7 +754,7 @@ export default function ShiftDetails(props: { id: string }) {
               </div>
             </div>
 
-            <div className="flex justify-end mt-4">
+            <div className="flex justify-end mt-4 hidden">
               <div>
                 <Button
                   fullWidth
