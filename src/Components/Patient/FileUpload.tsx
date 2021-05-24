@@ -36,7 +36,6 @@ import { VoiceRecorder } from "../../Utils/VoiceRecorder";
 import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
 import Modal from "@material-ui/core/Modal";
 import { Close } from "@material-ui/icons";
-import { BrowserClient } from "@sentry/browser";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
