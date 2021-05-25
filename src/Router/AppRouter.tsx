@@ -459,9 +459,9 @@ const AppRouter = () => {
                   ? "mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-white rounded-md bg-green-900 focus:outline-none focus:bg-green-900 transition ease-in-out duration-150"
                   : "mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-green-300 rounded-md hover:text-white hover:bg-green-700 focus:outline-none focus:bg-green-900 transition ease-in-out duration-150";
                 return (
-                  <button
+                  <a
                     key={item.title}
-                    onClick={() => navigate(item.link)}
+                    href={item.link}
                     className={selectedClasses}
                   >
                     <i
@@ -474,7 +474,7 @@ const AppRouter = () => {
                       }
                     ></i>
                     {item.title}
-                  </button>
+                  </a>
                 );
               })}
               <NotificationsList />
