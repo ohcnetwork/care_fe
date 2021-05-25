@@ -92,6 +92,7 @@ export const FacilityHome = (props: any) => {
   const handleDeleteSubmit = () => {
     dispatch(deleteFacility(facilityId));
     navigate("/facility");
+    window.location.reload();
   };
 
   const state: any = useSelector(state => state);
