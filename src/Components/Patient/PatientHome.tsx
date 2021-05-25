@@ -659,6 +659,26 @@ export const PatientHome = (props: any) => {
                     </div>
                   </div>
                 )}
+                {patientData.is_vaccinated && patientData.number_of_doses && (
+                  <div className="sm:col-span-1">
+                    <div className="text-sm leading-5 font-medium text-gray-500">
+                      Number of vaccine doses
+                    </div>
+                    <div className="mt-1 text-sm leading-5 text-gray-900">
+                      {patientData.number_of_doses}
+                    </div>
+                  </div>
+                )}
+                {patientData.is_vaccinated && patientData.vaccine_name && (
+                  <div className="sm:col-span-1">
+                    <div className="text-sm leading-5 font-medium text-gray-500">
+                      Vaccine name
+                    </div>
+                    <div className="mt-1 text-sm leading-5 text-gray-900">
+                      {patientData.vaccine_name}
+                    </div>
+                  </div>
+                )}
                 {patientData.countries_travelled &&
                   !!patientData.countries_travelled.length && (
                     <div className="sm:col-span-1">
