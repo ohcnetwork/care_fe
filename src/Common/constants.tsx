@@ -429,6 +429,13 @@ export const RESOURCE_CHOICES: Array<OptionsType> = [
   { id: 70, text: "TRANSFER IN PROGRESS" },
   { id: 80, text: "COMPLETED" },
 ];
+export const RESOURCE_SUBCATEGORIES: Array<OptionsType> = [
+  { id: 110, text: "LIQUID OXYGEN" },
+  { id: 120, text: "B TYPE OXYGEN CYLINDER" },
+  { id: 130, text: "C TYPE OXYGEN CYLINDER" },
+  { id: 140, text: "JUMBO D TYPE OXYGEN CYLINDER" },
+  { id: 1000, text: "UNSPECIFIED" }
+];
 
 export const RESOURCE_FILTER_ORDER: Array<OptionsType> = [
   { id: 1, text: "created_date", desc: "ASC Created Date" },
