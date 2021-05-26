@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { FacilitySelect } from "../Common/FacilitySelect";
-import { UserSelect } from "../Common/UserSelect";
+// import { UserSelect } from "../Common/UserSelect";
+import { UserSelect } from "../Common/UserSelect2";
 import {
   SelectField,
   DateInputField,
@@ -8,7 +9,7 @@ import {
 } from "../Common/HelperInputFields";
 import { SHIFTING_FILTER_ORDER } from "../../Common/constants";
 import moment from "moment";
-import { getFacility } from "../../Redux/actions";
+import { getFacility, getUserDetails } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { CircularProgress } from "@material-ui/core";
 import { SHIFTING_CHOICES } from "../../Common/constants";
@@ -57,9 +58,9 @@ export default function ListFilter(props: any) {
     ordering: filter.ordering || local.ordering || null,
     is_kasp: filter.is_kasp || local.is_kasp || "--",
     status: filter.status || local.status || null,
-    assigned_user_facility:
-      filter.assigned_user_facility || local.assigned_user_facility || "",
-    assigned_user_facility_ref: null,
+    assigned_user:
+      filter.assigned_user || local.assigned_user || "",
+    assigned_user_ref: null,
     assigned_to: filter.assigned_to || local.assigned_to || "",
   });
   const dispatch: any = useDispatch();
@@ -117,13 +118,11 @@ export default function ListFilter(props: any) {
 
   useEffect(() => {
     async function fetchData() {
-      if (filter.assigned_user_facility) {
+      if (filter.assigned_user) {
         setAssignedUserLoading(true);
-        const res = await dispatch(
-          getFacility(filter.assigned_user_facility, "assigned_user_facility")
-        );
+        const res = await dispatch(getUserDetails(filter.assigned_user));
         if (res && res.data) {
-          setFilterState({ assigned_user_facility_ref: res.data });
+          setFilterState({ assigned_user_ref: res.data });
         }
         setAssignedUserLoading(false);
       }
@@ -136,17 +135,18 @@ export default function ListFilter(props: any) {
     filterData[`${name}_ref`] = selected;
     filterData[name] = (selected || {}).id;
 
-    if (name === "assigned_user_facility") filterData.assigned_to = "";
 
     setFilterState(filterData);
   };
 
-  const setAssignedTo = (userId: string) => {
+  const setAssignedUser = (user: any) => {
     const filterData: any = { ...filterState };
-    filterData.assigned_to = userId;
-
+    filterData.assigned_to = user.id;
+    filterData.assigned_user = user.username;
+    filterData.assigned_user_ref = user;
+    
     setFilterState(filterData);
-  };
+  }
 
   const handleChange = (event: any) => {
     let { name, value } = event.target;
@@ -177,7 +177,7 @@ export default function ListFilter(props: any) {
       ordering,
       is_kasp,
       status,
-      assigned_user_facility,
+      assigned_user,
       assigned_to,
     } = filterState;
     localStorage.setItem("shift-filters", JSON.stringify(filterState));
@@ -207,11 +207,13 @@ export default function ListFilter(props: any) {
       ordering: ordering || "",
       is_kasp: is_kasp || "",
       status: status || "",
-      assigned_user_facility: assigned_user_facility || "",
+      assigned_user: assigned_user || "",
       assigned_to: assigned_to || "",
     };
     onChange(data);
   };
+
+  console.log(filterState)
 
   return (
     <div>
@@ -308,7 +310,7 @@ export default function ListFilter(props: any) {
           </div>
         </div>
 
-        <div className="w-64 flex-none hidden">
+        {/* <div className="w-64 flex-none hidden">
           <span className="text-sm font-semibold">Assigned to</span>
           <label
             id="listbox-label"
@@ -322,10 +324,10 @@ export default function ListFilter(props: any) {
             ) : (
               <FacilitySelect
                 multiple={false}
-                name="assigned_user_facility"
-                selected={filterState.assigned_user_facility_ref}
+                name="assigned_user"
+                selected={filterState.assigned_user_ref}
                 setSelected={(obj) =>
-                  setFacility(obj, "assigned_user_facility")
+                  setFacility(obj, "assigned_user")
                 }
                 className="shifting-page-filter-dropdown"
                 errors={""}
@@ -333,16 +335,34 @@ export default function ListFilter(props: any) {
             )}
           </div>
 
-          {filterState.assigned_user_facility && (
+          {filterState.assigned_user && (
             <div className="w-64 flex-none">
               <UserSelect
                 userId={filterState.assigned_to}
-                facilityId={filterState.assigned_user_facility}
+                facilityId={filterState.assigned_user}
                 onSelect={setAssignedTo}
                 placeholder="Select the Assigned Staff"
               />
             </div>
-          )}
+          )} 
+
+        </div> */}
+
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">Assigned To</span>
+          <div className="">
+            {isAssignedLoading ? (
+              <CircularProgress size={20} />
+            ) : (
+              <UserSelect
+                 multiple={false}
+                 selected={filterState.assigned_user_ref}
+                 setSelected={(obj) => setAssignedUser(obj)}
+                 className="shifting-page-filter-dropdown"
+                 errors={""}
+              />
+            )}
+          </div>
         </div>
 
         {/* <div className="w-64 flex-none">
