@@ -31,37 +31,35 @@ export default function ListFilter(props: any) {
   const [isAssignedLoading, setAssignedLoading] = useState(false);
   const [isAssignedUserLoading, setAssignedUserLoading] = useState(false);
 
-  const local = JSON.parse(localStorage.getItem("shift-filters") || "{}");
   const [filterState, setFilterState] = useMergeState({
-    orgin_facility: filter.orgin_facility || local.orgin_facility || "",
+    orgin_facility: filter.orgin_facility || "",
     orgin_facility_ref: null,
     shifting_approving_facility:
       filter.shifting_approving_facility ||
-      local.shifting_approving_facility ||
       "",
     shifting_approving_facility_ref: null,
     assigned_facility:
-      filter.assigned_facility || local.assigned_facility || "",
+      filter.assigned_facility || "",
     assigned_facility_ref: null,
-    emergency: filter.emergency || local.emergency || "--",
-    is_up_shift: filter.is_up_shift || local.is_up_shift || "--",
+    emergency: filter.emergency || "--",
+    is_up_shift: filter.is_up_shift || "--",
     created_date_before:
-      filter.created_date_before || local.created_date_before || null,
+      filter.created_date_before || null,
     created_date_after:
-      filter.created_date_after || local.created_date_after || null,
+      filter.created_date_after || null,
     modified_date_before:
-      filter.modified_date_before || local.modified_date_before || null,
+      filter.modified_date_before || null,
     modified_date_after:
-      filter.modified_date_after || local.modified_date_after || null,
+      filter.modified_date_after || null,
     patient_phone_number:
-      filter.patient_phone_number || local.patient_phone_number || "",
-    ordering: filter.ordering || local.ordering || null,
-    is_kasp: filter.is_kasp || local.is_kasp || "--",
-    status: filter.status || local.status || null,
+      filter.patient_phone_number || "",
+    ordering: filter.ordering || null,
+    is_kasp: filter.is_kasp || "--",
+    status: filter.status || null,
     assigned_user_facility:
-      filter.assigned_user_facility || local.assigned_user_facility || "",
+      filter.assigned_user_facility || "",
     assigned_user_facility_ref: null,
-    assigned_to: filter.assigned_to || local.assigned_to || "",
+    assigned_to: filter.assigned_to || "",
   });
   const dispatch: any = useDispatch();
 
