@@ -8,7 +8,7 @@ import {
 } from "../Common/HelperInputFields";
 import { SHIFTING_FILTER_ORDER } from "../../Common/constants";
 import moment from "moment";
-import { getFacility, getUserDetails } from "../../Redux/actions";
+import { getFacility, getUserList } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { CircularProgress } from "@material-ui/core";
 import { SHIFTING_CHOICES } from "../../Common/constants";
@@ -119,9 +119,19 @@ export default function ListFilter(props: any) {
     async function fetchData() {
       if (filter.assigned_user) {
         setAssignedUserLoading(true);
-        const res = await dispatch(getUserDetails(filter.assigned_user));
-        if (res && res.data) {
-          setFilterState({ assigned_user_ref: res.data });
+        const params = {
+          limit: 10,
+          offset: 0,
+          username: filter.assigned_user,
+        };
+        const res = await dispatch(getUserList(params));
+
+        if (res && res.data && res.data.count) {
+          const assigned_user = res.data.results.find(
+            (user: any) => user.id == filter.assigned_to
+          );
+
+          setFilterState({ assigned_user_ref: assigned_user });
         }
         setAssignedUserLoading(false);
       }
@@ -211,8 +221,6 @@ export default function ListFilter(props: any) {
     };
     onChange(data);
   };
-
-  console.log(filterState)
 
   return (
     <div>
