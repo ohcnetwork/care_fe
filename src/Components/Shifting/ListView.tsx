@@ -409,7 +409,7 @@ export default function ListView() {
         {badge("Modified Before", appliedFilters.modified_date_before)}
         {badge("Created Before", appliedFilters.created_date_before)}
         {badge("Created After", appliedFilters.created_date_after)}
-        {badge("Assigned To", appliedFilters.assigned_to)}
+        {badge("Assigned To", appliedFilters.assigned_user || appliedFilters.assigned_to)}
         {badge(
           "Filtered By",
           appliedFilters.assigned_facility && "Assigned Facility"
