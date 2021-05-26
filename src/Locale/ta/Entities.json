@@ -1,11 +1,11 @@
 {
-  "Facilities": "Facilities",
-  "Patients": "Patients",
-  "Sample Test": "Sample",
-  "Shifting": "Shifting",
-  "Resource": "Resource",
-  "External Results": "External",
-  "Users": "Users",
-  "Profile": "Profile",
-  "Dashboard": "Dashboard"
+  "Facilities": "வசதிகள்",
+  "Patients": "நோயாளிகள்",
+  "Sample Test": "மாதிரி சோதனை",
+  "Shifting": "மாற்றுதல்",
+  "Resource": "வளம்",
+  "External Results": "வெளி முடிவு",
+  "Users": "பயனர்கள்",
+  "Profile": "சுயவிவரம்",
+  "Dashboard": "டாஷ்போர்டு"
 }
