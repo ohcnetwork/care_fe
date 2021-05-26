@@ -439,7 +439,7 @@ export default function ListFilter(props: any) {
             margin="dense"
             optionArray={true}
             value={filterState.disease_status}
-            options={["--", ...DISEASE_STATUS]}
+            options={["Select", ...DISEASE_STATUS]}
             onChange={handleChange}
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
           />
