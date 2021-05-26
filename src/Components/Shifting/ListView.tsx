@@ -128,6 +128,7 @@ export default function ListView() {
     qParams.is_kasp,
     qParams.assigned_user_facility,
     qParams.assigned_to,
+    qParams.disease_status,
     offset,
   ]);
 
