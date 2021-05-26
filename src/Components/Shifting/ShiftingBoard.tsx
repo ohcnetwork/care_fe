@@ -78,7 +78,7 @@ export default function ListView({ board, filterProp, formatFilter }: boardProps
     filterProp.patient_phone_number,
     filterProp.ordering,
     filterProp.is_kasp,
-    filterProp.assigned_user_facility,
+    filterProp.assigned_user,
     filterProp.assigned_to,
     filterProp.disease_status,
   ]);
