@@ -15,6 +15,7 @@ import { navigate } from "raviger";
 import {
   FACILITY_TYPES,
   RESOURCE_CATEGORY_CHOICES,
+  RESOURCE_SUBCATEGORIES,
 } from "../../Common/constants";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import {
@@ -39,11 +40,12 @@ interface resourceProps {
 
 const initForm: any = {
   category: "OXYGEN",
+  sub_category: 1000,
   approving_facility: null,
   assigned_facility: null,
   emergency: "false",
+  title: "",
   reason: "",
-  comments: "",
   refering_facility_contact_name: "",
   refering_facility_contact_number: "",
 };
@@ -51,6 +53,9 @@ const initForm: any = {
 const requiredFields: any = {
   category: {
     errorText: "Category",
+  },
+  sub_category: {
+    errorText: "Subcategory",
   },
   approving_facility: {
     errorText: "Name of the referring facility",
@@ -61,6 +66,10 @@ const requiredFields: any = {
   refering_facility_contact_number: {
     errorText: "Phone number of contact of the referring facility",
     invalidText: "Please enter valid phone number",
+  },
+  title: {
+    errorText: "Title for resource request in mandatory",
+    invalidText: "Please enter title for resource request",
   },
   reason: {
     errorText: "Reason for resource request in mandatory",
@@ -159,12 +168,13 @@ export default function ResourceCreate(props: resourceProps) {
       const data = {
         status: "PENDING",
         category: state.form.category,
+        sub_category: state.form.sub_category,
         orgin_facility: props.facilityId,
         approving_facility: (state.form.approving_facility || {}).id,
         assigned_facility: (state.form.assigned_facility || {}).id,
         emergency: state.form.emergency === "true",
+        title: state.form.title,
         reason: state.form.reason,
-        comments: state.form.comments,
         refering_facility_contact_name:
           state.form.refering_facility_contact_name,
         refering_facility_contact_number: parsePhoneNumberFromString(
@@ -235,19 +245,7 @@ export default function ResourceCreate(props: resourceProps) {
                   errors={state.errors.approving_facility}
                 />
               </div>
-              <div>
-                <InputLabel>Category</InputLabel>
-                <SelectField
-                  name="status"
-                  variant="outlined"
-                  margin="dense"
-                  optionArray={true}
-                  value={state.form.category}
-                  options={RESOURCE_CATEGORY_CHOICES}
-                  onChange={handleChange}
-                  className="bg-white h-14 w-1/3 mt-2 shadow-sm md:text-sm md:leading-5"
-                />
-              </div>
+             
               <div>
                 <InputLabel>Is this an emergency?</InputLabel>
                 <RadioGroup
@@ -272,6 +270,48 @@ export default function ResourceCreate(props: resourceProps) {
                 </RadioGroup>
                 <ErrorHelperText error={state.errors.emergency} />
               </div>
+ 
+              <div>
+                <InputLabel>Category</InputLabel>
+                <SelectField
+                  name="category"
+                  variant="outlined"
+                  margin="dense"
+                  optionArray={true}
+                  value={state.form.category}
+                  options={RESOURCE_CATEGORY_CHOICES}
+                  onChange={handleChange}
+                  className="bg-white h-14 w-1/3 mt-2 shadow-sm md:text-sm md:leading-5"
+                />
+              </div>
+
+              <div>
+                <InputLabel>Subcategory</InputLabel>
+                <SelectField
+                  name="sub_category"
+                  variant="outlined"
+                  margin="dense"
+                  value={state.form.sub_category}
+                  options={RESOURCE_SUBCATEGORIES}
+                  onChange={handleChange}
+                  className="bg-white h-14 w-1/3 mt-2 shadow-sm md:text-sm md:leading-5"
+                />
+              </div>
+              
+              <div className="md:col-span-2">
+                <InputLabel>Request Title*</InputLabel>
+                <TextInputField
+                  rows={5}
+                  name="title"
+                  variant="outlined"
+                  margin="dense"
+                  type="text"
+                  placeholder="Type your title here"
+                  value={state.form.title}
+                  onChange={handleChange}
+                  errors={state.errors.title}
+                />
+              </div>
 
               <div className="md:col-span-2">
                 <InputLabel>Reason for request*</InputLabel>
@@ -285,21 +325,6 @@ export default function ResourceCreate(props: resourceProps) {
                   value={state.form.reason}
                   onChange={handleChange}
                   errors={state.errors.reason}
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <InputLabel>Any other comments</InputLabel>
-                <MultilineInputField
-                  rows={5}
-                  name="comments"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  placeholder="type any extra comments here"
-                  value={state.form.comments}
-                  onChange={handleChange}
-                  errors={state.errors.comments}
                 />
               </div>
 

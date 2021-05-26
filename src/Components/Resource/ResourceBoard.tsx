@@ -117,8 +117,8 @@ export default function ResourceBoard({
             <div className={"p-4 h-full flex flex-col justify-between"}>
               <div>
                 <div className="flex justify-between">
-                  <div className="font-bold text-xl capitalize mb-2">
-                    {resource.reason}
+                  <div className="font-semibold text-md capitalize mb-2 text-black">
+                    {resource.title}
                   </div>
                   <div>
                     {resource.emergency && (

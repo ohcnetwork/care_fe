@@ -275,7 +275,7 @@ export const FileUpload = (props: FileUploadProps) => {
                     loadFile(item.id);
                   }}
                 >
-                  Load File
+                  Preview File
                 </Button>
               </div>
             )}
