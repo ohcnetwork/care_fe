@@ -1,7 +1,7 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@material-ui/core';
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import { WithStyles, withStyles } from '@material-ui/styles';
-import React, { useReducer } from 'react';
+import React, { useEffect, useReducer } from 'react';
 import { ROLE_STATUS_MAP, SAMPLE_TEST_STATUS, SAMPLE_TEST_RESULT, SAMPLE_FLOW_RULES } from '../../Common/constants';
 import { CheckboxField, SelectField } from '../Common/HelperInputFields';
 import { SampleTestModel } from './models';
@@ -62,12 +62,18 @@ const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
     const { sample, handleOk, handleCancel, classes, userType } = props;
     const [state, dispatch] = useReducer(updateStatusReducer, initialState);
 
-    const currentStatus = SAMPLE_TEST_STATUS.find(i => i.text === sample.status)?.desc;
+    const currentStatus = SAMPLE_TEST_STATUS.find(i => i.text === sample.status);
 
     const status = String(sample.status) as keyof typeof SAMPLE_FLOW_RULES;
     const validStatusChoices = statusChoices
         .filter(i => status && statusFlow[status] && statusFlow[status].includes(i.text))
     // .filter(i => roleStatusMap[userType] && roleStatusMap[userType].includes(i.text))
+
+    useEffect(() => {
+        const form = { ...state.form };
+        form.status = currentStatus?.id;
+        dispatch({ type: "set_form", form });
+    },[])
 
     const newStatusChoices = [
         {
@@ -78,6 +84,7 @@ const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
     ];
 
     const okClicked = () => {
+        console.log("OK", state.form);
         handleOk(sample, state.form.status, state.form.result);
         dispatch({ type: "set_form", form: initForm });
     };
@@ -107,7 +114,7 @@ const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
                     <div className="font-semibold leading-relaxed text-right">
                         Current Status :
                     </div>
-                    <div className="md:col-span-2">{currentStatus}</div>
+                    <div className="md:col-span-2">{currentStatus?.desc}</div>
                     <div className="font-semibold leading-relaxed text-right">
                         New Status :
                     </div>

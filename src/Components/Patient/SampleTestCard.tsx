@@ -43,8 +43,10 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
       sampleData.result = result;
     }
     const statusName = SAMPLE_TEST_STATUS.find((i) => i.id === status)?.desc;
+    
     const res = await dispatch(patchSample(sample.id, sampleData));
     if (res && (res.status === 201 || res.status === 200)) {
+      console.log(sampleData);
       window.location.reload(false);
       Notification.Success({
         msg: `Success - ${statusName}`,
