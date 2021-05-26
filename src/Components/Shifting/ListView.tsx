@@ -411,6 +411,7 @@ export default function ListView() {
         {badge("Created Before", appliedFilters.created_date_before)}
         {badge("Created After", appliedFilters.created_date_after)}
         {badge("Assigned To", appliedFilters.assigned_to)}
+        {badge("Disease Status", appliedFilters.disease_status)}
         {badge(
           "Filtered By",
           appliedFilters.assigned_facility && "Assigned Facility"
