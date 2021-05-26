@@ -308,6 +308,9 @@ export default {
   getDistrictByState: {
     path: "/api/v1/state/{id}/districts/",
   },
+  getDistrictByName: {
+    path: "/api/v1/district/",
+  },
   getAllLocalBodyByDistrict: {
     path: "/api/v1/district/{id}/get_all_local_body/",
   },
@@ -320,7 +323,10 @@ export default {
     path: "/api/v1/local_body/{id}/",
   },
   getAllLocalBody: {
-    path: "/api/v1/local_body/"
+    path: "/api/v1/local_body/",
+  },
+  getLocalbodyByName: {
+    path: "/api/v1/local_body/",
   },
 
   // ward
@@ -469,11 +475,11 @@ export default {
     path: "/api/v1/patient/{patient_external_id}/investigation/",
     method: "GET",
   },
-   editInvestigation: {
+  editInvestigation: {
     path: "/api/v1/consultation/{consultation_external_id}/investigation/batchUpdate/",
     method: "PUT",
   },
-  
+
   // Resource
   createResource: {
     path: "/api/v1/resource/",
@@ -498,5 +504,12 @@ export default {
     path: "/api/v1/resource/",
     method: "GET",
   },
+  getResourceComments: {
+    path: "/api/v1/resource/{id}/comment/",
+    method: "GET",
+  },
+  addResourceComments: {
+    path: "/api/v1/resource/{id}/comment/",
+    method: "POST",
+  },
 };
-

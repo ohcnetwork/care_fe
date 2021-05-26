@@ -75,7 +75,9 @@ const routes = {
   "/facility/:facilityId": ({ facilityId }: any) => (
     <FacilityHome facilityId={facilityId} />
   ),
-  "/facility/:facilityId/resource/new": ({ facilityId } : any) => <ResourceCreate facilityId={facilityId} />,
+  "/facility/:facilityId/resource/new": ({ facilityId }: any) => (
+    <ResourceCreate facilityId={facilityId} />
+  ),
   "/facility/:facilityId/triage": ({ facilityId }: any) => (
     <TriageForm facilityId={facilityId} />
   ),
@@ -114,6 +116,8 @@ const routes = {
       consultationId=""
       type="PATIENT"
       hideBack={false}
+      audio={true}
+      unspecified={true}
     />
   ),
   "/facility/:facilityId/triage/:id": ({ facilityId, id }: any) => (
@@ -136,17 +140,15 @@ const routes = {
   }: any) => (
     <ConsultationForm facilityId={facilityId} patientId={patientId} id={id} />
   ),
-  "/facility/:facilityId/patient/:patientId/consultation/:id/": ({
-    facilityId,
-    patientId,
-    id,
-  }: any) => (
-    <ConsultationDetails
-      facilityId={facilityId}
-      patientId={patientId}
-      consultationId={id}
-    />
-  ),
+  "/facility/:facilityId/patient/:patientId/consultation/:id/last_consultation/:isLastConsultation":
+    ({ facilityId, patientId, id, isLastConsultation }: any) => (
+      <ConsultationDetails
+        facilityId={facilityId}
+        patientId={patientId}
+        consultationId={id}
+        isLastConsultation={isLastConsultation}
+      />
+    ),
   "/facility/:facilityId/patient/:patientId/consultation/:id/files/": ({
     facilityId,
     patientId,
@@ -158,6 +160,8 @@ const routes = {
       consultationId={id}
       type="CONSULTATION"
       hideBack={false}
+      audio={true}
+      unspecified={true}
     />
   ),
   "/facility/:facilityId/patient/:patientId/consultation/:id/investigation/": ({
@@ -171,30 +175,23 @@ const routes = {
       patientId={patientId}
     />
   ),
-  "/facility/:facilityId/patient/:patientId/consultation/:id/investigationSessions": ({
-    facilityId,
-    patientId,
-    id,
-  }: any) => (
-    <ViewInvestigations
-      consultationId={id}
-      facilityId={facilityId}
-      patientId={patientId}
-    />
-  ),
-  "/facility/:facilityId/patient/:patientId/consultation/:id/investigation/:sessionId": ({
-    facilityId,
-    patientId,
-    id,
-    sessionId,
-  }: any) => (
-    <ShowInvestigation
-      consultationId={id}
-      facilityId={facilityId}
-      patientId={patientId}
-      sessionId={sessionId}
-    />
-  ),
+  "/facility/:facilityId/patient/:patientId/consultation/:id/investigationSessions":
+    ({ facilityId, patientId, id }: any) => (
+      <ViewInvestigations
+        consultationId={id}
+        facilityId={facilityId}
+        patientId={patientId}
+      />
+    ),
+  "/facility/:facilityId/patient/:patientId/consultation/:id/investigation/:sessionId":
+    ({ facilityId, patientId, id, sessionId }: any) => (
+      <ShowInvestigation
+        consultationId={id}
+        facilityId={facilityId}
+        patientId={patientId}
+        sessionId={sessionId}
+      />
+    ),
   "/facility/:facilityId/patient/:patientId/consultation/:id/daily-rounds": ({
     facilityId,
     patientId,
@@ -206,32 +203,24 @@ const routes = {
       consultationId={id}
     />
   ),
-  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily-rounds/:id/update": ({
-    facilityId,
-    patientId,
-    consultationId,
-    id,
-  }: any) => (
-    <DailyRounds
-      facilityId={facilityId}
-      patientId={patientId}
-      consultationId={consultationId}
-      id={id}
-    />
-  ),
-  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily-rounds/:id": ({
-    facilityId,
-    patientId,
-    consultationId,
-    id,
-  }: any) => (
-    <DailyRoundListDetails
-      facilityId={facilityId}
-      patientId={patientId}
-      consultationId={consultationId}
-      id={id}
-    />
-  ),
+  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily-rounds/:id/update":
+    ({ facilityId, patientId, consultationId, id }: any) => (
+      <DailyRounds
+        facilityId={facilityId}
+        patientId={patientId}
+        consultationId={consultationId}
+        id={id}
+      />
+    ),
+  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily-rounds/:id":
+    ({ facilityId, patientId, consultationId, id }: any) => (
+      <DailyRoundListDetails
+        facilityId={facilityId}
+        patientId={patientId}
+        consultationId={consultationId}
+        id={id}
+      />
+    ),
   "/facility/:facilityId/patient/:patientId/shift/new": ({
     facilityId,
     patientId,
@@ -271,21 +260,21 @@ const routes = {
     ) : (
       <ShiftBoardView />
     ),
-    "/shifting/board-view": () => <ShiftBoardView />,
-    "/shifting/list-view": () => <ShiftListView />,
-    "/shifting/:id": ({ id }: any) => <ShiftDetails id={id} />,
-    "/shifting/:id/update": ({ id }: any) => <ShiftDetailsUpdate id={id} />,
-    "/resource": () =>
-      localStorage.getItem("defaultResourceView") === "list" ? (
-        <ResourceListView />
-      ) : (
-        <ResourceBoardView />
-      ),
+  "/shifting/board-view": () => <ShiftBoardView />,
+  "/shifting/list-view": () => <ShiftListView />,
+  "/shifting/:id": ({ id }: any) => <ShiftDetails id={id} />,
+  "/shifting/:id/update": ({ id }: any) => <ShiftDetailsUpdate id={id} />,
+  "/resource": () =>
+    localStorage.getItem("defaultResourceView") === "list" ? (
+      <ResourceListView />
+    ) : (
+      <ResourceBoardView />
+    ),
 
-    "/resource/board-view": () => <ResourceBoardView />,
-    "/resource/list-view": () => <ResourceListView />,
-    "/resource/:id": ({ id }: any) => <ResourceDetails id={id} />,
-    "/resource/:id/update": ({ id }: any) => <ResourceDetailsUpdate id={id} />,
+  "/resource/board-view": () => <ResourceBoardView />,
+  "/resource/list-view": () => <ResourceListView />,
+  "/resource/:id": ({ id }: any) => <ResourceDetails id={id} />,
+  "/resource/:id/update": ({ id }: any) => <ResourceDetailsUpdate id={id} />,
   "/external_results": () => <ResultList />,
   "/external_results/upload": () => <ExternalResultUpload />,
   "/external_results/:id": ({ id }: any) => <ResultItem id={id} />,
@@ -350,7 +339,6 @@ const AppRouter = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [path]);
-  // document.getElementById("pages")?.scrollTo(0,0);
 
   return (
     <div className="h-screen flex overflow-hidden bg-gray-100">
@@ -569,5 +557,4 @@ const AppRouter = () => {
     </div>
   );
 };
-
 export default AppRouter;
