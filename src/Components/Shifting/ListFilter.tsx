@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { FacilitySelect } from "../Common/FacilitySelect";
-// import { UserSelect } from "../Common/UserSelect";
 import { UserSelect } from "../Common/UserSelect2";
 import {
   SelectField,
@@ -310,56 +309,18 @@ export default function ListFilter(props: any) {
           </div>
         </div>
 
-        {/* <div className="w-64 flex-none hidden">
-          <span className="text-sm font-semibold">Assigned to</span>
-          <label
-            id="listbox-label"
-            className="block text-sm leading-5 font-medium text-gray-700"
-          >
-            Facility that assigned user belongs
-          </label>
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">Assigned To</span>
           <div className="">
             {isAssignedUserLoading ? (
               <CircularProgress size={20} />
             ) : (
-              <FacilitySelect
+              <UserSelect
                 multiple={false}
-                name="assigned_user"
                 selected={filterState.assigned_user_ref}
-                setSelected={(obj) =>
-                  setFacility(obj, "assigned_user")
-                }
+                setSelected={(obj) => setAssignedUser(obj)}
                 className="shifting-page-filter-dropdown"
                 errors={""}
-              />
-            )}
-          </div>
-
-          {filterState.assigned_user && (
-            <div className="w-64 flex-none">
-              <UserSelect
-                userId={filterState.assigned_to}
-                facilityId={filterState.assigned_user}
-                onSelect={setAssignedTo}
-                placeholder="Select the Assigned Staff"
-              />
-            </div>
-          )} 
-
-        </div> */}
-
-        <div className="w-64 flex-none">
-          <span className="text-sm font-semibold">Assigned To</span>
-          <div className="">
-            {isAssignedLoading ? (
-              <CircularProgress size={20} />
-            ) : (
-              <UserSelect
-                 multiple={false}
-                 selected={filterState.assigned_user_ref}
-                 setSelected={(obj) => setAssignedUser(obj)}
-                 className="shifting-page-filter-dropdown"
-                 errors={""}
               />
             )}
           </div>
