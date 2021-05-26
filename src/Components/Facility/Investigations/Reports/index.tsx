@@ -16,7 +16,7 @@ import Autocomplete from "@material-ui/lab/Autocomplete";
 import { InputLabel, makeStyles, CircularProgress } from "@material-ui/core";
 import { InvestigationResponse } from "./types";
 import ReportTable from "./ReportTable";
-import { useReactToPrint } from 'react-to-print';
+import ReactToPrint from 'react-to-print';
 
 const RESULT_PER_PAGE = 15;
 
@@ -107,9 +107,9 @@ const InvestigationReports = ({ id }: any) => {
     initialState
   );
   const componentRef = useRef<HTMLDivElement>(null);
-  const handlePrint = useReactToPrint({
-    content: () => componentRef.current,
-  });
+  // const handlePrint = useReactToPrint({
+  //   content: () => componentRef.current,
+  // });
 
   const {
     investigationGroups,
@@ -374,7 +374,11 @@ const InvestigationReports = ({ id }: any) => {
             </>
           )}
           <>
-          <button onClick={()=>handlePrint}>Print</button>
+            <ReactToPrint
+            trigger={() => <button>Print this out!</button>}
+            content={() => componentRef.current}
+            />
+            {console.log(componentRef.current)}
           <section id="reports_section" ref={ componentRef }>
             {!!investigationTableData.length && (
               <>
