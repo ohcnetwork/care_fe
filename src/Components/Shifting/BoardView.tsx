@@ -122,6 +122,7 @@ export default function BoardView() {
         {badge("Filtered By", appliedFilters.assigned_facility && "Assigned Facility")}
         {badge("Filtered By", appliedFilters.orgin_facility && "Origin Facility")}
         {badge("Filtered By", appliedFilters.shifting_approving_facility && "Shifting Approving Facility")}
+        {badge("Disease Status", appliedFilters.disease_status)}
       </div>
       <div className="flex mt-4 pb-2 flex-1 items-start overflow-x-scroll">
         {isLoading ? <Loading /> : boardFilter.map(board =>
