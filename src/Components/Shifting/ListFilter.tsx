@@ -6,7 +6,7 @@ import {
   DateInputField,
   TextInputField,
 } from "../Common/HelperInputFields";
-import { SHIFTING_FILTER_ORDER } from "../../Common/constants";
+import { SHIFTING_FILTER_ORDER, DISEASE_STATUS } from "../../Common/constants";
 import moment from "moment";
 import { getFacility } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
@@ -62,6 +62,7 @@ export default function ListFilter(props: any) {
       filter.assigned_user_facility || local.assigned_user_facility || "",
     assigned_user_facility_ref: null,
     assigned_to: filter.assigned_to || local.assigned_to || "",
+    disease_status: filter.disease_status || local.disease_status || "",
   });
   const dispatch: any = useDispatch();
 
@@ -180,6 +181,7 @@ export default function ListFilter(props: any) {
       status,
       assigned_user_facility,
       assigned_to,
+      disease_status,
     } = filterState;
     localStorage.setItem("shift-filters", JSON.stringify(filterState));
     const data = {
@@ -210,6 +212,7 @@ export default function ListFilter(props: any) {
       status: status || "",
       assigned_user_facility: assigned_user_facility || "",
       assigned_to: assigned_to || "",
+      disease_status: disease_status || "",
     };
     onChange(data);
   };
@@ -427,6 +430,21 @@ export default function ListFilter(props: any) {
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
           />
         </div>
+
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">Disease Status</span>
+          <SelectField
+            name="disease_status"
+            variant="outlined"
+            margin="dense"
+            optionArray={true}
+            value={filterState.disease_status}
+            options={["--", ...DISEASE_STATUS]}
+            onChange={handleChange}
+            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+          />
+        </div>
+
         <div className="w-64 flex-none">
           <span className="text-sm font-semibold">Patient Phone Number</span>
           <TextInputField
