@@ -17,6 +17,7 @@ import { InputLabel, makeStyles, CircularProgress } from "@material-ui/core";
 import { InvestigationResponse } from "./types";
 import ReportTable from "./ReportTable";
 import * as Notification from "../../../../Utils/Notifications";
+import ReactToPrint from 'react-to-print';
 
 const RESULT_PER_PAGE = 15;
 
@@ -106,6 +107,10 @@ const InvestigationReports = ({ id }: any) => {
     investigationReportsReducer,
     initialState
   );
+  const componentRef = useRef<HTMLDivElement>(null);
+  // const handlePrint = useReactToPrint({
+  //   content: () => componentRef.current,
+  // });
 
   const {
     investigationGroups,
@@ -283,6 +288,7 @@ const InvestigationReports = ({ id }: any) => {
   const prevSessionDisabled = sessionPage <= 1 || isLoading.tableData;
   const nextSessionDisabled = isNextSessionDisabled || isLoading.tableData;
 
+
   return (
     <div className="max-w-7xl mx-auto px-4">
       <PageTitle title={"Investigation Reports"} />
@@ -374,7 +380,13 @@ const InvestigationReports = ({ id }: any) => {
               </Button>
             </>
           )}
-          <section id="reports_section">
+          <>
+            <ReactToPrint
+            trigger={() => <button>Print this out!</button>}
+            content={() => componentRef.current}
+            />
+            {console.log(componentRef.current)}
+          <section id="reports_section" ref={ componentRef }>
             {!!investigationTableData.length && (
               <>
                 <ButtonGroup
@@ -420,6 +432,7 @@ const InvestigationReports = ({ id }: any) => {
               </>
             )}
           </section>
+          </>
         </>
       ) : (
         <Loading />
