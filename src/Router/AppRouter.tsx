@@ -340,6 +340,11 @@ const AppRouter = () => {
     window.scrollTo(0, 0);
   }, [path]);
 
+  const handleSidebarClick = (e :any, link :string) => {
+    e.preventDefault();
+    navigate(link);
+  };
+
   return (
     <div className="h-screen flex overflow-hidden bg-gray-100">
       {drawer && (
@@ -462,6 +467,7 @@ const AppRouter = () => {
                   <a
                     key={item.title}
                     href={item.link}
+                    onClick={(e) => handleSidebarClick(e, item.link)}
                     className={selectedClasses}
                   >
                     <i
