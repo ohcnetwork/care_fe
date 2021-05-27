@@ -504,6 +504,21 @@ export default function PatientFilterV2(props: any) {
             label={'Date of result'}
             size='small'
           />
+          <DateRangePicker
+            startDate={getDate(filterState.date_declared_positive_after)}
+            endDate={getDate(filterState.date_declared_positive_before)}
+            onChange={(e) =>
+              handleDateRangeChange(
+                'date_declared_positive_after',
+                'date_declared_positive_before',
+                e
+              )
+            }
+            endDateId={'date_declared_positive_before'}
+            startDateId={'date_declared_positive_after'}
+            label={'Date Declared Positive'}
+            size='small'
+          />
 
           <DateRangePicker
             startDate={getDate(filterState.created_date_after)}
