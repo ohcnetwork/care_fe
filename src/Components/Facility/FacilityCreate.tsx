@@ -24,6 +24,7 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   validateLocationCoordinates,
   phonePreg,
+  validatePincode,
 } from "../../Common/validation";
 import {
   createFacility,
@@ -310,10 +311,11 @@ export const FacilityCreate = (props: FacilityProps) => {
             errors[field] = "Field is required";
             invalidForm = true;
           }
+          return;
 
         case "pincode":
-          if (!Number(state.form[field])) {
-            errors[field] = "Field is required";
+          if (!validatePincode(state.form[field])) {
+            errors[field] = "Please enter valid pincode";
             invalidForm = true;
           }
           return;
@@ -336,27 +338,6 @@ export const FacilityCreate = (props: FacilityProps) => {
             !validateLocationCoordinates(state.form[field])
           ) {
             errors[field] = "Please enter valid coordinates";
-            invalidForm = true;
-          }
-          return;
-
-        case "type_b_cylinders":
-          if (state.form.type_b_cylinders === "") {
-            errors[field] = "Please fill number of type B cylinders";
-            invalidForm = true;
-          }
-          return;
-
-        case "type_c_cylinders":
-          if (state.form.type_c_cylinders === "") {
-            errors[field] = "Please fill number of type C cylinders";
-            invalidForm = true;
-          }
-          return;
-
-        case "type_d_cylinders":
-          if (state.form.type_d_cylinders === "") {
-            errors[field] = "Please fill number of type D cylinders";
             invalidForm = true;
           }
           return;
