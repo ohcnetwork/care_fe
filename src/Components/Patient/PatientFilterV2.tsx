@@ -1,27 +1,27 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { FacilitySelect } from '../Common/FacilitySelect';
+import React, { useCallback, useEffect, useState } from "react";
+import { FacilitySelect } from "../Common/FacilitySelect";
 import {
   SelectField,
   MultiSelectField,
   DateInputField,
   TextInputField,
   AutoCompleteAsyncField,
-} from '../Common/HelperInputFields';
+} from "../Common/HelperInputFields";
 import {
   PATIENT_FILTER_ORDER,
   GENDER_TYPES,
   DISEASE_STATUS,
   PATIENT_FILTER_CATEGORY,
   PATIENT_FILTER_ADMITTED_TO,
-} from '../../Common/constants';
-import moment from 'moment';
-import { getAllLocalBody, getFacility } from '../../Redux/actions';
-import { useDispatch } from 'react-redux';
-import { CircularProgress } from '@material-ui/core';
-import { navigate } from 'raviger';
-import { DateRangePicker, getDate } from '../Common/DateRangePicker';
+} from "../../Common/constants";
+import moment from "moment";
+import { getAllLocalBody, getFacility } from "../../Redux/actions";
+import { useDispatch } from "react-redux";
+import { CircularProgress } from "@material-ui/core";
+import { navigate } from "raviger";
+import { DateRangePicker, getDate } from "../Common/DateRangePicker";
 
-const debounce = require('lodash.debounce');
+const debounce = require("lodash.debounce");
 
 const useMergeState = (initialState: any) => {
   const [state, setState] = useState(initialState);
@@ -43,12 +43,12 @@ export default function PatientFilterV2(props: any) {
       setLsgLoading(false);
       setHasLsgSearchText(false);
     }
-    setFacility(current, 'lsgBody');
+    setFacility(current, "lsgBody");
   };
 
   const [filterState, setFilterState] = useMergeState({
-    facility: filter.facility || '',
-    lsgBody: filter.lsgBody || '',
+    facility: filter.facility || "",
+    lsgBody: filter.lsgBody || "",
     facility_ref: null,
     lsgBody_ref: null,
     date_declared_positive_before: filter.date_declared_positive_before || null,
@@ -77,7 +77,7 @@ export default function PatientFilterV2(props: any) {
       filter.last_consultation_discharge_date_after || null,
     last_consultation_admitted_to_list:
       filter.last_consultation_admitted_to_list
-        ? filter.last_consultation_admitted_to_list.split(',')
+        ? filter.last_consultation_admitted_to_list.split(",")
         : [],
     srf_id: filter.srf_id || null,
     number_of_doses: filter.number_of_doses || null,
@@ -91,7 +91,7 @@ export default function PatientFilterV2(props: any) {
       if (filter.facility) {
         setFacilityLoading(true);
         const { data: facilityData } = await dispatch(
-          getFacility(filter.facility, 'facility')
+          getFacility(filter.facility, "facility")
         );
         setFilterState({ facility_ref: facilityData });
         setFacilityLoading(false);
@@ -117,16 +117,16 @@ export default function PatientFilterV2(props: any) {
   }, [dispatch]);
 
   const VACCINATED_FILTER = [
-    { id: '', text: 'Show All' },
-    { id: 0, text: 'Unvaccinated' },
-    { id: 1, text: '1st dose only' },
-    { id: 2, text: 'Both doses' },
+    { id: "", text: "Show All" },
+    { id: 0, text: "Unvaccinated" },
+    { id: 1, text: "1st dose only" },
+    { id: 2, text: "Both doses" },
   ];
 
   const DECLARED_FILTER = [
-    { id: '', text: 'Show All' },
-    { id: 'false', text: 'Not Declared' },
-    { id: 'true', text: 'Declared' },
+    { id: "", text: "Show All" },
+    { id: "false", text: "Not Declared" },
+    { id: "true", text: "Declared" },
   ];
 
   const setFacility = (selected: any, name: string) => {
@@ -208,79 +208,79 @@ export default function PatientFilterV2(props: any) {
       is_kasp,
     } = filterState;
     const data = {
-      lsgBody: lsgBody || '',
-      facility: facility || '',
+      lsgBody: lsgBody || "",
+      facility: facility || "",
       date_declared_positive_before:
         date_declared_positive_before &&
         moment(date_declared_positive_before).isValid()
-          ? moment(date_declared_positive_before).format('YYYY-MM-DD')
-          : '',
+          ? moment(date_declared_positive_before).format("YYYY-MM-DD")
+          : "",
       date_declared_positive_after:
         date_declared_positive_after &&
         moment(date_declared_positive_after).isValid()
-          ? moment(date_declared_positive_after).format('YYYY-MM-DD')
-          : '',
+          ? moment(date_declared_positive_after).format("YYYY-MM-DD")
+          : "",
       date_of_result_before:
         date_of_result_before && moment(date_of_result_before).isValid()
-          ? moment(date_of_result_before).format('YYYY-MM-DD')
-          : '',
+          ? moment(date_of_result_before).format("YYYY-MM-DD")
+          : "",
       date_of_result_after:
         date_of_result_after && moment(date_of_result_after).isValid()
-          ? moment(date_of_result_after).format('YYYY-MM-DD')
-          : '',
+          ? moment(date_of_result_after).format("YYYY-MM-DD")
+          : "",
       created_date_before:
         created_date_before && moment(created_date_before).isValid()
-          ? moment(created_date_before).format('YYYY-MM-DD')
-          : '',
+          ? moment(created_date_before).format("YYYY-MM-DD")
+          : "",
       created_date_after:
         created_date_after && moment(created_date_after).isValid()
-          ? moment(created_date_after).format('YYYY-MM-DD')
-          : '',
+          ? moment(created_date_after).format("YYYY-MM-DD")
+          : "",
       modified_date_before:
         modified_date_before && moment(modified_date_before).isValid()
-          ? moment(modified_date_before).format('YYYY-MM-DD')
-          : '',
+          ? moment(modified_date_before).format("YYYY-MM-DD")
+          : "",
       modified_date_after:
         modified_date_after && moment(modified_date_after).isValid()
-          ? moment(modified_date_after).format('YYYY-MM-DD')
-          : '',
+          ? moment(modified_date_after).format("YYYY-MM-DD")
+          : "",
       date_of_result:
         date_of_result && moment(date_of_result).isValid()
-          ? moment(date_of_result).format('YYYY-MM-DD')
-          : '',
+          ? moment(date_of_result).format("YYYY-MM-DD")
+          : "",
       last_consultation_admission_date_before:
         last_consultation_admission_date_before &&
         moment(last_consultation_admission_date_before).isValid()
-          ? moment(last_consultation_admission_date_before).format('YYYY-MM-DD')
-          : '',
+          ? moment(last_consultation_admission_date_before).format("YYYY-MM-DD")
+          : "",
       last_consultation_admission_date_after:
         last_consultation_admission_date_after &&
         moment(last_consultation_admission_date_after).isValid()
-          ? moment(last_consultation_admission_date_after).format('YYYY-MM-DD')
-          : '',
+          ? moment(last_consultation_admission_date_after).format("YYYY-MM-DD")
+          : "",
       last_consultation_discharge_date_before:
         last_consultation_discharge_date_before &&
         moment(last_consultation_discharge_date_before).isValid()
-          ? moment(last_consultation_discharge_date_before).format('YYYY-MM-DD')
-          : '',
+          ? moment(last_consultation_discharge_date_before).format("YYYY-MM-DD")
+          : "",
       last_consultation_discharge_date_after:
         last_consultation_discharge_date_after &&
         moment(last_consultation_discharge_date_after).isValid()
-          ? moment(last_consultation_discharge_date_after).format('YYYY-MM-DD')
-          : '',
-      ordering: ordering || '',
-      category: category || '',
-      gender: gender || '',
+          ? moment(last_consultation_discharge_date_after).format("YYYY-MM-DD")
+          : "",
+      ordering: ordering || "",
+      category: category || "",
+      gender: gender || "",
       disease_status:
-        (disease_status == 'Show All' ? '' : disease_status) || '',
-      age_min: age_min || '',
-      age_max: age_max || '',
+        (disease_status == "Show All" ? "" : disease_status) || "",
+      age_min: age_min || "",
+      age_max: age_max || "",
       last_consultation_admitted_to_list:
         last_consultation_admitted_to_list || [],
-      srf_id: srf_id || '',
-      number_of_doses: number_of_doses || '',
-      covin_id: covin_id || '',
-      is_kasp: is_kasp || '',
+      srf_id: srf_id || "",
+      number_of_doses: number_of_doses || "",
+      covin_id: covin_id || "",
+      is_kasp: is_kasp || "",
     };
     onChange(data);
   };
@@ -299,58 +299,58 @@ export default function PatientFilterV2(props: any) {
 
   return (
     <div>
-      <div className='flex justify-between'>
-        <button className='btn btn-default' onClick={closeFilter}>
-          <i className='fas fa-times mr-2' />
+      <div className="flex justify-between">
+        <button className="btn btn-default" onClick={closeFilter}>
+          <i className="fas fa-times mr-2" />
           Cancel
         </button>
         <button
-          className='btn btn-default'
+          className="btn btn-default"
           onClick={(_) => {
-            navigate('/patients');
+            navigate("/patients");
           }}
         >
-          <i className='fas fa-times mr-2' />
+          <i className="fas fa-times mr-2" />
           Clear Filter
         </button>
-        <button className='btn btn-primary' onClick={applyFilter}>
-          <i className='fas fa-check mr-2' />
+        <button className="btn btn-primary" onClick={applyFilter}>
+          <i className="fas fa-check mr-2" />
           Apply
         </button>
       </div>
-      <div className='w-64 flex-none mt-2'>
-        <span className='text-sm font-semibold'>Ordering</span>
+      <div className="w-64 flex-none mt-2">
+        <span className="text-sm font-semibold">Ordering</span>
         <SelectField
-          name='ordering'
-          variant='outlined'
-          margin='dense'
-          optionKey='text'
-          optionValue='desc'
+          name="ordering"
+          variant="outlined"
+          margin="dense"
+          optionKey="text"
+          optionValue="desc"
           value={filterState.ordering}
-          options={[{ desc: 'Select', text: '' }, ...PATIENT_FILTER_ORDER]}
+          options={[{ desc: "Select", text: "" }, ...PATIENT_FILTER_ORDER]}
           onChange={handleChange}
-          className='bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9'
+          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
         />
       </div>
-      <div className='font-light text-md mt-2'>Filter By:</div>
-      <div className='flex flex-wrap gap-2'>
-        <div className='w-64 flex-none'>
-          <span className='text-sm font-semibold'>LSG body</span>
-          <div className=''>
+      <div className="font-light text-md mt-2">Filter By:</div>
+      <div className="flex flex-wrap gap-2">
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">LSG body</span>
+          <div className="">
             <AutoCompleteAsyncField
-              name='lsgBody'
+              name="lsgBody"
               multiple={false}
-              variant='outlined'
+              variant="outlined"
               value={filterState.lsgBody_ref}
               options={lsgBody}
               onSearch={handleLsgSearch}
               onChange={(e: object, value: any) => handleLsgChange(value)}
               loading={isLsgLoading}
-              placeholder='Search by LSG body name'
+              placeholder="Search by LSG body name"
               noOptionsText={
                 hasLsgSearchText
-                  ? 'No LSG body found, please try again'
-                  : 'Start typing to begin search'
+                  ? "No LSG body found, please try again"
+                  : "Start typing to begin search"
               }
               renderOption={(option: any) => <div>{option.name}</div>}
               freeSolo={false}
@@ -358,166 +358,166 @@ export default function PatientFilterV2(props: any) {
                 option.id === value.id
               }
               getOptionLabel={(option: any) => option.name}
-              className='shifting-page-filter-dropdown'
+              className="shifting-page-filter-dropdown"
             />
           </div>
         </div>
-        <div className='w-64 flex-none'>
-          <span className='text-sm font-semibold'>Facility</span>
-          <div className=''>
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">Facility</span>
+          <div className="">
             {isFacilityLoading ? (
               <CircularProgress size={20} />
             ) : (
               <FacilitySelect
                 multiple={false}
-                name='facility'
+                name="facility"
                 selected={filterState.facility_ref}
                 showAll={false}
-                setSelected={(obj) => setFacility(obj, 'facility')}
-                className='shifting-page-filter-dropdown'
-                errors={''}
+                setSelected={(obj) => setFacility(obj, "facility")}
+                className="shifting-page-filter-dropdown"
+                errors={""}
               />
             )}
           </div>
         </div>
-        <div className='w-64 flex-none'>
-          <span className='text-sm font-semibold'>Gender</span>
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">Gender</span>
           <SelectField
-            name='gender'
-            variant='outlined'
-            margin='dense'
+            name="gender"
+            variant="outlined"
+            margin="dense"
             value={filterState.gender}
-            options={[{ id: '', text: 'Show All' }, ...GENDER_TYPES]}
+            options={[{ id: "", text: "Show All" }, ...GENDER_TYPES]}
             onChange={handleChange}
-            className='bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9'
+            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
           />
         </div>
 
-        <div className='w-64 flex-none'>
-          <span className='text-sm font-semibold'>KASP</span>
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">KASP</span>
           <SelectField
-            name='is_kasp'
-            variant='outlined'
-            margin='dense'
+            name="is_kasp"
+            variant="outlined"
+            margin="dense"
             value={filterState.is_kasp}
             options={[
-              { id: '', text: 'Show All' },
-              { id: 'true', text: 'Show KASP' },
-              { id: 'false', text: 'Show Non KASP' },
+              { id: "", text: "Show All" },
+              { id: "true", text: "Show KASP" },
+              { id: "false", text: "Show Non KASP" },
             ]}
             onChange={handleChange}
-            className='bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9'
+            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
           />
         </div>
 
-        <div className='w-64 flex-none'>
-          <span className='text-sm font-semibold'>Category</span>
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">Category</span>
           <SelectField
-            name='category'
-            variant='outlined'
-            margin='dense'
+            name="category"
+            variant="outlined"
+            margin="dense"
             value={filterState.category}
-            options={[{ id: '', text: 'Show All' }, ...PATIENT_FILTER_CATEGORY]}
+            options={[{ id: "", text: "Show All" }, ...PATIENT_FILTER_CATEGORY]}
             onChange={handleChange}
-            className='bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9'
+            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
           />
         </div>
 
-        <div className='w-64 flex-none'>
-          <span className='text-sm font-semibold'>Disease Status</span>
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">Disease Status</span>
           <SelectField
-            name='disease_status'
-            variant='outlined'
-            margin='dense'
+            name="disease_status"
+            variant="outlined"
+            margin="dense"
             optionArray={true}
             value={filterState.disease_status}
-            options={['Show All', ...DISEASE_STATUS]}
+            options={["Show All", ...DISEASE_STATUS]}
             onChange={handleChange}
-            className='bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9'
+            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
           />
         </div>
-        <div className='w-64 flex-none'>
-          <span className='text-sm font-semibold'>Vaccinated</span>
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">Vaccinated</span>
           <SelectField
-            name='number_of_doses'
-            variant='outlined'
-            margin='dense'
+            name="number_of_doses"
+            variant="outlined"
+            margin="dense"
             value={filterState.number_of_doses}
             options={VACCINATED_FILTER}
             onChange={handleChange}
-            className='bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9'
+            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
           />
         </div>
-        <div className='w-64 flex-none'>
-          <span className='text-sm font-semibold'>Declared</span>
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">Declared</span>
           <SelectField
-            name='is_declared_positive'
-            variant='outlined'
-            margin='dense'
+            name="is_declared_positive"
+            variant="outlined"
+            margin="dense"
             value={filterState.is_declared_positive}
             options={DECLARED_FILTER}
             onChange={handleChange}
-            className='bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9'
+            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
           />
         </div>
-        <div className='w-64 flex-none'>
-          <span className='text-sm font-semibold'>COVIN ID</span>
-          <div className='flex justify-between'>
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">COVIN ID</span>
+          <div className="flex justify-between">
             <TextInputField
-              id='covin_id'
-              name='covin_id'
-              variant='outlined'
-              margin='dense'
-              errors=''
+              id="covin_id"
+              name="covin_id"
+              variant="outlined"
+              margin="dense"
+              errors=""
               value={filterState.covin_id}
               onChange={handleChange}
-              label='covin id'
-              className='bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 mr-1'
+              label="covin id"
+              className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 mr-1"
             />
           </div>
         </div>
-        <div className='w-64 flex-none'>
-          <span className='text-sm font-semibold'>
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">
             Last Admitted to (Bed Type)
           </span>
           <MultiSelectField
-            name='last_consultation_admitted_to_list'
-            variant='outlined'
+            name="last_consultation_admitted_to_list"
+            variant="outlined"
             value={filterState.last_consultation_admitted_to_list}
             options={[...PATIENT_FILTER_ADMITTED_TO]}
             onChange={handleMultiSelectChange}
           />
         </div>
-        <div className='w-64 flex-none'>
+        <div className="w-64 flex-none">
           <DateRangePicker
             startDate={getDate(filterState.date_of_result_after)}
             endDate={getDate(filterState.date_of_result_before)}
             onChange={(e) =>
               handleDateRangeChange(
-                'date_of_result_after',
-                'date_of_result_before',
+                "date_of_result_after",
+                "date_of_result_before",
                 e
               )
             }
-            endDateId={'date_of_result_before'}
-            startDateId={'date_of_result_after'}
-            label={'Date of result'}
-            size='small'
+            endDateId={"date_of_result_before"}
+            startDateId={"date_of_result_after"}
+            label={"Date of result"}
+            size="small"
           />
           <DateRangePicker
             startDate={getDate(filterState.date_declared_positive_after)}
             endDate={getDate(filterState.date_declared_positive_before)}
             onChange={(e) =>
               handleDateRangeChange(
-                'date_declared_positive_after',
-                'date_declared_positive_before',
+                "date_declared_positive_after",
+                "date_declared_positive_before",
                 e
               )
             }
-            endDateId={'date_declared_positive_before'}
-            startDateId={'date_declared_positive_after'}
-            label={'Date Declared Positive'}
-            size='small'
+            endDateId={"date_declared_positive_before"}
+            startDateId={"date_declared_positive_after"}
+            label={"Date Declared Positive"}
+            size="small"
           />
 
           <DateRangePicker
@@ -525,30 +525,30 @@ export default function PatientFilterV2(props: any) {
             endDate={getDate(filterState.created_date_before)}
             onChange={(e) =>
               handleDateRangeChange(
-                'created_date_after',
-                'created_date_before',
+                "created_date_after",
+                "created_date_before",
                 e
               )
             }
-            endDateId={'created_date_before'}
-            startDateId={'created_date_after'}
-            label={'Created Date'}
-            size='small'
+            endDateId={"created_date_before"}
+            startDateId={"created_date_after"}
+            label={"Created Date"}
+            size="small"
           />
           <DateRangePicker
             startDate={getDate(filterState.modified_date_after)}
             endDate={getDate(filterState.modified_date_before)}
             onChange={(e) =>
               handleDateRangeChange(
-                'modified_date_after',
-                'modified_date_before',
+                "modified_date_after",
+                "modified_date_before",
                 e
               )
             }
-            endDateId={'modified_date_before'}
-            startDateId={'modified_date_after'}
-            label={'Modified Date'}
-            size='small'
+            endDateId={"modified_date_before"}
+            startDateId={"modified_date_after"}
+            label={"Modified Date"}
+            size="small"
           />
           <DateRangePicker
             startDate={getDate(
@@ -559,15 +559,15 @@ export default function PatientFilterV2(props: any) {
             )}
             onChange={(e) =>
               handleDateRangeChange(
-                'last_consultation_admission_date_after',
-                'last_consultation_admission_date_before',
+                "last_consultation_admission_date_after",
+                "last_consultation_admission_date_before",
                 e
               )
             }
-            endDateId={'last_consultation_admission_date_before'}
-            startDateId={'last_consultation_admission_date_after'}
-            label={'Admit Date'}
-            size='small'
+            endDateId={"last_consultation_admission_date_before"}
+            startDateId={"last_consultation_admission_date_after"}
+            label={"Admit Date"}
+            size="small"
           />
           <DateRangePicker
             startDate={getDate(
@@ -578,58 +578,58 @@ export default function PatientFilterV2(props: any) {
             )}
             onChange={(e) =>
               handleDateRangeChange(
-                'last_consultation_discharge_date_after',
-                'last_consultation_discharge_date_before',
+                "last_consultation_discharge_date_after",
+                "last_consultation_discharge_date_before",
                 e
               )
             }
-            endDateId={'last_consultation_discharge_date_before'}
-            startDateId={'last_consultation_discharge_date_after'}
-            label={'Discharge Date'}
-            size='small'
+            endDateId={"last_consultation_discharge_date_before"}
+            startDateId={"last_consultation_discharge_date_after"}
+            label={"Discharge Date"}
+            size="small"
           />
         </div>
 
-        <div className='w-64 flex-none'>
-          <span className='text-sm font-semibold'>Age</span>
-          <div className='flex justify-between'>
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">Age</span>
+          <div className="flex justify-between">
             <TextInputField
-              id='age_min'
-              name='age_min'
-              variant='outlined'
-              margin='dense'
-              errors=''
+              id="age_min"
+              name="age_min"
+              variant="outlined"
+              margin="dense"
+              errors=""
               value={filterState.age_min}
               onChange={handleChange}
-              label='Min Age'
-              className='bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 mr-1'
+              label="Min Age"
+              className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 mr-1"
             />
             <TextInputField
-              id='age_max'
-              name='age_max'
-              variant='outlined'
-              margin='dense'
-              errors=''
+              id="age_max"
+              name="age_max"
+              variant="outlined"
+              margin="dense"
+              errors=""
               value={filterState.age_max}
               onChange={handleChange}
-              label='Max Age'
-              className='bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9'
+              label="Max Age"
+              className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
             />
           </div>
         </div>
-        <div className='w-64 flex-none'>
-          <span className='text-sm font-semibold'>SRF ID</span>
-          <div className='flex justify-between'>
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">SRF ID</span>
+          <div className="flex justify-between">
             <TextInputField
-              id='srf_id'
-              name='srf_id'
-              variant='outlined'
-              margin='dense'
-              errors=''
+              id="srf_id"
+              name="srf_id"
+              variant="outlined"
+              margin="dense"
+              errors=""
               value={filterState.srf_id}
               onChange={handleChange}
-              label='Srf id'
-              className='bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 mr-1'
+              label="Srf id"
+              className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 mr-1"
             />
           </div>
         </div>
