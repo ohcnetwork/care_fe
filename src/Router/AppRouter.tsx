@@ -47,7 +47,6 @@ import ViewInvestigations from "../Components/Facility/Investigations/ViewInvest
 import ShowInvestigation from "../Components/Facility/Investigations/ShowInvestigation";
 import InvestigationReports from "../Components/Facility/Investigations/Reports";
 import { withTranslation } from "react-i18next";
-import LanguageSelector from "../Components/Common/LanguageSelector";
 import DeathReport from "../Components/DeathReport/DeathReport";
 
 const get = require("lodash.get");
@@ -345,7 +344,7 @@ const AppRouter = (props: any) => {
     window.scrollTo(0, 0);
   }, [path]);
 
-  const handleSidebarClick = (e :any, link :string) => {
+  const handleSidebarClick = (e: any, link: string) => {
     e.preventDefault();
     navigate(link);
   };
@@ -419,7 +418,6 @@ const AppRouter = (props: any) => {
                     <i className="fas fa-tachometer-alt text-green-400 mr-3 text-md group-hover:text-green-300 group-focus:text-green-300 transition ease-in-out duration-150"></i>
                     {t("Dashboard")}
                   </a>
-                  <LanguageSelector className="bg-white w-full mt-5" />
                 </nav>
               </div>
               <div className="flex-shrink-0 flex border-t border-green-700 p-4">
@@ -499,7 +497,6 @@ const AppRouter = (props: any) => {
                 <i className="fas fa-tachometer-alt text-green-400 mr-3 text-md group-hover:text-green-300 group-focus:text-green-300 transition ease-in-out duration-150"></i>
                 {t("Dashboard")}
               </a>
-              <LanguageSelector className="bg-white w-full mt-5" />
             </nav>
           </div>
           <div className="flex-shrink-0 flex border-t border-green-700 p-4">
