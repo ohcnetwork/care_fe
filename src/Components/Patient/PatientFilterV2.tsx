@@ -51,6 +51,8 @@ export default function PatientFilterV2(props: any) {
     lsgBody: filter.lsgBody || "",
     facility_ref: null,
     lsgBody_ref: null,
+    date_of_result_before: filter.date_of_result_before || null,
+    date_of_result_after: filter.date_of_result_after || null,
     created_date_before: filter.created_date_before || null,
     created_date_after: filter.created_date_after || null,
     modified_date_before: filter.modified_date_before || null,
@@ -170,6 +172,8 @@ export default function PatientFilterV2(props: any) {
     const {
       facility,
       lsgBody,
+      date_of_result_before,
+      date_of_result_after,
       created_date_before,
       created_date_after,
       modified_date_before,
@@ -194,6 +198,14 @@ export default function PatientFilterV2(props: any) {
     const data = {
       lsgBody: lsgBody || "",
       facility: facility || "",
+      date_of_result_before:
+        date_of_result_before && moment(date_of_result_before).isValid()
+          ? moment(date_of_result_before).format("YYYY-MM-DD")
+          : "",
+      date_of_result_after:
+        date_of_result_after && moment(date_of_result_after).isValid()
+          ? moment(date_of_result_after).format("YYYY-MM-DD")
+          : "",
       created_date_before:
         created_date_before && moment(created_date_before).isValid()
           ? moment(created_date_before).format("YYYY-MM-DD")
@@ -443,26 +455,22 @@ export default function PatientFilterV2(props: any) {
           />
         </div>
         <div className="w-64 flex-none">
-          <span className="text-sm font-semibold">Date of Result</span>
-          <DateInputField
-            id="date_of_result"
-            name="date_of_result"
-            inputVariant="outlined"
-            margin="dense"
-            errors=""
-            value={filterState.date_of_result}
-            onChange={(date) =>
-              handleChange({
-                target: {
-                  name: "date_of_result",
-                  value: date,
-                },
-              })
+          <DateRangePicker
+            startDate={getDate(filterState.date_of_result_after)}
+            endDate={getDate(filterState.date_of_result_before)}
+            onChange={(e) =>
+              handleDateRangeChange(
+                "date_of_result_after",
+                "date_of_result_before",
+                e
+              )
             }
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+            endDateId={"date_of_result_before"}
+            startDateId={"date_of_result_after"}
+            label={"Date of result"}
+            size="small"
           />
-        </div>
-        <div className="w-64 flex-none">
+
           <DateRangePicker
             startDate={getDate(filterState.created_date_after)}
             endDate={getDate(filterState.created_date_before)}

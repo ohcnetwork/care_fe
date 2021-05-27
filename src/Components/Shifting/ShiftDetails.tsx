@@ -527,19 +527,10 @@ export default function ShiftDetails(props: { id: string }) {
                 </div>
               </div>
             </div>
-            <div>
-              <div>
-                <span className="font-semibold leading-relaxed">
-                  Signature of Doctor{" "}
-                </span>
-              </div>
-              <div className="mt-6 flex justify-end">
-                <div>
-                  <span className="font-semibold leading-relaxed">
-                    Name and Designation{" "}
-                  </span>
-                </div>
-              </div>
+            <div className="mt-10">
+              <span className="font-semibold leading-relaxed">
+                Approved by District COVID Control Room
+              </span>
             </div>
           </div>
           <div className="flex justify-center text-center mt-4">
