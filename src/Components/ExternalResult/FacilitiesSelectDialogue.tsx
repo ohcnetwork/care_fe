@@ -4,12 +4,12 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-} from '@material-ui/core';
-import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
-import { WithStyles, withStyles } from '@material-ui/styles';
-import React from 'react';
-import { FacilitySelect } from '../Common/FacilitySelect';
-import { FacilityModel } from '../Facility/models';
+} from "@material-ui/core";
+import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
+import { WithStyles, withStyles } from "@material-ui/styles";
+import React from "react";
+import { FacilitySelect } from "../Common/FacilitySelect";
+import { FacilityModel } from "../Facility/models";
 
 interface Props {
   handleOk: () => void;
@@ -20,8 +20,8 @@ interface Props {
 
 const styles = {
   paper: {
-    'max-width': '650px',
-    'min-width': '400px',
+    "max-width": "650px",
+    "min-width": "400px",
   },
 };
 
@@ -36,32 +36,33 @@ const FacilitiesSelectDialog = (props: Props & WithStyles<typeof styles>) => {
       }}
     >
       <DialogTitle
-        className=' font-semibold text-3xl'
-        id='font-semibold text-3xl'
+        className=" font-semibold text-3xl"
+        id="font-semibold text-3xl"
       >
         Search for a facility
       </DialogTitle>
       <DialogContent>
         <FacilitySelect
-          name='facilities'
+          name="facilities"
           selected={selectedFacility}
           setSelected={setSelected}
-          errors=''
+          errors=""
+          showAll={false}
           multiple={false}
         />
       </DialogContent>
-      <DialogActions style={{ justifyContent: 'space-between' }}>
+      <DialogActions style={{ justifyContent: "space-between" }}>
         <Button
-          className='capitalize'
-          color='secondary'
+          className="capitalize"
+          color="secondary"
           onClick={() => handleCancel()}
         >
           Cancel Creation
         </Button>
         <Button
           onClick={handleOk}
-          color='primary'
-          variant='contained'
+          color="primary"
+          variant="contained"
           disabled={!selectedFacility?.name || !selectedFacility}
           startIcon={<CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>}
         >

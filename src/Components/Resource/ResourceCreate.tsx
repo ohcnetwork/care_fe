@@ -14,8 +14,8 @@ import { useDispatch } from "react-redux";
 import { navigate } from "raviger";
 import {
   FACILITY_TYPES,
-  SHIFTING_VEHICLE_CHOICES,
-  BREATHLESSNESS_LEVEL,
+  RESOURCE_CATEGORY_CHOICES,
+  RESOURCE_SUBCATEGORIES,
 } from "../../Common/constants";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import {
@@ -30,32 +30,34 @@ import {
 } from "@material-ui/core";
 import { phonePreg } from "../../Common/validation";
 
-import { createShift } from "../../Redux/actions";
+import { createResource } from "../../Redux/actions";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
-interface patientShiftProps {
+interface resourceProps {
   facilityId: number;
-  patientId: number;
 }
 
 const initForm: any = {
-  shifting_approving_facility: null,
+  category: "OXYGEN",
+  sub_category: 1000,
+  approving_facility: null,
   assigned_facility: null,
   emergency: "false",
-  is_up_shift: "true",
+  title: "",
   reason: "",
-  vehicle_preference: "",
-  comments: "",
   refering_facility_contact_name: "",
   refering_facility_contact_number: "",
-  assigned_facility_type: "",
-  preferred_vehicle_choice: "",
-  breathlessness_level: "",
 };
 
 const requiredFields: any = {
-  shifting_approving_facility: {
+  category: {
+    errorText: "Category",
+  },
+  sub_category: {
+    errorText: "Subcategory",
+  },
+  approving_facility: {
     errorText: "Name of the referring facility",
   },
   refering_facility_contact_name: {
@@ -65,18 +67,13 @@ const requiredFields: any = {
     errorText: "Phone number of contact of the referring facility",
     invalidText: "Please enter valid phone number",
   },
+  title: {
+    errorText: "Title for resource request in mandatory",
+    invalidText: "Please enter title for resource request",
+  },
   reason: {
-    errorText: "Reason for shifting in mandatory",
-    invalidText: "Please enter reason for shifting",
-  },
-  assigned_facility_type: {
-    errorText: "Please Select Facility Type",
-  },
-  preferred_vehicle_choice: {
-    errorText: "Please Preferred Vehicle Type",
-  },
-  breathlessness_level: {
-    errorText: "Severity of Breathlessness is required",
+    errorText: "Reason for resource request in mandatory",
+    invalidText: "Please enter reason for resource request",
   },
 };
 
@@ -94,11 +91,11 @@ const goBack = () => {
   window.history.go(-1);
 };
 
-export const ShiftCreate = (props: patientShiftProps) => {
+export default function ResourceCreate(props: resourceProps) {
   const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
 
-  const shiftFormReducer = (state = initialState, action: any) => {
+  const resourceFormReducer = (state = initialState, action: any) => {
     switch (action.type) {
       case "set_form": {
         return {
@@ -117,7 +114,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
     }
   };
 
-  const [state, dispatch] = useReducer(shiftFormReducer, initialState);
+  const [state, dispatch] = useReducer(resourceFormReducer, initialState);
 
   const validateForm = () => {
     let errors = { ...initError };
@@ -170,42 +167,34 @@ export const ShiftCreate = (props: patientShiftProps) => {
 
       const data = {
         status: "PENDING",
+        category: state.form.category,
+        sub_category: state.form.sub_category,
         orgin_facility: props.facilityId,
-        shifting_approving_facility: (
-          state.form.shifting_approving_facility || {}
-        ).id,
+        approving_facility: (state.form.approving_facility || {}).id,
         assigned_facility: (state.form.assigned_facility || {}).id,
-        patient: props.patientId,
         emergency: state.form.emergency === "true",
-        is_up_shift: state.form.is_up_shift === "true",
+        title: state.form.title,
         reason: state.form.reason,
-        vehicle_preference: state.form.vehicle_preference,
-        comments: state.form.comments,
-        assigned_facility_type: state.form.assigned_facility_type,
-        preferred_vehicle_choice: state.form.preferred_vehicle_choice,
         refering_facility_contact_name:
           state.form.refering_facility_contact_name,
         refering_facility_contact_number: parsePhoneNumberFromString(
           state.form.refering_facility_contact_number
         )?.format("E.164"),
-        breathlessness_level: state.form.breathlessness_level,
       };
 
-      const res = await dispatchAction(createShift(data));
+      const res = await dispatchAction(createResource(data));
       setIsLoading(false);
 
       if (res && res.data && (res.status == 201 || res.status == 200)) {
         await dispatch({ type: "set_form", form: initForm });
         Notification.Success({
-          msg: "Shift request created successfully",
+          msg: "Resource request created successfully",
         });
 
-        navigate(`/shifting/${res.data.id}`);
+        navigate(`/resource/${res.data.id}`);
       }
     }
   };
-  const vehicleOptions = SHIFTING_VEHICLE_CHOICES.map((obj) => obj.text);
-  const facilityOptions = FACILITY_TYPES.map((obj) => obj.text);
 
   if (isLoading) {
     return <Loading />;
@@ -213,13 +202,13 @@ export const ShiftCreate = (props: patientShiftProps) => {
 
   return (
     <div className="px-2 pb-2">
-      <PageTitle title={"Create Shift Request"} />
+      <PageTitle title={"Create Resource Request"} />
       <div className="mt-4">
         <Card>
           <CardContent>
             <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
               <div>
-                <InputLabel>Contact person at the facility*</InputLabel>
+                <InputLabel>Name of Contact Person at Facility*</InputLabel>
                 <TextInputField
                   fullWidth
                   name="refering_facility_contact_name"
@@ -244,34 +233,19 @@ export const ShiftCreate = (props: patientShiftProps) => {
               </div>
 
               <div>
-                <InputLabel>Name of shifting approving facility*</InputLabel>
+                <InputLabel>Name of approving facility*</InputLabel>
                 <FacilitySelect
                   multiple={false}
-                  facilityType={1300}
-                  name="shifting_approving_facility"
-                  selected={state.form.shifting_approving_facility}
+                  facilityType={1500}
+                  name="approving_facility"
+                  selected={state.form.approving_facility}
                   setSelected={(value: any) =>
-                    handleValueChange(value, "shifting_approving_facility")
+                    handleValueChange(value, "approving_facility")
                   }
-                  errors={state.errors.shifting_approving_facility}
+                  errors={state.errors.approving_facility}
                 />
               </div>
-
-              <div>
-                <InputLabel>
-                  What facility would you like to assign the patient to
-                </InputLabel>
-                <FacilitySelect
-                  multiple={false}
-                  name="assigned_facility"
-                  selected={state.form.assigned_facility}
-                  setSelected={(value: any) =>
-                    handleValueChange(value, "assigned_facility")
-                  }
-                  errors={state.errors.assigned_facility}
-                />
-              </div>
-
+             
               <div>
                 <InputLabel>Is this an emergency?</InputLabel>
                 <RadioGroup
@@ -296,89 +270,51 @@ export const ShiftCreate = (props: patientShiftProps) => {
                 </RadioGroup>
                 <ErrorHelperText error={state.errors.emergency} />
               </div>
+ 
+              <div>
+                <InputLabel>Category</InputLabel>
+                <SelectField
+                  name="category"
+                  variant="outlined"
+                  margin="dense"
+                  optionArray={true}
+                  value={state.form.category}
+                  options={RESOURCE_CATEGORY_CHOICES}
+                  onChange={handleChange}
+                  className="bg-white h-14 w-1/3 mt-2 shadow-sm md:text-sm md:leading-5"
+                />
+              </div>
 
               <div>
-                <InputLabel>Is this an upshift?</InputLabel>
-                <RadioGroup
-                  aria-label="is it upshift"
-                  name="is_up_shift"
-                  value={state.form.is_up_shift === "true"}
-                  onChange={handleChange}
-                  style={{ padding: "0px 5px" }}
-                >
-                  <Box>
-                    <FormControlLabel
-                      value={true}
-                      control={<Radio />}
-                      label="Yes"
-                    />
-                    <FormControlLabel
-                      value={false}
-                      control={<Radio />}
-                      label="No"
-                    />
-                  </Box>
-                </RadioGroup>
-                <ErrorHelperText error={state.errors.is_up_shift} />
-              </div>
-
-              {/* <div>
-                                <InputLabel>Vehicle preference</InputLabel>
-                                <TextInputField
-                                    fullWidth
-                                    name="vehicle_preference"
-                                    variant="outlined"
-                                    margin="dense"
-                                    value={state.form.vehicle_preference}
-                                    onChange={handleChange}
-                                    errors={state.errors.vehicle_preference}
-                                />
-                            </div> */}
-              <div className="md:col-span-1">
-                <InputLabel>Preferred Vehicle*</InputLabel>
+                <InputLabel>Subcategory</InputLabel>
                 <SelectField
-                  name="preferred_vehicle_choice"
+                  name="sub_category"
                   variant="outlined"
                   margin="dense"
-                  optionArray={true}
-                  value={state.form.preferred_vehicle_choice}
-                  options={["", ...vehicleOptions]}
+                  value={state.form.sub_category}
+                  options={RESOURCE_SUBCATEGORIES}
                   onChange={handleChange}
                   className="bg-white h-14 w-1/3 mt-2 shadow-sm md:text-sm md:leading-5"
-                  errors={state.errors.preferred_vehicle_choice}
                 />
               </div>
-              <div className="md:col-span-1">
-                <InputLabel>Preferred Facility Type*</InputLabel>
-                <SelectField
-                  name="assigned_facility_type"
+              
+              <div className="md:col-span-2">
+                <InputLabel>Request Title*</InputLabel>
+                <TextInputField
+                  rows={5}
+                  name="title"
                   variant="outlined"
                   margin="dense"
-                  optionArray={true}
-                  value={state.form.assigned_facility_type}
-                  options={["", ...facilityOptions]}
+                  type="text"
+                  placeholder="Type your title here"
+                  value={state.form.title}
                   onChange={handleChange}
-                  className="bg-white h-14 w-1/3 mt-2 shadow-sm md:text-sm md:leading-5"
-                  errors={state.errors.assigned_facility_type}
-                />
-              </div>
-              <div className="md:col-span-1">
-                <InputLabel>Severity of Breathlessness*</InputLabel>
-                <SelectField
-                  name="breathlessness_level"
-                  variant="outlined"
-                  margin="dense"
-                  optionArray={true}
-                  value={state.form.breathlessness_level}
-                  options={["", ...BREATHLESSNESS_LEVEL]}
-                  onChange={handleChange}
-                  className="bg-white h-14 w-1/3 mt-2 shadow-sm md:text-sm md:leading-5"
-                  errors={state.errors.breathlessness_level}
+                  errors={state.errors.title}
                 />
               </div>
 
               <div className="md:col-span-2">
-                <InputLabel>Reason for shift*</InputLabel>
+                <InputLabel>Reason for request*</InputLabel>
                 <MultilineInputField
                   rows={5}
                   name="reason"
@@ -389,21 +325,6 @@ export const ShiftCreate = (props: patientShiftProps) => {
                   value={state.form.reason}
                   onChange={handleChange}
                   errors={state.errors.reason}
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <InputLabel>Any other comments</InputLabel>
-                <MultilineInputField
-                  rows={5}
-                  name="comments"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  placeholder="type any extra comments here"
-                  value={state.form.comments}
-                  onChange={handleChange}
-                  errors={state.errors.comments}
                 />
               </div>
 
@@ -430,4 +351,4 @@ export const ShiftCreate = (props: patientShiftProps) => {
       </div>
     </div>
   );
-};
+}

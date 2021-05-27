@@ -73,7 +73,7 @@ export const FACILITY_TYPES: Array<OptionsType> = [
   { id: 801, text: "24x7 Public Health Centres" },
   { id: 802, text: "Family Health Centres" },
   { id: 803, text: "Community Health Centres" },
-  { id: 820, text: "Urban Primary Health Centre" },
+  { id: 820, text: "Urban Primary Health Center" },
   { id: 830, text: "Taluk Hospitals" },
   { id: 831, text: "Taluk Headquarters Hospitals" },
   { id: 840, text: "Women and Child Health Centres" },
@@ -87,6 +87,9 @@ export const FACILITY_TYPES: Array<OptionsType> = [
   { id: 1200, text: "Second Line Treatment Center" },
   { id: 1300, text: "Shifting Centre" },
   { id: 1400, text: "Covid Management Center" },
+  { id: 1500, text: "Request Approving Center" },
+  { id: 1510, text: "Request Fulfilment Center" },
+  { id: 1600, text: "District War Room" },
 ];
 
 export const SHIFTING_CHOICES: Array<OptionsType> = [
@@ -323,6 +326,8 @@ export const DISEASE_STATUS = [
 
 export const TEST_TYPE = ["UNK", "ANTIGEN", "RTPCR", "CBNAAT", "TRUENAT"];
 
+export const VACCINES = ["CoviShield", "Covaxin"];
+
 export const BLOOD_GROUPS = [
   "UNK",
   "A+",
@@ -411,4 +416,30 @@ export const BREATHLESSNESS_LEVEL = [
   "MILD",
   "MODERATE",
   "SEVERE",
+];
+
+export const RESOURCE_CATEGORY_CHOICES = ["OXYGEN"];
+
+export const RESOURCE_CHOICES: Array<OptionsType> = [
+  { id: 10, text: "PENDING" },
+  { id: 15, text: "ON HOLD" },
+  { id: 20, text: "APPROVED" },
+  { id: 30, text: "REJECTED" },
+  { id: 55, text: "TRANSPORTATION TO BE ARRANGED" },
+  { id: 70, text: "TRANSFER IN PROGRESS" },
+  { id: 80, text: "COMPLETED" },
+];
+export const RESOURCE_SUBCATEGORIES: Array<OptionsType> = [
+  { id: 110, text: "LIQUID OXYGEN" },
+  { id: 120, text: "B TYPE OXYGEN CYLINDER" },
+  { id: 130, text: "C TYPE OXYGEN CYLINDER" },
+  { id: 140, text: "JUMBO D TYPE OXYGEN CYLINDER" },
+  { id: 1000, text: "UNSPECIFIED" }
+];
+
+export const RESOURCE_FILTER_ORDER: Array<OptionsType> = [
+  { id: 1, text: "created_date", desc: "ASC Created Date" },
+  { id: 2, text: "-created_date", desc: "DESC Created Date" },
+  { id: 3, text: "modified_date", desc: "ASC Modified Date" },
+  { id: 4, text: "-modified_date", desc: "DESC Modified Date" },
 ];

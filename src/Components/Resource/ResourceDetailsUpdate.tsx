@@ -13,14 +13,9 @@ import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
 import { navigate } from "raviger";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getShiftDetails, updateShift } from "../../Redux/actions";
+import { getResourceDetails, updateResource } from "../../Redux/actions";
 import { SelectField } from "../Common/HelperInputFields";
-import {
-  SHIFTING_CHOICES,
-  FACILITY_TYPES,
-  SHIFTING_VEHICLE_CHOICES,
-  BREATHLESSNESS_LEVEL,
-} from "../../Common/constants";
+import { RESOURCE_CHOICES } from "../../Common/constants";
 import { UserSelect } from "../Common/UserSelect";
 
 import {
@@ -36,35 +31,28 @@ import {
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
-interface patientShiftProps {
+interface resourceProps {
   id: string;
 }
 
-const shiftStatusOptions = SHIFTING_CHOICES.map((obj) => obj.text);
+const resourceStatusOptions = RESOURCE_CHOICES.map((obj) => obj.text);
 
 const initForm: any = {
-  shifting_approving_facility_object: null,
+  approving_facility_object: null,
   assigned_facility_object: null,
   emergency: "false",
-  is_kasp: "false",
-  is_up_shift: "true",
+  title: "",
   reason: "",
-  vehicle_preference: "",
-  comments: "",
   assigned_facility_type: "",
-  preferred_vehicle_choice: "",
   assigned_to: "",
 };
 
 const requiredFields: any = {
-  shifting_approving_facility_object: {
-    errorText: "Shifting approving facility can not be empty.",
+  approving_facility_object: {
+    errorText: "Resource approving facility can not be empty.",
   },
   assigned_facility_type: {
     errorText: "Please Select Facility Type",
-  },
-  preferred_vehicle_choice: {
-    errorText: "Please Preferred Vehicle Type",
   },
 };
 
@@ -82,11 +70,11 @@ const goBack = () => {
   window.history.go(-1);
 };
 
-export const ShiftDetailsUpdate = (props: patientShiftProps) => {
+export const ResourceDetailsUpdate = (props: resourceProps) => {
   const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState(true);
 
-  const shiftFormReducer = (state = initialState, action: any) => {
+  const resourceFormReducer = (state = initialState, action: any) => {
     switch (action.type) {
       case "set_form": {
         return {
@@ -105,7 +93,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     }
   };
 
-  const [state, dispatch] = useReducer(shiftFormReducer, initialState);
+  const [state, dispatch] = useReducer(resourceFormReducer, initialState);
 
   const validateForm = () => {
     let errors = { ...initError };
@@ -147,34 +135,27 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
       setIsLoading(true);
 
       const data = {
+        category: "OXYGEN",
         status: state.form.status,
         orgin_facility: state.form.orgin_facility_object?.id,
-        shifting_approving_facility:
-          state.form?.shifting_approving_facility_object?.id,
+        approving_facility: state.form?.approving_facility_object?.id,
         assigned_facility: state.form?.assigned_facility_object?.id,
-        patient: state.form.patient_object?.id,
         emergency: [true, "true"].includes(state.form.emergency),
-        is_kasp: [true, "true"].includes(state.form.is_kasp),
-        is_up_shift: [true, "true"].includes(state.form.is_up_shift),
+        title: state.form.title,
         reason: state.form.reason,
-        vehicle_preference: state.form.vehicle_preference,
-        comments: state.form.comments,
-        assigned_facility_type: state.form.assigned_facility_type,
-        preferred_vehicle_choice: state.form.preferred_vehicle_choice,
         assigned_to: state.form.assigned_to,
-        breathlessness_level: state.form.breathlessness_level,
       };
 
-      const res = await dispatchAction(updateShift(props.id, data));
+      const res = await dispatchAction(updateResource(props.id, data));
       setIsLoading(false);
 
       if (res && res.status == 200 && res.data) {
         dispatch({ type: "set_form", form: res.data });
         Notification.Success({
-          msg: "Shift request updated successfully",
+          msg: "Resource request updated successfully",
         });
 
-        navigate(`/shifting/${props.id}`);
+        navigate(`/resource/${props.id}`);
       } else {
         setIsLoading(false);
       }
@@ -184,7 +165,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const res = await dispatchAction(getShiftDetails({ id: props.id }));
+      const res = await dispatchAction(getResourceDetails({ id: props.id }));
       if (!status.aborted) {
         if (res && res.data) {
           dispatch({ type: "set_form", form: res.data });
@@ -202,16 +183,13 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     [fetchData]
   );
 
-  const vehicleOptions = SHIFTING_VEHICLE_CHOICES.map((obj) => obj.text);
-  const facilityOptions = FACILITY_TYPES.map((obj) => obj.text);
-
   if (isLoading) {
     return <Loading />;
   }
 
   return (
     <div className="px-2 pb-2">
-      <PageTitle title={"Update Shift Request"} />
+      <PageTitle title={"Update Resource Request"} />
       <div className="mt-4">
         <Card>
           <CardContent>
@@ -224,7 +202,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                   margin="dense"
                   optionArray={true}
                   value={state.form.status}
-                  options={shiftStatusOptions}
+                  options={resourceStatusOptions}
                   onChange={handleChange}
                   className="bg-white h-14 w-1/3 mt-2 shadow-sm md:text-sm md:leading-5"
                 />
@@ -233,33 +211,31 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                 <UserSelect
                   userId={state.form.assigned_to}
                   onSelect={handleOnSelect}
-                  facilityId={
-                    state.form?.shifting_approving_facility_object?.id
-                  }
-                  placeholder="Assign a Shifting Staff"
+                  facilityId={state.form?.approving_facility_object?.id}
                 />
               </div>
               <div>
-                <InputLabel>Name of shifting approving facility</InputLabel>
+                <InputLabel>Name of resource approving facility</InputLabel>
                 <FacilitySelect
                   multiple={false}
-                  name="shifting_approving_facility"
-                  facilityType={1300}
-                  selected={state.form.shifting_approving_facility_object}
+                  name="approving_facility"
+                  facilityType={1500}
+                  selected={state.form.approving_facility_object}
                   setSelected={(obj) =>
-                    setFacility(obj, "shifting_approving_facility_object")
+                    setFacility(obj, "approving_facility_object")
                   }
-                  errors={state.errors.shifting_approving_facility}
+                  errors={state.errors.approving_facility}
                 />
               </div>
 
               <div>
                 <InputLabel>
-                  What facility would you like to assign the patient to
+                  What facility would you like to assign the request to
                 </InputLabel>
                 <FacilitySelect
                   multiple={false}
                   name="assigned_facility"
+                  facilityType={1510}
                   selected={state.form.assigned_facility_object}
                   setSelected={(obj) =>
                     setFacility(obj, "assigned_facility_object")
@@ -293,109 +269,23 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                 <ErrorHelperText error={state.errors.emergency} />
               </div>
 
-              <div>
-                <InputLabel>Is Karunya Arogya Suraksha Padhathi?</InputLabel>
-                <RadioGroup
-                  aria-label="is_kasp"
-                  name="is_kasp"
-                  value={[true, "true"].includes(state.form.is_kasp)}
+              <div className="md:col-span-2">
+                <InputLabel>Request Title*</InputLabel>
+                <TextInputField
+                  rows={5}
+                  name="title"
+                  variant="outlined"
+                  margin="dense"
+                  type="text"
+                  placeholder="Type your title here"
+                  value={state.form.title}
                   onChange={handleChange}
-                  style={{ padding: "0px 5px" }}
-                >
-                  <Box>
-                    <FormControlLabel
-                      value={true}
-                      control={<Radio />}
-                      label="Yes"
-                    />
-                    <FormControlLabel
-                      value={false}
-                      control={<Radio />}
-                      label="No"
-                    />
-                  </Box>
-                </RadioGroup>
-                <ErrorHelperText error={state.errors.is_kasp} />
+                  errors={state.errors.title}
+                />
               </div>
 
-              <div>
-                <InputLabel>Is this an upshift?</InputLabel>
-                <RadioGroup
-                  aria-label="is it upshift"
-                  name="is_up_shift"
-                  value={[true, "true"].includes(state.form.is_up_shift)}
-                  onChange={handleChange}
-                  style={{ padding: "0px 5px" }}
-                >
-                  <Box>
-                    <FormControlLabel
-                      value={true}
-                      control={<Radio />}
-                      label="Yes"
-                    />
-                    <FormControlLabel
-                      value={false}
-                      control={<Radio />}
-                      label="No"
-                    />
-                  </Box>
-                </RadioGroup>
-                <ErrorHelperText error={state.errors.is_up_shift} />
-              </div>
-              {/*
-                            <div>
-                                <InputLabel>Vehicle preference</InputLabel>
-                                <TextInputField
-                                    fullWidth
-                                    name="vehicle_preference"
-                                    variant="outlined"
-                                    margin="dense"
-                                    value={state.form.vehicle_preference}
-                                    onChange={handleChange}
-                                    errors={state.errors.vehicle_preference}
-                                />
-                            </div> */}
-              <div className="md:col-span-1">
-                <InputLabel>Preferred Vehicle*</InputLabel>
-                <SelectField
-                  name="preferred_vehicle_choice"
-                  variant="outlined"
-                  margin="dense"
-                  optionArray={true}
-                  value={state.form.preferred_vehicle_choice}
-                  options={["", ...vehicleOptions]}
-                  onChange={handleChange}
-                  className="bg-white h-14 w-1/3 mt-2 shadow-sm md:text-sm md:leading-5"
-                />
-              </div>
-              <div className="md:col-span-1">
-                <InputLabel>Preferred Facility Type*</InputLabel>
-                <SelectField
-                  name="assigned_facility_type"
-                  variant="outlined"
-                  margin="dense"
-                  optionArray={true}
-                  value={state.form.assigned_facility_type}
-                  options={["", ...facilityOptions]}
-                  onChange={handleChange}
-                  className="bg-white h-14 w-1/3 mt-2 shadow-sm md:text-sm md:leading-5"
-                />
-              </div>
-              <div className="md:col-span-1">
-                <InputLabel>Severity of Breathlessness*</InputLabel>
-                <SelectField
-                  name="breathlessness_level"
-                  variant="outlined"
-                  margin="dense"
-                  optionArray={true}
-                  value={state.form.breathlessness_level}
-                  options={BREATHLESSNESS_LEVEL}
-                  onChange={handleChange}
-                  className="bg-white h-14 w-1/3 mt-2 shadow-sm md:text-sm md:leading-5"
-                />
-              </div>
               <div className="md:col-span-2">
-                <InputLabel>Reason for shift*</InputLabel>
+                <InputLabel>Reason for resource request*</InputLabel>
                 <MultilineInputField
                   rows={5}
                   name="reason"
@@ -406,21 +296,6 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                   value={state.form.reason}
                   onChange={handleChange}
                   errors={state.errors.reason}
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <InputLabel>Any other comments</InputLabel>
-                <MultilineInputField
-                  rows={5}
-                  name="comments"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  placeholder="type any extra comments here"
-                  value={state.form.comments}
-                  onChange={handleChange}
-                  errors={state.errors.comments}
                 />
               </div>
 
