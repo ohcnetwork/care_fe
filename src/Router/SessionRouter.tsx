@@ -8,6 +8,8 @@ import {
 } from "../Components/Auth";
 import { useRoutes } from "raviger";
 import { PublicDashboard } from "../Components/Dashboard/PublicDashboard";
+import msinsLogo from "../Common/mahakavach/msinsLogo.png";
+
 const TopBar = loadable(() => import("../Components/Common/TopBar"));
 
 const routes = {
@@ -38,11 +40,7 @@ const SessionRouter = () => {
       <div className="bg-white flex items-center">
         <div className="max-w-5xl mx-auto flex md:flex-row flex-col p-4 f-full flex items-center">
           <div className="mx-auto p-2">
-            <img
-              className="h-20"
-              src="https://cdn.coronasafe.network/ksdma_logo.webp"
-              alt="Care Logo"
-            />
+            <img className="h-20" src={msinsLogo} alt="Care Logo" />
           </div>
           <div className="max-w-xl text-sm">
             <a href="https://coronasafe.network/" className="text-gray-600">

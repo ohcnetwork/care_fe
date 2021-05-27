@@ -17,6 +17,7 @@ import Pagination from "../Common/Pagination";
 import { Modal, Button } from "@material-ui/core";
 
 import { limit, formatFilter, badge } from "./Commons";
+import { MJPJAY } from "../../Common/mahakavach";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -388,7 +389,7 @@ export default function ListView() {
             : undefined
         )}
         {badge(
-          "Is KASP",
+          `Is ${MJPJAY}`,
           appliedFilters.is_kasp === "true"
             ? "yes"
             : appliedFilters.is_kasp === "false"

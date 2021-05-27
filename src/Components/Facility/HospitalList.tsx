@@ -24,6 +24,7 @@ import AccordionSummary from "@material-ui/core/AccordionSummary";
 import AccordionDetails from "@material-ui/core/AccordionDetails";
 import Typography from "@material-ui/core/Typography";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import { MJPJAY } from "../../Common/mahakavach";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -62,7 +63,12 @@ export const HospitalList = () => {
     async (status: statusType) => {
       setIsLoading(true);
       const params = qParams.search
-        ? { limit, offset, search_text: qParams.search, kasp_empanelled: qParams.kasp_empanelled }
+        ? {
+            limit,
+            offset,
+            search_text: qParams.search,
+            kasp_empanelled: qParams.kasp_empanelled,
+          }
         : { limit, offset, kasp_empanelled: qParams.kasp_empanelled };
 
       const res = await dispatchAction(getFacilities(params));
@@ -90,8 +96,11 @@ export const HospitalList = () => {
   };
 
   const onKaspChange = (value: string) => {
-    setQueryParams({ "kasp_empanelled": value, search: qParams.search ? qParams.search : '' }, true);
-  }
+    setQueryParams(
+      { kasp_empanelled: value, search: qParams.search ? qParams.search : "" },
+      true
+    );
+  };
 
   const handleDownload = async () => {
     const res = await dispatchAction(downloadFacility());
@@ -141,10 +150,10 @@ export const HospitalList = () => {
   };
 
   const kaspOptionValues = [
-    { "id": "", "text": "Not Selected" },
-    { "id": "true", "text": "Yes" },
-    { "id": "false", "text": "No" }
-  ]
+    { id: "", text: "Not Selected" },
+    { id: "true", text: "Yes" },
+    { id: "false", text: "No" },
+  ];
 
   let facilityList: any[] = [];
   if (data && data.length) {
@@ -162,10 +171,9 @@ export const HospitalList = () => {
                 </div>
                 {facility.kasp_empanelled && (
                   <div className="mt-2 inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-yellow-100 text-yellow-800">
-                    KASP
+                    {MJPJAY}
                   </div>
-                )
-                }
+                )}
                 <div className="font-black text-2xl capitalize mt-2">
                   {facility.name}
                 </div>
@@ -362,9 +370,7 @@ export const HospitalList = () => {
       </div>
 
       <div className="mx-8 my-2 w-1/3">
-        <InputLabel id="kasp_empanelled">
-          KASP empanelled
-        </InputLabel>
+        <InputLabel id="kasp_empanelled">{MJPJAY} empanelled</InputLabel>
         <SelectField
           name="facility_type"
           variant="outlined"

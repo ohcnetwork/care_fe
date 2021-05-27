@@ -1,3 +1,5 @@
+import { MJPJAY } from "./mahakavach";
+
 export interface OptionsType {
   id: number;
   text: string;
@@ -135,10 +137,10 @@ export const BED_TYPES: Array<OptionsType> = [
   { id: 120, text: "Covid Oxygen beds" },
   { id: 110, text: "Covid ICU (ICU without ventilator)" },
   { id: 100, text: "Covid Ventilators (ICU with ventilator)" },
-  { id: 40, text: "KASP Ordinary Beds" },
-  { id: 60, text: "KASP Oxygen beds" },
-  { id: 50, text: "KASP ICU (ICU without ventilator)" },
-  { id: 70, text: "KASP ICU (ICU with ventilator)" },
+  { id: 40, text: `${MJPJAY} Ordinary Beds` },
+  { id: 60, text: `${MJPJAY} Oxygen beds` },
+  { id: 50, text: `${MJPJAY} ICU (ICU without ventilator)` },
+  { id: 70, text: `${MJPJAY} ICU (ICU with ventilator)` },
   { id: 2, text: "Hostel" },
   { id: 3, text: "Single Room with Attached Bathroom" },
 ];
