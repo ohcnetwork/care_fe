@@ -17,7 +17,7 @@ import { InputLabel, makeStyles, CircularProgress } from "@material-ui/core";
 import { InvestigationResponse } from "./types";
 import ReportTable from "./ReportTable";
 import * as Notification from "../../../../Utils/Notifications";
-import ReactToPrint from 'react-to-print';
+
 
 const RESULT_PER_PAGE = 15;
 
@@ -107,10 +107,7 @@ const InvestigationReports = ({ id }: any) => {
     investigationReportsReducer,
     initialState
   );
-  const componentRef = useRef<HTMLDivElement>(null);
-  // const handlePrint = useReactToPrint({
-  //   content: () => componentRef.current,
-  // });
+
 
   const {
     investigationGroups,
@@ -381,57 +378,53 @@ const InvestigationReports = ({ id }: any) => {
             </>
           )}
           <>
-            <ReactToPrint
-            trigger={() => <button>Print this out!</button>}
-            content={() => componentRef.current}
-            />
-            {console.log(componentRef.current)}
-          <section id="reports_section" ref={ componentRef }>
-            {!!investigationTableData.length && (
-              <>
-                <ButtonGroup
-                  disableElevation
-                  variant="outlined"
-                  color="primary"
-                  className={className.button}
-                >
-                  <Button
-                    onClick={() => handleSessionPage("PREV")}
-                    disabled={prevSessionDisabled}
-                  >
-                    {isLoading.tableData ? "Loading..." : "Prev Sessions"}
-                  </Button>
-                  <Button
-                    onClick={() => handleSessionPage("NEXT")}
-                    disabled={nextSessionDisabled}
-                  >
-                    {isLoading.tableData ? "Loading..." : "Next Sessions"}
-                  </Button>
-                </ButtonGroup>
-                <ReportTable
-                  investigationData={investigationTableData}
-                  title="Report"
-                />
-                {!!isLoading.tableData && (
-                  <CircularProgress className={className.button} />
-                )}
 
-                {!loadMoreDisabled && (
-                  <Button
-                    disabled={loadMoreDisabled}
-                    onClick={handleLoadMore}
-                    className={className.button}
-                    variant="contained"
+            <section id="reports_section">
+              {!!investigationTableData.length && (
+                <>
+                  <ButtonGroup
+                    disableElevation
+                    variant="outlined"
                     color="primary"
-                    fullWidth
-                    size="large"
+                    className={className.button}
                   >
-                    Load More
-                  </Button>
-                )}
-              </>
-            )}
-          </section>
+                    <Button
+                      onClick={() => handleSessionPage("PREV")}
+                      disabled={prevSessionDisabled}
+                    >
+                      {isLoading.tableData ? "Loading..." : "Prev Sessions"}
+                    </Button>
+                    <Button
+                      onClick={() => handleSessionPage("NEXT")}
+                      disabled={nextSessionDisabled}
+                    >
+                      {isLoading.tableData ? "Loading..." : "Next Sessions"}
+                    </Button>
+                  </ButtonGroup>
+                  <ReportTable
+                    investigationData={investigationTableData}
+                    title="Report"
+                  />
+                  {!!isLoading.tableData && (
+                    <CircularProgress className={className.button} />
+                  )}
+
+                  {!loadMoreDisabled && (
+                    <Button
+                      disabled={loadMoreDisabled}
+                      onClick={handleLoadMore}
+                      className={className.button}
+                      variant="contained"
+                      color="primary"
+                      fullWidth
+                      size="large"
+                    >
+                      Load More
+                    </Button>
+                  )}
+                </>
+              )}
+            </section>
           </>
         </>
       ) : (
