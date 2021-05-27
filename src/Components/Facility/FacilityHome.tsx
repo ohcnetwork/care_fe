@@ -6,6 +6,8 @@ import loadable from "@loadable/component";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
 import { BED_TYPES, DOCTOR_SPECIALIZATION } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
@@ -92,6 +94,7 @@ export const FacilityHome = (props: any) => {
   const handleDeleteSubmit = () => {
     dispatch(deleteFacility(facilityId));
     navigate("/facility");
+    window.location.reload();
   };
 
   const state: any = useSelector((state) => state);
@@ -178,6 +181,11 @@ export const FacilityHome = (props: any) => {
         <DialogTitle className="flex justify-center bg-green-100">
           Are you sure you want to delete {facilityData.name || "Facility"}
         </DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            You will not be able to access this facility after it is deleted.
+          </DialogContentText>
+        </DialogContent>
         <DialogActions>
           <button onClick={handleDeleteClose} className="btn btn-primary">
             Cancel
