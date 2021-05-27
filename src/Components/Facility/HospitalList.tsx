@@ -299,7 +299,7 @@ const HospitalListPage = (props: any) => {
   } else if (data && data.length) {
     manageFacilities = (
       <>
-        {facilityList}
+        <div className="grid md:grid-cols-2 gap-4">{facilityList}</div>
         {totalCount > limit && (
           <div className="mt-4 flex w-full justify-center">
             <Pagination
@@ -507,7 +507,7 @@ const HospitalListPage = (props: any) => {
           )}
       </div>
       <div>
-        <div className="grid md:grid-cols-2 gap-4">{manageFacilities}</div>
+        <div>{manageFacilities}</div>
       </div>
     </div>
   );
