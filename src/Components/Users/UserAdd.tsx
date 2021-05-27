@@ -135,7 +135,12 @@ export const UserAdd = (props: UserProps) => {
           getLocalbodyByDistrict({ id })
         );
         setIsLocalbodyLoading(false);
-        setLocalBody([...initialLocalbodies, ...localBodyList.data]);
+        if (localBodyList.data.length > 0) {
+          setLocalBody([...initialLocalbodies, ...localBodyList.data]);
+        } else {
+          setLocalBody([{ id: 0, name: "No local bodies found!" }])
+        }
+        //setLocalBody([...initialLocalbodies, ...localBodyList.data]);
       } else {
         setLocalBody(selectDistrict);
       }

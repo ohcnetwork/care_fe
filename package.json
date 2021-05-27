@@ -88,7 +88,7 @@
     "react-redux": "^7.2.2",
     "react-scripts": "^3.4.3",
     "react-swipeable-views": "^0.13.9",
-    "react-to-print": "^2.12.4",
+    "react-to-print": "2.12.4",
     "react-transition-group": "^4.4.1",
     "react-virtualized": "^9.22.3",
     "reason-react": "^0.9.1",
