@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
-import { getAllFacilities } from "../../Redux/actions";
+import { getAllFacilities, getFacilities } from "../../Redux/actions";
 import { AutoCompleteAsyncField } from "../Common/HelperInputFields";
 import { FacilityModel } from "../Facility/models";
 const debounce = require("lodash.debounce");
@@ -12,6 +12,7 @@ interface FacilitySelectProps {
   searchAll?: boolean;
   multiple?: boolean;
   facilityType?: number;
+  showAll?: boolean;
   selected: FacilityModel | FacilityModel[] | null;
   setSelected: (selected: FacilityModel | FacilityModel[] | null) => void;
 }
@@ -25,6 +26,7 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
     margin,
     errors,
     searchAll,
+    showAll = true,
     className = "",
     facilityType,
   } = props;
@@ -60,7 +62,11 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
           all: searchAll,
           facility_type: facilityType,
         };
-        const res = await dispatchAction(getAllFacilities(params));
+
+        const res = await dispatchAction(
+          showAll ? getAllFacilities(params) : getFacilities(params)
+        );
+
         if (res && res.data) {
           setFacilityList(res.data.results);
         }

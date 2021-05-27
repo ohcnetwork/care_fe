@@ -166,9 +166,8 @@ export const PatientHome = (props: any) => {
 
   const [isSendingDischargeApi, setIsSendingDischargeApi] = useState(false);
 
-  const [preDischargeForm, setPreDischargeForm] = useState(
-    initPreDischargeForm
-  );
+  const [preDischargeForm, setPreDischargeForm] =
+    useState(initPreDischargeForm);
 
   const handlePreDischargeFormChange = (key: string, event: any) => {
     if (key === "date_of_test") {
@@ -202,8 +201,7 @@ export const PatientHome = (props: any) => {
       ).then((response: any) => {
         if ((response || {}).status === 200) {
           Notification.Success({
-            msg:
-              "We will be sending an email shortly. Please check your inbox.",
+            msg: "We will be sending an email shortly. Please check your inbox.",
           });
         }
       });
@@ -486,8 +484,9 @@ export const PatientHome = (props: any) => {
     return <Loading />;
   }
 
-  const patientGender = GENDER_TYPES.find((i) => i.id === patientData.gender)
-    ?.text;
+  const patientGender = GENDER_TYPES.find(
+    (i) => i.id === patientData.gender
+  )?.text;
 
   let patientMedHis: any[] = [];
   if (
@@ -659,6 +658,26 @@ export const PatientHome = (props: any) => {
                     </div>
                   </div>
                 )}
+                {patientData.is_vaccinated && patientData.number_of_doses && (
+                  <div className="sm:col-span-1">
+                    <div className="text-sm leading-5 font-medium text-gray-500">
+                      Number of vaccine doses
+                    </div>
+                    <div className="mt-1 text-sm leading-5 text-gray-900">
+                      {patientData.number_of_doses}
+                    </div>
+                  </div>
+                )}
+                {patientData.is_vaccinated && patientData.vaccine_name && (
+                  <div className="sm:col-span-1">
+                    <div className="text-sm leading-5 font-medium text-gray-500">
+                      Vaccine name
+                    </div>
+                    <div className="mt-1 text-sm leading-5 text-gray-900">
+                      {patientData.vaccine_name}
+                    </div>
+                  </div>
+                )}
                 {patientData.countries_travelled &&
                   !!patientData.countries_travelled.length && (
                     <div className="sm:col-span-1">
@@ -714,6 +733,9 @@ export const PatientHome = (props: any) => {
                     icon="exclamation-triangle"
                     text="Travel (within last 28 days)"
                   />
+                )}
+                {patientData.last_consultation?.is_telemedicine && (
+                  <Badge color="purple" icon="phone" text="Telemedicine" />
                 )}
               </div>
             </div>
@@ -794,6 +816,18 @@ export const PatientHome = (props: any) => {
                 </div>
               </div>
               <div className="space-y-2 py-2">
+                {patientData.disease_status === "EXPIRED" && (
+                  <div>
+                    <button
+                      className="btn btn-primary w-full"
+                      disabled={!patientData.is_active}
+                      onClick={() => navigate(`/death_report/${id}`)}
+                    >
+                      <i className="fas fa-file-download mr-2" />
+                      Death Report
+                    </button>
+                  </div>
+                )}
                 <div>
                   <button
                     className="btn btn-primary w-full"
