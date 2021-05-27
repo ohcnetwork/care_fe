@@ -8,6 +8,7 @@ import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import {postResetPassword} from "../../Redux/actions";
 import {navigate} from "raviger";
+import { withTranslation } from 'react-i18next';
 
 const useStyles = makeStyles(theme => ({
     formTop:{
@@ -28,7 +29,7 @@ const panelStyles = makeStyles((theme: Theme) =>
 );
 
 
-export const ResetPassword = (props: any) => {
+const ResetPasswordPage = (props: any) => {
     const classes = useStyles();
     const panel = panelStyles();
 
@@ -42,7 +43,7 @@ export const ResetPassword = (props: any) => {
     const [ form, setForm ] = useState(initForm);
     const [ errors, setErrors ] = useState(initErr);
     const [passReg, setPassReg] = useState(0);
-
+    const { t } = props;
     const handleChange = (e: any) => {
         const { value, name } = e.target;
         const fieldValue = Object.assign({}, form);
@@ -62,19 +63,19 @@ export const ResetPassword = (props: any) => {
         if (form.password !== form.confirm) {
             hasError = true;
             setPassReg(1)
-            err.confirm = "Password and confirm password must be same."
+            err.confirm = t("password_mismatch")
         }
 
         const regex = /^(?=.*[a-z]+)(?=.*[A-Z]+)(?=.*[0-9]+)(?=.*[!@#$%^&*]).{8,}$/;
         if (!regex.test(form.password)) {
             hasError = true;
-            err.password = 'Password Doesnt meet the requirements';
+            err.password = t("invalid_password");
         }
 
         Object.keys(form).forEach((key) => {
             if (!form[key]) {
                 hasError = true;
-                err[key] = 'This field is required';
+                err[key] = t("field_required");
             }
         });
         if (hasError) {
@@ -95,14 +96,14 @@ export const ResetPassword = (props: any) => {
                 if (res && res.status === 'OK') {
                     localStorage.removeItem('care_access_token');
                     Notification.Success({
-                        msg: "Password Reset successfully"
+                        msg: t("password_reset_success")
                     });
                     navigate('/login');
                 } else if (res && res.data) {
                     setErrors(res.data);
                 } else {
                     Notification.Error({
-                        msg: "Password Reset Failed"
+                        msg: t("password_reset_failure")
                     });
                 }
             });
@@ -114,12 +115,12 @@ export const ResetPassword = (props: any) => {
                 <Grid item xs={12} md={4} className="marginAuto marginTop50">
                     <Card>
                         <form onSubmit={(e) => {handleSubmit(e)}}>
-                            <CardHeader title="Reset Password" />
+                            <CardHeader title={t("reset_password")} />
                             <CardContent>
                                 <TextInputField
                                     type="password"
                                     name="password"
-                                    placeholder="New Password"
+                                    placeholder={t("new_password")}
                                     variant="outlined"
                                     margin="dense"
                                     onChange={handleChange}
@@ -131,10 +132,10 @@ export const ResetPassword = (props: any) => {
                                         <ExpansionPanel>
                                             <ExpansionPanelDetails>
                                                 <Typography className="text-red-500">
-                                                    <li> Minimum password length 8</li>
+                                                    <li>Minimum password length 8</li>
                                                     <li>Require at least one digit</li>
                                                     <li>Require at least one upper case</li>
-                                                    <li> Require at least one lower case letter</li>
+                                                    <li>Require at least one lower case letter</li>
                                                     <li>Require at least one symbol</li>
                                                 </Typography>
                                             </ExpansionPanelDetails>
@@ -144,7 +145,7 @@ export const ResetPassword = (props: any) => {
                                 <TextInputField
                                     type="password"
                                     name="confirm"
-                                    placeholder="Confirm Password"
+                                    placeholder={t("confirm_password")}
                                     variant="outlined"
                                     margin="dense"
                                     onChange={handleChange}
@@ -160,7 +161,7 @@ export const ResetPassword = (props: any) => {
                                     type="submit"
                                     style={{ marginLeft: 'auto' }}
                                     onClick={(e) => handleSubmit(e)}
-                                >Reset
+                                >{t("reset")}
                                 </Button>
                             </CardActions>
                         </form>
@@ -170,3 +171,4 @@ export const ResetPassword = (props: any) => {
         </div>
     );
 }
+export const ResetPassword = withTranslation()(ResetPasswordPage)

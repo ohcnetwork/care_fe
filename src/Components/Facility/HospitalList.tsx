@@ -30,6 +30,7 @@ import SwipeableViews from "react-swipeable-views";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import FacillityFilter from "./FacilityFilter";
 import { FacilitySelect } from "../Common/FacilitySelect";
+import { withTranslation } from "react-i18next";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -45,7 +46,7 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
-export const HospitalList = () => {
+const HospitalListPage = (props: any) => {
   const [qParams, setQueryParams] = useQueryParams();
   const classes = useStyles();
   const dispatchAction: any = useDispatch();
@@ -62,6 +63,7 @@ export const HospitalList = () => {
   const downloadTypes = [...DOWNLOAD_TYPES];
   const [downloadSelect, setdownloadSelect] = useState("Facility List");
   const [showFilters, setShowFilters] = useState(false);
+  const { t } = props;
   const limit = 15;
 
   const fetchData = useCallback(
@@ -178,7 +180,7 @@ export const HospitalList = () => {
     return (
       value && (
         <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
-          {key}
+          {t(key)}
           {": "}
           {value}
           <i
@@ -241,7 +243,7 @@ export const HospitalList = () => {
                 <div className="mt-2 flex justify-between">
                   <div className="flex flex-col">
                     <div className="text-gray-500 leading-relaxed font-light">
-                      Location:
+                      {t("Location")}:
                     </div>
                     <div className="font-semibold">
                       {facility.local_body_object?.name}
@@ -250,7 +252,7 @@ export const HospitalList = () => {
 
                   <div className="flex flex-col">
                     <div className="text-gray-500 leading-relaxed font-light">
-                      Ward:
+                      {t("Ward")}:
                     </div>
 
                     {facility.ward_object && (
@@ -280,7 +282,7 @@ export const HospitalList = () => {
                       className="inline-flex items-center px-3 py-2 border border-green-500 text-sm leading-4 font-medium rounded-md text-green-700 bg-white hover:text-green-500 focus:outline-none focus:border-green-300 focus:shadow-outline-blue active:text-green-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
                       onClick={() => navigate(`/facility/${facility.id}`)}
                     >
-                      View Facility
+                      {t("View Facility")}
                     </button>
                   </span>
                 </div>
@@ -313,7 +315,7 @@ export const HospitalList = () => {
   } else if (data && data.length === 0) {
     manageFacilities = hasFiltersApplied(qParams) ? (
       <div className="w-full">
-        <div className="text-3xl mt-4">No Facilities found</div>
+        <div className="text-3xl mt-4">{t("no_facilities")}</div>
       </div>
     ) : (
       <div>
@@ -322,9 +324,9 @@ export const HospitalList = () => {
           onClick={() => navigate("/facility/create")}
         >
           <i className="fas fa-plus text-3xl"></i>
-          <div className="mt-2 text-xl">Create a new facility</div>
+          <div className="mt-2 text-xl">{t("create_facility")}</div>
           <div className="text-xs mt-1 text-red-700">
-            You should not create duplicate facilities
+            {t("no_duplicate_facility")}
           </div>
         </div>
       </div>
@@ -334,7 +336,7 @@ export const HospitalList = () => {
   return (
     <div className="px-6">
       <div className="grid grid-cols-2 ">
-        <PageTitle title="Facilities" hideBack={true} className="mx-3 " />
+        <PageTitle title={t("Facilities")} hideBack={true} className="mx-3 " />
 
         <div className="flex justify-end w-full mt-4">
           <div>
@@ -344,11 +346,11 @@ export const HospitalList = () => {
                 aria-controls="panel1a-content"
                 id="panel1a-header"
               >
-                <Typography className={classes.heading}>Downloads</Typography>
+                <Typography className={classes.heading}>{t("downloads")}</Typography>
               </AccordionSummary>
               <AccordionDetails>
                 <div>
-                  <InputLabel className="text-sm">Download type</InputLabel>
+                  <InputLabel className="text-sm">{t("download_type")}</InputLabel>
                   <div className="flex flex-row">
                     <SelectField
                       name="select_download"
@@ -429,7 +431,7 @@ export const HospitalList = () => {
           <InputSearchBox
             value={qParams.search}
             search={onSearchSuspects}
-            placeholder="Search by Facility / District Name"
+            placeholder={t("facility_search_placeholder")}
             errors=""
           />
         </div>
@@ -470,7 +472,7 @@ export const HospitalList = () => {
                     {" "}
                   </line>
                 </svg>
-                <span>Advanced Filters</span>
+                <span>{t("advanced_filters")}</span>
               </button>
             </div>
           </div>
@@ -506,3 +508,4 @@ export const HospitalList = () => {
     </div>
   );
 };
+export const HospitalList = withTranslation()(HospitalListPage)

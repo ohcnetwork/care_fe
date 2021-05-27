@@ -80,6 +80,7 @@ export default function ListView({ board, filterProp, formatFilter }: boardProps
     filterProp.is_kasp,
     filterProp.assigned_user,
     filterProp.assigned_to,
+    filterProp.disease_status,
   ]);
 
   const handlePagination = (page: number, limit: number) => {
