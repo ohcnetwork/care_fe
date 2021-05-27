@@ -4,10 +4,11 @@
 
 import * as React from 'react';
 
-// tslint:disable-next-line:no-var-requires
-const PrescriptionBuilderBS = require('./PrescriptionBuilder.bs');
+// @ts-ignore: Implicit any on import
+import * as PrescriptionBuilderBS__Es6Import from './PrescriptionBuilder.bs';
+const PrescriptionBuilderBS: any = PrescriptionBuilderBS__Es6Import;
 
-import {t as Prescription__Prescription_t} from '@coronasafe/prescription-builder/src/Types/Prescription__Prescription.gen';
+import type {t as Prescription__Prescription_t} from '@coronasafe/prescription-builder/src/Types/Prescription__Prescription.gen';
 
 // tslint:disable-next-line:interface-over-type-literal
 export type Props<T1> = { readonly prescriptions: Prescription__Prescription_t[]; readonly setPrescriptions: (_1:((_1:T1) => Prescription__Prescription_t[])) => void };
