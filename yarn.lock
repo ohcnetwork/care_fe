@@ -2850,7 +2850,7 @@
 
 "@types/qrcode.react@^1.0.1":
   version "1.0.1"
-  resolved "https://registry.npmjs.org/@types/qrcode.react/-/qrcode.react-1.0.1.tgz"
+  resolved "https://registry.yarnpkg.com/@types/qrcode.react/-/qrcode.react-1.0.1.tgz#0904e7a075a6274a5258f19567b4f64013c159d8"
   integrity sha512-PcVCjpsiT2KFKfJibOgTQtkt0QQT/6GbQUp1Np/hMPhwUzMJ2DRUkR9j7tXN9Q8X06qukw+RbaJ8lJ22SBod+Q==
   dependencies:
     "@types/react" "*"
