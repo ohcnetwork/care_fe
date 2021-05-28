@@ -2864,7 +2864,7 @@
 
 "@types/react-csv@^1.1.1":
   version "1.1.1"
-  resolved "https://registry.npmjs.org/@types/react-csv/-/react-csv-1.1.1.tgz"
+  resolved "https://registry.yarnpkg.com/@types/react-csv/-/react-csv-1.1.1.tgz#003f6de5a46e4f64712f97e5509a4b3f2df9a8b1"
   integrity sha512-sP8AxGrFJ/kb7ygFpGkssdD/vKSTqdZDJbw3pJKTCa1C0UoT+0+rdUWy2fZqvhvvdpHG+OCJ4G8O7OZqVIa+BA==
   dependencies:
     "@types/react" "*"
