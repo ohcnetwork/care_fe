@@ -37,7 +37,7 @@ const updateFormReducer = (state = initialState, action: any) => {
 
 export default function ShowInvestigation(props: any) {
   const [isLoading, setIsLoading] = useState(false);
-  const { consultationId, sessionId }: any = props;
+  const { consultationId, sessionId, isLastConsultation }: any = props;
   const dispatchAction: any = useDispatch();
   // const [investigationData, setInvestigationData] = useState([]);
   const [state, dispatch] = useReducer(updateFormReducer, initialState);
@@ -111,7 +111,7 @@ export default function ShowInvestigation(props: any) {
           msg: "Investigation Updated successfully!",
         });
         navigate(
-          `/facility/${props.facilityId}/patient/${props.patientId}/consultation/${props.consultationId}/`
+          `/facility/${props.facilityId}/patient/${props.patientId}/consultation/${props.consultationId}/last_consultation/${isLastConsultation}`
         );
       }
       return;
