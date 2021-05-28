@@ -2961,7 +2961,7 @@
 
 "@types/react-swipeable-views@^0.13.0":
   version "0.13.0"
-  resolved "https://registry.npmjs.org/@types/react-swipeable-views/-/react-swipeable-views-0.13.0.tgz"
+  resolved "https://registry.yarnpkg.com/@types/react-swipeable-views/-/react-swipeable-views-0.13.0.tgz#9e5f2efa51380886f3f73014ac8b15546d337210"
   integrity sha512-orrreCcXev6IUXDuHf07RDDCAoIZRMSr95eyWmYNRfjic7w/O+68iPu0NCysVls+UygRNvoqZMuXI72N/58E1w==
   dependencies:
     "@types/react" "*"
