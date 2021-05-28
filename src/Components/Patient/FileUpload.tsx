@@ -35,7 +35,7 @@ import * as Notification from "../../Utils/Notifications.js";
 import { VoiceRecorder } from "../../Utils/VoiceRecorder";
 import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
 import Modal from "@material-ui/core/Modal";
-import { Close } from "@material-ui/icons";
+import { Close, ZoomIn, ZoomOut } from "@material-ui/icons";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -153,6 +153,42 @@ export const FileUpload = (props: FileUploadProps) => {
   const [open, setOpen] = React.useState(false);
   const [downloadURL, setDownloadURL] = useState<string>();
   const [isImage, setIsImage] = useState<boolean>();
+  const [zoom, setZoom] = useState<number>(3);
+  const [isZoomInDisabled, setZoomInDisabled] = useState<boolean>(false);
+  const [isZoomOutDisabled, setZoomOutDisabled] = useState<boolean>(false);
+
+  const zoom_values = [
+    "h-1/6 my-40",
+    "h-2/6 my-32",
+    "h-3/6 my-24",
+    "h-4/6 my-20",
+    "h-5/6 my-16",
+    "h-full my-12",
+  ];
+
+  const handleZoomIn = () => {
+    const len = zoom_values.length - 1;
+    const curr = zoom;
+    setZoom(zoom + 1);
+    if (curr + 1 === len) {
+      setZoomInDisabled(true);
+    }
+    if (curr - 1 !== 0) {
+      setZoomOutDisabled(false);
+    }
+  };
+
+  const handleZoomOut = () => {
+    const len = zoom_values.length - 1;
+    const curr = zoom;
+    setZoom(zoom - 1);
+    if (curr - 1 === 0) {
+      setZoomOutDisabled(true);
+    }
+    if (curr + 1 !== len) {
+      setZoomInDisabled(false);
+    }
+  };
 
   const UPLOAD_HEADING: { [index: string]: string } = {
     PATIENT: "Upload Patient Files",
@@ -169,6 +205,7 @@ export const FileUpload = (props: FileUploadProps) => {
 
   const handleClose = () => {
     setDownloadURL("");
+    setZoom(3);
     setOpen(false);
   };
 
@@ -455,39 +492,73 @@ export const FileUpload = (props: FileUploadProps) => {
       >
         {fileUrl && fileUrl.length > 0 ? (
           <>
-            <div className="flex absolute right-2">
-              {downloadURL && downloadURL.length > 0 && (
-                <div>
-                  <a
-                    href={downloadURL}
-                    download
-                    className="text-white p-4 rounded m-2 bg-green-500"
-                  >
-                    <GetAppIcon>load</GetAppIcon>
-                    Download
-                  </a>
+            <div className="flex absolute w-3/5 right-2">
+              {isImage && (
+                <div className="w-2/6 flex">
+                  <div className="mr-4">
+                    <Button
+                      color="default"
+                      variant="contained"
+                      style={{ marginLeft: "auto" }}
+                      startIcon={<ZoomIn />}
+                      onClick={() => {
+                        handleZoomIn();
+                      }}
+                      disabled={isZoomInDisabled}
+                    >
+                      Zoom in
+                    </Button>
+                  </div>
+                  <div>
+                    <Button
+                      color="default"
+                      variant="contained"
+                      style={{ marginLeft: "4px" }}
+                      startIcon={<ZoomOut />}
+                      onClick={() => {
+                        handleZoomOut();
+                      }}
+                      disabled={isZoomOutDisabled}
+                    >
+                      Zoom Out
+                    </Button>
+                  </div>
                 </div>
               )}
+              <div className="flex absolute right-2">
+                {downloadURL && downloadURL.length > 0 && (
+                  <div>
+                    <a
+                      href={downloadURL}
+                      download
+                      className="text-white p-4 my-2 rounded m-2 bg-green-500"
+                    >
+                      <GetAppIcon>load</GetAppIcon>
+                      Download
+                    </a>
+                  </div>
+                )}
 
-              <div>
-                <Button
-                  color="primary"
-                  variant="contained"
-                  style={{ marginLeft: "auto" }}
-                  startIcon={<Close />}
-                  onClick={() => {
-                    handleClose();
-                  }}
-                >
-                  Close
-                </Button>
+                <div>
+                  <Button
+                    color="primary"
+                    variant="contained"
+                    style={{ marginLeft: "auto" }}
+                    startIcon={<Close />}
+                    onClick={() => {
+                      handleClose();
+                    }}
+                  >
+                    Close
+                  </Button>
+                </div>
               </div>
             </div>
             {isImage ? (
               <img
                 src={fileUrl}
                 alt="file"
-                className="h-5/6 object-contain mx-auto my-6"
+                className={"object-contain mx-auto " + zoom_values[zoom]}
               />
             ) : (
               <iframe
