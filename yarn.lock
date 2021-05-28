@@ -2744,9 +2744,9 @@
   dependencies:
     "@types/node" "*"
 
-"@types/loadable__component@^5.13.1":
+"@types/loadable__component@^5.13.3":
   version "5.13.3"
-  resolved "https://registry.npmjs.org/@types/loadable__component/-/loadable__component-5.13.3.tgz"
+  resolved "https://registry.yarnpkg.com/@types/loadable__component/-/loadable__component-5.13.3.tgz#ea620b218fb2b6744ce5b2efd9a6a5c1a525a021"
   integrity sha512-nkRRYpKxspH9yiYGSvyfM7GX1m57B9AVMrVEWY7Hlv9ueK2XCu39M5QyBTDHXcj5qixdD+MyAmNgoy2dEDxGLQ==
   dependencies:
     "@types/react" "*"

@@ -42,7 +42,7 @@
     "@sentry/browser": "^6.4.1",
     "@svgr/webpack": "^5.5.0",
     "@tailwindcss/ui": "^0.5.0",
-    "@types/loadable__component": "^5.13.1",
+    "@types/loadable__component": "^5.13.3",
     "@types/lodash": "^4.14.168",
     "@types/node": "^14.14.22",
     "@types/qrcode.react": "^1.0.1",
