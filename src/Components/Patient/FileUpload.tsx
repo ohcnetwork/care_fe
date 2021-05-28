@@ -168,26 +168,19 @@ export const FileUpload = (props: FileUploadProps) => {
 
   const handleZoomIn = () => {
     const len = zoom_values.length - 1;
-    const curr = zoom;
-    setZoom(zoom + 1);
-    if (curr + 1 === len) {
+    if (zoom + 1 === len) {
       setZoomInDisabled(true);
     }
-    if (curr - 1 !== 0) {
-      setZoomOutDisabled(false);
-    }
+    setZoom(zoom + 1);
+    setZoomOutDisabled(false);
   };
 
   const handleZoomOut = () => {
-    const len = zoom_values.length - 1;
-    const curr = zoom;
-    setZoom(zoom - 1);
-    if (curr - 1 === 0) {
+    if (zoom - 1 === 0) {
       setZoomOutDisabled(true);
     }
-    if (curr + 1 !== len) {
-      setZoomInDisabled(false);
-    }
+    setZoom(zoom - 1);
+    setZoomInDisabled(false);
   };
 
   const UPLOAD_HEADING: { [index: string]: string } = {
@@ -206,6 +199,8 @@ export const FileUpload = (props: FileUploadProps) => {
   const handleClose = () => {
     setDownloadURL("");
     setZoom(3);
+    setZoomOutDisabled(false);
+    setZoomInDisabled(false);
     setOpen(false);
   };
 
