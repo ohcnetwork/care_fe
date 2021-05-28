@@ -60,6 +60,15 @@ const header_content_type: URLS = {
   xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 };
 
+// Object for possible extension of image files
+const ExtImage: URLS = {
+  jpeg: "1",
+  jpg: "1",
+  gif: "1",
+  png: "1",
+  svg: "1",
+};
+
 function getModalStyle() {
   const top = 100;
   const left = 100;
@@ -143,6 +152,7 @@ export const FileUpload = (props: FileUploadProps) => {
   const [modalStyle] = React.useState(getModalStyle);
   const [open, setOpen] = React.useState(false);
   const [downloadURL, setDownloadURL] = useState<string>();
+  const [isImage, setIsImage] = useState<boolean>();
 
   const UPLOAD_HEADING: { [index: string]: string } = {
     PATIENT: "Upload Patient Files",
@@ -218,12 +228,23 @@ export const FileUpload = (props: FileUploadProps) => {
     [dispatch, fetchData, id, reload]
   );
 
+  // Function to extract the extension of the file and check if its image or not
+  const getExtension = (url: string) => {
+    const div1 = url.split("?")[0].split(".");
+    const ext: string = div1[div1.length - 1];
+    if (ExtImage[ext] && ExtImage[ext] === "1") {
+      setIsImage(true);
+    } else {
+      setIsImage(false);
+    }
+  };
+
   const loadFile = async (id: any) => {
     setFileUrl("");
     handleOpen();
     var data = { file_type: type, associating_id: getAssociatedId() };
     var responseData = await dispatch(retrieveUpload(data, id));
-    // window.open(responseData.data.read_signed_url, "_blank");
+    getExtension(responseData.data.read_signed_url);
     downloadFileUrl(responseData.data.read_signed_url);
     setFileUrl(responseData.data.read_signed_url);
   };
@@ -462,11 +483,19 @@ export const FileUpload = (props: FileUploadProps) => {
                 </Button>
               </div>
             </div>
-            <iframe
-              title="Source Files"
-              src={fileUrl}
-              className="border-2 border-black bg-white w-4/6 h-5/6 mx-auto my-6"
-            />
+            {isImage ? (
+              <img
+                src={fileUrl}
+                alt="file"
+                className="h-5/6 object-contain mx-auto my-6"
+              />
+            ) : (
+              <iframe
+                title="Source Files"
+                src={fileUrl}
+                className="border-2 border-black bg-white w-4/6 h-5/6 mx-auto my-6"
+              />
+            )}
           </>
         ) : (
           <div className="flex h-screen justify-center items-center">
