@@ -67,6 +67,7 @@ const Investigation = (props: {
   consultationId: string;
   patientId: string;
   facilityId: string;
+  isLastConsultation: string
 }) => {
   const dispatch: any = useDispatch();
   const [selectedGroup, setSelectedGroup] = useState([]);
@@ -162,7 +163,7 @@ const Investigation = (props: {
             msg: "Investigation created successfully!",
           });
           navigate(
-            `/facility/${props.facilityId}/patient/${props.patientId}/consultation/${props.consultationId}/`
+            `/facility/${props.facilityId}/patient/${props.patientId}/consultation/${props.consultationId}/last_consultation/${props.isLastConsultation}`
           );
         } else {
           setSaving(false);

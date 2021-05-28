@@ -164,15 +164,17 @@ const routes = {
       unspecified={true}
     />
   ),
-  "/facility/:facilityId/patient/:patientId/consultation/:id/investigation/": ({
+  "/facility/:facilityId/patient/:patientId/consultation/:id/last_consultation/:isLastConsultation/investigation/": ({
     facilityId,
     patientId,
     id,
+    isLastConsultation,
   }: any) => (
     <Investigation
       consultationId={id}
       facilityId={facilityId}
       patientId={patientId}
+      isLastConsultation={isLastConsultation}
     />
   ),
   "/facility/:facilityId/patient/:patientId/consultation/:id/investigationSessions":
