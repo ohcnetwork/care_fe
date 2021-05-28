@@ -128,7 +128,8 @@ export const PatientManager = (props: any) => {
     gender: qParams.gender || undefined,
     age_min: qParams.age_min || undefined,
     age_max: qParams.age_max || undefined,
-    date_of_result: qParams.date_of_result || undefined,
+    date_of_result_before: qParams.date_of_result_before || undefined,
+    date_of_result_after: qParams.date_of_result_after || undefined,
     last_consultation_admission_date_before:
       qParams.last_consultation_admission_date_before || undefined,
     last_consultation_admission_date_after:
@@ -358,6 +359,13 @@ export const PatientManager = (props: any) => {
                   icon="exclamation-triangle"
                   text="Contact with suspected carrier"
                 />
+              )}
+              {patient.disease_status === "EXPIRED" && (
+                <Badge
+                color="yellow"
+                icon="exclamation-triangle"
+                text="Patient Expired"
+              />
               )}
             </div>
             <div className="px-2">
