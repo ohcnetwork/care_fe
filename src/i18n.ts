@@ -3,14 +3,14 @@ import { initReactI18next } from "react-i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
 import en from "./Locale/en";
 import ta from "./Locale/ta";
+import ml from "./Locale/ml";
+import mr from "./Locale/mr";
 
 const resources = {
-  en: {
-    translation: en,
-  },
-  ta: {
-    translation: ta,
-  },
+  en: { translation: en },
+  ta: { translation: ta },
+  ml: { translation: ml },
+  mr: { translation: mr },
 };
 
 i18n
