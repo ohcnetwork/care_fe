@@ -423,7 +423,7 @@ export default function ListView() {
           appliedFilters.assigned_user || appliedFilters.assigned_to ||
           local.assigned_user || local.assigned_to)
         }
-
+        
         {badge(
           "Filtered By",
           (appliedFilters.assigned_facility || local.assigned_facility) && "Assigned Facility"

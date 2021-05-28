@@ -47,7 +47,6 @@ import ViewInvestigations from "../Components/Facility/Investigations/ViewInvest
 import ShowInvestigation from "../Components/Facility/Investigations/ShowInvestigation";
 import InvestigationReports from "../Components/Facility/Investigations/Reports";
 import { withTranslation } from "react-i18next";
-import LanguageSelector from "../Components/Common/LanguageSelector";
 import DeathReport from "../Components/DeathReport/DeathReport";
 
 const get = require("lodash.get");
@@ -345,6 +344,11 @@ const AppRouter = (props: any) => {
     window.scrollTo(0, 0);
   }, [path]);
 
+  const handleSidebarClick = (e: any, link: string) => {
+    e.preventDefault();
+    navigate(link);
+  };
+
   return (
     <div className="h-screen flex overflow-hidden bg-gray-100">
       {drawer && (
@@ -414,7 +418,6 @@ const AppRouter = (props: any) => {
                     <i className="fas fa-tachometer-alt text-green-400 mr-3 text-md group-hover:text-green-300 group-focus:text-green-300 transition ease-in-out duration-150"></i>
                     {t("Dashboard")}
                   </a>
-                  <LanguageSelector className="bg-white w-full mt-5" />
                 </nav>
               </div>
               <div className="flex-shrink-0 flex border-t border-green-700 p-4">
@@ -465,9 +468,10 @@ const AppRouter = (props: any) => {
                   ? "mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-white rounded-md bg-green-900 focus:outline-none focus:bg-green-900 transition ease-in-out duration-150"
                   : "mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-green-300 rounded-md hover:text-white hover:bg-green-700 focus:outline-none focus:bg-green-900 transition ease-in-out duration-150";
                 return (
-                  <button
+                  <a
                     key={item.title}
-                    onClick={() => navigate(item.link)}
+                    href={item.link}
+                    onClick={(e) => handleSidebarClick(e, item.link)}
                     className={selectedClasses}
                   >
                     <i
@@ -480,7 +484,7 @@ const AppRouter = (props: any) => {
                       }
                     ></i>
                     {t(item.title)}
-                  </button>
+                  </a>
                 );
               })}
               <NotificationsList />
@@ -493,7 +497,6 @@ const AppRouter = (props: any) => {
                 <i className="fas fa-tachometer-alt text-green-400 mr-3 text-md group-hover:text-green-300 group-focus:text-green-300 transition ease-in-out duration-150"></i>
                 {t("Dashboard")}
               </a>
-              <LanguageSelector className="bg-white w-full mt-5" />
             </nav>
           </div>
           <div className="flex-shrink-0 flex border-t border-green-700 p-4">

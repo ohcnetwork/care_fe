@@ -52,12 +52,12 @@ const LoginPage = (props: any) => {
       ) {
         if (!form[key].match(/\w/)) {
           hasError = true;
-          err[key] = "This field is required";
+          err[key] = t("field_required");
         }
       }
       if (!form[key]) {
         hasError = true;
-        err[key] = "This field is required";
+        err[key] = t("field_required");
       }
     });
     if (hasError) {

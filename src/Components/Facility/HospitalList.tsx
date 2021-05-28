@@ -120,7 +120,7 @@ const HospitalListPage = (props: any) => {
 
   const onSearchSuspects = (search: string) => {
     if (search !== "") setQueryParams({ search }, true);
-    else setQueryParams({ kasp_empanelled: qParams.kasp_empanelled }, true);
+    else setQueryParams({ search: "" }, true);
   };
 
   const handleDownload = async () => {
@@ -299,7 +299,7 @@ const HospitalListPage = (props: any) => {
   } else if (data && data.length) {
     manageFacilities = (
       <>
-        {facilityList}
+        <div className="grid md:grid-cols-2 gap-4">{facilityList}</div>
         {totalCount > limit && (
           <div className="mt-4 flex w-full justify-center">
             <Pagination
@@ -346,11 +346,15 @@ const HospitalListPage = (props: any) => {
                 aria-controls="panel1a-content"
                 id="panel1a-header"
               >
-                <Typography className={classes.heading}>{t("downloads")}</Typography>
+                <Typography className={classes.heading}>
+                  {t("downloads")}
+                </Typography>
               </AccordionSummary>
               <AccordionDetails>
                 <div>
-                  <InputLabel className="text-sm">{t("download_type")}</InputLabel>
+                  <InputLabel className="text-sm">
+                    {t("download_type")}
+                  </InputLabel>
                   <div className="flex flex-row">
                     <SelectField
                       name="select_download"
@@ -503,9 +507,9 @@ const HospitalListPage = (props: any) => {
           )}
       </div>
       <div>
-        <div className="grid md:grid-cols-2 gap-4">{manageFacilities}</div>
+        <div>{manageFacilities}</div>
       </div>
     </div>
   );
 };
-export const HospitalList = withTranslation()(HospitalListPage)
+export const HospitalList = withTranslation()(HospitalListPage);
