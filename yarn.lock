@@ -2456,7 +2456,7 @@
 
 "@svgr/webpack@^5.5.0":
   version "5.5.0"
-  resolved "https://registry.npmjs.org/@svgr/webpack/-/webpack-5.5.0.tgz"
+  resolved "https://registry.yarnpkg.com/@svgr/webpack/-/webpack-5.5.0.tgz#aae858ee579f5fa8ce6c3166ef56c6a1b381b640"
   integrity sha512-DOBOK255wfQxguUta2INKkzPj6AIS6iafZYiYmHn6W3pHlycSRRlvWKCfLDG10fXfLWqE3DJHgRUOyJYmARa7g==
   dependencies:
     "@babel/core" "^7.12.3"
