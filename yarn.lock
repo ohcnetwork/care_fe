@@ -2954,7 +2954,7 @@
 
 "@types/react-slick@^0.23.4":
   version "0.23.4"
-  resolved "https://registry.npmjs.org/@types/react-slick/-/react-slick-0.23.4.tgz"
+  resolved "https://registry.yarnpkg.com/@types/react-slick/-/react-slick-0.23.4.tgz#c97e2a9e7e3d1933c68593b8e82752fab1e8ce53"
   integrity sha512-vXoIy4GUfB7/YgqubR4H7RALo+pRdMYCeLgWwV3MPwl5pggTlEkFBTF19R7u+LJc85uMqC7RfsbkqPLMQ4ab+A==
   dependencies:
     "@types/react" "*"
