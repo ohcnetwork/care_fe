@@ -2975,7 +2975,7 @@
 
 "@types/react-virtualized@^9.21.11":
   version "9.21.11"
-  resolved "https://registry.npmjs.org/@types/react-virtualized/-/react-virtualized-9.21.11.tgz"
+  resolved "https://registry.yarnpkg.com/@types/react-virtualized/-/react-virtualized-9.21.11.tgz#8eb60ed12ef0b2625769819f9fd10ad4bb1bdce0"
   integrity sha512-ngNe2AY/2CHuZQstOS0Jo5jnSjeyKTdSgqrXCQEltRMXLp9rwPUpJdgkoWzES6wn427Z8zo8dkBN8Sx7hlRmig==
   dependencies:
     "@types/prop-types" "*"
