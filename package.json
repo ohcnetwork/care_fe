@@ -159,7 +159,7 @@
     "jest": "^27.0.2",
     "jest-environment-jsdom-fourteen": "^1.0.1",
     "jest-resolve": "^27.0.2",
-    "jest-watch-typeahead": "0.6.0",
+    "jest-watch-typeahead": "^0.6.4",
     "optimize-css-assets-webpack-plugin": "^5.0.4",
     "postcss-cli": "^7.1.2",
     "redux-devtools-extension": "^2.13.8",
