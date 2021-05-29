@@ -1411,7 +1411,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       variant="outlined"
                       margin="dense"
                       type="text"
-                      placeholder="Enter the address"
+                      placeholder="Enter the current address"
                       value={state.form.address}
                       onChange={handleChange}
                       errors={state.errors.address}
@@ -1433,7 +1433,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         variant="outlined"
                         margin="dense"
                         type="text"
-                        placeholder="Enter the address"
+                        placeholder="Enter the permanent address"
                         value={state.form.permanent_address}
                         onChange={handleChange}
                         errors={state.errors.permanent_address}
