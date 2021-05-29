@@ -314,7 +314,7 @@ export default function ResourceCreate(props: resourceProps) {
               </div>
 
               <div className="md:col-span-2">
-                <InputLabel>Reason for request*</InputLabel>
+                <InputLabel>Description of request*</InputLabel>
                 <MultilineInputField
                   rows={5}
                   name="reason"
