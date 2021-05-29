@@ -2633,10 +2633,18 @@
   resolved "https://registry.npmjs.org/@types/debug/-/debug-4.1.5.tgz"
   integrity sha512-Q1y515GcOdTHgagaVFhHnIFQ38ygs/kmxdNpvpou+raI9UO3YZcHDngBSYKQklcKlvA7iuQlmIKbzvmxcOE9CQ==
 
-"@types/draft-js@*", "@types/draft-js@^0.10.44":
+"@types/draft-js@*":
   version "0.10.45"
   resolved "https://registry.npmjs.org/@types/draft-js/-/draft-js-0.10.45.tgz"
   integrity sha512-ozmVQEI088kGQfY2XPB0b+YRNbkv1mxdxcLieBLCc2F4IkVWMs6mnIaEbBRExmM3H/Amm9CvhlmIYmDL4CjBvA==
+  dependencies:
+    "@types/react" "*"
+    immutable "~3.7.4"
+
+"@types/draft-js@^0.11.3":
+  version "0.11.3"
+  resolved "https://registry.yarnpkg.com/@types/draft-js/-/draft-js-0.11.3.tgz#8110c143e0ab419c04f749480b313e6ccc8713bb"
+  integrity sha512-+A1+E/Bg+IGCAECon8RZYR7SlJrVCsq+JxbCPyXiis0RoHSPNjbbXGVyU/EAsk8iBdKcatio7KXaTqP7+lmcug==
   dependencies:
     "@types/react" "*"
     immutable "~3.7.4"
