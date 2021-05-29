@@ -301,7 +301,7 @@ export default function ResourceCreate(props: resourceProps) {
               </div>
               
               <div>
-                <InputLabel>Quantity Required</InputLabel>
+                <InputLabel>Required Quantity</InputLabel>
                 <TextInputField
                   name="requested_quantity"
                   variant="outlined"

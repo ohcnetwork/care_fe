@@ -163,7 +163,7 @@ export default function ResourceDetails(props: { id: string }) {
             </div>
             <div>
               <span className="font-semibold leading-relaxed">
-                Quantity Required:{" "}
+                Required Quantity:{" "}
               </span>
               {data.requested_quantity || "--"}
             </div>

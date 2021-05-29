@@ -45,6 +45,7 @@ const initForm: any = {
   reason: "",
   assigned_facility_type: "",
   assigned_to: "",
+  requested_quantity: null,
 };
 
 const requiredFields: any = {
@@ -144,6 +145,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
         title: state.form.title,
         reason: state.form.reason,
         assigned_to: state.form.assigned_to,
+        requested_quantity: state.form.requested_quantity || 0,
       };
 
       const res = await dispatchAction(updateResource(props.id, data));
@@ -243,7 +245,18 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
                   errors={state.errors.assigned_facility}
                 />
               </div>
-
+              <div>
+                <InputLabel>Required Quantity</InputLabel>
+                <TextInputField
+                  name="requested_quantity"
+                  variant="outlined"
+                  margin="dense"
+                  type="number"
+                  value={state.form.requested_quantity}
+                  onChange={handleChange}
+                  errors=""
+                />
+              </div>
               <div>
                 <InputLabel>Is this an emergency?</InputLabel>
                 <RadioGroup
