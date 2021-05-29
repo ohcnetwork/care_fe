@@ -157,7 +157,7 @@
     "gentype": "^4.0.0",
     "http-server": "^0.12.3",
     "jest": "^27.0.2",
-    "jest-environment-jsdom-fourteen": "1.0.1",
+    "jest-environment-jsdom-fourteen": "^1.0.1",
     "jest-resolve": "26.2.2",
     "jest-watch-typeahead": "0.6.0",
     "optimize-css-assets-webpack-plugin": "^5.0.4",
