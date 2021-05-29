@@ -139,7 +139,7 @@
     "@types/draftjs-to-html": "^0.8.0",
     "@types/html-to-draftjs": "^1.4.0",
     "@types/jest": "^26.0.23",
-    "@types/mocha": "^8.2.0",
+    "@types/mocha": "^8.2.2",
     "@types/react-copy-to-clipboard": "^5.0.0",
     "@types/react-dates": "^21.8.2",
     "autoprefixer": "^9.8.6",
