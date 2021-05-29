@@ -154,7 +154,7 @@
     "eslint-plugin-flowtype": "^5.7.2",
     "eslint-plugin-import": "^2.23.3",
     "eslint-plugin-jsx-a11y": "^6.4.1",
-    "eslint-plugin-react": "7.20.5",
+    "eslint-plugin-react": "^7.23.2",
     "eslint-plugin-react-hooks": "^4.2.0",
     "gentype": "^3.42.0",
     "http-server": "^0.12.3",
