@@ -1882,7 +1882,7 @@
 
 "@pnotify/core@^5.2.0":
   version "5.2.0"
-  resolved "https://registry.npmjs.org/@pnotify/core/-/core-5.2.0.tgz"
+  resolved "https://registry.yarnpkg.com/@pnotify/core/-/core-5.2.0.tgz#fac2b1ab9b8cdad809c8bd82f169e6a9066d78cf"
   integrity sha512-d9ZM7Q6ZxuwTJ14QbOa7pWmoUqObPis7S1K+TzISffrL8w2f7JigEPI281agLShVAMIsE5SsC6O9YhkutwekbA==
 
 "@rollup/plugin-node-resolve@^7.1.1":
