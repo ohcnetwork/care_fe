@@ -64,7 +64,7 @@
     "date-fns": "^2.22.1",
     "file-loader": "^6.2.0",
     "html-webpack-plugin": "^4.5.1",
-    "i18next": "^20.3.0",
+    "i18next": "^20.3.1",
     "i18next-browser-languagedetector": "^6.1.1",
     "libphonenumber-js": "^1.9.9",
     "lodash.debounce": "^4.0.8",
