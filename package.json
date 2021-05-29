@@ -143,7 +143,7 @@
     "autoprefixer": "^9.8.6",
     "bs-platform": "^9.0.2",
     "concurrently": "^6.2.0",
-    "copy-webpack-plugin": "^9.0.0",
+    "copy-webpack-plugin": "6.4.1",
     "cssnano": "^5.0.5",
     "eslint": "^7.27.0",
     "eslint-config-airbnb": "^18.2.1",
