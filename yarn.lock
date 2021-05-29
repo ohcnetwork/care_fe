@@ -6906,7 +6906,7 @@ eslint-config-airbnb-base@^14.2.1:
 
 eslint-config-airbnb@^18.2.1:
   version "18.2.1"
-  resolved "https://registry.npmjs.org/eslint-config-airbnb/-/eslint-config-airbnb-18.2.1.tgz"
+  resolved "https://registry.yarnpkg.com/eslint-config-airbnb/-/eslint-config-airbnb-18.2.1.tgz#b7fe2b42f9f8173e825b73c8014b592e449c98d9"
   integrity sha512-glZNDEZ36VdlZWoxn/bUR1r/sdFKPd1mHPbqUtkctgNG4yT2DLLtJ3D+yCV+jzZCc2V1nBVkmdknOJBZ5Hc0fg==
   dependencies:
     eslint-config-airbnb-base "^14.2.1"
