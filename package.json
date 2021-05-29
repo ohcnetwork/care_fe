@@ -96,7 +96,7 @@
     "reason-react": "^0.9.1",
     "redux": "^4.1.0",
     "redux-thunk": "^2.3.0",
-    "resolve": "1.17.0",
+    "resolve": "^1.20.0",
     "sass-loader": "9.0.3",
     "save": "^2.4.0",
     "tailwindcss": "^1.9.6",
