@@ -13756,7 +13756,7 @@ react-copy-to-clipboard@^5.0.3:
     copy-to-clipboard "^3"
     prop-types "^15.5.8"
 
-react-csv-reader@^3.1.2:
+react-csv-reader@^3.3.0:
   version "3.3.0"
   resolved "https://registry.yarnpkg.com/react-csv-reader/-/react-csv-reader-3.3.0.tgz#bd05259622e75f196874486f9e1db63527e97d59"
   integrity sha512-0czNqDVtZeqqPPoG3+ov8o/gWLYGN99HWi1v7y730qW0v0TNGKDZcM8zD3IkCJjvRfOdkH89xPc/+Xw+Q20Zng==
