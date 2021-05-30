@@ -31,7 +31,6 @@ export const OnlineDoctorsSelect = (props: any) => {
   }, []);
 
   useEffect(() => {
-    console.log("useEffect running")
     const searchTerm = state.searchTerm.toLowerCase();
     const filteredDoctors = state.users.filter(
       (doctor) =>
