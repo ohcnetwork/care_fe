@@ -8,6 +8,7 @@ $border: #28a745;
   #section-to-print,
   #section-to-print * {
     visibility: visible;
+    -webkit-print-color-adjust: exact;
   }
   #section-to-print {
     position: absolute;
