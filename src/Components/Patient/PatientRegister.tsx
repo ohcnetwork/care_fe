@@ -222,7 +222,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     transfer?: boolean;
     patientList: Array<DupPatientModel>;
   }>({ patientList: [] });
-  const [sameAddress, setSameAddress] = useState(true);
+  const [sameAddress, setSameAddress] = useState(false);
   const [{ extId }, setQuery] = useQueryParams();
 
   useEffect(() => {
