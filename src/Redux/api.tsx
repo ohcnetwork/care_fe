@@ -388,6 +388,10 @@ export default {
     path: "/api/v1/facility/{facility_external_id}/inventory/{external_id}/flag/",
     method: "PUT",
   },
+  deleteLastInventoryLog: {
+    path: "/api/v1/facility/{facility_external_id}/inventory/delete_last/?item={external_id}",
+    method: "DELETE",
+  },
   discharge: {
     path: "/api/v1/patient/{external_id}/discharge_summary/",
     method: "POST",

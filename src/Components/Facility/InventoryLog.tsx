@@ -4,7 +4,11 @@ const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
-import { getInventoryLog, flagInventoryItem } from "../../Redux/actions";
+import {
+  getInventoryLog,
+  flagInventoryItem,
+  deleteLastInventoryLog,
+} from "../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import Pagination from "../Common/Pagination";
 import moment from "moment";
@@ -52,6 +56,24 @@ export default function InventoryLog(props: any) {
     if (res && res.status === 204) {
       Notification.Success({
         msg: "Updated Successfully",
+      });
+      window.location.reload();
+    }
+    setSaving(false);
+  };
+
+  const removeLastInventoryLog = async (id: any) => {
+    setSaving(true);
+    const res = await dispatchAction(
+      deleteLastInventoryLog({
+        facility_external_id: facilityId,
+        external_id: id,
+      })
+    );
+
+    if (res && res.status === 201) {
+      Notification.Success({
+        msg: "Deleted Successfully",
       });
       window.location.reload();
     }
@@ -187,6 +209,13 @@ export default function InventoryLog(props: any) {
         hideBack={false}
         className="mx-3 md:mx-8"
       />
+      <button
+        onClick={(_) => removeLastInventoryLog(inventoryItem.external_id)}
+        disabled={saving}
+        className="btn btn-default"
+      >
+        Delete
+      </button>
       <div className="container mx-auto px-4 sm:px-8">
         <div className="py-8 ">
           <h4>Item: {itemName}</h4>
