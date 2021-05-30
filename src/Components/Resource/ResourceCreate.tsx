@@ -48,6 +48,7 @@ const initForm: any = {
   reason: "",
   refering_facility_contact_name: "",
   refering_facility_contact_number: "",
+  required_quantity: null,
 };
 
 const requiredFields: any = {
@@ -180,6 +181,7 @@ export default function ResourceCreate(props: resourceProps) {
         refering_facility_contact_number: parsePhoneNumberFromString(
           state.form.refering_facility_contact_number
         )?.format("E.164"),
+        requested_quantity: state.form.requested_quantity || 0,
       };
 
       const res = await dispatchAction(createResource(data));
@@ -297,6 +299,19 @@ export default function ResourceCreate(props: resourceProps) {
                   className="bg-white h-14 w-1/3 mt-2 shadow-sm md:text-sm md:leading-5"
                 />
               </div>
+              
+              <div>
+                <InputLabel>Required Quantity</InputLabel>
+                <TextInputField
+                  name="requested_quantity"
+                  variant="outlined"
+                  margin="dense"
+                  type="number"
+                  value={state.form.required_quantity}
+                  onChange={handleChange}
+                  errors=""
+                />
+                </div>
               
               <div className="md:col-span-2">
                 <InputLabel>Request Title*</InputLabel>
