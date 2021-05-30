@@ -67,7 +67,7 @@ export default function InventoryLog(props: any) {
     const res = await dispatchAction(
       deleteLastInventoryLog({
         facility_external_id: facilityId,
-        external_id: id,
+        id: id,
       })
     );
 
@@ -210,7 +210,7 @@ export default function InventoryLog(props: any) {
         className="mx-3 md:mx-8"
       />
       <button
-        onClick={(_) => removeLastInventoryLog(inventoryItem.external_id)}
+        onClick={(_) => removeLastInventoryLog(inventory[0].item_object.id)}
         disabled={saving}
         className="btn btn-default"
       >

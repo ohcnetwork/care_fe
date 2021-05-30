@@ -389,7 +389,7 @@ export default {
     method: "PUT",
   },
   deleteLastInventoryLog: {
-    path: "/api/v1/facility/{facility_external_id}/inventory/delete_last/?item={external_id}",
+    path: "/api/v1/facility/{facility_external_id}/inventory/delete_last/?item={id}",
     method: "DELETE",
   },
   discharge: {
