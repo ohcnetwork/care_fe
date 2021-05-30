@@ -1,11 +1,11 @@
 {
-  "Facilities": "हॉस्पिटल",
+  "Facilities": "सुविधा",
   "Patients": "रुग्ण",
-  "Sample Test": "नमुना तपासणी ",
+  "Sample Test": "नमुना चाचणी",
   "Shifting": "शिफ्टिंग",
-  "Resource": "संसाधन",
-  "External Results": "बाह्य परिणाम",
-  "Users": "युजर्स",
+  "Resource": "स्त्रोत",
+  "External Results": "बाह्य बाह्य परिणाम",
+  "Users": "वापरकर्ते",
   "Profile": "प्रोफाइल",
   "Dashboard": "डॅशबोर्ड"
 }

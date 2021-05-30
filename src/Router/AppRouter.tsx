@@ -148,7 +148,7 @@ const routes = {
         facilityId={facilityId}
         patientId={patientId}
         consultationId={id}
-        isLastConsultation={JSON.parse(isLastConsultation)}
+        isLastConsultation={isLastConsultation}
       />
     ),
   "/facility/:facilityId/patient/:patientId/consultation/:id/files/": ({

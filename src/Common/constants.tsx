@@ -220,13 +220,13 @@ export const CONSULTATION_SUGGESTION = [
 ];
 
 export const ADMITTED_TO = [
-  "Home Isolation",
   "Isolation Room",
-  "Bed with Oxygen Support",
   "ICU",
-  "ICU with Oxygen Support",
   "ICU with Non Invasive Ventilator",
+  "ICU with Oxygen Support",
   "ICU with Invasive Ventilator",
+  "Bed with Oxygen Support",
+  "Home Isolation",
   "Gynaecology Ward",
   "Paediatric Ward",
 ];
@@ -434,7 +434,7 @@ export const RESOURCE_SUBCATEGORIES: Array<OptionsType> = [
   { id: 120, text: "B TYPE OXYGEN CYLINDER" },
   { id: 130, text: "C TYPE OXYGEN CYLINDER" },
   { id: 140, text: "JUMBO D TYPE OXYGEN CYLINDER" },
-  { id: 1000, text: "UNSPECIFIED" },
+  { id: 1000, text: "UNSPECIFIED" }
 ];
 
 export const RESOURCE_FILTER_ORDER: Array<OptionsType> = [
