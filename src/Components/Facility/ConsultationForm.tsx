@@ -65,7 +65,7 @@ const initForm: any = {
   diagnosis: "",
   verified_by: "",
   test_id: "",
-  is_kasp: "false",
+  is_kasp: "",
   kasp_enabled_date: null,
   examination_details: "",
   existing_medication: "",
@@ -257,8 +257,14 @@ export const ConsultationForm = (props: any) => {
             errors[field] = "Telemedicine should be `Yes` when Admitted To is Home Isolation";
             invalidForm = true;
           }
-
           return;
+        case "is_kasp":
+          if(!state.form[field]) {
+            errors[field] = "Please select an option, Kasp is mandatory";
+            invalidForm = true;
+          }
+
+      
         default:
           return;
       }
@@ -705,7 +711,7 @@ export const ConsultationForm = (props: any) => {
               </div>
 
               <div className="flex-1">
-                <InputLabel id="admitted-label">Kasp</InputLabel>
+                <InputLabel id="admitted-label">Kasp*</InputLabel>
                 <RadioGroup
                   aria-label="covid"
                   name="is_kasp"

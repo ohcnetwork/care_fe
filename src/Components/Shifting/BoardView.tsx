@@ -34,6 +34,9 @@ export default function BoardView() {
   const [downloadFile, setDownloadFile] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  
+  const local = JSON.parse(localStorage.getItem("shift-filters") || "{}");
+
 
   badge;
 
@@ -180,6 +183,68 @@ export default function BoardView() {
             "Shifting Approving Facility"
         )}
         {badge("Disease Status", appliedFilters.disease_status)}
+        {badge(
+          "status",
+          ((appliedFilters.status != "--" && appliedFilters.status) ||
+            (local.status !== "--" && local.status))
+        )}
+
+        {badge(
+          "Emergency",
+          local.emergency === "yes" || appliedFilters.emergency === "true"
+            ? "yes"
+            : local.emergency === "no" || appliedFilters.emergency === "false"
+              ? "no"
+              : undefined
+        )}
+
+        {badge(
+          "Is KASP",
+          local.is_kasp === "yes" || appliedFilters.is_kasp === "true"
+            ? "yes"
+            : local.is_kasp === "no" || appliedFilters.is_kasp === "false"
+              ? "no"
+              : undefined
+        )}
+
+        {badge(
+          "Up Shift",
+          local.is_up_shift === "yes" || appliedFilters.is_up_shift === "true"
+            ? "yes"
+            : local.is_up_shift === "no" || appliedFilters.is_up_shift === "false"
+              ? "no"
+              : undefined
+        )}
+
+        {badge("Phone Number", appliedFilters.patient_phone_number || local.patient_phone_number)}
+        {badge("Patient Name", appliedFilters.patient_name || local.patient_name)}
+        {badge("Modified After", appliedFilters.modified_date_after || local.modified_date_after)}
+        {badge("Modified Before", appliedFilters.modified_date_before || local.modified_date_before)}
+        {badge("Created Before", appliedFilters.created_date_before || local.created_date_before)}
+        {badge("Created After", appliedFilters.created_date_after || local.created_date_after)}
+        {badge("Disease Status", appliedFilters.disease_status || local.disease_status)}
+
+        {badge("Assigned To",
+          appliedFilters.assigned_user || appliedFilters.assigned_to ||
+          local.assigned_user || local.assigned_to)
+        }
+
+        {badge(
+          "Filtered By",
+          (appliedFilters.assigned_facility || local.assigned_facility) && "Assigned Facility"
+        )}
+
+        {badge(
+          "Filtered By",
+          (appliedFilters.orgin_facility || local.orgin_facility) && "Origin Facility"
+        )}
+
+        {badge(
+          "Filtered By",
+          (appliedFilters.shifting_approving_facility || local.shifting_approving_facility) &&
+          "Shifting Approving Facility"
+        )}
+
       </div>
       <div className="flex mt-4 pb-2 flex-1 items-start overflow-x-scroll">
         {isLoading ? (
@@ -205,6 +270,7 @@ export default function BoardView() {
         <div className="bg-white min-h-screen p-4">
           <ListFilter
             filter={qParams}
+            local={local}
             onChange={applyFilter}
             closeFilter={() => setShowFilters(false)}
           />
