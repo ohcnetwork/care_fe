@@ -175,6 +175,12 @@ export default function ResourceDetails(props: { id: string }) {
             </div>
             <div>
               <span className="font-semibold leading-relaxed">
+                Approved Quantity:{" "}
+              </span>
+              {data.assigned_quantity}
+            </div>
+            <div>
+              <span className="font-semibold leading-relaxed">
                 Contact person number:{" "}
               </span>
               {data.refering_facility_contact_number ? (
