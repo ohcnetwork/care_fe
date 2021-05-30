@@ -46,6 +46,8 @@ import Investigation from "../Components/Facility/Investigations";
 import ViewInvestigations from "../Components/Facility/Investigations/ViewInvestigations";
 import ShowInvestigation from "../Components/Facility/Investigations/ShowInvestigation";
 import InvestigationReports from "../Components/Facility/Investigations/Reports";
+import { withTranslation } from "react-i18next";
+import DeathReport from "../Components/DeathReport/DeathReport";
 
 const get = require("lodash.get");
 const img = "https://cdn.coronasafe.network/light-logo.svg";
@@ -278,6 +280,7 @@ const routes = {
   "/external_results": () => <ResultList />,
   "/external_results/upload": () => <ExternalResultUpload />,
   "/external_results/:id": ({ id }: any) => <ResultItem id={id} />,
+  "/death_report/:id": ({ id }: any) => <DeathReport id={id} />,
 };
 
 let menus = [
@@ -323,10 +326,11 @@ let menus = [
   },
 ];
 
-const AppRouter = () => {
+const AppRouter = (props: any) => {
   useRedirect("/", "/facility");
   const pages = useRoutes(routes);
   const path = usePath();
+  const { t } = props;
   const url = path.split("/");
   const state: any = useSelector((state) => state);
   const { currentUser } = state;
@@ -339,6 +343,11 @@ const AppRouter = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [path]);
+
+  const handleSidebarClick = (e: any, link: string) => {
+    e.preventDefault();
+    navigate(link);
+  };
 
   return (
     <div className="h-screen flex overflow-hidden bg-gray-100">
@@ -397,7 +406,7 @@ const AppRouter = () => {
                             " mr-3 text-md group-hover:text-green-300 group-focus:text-green-300 transition ease-in-out duration-150"
                           }
                         ></i>
-                        {item.title}
+                        {t(item.title)}
                       </a>
                     );
                   })}
@@ -407,7 +416,7 @@ const AppRouter = () => {
                     className="mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-green-300 rounded-md hover:text-white hover:bg-green-700 focus:outline-none focus:bg-green-900 transition ease-in-out duration-150"
                   >
                     <i className="fas fa-tachometer-alt text-green-400 mr-3 text-md group-hover:text-green-300 group-focus:text-green-300 transition ease-in-out duration-150"></i>
-                    Dashboard
+                    {t("Dashboard")}
                   </a>
                 </nav>
               </div>
@@ -432,7 +441,7 @@ const AppRouter = () => {
                         }}
                         className="text-xs leading-4 font-medium text-green-300 group-hover:text-green-100 transition ease-in-out duration-150"
                       >
-                        Sign Out
+                        {t("sign_out")}
                       </p>
                     </div>
                   </div>
@@ -459,9 +468,10 @@ const AppRouter = () => {
                   ? "mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-white rounded-md bg-green-900 focus:outline-none focus:bg-green-900 transition ease-in-out duration-150"
                   : "mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-green-300 rounded-md hover:text-white hover:bg-green-700 focus:outline-none focus:bg-green-900 transition ease-in-out duration-150";
                 return (
-                  <button
+                  <a
                     key={item.title}
-                    onClick={() => navigate(item.link)}
+                    href={item.link}
+                    onClick={(e) => handleSidebarClick(e, item.link)}
                     className={selectedClasses}
                   >
                     <i
@@ -473,8 +483,8 @@ const AppRouter = () => {
                         " mr-3 text-lg group-hover:text-green-300 group-focus:text-green-300 transition ease-in-out duration-150"
                       }
                     ></i>
-                    {item.title}
-                  </button>
+                    {t(item.title)}
+                  </a>
                 );
               })}
               <NotificationsList />
@@ -485,7 +495,7 @@ const AppRouter = () => {
                 className="mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-green-300 rounded-md hover:text-white hover:bg-green-700 focus:outline-none focus:bg-green-900 transition ease-in-out duration-150"
               >
                 <i className="fas fa-tachometer-alt text-green-400 mr-3 text-md group-hover:text-green-300 group-focus:text-green-300 transition ease-in-out duration-150"></i>
-                Dashboard
+                {t("Dashboard")}
               </a>
             </nav>
           </div>
@@ -510,7 +520,7 @@ const AppRouter = () => {
                     }}
                     className="text-xs leading-4 font-medium text-green-300 group-hover:text-green-100 transition ease-in-out duration-150"
                   >
-                    Sign Out
+                    {t("sign_out")}
                   </p>
                 </div>
               </div>
@@ -557,4 +567,4 @@ const AppRouter = () => {
     </div>
   );
 };
-export default AppRouter;
+export default withTranslation()(AppRouter);

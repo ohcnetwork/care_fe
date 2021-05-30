@@ -369,6 +369,13 @@ export const PatientManager = (props: any) => {
                   text="Contact with suspected carrier"
                 />
               )}
+              {patient.disease_status === "EXPIRED" && (
+                <Badge
+                color="yellow"
+                icon="exclamation-triangle"
+                text="Patient Expired"
+              />
+              )}
             </div>
             <div className="px-2">
               <div className="btn btn-default bg-white">Details</div>

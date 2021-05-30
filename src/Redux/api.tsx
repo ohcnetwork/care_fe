@@ -384,6 +384,10 @@ export default {
     path: "/api/v1/items",
     method: "GET",
   },
+  flagInventoryItem: {
+    path: "/api/v1/facility/{facility_external_id}/inventory/{external_id}/flag/",
+    method: "PUT",
+  },
   discharge: {
     path: "/api/v1/patient/{external_id}/discharge_summary/",
     method: "POST",
