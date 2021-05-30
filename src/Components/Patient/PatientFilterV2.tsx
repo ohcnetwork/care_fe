@@ -83,6 +83,7 @@ export default function PatientFilterV2(props: any) {
     number_of_doses: filter.number_of_doses || null,
     covin_id: filter.covin_id || null,
     is_kasp: filter.is_kasp || null,
+    is_declared_positive: filter.is_declared_positive || null,
   });
   const dispatch: any = useDispatch();
 
@@ -196,7 +197,6 @@ export default function PatientFilterV2(props: any) {
       age_min,
       age_max,
       date_of_result,
-      date_declared_positive,
       last_consultation_admission_date_before,
       last_consultation_admission_date_after,
       last_consultation_discharge_date_before,
@@ -206,6 +206,7 @@ export default function PatientFilterV2(props: any) {
       covin_id,
       srf_id,
       is_kasp,
+      is_declared_positive,
     } = filterState;
     const data = {
       lsgBody: lsgBody || "",
@@ -281,6 +282,7 @@ export default function PatientFilterV2(props: any) {
       number_of_doses: number_of_doses || "",
       covin_id: covin_id || "",
       is_kasp: is_kasp || "",
+      is_declared_positive: is_declared_positive || "",
     };
     onChange(data);
   };

@@ -148,6 +148,7 @@ export const PatientManager = (props: any) => {
     number_of_doses: qParams.number_of_doses || undefined,
     covin_id: qParams.covin_id || undefined,
     is_kasp: qParams.is_kasp || undefined,
+    is_declared_positive: qParams.is_declared_positive || undefined,
   };
 
   let managePatients: any = null;
@@ -215,6 +216,7 @@ export const PatientManager = (props: any) => {
     qParams.number_of_doses,
     qParams.lsgBody,
     qParams.is_kasp,
+    qParams.is_declared_positive,
   ]);
 
   const updateQuery = (params: any) => {
@@ -587,6 +589,11 @@ export const PatientManager = (props: any) => {
           {badge("Age max", qParams.age_max, "age_max")}
           {badge("SRF ID", qParams.srf_id, "srf_id")}
           {badge("LSG Body ID", qParams.lsgBody, "lsgBody")}
+          {badge(
+            "Declared Status",
+            qParams.is_declared_positive,
+            "is_declared_positive"
+          )}
         </div>
       </div>
       <div className={classesTab.root}>
