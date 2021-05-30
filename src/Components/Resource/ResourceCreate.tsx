@@ -68,12 +68,12 @@ const requiredFields: any = {
     invalidText: "Please enter valid phone number",
   },
   title: {
-    errorText: "Title for resource request in mandatory",
+    errorText: "Title for resource request is mandatory",
     invalidText: "Please enter title for resource request",
   },
   reason: {
-    errorText: "Reason for resource request in mandatory",
-    invalidText: "Please enter reason for resource request",
+    errorText: "Description of resource request is mandatory",
+    invalidText: "Please enter Description of resource request",
   },
 };
 
@@ -321,7 +321,7 @@ export default function ResourceCreate(props: resourceProps) {
                   variant="outlined"
                   margin="dense"
                   type="text"
-                  placeholder="Type your reason here"
+                  placeholder="Type your description here"
                   value={state.form.reason}
                   onChange={handleChange}
                   errors={state.errors.reason}
