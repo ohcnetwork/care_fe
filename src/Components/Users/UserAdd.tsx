@@ -12,7 +12,7 @@ import { validateEmailAddress, validatePassword, validateUsername } from "../../
 import { addUser, getDistrictByState, getLocalbodyByDistrict, getStates, getUserListFacility } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { FacilitySelect } from "../Common/FacilitySelect";
-import { DateInputField, PhoneNumberField, SelectField, TextInputField } from "../Common/HelperInputFields";
+import { DateInputField, PhoneNumberField, SelectField, TextInputField, MultiSelectField, } from "../Common/HelperInputFields";
 import { FacilityModel } from "../Facility/models";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -92,7 +92,7 @@ export const UserAdd = (props: UserProps) => {
   const [isStateLoading, setIsStateLoading] = useState(false);
   const [isDistrictLoading, setIsDistrictLoading] = useState(false);
   const [isLocalbodyLoading, setIsLocalbodyLoading] = useState(false);
-  const [current_user_facilities, setFacilities] = useState<Array<String>>([]);
+  const [current_user_facilities, setFacilities] = useState<Array<FacilityModel>>([]);
   const [states, setStates] = useState(initialStates);
   const [districts, setDistricts] = useState(selectStates);
   const [localBody, setLocalBody] = useState(selectDistrict);
@@ -197,8 +197,7 @@ export const UserAdd = (props: UserProps) => {
       setIsStateLoading(true);
       const res = await dispatchAction(getUserListFacility({ username }));
       if (!status.aborted && res && res.data) {
-        const facilities = res.data.map((f: any) => f.id);
-        setFacilities(facilities);
+        setFacilities(res.data);
       }
       setIsStateLoading(false);
     }, [dispatchAction]
@@ -211,7 +210,9 @@ export const UserAdd = (props: UserProps) => {
       //   fetchData(status);
       // }
       fetchStates(status);
-      fetchFacilities(status);
+      if (userType === "Staff" || userType === "StaffReadOnly") {
+        fetchFacilities(status);
+      }
     },
     [dispatch]
   );
@@ -247,21 +248,22 @@ export const UserAdd = (props: UserProps) => {
     dispatch({ type: "set_form", form });
   }
 
+  const handleMultiSelect = (event: any) => {
+    const { name, value } = event.target;
+    const form = { ...state.form };
+    form[name] = value;
+    dispatch({ type: "set_form", form });
+  }
+
   const validateForm = () => {
     let errors = { ...initError };
     let invalidForm = false;
     Object.keys(state.form).forEach(field => {
       switch (field) {
         case "facilities":
-          if (userType === "Staff" && state.form["user_type"] === "Staff") {
+          if (!state.form[field] && (userType === "Staff" || userType === "StaffReadOnly") && (state.form["user_type"] === "Staff" || state.form["user_type"] === "StaffReadOnly")) {
+            errors[field] = "Please select atleast one of the facilities you are linked to";
             invalidForm = true;
-            for (const facilityId of state.form[field]) {
-              if (current_user_facilities.indexOf(facilityId) !== -1) {
-                invalidForm = false;
-                return;
-              }
-            }
-            errors[field] = "Please select atleast one of your facilities";
           }
           return;
         case "user_type":
@@ -421,13 +423,28 @@ export const UserAdd = (props: UserProps) => {
 
               <div className="col-span-2">
                 <InputLabel>Facilities</InputLabel>
-                <FacilitySelect
-                  multiple={true}
-                  name="facilities"
-                  selected={selectedFacility}
-                  setSelected={setFacility}
-                  errors={state.errors.facilities}
-                />
+                {
+                  (userType === "Staff" || userType === "StaffReadOnly") ?
+                    (
+                      <MultiSelectField
+                        name="facilities"
+                        variant="outlined"
+                        value={state.form.facilities}
+                        options={current_user_facilities}
+                        onChange={handleMultiSelect}
+                        optionValue="name"
+                      />
+                    ) : (
+                      <FacilitySelect
+                        multiple={true}
+                        name="facilities"
+                        selected={selectedFacility}
+                        setSelected={setFacility}
+                        errors={state.errors.facilities}
+                      />
+                    )
+                }
+
               </div>
 
               <div>
