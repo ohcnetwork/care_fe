@@ -285,14 +285,14 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
               </div>
 
               <div className="md:col-span-2">
-                <InputLabel>Reason for resource request*</InputLabel>
+                <InputLabel>Description of request*</InputLabel>
                 <MultilineInputField
                   rows={5}
                   name="reason"
                   variant="outlined"
                   margin="dense"
                   type="text"
-                  placeholder="Type your reason here"
+                  placeholder="Type your description here"
                   value={state.form.reason}
                   onChange={handleChange}
                   errors={state.errors.reason}
