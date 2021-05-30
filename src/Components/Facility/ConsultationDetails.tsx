@@ -162,6 +162,14 @@ export const ConsultationDetails = (props: any) => {
                       {itemData.admitted_to || "-"}
                     </Typography>
                   </Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <span className="text-gray-700">Category: </span>
+                      <span className="badge badge-pill badge-warning">
+                        {patientCategoryChoices.find((i) => i.id === itemData.patient_category)?.text || "-"}
+                      </span>
+                    </Typography>
+                  </Grid>
                   <Grid item xs={6}>
                     <Typography>
                       <span className="text-gray-700">Created At:</span>{" "}
