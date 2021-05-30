@@ -261,7 +261,8 @@ export const UserAdd = (props: UserProps) => {
     Object.keys(state.form).forEach(field => {
       switch (field) {
         case "facilities":
-          if (!state.form[field] && (userType === "Staff" || userType === "StaffReadOnly") && (state.form["user_type"] === "Staff" || state.form["user_type"] === "StaffReadOnly")) {
+
+          if (state.form[field].length === 0 && (userType === "Staff" || userType === "StaffReadOnly") && (state.form["user_type"] === "Staff" || state.form["user_type"] === "StaffReadOnly")) {
             errors[field] = "Please select atleast one of the facilities you are linked to";
             invalidForm = true;
           }
@@ -433,6 +434,7 @@ export const UserAdd = (props: UserProps) => {
                         options={current_user_facilities}
                         onChange={handleMultiSelect}
                         optionValue="name"
+                        errors={state.errors.facilities}
                       />
                     ) : (
                       <FacilitySelect
