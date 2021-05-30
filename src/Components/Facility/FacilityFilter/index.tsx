@@ -30,9 +30,7 @@ const selectDistrict = [{ id: 0, name: "Please select your district" }];
 function FacillityFilter(props: any) {
     let { filter, onChange, closeFilter } = props;
     const [isFacilityLoading, setFacilityLoading] = useState(false);
-    // const [stateList, setStateList] = useState([])
     const dispatchAction: any = useDispatch();
-    //const [isstateLoading, setStateLoading] = useState(false);
     const [isStateLoading, setIsStateLoading] = useState(false);
     const [isDistrictLoading, setIsDistrictLoading] = useState(false);
     const [isLocalbodyLoading, setIsLocalbodyLoading] = useState(false);
@@ -121,26 +119,6 @@ function FacillityFilter(props: any) {
         setFilterState(filterData);
     };
 
-    // const fetchStates = useCallback(
-    //     async (status: statusType) => {
-    //         setIsStateLoading(true);
-    //         const statesRes = await dispatchAction(getStates());
-    //         if (!status.aborted && statesRes.data.results) {
-    //             setStates([...initialStates, ...statesRes.data.results]);
-    //         }
-    //         setIsStateLoading(false);
-    //     },
-    //     [dispatchAction]
-    // );
-
-    // useAbortableEffect(
-    //     (status: statusType) => {
-    //         fetchStates(status);
-    //     },
-    //     [dispatch]
-    // );
-
-
     useEffect(() => {
         setIsStateLoading(true)
         loadStates()
@@ -149,7 +127,6 @@ function FacillityFilter(props: any) {
     const loadStates = useCallback(debounce(async () => {
         const res = await dispatchAction(getStates());
         if (res && res.data) {
-            //setStateList(res.data.results)
             setStates([...initialStates, ...res.data.results]);
         }
         setIsStateLoading(false);
@@ -185,17 +162,6 @@ function FacillityFilter(props: any) {
                     <div>
                         {isStateLoading ? (
                             <CircularProgress size={20} />) : (
-                            // <SelectField
-                            //     name="state"
-                            //     variant="outlined"
-                            //     margin="dense"
-                            //     optionKey="id"
-                            //     optionValue="name"
-                            //     value={filterState.state}
-                            //     options={[{ id: "", name: "Show All" }, ...stateList]}
-                            //     onChange={handleChange}
-                            //     className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-                            // />)
                             <SelectField
                                 name="state"
                                 variant="outlined"
@@ -214,14 +180,6 @@ function FacillityFilter(props: any) {
 
                 <div className="w-64 flex-none">
                     <span className="text-sm font-semibold">District</span>
-                    {/* <DistrictSelect
-                        multiple={false}
-                        name="district"
-                        selected={filterState.district_ref}
-                        setSelected={(obj) => setKeys(obj, "district")}
-                        className="shifting-page-filter-dropdown"
-                        errors={""}
-                    /> */}
                     {isDistrictLoading ? (
                         <CircularProgress size={20} />
                     ) : (
@@ -243,14 +201,6 @@ function FacillityFilter(props: any) {
 
                 <div className="w-64 flex-none">
                     <span className="text-sm font-semibold">Local Body</span>
-                    {/* <LocalBodySelect
-                        multiple={false}
-                        name="local_body"
-                        selected={filterState.local_body_ref}
-                        setSelected={(obj) => setKeys(obj, "local_body")}
-                        className="shifting-page-filter-dropdown"
-                        errors={""}
-                    /> */}
                     {isLocalbodyLoading ? (
                         <CircularProgress size={20} />
                     ) : (
