@@ -3,7 +3,7 @@ import { navigate } from "raviger";
 import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { externalResultUploadCsv, getAllLocalBody } from "../../Redux/actions";
+import { externalResultUploadCsv, getAllLocalBodyByDistrict } from "../../Redux/actions";
 import CSVReader from "react-csv-reader";
 import {
   MultilineInputField,
@@ -21,6 +21,8 @@ const PageTitle = loadable(() => import("../Common/PageTitle"));
 export default function ExternalResultUpload() {
   const dispatch: any = useDispatch();
   const [uploadFile, setUploadFile] = useState("");
+  // for disabling save button once clicked
+  const [loading, setLoading] = useState(false);
   const [csvData, setCsvData] = useState(new Array<any>());
   const [errors, setErrors] = useState<any>({});
   const initalState = { loading: false, lsgs: new Array<any>() }
@@ -33,7 +35,7 @@ export default function ExternalResultUpload() {
   //   async (status: statusType) => {
   //     setState({ ...state, loading: true });
   //     let id = 7
-  //     const res = await dispatch(getAllLocalBody({ id }));
+  //     const res = await dispatch(getAllLocalBodyByDistrict({ id }));
   //     if (!status.aborted) {
   //       if (res && res.data) {
   //         setState({ loading: false, lsgs: res.data.results });
@@ -56,6 +58,7 @@ export default function ExternalResultUpload() {
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
+    setLoading(true);
     const valid = true
     const data = {
       sample_tests: csvData,
@@ -64,9 +67,8 @@ export default function ExternalResultUpload() {
     if (valid) {
       setErrors({})
       dispatch(externalResultUploadCsv(data)).then((resp: any) => {
-        console.log(resp)
-        console.log(resp.status)
         if (resp && resp.status === 202) {
+          setLoading(false);
           navigate('/external_results')
         } else {
           setErrors(resp.data)
@@ -139,7 +141,7 @@ export default function ExternalResultUpload() {
 
           </div>
           <div className="mt-2">
-            <button className="btn btn-primary" onClick={handleSubmit}>
+            <button disabled={loading} className="btn btn-primary" onClick={handleSubmit}>
               Save
               </button>
           </div>

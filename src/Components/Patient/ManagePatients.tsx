@@ -17,9 +17,14 @@ import { PhoneNumberField } from "../Common/HelperInputFields";
 import NavTabs from "../Common/NavTabs";
 import Pagination from "../Common/Pagination";
 import { InputSearchBox } from "../Common/SearchBox";
-import { TELEMEDICINE_ACTIONS } from "../../Common/constants";
+import {
+  ADMITTED_TO,
+  GENDER_TYPES,
+  TELEMEDICINE_ACTIONS,
+} from "../../Common/constants";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import PatientFilterV2 from "./PatientFilterV2";
+import { parseOptionId } from "../../Common/utils";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -85,7 +90,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const RESULT_LIMIT = 30;
+const RESULT_LIMIT = 15;
 
 export const PatientManager = (props: any) => {
   const { facilityId } = props;
@@ -111,6 +116,7 @@ export const PatientManager = (props: any) => {
     phone_number: qParams.phone_number
       ? parsePhoneNumberFromString(qParams.phone_number)?.format("E.164")
       : undefined,
+    local_body: qParams.lsgBody || undefined,
     facility: facilityId || qParams.facility,
     offset: (qParams.page ? qParams.page - 1 : 0) * RESULT_LIMIT,
     created_date_before: qParams.created_date_before || undefined,
@@ -125,14 +131,27 @@ export const PatientManager = (props: any) => {
     date_declared_positive_after: qParams.date_declared_positive_after || undefined,
     age_min: qParams.age_min || undefined,
     age_max: qParams.age_max || undefined,
-    last_consultation_admission_date_before: qParams.last_consultation_admission_date_before || undefined,
-    last_consultation_admission_date_after: qParams.last_consultation_admission_date_after || undefined,
-    last_consultation_discharge_date_before: qParams.last_consultation_discharge_date_before || undefined,
-    last_consultation_discharge_date_after: qParams.last_consultation_discharge_date_after || undefined,
-    last_consultation_admitted_to: qParams.last_consultation_admitted_to || undefined,
+    date_declared_positive_before:
+      qParams.date_declared_positive_before || undefined,
+    date_declared_positive_after:
+      qParams.date_declared_positive_after || undefined,
+    date_of_result_before: qParams.date_of_result_before || undefined,
+    date_of_result_after: qParams.date_of_result_after || undefined,
+    last_consultation_admission_date_before:
+      qParams.last_consultation_admission_date_before || undefined,
+    last_consultation_admission_date_after:
+      qParams.last_consultation_admission_date_after || undefined,
+    last_consultation_discharge_date_before:
+      qParams.last_consultation_discharge_date_before || undefined,
+    last_consultation_discharge_date_after:
+      qParams.last_consultation_discharge_date_after || undefined,
+    last_consultation_admitted_to_list:
+      qParams.last_consultation_admitted_to_list || undefined,
     srf_id: qParams.srf_id || undefined,
-    is_vaccinated: qParams.is_vaccinated || undefined,
-    covin_id: qParams.covin_id || undefined
+    number_of_doses: qParams.number_of_doses || undefined,
+    covin_id: qParams.covin_id || undefined,
+    is_kasp: qParams.is_kasp || undefined,
+    is_declared_positive: qParams.is_declared_positive || undefined,
   };
 
   let managePatients: any = null;
@@ -161,7 +180,6 @@ export const PatientManager = (props: any) => {
 
   useEffect(() => {
     setIsLoading(true);
-
     dispatch(getAllPatient(params, "listPatients"))
       .then((res: any) => {
         if (res && res.data) {
@@ -185,7 +203,7 @@ export const PatientManager = (props: any) => {
     qParams.last_consultation_discharge_date_after,
     qParams.age_max,
     qParams.age_min,
-    qParams.last_consultation_admitted_to,
+    qParams.last_consultation_admitted_to_list,
     qParams.facility,
     qParams.category,
     qParams.gender,
@@ -200,7 +218,13 @@ export const PatientManager = (props: any) => {
     qParams.page,
     qParams.phone_number,
     qParams.srf_id,
+    qParams.covin_id,
+    qParams.number_of_doses,
+    qParams.lsgBody,
+    qParams.is_kasp,
+    qParams.is_declared_positive,
   ]);
+
   const updateQuery = (params: any) => {
     const nParams = Object.assign({}, qParams, params);
     setQueryParams(nParams, true);
@@ -235,14 +259,24 @@ export const PatientManager = (props: any) => {
     updateQuery(filter);
     setShowFilters(false);
   };
+  const removeFilter = (paramKey: any) => {
+    updateQuery({
+      ...qParams,
+      [paramKey]: "",
+    });
+  };
 
-  const badge = (key: string, value: any) => {
+  const badge = (key: string, value: any, paramKey: string) => {
     return (
       value && (
         <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
           {key}
           {": "}
           {value}
+          <i
+            className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
+            onClick={(e) => removeFilter(paramKey)}
+          ></i>
         </span>
       )
     );
@@ -313,9 +347,8 @@ export const PatientManager = (props: any) => {
               {patient.disease_status === "POSITIVE" && (
                 <Badge color="red" icon="radiation" text="Positive" />
               )}
-              {["NEGATIVE", "RECOVERY", "RECOVERED"].indexOf(
-                patient.disease_status
-              ) >= 0 && (
+              {["NEGATIVE", "RECOVERED"].indexOf(patient.disease_status) >=
+                0 && (
                 <Badge
                   color="green"
                   icon="smile-beam"
@@ -341,6 +374,13 @@ export const PatientManager = (props: any) => {
                   icon="exclamation-triangle"
                   text="Contact with suspected carrier"
                 />
+              )}
+              {patient.disease_status === "EXPIRED" && (
+                <Badge
+                color="yellow"
+                icon="exclamation-triangle"
+                text="Patient Expired"
+              />
               )}
             </div>
             <div className="px-2">
@@ -421,7 +461,7 @@ export const PatientManager = (props: any) => {
             <PhoneNumberField
               value={qParams.phone_number}
               onChange={searchByPhone}
-              turnOffAutoFormat={true}
+              turnOffAutoFormat={false}
               errors=""
             />
           </div>

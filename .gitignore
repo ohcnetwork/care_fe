@@ -29,7 +29,7 @@ dist
 build
 .swp
 stats.json
-
+yarn.lock
 public/build-meta.json
 
 
@@ -37,3 +37,5 @@ public/build-meta.json
 /lib/bs/**
 .merlin
 *.bs.js
+*.gen.tsx
+*.gen

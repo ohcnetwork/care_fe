@@ -5,6 +5,10 @@ import {
   CircularProgress,
   InputLabel,
   IconButton,
+  RadioGroup,
+  FormControlLabel,
+  Box,
+  Radio,
 } from "@material-ui/core";
 import Popover from "@material-ui/core/Popover";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
@@ -20,6 +24,7 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   validateLocationCoordinates,
   phonePreg,
+  validatePincode,
 } from "../../Common/validation";
 import {
   createFacility,
@@ -53,7 +58,9 @@ const initialDistricts = [{ id: 0, name: "Choose District" }];
 const selectStates = [{ id: 0, name: "Please select your state" }];
 const initialLocalbodies = [{ id: 0, name: "Choose Localbody" }];
 const selectDistrict = [{ id: 0, name: "Please select your district" }];
-const selectLocalBody = [{ id: 0, name: "Please select your Local Body", number: 0 }];
+const selectLocalBody = [
+  { id: 0, name: "Please select your Local Body", number: 0 },
+];
 const initialWards = [{ id: 0, name: "Choose Ward", number: 0 }];
 
 const initForm: any = {
@@ -63,12 +70,20 @@ const initForm: any = {
   district: "",
   local_body: "",
   ward: "",
+  kasp_empanelled: "false",
   address: "",
   phone_number: "",
   latitude: "",
   longitude: "",
   pincode: "",
   oxygen_capacity: "",
+  type_b_cylinders: "",
+  type_c_cylinders: "",
+  type_d_cylinders: "",
+  expected_oxygen_requirement: "",
+  expected_type_b_cylinders: "",
+  expected_type_c_cylinders: "",
+  expected_type_d_cylinders: "",
 };
 
 const initError = Object.assign(
@@ -119,9 +134,8 @@ export const FacilityCreate = (props: FacilityProps) => {
   const [localBody, setLocalBody] = useState(selectDistrict);
   const [ward, setWard] = useState(selectLocalBody);
 
-  const [anchorEl, setAnchorEl] = React.useState<
-    (EventTarget & Element) | null
-  >(null);
+  const [anchorEl, setAnchorEl] =
+    React.useState<(EventTarget & Element) | null>(null);
   const [mapLoadLocation, setMapLoadLocation] = useState(DEFAULT_MAP_LOCATION);
 
   const headerText = !facilityId ? "Create Facility" : "Update Facility";
@@ -184,11 +198,24 @@ export const FacilityCreate = (props: FacilityProps) => {
             district: res.data.district ? res.data.district : "",
             local_body: res.data.local_body ? res.data.local_body : "",
             ward: res.data.ward_object ? res.data.ward_object.id : initialWards,
+            kasp_empanelled: res.data.kasp_empanelled
+              ? String(res.data.kasp_empanelled)
+              : "false",
             address: res.data.address,
             pincode: res.data.pincode,
-            phone_number: res.data.phone_number.length == 10 ? "+91" + res.data.phone_number : res.data.phone_number,
+            phone_number:
+              res.data.phone_number.length == 10
+                ? "+91" + res.data.phone_number
+                : res.data.phone_number,
             latitude: res.data.location ? res.data.location.latitude : "",
             longitude: res.data.location ? res.data.location.longitude : "",
+            type_b_cylinders: res.data.type_b_cylinders,
+            type_c_cylinders: res.data.type_c_cylinders,
+            type_d_cylinders: res.data.type_d_cylinders,
+            expected_type_b_cylinders: res.data.expected_type_b_cylinders,
+            expected_type_c_cylinders: res.data.expected_type_c_cylinders,
+            expected_type_d_cylinders: res.data.expected_type_d_cylinders,
+            expected_oxygen_requirement: res.data.expected_oxygen_requirement,
             oxygen_capacity: res.data.oxygen_capacity
               ? res.data.oxygen_capacity
               : "",
@@ -284,10 +311,11 @@ export const FacilityCreate = (props: FacilityProps) => {
             errors[field] = "Field is required";
             invalidForm = true;
           }
+          return;
 
         case "pincode":
-          if (!Number(state.form[field])) {
-            errors[field] = "Field is required";
+          if (!validatePincode(state.form[field])) {
+            errors[field] = "Please enter valid pincode";
             invalidForm = true;
           }
           return;
@@ -313,6 +341,7 @@ export const FacilityCreate = (props: FacilityProps) => {
             invalidForm = true;
           }
           return;
+
         default:
           return;
       }
@@ -339,18 +368,42 @@ export const FacilityCreate = (props: FacilityProps) => {
         pincode: state.form.pincode,
         local_body: state.form.local_body,
         ward: state.form.ward,
+        kasp_empanelled: JSON.parse(state.form.kasp_empanelled),
         location:
           state.form.latitude && state.form.longitude
             ? {
-              latitude: Number(state.form.latitude),
-              longitude: Number(state.form.longitude),
-            }
+                latitude: Number(state.form.latitude),
+                longitude: Number(state.form.longitude),
+              }
             : undefined,
         phone_number: parsePhoneNumberFromString(
           state.form.phone_number
         )?.format("E.164"),
         oxygen_capacity: state.form.oxygen_capacity
           ? Number(state.form.oxygen_capacity)
+          : 0,
+        type_b_cylinders: state.form.type_b_cylinders
+          ? Number(state.form.type_b_cylinders)
+          : 0,
+        type_c_cylinders: state.form.type_c_cylinders
+          ? Number(state.form.type_c_cylinders)
+          : 0,
+        type_d_cylinders: state.form.type_d_cylinders
+          ? Number(state.form.type_d_cylinders)
+          : 0,
+        expected_oxygen_requirement: state.form.expected_oxygen_requirement
+          ? Number(state.form.expected_oxygen_requirement)
+          : 0,
+        expected_type_b_cylinders: state.form.expected_type_b_cylinders
+          ? Number(state.form.expected_type_b_cylinders)
+          : 0,
+
+        expected_type_c_cylinders: state.form.expected_type_c_cylinders
+          ? Number(state.form.expected_type_c_cylinders)
+          : 0,
+
+        expected_type_d_cylinders: state.form.expected_type_d_cylinders
+          ? Number(state.form.expected_type_d_cylinders)
           : 0,
       };
       const res = await dispatchAction(
@@ -430,20 +483,20 @@ export const FacilityCreate = (props: FacilityProps) => {
                 {isStateLoading ? (
                   <CircularProgress size={20} />
                 ) : (
-                    <SelectField
-                      name="state"
-                      variant="outlined"
-                      margin="dense"
-                      value={state.form.state}
-                      options={states}
-                      optionValue="name"
-                      onChange={(e) => [
-                        handleChange(e),
-                        fetchDistricts(String(e.target.value)),
-                      ]}
-                      errors={state.errors.state}
-                    />
-                  )}
+                  <SelectField
+                    name="state"
+                    variant="outlined"
+                    margin="dense"
+                    value={state.form.state}
+                    options={states}
+                    optionValue="name"
+                    onChange={(e) => [
+                      handleChange(e),
+                      fetchDistricts(String(e.target.value)),
+                    ]}
+                    errors={state.errors.state}
+                  />
+                )}
               </div>
 
               <div>
@@ -451,20 +504,20 @@ export const FacilityCreate = (props: FacilityProps) => {
                 {isDistrictLoading ? (
                   <CircularProgress size={20} />
                 ) : (
-                    <SelectField
-                      name="district"
-                      variant="outlined"
-                      margin="dense"
-                      value={state.form.district}
-                      options={districts}
-                      optionValue="name"
-                      onChange={(e) => [
-                        handleChange(e),
-                        fetchLocalBody(String(e.target.value)),
-                      ]}
-                      errors={state.errors.district}
-                    />
-                  )}
+                  <SelectField
+                    name="district"
+                    variant="outlined"
+                    margin="dense"
+                    value={state.form.district}
+                    options={districts}
+                    optionValue="name"
+                    onChange={(e) => [
+                      handleChange(e),
+                      fetchLocalBody(String(e.target.value)),
+                    ]}
+                    errors={state.errors.district}
+                  />
+                )}
               </div>
 
               <div className="md:col-span-2">
@@ -472,41 +525,41 @@ export const FacilityCreate = (props: FacilityProps) => {
                 {isLocalbodyLoading ? (
                   <CircularProgress size={20} />
                 ) : (
-                    <SelectField
-                      name="local_body"
-                      variant="outlined"
-                      margin="dense"
-                      value={state.form.local_body}
-                      options={localBody}
-                      optionValue="name"
-                      onChange={(e) => [
-                        handleChange(e),
-                        fetchWards(String(e.target.value)),
-                      ]}
-                      errors={state.errors.local_body}
-                    />
-                  )}
+                  <SelectField
+                    name="local_body"
+                    variant="outlined"
+                    margin="dense"
+                    value={state.form.local_body}
+                    options={localBody}
+                    optionValue="name"
+                    onChange={(e) => [
+                      handleChange(e),
+                      fetchWards(String(e.target.value)),
+                    ]}
+                    errors={state.errors.local_body}
+                  />
+                )}
               </div>
               <div className="md:col-span-2">
                 <InputLabel id="ward-label">Ward*</InputLabel>
                 {isWardLoading ? (
                   <CircularProgress size={20} />
                 ) : (
-                    <SelectField
-                      name="ward"
-                      variant="outlined"
-                      margin="dense"
-                      options={ward
-                        .sort((a, b) => a.number - b.number)
-                        .map((e) => {
-                          return { id: e.id, name: e.number + ": " + e.name };
-                        })}
-                      value={state.form.ward}
-                      optionValue="name"
-                      onChange={handleChange}
-                      errors={state.errors.ward}
-                    />
-                  )}
+                  <SelectField
+                    name="ward"
+                    variant="outlined"
+                    margin="dense"
+                    options={ward
+                      .sort((a, b) => a.number - b.number)
+                      .map((e) => {
+                        return { id: e.id, name: e.number + ": " + e.name };
+                      })}
+                    value={state.form.ward}
+                    optionValue="name"
+                    onChange={handleChange}
+                    errors={state.errors.ward}
+                  />
+                )}
               </div>
 
               <div className="md:col-span-2">
@@ -545,19 +598,155 @@ export const FacilityCreate = (props: FacilityProps) => {
                   onlyIndia={true}
                 />
               </div>
+
+              <div className="grid grid-cols-2">
+                <div>
+                  <InputLabel id="oxygen_capacity">
+                    Liquid Oxygen Capacity (l)
+                  </InputLabel>
+                  <TextInputField
+                    name="oxygen_capacity"
+                    type="number"
+                    variant="outlined"
+                    margin="dense"
+                    value={state.form.oxygen_capacity}
+                    onChange={handleChange}
+                    errors={state.errors.oxygen_capacity}
+                  />
+                </div>
+                <div>
+                  <InputLabel id="name-label">
+                    Expected Liquid Oxygen (l)
+                  </InputLabel>
+                  <TextInputField
+                    name="expected_oxygen_requirement"
+                    type="number"
+                    variant="outlined"
+                    margin="dense"
+                    value={state.form.expected_oxygen_requirement}
+                    onChange={handleChange}
+                    errors={state.errors.expected_oxygen_requirement}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2">
+                <div>
+                  <InputLabel id="type_b_cylinders">
+                    B Type Cylinders
+                  </InputLabel>
+                  <TextInputField
+                    name="type_b_cylinders"
+                    type="number"
+                    variant="outlined"
+                    margin="dense"
+                    value={state.form.type_b_cylinders}
+                    onChange={handleChange}
+                    errors={state.errors.type_b_cylinders}
+                  />
+                </div>
+                <div>
+                  <InputLabel id="expected_type_b_cylinders">
+                    Expected B Type Cylinders
+                  </InputLabel>
+                  <TextInputField
+                    name="expected_type_b_cylinders"
+                    type="number"
+                    variant="outlined"
+                    margin="dense"
+                    value={state.form.expected_type_b_cylinders}
+                    onChange={handleChange}
+                    errors={state.errors.expected_type_b_cylinders}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2">
+                <div>
+                  <InputLabel id="type_c_cylinders">
+                    C Type Cylinders
+                  </InputLabel>
+                  <TextInputField
+                    name="type_c_cylinders"
+                    type="number"
+                    variant="outlined"
+                    margin="dense"
+                    value={state.form.type_c_cylinders}
+                    onChange={handleChange}
+                    errors={state.errors.type_c_cylinders}
+                  />
+                </div>
+                <div>
+                  <InputLabel id="expected_type_c_cylinders">
+                    Expected C Type Cylinders
+                  </InputLabel>
+                  <TextInputField
+                    name="expected_type_c_cylinders"
+                    type="number"
+                    variant="outlined"
+                    margin="dense"
+                    value={state.form.expected_type_c_cylinders}
+                    onChange={handleChange}
+                    errors={state.errors.expected_type_c_cylinders}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2">
+                <div>
+                  <InputLabel id="type_d_cylinders">
+                    D Type Cylinders
+                  </InputLabel>
+                  <TextInputField
+                    name="type_d_cylinders"
+                    type="number"
+                    variant="outlined"
+                    margin="dense"
+                    value={state.form.type_d_cylinders}
+                    onChange={handleChange}
+                    errors={state.errors.type_d_cylinders}
+                  />
+                </div>
+                <div>
+                  <InputLabel id="expected_type_d_cylinders">
+                    Expected D Type Cylinders
+                  </InputLabel>
+                  <TextInputField
+                    name="expected_type_d_cylinders"
+                    type="number"
+                    variant="outlined"
+                    margin="dense"
+                    value={state.form.expected_type_d_cylinders}
+                    onChange={handleChange}
+                    errors={state.errors.expected_type_d_cylinders}
+                  />
+                </div>
+              </div>
+
               <div>
-                <InputLabel id="name-label">
-                  Oxygen Capacity in liters
+                <InputLabel id="kasp_empanelled">
+                  Is this facility KASP empanelled?
                 </InputLabel>
-                <TextInputField
-                  name="oxygen_capacity"
-                  type="number"
-                  variant="outlined"
-                  margin="dense"
-                  value={state.form.oxygen_capacity}
+                <RadioGroup
+                  aria-label="kasp_empanelled"
+                  name="kasp_empanelled"
+                  value={state.form.kasp_empanelled}
                   onChange={handleChange}
-                  errors={state.errors.oxygen_capacity}
-                />
+                  style={{ padding: "0px 5px" }}
+                >
+                  <Box display="flex" flexDirection="row">
+                    <FormControlLabel
+                      value="true"
+                      control={<Radio />}
+                      label="Yes"
+                    />
+                    <FormControlLabel
+                      value="false"
+                      control={<Radio />}
+                      label="No"
+                    />
+                  </Box>
+                </RadioGroup>
               </div>
             </div>
             <div className="flex items-center mt-4 -mx-2">

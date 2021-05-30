@@ -1,25 +1,49 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { SelectField, DateInputField, TextInputField } from "../Common/HelperInputFields";
 import { PATIENT_FILTER_ORDER, GENDER_TYPES, DISEASE_STATUS, PATIENT_FILTER_CATEGORY, PATIENT_FILTER_ADMITTED_TO, PATIENT_FILTER_DECLARED_STATUS } from "../../Common/constants";
-import moment from "moment";
-import { getFacility } from '../../Redux/actions';
-import { useDispatch } from 'react-redux';
-import { CircularProgress } from '@material-ui/core';
-import { navigate } from 'raviger';
 
-function useMergeState(initialState: any) {
+import moment from "moment";
+import { getAllLocalBody, getFacility } from "../../Redux/actions";
+import { useDispatch } from "react-redux";
+import { CircularProgress } from "@material-ui/core";
+import { navigate } from "raviger";
+import { DateRangePicker, getDate } from "../Common/DateRangePicker";
+
+const debounce = require("lodash.debounce");
+
+const useMergeState = (initialState: any) => {
   const [state, setState] = useState(initialState);
-  const setMergedState = (newState: any) => setState((prevState: any) => Object.assign({}, prevState, newState));
+  const setMergedState = (newState: any) =>
+    setState((prevState: any) => Object.assign({}, prevState, newState));
   return [state, setMergedState];
-}
+};
 
 export default function PatientFilterV2(props: any) {
   let { filter, onChange, closeFilter } = props;
   const [isFacilityLoading, setFacilityLoading] = useState(false);
+  const [lsgBody, setLsgBody] = useState<any[]>([]);
+  const [isLsgLoading, setLsgLoading] = useState(false);
+  const [hasLsgSearchText, setHasLsgSearchText] = useState(false);
+
+  const handleLsgChange = (current: any) => {
+    if (!current) {
+      setLsgBody([]);
+      setLsgLoading(false);
+      setHasLsgSearchText(false);
+    }
+    setFacility(current, "lsgBody");
+  };
+
   const [filterState, setFilterState] = useMergeState({
-    facility: filter.facility || '',
+    facility: filter.facility || "",
+    lsgBody: filter.lsgBody || "",
     facility_ref: null,
+    lsgBody_ref: null,
+    date_declared_positive_before: filter.date_declared_positive_before || null,
+    date_declared_positive_after: filter.date_declared_positive_after || null,
+    date_of_result_before: filter.date_of_result_before || null,
+    date_of_result_after: filter.date_of_result_after || null,
     created_date_before: filter.created_date_before || null,
     created_date_after: filter.created_date_after || null,
     modified_date_before: filter.modified_date_before || null,
@@ -39,8 +63,10 @@ export default function PatientFilterV2(props: any) {
     last_consultation_discharge_date_after: filter.last_consultation_discharge_date_after || null,
     last_consultation_admitted_to: filter.last_consultation_admitted_to || null,
     srf_id: filter.srf_id || null,
-    is_vaccinated: filter.is_vaccinated || null,
+    number_of_doses: filter.number_of_doses || null,
     covin_id: filter.covin_id || null,
+    is_kasp: filter.is_kasp || null,
+    is_declared_positive: filter.is_declared_positive || null,
   });
   const dispatch: any = useDispatch();
 
@@ -48,11 +74,27 @@ export default function PatientFilterV2(props: any) {
     async function fetchData() {
       if (filter.facility) {
         setFacilityLoading(true);
-        const res = await dispatch(getFacility(filter.facility, 'facility'))
-        if (res && res.data) {
-          setFilterState({ facility_ref: res.data });
-        }
+        const { data: facilityData } = await dispatch(
+          getFacility(filter.facility, "facility")
+        );
+        setFilterState({ facility_ref: facilityData });
         setFacilityLoading(false);
+      }
+
+      if (filter.lsgBody) {
+        setLsgLoading(true);
+        const { data: lsgRes } = await dispatch(getAllLocalBody({}));
+        const lsgBodyData = lsgRes.results.map((obj: any) => ({
+          id: obj.id,
+          name: obj.name,
+        }));
+        setLsgBody(lsgBodyData);
+        setFilterState({
+          lsgBody_ref: lsgBodyData.filter(
+            (obj: any) => obj.id.toString() === filter.lsgBody.toString()
+          )[0],
+        });
+        setLsgLoading(false);
       }
     }
     fetchData();
@@ -60,8 +102,15 @@ export default function PatientFilterV2(props: any) {
 
   const VACCINATED_FILTER = [
     { id: "", text: "Show All" },
-    { id: "false", text: "Unvaccinated" },
-    { id: "true", text: "Vaccinated" },
+    { id: 0, text: "Unvaccinated" },
+    { id: 1, text: "1st dose only" },
+    { id: 2, text: "Both doses" },
+  ];
+
+  const DECLARED_FILTER = [
+    { id: "", text: "Show All" },
+    { id: "false", text: "Not Declared" },
+    { id: "true", text: "Declared" },
   ];
 
   const setFacility = (selected: any, name: string) => {
@@ -73,7 +122,7 @@ export default function PatientFilterV2(props: any) {
   };
 
   const handleChange = (event: any) => {
-    let { name, value } = event.target;
+    const { name, value } = event.target;
 
     const filterData: any = { ...filterState };
     filterData[name] = value;
@@ -81,9 +130,45 @@ export default function PatientFilterV2(props: any) {
     setFilterState(filterData);
   };
 
+  const handleMultiSelectChange = (event: any) => {
+    const { name, value } = event.target;
+
+    const filterData: any = { ...filterState };
+    filterData[name] = [...value];
+
+    setFilterState(filterData);
+  };
+
+  const handleLsgSearch = (e: any) => {
+    setHasLsgSearchText(!!e.target.value);
+    setLsgLoading(true);
+    onLsgSearch(e.target.value);
+  };
+
+  const onLsgSearch = useCallback(
+    debounce(async (text: string) => {
+      if (text) {
+        const {
+          data: { results: lsgBodies },
+        } = await dispatch(getAllLocalBody({ local_body_name: text }));
+        setLsgBody(lsgBodies);
+        setLsgLoading(false);
+      } else {
+        setLsgBody([]);
+        setLsgLoading(false);
+      }
+    }, 300),
+    []
+  );
+
   const applyFilter = () => {
     const {
       facility,
+      lsgBody,
+      date_declared_positive_before,
+      date_declared_positive_after,
+      date_of_result_before,
+      date_of_result_after,
       created_date_before,
       created_date_after,
       modified_date_before,
@@ -97,15 +182,17 @@ export default function PatientFilterV2(props: any) {
       date_declared_positive_after,
       age_min,
       age_max,
+      date_of_result,
       last_consultation_admission_date_before,
       last_consultation_admission_date_after,
       last_consultation_discharge_date_before,
       last_consultation_discharge_date_after,
-      last_consultation_admitted_to,
-      is_vaccinated,
+      last_consultation_admitted_to_list,
+      number_of_doses,
       covin_id,
       srf_id,
-
+      is_kasp,
+      is_declared_positive,
     } = filterState;
     const data = {
       facility: facility || '',
@@ -134,17 +221,37 @@ export default function PatientFilterV2(props: any) {
     onChange(data);
   };
 
+  const handleDateRangeChange = (
+    startDateId: string,
+    endDateId: string,
+    { startDate, endDate }: any
+  ) => {
+    const filterData: any = { ...filterState };
+    filterData[startDateId] = startDate?.toString();
+    filterData[endDateId] = endDate?.toString();
+
+    setFilterState(filterData);
+  };
+
   return (
     <div>
       <div className="flex justify-between">
         <button className="btn btn-default" onClick={closeFilter}>
-          <i className="fas fa-times mr-2" />Cancel
+          <i className="fas fa-times mr-2" />
+          Cancel
         </button>
-        <button className="btn btn-default" onClick={_ => { navigate("/patients") }}>
-          <i className="fas fa-times mr-2" />Clear Filter
+        <button
+          className="btn btn-default"
+          onClick={(_) => {
+            navigate("/patients");
+          }}
+        >
+          <i className="fas fa-times mr-2" />
+          Clear Filter
         </button>
         <button className="btn btn-primary" onClick={applyFilter}>
-          <i className="fas fa-check mr-2" />Apply
+          <i className="fas fa-check mr-2" />
+          Apply
         </button>
       </div>
       <div className="w-64 flex-none mt-2">
@@ -156,28 +263,57 @@ export default function PatientFilterV2(props: any) {
           optionKey="text"
           optionValue="desc"
           value={filterState.ordering}
-          options={[{ desc: "Select", text: '' }, ...PATIENT_FILTER_ORDER]}
+          options={[{ desc: "Select", text: "" }, ...PATIENT_FILTER_ORDER]}
           onChange={handleChange}
-          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9" />
+          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+        />
       </div>
-      <div className="font-light text-md mt-2">
-        Filter By:
-      </div>
+      <div className="font-light text-md mt-2">Filter By:</div>
       <div className="flex flex-wrap gap-2">
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">LSG body</span>
+          <div className="">
+            <AutoCompleteAsyncField
+              name="lsgBody"
+              multiple={false}
+              variant="outlined"
+              value={filterState.lsgBody_ref}
+              options={lsgBody}
+              onSearch={handleLsgSearch}
+              onChange={(e: object, value: any) => handleLsgChange(value)}
+              loading={isLsgLoading}
+              placeholder="Search by LSG body name"
+              noOptionsText={
+                hasLsgSearchText
+                  ? "No LSG body found, please try again"
+                  : "Start typing to begin search"
+              }
+              renderOption={(option: any) => <div>{option.name}</div>}
+              freeSolo={false}
+              getOptionSelected={(option: any, value: any) =>
+                option.id === value.id
+              }
+              getOptionLabel={(option: any) => option.name}
+              className="shifting-page-filter-dropdown"
+            />
+          </div>
+        </div>
         <div className="w-64 flex-none">
           <span className="text-sm font-semibold">Facility</span>
           <div className="">
             {isFacilityLoading ? (
               <CircularProgress size={20} />
             ) : (
-                <FacilitySelect
-                  multiple={false}
-                  name="facility"
-                  selected={filterState.facility_ref}
-                  setSelected={(obj) => setFacility(obj, 'facility')}
-                  className="shifting-page-filter-dropdown"
-                  errors={''} />
-              )}
+              <FacilitySelect
+                multiple={false}
+                name="facility"
+                selected={filterState.facility_ref}
+                showAll={false}
+                setSelected={(obj) => setFacility(obj, "facility")}
+                className="shifting-page-filter-dropdown"
+                errors={""}
+              />
+            )}
           </div>
         </div>
         <div className="w-64 flex-none">
@@ -187,7 +323,24 @@ export default function PatientFilterV2(props: any) {
             variant="outlined"
             margin="dense"
             value={filterState.gender}
-            options={[{ id: '', text: 'Show All' }, ...GENDER_TYPES]}
+            options={[{ id: "", text: "Show All" }, ...GENDER_TYPES]}
+            onChange={handleChange}
+            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+          />
+        </div>
+
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">KASP</span>
+          <SelectField
+            name="is_kasp"
+            variant="outlined"
+            margin="dense"
+            value={filterState.is_kasp}
+            options={[
+              { id: "", text: "Show All" },
+              { id: "true", text: "Show KASP" },
+              { id: "false", text: "Show Non KASP" },
+            ]}
             onChange={handleChange}
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
           />
@@ -200,7 +353,7 @@ export default function PatientFilterV2(props: any) {
             variant="outlined"
             margin="dense"
             value={filterState.category}
-            options={[{ id: '', text: 'Show All' }, ...PATIENT_FILTER_CATEGORY]}
+            options={[{ id: "", text: "Show All" }, ...PATIENT_FILTER_CATEGORY]}
             onChange={handleChange}
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
           />
@@ -214,7 +367,7 @@ export default function PatientFilterV2(props: any) {
             margin="dense"
             optionArray={true}
             value={filterState.disease_status}
-            options={['Show All', ...DISEASE_STATUS]}
+            options={["Show All", ...DISEASE_STATUS]}
             onChange={handleChange}
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
           />
@@ -261,11 +414,23 @@ export default function PatientFilterV2(props: any) {
         <div className="w-64 flex-none">
           <span className="text-sm font-semibold">Vaccinated</span>
           <SelectField
-            name="is_vaccinated"
+            name="number_of_doses"
             variant="outlined"
             margin="dense"
-            value={filterState.is_vaccinated}
+            value={filterState.number_of_doses}
             options={VACCINATED_FILTER}
+            onChange={handleChange}
+            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+          />
+        </div>
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">Declared</span>
+          <SelectField
+            name="is_declared_positive"
+            variant="outlined"
+            margin="dense"
+            value={filterState.is_declared_positive}
+            options={DECLARED_FILTER}
             onChange={handleChange}
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
           />
@@ -282,118 +447,124 @@ export default function PatientFilterV2(props: any) {
               value={filterState.covin_id}
               onChange={handleChange}
               label="covin id"
-              className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 mr-1" />
+              className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 mr-1"
+            />
           </div>
         </div>
         <div className="w-64 flex-none">
-          <span className="text-sm font-semibold">Last Admitted to</span>
-          <SelectField
-            name="last_consultation_admitted_to"
+          <span className="text-sm font-semibold">
+            Last Admitted to (Bed Type)
+          </span>
+          <MultiSelectField
+            name="last_consultation_admitted_to_list"
             variant="outlined"
-            margin="dense"
-            value={filterState.last_consultation_admitted_to}
-            options={[{ id: '', text: 'Show All' }, ...PATIENT_FILTER_ADMITTED_TO]}
-            onChange={handleChange}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+            value={filterState.last_consultation_admitted_to_list}
+            options={[...PATIENT_FILTER_ADMITTED_TO]}
+            onChange={handleMultiSelectChange}
           />
         </div>
         <div className="w-64 flex-none">
-          <span className="text-sm font-semibold">Created Date Before</span>
-          <DateInputField
-            id="created_date_before"
-            name="created_date_before"
-            inputVariant="outlined"
-            margin="dense"
-            errors=""
-            value={filterState.created_date_before}
-            onChange={date => handleChange({ target: { name: "created_date_before", value: date } })}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9" />
-        </div>
-        <div className="w-64 flex-none">
-          <span className="text-sm font-semibold">Created Date After</span>
-          <DateInputField
-            id="created_date_after"
-            name="created_date_after"
-            inputVariant="outlined"
-            margin="dense"
-            errors=""
-            value={filterState.created_date_after}
-            onChange={date => handleChange({ target: { name: "created_date_after", value: date } })}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9" />
+          <DateRangePicker
+            startDate={getDate(filterState.date_of_result_after)}
+            endDate={getDate(filterState.date_of_result_before)}
+            onChange={(e) =>
+              handleDateRangeChange(
+                "date_of_result_after",
+                "date_of_result_before",
+                e
+              )
+            }
+            endDateId={"date_of_result_before"}
+            startDateId={"date_of_result_after"}
+            label={"Date of result"}
+            size="small"
+          />
+          <DateRangePicker
+            startDate={getDate(filterState.date_declared_positive_after)}
+            endDate={getDate(filterState.date_declared_positive_before)}
+            onChange={(e) =>
+              handleDateRangeChange(
+                "date_declared_positive_after",
+                "date_declared_positive_before",
+                e
+              )
+            }
+            endDateId={"date_declared_positive_before"}
+            startDateId={"date_declared_positive_after"}
+            label={"Date Declared Positive"}
+            size="small"
+          />
+
+          <DateRangePicker
+            startDate={getDate(filterState.created_date_after)}
+            endDate={getDate(filterState.created_date_before)}
+            onChange={(e) =>
+              handleDateRangeChange(
+                "created_date_after",
+                "created_date_before",
+                e
+              )
+            }
+            endDateId={"created_date_before"}
+            startDateId={"created_date_after"}
+            label={"Created Date"}
+            size="small"
+          />
+          <DateRangePicker
+            startDate={getDate(filterState.modified_date_after)}
+            endDate={getDate(filterState.modified_date_before)}
+            onChange={(e) =>
+              handleDateRangeChange(
+                "modified_date_after",
+                "modified_date_before",
+                e
+              )
+            }
+            endDateId={"modified_date_before"}
+            startDateId={"modified_date_after"}
+            label={"Modified Date"}
+            size="small"
+          />
+          <DateRangePicker
+            startDate={getDate(
+              filterState.last_consultation_admission_date_after
+            )}
+            endDate={getDate(
+              filterState.last_consultation_admission_date_before
+            )}
+            onChange={(e) =>
+              handleDateRangeChange(
+                "last_consultation_admission_date_after",
+                "last_consultation_admission_date_before",
+                e
+              )
+            }
+            endDateId={"last_consultation_admission_date_before"}
+            startDateId={"last_consultation_admission_date_after"}
+            label={"Admit Date"}
+            size="small"
+          />
+          <DateRangePicker
+            startDate={getDate(
+              filterState.last_consultation_discharge_date_after
+            )}
+            endDate={getDate(
+              filterState.last_consultation_discharge_date_before
+            )}
+            onChange={(e) =>
+              handleDateRangeChange(
+                "last_consultation_discharge_date_after",
+                "last_consultation_discharge_date_before",
+                e
+              )
+            }
+            endDateId={"last_consultation_discharge_date_before"}
+            startDateId={"last_consultation_discharge_date_after"}
+            label={"Discharge Date"}
+            size="small"
+          />
         </div>
 
-        <div className="w-64 flex-none">
-          <span className="text-sm font-semibold">Modified Date Before</span>
-          <DateInputField
-            id="modified_date_before"
-            name="modified_date_before"
-            inputVariant="outlined"
-            margin="dense"
-            errors=""
-            value={filterState.modified_date_before}
-            onChange={date => handleChange({ target: { name: "modified_date_before", value: date } })}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9" />
-        </div>
-        <div className="w-64 flex-none">
-          <span className="text-sm font-semibold">Modified Date After</span>
-          <DateInputField
-            id="modified_date_after"
-            name="modified_date_after"
-            inputVariant="outlined"
-            margin="dense"
-            errors=""
-            value={filterState.modified_date_after}
-            onChange={date => handleChange({ target: { name: "modified_date_after", value: date } })}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9" />
-        </div>
-        <div className="w-64 flex-none">
-          <span className="text-sm font-semibold">Admitted Before</span>
-          <DateInputField
-            id="last_consultation_admission_date_before"
-            name="last_consultation_admission_date_before"
-            inputVariant="outlined"
-            margin="dense"
-            errors=""
-            value={filterState.last_consultation_admission_date_before}
-            onChange={date => handleChange({ target: { name: "last_consultation_admission_date_before", value: date } })}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9" />
-        </div>
-        <div className="w-64 flex-none">
-          <span className="text-sm font-semibold">Admitted After</span>
-          <DateInputField
-            id="last_consultation_admission_date_after"
-            name="last_consultation_admission_date_after"
-            inputVariant="outlined"
-            margin="dense"
-            errors=""
-            value={filterState.last_consultation_admission_date_after}
-            onChange={date => handleChange({ target: { name: "last_consultation_admission_date_after", value: date } })}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9" />
-        </div>
-        <div className="w-64 flex-none">
-          <span className="text-sm font-semibold">Discharge Before</span>
-          <DateInputField
-            id="last_consultation_discharge_date_before"
-            name="last_consultation_discharge_date_before"
-            inputVariant="outlined"
-            margin="dense"
-            errors=""
-            value={filterState.last_consultation_discharge_date_before}
-            onChange={date => handleChange({ target: { name: "last_consultation_discharge_date_before", value: date } })}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9" />
-        </div>
-        <div className="w-64 flex-none">
-          <span className="text-sm font-semibold">Discharge After</span>
-          <DateInputField
-            id="last_consultation_discharge_date_after"
-            name="last_consultation_discharge_date_after"
-            inputVariant="outlined"
-            margin="dense"
-            errors=""
-            value={filterState.last_consultation_discharge_date_after}
-            onChange={date => handleChange({ target: { name: "last_consultation_discharge_date_after", value: date } })}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9" />
-        </div>
         <div className="w-64 flex-none">
           <span className="text-sm font-semibold">Age</span>
           <div className="flex justify-between">
@@ -406,7 +577,8 @@ export default function PatientFilterV2(props: any) {
               value={filterState.age_min}
               onChange={handleChange}
               label="Min Age"
-              className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 mr-1" />
+              className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 mr-1"
+            />
             <TextInputField
               id="age_max"
               name="age_max"
@@ -416,7 +588,8 @@ export default function PatientFilterV2(props: any) {
               value={filterState.age_max}
               onChange={handleChange}
               label="Max Age"
-              className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9" />
+              className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+            />
           </div>
         </div>
         <div className="w-64 flex-none">
@@ -431,11 +604,11 @@ export default function PatientFilterV2(props: any) {
               value={filterState.srf_id}
               onChange={handleChange}
               label="Srf id"
-              className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 mr-1" />
+              className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 mr-1"
+            />
           </div>
         </div>
-
       </div>
     </div>
-  )
+  );
 }

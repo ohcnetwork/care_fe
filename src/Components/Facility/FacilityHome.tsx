@@ -1,12 +1,18 @@
 import { Button, Card, CardContent, Grid, Typography } from "@material-ui/core";
 import { navigate } from "raviger";
 import React, { useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import loadable from "@loadable/component";
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogTitle from "@material-ui/core/DialogTitle";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
 import { BED_TYPES, DOCTOR_SPECIALIZATION } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   getFacility,
+  deleteFacility,
   getTriageInfo,
   listCapacity,
   listDoctor,
@@ -30,6 +36,7 @@ export const FacilityHome = (props: any) => {
   const [capacityData, setCapacityData] = useState<Array<CapacityModal>>([]);
   const [doctorData, setDoctorData] = useState<Array<DoctorModal>>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = React.useState(false);
 
   const [patientStatsData, setPatientStatsData] = useState<
     Array<PatientStatsModel>
@@ -38,17 +45,13 @@ export const FacilityHome = (props: any) => {
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const [
-        facilityRes,
-        capacityRes,
-        doctorRes,
-        triageRes,
-      ] = await Promise.all([
-        dispatch(getFacility(facilityId)),
-        dispatch(listCapacity({}, { facilityId })),
-        dispatch(listDoctor({}, { facilityId })),
-        dispatch(getTriageInfo({ facilityId })),
-      ]);
+      const [facilityRes, capacityRes, doctorRes, triageRes] =
+        await Promise.all([
+          dispatch(getFacility(facilityId)),
+          dispatch(listCapacity({}, { facilityId })),
+          dispatch(listDoctor({}, { facilityId })),
+          dispatch(getTriageInfo({ facilityId })),
+        ]);
       if (!status.aborted) {
         setIsLoading(false);
         if (!facilityRes.data) {
@@ -84,6 +87,19 @@ export const FacilityHome = (props: any) => {
     [dispatch, fetchData]
   );
 
+  const handleDeleteClose = () => {
+    setOpenDeleteDialog(false);
+  };
+
+  const handleDeleteSubmit = () => {
+    dispatch(deleteFacility(facilityId));
+    navigate("/facility");
+    window.location.reload();
+  };
+
+  const state: any = useSelector((state) => state);
+  const { currentUser } = state;
+
   if (isLoading) {
     return <Loading />;
   }
@@ -92,10 +108,15 @@ export const FacilityHome = (props: any) => {
   if (!capacityData || !capacityData.length) {
     capacityList = <h5>No Bed Types Found</h5>;
   } else {
-    capacityList = capacityData.map((data: CapacityModal) => {
-      return (
-        <BedTypeCard facilityId={facilityId} key={`bed_${data.id}`} {...data} />
-      );
+    capacityList = BED_TYPES.map((x) => {
+      let res = capacityData.find((data) => {
+        return data.room_type === x.id;
+      });
+      if (res) {
+        return (
+          <BedTypeCard facilityId={facilityId} key={`bed_${res.id}`} {...res} />
+        );
+      }
     });
   }
 
@@ -152,6 +173,28 @@ export const FacilityHome = (props: any) => {
   return (
     <div className="px-2 pb-2">
       <PageTitle title={facilityData.name || "Facility"} />
+      <Dialog
+        maxWidth={"md"}
+        open={openDeleteDialog}
+        onClose={handleDeleteClose}
+      >
+        <DialogTitle className="flex justify-center bg-green-100">
+          Are you sure you want to delete {facilityData.name || "Facility"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            You will not be able to access this facility after it is deleted.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <button onClick={handleDeleteClose} className="btn btn-primary">
+            Cancel
+          </button>
+          <button onClick={handleDeleteSubmit} className="btn btn-danger">
+            Delete
+          </button>
+        </DialogActions>
+      </Dialog>
       <div className="bg-white rounded-lg md:p-6 p-3 shadow">
         <div className="md:flex justify-between">
           <div>
@@ -173,9 +216,31 @@ export const FacilityHome = (props: any) => {
                   facilityData?.ward_object?.name}
               </Typography>
             )}
-            <Typography>
-              Oxygen Capacity :{` ${facilityData.oxygen_capacity} Litres`}
-            </Typography>
+            <div className="grid grid-cols-5">
+              <div className="border"></div>
+              <div className="border font-semibold">Liquid</div>
+              <div className="border font-semibold">B</div>
+              <div className="border font-semibold">C</div>
+              <div className="border font-semibold">D</div>
+              <div className="border font-semibold">Capacity</div>
+              <div className="border">{facilityData.oxygen_capacity}</div>
+              <div className="border">{facilityData.type_b_cylinders}</div>
+              <div className="border">{facilityData.type_c_cylinders}</div>
+              <div className="border">{facilityData.type_d_cylinders}</div>
+              <div className="border font-semibold">Expected</div>
+              <div className="border">
+                {facilityData.expected_oxygen_requirement}
+              </div>
+              <div className="border">
+                {facilityData.expected_type_b_cylinders}
+              </div>
+              <div className="border">
+                {facilityData.expected_type_c_cylinders}
+              </div>
+              <div className="border">
+                {facilityData.expected_type_d_cylinders}
+              </div>
+            </div>
           </div>
           <div className="flex flex-col">
             <button
@@ -192,6 +257,23 @@ export const FacilityHome = (props: any) => {
               <i className="fas fa-dolly-flatbed text-white mr-2"></i>
               Inventory Management
             </button>
+            <button
+              className="btn-primary btn mt-2"
+              onClick={() => navigate(`/facility/${facilityId}/resource/new`)}
+            >
+              <i className="fas fa-dolly-flatbed text-white mr-2"></i>
+              Resource Request
+            </button>
+            {(currentUser.data.user_type === "DistrictAdmin" ||
+              currentUser.data.user_type === "StateAdmin") && (
+              <button
+                className="btn-danger btn mt-2"
+                onClick={() => setOpenDeleteDialog(true)}
+              >
+                <i className="fas fa-trash text-white mr-2"></i>
+                Delete Facility
+              </button>
+            )}
           </div>
         </div>
         <div>
@@ -217,7 +299,6 @@ export const FacilityHome = (props: any) => {
             <button
               className="btn-primary btn w-full md:w-auto"
               onClick={() => navigate(`/facility/${facilityId}/bed`)}
-              disabled={capacityList.length === BED_TYPES.length}
             >
               <i className="fas fa-bed text-white mr-2"></i>
               Add More Bed Types

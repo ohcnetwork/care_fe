@@ -26,7 +26,7 @@ let make = (~show, ~setShow, ~children) => {
             leave="transform transition ease-in-out duration-500 sm:duration-700"
             leaveFrom="translate-x-0"
             leaveTo="translate-x-full">
-            <div className="w-screen max-w-sm overflow-y-auto"> children </div>
+            <div className="w-screen max-w-sm overflow-y-auto bg-white"> children </div>
           </Transition>
         </section>
       </div>

@@ -3,6 +3,7 @@ import ReactDOM from "react-dom";
 import reducer from "../src/Redux/Reducer";
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import App from "./App";
+import "./i18n";
 import { applyMiddleware, createStore } from "redux";
 import thunk from "redux-thunk";
 import { Provider } from "react-redux";

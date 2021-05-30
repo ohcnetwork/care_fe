@@ -9,7 +9,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { GENDER_TYPES, USER_TYPES } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { validateEmailAddress, validatePassword, validateUsername } from "../../Common/validation";
-import { addUser, getDistrictByState, getLocalbodyByDistrict, getStates } from "../../Redux/actions";
+import { addUser, getDistrictByState, getLocalbodyByDistrict, getStates, getUserListFacility } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { DateInputField, PhoneNumberField, SelectField, TextInputField } from "../Common/HelperInputFields";
@@ -92,6 +92,7 @@ export const UserAdd = (props: UserProps) => {
   const [isStateLoading, setIsStateLoading] = useState(false);
   const [isDistrictLoading, setIsDistrictLoading] = useState(false);
   const [isLocalbodyLoading, setIsLocalbodyLoading] = useState(false);
+  const [current_user_facilities, setFacilities] = useState<Array<String>>([]);
   const [states, setStates] = useState(initialStates);
   const [districts, setDistricts] = useState(selectStates);
   const [localBody, setLocalBody] = useState(selectDistrict);
@@ -100,12 +101,17 @@ export const UserAdd = (props: UserProps) => {
   const rootState: any = useSelector((rootState) => rootState);
   const { currentUser } = rootState;
   const isSuperuser = currentUser.data.is_superuser;
+
+  const username = currentUser.data.username;
+
   const userType = currentUser.data.user_type;
+
   const userIndex = USER_TYPES.indexOf(userType);
   const userTypes = isSuperuser ? [...USER_TYPES] : USER_TYPES.slice(0, userIndex + 1)
 
   const headerText = !userId ? "Add User" : "Update User";
   const buttonText = !userId ? "Save User" : "Update Details";
+  const showLocalbody = !(state.form.user_type === "Staff" || state.form.user_type === "StaffReadOnly");
 
   const fetchDistricts = useCallback(
     async (id: string) => {
@@ -136,6 +142,9 @@ export const UserAdd = (props: UserProps) => {
     },
     [dispatchAction]
   );
+
+
+
 
   // const fetchData = useCallback(
   //   async (status: statusType) => {
@@ -183,12 +192,26 @@ export const UserAdd = (props: UserProps) => {
     [dispatchAction]
   );
 
+  const fetchFacilities = useCallback(
+    async (status: any) => {
+      setIsStateLoading(true);
+      const res = await dispatchAction(getUserListFacility({ username }));
+      if (!status.aborted && res && res.data) {
+        const facilities = res.data.map((f: any) => f.id);
+        setFacilities(facilities);
+      }
+      setIsStateLoading(false);
+    }, [dispatchAction]
+  );
+
+
   useAbortableEffect(
     (status: statusType) => {
       // if (userId) {
       //   fetchData(status);
       // }
       fetchStates(status);
+      fetchFacilities(status);
     },
     [dispatch]
   );
@@ -229,6 +252,18 @@ export const UserAdd = (props: UserProps) => {
     let invalidForm = false;
     Object.keys(state.form).forEach(field => {
       switch (field) {
+        case "facilities":
+          if (userType === "Staff" && state.form["user_type"] === "Staff") {
+            invalidForm = true;
+            for (const facilityId of state.form[field]) {
+              if (current_user_facilities.indexOf(facilityId) !== -1) {
+                invalidForm = false;
+                return;
+              }
+            }
+            errors[field] = "Please select atleast one of your facilities";
+          }
+          return;
         case "user_type":
           if (!state.form[field]) {
             errors[field] = "Please select the User Type";
@@ -246,7 +281,7 @@ export const UserAdd = (props: UserProps) => {
             errors[field] = "Please enter the username";
             invalidForm = true;
           } else if (!validateUsername(state.form[field])) {
-            errors[field] = "Please enter letters, digits and @ . + - _ only";
+            errors[field] = "Please enter letters, digits and @ . + - _ only and username should not end with @, ., +, - or _";
             invalidForm = true;
           }
           return;
@@ -293,6 +328,7 @@ export const UserAdd = (props: UserProps) => {
             invalidForm = true;
           }
           return;
+
         default:
           return;
       }
@@ -328,7 +364,7 @@ export const UserAdd = (props: UserProps) => {
       };
       const res = await dispatchAction(addUser(data));
       // userId ? updateUser(userId, data) : addUser(data)
-      if (res && res.data) {
+      if (res && res.data && res.status >= 200 && res.status < 300) {
         // const id = res.data.id;
         dispatch({ type: "set_form", form: initForm });
         if (!userId) {
@@ -506,20 +542,20 @@ export const UserAdd = (props: UserProps) => {
                 {isStateLoading ? (
                   <CircularProgress size={20} />
                 ) : (
-                    <SelectField
-                      name="state"
-                      variant="outlined"
-                      margin="dense"
-                      value={state.form.state}
-                      options={states}
-                      optionValue="name"
-                      onChange={e => [
-                        handleChange(e),
-                        fetchDistricts(String(e.target.value))
-                      ]}
-                      errors={state.errors.state}
-                    />
-                  )}
+                  <SelectField
+                    name="state"
+                    variant="outlined"
+                    margin="dense"
+                    value={state.form.state}
+                    options={states}
+                    optionValue="name"
+                    onChange={e => [
+                      handleChange(e),
+                      fetchDistricts(String(e.target.value))
+                    ]}
+                    errors={state.errors.state}
+                  />
+                )}
               </div>
 
               <div>
@@ -527,39 +563,39 @@ export const UserAdd = (props: UserProps) => {
                 {isDistrictLoading ? (
                   <CircularProgress size={20} />
                 ) : (
-                    <SelectField
-                      name="district"
-                      variant="outlined"
-                      margin="dense"
-                      value={state.form.district}
-                      options={districts}
-                      optionValue="name"
-                      onChange={e => [
-                        handleChange(e),
-                        fetchLocalBody(String(e.target.value))
-                      ]}
-                      errors={state.errors.district}
-                    />
-                  )}
+                  <SelectField
+                    name="district"
+                    variant="outlined"
+                    margin="dense"
+                    value={state.form.district}
+                    options={districts}
+                    optionValue="name"
+                    onChange={e => [
+                      handleChange(e),
+                      fetchLocalBody(String(e.target.value))
+                    ]}
+                    errors={state.errors.district}
+                  />
+                )}
               </div>
 
-              <div>
+              {showLocalbody && <div>
                 <InputLabel>Localbody</InputLabel>
                 {isLocalbodyLoading ? (
                   <CircularProgress size={20} />
                 ) : (
-                    <SelectField
-                      name="local_body"
-                      variant="outlined"
-                      margin="dense"
-                      value={state.form.local_body}
-                      options={localBody}
-                      optionValue="name"
-                      onChange={handleChange}
-                      errors={state.errors.local_body}
-                    />
-                  )}
-              </div>
+                  <SelectField
+                    name="local_body"
+                    variant="outlined"
+                    margin="dense"
+                    value={state.form.local_body}
+                    options={localBody}
+                    optionValue="name"
+                    onChange={handleChange}
+                    errors={state.errors.local_body}
+                  />
+                )}
+              </div>}
 
             </div>
             <div

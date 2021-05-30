@@ -12,7 +12,7 @@ import {
 } from "../../Redux/actions";
 import loadable from "@loadable/component";
 import { SelectField } from "../Common/HelperInputFields";
-import { InputLabel } from "@material-ui/core";
+import { CircularProgress, InputLabel } from "@material-ui/core";
 import Pagination from "../Common/Pagination";
 import { FacilityModel } from "./models";
 import { InputSearchBox } from "../Common/SearchBox";
@@ -26,11 +26,17 @@ import Typography from "@material-ui/core/Typography";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
+import SwipeableViews from "react-swipeable-views";
+import { make as SlideOver } from "../Common/SlideOver.gen";
+import FacillityFilter from "./FacilityFilter";
+import { FacilitySelect } from "../Common/FacilitySelect";
+import { withTranslation } from "react-i18next";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
       width: "100%",
+      // "grid-column": "span 4 / span 4",
     },
     heading: {
       fontSize: theme.typography.pxToRem(15),
@@ -40,7 +46,7 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
-export const HospitalList = () => {
+const HospitalListPage = (props: any) => {
   const [qParams, setQueryParams] = useQueryParams();
   const classes = useStyles();
   const dispatchAction: any = useDispatch();
@@ -56,14 +62,34 @@ export const HospitalList = () => {
   const [triageDownloadFile, setTriageDownloadFile] = useState("");
   const downloadTypes = [...DOWNLOAD_TYPES];
   const [downloadSelect, setdownloadSelect] = useState("Facility List");
-  const limit = 14;
+  const [showFilters, setShowFilters] = useState(false);
+  const { t } = props;
+  const limit = 15;
 
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
       const params = qParams.search
-        ? { limit, offset, search_text: qParams.search }
-        : { limit, offset };
+        ? {
+            limit,
+            offset,
+            search_text: qParams.search,
+            state: qParams.state,
+            district: qParams.district,
+            local_body: qParams.local_body,
+            facility_type: qParams.facility_type,
+            kasp_empanelled: qParams.kasp_empanelled,
+          }
+        : {
+            limit,
+            offset,
+            state: qParams.state,
+            district: qParams.district,
+            local_body: qParams.local_body,
+            facility_type: qParams.facility_type,
+            kasp_empanelled: qParams.kasp_empanelled,
+          };
+
       const res = await dispatchAction(getFacilities(params));
       if (!status.aborted) {
         if (res && res.data) {
@@ -73,7 +99,16 @@ export const HospitalList = () => {
         setIsLoading(false);
       }
     },
-    [dispatchAction, offset, qParams.search]
+    [
+      dispatchAction,
+      offset,
+      qParams.search,
+      qParams.kasp_empanelled,
+      qParams.state,
+      qParams.district,
+      qParams.local_body,
+      qParams.facility_type,
+    ]
   );
 
   useAbortableEffect(
@@ -85,7 +120,7 @@ export const HospitalList = () => {
 
   const onSearchSuspects = (search: string) => {
     if (search !== "") setQueryParams({ search }, true);
-    else setQueryParams({}, true);
+    else setQueryParams({ search: "" }, true);
   };
 
   const handleDownload = async () => {
@@ -112,6 +147,51 @@ export const HospitalList = () => {
     document.getElementById("triageDownloader")?.click();
   };
 
+  const updateQuery = (params: any) => {
+    const nParams = Object.assign({}, qParams, params);
+    setQueryParams(nParams, true);
+  };
+
+  const applyFilter = (data: any) => {
+    const filter = { ...qParams, ...data };
+    updateQuery(filter);
+    setShowFilters(false);
+  };
+
+  const removeFilter = (paramKey: any) => {
+    updateQuery({
+      ...qParams,
+      [paramKey]: "",
+    });
+  };
+
+  const hasFiltersApplied = (qParams: any) => {
+    return (
+      qParams.state ||
+      qParams.district ||
+      qParams.local_body ||
+      qParams.facility_type ||
+      qParams.kasp_empanelled ||
+      qParams?.search
+    );
+  };
+
+  const badge = (key: string, value: any, paramKey: string) => {
+    return (
+      value && (
+        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
+          {t(key)}
+          {": "}
+          {value}
+          <i
+            className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
+            onClick={(e) => removeFilter(paramKey)}
+          ></i>
+        </span>
+      )
+    );
+  };
+
   const handleDownloader = () => {
     switch (downloadSelect) {
       case "Facility List":
@@ -135,27 +215,35 @@ export const HospitalList = () => {
     setOffset(offset);
   };
 
+  const kaspOptionValues = [
+    { id: "", text: "Not Selected" },
+    { id: "true", text: "Yes" },
+    { id: "false", text: "No" },
+  ];
+
   let facilityList: any[] = [];
   if (data && data.length) {
     facilityList = data.map((facility: any, idx: number) => {
       return (
-        <div
-          key={`usr_${facility.id}`}
-          className="w-full md:w-1/2 mt-6 md:px-4"
-        >
+        <div key={`usr_${facility.id}`} className="w-full">
           <div className="block rounded-lg bg-white shadow h-full hover:border-primary-500 overflow-hidden">
             <div className="h-full flex flex-col justify-between">
               <div className="px-6 py-4">
-                <div className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800">
+                <div className="inline-flex items-center px-2.5 py-0.5 mr-4 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800">
                   {facility.facility_type}
                 </div>
+                {facility.kasp_empanelled && (
+                  <div className="mt-2 inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-yellow-100 text-yellow-800">
+                    KASP
+                  </div>
+                )}
                 <div className="font-black text-2xl capitalize mt-2">
                   {facility.name}
                 </div>
                 <div className="mt-2 flex justify-between">
                   <div className="flex flex-col">
                     <div className="text-gray-500 leading-relaxed font-light">
-                      Location:
+                      {t("Location")}:
                     </div>
                     <div className="font-semibold">
                       {facility.local_body_object?.name}
@@ -164,7 +252,7 @@ export const HospitalList = () => {
 
                   <div className="flex flex-col">
                     <div className="text-gray-500 leading-relaxed font-light">
-                      Ward:
+                      {t("Ward")}:
                     </div>
 
                     {facility.ward_object && (
@@ -194,7 +282,7 @@ export const HospitalList = () => {
                       className="inline-flex items-center px-3 py-2 border border-green-500 text-sm leading-4 font-medium rounded-md text-green-700 bg-white hover:text-green-500 focus:outline-none focus:border-green-300 focus:shadow-outline-blue active:text-green-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
                       onClick={() => navigate(`/facility/${facility.id}`)}
                     >
-                      View Facility
+                      {t("View Facility")}
                     </button>
                   </span>
                 </div>
@@ -211,7 +299,7 @@ export const HospitalList = () => {
   } else if (data && data.length) {
     manageFacilities = (
       <>
-        {facilityList}
+        <div className="grid md:grid-cols-2 gap-4">{facilityList}</div>
         {totalCount > limit && (
           <div className="mt-4 flex w-full justify-center">
             <Pagination
@@ -225,49 +313,48 @@ export const HospitalList = () => {
       </>
     );
   } else if (data && data.length === 0) {
-    manageFacilities = qParams?.search ? (
+    manageFacilities = hasFiltersApplied(qParams) ? (
       <div className="w-full">
-        <div className="p-16 mt-4 text-gray-800 mx-auto text-center whitespace-no-wrap text-sm font-semibold rounded ">
-          No results found
-        </div>
+        <div className="text-3xl mt-4">{t("no_facilities")}</div>
       </div>
     ) : (
       <div>
         <div
-          className="p-16 mt-4 bg-white shadow rounded-md shadow border border-grey-500 whitespace-no-wrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300"
+          className="p-16 mt-4 bg-white shadow rounded-md border border-grey-500 whitespace-no-wrap text-sm font-semibold cursor-pointer hover:bg-gray-300 text-center"
           onClick={() => navigate("/facility/create")}
         >
-          Create a new facility
+          <i className="fas fa-plus text-3xl"></i>
+          <div className="mt-2 text-xl">{t("create_facility")}</div>
+          <div className="text-xs mt-1 text-red-700">
+            {t("no_duplicate_facility")}
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div>
-      <PageTitle title="Facilities" hideBack={true} className="mx-3 md:mx-8" />
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2">
-        <div className="ml-3 w-3/4 md:ml-8">
-          <InputSearchBox
-            value={qParams.search}
-            search={onSearchSuspects}
-            placeholder="Search by Facility / District Name"
-            errors=""
-          />
-        </div>
-        <div className={classes.root}>
+    <div className="px-6">
+      <div className="grid grid-cols-2 ">
+        <PageTitle title={t("Facilities")} hideBack={true} className="mx-3 " />
+
+        <div className="flex justify-end w-full mt-4">
           <div>
-            <Accordion className="lg:w-1/2 mt-2 lg:mt-0 md:mt-0 w-3/4 m-0 m-auto">
+            <Accordion className="mt-2 lg:mt-0 md:mt-0">
               <AccordionSummary
                 expandIcon={<ExpandMoreIcon />}
                 aria-controls="panel1a-content"
                 id="panel1a-header"
               >
-                <Typography className={classes.heading}>Downloads</Typography>
+                <Typography className={classes.heading}>
+                  {t("downloads")}
+                </Typography>
               </AccordionSummary>
               <AccordionDetails>
                 <div>
-                  <InputLabel className="text-sm">Download type</InputLabel>
+                  <InputLabel className="text-sm">
+                    {t("download_type")}
+                  </InputLabel>
                   <div className="flex flex-row">
                     <SelectField
                       name="select_download"
@@ -342,9 +429,87 @@ export const HospitalList = () => {
           </div>
         </div>
       </div>
-      <div className="px-3 md:px-8">
-        <div className="flex flex-wrap md:-mx-4">{manageFacilities}</div>
+
+      <div className="md:flex mt-5 space-y-2">
+        <div className="flex-1">
+          <InputSearchBox
+            value={qParams.search}
+            search={onSearchSuspects}
+            placeholder={t("facility_search_placeholder")}
+            errors=""
+          />
+        </div>
+
+        <div className="flex-1 flex justify-end">
+          <div>
+            <div className="flex items-start mb-2">
+              <button
+                className="btn btn-primary-ghost"
+                onClick={() => setShowFilters(true)}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="fill-current w-4 h-4 mr-2"
+                >
+                  <line x1="8" y1="6" x2="21" y2="6"></line>
+                  <line x1="8" y1="12" x2="21" y2="12">
+                    {" "}
+                  </line>
+                  <line x1="8" y1="18" x2="21" y2="18">
+                    {" "}
+                  </line>
+                  <line x1="3" y1="6" x2="3.01" y2="6">
+                    {" "}
+                  </line>
+                  <line x1="3" y1="12" x2="3.01" y2="12">
+                    {" "}
+                  </line>
+                  <line x1="3" y1="18" x2="3.01" y2="18">
+                    {" "}
+                  </line>
+                </svg>
+                <span>{t("advanced_filters")}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <SlideOver show={showFilters} setShow={setShowFilters}>
+          <div className="bg-white min-h-screen p-4">
+            <FacillityFilter
+              filter={qParams}
+              onChange={applyFilter}
+              closeFilter={() => setShowFilters(false)}
+            />
+          </div>
+        </SlideOver>
+      </div>
+      <div className="flex space-x-2 mt-2 flex-wrap w-full col-span-3 space-y-1">
+        {badge("State", qParams.state, "state")}
+        {badge("District", qParams.district, "district")}
+        {badge("Local Body", qParams.local_body, "local_body")}
+        {badge("Facility Type", qParams.facility_type, "facility_type")}
+        {qParams.kasp_empanelled &&
+          badge(
+            "KASP Empanelled",
+            qParams.kasp_empanelled === "true" ? "KASP" : "Non KASP",
+            "kasp_empanelled"
+          )}
+      </div>
+      <div>
+        <div>{manageFacilities}</div>
       </div>
     </div>
   );
 };
+export const HospitalList = withTranslation()(HospitalListPage);

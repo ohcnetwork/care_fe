@@ -308,16 +308,25 @@ export default {
   getDistrictByState: {
     path: "/api/v1/state/{id}/districts/",
   },
-  getAllLocalBody: {
+  getDistrictByName: {
+    path: "/api/v1/district/",
+  },
+  getAllLocalBodyByDistrict: {
     path: "/api/v1/district/{id}/get_all_local_body/",
+  },
+  getLocalbodyByDistrict: {
+    path: "/api/v1/district/{id}/local_bodies/",
   },
 
   // Local Body
   getLocalBody: {
     path: "/api/v1/local_body/{id}/",
   },
-  getLocalbodyByDistrict: {
-    path: "/api/v1/district/{id}/local_bodies/",
+  getAllLocalBody: {
+    path: "/api/v1/local_body/",
+  },
+  getLocalbodyByName: {
+    path: "/api/v1/local_body/",
   },
 
   // ward
@@ -374,6 +383,10 @@ export default {
   getItemName: {
     path: "/api/v1/items",
     method: "GET",
+  },
+  flagInventoryItem: {
+    path: "/api/v1/facility/{facility_external_id}/inventory/{external_id}/flag/",
+    method: "PUT",
   },
   discharge: {
     path: "/api/v1/patient/{external_id}/discharge_summary/",
@@ -461,5 +474,46 @@ export default {
   getInvestigation: {
     path: "/api/v1/consultation/{consultation_external_id}/investigation/",
     method: "GET",
+  },
+  getPatientInvestigation: {
+    path: "/api/v1/patient/{patient_external_id}/investigation/",
+    method: "GET",
+  },
+  editInvestigation: {
+    path: "/api/v1/consultation/{consultation_external_id}/investigation/batchUpdate/",
+    method: "PUT",
+  },
+
+  // Resource
+  createResource: {
+    path: "/api/v1/resource/",
+    method: "POST",
+  },
+  updateResource: {
+    path: "/api/v1/resource",
+    method: "PUT",
+  },
+  deleteResourceRecord: {
+    path: "/api/v1/resource",
+    method: "DELETE",
+  },
+  listResourceRequests: {
+    path: "/api/v1/resource/",
+    method: "GET",
+  },
+  getResourceDetails: {
+    path: "/api/v1/resource/{id}/",
+  },
+  downloadResourceRequests: {
+    path: "/api/v1/resource/",
+    method: "GET",
+  },
+  getResourceComments: {
+    path: "/api/v1/resource/{id}/comment/",
+    method: "GET",
+  },
+  addResourceComments: {
+    path: "/api/v1/resource/{id}/comment/",
+    method: "POST",
   },
 };
