@@ -107,7 +107,7 @@ export const UserAdd = (props: UserProps) => {
   const userType = currentUser.data.user_type;
 
   const userIndex = USER_TYPES.indexOf(userType);
-  const userTypes = isSuperuser ? [...USER_TYPES] : USER_TYPES.slice(0, userIndex + 1)
+  const userTypes = isSuperuser ? [...USER_TYPES] : (userType === "StaffReadOnly" ? ["StaffReadOnly"] : USER_TYPES.slice(0, userIndex + 1));
 
   const headerText = !userId ? "Add User" : "Update User";
   const buttonText = !userId ? "Save User" : "Update Details";
