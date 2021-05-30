@@ -128,6 +128,10 @@ export const PatientManager = (props: any) => {
     gender: qParams.gender || undefined,
     age_min: qParams.age_min || undefined,
     age_max: qParams.age_max || undefined,
+    date_declared_positive_before:
+      qParams.date_declared_positive_before || undefined,
+    date_declared_positive_after:
+      qParams.date_declared_positive_after || undefined,
     date_of_result_before: qParams.date_of_result_before || undefined,
     date_of_result_after: qParams.date_of_result_after || undefined,
     last_consultation_admission_date_before:
@@ -144,6 +148,7 @@ export const PatientManager = (props: any) => {
     number_of_doses: qParams.number_of_doses || undefined,
     covin_id: qParams.covin_id || undefined,
     is_kasp: qParams.is_kasp || undefined,
+    is_declared_positive: qParams.is_declared_positive || undefined,
   };
 
   let managePatients: any = null;
@@ -211,6 +216,7 @@ export const PatientManager = (props: any) => {
     qParams.number_of_doses,
     qParams.lsgBody,
     qParams.is_kasp,
+    qParams.is_declared_positive,
   ]);
 
   const updateQuery = (params: any) => {
@@ -250,18 +256,21 @@ export const PatientManager = (props: any) => {
   const removeFilter = (paramKey: any) => {
     updateQuery({
       ...qParams,
-      [paramKey]: ""
+      [paramKey]: "",
     });
-  }
+  };
 
   const badge = (key: string, value: any, paramKey: string) => {
     return (
       value && (
         <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
-          {key}{": "}{value}
-          <i className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
-            onClick={(e) => removeFilter(paramKey)}>
-          </i>
+          {key}
+          {": "}
+          {value}
+          <i
+            className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
+            onClick={(e) => removeFilter(paramKey)}
+          ></i>
         </span>
       )
     );
@@ -515,48 +524,83 @@ export const PatientManager = (props: any) => {
             ? badge("Phone Number", qParams.phone_number, "phone_number")
             : null}
           {badge("Patient Name", qParams.name, "name")}
-          {badge("Modified After", qParams.modified_date_after, "modified_date_after")}
-          {badge("Modified Before", qParams.modified_date_before, "modified_date_before")}
-          {badge("Created Before", qParams.created_date_before, "created_date_before")}
-          {badge("Created After", qParams.created_date_after, "created_date_after")}
+          {badge(
+            "Modified After",
+            qParams.modified_date_after,
+            "modified_date_after"
+          )}
+          {badge(
+            "Modified Before",
+            qParams.modified_date_before,
+            "modified_date_before"
+          )}
+          {badge(
+            "Created Before",
+            qParams.created_date_before,
+            "created_date_before"
+          )}
+          {badge(
+            "Created After",
+            qParams.created_date_after,
+            "created_date_after"
+          )}
           {badge(
             "Admitted Before",
-            qParams.last_consultation_discharge_date_before, "last_consultation_discharge_date_before"
+            qParams.last_consultation_discharge_date_before,
+            "last_consultation_discharge_date_before"
           )}
           {badge(
             "Admitted After",
-            qParams.last_consultation_admission_date_after, "last_consultation_admission_date_after"
+            qParams.last_consultation_admission_date_after,
+            "last_consultation_admission_date_after"
           )}
           {badge(
             "Discharged Before",
-            qParams.last_consultation_discharge_date_before, "last_consultation_discharge_date_before"
+            qParams.last_consultation_discharge_date_before,
+            "last_consultation_discharge_date_before"
           )}
           {badge(
             "Discharged After",
-            qParams.last_consultation_discharge_date_after, "last_consultation_discharge_date_after"
+            qParams.last_consultation_discharge_date_after,
+            "last_consultation_discharge_date_after"
           )}
-          {qParams.number_of_doses && 
-          badge(
-            "Number of Vaccination Doses",
-            qParams.number_of_doses, "number_of_doses"
-          )}
+          {qParams.number_of_doses &&
+            badge(
+              "Number of Vaccination Doses",
+              qParams.number_of_doses,
+              "number_of_doses"
+            )}
           {qParams.is_kasp &&
-            badge("KASP", qParams.is_kasp === "true" ? "KASP" : "Non KASP", "is_kasp")}
+            badge(
+              "KASP",
+              qParams.is_kasp === "true" ? "KASP" : "Non KASP",
+              "is_kasp"
+            )}
           {badge("COVIN ID", qParams.covin_id, "covin_id")}
 
           {badge("Filtered By: Facility", qParams.facility, "facility")}
           {badge("Ordering", qParams.ordering, "ordering")}
           {badge("Category", qParams.category, "category")}
           {badge("Disease Status", qParams.disease_status, "disease_status")}
-          {badge("Gender", parseOptionId(GENDER_TYPES, qParams.gender), "gender")}
+          {badge(
+            "Gender",
+            parseOptionId(GENDER_TYPES, qParams.gender),
+            "gender"
+          )}
           {badge(
             "Admitted to",
-            ADMITTED_TO[qParams.last_consultation_admitted_to], "last_consultation_admitted_to"
+            ADMITTED_TO[qParams.last_consultation_admitted_to],
+            "last_consultation_admitted_to"
           )}
           {badge("Age min", qParams.age_min, "age_min")}
           {badge("Age max", qParams.age_max, "age_max")}
           {badge("SRF ID", qParams.srf_id, "srf_id")}
           {badge("LSG Body ID", qParams.lsgBody, "lsgBody")}
+          {badge(
+            "Declared Status",
+            qParams.is_declared_positive,
+            "is_declared_positive"
+          )}
         </div>
       </div>
       <div className={classesTab.root}>
