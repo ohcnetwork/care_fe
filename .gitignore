@@ -29,7 +29,7 @@ dist
 build
 .swp
 stats.json
-
+yarn.lock
 public/build-meta.json
 
 

@@ -58,8 +58,7 @@ export default function ListFilter(props: any) {
     ordering: filter.ordering || local.ordering || null,
     is_kasp: filter.is_kasp || local.is_kasp || "--",
     status: filter.status || local.status || null,
-    assigned_user:
-      filter.assigned_user || local.assigned_user || "",
+    assigned_user: filter.assigned_user || local.assigned_user || "",
     assigned_user_ref: null,
     assigned_to: filter.assigned_to || local.assigned_to || "",
     disease_status: filter.disease_status || local.disease_status || "",
@@ -146,7 +145,6 @@ export default function ListFilter(props: any) {
     filterData[`${name}_ref`] = selected;
     filterData[name] = (selected || {}).id;
 
-
     setFilterState(filterData);
   };
 
@@ -155,9 +153,9 @@ export default function ListFilter(props: any) {
     filterData.assigned_to = user.id;
     filterData.assigned_user = user.username;
     filterData.assigned_user_ref = user;
-    
+
     setFilterState(filterData);
-  }
+  };
 
   const handleChange = (event: any) => {
     let { name, value } = event.target;
@@ -428,7 +426,7 @@ export default function ListFilter(props: any) {
             margin="dense"
             optionArray={true}
             value={filterState.disease_status}
-            options={["Select", ...DISEASE_STATUS]}
+            options={["--", ...DISEASE_STATUS]}
             onChange={handleChange}
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
           />
