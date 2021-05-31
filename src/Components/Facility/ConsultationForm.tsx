@@ -358,6 +358,8 @@ export const ConsultationForm = (props: any) => {
     if (value === "A") {
       form.admitted = "true";
     }
+    else
+      form.admitted = "false"
     dispatch({ type: "set_form", form });
   };
 
