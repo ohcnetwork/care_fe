@@ -625,19 +625,9 @@ export const PatientHome = (props: any) => {
                     Phone
                   </div>
                   <div className="mt-1 text-sm leading-5 text-gray-900">
-                    <div>
-                      <a href={`tel:${patientData.phone_number}`}>
-                        {patientData.phone_number || "-"}
-                      </a>
-                    </div>
-                    <div>
-                      <a
-                        href={`https://wa.me/${patientData.phone_number}`}
-                        target="_blank"
-                      >
-                        <i className="fab fa-whatsapp"></i> Chat on WhatsApp
-                      </a>
-                    </div>
+                    <a href={`tel:${patientData.phone_number}`}>
+                      {patientData.phone_number || "-"}
+                    </a>
                   </div>
                 </div>
                 <div className="sm:col-span-1">
@@ -645,19 +635,9 @@ export const PatientHome = (props: any) => {
                     Emergency Contact
                   </div>
                   <div className="mt-1 text-sm leading-5 text-gray-900">
-                    <div>
-                      <a href={`tel:${patientData.emergency_phone_number}`}>
-                        {patientData.emergency_phone_number || "-"}
-                      </a>
-                    </div>
-                    <div>
-                      <a
-                        href={`https://wa.me/${patientData.emergency_phone_number}`}
-                        target="_blank"
-                      >
-                        <i className="fab fa-whatsapp"></i> Chat on WhatsApp
-                      </a>
-                    </div>
+                    <a href={`tel:${patientData.emergency_phone_number}`}>
+                      {patientData.emergency_phone_number || "-"}
+                    </a>
                   </div>
                 </div>
                 <div className="sm:col-span-1">
