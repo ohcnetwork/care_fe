@@ -123,7 +123,6 @@ interface URLS {
 }
 
 interface StateInterface {
-  open: boolean;
   isImage: boolean;
   zoom: number;
   isZoomInDisabled: boolean;
@@ -158,14 +157,13 @@ export const FileUpload = (props: FileUploadProps) => {
   const [contentType, setcontentType] = useState<string>("");
   const classes = useStyles();
   const [modalStyle] = React.useState(getModalStyle);
-  // const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = React.useState(false);
   const [downloadURL, setDownloadURL] = useState<string>();
   // const [isImage, setIsImage] = useState<boolean>();
   // const [zoom, setZoom] = useState<number>(3);
   // const [isZoomInDisabled, setZoomInDisabled] = useState<boolean>(false);
   // const [isZoomOutDisabled, setZoomOutDisabled] = useState<boolean>(false);
   const initialState = {
-    open: false,
     isImage: false,
     zoom: 3,
     isZoomInDisabled: false,
@@ -233,29 +231,15 @@ export const FileUpload = (props: FileUploadProps) => {
     CONSULTATION: "View Consultation Files",
   };
 
-  const handleOpen = () => {
-    // setOpen(true);
-    console.log("Before open state: ", file_state);
-    setFileState((state) => {
-      return { ...state, open: true };
-    });
-    console.log("Inside open state: ", file_state);
-  };
-
   const handleClose = () => {
+    setOpen(false);
     setDownloadURL("");
     setFileState({
       ...file_state,
       zoom: 3,
       isZoomInDisabled: false,
       isZoomOutDisabled: false,
-      open: false,
     });
-    // setDownloadURL("");
-    // setZoom(3);
-    // setZoomOutDisabled(false);
-    // setZoomInDisabled(false);
-    // setOpen(false);
   };
 
   const getAssociatedId = () => {
@@ -332,12 +316,12 @@ export const FileUpload = (props: FileUploadProps) => {
 
   const loadFile = async (id: any) => {
     setFileUrl("");
+    setOpen(true);
     console.log("Open State is ", file_state);
     var data = { file_type: type, associating_id: getAssociatedId() };
     var responseData = await dispatch(retrieveUpload(data, id));
     setFileState({
       ...file_state,
-      open: true,
       isImage: getExtension(responseData.data.read_signed_url),
     });
     console.log("Ext State is ", file_state);
@@ -539,14 +523,14 @@ export const FileUpload = (props: FileUploadProps) => {
       .then((res) => res.blob())
       .then((blob) => {
         // setFileState({ ...file_state, downloadURL: URL.createObjectURL(blob) });
-         setDownloadURL(URL.createObjectURL(blob));
+        setDownloadURL(URL.createObjectURL(blob));
       });
   };
 
   return (
     <div className={hideBack ? "py-2" : "p-4"}>
       <Modal
-        open={file_state.open}
+        open={open}
         onClose={handleClose}
         aria-labelledby="simple-modal-title"
         aria-describedby="simple-modal-description"
