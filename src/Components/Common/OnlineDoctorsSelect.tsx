@@ -3,12 +3,16 @@ import React, { useCallback, useReducer, useState, useEffect, useRef } from "rea
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import moment from "moment";
-import { getOnlineDoctors } from "../../Redux/actions";
+import { getUserList } from "../../Redux/actions";
 
 export const OnlineDoctorsSelect = (props: any) => {
   const dispatchAction: any = useDispatch();
   const { userId, onSelect } = props;
-  const initalState = { loading: false, users: new Array<any>(), searchTerm: "", filteredUsers: new Array<any>() }
+  const initalState = {
+    loading: false,
+    users: new Array<any>(),
+    searchTerm: "",
+  };
   const [state, setState] = useState(initalState)
   const [isExpanded, setIsExpanded] = useState(false);
   const searchFieldRef = useRef<any>(null);
@@ -16,30 +20,24 @@ export const OnlineDoctorsSelect = (props: any) => {
   const fetchUsers = useCallback(
     async (status: statusType) => {
       setState({ ...state, loading: true });
-      const res = await dispatchAction(getOnlineDoctors());
+      const params = {
+        user_type: "Doctor",
+        ordering: "-last-login",
+        username: state.searchTerm,
+      };
+      const res = await dispatchAction(getUserList(params));
       if (!status.aborted) {
         if (res && res.data) {
           setState({ ...state, loading: false, users: res.data.results });
         }
       }
     },
-    [dispatchAction]
+    [dispatchAction, state.searchTerm]
   );
 
   useAbortableEffect((status: statusType) => {
     fetchUsers(status);
-  }, []);
-
-  useEffect(() => {
-    const searchTerm = state.searchTerm.toLowerCase();
-    const filteredDoctors = state.users.filter(
-      (doctor) =>
-        doctor.first_name.toLowerCase().includes(searchTerm) ||
-        doctor.last_name.toLowerCase().includes(searchTerm) ||
-        doctor.username.toLowerCase().includes(searchTerm)
-    );
-    setState({ ...state, filteredUsers: filteredDoctors });
-  }, [state.searchTerm, state.users]);
+  }, [state.searchTerm]);
 
   useEffect(() => {
     if(isExpanded) {
@@ -66,7 +64,7 @@ export const OnlineDoctorsSelect = (props: any) => {
                 ref={searchFieldRef}
                 name="searchTerm"
                 type="text"
-                placeholder="Search by name or username"
+                placeholder="Search by username"
                 className={`py-2 pl-3 w-full outline-none ${!isExpanded ? 'hidden' : ''}`}
                 value={state.searchTerm}
                 onChange={handleSearchTermChange}
@@ -95,7 +93,7 @@ export const OnlineDoctorsSelect = (props: any) => {
           {isExpanded &&
             <div role="listbox" aria-labelledby="listbox-label" aria-activedescendant="listbox-item-3" className="multiselect-dropdown__search-dropdown w-full absolute border border-gray-400 bg-white mt-1 rounded-lg shadow-lg px-4 py-2 z-50">
               {
-                state.filteredUsers.map((user: any) => {
+                state.users.map((user: any) => {
                   return <button onClick={_ => { setIsExpanded(false); onSelect(user.id); setState({...state, searchTerm: ""}) }} id="listbox-item-0" role="option" className="flex text-xs py-1 items-center w-full hover:bg-gray-200 focus:outline-none focus:bg-gray-200">
                     <div className="flex items-center space-x-3">
                       <span aria-label="Online" className={"flex-shrink-0 inline-block h-2 w-2 rounded-full " + (moment().subtract(5, 'minutes').isBefore(user.last_login) ? "bg-green-400" : "bg-gray-300")}></span>
