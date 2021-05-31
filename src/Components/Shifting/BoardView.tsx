@@ -118,10 +118,18 @@ export default function BoardView() {
         {badge("Modified Before", appliedFilters.modified_date_before)}
         {badge("Created Before", appliedFilters.created_date_before)}
         {badge("Created After", appliedFilters.created_date_after)}
+<<<<<<< HEAD
         {badge("Assigned To", appliedFilters.assigned_to)}
         {badge("Filtered By", appliedFilters.assigned_facility && "Assigned Facility")}
         {badge("Filtered By", appliedFilters.orgin_facility && "Origin Facility")}
         {badge("Filtered By", appliedFilters.shifting_approving_facility && "Shifting Approving Facility")}
+=======
+        {badge("Assigned To", appliedFilters.assigned_user || appliedFilters.assigned_to)}
+        {badge("Filtered By", appliedFilters.assigned_facility && "Assigned Facility")}
+        {badge("Filtered By", appliedFilters.orgin_facility && "Origin Facility")}
+        {badge("Filtered By", appliedFilters.shifting_approving_facility && "Shifting Approving Facility")}
+        {badge("Disease Status", appliedFilters.disease_status)}
+>>>>>>> 05f4a756fe2b1e418f2ace5cde13ef4d37b03fa2
       </div>
       <div className="flex mt-4 pb-2 flex-1 items-start overflow-x-scroll">
         {isLoading ? <Loading /> : boardFilter.map(board =>

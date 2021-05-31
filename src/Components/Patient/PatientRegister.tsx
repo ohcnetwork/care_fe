@@ -121,6 +121,7 @@ const initForm: any = {
   local_body: "",
   ward: "",
   address: "",
+  permanent_address: "",
   village: "",
   allergies: "",
   pincode: "",
@@ -221,6 +222,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     transfer?: boolean;
     patientList: Array<DupPatientModel>;
   }>({ patientList: [] });
+  const [sameAddress, setSameAddress] = useState(false);
   const [{ extId }, setQuery] = useQueryParams();
 
   useEffect(() => {
@@ -303,6 +305,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       form["address"] = res.data.address
         ? res.data.address
         : state.form.address;
+      form["permanent_address"] = res.data.permanent_address
+        ? res.data.permanent_address
+        : state.form.permanent_address;
       form["gender"] = res.data.gender
         ? parseGenderFromExt(res.data.gender, state.form.gender)
         : state.form.gender;
@@ -492,6 +497,14 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             errors[field] = "Field is required";
             invalidForm = true;
           }
+          return;
+        case "permanent_address":
+          if (!sameAddress) {
+            if(!state.form[field]){
+              errors[field] = "Field is required";
+              invalidForm = true;
+            }
+          } 
           return;
         case "date_of_birth":
           if (!state.form[field]) {
@@ -688,6 +701,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         ward: state.form.ward,
         village: state.form.village,
         address: state.form.address ? state.form.address : undefined,
+        permanent_address: sameAddress
+          ? state.form.address
+          : state.form.permanent_address
+          ? state.form.permanent_address
+          : undefined,
         present_health: state.form.present_health
           ? state.form.present_health
           : undefined,
@@ -1393,18 +1411,41 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   )}
 
                   <div>
-                    <InputLabel id="address-label">Address*</InputLabel>
+                    <InputLabel id="address-label">Current Address*</InputLabel>
                     <MultilineInputField
                       rows={2}
                       name="address"
                       variant="outlined"
                       margin="dense"
                       type="text"
-                      placeholder="Enter the address"
+                      placeholder="Enter the current address"
                       value={state.form.address}
                       onChange={handleChange}
                       errors={state.errors.address}
                     />
+                  </div>
+                  <div>
+                    <InputLabel id="permanent-address-label">
+                      Permanent Address*
+                    </InputLabel>
+                    <CheckboxField
+                      checked={sameAddress}
+                      onChange={() => setSameAddress(!sameAddress)}
+                      label="Same as Current Address"
+                    />
+                    {sameAddress ? null : (
+                      <MultilineInputField
+                        rows={2}
+                        name="permanent_address"
+                        variant="outlined"
+                        margin="dense"
+                        type="text"
+                        placeholder="Enter the permanent address"
+                        value={state.form.permanent_address}
+                        onChange={handleChange}
+                        errors={state.errors.permanent_address}
+                      />
+                    )}
                   </div>
                   <div>
                     <InputLabel id="ward-label">

@@ -377,6 +377,7 @@ const InvestigationReports = ({ id }: any) => {
               </Button>
             </>
           )}
+<<<<<<< HEAD
           <>
 
             <section id="reports_section">
@@ -385,6 +386,46 @@ const InvestigationReports = ({ id }: any) => {
                   <ButtonGroup
                     disableElevation
                     variant="outlined"
+=======
+          <section id="reports_section">
+            {!!investigationTableData.length && (
+              <>
+                <ButtonGroup
+                  disableElevation
+                  variant="outlined"
+                  color="primary"
+                  className={className.button}
+                >
+                  <Button
+                    onClick={() => handleSessionPage("PREV")}
+                    disabled={prevSessionDisabled}
+                  >
+                    {isLoading.tableData ? "Loading..." : "Prev Sessions"}
+                  </Button>
+                  <Button
+                    onClick={() => handleSessionPage("NEXT")}
+                    disabled={nextSessionDisabled}
+                  >
+                    {isLoading.tableData ? "Loading..." : "Next Sessions"}
+                  </Button>
+                </ButtonGroup>
+          
+                <ReportTable
+                  investigationData={investigationTableData}
+                  title="Report"
+                />
+
+                {!!isLoading.tableData && (
+                  <CircularProgress className={className.button} />
+                )}
+
+                {!loadMoreDisabled && (
+                  <Button
+                    disabled={loadMoreDisabled}
+                    onClick={handleLoadMore}
+                    className={className.button}
+                    variant="contained"
+>>>>>>> 05f4a756fe2b1e418f2ace5cde13ef4d37b03fa2
                     color="primary"
                     className={className.button}
                   >
