@@ -22,6 +22,7 @@ export default function InventoryLog(props: any) {
   const initialInventory: any[] = [];
   let inventoryItem: any = null;
   const [inventory, setInventory] = useState(initialInventory);
+  const [current_stock, setCurrentStock] = useState(0);
   const [offset, setOffset] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
@@ -38,6 +39,7 @@ export default function InventoryLog(props: any) {
       if (!status.aborted) {
         if (res && res.data) {
           setInventory(res.data.results);
+          setCurrentStock(res.data.results[0].current_stock);
           setTotalCount(res.data.count);
           setItemName(res.data.results[0].item_object.name);
         }
@@ -209,16 +211,25 @@ export default function InventoryLog(props: any) {
         hideBack={false}
         className="mx-3 md:mx-8"
       />
-      <button
-        onClick={(_) => removeLastInventoryLog(inventory[0].item_object.id)}
-        disabled={saving}
-        className="btn btn-default"
-      >
-        Delete
-      </button>
       <div className="container mx-auto px-4 sm:px-8">
         <div className="py-8 ">
-          <h4>Item: {itemName}</h4>
+          <div className="flex justify-between">
+            <h4>Item: {itemName}</h4>
+            {current_stock > 0 && (
+              <button
+                onClick={(_) =>
+                  removeLastInventoryLog(inventory[0].item_object.id)
+                }
+                disabled={saving}
+                className="btn btn-default"
+              >
+                <span className="text-red-500">
+                  <i className="fas fa-exclamation-circle pr-2"></i>
+                  Delete Last Entry
+                </span>
+              </button>
+            )}
+          </div>
           {inventoryItem}
         </div>
       </div>
