@@ -143,9 +143,6 @@ const TreatmentSummary = (props: any) => {
                             <div className="border-b-2 border-gray-800 px-5 py-2">
                                 <b>Comorbidities :</b>
                                 <div className="mx-5">
-                                    {
-                                        patientData.medical_history && patientData.medical_history.length > 0 ?
-                                            (
                                                 <table className="border-collapse border border-gray-800 w-full">
                                                     <thead>
                                                         <tr>
@@ -158,52 +155,55 @@ const TreatmentSummary = (props: any) => {
                                                         </tr>
                                                     </thead>
                                                     <tbody>
-                                                        {
-                                                            patientData.medical_history.map(
-                                                                obj => {
-                                                                    return (
-                                                                        <tr>
-                                                                            <td className="border border-gray-800 text-center">{obj["disease"]}</td>
-                                                                            <td className="border border-gray-800 text-center">{obj["details"]}</td>
-                                                                        </tr>
-                                                                    )
-                                                                }
-                                                            )
-                                                        }
+                                            {patientData.medical_history && patientData.medical_history.length > 0 ? (
+                                                patientData.medical_history.map((obj: any) => {
+                                                    return (
+                                                        <tr>
+                                                            <td className="border border-gray-800 text-center">
+                                                                {obj["disease"]}
+                                                            </td>
+                                                            <td className="border border-gray-800 text-center">
+                                                                {obj["details"] ? obj["details"] : "---"}
+                                                            </td>
+                                                        </tr>
+                                                    )
+                                                })) : (
+                                                <tr>
+                                                    <td className="border border-gray-800 text-center">---</td>
+                                                    <td className="border border-gray-800 text-center">---</td>
+                                                </tr>
+                                            )}
                                                     </tbody>
-                                                </table>
-                                            ) :
-                                        (<span> - </span>)
-                                    }
+                                    </table>
                                 </div>
                             </div>
 
                             <div className="border-b-2 border-gray-800 px-5 py-2">
                                 <b>Diagnosis :</b>
                                 <div className="mx-5">
-                                    {props.consultationData.existing_medication && (
-                                        <div>
-                                            <b>History of present illness :</b> {props.consultationData.existing_medication}
-                                        </div>
-                                    )}
+                                    <div>
+                                        <b>History of present illness :</b>
+                                        {props.consultationData.existing_medication ?
+                                            props.consultationData.existing_medication : "    ---"}
+                                    </div>
 
-                                    {props.consultationData.examination_details && (
                                         <div>
-                                            <b>Examination details and clinical conditions :</b> {props.consultationData.examination_details}
-                                        </div>
-                                    )}
+                                        <b>Examination details and clinical conditions :</b>
+                                        {props.consultationData.examination_details ?
+                                            props.consultationData.examination_detail : "    ---"}
+                                    </div>
 
-                                    {props.consultationData.diagnosis && (
-                                        <div>
-                                            <b>Diagnosis :</b> {props.consultationData.diagnosis}
-                                        </div>
-                                    )}
+                                    <div>
+                                        <b>Diagnosis :</b>
+                                        {props.consultationData.diagnosis ?
+                                            props.consultationData.diagnosis : "    ---"}
+                                    </div>
 
-                                    {(props.dailyRoundsListData.length > 0 && props.dailyRoundsListData["0"]["physical_examination_info"]) && (
                                         <div>
-                                            <b>Physical Examination info :</b> {props.dailyRoundsListData["0"]["physical_examination_info"]}
-                                        </div>
-                                    )}
+                                        <b>Physical Examination info :</b>
+                                        {(props.dailyRoundsListData.length > 0 && props.dailyRoundsListData["0"]["physical_examination_info"]) ?
+                                            props.dailyRoundsListData["0"]["physical_examination_info"] : "    ---"}
+                                    </div>
                                 </div>
                             </div>
 
@@ -223,48 +223,43 @@ const TreatmentSummary = (props: any) => {
                                                 </tr>
                                             </thead>
 
-                                        {investigations.length > 0 ? (
-                                            <tbody>
-                                                {
-                                                    Object.values(investigations).map((value: any) => {
-                                                        return (
-                                                            <tr>
-                                                                <td className="border border-gray-800 text-center">
-                                                                    {moment(value["session_object"]["session_created_date"]).format("DD/MM/YYYY")}
-                                                                </td>
-                                                                <td className="border border-gray-800 text-center">
-                                                                    {value["investigation_object"]["name"]}
-                                                                </td>
-                                                                <td className="border border-gray-800 text-center">
-                                                                    {value["notes"] || value["value"]}
-                                                                </td>
-                                                                <td className="border border-gray-800 text-center">
-                                                                    {value["investigation_object"]["ideal_value"] || "-"}
-                                                                </td>
-                                                                <td className="border border-gray-800 text-center">
-                                                                    {value["investigation_object"]["min_value"]} - {value["investigation_object"]["max_value"]}
-                                                                </td>
-                                                                <td className="border border-gray-800 text-center">
-                                                                    {value["investigation_object"]["unit"] || "-"}
-                                                                </td>
-                                                            </tr>
-                                                        )
-                                                    })
-                                                }
-                                            </tbody>
-                                        ) : (
-                                            <tbody>
-                                                <tr>
-                                                    <td className="border border-gray-800 text-center">---</td>
-                                                    <td className="border border-gray-800 text-center">---</td>
-                                                    <td className="border border-gray-800 text-center">---</td>
-                                                    <td className="border border-gray-800 text-center">---</td>
-                                                    <td className="border border-gray-800 text-center">---</td>
-                                                    <td className="border border-gray-800 text-center">---</td>
-                                                </tr>
-                                            </tbody>
-                                        )
-                                        }
+                                        <tbody>
+                                            {investigations.length > 0 ? (
+                                                Object.values(investigations).map((value: any) => {
+                                                    return (
+                                                        <tr>
+                                                            <td className="border border-gray-800 text-center">
+                                                                {moment(value["session_object"]["session_created_date"]).format("DD/MM/YYYY")}
+                                                            </td>
+                                                            <td className="border border-gray-800 text-center">
+                                                                {value["investigation_object"]["name"]}
+                                                            </td>
+                                                            <td className="border border-gray-800 text-center">
+                                                                {value["notes"] || value["value"]}
+                                                            </td>
+                                                            <td className="border border-gray-800 text-center">
+                                                                {value["investigation_object"]["ideal_value"] || "-"}
+                                                            </td>
+                                                            <td className="border border-gray-800 text-center">
+                                                                {value["investigation_object"]["min_value"]} - {value["investigation_object"]["max_value"]}
+                                                            </td>
+                                                            <td className="border border-gray-800 text-center">
+                                                                {value["investigation_object"]["unit"] || "-"}
+                                                            </td>
+                                                        </tr>
+                                                    )
+                                                })
+                                            ) : (
+                                                    <tr>
+                                                        <td className="border border-gray-800 text-center">---</td>
+                                                        <td className="border border-gray-800 text-center">---</td>
+                                                        <td className="border border-gray-800 text-center">---</td>
+                                                        <td className="border border-gray-800 text-center">---</td>
+                                                        <td className="border border-gray-800 text-center">---</td>
+                                                        <td className="border border-gray-800 text-center">---</td>
+                                                    </tr>
+                                            )}
+                                        </tbody>
                                     </table>
                                 </div>
                             </div>
@@ -273,8 +268,6 @@ const TreatmentSummary = (props: any) => {
                                 <b className="mb-2">Treatment summary :</b>
 
                                 <div className="mx-5">
-                                    {
-                                        dailyRounds.length > 0 && (
                                             <table className="border-collapse border border-gray-800 w-full">
                                                 <thead>
                                                     <tr>
@@ -291,25 +284,32 @@ const TreatmentSummary = (props: any) => {
                                                 </thead>
 
                                                 <tbody>
-                                                    {
-                                                        dailyRounds.map((rounds: DailyRoundsModel) => (
-                                                            <tr>
-                                                                <td className="border border-gray-800 text-center">
-                                                                    {moment(rounds.created_date).format('DD/MM/YYYY')}
-                                                                </td>
-                                                                <td className="border border-gray-800 text-center">
-                                                                    {rounds.spo2 || "-"}
-                                                                </td>
-                                                                <td className="border border-gray-800 text-center">
-                                                                    {rounds.temperature || "-"}
-                                                                </td>
-                                                            </tr>
-                                                        ))
-                                                    }
+                                            {
+                                                dailyRounds.length > 0 ? (
+                                                    dailyRounds.map((rounds: DailyRoundsModel) => (
+                                                        <tr>
+                                                            <td className="border border-gray-800 text-center">
+                                                                {moment(rounds.created_date).format('DD/MM/YYYY')}
+                                                            </td>
+                                                            <td className="border border-gray-800 text-center">
+                                                                {rounds.spo2 || "-"}
+                                                            </td>
+                                                            <td className="border border-gray-800 text-center">
+                                                                {rounds.temperature || "-"}
+                                                            </td>
+                                                        </tr>
+                                                    ))
+                                                ) : (
+                                                    <tr>
+                                                        <td className="border border-gray-800 text-center">---</td>
+                                                        <td className="border border-gray-800 text-center">---</td>
+                                                        <td className="border border-gray-800 text-center">---</td>
+                                                    </tr>
+
+                                                )
+                                            }
                                                 </tbody>
-                                            </table>
-                                        )
-                                    }
+                                    </table>
 
                                     {props.consultationData.prescribed_medication && (
                                         <p>{props.consultationData.prescribed_medication}</p>
