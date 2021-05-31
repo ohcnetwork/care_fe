@@ -493,11 +493,18 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         case "address":
         case "name":
         case "gender":
-        case "permanent_address":
           if (!state.form[field]) {
             errors[field] = "Field is required";
             invalidForm = true;
           }
+          return;
+        case "permanent_address":
+          if (!sameAddress) {
+            if(!state.form[field]){
+              errors[field] = "Field is required";
+              invalidForm = true;
+            }
+          } 
           return;
         case "date_of_birth":
           if (!state.form[field]) {
