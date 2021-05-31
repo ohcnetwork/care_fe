@@ -11,7 +11,7 @@ export const LanguageSelector = (props: any) => {
   }, []);
 
   const handleLanguage = (value: string) => {
-    i18n.changeLanguage(value);
+    i18n.changeLanguage(value).then(r => r);
     if (window && window.localStorage) {
       localStorage.setItem("i18nextLng", value);
       document.documentElement.setAttribute("lang", i18n.language);

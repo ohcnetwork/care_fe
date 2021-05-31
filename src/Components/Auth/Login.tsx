@@ -10,7 +10,10 @@ import ReCaptcha from "react-google-recaptcha";
 import VisibilityIcon from "@material-ui/icons/Visibility";
 import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
 import LanguageSelector from "../Common/LanguageSelector";
+import msinsLogo from "../../Common/mahakavach/msinsLogo-removebg.png"
+
 const get = require("lodash.get");
+
 
 const LoginPage = (props: any) => {
   const dispatch: any = useDispatch();
@@ -97,14 +100,14 @@ const LoginPage = (props: any) => {
   return (
     <div className="flex flex-col md:flex-row h-screen relative">
       <div className="absolute top-2 right-2">
-        <LanguageSelector className="md:bg-green-500 md:text-white bg-white" />
+        <LanguageSelector className="md:bg-teal-500 md:text-white bg-white" />
       </div>
-      <div className="flex flex-col justify-center h-1/2 md:w-1/2 md:h-full bg-green-500">
+      <div className="flex flex-col justify-center h-1/2 md:w-1/2 md:h-full bg-teal-300">
         <div className="pl-1/5">
           <a href={"/"}>
             <img
-              src="https://cdn.coronasafe.network/light-logo.svg"
-              className="h-8 w-auto"
+              src={msinsLogo}
+              className="h-36"
               alt="care logo"
             />{" "}
           </a>
@@ -116,7 +119,7 @@ const LoginPage = (props: any) => {
 
       <div className="flex items-center justify-center w-full mt-4 md:mt-0 md:w-1/2 md:h-full">
         <div className="bg-white mt-4 md:mt-20 rounded-lg px-4 py-4">
-          <div className="text-2xl font-bold text-center pt-4 text-green-600">
+          <div className="text-2xl font-bold text-center pt-4 text-teal-500">
             {t("auth_login_title")}
           </div>
           <form onSubmit={(e) => handleSubmit(e)}>
@@ -173,14 +176,14 @@ const LoginPage = (props: any) => {
                 <div className="w-full flex justify-between items-center px-4 pb-4">
                   <a
                     href="/forgot-password"
-                    className="text-sm text-green-400 hover:text-green-500"
+                    className="text-sm text-teal-400 hover:text-teal-500"
                   >
                     {t("forget_password")}
                   </a>
                 </div>
 
                 <button
-                  className="w-full bg-green-500 btn text-white"
+                  className="w-full bg-teal-400 btn text-white"
                   onClick={(e) => handleSubmit(e)}
                 >
                   {t("login")}

@@ -412,7 +412,7 @@ const AppRouter = (props: any) => {
                   })}
                   <a
                     key="dashboard"
-                    href="http://dashboard.coronasafe.network/"
+                    href="https://dashboard.mahakavach.in/"
                     className="mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-green-300 rounded-md hover:text-white hover:bg-green-700 focus:outline-none focus:bg-green-900 transition ease-in-out duration-150"
                   >
                     <i className="fas fa-tachometer-alt text-green-400 mr-3 text-md group-hover:text-green-300 group-focus:text-green-300 transition ease-in-out duration-150"></i>
@@ -490,7 +490,7 @@ const AppRouter = (props: any) => {
               <NotificationsList />
               <a
                 key="dashboard"
-                href="http://dashboard.coronasafe.network/"
+                href="https://dashboard.mahakavach.in/"
                 target="_blank"
                 className="mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-green-300 rounded-md hover:text-white hover:bg-green-700 focus:outline-none focus:bg-green-900 transition ease-in-out duration-150"
               >
