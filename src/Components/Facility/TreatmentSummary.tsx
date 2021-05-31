@@ -211,7 +211,6 @@ const TreatmentSummary = (props: any) => {
                                 <b>Relevant investigations :</b>
 
                                 <div className="mx-5">
-                                    {investigations && (
                                         <table className="border-collapse border border-gray-800 w-full">
                                             <thead>
                                                 <tr>
@@ -224,6 +223,7 @@ const TreatmentSummary = (props: any) => {
                                                 </tr>
                                             </thead>
 
+                                        {investigations.length > 0 ? (
                                             <tbody>
                                                 {
                                                     Object.values(investigations).map((value: any) => {
@@ -252,8 +252,20 @@ const TreatmentSummary = (props: any) => {
                                                     })
                                                 }
                                             </tbody>
-                                        </table>
-                                    )}
+                                        ) : (
+                                            <tbody>
+                                                <tr>
+                                                    <td className="border border-gray-800 text-center">---</td>
+                                                    <td className="border border-gray-800 text-center">---</td>
+                                                    <td className="border border-gray-800 text-center">---</td>
+                                                    <td className="border border-gray-800 text-center">---</td>
+                                                    <td className="border border-gray-800 text-center">---</td>
+                                                    <td className="border border-gray-800 text-center">---</td>
+                                                </tr>
+                                            </tbody>
+                                        )
+                                        }
+                                    </table>
                                 </div>
                             </div>
 
