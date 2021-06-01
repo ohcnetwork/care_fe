@@ -112,7 +112,8 @@
     "re:watch": "bsb -make-world -clean-world -w",
     "build": "cross-env NODE_ENV=production ./node_modules/.bin/webpack -p --mode=production",
     "generate-build-meta": "node ./build-scripts/generate-build-version.js",
-    "test": "snyk test"
+    "test": "snyk test",
+    "prepare": "husky install"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -158,10 +159,12 @@
     "eslint-plugin-react-hooks": "^4.2.0",
     "gentype": "^3.42.0",
     "http-server": "^0.12.3",
+    "husky": "^6.0.0",
     "jest": "26.2.2",
     "jest-environment-jsdom-fourteen": "1.0.1",
     "jest-resolve": "26.2.2",
     "jest-watch-typeahead": "0.6.0",
+    "lint-staged": "^11.0.0",
     "optimize-css-assets-webpack-plugin": "^5.0.4",
     "postcss-cli": "^7.1.2",
     "prettier": "^2.3.0",
@@ -229,5 +232,8 @@
     "presets": [
       "react-app"
     ]
+  },
+  "lint-staged": {
+    "**/*": "prettier --write --ignore-unknown"
   }
 }
