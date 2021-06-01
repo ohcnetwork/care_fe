@@ -396,10 +396,12 @@ const InvestigationReports = ({ id }: any) => {
                     {isLoading.tableData ? "Loading..." : "Next Sessions"}
                   </Button>
                 </ButtonGroup>
+          
                 <ReportTable
                   investigationData={investigationTableData}
                   title="Report"
                 />
+
                 {!!isLoading.tableData && (
                   <CircularProgress className={className.button} />
                 )}
