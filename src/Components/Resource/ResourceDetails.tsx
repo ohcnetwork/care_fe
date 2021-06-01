@@ -6,7 +6,11 @@ import { getResourceDetails, deleteResourceRecord } from "../../Redux/actions";
 import { navigate, Link } from "raviger";
 import Button from "@material-ui/core/Button";
 import QRCode from "qrcode.react";
-import { GENDER_TYPES, TEST_TYPE_CHOICES } from "../../Common/constants";
+import {
+  GENDER_TYPES,
+  TEST_TYPE_CHOICES,
+  KeralaLogo,
+} from "../../Common/constants";
 import moment from "moment";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
@@ -15,7 +19,6 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import * as Notification from "../../Utils/Notifications.js";
 import CommentSection from "./CommentSection";
-import KeralaLogo from "../../../public/images/kerala-logo.png";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
