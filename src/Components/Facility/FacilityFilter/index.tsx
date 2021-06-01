@@ -6,9 +6,11 @@ import { CircularProgress } from "@material-ui/core";
 import DistrictSelect from './DistrictSelect';
 import LocalBodySelect from './LocalBodySelect';
 import { FACILITY_TYPES } from '../../../Common/constants';
-import { getStates } from '../../../Redux/actions';
+import { getStates, getDistrictByState, getLocalbodyByDistrict } from '../../../Redux/actions';
 import { useDispatch } from 'react-redux';
 import { debounce } from 'lodash';
+import { statusType, useAbortableEffect } from "../../../Common/utils";
+
 
 function useMergeState(initialState: any) {
     const [state, setState] = useState(initialState);
@@ -18,13 +20,63 @@ function useMergeState(initialState: any) {
     return [state, setMergedState];
 }
 
+const initialStates = [{ id: 0, name: "Choose State *" }];
+const initialDistricts = [{ id: 0, name: "Choose District" }];
+const selectStates = [{ id: 0, name: "Please select your state" }];
+const initialLocalbodies = [{ id: 0, name: "Choose Localbody" }];
+const selectDistrict = [{ id: 0, name: "Please select your district" }];
+
 
 function FacillityFilter(props: any) {
     let { filter, onChange, closeFilter } = props;
     const [isFacilityLoading, setFacilityLoading] = useState(false);
-    const [stateList, setStateList] = useState([])
+    //const [stateList, setStateList] = useState([])
     const dispatchAction: any = useDispatch();
-    const [isstateLoading, setStateLoading] = useState(false);
+    //const [isstateLoading, setStateLoading] = useState(false);
+
+    const [isStateLoading, setIsStateLoading] = useState(false);
+    const [isDistrictLoading, setIsDistrictLoading] = useState(false);
+    const [isLocalbodyLoading, setIsLocalbodyLoading] = useState(false);
+    const [states, setStates] = useState(initialStates);
+    const [districts, setDistricts] = useState(selectStates);
+    const [localBody, setLocalBody] = useState(selectDistrict);
+
+
+    const fetchDistricts = useCallback(
+        async (id: string) => {
+            if (Number(id) > 0) {
+                setIsDistrictLoading(true);
+                const districtList = await dispatchAction(getDistrictByState({ id }));
+                setDistricts([...initialDistricts, ...districtList.data]);
+                setIsDistrictLoading(false);
+            } else {
+                setDistricts(selectStates);
+            }
+        },
+        [dispatchAction]
+    );
+
+    const fetchLocalBody = useCallback(
+        async (id: string) => {
+            if (Number(id) > 0) {
+                setIsLocalbodyLoading(true);
+                const localBodyList = await dispatchAction(
+                    getLocalbodyByDistrict({ id })
+                );
+                setIsLocalbodyLoading(false);
+                if (localBodyList.data.length > 0) {
+                    setLocalBody([...initialLocalbodies, ...localBodyList.data]);
+                } else {
+                    setLocalBody([{ id: 0, name: "No local bodies found!" }])
+                }
+            } else {
+                setLocalBody(selectDistrict);
+            }
+        },
+        [dispatchAction]
+    );
+
+
     const [filterState, setFilterState] = useMergeState({
         state: filter.state || "",
         district: filter.district || "",
@@ -34,6 +86,16 @@ function FacillityFilter(props: any) {
         facility_type: filter.facility_type || "",
         kasp_empanelled: filter.kasp_empanelled || "",
     });
+
+    const emptyFilterState = {
+        state: "",
+        district: "",
+        district_ref: null,
+        local_body: "",
+        local_body_ref: null,
+        facility_type: "",
+        kasp_empanelled: "",
+    }
 
     const setKeys = (selected: any, name: string) => {
         const filterData: any = { ...filterState };
@@ -62,16 +124,17 @@ function FacillityFilter(props: any) {
     };
 
     useEffect(() => {
-        setStateLoading(true)
+        setIsStateLoading(true)
         loadStates()
     }, []);
 
     const loadStates = useCallback(debounce(async () => {
         const res = await dispatchAction(getStates());
         if (res && res.data) {
-            setStateList(res.data.results)
+            //setStateList(res.data.results)
+            setStates([...initialStates, ...res.data.results]);
         }
-        setStateLoading(false);
+        setIsStateLoading(false);
     }, 300), []);
 
     return (
@@ -85,6 +148,7 @@ function FacillityFilter(props: any) {
                     className="btn btn-default"
                     onClick={(_) => {
                         navigate("/facility");
+                        setFilterState(emptyFilterState);
                     }}
                 >
                     <i className="fas fa-times mr-2" />
@@ -101,45 +165,88 @@ function FacillityFilter(props: any) {
                 <div className="w-64 flex-none">
                     <span className="text-sm font-semibold">State</span>
                     <div>
-                        {isstateLoading ? (
+                        {isStateLoading ? (
                             <CircularProgress size={20} />) : (
-                            <SelectField
-                                name="state"
-                                variant="outlined"
-                                margin="dense"
-                                optionKey="id"
-                                optionValue="name"
-                                value={filterState.state}
-                                options={[{ id: "", name: "Show All" }, ...stateList]}
-                                onChange={handleChange}
-                                className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-                            />)
+                            // <SelectField
+                            //     name="state"
+                            //     variant="outlined"
+                            //     margin="dense"
+                            //     optionKey="id"
+                            //     optionValue="name"
+                            //     value={filterState.state}
+                            //     options={[{ id: "", name: "Show All" }, ...stateList]}
+                            //     onChange={handleChange}
+                            //     className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+                            // />)
+                                <SelectField
+                                    name="state"
+                                    variant="outlined"
+                                    margin="dense"
+                                    value={filterState.state}
+                                    options={states}
+                                    optionValue="name"
+                                    onChange={e => [
+                                        handleChange(e),
+                                        fetchDistricts(String(e.target.value))
+                                    ]}
+                                />)
                         }
                     </div>
                 </div>
 
                 <div className="w-64 flex-none">
                     <span className="text-sm font-semibold">District</span>
-                    <DistrictSelect
+                    {/* <DistrictSelect
                         multiple={false}
                         name="district"
                         selected={filterState.district_ref}
                         setSelected={(obj) => setKeys(obj, "district")}
                         className="shifting-page-filter-dropdown"
                         errors={""}
-                    />
+                    /> */}
+                    {isDistrictLoading ? (
+                        <CircularProgress size={20} />
+                    ) : (
+                        <SelectField
+                            name="district"
+                            variant="outlined"
+                            margin="dense"
+                            value={filterState.district}
+                            options={districts}
+                            optionValue="name"
+                            onChange={e => [
+                                handleChange(e),
+                                fetchLocalBody(String(e.target.value))
+                            ]}
+
+                        />
+                    )}
                 </div>
 
                 <div className="w-64 flex-none">
                     <span className="text-sm font-semibold">Local Body</span>
-                    <LocalBodySelect
+                    {/* <LocalBodySelect
                         multiple={false}
                         name="local_body"
                         selected={filterState.local_body_ref}
                         setSelected={(obj) => setKeys(obj, "local_body")}
                         className="shifting-page-filter-dropdown"
                         errors={""}
-                    />
+                    /> */}
+                    {isLocalbodyLoading ? (
+                        <CircularProgress size={20} />
+                    ) : (
+                        <SelectField
+                            name="local_body"
+                            variant="outlined"
+                            margin="dense"
+                            value={filterState.local_body}
+                            options={localBody}
+                            optionValue="name"
+                            onChange={handleChange}
+
+                        />
+                    )}
                 </div>
 
 
