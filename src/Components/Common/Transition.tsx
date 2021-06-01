@@ -1,6 +1,5 @@
-
-import { CSSTransition as ReactCSSTransition } from 'react-transition-group';
-import React, { useContext, useEffect, useRef } from 'react';
+import { CSSTransition as ReactCSSTransition } from "react-transition-group";
+import React, { useContext, useEffect, useRef } from "react";
 
 type TransitionContextProps = {
   parent: {
@@ -39,21 +38,21 @@ interface TransitionProps {
 
 function CSSTransition({
   show,
-  enter = '',
-  enterFrom = '',
-  enterTo = '',
-  leave = '',
-  leaveFrom = '',
-  leaveTo = '',
+  enter = "",
+  enterFrom = "",
+  enterTo = "",
+  leave = "",
+  leaveFrom = "",
+  leaveTo = "",
   appear,
   children,
 }: TransitionProps) {
-  const enterClasses = enter.split(' ').filter((s) => s.length);
-  const enterFromClasses = enterFrom.split(' ').filter((s) => s.length);
-  const enterToClasses = enterTo.split(' ').filter((s) => s.length);
-  const leaveClasses = leave.split(' ').filter((s) => s.length);
-  const leaveFromClasses = leaveFrom.split(' ').filter((s) => s.length);
-  const leaveToClasses = leaveTo.split(' ').filter((s) => s.length);
+  const enterClasses = enter.split(" ").filter((s) => s.length);
+  const enterFromClasses = enterFrom.split(" ").filter((s) => s.length);
+  const enterToClasses = enterTo.split(" ").filter((s) => s.length);
+  const leaveClasses = leave.split(" ").filter((s) => s.length);
+  const leaveFromClasses = leaveFrom.split(" ").filter((s) => s.length);
+  const leaveToClasses = leaveTo.split(" ").filter((s) => s.length);
 
   function addClasses(node: HTMLElement, classes: string[]): void {
     if (classes.length) {
@@ -72,28 +71,28 @@ function CSSTransition({
       appear={appear}
       unmountOnExit
       in={show}
-      timeout={(undefined as unknown) as any}
+      timeout={undefined as unknown as any}
       addEndListener={(node, done) => {
-        node.addEventListener('transitionend', done, false);
+        node.addEventListener("transitionend", done, false);
       }}
-      onEnter={(node:any) => {
+      onEnter={(node: any) => {
         addClasses(node, [...enterClasses, ...enterFromClasses]);
       }}
-      onEntering={(node:any) => {
+      onEntering={(node: any) => {
         removeClasses(node, enterFromClasses);
         addClasses(node, enterToClasses);
       }}
-      onEntered={(node:any) => {
+      onEntered={(node: any) => {
         removeClasses(node, [...enterToClasses, ...enterClasses]);
       }}
-      onExit={(node:any) => {
+      onExit={(node: any) => {
         addClasses(node, [...leaveClasses, ...leaveFromClasses]);
       }}
-      onExiting={(node:any) => {
+      onExiting={(node: any) => {
         removeClasses(node, leaveFromClasses);
         addClasses(node, leaveToClasses);
       }}
-      onExited={(node:any) => {
+      onExited={(node: any) => {
         removeClasses(node, [...leaveToClasses, ...leaveClasses]);
       }}
     >

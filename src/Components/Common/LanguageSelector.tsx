@@ -40,9 +40,7 @@ export const LanguageSelector = (props: any) => {
         ))}
       </select>
       <div className="absolute right-0 mr-1 z-10 h-auto w-8">
-        <ExpandMoreIcon
-          className={className}
-        />
+        <ExpandMoreIcon className={className} />
       </div>
     </div>
   );

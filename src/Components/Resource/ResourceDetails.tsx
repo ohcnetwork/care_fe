@@ -120,11 +120,7 @@ export default function ResourceDetails(props: { id: string }) {
         )}
         <div className="border rounded-lg bg-white shadow h-full text-black mt-4 p-4">
           <div className="flex justify-between">
-
-
-            <div className="text-xl font-semibold">
-              {data.title || "--"}
-            </div>
+            <div className="text-xl font-semibold">{data.title || "--"}</div>
             <div>
               <div className="mt-2">
                 <Button
@@ -150,9 +146,7 @@ export default function ResourceDetails(props: { id: string }) {
               </span>
             </div>
             <div>
-              <span className="font-semibold leading-relaxed">
-                Category:{" "}
-              </span>
+              <span className="font-semibold leading-relaxed">Category: </span>
               {data.category || "--"}
             </div>
             <div>

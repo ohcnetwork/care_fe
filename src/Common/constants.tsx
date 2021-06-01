@@ -434,7 +434,7 @@ export const RESOURCE_SUBCATEGORIES: Array<OptionsType> = [
   { id: 120, text: "B TYPE OXYGEN CYLINDER" },
   { id: 130, text: "C TYPE OXYGEN CYLINDER" },
   { id: 140, text: "JUMBO D TYPE OXYGEN CYLINDER" },
-  { id: 1000, text: "UNSPECIFIED" }
+  { id: 1000, text: "UNSPECIFIED" },
 ];
 
 export const RESOURCE_FILTER_ORDER: Array<OptionsType> = [

@@ -56,7 +56,7 @@ module.exports = (env, argv) => {
             },
           },
       runtimeChunk: {
-        name: entrypoint => `runtime-${entrypoint.name}`,
+        name: (entrypoint) => `runtime-${entrypoint.name}`,
       },
     },
     devtool: isDev ? "eval-cheap-module-source-map" : "none",

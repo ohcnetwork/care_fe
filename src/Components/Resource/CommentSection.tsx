@@ -16,7 +16,7 @@ const CommentSection = (props: CommentSectionProps) => {
   const [commentBox, setCommentBox] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const fetchData = useCallback(
-    async (status: statusType = {aborted: false}) => {
+    async (status: statusType = { aborted: false }) => {
       setIsLoading(true);
       const res = await dispatch(getResourceComments(props.id));
       if (!status.aborted) {

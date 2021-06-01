@@ -1,18 +1,39 @@
-import { Button, Card, CardContent, CircularProgress, InputLabel } from "@material-ui/core";
-import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
-import loadable from '@loadable/component';
+import {
+  Button,
+  Card,
+  CardContent,
+  CircularProgress,
+  InputLabel,
+} from "@material-ui/core";
+import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
+import loadable from "@loadable/component";
 import { navigate } from "raviger";
-import { parsePhoneNumberFromString } from 'libphonenumber-js';
+import { parsePhoneNumberFromString } from "libphonenumber-js";
 import moment from "moment";
 import React, { useCallback, useReducer, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { GENDER_TYPES, USER_TYPES } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { validateEmailAddress, validatePassword, validateUsername } from "../../Common/validation";
-import { addUser, getDistrictByState, getLocalbodyByDistrict, getStates, getUserListFacility } from "../../Redux/actions";
+import {
+  validateEmailAddress,
+  validatePassword,
+  validateUsername,
+} from "../../Common/validation";
+import {
+  addUser,
+  getDistrictByState,
+  getLocalbodyByDistrict,
+  getStates,
+  getUserListFacility,
+} from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { FacilitySelect } from "../Common/FacilitySelect";
-import { DateInputField, PhoneNumberField, SelectField, TextInputField } from "../Common/HelperInputFields";
+import {
+  DateInputField,
+  PhoneNumberField,
+  SelectField,
+  TextInputField,
+} from "../Common/HelperInputFields";
 import { FacilityModel } from "../Facility/models";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -20,9 +41,9 @@ const PageTitle = loadable(() => import("../Common/PageTitle"));
 const genderTypes = [
   {
     id: 0,
-    text: "Select"
+    text: "Select",
   },
-  ...GENDER_TYPES
+  ...GENDER_TYPES,
 ];
 
 interface UserProps {
@@ -53,11 +74,14 @@ const initForm: any = {
   local_body: "",
 };
 
-const initError = Object.assign({}, ...Object.keys(initForm).map(k => ({ [k]: "" })));
+const initError = Object.assign(
+  {},
+  ...Object.keys(initForm).map((k) => ({ [k]: "" }))
+);
 
 const initialState = {
   form: { ...initForm },
-  errors: { ...initError }
+  errors: { ...initError },
 };
 
 const user_create_reducer = (state = initialState, action: any) => {
@@ -65,13 +89,13 @@ const user_create_reducer = (state = initialState, action: any) => {
     case "set_form": {
       return {
         ...state,
-        form: action.form
+        form: action.form,
       };
     }
     case "set_error": {
       return {
         ...state,
-        errors: action.errors
+        errors: action.errors,
       };
     }
     default:
@@ -96,7 +120,9 @@ export const UserAdd = (props: UserProps) => {
   const [states, setStates] = useState(initialStates);
   const [districts, setDistricts] = useState(selectStates);
   const [localBody, setLocalBody] = useState(selectDistrict);
-  const [selectedFacility, setSelectedFacility] = useState<FacilityModel[] | null>([]);
+  const [selectedFacility, setSelectedFacility] = useState<
+    FacilityModel[] | null
+  >([]);
 
   const rootState: any = useSelector((rootState) => rootState);
   const { currentUser } = rootState;
@@ -107,11 +133,15 @@ export const UserAdd = (props: UserProps) => {
   const userType = currentUser.data.user_type;
 
   const userIndex = USER_TYPES.indexOf(userType);
-  const userTypes = isSuperuser ? [...USER_TYPES] : USER_TYPES.slice(0, userIndex + 1)
+  const userTypes = isSuperuser
+    ? [...USER_TYPES]
+    : USER_TYPES.slice(0, userIndex + 1);
 
   const headerText = !userId ? "Add User" : "Update User";
   const buttonText = !userId ? "Save User" : "Update Details";
-  const showLocalbody = !(state.form.user_type === "Staff" || state.form.user_type === "StaffReadOnly");
+  const showLocalbody = !(
+    state.form.user_type === "Staff" || state.form.user_type === "StaffReadOnly"
+  );
 
   const fetchDistricts = useCallback(
     async (id: string) => {
@@ -142,9 +172,6 @@ export const UserAdd = (props: UserProps) => {
     },
     [dispatchAction]
   );
-
-
-
 
   // const fetchData = useCallback(
   //   async (status: statusType) => {
@@ -201,9 +228,9 @@ export const UserAdd = (props: UserProps) => {
         setFacilities(facilities);
       }
       setIsStateLoading(false);
-    }, [dispatchAction]
+    },
+    [dispatchAction]
   );
-
 
   useAbortableEffect(
     (status: statusType) => {
@@ -243,14 +270,16 @@ export const UserAdd = (props: UserProps) => {
   const setFacility = (selected: FacilityModel | FacilityModel[] | null) => {
     setSelectedFacility(selected as FacilityModel[]);
     const form = { ...state.form };
-    form.facilities = selected ? (selected as FacilityModel[]).map(i => i.id) : [];
+    form.facilities = selected
+      ? (selected as FacilityModel[]).map((i) => i.id)
+      : [];
     dispatch({ type: "set_form", form });
-  }
+  };
 
   const validateForm = () => {
     let errors = { ...initError };
     let invalidForm = false;
-    Object.keys(state.form).forEach(field => {
+    Object.keys(state.form).forEach((field) => {
       switch (field) {
         case "facilities":
           if (userType === "Staff" && state.form["user_type"] === "Staff") {
@@ -281,7 +310,8 @@ export const UserAdd = (props: UserProps) => {
             errors[field] = "Please enter the username";
             invalidForm = true;
           } else if (!validateUsername(state.form[field])) {
-            errors[field] = "Please enter letters, digits and @ . + - _ only and username should not end with @, ., +, - or _";
+            errors[field] =
+              "Please enter letters, digits and @ . + - _ only and username should not end with @, ., +, - or _";
             invalidForm = true;
           }
           return;
@@ -290,7 +320,8 @@ export const UserAdd = (props: UserProps) => {
             errors[field] = "Please enter the password";
             invalidForm = true;
           } else if (!validatePassword(state.form[field])) {
-            errors.password = "Password should have 1 lowercase letter, 1 uppercase letter, 1 number, and be at least 8 characters long";
+            errors.password =
+              "Password should have 1 lowercase letter, 1 uppercase letter, 1 number, and be at least 8 characters long";
             invalidForm = true;
           }
           return;
@@ -311,7 +342,10 @@ export const UserAdd = (props: UserProps) => {
           }
           return;
         case "email":
-          if (state.form[field].length && !validateEmailAddress(state.form[field])) {
+          if (
+            state.form[field].length &&
+            !validateEmailAddress(state.form[field])
+          ) {
             errors[field] = "Please enter a valid email address";
             invalidForm = true;
           }
@@ -358,9 +392,11 @@ export const UserAdd = (props: UserProps) => {
         state: state.form.state,
         district: state.form.district,
         local_body: state.form.local_body,
-        phone_number: parsePhoneNumberFromString(state.form.phone_number)?.format('E.164'),
-        date_of_birth: moment(state.form.date_of_birth).format('YYYY-MM-DD'),
-        age: Number(moment().diff(state.form.date_of_birth, 'years', false)),
+        phone_number: parsePhoneNumberFromString(
+          state.form.phone_number
+        )?.format("E.164"),
+        date_of_birth: moment(state.form.date_of_birth).format("YYYY-MM-DD"),
+        age: Number(moment().diff(state.form.date_of_birth, "years", false)),
       };
       const res = await dispatchAction(addUser(data));
       // userId ? updateUser(userId, data) : addUser(data)
@@ -369,14 +405,14 @@ export const UserAdd = (props: UserProps) => {
         dispatch({ type: "set_form", form: initForm });
         if (!userId) {
           Notification.Success({
-            msg: "User added successfully"
+            msg: "User added successfully",
           });
         } else {
           Notification.Success({
-            msg: "User updated successfully"
+            msg: "User updated successfully",
           });
         }
-        navigate('/users');
+        navigate("/users");
       }
       setIsLoading(false);
     }
@@ -391,9 +427,8 @@ export const UserAdd = (props: UserProps) => {
       <PageTitle title={headerText} />
       <Card className="mt-4">
         <CardContent>
-          <form onSubmit={e => handleSubmit(e)}>
+          <form onSubmit={(e) => handleSubmit(e)}>
             <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
-
               <div>
                 <InputLabel>User Type*</InputLabel>
                 <SelectField
@@ -413,7 +448,9 @@ export const UserAdd = (props: UserProps) => {
                 <PhoneNumberField
                   label="Phone Number*"
                   value={state.form.phone_number}
-                  onChange={(value: any) => handleValueChange(value, 'phone_number')}
+                  onChange={(value: any) =>
+                    handleValueChange(value, "phone_number")
+                  }
                   errors={state.errors.phone_number}
                   onlyIndia={true}
                 />
@@ -448,7 +485,7 @@ export const UserAdd = (props: UserProps) => {
                 <DateInputField
                   fullWidth={true}
                   value={state.form.date_of_birth}
-                  onChange={date => handleDateChange(date, "date_of_birth")}
+                  onChange={(date) => handleDateChange(date, "date_of_birth")}
                   errors={state.errors.date_of_birth}
                   inputVariant="outlined"
                   margin="dense"
@@ -549,9 +586,9 @@ export const UserAdd = (props: UserProps) => {
                     value={state.form.state}
                     options={states}
                     optionValue="name"
-                    onChange={e => [
+                    onChange={(e) => [
                       handleChange(e),
-                      fetchDistricts(String(e.target.value))
+                      fetchDistricts(String(e.target.value)),
                     ]}
                     errors={state.errors.state}
                   />
@@ -570,50 +607,51 @@ export const UserAdd = (props: UserProps) => {
                     value={state.form.district}
                     options={districts}
                     optionValue="name"
-                    onChange={e => [
+                    onChange={(e) => [
                       handleChange(e),
-                      fetchLocalBody(String(e.target.value))
+                      fetchLocalBody(String(e.target.value)),
                     ]}
                     errors={state.errors.district}
                   />
                 )}
               </div>
 
-              {showLocalbody && <div>
-                <InputLabel>Localbody</InputLabel>
-                {isLocalbodyLoading ? (
-                  <CircularProgress size={20} />
-                ) : (
-                  <SelectField
-                    name="local_body"
-                    variant="outlined"
-                    margin="dense"
-                    value={state.form.local_body}
-                    options={localBody}
-                    optionValue="name"
-                    onChange={handleChange}
-                    errors={state.errors.local_body}
-                  />
-                )}
-              </div>}
-
+              {showLocalbody && (
+                <div>
+                  <InputLabel>Localbody</InputLabel>
+                  {isLocalbodyLoading ? (
+                    <CircularProgress size={20} />
+                  ) : (
+                    <SelectField
+                      name="local_body"
+                      variant="outlined"
+                      margin="dense"
+                      value={state.form.local_body}
+                      options={localBody}
+                      optionValue="name"
+                      onChange={handleChange}
+                      errors={state.errors.local_body}
+                    />
+                  )}
+                </div>
+              )}
             </div>
-            <div
-              className="flex justify-between mt-4"
-            >
-              <Button
-                color="default"
-                variant="contained"
-                onClick={goBack}
-              >Cancel</Button>
+            <div className="flex justify-between mt-4">
+              <Button color="default" variant="contained" onClick={goBack}>
+                Cancel
+              </Button>
               <Button
                 color="primary"
                 variant="contained"
                 type="submit"
                 style={{ marginLeft: "auto" }}
-                onClick={e => handleSubmit(e)}
-                startIcon={<CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>}
-              >{buttonText}</Button>
+                onClick={(e) => handleSubmit(e)}
+                startIcon={
+                  <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
+                }
+              >
+                {buttonText}
+              </Button>
             </div>
           </form>
         </CardContent>

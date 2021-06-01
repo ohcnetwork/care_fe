@@ -247,7 +247,7 @@ export default function ResourceCreate(props: resourceProps) {
                   errors={state.errors.approving_facility}
                 />
               </div>
-             
+
               <div>
                 <InputLabel>Is this an emergency?</InputLabel>
                 <RadioGroup
@@ -272,7 +272,7 @@ export default function ResourceCreate(props: resourceProps) {
                 </RadioGroup>
                 <ErrorHelperText error={state.errors.emergency} />
               </div>
- 
+
               <div>
                 <InputLabel>Category</InputLabel>
                 <SelectField
@@ -299,7 +299,7 @@ export default function ResourceCreate(props: resourceProps) {
                   className="bg-white h-14 w-1/3 mt-2 shadow-sm md:text-sm md:leading-5"
                 />
               </div>
-              
+
               <div>
                 <InputLabel>Required Quantity</InputLabel>
                 <TextInputField
@@ -311,8 +311,8 @@ export default function ResourceCreate(props: resourceProps) {
                   onChange={handleChange}
                   errors=""
                 />
-                </div>
-              
+              </div>
+
               <div className="md:col-span-2">
                 <InputLabel>Request Title*</InputLabel>
                 <TextInputField

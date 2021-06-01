@@ -148,7 +148,10 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
         reason: state.form.reason,
         assigned_to: state.form.assigned_to,
         requested_quantity: state.form.requested_quantity || 0,
-        assigned_quantity: state.form.status === "PENDING"? state.form.assigned_quantity : assignedQuantity,
+        assigned_quantity:
+          state.form.status === "PENDING"
+            ? state.form.assigned_quantity
+            : assignedQuantity,
       };
 
       const res = await dispatchAction(updateResource(props.id, data));
@@ -262,17 +265,17 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
                 />
               </div>
               <div>
-                  <InputLabel>Approved Quantity</InputLabel>
-                  <TextInputField
-                    name="assigned_quantity"
-                    variant="outlined"
-                    margin="dense"
-                    type="number"
-                    value={state.form.assigned_quantity}
-                    onChange={handleChange}
-                    disabled={state.form.status !== "PENDING"}
-                    errors=""
-                  />
+                <InputLabel>Approved Quantity</InputLabel>
+                <TextInputField
+                  name="assigned_quantity"
+                  variant="outlined"
+                  margin="dense"
+                  type="number"
+                  value={state.form.assigned_quantity}
+                  onChange={handleChange}
+                  disabled={state.form.status !== "PENDING"}
+                  errors=""
+                />
               </div>
               <div>
                 <InputLabel>Is this an emergency?</InputLabel>
