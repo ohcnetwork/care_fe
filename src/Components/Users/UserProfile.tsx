@@ -23,6 +23,7 @@ const initForm: any = {
   gender: "",
   email: "",
   phoneNumber: "",
+  altPhoneNumber: "",
 };
 
 const initError = Object.assign(
@@ -93,6 +94,7 @@ export default function UserProfile() {
             })[0].id,
             email: res.data.email,
             phoneNumber: res.data.phone_number,
+            altPhoneNumber: res.data.alt_phone_number,
           };
           dispatch({
             type: "set_form",
@@ -140,6 +142,7 @@ export default function UserProfile() {
           const phoneNumber = parsePhoneNumberFromString(
             states.form[field]
           )?.number;
+
           if (!states.form[field] || !phonePreg(String(phoneNumber))) {
             errors[field] = "Please enter valid phone number";
             invalidForm = true;
@@ -180,6 +183,9 @@ export default function UserProfile() {
         phone_number: parsePhoneNumberFromString(
           states.form.phoneNumber
         )?.format("E.164"),
+        alt_phone_number: parsePhoneNumberFromString(
+          states.form.altPhoneNumber
+        )?.format("E.164"),
         gender: Number(states.form.gender),
         age: states.form.age,
       };
@@ -199,6 +205,7 @@ export default function UserProfile() {
           })[0].text,
           email: states.form.email,
           phone_number: states.form.phoneNumber,
+          alt_phone_number: states.form.altPhoneNumber,
         });
         setShowEdit(false);
       }
@@ -268,6 +275,15 @@ export default function UserProfile() {
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.phone_number || "-"}
+                    </dd>
+                  </div>
+
+                  <div className="sm:col-span-1">
+                    <dt className="text-sm leading-5 font-medium text-gray-500">
+                      Whatsapp No
+                    </dt>
+                    <dd className="mt-1 text-sm leading-5 text-gray-900">
+                      {details.alt_phone_number || "-"}
                     </dd>
                   </div>
                   <div className="sm:col-span-1">
@@ -446,6 +462,17 @@ export default function UserProfile() {
                           value={states.form.phoneNumber}
                           onChange={(value: any) => [
                             handleValueChange(value, "phoneNumber"),
+                          ]}
+                          errors={states.errors.phoneNumber}
+                        />
+                      </div>
+
+                      <div className="col-span-6 sm:col-span-3">
+                        <PhoneNumberField
+                          label="Whatsapp Number*"
+                          value={states.form.altPhoneNumber}
+                          onChange={(value: any) => [
+                            handleValueChange(value, "altPhoneNumber"),
                           ]}
                           errors={states.errors.phoneNumber}
                         />
