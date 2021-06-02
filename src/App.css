@@ -6,6 +6,7 @@
   #section-to-print,
   #section-to-print * {
     visibility: visible;
+    -webkit-print-color-adjust: exact;
   }
 
   #section-to-print {

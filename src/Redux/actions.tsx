@@ -283,6 +283,10 @@ export const flagInventoryItem = (params: object) => {
   return fireRequest("flagInventoryItem", [], {}, params);
 };
 
+export const deleteLastInventoryLog = (params: object) => {
+  return fireRequest("deleteLastInventoryLog", [], {}, params);
+};
+
 export const discharge = (params: object, pathParams: object) => {
   return fireRequest("discharge", [], params, pathParams);
 };
