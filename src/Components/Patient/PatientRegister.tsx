@@ -679,6 +679,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           state.form.is_vaccinated === "true"
             ? state.form.vaccine_name
             : null,
+        last_vaccinated_date:
+          state.form.is_vaccinated === "true"
+            ? state.form.last_vaccinated_date
+              ? state.form.last_vaccinated_date
+              : null
+            : null,
         test_type: state.form.test_type,
         name: state.form.name,
         pincode: state.form.pincode ? state.form.pincode : undefined,
@@ -1163,6 +1169,26 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         options={vaccines}
                         onChange={handleChange}
                         errors={state.errors.vaccine_name}
+                      />
+                    </div>
+                  )}
+
+                  {state.form.is_vaccinated === "true" && (
+                    <div>
+                      <InputLabel id="last_vaccinated_date-label">
+                        Last Date of Vaccination
+                      </InputLabel>
+                      <DateInputField
+                        fullWidth={true}
+                        value={state.form.last_vaccinated_date}
+                        onChange={(date) =>
+                          handleDateChange(date, "last_vaccinated_date")
+                        }
+                        errors={state.errors.last_vaccinated_date}
+                        inputVariant="outlined"
+                        margin="dense"
+                        openTo="year"
+                        disableFuture={true}
                       />
                     </div>
                   )}
