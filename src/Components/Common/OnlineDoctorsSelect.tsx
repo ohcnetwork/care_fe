@@ -4,6 +4,7 @@ import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import moment from "moment";
 import { getUserList } from "../../Redux/actions";
+import classNames from "classnames";
 
 export const OnlineDoctorsSelect = (props: any) => {
   const dispatchAction: any = useDispatch();
@@ -59,17 +60,17 @@ export const OnlineDoctorsSelect = (props: any) => {
         </label>
         <div className="relative">
           <span className="inline-block w-full rounded-md shadow-sm">
-            <button onClick={_ => setIsExpanded(!isExpanded)} type="button" aria-haspopup="listbox" aria-expanded="true" aria-labelledby="listbox-label" className={`cursor-default relative w-full rounded-md border border-gray-300 bg-white pl-3 pr-10 py-2 text-left focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition ease-in-out duration-150 sm:text-sm sm:leading-5`}>
+            <button onClick={_ => setIsExpanded(!isExpanded)} type="button" aria-haspopup="listbox" aria-expanded="true" aria-labelledby="listbox-label" className="cursor-default relative w-full rounded-md border border-gray-300 bg-white pl-3 pr-10 py-2 text-left focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition ease-in-out duration-150 sm:text-sm sm:leading-5">
               <input
                 ref={searchFieldRef}
                 name="searchTerm"
                 type="text"
                 placeholder="Search by username"
-                className={`py-2 pl-3 w-full outline-none ${!isExpanded ? 'hidden' : ''}`}
+                className={classNames("py-2 pl-3 w-full outline-none", { "hidden": !isExpanded })} 
                 value={state.searchTerm}
                 onChange={handleSearchTermChange}
               />
-              <div className={`flex items-center justify-between ${isExpanded ? 'hidden' : ''}`}>
+              <div className={classNames("flex items-center justify-between", { "hidden": isExpanded })}>
                 <div className="space-x-3 flex items-center">
                   <span aria-label="Online"
                     className={"flex-shrink-0 inline-block h-2 w-2 rounded-full " +
@@ -94,7 +95,7 @@ export const OnlineDoctorsSelect = (props: any) => {
             <div role="listbox" aria-labelledby="listbox-label" aria-activedescendant="listbox-item-3" className="multiselect-dropdown__search-dropdown w-full absolute border border-gray-400 bg-white mt-1 rounded-lg shadow-lg px-4 py-2 z-50">
               {
                 state.users.map((user: any) => {
-                  return <button onClick={_ => { setIsExpanded(false); onSelect(user.id); setState({...state, searchTerm: ""}) }} id="listbox-item-0" role="option" className="flex text-xs py-1 items-center w-full hover:bg-gray-200 focus:outline-none focus:bg-gray-200">
+                  return <button key={user.id} onClick={_ => { setIsExpanded(false); onSelect(user.id); setState({...state, searchTerm: ""}) }} id="listbox-item-0" role="option" className="flex text-xs py-1 items-center w-full hover:bg-gray-200 focus:outline-none focus:bg-gray-200">
                     <div className="flex items-center space-x-3">
                       <span aria-label="Online" className={"flex-shrink-0 inline-block h-2 w-2 rounded-full " + (moment().subtract(5, 'minutes').isBefore(user.last_login) ? "bg-green-400" : "bg-gray-300")}></span>
                       <span className="font-normal block truncate">
