@@ -1,6 +1,12 @@
-import { cy, it, describe } from 'local-cypress'
+import { cy, it, describe, afterEach } from 'local-cypress'
 
 describe('authentication', () => {
+    afterEach(() => {
+        cy.log('Logging the user out')
+        cy.get('p').contains('Sign Out').click()
+        cy.url().should('include', '/login')
+    })
+
     it('Login as distict admin', () => {
         cy.visit('http://localhost:4000/')
 
