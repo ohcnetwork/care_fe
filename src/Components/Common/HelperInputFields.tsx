@@ -319,10 +319,11 @@ export const MultiSelectField = (props: MultiSelectInputProps) => {
                 >
                     {options.map((opt: any) => {
                         const selected = value as Array<any>;
-                        return (<MenuItem key={opt.id} value={opt[optKey]}>
-                            <Checkbox checked={selected.indexOf(opt[optKey]) > -1} />
-                            <ListItemText primary={opt[optVal]} />
-                        </MenuItem>
+                        return (
+                            <MenuItem key={opt.id} value={opt[optKey]}>
+                                <Checkbox checked={selected.indexOf(opt[optKey]) > -1} />
+                                <ListItemText primary={opt[optVal]} />
+                            </MenuItem>
                         )
                     })}
                 </Select>
