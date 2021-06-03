@@ -708,8 +708,8 @@ export const PatientHome = (props: any) => {
                         {Array.isArray(patientData.countries_travelled)
                           ? patientData.countries_travelled.join(", ")
                           : patientData.countries_travelled
-                            .split(",")
-                            .join(", ")}
+                              .split(",")
+                              .join(", ")}
                       </div>
                     </div>
                   )}
@@ -1114,8 +1114,8 @@ export const PatientHome = (props: any) => {
                 <div className="mt-1 text-sm leading-5 text-gray-900">
                   {(patientData.ward_object &&
                     patientData.ward_object.number +
-                    ", " +
-                    patientData.ward_object.name) ||
+                      ", " +
+                      patientData.ward_object.name) ||
                     "-"}
                 </div>
               </div>
@@ -1150,12 +1150,12 @@ export const PatientHome = (props: any) => {
                 <div className="mt-1 text-sm leading-5 text-gray-900 break-all">
                   {patientData.is_medical_worker
                     ? "Yes" +
-                    (patientData.designation_of_health_care_worker
-                      ? ", " + patientData.designation_of_health_care_worker
-                      : "") +
-                    (patientData.instituion_of_health_care_worker
-                      ? ", " + patientData.instituion_of_health_care_worker
-                      : "")
+                      (patientData.designation_of_health_care_worker
+                        ? ", " + patientData.designation_of_health_care_worker
+                        : "") +
+                      (patientData.instituion_of_health_care_worker
+                        ? ", " + patientData.instituion_of_health_care_worker
+                        : "")
                     : "No"}
                 </div>
               </div>
