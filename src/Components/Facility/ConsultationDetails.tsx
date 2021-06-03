@@ -497,8 +497,8 @@ export const ConsultationDetails = (props: any) => {
                         </tr>
                       </thead>
                       <tbody>
-                        {consultationData.discharge_advice.map((med: any) => (
-                          <tr className="bg-white">
+                          {consultationData.discharge_advice.map((med: any, index: number) => (
+                            <tr className="bg-white" key={index}>
                             <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 font-medium text-gray-900">
                               {med.medicine}
                             </td>

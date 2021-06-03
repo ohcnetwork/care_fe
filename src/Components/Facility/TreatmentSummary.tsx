@@ -143,22 +143,22 @@ const TreatmentSummary = (props: any) => {
                             <div className="border-b-2 border-gray-800 px-5 py-2">
                                 <b>Comorbidities :</b>
                                 <div className="mx-5">
-                                                <table className="border-collapse border border-gray-800 w-full">
-                                                    <thead>
-                                                        <tr>
-                                                            <th className="border border-gray-800">
-                                                                Disease
-                                                        </th>
-                                                            <th className="border border-gray-800">
-                                                                Details
-                                                            </th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
+                                    <table className="border-collapse border border-gray-800 w-full">
+                                        <thead>
+                                            <tr>
+                                                <th className="border border-gray-800">
+                                                    Disease
+                                            </th>
+                                                <th className="border border-gray-800">
+                                                    Details
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
                                             {patientData.medical_history && patientData.medical_history.length > 0 ? (
-                                                patientData.medical_history.map((obj: any) => {
+                                                patientData.medical_history.map((obj: any, index:number) => {
                                                     return (
-                                                        <tr>
+                                                        <tr key={index}>
                                                             <td className="border border-gray-800 text-center">
                                                                 {obj["disease"]}
                                                             </td>
@@ -173,7 +173,7 @@ const TreatmentSummary = (props: any) => {
                                                     <td className="border border-gray-800 text-center">---</td>
                                                 </tr>
                                             )}
-                                                    </tbody>
+                                        </tbody>
                                     </table>
                                 </div>
                             </div>
@@ -211,23 +211,23 @@ const TreatmentSummary = (props: any) => {
                                 <b>Relevant investigations :</b>
 
                                 <div className="mx-5">
-                                        <table className="border-collapse border border-gray-800 w-full">
-                                            <thead>
-                                                <tr>
-                                                    <th className="border border-gray-800 text-center">Date</th>
-                                                    <th className="border border-gray-800 text-center">Name</th>
-                                                    <th className="border border-gray-800 text-center">Result</th>
-                                                    <th className="border border-gray-800 text-center">Ideal value</th>
-                                                    <th className="border border-gray-800 text-center">values range</th>
-                                                    <th className="border border-gray-800 text-center">unit</th>
-                                                </tr>
-                                            </thead>
+                                    <table className="border-collapse border border-gray-800 w-full">
+                                        <thead>
+                                            <tr>
+                                                <th className="border border-gray-800 text-center">Date</th>
+                                                <th className="border border-gray-800 text-center">Name</th>
+                                                <th className="border border-gray-800 text-center">Result</th>
+                                                <th className="border border-gray-800 text-center">Ideal value</th>
+                                                <th className="border border-gray-800 text-center">values range</th>
+                                                <th className="border border-gray-800 text-center">unit</th>
+                                            </tr>
+                                        </thead>
 
                                         <tbody>
                                             {investigations.length > 0 ? (
-                                                Object.values(investigations).map((value: any) => {
+                                                Object.values(investigations).map((value: any, index:number) => {
                                                     return (
-                                                        <tr>
+                                                        <tr key={index}>
                                                             <td className="border border-gray-800 text-center">
                                                                 {moment(value["session_object"]["session_created_date"]).format("DD/MM/YYYY")}
                                                             </td>
@@ -248,8 +248,7 @@ const TreatmentSummary = (props: any) => {
                                                             </td>
                                                         </tr>
                                                     )
-                                                })
-                                            ) : (
+                                                })) : (
                                                     <tr>
                                                         <td className="border border-gray-800 text-center">---</td>
                                                         <td className="border border-gray-800 text-center">---</td>
@@ -258,7 +257,8 @@ const TreatmentSummary = (props: any) => {
                                                         <td className="border border-gray-800 text-center">---</td>
                                                         <td className="border border-gray-800 text-center">---</td>
                                                     </tr>
-                                            )}
+                                                )
+                                            }
                                         </tbody>
                                     </table>
                                 </div>
@@ -268,26 +268,26 @@ const TreatmentSummary = (props: any) => {
                                 <b className="mb-2">Treatment summary :</b>
 
                                 <div className="mx-5">
-                                            <table className="border-collapse border border-gray-800 w-full">
-                                                <thead>
-                                                    <tr>
-                                                        <th className="border border-gray-800">
-                                                            Date
-                                                        </th>
-                                                        <th className="border border-gray-800">
-                                                            Spo2
-                                                        </th>
-                                                        <th className="border border-gray-800">
-                                                            Temperature
-                                                        </th>
-                                                    </tr>
-                                                </thead>
+                                    <table className="border-collapse border border-gray-800 w-full">
+                                        <thead>
+                                            <tr>
+                                                <th className="border border-gray-800">
+                                                    Date
+                                                </th>
+                                                <th className="border border-gray-800">
+                                                    Spo2
+                                                </th>
+                                                <th className="border border-gray-800">
+                                                    Temperature
+                                                </th>
+                                            </tr>
+                                        </thead>
 
-                                                <tbody>
+                                        <tbody>
                                             {
                                                 dailyRounds.length > 0 ? (
-                                                    dailyRounds.map((rounds: DailyRoundsModel) => (
-                                                        <tr>
+                                                    dailyRounds.map((rounds: DailyRoundsModel, index:number) => (
+                                                        <tr key={index}>
                                                             <td className="border border-gray-800 text-center">
                                                                 {moment(rounds.created_date).format('DD/MM/YYYY')}
                                                             </td>
@@ -305,10 +305,9 @@ const TreatmentSummary = (props: any) => {
                                                         <td className="border border-gray-800 text-center">---</td>
                                                         <td className="border border-gray-800 text-center">---</td>
                                                     </tr>
-
                                                 )
                                             }
-                                                </tbody>
+                                        </tbody>
                                     </table>
 
                                     {props.consultationData.prescribed_medication && (
