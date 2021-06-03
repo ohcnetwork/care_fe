@@ -149,6 +149,10 @@ export const PatientManager = (props: any) => {
     covin_id: qParams.covin_id || undefined,
     is_kasp: qParams.is_kasp || undefined,
     is_declared_positive: qParams.is_declared_positive || undefined,
+    last_consultation_symptoms_onset_date_before:
+      qParams.last_consultation_symptoms_onset_date_before || undefined,
+    last_consultation_symptoms_onset_date_after:
+      qParams.last_consultation_symptoms_onset_date_after || undefined,
   };
 
   let managePatients: any = null;
@@ -221,6 +225,8 @@ export const PatientManager = (props: any) => {
     qParams.date_declared_positive_after,
     qParams.date_of_result_before,
     qParams.date_of_result_after,
+    qParams.last_consultation_symptoms_onset_date_before,
+    qParams.last_consultation_symptoms_onset_date_after,
   ]);
 
   const updateQuery = (params: any) => {

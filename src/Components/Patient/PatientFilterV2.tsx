@@ -84,6 +84,10 @@ export default function PatientFilterV2(props: any) {
     covin_id: filter.covin_id || null,
     is_kasp: filter.is_kasp || null,
     is_declared_positive: filter.is_declared_positive || null,
+    last_consultation_symptoms_onset_date_before:
+      filter.last_consultation_symptoms_onset_date_before || null,
+    last_consultation_symptoms_onset_date_after:
+      filter.last_consultation_symptoms_onset_date_after || null,
   });
   const dispatch: any = useDispatch();
 
@@ -207,6 +211,8 @@ export default function PatientFilterV2(props: any) {
       srf_id,
       is_kasp,
       is_declared_positive,
+      last_consultation_symptoms_onset_date_before,
+      last_consultation_symptoms_onset_date_after,
     } = filterState;
     const data = {
       lsgBody: lsgBody || "",
@@ -283,6 +289,20 @@ export default function PatientFilterV2(props: any) {
       covin_id: covin_id || "",
       is_kasp: is_kasp || "",
       is_declared_positive: is_declared_positive || "",
+      last_consultation_symptoms_onset_date_before:
+        last_consultation_symptoms_onset_date_before &&
+        moment(last_consultation_symptoms_onset_date_before).isValid()
+          ? moment(last_consultation_symptoms_onset_date_before).format(
+              "YYYY-MM-DD"
+            )
+          : "",
+      last_consultation_symptoms_onset_date_after:
+        last_consultation_symptoms_onset_date_after &&
+        moment(last_consultation_symptoms_onset_date_after).isValid()
+          ? moment(last_consultation_symptoms_onset_date_after).format(
+              "YYYY-MM-DD"
+            )
+          : "",
     };
     onChange(data);
   };
@@ -588,6 +608,25 @@ export default function PatientFilterV2(props: any) {
             endDateId={"last_consultation_discharge_date_before"}
             startDateId={"last_consultation_discharge_date_after"}
             label={"Discharge Date"}
+            size="small"
+          />
+          <DateRangePicker
+            startDate={getDate(
+              filterState.last_consultation_symptoms_onset_date_after
+            )}
+            endDate={getDate(
+              filterState.last_consultation_symptoms_onset_date_before
+            )}
+            onChange={(e) =>
+              handleDateRangeChange(
+                "last_consultation_symptoms_onset_date_after",
+                "last_consultation_symptoms_onset_date_before",
+                e
+              )
+            }
+            endDateId={"last_consultation_symptoms_onset_date_before"}
+            startDateId={"last_consultation_symptoms_onset_date_after"}
+            label={"Onset of Symptoms Date"}
             size="small"
           />
         </div>
