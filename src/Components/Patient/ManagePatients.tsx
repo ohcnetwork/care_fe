@@ -217,6 +217,10 @@ export const PatientManager = (props: any) => {
     qParams.lsgBody,
     qParams.is_kasp,
     qParams.is_declared_positive,
+    qParams.date_declared_positive_before,
+    qParams.date_declared_positive_after,
+    qParams.date_of_result_before,
+    qParams.date_of_result_after,
   ]);
 
   const updateQuery = (params: any) => {
