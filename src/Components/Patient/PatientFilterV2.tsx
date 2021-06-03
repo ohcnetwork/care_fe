@@ -91,6 +91,41 @@ export default function PatientFilterV2(props: any) {
   });
   const dispatch: any = useDispatch();
 
+  const clearFilterState = {
+    facility: "",
+    lsgBody: "",
+    facility_ref: null,
+    lsgBody_ref: null,
+    date_declared_positive_before: null,
+    date_declared_positive_after: null,
+    date_of_result_before: null,
+    date_of_result_after: null,
+    created_date_before: null,
+    created_date_after: null,
+    modified_date_before: null,
+    modified_date_after: null,
+    ordering: "Select",
+    category: null,
+    gender: null,
+    disease_status: null,
+    age_min: null,
+    age_max: null,
+    date_of_result: null,
+    date_declared_positive: null,
+    last_consultation_admission_date_before: null,
+    last_consultation_admission_date_after: null,
+    last_consultation_discharge_date_before: null,
+    last_consultation_discharge_date_after: null,
+    last_consultation_admitted_to_list: [],
+    srf_id: null,
+    number_of_doses: null,
+    covin_id: null,
+    is_kasp: null,
+    is_declared_positive: null,
+    last_consultation_symptoms_onset_date_before: null,
+    last_consultation_symptoms_onset_date_after: null,
+  };
+
   useEffect(() => {
     async function fetchData() {
       if (filter.facility) {
@@ -330,6 +365,7 @@ export default function PatientFilterV2(props: any) {
           className="btn btn-default"
           onClick={(_) => {
             navigate("/patients");
+            setFilterState(clearFilterState);
           }}
         >
           <i className="fas fa-times mr-2" />
