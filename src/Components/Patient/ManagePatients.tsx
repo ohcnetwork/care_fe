@@ -381,10 +381,10 @@ export const PatientManager = (props: any) => {
               )}
               {patient.disease_status === "EXPIRED" && (
                 <Badge
-                color="yellow"
-                icon="exclamation-triangle"
-                text="Patient Expired"
-              />
+                  color="yellow"
+                  icon="exclamation-triangle"
+                  text="Patient Expired"
+                />
               )}
             </div>
             <div className="px-2">
@@ -556,8 +556,8 @@ export const PatientManager = (props: any) => {
           )}
           {badge(
             "Admitted Before",
-            qParams.last_consultation_discharge_date_before,
-            "last_consultation_discharge_date_before"
+            qParams.last_consultation_admission_date_before,
+            "last_consultation_admission_date_before"
           )}
           {badge(
             "Admitted After",
@@ -610,6 +610,40 @@ export const PatientManager = (props: any) => {
             "Declared Status",
             qParams.is_declared_positive,
             "is_declared_positive"
+          )}
+          {badge(
+            "Result before",
+            qParams.date_of_result_before,
+            "date_of_result_before"
+          )}
+          {badge(
+            "Result after",
+            qParams.date_of_result_after,
+            "date_of_result_after"
+          )}
+
+          {badge(
+            "Declared positive before",
+            qParams.date_declared_positive_before,
+            "date_declared_positive_before"
+          )}
+
+          {badge(
+            "Declared positive after",
+            qParams.date_declared_positive_after,
+            "date_declared_positive_after"
+          )}
+
+          {badge(
+            "Onset of symptoms before",
+            qParams.last_consultation_symptoms_onset_date_before,
+            "last_consultation_symptoms_onset_date_before"
+          )}
+
+          {badge(
+            "Onset of symptoms after",
+            qParams.last_consultation_symptoms_onset_date_after,
+            "last_consultation_symptoms_onset_date_after"
           )}
         </div>
       </div>
