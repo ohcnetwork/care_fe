@@ -20,6 +20,7 @@ import { useDispatch } from "react-redux";
 import { CircularProgress } from "@material-ui/core";
 import { navigate } from "raviger";
 import { DateRangePicker, getDate } from "../Common/DateRangePicker";
+import DistrictSelect from "../Facility/FacilityFilter/DistrictSelect";
 
 const debounce = require("lodash.debounce");
 
@@ -47,10 +48,12 @@ export default function PatientFilterV2(props: any) {
   };
 
   const [filterState, setFilterState] = useMergeState({
+    district: filter.district || "",
     facility: filter.facility || "",
     lsgBody: filter.lsgBody || "",
     facility_ref: null,
     lsgBody_ref: null,
+    district_ref: null,
     date_declared_positive_before: filter.date_declared_positive_before || null,
     date_declared_positive_after: filter.date_declared_positive_after || null,
     date_of_result_before: filter.date_of_result_before || null,
@@ -92,10 +95,12 @@ export default function PatientFilterV2(props: any) {
   const dispatch: any = useDispatch();
 
   const clearFilterState = {
+    district: "",
     facility: "",
     lsgBody: "",
     facility_ref: null,
     lsgBody_ref: null,
+    district_ref: null,
     date_declared_positive_before: null,
     date_declared_positive_after: null,
     date_of_result_before: null,
@@ -128,14 +133,14 @@ export default function PatientFilterV2(props: any) {
 
   useEffect(() => {
     async function fetchData() {
-      if (filter.facility) {
-        setFacilityLoading(true);
-        const { data: facilityData } = await dispatch(
-          getFacility(filter.facility, "facility")
-        );
-        setFilterState({ facility_ref: facilityData });
-        setFacilityLoading(false);
-      }
+      // if (filter.facility) {
+      //   setFacilityLoading(true);
+      //   const { data: facilityData } = await dispatch(
+      //     getFacility(filter.facility, "facility")
+      //   );
+      //   setFilterState({ facility_ref: facilityData });
+      //   setFacilityLoading(false);
+      // }
 
       if (filter.lsgBody) {
         setLsgLoading(true);
@@ -217,8 +222,16 @@ export default function PatientFilterV2(props: any) {
     []
   );
 
+  const setDistrict = (selected: any, name: string) => {
+    const filterData: any = { ...filterState };
+    filterData[`${name}_ref`] = selected;
+    filterData[name] = (selected || {}).id;
+    setFilterState(filterData);
+  };
+
   const applyFilter = () => {
     const {
+      district,
       facility,
       lsgBody,
       date_declared_positive_before,
@@ -250,6 +263,7 @@ export default function PatientFilterV2(props: any) {
       last_consultation_symptoms_onset_date_after,
     } = filterState;
     const data = {
+      district: district || "",
       lsgBody: lsgBody || "",
       facility: facility || "",
       date_declared_positive_before:
@@ -420,12 +434,21 @@ export default function PatientFilterV2(props: any) {
             />
           </div>
         </div>
+
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">District</span>
+          <DistrictSelect
+            multiple={false}
+            name="district"
+            selected={filterState.district_ref}
+            setSelected={(obj: any) => setDistrict(obj, "district")}
+            className="shifting-page-filter-dropdown"
+            errors={""}
+          />
+        </div>
+
         <div className="w-64 flex-none">
           <span className="text-sm font-semibold">Facility</span>
-          <div className="">
-            {isFacilityLoading ? (
-              <CircularProgress size={20} />
-            ) : (
               <FacilitySelect
                 multiple={false}
                 name="facility"
@@ -435,8 +458,6 @@ export default function PatientFilterV2(props: any) {
                 className="shifting-page-filter-dropdown"
                 errors={""}
               />
-            )}
-          </div>
         </div>
         <div className="w-64 flex-none">
           <span className="text-sm font-semibold">Gender</span>
