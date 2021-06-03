@@ -10,7 +10,7 @@ import {
   SelectField,
   TextInputField,
 } from "../Common/HelperInputFields";
-import { parsePhoneNumberFromString } from "libphonenumber-js";
+import { parsePhoneNumberFromString } from "libphonenumber-js/max";
 import { validateEmailAddress, phonePreg } from "../../Common/validation";
 import * as Notification from "../../Utils/Notifications.js";
 import { checkIfLatestBundle } from "../../Utils/build-meta-info";
@@ -140,11 +140,36 @@ export default function UserProfile() {
           return;
         case "phoneNumber":
           const phoneNumber = parsePhoneNumberFromString(
-            states.form[field]
-          )?.number;
+            states.form[field],
+            "IN"
+          );
 
-          if (!states.form[field] || !phonePreg(String(phoneNumber))) {
+          let is_valid: boolean = false;
+          if (phoneNumber) {
+            is_valid = phoneNumber.isValid();
+          }
+
+          if (!states.form[field] || !is_valid) {
             errors[field] = "Please enter valid phone number";
+            invalidForm = true;
+          }
+          return;
+        case "altPhoneNumber":
+          const altPhoneNumber = parsePhoneNumberFromString(
+            states.form[field],
+            "IN"
+          );
+
+          let alt_is_valid: boolean = false;
+
+          if (altPhoneNumber) {
+            alt_is_valid = altPhoneNumber.isValid();
+            if (alt_is_valid)
+              alt_is_valid = altPhoneNumber.getType() === "MOBILE";
+          }
+
+          if (!states.form[field] || !alt_is_valid) {
+            errors[field] = "Please enter valid mobile number";
             invalidForm = true;
           }
           return;
@@ -474,7 +499,7 @@ export default function UserProfile() {
                           onChange={(value: any) => [
                             handleValueChange(value, "altPhoneNumber"),
                           ]}
-                          errors={states.errors.phoneNumber}
+                          errors={states.errors.altPhoneNumber}
                         />
                       </div>
                       <div className="col-span-6 sm:col-span-3">

@@ -8,7 +8,7 @@ import {
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import loadable from "@loadable/component";
 import { navigate } from "raviger";
-import { parsePhoneNumberFromString } from "libphonenumber-js";
+import { parsePhoneNumberFromString } from "libphonenumber-js/max";
 import moment from "moment";
 import React, { useCallback, useReducer, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -336,9 +336,34 @@ export const UserAdd = (props: UserProps) => {
           }
           return;
         case "phone_number":
-          const phoneNumber = parsePhoneNumberFromString(state.form[field]);
-          if (!state.form[field] || !phoneNumber?.isPossible()) {
+          const phoneNumber = parsePhoneNumberFromString(
+            state.form[field],
+            "IN"
+          );
+          let is_valid: boolean = false;
+          if (phoneNumber) {
+            is_valid = phoneNumber.isValid();
+          }
+          if (!state.form[field] || !is_valid) {
             errors[field] = "Please enter valid phone number";
+            invalidForm = true;
+          }
+          return;
+
+        case "alt_phone_number":
+          const altPhoneNumber = parsePhoneNumberFromString(
+            state.form[field],
+            "IN"
+          );
+          let alt_is_valid: boolean = false;
+
+          if (altPhoneNumber) {
+            alt_is_valid = altPhoneNumber.isValid();
+            if (alt_is_valid)
+              alt_is_valid = altPhoneNumber.getType() === "MOBILE";
+          }
+          if (!state.form[field] || !alt_is_valid) {
+            errors[field] = "Please enter valid mobile number";
             invalidForm = true;
           }
           return;
@@ -467,7 +492,7 @@ export const UserAdd = (props: UserProps) => {
                   onChange={(value: any) =>
                     handleValueChange(value, "alt_phone_number")
                   }
-                  errors={state.errors.phone_number}
+                  errors={state.errors.alt_phone_number}
                   onlyIndia={true}
                 />
               </div>
