@@ -190,10 +190,10 @@ function FacillityFilter(props: any) {
                             value={filterState.district}
                             options={districts}
                             optionValue="name"
-                            onChange={e => [
-                                handleChange(e),
+                            onChange={e => {
+                                handleChange(e)
                                 fetchLocalBody(String(e.target.value))
-                            ]}
+                            }}
 
                         />
                     )}
