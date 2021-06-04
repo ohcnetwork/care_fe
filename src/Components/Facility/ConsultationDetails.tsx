@@ -274,7 +274,7 @@ export const ConsultationDetails = (props: any) => {
                 className="float-right"
                 onClick={() =>
                   navigate(
-                    `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/last_consultation/${isLastConsultation}/investigation/`
+                    `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/investigation/`
                   )
                 }
               >

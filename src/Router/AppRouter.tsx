@@ -163,7 +163,7 @@ const routes = {
       unspecified={true}
     />
   ),
-  "/facility/:facilityId/patient/:patientId/consultation/:id/last_consultation/:isLastConsultation/investigation/": ({
+  "/facility/:facilityId/patient/:patientId/consultation/:id/investigation/": ({
     facilityId,
     patientId,
     id,

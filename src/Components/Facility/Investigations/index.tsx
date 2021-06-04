@@ -163,7 +163,7 @@ const Investigation = (props: {
             msg: "Investigation created successfully!",
           });
           navigate(
-            `/facility/${props.facilityId}/patient/${props.patientId}/consultation/${props.consultationId}/last_consultation/${props.isLastConsultation}`
+            `/facility/${props.facilityId}/patient/${props.patientId}/consultation/${props.consultationId}`
           );
         } else {
           setSaving(false);
