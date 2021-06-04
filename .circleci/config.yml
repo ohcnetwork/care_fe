@@ -19,8 +19,8 @@ workflows:
               only: develop
       - aws-eks/update-container-image:
           cluster-name: "${EKS_CLUSTER_NAME}"
-          aws-region: "${AWS_DEFAULT_REGION}"
           namespace: "staging"
+          aws-region: "${AWS_DEFAULT_REGION}"
           container-image-updates: '${EKS_CONTAINER_NAME}=${AWS_ECR_ACCOUNT_URL}/${ECR_REPO_NAME}:${CIRCLE_SHA1}'
           resource-name: "${EKS_STAGING_RESOURCE_NAME}"
           requires:
