@@ -634,6 +634,7 @@ export const PatientHome = (props: any) => {
                       <a
                         href={`https://wa.me/${patientData.phone_number}`}
                         target="_blank"
+                        rel="noreferrer"
                       >
                         <i className="fab fa-whatsapp"></i> Chat on WhatsApp
                       </a>
@@ -654,6 +655,7 @@ export const PatientHome = (props: any) => {
                       <a
                         href={`https://wa.me/${patientData.emergency_phone_number}`}
                         target="_blank"
+                        rel="noreferrer"
                       >
                         <i className="fab fa-whatsapp"></i> Chat on WhatsApp
                       </a>
