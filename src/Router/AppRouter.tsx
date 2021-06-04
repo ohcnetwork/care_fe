@@ -176,7 +176,7 @@ const routes = {
       isLastConsultation={isLastConsultation}
     />
   ),
-  "/facility/:facilityId/patient/:patientId/consultation/:id/last_consultation/:isLastConsultation/investigationSessions":
+  "/facility/:facilityId/patient/:patientId/consultation/:id/investigationSessions":
     ({ facilityId, patientId, id, isLastConsultation  }: any) => (
       <ViewInvestigations
         consultationId={id}
@@ -185,7 +185,7 @@ const routes = {
         isLastConsultation={isLastConsultation}
       />
     ),
-  "/facility/:facilityId/patient/:patientId/consultation/:id/last_consultation/:isLastConsultation/investigation/:sessionId":
+  "/facility/:facilityId/patient/:patientId/consultation/:id/investigation/:sessionId":
     ({ facilityId, patientId, id, sessionId, isLastConsultation }: any) => (
       <ShowInvestigation
         consultationId={id}
