@@ -8,7 +8,7 @@ import {
 } from "../Components/Auth";
 import { useRoutes } from "raviger";
 import { PublicDashboard } from "../Components/Dashboard/PublicDashboard";
-import msinsLogo from "../Common/mahakavach/msinsLogo.png";
+import careLogo from "../Common/mahakavach/careLogo.png";
 
 import { withTranslation } from "react-i18next";
 const TopBar = loadable(() => import("../Components/Common/TopBar"));
@@ -42,9 +42,9 @@ const SessionRouter = (props: any) => {
       <div className="bg-white flex items-center">
         <div className="max-w-5xl mx-auto flex md:flex-row flex-col p-4 f-full flex items-center">
           <div className="mx-auto p-2">
-            <img className="h-20" src={msinsLogo} alt="Care Logo" />
+            <img className="h-10" src={careLogo} alt="Care Logo" />
           </div>
-          <div className="max-w-xl text-sm">
+          <div className="max-w-xl text-sm text-justify">
             <a href="https://coronasafe.network/" className="text-gray-600">
               {t("footer_body")}
             </a>

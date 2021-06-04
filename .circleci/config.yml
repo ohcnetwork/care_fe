@@ -38,9 +38,9 @@ workflows:
             branches:
               only: master
       - aws-eks/update-container-image:
-          cluster-name: "${EKS_CLUSTER_NAME}"
+          cluster-name: "care"
           aws-region: "${AWS_DEFAULT_REGION}"
-          container-image-updates: '${EKS_CONTAINER_NAME}=${AWS_ECR_ACCOUNT_URL}/${ECR_REPO_NAME}:${CIRCLE_SHA1}'
-          resource-name: "${EKS_PRODUCTION_RESOURCE_NAME}"
+          container-image-updates: "care-fe=${AWS_ECR_ACCOUNT_URL}/care_fe:${CIRCLE_SHA1}"
+          resource-name: "deployment/care-fe-production-deployment"
           requires:
             - aws-ecr/build-and-push-image
