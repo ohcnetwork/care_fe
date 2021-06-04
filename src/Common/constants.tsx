@@ -220,26 +220,26 @@ export const CONSULTATION_SUGGESTION = [
 ];
 
 export const ADMITTED_TO = [
-  "Isolation Room",
-  "ICU",
-  "ICU with Non Invasive Ventilator",
-  "ICU with Oxygen Support",
-  "ICU with Invasive Ventilator",
-  "Bed with Oxygen Support",
   "Home Isolation",
+  "Isolation Room",
+  "Bed with Oxygen Support",
+  "ICU",
+  "ICU with Oxygen Support",
+  "ICU with Non Invasive Ventilator",
+  "ICU with Invasive Ventilator",
   "Gynaecology Ward",
   "Paediatric Ward",
 ];
 
 export const PATIENT_FILTER_ADMITTED_TO = [
   { id: "0", text: "Not admitted" },
-  { id: "1", text: "Isolation Room" },
-  { id: "2", text: "ICU" },
-  { id: "3", text: "ICU with Non Invasive Ventilator" },
-  { id: "4", text: "ICU with Oxygen Support" },
-  { id: "5", text: "ICU with Invasive Ventilator" },
-  { id: "6", text: "Bed with Oxygen Support" },
   { id: "20", text: "Home Isolation" },
+  { id: "1", text: "Isolation Room" },
+  { id: "6", text: "Bed with Oxygen Support" },
+  { id: "2", text: "ICU" },
+  { id: "4", text: "ICU with Oxygen Support" },
+  { id: "3", text: "ICU with Non Invasive Ventilator" },
+  { id: "5", text: "ICU with Invasive Ventilator" },
   { id: "30", text: "Gynaecology Ward" },
   { id: "40", text: "Paediatric Ward" },
 ];
@@ -412,7 +412,7 @@ export const DESIGNATION_HEALTH_CARE_WORKER = [
 ];
 
 export const BREATHLESSNESS_LEVEL = [
-  "NOT SPECIFIED",
+  "NOT BREATHLESS",
   "MILD",
   "MODERATE",
   "SEVERE",
@@ -430,11 +430,11 @@ export const RESOURCE_CHOICES: Array<OptionsType> = [
   { id: 80, text: "COMPLETED" },
 ];
 export const RESOURCE_SUBCATEGORIES: Array<OptionsType> = [
-  { id: 110, text: "LIQUID OXYGEN" },
+  { id: 110, text: "LMO in KL" },
   { id: 120, text: "B TYPE OXYGEN CYLINDER" },
   { id: 130, text: "C TYPE OXYGEN CYLINDER" },
   { id: 140, text: "JUMBO D TYPE OXYGEN CYLINDER" },
-  { id: 1000, text: "UNSPECIFIED" }
+  { id: 1000, text: "UNSPECIFIED" },
 ];
 
 export const RESOURCE_FILTER_ORDER: Array<OptionsType> = [

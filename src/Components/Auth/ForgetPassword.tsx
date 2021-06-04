@@ -6,9 +6,10 @@ import { useDispatch } from 'react-redux';
 import { postForgotPassword } from '../../Redux/actions';
 import { TextInputField } from '../Common/HelperInputFields';
 import * as Notification from "../../Utils/Notifications.js";
+import { withTranslation } from 'react-i18next';
 const Loading = loadable( () => import("../Common/Loading"));
 
-export const ForgotPassword = () => {
+const ForgotPasswordPage = (props: any) => {
     const dispatch: any = useDispatch();
     const initForm: any = {
         username: '',
@@ -18,6 +19,7 @@ export const ForgotPassword = () => {
     const [errors, setErrors] = useState(initErr);
     const [disableBtn, setDisableBtn] = useState(false);
     const [showLoader, setShowLoader] = useState(false);
+	const { t } = props;
 
     const handleChange = (e: any) => {
         const { value, name } = e.target;
@@ -38,12 +40,12 @@ export const ForgotPassword = () => {
             if (typeof (form[key]) === 'string') {
                 if (!form[key].match(/\w/)) {
                     hasError = true;
-                    err[key] = 'This field is required';
+                    err[key] = t("field_request");
                 }
             }
             if (!form[key]) {
                 hasError = true;
-                err[key] = 'This field is required';
+                err[key] = t("field_request");
             }
 
         });
@@ -65,13 +67,13 @@ export const ForgotPassword = () => {
                 const res = resp && resp.data;
                 if (res && res.status === 'OK') {
                     Notification.Success({
-                        msg: "Password Reset Email Sent"
+                        msg: t("password_sent")
                     });
                 } else if (res && res.data) {
                     setErrors(res.data);
                 } else {
                     Notification.Error({
-                        msg: "Something went wrong try again later "
+                        msg: t("something_wrong")
                     });
                 }
                 setDisableBtn(false);
@@ -88,13 +90,13 @@ export const ForgotPassword = () => {
                     handleSubmit(e);
                 }}>
                     <div className="text-xl font-bold pt-4 text-center">
-                        Forgot Password
+                        {t("forget_password")}
                     </div>
                     <CardContent>
-                        Enter your username and we will send you a link to reset your password.
-                                <TextInputField
+						{t("forget_password_instruction")}
+                        <TextInputField
                             name="username"
-                            placeholder="username"
+                            label={t("username")}
                             variant="outlined"
                             margin="dense"
                             value={form.username.toLowerCase()}
@@ -109,14 +111,16 @@ export const ForgotPassword = () => {
                             color="primary"
                             variant="contained"
                             onClick={handleSubmit}
-                        >Send Reset Link
+                        >{t("send_reset_link")}
                                 </Button>
                     </CardActions>
                     <CardContent className="alignCenter">
-                        Already a member? <Link href="/login">Login</Link>
+                        {t("already_a_member")} <Link href="/login">{t("login")}</Link>
                     </CardContent>
                 </form>
             </div>
         </div>
     );
 };
+
+export const ForgotPassword = withTranslation()(ForgotPasswordPage)

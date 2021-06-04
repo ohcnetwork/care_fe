@@ -51,6 +51,10 @@ export default function PatientFilterV2(props: any) {
     lsgBody: filter.lsgBody || "",
     facility_ref: null,
     lsgBody_ref: null,
+    date_declared_positive_before: filter.date_declared_positive_before || null,
+    date_declared_positive_after: filter.date_declared_positive_after || null,
+    date_of_result_before: filter.date_of_result_before || null,
+    date_of_result_after: filter.date_of_result_after || null,
     created_date_before: filter.created_date_before || null,
     created_date_after: filter.created_date_after || null,
     modified_date_before: filter.modified_date_before || null,
@@ -62,6 +66,7 @@ export default function PatientFilterV2(props: any) {
     age_min: filter.age_min || null,
     age_max: filter.age_max || null,
     date_of_result: filter.date_of_result || null,
+    date_declared_positive: filter.date_declared_positive || null,
     last_consultation_admission_date_before:
       filter.last_consultation_admission_date_before || null,
     last_consultation_admission_date_after:
@@ -78,6 +83,7 @@ export default function PatientFilterV2(props: any) {
     number_of_doses: filter.number_of_doses || null,
     covin_id: filter.covin_id || null,
     is_kasp: filter.is_kasp || null,
+    is_declared_positive: filter.is_declared_positive || null,
   });
   const dispatch: any = useDispatch();
 
@@ -115,9 +121,15 @@ export default function PatientFilterV2(props: any) {
     { id: "", text: "Show All" },
     { id: 0, text: "Unvaccinated" },
     { id: 1, text: "1st dose only" },
-    { id: 2, text: "Both doses"}
+    { id: 2, text: "Both doses" },
   ];
-  
+
+  const DECLARED_FILTER = [
+    { id: "", text: "Show All" },
+    { id: "false", text: "Not Declared" },
+    { id: "true", text: "Declared" },
+  ];
+
   const setFacility = (selected: any, name: string) => {
     const filterData: any = { ...filterState };
     filterData[`${name}_ref`] = selected;
@@ -170,6 +182,10 @@ export default function PatientFilterV2(props: any) {
     const {
       facility,
       lsgBody,
+      date_declared_positive_before,
+      date_declared_positive_after,
+      date_of_result_before,
+      date_of_result_after,
       created_date_before,
       created_date_after,
       modified_date_before,
@@ -190,10 +206,29 @@ export default function PatientFilterV2(props: any) {
       covin_id,
       srf_id,
       is_kasp,
+      is_declared_positive,
     } = filterState;
     const data = {
       lsgBody: lsgBody || "",
       facility: facility || "",
+      date_declared_positive_before:
+        date_declared_positive_before &&
+        moment(date_declared_positive_before).isValid()
+          ? moment(date_declared_positive_before).format("YYYY-MM-DD")
+          : "",
+      date_declared_positive_after:
+        date_declared_positive_after &&
+        moment(date_declared_positive_after).isValid()
+          ? moment(date_declared_positive_after).format("YYYY-MM-DD")
+          : "",
+      date_of_result_before:
+        date_of_result_before && moment(date_of_result_before).isValid()
+          ? moment(date_of_result_before).format("YYYY-MM-DD")
+          : "",
+      date_of_result_after:
+        date_of_result_after && moment(date_of_result_after).isValid()
+          ? moment(date_of_result_after).format("YYYY-MM-DD")
+          : "",
       created_date_before:
         created_date_before && moment(created_date_before).isValid()
           ? moment(created_date_before).format("YYYY-MM-DD")
@@ -247,6 +282,7 @@ export default function PatientFilterV2(props: any) {
       number_of_doses: number_of_doses || "",
       covin_id: covin_id || "",
       is_kasp: is_kasp || "",
+      is_declared_positive: is_declared_positive || "",
     };
     onChange(data);
   };
@@ -415,6 +451,18 @@ export default function PatientFilterV2(props: any) {
           />
         </div>
         <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">Declared</span>
+          <SelectField
+            name="is_declared_positive"
+            variant="outlined"
+            margin="dense"
+            value={filterState.is_declared_positive}
+            options={DECLARED_FILTER}
+            onChange={handleChange}
+            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+          />
+        </div>
+        <div className="w-64 flex-none">
           <span className="text-sm font-semibold">COVIN ID</span>
           <div className="flex justify-between">
             <TextInputField
@@ -443,26 +491,37 @@ export default function PatientFilterV2(props: any) {
           />
         </div>
         <div className="w-64 flex-none">
-          <span className="text-sm font-semibold">Date of Result</span>
-          <DateInputField
-            id="date_of_result"
-            name="date_of_result"
-            inputVariant="outlined"
-            margin="dense"
-            errors=""
-            value={filterState.date_of_result}
-            onChange={(date) =>
-              handleChange({
-                target: {
-                  name: "date_of_result",
-                  value: date,
-                },
-              })
+          <DateRangePicker
+            startDate={getDate(filterState.date_of_result_after)}
+            endDate={getDate(filterState.date_of_result_before)}
+            onChange={(e) =>
+              handleDateRangeChange(
+                "date_of_result_after",
+                "date_of_result_before",
+                e
+              )
             }
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+            endDateId={"date_of_result_before"}
+            startDateId={"date_of_result_after"}
+            label={"Date of result"}
+            size="small"
           />
-        </div>
-        <div className="w-64 flex-none">
+          <DateRangePicker
+            startDate={getDate(filterState.date_declared_positive_after)}
+            endDate={getDate(filterState.date_declared_positive_before)}
+            onChange={(e) =>
+              handleDateRangeChange(
+                "date_declared_positive_after",
+                "date_declared_positive_before",
+                e
+              )
+            }
+            endDateId={"date_declared_positive_before"}
+            startDateId={"date_declared_positive_after"}
+            label={"Date Declared Positive"}
+            size="small"
+          />
+
           <DateRangePicker
             startDate={getDate(filterState.created_date_after)}
             endDate={getDate(filterState.created_date_before)}
