@@ -103,7 +103,7 @@ export default function InventoryLog(props: any) {
             <div className="ml-3">
               <p className="text-gray-900 whitespace-no-wrap">
                 {moment(inventoryItem.created_date).format(
-                  "DD-MM-YYYY hh:mm:ss"
+                  "DD-MM-YYYY LTS"
                 )}
               </p>
             </div>
