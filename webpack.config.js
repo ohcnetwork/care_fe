@@ -72,7 +72,7 @@ module.exports = (env, argv) => {
       port: 4000,
       proxy: {
         "/api": {
-          target: "https://careapi.coronasafe.in/",
+          target: "https://careapi.mahakavach.in/",
           changeOrigin: true,
         },
       },
