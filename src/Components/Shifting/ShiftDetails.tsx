@@ -571,7 +571,7 @@ export default function ShiftDetails(props: { id: string }) {
       ) : (
         <div className="mx-3 md:mx-8 mb-10">
           <div className="my-4 flex justify-between items-center">
-            <PageTitle title={"Shifting details"} /> 
+            <PageTitle title={"Shifting details"} />
             <div>
               <button
                 onClick={(_) => setIsPrintMode(true)}
@@ -637,7 +637,7 @@ export default function ShiftDetails(props: { id: string }) {
               </div>
               <div>
                 <span className="font-semibold leading-relaxed">
-                  Orgin facility:{" "}
+                  Origin facility:{" "}
                 </span>
                 {data.orgin_facility_object?.name || "--"}
               </div>

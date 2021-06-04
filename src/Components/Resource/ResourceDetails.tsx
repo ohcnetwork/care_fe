@@ -424,7 +424,7 @@ export default function ResourceDetails(props: { id: string }) {
           </div>
           <div className="grid md:grid-cols-3 gap-4 pb-4">
             <div>
-              <h4 className="mt-8">Orgin Facility</h4>
+              <h4 className="mt-8">Origin Facility</h4>
 
               {showFacilityCard(data.orgin_facility_object)}
             </div>
