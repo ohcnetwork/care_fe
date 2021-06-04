@@ -5,7 +5,7 @@ import moment from "moment";
 import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getConsultation, getDailyReport } from "../../Redux/actions";
+import { getConsultation, getDailyReport, getPatient } from "../../Redux/actions";
 import loadable from "@loadable/component";
 import Pagination from "../Common/Pagination";
 import { ConsultationModel } from "./models";
@@ -18,13 +18,14 @@ const symptomChoices = [...SYMPTOM_CHOICES];
 const patientCategoryChoices = [...PATIENT_CATEGORY];
 
 export const ConsultationDetails = (props: any) => {
-  const { facilityId, patientId, consultationId, isLastConsultation } = props;
+  const { facilityId, patientId, consultationId } = props;
   const dispatch: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [isDailyRoundLoading, setIsDailyRoundLoading] = useState(false);
   const [consultationData, setConsultationData] = useState<ConsultationModel>(
     {}
   );
+  const [isLastConsultation, setIsLastConsultation] = useState(false);
   const [dailyRoundsListData, setDailyRoundsListData] = useState<
     Array<DailyRoundsModel>
   >([]);
@@ -84,9 +85,25 @@ export const ConsultationDetails = (props: any) => {
     [consultationId, dispatch, offset]
   );
 
+  const fetchIsLastConsultation = useCallback(
+    async (status: statusType) => {
+      setIsLoading(true);
+      const res = await dispatch(getPatient({ id: patientId }));
+      if (!status.aborted) {
+        if (res && res.data) {
+          if(res.data.last_consultation.id === consultationId) setIsLastConsultation(true);
+          else setIsLastConsultation(false);
+        }
+        setIsLoading(false);
+      }
+    },
+    [consultationId, dispatch, patientId]
+  );
+
   useAbortableEffect((status: statusType) => {
     fetchData(status);
     fetchDailyRounds(status);
+    fetchIsLastConsultation(status);
   }, []);
 
   const handlePagination = (page: number, limit: number) => {
