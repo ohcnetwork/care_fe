@@ -67,7 +67,6 @@ const Investigation = (props: {
   consultationId: string;
   patientId: string;
   facilityId: string;
-  isLastConsultation: string
 }) => {
   const dispatch: any = useDispatch();
   const [selectedGroup, setSelectedGroup] = useState([]);

@@ -10,7 +10,7 @@ const Loading = loadable(() => import("../../Common/Loading"));
 
 export default function ViewInvestigations(props: any) {
   const [isLoading, setIsLoading] = useState(false);
-  const { facilityId, patientId, consultationId, isLastConsultation }: any = props;
+  const { facilityId, patientId, consultationId }: any = props;
   const dispatchAction: any = useDispatch();
   const [investigationData, setInvestigationData] = useState([]);
   interface InvestigationType {

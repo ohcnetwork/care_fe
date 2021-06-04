@@ -163,36 +163,29 @@ const routes = {
       unspecified={true}
     />
   ),
-  "/facility/:facilityId/patient/:patientId/consultation/:id/investigation/": ({
-    facilityId,
-    patientId,
-    id,
-    isLastConsultation,
-  }: any) => (
+  "/facility/:facilityId/patient/:patientId/consultation/:id/investigation/": 
+  ({ facilityId, patientId, id }: any) => (
     <Investigation
       consultationId={id}
       facilityId={facilityId}
       patientId={patientId}
-      isLastConsultation={isLastConsultation}
     />
   ),
   "/facility/:facilityId/patient/:patientId/consultation/:id/investigationSessions":
-    ({ facilityId, patientId, id, isLastConsultation  }: any) => (
+    ({ facilityId, patientId, id  }: any) => (
       <ViewInvestigations
         consultationId={id}
         facilityId={facilityId}
         patientId={patientId}
-        isLastConsultation={isLastConsultation}
       />
     ),
   "/facility/:facilityId/patient/:patientId/consultation/:id/investigation/:sessionId":
-    ({ facilityId, patientId, id, sessionId, isLastConsultation }: any) => (
+    ({ facilityId, patientId, id, sessionId }: any) => (
       <ShowInvestigation
         consultationId={id}
         facilityId={facilityId}
         patientId={patientId}
         sessionId={sessionId}
-        isLastConsultation={isLastConsultation}
       />
     ),
   "/facility/:facilityId/patient/:patientId/consultation/:id/daily-rounds": ({

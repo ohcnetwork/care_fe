@@ -91,7 +91,7 @@ export const ConsultationDetails = (props: any) => {
       const res = await dispatch(getPatient({ id: patientId }));
       if (!status.aborted) {
         if (res && res.data) {
-          if(res.data.last_consultation.id === consultationId) setIsLastConsultation(true);
+          if(res.data.last_consultation?.id === consultationId) setIsLastConsultation(true);
           else setIsLastConsultation(false);
         }
         setIsLoading(false);
