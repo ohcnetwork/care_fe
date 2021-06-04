@@ -37,7 +37,7 @@ const updateFormReducer = (state = initialState, action: any) => {
 
 export default function ShowInvestigation(props: any) {
   const [isLoading, setIsLoading] = useState(false);
-  const { consultationId, sessionId, isLastConsultation }: any = props;
+  const { consultationId, sessionId }: any = props;
   const dispatchAction: any = useDispatch();
   // const [investigationData, setInvestigationData] = useState([]);
   const [state, dispatch] = useReducer(updateFormReducer, initialState);
