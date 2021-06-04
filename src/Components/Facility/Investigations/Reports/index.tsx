@@ -338,7 +338,6 @@ const InvestigationReports = ({ id }: any) => {
                   )}
                   renderInput={(params) => (
                     <>
-
                       <InputLabel>
                         Select Investigations (all investigations will be
                         selected by default)
@@ -396,10 +395,12 @@ const InvestigationReports = ({ id }: any) => {
                     {isLoading.tableData ? "Loading..." : "Next Sessions"}
                   </Button>
                 </ButtonGroup>
+
                 <ReportTable
                   investigationData={investigationTableData}
                   title="Report"
                 />
+
                 {!!isLoading.tableData && (
                   <CircularProgress className={className.button} />
                 )}
