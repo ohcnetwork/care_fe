@@ -1,6 +1,7 @@
 {
   "coronasafe_network": "MahaKavach",
-  "mahakavach_title": "Centralised Resource Management Platform",
+  "mahakavach_title": "MahaKavach",
+  "mahakavach_subtitle": "Centralised Resource Management Platform",
   "goal": "आमचे ध्येय हेल्थकेअर सिस्टमला क्षमतेपेक्षा जास्त ओव्हरलोडिंगपासून संरक्षण करणे आहे.",
   "something_wrong": "काहीतरी चूक झाली! पुन्हा प्रयत्न करा!",
   "contribute_github": "गीथूब वर योगदान द्या",
