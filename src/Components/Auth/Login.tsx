@@ -10,10 +10,9 @@ import ReCaptcha from "react-google-recaptcha";
 import VisibilityIcon from "@material-ui/icons/Visibility";
 import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
 import LanguageSelector from "../Common/LanguageSelector";
-import msinsLogo from "../../Common/mahakavach/msinsLogo-removebg.png"
+import msinsLogo from "../../Common/mahakavach/msinsLogo-removebg.png";
 
 const get = require("lodash.get");
-
 
 const LoginPage = (props: any) => {
   const dispatch: any = useDispatch();
@@ -102,17 +101,13 @@ const LoginPage = (props: any) => {
       <div className="absolute top-2 right-2">
         <LanguageSelector className="md:bg-teal-500 md:text-white bg-white" />
       </div>
-      <div className="flex flex-col justify-center h-1/2 md:w-1/2 md:h-full bg-teal-300">
-        <div className="pl-1/5">
+      <div className="flex flex-col justify-center items-center p-2 h-1/2 md:w-1/2 md:h-full bg-teal-300">
+        <div>
           <a href={"/"}>
-            <img
-              src={msinsLogo}
-              className="h-36"
-              alt="care logo"
-            />{" "}
+            <img src={msinsLogo} className="my-auto max-h-36" alt="care logo" />{" "}
           </a>
         </div>
-        <div className="mt-4 md:mt-20 rounded-lg px-1/5 py-4">
+        <div className="mt-4 md:mt-20 rounded-lg py-4">
           <PublicDashboard />
         </div>
       </div>
