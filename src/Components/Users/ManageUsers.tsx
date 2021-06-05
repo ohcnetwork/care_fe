@@ -20,6 +20,7 @@ import DeleteForeverIcon from "@material-ui/icons/DeleteForever";
 import { IconButton } from "@material-ui/core";
 import LinkFacilityDialog from "./LinkFacilityDialog";
 import UserDeleteDialog from "./UserDeleteDialog";
+import classNames from "classnames";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -36,7 +37,6 @@ export default function ManageUsers(props: any) {
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [offset, setOffset] = useState(0);
-  // const [reload, setReload] = useState<boolean>(false);
 
   const state: any = useSelector((state) => state);
   const { currentUser } = state;
@@ -221,15 +221,17 @@ export default function ManageUsers(props: any) {
     });
   };
 
+  const facilityClassname = classNames({
+    "align-baseline font-bold text-sm": true,
+    "text-blue-500 hover:text-blue-800": !isFacilityLoading,
+    "text-gray-500": isFacilityLoading,
+  });
+
   const showLinkFacility = (username: string) => {
     return (
       <a
         onClick={() => showLinkFacilityModal(username)}
-        className={`align-baseline font-bold text-sm ${
-          !isFacilityLoading
-            ? "text-blue-500 hover:text-blue-800"
-            : "text-gray-500"
-        }`}
+        className={facilityClassname}
         href="#"
       >
         Link new facility
@@ -329,11 +331,7 @@ export default function ManageUsers(props: any) {
                     {!user.facilities && (
                       <a
                         onClick={() => loadFacilities(user.username)}
-                        className={`inline-block align-baseline font-bold text-sm ${
-                          !isFacilityLoading
-                            ? "text-blue-500 hover:text-blue-800"
-                            : "text-gray-500"
-                        }`}
+                        className={`inline-block ${facilityClassname}`}
                         href="#"
                       >
                         Click here to show
