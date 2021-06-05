@@ -36,13 +36,12 @@ export default function ManageUsers(props: any) {
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [offset, setOffset] = useState(0);
-  const [reload, setReload] = useState<boolean>(false);
+  // const [reload, setReload] = useState<boolean>(false);
 
   const state: any = useSelector((state) => state);
   const { currentUser } = state;
   const isSuperuser = currentUser.data.is_superuser;
   const userType = currentUser.data.user_type;
-  // console.log(isSuperuser, userType);
   const userIndex = USER_TYPES.indexOf(userType);
   const userTypes = isSuperuser
     ? [...USER_TYPES]
@@ -87,7 +86,7 @@ export default function ManageUsers(props: any) {
     (status: statusType) => {
       fetchData(status);
     },
-    [fetchData, reload]
+    [fetchData]
   );
 
   const handlePagination = (page: number, limit: number) => {
@@ -209,15 +208,12 @@ export default function ManageUsers(props: any) {
         msg: "User deleted successfully",
       });
     }
-    console.log(userData);
 
     setUserData({ show: false, username: "", name: "" });
-    // setReload(!reload);
     window.location.reload();
   };
 
   const handleDelete = (user: any) => {
-    console.log(user);
     setUserData({
       show: true,
       username: user.username,
@@ -252,8 +248,8 @@ export default function ManageUsers(props: any) {
     }
     return (
       <>
-        {facilities.map((facility) => (
-          <div className="flex items-center mb-2">
+        {facilities.map((facility, i) => (
+          <div key={`facility_${i}`} className="flex items-center mb-2">
             <div className="font-semibold">{facility.name}</div>
             <IconButton
               size="small"
@@ -281,7 +277,6 @@ export default function ManageUsers(props: any) {
   let userList: any[] = [];
   if (users && users.length) {
     userList = users.map((user: any, idx: number) => {
-      console.log(user);
       return (
         <div key={`usr_${user.id}`} className="w-full md:w-1/2 mt-6 md:px-4">
           <div className="block rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 overflow-hidden">
