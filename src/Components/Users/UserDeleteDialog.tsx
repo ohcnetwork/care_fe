@@ -45,8 +45,10 @@ const UserDeleteDialog = (
           id="alert-dialog-description"
           className="flex text-gray-800 leading-relaxed"
         >
-          <p>Are u sure you want to delete user</p>
-          <p className="mx-1 font-semibold capitalize">{name} ?</p>
+          <div className="flex">
+            Are you sure you want to delete user{" "}
+            <p className="mx-1 font-semibold capitalize">{name}</p> ?
+          </div>
         </DialogContentText>
       </DialogContent>
       <DialogActions>
@@ -58,7 +60,7 @@ const UserDeleteDialog = (
           className="font-medium btn btn-danger"
           disabled={disable}
         >
-          Yes
+          Delete
         </button>
       </DialogActions>
     </Dialog>
