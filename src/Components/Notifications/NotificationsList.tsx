@@ -93,9 +93,11 @@ export default function ResultList() {
     });
   }
   if (!offset && isLoading) {
-    <div className="flex items-center justify-center">
-      <CircularProgress color="primary" />
-    </div>;
+    manageResults = (
+      <div className="flex items-center justify-center">
+        <CircularProgress color="primary" />
+      </div>
+    );
   } else if (data && data.length) {
     manageResults = (
       <>
