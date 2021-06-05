@@ -1,7 +1,9 @@
-import { cy, it, describe, afterEach } from "local-cypress";
+import { cy, it, describe } from "local-cypress";
 
 const username = "dummy_user_1";
 const password = "Dummyuser1";
+const backspace =
+  "{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}";
 
 const base_url = "http://localhost:4000";
 describe("Edit Profile Testing", () => {
@@ -18,28 +20,62 @@ describe("Edit Profile Testing", () => {
     cy.url().should("include", "/facility");
   });
 
-  it("Edit Whatsapp Number of " + username, () => {
+  it("Invalid Whatsapp Number of " + username, () => {
     // Opening editing form
+
+    const whatsapp_num = "11111-11111";
+
     cy.get("a").contains("Profile").click();
     cy.url().should("include", "/user/profile");
     cy.get("button").contains("Edit User Profile").click();
 
-    //Editing Whatsapp Number
-    // cy.get(".react-tel-input").as("phone");
     cy.get(".flag-dropdown").last().find(".arrow").click();
     cy.get('li[data-flag-key="flag_no_84"]').click();
 
+    // Updating the Whatsapp Number field
     cy.get("input[type='tel']")
       .last()
       .focus()
-      .type(
-        "{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}1111111111"
-      )
-      .trigger("change", { value: "1111111111", force: true })
-      .should("have.attr", "value", "+91 11111-11111");
+      .type(`${backspace}${whatsapp_num}`)
+      .trigger("change", { force: true })
+      .should("have.attr", "value", `+91 ${whatsapp_num}`);
 
+    // Waiting for async call to complete
     cy.wait(3000);
     cy.get("form").get("button[type='submit']").click();
     cy.get(".error-text").contains("Please enter valid mobile number");
+  });
+
+  it("Valid Whatsapp Number of " + username, () => {
+    // Opening editing form
+
+    const whatsapp_num = "91111-11111";
+
+    cy.get("a").contains("Profile").click();
+    cy.url().should("include", "/user/profile");
+    cy.get("button").contains("Edit User Profile").click();
+
+    cy.get(".flag-dropdown").last().find(".arrow").click();
+    cy.get('li[data-flag-key="flag_no_84"]').click();
+
+    // Updating the Whatsapp Number field
+    cy.get("input[type='tel']")
+      .last()
+      .focus()
+      .type(`${backspace}${whatsapp_num}`)
+      .trigger("change", { force: true })
+      .should("have.attr", "value", `+91 ${whatsapp_num}`);
+
+    // Waiting for async call to complete
+    cy.wait(2000);
+    cy.get("form").get("button[type='submit']").click();
+
+    // Waiting for async call to complete
+    cy.wait(2000);
+    cy.get("dt")
+      .contains("Whatsapp No")
+      .siblings()
+      .first()
+      .contains(`+91 ${whatsapp_num}`);
   });
 });
