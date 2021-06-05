@@ -10,14 +10,13 @@ const OptimizeCssAssetsPlugin = require("optimize-css-assets-webpack-plugin");
 const safePostCssParser = require("postcss-safe-parser");
 
 const prodPlugins = (isDev) => {
-  if (isDev) {
-    return [];
-  }
+  // if (isDev) {
+  //   return [];
+  // }
 
   return [
-    new WorkboxPlugin.GenerateSW({
-      clientsClaim: true,
-      skipWaiting: true,
+    new WorkboxPlugin.InjectManifest({
+      swSrc: "./src/service-worker.js",
       maximumFileSizeToCacheInBytes: 7340032,
       exclude: ["build-meta.json", /\.map$/],
     }),
@@ -56,7 +55,7 @@ module.exports = (env, argv) => {
             },
           },
       runtimeChunk: {
-        name: entrypoint => `runtime-${entrypoint.name}`,
+        name: (entrypoint) => `runtime-${entrypoint.name}`,
       },
     },
     devtool: isDev ? "eval-cheap-module-source-map" : "none",
@@ -95,11 +94,7 @@ module.exports = (env, argv) => {
         },
         {
           test: /\.(sa|sc|c)ss$/,
-          use: [
-            MiniCssExtractPlugin.loader,
-            "css-loader",
-            "postcss-loader",
-          ],
+          use: [MiniCssExtractPlugin.loader, "css-loader", "postcss-loader"],
         },
         {
           test: /\.(png|jpe?g|gif)$/i,

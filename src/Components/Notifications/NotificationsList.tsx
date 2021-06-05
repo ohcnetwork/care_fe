@@ -6,6 +6,7 @@ import { getNotifications } from "../../Redux/actions";
 import Pagination from "../Common/Pagination";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import moment from "moment";
+import axios from "axios";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -23,6 +24,37 @@ export default function ResultList() {
   const [reload, setReload] = useState(false);
 
   let manageResults: any = null;
+
+  const urlB64ToUint8Array = (urlSafeBase64: any) => {
+    const decoded = atob(urlSafeBase64);
+    var cleaned = decoded.replace("-----BEGIN PUBLIC KEY-----", "");
+    cleaned = cleaned.replace("-----END PUBLIC KEY-----", "").trim();
+
+    // for (let i = 0; i < cleaned.length; ++i) {
+    //   outputArray[i] = cleaned.charCodeAt(i);
+    // }
+    let bytes: any = [];
+    for (var i = 0; i < cleaned.length; ++i) {
+      let code = cleaned.charCodeAt(i);
+      bytes = bytes.concat([code & 0xff, (code / 256) >>> 0]);
+    }
+    const outputArray = new Uint8Array(bytes);
+    return outputArray;
+  };
+
+  async function subscribe() {
+    const apiUrl =
+      "https://careapi.coronasafe.in/api/v1/notification/public_key/";
+    const reponse = await axios.get(apiUrl);
+    const public_key = reponse.data.public_key;
+    const sw = await navigator.serviceWorker.ready;
+    const key = urlB64ToUint8Array(public_key);
+    const push = await sw.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: key,
+    });
+    console.log("Subscription Info: ", push);
+  }
 
   useEffect(() => {
     setIsLoading(true);
@@ -153,6 +185,12 @@ export default function ResultList() {
                 className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0"
               >
                 <i className="fa-fw fas fa-times cursor-pointer mr-2" /> Close
+              </button>
+              <button
+                onClick={subscribe}
+                className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0"
+              >
+                Subscribe
               </button>
             </div>
           </div>
