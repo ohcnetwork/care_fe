@@ -164,8 +164,8 @@ export default function UserProfile() {
 
           if (altPhoneNumber) {
             alt_is_valid = altPhoneNumber.isValid();
-            if (alt_is_valid)
-              alt_is_valid = altPhoneNumber.getType() === "MOBILE";
+            if (alt_is_valid) console.log("Type is ", altPhoneNumber.getType());
+            alt_is_valid = altPhoneNumber.getType() === "MOBILE";
           }
 
           if (!states.form[field] || !alt_is_valid) {
@@ -190,7 +190,9 @@ export default function UserProfile() {
   const handleValueChange = (phoneNo: any, name: string) => {
     if (phoneNo && parsePhoneNumberFromString(phoneNo)?.isPossible()) {
       const form = { ...states.form };
+      console.log("Phone is ", phoneNo);
       form[name] = phoneNo;
+      console.log("FOrm is ", form);
       dispatch({ type: "set_form", form });
     }
   };
@@ -198,6 +200,7 @@ export default function UserProfile() {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     const validForm = validateForm();
+    console.log("Valid form is ", validForm);
     if (validForm) {
       setIsLoading(true);
       const data = {

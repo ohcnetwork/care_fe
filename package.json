@@ -111,7 +111,8 @@
     "re:watch": "bsb -make-world -clean-world -w",
     "build": "cross-env NODE_ENV=production ./node_modules/.bin/webpack -p --mode=production",
     "generate-build-meta": "node ./build-scripts/generate-build-version.js",
-    "test": "snyk test"
+    "test": "snyk test",
+    "cypress-test": "cross-env NODE_ENV=development npx cypress open"
   },
   "eslintConfig": {
     "extends": "react-app"
