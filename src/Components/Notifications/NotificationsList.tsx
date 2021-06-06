@@ -27,17 +27,19 @@ export default function ResultList() {
 
   const urlB64ToUint8Array = (urlSafeBase64: any) => {
     const decoded = atob(urlSafeBase64);
-    var cleaned = decoded.replace("-----BEGIN PUBLIC KEY-----", "");
-    cleaned = cleaned.replace("-----END PUBLIC KEY-----", "").trim();
-
-    // for (let i = 0; i < cleaned.length; ++i) {
-    //   outputArray[i] = cleaned.charCodeAt(i);
+    // var cleaned = decoded.replace("-----BEGIN PUBLIC KEY-----", "");
+    // cleaned = cleaned.replace("-----END PUBLIC KEY-----", "").trim();
+    // console.log(cleaned);
+    // const outputArray = new Uint8Array(decoded.length);
+    // for (let i = 0; i < decoded.length; ++i) {
+    //   outputArray[i] = decoded.charCodeAt(i);
     // }
     let bytes: any = [];
-    for (var i = 0; i < cleaned.length; ++i) {
-      let code = cleaned.charCodeAt(i);
+    for (var i = 0; i < decoded.length; ++i) {
+      let code = decoded.charCodeAt(i);
       bytes = bytes.concat([code & 0xff, (code / 256) >>> 0]);
     }
+    // console.log(bytes);
     const outputArray = new Uint8Array(bytes);
     return outputArray;
   };
