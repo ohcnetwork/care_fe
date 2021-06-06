@@ -5,6 +5,7 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 import { externalResult, deleteExternalResult } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { navigate } from "raviger";
+import AlertDialog from "../Common/AlertDialog"
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -14,6 +15,7 @@ export default function ResultItem(props: any) {
   let initialData: any = {};
   const [data, setData] = useState(initialData);
   const [isLoading, setIsLoading] = useState(true);
+  const [showDeleteAlert, setShowDeleteAlert] = useState(false);
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -37,6 +39,7 @@ export default function ResultItem(props: any) {
       });
     }
 
+    setShowDeleteAlert(false);
     navigate(`/external_results`);
   };
 
@@ -55,9 +58,17 @@ export default function ResultItem(props: any) {
     <div>
       <PageTitle title={"Result details"} className="px-6 mb-2" />
 
+      {showDeleteAlert && <AlertDialog 
+        title="Confirm Delete"
+        message={"Are you sure want to delete this record?"}
+        primaryButton={{text: "DELETE", color: "secondary"}}
+        handleClose={() => handleDelete()}
+        handleCancel={() => setShowDeleteAlert(false)}
+      />}
+
       <div className="mx-3 md:mx-8 mb-10 mt-4">
         <div className="flex justify-end ">
-          <button className="btn btn-danger" onClick={() => handleDelete()}>
+          <button className="btn btn-danger" onClick={() => setShowDeleteAlert(true)}>
             Delete Record
       </button>
         </div>
