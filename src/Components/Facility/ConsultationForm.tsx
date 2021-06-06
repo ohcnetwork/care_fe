@@ -1,4 +1,4 @@
-import { t as Prescription_t } from "@coronasafe/prescription-builder/src/Types/Prescription__Prescription.gen";
+import { t as Prescription_t } from "../Common/prescription-builder/types/Prescription__Prescription.gen";
 import loadable from "@loadable/component";
 import {
   Box,
@@ -254,13 +254,17 @@ export const ConsultationForm = (props: any) => {
           }
           return;
         case "is_telemedicine":
-          if ( state.form.admitted_to === "Home Isolation" && state.form[field] === "false") {
-            errors[field] = "Telemedicine should be `Yes` when Admitted To is Home Isolation";
+          if (
+            state.form.admitted_to === "Home Isolation" &&
+            state.form[field] === "false"
+          ) {
+            errors[field] =
+              "Telemedicine should be `Yes` when Admitted To is Home Isolation";
             invalidForm = true;
           }
           return;
         case "is_kasp":
-          if(!state.form[field]) {
+          if (!state.form[field]) {
             errors[field] = "Please select an option, Kasp is mandatory";
             invalidForm = true;
           }
@@ -318,7 +322,8 @@ export const ConsultationForm = (props: any) => {
         is_telemedicine: state.form.is_telemedicine,
         action: state.form.action,
         review_time: state.form.review_time,
-        assigned_to: state.form.is_telemedicine === "true" ? state.form.assigned_to : "",
+        assigned_to:
+          state.form.is_telemedicine === "true" ? state.form.assigned_to : "",
       };
       const res = await dispatchAction(
         id ? updateConsultation(id, data) : createConsultation(data)
