@@ -118,6 +118,7 @@ export const PatientManager = (props: any) => {
       : undefined,
     local_body: qParams.lsgBody || undefined,
     facility: facilityId || qParams.facility,
+    district: qParams.district || undefined,
     offset: (qParams.page ? qParams.page - 1 : 0) * RESULT_LIMIT,
     created_date_before: qParams.created_date_before || undefined,
     created_date_after: qParams.created_date_after || undefined,
@@ -203,6 +204,7 @@ export const PatientManager = (props: any) => {
     qParams.age_min,
     qParams.last_consultation_admitted_to_list,
     qParams.facility,
+    qParams.district,
     qParams.category,
     qParams.gender,
     qParams.ordering,
@@ -589,6 +591,7 @@ export const PatientManager = (props: any) => {
           {badge("COVIN ID", qParams.covin_id, "covin_id")}
 
           {badge("Filtered By: Facility", qParams.facility, "facility")}
+          {badge("Filtered By: District", qParams.district, "district")}
           {badge("Ordering", qParams.ordering, "ordering")}
           {badge("Category", qParams.category, "category")}
           {badge("Disease Status", qParams.disease_status, "disease_status")}
