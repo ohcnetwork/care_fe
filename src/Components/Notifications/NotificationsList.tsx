@@ -8,6 +8,7 @@ import { make as SlideOver } from "../Common/SlideOver.gen";
 import { SelectField } from "../Common/HelperInputFields";
 import { InputLabel } from "@material-ui/core";
 import moment from "moment";
+import { Button, CircularProgress } from "@material-ui/core";
 import { NOTIFICATION_EVENTS } from "../../Common/constants";
 
 const Loading = loadable(() => import("../Common/Loading"));
@@ -18,7 +19,7 @@ const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
 export default function ResultList() {
   const dispatch: any = useDispatch();
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [offset, setOffset] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
@@ -34,16 +35,17 @@ export default function ResultList() {
       dispatch(getNotifications({ offset, event: eventFilter }))
         .then((res: any) => {
           if (res && res.data) {
-            setData(res.data.results);
+            setData((prev) => [...prev, ...res.data.results]);
             setTotalCount(res.data.count);
           }
           setIsLoading(false);
         })
         .catch(() => {
           setIsLoading(false);
+          setOffset((prev) => prev - RESULT_LIMIT);
         });
     }
-  }, [dispatch, reload, showNotifications, eventFilter]);
+  }, [dispatch, reload, showNotifications, offset, eventFilter]);
 
   // const handlePagination = (page: number, limit: number) => {
   //   updateQuery({ page, limit });
@@ -79,7 +81,7 @@ export default function ResultList() {
           onClick={() =>
             navigate(resultUrl(result.event, result.caused_objects))
           }
-          className="relative py-5 px-4 lg:px-8 hover:bg-gray-200 focus:bg-gray-200 transition ease-in-out duration-150 "
+          className="relative py-5 px-4 lg:px-8 hover:bg-gray-200 focus:bg-gray-200 transition ease-in-out duration-150 cursor-pointer"
         >
           <div className="text-lg font-bold">{result.event}</div>
           <div className="text-sm">{result.message}</div>
@@ -94,27 +96,34 @@ export default function ResultList() {
       );
     });
   }
-
-  if (isLoading || !data) {
+  if (!offset && isLoading) {
     manageResults = (
-      <tr className="bg-white">
-        <td colSpan={4}>
-          <Loading />
-        </td>
-      </tr>
+      <div className="flex items-center justify-center">
+        <CircularProgress color="primary" />
+      </div>
     );
   } else if (data && data.length) {
     manageResults = (
       <>
         {resultList}
-        {totalCount > RESULT_LIMIT && (
-          <div className="mt-4 flex w-full justify-center">
-            {/* <Pagination
-              cPage={qParams.page}
-              defaultPerPage={RESULT_LIMIT}
-              data={{ totalCount }}
-              onChange={handlePagination}
-            /> */}
+        {isLoading && (
+          <div className="flex items-center justify-center">
+            <CircularProgress color="primary" />
+          </div>
+        )}
+        {totalCount > RESULT_LIMIT && offset < totalCount - RESULT_LIMIT && (
+          <div className="mt-4 flex w-full justify-center py-5 px-4 lg:px-8">
+            <Button
+              disabled={isLoading}
+              variant="contained"
+              color="primary"
+              fullWidth
+              onClick={() => {
+                setOffset((prev) => prev + RESULT_LIMIT);
+              }}
+            >
+              {isLoading ? "Loading..." : "Load More"}
+            </Button>
           </div>
         )}
       </>
@@ -148,7 +157,11 @@ export default function ResultList() {
               <div className="font-bold text-xl">Notifications</div>
               <div className="">
                 <button
-                  onClick={(_) => setReload(!reload)}
+                  onClick={(_) => {
+                    setReload(!reload);
+                    setData([]);
+                    setOffset(0);
+                  }}
                   className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0"
                 >
                   <i className="fa-fw fas fa-sync cursor-pointer mr-2" /> Reload
@@ -164,19 +177,24 @@ export default function ResultList() {
 
             <div>
               <div className="w-2/3">
-              <span className="text-sm font-semibold">Filter by category</span>
+                <span className="text-sm font-semibold">
+                  Filter by category
+                </span>
                 <SelectField
                   name="event_filter"
                   variant="outlined"
                   margin="dense"
                   value={eventFilter}
-                  options={[ { id: "", text: "Show All" }, ...NOTIFICATION_EVENTS ]}
+                  options={[
+                    { id: "", text: "Show All" },
+                    ...NOTIFICATION_EVENTS,
+                  ]}
                   onChange={(e: any) => setEventFilter(e.target.value)}
                 />
               </div>
             </div>
           </div>
-          
+
           <div>{manageResults}</div>
         </div>
       </SlideOver>
