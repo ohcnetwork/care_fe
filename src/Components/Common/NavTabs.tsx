@@ -24,7 +24,7 @@ export default function NavTabs(props: NavTabsProps) {
           onChange={(e) => onChange(Number(e.target.value))}
         >
           {options?.map((option: TabValue) => (
-            <option value={option.value}>{option.label}</option>
+            <option key={option.value} value={option.value}>{option.label}</option>
           ))}
         </select>
       </div>

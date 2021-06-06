@@ -1553,7 +1553,9 @@ export const PatientHome = (props: any) => {
                   }
                 >
                   {DISEASE_STATUS.map((value) => (
-                    <MenuItem value={value}>{value}</MenuItem>
+                    <MenuItem key={value} value={value}>
+                      {value}
+                    </MenuItem>
                   ))}
                 </Select>
               </Fragment>
