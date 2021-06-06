@@ -8,8 +8,8 @@ export interface OptionsType {
 export const USER_TYPES: Array<String> = [
   "Volunteer",
   "Pharmacist",
-  "Staff",
   "StaffReadOnly",
+  "Staff",
   "Doctor",
   "WardAdmin",
   "LocalBodyAdmin",
