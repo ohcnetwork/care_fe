@@ -1,4 +1,4 @@
-import { t as Prescription_t } from "@coronasafe/prescription-builder/src/Types/Prescription__Prescription.gen";
+import { t as Prescription_t } from "../Common/prescription-builder/types/Prescription__Prescription.gen";
 import loadable from "@loadable/component";
 import {
   Box,
