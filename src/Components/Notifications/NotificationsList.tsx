@@ -5,7 +5,10 @@ import { useDispatch } from "react-redux";
 import { getNotifications } from "../../Redux/actions";
 import Pagination from "../Common/Pagination";
 import { make as SlideOver } from "../Common/SlideOver.gen";
+import { SelectField } from "../Common/HelperInputFields";
+import { InputLabel } from "@material-ui/core";
 import moment from "moment";
+import { NOTIFICATION_EVENTS } from "../../Common/constants";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -21,13 +24,14 @@ export default function ResultList() {
   const [totalCount, setTotalCount] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
   const [reload, setReload] = useState(false);
+  const [eventFilter, setEventFilter] = useState("");
 
   let manageResults: any = null;
 
   useEffect(() => {
     setIsLoading(true);
     if (showNotifications) {
-      dispatch(getNotifications({ offset }))
+      dispatch(getNotifications({ offset, event: eventFilter }))
         .then((res: any) => {
           if (res && res.data) {
             setData(res.data.results);
@@ -39,7 +43,7 @@ export default function ResultList() {
           setIsLoading(false);
         });
     }
-  }, [dispatch, reload, showNotifications]);
+  }, [dispatch, reload, showNotifications, eventFilter]);
 
   // const handlePagination = (page: number, limit: number) => {
   //   updateQuery({ page, limit });
@@ -139,23 +143,40 @@ export default function ResultList() {
 
       <SlideOver show={showNotifications} setShow={setShowNotifications}>
         <div className="bg-white h-full">
-          <div className="flex justify-between items-end pt-4 w-full bg-gray-100 border-b sticky top-0 z-30 px-4 lg:px-8 py-3 space-x-2">
-            <div className="font-bold text-xl">Notifications</div>
-            <div className="">
-              <button
-                onClick={(_) => setReload(!reload)}
-                className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0"
-              >
-                <i className="fa-fw fas fa-sync cursor-pointer mr-2" /> Reload
-              </button>
-              <button
-                onClick={(_) => setShowNotifications(false)}
-                className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0"
-              >
-                <i className="fa-fw fas fa-times cursor-pointer mr-2" /> Close
-              </button>
+          <div className="w-full bg-gray-100 border-b sticky top-0 z-30 px-4 pb-1 lg:px-8">
+            <div className="flex justify-between items-end pt-4 py-2 space-x-2">
+              <div className="font-bold text-xl">Notifications</div>
+              <div className="">
+                <button
+                  onClick={(_) => setReload(!reload)}
+                  className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0"
+                >
+                  <i className="fa-fw fas fa-sync cursor-pointer mr-2" /> Reload
+                </button>
+                <button
+                  onClick={(_) => setShowNotifications(false)}
+                  className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0"
+                >
+                  <i className="fa-fw fas fa-times cursor-pointer mr-2" /> Close
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <div className="w-2/3">
+              <span className="text-sm font-semibold">Filter by category</span>
+                <SelectField
+                  name="event_filter"
+                  variant="outlined"
+                  margin="dense"
+                  value={eventFilter}
+                  options={[ { id: "", text: "Show All" }, ...NOTIFICATION_EVENTS ]}
+                  onChange={(e: any) => setEventFilter(e.target.value)}
+                />
+              </div>
             </div>
           </div>
+          
           <div>{manageResults}</div>
         </div>
       </SlideOver>
