@@ -9,7 +9,7 @@ import {
   Theme,
   Typography,
   Box,
-  Button
+  Button,
 } from "@material-ui/core";
 import { createStyles, makeStyles, withStyles } from "@material-ui/styles";
 import React from "react";
@@ -80,9 +80,9 @@ const ReportRow = ({ data, name, min, max }: any) => {
               wordBreak: "break-all",
               ...(color >= 0
                 ? {
-                  backgroundColor: rowColor[color]?.color || "white",
-                  color: rowColor[color]?.text || "black",
-                }
+                    backgroundColor: rowColor[color]?.color || "white",
+                    color: rowColor[color]?.text || "black",
+                  }
                 : {}),
             }}
           >
@@ -117,18 +117,25 @@ const ReportTable: React.FC<ReportTableProps> = ({
 
   return (
     <>
-      <Box display="flex" flexDirection="row" justifyContent="flex-end" displayPrint="none" margin="10px"
+      <Box
+        display="flex"
+        flexDirection="row"
+        justifyContent="flex-end"
+        displayPrint="none"
+        margin="10px"
         paddingTop="10px"
       >
         <Button
           color="primary"
           variant="contained"
           size="small"
-          onClick={() => window.print()}>Print Report</Button>
+          onClick={() => window.print()}
+        >
+          Print Report
+        </Button>
       </Box>
 
       <Box padding="1rem" margin="1rem 0" id="section-to-print">
-
         {title && (
           <Typography component="h1" variant="h4">
             {title}
@@ -138,15 +145,15 @@ const ReportTable: React.FC<ReportTableProps> = ({
         <div className="my-4">
           <span className="inline-block  bg-yellow-200 py-1 m-1 px-6 rounded-full text-yellow-900 font-medium">
             Below Ideal
-        </span>
+          </span>
 
           <span className="inline-block  bg-green-200 py-1 m-1 px-6 rounded-full text-green-900 font-medium">
             Ideal
-        </span>
+          </span>
 
           <span className="inline-block  bg-red-200 py-1 m-1 px-6 rounded-full text-red-900 font-medium">
             Above Ideal
-        </span>
+          </span>
         </div>
         {/* <InputLabel>Search Test</InputLabel>
       <TextInputField
@@ -179,10 +186,10 @@ const ReportTable: React.FC<ReportTableProps> = ({
                 ))}
                 <TableCell align="center" className={className.tableCell}>
                   Min
-              </TableCell>
+                </TableCell>
                 <TableCell align="center" className={className.tableCell}>
                   Max
-              </TableCell>
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -197,7 +204,7 @@ const ReportTable: React.FC<ReportTableProps> = ({
                       min={t.investigation_object.min_value}
                       max={t.investigation_object.max_value}
                       name={t.investigation_object.name}
-                      onChange={(e: { target: { value: any } }) => { }}
+                      onChange={(e: { target: { value: any } }) => {}}
                     />
                   );
                 })
@@ -205,7 +212,7 @@ const ReportTable: React.FC<ReportTableProps> = ({
                 <TableRow>
                   <TableCell component="th" scope="row">
                     No test
-                </TableCell>
+                  </TableCell>
                 </TableRow>
               )}
             </TableBody>

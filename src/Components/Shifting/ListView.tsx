@@ -38,6 +38,8 @@ export default function ListView() {
     loading: false,
   });
 
+  const local = JSON.parse(localStorage.getItem("shift-filters") || "{}");
+
   const applyFilter = (data: any) => {
     const filter = { ...qParams, ...data };
     updateQuery(filter);
@@ -378,54 +380,84 @@ export default function ListView() {
       <div className="flex space-x-2 mt-2 ml-2">
         {badge(
           "status",
-          appliedFilters.status != "--" && appliedFilters.status
+          (appliedFilters.status != "--" && appliedFilters.status) ||
+            (local.status !== "--" && local.status)
         )}
         {badge(
           "Emergency",
-          appliedFilters.emergency === "true"
+          local.emergency === "yes" || appliedFilters.emergency === "true"
             ? "yes"
-            : appliedFilters.emergency === "false"
+            : local.emergency === "no" || appliedFilters.emergency === "false"
             ? "no"
             : undefined
         )}
         {badge(
           "Is KASP",
-          appliedFilters.is_kasp === "true"
+          local.is_kasp === "yes" || appliedFilters.is_kasp === "true"
             ? "yes"
-            : appliedFilters.is_kasp === "false"
+            : local.is_kasp === "no" || appliedFilters.is_kasp === "false"
             ? "no"
             : undefined
         )}
         {badge(
           "Up Shift",
-          appliedFilters.is_up_shift === "true"
+          local.is_up_shift === "yes" || appliedFilters.is_up_shift === "true"
             ? "yes"
-            : appliedFilters.is_up_shift === "false"
+            : local.is_up_shift === "no" ||
+              appliedFilters.is_up_shift === "false"
             ? "no"
             : undefined
         )}
-        {badge("Phone Number", appliedFilters.patient_phone_number)}
-        {badge("Patient Name", appliedFilters.patient_name)}
-        {badge("Modified After", appliedFilters.modified_date_after)}
-        {badge("Modified Before", appliedFilters.modified_date_before)}
-        {badge("Created Before", appliedFilters.created_date_before)}
-        {badge("Created After", appliedFilters.created_date_after)}
-        {badge("Disease Status", appliedFilters.disease_status)}
+        {badge(
+          "Phone Number",
+          appliedFilters.patient_phone_number || local.patient_phone_number
+        )}
+        {badge(
+          "Patient Name",
+          appliedFilters.patient_name || local.patient_name
+        )}
+        {badge(
+          "Modified After",
+          appliedFilters.modified_date_after || local.modified_date_after
+        )}
+        {badge(
+          "Modified Before",
+          appliedFilters.modified_date_before || local.modified_date_before
+        )}
+        {badge(
+          "Created Before",
+          appliedFilters.created_date_before || local.created_date_before
+        )}
+        {badge(
+          "Created After",
+          appliedFilters.created_date_after || local.created_date_after
+        )}
+        {badge(
+          "Disease Status",
+          appliedFilters.disease_status || local.disease_status
+        )}
+
         {badge(
           "Assigned To",
-          appliedFilters.assigned_user || appliedFilters.assigned_to
+          appliedFilters.assigned_user ||
+            appliedFilters.assigned_to ||
+            local.assigned_user ||
+            local.assigned_to
         )}
         {badge(
           "Filtered By",
-          appliedFilters.assigned_facility && "Assigned Facility"
+          (appliedFilters.assigned_facility || local.assigned_facility) &&
+            "Assigned Facility"
         )}
         {badge(
           "Filtered By",
-          appliedFilters.orgin_facility && "Origin Facility"
+          (appliedFilters.orgin_facility || local.orgin_facility) &&
+            "Origin Facility"
         )}
         {badge(
           "Filtered By",
-          appliedFilters.shifting_approving_facility &&
+          (appliedFilters.shifting_approving_facility ||
+            local.shifting_approving_facility) &&
             "Shifting Approving Facility"
         )}
       </div>
@@ -475,6 +507,7 @@ export default function ListView() {
         <div className="bg-white min-h-screen p-4">
           <ListFilter
             filter={qParams}
+            local={local}
             showShiftingStatus={true}
             onChange={applyFilter}
             closeFilter={() => setShowFilters(false)}

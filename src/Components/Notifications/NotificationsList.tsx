@@ -52,9 +52,9 @@ export default function ResultList() {
       case "PATIENT_UPDATED":
         return `/facility/${data.facility}/patient/${data.patient}`;
       case "PATIENT_CONSULTATION_CREATED":
-        return `/facility/${data.facility}/patient/${data.patient}/consultation/${data.consultation}/`;
+        return `/facility/${data.facility}/patient/${data.patient}/consultation/${data.consultation}`;
       case "PATIENT_CONSULTATION_UPDATED":
-        return `/facility/${data.facility}/patient/${data.patient}/consultation/${data.consultation}/`;
+        return `/facility/${data.facility}/patient/${data.patient}/consultation/${data.consultation}`;
       case "PATIENT_CONSULTATION_UPDATE_CREATED":
         return `/facility/${data.facility}/patient/${data.patient}/consultation/${data.consultation}/daily-rounds/${data.daily_round}`;
       case "PATIENT_CONSULTATION_UPDATE_UPDATED":
