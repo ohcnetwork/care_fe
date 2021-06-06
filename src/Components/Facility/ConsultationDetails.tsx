@@ -18,7 +18,7 @@ const symptomChoices = [...SYMPTOM_CHOICES];
 const patientCategoryChoices = [...PATIENT_CATEGORY];
 
 export const ConsultationDetails = (props: any) => {
-  const { facilityId, patientId, consultationId } = props;
+  const { facilityId, patientId, consultationId, isLastConsultation } = props;
   const dispatch: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [isDailyRoundLoading, setIsDailyRoundLoading] = useState(false);
@@ -31,7 +31,7 @@ export const ConsultationDetails = (props: any) => {
   const [totalCount, setTotalCount] = useState(0);
   const [offset, setOffset] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
-  const limit = 5;
+  const limit = 15;
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -100,6 +100,7 @@ export const ConsultationDetails = (props: any) => {
   }
 
   let roundsList: any;
+
   if (isDailyRoundLoading) {
     roundsList = <CircularProgress size={20} />;
   } else if (dailyRoundsListData.length === 0) {
@@ -108,76 +109,33 @@ export const ConsultationDetails = (props: any) => {
     );
   } else if (dailyRoundsListData.length > 0) {
     roundsList = dailyRoundsListData.map((itemData, idx) => {
+      const telemedicine_doctor_update =
+        itemData.created_by_telemedicine ||
+        itemData.last_updated_by_telemedicine;
+
       return (
         <div key={`daily_round_${idx}`} className="w-full mt-4 px-2">
-          <div className="block border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black">
+          <div
+            className={`block border rounded-lg ${
+              telemedicine_doctor_update ? "bg-purple-200" : "bg-white"
+            }  shadow h-full cursor-pointer hover:border-primary-500 text-black`}
+          >
             <div className="p-4">
               <Grid container justify="space-between" alignItems="center">
                 <Grid item xs={11} container spacing={1}>
-                  <Grid item xs={6}>
-                    <Typography>
-                      <span className="w3-text-grey">Temperature:</span>{" "}
-                      {itemData.temperature}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography>
-                      <span className="w3-text-grey">Taken at :</span>{" "}
-                      {itemData.temperature_measured_at
-                        ? moment(itemData.temperature_measured_at).format("lll")
-                        : "-"}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Typography>
-                      <span className="w3-text-grey">
-                        Physical Examination Info:
-                      </span>{" "}
-                      {itemData.physical_examination_info}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Typography>
-                      <span className="w3-text-grey">Other Details:</span>{" "}
-                      {itemData.other_details}
-                    </Typography>
-                  </Grid>
-                </Grid>
-              </Grid>
-              <div className="mt-2">
-                <Button
-                  size="small"
-                  variant="outlined"
-                  fullWidth
-                  onClick={(e) =>
-                    navigate(
-                      `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${itemData.id}`
-                    )
-                  }
-                >
-                  View Consultation Update Details
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      );
-    });
-  }
-  if (isDailyRoundLoading) {
-    roundsList = <CircularProgress size={20} />;
-  } else if (dailyRoundsListData.length === 0) {
-    roundsList = (
-      <Typography>No Consultation Update data is available.</Typography>
-    );
-  } else if (dailyRoundsListData.length > 0) {
-    roundsList = dailyRoundsListData.map((itemData, idx) => {
-      return (
-        <div key={`daily_round_${idx}`} className="w-full mt-4 px-2">
-          <div className="block border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black">
-            <div className="p-4">
-              <Grid container justify="space-between" alignItems="center">
-                <Grid item xs={11} container spacing={1}>
+                  {telemedicine_doctor_update ? (
+                    <Grid item xs={6}>
+                      <Typography>
+                        <span className="text-gray-700">Updated by:</span>{" "}
+                        {telemedicine_doctor_update &&
+                        consultationData.assigned_to_object
+                          ? consultationData.assigned_to_object.first_name +
+                            " " +
+                            consultationData.assigned_to_object.last_name
+                          : "-"}
+                      </Typography>
+                    </Grid>
+                  ) : null}
                   <Grid item xs={6}>
                     <Typography>
                       <span className="text-gray-700">Temperature:</span>{" "}
@@ -204,6 +162,14 @@ export const ConsultationDetails = (props: any) => {
                       {itemData.admitted_to || "-"}
                     </Typography>
                   </Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <span className="text-gray-700">Category: </span>
+                      <span className="badge badge-pill badge-warning">
+                        {patientCategoryChoices.find((i) => i.id === itemData.patient_category)?.text || "-"}
+                      </span>
+                    </Typography>
+                  </Grid>
                   <Grid item xs={6}>
                     <Typography>
                       <span className="text-gray-700">Created At:</span>{" "}
@@ -220,6 +186,7 @@ export const ConsultationDetails = (props: any) => {
                         : "-"}
                     </Typography>
                   </Grid>
+
                   <Grid item xs={12}>
                     <Typography>
                       <span className="text-gray-700">
@@ -347,12 +314,6 @@ export const ConsultationDetails = (props: any) => {
             </span>
           </div>
           <div>
-            <span className="font-semibold leading-relaxed">Updated on: </span>
-            {consultationData.created_date
-              ? moment(consultationData.created_date).format("lll")
-              : "-"}
-          </div>
-          <div>
             <span className="font-semibold leading-relaxed">Admitted: </span>
             {consultationData.admitted ? "Yes" : "No"}
           </div>
@@ -432,12 +393,35 @@ export const ConsultationDetails = (props: any) => {
             </div>
           )}
         </div>
+
+        <div className="flex flex-col mt-6">
+          <div className="text-sm text-gray-700">
+            Created on {moment(consultationData.created_date).format("lll")}
+            {consultationData.created_by && (
+              <span>
+                by{" "}
+                {`${consultationData.created_by?.first_name} ${consultationData.created_by?.last_name} @${consultationData.created_by?.username} (${consultationData.created_by?.user_type})`}
+              </span>
+            )}
+          </div>
+
+          <div className="text-sm text-gray-700">
+            Last Modified on{" "}
+            {moment(consultationData.modified_date).format("lll")}{" "}
+            {consultationData.last_edited_by && (
+              <span>
+                by{" "}
+                {`${consultationData.last_edited_by?.first_name} ${consultationData.last_edited_by?.last_name} @${consultationData.last_edited_by?.username} (${consultationData.last_edited_by?.user_type})`}
+              </span>
+            )}
+          </div>
+        </div>
       </div>
       {consultationData.existing_medication && (
         <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
           <div className="px-4 py-5 sm:p-6">
             <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-              Existing Medication:{" "}
+              History of present illness : {" "}
             </h3>
             <div className="mt-2">
               {consultationData.existing_medication || "-"}
@@ -523,6 +507,18 @@ export const ConsultationDetails = (props: any) => {
       )}
       <div>
         <PageTitle title="Consultation Update" hideBack={true} />
+        {isLastConsultation && (
+          <button
+            className="mr-4 px-4 py-2 shadow border bg-white rounded-md border border-grey-500 whitespace-no-wrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300 text-center"
+            onClick={() =>
+              navigate(
+                `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds`
+              )
+            }
+          >
+            Add Consultation Updates
+          </button>
+        )}
         <div className="flex flex-wrap mt-4">
           {roundsList}
           {!isDailyRoundLoading && totalCount > limit && (
@@ -544,6 +540,8 @@ export const ConsultationDetails = (props: any) => {
           consultationId={consultationId}
           type="CONSULTATION"
           hideBack={true}
+          audio={true}
+          unspecified={true}
         />
       </div>
     </div>

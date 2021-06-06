@@ -20,6 +20,9 @@ export const initialFilterData = {
   offset: 0,
   ordering: null,
   is_kasp: "--",
+  assigned_user: "",
+  assigned_to: "",
+  disease_status: "",
 };
 
 export const formatFilter = (params: any) => {
@@ -52,6 +55,9 @@ export const formatFilter = (params: any) => {
     modified_date_after: filter.modified_date_after || undefined,
     patient_phone_number: filter.patient_phone_number || undefined,
     ordering: filter.ordering || undefined,
+    assigned_user: filter.assigned_user || undefined,
+    assigned_to: filter.assigned_to || undefined,
+    disease_status: filter.disease_status || undefined,
     is_kasp:
       (filter.is_kasp && filter.is_kasp) === "--"
         ? ""
