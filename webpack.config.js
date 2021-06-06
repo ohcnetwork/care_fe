@@ -6,8 +6,7 @@ const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const CopyPlugin = require("copy-webpack-plugin");
 const WorkboxPlugin = require("workbox-webpack-plugin");
 const MomentLocalesPlugin = require("moment-locales-webpack-plugin");
-const OptimizeCssAssetsPlugin = require("optimize-css-assets-webpack-plugin");
-const safePostCssParser = require("postcss-safe-parser");
+const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
 
 const prodPlugins = (isDev) => {
   if (isDev) {
@@ -38,28 +37,30 @@ module.exports = (env, argv) => {
     },
     output: {
       path: path.resolve(__dirname, "dist"),
-      filename: isDev ? "js/bundle.[hash].js" : "js/bundle.prod.[hash].js",
+      filename: isDev
+        ? "js/bundle.[contenthash].js"
+        : "js/bundle.prod.[contenthash].js",
       chunkFilename: "[name].[chunkhash].chunk.js",
       publicPath: "/",
     },
     optimization: {
-      moduleIds: "hashed",
+      moduleIds: "deterministic",
+      minimizer: [new CssMinimizerPlugin()],
       splitChunks: isDev
         ? false
         : {
             cacheGroups: {
               commons: {
                 test: /[\\/]node_modules[\\/]/,
-                name: false,
                 chunks: "all",
               },
             },
           },
       runtimeChunk: {
-        name: entrypoint => `runtime-${entrypoint.name}`,
+        name: (entrypoint) => `runtime-${entrypoint.name}`,
       },
     },
-    devtool: isDev ? "eval-cheap-module-source-map" : "none",
+    devtool: isDev ? "eval-cheap-module-source-map" : "eval",
     mode,
     resolve: {
       extensions: [".js", ".jsx", ".json", ".ts", ".tsx", ".manifest"],
@@ -95,19 +96,11 @@ module.exports = (env, argv) => {
         },
         {
           test: /\.(sa|sc|c)ss$/,
-          use: [
-            MiniCssExtractPlugin.loader,
-            "css-loader",
-            "postcss-loader",
-          ],
+          use: [MiniCssExtractPlugin.loader, "css-loader", "postcss-loader"],
         },
         {
           test: /\.(png|jpe?g|gif)$/i,
-          use: [
-            {
-              loader: "file-loader",
-            },
-          ],
+          type: "asset/resource",
         },
       ],
     },
@@ -157,22 +150,13 @@ module.exports = (env, argv) => {
               minifyURLs: true,
             },
       }),
-      new OptimizeCssAssetsPlugin({
-        cssProcessorOptions: {
-          parser: safePostCssParser,
-          map: false,
-        },
-        cssProcessorPluginOptions: {
-          preset: ["default", { minifyFontValues: { removeQuotes: false } }],
-        },
-      }),
 
       new webpack.HotModuleReplacementPlugin(),
       new MomentLocalesPlugin(),
       new MiniCssExtractPlugin({
         filename: isDev
-          ? "css/[name][hash].bundle.css"
-          : "css/[name][hash].prod.bundle.css",
+          ? "css/[name][contenthash].bundle.css"
+          : "css/[name][contenthash].prod.bundle.css",
       }),
       ...prodPlugins(isDev),
     ],
