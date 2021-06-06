@@ -9,7 +9,7 @@ const Loading = loadable(() => import("../Common/Loading"));
 
 export const UserSelect = (props: any) => {
   const dispatchAction: any = useDispatch();
-  const { facilityId, userId, onSelect } = props;
+  const { facilityId, userId, onSelect, placeholder="Select a User" } = props;
   const [users, setUsers] = useState(new Array<any>());
   const [isLoading, setIsLoading] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -53,7 +53,7 @@ export const UserSelect = (props: any) => {
                   >
                   </span>
                   <span className="block truncate">
-                    {selectedUser ? selectedUser.first_name + ' ' + selectedUser.last_name : "Assign a Shifting Staff"}
+                    {selectedUser ? selectedUser.first_name + ' ' + selectedUser.last_name : placeholder }
                   </span>
                 </div>
                 <div className="btn btn-default" onClick={_ => { onSelect('') }}> Clear</div>

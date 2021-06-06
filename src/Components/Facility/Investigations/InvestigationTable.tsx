@@ -6,24 +6,25 @@ import {
   TableHead,
   TableRow,
   TableBody,
-  Theme,
   InputLabel,
   Box,
+  Button,
+  TableRowProps,
 } from "@material-ui/core";
 import { createStyles, makeStyles, withStyles } from "@material-ui/styles";
 import React from "react";
 import { useState } from "react";
-import { TextInputField } from "../../Common/HelperInputFields";
-import { getColorIndex, rowColor } from "./Reports/utils";
+import { SelectField, TextInputField } from "../../Common/HelperInputFields";
+import _ from "lodash";
 
-const useStyle = makeStyles((theme: Theme) => ({
+const useStyle = makeStyles(() => ({
   tableCell: {
     paddingTop: 0,
     paddingBottom: 0,
   },
 }));
 
-const StyledTableRow = withStyles((theme: Theme) =>
+const StyledTableRow = withStyles(() =>
   createStyles({
     root: {
       "&:nth-of-type(odd)": {
@@ -36,45 +37,70 @@ const StyledTableRow = withStyles((theme: Theme) =>
   })
 )(TableRow);
 
-const TestRow = ({ data }: any) => {
-  const className = useStyle();
+const TestRow = ({ data, onChange, showForm, value, isChanged }: any) => {
+  const tableClass = `h-12 text-sm border-l border-r border-gray-400 px-2`;
+  const testValue = value;
 
-  const tableClass = "px-4 h-12 text-sm border-l border-r border-gray-400";
-  const color = getColorIndex({
-    min: data.investigation_object.min_value,
-    max: data.investigation_object.max_value,
-    value: data?.value,
-  });
-
+  const inputType =
+    data?.investigation_object?.investigation_type === "Float"
+      ? "number"
+      : "string";
   return (
-    <StyledTableRow>
+    <StyledTableRow className={isChanged ? "bg-green-300" : ""}>
       <TableCell className={tableClass}>
-        {data.investigation_object.name}
+        {data?.investigation_object?.name || "---"}
       </TableCell>
       <TableCell
-        className={tableClass}
+        className={`h-12 text-sm border-l border-r border-gray-400 ${
+          showForm ? "p-0" : "px-2"
+        } `}
         align="right"
         style={{
-          ...(color >= 0
-            ? {
-                backgroundColor: rowColor[color]?.color || "white",
-                color: rowColor[color]?.text || "black",
-              }
-            : {}),
+          padding: 0,
+          minWidth: 150,
+          maxWidth: 150,
         }}
       >
-        {data?.notes ||
-          (data?.value &&
-            Math.round((data.value + Number.EPSILON) * 100) / 100) ||
-          "---"}
+        {showForm ? (
+          data?.investigation_object?.investigation_type === "Choice" ? (
+            <SelectField
+              name="preferred_vehicle_choice"
+              variant="outlined"
+              margin="dense"
+              optionArray={true}
+              value={data?.notes}
+              options={[
+                "Unselected",
+                ...data?.investigation_object?.choices.split(","),
+              ]}
+              onChange={onChange}
+              className={
+                "w-full px-4 h-full text-right text-sm border-l border-r border-gray-800 m-0"
+              }
+            />
+          ) : (
+            <input
+              className={
+                "w-full px-4 h-full text-right text-sm border-l border-r border-gray-800 m-0"
+              }
+              value={testValue}
+              onChange={onChange}
+              type={inputType}
+              step="any"
+              placeholder="Enter value"
+            />
+          )
+        ) : (
+          testValue || "---"
+        )}
       </TableCell>
       <TableCell className={tableClass} align="left">
         {data.investigation_object.unit || "---"}
       </TableCell>
-      <TableCell className={tableClass} align="right">
+      <TableCell className={tableClass} align="center">
         {data.investigation_object.min_value || "---"}
       </TableCell>
-      <TableCell className={tableClass} align="right">
+      <TableCell className={tableClass} align="center">
         {data.investigation_object.max_value || "---"}
       </TableCell>
       <TableCell className={tableClass} align="right">
@@ -84,12 +110,17 @@ const TestRow = ({ data }: any) => {
   );
 };
 
-export const InvestigationTable = ({ title, data }: any) => {
-  const className = useStyle();
-
+export const InvestigationTable = ({
+  title,
+  data,
+  handleValueChange,
+  changedFields,
+  handleUpdateCancel,
+  handleSave,
+}: any) => {
   const [searchFilter, setSearchFilter] = useState("");
-
-  const filterTests = data.filter((i: any) => {
+  const [showForm, setShowForm] = useState(false);
+  const filterTests = Object.values(data).filter((i: any) => {
     const result = !(
       String(i.investigation_object.name)
         .toLowerCase()
@@ -100,8 +131,33 @@ export const InvestigationTable = ({ title, data }: any) => {
 
   return (
     <Box padding="1rem" margin="1rem 0">
-      {title && <div className="font-bold text-xl">{title}</div>}
-      <br />
+      <div className="flex items-center justify-between mb">
+        {title && <div className="font-bold text-xl">{title}</div>}
+        <div>
+          <Button
+            variant={showForm ? "outlined" : "contained"}
+            color="primary"
+            onClick={() => {
+              showForm && handleUpdateCancel();
+              setShowForm((prev) => !prev);
+            }}
+          >
+            {!showForm && <i className="fas fa-pencil-alt mr-2" />}
+            {showForm ? "Cancel" : "Update Details"}
+          </Button>
+          {showForm && (
+            <Button
+              variant={"contained"}
+              color="primary"
+              onClick={() => handleSave()}
+              className="ml-2"
+            >
+              Save
+            </Button>
+          )}
+        </div>
+      </div>
+
       <InputLabel>Search Test</InputLabel>
       <TextInputField
         value={searchFilter}
@@ -127,7 +183,33 @@ export const InvestigationTable = ({ title, data }: any) => {
           <TableBody>
             {filterTests.length > 0 ? (
               filterTests.map((t: any) => {
-                return <TestRow data={t} key={t.id} />;
+                const value =
+                  changedFields[t.id]?.notes ??
+                  changedFields[t.id]?.value ??
+                  null;
+                const isChanged = changedFields[t.id]?.initialValue !== value;
+                return (
+                  <TestRow
+                    data={t}
+                    key={t.id}
+                    showForm={showForm}
+                    value={value}
+                    isChanged={isChanged}
+                    onChange={(e: { target: { value: any } }) => {
+                      const { target, value } =
+                        t?.investigation_object?.investigation_type === "Float"
+                          ? {
+                              target: `${t.id}.value`,
+                              value: Number(e.target.value) || null,
+                            }
+                          : {
+                              target: `${t.id}.notes`,
+                              value: e.target.value,
+                            };
+                      handleValueChange(value, target);
+                    }}
+                  />
+                );
               })
             ) : (
               <TableRow>

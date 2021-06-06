@@ -14,6 +14,7 @@ import { IconButton } from '@material-ui/core';
 import LinkFacilityDialog from './LinkFacilityDialog';
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
+import { SelectField } from "../Common/HelperInputFields";
 
 export default function ManageUsers(props: any) {
   const dispatch: any = useDispatch();
@@ -34,7 +35,15 @@ export default function ManageUsers(props: any) {
   const userTypes = isSuperuser ? [...USER_TYPES] : USER_TYPES.slice(0, userIndex + 1);
   const [linkFacility, setLinkFacility] = useState<{ show: boolean; username: string }>({ show: false, username: '' });
 
+  const [selectedRole, setSelectedRole] = useState("")
+
   const limit = userTypes.length ? 13 : 14;
+
+  const USER_TYPE_OPTIONS = ["Select", ...USER_TYPES].map((user) => {
+    return {
+      "text": user,
+    };
+  })
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -93,6 +102,19 @@ export default function ManageUsers(props: any) {
     }
     setIsLoading(false);
   }
+
+  const filterByRole = async (role: string) => {
+    setIsLoading(true);
+    setSelectedRole(role);
+    role = (role === "Select") ? "" : role;
+    const res = await dispatch(searchUser({ limit, offset, user_type: encodeURI(role) }))
+    if (res && res.data) {
+      setUsers(res.data.results);
+      setTotalCount(res.data.count);
+    }
+    setIsLoading(false);
+  }
+
   const addUser = (<button className="px-4 py-1 rounded-md bg-green-500 mt-4 text-white text-lg font-semibold rounded shadow"
     onClick={() => navigate("/user/add")}>
     <i className="fas fa-plus mr-2"></i>
@@ -293,6 +315,20 @@ export default function ManageUsers(props: any) {
             search={searchByPhone}
             placeholder='+919876543210'
             errors=''
+          />
+        </div>
+        <div className="px-4">
+          <div className="text-sm font-semibold">
+            Filter By Role
+          </div>
+          <SelectField
+            name="role"
+            variant="outlined"
+            margin="dense"
+            value={selectedRole}
+            options={USER_TYPE_OPTIONS}
+            onChange={(e) => { filterByRole(e.target.value) }}
+            errors=""
           />
         </div>
       </div>

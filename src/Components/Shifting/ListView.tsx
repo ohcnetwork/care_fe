@@ -126,6 +126,9 @@ export default function ListView() {
     qParams.patient_phone_number,
     qParams.ordering,
     qParams.is_kasp,
+    qParams.assigned_user,
+    qParams.assigned_to,
+    qParams.disease_status,
     offset,
   ]);
 
@@ -407,6 +410,11 @@ export default function ListView() {
         {badge("Modified Before", appliedFilters.modified_date_before)}
         {badge("Created Before", appliedFilters.created_date_before)}
         {badge("Created After", appliedFilters.created_date_after)}
+        {badge("Disease Status", appliedFilters.disease_status)}
+        {badge(
+          "Assigned To",
+          appliedFilters.assigned_user || appliedFilters.assigned_to
+        )}
         {badge(
           "Filtered By",
           appliedFilters.assigned_facility && "Assigned Facility"
