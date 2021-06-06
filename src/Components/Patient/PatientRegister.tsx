@@ -154,6 +154,7 @@ const initForm: any = {
   is_vaccinated: "false",
   number_of_doses: "1",
   vaccine_name: null,
+  last_vaccinated_date: null,
   ...medicalHistoryChoices,
 };
 
@@ -434,6 +435,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               ? String(res.data.number_of_doses)
               : "1",
             vaccine_name: res.data.vaccine_name ? res.data.vaccine_name : null,
+            last_vaccinated_date: res.data.last_vaccinated_date ? res.data.last_vaccinated_date : null,
           };
           res.data.medical_history.forEach((i: any) => {
             const medicalHistory = medicalHistoryTypes.find(
