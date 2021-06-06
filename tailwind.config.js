@@ -18,7 +18,7 @@ module.exports = {
     },
   },
   variants: {},
-  plugins: [require("@tailwindcss/ui")],
+  plugins: [require("@tailwindcss/forms")],
   purge: {
     content: [
       "./src/**/*.html",
@@ -27,7 +27,7 @@ module.exports = {
       "./src/**/*.js",
     ],
     options: {
-      whitelistPatterns: [/^bg-/, /^text-/, /^border-/, /^hover:/],
+      safelist: [/^bg-/, /^text-/, /^border-/, /^hover:/],
     },
   },
 };

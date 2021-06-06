@@ -101,16 +101,14 @@ export default function InventoryLog(props: any) {
         <td className="px-5 py-5 border-b border-gray-200 text-sm hover:bg-gray-100">
           <div className="flex items-center">
             <div className="ml-3">
-              <p className="text-gray-900 whitespace-no-wrap">
-                {moment(inventoryItem.created_date).format(
-                  "DD-MM-YYYY LTS"
-                )}
+              <p className="text-gray-900 whitespace-nowrap">
+                {moment(inventoryItem.created_date).format("DD-MM-YYYY LTS")}
               </p>
             </div>
           </div>
         </td>
         <td className="px-5 py-5 border-b border-gray-200 text-sm hover:bg-gray-100">
-          <p className="text-gray-900 whitespace-no-wrap lowercase">
+          <p className="text-gray-900 whitespace-nowrap lowercase">
             {inventoryItem.quantity_in_default_unit}{" "}
             {inventoryItem.item_object?.default_unit?.name}
             {inventoryItem.probable_accident && (
@@ -119,7 +117,7 @@ export default function InventoryLog(props: any) {
           </p>
         </td>
         <td className="px-5 py-5 border-b border-gray-200 text-sm hover:bg-gray-100">
-          <p className="text-gray-900 whitespace-no-wrap lowercase">
+          <p className="text-gray-900 whitespace-nowrap lowercase">
             {inventoryItem.is_incoming ? (
               <span className="ml-2 text-green-600">Added Stock</span>
             ) : (
@@ -154,7 +152,7 @@ export default function InventoryLog(props: any) {
           colSpan={3}
           className="px-5 py-5 border-b border-gray-200 text-center"
         >
-          <p className="text-gray-500 whitespace-no-wrap">
+          <p className="text-gray-500 whitespace-nowrap">
             No log for this inventory available
           </p>
         </td>

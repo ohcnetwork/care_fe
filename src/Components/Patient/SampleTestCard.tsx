@@ -131,13 +131,13 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
                 `/patient/${itemData.patient}/test_sample/${itemData.id}/icmr_sample`
               )
             }
-            className="px-4 py-2 shadow border bg-white rounded-md border border-grey-500 whitespace-no-wrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300 text-center"
+            className="px-4 py-2 shadow border bg-white rounded-md border border-grey-500 whitespace-nowrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300 text-center"
           >
             View Sample Report
           </button>
           <button
             onClick={(e) => showUpdateStatus(itemData)}
-            className="px-4 py-2 shadow border bg-white rounded-md border border-grey-500 whitespace-no-wrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300 text-center"
+            className="px-4 py-2 shadow border bg-white rounded-md border border-grey-500 whitespace-nowrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300 text-center"
           >
             UPDATE SAMPLE TEST STATUS
           </button>

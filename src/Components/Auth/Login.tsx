@@ -99,7 +99,7 @@ const LoginPage = (props: any) => {
       <div className="absolute top-2 right-2">
         <LanguageSelector className="md:bg-green-500 md:text-white bg-white" />
       </div>
-      <div className="flex flex-col justify-center h-1/2 md:w-1/2 md:h-full bg-green-500">
+      <div className="flex flex-col justify-center h-1/2 md:w-1/2 md:h-full bg-green-500 p-10">
         <div className="pl-1/5">
           <a href={"/"}>
             <img

@@ -21,10 +21,8 @@ const patientCategoryChoices = [...PATIENT_CATEGORY];
 export const DailyRoundListDetails = (props: any) => {
   const { facilityId, patientId, consultationId, id } = props;
   const dispatch: any = useDispatch();
-  const [
-    dailyRoundListDetailsData,
-    setDailyRoundListDetails,
-  ] = useState<DailyRoundsModel>({});
+  const [dailyRoundListDetailsData, setDailyRoundListDetails] =
+    useState<DailyRoundsModel>({});
   const [isLoading, setIsLoading] = useState(false);
 
   const fetchpatient = useCallback(
@@ -198,13 +196,13 @@ export const DailyRoundListDetails = (props: any) => {
                           {dailyRoundListDetailsData?.medication_given?.map(
                             (med) => (
                               <tr className="bg-white">
-                                <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 font-medium text-gray-900">
+                                <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 font-medium text-gray-900">
                                   {med.medicine}
                                 </td>
-                                <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-gray-500">
+                                <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-500">
                                   {med.dosage}
                                 </td>
-                                <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-gray-500">
+                                <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-500">
                                   {med.dosage}
                                 </td>
                               </tr>

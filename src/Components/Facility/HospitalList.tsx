@@ -279,7 +279,7 @@ const HospitalListPage = (props: any) => {
                   <span className="inline-flex rounded-md shadow-sm">
                     <button
                       type="button"
-                      className="inline-flex items-center px-3 py-2 border border-green-500 text-sm leading-4 font-medium rounded-md text-green-700 bg-white hover:text-green-500 focus:outline-none focus:border-green-300 focus:shadow-outline-blue active:text-green-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                      className="inline-flex items-center px-3 py-2 border border-green-500 text-sm leading-4 font-medium rounded-md text-green-700 bg-white hover:text-green-500 focus:outline-none focus:border-green-300 focus:ring-blue active:text-green-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
                       onClick={() => navigate(`/facility/${facility.id}`)}
                     >
                       {t("View Facility")}
@@ -320,7 +320,7 @@ const HospitalListPage = (props: any) => {
     ) : (
       <div>
         <div
-          className="p-16 mt-4 bg-white shadow rounded-md border border-grey-500 whitespace-no-wrap text-sm font-semibold cursor-pointer hover:bg-gray-300 text-center"
+          className="p-16 mt-4 bg-white shadow rounded-md border border-grey-500 whitespace-nowrap text-sm font-semibold cursor-pointer hover:bg-gray-300 text-center"
           onClick={() => navigate("/facility/create")}
         >
           <i className="fas fa-plus text-3xl"></i>
@@ -379,15 +379,15 @@ const HospitalListPage = (props: any) => {
                         xmlns="http://www.w3.org/2000/svg"
                       >
                         <path
-                          fill-rule="evenodd"
+                          fillRule="evenodd"
                           d="M.5 8a.5.5 0 0 1 .5.5V12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8.5a.5.5 0 0 1 1 0V12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V8.5A.5.5 0 0 1 .5 8z"
                         />
                         <path
-                          fill-rule="evenodd"
+                          fillRule="evenodd"
                           d="M5 7.5a.5.5 0 0 1 .707 0L8 9.793 10.293 7.5a.5.5 0 1 1 .707.707l-2.646 2.647a.5.5 0 0 1-.708 0L5 8.207A.5.5 0 0 1 5 7.5z"
                         />
                         <path
-                          fill-rule="evenodd"
+                          fillRule="evenodd"
                           d="M8 1a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0v-8A.5.5 0 0 1 8 1z"
                         />
                       </svg>

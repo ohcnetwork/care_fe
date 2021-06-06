@@ -83,7 +83,10 @@ export default function ListView() {
   const fetchData = () => {
     setIsLoading(true);
     dispatch(
-      listResourceRequests(formatFilter({ ...qParams, offset }), "resource-list-call")
+      listResourceRequests(
+        formatFilter({ ...qParams, offset }),
+        "resource-list-call"
+      )
     ).then((res: any) => {
       if (res && res.data) {
         setData(res.data.results);
@@ -122,11 +125,7 @@ export default function ListView() {
     return data.map((resource: any) => (
       <div key={`resource_${resource.id}`} className="w-1/2 mt-6 md:px-4">
         <div className="overflow-hidden shadow rounded-lg bg-white h-full">
-          <div
-            className={
-              "p-4 h-full flex flex-col justify-between"
-            }
-          >
+          <div className={"p-4 h-full flex flex-col justify-between"}>
             <div>
               <div className="flex justify-between">
                 <div className="font-bold text-xl capitalize mb-2">
@@ -140,7 +139,7 @@ export default function ListView() {
                   )}
                 </div>
               </div>
-              <dl className="grid grid-cols-1 col-gap-1 row-gap-2 sm:grid-cols-1">
+              <dl className="grid grid-cols-1 gap-x-1 gap-y-2 sm:grid-cols-1">
                 <div className="sm:col-span-1">
                   <dt
                     title="Resource status"
@@ -286,8 +285,7 @@ export default function ListView() {
         )}
         {badge(
           "Filtered By",
-          appliedFilters.approving_facility &&
-            "Resource Approving Facility"
+          appliedFilters.approving_facility && "Resource Approving Facility"
         )}
       </div>
 

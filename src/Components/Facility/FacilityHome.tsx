@@ -138,7 +138,7 @@ export const FacilityHome = (props: any) => {
   let stats = patientStatsData.map((data: PatientStatsModel, index) => {
     return (
       <tr className="border" key={index}>
-        <td className="border px-4 py-2 whitespace-no-wrap">
+        <td className="border px-4 py-2 whitespace-nowrap">
           {data.entry_date || "0"}
         </td>
         <td className="border px-4 py-2 text-center">
