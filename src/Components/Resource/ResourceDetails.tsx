@@ -97,7 +97,7 @@ export default function ResourceDetails(props: { id: string }) {
     );
   };
 
-  const printData = (data: any) => {
+  const ApprovalLetter = (data: any) => {
     return (
       <div id="section-to-print" className="print bg-white">
         <div className="flex justify-center">
@@ -250,7 +250,7 @@ export default function ResourceDetails(props: { id: string }) {
               <i className="fas fa-times mr-2"></i> Close
             </button>
           </div>
-          {printData(data)}
+          {ApprovalLetter(data)}
         </div>
       ) : (
         <div className="mx-3 md:mx-8 mb-10">
@@ -444,7 +444,7 @@ export default function ResourceDetails(props: { id: string }) {
           </div>
           <div className="grid md:grid-cols-3 gap-4 pb-4">
             <div>
-              <h4 className="mt-8">Orgin Facility</h4>
+              <h4 className="mt-8">Origin Facility</h4>
 
               {showFacilityCard(data.orgin_facility_object)}
             </div>
