@@ -46,6 +46,9 @@ export default function ManageUsers(props: any) {
   const userTypes = isSuperuser
     ? [...USER_TYPES]
     : USER_TYPES.slice(0, userIndex + 1);
+  const deleteUserTypes = isSuperuser
+    ? [...USER_TYPES]
+    : USER_TYPES.slice(0, userIndex);
   const [linkFacility, setLinkFacility] = useState<{
     show: boolean;
     username: string;
@@ -358,7 +361,7 @@ export default function ManageUsers(props: any) {
                 </div>
               )}
               {userType === "DistrictAdmin" &&
-                userTypes.find((x) => x === user.user_type) && (
+                deleteUserTypes.find((x) => x === user.user_type) && (
                   <button
                     type="button"
                     className="m-3 px-3 py-2 self-end w-20 border border-red-500 text-center text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:text-red-500 focus:outline-none focus:border-red-300 focus:shadow-outline-blue active:text-red-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
