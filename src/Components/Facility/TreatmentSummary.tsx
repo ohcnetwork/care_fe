@@ -48,8 +48,8 @@ const TreatmentSummary = (props: any) => {
                 );
                 setInvestigations(valueMap)
             }
-            setIsLoading(false)
         }
+        setIsLoading(false)
     }, [dispatch]
     )
 
@@ -106,15 +106,14 @@ const TreatmentSummary = (props: any) => {
                                 </div>
                                 <div className="col-span-1 py-2 px-3 border-r-2 border-gray-800">
                                     <b>Date of admission :</b>
-                                    {props.consultationData.admitted &&
-                                        <span>{props.consultationData.admission_date ?
-                                            moment(props.consultationData.admission_date).format('DD/MM/YYYY') : "-"
-                                        }</span>}
+                                        <span>{props.consultationData.admitted ?
+                                            moment(props.consultationData.admission_date).format('DD/MM/YYYY') : " ---"
+                                        }</span>
                                 </div>
                                 <div className="col-span-1 py-2 px-3">
                                     <b>Date of positive :</b>
                                     {patientData.date_of_result ?
-                                        moment(patientData.date_of_result).format('DD/MM/YYYY') : "   -"}
+                                        moment(patientData.date_of_result).format('DD/MM/YYYY') : " ---"}
                                 </div>
                             </div>
 
@@ -135,7 +134,7 @@ const TreatmentSummary = (props: any) => {
                                 <div className="col-span-1 py-2 px-3">
                                     <b>Date of negative :</b>
                                     <span>{patientData.disease_status == "NEGATIVE" ?
-                                        moment(patientData.modified_date).format("DD/MM/YYYY") : "   -"}
+                                        moment(patientData.modified_date).format("DD/MM/YYYY") : " ---"}
                                     </span>
                                 </div>
                             </div>
@@ -190,7 +189,7 @@ const TreatmentSummary = (props: any) => {
                                         <div>
                                         <b>Examination details and clinical conditions :</b>
                                         {props.consultationData.examination_details ?
-                                            props.consultationData.examination_detail : "    ---"}
+                                            props.consultationData.examination_details : "    ---"}
                                     </div>
 
                                     <div>
@@ -224,7 +223,7 @@ const TreatmentSummary = (props: any) => {
                                         </thead>
 
                                         <tbody>
-                                            {investigations.length > 0 ? (
+                                            {Object.values(investigations).length > 0 ? (
                                                 Object.values(investigations).map((value: any, index:number) => {
                                                     return (
                                                         <tr key={index}>
