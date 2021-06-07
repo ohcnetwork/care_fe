@@ -88,10 +88,6 @@ export default function ResultList() {
           <div className="text-xs">
             {moment(result.created_date).format("lll")}
           </div>
-          <a className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0">
-            <i className="fas fa-eye mr-2 text-primary-500" />
-            Visit Link
-          </a>
         </div>
       );
     });
