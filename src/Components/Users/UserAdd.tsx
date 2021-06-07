@@ -255,6 +255,7 @@ export const UserAdd = (props: UserProps) => {
   };
 
   const handleDateChange = (date: any, field: string) => {
+    console.log("Date handling is there");
     if (moment(date).isValid()) {
       const form = { ...state.form };
       form[field] = date;
