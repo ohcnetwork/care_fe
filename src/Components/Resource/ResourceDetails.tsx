@@ -138,7 +138,9 @@ export default function ResourceDetails(props: { id: string }) {
                 {data.orgin_facility_object?.state_object?.name || "--"}
               </div>
             </div>
-            {data.status === "NOT APPROVED" ? (
+            {data.status === "REJECTED" ||
+            data.status === "PENDING" ||
+            data.status === "ON HOLD" ? (
               <div className="mt-4">
                 <span className="leading-relaxed">
                   The request for resource (details below) placed by yourself is{" "}
