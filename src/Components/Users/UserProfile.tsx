@@ -155,17 +155,18 @@ export default function UserProfile() {
           }
           return;
         case "altPhoneNumber":
-          const altPhoneNumber = parsePhoneNumberFromString(
-            states.form[field],
-            "IN"
-          );
-
           let alt_is_valid: boolean = false;
-
-          if (altPhoneNumber) {
-            alt_is_valid = altPhoneNumber.isValid();
-            if (alt_is_valid) console.log("Type is ", altPhoneNumber.getType());
-            alt_is_valid = altPhoneNumber.getType() === "MOBILE";
+          if (states.form[field]) {
+            const altPhoneNumber = parsePhoneNumberFromString(
+              states.form[field],
+              "IN"
+            );
+            if (altPhoneNumber) {
+              alt_is_valid = altPhoneNumber.isValid();
+              if (alt_is_valid) {
+                alt_is_valid = altPhoneNumber.getType() === "MOBILE";
+              }
+            }
           }
 
           if (!states.form[field] || !alt_is_valid) {
@@ -190,9 +191,7 @@ export default function UserProfile() {
   const handleValueChange = (phoneNo: any, name: string) => {
     if (phoneNo && parsePhoneNumberFromString(phoneNo)?.isPossible()) {
       const form = { ...states.form };
-      console.log("Phone is ", phoneNo);
       form[name] = phoneNo;
-      console.log("FOrm is ", form);
       dispatch({ type: "set_form", form });
     }
   };
@@ -200,7 +199,6 @@ export default function UserProfile() {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     const validForm = validateForm();
-    console.log("Valid form is ", validForm);
     if (validForm) {
       setIsLoading(true);
       const data = {
@@ -488,9 +486,9 @@ export default function UserProfile() {
                         <PhoneNumberField
                           label="Phone Number*"
                           value={states.form.phoneNumber}
-                          onChange={(value: any) => [
-                            handleValueChange(value, "phoneNumber"),
-                          ]}
+                          onChange={(value: any) => {
+                            handleValueChange(value, "phoneNumber");
+                          }}
                           errors={states.errors.phoneNumber}
                         />
                       </div>
@@ -499,9 +497,9 @@ export default function UserProfile() {
                         <PhoneNumberField
                           label="Whatsapp Number*"
                           value={states.form.altPhoneNumber}
-                          onChange={(value: any) => [
-                            handleValueChange(value, "altPhoneNumber"),
-                          ]}
+                          onChange={(value: any) => {
+                            handleValueChange(value, "altPhoneNumber");
+                          }}
                           errors={states.errors.altPhoneNumber}
                         />
                       </div>

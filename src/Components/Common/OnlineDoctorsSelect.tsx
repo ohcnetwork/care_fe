@@ -24,7 +24,7 @@ export const OnlineDoctorsSelect = (props: any) => {
       const params = {
         user_type: "Doctor",
         ordering: "-last-login",
-        username: state.searchTerm,
+        search_text: state.searchTerm,
       };
       const res = await dispatchAction(getUserList(params));
       if (!status.aborted) {
@@ -65,7 +65,7 @@ export const OnlineDoctorsSelect = (props: any) => {
                 ref={searchFieldRef}
                 name="searchTerm"
                 type="text"
-                placeholder="Search by username"
+                placeholder="Search by name or username"
                 className={classNames("py-2 pl-3 w-full outline-none", { "hidden": !isExpanded })} 
                 value={state.searchTerm}
                 onChange={handleSearchTermChange}

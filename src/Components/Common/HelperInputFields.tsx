@@ -36,6 +36,7 @@ export interface MultiSelectInputProps extends Omit<SelectProps, 'onChange'> {
     optionKey?: string,
     optionValue?: string,
     onChange?: (e: any, child?: any) => void,
+    errors?: string;
 }
 
 export interface DefaultNativeSelectInputProps extends NativeSelectInputProps {
@@ -294,37 +295,43 @@ export const SelectField = (props: DefaultSelectInputProps) => {
 };
 
 export const MultiSelectField = (props: MultiSelectInputProps) => {
-    const { options, label, value, variant, margin, optionKey, optionValue, ...restProps } = props;
+    const { errors, options, label, value, variant, margin, optionKey, optionValue, ...restProps } = props;
     const optKey = optionKey ? optionKey : "id";
     const optVal = optionValue ? optionValue : "text";
     return (
-        <FormControl className="w-full" variant={variant} margin={margin}>
-            <Select
-                multiple
-                {...restProps}
-                value={value}
-                input={<Input id={`${label}_chip`} />}
-                renderValue={(selected: any) => (
-                    <div className="flex flex-wrap">
-                        {selected.map((value: any) => {
-                            const label = options.find(opt => value === opt[optKey])?.[optVal];
-                            return (
-                                <Chip key={value} label={label} className="m-1" />
-                            )
-                        })}
-                    </div>
-                )}
-            >
-                {options.map((opt: any) => {
-                    const selected = value as Array<any>;
-                    return (<MenuItem key={opt.id} value={opt[optKey]}>
-                        <Checkbox checked={selected.indexOf(opt[optKey]) > -1} />
-                        <ListItemText primary={opt[optVal]} />
-                    </MenuItem>
-                    )
-                })}
-            </Select>
-        </FormControl>
+        <>
+            <FormControl className="w-full" variant={variant} margin={margin}>
+                <Select
+                    multiple
+                    {...restProps}
+                    value={value}
+                    input={<Input id={`${label}_chip`} />}
+                    renderValue={(selected: any) => (
+                        <div className="flex flex-wrap">
+                            {selected.map((value: any) => {
+                                const label = options.find(opt => value === opt[optKey])?.[optVal];
+                                return (
+                                    <Chip key={value} label={label} className="m-1" />
+                                )
+                            })}
+                        </div>
+                    )}
+                >
+                    {options.map((opt: any) => {
+                        const selected = value as Array<any>;
+                        return (
+                            <MenuItem key={opt.id} value={opt[optKey]}>
+                                <Checkbox checked={selected.indexOf(opt[optKey]) > -1} />
+                                <ListItemText primary={opt[optVal]} />
+                            </MenuItem>
+                        )
+                    })}
+                </Select>
+            </FormControl>
+            {!!errors && <ErrorHelperText error={errors} />}
+
+        </>
+
     );
 };
 
@@ -368,7 +375,7 @@ export const AutoCompleteMultiField = (props: any) => {
 }
 
 export const AutoCompleteAsyncField = (props: any) => {
-    const { margin, options, label, getOptionSelected, getOptionLabel, renderOption, variant, placeholder, errors, onChange, onSearch, value, loading, onOpen, noOptionsText, filterOptions, multiple = false, className ='' } = props;
+    const { margin, options, label, getOptionSelected, getOptionLabel, renderOption, variant, placeholder, errors, onChange, onSearch, value, loading, onOpen, noOptionsText, filterOptions, multiple = false, className = '' } = props;
     return (<>
         <Autocomplete
             multiple={multiple}
@@ -424,7 +431,7 @@ export const PhoneNumberField = (props: any) => {
             country="in"
             autoFormat={!turnOffAutoFormat}
             {...countryRestriction}
-        /><div className="flex items-center ml-1 mt-1 border border-gray-400 rounded px-4 h-10 cursor-pointer hover:bg-gray-200" onClick={_=>onChange("+91")}><i className="fas fa-times text-red-600"/></div></div>
+        /><div className="flex items-center ml-1 mt-1 border border-gray-400 rounded px-4 h-10 cursor-pointer hover:bg-gray-200" onClick={_ => onChange("+91")}><i className="fas fa-times text-red-600" /></div></div>
         <ErrorHelperText error={errors} />
     </>)
 }
