@@ -138,12 +138,32 @@ export default function ResourceDetails(props: { id: string }) {
                 {data.orgin_facility_object?.state_object?.name || "--"}
               </div>
             </div>
-            <div className="mt-4">
-              <span className="leading-relaxed">
-                The request for resource (details below) placed by yourself is{" "}
-              </span>
-              <text className="font-semibold">{data.status}</text>
-            </div>
+            {data.status === "NOT APPROVED" ? (
+              <div className="mt-4">
+                <span className="leading-relaxed">
+                  The request for resource (details below) placed by yourself is{" "}
+                </span>
+                <text className="font-semibold">{data.status}</text>
+              </div>
+            ) : data.status === "APPROVED" ? (
+              <div className="mt-4">
+                <span className="leading-relaxed">
+                  The request for resource (details below) placed by yourself is{" "}
+                </span>
+                <text className="font-semibold">{data.status}</text>
+              </div>
+            ) : (
+              <div className="mt-4">
+                <span className="leading-relaxed">
+                  The request for resource (details below) placed by yourself is{" "}
+                </span>
+                <text className="font-semibold">APPROVED</text>
+                <span className="leading-relaxed">
+                  and the status of request is{" "}
+                </span>
+                <text className="font-semibold">{data.status}</text>
+              </div>
+            )}
             <div className="mt-4">
               <span className="font-semibold leading-relaxed">
                 Title of Request:{" "}
