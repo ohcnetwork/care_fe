@@ -15,7 +15,7 @@ import {
   PATIENT_FILTER_ADMITTED_TO,
 } from "../../Common/constants";
 import moment from "moment";
-import { getAllLocalBody, getFacility } from "../../Redux/actions";
+import { getAllLocalBody, getFacility, getDistrict } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { CircularProgress } from "@material-ui/core";
 import { navigate } from "raviger";
@@ -34,6 +34,8 @@ const useMergeState = (initialState: any) => {
 export default function PatientFilterV2(props: any) {
   let { filter, onChange, closeFilter } = props;
   const [isFacilityLoading, setFacilityLoading] = useState(false);
+  const [isDistrictLoading, setDistrictLoading] = useState(false);
+
   const [lsgBody, setLsgBody] = useState<any[]>([]);
   const [isLsgLoading, setLsgLoading] = useState(false);
   const [hasLsgSearchText, setHasLsgSearchText] = useState(false);
@@ -133,14 +135,22 @@ export default function PatientFilterV2(props: any) {
 
   useEffect(() => {
     async function fetchData() {
-      // if (filter.facility) {
-      //   setFacilityLoading(true);
-      //   const { data: facilityData } = await dispatch(
-      //     getFacility(filter.facility, "facility")
-      //   );
-      //   setFilterState({ facility_ref: facilityData });
-      //   setFacilityLoading(false);
-      // }
+      if (filter.facility) {
+        setFacilityLoading(true);
+        const { data: facilityData } = await dispatch(
+          getFacility(filter.facility, "facility")
+        );
+        setFilterState({ facility_ref: facilityData });
+        setFacilityLoading(false);
+      }
+      if (filter.district) {
+        setDistrictLoading(true);
+        const { data: districtData } = await dispatch(
+          getDistrict(filter.district, "district")
+        );
+        setFilterState({ district_ref: districtData });
+        setDistrictLoading(false);
+      }
 
       if (filter.lsgBody) {
         setLsgLoading(true);
@@ -221,13 +231,6 @@ export default function PatientFilterV2(props: any) {
     }, 300),
     []
   );
-
-  const setDistrict = (selected: any, name: string) => {
-    const filterData: any = { ...filterState };
-    filterData[`${name}_ref`] = selected;
-    filterData[name] = (selected || {}).id;
-    setFilterState(filterData);
-  };
 
   const applyFilter = () => {
     const {
@@ -441,7 +444,7 @@ export default function PatientFilterV2(props: any) {
             multiple={false}
             name="district"
             selected={filterState.district_ref}
-            setSelected={(obj: any) => setDistrict(obj, "district")}
+            setSelected={(obj: any) => setFacility(obj, "district")}
             className="shifting-page-filter-dropdown"
             errors={""}
           />
@@ -449,15 +452,15 @@ export default function PatientFilterV2(props: any) {
 
         <div className="w-64 flex-none">
           <span className="text-sm font-semibold">Facility</span>
-              <FacilitySelect
-                multiple={false}
-                name="facility"
-                selected={filterState.facility_ref}
-                showAll={false}
-                setSelected={(obj) => setFacility(obj, "facility")}
-                className="shifting-page-filter-dropdown"
-                errors={""}
-              />
+          <FacilitySelect
+            multiple={false}
+            name="facility"
+            selected={filterState.facility_ref}
+            showAll={false}
+            setSelected={(obj) => setFacility(obj, "facility")}
+            className="shifting-page-filter-dropdown"
+            errors={""}
+          />
         </div>
         <div className="w-64 flex-none">
           <span className="text-sm font-semibold">Gender</span>
