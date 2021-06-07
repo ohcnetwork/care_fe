@@ -979,7 +979,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   result in duplication of patient records.
                 </div>
                 <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
-                  <div>
+                  <div data-testid="phone-number">
                     <PhoneNumberField
                       label="Phone Number*"
                       value={state.form.phone_number}
@@ -990,7 +990,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       errors={state.errors.phone_number}
                     />
                   </div>
-                  <div>
+                  <div data-testid="date-of-birth">
                     <InputLabel id="date_of_birth-label">
                       Date of birth*
                     </InputLabel>
@@ -1008,7 +1008,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     />
                   </div>
 
-                  <div>
+                  <div data-testid="name">
                     <InputLabel id="name-label">Name*</InputLabel>
                     <TextInputField
                       name="name"
@@ -1021,7 +1021,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     />
                   </div>
 
-                  <div>
+                  <div data-testid="disease-status">
                     <InputLabel id="disease_status-label">
                       Disease Status*
                     </InputLabel>
@@ -1224,7 +1224,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       disableFuture={true}
                     />
                   </div>
-                  <div>
+                  <div data-testid="Gender">
                     <InputLabel id="gender-label">Gender*</InputLabel>
                     <SelectField
                       name="gender"
@@ -1329,7 +1329,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
                   {state.form.nationality === "India" ? (
                     <>
-                      <div>
+                      <div data-testid="state">
                         <InputLabel id="gender-label">State*</InputLabel>
                         {isStateLoading ? (
                           <CircularProgress size={20} />
@@ -1350,7 +1350,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         )}
                       </div>
 
-                      <div>
+                      <div data-testid="district">
                         <InputLabel id="district-label">District*</InputLabel>
                         {isDistrictLoading ? (
                           <CircularProgress size={20} />
@@ -1371,7 +1371,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         )}
                       </div>
 
-                      <div>
+                      <div data-testid="localbody">
                         <InputLabel id="local_body-label">
                           Localbody*
                         </InputLabel>
@@ -1410,7 +1410,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     </div>
                   )}
 
-                  <div>
+                  <div data-testid="current-address">
                     <InputLabel id="address-label">Current Address*</InputLabel>
                     <MultilineInputField
                       rows={2}
@@ -1424,7 +1424,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       errors={state.errors.address}
                     />
                   </div>
-                  <div>
+                  <div data-testid="permanent-address">
                     <InputLabel id="permanent-address-label">
                       Permanent Address*
                     </InputLabel>
@@ -1447,7 +1447,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       />
                     )}
                   </div>
-                  <div>
+                  <div data-testid="ward-respective-lsgi">
                     <InputLabel id="ward-label">
                       Ward/Division of respective LSGI*
                     </InputLabel>
@@ -1482,7 +1482,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       errors={state.errors.village}
                     />
                   </div>
-                  <div>
+                  <div data-testid="pincode">
                     <InputLabel id="name-label">Pincode*</InputLabel>
                     <TextInputField
                       name="pincode"
@@ -1494,7 +1494,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       errors={state.errors.pincode}
                     />
                   </div>
-                  <div>
+                  <div data-testid="blood-group">
                     <InputLabel id="blood_group-label">Blood Group*</InputLabel>
                     <SelectField
                       name="blood_group"
@@ -1508,7 +1508,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       errors={state.errors.blood_group}
                     />
                   </div>
-                  <div>
+                  <div data-testid="emergency-phone-number">
                     <PhoneNumberField
                       label="Emergency contact number*"
                       value={state.form.emergency_phone_number}
@@ -1859,6 +1859,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
                     }
                     onClick={(e) => handleSubmit(e)}
+                    data-testid="submit-button"
                   >
                     {" "}
                     {buttonText}{" "}

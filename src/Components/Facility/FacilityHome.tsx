@@ -280,6 +280,7 @@ export const FacilityHome = (props: any) => {
           <button
             className="btn-primary btn mt-2 mr-2 w-full md:w-auto"
             onClick={() => navigate(`/facility/${facilityId}/patient`)}
+            data-testid="add-patient-button"
           >
             <i className="fas fa-plus text-white mr-2"></i>
             Add Details of a Patient
