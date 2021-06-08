@@ -25,37 +25,21 @@ export default function ResultList() {
 
   let manageResults: any = null;
 
-  const urlB64ToUint8Array = (urlSafeBase64: any) => {
-    const decoded = atob(urlSafeBase64);
-    // var cleaned = decoded.replace("-----BEGIN PUBLIC KEY-----", "");
-    // cleaned = cleaned.replace("-----END PUBLIC KEY-----", "").trim();
-    // console.log(cleaned);
-    // const outputArray = new Uint8Array(decoded.length);
-    // for (let i = 0; i < decoded.length; ++i) {
-    //   outputArray[i] = decoded.charCodeAt(i);
-    // }
-    let bytes: any = [];
-    for (var i = 0; i < decoded.length; ++i) {
-      let code = decoded.charCodeAt(i);
-      bytes = bytes.concat([code & 0xff, (code / 256) >>> 0]);
-    }
-    // console.log(bytes);
-    const outputArray = new Uint8Array(bytes);
-    return outputArray;
-  };
-
   async function subscribe() {
     const apiUrl =
       "https://careapi.coronasafe.in/api/v1/notification/public_key/";
     const reponse = await axios.get(apiUrl);
     const public_key = reponse.data.public_key;
     const sw = await navigator.serviceWorker.ready;
-    const key = urlB64ToUint8Array(public_key);
     const push = await sw.pushManager.subscribe({
       userVisibleOnly: true,
-      applicationServerKey: key,
+      applicationServerKey: public_key,
     });
+    const p256dh = btoa(String.fromCharCode.apply(null, new Uint8Array(push.getKey('p256dh') as any) as any))
+    const auth = btoa(String.fromCharCode.apply(null, new Uint8Array(push.getKey('auth') as any) as any))
     console.log("Subscription Info: ", push);
+    console.log('p256dh', p256dh);
+    console.log('auth', auth);
   }
 
   useEffect(() => {
