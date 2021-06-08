@@ -54,6 +54,7 @@ const initForm: any = {
   assigned_facility_type: "",
   preferred_vehicle_choice: "",
   assigned_to: "",
+  initial_status: "",
 };
 
 const requiredFields: any = {
@@ -146,8 +147,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     if (validForm) {
       setIsLoading(true);
 
-      const data = {
-        status: state.form.status,
+      const data: any = {
         orgin_facility: state.form.orgin_facility_object?.id,
         shifting_approving_facility:
           state.form?.shifting_approving_facility_object?.id,
@@ -164,6 +164,10 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
         assigned_to: state.form.assigned_to,
         breathlessness_level: state.form.breathlessness_level,
       };
+
+      if (state.form.status !== state.form.initial_status) {
+        data["status"] = state.form.status;
+      }
 
       const res = await dispatchAction(updateShift(props.id, data));
       setIsLoading(false);
@@ -187,7 +191,9 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
       const res = await dispatchAction(getShiftDetails({ id: props.id }));
       if (!status.aborted) {
         if (res && res.data) {
-          dispatch({ type: "set_form", form: res.data });
+          const d = res.data;
+          d["initial_status"] = res.data.status;
+          dispatch({ type: "set_form", form: d });
         }
         setIsLoading(false);
       }

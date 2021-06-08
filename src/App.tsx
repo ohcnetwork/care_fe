@@ -4,7 +4,7 @@ import SessionRouter from './Router/SessionRouter';
 import AppRouter from './Router/AppRouter';
 import { useDispatch, useSelector } from 'react-redux';
 import { getCurrentUser } from './Redux/actions';
-import './App.scss';
+import './App.css';
 const Loading = loadable( () => import("./Components/Common/Loading"));
 import { useAbortableEffect, statusType } from './Common/utils';
 import axios from 'axios';
@@ -17,8 +17,8 @@ const App: React.FC = () => {
 
   const updateRefreshToken = () => {
       const refresh = localStorage.getItem('care_refresh_token');
-      const access = localStorage.getItem('care_access_token'); 
-      if (!access && refresh){ 
+      const access = localStorage.getItem('care_access_token');
+      if (!access && refresh){
         localStorage.removeItem('care_refresh_token');
         document.location.reload();
         return;
@@ -28,14 +28,14 @@ const App: React.FC = () => {
       }
       axios.post('/api/v1/auth/token/refresh/', {
         refresh
-      }).then((resp: any) => { 
+      }).then((resp: any) => {
         localStorage.setItem('care_access_token', resp.data.access)
           localStorage.setItem('care_refresh_token', resp.data.refresh);
       }).catch( (ex:any)=> {
         // console.error('Error while refreshing',ex);
       });
-    
-  } 
+
+  }
   useEffect(() => {
     updateRefreshToken();
     setInterval(updateRefreshToken , 5 * 60 * 1000)

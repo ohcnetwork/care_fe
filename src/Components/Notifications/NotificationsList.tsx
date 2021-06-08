@@ -6,6 +6,7 @@ import { getNotifications } from "../../Redux/actions";
 import Pagination from "../Common/Pagination";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import moment from "moment";
+import axios from "axios";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -23,6 +24,23 @@ export default function ResultList() {
   const [reload, setReload] = useState(false);
 
   let manageResults: any = null;
+
+  async function subscribe() {
+    const apiUrl =
+      "https://careapi.coronasafe.in/api/v1/notification/public_key/";
+    const reponse = await axios.get(apiUrl);
+    const public_key = reponse.data.public_key;
+    const sw = await navigator.serviceWorker.ready;
+    const push = await sw.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: public_key,
+    });
+    const p256dh = btoa(String.fromCharCode.apply(null, new Uint8Array(push.getKey('p256dh') as any) as any))
+    const auth = btoa(String.fromCharCode.apply(null, new Uint8Array(push.getKey('auth') as any) as any))
+    console.log("Subscription Info: ", push);
+    console.log('p256dh', p256dh);
+    console.log('auth', auth);
+  }
 
   useEffect(() => {
     setIsLoading(true);
@@ -153,6 +171,12 @@ export default function ResultList() {
                 className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0"
               >
                 <i className="fa-fw fas fa-times cursor-pointer mr-2" /> Close
+              </button>
+              <button
+                onClick={subscribe}
+                className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0"
+              >
+                Subscribe
               </button>
             </div>
           </div>
