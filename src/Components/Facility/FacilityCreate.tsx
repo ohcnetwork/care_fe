@@ -453,6 +453,7 @@ export const FacilityCreate = (props: FacilityProps) => {
               <div>
                 <InputLabel id="facility_type-label">Facility Type*</InputLabel>
                 <SelectField
+                  data-test="facility-type"
                   name="facility_type"
                   variant="outlined"
                   margin="dense"
@@ -467,6 +468,7 @@ export const FacilityCreate = (props: FacilityProps) => {
               <div>
                 <InputLabel id="name-label">Facility Name*</InputLabel>
                 <TextInputField
+                  data-test="facility-name"
                   fullWidth
                   name="name"
                   placeholder=""
@@ -484,6 +486,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                   <CircularProgress size={20} />
                 ) : (
                   <SelectField
+                    data-test="facility-state"
                     name="state"
                     variant="outlined"
                     margin="dense"
@@ -505,6 +508,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                   <CircularProgress size={20} />
                 ) : (
                   <SelectField
+                    data-test="facility-district"
                     name="district"
                     variant="outlined"
                     margin="dense"
@@ -526,6 +530,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                   <CircularProgress size={20} />
                 ) : (
                   <SelectField
+                    data-test="facility-localbody"
                     name="local_body"
                     variant="outlined"
                     margin="dense"
@@ -546,6 +551,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                   <CircularProgress size={20} />
                 ) : (
                   <SelectField
+                    data-test="facility-ward"
                     name="ward"
                     variant="outlined"
                     margin="dense"
@@ -565,6 +571,7 @@ export const FacilityCreate = (props: FacilityProps) => {
               <div className="md:col-span-2">
                 <InputLabel id="name-label">Address*</InputLabel>
                 <MultilineInputField
+                  data-test="facility-address"
                   rows={5}
                   name="address"
                   placeholder=""
@@ -578,6 +585,7 @@ export const FacilityCreate = (props: FacilityProps) => {
               <div>
                 <InputLabel id="name-label">Pincode*</InputLabel>
                 <TextInputField
+                  data-test="facility-pincode"
                   name="pincode"
                   variant="outlined"
                   margin="dense"
@@ -589,6 +597,7 @@ export const FacilityCreate = (props: FacilityProps) => {
               </div>
               <div>
                 <PhoneNumberField
+                  data-test="facility-phone-number"
                   label="Emergency Contact Number"
                   value={state.form.phone_number}
                   onChange={(value: any) =>
@@ -605,6 +614,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                     Liquid Oxygen Capacity (l)
                   </InputLabel>
                   <TextInputField
+                    data-test="facility-oxygen-capacity"
                     name="oxygen_capacity"
                     type="number"
                     variant="outlined"
@@ -619,6 +629,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                     Expected Liquid Oxygen (l)
                   </InputLabel>
                   <TextInputField
+                    data-test="facility-oxygen-requirement"
                     name="expected_oxygen_requirement"
                     type="number"
                     variant="outlined"
@@ -636,6 +647,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                     B Type Cylinders
                   </InputLabel>
                   <TextInputField
+                    data-test="facility-type-b-cylinders"
                     name="type_b_cylinders"
                     type="number"
                     variant="outlined"
@@ -650,6 +662,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                     Expected B Type Cylinders
                   </InputLabel>
                   <TextInputField
+                    data-test="facility-expected-type-b-cylinders"
                     name="expected_type_b_cylinders"
                     type="number"
                     variant="outlined"
@@ -667,6 +680,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                     C Type Cylinders
                   </InputLabel>
                   <TextInputField
+                    data-test="facility-type-c-cylinders"
                     name="type_c_cylinders"
                     type="number"
                     variant="outlined"
@@ -681,6 +695,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                     Expected C Type Cylinders
                   </InputLabel>
                   <TextInputField
+                    data-test="facility-expected-type-c-cylinders"
                     name="expected_type_c_cylinders"
                     type="number"
                     variant="outlined"
@@ -698,6 +713,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                     D Type Cylinders
                   </InputLabel>
                   <TextInputField
+                    data-test="facility-type-d-cylinders"
                     name="type_d_cylinders"
                     type="number"
                     variant="outlined"
@@ -712,6 +728,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                     Expected D Type Cylinders
                   </InputLabel>
                   <TextInputField
+                    data-test="facility-expected-type-d-cylinders"
                     name="expected_type_d_cylinders"
                     type="number"
                     variant="outlined"
@@ -734,7 +751,10 @@ export const FacilityCreate = (props: FacilityProps) => {
                   onChange={handleChange}
                   style={{ padding: "0px 5px" }}
                 >
-                  <Box display="flex" flexDirection="row">
+                  <Box display="flex" 
+                    data-test="facility-kasp-empanelled"
+                    flexDirection="row"
+                  >
                     <FormControlLabel
                       value="true"
                       control={<Radio />}
@@ -764,7 +784,10 @@ export const FacilityCreate = (props: FacilityProps) => {
                 />
               </div>
               <div className="pt-4">
-                <IconButton onClick={handleClickLocationPicker}>
+                <IconButton 
+                  data-test="facility-location-button"
+                  onClick={handleClickLocationPicker}
+                 >
                   <MyLocationIcon />
                 </IconButton>
                 <Popover
@@ -784,6 +807,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                   <LocationSearchAndPick
                     latitude={mapLoadLocation[0]}
                     longitude={mapLoadLocation[1]}
+                    data-test="facility-location"
                     onSelectLocation={handleLocationSelect}
                   />
                 </Popover>
@@ -807,6 +831,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                 Cancel
               </Button>
               <Button
+                data-test="facility-save"
                 color="primary"
                 variant="contained"
                 type="submit"

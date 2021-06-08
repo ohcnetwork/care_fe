@@ -218,6 +218,7 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
                 Area of specialization*
               </InputLabel>
               <NativeSelectField
+                data-test="area-of-specialization"
                 name="area"
                 variant="outlined"
                 value={state.form.area}
@@ -232,6 +233,7 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
                 Count*
               </InputLabel>
               <TextInputField
+                data-test="count"
                 name="count"
                 variant="outlined"
                 margin="dense"
@@ -246,6 +248,7 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
               <Grid container justify="space-between" spacing={5}>
                 <Grid item>
                   <Button
+                    data-test="doctor-cancel"
                     color="default"
                     variant="contained"
                     onClick={goBack}
@@ -255,6 +258,7 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
                 </Grid>
                 <Grid item>
                   <Button
+                    data-test="doctor-save"
                     color="primary"
                     variant="contained"
                     type="submit"
