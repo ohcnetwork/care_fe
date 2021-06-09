@@ -814,6 +814,13 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     }
   };
 
+  const handleNameChange = (e: any) => {
+    const onlyText = e.target.value.replace(/[0-9]+$/i, "");
+    const form = { ...state.form };
+    form[e.target.name] = onlyText;
+    dispatch({ type: "set_form", form });
+  };
+
   const handleCheckboxFieldChange = (e: any) => {
     const form = { ...state.form };
     const { checked, name } = e.target;
@@ -1023,7 +1030,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       margin="dense"
                       type="text"
                       value={state.form.name}
-                      onChange={handleChange}
+                      onChange={handleNameChange}
                       errors={state.errors.name}
                     />
                   </div>
