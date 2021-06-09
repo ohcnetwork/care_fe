@@ -35,11 +35,41 @@ export default function ResultList() {
       userVisibleOnly: true,
       applicationServerKey: public_key,
     });
-    const p256dh = btoa(String.fromCharCode.apply(null, new Uint8Array(push.getKey('p256dh') as any) as any))
-    const auth = btoa(String.fromCharCode.apply(null, new Uint8Array(push.getKey('auth') as any) as any))
+    const p256dh = btoa(
+      String.fromCharCode.apply(
+        null,
+        new Uint8Array(push.getKey("p256dh") as any) as any
+      )
+    );
+    const auth = btoa(
+      String.fromCharCode.apply(
+        null,
+        new Uint8Array(push.getKey("auth") as any) as any
+      )
+    );
     console.log("Subscription Info: ", push);
-    console.log('p256dh', p256dh);
-    console.log('auth', auth);
+    console.log("p256dh", p256dh);
+    console.log("auth", auth);
+
+    const res = await axios.patch(
+      `https://careapi.coronasafe.in/api/v1/users/${"devdistrictadmin"}/pnconfig/`,
+      {
+        endpoint: push.endpoint,
+        pn_p256dh: p256dh,
+        pn_auth: auth,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("care_access_token")}`,
+        },
+      }
+    );
+
+    if (res.status >= 200 && res.status <= 300) {
+      console.log("Saved web push info.");
+    } else {
+      console.log("Error saving web push info.");
+    }
   }
 
   useEffect(() => {
