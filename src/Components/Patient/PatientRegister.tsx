@@ -500,11 +500,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           return;
         case "permanent_address":
           if (!sameAddress) {
-            if(!state.form[field]){
+            if (!state.form[field]) {
               errors[field] = "Field is required";
               invalidForm = true;
             }
-          } 
+          }
           return;
         case "date_of_birth":
           if (!state.form[field]) {
@@ -616,6 +616,13 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               errors["vaccine_name"] = "Please select vaccine name";
               invalidForm = true;
             }
+          }
+          return;
+
+        case "number_of_aged_dependents":
+          if (state.form.number_of_aged_dependents > 100) {
+            errors["number_of_aged_dependents"] = "Max allowed is 100";
+            invalidForm = true;
           }
           return;
 
@@ -805,6 +812,13 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       form[field] = date;
       dispatch({ type: "set_form", form });
     }
+  };
+
+  const handleNameChange = (e: any) => {
+    const onlyText = e.target.value.replace(/[0-9]+$/i, "");
+    const form = { ...state.form };
+    form[e.target.name] = onlyText;
+    dispatch({ type: "set_form", form });
   };
 
   const handleCheckboxFieldChange = (e: any) => {
@@ -1016,7 +1030,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       margin="dense"
                       type="text"
                       value={state.form.name}
-                      onChange={handleChange}
+                      onChange={handleNameChange}
                       errors={state.errors.name}
                     />
                   </div>
