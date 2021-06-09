@@ -38,6 +38,7 @@ export interface FacilityModel {
 export interface CapacityModal {
   id?: number;
   room_type?: number;
+  modified_date?: any;
   total_capacity?: number;
   current_capacity?: number;
 }
