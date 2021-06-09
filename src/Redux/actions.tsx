@@ -171,6 +171,10 @@ export const getDistrictByState = (pathParam: object) => {
 export const getDistrictByName = (params: object) => {
   return fireRequest("getDistrictByName", [], params, null);
 };
+export const getDistrict = (id: number, key?: string) => {
+  return fireRequest("getDistrict", [], {}, { id: id }, key);
+};
+
 export const getLocalbodyByDistrict = (pathParam: object) => {
   return fireRequest("getLocalbodyByDistrict", [], {}, pathParam);
 };
@@ -281,6 +285,10 @@ export const getItemName = (id: number) => {
 
 export const flagInventoryItem = (params: object) => {
   return fireRequest("flagInventoryItem", [], {}, params);
+};
+
+export const deleteLastInventoryLog = (params: object) => {
+  return fireRequest("deleteLastInventoryLog", [], {}, params);
 };
 
 export const discharge = (params: object, pathParams: object) => {

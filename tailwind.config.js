@@ -25,6 +25,7 @@ module.exports = {
       "./src/**/*.tsx",
       "./src/**/*.ts",
       "./src/**/*.js",
+      "./src/**/*.res",
     ],
     options: {
       whitelistPatterns: [/^bg-/, /^text-/, /^border-/, /^hover:/],

@@ -35,7 +35,7 @@ import * as Notification from "../../Utils/Notifications.js";
 import { VoiceRecorder } from "../../Utils/VoiceRecorder";
 import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
 import Modal from "@material-ui/core/Modal";
-import { Close } from "@material-ui/icons";
+import { Close, ZoomIn, ZoomOut } from "@material-ui/icons";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -58,6 +58,15 @@ const header_content_type: URLS = {
   pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
   svg: "image/svg+xml",
   xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+};
+
+// Object for possible extension of image files
+const ExtImage: URLS = {
+  jpeg: "1",
+  jpg: "1",
+  gif: "1",
+  png: "1",
+  svg: "1",
 };
 
 function getModalStyle() {
@@ -113,6 +122,14 @@ interface URLS {
   [id: string]: string;
 }
 
+interface StateInterface {
+  open: boolean;
+  isImage: boolean;
+  zoom: number;
+  isZoomInDisabled: boolean;
+  isZoomOutDisabled: boolean;
+}
+
 export const FileUpload = (props: FileUploadProps) => {
   const [audioBlob, setAudioBlob] = useState<Blob>();
   const [file, setfile] = useState<File>();
@@ -141,8 +158,60 @@ export const FileUpload = (props: FileUploadProps) => {
   const [contentType, setcontentType] = useState<string>("");
   const classes = useStyles();
   const [modalStyle] = React.useState(getModalStyle);
-  const [open, setOpen] = React.useState(false);
   const [downloadURL, setDownloadURL] = useState<string>();
+  const initialState = {
+    open: false,
+    isImage: false,
+    zoom: 3,
+    isZoomInDisabled: false,
+    isZoomOutDisabled: false,
+  };
+  const [file_state, setFileState] = useState<StateInterface>(initialState);
+
+  const zoom_values = [
+    "h-1/6 my-40",
+    "h-2/6 my-32",
+    "h-3/6 my-24",
+    "h-4/6 my-20",
+    "h-5/6 my-16",
+    "h-full my-12",
+  ];
+
+  const handleZoomIn = () => {
+    const len = zoom_values.length - 1;
+    if (file_state.zoom + 1 === len) {
+      setFileState({
+        ...file_state,
+        zoom: file_state.zoom + 1,
+        isZoomOutDisabled: false,
+        isZoomInDisabled: true,
+      });
+      // setZoomInDisabled(true);
+    } else {
+      setFileState({
+        ...file_state,
+        zoom: file_state.zoom + 1,
+        isZoomOutDisabled: false,
+      });
+    }
+  };
+
+  const handleZoomOut = () => {
+    if (file_state.zoom - 1 === 0) {
+      setFileState({
+        ...file_state,
+        zoom: file_state.zoom - 1,
+        isZoomOutDisabled: true,
+        isZoomInDisabled: false,
+      });
+    } else {
+      setFileState({
+        ...file_state,
+        zoom: file_state.zoom - 1,
+        isZoomInDisabled: false,
+      });
+    }
+  };
 
   const UPLOAD_HEADING: { [index: string]: string } = {
     PATIENT: "Upload Patient Files",
@@ -153,13 +222,15 @@ export const FileUpload = (props: FileUploadProps) => {
     CONSULTATION: "View Consultation Files",
   };
 
-  const handleOpen = () => {
-    setOpen(true);
-  };
-
   const handleClose = () => {
     setDownloadURL("");
-    setOpen(false);
+    setFileState({
+      ...file_state,
+      open: false,
+      zoom: 3,
+      isZoomInDisabled: false,
+      isZoomOutDisabled: false,
+    });
   };
 
   const getAssociatedId = () => {
@@ -218,12 +289,26 @@ export const FileUpload = (props: FileUploadProps) => {
     [dispatch, fetchData, id, reload]
   );
 
+  // Function to extract the extension of the file and check if its image or not
+  const getExtension = (url: string) => {
+    const div1 = url.split("?")[0].split(".");
+    const ext: string = div1[div1.length - 1];
+    if (ExtImage[ext] && ExtImage[ext] === "1") {
+      return true;
+    }
+    return false;
+  };
+
   const loadFile = async (id: any) => {
     setFileUrl("");
-    handleOpen();
+    setFileState({ ...file_state, open: true });
     var data = { file_type: type, associating_id: getAssociatedId() };
     var responseData = await dispatch(retrieveUpload(data, id));
-    // window.open(responseData.data.read_signed_url, "_blank");
+    setFileState({
+      ...file_state,
+      open: true,
+      isImage: getExtension(responseData.data.read_signed_url),
+    });
     downloadFileUrl(responseData.data.read_signed_url);
     setFileUrl(responseData.data.read_signed_url);
   };
@@ -427,46 +512,90 @@ export const FileUpload = (props: FileUploadProps) => {
   return (
     <div className={hideBack ? "py-2" : "p-4"}>
       <Modal
-        open={open}
+        open={file_state.open}
         onClose={handleClose}
         aria-labelledby="simple-modal-title"
         aria-describedby="simple-modal-description"
       >
         {fileUrl && fileUrl.length > 0 ? (
           <>
-            <div className="flex absolute right-2">
-              {downloadURL && downloadURL.length > 0 && (
-                <div>
-                  <a
-                    href={downloadURL}
-                    download
-                    className="text-white p-4 rounded m-2 bg-green-500"
-                  >
-                    <GetAppIcon>load</GetAppIcon>
-                    Download
-                  </a>
+            <div className="flex absolute w-3/5 right-2">
+              {file_state.isImage && (
+                <div className="w-2/6 flex">
+                  <div className="mr-4">
+                    <Button
+                      color="default"
+                      variant="contained"
+                      style={{ marginLeft: "auto" }}
+                      startIcon={<ZoomIn />}
+                      onClick={() => {
+                        handleZoomIn();
+                      }}
+                      disabled={file_state.isZoomInDisabled}
+                    >
+                      Zoom in
+                    </Button>
+                  </div>
+                  <div>
+                    <Button
+                      color="default"
+                      variant="contained"
+                      style={{ marginLeft: "4px" }}
+                      startIcon={<ZoomOut />}
+                      onClick={() => {
+                        handleZoomOut();
+                      }}
+                      disabled={file_state.isZoomOutDisabled}
+                    >
+                      Zoom Out
+                    </Button>
+                  </div>
                 </div>
               )}
+              <div className="flex absolute right-2">
+                {downloadURL && downloadURL.length > 0 && (
+                  <div>
+                    <a
+                      href={downloadURL}
+                      download
+                      className="text-white p-4 my-2 rounded m-2 bg-green-500"
+                    >
+                      <GetAppIcon>load</GetAppIcon>
+                      Download
+                    </a>
+                  </div>
+                )}
 
-              <div>
-                <Button
-                  color="primary"
-                  variant="contained"
-                  style={{ marginLeft: "auto" }}
-                  startIcon={<Close />}
-                  onClick={() => {
-                    handleClose();
-                  }}
-                >
-                  Close
-                </Button>
+                <div>
+                  <Button
+                    color="primary"
+                    variant="contained"
+                    style={{ marginLeft: "auto" }}
+                    startIcon={<Close />}
+                    onClick={() => {
+                      handleClose();
+                    }}
+                  >
+                    Close
+                  </Button>
+                </div>
               </div>
             </div>
-            <iframe
-              title="Source Files"
-              src={fileUrl}
-              className="border-2 border-black bg-white w-4/6 h-5/6 mx-auto my-6"
-            />
+            {file_state.isImage ? (
+              <img
+                src={fileUrl}
+                alt="file"
+                className={
+                  "object-contain mx-auto " + zoom_values[file_state.zoom]
+                }
+              />
+            ) : (
+              <iframe
+                title="Source Files"
+                src={fileUrl}
+                className="border-2 border-black bg-white w-4/6 h-5/6 mx-auto my-6"
+              />
+            )}
           </>
         ) : (
           <div className="flex h-screen justify-center items-center">
