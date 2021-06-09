@@ -8,8 +8,8 @@ export interface OptionsType {
 export const USER_TYPES: Array<String> = [
   "Volunteer",
   "Pharmacist",
-  "Staff",
   "StaffReadOnly",
+  "Staff",
   "Doctor",
   "WardAdmin",
   "LocalBodyAdmin",
@@ -409,6 +409,23 @@ export const DESIGNATION_HEALTH_CARE_WORKER = [
   "SONOLOGIST",
   "STAFF NURSE",
   "OTHERS",
+];
+
+export const NOTIFICATION_EVENTS = [ 
+  { id: "MESSAGE", text: "Message" },
+  { id: "PATIENT_CREATED", text: "Patient Created" },
+  { id: "PATIENT_UPDATED", text: "Patient Updated" },
+  { id: "PATIENT_DELETED", text: "Patient Deleted" },
+  { id: "PATIENT_CONSULTATION_CREATED", text: "Patient Consultation Created" },
+  { id: "PATIENT_CONSULTATION_UPDATED", text: "Patient Consultation Updated" },
+  { id: "PATIENT_CONSULTATION_DELETED", text: "Patient Consultation Deleted" },
+  { id: "INVESTIGATION_SESSION_CREATED", text: "Investigation Session Created" },
+  { id: "INVESTIGATION_UPDATED", text: "Investigation Updated" },
+  { id: "PATIENT_FILE_UPLOAD_CREATED", text: "Patient File Upload Created" },
+  { id: "CONSULTATION_FILE_UPLOAD_CREATED", text: "Consultation File Upload Created" },
+  { id: "PATIENT_CONSULTATION_UPDATE_CREATED", text: "Patient Consultation Update Created" },
+  { id: "PATIENT_CONSULTATION_UPDATE_UPDATED", text: "Patient Consultation Update Updated" },
+  { id: "SHIFTING_UPDATED", text: "Shifting Updated" },
 ];
 
 export const BREATHLESSNESS_LEVEL = [
