@@ -1,9 +1,8 @@
-let str = React.string;
+let str = React.string
 
-[@genType]
-[@react.component]
-let make = (~show, ~setShow, ~children) => {
-  <Transition show={Some(show)}>
+@react.component
+export make = (~show, ~setShow, ~children) =>
+  <Transition show=Some(show)>
     <div className="inset-0 overflow-hidden fixed z-40">
       <div className="absolute inset-0 overflow-hidden">
         <Transition
@@ -31,5 +30,4 @@ let make = (~show, ~setShow, ~children) => {
         </section>
       </div>
     </div>
-  </Transition>;
-};
+  </Transition>
