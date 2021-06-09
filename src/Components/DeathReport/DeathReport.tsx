@@ -44,23 +44,24 @@ export default function PrintDeathReport(props: { id: string }) {
   const { id } = props;
   const dispatch: any = useDispatch();
 
-  const getPatientGender = GENDER_TYPES.find(
-    (i) => i.id === patientData.gender
-  )?.text;
+  const getPatientGender = (patientData: any) =>
+    GENDER_TYPES.find((i) => i.id === patientData.gender)?.text;
 
-  const patientAddress = `${patientData.address},\n${patientData.ward_object?.name},\n${patientData.local_body_object?.name},\n${patientData.district_object?.name},\n${patientData.state_object?.name}`;
+  const getPatientAddress = (patientData: any) =>
+    `${patientData.address},\n${patientData.ward_object?.name},\n${patientData.local_body_object?.name},\n${patientData.district_object?.name},\n${patientData.state_object?.name}`;
 
-  let patientComorbidities: any;
-  if (
-    patientData &&
-    patientData.medical_history &&
-    patientData.medical_history.length
-  ) {
-    const medHis = patientData.medical_history;
-    patientComorbidities = medHis.map((item: any) => item.disease).join(", ");
-  } else {
-    patientComorbidities = "None";
-  }
+  const getPatientComorbidities = (patientData: any) => {
+    if (
+      patientData &&
+      patientData.medical_history &&
+      patientData.medical_history.length
+    ) {
+      const medHis = patientData.medical_history;
+      return medHis.map((item: any) => item.disease).join(", ");
+    } else {
+      return "None";
+    }
+  };
 
   const fetchpatient = useCallback(
     async (status: statusType) => {
@@ -68,12 +69,21 @@ export default function PrintDeathReport(props: { id: string }) {
       const patientRes = await dispatch(getPatient({ id }));
       if (!status.aborted) {
         if (patientRes && patientRes.data) {
-          const patientGender = getPatientGender
+          const patientGender = getPatientGender(patientRes.data);
+          const patientAddress = getPatientAddress(patientRes.data);
+          const patientComorbidities = getPatientComorbidities(patientRes.data);
           const data = {
             ...patientRes.data,
-            gender:
-          }
-          setPatientData(patientRes.data);
+            gender: patientGender,
+            address: patientAddress,
+            comorbidities: patientComorbidities,
+            is_declared_positive: patientRes.data.is_declared_positive
+              ? "Yes"
+              : "No",
+            is_vaccinated: patientData.is_vaccinated ? "Yes" : "No",
+          };
+          console.log(data);
+          setPatientData(data);
         }
         setIsLoading(false);
       }
@@ -97,6 +107,12 @@ export default function PrintDeathReport(props: { id: string }) {
         >
           <i className="fas fa-print mr-2"></i> Print Death Report
         </button>
+        <button
+          onClick={(_) => setIsPrintMode(false)}
+          className="bg-white btn btn-default"
+        >
+          <i className="fas fa-times mr-2"></i> Close
+        </button>
       </div>
 
       <div id="section-to-print" className="print bg-white ">
@@ -114,20 +130,12 @@ export default function PrintDeathReport(props: { id: string }) {
               <span className="font-semibold leading-relaxed">
                 Age & Gender:{" "}
               </span>
-              {patientData.age} {patientGender}
+              {patientData.age} {patientData.gender}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">Address: </span>
               <div className="ml-2">
                 <div className="whitespace-pre-wrap">{patientData.address}</div>
-                {patientData.nationality === "India" && (
-                  <>
-                    <div>{patientData.ward_object?.name}</div>
-                    <div>{patientData.local_body_object?.name}</div>
-                    <div>{patientData.district_object?.name}</div>
-                    <div>{patientData.state_object?.name}</div>
-                  </>
-                )}
               </div>
             </div>
             <div>
@@ -140,7 +148,7 @@ export default function PrintDeathReport(props: { id: string }) {
               <span className="font-semibold leading-relaxed">
                 Whether declared positive:{" "}
               </span>
-              {patientData.is_declared_positive ? "Yes" : "No"}
+              {patientData.is_declared_positive}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">
@@ -172,77 +180,86 @@ export default function PrintDeathReport(props: { id: string }) {
                 Name of the hospital in which the patient was tested for SARS
                 COV 2:{" "}
               </span>
+              {patientData.hospital_tested_in}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">
                 Name of the hospital in which the patient died:{" "}
               </span>
-              {patientData.facility_object?.name}
+              {patientData.hospital_died_in}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">
                 Date of admission:{" "}
               </span>
+              {moment(patientData.date_of_admission).format("LLL") || ""}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">
                 Date of death:{" "}
               </span>
+              {moment(patientData.date_of_death).format("LLL") || ""}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">
                 Mention the co-morbidities if present:{" "}
               </span>
-              {patientComorbidities}
+              {patientData.comorbidities}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">
                 History and clinical course in the hospital:{" "}
               </span>
+              {patientData.history_clinical_course}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">
                 Whether brought dead:{" "}
               </span>
+              {patientData.brought_dead}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">
                 If yes was the deceased brought from home/CFLTC:{" "}
               </span>
+              {patientData.home_or_cfltc}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">
                 Whether vaccinated:{" "}
               </span>
-              {patientData.is_vaccinated ? "Yes" : "No"}
+              {patientData.is_vaccinated}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">
                 Whether NIV/IUBCR Kottayam confirmation sent:{" "}
               </span>
+              {patientData.kottayam_confirmation_sent}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">
                 Date of sending the sample for confirmation to NIV/IUCBR
                 Kottayam:{" "}
               </span>
+              {moment(patientData.kottayam_sample_date).format("LLL") || ""}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">
                 Cause of death:{" "}
               </span>
+              {patientData.cause_of_death}
             </div>
-            <div>
+            <div className="mt-5">
               <span className="font-semibold leading-relaxed">
                 Signature of the Superintendent:{" "}
               </span>
             </div>
-            <div>
+            <div className="mt-5">
               <span className="font-semibold leading-relaxed">
                 Signature of the Nodal officer:{" "}
               </span>
             </div>
-            <div>
+            <div className="mt-5">
               <span className="font-semibold leading-relaxed">
                 Signature of a member of the medical board:{" "}
               </span>
@@ -305,7 +322,7 @@ export default function PrintDeathReport(props: { id: string }) {
                   variant="outlined"
                   margin="dense"
                   type="text"
-                  value={patientGender}
+                  value={patientData.gender}
                   onChange={(e) => handleChange(e)}
                   errors=""
                 />
@@ -319,7 +336,7 @@ export default function PrintDeathReport(props: { id: string }) {
                 variant="outlined"
                 margin="dense"
                 type="text"
-                value={patientAddress}
+                value={patientData.address}
                 onChange={(e) => handleChange(e)}
                 errors=""
               />
@@ -348,7 +365,7 @@ export default function PrintDeathReport(props: { id: string }) {
                   variant="outlined"
                   margin="dense"
                   type="text"
-                  value={patientData.is_declared_positive ? "Yes" : "No"}
+                  value={patientData.is_declared_positive}
                   onChange={(e) => handleChange(e)}
                   errors=""
                 />
@@ -404,7 +421,7 @@ export default function PrintDeathReport(props: { id: string }) {
               </div>
               <div>
                 <InputLabel htmlFor="date_of_result">
-                  Date of confirmation as Covid with SRF ID
+                  Date of confirmation as Covid
                 </InputLabel>
                 <TextInputField
                   name="date_of_result"
@@ -431,7 +448,7 @@ export default function PrintDeathReport(props: { id: string }) {
                   variant="outlined"
                   margin="dense"
                   type="text"
-                  value={""}
+                  value={patientData.hospital_tested_in}
                   onChange={(e) => handleChange(e)}
                   errors=""
                 />
@@ -463,7 +480,7 @@ export default function PrintDeathReport(props: { id: string }) {
                   variant="outlined"
                   margin="dense"
                   type="date"
-                  value={""}
+                  value={patientData.date_of_admission}
                   onChange={(e) => handleChange(e)}
                   errors=""
                 />
@@ -476,7 +493,7 @@ export default function PrintDeathReport(props: { id: string }) {
                   variant="outlined"
                   margin="dense"
                   type="date"
-                  value={""}
+                  value={patientData.date_of_death}
                   onChange={(e) => handleChange(e)}
                   errors=""
                 />
@@ -493,7 +510,7 @@ export default function PrintDeathReport(props: { id: string }) {
                   variant="outlined"
                   margin="dense"
                   type="text"
-                  value={patientComorbidities}
+                  value={patientData.comorbidities}
                   onChange={(e) => handleChange(e)}
                   errors=""
                 />
@@ -508,7 +525,7 @@ export default function PrintDeathReport(props: { id: string }) {
                   variant="outlined"
                   margin="dense"
                   type="text"
-                  value={""}
+                  value={patientData.history_clinical_course}
                   onChange={(e) => handleChange(e)}
                   errors=""
                 />
@@ -525,7 +542,7 @@ export default function PrintDeathReport(props: { id: string }) {
                   variant="outlined"
                   margin="dense"
                   type="text"
-                  value={""}
+                  value={patientData.brought_dead}
                   onChange={(e) => handleChange(e)}
                   errors=""
                 />
@@ -540,7 +557,7 @@ export default function PrintDeathReport(props: { id: string }) {
                   variant="outlined"
                   margin="dense"
                   type="text"
-                  value={""}
+                  value={patientData.home_or_cfltc}
                   onChange={(e) => handleChange(e)}
                   errors=""
                 />
@@ -557,7 +574,7 @@ export default function PrintDeathReport(props: { id: string }) {
                   variant="outlined"
                   margin="dense"
                   type="text"
-                  value={patientData.is_vaccinated ? "Yes" : "No"}
+                  value={patientData.is_vaccinated}
                   onChange={(e) => handleChange(e)}
                   errors=""
                 />
@@ -572,7 +589,7 @@ export default function PrintDeathReport(props: { id: string }) {
                   variant="outlined"
                   margin="dense"
                   type="text"
-                  value={""}
+                  value={patientData.kottayam_confirmation_sent}
                   onChange={(e) => handleChange(e)}
                   errors=""
                 />
@@ -589,7 +606,7 @@ export default function PrintDeathReport(props: { id: string }) {
                   variant="outlined"
                   margin="dense"
                   type="date"
-                  value={""}
+                  value={patientData.kottayam_sample_date}
                   onChange={(e) => handleChange(e)}
                   errors=""
                 />
@@ -602,7 +619,22 @@ export default function PrintDeathReport(props: { id: string }) {
                   variant="outlined"
                   margin="dense"
                   type="text"
-                  value={""}
+                  value={patientData.cause_of_death}
+                  onChange={(e) => handleChange(e)}
+                  errors=""
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 mt-4 gap-10">
+              <div>
+                <InputLabel htmlFor="srf_id">SRF ID</InputLabel>
+                <TextInputField
+                  name="srf_id"
+                  id="srf_id"
+                  variant="outlined"
+                  margin="dense"
+                  type="text"
+                  value={patientData.srf_id}
                   onChange={(e) => handleChange(e)}
                   errors=""
                 />
