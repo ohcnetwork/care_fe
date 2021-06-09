@@ -1,7 +1,7 @@
 import {cy, describe, it} from "local-cypress"
 
 // function to create and update facility
-function facilityForm(
+const facilityForm = (
     type, name,
     state, district,
     localbody, ward,
@@ -11,7 +11,7 @@ function facilityForm(
     type_c_cylinders, expected_type_c_cylinders,
     type_d_cylinders, expected_type_d_cylinders,
     kasp_empanelled
-){
+) => {
     cy.get('[data-test=facility-type] select').should('exist').select(type)
     cy.get('[data-test=facility-name]').should('exist').type(name)
     cy.get('[data-test=facility-state] select').should('exist').select(state)
@@ -57,7 +57,7 @@ function facilityForm(
 }
 
 // function to check notification and remove them
-function verifyNotification(text){
+const verifyNotification = (text) => {
     cy.get('.pnotify-container').should('exist').contains(text)
     cy.get('.pnotify-container').click()
 }
