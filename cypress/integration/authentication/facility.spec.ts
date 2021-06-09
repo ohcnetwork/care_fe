@@ -56,13 +56,6 @@ const facilityForm = (
     cy.get('[data-test=facility-save]').should('exist').click()
 }
 
-// function to check notification and remove them
-const verifyNotification = (text) => {
-    cy.get('.pnotify-container').should('exist').contains(text)
-    cy.get('.pnotify-container').click()
-}
-
-
 describe('Facility creation', () => {
     it('Facility workflow', () => {
         // login
@@ -84,7 +77,7 @@ describe('Facility creation', () => {
             "20", "46", "43", "34",
             "342", "43", true
         )
-        verifyNotification("Facility added successfully")
+        cy.verifyNotification("Facility added successfully")
 
         // add bed type
         cy.url().should('include', 'bed')
@@ -92,7 +85,7 @@ describe('Facility creation', () => {
         cy.get('[data-test=total-capacity] input').type('150')
         cy.get('[data-test=currently-occupied] input').type('100')
         cy.get('[data-test=bed-capacity-save]').click()
-        verifyNotification("Bed capacity added successfully")
+        cy.verifyNotification("Bed capacity added successfully")
 
         cy.url().should('include', 'bed')
         cy.get('[data-test=bed-capacity-cancel]').click()
@@ -102,7 +95,7 @@ describe('Facility creation', () => {
         cy.get('[data-test=area-of-specialization] select').select('1')
         cy.get('[data-test=count] input').type('15')
         cy.get('[data-test=doctor-save').click()
-        verifyNotification("Doctor count added successfully")
+        cy.verifyNotification("Doctor count added successfully")
 
         cy.url().should('include', 'doctor')
         cy.get('[data-test=doctor-cancel').click()
@@ -119,12 +112,12 @@ describe('Facility creation', () => {
             "23", "29", "72", "84",
             "64", "4", false
         )
-        verifyNotification("Facility updated successfully")
+        cy.verifyNotification("Facility updated successfully")
 
         // delete facility
         cy.get('[data-test=facility-delete]').click()
         cy.get('[data-test=facility-delete-confirm]').click()
-        verifyNotification("Facility deleted successfully")
+        cy.verifyNotification("Facility deleted successfully")
     })
     
 })
