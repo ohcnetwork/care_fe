@@ -251,7 +251,7 @@ export const SampleTest = (props: any) => {
                   />
                 </div>
                 <div>
-                  <InputLabel>ICMR Category*</InputLabel>
+                  <InputLabel>ICMR Category (for COVID Test)</InputLabel>
                   <SelectField
                     name="icmr_category"
                     variant="outlined"
