@@ -25,6 +25,7 @@ import {
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import PatientFilterV2 from "./PatientFilterV2";
 import { parseOptionId } from "../../Common/utils";
+import { useTranslation } from "react-i18next";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -98,6 +99,7 @@ export const PatientManager = (props: any) => {
   const classesTab = useStylesTab();
   const theme = useTheme();
   const dispatch: any = useDispatch();
+  const { t } = useTranslation();
 
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -264,7 +266,7 @@ export const PatientManager = (props: any) => {
     return (
       value && (
         <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
-          {key}
+          {t(key)}
           {": "}
           {value}
           <i
@@ -323,8 +325,8 @@ export const PatientManager = (props: any) => {
                   >
                     <i className="mr-2 text-md fas fa-clock"></i>
                     {(moment().isBefore(patient.review_time)
-                      ? "Review at: "
-                      : "Review Missed: ") +
+                      ? t("Review at: ")
+                      : t("Review Missed: ")) +
                       moment(patient.review_time).format("lll")}
                   </span>
                 )}
@@ -334,51 +336,59 @@ export const PatientManager = (props: any) => {
           <div className="md:flex">
             <div className="md:flex flex-wrap justify-end">
               {patient.allow_transfer ? (
-                <Badge color="yellow" icon="unlock" text="Transfer Allowed" />
+                <Badge
+                  color="yellow"
+                  icon="unlock"
+                  text={t("Transfer Allowed")}
+                />
               ) : (
-                <Badge color="green" icon="lock" text="Transfer Blocked" />
+                <Badge color="green" icon="lock" text={t("Transfer Blocked")} />
               )}
               {patient.disease_status === "POSITIVE" && (
-                <Badge color="red" icon="radiation" text="Positive" />
+                <Badge color="red" icon="radiation" text={t("Positive")} />
               )}
               {["NEGATIVE", "RECOVERED"].indexOf(patient.disease_status) >=
                 0 && (
                 <Badge
                   color="green"
                   icon="smile-beam"
-                  text={patient.disease_status}
+                  text={t(patient.disease_status)}
                 />
               )}
               {patient.is_antenatal && patient.is_active && (
-                <Badge color="blue" icon="baby-carriage" text="Antenatal" />
+                <Badge
+                  color="blue"
+                  icon="baby-carriage"
+                  text={t("Antenatal")}
+                />
               )}
               {patient.is_medical_worker && patient.is_active && (
-                <Badge color="blue" icon="user-md" text="Medical Worker" />
+                <Badge color="blue" icon="user-md" text={t("Medical Worker")} />
               )}
               {patient.contact_with_confirmed_carrier && (
                 <Badge
                   color="red"
                   icon="exclamation-triangle"
-                  text="Contact with confirmed carrier"
+                  text={t("Contact with confirmed carrier")}
                 />
               )}
               {patient.contact_with_suspected_carrier && (
                 <Badge
                   color="yellow"
                   icon="exclamation-triangle"
-                  text="Contact with suspected carrier"
+                  text={t("Contact with suspected carrier")}
                 />
               )}
               {patient.disease_status === "EXPIRED" && (
                 <Badge
-                color="yellow"
-                icon="exclamation-triangle"
-                text="Patient Expired"
-              />
+                  color="yellow"
+                  icon="exclamation-triangle"
+                  text={t("Patient Expired")}
+                />
               )}
             </div>
             <div className="px-2">
-              <div className="btn btn-default bg-white">Details</div>
+              <div className="btn btn-default bg-white">{t("Details")}</div>
             </div>
           </div>
         </div>
@@ -408,7 +418,7 @@ export const PatientManager = (props: any) => {
     managePatients = (
       <Grid item xs={12} md={12} className={classes.displayFlex}>
         <Grid container justify="center" alignItems="center">
-          <h5> No Patients Found</h5>
+          <h5>{t("No Patients Found")}</h5>
         </Grid>
       </Grid>
     );
@@ -425,14 +435,14 @@ export const PatientManager = (props: any) => {
             size="small"
             startIcon={<ArrowDownwardIcon>download</ArrowDownwardIcon>}
           >
-            Download All Patients
+            {t("Download All Patients")}
           </Button>
         </div>
         <div className="bg-white overflow-hidden shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">
             <dl>
               <dt className="text-sm leading-5 font-medium text-gray-500 truncate">
-                Total Patients
+                {t("Total Patients")}
               </dt>
               <dd className="mt-4 text-5xl leading-9 font-semibold text-gray-900">
                 {totalCount}
@@ -442,16 +452,20 @@ export const PatientManager = (props: any) => {
         </div>
         <div>
           <div>
-            <div className="text-sm font-semibold mb-2">Search by Name</div>
+            <div className="text-sm font-semibold mb-2">
+              {t("Search by Name")}
+            </div>
             <InputSearchBox
               search={searchByName}
               value={qParams.name}
-              placeholder="Search by Patient Name"
+              placeholder={t("Search by Patient Name")}
               errors=""
             />
           </div>
           <div>
-            <div className="text-sm font-semibold mt-2">Search by number</div>
+            <div className="text-sm font-semibold mt-2">
+              {t("Search by number")}
+            </div>
             <PhoneNumberField
               value={qParams.phone_number}
               onChange={searchByPhone}
@@ -496,7 +510,7 @@ export const PatientManager = (props: any) => {
                     {" "}
                   </line>
                 </svg>
-                <span>Advanced Filters</span>
+                <span>{t("Advanced Filters")}</span>
               </button>
             </div>
           </div>
@@ -508,7 +522,8 @@ export const PatientManager = (props: any) => {
               onClick={handleDownloadFiltered}
               startIcon={<ArrowDownwardIcon>download</ArrowDownwardIcon>}
             >
-              Download {tabValue === 0 ? "Live" : "Discharged"} List
+              {t("Download")} {tabValue === 0 ? t("Live") : t("Discharged")}{" "}
+              {t("List")}
             </Button>
             <CSVLink
               id="downloadlink"
