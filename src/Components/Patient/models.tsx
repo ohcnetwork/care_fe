@@ -85,6 +85,7 @@ export interface PatientModel {
   is_vaccinated?: boolean;
   vaccine_name?: string;
   number_of_doses?: number;
+  last_vaccinated_date?: string;
   date_of_birth?: string;
   blood_group?: string;
   review_time?: string;
