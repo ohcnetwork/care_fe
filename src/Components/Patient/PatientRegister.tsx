@@ -56,7 +56,7 @@ import { DupPatientModel } from "../Facility/models";
 import { PatientModel } from "./models";
 import TransferPatientDialog from "../Facility/TransferPatientDialog";
 import { validatePincode } from "../../Common/validation";
-
+import { useTranslation } from "react-i18next";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const debounce = require("lodash.debounce");
@@ -224,6 +224,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   }>({ patientList: [] });
   const [sameAddress, setSameAddress] = useState(false);
   const [{ extId }, setQuery] = useQueryParams();
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (extId) {
@@ -233,9 +234,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   }, [careExtId]);
 
   const headerText = !id
-    ? "Add Details of Covid Suspect / Patient"
-    : "Update Covid Suspect / Patient Details";
-  const buttonText = !id ? "Add Covid Suspect / Patient" : "Save Details";
+    ? t("Add Details of Covid Suspect / Patient")
+    : t("Update Covid Suspect / Patient Details");
+  const buttonText = !id ? t("Add Covid Suspect / Patient") : t("Save Details");
 
   const fetchDistricts = useCallback(
     async (id: string) => {
@@ -500,11 +501,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           return;
         case "permanent_address":
           if (!sameAddress) {
-            if(!state.form[field]){
+            if (!state.form[field]) {
               errors[field] = "Field is required";
               invalidForm = true;
             }
-          } 
+          }
           return;
         case "date_of_birth":
           if (!state.form[field]) {
@@ -931,13 +932,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                 className="btn border"
                 onClick={(_) => setShowImport(false)}
               >
-                Cancel Import
+                {t("Cancel Import")}
               </button>
               <div>
                 <div className="mt-4">
                   <InputLabel id="care-external-results-id">
-                    {" "}
-                    Enter Care External Results Id*
+                    {t("Enter Care External Results Id")}*
                   </InputLabel>
                   <TextInputField
                     name="care-external-results-id"
@@ -953,7 +953,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   className="btn btn-primary"
                   onClick={fetchExtResultData}
                 >
-                  Import Patient Data from External Resuts
+                  {t("Import Patient Data from External Resuts")}
                 </button>
               </div>
             </div>
@@ -967,21 +967,18 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     setQuery({ extId: "" }, true);
                   }}
                 >
-                  {" "}
-                  Import From External Results
+                  {t("Import From External Results")}
                 </button>
                 <div className="bg-red-100 text-red-800 p-2 rounded-lg shadow mb-4 mt-2 font-semibold text-xs">
                   <div className="text-xl font-bold">
-                    Please enter the correct date of birth for the patient
+                    {t("patient_date_of_birth")}
                   </div>
-                  Each patient in the system is uniquely identifiable by the
-                  number and date of birth. Adding incorrect date of birth can
-                  result in duplication of patient records.
+                  {t("patient_date_of_birth_warning")}
                 </div>
                 <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
                   <div>
                     <PhoneNumberField
-                      label="Phone Number*"
+                      label={`${t("phone_number")}*`}
                       value={state.form.phone_number}
                       onChange={(value: any) => [
                         duplicateCheck(value),
@@ -992,7 +989,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   </div>
                   <div>
                     <InputLabel id="date_of_birth-label">
-                      Date of birth*
+                      {t("Date of Birth")}*
                     </InputLabel>
                     <DateInputField
                       fullWidth={true}
@@ -1009,7 +1006,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   </div>
 
                   <div>
-                    <InputLabel id="name-label">Name*</InputLabel>
+                    <InputLabel id="name-label">{t("Name")}*</InputLabel>
                     <TextInputField
                       name="name"
                       variant="outlined"
@@ -1023,7 +1020,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
                   <div>
                     <InputLabel id="disease_status-label">
-                      Disease Status*
+                      {t("Disease Status")}*
                     </InputLabel>
                     <SelectField
                       name="disease_status"
@@ -1038,7 +1035,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   </div>
                   <div>
                     <InputLabel id="is_declared_positive">
-                      Is patient declared covid postive by state?
+                      {t("is_declared_positive")}
                     </InputLabel>
                     <RadioGroup
                       aria-label="is_declared_positive"
@@ -1051,12 +1048,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         <FormControlLabel
                           value="true"
                           control={<Radio />}
-                          label="Yes"
+                          label={t("Yes")}
                         />
                         <FormControlLabel
                           value="false"
                           control={<Radio />}
-                          label="No"
+                          label={t("No")}
                         />
                       </Box>
                     </RadioGroup>
@@ -1064,7 +1061,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   {state.form.is_declared_positive === "true" && (
                     <div>
                       <InputLabel id="date_declared_positive-label">
-                        Date Patient is Declared Positive
+                        {t("date_declared_positive")}
                       </InputLabel>
                       <DateInputField
                         fullWidth={true}
@@ -1082,7 +1079,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
                   <div>
                     <InputLabel id="is_vaccinated">
-                      Is patient Vaccinated?
+                      {t("is_vaccinated")}
                     </InputLabel>
                     <RadioGroup
                       aria-label="is_vaccinated"
@@ -1095,12 +1092,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         <FormControlLabel
                           value="true"
                           control={<Radio />}
-                          label="Yes"
+                          label={t("Yes")}
                         />
                         <FormControlLabel
                           value="false"
                           control={<Radio />}
-                          label="No"
+                          label={t("No")}
                         />
                       </Box>
                     </RadioGroup>
@@ -1108,7 +1105,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
                   {state.form.is_vaccinated === "true" && (
                     <div>
-                      <InputLabel id="covin_id-label">COVIN Id</InputLabel>
+                      <InputLabel id="covin_id-label">
+                        {t("COVIN ID")}
+                      </InputLabel>
                       <TextInputField
                         name="covin_id"
                         variant="outlined"
@@ -1124,7 +1123,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   {state.form.is_vaccinated === "true" && (
                     <div>
                       <InputLabel id="doses-label">
-                        Number of doses *
+                        {t("Number of doses")}*
                       </InputLabel>
                       <RadioGroup
                         aria-label="number_of_doses"
@@ -1152,7 +1151,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   {state.form.is_vaccinated === "true" && (
                     <div>
                       <InputLabel id="vaccine-name-label">
-                        Vaccine Name *
+                        {t("Vaccine Name")}*
                       </InputLabel>
                       <SelectField
                         name="vaccine_name"
@@ -1168,7 +1167,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   )}
 
                   <div>
-                    <InputLabel id="test_type-label">Test Type</InputLabel>
+                    <InputLabel id="test_type-label">
+                      {t("Test Type")}
+                    </InputLabel>
                     <SelectField
                       name="test_type"
                       variant="outlined"
@@ -1181,7 +1182,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     />
                   </div>
                   <div>
-                    <InputLabel id="srf_id-label">SRF Id</InputLabel>
+                    <InputLabel id="srf_id-label">{t("SRF ID")}</InputLabel>
                     <TextInputField
                       name="srf_id"
                       variant="outlined"
@@ -1194,7 +1195,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   </div>
                   <div>
                     <InputLabel id="date_of_birth-label">
-                      Date of Sample given
+                      {t("Date of Sample given")}
                     </InputLabel>
                     <DateInputField
                       fullWidth={true}
@@ -1210,7 +1211,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   </div>
                   <div>
                     <InputLabel id="date_of_result-label">
-                      Date of Result
+                      {t("Date of Result")}
                     </InputLabel>
                     <DateInputField
                       fullWidth={true}
@@ -1225,7 +1226,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     />
                   </div>
                   <div>
-                    <InputLabel id="gender-label">Gender*</InputLabel>
+                    <InputLabel id="gender-label">{t("gender")}*</InputLabel>
                     <SelectField
                       name="gender"
                       variant="outlined"
@@ -1239,7 +1240,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
                   <div>
                     <InputLabel id="is_medical_worker">
-                      Medical Worker
+                      {t("Medical Worker")}
                     </InputLabel>
                     <RadioGroup
                       aria-label="is_medical_worker"
@@ -1252,12 +1253,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         <FormControlLabel
                           value="true"
                           control={<Radio />}
-                          label="Yes"
+                          label={t("Yes")}
                         />
                         <FormControlLabel
                           value="false"
                           control={<Radio />}
-                          label="No"
+                          label={t("No")}
                         />
                       </Box>
                     </RadioGroup>
@@ -1267,7 +1268,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     <>
                       <div>
                         <InputLabel id="designation_of_health_care_worker-label">
-                          Designation of Medical Worker
+                          {t("Designation of Medical Worker")}
                         </InputLabel>
                         <SelectField
                           name="designation_of_health_care_worker"
@@ -1284,7 +1285,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       </div>
                       <div>
                         <InputLabel id="institution_of_health_care_worker-label">
-                          Institution of Medical Worker{" "}
+                          {t("Institution of Medical Worker")}
                         </InputLabel>
                         <TextInputField
                           name="instituion_of_health_care_worker"
@@ -1300,7 +1301,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   )}
                   <div>
                     <InputLabel id="frontline_worker-label">
-                      Frontline Worker
+                      {t("Frontline Worker")}
                     </InputLabel>
                     <SelectField
                       name="frontline_worker"
@@ -1314,7 +1315,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     />
                   </div>
                   <div>
-                    <InputLabel id="nationality-label">Nationality*</InputLabel>
+                    <InputLabel id="nationality-label">
+                      {t("Nationality")}*
+                    </InputLabel>
                     <SelectField
                       name="nationality"
                       variant="outlined"
@@ -1330,7 +1333,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   {state.form.nationality === "India" ? (
                     <>
                       <div>
-                        <InputLabel id="gender-label">State*</InputLabel>
+                        <InputLabel id="gender-label">{t("State")}*</InputLabel>
                         {isStateLoading ? (
                           <CircularProgress size={20} />
                         ) : (
@@ -1351,7 +1354,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       </div>
 
                       <div>
-                        <InputLabel id="district-label">District*</InputLabel>
+                        <InputLabel id="district-label">
+                          {t("district")}*
+                        </InputLabel>
                         {isDistrictLoading ? (
                           <CircularProgress size={20} />
                         ) : (
@@ -1373,7 +1378,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
                       <div>
                         <InputLabel id="local_body-label">
-                          Localbody*
+                          {t("Local Body")}*
                         </InputLabel>
                         {isLocalbodyLoading ? (
                           <CircularProgress size={20} />
@@ -1397,7 +1402,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   ) : (
                     <div>
                       <InputLabel id="passport-label">
-                        Passport Number*
+                        {t("Passport Number")}*
                       </InputLabel>
                       <TextInputField
                         name="passport_no"
@@ -1411,14 +1416,16 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   )}
 
                   <div>
-                    <InputLabel id="address-label">Current Address*</InputLabel>
+                    <InputLabel id="address-label">
+                      {t("Current Address")}*
+                    </InputLabel>
                     <MultilineInputField
                       rows={2}
                       name="address"
                       variant="outlined"
                       margin="dense"
                       type="text"
-                      placeholder="Enter the current address"
+                      placeholder={t("Enter the current address")}
                       value={state.form.address}
                       onChange={handleChange}
                       errors={state.errors.address}
@@ -1426,12 +1433,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   </div>
                   <div>
                     <InputLabel id="permanent-address-label">
-                      Permanent Address*
+                      {t("Permanent Address")}*
                     </InputLabel>
                     <CheckboxField
                       checked={sameAddress}
                       onChange={() => setSameAddress(!sameAddress)}
-                      label="Same as Current Address"
+                      label={t("Same as Current Address")}
                     />
                     {sameAddress ? null : (
                       <MultilineInputField
@@ -1440,7 +1447,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         variant="outlined"
                         margin="dense"
                         type="text"
-                        placeholder="Enter the permanent address"
+                        placeholder={t("Enter the permanent address")}
                         value={state.form.permanent_address}
                         onChange={handleChange}
                         errors={state.errors.permanent_address}
@@ -1449,7 +1456,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   </div>
                   <div>
                     <InputLabel id="ward-label">
-                      Ward/Division of respective LSGI*
+                      {t("Ward/Division of respective LSGI")}*
                     </InputLabel>
                     {isWardLoading ? (
                       <CircularProgress size={20} />
@@ -1471,7 +1478,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     )}
                   </div>
                   <div>
-                    <InputLabel id="name-label">Village</InputLabel>
+                    <InputLabel id="name-label">{t("Village")}</InputLabel>
                     <TextInputField
                       name="village"
                       variant="outlined"
@@ -1483,7 +1490,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     />
                   </div>
                   <div>
-                    <InputLabel id="name-label">Pincode*</InputLabel>
+                    <InputLabel id="name-label">{t("Pincode")}*</InputLabel>
                     <TextInputField
                       name="pincode"
                       variant="outlined"
@@ -1495,7 +1502,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     />
                   </div>
                   <div>
-                    <InputLabel id="blood_group-label">Blood Group*</InputLabel>
+                    <InputLabel id="blood_group-label">
+                      {t("Blood Group")}*
+                    </InputLabel>
                     <SelectField
                       name="blood_group"
                       variant="outlined"
@@ -1510,7 +1519,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   </div>
                   <div>
                     <PhoneNumberField
-                      label="Emergency contact number*"
+                      label={`${t("Emergency contact number")}*`}
                       value={state.form.emergency_phone_number}
                       onChange={(value: any) => [
                         handleValueChange(value, "emergency_phone_number"),
@@ -1523,7 +1532,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                 <div className="grid gap-4 grid-cols-1 md:grid-cols-2 mt-4">
                   {state.form.gender === "2" && (
                     <div>
-                      <InputLabel id="is_antenatal">Is antenatal ? </InputLabel>
+                      <InputLabel id="is_antenatal">
+                        {t("Is antenatal ?")}
+                      </InputLabel>
                       <RadioGroup
                         aria-label="is_antenatal"
                         name="is_antenatal"
@@ -1535,12 +1546,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           <FormControlLabel
                             value="true"
                             control={<Radio />}
-                            label="Yes"
+                            label={t("Yes")}
                           />
                           <FormControlLabel
                             value="false"
                             control={<Radio />}
-                            label="No"
+                            label={t("No")}
                           />
                         </Box>
                       </RadioGroup>
@@ -1548,7 +1559,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   )}
                   <div>
                     <InputLabel id="is_migrant_worker">
-                      Is a Guest workers?
+                      {t("Is a Guest workers?")}
                     </InputLabel>
                     <RadioGroup
                       aria-label="is_migrant_worker"
@@ -1561,12 +1572,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         <FormControlLabel
                           value="true"
                           control={<Radio />}
-                          label="Yes"
+                          label={t("Yes")}
                         />
                         <FormControlLabel
                           value="false"
                           control={<Radio />}
-                          label="No"
+                          label={t("No")}
                         />
                       </Box>
                     </RadioGroup>
@@ -1574,7 +1585,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
                   <div>
                     <InputLabel id="contact_with_confirmed_carrier">
-                      Contact with confirmed Covid patient?
+                      {t("Contact with confirmed Covid patient?")}
                     </InputLabel>
                     <RadioGroup
                       aria-label="contact_with_confirmed_carrier"
@@ -1587,12 +1598,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         <FormControlLabel
                           value="true"
                           control={<Radio />}
-                          label="Yes"
+                          label={t("Yes")}
                         />
                         <FormControlLabel
                           value="false"
                           control={<Radio />}
-                          label="No"
+                          label={t("No")}
                         />
                       </Box>
                     </RadioGroup>
@@ -1600,7 +1611,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
                   <div>
                     <InputLabel id="contact_with_suspected_carrier">
-                      Contact with Covid suspect?
+                      {t("Contact with Covid suspect?")}
                     </InputLabel>
                     <RadioGroup
                       aria-label="contact_with_suspected_carrier"
@@ -1613,12 +1624,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         <FormControlLabel
                           value="true"
                           control={<Radio />}
-                          label="Yes"
+                          label={t("Yes")}
                         />
                         <FormControlLabel
                           value="false"
                           control={<Radio />}
-                          label="No"
+                          label={t("No")}
                         />
                       </Box>
                     </RadioGroup>
@@ -1629,7 +1640,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     <div>
                       <DateInputField
                         fullWidth={true}
-                        label="Estimate date of contact*"
+                        label={`${t("Estimate date of contact")}*`}
                         value={state.form.estimated_contact_date}
                         onChange={(date) =>
                           handleDateChange(date, "estimated_contact_date")
@@ -1646,14 +1657,14 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     JSON.parse(state.form.contact_with_suspected_carrier)) && (
                     <div>
                       <InputLabel id="cluster_name-label">
-                        Name / Cluster of Contact*
+                        {t("Name / Cluster of Contact")}*
                       </InputLabel>
                       <TextInputField
                         name="cluster_name"
                         variant="outlined"
                         margin="dense"
                         type="text"
-                        placeholder="Name / Cluster of Contact"
+                        placeholder={t("Name / Cluster of Contact")}
                         value={state.form.cluster_name}
                         onChange={handleChange}
                         errors={state.errors.cluster_name}
@@ -1665,7 +1676,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       checked={state.form.past_travel}
                       onChange={handleCheckboxFieldChange}
                       name="past_travel"
-                      label="Domestic/international Travel History (within last 28 days)"
+                      label={t("past_travel")}
                     />
                   </div>
 
@@ -1675,9 +1686,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         <AutoCompleteMultiField
                           id="countries-travelled"
                           options={placesList}
-                          label="Countries / Places Visited* (including transit stops)"
+                          label={t("countries_travelled")}
                           variant="outlined"
-                          placeholder="Select country or enter the place of visit"
+                          placeholder={t("countries_travelled_select")}
                           onChange={(e: object, value: any) =>
                             handleValueChange(value, "countries_travelled")
                           }
@@ -1687,14 +1698,14 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       </div>
                       <div>
                         <InputLabel id="transit_details-label">
-                          Transit_details
+                          {t("Transit Details")}
                         </InputLabel>
                         <TextInputField
                           name="transit_details"
                           variant="outlined"
                           margin="dense"
                           type="text"
-                          placeholder="Flight No:/Train No:/Vehicle No: (with seat number)"
+                          placeholder={t("transit_details_placeholder")}
                           value={state.form.transit_details}
                           onChange={handleChange}
                           errors={state.errors.transit_details}
@@ -1702,7 +1713,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       </div>
                       <div>
                         <InputLabel id="date_of_return-label">
-                          Estimated date of Arrival*
+                          {t("Estimated date of Arrival")}*
                         </InputLabel>
                         <DateInputField
                           fullWidth={true}
@@ -1720,7 +1731,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   )}
                   <div>
                     <InputLabel id="number_of_primary_contacts-label">
-                      Number Of Primary Contacts
+                      {t("Number Of Primary Contacts")}
                     </InputLabel>
                     <TextInputField
                       name="number_of_primary_contacts"
@@ -1734,7 +1745,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   </div>
                   <div>
                     <InputLabel id="number_of_secondary_contacts-label">
-                      Number Of Secondary Contacts
+                      {t("Number Of Secondary Contacts")}
                     </InputLabel>
                     <TextInputField
                       name="number_of_secondary_contacts"
@@ -1751,7 +1762,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                 <div className="grid gap-4 grid-cols-1 md:grid-cols-2 mt-4">
                   <div className="md:col-span-2">
                     <InputLabel id="med-history-label">
-                      Any medical history? (Optional Information)
+                      {t("Any medical history?")}({t("Optional Information")})
                     </InputLabel>
                     <div className="grid grid-cols-1 md:grid-cols-2">
                       {medicalHistoryTypes.map((i) => {
@@ -1762,7 +1773,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
                   <div>
                     <InputLabel id="present_health-label">
-                      Present Health Condition
+                      {t("Present Health Condition")}
                     </InputLabel>
                     <MultilineInputField
                       rows={2}
@@ -1770,7 +1781,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       variant="outlined"
                       margin="dense"
                       type="text"
-                      placeholder="Optional Information"
+                      placeholder={t("Optional Information")}
                       value={state.form.present_health}
                       onChange={handleChange}
                       errors={state.errors.present_health}
@@ -1779,7 +1790,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
                   <div>
                     <InputLabel id="ongoing_medication-label">
-                      Ongoing Medication
+                      {t("Ongoing Medication")}
                     </InputLabel>
                     <MultilineInputField
                       rows={2}
@@ -1787,7 +1798,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       variant="outlined"
                       margin="dense"
                       type="text"
-                      placeholder="Optional Information"
+                      placeholder={t("Optional Information")}
                       value={state.form.ongoing_medication}
                       onChange={handleChange}
                       errors={state.errors.ongoing_medication}
@@ -1795,14 +1806,16 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   </div>
 
                   <div>
-                    <InputLabel id="allergies_label">Allergies</InputLabel>
+                    <InputLabel id="allergies_label">
+                      {t("Allergies")}
+                    </InputLabel>
                     <MultilineInputField
                       rows={2}
                       name="allergies"
                       variant="outlined"
                       margin="dense"
                       type="text"
-                      placeholder="Optional Information"
+                      placeholder={t("Optional Information")}
                       value={state.form.allergies}
                       onChange={handleChange}
                       errors={state.errors.allergies}
@@ -1810,7 +1823,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   </div>
                   <div>
                     <InputLabel id="number_of_aged_dependents-label">
-                      Number Of Aged Dependents (Above 60)
+                      {t("Number Of Aged Dependents (Above 60)")}
                     </InputLabel>
                     <TextInputField
                       name="number_of_aged_dependents"
@@ -1825,7 +1838,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
                   <div>
                     <InputLabel id="number_of_chronic_diseased_dependents-label">
-                      Number Of Chronic Diseased Dependents
+                      {t("Number Of Chronic Diseased Dependents")}
                     </InputLabel>
                     <TextInputField
                       name="number_of_chronic_diseased_dependents"
@@ -1847,8 +1860,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     type="button"
                     onClick={goBack}
                   >
-                    {" "}
-                    Cancel{" "}
+                    {t("Cancel")}
                   </Button>
                   <Button
                     color="primary"
@@ -1860,8 +1872,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     }
                     onClick={(e) => handleSubmit(e)}
                   >
-                    {" "}
-                    {buttonText}{" "}
+                    {buttonText}
                   </Button>
                 </div>
               </form>
