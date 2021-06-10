@@ -7,9 +7,13 @@
   "reset": "மீட்டமை",
   "downloads": "பதிவிறக்கங்கள்",
   "download_type": "பதிவிறக்க வகை",
+  "Pincode": "Pincode",
+  "Country": "Country",
   "State": "மாநிலம்",
   "District": "மாவட்டம்",
   "Local Body": "உள்ளாட்சி மன்றம்",
   "Location": "இடம்",
-  "Ward": "தொகுதி"
+  "Ward": "தொகுதி",
+  "Yes": "Yes",
+  "No": "No"
 }

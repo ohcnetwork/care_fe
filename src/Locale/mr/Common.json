@@ -7,9 +7,13 @@
   "reset": "रीसेट करा",
   "downloads": "डाउनलोड",
   "download_type": "डाउनलोड प्रकार",
+  "Pincode": "Pincode",
+  "Country": "Country",
   "State": "राज्य",
   "District": "जिल्हा",
   "Local Body": "स्थानिक संस्था",
   "Location": "स्थान",
-  "Ward": "वॉर्ड"
+  "Ward": "वॉर्ड",
+  "Yes": "Yes",
+  "No": "No"
 }

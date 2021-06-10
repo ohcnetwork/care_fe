@@ -7,9 +7,13 @@
   "reset": "പുന: സജ്ജമാക്കുക ",
   "downloads": "ഡൗൺലോഡുകൾ",
   "download_type": "ഡൗൺലോഡുകളുടെ തരം",
+  "Pincode": "Pincode",
+  "Country": "Country",
   "State": "സംസ്ഥാനം",
   "District": "ജില്ല",
   "Local Body": "തദ്ദേശസ്ഥാപനം",
   "Location": "സ്ഥാനം",
-  "Ward": "വാര്‍ഡ്‌"
+  "Ward": "വാര്‍ഡ്‌",
+  "Yes": "Yes",
+  "No": "No"
 }
