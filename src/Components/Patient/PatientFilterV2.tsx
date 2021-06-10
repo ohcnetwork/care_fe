@@ -15,11 +15,12 @@ import {
   PATIENT_FILTER_ADMITTED_TO,
 } from "../../Common/constants";
 import moment from "moment";
-import { getAllLocalBody, getFacility } from "../../Redux/actions";
+import { getAllLocalBody, getFacility, getDistrict } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { CircularProgress } from "@material-ui/core";
 import { navigate } from "raviger";
 import { DateRangePicker, getDate } from "../Common/DateRangePicker";
+import DistrictSelect from "../Facility/FacilityFilter/DistrictSelect";
 
 const debounce = require("lodash.debounce");
 
@@ -33,6 +34,8 @@ const useMergeState = (initialState: any) => {
 export default function PatientFilterV2(props: any) {
   let { filter, onChange, closeFilter } = props;
   const [isFacilityLoading, setFacilityLoading] = useState(false);
+  const [isDistrictLoading, setDistrictLoading] = useState(false);
+
   const [lsgBody, setLsgBody] = useState<any[]>([]);
   const [isLsgLoading, setLsgLoading] = useState(false);
   const [hasLsgSearchText, setHasLsgSearchText] = useState(false);
@@ -47,10 +50,12 @@ export default function PatientFilterV2(props: any) {
   };
 
   const [filterState, setFilterState] = useMergeState({
+    district: filter.district || "",
     facility: filter.facility || "",
     lsgBody: filter.lsgBody || "",
     facility_ref: null,
     lsgBody_ref: null,
+    district_ref: null,
     date_declared_positive_before: filter.date_declared_positive_before || null,
     date_declared_positive_after: filter.date_declared_positive_after || null,
     date_of_result_before: filter.date_of_result_before || null,
@@ -84,8 +89,49 @@ export default function PatientFilterV2(props: any) {
     covin_id: filter.covin_id || null,
     is_kasp: filter.is_kasp || null,
     is_declared_positive: filter.is_declared_positive || null,
+    last_consultation_symptoms_onset_date_before:
+      filter.last_consultation_symptoms_onset_date_before || null,
+    last_consultation_symptoms_onset_date_after:
+      filter.last_consultation_symptoms_onset_date_after || null,
   });
   const dispatch: any = useDispatch();
+
+  const clearFilterState = {
+    district: "",
+    facility: "",
+    lsgBody: "",
+    facility_ref: null,
+    lsgBody_ref: null,
+    district_ref: null,
+    date_declared_positive_before: null,
+    date_declared_positive_after: null,
+    date_of_result_before: null,
+    date_of_result_after: null,
+    created_date_before: null,
+    created_date_after: null,
+    modified_date_before: null,
+    modified_date_after: null,
+    ordering: "Select",
+    category: null,
+    gender: null,
+    disease_status: null,
+    age_min: null,
+    age_max: null,
+    date_of_result: null,
+    date_declared_positive: null,
+    last_consultation_admission_date_before: null,
+    last_consultation_admission_date_after: null,
+    last_consultation_discharge_date_before: null,
+    last_consultation_discharge_date_after: null,
+    last_consultation_admitted_to_list: [],
+    srf_id: null,
+    number_of_doses: null,
+    covin_id: null,
+    is_kasp: null,
+    is_declared_positive: null,
+    last_consultation_symptoms_onset_date_before: null,
+    last_consultation_symptoms_onset_date_after: null,
+  };
 
   useEffect(() => {
     async function fetchData() {
@@ -96,6 +142,14 @@ export default function PatientFilterV2(props: any) {
         );
         setFilterState({ facility_ref: facilityData });
         setFacilityLoading(false);
+      }
+      if (filter.district) {
+        setDistrictLoading(true);
+        const { data: districtData } = await dispatch(
+          getDistrict(filter.district, "district")
+        );
+        setFilterState({ district_ref: districtData });
+        setDistrictLoading(false);
       }
 
       if (filter.lsgBody) {
@@ -180,6 +234,7 @@ export default function PatientFilterV2(props: any) {
 
   const applyFilter = () => {
     const {
+      district,
       facility,
       lsgBody,
       date_declared_positive_before,
@@ -207,8 +262,11 @@ export default function PatientFilterV2(props: any) {
       srf_id,
       is_kasp,
       is_declared_positive,
+      last_consultation_symptoms_onset_date_before,
+      last_consultation_symptoms_onset_date_after,
     } = filterState;
     const data = {
+      district: district || "",
       lsgBody: lsgBody || "",
       facility: facility || "",
       date_declared_positive_before:
@@ -283,6 +341,20 @@ export default function PatientFilterV2(props: any) {
       covin_id: covin_id || "",
       is_kasp: is_kasp || "",
       is_declared_positive: is_declared_positive || "",
+      last_consultation_symptoms_onset_date_before:
+        last_consultation_symptoms_onset_date_before &&
+        moment(last_consultation_symptoms_onset_date_before).isValid()
+          ? moment(last_consultation_symptoms_onset_date_before).format(
+              "YYYY-MM-DD"
+            )
+          : "",
+      last_consultation_symptoms_onset_date_after:
+        last_consultation_symptoms_onset_date_after &&
+        moment(last_consultation_symptoms_onset_date_after).isValid()
+          ? moment(last_consultation_symptoms_onset_date_after).format(
+              "YYYY-MM-DD"
+            )
+          : "",
     };
     onChange(data);
   };
@@ -310,6 +382,7 @@ export default function PatientFilterV2(props: any) {
           className="btn btn-default"
           onClick={(_) => {
             navigate("/patients");
+            setFilterState(clearFilterState);
           }}
         >
           <i className="fas fa-times mr-2" />
@@ -364,23 +437,30 @@ export default function PatientFilterV2(props: any) {
             />
           </div>
         </div>
+
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">District</span>
+          <DistrictSelect
+            multiple={false}
+            name="district"
+            selected={filterState.district_ref}
+            setSelected={(obj: any) => setFacility(obj, "district")}
+            className="shifting-page-filter-dropdown"
+            errors={""}
+          />
+        </div>
+
         <div className="w-64 flex-none">
           <span className="text-sm font-semibold">Facility</span>
-          <div className="">
-            {isFacilityLoading ? (
-              <CircularProgress size={20} />
-            ) : (
-              <FacilitySelect
-                multiple={false}
-                name="facility"
-                selected={filterState.facility_ref}
-                showAll={false}
-                setSelected={(obj) => setFacility(obj, "facility")}
-                className="shifting-page-filter-dropdown"
-                errors={""}
-              />
-            )}
-          </div>
+          <FacilitySelect
+            multiple={false}
+            name="facility"
+            selected={filterState.facility_ref}
+            showAll={false}
+            setSelected={(obj) => setFacility(obj, "facility")}
+            className="shifting-page-filter-dropdown"
+            errors={""}
+          />
         </div>
         <div className="w-64 flex-none">
           <span className="text-sm font-semibold">Gender</span>
@@ -588,6 +668,25 @@ export default function PatientFilterV2(props: any) {
             endDateId={"last_consultation_discharge_date_before"}
             startDateId={"last_consultation_discharge_date_after"}
             label={"Discharge Date"}
+            size="small"
+          />
+          <DateRangePicker
+            startDate={getDate(
+              filterState.last_consultation_symptoms_onset_date_after
+            )}
+            endDate={getDate(
+              filterState.last_consultation_symptoms_onset_date_before
+            )}
+            onChange={(e) =>
+              handleDateRangeChange(
+                "last_consultation_symptoms_onset_date_after",
+                "last_consultation_symptoms_onset_date_before",
+                e
+              )
+            }
+            endDateId={"last_consultation_symptoms_onset_date_before"}
+            startDateId={"last_consultation_symptoms_onset_date_after"}
+            label={"Onset of Symptoms Date"}
             size="small"
           />
         </div>
