@@ -228,6 +228,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
                 Bed Type*
               </InputLabel>
               <NativeSelectField
+                data-test="bed-type"
                 name="bedType"
                 variant="outlined"
                 value={state.form.bedType}
@@ -242,6 +243,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
                 Total Capacity*
               </InputLabel>
               <TextInputField
+                data-test="total-capacity"
                 name="totalCapacity"
                 variant="outlined"
                 margin="dense"
@@ -257,6 +259,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
                 Currently Occupied*
               </InputLabel>
               <TextInputField
+                data-test="currently-occupied"
                 name="currentOccupancy"
                 variant="outlined"
                 margin="dense"
@@ -273,6 +276,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
                 style={{ justifyContent: "space-between" }}
               >
                 <Button
+                  data-test="bed-capacity-cancel"
                   color="default"
                   variant="contained"
                   type="button"
@@ -281,6 +285,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
                   Cancel
                 </Button>
                 <Button
+                  data-test="bed-capacity-save"
                   color="primary"
                   variant="contained"
                   type="submit"
