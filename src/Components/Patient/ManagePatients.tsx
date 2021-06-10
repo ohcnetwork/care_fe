@@ -120,6 +120,7 @@ export const PatientManager = (props: any) => {
       : undefined,
     local_body: qParams.lsgBody || undefined,
     facility: facilityId || qParams.facility,
+    district: qParams.district || undefined,
     offset: (qParams.page ? qParams.page - 1 : 0) * RESULT_LIMIT,
     created_date_before: qParams.created_date_before || undefined,
     created_date_after: qParams.created_date_after || undefined,
@@ -151,6 +152,10 @@ export const PatientManager = (props: any) => {
     covin_id: qParams.covin_id || undefined,
     is_kasp: qParams.is_kasp || undefined,
     is_declared_positive: qParams.is_declared_positive || undefined,
+    last_consultation_symptoms_onset_date_before:
+      qParams.last_consultation_symptoms_onset_date_before || undefined,
+    last_consultation_symptoms_onset_date_after:
+      qParams.last_consultation_symptoms_onset_date_after || undefined,
   };
 
   let managePatients: any = null;
@@ -201,6 +206,7 @@ export const PatientManager = (props: any) => {
     qParams.age_min,
     qParams.last_consultation_admitted_to_list,
     qParams.facility,
+    qParams.district,
     qParams.category,
     qParams.gender,
     qParams.ordering,
@@ -219,6 +225,12 @@ export const PatientManager = (props: any) => {
     qParams.lsgBody,
     qParams.is_kasp,
     qParams.is_declared_positive,
+    qParams.date_declared_positive_before,
+    qParams.date_declared_positive_after,
+    qParams.date_of_result_before,
+    qParams.date_of_result_after,
+    qParams.last_consultation_symptoms_onset_date_before,
+    qParams.last_consultation_symptoms_onset_date_after,
   ]);
 
   const updateQuery = (params: any) => {
@@ -561,8 +573,8 @@ export const PatientManager = (props: any) => {
           )}
           {badge(
             "Admitted Before",
-            qParams.last_consultation_discharge_date_before,
-            "last_consultation_discharge_date_before"
+            qParams.last_consultation_admission_date_before,
+            "last_consultation_admission_date_before"
           )}
           {badge(
             "Admitted After",
@@ -594,6 +606,7 @@ export const PatientManager = (props: any) => {
           {badge("COVIN ID", qParams.covin_id, "covin_id")}
 
           {badge("Filtered By: Facility", qParams.facility, "facility")}
+          {badge("Filtered By: District", qParams.district, "district")}
           {badge("Ordering", qParams.ordering, "ordering")}
           {badge("Category", qParams.category, "category")}
           {badge("Disease Status", qParams.disease_status, "disease_status")}
@@ -615,6 +628,40 @@ export const PatientManager = (props: any) => {
             "Declared Status",
             qParams.is_declared_positive,
             "is_declared_positive"
+          )}
+          {badge(
+            "Result before",
+            qParams.date_of_result_before,
+            "date_of_result_before"
+          )}
+          {badge(
+            "Result after",
+            qParams.date_of_result_after,
+            "date_of_result_after"
+          )}
+
+          {badge(
+            "Declared positive before",
+            qParams.date_declared_positive_before,
+            "date_declared_positive_before"
+          )}
+
+          {badge(
+            "Declared positive after",
+            qParams.date_declared_positive_after,
+            "date_declared_positive_after"
+          )}
+
+          {badge(
+            "Onset of symptoms before",
+            qParams.last_consultation_symptoms_onset_date_before,
+            "last_consultation_symptoms_onset_date_before"
+          )}
+
+          {badge(
+            "Onset of symptoms after",
+            qParams.last_consultation_symptoms_onset_date_after,
+            "last_consultation_symptoms_onset_date_after"
           )}
         </div>
       </div>
