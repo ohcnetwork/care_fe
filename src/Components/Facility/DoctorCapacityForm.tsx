@@ -1,17 +1,21 @@
 import { Button, Card, CardContent, Grid, InputLabel } from "@material-ui/core";
-import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
+import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { navigate } from "raviger";
-import loadable from '@loadable/component';
+import loadable from "@loadable/component";
 import React, { useCallback, useEffect, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
 import { DOCTOR_SPECIALIZATION } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-const Loading = loadable(() => import("../../Components/Common/Loading"));
 import { createDoctor, getDoctor, listDoctor } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import { ErrorHelperText, NativeSelectField, TextInputField } from "../Common/HelperInputFields";
-const PageTitle = loadable(() => import("../Common/PageTitle"));
+import {
+  ErrorHelperText,
+  NativeSelectField,
+  TextInputField,
+} from "../Common/HelperInputFields";
 import { DoctorModal, OptionsType } from "./models";
+const Loading = loadable(() => import("../../Components/Common/Loading"));
+const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 interface DoctorCapacityProps extends DoctorModal {
   facilityId: number;
@@ -20,19 +24,19 @@ interface DoctorCapacityProps extends DoctorModal {
 const initDoctorTypes: Array<OptionsType> = [
   {
     id: 0,
-    text: "Select"
+    text: "Select",
   },
-  ...DOCTOR_SPECIALIZATION
+  ...DOCTOR_SPECIALIZATION,
 ];
 
 const initForm: any = {
   area: "",
-  count: ""
+  count: "",
 };
 
 const initialState = {
   form: { ...initForm },
-  errors: { ...initForm }
+  errors: { ...initForm },
 };
 
 const doctorCapacityReducer = (state = initialState, action: any) => {
@@ -40,13 +44,13 @@ const doctorCapacityReducer = (state = initialState, action: any) => {
     case "set_form": {
       return {
         ...state,
-        form: action.form
+        form: action.form,
       };
     }
     case "set_error": {
       return {
         ...state,
-        errors: action.errors
+        errors: action.errors,
       };
     }
     default:
@@ -60,9 +64,8 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
   const [state, dispatch] = useReducer(doctorCapacityReducer, initialState);
   const [isLoading, setIsLoading] = useState(false);
   const [isLastOptionType, setIsLastOptionType] = useState(false);
-  const [doctorTypes, setDoctorTypes] = useState<Array<OptionsType>>(
-    initDoctorTypes
-  );
+  const [doctorTypes, setDoctorTypes] =
+    useState<Array<OptionsType>>(initDoctorTypes);
 
   const headerText = !id ? "Add Doctor Capacity" : "Edit Doctor Capacity";
   const buttonText = !id
@@ -99,7 +102,7 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
                 );
                 return {
                   ...type,
-                  disabled: !!isExisting
+                  disabled: !!isExisting,
                 };
               }
             );
@@ -108,11 +111,13 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
         }
       } else {
         // Edit Form functionality
-        const res = await dispatchAction(getDoctor({ facilityId: facilityId, id: id }));
+        const res = await dispatchAction(
+          getDoctor({ facilityId: facilityId, id: id })
+        );
         if (res && res.data) {
           dispatch({
             type: "set_form",
-            form: { area: res.data.area, count: res.data.count }
+            form: { area: res.data.area, count: res.data.count },
           });
         } else {
           navigate(`/facility/${facilityId}`);
@@ -167,7 +172,7 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
       setIsLoading(true);
       const data = {
         area: Number(state.form.area),
-        count: Number(state.form.count)
+        count: Number(state.form.count),
       };
       const res = await dispatchAction(createDoctor(id, data, { facilityId }));
       setIsLoading(false);
@@ -176,7 +181,7 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
         const updatedDoctorTypes = doctorTypes.map((type: OptionsType) => {
           return {
             ...type,
-            disabled: res.data.area !== type.id ? type.disabled : true
+            disabled: res.data.area !== type.id ? type.disabled : true,
           };
         });
         setDoctorTypes(updatedDoctorTypes);
@@ -185,14 +190,14 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
         // show success message
         if (!id) {
           Notification.Success({
-            msg: "Doctor count added successfully"
+            msg: "Doctor count added successfully",
           });
           if (isLastOptionType) {
             navigate(`/facility/${facilityId}`);
           }
         } else {
           Notification.Success({
-            msg: "Doctor count updated successfully"
+            msg: "Doctor count updated successfully",
           });
           navigate(`/facility/${facilityId}`);
         }
@@ -209,7 +214,7 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
       <div>
         <Card style={{ marginTop: "20px" }}>
           <form
-            onSubmit={e => {
+            onSubmit={(e) => {
               handleSubmit(e);
             }}
           >
@@ -245,11 +250,7 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
             <CardContent>
               <Grid container justify="space-between" spacing={5}>
                 <Grid item>
-                  <Button
-                    color="default"
-                    variant="contained"
-                    onClick={goBack}
-                  >
+                  <Button color="default" variant="contained" onClick={goBack}>
                     Cancel
                   </Button>
                 </Grid>
@@ -258,8 +259,10 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
                     color="primary"
                     variant="contained"
                     type="submit"
-                    startIcon={<CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>}
-                    onClick={e => handleSubmit(e)}
+                    startIcon={
+                      <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
+                    }
+                    onClick={(e) => handleSubmit(e)}
                   >
                     {buttonText}
                   </Button>

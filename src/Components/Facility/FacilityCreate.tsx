@@ -42,8 +42,8 @@ import {
   SelectField,
   TextInputField,
 } from "../Common/HelperInputFields";
-const Loading = loadable(() => import("../Common/Loading"));
 import { LocationSearchAndPick } from "../Common/LocationSearchAndPick";
+const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 const DEFAULT_MAP_LOCATION = [10.038394700000001, 76.5074145180173]; // Ernakulam
@@ -134,8 +134,9 @@ export const FacilityCreate = (props: FacilityProps) => {
   const [localBody, setLocalBody] = useState(selectDistrict);
   const [ward, setWard] = useState(selectLocalBody);
 
-  const [anchorEl, setAnchorEl] =
-    React.useState<(EventTarget & Element) | null>(null);
+  const [anchorEl, setAnchorEl] = React.useState<
+    (EventTarget & Element) | null
+  >(null);
   const [mapLoadLocation, setMapLoadLocation] = useState(DEFAULT_MAP_LOCATION);
 
   const headerText = !facilityId ? "Create Facility" : "Update Facility";

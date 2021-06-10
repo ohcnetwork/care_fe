@@ -1,7 +1,5 @@
 import React, { useState, useCallback } from "react";
 import loadable from "@loadable/component";
-const PageTitle = loadable(() => import("../Common/PageTitle"));
-const Loading = loadable(() => import("../Common/Loading"));
 import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
 import {
@@ -12,6 +10,8 @@ import {
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import Pagination from "../Common/Pagination";
 import moment from "moment";
+const PageTitle = loadable(() => import("../Common/PageTitle"));
+const Loading = loadable(() => import("../Common/Loading"));
 
 export default function InventoryLog(props: any) {
   const { facilityId, inventoryId }: any = props;
@@ -102,9 +102,7 @@ export default function InventoryLog(props: any) {
           <div className="flex items-center">
             <div className="ml-3">
               <p className="text-gray-900 whitespace-no-wrap">
-                {moment(inventoryItem.created_date).format(
-                  "DD-MM-YYYY LTS"
-                )}
+                {moment(inventoryItem.created_date).format("DD-MM-YYYY LTS")}
               </p>
             </div>
           </div>

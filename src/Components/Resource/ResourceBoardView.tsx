@@ -34,7 +34,7 @@ export default function BoardView() {
   const [isLoading, setIsLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
-  badge;
+  // badge;
 
   const updateQuery = (filter: any) => {
     // prevent empty filters from cluttering the url

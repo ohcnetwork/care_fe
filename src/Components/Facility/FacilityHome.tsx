@@ -18,8 +18,6 @@ import {
   listDoctor,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 import BedTypeCard from "./BedTypeCard";
 import DoctorsCountCard from "./DoctorsCountCard";
 import {
@@ -28,6 +26,8 @@ import {
   FacilityModel,
   PatientStatsModel,
 } from "./models";
+const Loading = loadable(() => import("../Common/Loading"));
+const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export const FacilityHome = (props: any) => {
   const { facilityId } = props;
@@ -93,9 +93,9 @@ export const FacilityHome = (props: any) => {
 
   const handleDeleteSubmit = async () => {
     const res = await dispatch(deleteFacility(facilityId));
-    if(res && res.status == 204){
+    if (res && res.status == 204) {
       Notification.Success({
-        msg: "Facility deleted successfully"
+        msg: "Facility deleted successfully",
       });
     }
     navigate("/facility");
