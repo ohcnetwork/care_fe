@@ -54,9 +54,9 @@ export default function ResultList() {
     const res = await axios.patch(
       `https://careapi.coronasafe.in/api/v1/users/${"devdistrictadmin"}/pnconfig/`,
       {
-        endpoint: push.endpoint,
-        pn_p256dh: p256dh,
-        pn_auth: auth,
+        pf_endpoint: push.endpoint,
+        pf_p256dh: p256dh,
+        pf_auth: auth,
       },
       {
         headers: {
