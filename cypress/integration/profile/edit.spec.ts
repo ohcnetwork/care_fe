@@ -20,6 +20,25 @@ describe("Edit Profile Testing", () => {
     cy.url().should("include", "/facility");
   });
 
+  it("Empty First-Name field of " + username, () => {
+    // Opening editing form
+
+    cy.get("a").contains("Profile").click();
+    cy.url().should("include", "/user/profile");
+    cy.get("button").contains("Edit User Profile").click();
+
+    // Typing into firstname field
+    cy.get("input[name=firstName]").clear().trigger("change", { force: true });
+
+    // Waiting for async call to complete
+    cy.wait(2000);
+    cy.get("form").get("button[type='submit']").click();
+
+    // Waiting for async call to complete
+    cy.wait(2000);
+    cy.get(".error-text").contains("Field is required");
+  });
+
   it("Valid First-Name field of " + username, () => {
     // Opening editing form
 
@@ -28,9 +47,8 @@ describe("Edit Profile Testing", () => {
     cy.get("button").contains("Edit User Profile").click();
 
     // Typing into firstname field
-    cy.get("input[name=firstName")
-      .clear()
-      .type("User 1")
+    cy.get("input[name=firstName]")
+      .type(backspace + "User 1")
       .trigger("change", { force: true });
 
     // Waiting for async call to complete
@@ -42,6 +60,48 @@ describe("Edit Profile Testing", () => {
     // Waiting for async call to complete
     cy.wait(2000);
     cy.get("dt").contains("First Name").siblings().first().contains(`User 1`);
+  });
+
+  it("Empty Last-Name field of " + username, () => {
+    // Opening editing form
+
+    cy.get("a").contains("Profile").click();
+    cy.url().should("include", "/user/profile");
+    cy.get("button").contains("Edit User Profile").click();
+
+    // Typing into lastname field
+    cy.get("input[name=lastName]").clear().trigger("change", { force: true });
+
+    // Waiting for async call to complete
+    cy.wait(2000);
+    cy.get("form").get("button[type='submit']").click();
+
+    // Waiting for async call to complete
+    cy.wait(2000);
+    cy.get(".error-text").contains("Field is required");
+  });
+
+  it("Valid Last-Name field of " + username, () => {
+    // Opening editing form
+
+    cy.get("a").contains("Profile").click();
+    cy.url().should("include", "/user/profile");
+    cy.get("button").contains("Edit User Profile").click();
+
+    // Typing into lastname field
+    cy.get("input[name=lastName]")
+      .type(backspace + "User 1")
+      .trigger("change", { force: true });
+
+    // Waiting for async call to complete
+    cy.wait(2000);
+    cy.get("form").get("button[type='submit']").click();
+
+    // Waiting for async call to complete
+    cy.wait(2000);
+    // Waiting for async call to complete
+    cy.wait(2000);
+    cy.get("dt").contains("Last Name").siblings().first().contains(`User 1`);
   });
 
   it("Invalid Whatsapp Number of " + username, () => {
@@ -164,23 +224,4 @@ describe("Edit Profile Testing", () => {
   });
 
   // Firstname testing
-
-  it("Empty First-Name field of " + username, () => {
-    // Opening editing form
-
-    cy.get("a").contains("Profile").click();
-    cy.url().should("include", "/user/profile");
-    cy.get("button").contains("Edit User Profile").click();
-
-    // Typing into firstname field
-    cy.get("input[name=firstName").clear().trigger("change", { force: true });
-
-    // Waiting for async call to complete
-    cy.wait(2000);
-    cy.get("form").get("button[type='submit']").click();
-
-    // Waiting for async call to complete
-    cy.wait(2000);
-    cy.get(".error-text").contains("Field is required");
-  });
 });
