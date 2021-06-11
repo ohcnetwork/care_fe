@@ -93,9 +93,9 @@ export const FacilityHome = (props: any) => {
 
   const handleDeleteSubmit = async () => {
     const res = await dispatch(deleteFacility(facilityId));
-    if(res && res.status == 204){
+    if (res && res.status == 204) {
       Notification.Success({
-        msg: "Facility deleted successfully"
+        msg: "Facility deleted successfully",
       });
     }
     navigate("/facility");
@@ -220,17 +220,21 @@ export const FacilityHome = (props: any) => {
                   facilityData?.ward_object?.name}
               </Typography>
             )}
-            <div className="grid grid-cols-5">
+            <div className="grid grid-cols-7">
               <div className="border"></div>
               <div className="border font-semibold">Liquid</div>
               <div className="border font-semibold">B</div>
               <div className="border font-semibold">C</div>
               <div className="border font-semibold">D</div>
+              <div className="border font-semibold">J</div>
+              <div className="border font-semibold">Gaseous</div>
               <div className="border font-semibold">Capacity</div>
               <div className="border">{facilityData.oxygen_capacity}</div>
               <div className="border">{facilityData.type_b_cylinders}</div>
               <div className="border">{facilityData.type_c_cylinders}</div>
               <div className="border">{facilityData.type_d_cylinders}</div>
+              <div className="border">{facilityData.type_j_cylinders}</div>
+              <div className="border">{facilityData.type_gaseous}</div>
               <div className="border font-semibold">Expected</div>
               <div className="border">
                 {facilityData.expected_oxygen_requirement}
@@ -244,6 +248,10 @@ export const FacilityHome = (props: any) => {
               <div className="border">
                 {facilityData.expected_type_d_cylinders}
               </div>
+              <div className="border">
+                {facilityData.expected_type_j_cylinders}
+              </div>
+              <div className="border">{facilityData.expected_type_gaseous}</div>
             </div>
           </div>
           <div className="flex flex-col">
