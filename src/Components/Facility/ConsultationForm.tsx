@@ -136,8 +136,10 @@ export const ConsultationForm = (props: any) => {
   const { facilityId, patientId, id } = props;
   const [state, dispatch] = useReducer(consultationFormReducer, initialState);
   const [dischargeAdvice, setDischargeAdvice] = useState<Prescription_t[]>([]);
-  const [selectedFacility, setSelectedFacility] =
-    useState<FacilityModel | null>(null);
+  const [
+    selectedFacility,
+    setSelectedFacility,
+  ] = useState<FacilityModel | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const headerText = !id ? "Consultation" : "Edit Consultation";
@@ -254,14 +256,18 @@ export const ConsultationForm = (props: any) => {
           }
           return;
         case "is_telemedicine":
-          if ( state.form.admitted_to === "Home Isolation" && state.form[field] === "false") {
-            errors[field] = "Telemedicine should be `Yes` when Admitted To is Home Isolation";
+          if (
+            state.form.admitted_to === "Home Isolation" &&
+            state.form[field] === "false"
+          ) {
+            errors[field] =
+              "Telemedicine should be `Yes` when Admitted To is Home Isolation";
             invalidForm = true;
           }
           return;
         case "is_kasp":
-          if(!state.form[field]) {
-            errors[field] = "Please select an option, Kasp is mandatory";
+          if (!state.form[field]) {
+            errors[field] = "Please select an option, MJPJAY is mandatory";
             invalidForm = true;
           }
           return;
@@ -318,7 +324,8 @@ export const ConsultationForm = (props: any) => {
         is_telemedicine: state.form.is_telemedicine,
         action: state.form.action,
         review_time: state.form.review_time,
-        assigned_to: state.form.is_telemedicine === "true" ? state.form.assigned_to : "",
+        assigned_to:
+          state.form.is_telemedicine === "true" ? state.form.assigned_to : "",
       };
       const res = await dispatchAction(
         id ? updateConsultation(id, data) : createConsultation(data)
@@ -713,7 +720,7 @@ export const ConsultationForm = (props: any) => {
               </div>
 
               <div className="flex-1">
-                <InputLabel id="admitted-label">Kasp*</InputLabel>
+                <InputLabel id="admitted-label">MJPJAY*</InputLabel>
                 <RadioGroup
                   aria-label="covid"
                   name="is_kasp"

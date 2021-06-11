@@ -390,7 +390,7 @@ export default function ListFilter(props: any) {
         </div>
 
         <div className="w-64 flex-none">
-          <span className="text-sm font-semibold">Is KASP</span>
+          <span className="text-sm font-semibold">Is MJPJAY</span>
           <SelectField
             name="is_kasp"
             variant="outlined"

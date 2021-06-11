@@ -476,7 +476,7 @@ export default function PatientFilterV2(props: any) {
         </div>
 
         <div className="w-64 flex-none">
-          <span className="text-sm font-semibold">KASP</span>
+          <span className="text-sm font-semibold">MJPJAY</span>
           <SelectField
             name="is_kasp"
             variant="outlined"
@@ -484,8 +484,8 @@ export default function PatientFilterV2(props: any) {
             value={filterState.is_kasp}
             options={[
               { id: "", text: "Show All" },
-              { id: "true", text: "Show KASP" },
-              { id: "false", text: "Show Non KASP" },
+              { id: "true", text: "Show MJPJAY" },
+              { id: "false", text: "Show Non MJPJAY" },
             ]}
             onChange={handleChange}
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
