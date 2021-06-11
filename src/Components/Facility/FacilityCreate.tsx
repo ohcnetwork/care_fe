@@ -80,10 +80,14 @@ const initForm: any = {
   type_b_cylinders: "",
   type_c_cylinders: "",
   type_d_cylinders: "",
+  type_j_cylinders: "",
+  type_gaseous: "",
   expected_oxygen_requirement: "",
   expected_type_b_cylinders: "",
   expected_type_c_cylinders: "",
   expected_type_d_cylinders: "",
+  expected_type_j_cylinders: "",
+  expected_type_gaseous: "",
 };
 
 const initError = Object.assign(
@@ -134,8 +138,9 @@ export const FacilityCreate = (props: FacilityProps) => {
   const [localBody, setLocalBody] = useState(selectDistrict);
   const [ward, setWard] = useState(selectLocalBody);
 
-  const [anchorEl, setAnchorEl] =
-    React.useState<(EventTarget & Element) | null>(null);
+  const [anchorEl, setAnchorEl] = React.useState<
+    (EventTarget & Element) | null
+  >(null);
   const [mapLoadLocation, setMapLoadLocation] = useState(DEFAULT_MAP_LOCATION);
 
   const headerText = !facilityId ? "Create Facility" : "Update Facility";
@@ -212,9 +217,13 @@ export const FacilityCreate = (props: FacilityProps) => {
             type_b_cylinders: res.data.type_b_cylinders,
             type_c_cylinders: res.data.type_c_cylinders,
             type_d_cylinders: res.data.type_d_cylinders,
+            type_j_cylinders: res.data.type_j_cylinders,
+            type_gaseous: res.data.type_gaseous,
             expected_type_b_cylinders: res.data.expected_type_b_cylinders,
             expected_type_c_cylinders: res.data.expected_type_c_cylinders,
             expected_type_d_cylinders: res.data.expected_type_d_cylinders,
+            expected_type_j_cylinders: res.data.expected_type_j_cylinders,
+            expected_type_gaseous: res.data.expected_type_gaseous,
             expected_oxygen_requirement: res.data.expected_oxygen_requirement,
             oxygen_capacity: res.data.oxygen_capacity
               ? res.data.oxygen_capacity
@@ -391,6 +400,12 @@ export const FacilityCreate = (props: FacilityProps) => {
         type_d_cylinders: state.form.type_d_cylinders
           ? Number(state.form.type_d_cylinders)
           : 0,
+        type_j_cylinders: state.form.type_j_cylinders
+          ? Number(state.form.type_j_cylinders)
+          : 0,
+        type_gaseous: state.form.type_gaseous
+          ? Number(state.form.type_gaseous)
+          : 0,
         expected_oxygen_requirement: state.form.expected_oxygen_requirement
           ? Number(state.form.expected_oxygen_requirement)
           : 0,
@@ -404,6 +419,14 @@ export const FacilityCreate = (props: FacilityProps) => {
 
         expected_type_d_cylinders: state.form.expected_type_d_cylinders
           ? Number(state.form.expected_type_d_cylinders)
+          : 0,
+
+        expected_type_j_cylinders: state.form.expected_type_j_cylinders
+          ? Number(state.form.expected_type_j_cylinders)
+          : 0,
+
+        expected_type_gaseous: state.form.expected_type_gaseous
+          ? Number(state.form.expected_type_gaseous)
           : 0,
       };
       const res = await dispatchAction(
@@ -719,6 +742,66 @@ export const FacilityCreate = (props: FacilityProps) => {
                     value={state.form.expected_type_d_cylinders}
                     onChange={handleChange}
                     errors={state.errors.expected_type_d_cylinders}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2">
+                <div>
+                  <InputLabel id="type_j_cylinders">
+                    J Type Cylinders
+                  </InputLabel>
+                  <TextInputField
+                    name="type_j_cylinders"
+                    type="number"
+                    variant="outlined"
+                    margin="dense"
+                    value={state.form.type_j_cylinders}
+                    onChange={handleChange}
+                    errors={state.errors.type_j_cylinders}
+                  />
+                </div>
+                <div>
+                  <InputLabel id="expected_type_j_cylinders">
+                    Expected J Type Cylinders
+                  </InputLabel>
+                  <TextInputField
+                    name="expected_type_j_cylinders"
+                    type="number"
+                    variant="outlined"
+                    margin="dense"
+                    value={state.form.expected_type_j_cylinders}
+                    onChange={handleChange}
+                    errors={state.errors.expected_type_j_cylinders}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2">
+                <div>
+                  <InputLabel id="type_gaseous">Gaseous Type</InputLabel>
+                  <TextInputField
+                    name="type_gaseous"
+                    type="number"
+                    variant="outlined"
+                    margin="dense"
+                    value={state.form.type_gaseous}
+                    onChange={handleChange}
+                    errors={state.errors.type_gaseous}
+                  />
+                </div>
+                <div>
+                  <InputLabel id="expected_type_gaseous">
+                    Expected Gaseous Type
+                  </InputLabel>
+                  <TextInputField
+                    name="expected_type_gaseous"
+                    type="number"
+                    variant="outlined"
+                    margin="dense"
+                    value={state.form.expected_type_gaseous}
+                    onChange={handleChange}
+                    errors={state.errors.expected_type_gaseous}
                   />
                 </div>
               </div>
