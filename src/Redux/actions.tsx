@@ -171,6 +171,10 @@ export const getDistrictByState = (pathParam: object) => {
 export const getDistrictByName = (params: object) => {
   return fireRequest("getDistrictByName", [], params, null);
 };
+export const getDistrict = (id: number, key?: string) => {
+  return fireRequest("getDistrict", [], {}, { id: id }, key);
+};
+
 export const getLocalbodyByDistrict = (pathParam: object) => {
   return fireRequest("getLocalbodyByDistrict", [], {}, pathParam);
 };

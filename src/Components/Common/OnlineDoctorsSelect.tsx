@@ -14,9 +14,15 @@ export const OnlineDoctorsSelect = (props: any) => {
     users: new Array<any>(),
     searchTerm: "",
   };
-  const [state, setState] = useState(initalState)
+  const [state, setState] = useState(initalState);
+  const [selectedDoctor, setSelectedDoctor] = useState<any>(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const searchFieldRef = useRef<any>(null);
+
+  useEffect(() => {
+    const selectedDoctor = state.users.find((item: any) => item.id == userId);
+    setSelectedDoctor(selectedDoctor);
+  }, [userId])
 
   const fetchUsers = useCallback(
     async (status: statusType) => {
@@ -24,7 +30,7 @@ export const OnlineDoctorsSelect = (props: any) => {
       const params = {
         user_type: "Doctor",
         ordering: "-last-login",
-        username: state.searchTerm,
+        search_text: state.searchTerm,
       };
       const res = await dispatchAction(getUserList(params));
       if (!status.aborted) {
@@ -51,7 +57,6 @@ export const OnlineDoctorsSelect = (props: any) => {
     setState({ ...state, searchTerm: value });
   }
 
-  const selectedDoctor = state.users.find((item: any) => item.id == userId);
   return (
     <div className="pb-2">
       <div className="space-y-1">
@@ -65,7 +70,7 @@ export const OnlineDoctorsSelect = (props: any) => {
                 ref={searchFieldRef}
                 name="searchTerm"
                 type="text"
-                placeholder="Search by username"
+                placeholder="Search by name or username"
                 className={classNames("py-2 pl-3 w-full outline-none", { "hidden": !isExpanded })} 
                 value={state.searchTerm}
                 onChange={handleSearchTermChange}
@@ -74,12 +79,12 @@ export const OnlineDoctorsSelect = (props: any) => {
                 <div className="space-x-3 flex items-center">
                   <span aria-label="Online"
                     className={"flex-shrink-0 inline-block h-2 w-2 rounded-full " +
-                      (selectedDoctor ? (moment().subtract(5, 'minutes').isBefore(selectedDoctor.last_login) ? "bg-green-400" : "bg-gray-300") : "bg-blue-400")
+                      (selectedDoctor ? (moment().subtract(5, 'minutes').isBefore(selectedDoctor?.last_login) ? "bg-green-400" : "bg-gray-300") : "bg-blue-400")
                     }
                   >
                   </span>
                   <span className="block truncate">
-                    {selectedDoctor ? selectedDoctor.first_name + ' ' + selectedDoctor.last_name : "Assign a doctor"}
+                    {selectedDoctor ? selectedDoctor?.first_name + ' ' + selectedDoctor?.last_name : "Assign a doctor"}
                   </span>
                 </div>
                 <div className="btn btn-default" onClick={_ => { onSelect('') }}> Clear</div>
