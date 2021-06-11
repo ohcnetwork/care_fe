@@ -402,8 +402,8 @@ export default function PrintDeathReport(props: { id: string }) {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 mt-4 gap-10">
-              <div>
+            <div className="grid grid-cols-4 mt-4 gap-10">
+              <div className="col-span-2">
                 <InputLabel htmlFor="date_of_test">
                   Date of sample collection for Covid testing
                 </InputLabel>
@@ -418,9 +418,9 @@ export default function PrintDeathReport(props: { id: string }) {
                   errors=""
                 />
               </div>
-              <div>
+              <div className="col-span-1">
                 <InputLabel htmlFor="date_of_result">
-                  Date of confirmation as Covid
+                  Covid confirmation date
                 </InputLabel>
                 <TextInputField
                   name="date_of_result"
@@ -431,6 +431,19 @@ export default function PrintDeathReport(props: { id: string }) {
                   value={moment(patientData.date_of_result).format(
                     "YYYY-MM-DD"
                   )}
+                  onChange={(e) => handleChange(e)}
+                  errors=""
+                />
+              </div>
+              <div className="col-span-1">
+                <InputLabel htmlFor="srf_id">SRF ID</InputLabel>
+                <TextInputField
+                  name="srf_id"
+                  id="srf_id"
+                  variant="outlined"
+                  margin="dense"
+                  type="text"
+                  value={patientData.srf_id}
                   onChange={(e) => handleChange(e)}
                   errors=""
                 />
@@ -619,21 +632,6 @@ export default function PrintDeathReport(props: { id: string }) {
                   margin="dense"
                   type="text"
                   value={patientData.cause_of_death}
-                  onChange={(e) => handleChange(e)}
-                  errors=""
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 mt-4 gap-10">
-              <div>
-                <InputLabel htmlFor="srf_id">SRF ID</InputLabel>
-                <TextInputField
-                  name="srf_id"
-                  id="srf_id"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  value={patientData.srf_id}
                   onChange={(e) => handleChange(e)}
                   errors=""
                 />
