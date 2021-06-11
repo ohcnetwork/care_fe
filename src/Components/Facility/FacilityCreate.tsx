@@ -134,8 +134,9 @@ export const FacilityCreate = (props: FacilityProps) => {
   const [localBody, setLocalBody] = useState(selectDistrict);
   const [ward, setWard] = useState(selectLocalBody);
 
-  const [anchorEl, setAnchorEl] =
-    React.useState<(EventTarget & Element) | null>(null);
+  const [anchorEl, setAnchorEl] = React.useState<
+    (EventTarget & Element) | null
+  >(null);
   const [mapLoadLocation, setMapLoadLocation] = useState(DEFAULT_MAP_LOCATION);
 
   const headerText = !facilityId ? "Create Facility" : "Update Facility";
@@ -725,7 +726,7 @@ export const FacilityCreate = (props: FacilityProps) => {
 
               <div>
                 <InputLabel id="kasp_empanelled">
-                  Is this facility KASP empanelled?
+                  Is this facility MJPJAY empanelled?
                 </InputLabel>
                 <RadioGroup
                   aria-label="kasp_empanelled"

@@ -515,7 +515,7 @@ const HospitalListPage = (props: any) => {
         {qParams.kasp_empanelled &&
           badge(
             "MJPJAY Empanelled",
-            qParams.kasp_empanelled === "true" ? "KASP" : "Non KASP",
+            qParams.kasp_empanelled === "true" ? "MJPJAY" : "Non MJPJAY",
             "kasp_empanelled"
           )}
       </div>

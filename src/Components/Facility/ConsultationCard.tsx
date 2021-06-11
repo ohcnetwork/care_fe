@@ -15,7 +15,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
     <div className="block border rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 text-black mt-4">
       {itemData.is_kasp && (
         <div className="ml-3 mt-2 inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-yellow-100 text-yellow-800">
-          KASP
+          MJPJAY
         </div>
       )}
 
@@ -46,7 +46,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
             {itemData.kasp_enabled_date && (
               <Grid item xs={7}>
                 <Typography>
-                  <span className="text-gray-700">Kasp Enabled date: </span>
+                  <span className="text-gray-700">MJPJAY Enabled date: </span>
                   {itemData.kasp_enabled_date
                     ? moment(itemData.kasp_enabled_date).format("lll")
                     : "-"}
