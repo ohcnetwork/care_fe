@@ -33,7 +33,30 @@ export default function ResultList() {
   const [reload, setReload] = useState(false);
   const [eventFilter, setEventFilter] = useState("");
 
+  const [isSubscribed, setIsSubscribed] = useState(
+    Notification.permission === "granted"
+  );
+
   let manageResults: any = null;
+
+  const unsubscribe = () => {
+    console.log("called?");
+    navigator.serviceWorker.ready.then(function (reg) {
+      reg.pushManager.getSubscription().then(function (subscription) {
+        console.log(subscription);
+        if (!subscription) setIsSubscribed(false);
+        subscription
+          ?.unsubscribe()
+          .then(function (successful) {
+            console.log("You successfully unsubscribed");
+            setIsSubscribed(false);
+          })
+          .catch(function (e) {
+            console.log("Unsubscription failed");
+          });
+      });
+    });
+  };
 
   async function subscribe() {
     const apiUrl = "/api/v1/notification/public_key/";
@@ -56,9 +79,6 @@ export default function ResultList() {
         new Uint8Array(push.getKey("auth") as any) as any
       )
     );
-    console.log("Subscription Info: ", push);
-    console.log("p256dh", p256dh);
-    console.log("auth", auth);
 
     const res = await axios.patch(
       `/api/v1/users/${username}/pnconfig/`,
@@ -75,7 +95,8 @@ export default function ResultList() {
     );
 
     if (res.status >= 200 && res.status <= 300) {
-      console.log("Saved web push info.");
+      console.log("subscribed");
+      setIsSubscribed(true);
     } else {
       console.log("Error saving web push info.");
     }
@@ -225,10 +246,10 @@ export default function ResultList() {
                   <i className="fa-fw fas fa-times cursor-pointer mr-2" /> Close
                 </button>
                 <button
-                  onClick={subscribe}
+                  onClick={isSubscribed ? unsubscribe : subscribe}
                   className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0"
                 >
-                  Subscribe
+                  {isSubscribed ? "Unsubscribe" : "Subscribe"}
                 </button>
               </div>
             </div>
