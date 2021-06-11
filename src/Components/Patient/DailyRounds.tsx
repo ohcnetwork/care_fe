@@ -1,4 +1,4 @@
-import { t as Prescription_t } from "@coronasafe/prescription-builder/src/Types/Prescription__Prescription.gen";
+import { t as Prescription_t } from "../Common/prescription-builder/types/Prescription__Prescription.gen";
 import { Button, CardContent, InputLabel } from "@material-ui/core";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { navigate } from "raviger";

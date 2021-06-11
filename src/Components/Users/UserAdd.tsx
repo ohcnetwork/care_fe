@@ -8,7 +8,7 @@ import {
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import loadable from "@loadable/component";
 import { navigate } from "raviger";
-import { parsePhoneNumberFromString } from "libphonenumber-js";
+import { parsePhoneNumberFromString } from "libphonenumber-js/max";
 import moment from "moment";
 import React, { useCallback, useReducer, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -33,6 +33,7 @@ import {
   PhoneNumberField,
   SelectField,
   TextInputField,
+  MultiSelectField,
 } from "../Common/HelperInputFields";
 import { FacilityModel } from "../Facility/models";
 const Loading = loadable(() => import("../Common/Loading"));
@@ -67,6 +68,7 @@ const initForm: any = {
   last_name: "",
   email: "",
   phone_number: "",
+  alt_phone_number: "",
   age: "",
   date_of_birth: null,
   state: "",
@@ -116,7 +118,9 @@ export const UserAdd = (props: UserProps) => {
   const [isStateLoading, setIsStateLoading] = useState(false);
   const [isDistrictLoading, setIsDistrictLoading] = useState(false);
   const [isLocalbodyLoading, setIsLocalbodyLoading] = useState(false);
-  const [current_user_facilities, setFacilities] = useState<Array<String>>([]);
+  const [current_user_facilities, setFacilities] = useState<
+    Array<FacilityModel>
+  >([]);
   const [states, setStates] = useState(initialStates);
   const [districts, setDistricts] = useState(selectStates);
   const [localBody, setLocalBody] = useState(selectDistrict);
@@ -135,6 +139,8 @@ export const UserAdd = (props: UserProps) => {
   const userIndex = USER_TYPES.indexOf(userType);
   const userTypes = isSuperuser
     ? [...USER_TYPES]
+    : userType === "StaffReadOnly"
+    ? ["StaffReadOnly"]
     : USER_TYPES.slice(0, userIndex + 1);
 
   const headerText = !userId ? "Add User" : "Update User";
@@ -224,8 +230,7 @@ export const UserAdd = (props: UserProps) => {
       setIsStateLoading(true);
       const res = await dispatchAction(getUserListFacility({ username }));
       if (!status.aborted && res && res.data) {
-        const facilities = res.data.map((f: any) => f.id);
-        setFacilities(facilities);
+        setFacilities(res.data);
       }
       setIsStateLoading(false);
     },
@@ -238,7 +243,9 @@ export const UserAdd = (props: UserProps) => {
       //   fetchData(status);
       // }
       fetchStates(status);
-      fetchFacilities(status);
+      if (userType === "Staff" || userType === "StaffReadOnly") {
+        fetchFacilities(status);
+      }
     },
     [dispatch]
   );
@@ -276,21 +283,28 @@ export const UserAdd = (props: UserProps) => {
     dispatch({ type: "set_form", form });
   };
 
+  const handleMultiSelect = (event: any) => {
+    const { name, value } = event.target;
+    const form = { ...state.form };
+    form[name] = value;
+    dispatch({ type: "set_form", form });
+  };
+
   const validateForm = () => {
     let errors = { ...initError };
     let invalidForm = false;
     Object.keys(state.form).forEach((field) => {
       switch (field) {
         case "facilities":
-          if (userType === "Staff" && state.form["user_type"] === "Staff") {
+          if (
+            state.form[field].length === 0 &&
+            (userType === "Staff" || userType === "StaffReadOnly") &&
+            (state.form["user_type"] === "Staff" ||
+              state.form["user_type"] === "StaffReadOnly")
+          ) {
+            errors[field] =
+              "Please select atleast one of the facilities you are linked to";
             invalidForm = true;
-            for (const facilityId of state.form[field]) {
-              if (current_user_facilities.indexOf(facilityId) !== -1) {
-                invalidForm = false;
-                return;
-              }
-            }
-            errors[field] = "Please select atleast one of your facilities";
           }
           return;
         case "user_type":
@@ -335,9 +349,36 @@ export const UserAdd = (props: UserProps) => {
           }
           return;
         case "phone_number":
-          const phoneNumber = parsePhoneNumberFromString(state.form[field]);
-          if (!state.form[field] || !phoneNumber?.isPossible()) {
+          const phoneNumber = parsePhoneNumberFromString(
+            state.form[field],
+            "IN"
+          );
+          let is_valid: boolean = false;
+          if (phoneNumber) {
+            is_valid = phoneNumber.isValid();
+          }
+          if (!state.form[field] || !is_valid) {
             errors[field] = "Please enter valid phone number";
+            invalidForm = true;
+          }
+          return;
+
+        case "alt_phone_number":
+          let alt_is_valid: boolean = false;
+          if (state.form[field]) {
+            const altPhoneNumber = parsePhoneNumberFromString(
+              state.form[field],
+              "IN"
+            );
+            if (altPhoneNumber) {
+              alt_is_valid = altPhoneNumber.isValid();
+              if (alt_is_valid) {
+                alt_is_valid = altPhoneNumber.getType() === "MOBILE";
+              }
+            }
+          }
+          if (!state.form[field] || !alt_is_valid) {
+            errors[field] = "Please enter valid mobile number";
             invalidForm = true;
           }
           return;
@@ -394,6 +435,9 @@ export const UserAdd = (props: UserProps) => {
         local_body: state.form.local_body,
         phone_number: parsePhoneNumberFromString(
           state.form.phone_number
+        )?.format("E.164"),
+        alt_phone_number: parsePhoneNumberFromString(
+          state.form.alt_phone_number
         )?.format("E.164"),
         date_of_birth: moment(state.form.date_of_birth).format("YYYY-MM-DD"),
         age: Number(moment().diff(state.form.date_of_birth, "years", false)),
@@ -456,15 +500,39 @@ export const UserAdd = (props: UserProps) => {
                 />
               </div>
 
+              <div>
+                <PhoneNumberField
+                  label="Whatsapp Number"
+                  value={state.form.alt_phone_number}
+                  onChange={(value: any) =>
+                    handleValueChange(value, "alt_phone_number")
+                  }
+                  errors={state.errors.alt_phone_number}
+                  onlyIndia={true}
+                />
+              </div>
+
               <div className="col-span-2">
                 <InputLabel>Facilities</InputLabel>
-                <FacilitySelect
-                  multiple={true}
-                  name="facilities"
-                  selected={selectedFacility}
-                  setSelected={setFacility}
-                  errors={state.errors.facilities}
-                />
+                {userType === "Staff" || userType === "StaffReadOnly" ? (
+                  <MultiSelectField
+                    name="facilities"
+                    variant="outlined"
+                    value={state.form.facilities}
+                    options={current_user_facilities}
+                    onChange={handleMultiSelect}
+                    optionValue="name"
+                    errors={state.errors.facilities}
+                  />
+                ) : (
+                  <FacilitySelect
+                    multiple={true}
+                    name="facilities"
+                    selected={selectedFacility}
+                    setSelected={setFacility}
+                    errors={state.errors.facilities}
+                  />
+                )}
               </div>
 
               <div>

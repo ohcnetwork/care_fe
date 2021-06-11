@@ -1,5 +1,5 @@
 export const phonePreg = (phone: string) => {
-  const pattern = /^((\+91|91|0)[\- ]{0,1})?[456789]\d{9}$/;
+  const pattern = /^((\+91|91|0)[\- ]{0,1})?[123456789]\d{9}$/;
   return pattern.test(phone);
 };
 

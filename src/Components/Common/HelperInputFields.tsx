@@ -57,6 +57,7 @@ export interface MultiSelectInputProps extends Omit<SelectProps, "onChange"> {
   optionKey?: string;
   optionValue?: string;
   onChange?: (e: any, child?: any) => void;
+  errors?: string;
 }
 
 export interface DefaultNativeSelectInputProps extends NativeSelectInputProps {
@@ -355,6 +356,7 @@ export const SelectField = (props: DefaultSelectInputProps) => {
 
 export const MultiSelectField = (props: MultiSelectInputProps) => {
   const {
+    errors,
     options,
     label,
     value,
@@ -367,34 +369,37 @@ export const MultiSelectField = (props: MultiSelectInputProps) => {
   const optKey = optionKey ? optionKey : "id";
   const optVal = optionValue ? optionValue : "text";
   return (
-    <FormControl className="w-full" variant={variant} margin={margin}>
-      <Select
-        multiple
-        {...restProps}
-        value={value}
-        input={<Input id={`${label}_chip`} />}
-        renderValue={(selected: any) => (
-          <div className="flex flex-wrap">
-            {selected.map((value: any) => {
-              const label = options.find((opt) => value === opt[optKey])?.[
-                optVal
-              ];
-              return <Chip key={value} label={label} className="m-1" />;
-            })}
-          </div>
-        )}
-      >
-        {options.map((opt: any) => {
-          const selected = value as Array<any>;
-          return (
-            <MenuItem key={opt.id} value={opt[optKey]}>
-              <Checkbox checked={selected.indexOf(opt[optKey]) > -1} />
-              <ListItemText primary={opt[optVal]} />
-            </MenuItem>
-          );
-        })}
-      </Select>
-    </FormControl>
+    <>
+      <FormControl className="w-full" variant={variant} margin={margin}>
+        <Select
+          multiple
+          {...restProps}
+          value={value}
+          input={<Input id={`${label}_chip`} />}
+          renderValue={(selected: any) => (
+            <div className="flex flex-wrap">
+              {selected.map((value: any) => {
+                const label = options.find((opt) => value === opt[optKey])?.[
+                  optVal
+                ];
+                return <Chip key={value} label={label} className="m-1" />;
+              })}
+            </div>
+          )}
+        >
+          {options.map((opt: any) => {
+            const selected = value as Array<any>;
+            return (
+              <MenuItem key={opt.id} value={opt[optKey]}>
+                <Checkbox checked={selected.indexOf(opt[optKey]) > -1} />
+                <ListItemText primary={opt[optVal]} />
+              </MenuItem>
+            );
+          })}
+        </Select>
+      </FormControl>
+      {!!errors && <ErrorHelperText error={errors} />}
+    </>
   );
 };
 

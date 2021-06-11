@@ -82,10 +82,7 @@ module.exports = (env, argv) => {
       rules: [
         {
           test: /\.(ts|tsx)$/,
-          include: [
-            path.resolve(__dirname, "src"),
-            path.resolve(__dirname, "node_modules/@coronasafe"),
-          ],
+          include: [path.resolve(__dirname, "src")],
           loader: "ts-loader",
         },
         {
@@ -95,12 +92,7 @@ module.exports = (env, argv) => {
         },
         {
           test: /\.(sa|sc|c)ss$/,
-          use: [
-            MiniCssExtractPlugin.loader,
-            "css-loader",
-            "sass-loader",
-            "postcss-loader",
-          ],
+          use: [MiniCssExtractPlugin.loader, "css-loader", "postcss-loader"],
         },
         {
           test: /\.(png|jpe?g|gif)$/i,

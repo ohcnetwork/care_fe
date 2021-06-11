@@ -1,4 +1,4 @@
-/* TypeScript file generated from SlideOver.re by genType. */
+/* TypeScript file generated from SlideOver.res by genType. */
 /* eslint-disable import/first */
 
 import * as React from "react";

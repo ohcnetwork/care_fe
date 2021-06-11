@@ -1,35 +1,71 @@
 import loadable from "@loadable/component";
-import React, { useCallback, useReducer, useState } from "react";
+import React, {
+  useCallback,
+  useReducer,
+  useState,
+  useEffect,
+  useRef,
+} from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import moment from "moment";
-import { getOnlineDoctors } from "../../Redux/actions";
+import { getUserList } from "../../Redux/actions";
+import classNames from "classnames";
 
 export const OnlineDoctorsSelect = (props: any) => {
   const dispatchAction: any = useDispatch();
   const { userId, onSelect } = props;
-  const initalState = { loading: false, users: new Array<any>() };
+  const initalState = {
+    loading: false,
+    users: new Array<any>(),
+    searchTerm: "",
+  };
   const [state, setState] = useState(initalState);
+  const [selectedDoctor, setSelectedDoctor] = useState<any>(null);
   const [isExpanded, setIsExpanded] = useState(false);
+  const searchFieldRef = useRef<any>(null);
+
+  useEffect(() => {
+    const selectedDoctor = state.users.find((item: any) => item.id == userId);
+    setSelectedDoctor(selectedDoctor);
+  }, [userId]);
 
   const fetchUsers = useCallback(
     async (status: statusType) => {
       setState({ ...state, loading: true });
-      const res = await dispatchAction(getOnlineDoctors());
+      const params = {
+        user_type: "Doctor",
+        ordering: "-last-login",
+        search_text: state.searchTerm,
+      };
+      const res = await dispatchAction(getUserList(params));
       if (!status.aborted) {
         if (res && res.data) {
-          setState({ loading: false, users: res.data.results });
+          setState({ ...state, loading: false, users: res.data.results });
         }
       }
     },
-    [dispatchAction]
+    [dispatchAction, state.searchTerm]
   );
 
-  useAbortableEffect((status: statusType) => {
-    fetchUsers(status);
-  }, []);
+  useAbortableEffect(
+    (status: statusType) => {
+      fetchUsers(status);
+    },
+    [state.searchTerm]
+  );
 
-  const selectedDoctor = state.users.find((item: any) => item.id == userId);
+  useEffect(() => {
+    if (isExpanded) {
+      searchFieldRef.current.focus();
+    }
+  }, [isExpanded]);
+
+  const handleSearchTermChange = (e: any) => {
+    const { value } = e.target;
+    setState({ ...state, searchTerm: value });
+  };
+
   return (
     <div className="pb-2">
       <div className="space-y-1">
@@ -49,7 +85,22 @@ export const OnlineDoctorsSelect = (props: any) => {
               aria-labelledby="listbox-label"
               className="cursor-default relative w-full rounded-md border border-gray-300 bg-white pl-3 pr-10 py-2 text-left focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition ease-in-out duration-150 sm:text-sm sm:leading-5"
             >
-              <div className="flex items-center justify-between">
+              <input
+                ref={searchFieldRef}
+                name="searchTerm"
+                type="text"
+                placeholder="Search by name or username"
+                className={classNames("py-2 pl-3 w-full outline-none", {
+                  hidden: !isExpanded,
+                })}
+                value={state.searchTerm}
+                onChange={handleSearchTermChange}
+              />
+              <div
+                className={classNames("flex items-center justify-between", {
+                  hidden: isExpanded,
+                })}
+              >
                 <div className="space-x-3 flex items-center">
                   <span
                     aria-label="Online"
@@ -58,7 +109,7 @@ export const OnlineDoctorsSelect = (props: any) => {
                       (selectedDoctor
                         ? moment()
                             .subtract(5, "minutes")
-                            .isBefore(selectedDoctor.last_login)
+                            .isBefore(selectedDoctor?.last_login)
                           ? "bg-green-400"
                           : "bg-gray-300"
                         : "bg-blue-400")
@@ -66,9 +117,9 @@ export const OnlineDoctorsSelect = (props: any) => {
                   ></span>
                   <span className="block truncate">
                     {selectedDoctor
-                      ? selectedDoctor.first_name +
+                      ? selectedDoctor?.first_name +
                         " " +
-                        selectedDoctor.last_name
+                        selectedDoctor?.last_name
                       : "Assign a doctor"}
                   </span>
                 </div>
@@ -109,9 +160,11 @@ export const OnlineDoctorsSelect = (props: any) => {
               {state.users.map((user: any) => {
                 return (
                   <button
+                    key={user.id}
                     onClick={(_) => {
                       setIsExpanded(false);
                       onSelect(user.id);
+                      setState({ ...state, searchTerm: "" });
                     }}
                     id="listbox-item-0"
                     role="option"
