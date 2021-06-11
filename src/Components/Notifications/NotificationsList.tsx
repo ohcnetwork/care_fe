@@ -7,6 +7,7 @@ import Pagination from "../Common/Pagination";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import moment from "moment";
 import axios from "axios";
+import { useSelector } from "react-redux";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -15,6 +16,10 @@ const RESULT_LIMIT = 15;
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
 export default function ResultList() {
+  const rootState: any = useSelector((rootState) => rootState);
+  const { currentUser } = rootState;
+
+  const username = currentUser.data.username;
   const dispatch: any = useDispatch();
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -26,8 +31,7 @@ export default function ResultList() {
   let manageResults: any = null;
 
   async function subscribe() {
-    const apiUrl =
-      "https://careapi.coronasafe.in/api/v1/notification/public_key/";
+    const apiUrl = "/api/v1/notification/public_key/";
     const reponse = await axios.get(apiUrl);
     const public_key = reponse.data.public_key;
     const sw = await navigator.serviceWorker.ready;
@@ -52,7 +56,7 @@ export default function ResultList() {
     console.log("auth", auth);
 
     const res = await axios.patch(
-      `https://careapi.coronasafe.in/api/v1/users/${"devdistrictadmin"}/pnconfig/`,
+      `/api/v1/users/${username}/pnconfig/`,
       {
         pf_endpoint: push.endpoint,
         pf_p256dh: p256dh,
