@@ -226,32 +226,40 @@ export default function ResultList() {
       <SlideOver show={showNotifications} setShow={setShowNotifications}>
         <div className="bg-white h-full">
           <div className="w-full bg-gray-100 border-b sticky top-0 z-30 px-4 pb-1 lg:px-8">
-            <div className="flex justify-between items-end pt-4 py-2 space-x-2">
-              <div className="font-bold text-xl">Notifications</div>
-              <div className="">
-                <button
-                  onClick={(_) => {
-                    setReload(!reload);
-                    setData([]);
-                    setOffset(0);
-                  }}
-                  className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0"
-                >
-                  <i className="fa-fw fas fa-sync cursor-pointer mr-2" /> Reload
-                </button>
-                <button
-                  onClick={(_) => setShowNotifications(false)}
-                  className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0"
-                >
-                  <i className="fa-fw fas fa-times cursor-pointer mr-2" /> Close
-                </button>
-                <button
-                  onClick={isSubscribed ? unsubscribe : subscribe}
-                  className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0"
-                >
-                  {isSubscribed ? "Unsubscribe" : "Subscribe"}
-                </button>
+            <div className="flex flex-col pt-4 py-2">
+              <div className="grid grid-cols-3">
+                <div>
+                  <button
+                    onClick={(_) => {
+                      setReload(!reload);
+                      setData([]);
+                      setOffset(0);
+                    }}
+                    className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0"
+                  >
+                    <i className="fa-fw fas fa-sync cursor-pointer mr-2" />{" "}
+                    Reload
+                  </button>
+                </div>
+                <div>
+                  <button
+                    onClick={(_) => setShowNotifications(false)}
+                    className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0"
+                  >
+                    <i className="fa-fw fas fa-times cursor-pointer mr-2" />{" "}
+                    Close
+                  </button>
+                </div>
+                <div>
+                  <button
+                    onClick={isSubscribed ? unsubscribe : subscribe}
+                    className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0"
+                  >
+                    {isSubscribed ? "Unsubscribe" : "Subscribe"}
+                  </button>
+                </div>
               </div>
+              <div className="font-bold text-xl mt-4">Notifications</div>
             </div>
 
             <div>
