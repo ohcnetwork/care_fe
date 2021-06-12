@@ -222,7 +222,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     transfer?: boolean;
     patientList: Array<DupPatientModel>;
   }>({ patientList: [] });
-  const [sameAddress, setSameAddress] = useState(false);
+  const [sameAddress, setSameAddress] = useState(true);
   const [{ extId }, setQuery] = useQueryParams();
 
   useEffect(() => {
@@ -500,11 +500,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           return;
         case "permanent_address":
           if (!sameAddress) {
-            if(!state.form[field]){
+            if (!state.form[field]) {
               errors[field] = "Field is required";
               invalidForm = true;
             }
-          } 
+          }
           return;
         case "date_of_birth":
           if (!state.form[field]) {
