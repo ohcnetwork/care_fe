@@ -120,12 +120,12 @@ export const SampleTest = (props: any) => {
             invalidForm = true;
           }
           break;
-        case "icmr_category":
-          if (!state.form[field]) {
-            errors[field] = "Please Choose a category";
-            invalidForm = true;
-          }
-          break;
+        // case "icmr_category":
+        //   if (!state.form[field]) {
+        //     errors[field] = "Please Choose a category";
+        //     invalidForm = true;
+        //   }
+        //   break;
         case "icmr_label":
           if (!state.form[field]) {
             errors[field] = "Please specify the label";
