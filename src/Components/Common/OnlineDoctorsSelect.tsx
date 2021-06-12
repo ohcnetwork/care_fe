@@ -44,7 +44,10 @@ export const OnlineDoctorsSelect = (props: any) => {
 
   useAbortableEffect(
     (status: statusType) => {
-      fetchUsers(status);
+      const debounce_timer = setTimeout(() => {
+        fetchUsers(status);
+      }, 1000);
+      return () => clearTimeout(debounce_timer);
     },
     [state.searchTerm]
   );
