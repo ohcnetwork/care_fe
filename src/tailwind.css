@@ -1,5 +1,3 @@
-@import "../node_modules/@coronasafe/prescription-builder/src/index.css";
-
 @import "tailwindcss/base";
 
 @import "tailwindcss/components";
@@ -236,6 +234,11 @@ button:disabled:focus,
 @import "tailwindcss/utilities";
 
 .multiselect-dropdown__search-dropdown {
+  max-height: 20rem;
+  overflow: auto;
+}
+
+.max-height-dropdown {
   max-height: 20rem;
   overflow: auto;
 }

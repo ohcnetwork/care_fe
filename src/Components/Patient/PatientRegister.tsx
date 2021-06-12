@@ -121,6 +121,7 @@ const initForm: any = {
   local_body: "",
   ward: "",
   address: "",
+  permanent_address: "",
   village: "",
   allergies: "",
   pincode: "",
@@ -153,6 +154,7 @@ const initForm: any = {
   is_vaccinated: "false",
   number_of_doses: "1",
   vaccine_name: null,
+  last_vaccinated_date: null,
   ...medicalHistoryChoices,
 };
 
@@ -221,6 +223,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     transfer?: boolean;
     patientList: Array<DupPatientModel>;
   }>({ patientList: [] });
+  const [sameAddress, setSameAddress] = useState(true);
   const [{ extId }, setQuery] = useQueryParams();
 
   useEffect(() => {
@@ -303,6 +306,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       form["address"] = res.data.address
         ? res.data.address
         : state.form.address;
+      form["permanent_address"] = res.data.permanent_address
+        ? res.data.permanent_address
+        : state.form.permanent_address;
       form["gender"] = res.data.gender
         ? parseGenderFromExt(res.data.gender, state.form.gender)
         : state.form.gender;
@@ -429,6 +435,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               ? String(res.data.number_of_doses)
               : "1",
             vaccine_name: res.data.vaccine_name ? res.data.vaccine_name : null,
+            last_vaccinated_date: res.data.last_vaccinated_date ? res.data.last_vaccinated_date : null,
           };
           res.data.medical_history.forEach((i: any) => {
             const medicalHistory = medicalHistoryTypes.find(
@@ -491,6 +498,14 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           if (!state.form[field]) {
             errors[field] = "Field is required";
             invalidForm = true;
+          }
+          return;
+        case "permanent_address":
+          if (!sameAddress) {
+            if (!state.form[field]) {
+              errors[field] = "Field is required";
+              invalidForm = true;
+            }
           }
           return;
         case "date_of_birth":
@@ -666,6 +681,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           state.form.is_vaccinated === "true"
             ? state.form.vaccine_name
             : null,
+        last_vaccinated_date:
+          state.form.is_vaccinated === "true"
+            ? state.form.last_vaccinated_date
+              ? state.form.last_vaccinated_date
+              : null
+            : null,
         test_type: state.form.test_type,
         name: state.form.name,
         pincode: state.form.pincode ? state.form.pincode : undefined,
@@ -688,6 +709,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         ward: state.form.ward,
         village: state.form.village,
         address: state.form.address ? state.form.address : undefined,
+        permanent_address: sameAddress
+          ? state.form.address
+          : state.form.permanent_address
+          ? state.form.permanent_address
+          : undefined,
         present_health: state.form.present_health
           ? state.form.present_health
           : undefined,
@@ -1149,6 +1175,26 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     </div>
                   )}
 
+                  {state.form.is_vaccinated === "true" && (
+                    <div>
+                      <InputLabel id="last_vaccinated_date-label">
+                        Last Date of Vaccination
+                      </InputLabel>
+                      <DateInputField
+                        fullWidth={true}
+                        value={state.form.last_vaccinated_date}
+                        onChange={(date) =>
+                          handleDateChange(date, "last_vaccinated_date")
+                        }
+                        errors={state.errors.last_vaccinated_date}
+                        inputVariant="outlined"
+                        margin="dense"
+                        openTo="year"
+                        disableFuture={true}
+                      />
+                    </div>
+                  )}
+
                   <div>
                     <InputLabel id="test_type-label">Test Type</InputLabel>
                     <SelectField
@@ -1393,18 +1439,41 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   )}
 
                   <div>
-                    <InputLabel id="address-label">Address*</InputLabel>
+                    <InputLabel id="address-label">Current Address*</InputLabel>
                     <MultilineInputField
                       rows={2}
                       name="address"
                       variant="outlined"
                       margin="dense"
                       type="text"
-                      placeholder="Enter the address"
+                      placeholder="Enter the current address"
                       value={state.form.address}
                       onChange={handleChange}
                       errors={state.errors.address}
                     />
+                  </div>
+                  <div>
+                    <InputLabel id="permanent-address-label">
+                      Permanent Address*
+                    </InputLabel>
+                    <CheckboxField
+                      checked={sameAddress}
+                      onChange={() => setSameAddress(!sameAddress)}
+                      label="Same as Current Address"
+                    />
+                    {sameAddress ? null : (
+                      <MultilineInputField
+                        rows={2}
+                        name="permanent_address"
+                        variant="outlined"
+                        margin="dense"
+                        type="text"
+                        placeholder="Enter the permanent address"
+                        value={state.form.permanent_address}
+                        onChange={handleChange}
+                        errors={state.errors.permanent_address}
+                      />
+                    )}
                   </div>
                   <div>
                     <InputLabel id="ward-label">

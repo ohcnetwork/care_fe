@@ -5,26 +5,33 @@ import moment from "moment";
 import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getConsultation, getDailyReport } from "../../Redux/actions";
+import {
+  getConsultation,
+  getDailyReport,
+  getPatient,
+} from "../../Redux/actions";
 import loadable from "@loadable/component";
 import Pagination from "../Common/Pagination";
 import { ConsultationModel } from "./models";
 import { DailyRoundsModel } from "../Patient/models";
 import { PATIENT_CATEGORY, SYMPTOM_CHOICES } from "../../Common/constants";
 import { FileUpload } from "../Patient/FileUpload";
+import TreatmentSummary from "./TreatmentSummary";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const symptomChoices = [...SYMPTOM_CHOICES];
 const patientCategoryChoices = [...PATIENT_CATEGORY];
 
 export const ConsultationDetails = (props: any) => {
-  const { facilityId, patientId, consultationId, isLastConsultation } = props;
+  const { facilityId, patientId, consultationId } = props;
   const dispatch: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [isDailyRoundLoading, setIsDailyRoundLoading] = useState(false);
+  const [isPrintMode, setIsPrintMode] = useState(false);
   const [consultationData, setConsultationData] = useState<ConsultationModel>(
     {}
   );
+  const [isLastConsultation, setIsLastConsultation] = useState(false);
   const [dailyRoundsListData, setDailyRoundsListData] = useState<
     Array<DailyRoundsModel>
   >([]);
@@ -84,9 +91,26 @@ export const ConsultationDetails = (props: any) => {
     [consultationId, dispatch, offset]
   );
 
+  const fetchIsLastConsultation = useCallback(
+    async (status: statusType) => {
+      setIsLoading(true);
+      const res = await dispatch(getPatient({ id: patientId }));
+      if (!status.aborted) {
+        if (res && res.data) {
+          if (res.data.last_consultation?.id === consultationId)
+            setIsLastConsultation(true);
+          else setIsLastConsultation(false);
+        }
+        setIsLoading(false);
+      }
+    },
+    [consultationId, dispatch, patientId]
+  );
+
   useAbortableEffect((status: statusType) => {
     fetchData(status);
     fetchDailyRounds(status);
+    fetchIsLastConsultation(status);
   }, []);
 
   const handlePagination = (page: number, limit: number) => {
@@ -162,6 +186,16 @@ export const ConsultationDetails = (props: any) => {
                       {itemData.admitted_to || "-"}
                     </Typography>
                   </Grid>
+                  <Grid item xs={12}>
+                    <Typography>
+                      <span className="text-gray-700">Category: </span>
+                      <span className="badge badge-pill badge-warning">
+                        {patientCategoryChoices.find(
+                          (i) => i.id === itemData.patient_category
+                        )?.text || "-"}
+                      </span>
+                    </Typography>
+                  </Grid>
                   <Grid item xs={6}>
                     <Typography>
                       <span className="text-gray-700">Created At:</span>{" "}
@@ -217,325 +251,363 @@ export const ConsultationDetails = (props: any) => {
   }
 
   return (
-    <div className="px-2 pb-2">
-      <PageTitle title={`Consultation #${consultationId}`} />
-      <div className="border rounded-lg bg-white shadow h-full hover:border-primary-500 text-black mt-4 p-4">
-        <div className="flex justify-between">
-          <div className="grid gap-2 grid-cols-1">
-            <div className="capitalize">
-              <span className="font-semibold leading-relaxed">
-                Decision after Consultation:{" "}
-              </span>
-              {consultationData.suggestion_text?.toLocaleLowerCase()}
-            </div>
-            <div>
-              <span className="font-semibold leading-relaxed">Facility: </span>
-              {consultationData.facility_name || "-"}
-            </div>
-          </div>
-          <div className="flex flex-col">
-            <div className="mt-2">
-              <Button
-                variant="contained"
-                color="primary"
-                size="small"
-                className="float-right"
-                onClick={() =>
-                  navigate(
-                    `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/update`
-                  )
-                }
-              >
-                Update Details
-              </Button>
-            </div>
-            <div className="mt-2">
-              <Button
-                variant="contained"
-                color="primary"
-                size="small"
-                className="float-right"
-                onClick={() =>
-                  navigate(
-                    `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/investigation/`
-                  )
-                }
-              >
-                Create Investigation
-              </Button>
-            </div>
-            <div className="mt-2">
-              <Button
-                variant="contained"
-                color="primary"
-                size="small"
-                className="float-right"
-                onClick={() =>
-                  navigate(
-                    `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/investigationSessions`
-                  )
-                }
-              >
-                View Investigations
-              </Button>
-            </div>
+    <div>
+      {isPrintMode ? (
+        <TreatmentSummary
+          setIsPrintMode={setIsPrintMode}
+          consultationData={consultationData}
+          dailyRoundsListData={dailyRoundsListData}
+          patientId={patientId}
+        />
+      ) : (
+        <div className="px-2 pb-2">
+          <PageTitle title={`Consultation #${consultationId}`} />
+          <div className="border rounded-lg bg-white shadow h-full hover:border-primary-500 text-black mt-4 p-4">
+            <div className="flex justify-between">
+              <div className="grid gap-2 grid-cols-1">
+                <div className="capitalize">
+                  <span className="font-semibold leading-relaxed">
+                    Decision after Consultation:{" "}
+                  </span>
+                  {consultationData.suggestion_text?.toLocaleLowerCase()}
+                </div>
+                <div>
+                  <span className="font-semibold leading-relaxed">
+                    Facility:{" "}
+                  </span>
+                  {consultationData.facility_name || "-"}
+                </div>
+              </div>
+              <div className="flex flex-col lg:grid grid-rows-2 grid-flow-col lg:gap-2 justify-items-center items-center">
+                <div className="mt-2">
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    size="small"
+                    className="float-right md:float-none truncate"
+                    onClick={() =>
+                      navigate(
+                        `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/update`
+                      )
+                    }
+                  >
+                    Update Details
+                  </Button>
+                </div>
+                <div className="mt-2">
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    size="small"
+                    className="float-right md:float-none truncate"
+                    onClick={() =>
+                      navigate(
+                        `/facility/${facilityId}/patient/${patientId}/shift/new`
+                      )
+                    }
+                  >
+                    SHIFT PATIENT
+                  </Button>
+                </div>
+                <div className="mt-2">
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    size="small"
+                    className="float-right md:float-none truncate"
+                    onClick={() =>
+                      navigate(
+                        `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/investigation/`
+                      )
+                    }
+                  >
+                    Create Investigation
+                  </Button>
+                </div>
+                <div className="mt-2">
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    size="small"
+                    className="float-right md:float-none truncate"
+                    onClick={() =>
+                      navigate(
+                        `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/investigationSessions`
+                      )
+                    }
+                  >
+                    View Investigations
+                  </Button>
+                </div>
 
-            <div className="mt-2">
-              <Button
-                variant="contained"
-                color="primary"
-                size="small"
-                className="float-right"
-                onClick={() =>
-                  navigate(
-                    `/facility/${facilityId}/patient/${patientId}/shift/new`
-                  )
-                }
-              >
-                SHIFT PATIENT
-              </Button>
+                {!consultationData.discharge_date && (
+                  <div className="mt-2">
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      size="small"
+                      className="float-right md:float-none truncate"
+                      onClick={() => setIsPrintMode(true)}
+                    >
+                      Treatment Summary
+                    </Button>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        </div>
-        <div className="grid gap-2 grid-cols-1 md:grid-cols-2 mt-2">
-          <div className="md:col-span-2">
-            <span className="font-semibold leading-relaxed">Category: </span>
-            <span className="badge badge-pill badge-warning">
-              {" "}
-              {consultationData.category || "-"}
-            </span>
-          </div>
-          <div>
-            <span className="font-semibold leading-relaxed">Admitted: </span>
-            {consultationData.admitted ? "Yes" : "No"}
-          </div>
-          {consultationData.admitted && (
-            <>
-              <div>
+            <div className="grid gap-2 grid-cols-1 md:grid-cols-2 mt-2">
+              <div className="md:col-span-2">
                 <span className="font-semibold leading-relaxed">
-                  Admitted To:{" "}
+                  Category:{" "}
                 </span>
                 <span className="badge badge-pill badge-warning">
                   {" "}
-                  {consultationData.admitted_to || "-"}
+                  {consultationData.category || "-"}
                 </span>
               </div>
               <div>
                 <span className="font-semibold leading-relaxed">
-                  Admitted on:{" "}
+                  Admitted:{" "}
                 </span>
-                {consultationData.admission_date
-                  ? moment(consultationData.admission_date).format("lll")
-                  : "-"}
+                {consultationData.admitted ? "Yes" : "No"}
               </div>
-              <div>
+              {consultationData.admitted && (
+                <>
+                  <div>
+                    <span className="font-semibold leading-relaxed">
+                      Admitted To:{" "}
+                    </span>
+                    <span className="badge badge-pill badge-warning">
+                      {" "}
+                      {consultationData.admitted_to || "-"}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="font-semibold leading-relaxed">
+                      Admitted on:{" "}
+                    </span>
+                    {consultationData.admission_date
+                      ? moment(consultationData.admission_date).format("lll")
+                      : "-"}
+                  </div>
+                  <div>
+                    <span className="font-semibold leading-relaxed">
+                      Discharged on:{" "}
+                    </span>
+                    {consultationData.discharge_date
+                      ? moment(consultationData.discharge_date).format("lll")
+                      : "-"}
+                  </div>
+                </>
+              )}
+            </div>
+            <div className="grid gap-2 grid-cols-1 md:grid-cols-2 mt-2">
+              <div className="capitalize">
                 <span className="font-semibold leading-relaxed">
-                  Discharged on:{" "}
+                  Symptoms:{" "}
                 </span>
-                {consultationData.discharge_date
-                  ? moment(consultationData.discharge_date).format("lll")
-                  : "-"}
+                {consultationData.symptoms_text || "-"}
               </div>
-            </>
-          )}
-        </div>
-        <div className="grid gap-2 grid-cols-1 md:grid-cols-2 mt-2">
-          <div className="capitalize">
-            <span className="font-semibold leading-relaxed">Symptoms: </span>
-            {consultationData.symptoms_text || "-"}
-          </div>
-          {consultationData.symptoms_onset_date && (
-            <div>
-              <span className="font-semibold leading-relaxed">
-                Symptoms Onset Date:{" "}
-              </span>
-              {moment(consultationData.symptoms_onset_date).format("lll")}
+              {consultationData.symptoms_onset_date && (
+                <div>
+                  <span className="font-semibold leading-relaxed">
+                    Symptoms Onset Date:{" "}
+                  </span>
+                  {moment(consultationData.symptoms_onset_date).format("lll")}
+                </div>
+              )}
+              {consultationData.other_symptoms && (
+                <div className="md:col-span-2 capitalize">
+                  <span className="font-semibold leading-relaxed">
+                    Other Symptoms:{" "}
+                  </span>
+                  {consultationData.other_symptoms}
+                </div>
+              )}
+              {consultationData.ip_no && (
+                <div className="md:col-span-2 capitalize">
+                  <span className="font-semibold leading-relaxed">
+                    IP number:{" "}
+                  </span>
+                  <span className="badge badge-pill badge-primary">
+                    {consultationData.ip_no}
+                  </span>
+                </div>
+              )}
+              {consultationData.diagnosis && (
+                <div className="md:col-span-2 capitalize">
+                  <span className="font-semibold leading-relaxed">
+                    Diagnosis:{" "}
+                  </span>
+                  {consultationData.diagnosis}
+                </div>
+              )}
+              {consultationData.verified_by && (
+                <div className="md:col-span-2 capitalize">
+                  <span className="font-semibold leading-relaxed">
+                    Verified By :{" "}
+                  </span>
+                  <span className="badge badge-pill badge-primary">
+                    {consultationData.verified_by}
+                  </span>
+                </div>
+              )}
             </div>
-          )}
-          {consultationData.other_symptoms && (
-            <div className="md:col-span-2 capitalize">
-              <span className="font-semibold leading-relaxed">
-                Other Symptoms:{" "}
-              </span>
-              {consultationData.other_symptoms}
-            </div>
-          )}
-          {consultationData.ip_no && (
-            <div className="md:col-span-2 capitalize">
-              <span className="font-semibold leading-relaxed">IP number: </span>
-              <span className="badge badge-pill badge-primary">
-                {consultationData.ip_no}
-              </span>
-            </div>
-          )}
-          {consultationData.diagnosis && (
-            <div className="md:col-span-2 capitalize">
-              <span className="font-semibold leading-relaxed">Diagnosis: </span>
-              {consultationData.diagnosis}
-            </div>
-          )}
-          {consultationData.verified_by && (
-            <div className="md:col-span-2 capitalize">
-              <span className="font-semibold leading-relaxed">
-                Verified By :{" "}
-              </span>
-              <span className="badge badge-pill badge-primary">
-                {consultationData.verified_by}
-              </span>
-            </div>
-          )}
-        </div>
 
-        <div className="flex flex-col mt-6">
-          <div className="text-sm text-gray-700">
-            Created on {moment(consultationData.created_date).format("lll")}
-            {consultationData.created_by && (
-              <span>
-                by{" "}
-                {`${consultationData.created_by?.first_name} ${consultationData.created_by?.last_name} @${consultationData.created_by?.username} (${consultationData.created_by?.user_type})`}
-              </span>
-            )}
-          </div>
+            <div className="flex flex-col mt-6">
+              <div className="text-sm text-gray-700">
+                Created on {moment(consultationData.created_date).format("lll")}
+                {consultationData.created_by && (
+                  <span>
+                    by{" "}
+                    {`${consultationData.created_by?.first_name} ${consultationData.created_by?.last_name} @${consultationData.created_by?.username} (${consultationData.created_by?.user_type})`}
+                  </span>
+                )}
+              </div>
 
-          <div className="text-sm text-gray-700">
-            Last Modified on{" "}
-            {moment(consultationData.modified_date).format("lll")}{" "}
-            {consultationData.last_edited_by && (
-              <span>
-                by{" "}
-                {`${consultationData.last_edited_by?.first_name} ${consultationData.last_edited_by?.last_name} @${consultationData.last_edited_by?.username} (${consultationData.last_edited_by?.user_type})`}
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
-      {consultationData.existing_medication && (
-        <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
-          <div className="px-4 py-5 sm:p-6">
-            <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-              Existing Medication:{" "}
-            </h3>
-            <div className="mt-2">
-              {consultationData.existing_medication || "-"}
-            </div>
-          </div>
-        </div>
-      )}
-      {consultationData.examination_details && (
-        <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
-          <div className="px-4 py-5 sm:p-6">
-            <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-              Examination details and Clinical conditions:{" "}
-            </h3>
-            <div className="mt-2">
-              {consultationData.examination_details || "-"}
-            </div>
-          </div>
-        </div>
-      )}
-      {consultationData.prescribed_medication && (
-        <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
-          <div className="px-4 py-5 sm:p-6">
-            <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-              Treatment Summary
-            </h3>
-            <div className="mt-2">
-              {consultationData.prescribed_medication || "-"}
-            </div>
-          </div>
-        </div>
-      )}
-      {consultationData.discharge_advice && (
-        <div className="mt-4">
-          <div className="flex flex-col">
-            <div className="-my-2 py-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
-              <div className="align-middle inline-block min-w-full shadow overflow-hidden sm:rounded-lg border-b border-gray-200">
-                <table className="min-w-full">
-                  <thead>
-                    <tr>
-                      <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
-                        Medicine
-                      </th>
-                      <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
-                        Dosage
-                      </th>
-                      <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
-                        Days
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {consultationData.discharge_advice.map((med: any) => (
-                      <tr className="bg-white">
-                        <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 font-medium text-gray-900">
-                          {med.medicine}
-                        </td>
-                        <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-gray-500">
-                          {med.dosage}
-                        </td>
-                        <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-gray-500">
-                          {med.dosage}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="text-sm text-gray-700">
+                Last Modified on{" "}
+                {moment(consultationData.modified_date).format("lll")}{" "}
+                {consultationData.last_edited_by && (
+                  <span>
+                    by{" "}
+                    {`${consultationData.last_edited_by?.first_name} ${consultationData.last_edited_by?.last_name} @${consultationData.last_edited_by?.username} (${consultationData.last_edited_by?.user_type})`}
+                  </span>
+                )}
               </div>
             </div>
           </div>
-        </div>
-      )}
-      {consultationData.consultation_notes && (
-        <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
-          <div className="px-4 py-5 sm:p-6">
-            <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-              Advice
-            </h3>
-            <div className="mt-2">
-              {consultationData.consultation_notes || "-"}
+          {consultationData.existing_medication && (
+            <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
+              <div className="px-4 py-5 sm:p-6">
+                <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                  Existing Medication:{" "}
+                </h3>
+                <div className="mt-2">
+                  {consultationData.existing_medication || "-"}
+                </div>
+              </div>
             </div>
+          )}
+          {consultationData.examination_details && (
+            <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
+              <div className="px-4 py-5 sm:p-6">
+                <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                  Examination details and Clinical conditions:{" "}
+                </h3>
+                <div className="mt-2">
+                  {consultationData.examination_details || "-"}
+                </div>
+              </div>
+            </div>
+          )}
+          {consultationData.prescribed_medication && (
+            <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
+              <div className="px-4 py-5 sm:p-6">
+                <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                  Treatment Summary
+                </h3>
+                <div className="mt-2">
+                  {consultationData.prescribed_medication || "-"}
+                </div>
+              </div>
+            </div>
+          )}
+          {consultationData.discharge_advice && (
+            <div className="mt-4">
+              <div className="flex flex-col">
+                <div className="-my-2 py-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+                  <div className="align-middle inline-block min-w-full shadow overflow-hidden sm:rounded-lg border-b border-gray-200">
+                    <table className="min-w-full">
+                      <thead>
+                        <tr>
+                          <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                            Medicine
+                          </th>
+                          <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                            Dosage
+                          </th>
+                          <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                            Days
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {consultationData.discharge_advice.map(
+                          (med: any, index: number) => (
+                            <tr className="bg-white" key={index}>
+                              <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 font-medium text-gray-900">
+                                {med.medicine}
+                              </td>
+                              <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-gray-500">
+                                {med.dosage}
+                              </td>
+                              <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-gray-500">
+                                {med.dosage}
+                              </td>
+                            </tr>
+                          )
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          {consultationData.consultation_notes && (
+            <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
+              <div className="px-4 py-5 sm:p-6">
+                <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                  Advice
+                </h3>
+                <div className="mt-2">
+                  {consultationData.consultation_notes || "-"}
+                </div>
+              </div>
+            </div>
+          )}
+          <div>
+            <PageTitle title="Consultation Update" hideBack={true} />
+            {isLastConsultation && (
+              <button
+                className="mr-4 px-4 py-2 shadow border bg-white rounded-md border border-grey-500 whitespace-no-wrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300 text-center"
+                onClick={() =>
+                  navigate(
+                    `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds`
+                  )
+                }
+              >
+                Add Consultation Updates
+              </button>
+            )}
+            <div className="flex flex-wrap mt-4">
+              {roundsList}
+              {!isDailyRoundLoading && totalCount > limit && (
+                <div className="mt-4 flex w-full justify-center">
+                  <Pagination
+                    cPage={currentPage}
+                    defaultPerPage={limit}
+                    data={{ totalCount }}
+                    onChange={handlePagination}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+          <div>
+            <FileUpload
+              facilityId={facilityId}
+              patientId={patientId}
+              consultationId={consultationId}
+              type="CONSULTATION"
+              hideBack={true}
+              audio={true}
+              unspecified={true}
+            />
           </div>
         </div>
       )}
-      <div>
-        <PageTitle title="Consultation Update" hideBack={true} />
-        {isLastConsultation && (
-          <button
-            className="mr-4 px-4 py-2 shadow border bg-white rounded-md border border-grey-500 whitespace-no-wrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300 text-center"
-            onClick={() =>
-              navigate(
-                `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds`
-              )
-            }
-          >
-            Add Consultation Updates
-          </button>
-        )}
-        <div className="flex flex-wrap mt-4">
-          {roundsList}
-          {!isDailyRoundLoading && totalCount > limit && (
-            <div className="mt-4 flex w-full justify-center">
-              <Pagination
-                cPage={currentPage}
-                defaultPerPage={limit}
-                data={{ totalCount }}
-                onChange={handlePagination}
-              />
-            </div>
-          )}
-        </div>
-      </div>
-      <div>
-        <FileUpload
-          facilityId={facilityId}
-          patientId={patientId}
-          consultationId={consultationId}
-          type="CONSULTATION"
-          hideBack={true}
-          audio={true}
-          unspecified={true}
-        />
-      </div>
     </div>
   );
 };
