@@ -851,6 +851,7 @@ export const PatientHome = (props: any) => {
                   <div>
                     <button
                       className="btn btn-primary w-full"
+                      name="death_report"
                       disabled={!patientData.is_active}
                       onClick={() => navigate(`/death_report/${id}`)}
                     >
