@@ -347,3 +347,21 @@
 .copy-to-cb {
   padding-left: 5px;
 }
+
+@screen md {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: theme(colors.gray.500) theme(colors.gray.100);
+  }
+  ::-webkit-scrollbar {
+    width: 12px;
+  }
+  ::-webkit-scrollbar-track {
+    background: theme(colors.gray.100);
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: theme(colors.gray.500);
+    border-radius: 6px;
+    border: 3px solid theme(colors.gray.100);
+  }
+}

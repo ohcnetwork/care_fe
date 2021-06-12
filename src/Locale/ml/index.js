@@ -5,9 +5,9 @@ import Facility from "./Facility.json";
 import Patient from "./Patient.json";
 
 export default {
-    ...Auth,
-    ...Common,
-    ...Entities,
-    ...Facility,
-    ...Patient
+  ...Auth,
+  ...Common,
+  ...Entities,
+  ...Facility,
+  ...Patient
 }

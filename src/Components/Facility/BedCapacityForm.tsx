@@ -1,15 +1,30 @@
-import { Button, Card, CardActions, CardContent, InputLabel } from "@material-ui/core";
-import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
+import {
+  Button,
+  Card,
+  CardActions,
+  CardContent,
+  InputLabel,
+} from "@material-ui/core";
+import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { navigate } from "raviger";
-import loadable from '@loadable/component';
+import loadable from "@loadable/component";
 import React, { useCallback, useEffect, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
 import { BED_TYPES } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 const Loading = loadable(() => import("../../Components/Common/Loading"));
-import { createCapacity, getCapacity, listCapacity, getCapacityBed } from "../../Redux/actions";
+import {
+  createCapacity,
+  getCapacity,
+  listCapacity,
+  getCapacityBed,
+} from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import { ErrorHelperText, NativeSelectField, TextInputField } from "../Common/HelperInputFields";
+import {
+  ErrorHelperText,
+  NativeSelectField,
+  TextInputField,
+} from "../Common/HelperInputFields";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 import { CapacityModal, OptionsType } from "./models";
 
@@ -20,20 +35,20 @@ interface BedCapacityProps extends CapacityModal {
 const initBedTypes: Array<OptionsType> = [
   {
     id: 0,
-    text: "Select"
+    text: "Select",
   },
-  ...BED_TYPES
+  ...BED_TYPES,
 ];
 
 const initForm: any = {
   bedType: "",
   totalCapacity: "",
-  currentOccupancy: ""
+  currentOccupancy: "",
 };
 
 const initialState = {
   form: { ...initForm },
-  errors: { ...initForm }
+  errors: { ...initForm },
 };
 
 const bedCountReducer = (state = initialState, action: any) => {
@@ -41,13 +56,13 @@ const bedCountReducer = (state = initialState, action: any) => {
     case "set_form": {
       return {
         ...state,
-        form: action.form
+        form: action.form,
       };
     }
     case "set_error": {
       return {
         ...state,
-        errors: action.errors
+        errors: action.errors,
       };
     }
     default:
@@ -99,7 +114,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
               );
               return {
                 ...type,
-                disabled: !!isExisting
+                disabled: !!isExisting,
               };
             });
             setBedTypes(updatedBedTypes);
@@ -107,15 +122,17 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
         }
       } else {
         // Edit Form functionality
-        const res = await dispatchAction(getCapacityBed({ facilityId: facilityId, bed_id: id }));
+        const res = await dispatchAction(
+          getCapacityBed({ facilityId: facilityId, bed_id: id })
+        );
         if (res && res.data) {
           dispatch({
             type: "set_form",
             form: {
               bedType: res.data.room_type,
               totalCapacity: res.data.total_capacity,
-              currentOccupancy: res.data.current_capacity
-            }
+              currentOccupancy: res.data.current_capacity,
+            },
           });
         }
       }
@@ -175,7 +192,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
       const data = {
         room_type: Number(state.form.bedType),
         total_capacity: Number(state.form.totalCapacity),
-        current_capacity: Number(state.form.currentOccupancy)
+        current_capacity: Number(state.form.currentOccupancy),
       };
       const res = await dispatchAction(
         createCapacity(id, data, { facilityId })
@@ -186,7 +203,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
         const updatedBedTypes = bedTypes.map((type: OptionsType) => {
           return {
             ...type,
-            disabled: res.data.room_type !== type.id ? type.disabled : true
+            disabled: res.data.room_type !== type.id ? type.disabled : true,
           };
         });
         setBedTypes(updatedBedTypes);
@@ -195,14 +212,14 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
         // show success message
         if (!id) {
           Notification.Success({
-            msg: "Bed capacity added successfully"
+            msg: "Bed capacity added successfully",
           });
           if (isLastOptionType) {
             navigate(`/facility/${facilityId}/doctor`);
           }
         } else {
           Notification.Success({
-            msg: "Bed capacity updated successfully"
+            msg: "Bed capacity updated successfully",
           });
           navigate(`/facility/${facilityId}`);
         }
@@ -219,7 +236,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
       <div>
         <Card className="mt-4">
           <form
-            onSubmit={e => {
+            onSubmit={(e) => {
               handleSubmit(e);
             }}
           >
@@ -284,8 +301,10 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
                   color="primary"
                   variant="contained"
                   type="submit"
-                  onClick={e => handleSubmit(e)}
-                  startIcon={<CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>}
+                  onClick={(e) => handleSubmit(e)}
+                  startIcon={
+                    <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
+                  }
                 >
                   {buttonText}
                 </Button>
