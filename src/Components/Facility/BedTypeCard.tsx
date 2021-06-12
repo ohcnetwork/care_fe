@@ -2,13 +2,14 @@ import React from "react";
 import { CapacityModal } from "./models";
 import { navigate } from "raviger";
 import { BED_TYPES } from "../../Common/constants";
+import moment from "moment";
 
 interface BedTypeProps extends CapacityModal {
   facilityId: number;
 }
 
 const BedTypeCard = (props: BedTypeProps) => {
-  const bed = BED_TYPES.find(i => i.id === props.room_type);
+  const bed = BED_TYPES.find((i) => i.id === props.room_type);
   const roomType = bed ? bed.text : "Unknown";
   return (
     <div className="px-2 py-2 lg:w-1/5 w-full">
@@ -27,6 +28,10 @@ const BedTypeCard = (props: BedTypeProps) => {
           }
         >
           Edit
+        </div>
+        <div className="text-xs text-gray-600 mt-2">
+          <i className="fas fa-history text-sm pr-2"></i>
+          {moment(props.modified_date).startOf("hour").fromNow()}
         </div>
       </div>
     </div>

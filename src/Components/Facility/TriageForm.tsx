@@ -1,7 +1,7 @@
 import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
-import loadable from '@loadable/component';
-import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
-import moment from 'moment';
+import loadable from "@loadable/component";
+import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
+import moment from "moment";
 import React, { useCallback, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -17,19 +17,18 @@ interface triageFormProps extends PatientStatsModel {
   id?: number;
 }
 
-
 const initForm: any = {
   entry_date: null,
   num_patients_visited: "",
   num_patients_home_quarantine: "",
   num_patients_isolation: "",
   num_patient_referred: "",
-  num_patient_confirmed_positive: ""
+  num_patient_confirmed_positive: "",
 };
 
 const initialState = {
   form: { ...initForm },
-  errors: { ...initForm }
+  errors: { ...initForm },
 };
 
 const triageFormReducer = (state = initialState, action: any) => {
@@ -37,13 +36,13 @@ const triageFormReducer = (state = initialState, action: any) => {
     case "set_form": {
       return {
         ...state,
-        form: action.form
+        form: action.form,
       };
     }
     case "set_error": {
       return {
         ...state,
-        errors: action.errors
+        errors: action.errors,
       };
     }
     default:
@@ -69,18 +68,24 @@ export const TriageForm = (props: triageFormProps) => {
       setIsLoading(true);
       if (id) {
         // Edit Form functionality
-        const res = await dispatchAction(getTriageDetails({ facilityId: facilityId, id: id }));
+        const res = await dispatchAction(
+          getTriageDetails({ facilityId: facilityId, id: id })
+        );
         if (!status.aborted && res && res.data) {
           dispatch({
             type: "set_form",
             form: {
-              entry_date: res.data.entry_date ? moment(res.data.entry_date, 'YYYY-MM-DD') : null,
+              entry_date: res.data.entry_date
+                ? moment(res.data.entry_date, "YYYY-MM-DD")
+                : null,
               num_patients_visited: res.data.num_patients_visited,
-              num_patients_home_quarantine: res.data.num_patients_home_quarantine,
+              num_patients_home_quarantine:
+                res.data.num_patients_home_quarantine,
               num_patients_isolation: res.data.num_patients_isolation,
               num_patient_referred: res.data.num_patient_referred,
-              num_patient_confirmed_positive: res.data.num_patient_confirmed_positive
-            }
+              num_patient_confirmed_positive:
+                res.data.num_patient_confirmed_positive,
+            },
           });
         }
       }
@@ -125,12 +130,16 @@ export const TriageForm = (props: triageFormProps) => {
     if (validForm) {
       setIsLoading(true);
       const data = {
-        entry_date: `${moment(state.form.entry_date).format('YYYY-MM-DD')}`,
+        entry_date: `${moment(state.form.entry_date).format("YYYY-MM-DD")}`,
         num_patients_visited: Number(state.form.num_patients_visited),
-        num_patients_home_quarantine: Number(state.form.num_patients_home_quarantine),
+        num_patients_home_quarantine: Number(
+          state.form.num_patients_home_quarantine
+        ),
         num_patients_isolation: Number(state.form.num_patients_isolation),
         num_patient_referred: Number(state.form.num_patient_referred),
-        num_patient_confirmed_positive: Number(state.form.num_patient_confirmed_positive)
+        num_patient_confirmed_positive: Number(
+          state.form.num_patient_confirmed_positive
+        ),
       };
 
       const res = await dispatchAction(createTriageForm(data, { facilityId }));
@@ -139,11 +148,11 @@ export const TriageForm = (props: triageFormProps) => {
         dispatch({ type: "set_form", form: initForm });
         if (id) {
           Notification.Success({
-            msg: "Triage updated successfully"
+            msg: "Triage updated successfully",
           });
         } else {
           Notification.Success({
-            msg: "Triage created successfully"
+            msg: "Triage created successfully",
           });
         }
         goBack();
@@ -174,77 +183,97 @@ export const TriageForm = (props: triageFormProps) => {
       <PageTitle title={headerText} />
       <div className="mt-4">
         <Card>
-          <form onSubmit={e => handleSubmit(e)}>
+          <form onSubmit={(e) => handleSubmit(e)}>
             <CardContent>
               <div>
                 <DateInputField
                   label="Entry Date"
                   value={state.form.entry_date}
-                  onChange={date => handleDateChange(date, "entry_date")}
+                  onChange={(date) => handleDateChange(date, "entry_date")}
                   errors={state.errors.entry_date}
                 />
               </div>
               <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
                 <div>
-                  <InputLabel id="num-patients-visited-label">Patients Visited in Triage</InputLabel>
+                  <InputLabel id="num-patients-visited-label">
+                    Patients Visited in Triage
+                  </InputLabel>
                   <TextInputField
                     name="num_patients_visited"
                     variant="outlined"
                     margin="dense"
                     type="number"
-                    InputLabelProps={{ shrink: !!state.form.num_patients_visited }}
+                    InputLabelProps={{
+                      shrink: !!state.form.num_patients_visited,
+                    }}
                     value={state.form.num_patients_visited}
                     onChange={handleChange}
                     errors={state.errors.num_patients_visited}
                   />
                 </div>
                 <div>
-                  <InputLabel id="num-patients-home-quarantine-label">Patients in Home Quarantine</InputLabel>
+                  <InputLabel id="num-patients-home-quarantine-label">
+                    Patients in Home Quarantine
+                  </InputLabel>
                   <TextInputField
                     name="num_patients_home_quarantine"
                     variant="outlined"
                     margin="dense"
                     type="number"
-                    InputLabelProps={{ shrink: !!state.form.num_patients_home_quarantine }}
+                    InputLabelProps={{
+                      shrink: !!state.form.num_patients_home_quarantine,
+                    }}
                     value={state.form.num_patients_home_quarantine}
                     onChange={handleChange}
                     errors={state.errors.num_patients_home_quarantine}
                   />
                 </div>
                 <div>
-                  <InputLabel id="num-patients-isolation-label">Suspected Isolated</InputLabel>
+                  <InputLabel id="num-patients-isolation-label">
+                    Suspected Isolated
+                  </InputLabel>
                   <TextInputField
                     name="num_patients_isolation"
                     variant="outlined"
                     margin="dense"
                     type="number"
-                    InputLabelProps={{ shrink: !!state.form.num_patients_isolation }}
+                    InputLabelProps={{
+                      shrink: !!state.form.num_patients_isolation,
+                    }}
                     value={state.form.num_patients_isolation}
                     onChange={handleChange}
                     errors={state.errors.num_patients_isolation}
                   />
                 </div>
                 <div>
-                  <InputLabel id="num-patient-referred-label">Patients Referred</InputLabel>
+                  <InputLabel id="num-patient-referred-label">
+                    Patients Referred
+                  </InputLabel>
                   <TextInputField
                     name="num_patient_referred"
                     variant="outlined"
                     margin="dense"
                     type="number"
-                    InputLabelProps={{ shrink: !!state.form.num_patient_referred }}
+                    InputLabelProps={{
+                      shrink: !!state.form.num_patient_referred,
+                    }}
                     value={state.form.num_patient_referred}
                     onChange={handleChange}
                     errors={state.errors.num_patient_referred}
                   />
                 </div>
                 <div>
-                  <InputLabel id="num-patient-referred-label">Confirmed Positive</InputLabel>
+                  <InputLabel id="num-patient-referred-label">
+                    Confirmed Positive
+                  </InputLabel>
                   <TextInputField
                     name="num_patient_confirmed_positive"
                     variant="outlined"
                     margin="dense"
                     type="number"
-                    InputLabelProps={{ shrink: !!state.form.num_patient_confirmed_positive }}
+                    InputLabelProps={{
+                      shrink: !!state.form.num_patient_confirmed_positive,
+                    }}
                     value={state.form.num_patient_confirmed_positive}
                     onChange={handleChange}
                     errors={state.errors.num_patient_confirmed_positive}
@@ -257,19 +286,26 @@ export const TriageForm = (props: triageFormProps) => {
                   variant="contained"
                   type="button"
                   onClick={goBack}
-                >Cancel</Button>
+                >
+                  Cancel
+                </Button>
                 <Button
                   color="primary"
                   variant="contained"
                   type="submit"
                   style={{ marginLeft: "auto" }}
-                  startIcon={<CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>}
-                  onClick={e => handleSubmit(e)}
-                >{buttonText}</Button>
+                  startIcon={
+                    <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
+                  }
+                  onClick={(e) => handleSubmit(e)}
+                >
+                  {buttonText}
+                </Button>
               </div>
             </CardContent>
           </form>
         </Card>
       </div>
-    </div>);
+    </div>
+  );
 };
