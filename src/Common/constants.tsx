@@ -357,7 +357,6 @@ export const SAMPLE_TYPE_CHOICES = [
 ];
 
 export const ICMR_CATEGORY = [
-  "",
   "Cat 0",
   "Cat 1",
   "Cat 2",

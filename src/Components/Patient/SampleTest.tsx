@@ -38,7 +38,7 @@ const initForm: SampleTestModel = {
   is_atypical_presentation: false,
   is_unusual_course: false,
   sample_type: "UNKNOWN",
-  icmr_category: "",
+  icmr_category: "Cat 0",
   sample_type_other: "",
 };
 
