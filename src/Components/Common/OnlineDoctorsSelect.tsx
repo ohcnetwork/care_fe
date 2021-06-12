@@ -14,21 +14,15 @@ import classNames from "classnames";
 
 export const OnlineDoctorsSelect = (props: any) => {
   const dispatchAction: any = useDispatch();
-  const { userId, onSelect } = props;
+  const { selectedDoctor, userId, onSelect } = props;
   const initalState = {
     loading: false,
     users: new Array<any>(),
     searchTerm: "",
   };
   const [state, setState] = useState(initalState);
-  const [selectedDoctor, setSelectedDoctor] = useState<any>(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const searchFieldRef = useRef<any>(null);
-
-  useEffect(() => {
-    const selectedDoctor = state.users.find((item: any) => item.id == userId);
-    setSelectedDoctor(selectedDoctor);
-  }, [userId]);
 
   const fetchUsers = useCallback(
     async (status: statusType) => {
@@ -163,7 +157,7 @@ export const OnlineDoctorsSelect = (props: any) => {
                     key={user.id}
                     onClick={(_) => {
                       setIsExpanded(false);
-                      onSelect(user.id);
+                      onSelect(user);
                       setState({ ...state, searchTerm: "" });
                     }}
                     id="listbox-item-0"

@@ -278,13 +278,13 @@ export const ConsultationDetails = (props: any) => {
                   {consultationData.facility_name || "-"}
                 </div>
               </div>
-              <div className="flex flex-col">
+              <div className="flex flex-col lg:grid grid-rows-2 grid-flow-col lg:gap-2 justify-items-center items-center">
                 <div className="mt-2">
                   <Button
                     variant="contained"
                     color="primary"
                     size="small"
-                    className="float-right"
+                    className="float-right md:float-none truncate"
                     onClick={() =>
                       navigate(
                         `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/update`
@@ -299,7 +299,22 @@ export const ConsultationDetails = (props: any) => {
                     variant="contained"
                     color="primary"
                     size="small"
-                    className="float-right"
+                    className="float-right md:float-none truncate"
+                    onClick={() =>
+                      navigate(
+                        `/facility/${facilityId}/patient/${patientId}/shift/new`
+                      )
+                    }
+                  >
+                    SHIFT PATIENT
+                  </Button>
+                </div>
+                <div className="mt-2">
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    size="small"
+                    className="float-right md:float-none truncate"
                     onClick={() =>
                       navigate(
                         `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/investigation/`
@@ -314,7 +329,7 @@ export const ConsultationDetails = (props: any) => {
                     variant="contained"
                     color="primary"
                     size="small"
-                    className="float-right"
+                    className="float-right md:float-none truncate"
                     onClick={() =>
                       navigate(
                         `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/investigationSessions`
@@ -325,29 +340,13 @@ export const ConsultationDetails = (props: any) => {
                   </Button>
                 </div>
 
-                <div className="mt-2">
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    size="small"
-                    className="float-right"
-                    onClick={() =>
-                      navigate(
-                        `/facility/${facilityId}/patient/${patientId}/shift/new`
-                      )
-                    }
-                  >
-                    SHIFT PATIENT
-                  </Button>
-                </div>
-
                 {!consultationData.discharge_date && (
                   <div className="mt-2">
                     <Button
                       variant="contained"
                       color="primary"
                       size="small"
-                      className="float-right"
+                      className="float-right md:float-none truncate"
                       onClick={() => setIsPrintMode(true)}
                     >
                       Treatment Summary

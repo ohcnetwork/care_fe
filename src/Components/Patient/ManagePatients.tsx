@@ -388,6 +388,14 @@ export const PatientManager = (props: any) => {
                   text="Patient Expired"
                 />
               )}
+              {(!patient.last_consultation ||
+                patient.last_consultation?.facility !== patient.facility) && (
+                <Badge
+                  color="red"
+                  icon="notes-medical"
+                  text="No Consultation Filed"
+                />
+              )}
             </div>
             <div className="px-2">
               <div className="btn btn-default bg-white">Details</div>
