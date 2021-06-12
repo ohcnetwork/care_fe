@@ -29,7 +29,7 @@
   "author": "Coronsafe Care Contributors",
   "license": "MIT",
   "dependencies": {
-    "@babel/core": "^7.14.3",
+    "@babel/core": "^7.14.5",
     "@coronasafe/prescription-builder": "^0.3.0",
     "@glennsl/bs-json": "^5.0.3",
     "bs-webapi": "^0.19.0",
@@ -64,7 +64,7 @@
     "clean-webpack-plugin": "^4.0.0-alpha.0",
     "cross-env": "^7.0.3",
     "css-loader": "^5.2.6",
-    "cypress": "^7.4.0",
+    "cypress": "^7.5.0",
     "date-fns": "^2.16.1",
     "file-loader": "^6.2.0",
     "html-webpack-plugin": "^4.5.1",
