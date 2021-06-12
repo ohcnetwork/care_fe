@@ -252,7 +252,7 @@ export default function SampleViewAdmin(props: any) {
               </div>
 
               <div className="mt-2">
-                {item.result !== "POSITIVE" && item.result !== "NEGATIVE" && (
+                {item.result === "AWAITING" && (
                   <div className="mt-2">
                     <button
                       onClick={(e) => showUpdateStatus(item)}
