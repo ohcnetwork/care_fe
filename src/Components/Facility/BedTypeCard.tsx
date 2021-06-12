@@ -31,7 +31,7 @@ const BedTypeCard = (props: BedTypeProps) => {
         </div>
         <div className="text-xs text-gray-600 mt-2">
           <i className="fas fa-history text-sm pr-2"></i>
-          {moment(props.modified_date).startOf("hour").fromNow()}
+          {props.modified_date && moment(props.modified_date).fromNow()}
         </div>
       </div>
     </div>

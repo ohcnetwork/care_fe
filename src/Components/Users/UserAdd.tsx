@@ -372,9 +372,6 @@ export const UserAdd = (props: UserProps) => {
             );
             if (altPhoneNumber) {
               alt_is_valid = altPhoneNumber.isValid();
-              if (alt_is_valid) {
-                alt_is_valid = altPhoneNumber.getType() === "MOBILE";
-              }
             }
           }
           if (!state.form[field] || !alt_is_valid) {

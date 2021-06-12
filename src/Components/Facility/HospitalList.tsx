@@ -239,8 +239,8 @@ const HospitalListPage = (props: any) => {
                 )}
                 <div className="text-xs text-gray-600 mt-2 inline-flex float-right">
                   <i className="fas fa-history text-sm pr-2"></i>
-                  {" " +
-                    moment(facility.modified_date).startOf("hour").fromNow()}
+                  {facility.modified_date &&
+                    moment(facility.modified_date).fromNow()}
                 </div>
                 <div className="font-black text-2xl capitalize mt-2">
                   {facility.name}
