@@ -280,10 +280,26 @@ export default function ManageUsers(props: any) {
     loadFacilities(username);
   };
 
+  const showDelete = (user: any) => {
+    const STATE_ADMIN_LEVEL = USER_TYPES.indexOf("StateLabAdmin");
+    const STATE_READ_ONLY_ADMIN_LEVEL =
+      USER_TYPES.indexOf("StateReadOnlyAdmin");
+    const DISTRICT_ADMIN_LEVEL = USER_TYPES.indexOf("DistrictAdmin");
+    const level = USER_TYPES.indexOf(user.user_type);
+    const currentUserLevel = USER_TYPES.indexOf(currentUser.data.user_type);
+    if (
+      currentUserLevel >= STATE_ADMIN_LEVEL &&
+      currentUserLevel < STATE_READ_ONLY_ADMIN_LEVEL
+    )
+      return user.state_object.id === currentUser.data.state;
+    if (currentUserLevel >= DISTRICT_ADMIN_LEVEL && currentUserLevel >= level)
+      return user.district_object.id === currentUser.data.district;
+    return false;
+  };
+
   let userList: any[] = [];
   if (users && users.length) {
     userList = users.map((user: any, idx: number) => {
-      console.log(user);
       return (
         <div key={`usr_${user.id}`} className="w-full md:w-1/2 mt-6 md:px-4">
           <div className="block rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 overflow-hidden">
@@ -362,18 +378,15 @@ export default function ManageUsers(props: any) {
                   </div>
                 </div>
               )}
-              {userType === "DistrictAdmin" &&
-                deleteUserTypes.find((x) => x === user.user_type) &&
-                user.district_object.name ===
-                  currentUser.data.district_object.name && (
-                  <button
-                    type="button"
-                    className="m-3 px-3 py-2 self-end w-20 border border-red-500 text-center text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:text-red-500 focus:outline-none focus:border-red-300 focus:shadow-outline-blue active:text-red-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
-                    onClick={() => handleDelete(user)}
-                  >
-                    Delete
-                  </button>
-                )}
+              {showDelete(user) && (
+                <button
+                  type="button"
+                  className="m-3 px-3 py-2 self-end w-20 border border-red-500 text-center text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:text-red-500 focus:outline-none focus:border-red-300 focus:shadow-outline-blue active:text-red-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                  onClick={() => handleDelete(user)}
+                >
+                  Delete
+                </button>
+              )}
             </div>
           </div>
         </div>
