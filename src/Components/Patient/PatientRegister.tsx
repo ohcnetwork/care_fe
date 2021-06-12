@@ -154,6 +154,7 @@ const initForm: any = {
   is_vaccinated: "false",
   number_of_doses: "1",
   vaccine_name: null,
+  last_vaccinated_date: null,
   ...medicalHistoryChoices,
 };
 
@@ -434,6 +435,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               ? String(res.data.number_of_doses)
               : "1",
             vaccine_name: res.data.vaccine_name ? res.data.vaccine_name : null,
+            last_vaccinated_date: res.data.last_vaccinated_date ? res.data.last_vaccinated_date : null,
           };
           res.data.medical_history.forEach((i: any) => {
             const medicalHistory = medicalHistoryTypes.find(
@@ -678,6 +680,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           state.form.vaccine_name !== "Select" &&
           state.form.is_vaccinated === "true"
             ? state.form.vaccine_name
+            : null,
+        last_vaccinated_date:
+          state.form.is_vaccinated === "true"
+            ? state.form.last_vaccinated_date
+              ? state.form.last_vaccinated_date
+              : null
             : null,
         test_type: state.form.test_type,
         name: state.form.name,
@@ -1163,6 +1171,26 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         options={vaccines}
                         onChange={handleChange}
                         errors={state.errors.vaccine_name}
+                      />
+                    </div>
+                  )}
+
+                  {state.form.is_vaccinated === "true" && (
+                    <div>
+                      <InputLabel id="last_vaccinated_date-label">
+                        Last Date of Vaccination
+                      </InputLabel>
+                      <DateInputField
+                        fullWidth={true}
+                        value={state.form.last_vaccinated_date}
+                        onChange={(date) =>
+                          handleDateChange(date, "last_vaccinated_date")
+                        }
+                        errors={state.errors.last_vaccinated_date}
+                        inputVariant="outlined"
+                        margin="dense"
+                        openTo="year"
+                        disableFuture={true}
                       />
                     </div>
                   )}
