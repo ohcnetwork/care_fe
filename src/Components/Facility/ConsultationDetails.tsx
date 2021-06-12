@@ -5,14 +5,18 @@ import moment from "moment";
 import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getConsultation, getDailyReport, getPatient } from "../../Redux/actions";
+import {
+  getConsultation,
+  getDailyReport,
+  getPatient,
+} from "../../Redux/actions";
 import loadable from "@loadable/component";
 import Pagination from "../Common/Pagination";
 import { ConsultationModel } from "./models";
 import { DailyRoundsModel } from "../Patient/models";
 import { PATIENT_CATEGORY, SYMPTOM_CHOICES } from "../../Common/constants";
 import { FileUpload } from "../Patient/FileUpload";
-import TreatmentSummary from './TreatmentSummary';
+import TreatmentSummary from "./TreatmentSummary";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const symptomChoices = [...SYMPTOM_CHOICES];
@@ -23,7 +27,7 @@ export const ConsultationDetails = (props: any) => {
   const dispatch: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [isDailyRoundLoading, setIsDailyRoundLoading] = useState(false);
-  const [isPrintMode, setIsPrintMode] = useState(false)
+  const [isPrintMode, setIsPrintMode] = useState(false);
   const [consultationData, setConsultationData] = useState<ConsultationModel>(
     {}
   );
@@ -93,7 +97,8 @@ export const ConsultationDetails = (props: any) => {
       const res = await dispatch(getPatient({ id: patientId }));
       if (!status.aborted) {
         if (res && res.data) {
-          if(res.data.last_consultation?.id === consultationId) setIsLastConsultation(true);
+          if (res.data.last_consultation?.id === consultationId)
+            setIsLastConsultation(true);
           else setIsLastConsultation(false);
         }
         setIsLoading(false);
@@ -185,7 +190,9 @@ export const ConsultationDetails = (props: any) => {
                     <Typography>
                       <span className="text-gray-700">Category: </span>
                       <span className="badge badge-pill badge-warning">
-                        {patientCategoryChoices.find((i) => i.id === itemData.patient_category)?.text || "-"}
+                        {patientCategoryChoices.find(
+                          (i) => i.id === itemData.patient_category
+                        )?.text || "-"}
                       </span>
                     </Typography>
                   </Grid>
@@ -251,7 +258,8 @@ export const ConsultationDetails = (props: any) => {
           consultationData={consultationData}
           dailyRoundsListData={dailyRoundsListData}
           patientId={patientId}
-        /> ) : (
+        />
+      ) : (
         <div className="px-2 pb-2">
           <PageTitle title={`Consultation #${consultationId}`} />
           <div className="border rounded-lg bg-white shadow h-full hover:border-primary-500 text-black mt-4 p-4">
@@ -264,7 +272,9 @@ export const ConsultationDetails = (props: any) => {
                   {consultationData.suggestion_text?.toLocaleLowerCase()}
                 </div>
                 <div>
-                  <span className="font-semibold leading-relaxed">Facility: </span>
+                  <span className="font-semibold leading-relaxed">
+                    Facility:{" "}
+                  </span>
                   {consultationData.facility_name || "-"}
                 </div>
               </div>
@@ -340,21 +350,25 @@ export const ConsultationDetails = (props: any) => {
                       onClick={() => setIsPrintMode(true)}
                     >
                       Treatment Summary
-                  </Button>
+                    </Button>
                   </div>
                 )}
               </div>
             </div>
             <div className="grid gap-2 grid-cols-1 md:grid-cols-2 mt-2">
               <div className="md:col-span-2">
-                <span className="font-semibold leading-relaxed">Category: </span>
+                <span className="font-semibold leading-relaxed">
+                  Category:{" "}
+                </span>
                 <span className="badge badge-pill badge-warning">
                   {" "}
                   {consultationData.category || "-"}
                 </span>
               </div>
               <div>
-                <span className="font-semibold leading-relaxed">Admitted: </span>
+                <span className="font-semibold leading-relaxed">
+                  Admitted:{" "}
+                </span>
                 {consultationData.admitted ? "Yes" : "No"}
               </div>
               {consultationData.admitted && (
@@ -389,7 +403,9 @@ export const ConsultationDetails = (props: any) => {
             </div>
             <div className="grid gap-2 grid-cols-1 md:grid-cols-2 mt-2">
               <div className="capitalize">
-                <span className="font-semibold leading-relaxed">Symptoms: </span>
+                <span className="font-semibold leading-relaxed">
+                  Symptoms:{" "}
+                </span>
                 {consultationData.symptoms_text || "-"}
               </div>
               {consultationData.symptoms_onset_date && (
@@ -410,7 +426,9 @@ export const ConsultationDetails = (props: any) => {
               )}
               {consultationData.ip_no && (
                 <div className="md:col-span-2 capitalize">
-                  <span className="font-semibold leading-relaxed">IP number: </span>
+                  <span className="font-semibold leading-relaxed">
+                    IP number:{" "}
+                  </span>
                   <span className="badge badge-pill badge-primary">
                     {consultationData.ip_no}
                   </span>
@@ -418,7 +436,9 @@ export const ConsultationDetails = (props: any) => {
               )}
               {consultationData.diagnosis && (
                 <div className="md:col-span-2 capitalize">
-                  <span className="font-semibold leading-relaxed">Diagnosis: </span>
+                  <span className="font-semibold leading-relaxed">
+                    Diagnosis:{" "}
+                  </span>
                   {consultationData.diagnosis}
                 </div>
               )}
@@ -513,19 +533,21 @@ export const ConsultationDetails = (props: any) => {
                         </tr>
                       </thead>
                       <tbody>
-                          {consultationData.discharge_advice.map((med: any, index: number) => (
+                        {consultationData.discharge_advice.map(
+                          (med: any, index: number) => (
                             <tr className="bg-white" key={index}>
-                            <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 font-medium text-gray-900">
-                              {med.medicine}
-                            </td>
-                            <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-gray-500">
-                              {med.dosage}
-                            </td>
-                            <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-gray-500">
-                              {med.dosage}
-                            </td>
-                          </tr>
-                        ))}
+                              <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 font-medium text-gray-900">
+                                {med.medicine}
+                              </td>
+                              <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-gray-500">
+                                {med.dosage}
+                              </td>
+                              <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-gray-500">
+                                {med.dosage}
+                              </td>
+                            </tr>
+                          )
+                        )}
                       </tbody>
                     </table>
                   </div>

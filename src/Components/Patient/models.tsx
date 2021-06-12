@@ -13,8 +13,7 @@ export interface DischargeSummaryModel {
   email?: string;
 }
 
-export interface AssignedToObjectModel{
-
+export interface AssignedToObjectModel {
   first_name: string;
   last_name: string;
   last_login?: string;
@@ -29,9 +28,9 @@ export interface PatientModel {
   allow_transfer?: boolean;
   discharge?: boolean;
   gender?: number;
-  created_date?: string,
-  modified_date?: string,
-  facility?: string,
+  created_date?: string;
+  modified_date?: string;
+  facility?: string;
   phone_number?: string;
   emergency_phone_number?: string;
   allergies?: string;
@@ -52,7 +51,12 @@ export interface PatientModel {
   district_object?: { id: number; name: string };
   state_object?: { id: number; name: string };
   tele_consultation_history?: Array<any>;
-  last_consultation?: { id: number; facility: string; assigned_to_object?: AssignedToObjectModel; is_telemedicine?: boolean };
+  last_consultation?: {
+    id: number;
+    facility: string;
+    assigned_to_object?: AssignedToObjectModel;
+    is_telemedicine?: boolean;
+  };
   address?: string;
   village?: string;
   pincode?: number;
@@ -259,6 +263,6 @@ export interface FileUploadModel {
   id?: string;
   name?: string;
   created_date?: string;
-  uploaded_by?: { username?: string; };
+  uploaded_by?: { username?: string };
   file_category?: string;
 }
