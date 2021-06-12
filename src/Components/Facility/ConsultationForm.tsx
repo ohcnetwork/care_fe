@@ -76,6 +76,7 @@ const initForm: any = {
   is_telemedicine: "false",
   action: "PENDING",
   assigned_to: "",
+  assigned_to_object: null,
 };
 
 const initError = Object.assign(
@@ -393,9 +394,10 @@ export const ConsultationForm = (props: any) => {
     }
   };
 
-  const handleOnSelect = (id: string) => {
+  const handleDoctorSelect = (doctor: any) => {
     const form = { ...state.form };
-    form["assigned_to"] = id;
+    form["assigned_to"] = doctor.id;
+    form["assigned_to_object"] = doctor;
     dispatch({ type: "set_form", form });
   };
 
@@ -786,7 +788,8 @@ export const ConsultationForm = (props: any) => {
                 <div className="md:col-span-1">
                   <OnlineDoctorsSelect
                     userId={state.form.assigned_to}
-                    onSelect={handleOnSelect}
+                    selectedDoctor={state.form.assigned_to_object}
+                    onSelect={handleDoctorSelect}
                   />
                 </div>
               )}
