@@ -241,11 +241,14 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
             }}
           >
             <CardContent>
-              <InputLabel id="demo-simple-select-outlined-label">
+              <InputLabel
+                htmlFor="bed-type"
+                id="demo-simple-select-outlined-label"
+              >
                 Bed Type*
               </InputLabel>
               <NativeSelectField
-                data-test="bed-type"
+                id="bed-type"
                 name="bedType"
                 variant="outlined"
                 value={state.form.bedType}
@@ -256,11 +259,14 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
               <ErrorHelperText error={state.errors.bedType} />
             </CardContent>
             <CardContent>
-              <InputLabel id="demo-simple-select-outlined-label">
+              <InputLabel
+                htmlFor="total-capacity"
+                id="demo-simple-select-outlined-label"
+              >
                 Total Capacity*
               </InputLabel>
               <TextInputField
-                data-test="total-capacity"
+                id="total-capacity"
                 name="totalCapacity"
                 variant="outlined"
                 margin="dense"
@@ -272,11 +278,14 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
               />
             </CardContent>
             <CardContent>
-              <InputLabel id="demo-simple-select-outlined-label">
+              <InputLabel
+                htmlFor="currently-occupied"
+                id="demo-simple-select-outlined-label"
+              >
                 Currently Occupied*
               </InputLabel>
               <TextInputField
-                data-test="currently-occupied"
+                id="currently-occupied"
                 name="currentOccupancy"
                 variant="outlined"
                 margin="dense"
@@ -293,7 +302,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
                 style={{ justifyContent: "space-between" }}
               >
                 <Button
-                  data-test="bed-capacity-cancel"
+                  id="bed-capacity-cancel"
                   color="default"
                   variant="contained"
                   type="button"
@@ -302,7 +311,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
                   Cancel
                 </Button>
                 <Button
-                  data-test="bed-capacity-save"
+                  id="bed-capacity-save"
                   color="primary"
                   variant="contained"
                   type="submit"

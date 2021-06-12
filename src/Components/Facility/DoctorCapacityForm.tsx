@@ -219,11 +219,14 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
             }}
           >
             <CardContent>
-              <InputLabel id="demo-simple-select-outlined-label">
+              <InputLabel
+                htmlFor="area-of-specialization"
+                id="demo-simple-select-outlined-label"
+              >
                 Area of specialization*
               </InputLabel>
               <NativeSelectField
-                data-test="area-of-specialization"
+                id="area-of-specialization"
                 name="area"
                 variant="outlined"
                 value={state.form.area}
@@ -234,11 +237,14 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
               <ErrorHelperText error={state.errors.area} />
             </CardContent>
             <CardContent>
-              <InputLabel id="demo-simple-select-outlined-label">
+              <InputLabel
+                htmlFor="count"
+                id="demo-simple-select-outlined-label"
+              >
                 Count*
               </InputLabel>
               <TextInputField
-                data-test="count"
+                id="count"
                 name="count"
                 variant="outlined"
                 margin="dense"
@@ -253,7 +259,7 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
               <Grid container justify="space-between" spacing={5}>
                 <Grid item>
                   <Button
-                    data-test="doctor-cancel"
+                    id="doctor-cancel"
                     color="default"
                     variant="contained"
                     onClick={goBack}
@@ -263,7 +269,7 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
                 </Grid>
                 <Grid item>
                   <Button
-                    data-test="doctor-save"
+                    id="doctor-save"
                     color="primary"
                     variant="contained"
                     type="submit"
