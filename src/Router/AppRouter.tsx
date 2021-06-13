@@ -12,6 +12,7 @@ import { TriageForm } from "../Components/Facility/TriageForm";
 import { DailyRoundListDetails } from "../Components/Patient/DailyRoundListDetails";
 import { DailyRounds } from "../Components/Patient/DailyRounds";
 import { PatientManager } from "../Components/Patient/ManagePatients";
+import  PatientNotes  from "../Components/Patient/PatientNotes";
 import { PatientHome } from "../Components/Patient/PatientHome";
 import { PatientRegister } from "../Components/Patient/PatientRegister";
 import { SampleDetails } from "../Components/Patient/SampleDetails";
@@ -108,6 +109,12 @@ const routes = {
   "/facility/:facilityId/patient/:patientId/sample/:id": ({ id }: any) => (
     <SampleDetails id={id} />
   ),
+  "/facility/:facilityId/patient/:patientId/notes/": ({ facilityId, patientId, }: any) => (
+    <PatientNotes
+      patientId={patientId}
+      facilityId={facilityId}
+    />
+  ),
   "/facility/:facilityId/patient/:patientId/files/": ({
     facilityId,
     patientId,
@@ -142,15 +149,17 @@ const routes = {
   }: any) => (
     <ConsultationForm facilityId={facilityId} patientId={patientId} id={id} />
   ),
-  "/facility/:facilityId/patient/:patientId/consultation/:id/last_consultation/:isLastConsultation":
-    ({ facilityId, patientId, id, isLastConsultation }: any) => (
-      <ConsultationDetails
-        facilityId={facilityId}
-        patientId={patientId}
-        consultationId={id}
-        isLastConsultation={isLastConsultation}
-      />
-    ),
+  "/facility/:facilityId/patient/:patientId/consultation/:id": ({
+    facilityId,
+    patientId,
+    id,
+  }: any) => (
+    <ConsultationDetails
+      facilityId={facilityId}
+      patientId={patientId}
+      consultationId={id}
+    />
+  ),
   "/facility/:facilityId/patient/:patientId/consultation/:id/files/": ({
     facilityId,
     patientId,

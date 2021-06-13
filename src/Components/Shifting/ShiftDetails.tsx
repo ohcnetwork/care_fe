@@ -637,7 +637,7 @@ export default function ShiftDetails(props: { id: string }) {
               </div>
               <div>
                 <span className="font-semibold leading-relaxed">
-                  Orgin facility:{" "}
+                  Origin facility:{" "}
                 </span>
                 {data.orgin_facility_object?.name || "--"}
               </div>

@@ -1,3 +1,6 @@
+import keralaLogo from "../../public/images/kerala-logo.png";
+
+export const KeralaLogo = keralaLogo;
 export interface OptionsType {
   id: number;
   text: string;
@@ -8,8 +11,8 @@ export interface OptionsType {
 export const USER_TYPES: Array<String> = [
   "Volunteer",
   "Pharmacist",
-  "Staff",
   "StaffReadOnly",
+  "Staff",
   "Doctor",
   "WardAdmin",
   "LocalBodyAdmin",
@@ -220,26 +223,26 @@ export const CONSULTATION_SUGGESTION = [
 ];
 
 export const ADMITTED_TO = [
-  "Isolation Room",
-  "ICU",
-  "ICU with Non Invasive Ventilator",
-  "ICU with Oxygen Support",
-  "ICU with Invasive Ventilator",
-  "Bed with Oxygen Support",
   "Home Isolation",
+  "Isolation Room",
+  "Bed with Oxygen Support",
+  "ICU",
+  "ICU with Oxygen Support",
+  "ICU with Non Invasive Ventilator",
+  "ICU with Invasive Ventilator",
   "Gynaecology Ward",
   "Paediatric Ward",
 ];
 
 export const PATIENT_FILTER_ADMITTED_TO = [
   { id: "0", text: "Not admitted" },
-  { id: "1", text: "Isolation Room" },
-  { id: "2", text: "ICU" },
-  { id: "3", text: "ICU with Non Invasive Ventilator" },
-  { id: "4", text: "ICU with Oxygen Support" },
-  { id: "5", text: "ICU with Invasive Ventilator" },
-  { id: "6", text: "Bed with Oxygen Support" },
   { id: "20", text: "Home Isolation" },
+  { id: "1", text: "Isolation Room" },
+  { id: "6", text: "Bed with Oxygen Support" },
+  { id: "2", text: "ICU" },
+  { id: "4", text: "ICU with Oxygen Support" },
+  { id: "3", text: "ICU with Non Invasive Ventilator" },
+  { id: "5", text: "ICU with Invasive Ventilator" },
   { id: "30", text: "Gynaecology Ward" },
   { id: "40", text: "Paediatric Ward" },
 ];
@@ -411,6 +414,35 @@ export const DESIGNATION_HEALTH_CARE_WORKER = [
   "OTHERS",
 ];
 
+export const NOTIFICATION_EVENTS = [
+  { id: "MESSAGE", text: "Message" },
+  { id: "PATIENT_CREATED", text: "Patient Created" },
+  { id: "PATIENT_UPDATED", text: "Patient Updated" },
+  { id: "PATIENT_DELETED", text: "Patient Deleted" },
+  { id: "PATIENT_CONSULTATION_CREATED", text: "Patient Consultation Created" },
+  { id: "PATIENT_CONSULTATION_UPDATED", text: "Patient Consultation Updated" },
+  { id: "PATIENT_CONSULTATION_DELETED", text: "Patient Consultation Deleted" },
+  {
+    id: "INVESTIGATION_SESSION_CREATED",
+    text: "Investigation Session Created",
+  },
+  { id: "INVESTIGATION_UPDATED", text: "Investigation Updated" },
+  { id: "PATIENT_FILE_UPLOAD_CREATED", text: "Patient File Upload Created" },
+  {
+    id: "CONSULTATION_FILE_UPLOAD_CREATED",
+    text: "Consultation File Upload Created",
+  },
+  {
+    id: "PATIENT_CONSULTATION_UPDATE_CREATED",
+    text: "Patient Consultation Update Created",
+  },
+  {
+    id: "PATIENT_CONSULTATION_UPDATE_UPDATED",
+    text: "Patient Consultation Update Updated",
+  },
+  { id: "SHIFTING_UPDATED", text: "Shifting Updated" },
+];
+
 export const BREATHLESSNESS_LEVEL = [
   "NOT BREATHLESS",
   "MILD",
@@ -434,7 +466,7 @@ export const RESOURCE_SUBCATEGORIES: Array<OptionsType> = [
   { id: 120, text: "B TYPE OXYGEN CYLINDER" },
   { id: 130, text: "C TYPE OXYGEN CYLINDER" },
   { id: 140, text: "JUMBO D TYPE OXYGEN CYLINDER" },
-  { id: 1000, text: "UNSPECIFIED" }
+  { id: 1000, text: "UNSPECIFIED" },
 ];
 
 export const RESOURCE_FILTER_ORDER: Array<OptionsType> = [

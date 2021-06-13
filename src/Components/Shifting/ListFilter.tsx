@@ -25,13 +25,12 @@ function useMergeState(initialState: any) {
 const shiftStatusOptions = SHIFTING_CHOICES.map((obj) => obj.text);
 
 export default function ListFilter(props: any) {
-  let { filter, onChange, closeFilter } = props;
+  let { filter, onChange, closeFilter, local } = props;
   const [isOriginLoading, setOriginLoading] = useState(false);
   const [isShiftingLoading, setShiftingLoading] = useState(false);
   const [isAssignedLoading, setAssignedLoading] = useState(false);
   const [isAssignedUserLoading, setAssignedUserLoading] = useState(false);
 
-  const local = JSON.parse(localStorage.getItem("shift-filters") || "{}");
   const [filterState, setFilterState] = useMergeState({
     orgin_facility: filter.orgin_facility || local.orgin_facility || "",
     orgin_facility_ref: null,
@@ -150,8 +149,8 @@ export default function ListFilter(props: any) {
 
   const setAssignedUser = (user: any) => {
     const filterData: any = { ...filterState };
-    filterData.assigned_to = user.id;
-    filterData.assigned_user = user.username;
+    filterData.assigned_to = user ? user.id : "";
+    filterData.assigned_user = user ? user.username : "";
     filterData.assigned_user_ref = user;
 
     setFilterState(filterData);

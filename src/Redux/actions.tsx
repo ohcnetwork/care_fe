@@ -157,6 +157,13 @@ export const patchPatient = (params: object, pathParam: object) => {
 export const transferPatient = (params: object, pathParam: object) => {
   return fireRequest("transferPatient", [], params, pathParam);
 };
+export const getPatientNotes = (patientId: string , limit :number , offset : number) => {
+  return fireRequest("getPatientNotes", [], {limit , offset}, { patientId });
+};
+export const addPatientNote = (patientId: string, params: object) => {
+  return fireRequest("addPatientNote", [], params, { patientId });
+};
+
 export const getStates = () => {
   return fireRequest("statesList", []);
 };
@@ -171,6 +178,10 @@ export const getDistrictByState = (pathParam: object) => {
 export const getDistrictByName = (params: object) => {
   return fireRequest("getDistrictByName", [], params, null);
 };
+export const getDistrict = (id: number, key?: string) => {
+  return fireRequest("getDistrict", [], {}, { id: id }, key);
+};
+
 export const getLocalbodyByDistrict = (pathParam: object) => {
   return fireRequest("getLocalbodyByDistrict", [], {}, pathParam);
 };
@@ -281,6 +292,10 @@ export const getItemName = (id: number) => {
 
 export const flagInventoryItem = (params: object) => {
   return fireRequest("flagInventoryItem", [], {}, params);
+};
+
+export const deleteLastInventoryLog = (params: object) => {
+  return fireRequest("deleteLastInventoryLog", [], {}, params);
 };
 
 export const discharge = (params: object, pathParams: object) => {

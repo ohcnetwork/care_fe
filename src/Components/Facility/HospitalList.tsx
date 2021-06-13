@@ -64,7 +64,7 @@ const HospitalListPage = (props: any) => {
   const [downloadSelect, setdownloadSelect] = useState("Facility List");
   const [showFilters, setShowFilters] = useState(false);
   const { t } = props;
-  const limit = 15;
+  const limit = 14;
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -237,6 +237,11 @@ const HospitalListPage = (props: any) => {
                     KASP
                   </div>
                 )}
+                <div className="text-xs text-gray-600 mt-2 inline-flex float-right">
+                  <i className="fas fa-history text-sm pr-2"></i>
+                  {facility.modified_date &&
+                    moment(facility.modified_date).fromNow()}
+                </div>
                 <div className="font-black text-2xl capitalize mt-2">
                   {facility.name}
                 </div>
@@ -431,6 +436,18 @@ const HospitalListPage = (props: any) => {
       </div>
 
       <div className="md:flex mt-5 space-y-2">
+        <div className="bg-white overflow-hidden shadow rounded-lg flex-1 md:mr-2">
+          <div className="px-4 py-5 sm:p-6">
+            <dl>
+              <dt className="text-sm leading-5 font-medium text-gray-500 truncate">
+                Total Facilities
+              </dt>
+              <dd className="mt-4 text-5xl leading-9 font-semibold text-gray-900">
+                {totalCount}
+              </dd>
+            </dl>
+          </div>
+        </div>
         <div className="flex-1">
           <InputSearchBox
             value={qParams.search}

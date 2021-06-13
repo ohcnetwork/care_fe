@@ -263,6 +263,14 @@ export default {
     path: "/api/v1/patient/{id}/transfer/",
     method: "POST",
   },
+  getPatientNotes: {
+    path: "/api/v1/patient/{patientId}/notes/",
+    method: "GET"
+  },
+  addPatientNote: {
+    path: "/api/v1/patient/{patientId}/notes/",
+    method: "POST"
+  },
   sampleTestList: {
     path: "/api/v1/patient/{patientId}/test_sample/",
   },
@@ -387,6 +395,10 @@ export default {
   flagInventoryItem: {
     path: "/api/v1/facility/{facility_external_id}/inventory/{external_id}/flag/",
     method: "PUT",
+  },
+  deleteLastInventoryLog: {
+    path: "/api/v1/facility/{facility_external_id}/inventory/delete_last/?item={id}",
+    method: "DELETE",
   },
   discharge: {
     path: "/api/v1/patient/{external_id}/discharge_summary/",
