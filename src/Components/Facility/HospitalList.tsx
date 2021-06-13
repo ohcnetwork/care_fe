@@ -64,7 +64,7 @@ const HospitalListPage = (props: any) => {
   const [downloadSelect, setdownloadSelect] = useState("Facility List");
   const [showFilters, setShowFilters] = useState(false);
   const { t } = props;
-  const limit = 15;
+  const limit = 14;
 
   const fetchData = useCallback(
     async (status: statusType) => {

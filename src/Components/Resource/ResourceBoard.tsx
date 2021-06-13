@@ -11,7 +11,7 @@ import { Modal } from "@material-ui/core";
 import { CSVLink } from "react-csv";
 import GetAppIcon from "@material-ui/icons/GetApp";
 
-const limit = 30;
+const limit = 14;
 
 interface boardProps {
   board: string;

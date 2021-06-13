@@ -37,7 +37,7 @@ function Badge(props: { color: string; icon: string; text: string }) {
   );
 }
 
-const RESULT_LIMIT = 15;
+const RESULT_LIMIT = 14;
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
 export default function ResultList() {

@@ -14,7 +14,7 @@ import { NOTIFICATION_EVENTS } from "../../Common/constants";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
-const RESULT_LIMIT = 15;
+const RESULT_LIMIT = 14;
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
 export default function ResultList() {
