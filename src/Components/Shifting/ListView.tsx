@@ -46,6 +46,10 @@ export default function ListView() {
     setShowFilters(false);
   };
 
+  useEffect(() => {
+    applyFilter(local);
+  }, []);
+
   const triggerDownload = async () => {
     const res = await dispatch(
       downloadShiftRequests({ ...formatFilter(qParams), csv: 1 })
