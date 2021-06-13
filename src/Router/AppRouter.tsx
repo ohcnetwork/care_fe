@@ -12,6 +12,7 @@ import { TriageForm } from "../Components/Facility/TriageForm";
 import { DailyRoundListDetails } from "../Components/Patient/DailyRoundListDetails";
 import { DailyRounds } from "../Components/Patient/DailyRounds";
 import { PatientManager } from "../Components/Patient/ManagePatients";
+import  PatientNotes  from "../Components/Patient/PatientNotes";
 import { PatientHome } from "../Components/Patient/PatientHome";
 import { PatientRegister } from "../Components/Patient/PatientRegister";
 import { SampleDetails } from "../Components/Patient/SampleDetails";
@@ -107,6 +108,12 @@ const routes = {
   }: any) => <SampleTest facilityId={facilityId} patientId={patientId} />,
   "/facility/:facilityId/patient/:patientId/sample/:id": ({ id }: any) => (
     <SampleDetails id={id} />
+  ),
+  "/facility/:facilityId/patient/:patientId/notes/": ({ facilityId, patientId, }: any) => (
+    <PatientNotes
+      patientId={patientId}
+      facilityId={facilityId}
+    />
   ),
   "/facility/:facilityId/patient/:patientId/files/": ({
     facilityId,

@@ -1433,6 +1433,18 @@ export const PatientHome = (props: any) => {
                 <div>
                   <button
                     className="btn btn-primary w-full"
+                    onClick={() =>
+                      navigate(
+                        `/facility/${facilityId}/patient/${id}/notes/`
+                      )
+                    }
+                  >
+                    View Patient Notes
+                  </button>
+                </div>
+                <div>
+                  <button
+                    className="btn btn-primary w-full"
                     onClick={handleClickOpen}
                   >
                     Discharge Summary
