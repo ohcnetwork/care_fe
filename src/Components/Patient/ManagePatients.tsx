@@ -374,7 +374,7 @@ export const PatientManager = (props: any) => {
                 color="yellow"
                 icon="exclamation-triangle"
                 text="Patient Expired"
-                />
+              />
               )}
             </div>
             <div className="px-2">
