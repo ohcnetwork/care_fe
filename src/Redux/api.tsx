@@ -65,7 +65,7 @@ export default {
   },
 
   deleteUser: {
-    path: "/api/v1/users/",
+    path: "/api/v1/users",
     method: "DELETE",
   },
 
