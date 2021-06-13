@@ -371,9 +371,9 @@ export const PatientManager = (props: any) => {
               )}
               {patient.disease_status === "EXPIRED" && (
                 <Badge
-                  color="yellow"
-                  icon="exclamation-triangle"
-                  text="Patient Expired"
+                color="yellow"
+                icon="exclamation-triangle"
+                text="Patient Expired"
                 />
               )}
             </div>
