@@ -85,7 +85,7 @@ interface preDischargeFormInterface {
   donatePlasma: donatePlasmaOptionType;
   disease_status?: string;
   srf_id?: string;
-  date_of_test?: string;
+  date_of_test: any;
 }
 
 export const PatientHome = (props: any) => {
@@ -162,6 +162,7 @@ export const PatientHome = (props: any) => {
 
   const initPreDischargeForm: preDischargeFormInterface = {
     donatePlasma: null,
+    date_of_test: null,
   };
 
   const [isSendingDischargeApi, setIsSendingDischargeApi] = useState(false);
@@ -1592,7 +1593,7 @@ export const PatientHome = (props: any) => {
                   margin="dense"
                   type="text"
                   placeholder="SRF ID"
-                  value={preDischargeForm.srf_id || patientData.srf_id}
+                  value={preDischargeForm.srf_id}
                   onChange={(event) =>
                     handlePreDischargeFormChange("srf_id", event)
                   }
@@ -1603,10 +1604,7 @@ export const PatientHome = (props: any) => {
                   className="flex flex-1 ml-5"
                   fullWidth={true}
                   label="Date of test"
-                  value={
-                    preDischargeForm.date_of_test ||
-                    (patientData.date_of_test as string)
-                  }
+                  value={preDischargeForm.date_of_test}
                   onChange={(event) =>
                     handlePreDischargeFormChange("date_of_test", event)
                   }
