@@ -1435,9 +1435,7 @@ export const PatientHome = (props: any) => {
                   <button
                     className="btn btn-primary w-full"
                     onClick={() =>
-                      navigate(
-                        `/facility/${facilityId}/patient/${id}/notes/`
-                      )
+                      navigate(`/facility/${facilityId}/patient/${id}/notes/`)
                     }
                   >
                     View Patient Notes
