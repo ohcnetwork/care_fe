@@ -300,6 +300,17 @@ export default {
     path: "/api/v1/state/{id}/",
   },
 
+  // Divisions
+  getDivisionByState: {
+    path: "/api/v1/state/{id}/divisions/",
+  },
+  getAllDistrictsByDivision: {
+    path: "/api/v1/district/?division={id}",
+  },
+  getDistrictByDivision: {
+    path: "/api/v1/district/{id}/local_bodies/",
+  },
+
   // Districts
 
   getDistrict: {

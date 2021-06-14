@@ -164,7 +164,14 @@ export const getStatesByText = (params: object) => {
   return fireRequest("statesList", [], params);
 };
 
-// District/State/Local body/ward
+// Division/District/State/Local body/ward
+export const getDivisionByState = (pathParam: object) => {
+  return fireRequest("getDivisionByState", [], {}, pathParam);
+};
+
+export const getDistrictByDivision = (pathParam: object) => {
+  return fireRequest("getAllDistrictsByDivision", [], {}, pathParam);
+};
 export const getDistrictByState = (pathParam: object) => {
   return fireRequest("getDistrictByState", [], {}, pathParam);
 };
