@@ -12,9 +12,9 @@ import moment from "moment";
 import { getUserList } from "../../Redux/actions";
 import classNames from "classnames";
 
-export const OnlineDoctorsSelect = (props: any) => {
+export const OnlineUsersSelect = (props: any) => {
   const dispatchAction: any = useDispatch();
-  const { selectedDoctor, userId, onSelect } = props;
+  const { selectedUser, userId, onSelect, user_type } = props;
   const initalState = {
     loading: false,
     users: new Array<any>(),
@@ -28,7 +28,7 @@ export const OnlineDoctorsSelect = (props: any) => {
     async (status: statusType) => {
       setState({ ...state, loading: true });
       const params = {
-        user_type: "Doctor",
+        user_type: user_type,
         ordering: "-last-login",
         search_text: state.searchTerm,
       };
@@ -103,21 +103,21 @@ export const OnlineDoctorsSelect = (props: any) => {
                     aria-label="Online"
                     className={
                       "flex-shrink-0 inline-block h-2 w-2 rounded-full " +
-                      (selectedDoctor
+                      (selectedUser
                         ? moment()
                             .subtract(5, "minutes")
-                            .isBefore(selectedDoctor?.last_login)
+                            .isBefore(selectedUser?.last_login)
                           ? "bg-green-400"
                           : "bg-gray-300"
                         : "bg-blue-400")
                     }
                   ></span>
                   <span className="block truncate">
-                    {selectedDoctor
-                      ? selectedDoctor?.first_name +
-                        " " +
-                        selectedDoctor?.last_name
-                      : "Assign a doctor"}
+                    {selectedUser
+                      ? selectedUser?.first_name + " " + selectedUser?.last_name
+                      : `Assign a ${
+                          user_type == "Doctor" ? "Doctor" : "Volunteer"
+                        }`}
                   </span>
                 </div>
                 <div
@@ -152,7 +152,7 @@ export const OnlineDoctorsSelect = (props: any) => {
               role="listbox"
               aria-labelledby="listbox-label"
               aria-activedescendant="listbox-item-3"
-              className="multiselect-dropdown__search-dropdown w-full absolute border border-gray-400 bg-white mt-1 rounded-lg shadow-lg px-4 py-2 z-50"
+              className="multiselect-dropdown__search-dropdown w-full border border-gray-400 bg-white mt-1 rounded-lg shadow-lg px-4 py-2 z-50"
             >
               {state.users.map((user: any) => {
                 return (
