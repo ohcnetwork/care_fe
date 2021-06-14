@@ -35,7 +35,7 @@ export default function ResultList() {
       dispatch(getNotifications({ offset, event: eventFilter }))
         .then((res: any) => {
           if (res && res.data) {
-            setData((prev) => [...prev, ...res.data.results]);
+            setData(res.data.results);
             setTotalCount(res.data.count);
           }
           setIsLoading(false);
