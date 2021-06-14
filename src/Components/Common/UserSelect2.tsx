@@ -27,6 +27,12 @@ export const UserSelect = (props: UserSelectProps) => {
   const [hasSearchText, setHasSearchText] = useState(false);
   const [UserList, setUserList] = useState<Array<UserModal>>([]);
 
+  const getPersonName = (user: any) => {
+    let personName = user.first_name + " " + user.last_name;
+
+    return personName.trim().length > 0 ? personName : user.username;
+  };
+
   const handleValueChange = (current: UserModal | UserModal[] | null) => {
     if (!current) {
       setUserList([]);
@@ -84,13 +90,13 @@ export const UserSelect = (props: UserSelectProps) => {
       renderOption={(option: any) => (
         <div className="flex items-center space-x-3">
           <span className="font-normal block truncate">
-            {option.first_name} {option.last_name} - ({option.user_type})
+            {getPersonName(option)} - ({option.user_type})
           </span>
         </div>
       )}
       getOptionSelected={(option: any, value: any) => option.id === value.id}
       getOptionLabel={(option: any) =>
-        `${option.first_name} ${option.last_name} - (${option.user_type})`
+        `${getPersonName(option)} - (${option.user_type})`
       }
       filterOptions={(options: UserModal[]) => options}
       errors={errors}
