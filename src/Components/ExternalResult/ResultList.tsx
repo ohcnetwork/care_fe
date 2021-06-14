@@ -134,12 +134,35 @@ export default function ResultList() {
     setShowFilters(false);
   };
 
+  const removeFilter = (paramKey: any) => {
+    updateQuery({
+      ...qParams,
+      [paramKey]: "",
+    });
+  };
+
   const triggerDownload = async () => {
     const res = await dispatch(
       externalResultList({ ...qParams, csv: true }, "externalResultList")
     );
     setDownloadFile(res?.data);
     document.getElementById(`downloadCSV`)?.click();
+  };
+
+  const badge = (key: string, value: any, paramKey: string) => {
+    return (
+      value && (
+        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
+          {key}
+          {": "}
+          {value}
+          <i
+            className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
+            onClick={(e) => removeFilter(paramKey)}
+          ></i>
+        </span>
+      )
+    );
   };
 
   let resultList: any[] = [];
@@ -303,6 +326,36 @@ export default function ResultList() {
             </button>
           </div>
         </div>
+      </div>
+      <div className="flex space-x-2 my-2 flex-wrap w-full col-span-3 space-y-1">
+        {console.log(qParams.local_bodies)}
+        {badge("LSG", qParams.local_bodies, "local_bodies")}
+        {badge(
+          "Created before",
+          qParams.created_date_before,
+          "created_date_before"
+        )}
+        {badge(
+          "Created after",
+          qParams.created_date_after,
+          "created_date_after"
+        )}
+        {badge(
+          "Result before",
+          qParams.result_date_before,
+          "result_date_before"
+        )}
+        {badge("Result after", qParams.result_date_after, "result_date_after")}
+        {badge(
+          "Sample created before",
+          qParams.sample_collection_date_befor,
+          "sample_collection_date_before"
+        )}
+        {badge(
+          "Sample created after",
+          qParams.sample_collection_date_after,
+          "sample_collection_date_after"
+        )}
       </div>
       <div className="align-middle min-w-full overflow-x-auto shadow overflow-hidden sm:rounded-lg">
         <table className="min-w-full divide-y divide-cool-gray-200">
