@@ -127,7 +127,7 @@ export default function UserProfile() {
         case "firstName":
         case "lastName":
         case "gender":
-          if (!states.form[field]) {
+          if (!states.form[field] || states.form[field] === "0") {
             errors[field] = "Field is required";
             invalidForm = true;
           }
@@ -135,6 +135,12 @@ export default function UserProfile() {
         case "age":
           if (!states.form[field]) {
             errors[field] = "This field is required";
+            invalidForm = true;
+          } else if (
+            states.form[field] <= 0 ||
+            !/^\d+$/.test(states.form[field])
+          ) {
+            errors[field] = "Age must be a number greater than 0";
             invalidForm = true;
           }
           return;
@@ -410,7 +416,7 @@ export default function UserProfile() {
                           htmlFor="firstName"
                           className="block text-sm font-medium leading-5 text-gray-700"
                         >
-                          First name
+                          First name*
                         </label>
                         <TextInputField
                           name="firstName"
@@ -429,7 +435,7 @@ export default function UserProfile() {
                           htmlFor="lastName"
                           className="block text-sm font-medium leading-5 text-gray-700"
                         >
-                          Last name
+                          Last name*
                         </label>
                         <TextInputField
                           name="lastName"
@@ -448,7 +454,7 @@ export default function UserProfile() {
                           htmlFor="age"
                           className="block text-sm font-medium leading-5 text-gray-700"
                         >
-                          Age
+                          Age*
                         </label>
                         <TextInputField
                           name="age"
@@ -466,7 +472,7 @@ export default function UserProfile() {
                           htmlFor="gender"
                           className="block text-sm font-medium leading-5 text-gray-700"
                         >
-                          Gender
+                          Gender*
                         </label>
                         <SelectField
                           name="gender"
@@ -501,7 +507,7 @@ export default function UserProfile() {
                         />
                       </div>
                       <div className="col-span-6 sm:col-span-3">
-                        <InputLabel id="email-label">Email*</InputLabel>
+                        <InputLabel id="email-label">Email</InputLabel>
                         <TextInputField
                           name="email"
                           variant="outlined"
