@@ -229,18 +229,13 @@ const HospitalListPage = (props: any) => {
           <div className="block rounded-lg bg-white shadow h-full hover:border-primary-500 overflow-hidden">
             <div className="h-full flex flex-col justify-between">
               <div className="px-6 py-4">
-                <div className="inline-flex items-center px-2.5 py-0.5 mr-4 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800">
-                  {facility.facility_type}
-                </div>
                 {facility.kasp_empanelled && (
                   <div className="mt-2 inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-yellow-100 text-yellow-800">
                     KASP
                   </div>
                 )}
-                <div className="text-xs text-gray-600 mt-2 inline-flex float-right">
-                  <i className="fas fa-history text-sm pr-2"></i>
-                  {facility.modified_date &&
-                    moment(facility.modified_date).fromNow()}
+                <div className="inline-flex float-right items-center px-2.5 py-0.5 mt-2 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800">
+                  {facility.facility_type}
                 </div>
                 <div className="font-black text-2xl capitalize mt-2">
                   {facility.name}
