@@ -119,6 +119,12 @@ export default function UserProfile() {
     dispatch({ type: "set_form", form });
   };
 
+  const handleWhatsappNumberChange = (value: any) => {
+    let form = { ...states.form };
+    form["altPhoneNumber"] = value;
+    dispatch({ type: "set_form", form });
+  };
+
   const validateForm = () => {
     let errors = { ...initError };
     let invalidForm = false;
@@ -162,7 +168,11 @@ export default function UserProfile() {
           return;
         case "altPhoneNumber":
           let alt_is_valid: boolean = false;
+          console.log("Value is ", states.form[field]);
           if (states.form[field]) {
+            if (states.form[field] === "+91") {
+              return;
+            }
             const altPhoneNumber = parsePhoneNumberFromString(
               states.form[field],
               "IN"
@@ -172,7 +182,7 @@ export default function UserProfile() {
             }
           }
 
-          if (!states.form[field] || !alt_is_valid) {
+          if (states.form[field] && !alt_is_valid) {
             errors[field] = "Please enter valid mobile number";
             invalidForm = true;
           }
@@ -498,11 +508,12 @@ export default function UserProfile() {
 
                       <div className="col-span-6 sm:col-span-3">
                         <PhoneNumberField
-                          label="Whatsapp Number*"
+                          name="altPhoneNumber"
+                          label="Whatsapp Number"
                           value={states.form.altPhoneNumber}
-                          onChange={(value: any) => {
-                            handleValueChange(value, "altPhoneNumber");
-                          }}
+                          onChange={(value: any) =>
+                            handleWhatsappNumberChange(value)
+                          }
                           errors={states.errors.altPhoneNumber}
                         />
                       </div>
