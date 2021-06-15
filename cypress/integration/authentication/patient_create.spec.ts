@@ -15,10 +15,9 @@ describe("Patient Creation", () => {
     cy.get('button').contains('Login').click()
     cy.url().should('include', '/facility')
   })
-  it("Create", () => {
-    cy.visit("http://localhost:4000/facility/2fa3fceb-d54d-455d-949c-e64dde945168", {
-    })
 
+  it("Create", () => {
+    cy.visit("http://localhost:4000/facility/2fa3fceb-d54d-455d-949c-e64dde945168")
     cy.get("[data-testid=add-patient-button]").click()
     cy.get("[data-testid=phone-number] input").type(phone_number)
     cy.get("[data-testid=date-of-birth] svg").click()
@@ -39,16 +38,13 @@ describe("Patient Creation", () => {
     cy.get("[data-testid=submit-button]").click()
     cy.url().should("include", "/consultation")
     cy.url().then((url) => {
-      console.log(url);
+      cy.log(url);
       patient_url = url.split("/").slice(0, -1).join("/")
-      console.log(patient_url);
-      
+      cy.log(patient_url);
     })
   })
   it("Dashboard", () => {
-    cy.visit(patient_url, {
-    })
-
+    cy.visit(patient_url)
     cy.url().should('include', '/patient/')
     cy.get("[data-testid=patient-dashboard]").should("contain","22")
     cy.get("[data-testid=patient-dashboard]").should("contain","Test E2E User")
@@ -58,8 +54,7 @@ describe("Patient Creation", () => {
     cy.get("[data-testid=patient-dashboard]").should("contain","O+")
   })
   it("Edit", () => {
-    cy.visit(patient_url+"/update", {
-    })
+    cy.visit(patient_url+"/update")
     cy.get("[data-testid=state] select").should("contain","Kerala")
     cy.get("[data-testid=district] select").should("contain","Ernakulam")
     cy.get("[data-testid=localbody] select").should("contain","Alangad")
