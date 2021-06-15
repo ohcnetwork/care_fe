@@ -13,6 +13,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { GENDER_TYPES, DISEASE_STATUS } from "../../Common/constants";
 import loadable from "@loadable/component";
 import { statusType, useAbortableEffect } from "../../Common/utils";
+import { OnlineUsersSelect } from "../Common/OnlineUsersSelect";
 import {
   getConsultationList,
   listShiftRequests,
@@ -36,7 +37,11 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import { TextInputField, DateInputField } from "../Common/HelperInputFields";
+import {
+  TextInputField,
+  DateInputField,
+  ErrorHelperText,
+} from "../Common/HelperInputFields";
 import { validateEmailAddress } from "../../Common/validation";
 import Radio from "@material-ui/core/Radio";
 import RadioGroup from "@material-ui/core/RadioGroup";
@@ -103,6 +108,8 @@ export const PatientHome = (props: any) => {
     []
   );
   const [activeShiftingData, setActiveShiftingData] = useState<Array<any>>([]);
+  const [assignedVolunteerObject, setAssignedVolunteerObject] =
+    useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [totalConsultationCount, setTotalConsultationCount] = useState(0);
   const [currentConsultationPage, setCurrentConsultationPage] = useState(1);
@@ -128,6 +135,8 @@ export const PatientHome = (props: any) => {
   });
   const [open, setOpen] = React.useState(false);
   const [openDischargeDialog, setOpenDischargeDialog] = React.useState(false);
+  const [openAssignVolunteerDialog, setOpenAssignVolunteerDialog] =
+    React.useState(false);
   const state: any = useSelector((state) => state);
   const { currentUser } = state;
 
@@ -207,6 +216,29 @@ export const PatientHome = (props: any) => {
         }
       });
       setOpen(false);
+    }
+  };
+
+  const handleAssignedVolunteer = () => {
+    if (!assignedVolunteerObject) {
+      const errorField = Object.assign({}, errors);
+      errorField["assignedVolunteer"] = "Please select a volunteer";
+      setErrors(errorField);
+    } else {
+      dispatch(
+        patchPatient(
+          { assigned_to: assignedVolunteerObject.id },
+          { id: patientData.id }
+        )
+      ).then((response: any) => {
+        if ((response || {}).status === 200) {
+          Notification.Success({
+            msg: "Volunteer assigned successfully.",
+          });
+        }
+      });
+      setOpenAssignVolunteerDialog(false);
+      if (errors["assignedVolunteer"]) delete errors["assignedVolunteer"];
     }
   };
 
@@ -306,6 +338,10 @@ export const PatientHome = (props: any) => {
 
   const dischargeSummaryFormSetUserEmail = () => {
     setDischargeSummaryForm({ email: currentUser.data.email });
+  };
+
+  const handleVolunteerSelect = (volunteer: any) => {
+    setAssignedVolunteerObject(volunteer);
   };
 
   const handleClickOpen = () => {
@@ -1462,6 +1498,15 @@ export const PatientHome = (props: any) => {
                     Discharge from CARE
                   </button>
                 </div>
+                <div>
+                  <button
+                    className="btn btn-primary w-full"
+                    onClick={() => setOpenAssignVolunteerDialog(true)}
+                    disabled={false}
+                  >
+                    Assign to a volunteer
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -1517,6 +1562,41 @@ export const PatientHome = (props: any) => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <Dialog
+        maxWidth={"md"}
+        open={openAssignVolunteerDialog}
+        onClose={() => setOpenAssignVolunteerDialog(false)}
+      >
+        <div className="mx-10 my-5">
+          <DialogTitle id="form-dialog-title">
+            Assign a volunteer to {patientData.name}
+          </DialogTitle>
+
+          <div>
+            <OnlineUsersSelect
+              userId={assignedVolunteerObject?.id}
+              selectedUser={assignedVolunteerObject}
+              onSelect={handleVolunteerSelect}
+              user_type={"Volunteer"}
+            />
+            <ErrorHelperText error={errors.assignedVolunteer} />
+          </div>
+
+          <DialogActions>
+            <Button
+              onClick={() => setOpenAssignVolunteerDialog(false)}
+              color="primary"
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleAssignedVolunteer} color="primary">
+              Submit
+            </Button>
+          </DialogActions>
+        </div>
+      </Dialog>
+
       <Dialog
         maxWidth={"md"}
         open={openDischargeDialog}
