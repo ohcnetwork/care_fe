@@ -12,7 +12,7 @@ import { TriageForm } from "../Components/Facility/TriageForm";
 import { DailyRoundListDetails } from "../Components/Patient/DailyRoundListDetails";
 import { DailyRounds } from "../Components/Patient/DailyRounds";
 import { PatientManager } from "../Components/Patient/ManagePatients";
-import  PatientNotes  from "../Components/Patient/PatientNotes";
+import PatientNotes from "../Components/Patient/PatientNotes";
 import { PatientHome } from "../Components/Patient/PatientHome";
 import { PatientRegister } from "../Components/Patient/PatientRegister";
 import { SampleDetails } from "../Components/Patient/SampleDetails";
@@ -49,12 +49,14 @@ import ShowInvestigation from "../Components/Facility/Investigations/ShowInvesti
 import InvestigationReports from "../Components/Facility/Investigations/Reports";
 import { withTranslation } from "react-i18next";
 import DeathReport from "../Components/DeathReport/DeathReport";
+import { make as CriticalCareRecording } from "../Components/Common/CriticalCareRecording.gen";
 
 const get = require("lodash.get");
 const img = "https://cdn.coronasafe.network/light-logo.svg";
 const logoBlack = "https://cdn.coronasafe.network/black-logo.svg";
 
 const routes = {
+  "/critical_care": () => <CriticalCareRecording />,
   "/": () => <HospitalList />,
   "/users": () => <ManageUsers />,
   "/user/add": () => <UserAdd />,
@@ -109,12 +111,10 @@ const routes = {
   "/facility/:facilityId/patient/:patientId/sample/:id": ({ id }: any) => (
     <SampleDetails id={id} />
   ),
-  "/facility/:facilityId/patient/:patientId/notes/": ({ facilityId, patientId, }: any) => (
-    <PatientNotes
-      patientId={patientId}
-      facilityId={facilityId}
-    />
-  ),
+  "/facility/:facilityId/patient/:patientId/notes/": ({
+    facilityId,
+    patientId,
+  }: any) => <PatientNotes patientId={patientId} facilityId={facilityId} />,
   "/facility/:facilityId/patient/:patientId/files/": ({
     facilityId,
     patientId,
