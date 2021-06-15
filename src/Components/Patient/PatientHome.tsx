@@ -232,6 +232,9 @@ export const PatientHome = (props: any) => {
         )
       ).then((response: any) => {
         if ((response || {}).status === 200) {
+          let dummyPatientData = Object.assign({}, patientData);
+          dummyPatientData["assigned_to"] = assignedVolunteerObject;
+          setPatientData(dummyPatientData);
           Notification.Success({
             msg: "Volunteer assigned successfully.",
           });
@@ -1470,9 +1473,7 @@ export const PatientHome = (props: any) => {
                   <button
                     className="btn btn-primary w-full"
                     onClick={() =>
-                      navigate(
-                        `/facility/${facilityId}/patient/${id}/notes/`
-                      )
+                      navigate(`/facility/${facilityId}/patient/${id}/notes/`)
                     }
                   >
                     View Patient Notes
@@ -1575,8 +1576,10 @@ export const PatientHome = (props: any) => {
 
           <div>
             <OnlineUsersSelect
-              userId={assignedVolunteerObject?.id}
-              selectedUser={assignedVolunteerObject}
+              userId={assignedVolunteerObject?.id || patientData.assigned_to}
+              selectedUser={
+                assignedVolunteerObject || patientData.assigned_to_object
+              }
               onSelect={handleVolunteerSelect}
               user_type={"Volunteer"}
             />
