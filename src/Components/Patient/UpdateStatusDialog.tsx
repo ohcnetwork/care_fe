@@ -74,7 +74,8 @@ const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
   const [state, dispatch] = useReducer(updateStatusReducer, initialState);
 
   const currentStatus = SAMPLE_TEST_STATUS.find(
-    (i) => i.text === sample.status);
+    (i) => i.text === sample.status
+  );
 
   const status = String(sample.status) as keyof typeof SAMPLE_FLOW_RULES;
   const validStatusChoices = statusChoices.filter(

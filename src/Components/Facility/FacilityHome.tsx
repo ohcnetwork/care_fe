@@ -195,7 +195,11 @@ export const FacilityHome = (props: any) => {
           <button onClick={handleDeleteClose} className="btn btn-primary">
             Cancel
           </button>
-          <button onClick={handleDeleteSubmit} className="btn btn-danger">
+          <button
+            onClick={handleDeleteSubmit}
+            id="facility-delete-confirm"
+            className="btn btn-danger"
+          >
             Delete
           </button>
         </DialogActions>
@@ -257,6 +261,7 @@ export const FacilityHome = (props: any) => {
           </div>
           <div className="flex flex-col">
             <button
+              id="update-facility"
               className="btn-primary btn"
               onClick={() => navigate(`/facility/${facilityId}/update`)}
             >
@@ -280,6 +285,7 @@ export const FacilityHome = (props: any) => {
             {(currentUser.data.user_type === "DistrictAdmin" ||
               currentUser.data.user_type === "StateAdmin") && (
               <button
+                id="facility-delete"
                 className="btn-danger btn mt-2"
                 onClick={() => setOpenDeleteDialog(true)}
               >
