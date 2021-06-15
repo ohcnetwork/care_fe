@@ -142,15 +142,17 @@ const routes = {
   }: any) => (
     <ConsultationForm facilityId={facilityId} patientId={patientId} id={id} />
   ),
-  "/facility/:facilityId/patient/:patientId/consultation/:id/last_consultation/:isLastConsultation":
-    ({ facilityId, patientId, id, isLastConsultation }: any) => (
-      <ConsultationDetails
-        facilityId={facilityId}
-        patientId={patientId}
-        consultationId={id}
-        isLastConsultation={isLastConsultation}
-      />
-    ),
+  "/facility/:facilityId/patient/:patientId/consultation/:id": ({
+    facilityId,
+    patientId,
+    id,
+  }: any) => (
+    <ConsultationDetails
+      facilityId={facilityId}
+      patientId={patientId}
+      consultationId={id}
+    />
+  ),
   "/facility/:facilityId/patient/:patientId/consultation/:id/files/": ({
     facilityId,
     patientId,

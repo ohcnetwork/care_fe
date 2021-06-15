@@ -69,12 +69,12 @@ const requiredFields: any = {
     invalidText: "Please enter valid phone number",
   },
   title: {
-    errorText: "Title for resource request in mandatory",
+    errorText: "Title for resource request is mandatory",
     invalidText: "Please enter title for resource request",
   },
   reason: {
-    errorText: "Reason for resource request in mandatory",
-    invalidText: "Please enter reason for resource request",
+    errorText: "Description of resource request is mandatory",
+    invalidText: "Please enter Description of resource request",
   },
 };
 
@@ -247,7 +247,7 @@ export default function ResourceCreate(props: resourceProps) {
                   errors={state.errors.approving_facility}
                 />
               </div>
-             
+
               <div>
                 <InputLabel>Is this an emergency?</InputLabel>
                 <RadioGroup
@@ -272,7 +272,7 @@ export default function ResourceCreate(props: resourceProps) {
                 </RadioGroup>
                 <ErrorHelperText error={state.errors.emergency} />
               </div>
- 
+
               <div>
                 <InputLabel>Category</InputLabel>
                 <SelectField
@@ -299,7 +299,7 @@ export default function ResourceCreate(props: resourceProps) {
                   className="bg-white h-14 w-1/3 mt-2 shadow-sm md:text-sm md:leading-5"
                 />
               </div>
-              
+
               <div>
                 <InputLabel>Required Quantity</InputLabel>
                 <TextInputField
@@ -311,8 +311,8 @@ export default function ResourceCreate(props: resourceProps) {
                   onChange={handleChange}
                   errors=""
                 />
-                </div>
-              
+              </div>
+
               <div className="md:col-span-2">
                 <InputLabel>Request Title*</InputLabel>
                 <TextInputField
@@ -329,14 +329,14 @@ export default function ResourceCreate(props: resourceProps) {
               </div>
 
               <div className="md:col-span-2">
-                <InputLabel>Reason for request*</InputLabel>
+                <InputLabel>Description of request*</InputLabel>
                 <MultilineInputField
                   rows={5}
                   name="reason"
                   variant="outlined"
                   margin="dense"
                   type="text"
-                  placeholder="Type your reason here"
+                  placeholder="Type your description here"
                   value={state.form.reason}
                   onChange={handleChange}
                   errors={state.errors.reason}

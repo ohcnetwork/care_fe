@@ -1,15 +1,14 @@
-$primary: #03543f;
-$border: #28a745;
-
 @media print {
   body * {
     visibility: hidden;
   }
+
   #section-to-print,
   #section-to-print * {
     visibility: visible;
     -webkit-print-color-adjust: exact;
   }
+
   #section-to-print {
     position: absolute;
     left: 0;
@@ -17,17 +16,17 @@ $border: #28a745;
   }
 }
 
-.header-section {
-  .appBar {
-    z-index: 1201;
-  }
-  .toolbar {
-    padding-top: 72px;
-  }
-  .menuButton {
-    @media only screen and (min-width: 601px) {
-      display: none;
-    }
+.header-section .appBar {
+  z-index: 1201;
+}
+
+.header-section .toolbar {
+  padding-top: 72px;
+}
+
+@media only screen and (min-width: 601px) {
+  .header-section .menuButton {
+    display: none;
   }
 }
 
@@ -60,29 +59,33 @@ $border: #28a745;
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
 }
 
-.Mui-selected {
-  .MuiSvgIcon-root {
-    color: #0085ad !important;
-  }
-  .MuiListItemText-root {
-    color: #0085ad !important;
-  }
+.Mui-selected .MuiSvgIcon-root {
+  color: #0085ad !important;
+}
+
+.Mui-selected .MuiListItemText-root {
+  color: #0085ad !important;
 }
 
 .main-content {
   margin-top: 64px;
   border-bottom: solid 50px #f1f1f1;
   background: #f1f1f1;
-  @media only screen and (min-width: 601px) {
-    margin-left: 240px;
-  }
   min-height: 100vh;
 }
+
+@media only screen and (min-width: 601px) {
+  .main-content {
+    margin-left: 240px;
+  }
+}
+
 .app-footer {
   width: 100%;
   background: #ffffff no-repeat;
@@ -92,7 +95,10 @@ $border: #28a745;
   display: flex;
   flex-direction: row;
   margin-top: auto;
-  @media (max-width: 768px) {
+}
+
+@media (max-width: 768px) {
+  .app-footer {
     flex-direction: column;
   }
 }
@@ -114,11 +120,10 @@ $border: #28a745;
   min-height: 120px;
   line-height: 120px;
 }
-.stats-cards {
-  .stats-card-item {
-    padding: 10px;
-    margin: 16px;
-  }
+
+.stats-cards .stats-card-item {
+  padding: 10px;
+  margin: 16px;
 }
 
 @media only screen and (max-width: 601px) {
@@ -154,6 +159,7 @@ $border: #28a745;
 .pagination {
   margin: auto;
 }
+
 .error-text {
   font-size: 14px;
   color: red;
@@ -164,10 +170,8 @@ $border: #28a745;
   padding-top: 5px;
 }
 
-.nativeSelectMod {
-  .MuiInputBase-root {
-    width: 100%;
-  }
+.nativeSelectMod .MuiInputBase-root {
+  width: 100%;
 }
 
 .care-secondary-color {
@@ -176,7 +180,10 @@ $border: #28a745;
 
 .hometext {
   margin: 10px 35px !important;
-  @media (max-width: 768px) {
+}
+
+@media (max-width: 768px) {
+  .hometext {
     margin: 10px 15px !important;
   }
 }
@@ -185,18 +192,22 @@ $border: #28a745;
   text-align: center;
 }
 
-.hometitle {
-  @media (min-width: 768px) {
+@media (min-width: 768px) {
+  .hometitle {
     margin-top: 15px !important;
   }
 }
 
 .MuiTypography-h6 {
   font-weight: 400 !important;
-  @media (max-width: 768px) {
+}
+
+@media (max-width: 768px) {
+  .MuiTypography-h6 {
     font-size: 1.1rem !important;
   }
 }
+
 .badge {
   display: inline-block;
   padding: 0.25em 0.4em;
@@ -251,7 +262,7 @@ $border: #28a745;
 }
 
 .border-primary {
-  border-color: $border;
+  border-color: #28a745;
 }
 
 .react-tel-input .form-control + div:before {
@@ -261,17 +272,19 @@ $border: #28a745;
 .react-tel-input {
   margin-top: 8px;
   margin-bottom: 4px;
-  .form-control {
-    padding-top: 6px;
-    padding-bottom: 6px;
-    width: 100%;
-    border-radius: 4px;
-    height: 38px;
-    &:focus {
-      border-color: $border;
-      box-shadow: 0 0 0 1px $border;
-    }
-  }
+}
+
+.react-tel-input .form-control {
+  padding-top: 6px;
+  padding-bottom: 6px;
+  width: 100%;
+  border-radius: 4px;
+  height: 38px;
+}
+
+.react-tel-input .form-control:focus {
+  border-color: #28a745;
+  box-shadow: 0 0 0 1px #28a745;
 }
 
 .form-input {
@@ -280,24 +293,23 @@ $border: #28a745;
   width: 100%;
   border-radius: 4px;
   height: 38px;
-  &:focus {
-    border-color: $border !important;
-    box-shadow: 0 0 0 1px $border !important;
-  }
 }
 
-.shifting-page-filter-dropdown {
-  .MuiFormControl-root {
-    @apply mt-2;
+.form-input:focus {
+  border-color: #28a745 !important;
+  box-shadow: 0 0 0 1px #28a745 !important;
+}
 
-    .MuiInputBase-root {
-      @apply bg-white h-9;
+.shifting-page-filter-dropdown .MuiFormControl-root {
+  @apply mt-2;
+}
 
-      input {
-        @apply p-0;
-      }
-    }
-  }
+.shifting-page-filter-dropdown .MuiFormControl-root .MuiInputBase-root {
+  @apply bg-white h-9;
+}
+
+.shifting-page-filter-dropdown .MuiFormControl-root .MuiInputBase-root input {
+  @apply p-0;
 }
 
 .title-text {
@@ -310,23 +322,46 @@ $border: #28a745;
 .DateRangePicker_picker__portal {
   z-index: 100000 !important;
 }
+
 .DateRangePickerInput {
   padding: 4px;
   border-radius: 4px;
   border-color: rgba(0, 0, 0, 0.22);
-  &:hover {
-    border-color: rgba(0, 0, 0, 0.8);
-  }
 }
+
+.DateRangePickerInput:hover {
+  border-color: rgba(0, 0, 0, 0.8);
+}
+
 .DateRangePicker_picker {
   z-index: 100000 !important;
 }
+
 .copied-to-cb {
   color: #28a745;
   font-size: 13px;
   padding-left: 5px;
   font-style: italic;
 }
+
 .copy-to-cb {
   padding-left: 5px;
+}
+
+@screen md {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: theme(colors.gray.500) theme(colors.gray.100);
+  }
+  ::-webkit-scrollbar {
+    width: 12px;
+  }
+  ::-webkit-scrollbar-track {
+    background: theme(colors.gray.100);
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: theme(colors.gray.500);
+    border-radius: 6px;
+    border: 3px solid theme(colors.gray.100);
+  }
 }

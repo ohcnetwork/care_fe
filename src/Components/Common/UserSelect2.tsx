@@ -48,7 +48,7 @@ export const UserSelect = (props: UserSelectProps) => {
         const params = {
           limit: 50,
           offset: 0,
-          username: text,
+          search_text: text,
         };
 
         const res = await dispatchAction(getUserList(params));
@@ -75,7 +75,7 @@ export const UserSelect = (props: UserSelectProps) => {
       onSearch={handelSearch}
       onChange={(e: any, selected: any) => handleValueChange(selected)}
       loading={userLoading}
-      placeholder="Search by username"
+      placeholder="Search by name or username"
       noOptionsText={
         hasSearchText
           ? "No user found, please try again"

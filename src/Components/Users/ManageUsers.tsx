@@ -69,7 +69,6 @@ export default function ManageUsers(props: any) {
       text: user,
     };
   });
-  console.log(currentUser);
 
   const fetchData = useCallback(
     async (status: statusType) => {

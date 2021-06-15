@@ -111,7 +111,7 @@ export default function ShowInvestigation(props: any) {
           msg: "Investigation Updated successfully!",
         });
         navigate(
-          `/facility/${props.facilityId}/patient/${props.patientId}/consultation/${props.consultationId}/`
+          `/facility/${props.facilityId}/patient/${props.patientId}/consultation/${props.consultationId}`
         );
       }
       return;

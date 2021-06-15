@@ -1,4 +1,4 @@
-import { t as Prescription_t } from "@coronasafe/prescription-builder/src/Types/Prescription__Prescription.gen";
+import { t as Prescription_t } from "../Common/prescription-builder/types/Prescription__Prescription.gen";
 import loadable from "@loadable/component";
 import {
   Box,
@@ -65,7 +65,7 @@ const initForm: any = {
   diagnosis: "",
   verified_by: "",
   test_id: "",
-  is_kasp: "false",
+  is_kasp: "",
   kasp_enabled_date: null,
   examination_details: "",
   existing_medication: "",
@@ -76,6 +76,7 @@ const initForm: any = {
   is_telemedicine: "false",
   action: "PENDING",
   assigned_to: "",
+  assigned_to_object: null,
 };
 
 const initError = Object.assign(
@@ -252,12 +253,22 @@ export const ConsultationForm = (props: any) => {
             errors[field] = "Please enter OP consultation Details";
             invalidForm = true;
           }
+          return;
         case "is_telemedicine":
-          if ( state.form.admitted_to === "Home Isolation" && state.form[field] === "false") {
-            errors[field] = "Telemedicine should be `Yes` when Admitted To is Home Isolation";
+          if (
+            state.form.admitted_to === "Home Isolation" &&
+            state.form[field] === "false"
+          ) {
+            errors[field] =
+              "Telemedicine should be `Yes` when Admitted To is Home Isolation";
             invalidForm = true;
           }
-
+          return;
+        case "is_kasp":
+          if (!state.form[field]) {
+            errors[field] = "Please select an option, Kasp is mandatory";
+            invalidForm = true;
+          }
           return;
         default:
           return;
@@ -312,7 +323,8 @@ export const ConsultationForm = (props: any) => {
         is_telemedicine: state.form.is_telemedicine,
         action: state.form.action,
         review_time: state.form.review_time,
-        assigned_to: state.form.is_telemedicine === "true" ? state.form.assigned_to : "",
+        assigned_to:
+          state.form.is_telemedicine === "true" ? state.form.assigned_to : "",
       };
       const res = await dispatchAction(
         id ? updateConsultation(id, data) : createConsultation(data)
@@ -387,9 +399,10 @@ export const ConsultationForm = (props: any) => {
     }
   };
 
-  const handleOnSelect = (id: string) => {
+  const handleDoctorSelect = (doctor: any) => {
     const form = { ...state.form };
-    form["assigned_to"] = id;
+    form["assigned_to"] = doctor.id;
+    form["assigned_to_object"] = doctor;
     dispatch({ type: "set_form", form });
   };
 
@@ -707,7 +720,7 @@ export const ConsultationForm = (props: any) => {
               </div>
 
               <div className="flex-1">
-                <InputLabel id="admitted-label">Kasp</InputLabel>
+                <InputLabel id="admitted-label">Kasp*</InputLabel>
                 <RadioGroup
                   aria-label="covid"
                   name="is_kasp"
@@ -780,7 +793,8 @@ export const ConsultationForm = (props: any) => {
                 <div className="md:col-span-1">
                   <OnlineDoctorsSelect
                     userId={state.form.assigned_to}
-                    onSelect={handleOnSelect}
+                    selectedDoctor={state.form.assigned_to_object}
+                    onSelect={handleDoctorSelect}
                   />
                 </div>
               )}

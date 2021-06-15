@@ -4,8 +4,8 @@ import Entities from "./Entities.json";
 import Facility from "./Facility.json";
 
 export default {
-    ...Auth,
-    ...Common,
-    ...Entities,
-    ...Facility
-}
+  ...Auth,
+  ...Common,
+  ...Entities,
+  ...Facility,
+};

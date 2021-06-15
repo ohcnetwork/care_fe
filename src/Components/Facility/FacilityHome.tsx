@@ -91,10 +91,14 @@ export const FacilityHome = (props: any) => {
     setOpenDeleteDialog(false);
   };
 
-  const handleDeleteSubmit = () => {
-    dispatch(deleteFacility(facilityId));
+  const handleDeleteSubmit = async () => {
+    const res = await dispatch(deleteFacility(facilityId));
+    if (res && res.status == 204) {
+      Notification.Success({
+        msg: "Facility deleted successfully",
+      });
+    }
     navigate("/facility");
-    window.location.reload();
   };
 
   const state: any = useSelector((state) => state);
