@@ -1,7 +1,7 @@
 import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { navigate } from "raviger";
-import loadable from '@loadable/component';
+import loadable from "@loadable/component";
 import React, { useReducer, useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { SAMPLE_TYPE_CHOICES, ICMR_CATEGORY } from "../../Common/constants";
@@ -17,8 +17,8 @@ import {
 import { SampleTestModel, FacilityNameModel } from "./models";
 import Typography from "@material-ui/core/Typography";
 import Container from "@material-ui/core/Container";
-const Loading = loadable( () => import("../Common/Loading"));
-const PageTitle = loadable( () => import("../Common/PageTitle"));
+const Loading = loadable(() => import("../Common/Loading"));
+const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 const sampleTestTypes = [...SAMPLE_TYPE_CHOICES];
 const icmrCategories = [...ICMR_CATEGORY];
@@ -120,12 +120,12 @@ export const SampleTest = (props: any) => {
             invalidForm = true;
           }
           break;
-        case "icmr_category":
-          if (!state.form[field]) {
-            errors[field] = "Please Choose a category";
-            invalidForm = true;
-          }
-          break;
+        // case "icmr_category":
+        //   if (!state.form[field]) {
+        //     errors[field] = "Please Choose a category";
+        //     invalidForm = true;
+        //   }
+        //   break;
         case "icmr_label":
           if (!state.form[field]) {
             errors[field] = "Please specify the label";
@@ -251,7 +251,7 @@ export const SampleTest = (props: any) => {
                   />
                 </div>
                 <div>
-                  <InputLabel>ICMR Category*</InputLabel>
+                  <InputLabel>ICMR Category (for COVID Test)</InputLabel>
                   <SelectField
                     name="icmr_category"
                     variant="outlined"
@@ -353,7 +353,7 @@ export const SampleTest = (props: any) => {
                   name="testing_facility"
                   variant="outlined"
                   margin="dense"
-                  value={state.form.testing_facility || ''}
+                  value={state.form.testing_facility || ""}
                   options={facilityName.map((e) => {
                     return { id: e.id, name: e.name };
                   })}

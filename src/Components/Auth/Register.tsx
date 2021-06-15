@@ -1,17 +1,26 @@
-import loadable from '@loadable/component';
-import { Button, Card, CardActions, CardContent, FormControl, Grid, InputLabel, MenuItem, Select } from "@material-ui/core";
+import loadable from "@loadable/component";
+import {
+  Button,
+  Card,
+  CardActions,
+  CardContent,
+  FormControl,
+  Grid,
+  InputLabel,
+  MenuItem,
+  Select,
+} from "@material-ui/core";
 import { makeStyles, Theme } from "@material-ui/core/styles";
-import { parsePhoneNumberFromString } from 'libphonenumber-js';
+import { parsePhoneNumberFromString } from "libphonenumber-js";
 import React, { useState } from "react";
 import ReCaptcha from "react-google-recaptcha";
-import { withTranslation } from 'react-i18next';
+import { withTranslation } from "react-i18next";
 import { useDispatch } from "react-redux";
 import { DISTRICT_CHOICES, GENDER_TYPES } from "../../Common/constants";
 import { validateEmailAddress } from "../../Common/validation";
 import { signupUser } from "../../Redux/actions";
 import { PhoneNumberField, TextInputField } from "../Common/HelperInputFields";
-const PageTitle = loadable( () => import("../Common/PageTitle"));
-
+const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 const optionalFields = [
   "first_name",
@@ -26,16 +35,16 @@ const optionalFields = [
 const useStyles = makeStyles((theme: Theme) => ({
   formTop: {
     marginTop: "80px",
-    marginBottom: "70px"
+    marginBottom: "70px",
   },
   pdLogo: {
     height: "345px",
-    border: "solid 3px white"
+    border: "solid 3px white",
   },
   cardActions: {
     padding: 0,
-    paddingTop: 16
-  }
+    paddingTop: 16,
+  },
 }));
 
 const RegisterPage = (props: any) => {
@@ -59,7 +68,7 @@ const RegisterPage = (props: any) => {
   const [errors, setErrors] = useState(initErr);
   const [isCaptchaEnabled, setCaptcha] = useState(false);
   const { t } = props;
-  const captchaKey = '6LdvxuQUAAAAADDWVflgBqyHGfq-xmvNJaToM0pN';
+  const captchaKey = "6LdvxuQUAAAAADDWVflgBqyHGfq-xmvNJaToM0pN";
 
   const validateForm = () => {
     const oldError: any = {};
@@ -122,7 +131,9 @@ const RegisterPage = (props: any) => {
     if (validForm) {
       const data = {
         ...form,
-        phone_number: parsePhoneNumberFromString(form.phone_number)?.format('E.164'),
+        phone_number: parsePhoneNumberFromString(form.phone_number)?.format(
+          "E.164"
+        ),
       };
       dispatch(signupUser(data)).then((res: any) => {
         if (res.status === 201) {
@@ -167,7 +178,7 @@ const RegisterPage = (props: any) => {
       <PageTitle title={t("register_page_title")} />
 
       <Card>
-        <form onSubmit={e => handleSubmit(e)}>
+        <form onSubmit={(e) => handleSubmit(e)}>
           <CardContent>
             <TextInputField
               name="username"
@@ -215,7 +226,9 @@ const RegisterPage = (props: any) => {
             <PhoneNumberField
               label={t("phone_number")}
               value={form.phone_number}
-              onChange={(value: any) => handleValueChange(value, 'phone_number')}
+              onChange={(value: any) =>
+                handleValueChange(value, "phone_number")
+              }
               errors={errors.phone_number}
             />
 
@@ -243,7 +256,7 @@ const RegisterPage = (props: any) => {
                     <MenuItem value="">
                       <em>None</em>
                     </MenuItem>
-                    {DISTRICT_CHOICES.map(district => {
+                    {DISTRICT_CHOICES.map((district) => {
                       return (
                         <MenuItem
                           key={district.id.toString()}
@@ -274,7 +287,7 @@ const RegisterPage = (props: any) => {
                     <MenuItem value="">
                       <em>None</em>
                     </MenuItem>
-                    {GENDER_TYPES.map(gender => {
+                    {GENDER_TYPES.map((gender) => {
                       return (
                         <MenuItem key={gender.id} value={gender.id}>
                           {gender.text}
@@ -304,7 +317,7 @@ const RegisterPage = (props: any) => {
               placeholder=""
               variant="outlined"
               margin="dense"
-              autoComplete='new-password'
+              autoComplete="new-password"
               value={form.password}
               onChange={handleChange}
               errors={errors.password}
@@ -316,7 +329,7 @@ const RegisterPage = (props: any) => {
               placeholder=""
               variant="outlined"
               margin="dense"
-              autoComplete='new-password'
+              autoComplete="new-password"
               value={form.c_password}
               onChange={handleChange}
               errors={errors.c_password}
@@ -340,7 +353,7 @@ const RegisterPage = (props: any) => {
                         color="primary"
                         variant="contained"
                         type="submit"
-                        onClick={e => handleSubmit(e)}
+                        onClick={(e) => handleSubmit(e)}
                       >
                         {t("register_hospital")}
                       </Button>

@@ -12,6 +12,7 @@ import { TriageForm } from "../Components/Facility/TriageForm";
 import { DailyRoundListDetails } from "../Components/Patient/DailyRoundListDetails";
 import { DailyRounds } from "../Components/Patient/DailyRounds";
 import { PatientManager } from "../Components/Patient/ManagePatients";
+import  PatientNotes  from "../Components/Patient/PatientNotes";
 import { PatientHome } from "../Components/Patient/PatientHome";
 import { PatientRegister } from "../Components/Patient/PatientRegister";
 import { SampleDetails } from "../Components/Patient/SampleDetails";
@@ -108,6 +109,12 @@ const routes = {
   "/facility/:facilityId/patient/:patientId/sample/:id": ({ id }: any) => (
     <SampleDetails id={id} />
   ),
+  "/facility/:facilityId/patient/:patientId/notes/": ({ facilityId, patientId, }: any) => (
+    <PatientNotes
+      patientId={patientId}
+      facilityId={facilityId}
+    />
+  ),
   "/facility/:facilityId/patient/:patientId/files/": ({
     facilityId,
     patientId,
@@ -142,14 +149,17 @@ const routes = {
   }: any) => (
     <ConsultationForm facilityId={facilityId} patientId={patientId} id={id} />
   ),
-  "/facility/:facilityId/patient/:patientId/consultation/:id":
-    ({ facilityId, patientId, id }: any) => (
-      <ConsultationDetails
-        facilityId={facilityId}
-        patientId={patientId}
-        consultationId={id}
-      />
-    ),
+  "/facility/:facilityId/patient/:patientId/consultation/:id": ({
+    facilityId,
+    patientId,
+    id,
+  }: any) => (
+    <ConsultationDetails
+      facilityId={facilityId}
+      patientId={patientId}
+      consultationId={id}
+    />
+  ),
   "/facility/:facilityId/patient/:patientId/consultation/:id/files/": ({
     facilityId,
     patientId,
@@ -165,8 +175,11 @@ const routes = {
       unspecified={true}
     />
   ),
-  "/facility/:facilityId/patient/:patientId/consultation/:id/investigation/": 
-  ({ facilityId, patientId, id }: any) => (
+  "/facility/:facilityId/patient/:patientId/consultation/:id/investigation/": ({
+    facilityId,
+    patientId,
+    id,
+  }: any) => (
     <Investigation
       consultationId={id}
       facilityId={facilityId}
@@ -174,7 +187,7 @@ const routes = {
     />
   ),
   "/facility/:facilityId/patient/:patientId/consultation/:id/investigationSessions":
-    ({ facilityId, patientId, id  }: any) => (
+    ({ facilityId, patientId, id }: any) => (
       <ViewInvestigations
         consultationId={id}
         facilityId={facilityId}

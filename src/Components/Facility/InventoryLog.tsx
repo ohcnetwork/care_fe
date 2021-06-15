@@ -102,9 +102,7 @@ export default function InventoryLog(props: any) {
           <div className="flex items-center">
             <div className="ml-3">
               <p className="text-gray-900 whitespace-no-wrap">
-                {moment(inventoryItem.created_date).format(
-                  "DD-MM-YYYY LTS"
-                )}
+                {moment(inventoryItem.created_date).format("DD-MM-YYYY LTS")}
               </p>
             </div>
           </div>

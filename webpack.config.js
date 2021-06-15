@@ -56,7 +56,7 @@ module.exports = (env, argv) => {
             },
           },
       runtimeChunk: {
-        name: entrypoint => `runtime-${entrypoint.name}`,
+        name: (entrypoint) => `runtime-${entrypoint.name}`,
       },
     },
     devtool: isDev ? "eval-cheap-module-source-map" : "none",
@@ -82,10 +82,7 @@ module.exports = (env, argv) => {
       rules: [
         {
           test: /\.(ts|tsx)$/,
-          include: [
-            path.resolve(__dirname, "src"),
-            path.resolve(__dirname, "node_modules/@coronasafe"),
-          ],
+          include: [path.resolve(__dirname, "src")],
           loader: "ts-loader",
         },
         {
@@ -95,11 +92,7 @@ module.exports = (env, argv) => {
         },
         {
           test: /\.(sa|sc|c)ss$/,
-          use: [
-            MiniCssExtractPlugin.loader,
-            "css-loader",
-            "postcss-loader",
-          ],
+          use: [MiniCssExtractPlugin.loader, "css-loader", "postcss-loader"],
         },
         {
           test: /\.(png|jpe?g|gif)$/i,
