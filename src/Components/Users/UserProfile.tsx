@@ -168,7 +168,6 @@ export default function UserProfile() {
           return;
         case "altPhoneNumber":
           let alt_is_valid: boolean = false;
-          console.log("Value is ", states.form[field]);
           if (states.form[field]) {
             if (states.form[field] === "+91") {
               return;

@@ -366,6 +366,9 @@ export const UserAdd = (props: UserProps) => {
         case "alt_phone_number":
           let alt_is_valid: boolean = false;
           if (state.form[field]) {
+            if (state.form[field] === "+91") {
+              return;
+            }
             const altPhoneNumber = parsePhoneNumberFromString(
               state.form[field],
               "IN"
@@ -374,7 +377,8 @@ export const UserAdd = (props: UserProps) => {
               alt_is_valid = altPhoneNumber.isValid();
             }
           }
-          if (!state.form[field] || !alt_is_valid) {
+
+          if (state.form[field] && !alt_is_valid) {
             errors[field] = "Please enter valid mobile number";
             invalidForm = true;
           }
