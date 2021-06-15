@@ -28,6 +28,7 @@ import {
   FacilityModel,
   PatientStatsModel,
 } from "./models";
+import moment from "moment";
 
 export const FacilityHome = (props: any) => {
   const { facilityId } = props;
@@ -211,7 +212,15 @@ export const FacilityHome = (props: any) => {
             <Typography>
               Local Body : {facilityData?.local_body_object?.name}
             </Typography>
-
+            <Typography>
+              Last Updated:{" "}
+              {
+                // @ts-ignore
+                facilityData?.modified_date &&
+                  // @ts-ignore
+                  moment(facilityData?.modified_date).fromNow()
+              }
+            </Typography>
             {facilityData?.ward_object && (
               <Typography>
                 Ward :
