@@ -141,6 +141,8 @@ export const UserAdd = (props: UserProps) => {
     ? [...USER_TYPES]
     : userType === "StaffReadOnly"
     ? ["StaffReadOnly"]
+    : userType === "Pharmacist"
+    ? ["Pharmacist"]
     : USER_TYPES.slice(0, userIndex + 1);
 
   const headerText = !userId ? "Add User" : "Update User";
