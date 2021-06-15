@@ -350,6 +350,9 @@ export const SAMPLE_TYPE_CHOICES = [
   "Blood in EDTA",
   "Acute Sera",
   "Covalescent sera",
+  "Biopsy",
+  "AMR",
+  "Communicable Diseases",
   "OTHER TYPE",
 ];
 
