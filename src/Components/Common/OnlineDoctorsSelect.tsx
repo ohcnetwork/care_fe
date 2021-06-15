@@ -92,6 +92,7 @@ export const OnlineDoctorsSelect = (props: any) => {
                 })}
                 value={state.searchTerm}
                 onChange={handleSearchTermChange}
+                onKeyUp={(e) => e.preventDefault()}
               />
               <div
                 className={classNames("flex items-center justify-between", {
