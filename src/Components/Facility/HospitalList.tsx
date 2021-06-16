@@ -9,6 +9,7 @@ import {
   downloadFacilityCapacity,
   downloadFacilityDoctors,
   downloadFacilityTriage,
+  getState,
 } from "../../Redux/actions";
 import loadable from "@loadable/component";
 import { SelectField } from "../Common/HelperInputFields";
@@ -63,6 +64,7 @@ const HospitalListPage = (props: any) => {
   const downloadTypes = [...DOWNLOAD_TYPES];
   const [downloadSelect, setdownloadSelect] = useState("Facility List");
   const [showFilters, setShowFilters] = useState(false);
+  const [stateName, setStateName] = useState("");
   const { t } = props;
   const limit = 14;
 
@@ -116,6 +118,27 @@ const HospitalListPage = (props: any) => {
       fetchData(status);
     },
     [fetchData]
+  );
+
+  const fetchStateName = useCallback(
+    async (status: statusType) => {
+      setIsLoading(true);
+      const res = await dispatchAction(getState(qParams.state));
+      if (!status.aborted) {
+        if (res && res.data) {
+          setStateName(res.data.name);
+        }
+        setIsLoading(false);
+      }
+    },
+    [dispatchAction, qParams.state]
+  );
+
+  useAbortableEffect(
+    (status: statusType) => {
+      fetchStateName(status);
+    },
+    [fetchStateName]
   );
 
   const onSearchSuspects = (search: string) => {
@@ -507,7 +530,7 @@ const HospitalListPage = (props: any) => {
         </SlideOver>
       </div>
       <div className="flex space-x-2 mt-2 flex-wrap w-full col-span-3 space-y-1">
-        {badge("State", qParams.state, "state")}
+        {badge("State", stateName, "state")}
         {badge("District", qParams.district, "district")}
         {badge("Local Body", qParams.local_body, "local_body")}
         {badge("Facility Type", qParams.facility_type, "facility_type")}
