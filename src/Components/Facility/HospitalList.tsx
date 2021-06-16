@@ -2,7 +2,7 @@ import { navigate, useQueryParams } from "raviger";
 import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { DOWNLOAD_TYPES } from "../../Common/constants";
+import { DOWNLOAD_TYPES, FACILITY_TYPES } from "../../Common/constants";
 import {
   getFacilities,
   downloadFacility,
@@ -188,6 +188,11 @@ const HospitalListPage = (props: any) => {
     },
     [fetchLocalbodyName]
   );
+
+  const findFacilityTypeById = (id: number) => {
+    const facility_type = FACILITY_TYPES.find((type) => type.id == id);
+    return facility_type?.text;
+  };
 
   const onSearchSuspects = (search: string) => {
     if (search !== "") setQueryParams({ search }, true);
@@ -581,7 +586,11 @@ const HospitalListPage = (props: any) => {
         {badge("State", stateName, "state")}
         {badge("District", districtName, "district")}
         {badge("Local Body", localbodyName, "local_body")}
-        {badge("Facility Type", qParams.facility_type, "facility_type")}
+        {badge(
+          "Facility Type",
+          findFacilityTypeById(qParams.facility_type),
+          "facility_type"
+        )}
         {qParams.kasp_empanelled &&
           badge(
             "KASP Empanelled",
