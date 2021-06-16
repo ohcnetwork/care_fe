@@ -11,6 +11,7 @@ import {
   downloadFacilityTriage,
   getState,
   getDistrict,
+  getLocalBody,
 } from "../../Redux/actions";
 import loadable from "@loadable/component";
 import { SelectField } from "../Common/HelperInputFields";
@@ -67,6 +68,7 @@ const HospitalListPage = (props: any) => {
   const [showFilters, setShowFilters] = useState(false);
   const [stateName, setStateName] = useState("");
   const [districtName, setDistrictName] = useState("");
+  const [localbodyName, setLocalbodyName] = useState("");
   const { t } = props;
   const limit = 14;
 
@@ -162,6 +164,29 @@ const HospitalListPage = (props: any) => {
       fetchDistrictName(status);
     },
     [fetchDistrictName]
+  );
+
+  const fetchLocalbodyName = useCallback(
+    async (status: statusType) => {
+      setIsLoading(true);
+      const res = await dispatchAction(
+        getLocalBody({ id: qParams.local_body })
+      );
+      if (!status.aborted) {
+        if (res && res.data) {
+          setLocalbodyName(res.data.name);
+        }
+        setIsLoading(false);
+      }
+    },
+    [dispatchAction, qParams.local_body]
+  );
+
+  useAbortableEffect(
+    (status: statusType) => {
+      fetchLocalbodyName(status);
+    },
+    [fetchLocalbodyName]
   );
 
   const onSearchSuspects = (search: string) => {
@@ -555,7 +580,7 @@ const HospitalListPage = (props: any) => {
       <div className="flex space-x-2 mt-2 flex-wrap w-full col-span-3 space-y-1">
         {badge("State", stateName, "state")}
         {badge("District", districtName, "district")}
-        {badge("Local Body", qParams.local_body, "local_body")}
+        {badge("Local Body", localbodyName, "local_body")}
         {badge("Facility Type", qParams.facility_type, "facility_type")}
         {qParams.kasp_empanelled &&
           badge(
