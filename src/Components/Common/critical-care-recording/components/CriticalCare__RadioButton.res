@@ -2,7 +2,7 @@ let str = React.string
 
 
 @react.component
-let make = (~options, ~align) => {
+let make = (~options) => {
     <div className="w-1/2 flex justify-center">
         {options|>Array.map((x) => {
             <>

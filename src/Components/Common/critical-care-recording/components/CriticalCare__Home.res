@@ -34,6 +34,7 @@ let options :array<Options.t> = [
 let make = () => {
     <div>
         {str("placeholder text")}
-        <CriticalCare__RadioButton options={options} align="flex" />
+        <CriticalCare__RadioButton options={options} />
+        <CriticalCare__PupilRangeSlider />
     </div>
 }
