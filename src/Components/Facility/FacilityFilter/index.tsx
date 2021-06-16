@@ -8,7 +8,8 @@ import LocalBodySelect from "./LocalBodySelect";
 import { FACILITY_TYPES } from "../../../Common/constants";
 import {
   getStates,
-  getDistrictByState,
+  getDivisionByState,
+  getDistrictByDivision,
   getLocalbodyByDistrict,
 } from "../../../Redux/actions";
 import { useDispatch } from "react-redux";
@@ -23,8 +24,10 @@ function useMergeState(initialState: any) {
 }
 
 const initialStates = [{ id: 0, name: "Choose State *" }];
+const initialDivisions = [{ id: 0, name: "Choose Division" }];
 const initialDistricts = [{ id: 0, name: "Choose District" }];
 const selectStates = [{ id: 0, name: "Please select your state" }];
+const selectDivisions = [{ id: 0, name: "Please select your division" }];
 const initialLocalbodies = [{ id: 0, name: "Choose Localbody" }];
 const selectDistrict = [{ id: 0, name: "Please select your district" }];
 
@@ -34,21 +37,42 @@ function FacillityFilter(props: any) {
   const dispatchAction: any = useDispatch();
 
   const [isStateLoading, setIsStateLoading] = useState(false);
+  const [isDivisionLoading, setIsDivisionLoading] = useState(false);
   const [isDistrictLoading, setIsDistrictLoading] = useState(false);
   const [isLocalbodyLoading, setIsLocalbodyLoading] = useState(false);
   const [states, setStates] = useState(initialStates);
-  const [districts, setDistricts] = useState(selectStates);
+  const [divisions, setDivisions] = useState(selectStates);
+  const [districts, setDistricts] = useState(selectDivisions);
   const [localBody, setLocalBody] = useState(selectDistrict);
 
+  const fetchDivisions = useCallback(
+    async (id: string) => {
+      if (Number(id) > 0) {
+        setIsDivisionLoading(true);
+        const divisionList = await dispatchAction(getDivisionByState({ id }));
+        setDivisions([...initialDivisions, ...divisionList.data]);
+        setIsDivisionLoading(false);
+      } else {
+        setDivisions(selectStates);
+      }
+    },
+    [dispatchAction]
+  );
   const fetchDistricts = useCallback(
     async (id: string) => {
       if (Number(id) > 0) {
         setIsDistrictLoading(true);
-        const districtList = await dispatchAction(getDistrictByState({ id }));
-        setDistricts([...initialDistricts, ...districtList.data]);
+        const districtList = await dispatchAction(
+          getDistrictByDivision({ id })
+        );
         setIsDistrictLoading(false);
+        if (districtList.data.results.length > 0) {
+          setDistricts([...initialDistricts, ...districtList.data.results]);
+        } else {
+          setDistricts([{ id: 0, name: "No districts found!" }]);
+        }
       } else {
-        setDistricts(selectStates);
+        setDistricts(selectDivisions);
       }
     },
     [dispatchAction]
@@ -76,6 +100,7 @@ function FacillityFilter(props: any) {
 
   const [filterState, setFilterState] = useMergeState({
     state: filter.state || "",
+    division: filter.division || "",
     district: filter.district || "",
     district_ref: null,
     local_body: filter.local_body || "",
@@ -104,6 +129,7 @@ function FacillityFilter(props: any) {
   const applyFilter = () => {
     const data = {
       state: filterState.state || "",
+      division: filterState.division || "",
       district: filterState.district || "",
       local_body: filterState.local_body || "",
       facility_type: filterState.facility_type || "",
@@ -173,6 +199,28 @@ function FacillityFilter(props: any) {
                 margin="dense"
                 value={filterState.state}
                 options={states}
+                optionValue="name"
+                onChange={(e) => {
+                  handleChange(e);
+                  fetchDivisions(String(e.target.value));
+                }}
+              />
+            )}
+          </div>
+        </div>
+
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">Division</span>
+          <div>
+            {isDivisionLoading ? (
+              <CircularProgress size={20} />
+            ) : (
+              <SelectField
+                name="division"
+                variant="outlined"
+                margin="dense"
+                value={filterState.division}
+                options={divisions}
                 optionValue="name"
                 onChange={(e) => {
                   handleChange(e);
