@@ -43,9 +43,9 @@ export default function ResultList() {
     });
     const reg = await navigator.serviceWorker.ready;
     const subscription = await reg.pushManager.getSubscription();
-    if (!subscription) {
+    if (!subscription && !res.data.pf_endpoint) {
       setIsSubscribed("NotSubscribed");
-    } else if (subscription.endpoint === res.data.pf_endpoint) {
+    } else if (subscription?.endpoint === res.data.pf_endpoint) {
       setIsSubscribed("SubscribedOnThisDevice");
     } else {
       setIsSubscribed("SubscribedOnAnotherDevice");
