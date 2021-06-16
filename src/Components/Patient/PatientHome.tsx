@@ -597,12 +597,12 @@ export const PatientHome = (props: any) => {
       <div id="revamp">
         <PageTitle title={`Covid Suspect Details`} />
         {patientData?.last_consultation?.assigned_to_object && (
-          <div className="relative rounded-lg shadow bg-green-200 mt-2">
+          <div className="relative mt-2">
             <div className="max-w-screen-xl mx-auto py-3 px-3 sm:px-6 lg:px-8">
-              <div className="pr-16 sm:text-center sm:px-16">
-                <p className="font-bold text-green-800">
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                <p className="font-bold text-green-800 rounded-lg shadow bg-green-200 p-3 col-span-1 text-center">
                   <span className="inline">
-                    Assigned to:{" "}
+                    Assigned Doctor:{" "}
                     {
                       patientData.last_consultation.assigned_to_object
                         .first_name
@@ -610,6 +610,15 @@ export const PatientHome = (props: any) => {
                     {patientData.last_consultation.assigned_to_object.last_name}
                   </span>
                 </p>
+                {patientData.assigned_to_object && (
+                  <p className="font-bold text-green-800 rounded-lg shadow bg-green-200 p-3 col-span-1 text-center">
+                    <span className="inline">
+                      Assigned Volunteer:{" "}
+                      {patientData.assigned_to_object.first_name}{" "}
+                      {patientData.assigned_to_object.last_name}
+                    </span>
+                  </p>
+                )}
               </div>
             </div>
           </div>
