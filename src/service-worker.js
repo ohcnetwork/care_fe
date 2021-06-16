@@ -1,35 +1,36 @@
 import { precacheAndRoute } from "workbox-precaching/precacheAndRoute";
-import { axios } from "axios";
 
 precacheAndRoute(self.__WB_MANIFEST);
 
 console.log("In custom service worker");
-self.addEventListener("push", function (event) {
-  console.log(event);
-  const data = JSON.parse(event.data);
-
-  const res = axios.get(`/api/v1/notification/${data.external_id}/`);
-  console.log(res);
-
+self.addEventListener("push", async function (event) {
   event.waitUntil(
     self.registration.showNotification("Care - CoronaSafe", {
-      body: data.title,
+      body: "title",
     })
   );
 });
 
-/*
-  const options = {
-    body: "Yay it works.",
-    icon: "images/icon.png",
-    badge: "images/badge.png",
-  };
-
-self.addEventListener("push", function(event) {
-  var json = event.data.json();
-  self.registration.showNotification(json.title, {
-    body: json.body,
-    icon: json.icon
-  });
+// Notification click event listener
+self.addEventListener("notificationclose", (e) => {
+  const t_id = "dba42af0-9c23-405c-84bd-4d2229d5b4b8";
+  console.log("on notification click");
+  // Close the notification popout
+  e.notification.close();
+  // Get all the Window clients
+  e.waitUntil(
+    clients.matchAll({ type: "window" }).then((clientsArr) => {
+      // If a Window tab matching the targeted URL already exists, focus that;
+      const hadWindowToFocus = clientsArr.some((windowClient) =>
+        windowClient.url === "/show_notification/".concat(t_id)
+          ? (windowClient.focus(), true)
+          : false
+      );
+      // Otherwise, open a new tab to the applicable URL and focus it.
+      if (!hadWindowToFocus)
+        clients
+          .openWindow("/show_notification/".concat(t_id))
+          .then((windowClient) => (windowClient ? windowClient.focus() : null));
+    })
+  );
 });
-*/

@@ -48,6 +48,7 @@ import ShowInvestigation from "../Components/Facility/Investigations/ShowInvesti
 import InvestigationReports from "../Components/Facility/Investigations/Reports";
 import { withTranslation } from "react-i18next";
 import DeathReport from "../Components/DeathReport/DeathReport";
+import ShowPushNotification from "../Components/Notifications/ShowPushNotification";
 
 const get = require("lodash.get");
 const img = "https://cdn.coronasafe.network/light-logo.svg";
@@ -142,14 +143,17 @@ const routes = {
   }: any) => (
     <ConsultationForm facilityId={facilityId} patientId={patientId} id={id} />
   ),
-  "/facility/:facilityId/patient/:patientId/consultation/:id":
-    ({ facilityId, patientId, id }: any) => (
-      <ConsultationDetails
-        facilityId={facilityId}
-        patientId={patientId}
-        consultationId={id}
-      />
-    ),
+  "/facility/:facilityId/patient/:patientId/consultation/:id": ({
+    facilityId,
+    patientId,
+    id,
+  }: any) => (
+    <ConsultationDetails
+      facilityId={facilityId}
+      patientId={patientId}
+      consultationId={id}
+    />
+  ),
   "/facility/:facilityId/patient/:patientId/consultation/:id/files/": ({
     facilityId,
     patientId,
@@ -165,8 +169,11 @@ const routes = {
       unspecified={true}
     />
   ),
-  "/facility/:facilityId/patient/:patientId/consultation/:id/investigation/": 
-  ({ facilityId, patientId, id }: any) => (
+  "/facility/:facilityId/patient/:patientId/consultation/:id/investigation/": ({
+    facilityId,
+    patientId,
+    id,
+  }: any) => (
     <Investigation
       consultationId={id}
       facilityId={facilityId}
@@ -174,7 +181,7 @@ const routes = {
     />
   ),
   "/facility/:facilityId/patient/:patientId/consultation/:id/investigationSessions":
-    ({ facilityId, patientId, id  }: any) => (
+    ({ facilityId, patientId, id }: any) => (
       <ViewInvestigations
         consultationId={id}
         facilityId={facilityId}
@@ -277,6 +284,7 @@ const routes = {
   "/external_results/upload": () => <ExternalResultUpload />,
   "/external_results/:id": ({ id }: any) => <ResultItem id={id} />,
   "/death_report/:id": ({ id }: any) => <DeathReport id={id} />,
+  "/show_notification/:id": (id: any) => <ShowPushNotification id={id} />,
 };
 
 let menus = [

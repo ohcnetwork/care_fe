@@ -33,23 +33,72 @@ export default function ResultList() {
   const [reload, setReload] = useState(false);
   const [eventFilter, setEventFilter] = useState("");
 
-  const [isSubscribed, setIsSubscribed] = useState(
-    Notification.permission === "granted"
-  );
+  const [isSubscribed, setIsSubscribed] = useState("");
+
+  const intialSubscriptionState = async () => {
+    const res = await axios.get(`/api/v1/users/${username}/pnconfig/`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("care_access_token")}`,
+      },
+    });
+    const reg = await navigator.serviceWorker.ready;
+    const subscription = await reg.pushManager.getSubscription();
+    if (!subscription) {
+      setIsSubscribed("NotSubscribed");
+    } else if (subscription.endpoint === res.data.pf_endpoint) {
+      setIsSubscribed("SubscribedOnThisDevice");
+    } else {
+      setIsSubscribed("SubscribedOnAnotherDevice");
+    }
+  };
+
+  const handleSubscribeClick = () => {
+    const status = isSubscribed;
+    if (status === "NotSubscribed" || status === "SubscribedOnAnotherDevice") {
+      subscribe();
+    } else {
+      unsubscribe();
+    }
+  };
+
+  const getButtonText = () => {
+    const status = isSubscribed;
+    if (status === "NotSubscribed") {
+      return "Subscribe";
+    } else if (status === "SubscribedOnAnotherDevice") {
+      return "Subscribe On This Device";
+    } else {
+      return "Unsubscribe";
+    }
+  };
+
+  console.log("Status:", isSubscribed);
+  console.log("Notificiation Permission", Notification.permission);
 
   let manageResults: any = null;
 
   const unsubscribe = () => {
-    console.log("called?");
     navigator.serviceWorker.ready.then(function (reg) {
       reg.pushManager.getSubscription().then(function (subscription) {
-        console.log(subscription);
-        if (!subscription) setIsSubscribed(false);
         subscription
           ?.unsubscribe()
-          .then(function (successful) {
-            console.log("You successfully unsubscribed");
-            setIsSubscribed(false);
+          .then(async function (successful) {
+            const res = await axios.patch(
+              `/api/v1/users/${username}/pnconfig/`,
+              {
+                pf_endpoint: "",
+                pf_p256dh: "",
+                pf_auth: "",
+              },
+              {
+                headers: {
+                  Authorization: `Bearer ${localStorage.getItem(
+                    "care_access_token"
+                  )}`,
+                },
+              }
+            );
+            setIsSubscribed("NotSubscribed");
           })
           .catch(function (e) {
             console.log("Unsubscription failed");
@@ -96,7 +145,7 @@ export default function ResultList() {
 
     if (res.status >= 200 && res.status <= 300) {
       console.log("subscribed");
-      setIsSubscribed(true);
+      setIsSubscribed("SubscribedOnThisDevice");
     } else {
       console.log("Error saving web push info.");
     }
@@ -118,7 +167,8 @@ export default function ResultList() {
           setOffset((prev) => prev - RESULT_LIMIT);
         });
     }
-  }, [dispatch, reload, showNotifications, offset, eventFilter]);
+    intialSubscriptionState();
+  }, [dispatch, reload, showNotifications, offset, eventFilter, isSubscribed]);
 
   // const handlePagination = (page: number, limit: number) => {
   //   updateQuery({ page, limit });
@@ -252,10 +302,10 @@ export default function ResultList() {
                 </div>
                 <div>
                   <button
-                    onClick={isSubscribed ? unsubscribe : subscribe}
+                    onClick={handleSubscribeClick}
                     className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0"
                   >
-                    {isSubscribed ? "Unsubscribe" : "Subscribe"}
+                    {getButtonText()}
                   </button>
                 </div>
               </div>
