@@ -201,8 +201,6 @@ export default function UserProfile() {
   };
 
   const handleWhatsappNumChange = (phoneNo: any, name: string) => {
-    console.log("Phone No is ", phoneNo);
-    console.log("Name is ", name);
     const form = { ...states.form };
     form[name] = phoneNo;
     dispatch({ type: "set_form", form });

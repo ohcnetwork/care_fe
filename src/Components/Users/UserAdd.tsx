@@ -269,7 +269,6 @@ export const UserAdd = (props: UserProps) => {
   };
 
   const handleValueChange = (value: any, name: string) => {
-    console.log("Value is ", value);
     const form = { ...state.form };
     form[name] = value;
     dispatch({ type: "set_form", form });
