@@ -103,6 +103,14 @@ export const fireRequest = (
             return;
           }
 
+          // deleteUser: 404 is for permission denied
+          if (error.response.status === 404 && key === "deleteUser") {
+            Notification.Error({
+              msg: "Permission denied!",
+            });
+            return;
+          }
+
           // currentUser is ignored because on the first page load
           // 403 error is displayed for invalid credential.
           if (error.response.status === 403 && key === "currentUser") {
