@@ -12,8 +12,10 @@ self.addEventListener("push", async function (event) {
 });
 
 // Notification click event listener
-self.addEventListener("notificationclose", (e) => {
+self.addEventListener("notificationclick", (e) => {
+  // !!! For testing, remove in production !!!
   const t_id = "dba42af0-9c23-405c-84bd-4d2229d5b4b8";
+
   console.log("on notification click");
   // Close the notification popout
   e.notification.close();

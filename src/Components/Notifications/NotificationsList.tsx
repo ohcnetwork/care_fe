@@ -72,9 +72,6 @@ export default function ResultList() {
     }
   };
 
-  console.log("Status:", isSubscribed);
-  console.log("Notificiation Permission", Notification.permission);
-
   let manageResults: any = null;
 
   const unsubscribe = () => {
