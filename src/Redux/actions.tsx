@@ -13,6 +13,9 @@ export const signupUser = (params: object) => {
 export const addUser = (params: object) => {
   return fireRequest("addUser", [], params);
 };
+export const deleteUser = (username: string) => {
+  return fireRequest("deleteUser", [username], {});
+};
 
 export const postResetPassword = (form: object) => {
   return fireRequest("resetPassword", [], form);
