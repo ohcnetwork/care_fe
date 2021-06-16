@@ -269,6 +269,7 @@ export const UserAdd = (props: UserProps) => {
   };
 
   const handleValueChange = (value: any, name: string) => {
+    console.log("Value is ", value);
     const form = { ...state.form };
     form[name] = value;
     dispatch({ type: "set_form", form });
@@ -365,7 +366,7 @@ export const UserAdd = (props: UserProps) => {
 
         case "alt_phone_number":
           let alt_is_valid: boolean = false;
-          if (state.form[field]) {
+          if (state.form[field] && state.form[field] !== "+91") {
             const altPhoneNumber = parsePhoneNumberFromString(
               state.form[field],
               "IN"
@@ -377,7 +378,11 @@ export const UserAdd = (props: UserProps) => {
               }
             }
           }
-          if (!state.form[field] || !alt_is_valid) {
+          if (
+            state.form[field] &&
+            state.form[field] !== "+91" &&
+            !alt_is_valid
+          ) {
             errors[field] = "Please enter valid mobile number";
             invalidForm = true;
           }
