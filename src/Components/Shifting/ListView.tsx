@@ -386,7 +386,6 @@ export default function ListView() {
           </button>
         </div>
       </div>
-      {console.log(qParams)}
       <BadgesList
         filterParams={qParams}
         appliedFilters={appliedFilters}
