@@ -1,8 +1,11 @@
+const colors = require("@tailwindcss/ui/colors");
+
 module.exports = {
   important: true,
   theme: {
     extend: {
       colors: {
+        "brand-primary": colors.green,
         gray: {
           100: "#FBFAFC",
           200: "#F7F5FA",

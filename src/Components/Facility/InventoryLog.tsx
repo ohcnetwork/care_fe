@@ -119,7 +119,7 @@ export default function InventoryLog(props: any) {
         <td className="px-5 py-5 border-b border-gray-200 text-sm hover:bg-gray-100">
           <p className="text-gray-900 whitespace-no-wrap lowercase">
             {inventoryItem.is_incoming ? (
-              <span className="ml-2 text-green-600">Added Stock</span>
+              <span className="ml-2 text-brand-primary-600">Added Stock</span>
             ) : (
               <span className="ml-2 text-red-600">Used Stock</span>
             )}
@@ -132,7 +132,7 @@ export default function InventoryLog(props: any) {
             className="btn btn-default"
           >
             {inventoryItem.probable_accident ? (
-              <span className="text-green-500">
+              <span className="text-brand-primary-500">
                 <i className="fas fa-exclamation-triangle pr-2"></i>UnMark
               </span>
             ) : (
@@ -170,16 +170,16 @@ export default function InventoryLog(props: any) {
             <table className="min-w-full leading-normal shadow rounded-lg overflow-hidden">
               <thead>
                 <tr>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-green-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-brand-primary-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
                     Created On
                   </th>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-green-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-brand-primary-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
                     Quantity
                   </th>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-green-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-brand-primary-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-green-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-brand-primary-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>

@@ -18,7 +18,7 @@ export const VoiceRecorder = (props: any) => {
       <div className="mt-2">
         {isRecording ? (
           <div className="space-x-2 flex">
-            <div className="bg-gray-100 p-2 text-green-700">
+            <div className="bg-gray-100 p-2 text-brand-primary-700">
               <i className="fas fa-microphone-alt animate-pulse mr-2"></i>
               Recording...
             </div>

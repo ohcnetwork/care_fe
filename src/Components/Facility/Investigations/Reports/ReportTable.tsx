@@ -147,7 +147,7 @@ const ReportTable: React.FC<ReportTableProps> = ({
             Below Ideal
           </span>
 
-          <span className="inline-block  bg-green-200 py-1 m-1 px-6 rounded-full text-green-900 font-medium">
+          <span className="inline-block  bg-brand-primary-200 py-1 m-1 px-6 rounded-full text-brand-primary-900 font-medium">
             Ideal
           </span>
 

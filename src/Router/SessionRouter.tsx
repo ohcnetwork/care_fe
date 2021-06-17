@@ -32,7 +32,7 @@ const SessionRouter = (props: any) => {
   const login =
     !path || path === "/" || path === "/login" || path === "/login/";
   return (
-    <div className={!login ? "bg-green-100" : ""}>
+    <div className={!login ? "bg-brand-primary-100" : ""}>
       {!login && <TopBar />}
       <div className={!login ? "p-4 container max-w-5xl mx-auto" : ""}>
         {content}

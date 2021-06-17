@@ -268,10 +268,10 @@ export default function ResourceDetails(props: { id: string }) {
             </div>
           </div>
           {data.assigned_to_object && (
-            <div className="relative rounded-lg shadow bg-green-200">
+            <div className="relative rounded-lg shadow bg-brand-primary-200">
               <div className="max-w-screen-xl mx-auto py-3 px-3 sm:px-6 lg:px-8">
                 <div className="pr-16 sm:text-center sm:px-16">
-                  <p className="font-bold text-green-800">
+                  <p className="font-bold text-brand-primary-800">
                     <span className="inline">
                       Assigned to: {data.assigned_to_object.first_name}{" "}
                       {data.assigned_to_object.last_name} -{" "}

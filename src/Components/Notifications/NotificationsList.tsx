@@ -140,11 +140,11 @@ export default function ResultList() {
     <div>
       <button
         onClick={() => setShowNotifications(!showNotifications)}
-        className="mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-green-300 rounded-md hover:text-white hover:bg-green-700 focus:outline-none focus:bg-green-900 transition ease-in-out duration-150"
+        className="mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-brand-primary-300 rounded-md hover:text-white hover:bg-brand-primary-700 focus:outline-none focus:bg-brand-primary-900 transition ease-in-out duration-150"
       >
         <i
           className={
-            "fas fa-bell text-green-400 mr-3 text-lg group-hover:text-green-300 group-focus:text-green-300 transition ease-in-out duration-150"
+            "fas fa-bell text-brand-primary-400 mr-3 text-lg group-hover:text-brand-primary-300 group-focus:text-brand-primary-300 transition ease-in-out duration-150"
           }
         ></i>
         Notifications

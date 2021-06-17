@@ -103,7 +103,7 @@ const DuplicatePatientDialog = (props: Props & WithStyles<typeof styles>) => {
                 <FormControlLabel
                   value="transfer"
                   control={<Radio />}
-                  className="bg-green-500 text-white mb-2"
+                  className="bg-brand-primary-500 text-white mb-2"
                   label="Admit the patient record to your facility by adding the date of birth"
                 />
                 <FormControlLabel

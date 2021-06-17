@@ -223,7 +223,7 @@ export default function ResourceBoard({
           {renderBoardTitle(board)}{" "}
           <GetAppIcon className="cursor-pointer" onClick={triggerDownload} />
         </h3>
-        <span className="rounded-lg ml-2 bg-green-500 text-white px-2">
+        <span className="rounded-lg ml-2 bg-brand-primary-500 text-white px-2">
           {totalCount || "0"}
         </span>
       </div>
