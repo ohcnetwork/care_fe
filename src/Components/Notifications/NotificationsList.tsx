@@ -34,6 +34,7 @@ export default function ResultList() {
   const [eventFilter, setEventFilter] = useState("");
 
   const [isSubscribed, setIsSubscribed] = useState("");
+  const [isSubscribing, setIsSubscribing] = useState(false);
 
   const intialSubscriptionState = async () => {
     const res = await axios.get(`/api/v1/users/${username}/pnconfig/`, {
@@ -76,6 +77,7 @@ export default function ResultList() {
 
   const unsubscribe = () => {
     navigator.serviceWorker.ready.then(function (reg) {
+      setIsSubscribing(true);
       reg.pushManager.getSubscription().then(function (subscription) {
         subscription
           ?.unsubscribe()
@@ -96,6 +98,7 @@ export default function ResultList() {
               }
             );
             setIsSubscribed("NotSubscribed");
+            setIsSubscribing(false);
           })
           .catch(function (e) {
             console.log("Unsubscription failed");
@@ -105,6 +108,7 @@ export default function ResultList() {
   };
 
   async function subscribe() {
+    setIsSubscribing(true);
     const apiUrl = "/api/v1/notification/public_key/";
     const reponse = await axios.get(apiUrl);
     const public_key = reponse.data.public_key;
@@ -146,6 +150,7 @@ export default function ResultList() {
     } else {
       console.log("Error saving web push info.");
     }
+    setIsSubscribing(false);
   }
 
   useEffect(() => {
@@ -300,8 +305,30 @@ export default function ResultList() {
                 <div>
                   <button
                     onClick={handleSubscribeClick}
-                    className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0"
+                    className="inline-flex items-center font-semibold p-2 md:py-1 bg-white active:bg-gray-300 border rounded text-xs flex-shrink-0"
+                    disabled={isSubscribing}
                   >
+                    {isSubscribing && (
+                      <svg
+                        className="animate-spin h-5 w-5 mr-3"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-75"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="#f1edf7"
+                          fill="white"
+                          stroke-width="4"
+                        />
+                        <path
+                          className=""
+                          fill="white"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                    )}
                     {getButtonText()}
                   </button>
                 </div>
