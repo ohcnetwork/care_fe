@@ -1,6 +1,7 @@
 import React from "react";
+import { PAGE_LIMIT } from "../../Common/constants";
 
-export const limit = 14;
+export const limit = PAGE_LIMIT;
 
 export const initialFilterData = {
   status: "--",

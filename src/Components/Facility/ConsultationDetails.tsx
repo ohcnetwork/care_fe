@@ -14,7 +14,11 @@ import loadable from "@loadable/component";
 import Pagination from "../Common/Pagination";
 import { ConsultationModel } from "./models";
 import { DailyRoundsModel } from "../Patient/models";
-import { PATIENT_CATEGORY, SYMPTOM_CHOICES } from "../../Common/constants";
+import {
+  PAGE_LIMIT,
+  PATIENT_CATEGORY,
+  SYMPTOM_CHOICES,
+} from "../../Common/constants";
 import { FileUpload } from "../Patient/FileUpload";
 import TreatmentSummary from "./TreatmentSummary";
 const Loading = loadable(() => import("../Common/Loading"));
@@ -38,7 +42,7 @@ export const ConsultationDetails = (props: any) => {
   const [totalCount, setTotalCount] = useState(0);
   const [offset, setOffset] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
-  const limit = 14;
+  const limit = PAGE_LIMIT;
 
   const fetchData = useCallback(
     async (status: statusType) => {

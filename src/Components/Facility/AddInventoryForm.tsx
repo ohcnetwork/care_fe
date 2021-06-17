@@ -7,8 +7,9 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getItems, postInventory } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { SelectField, TextInputField } from "../Common/HelperInputFields";
-const Loading = loadable(() => import("../Common/Loading"));
 import { InventoryItemsModel } from "./models";
+import { PAGE_LIMIT } from "../../Common/constants";
+const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 const initForm = {
@@ -53,7 +54,7 @@ export const AddInventoryForm = (props: any) => {
   const [data, setData] = useState<Array<InventoryItemsModel>>([]);
   const [currentUnit, setCurrentUnit] = useState<any>();
 
-  const limit = 14;
+  const limit = PAGE_LIMIT;
 
   const fetchData = useCallback(
     async (status: statusType) => {

@@ -7,27 +7,35 @@ import * as Notification from "../../Utils/Notifications.js";
 import moment from "moment";
 import PageTitle from "../Common/PageTitle";
 import Pagination from "../Common/Pagination";
+import { PAGE_LIMIT } from "../../Common/constants";
 
 interface PatientNotesProps {
   patientId: any;
   facilityId: any;
 }
 
-const pageSize = 14
+const pageSize = PAGE_LIMIT;
 
 const PatientNotes = (props: PatientNotesProps) => {
   const dispatch: any = useDispatch();
-  let initialData: any = {notes : [] , cPage  : 1 , count: 1}
-  const [state , setState] = useState(initialData);
+  let initialData: any = { notes: [], cPage: 1, count: 1 };
+  const [state, setState] = useState(initialData);
   const [noteField, setNoteField] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const fetchData = useCallback(
-    async ( page: number = 1  ,status: statusType = { aborted: false } ) => {
+    async (page: number = 1, status: statusType = { aborted: false }) => {
       setIsLoading(true);
-      const res = await dispatch(getPatientNotes(props.patientId , pageSize , ((page-1) *pageSize)));
+      const res = await dispatch(
+        getPatientNotes(props.patientId, pageSize, (page - 1) * pageSize)
+      );
       if (!status.aborted) {
         if (res && res.data) {
-          setState({ ...state , count : res.data?.count , notes :  res.data?.results , cPage:page});
+          setState({
+            ...state,
+            count: res.data?.count,
+            notes: res.data?.results,
+            cPage: page,
+          });
         }
         setIsLoading(false);
       }
@@ -37,13 +45,13 @@ const PatientNotes = (props: PatientNotesProps) => {
 
   useAbortableEffect(
     (status: statusType) => {
-      fetchData(1,status);
+      fetchData(1, status);
     },
     [fetchData]
   );
 
-   function handlePagination(page : number) {
-    fetchData(page)
+  function handlePagination(page: number) {
+    fetchData(page);
   }
 
   const onAddNote = () => {
@@ -56,13 +64,13 @@ const PatientNotes = (props: PatientNotesProps) => {
     });
   };
 
-  if(isLoading){
-    return <div>Loading</div>
+  if (isLoading) {
+    return <div>Loading</div>;
   }
 
   return (
     <div className="w-full flex flex-col">
-      <PageTitle title="Patient Notes"  />
+      <PageTitle title="Patient Notes" />
       <div className=" w-full">
         {state.notes.map((note: any) => (
           <div className="flex p-4 bg-white rounded-lg text-gray-800 mt-4 flex-col w-full border border-gray-300">
@@ -85,10 +93,15 @@ const PatientNotes = (props: PatientNotesProps) => {
             </div>
           </div>
         ))}
-        <div className="mt-2 left-0" >
-        <Pagination data={ {totalCount: state.count} } onChange={handlePagination} defaultPerPage={pageSize}  cPage={state.cPage} />
+        <div className="mt-2 left-0">
+          <Pagination
+            data={{ totalCount: state.count }}
+            onChange={handlePagination}
+            defaultPerPage={pageSize}
+            cPage={state.cPage}
+          />
         </div>
-        </div>
+      </div>
       <textarea
         rows={3}
         placeholder="Type your Note"

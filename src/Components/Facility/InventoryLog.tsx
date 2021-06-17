@@ -12,6 +12,7 @@ import {
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import Pagination from "../Common/Pagination";
 import moment from "moment";
+import { PAGE_LIMIT } from "../../Common/constants.js";
 
 export default function InventoryLog(props: any) {
   const { facilityId, inventoryId }: any = props;
@@ -26,7 +27,7 @@ export default function InventoryLog(props: any) {
   const [offset, setOffset] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
-  const limit = 14;
+  const limit = PAGE_LIMIT;
   const item = inventoryId;
   const [itemName, setItemName] = useState(" ");
 

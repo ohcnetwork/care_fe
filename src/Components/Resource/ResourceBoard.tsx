@@ -10,8 +10,9 @@ import moment from "moment";
 import { Modal } from "@material-ui/core";
 import { CSVLink } from "react-csv";
 import GetAppIcon from "@material-ui/icons/GetApp";
+import { PAGE_LIMIT } from "../../Common/constants";
 
-const limit = 14;
+const limit = PAGE_LIMIT;
 
 interface boardProps {
   board: string;

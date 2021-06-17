@@ -8,6 +8,7 @@ const PageTitle = loadable(() => import("../Common/PageTitle"));
 import Pagination from "../Common/Pagination";
 import { Button, ButtonBase } from "@material-ui/core";
 import { navigate } from "raviger";
+import { PAGE_LIMIT } from "../../Common/constants";
 
 export default function MinQuantityList(props: any) {
   const { facilityId }: any = props;
@@ -19,7 +20,7 @@ export default function MinQuantityList(props: any) {
   const [offset, setOffset] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
-  const limit = 14;
+  const limit = PAGE_LIMIT;
 
   const fetchData = useCallback(
     async (status: statusType) => {

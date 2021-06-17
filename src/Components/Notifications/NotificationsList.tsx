@@ -9,12 +9,12 @@ import { SelectField } from "../Common/HelperInputFields";
 import { InputLabel } from "@material-ui/core";
 import moment from "moment";
 import { Button, CircularProgress } from "@material-ui/core";
-import { NOTIFICATION_EVENTS } from "../../Common/constants";
+import { NOTIFICATION_EVENTS, PAGE_LIMIT } from "../../Common/constants";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
-const RESULT_LIMIT = 14;
+const RESULT_LIMIT = PAGE_LIMIT;
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
 export default function ResultList() {

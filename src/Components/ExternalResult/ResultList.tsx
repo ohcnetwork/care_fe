@@ -17,6 +17,7 @@ import { externalResultFormatter } from "./Commons";
 import GetAppIcon from "@material-ui/icons/GetApp";
 import FacilitiesSelectDialogue from "./FacilitiesSelectDialogue";
 import { FacilityModel } from "../Facility/models";
+import { PAGE_LIMIT } from "../../Common/constants";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -37,7 +38,7 @@ function Badge(props: { color: string; icon: string; text: string }) {
   );
 }
 
-const RESULT_LIMIT = 14;
+const RESULT_LIMIT = PAGE_LIMIT;
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
 export default function ResultList() {

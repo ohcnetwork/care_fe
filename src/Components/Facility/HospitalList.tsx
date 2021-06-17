@@ -2,7 +2,7 @@ import { navigate, useQueryParams } from "raviger";
 import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { DOWNLOAD_TYPES } from "../../Common/constants";
+import { DOWNLOAD_TYPES, PAGE_LIMIT } from "../../Common/constants";
 import {
   getFacilities,
   downloadFacility,
@@ -64,7 +64,7 @@ const HospitalListPage = (props: any) => {
   const [downloadSelect, setdownloadSelect] = useState("Facility List");
   const [showFilters, setShowFilters] = useState(false);
   const { t } = props;
-  const limit = 14;
+  const limit = PAGE_LIMIT;
 
   const fetchData = useCallback(
     async (status: statusType) => {

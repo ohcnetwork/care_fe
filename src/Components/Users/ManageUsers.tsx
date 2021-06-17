@@ -13,7 +13,7 @@ import {
 } from "../../Redux/actions";
 import Pagination from "../Common/Pagination";
 import { navigate } from "raviger";
-import { USER_TYPES } from "../../Common/constants";
+import { PAGE_LIMIT, USER_TYPES } from "../../Common/constants";
 import { InputSearchBox } from "../Common/SearchBox";
 import { FacilityModel } from "../Facility/models";
 import DeleteForeverIcon from "@material-ui/icons/DeleteForever";
@@ -62,7 +62,7 @@ export default function ManageUsers(props: any) {
 
   const [selectedRole, setSelectedRole] = useState("");
 
-  const limit = userTypes.length ? 13 : 14;
+  const limit = userTypes.length ? 13 : PAGE_LIMIT;
 
   const USER_TYPE_OPTIONS = ["Select", ...USER_TYPES].map((user) => {
     return {

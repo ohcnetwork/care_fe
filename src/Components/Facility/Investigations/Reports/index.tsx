@@ -17,8 +17,9 @@ import { InputLabel, makeStyles, CircularProgress } from "@material-ui/core";
 import { InvestigationResponse } from "./types";
 import ReportTable from "./ReportTable";
 import * as Notification from "../../../../Utils/Notifications";
+import { PAGE_LIMIT } from "../../../../Common/constants";
 
-const RESULT_PER_PAGE = 14;
+const RESULT_PER_PAGE = PAGE_LIMIT;
 
 const useStyle = makeStyles({
   button: {

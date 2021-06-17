@@ -20,6 +20,7 @@ import { InputSearchBox } from "../Common/SearchBox";
 import {
   ADMITTED_TO,
   GENDER_TYPES,
+  PAGE_LIMIT,
   TELEMEDICINE_ACTIONS,
 } from "../../Common/constants";
 import { make as SlideOver } from "../Common/SlideOver.gen";
@@ -90,7 +91,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const RESULT_LIMIT = 14;
+const RESULT_LIMIT = PAGE_LIMIT;
 
 export const PatientManager = (props: any) => {
   const { facilityId } = props;

@@ -478,3 +478,5 @@ export const RESOURCE_FILTER_ORDER: Array<OptionsType> = [
   { id: 3, text: "modified_date", desc: "ASC Modified Date" },
   { id: 4, text: "-modified_date", desc: "DESC Modified Date" },
 ];
+
+export const PAGE_LIMIT = 14;

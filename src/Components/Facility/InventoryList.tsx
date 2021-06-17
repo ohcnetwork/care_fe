@@ -6,6 +6,7 @@ import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getInventorySummary } from "../../Redux/actions";
 import Pagination from "../Common/Pagination";
+import { PAGE_LIMIT } from "../../Common/constants";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -19,7 +20,7 @@ export default function InventoryList(props: any) {
   const [offset, setOffset] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
-  const limit = 14;
+  const limit = PAGE_LIMIT;
 
   const fetchData = useCallback(
     async (status: statusType) => {

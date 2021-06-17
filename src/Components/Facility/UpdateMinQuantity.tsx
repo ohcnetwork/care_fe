@@ -7,6 +7,7 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getItemName, updateMinQuantity } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { TextInputField } from "../Common/HelperInputFields";
+import { PAGE_LIMIT } from "../../Common/constants";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -50,7 +51,7 @@ export const UpdateMinQuantity = (props: any) => {
   const [data, setData] = useState(" ");
   const [currentUnit, setCurrentUnit] = useState<any>();
 
-  const limit = 14;
+  const limit = PAGE_LIMIT;
 
   const fetchData = useCallback(
     async (status: statusType) => {
