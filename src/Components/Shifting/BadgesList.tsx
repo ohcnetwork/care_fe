@@ -1,7 +1,7 @@
 import React from "react";
 
 export default function BadgesList(props: any) {
-  const { filterParams, appliedFilters, local, updatedFilters } = props;
+  const { filterParams, appliedFilters, local, updateFilter } = props;
 
   const removeFilter = (paramKey: any) => {
     const localData: any = { ...local };
@@ -11,22 +11,20 @@ export default function BadgesList(props: any) {
     params[paramKey] = "";
 
     if (paramKey === "assigned_to") {
-      //or "assigned_user"
-
       localData["assigned_user"] = "";
       localData["assigned_user_ref"] = "";
 
       params["assigned_user"] = "";
-      params["assigned_user_ref"] = "";
+      // params["assigned_user_ref"] = "";
     } else if (
       paramKey === "assigned_facility" ||
       paramKey === "orgin_facility" ||
       paramKey === "shifting_approving_facility"
     ) {
       localData[`${paramKey}_ref`] = "";
-      params[`${paramKey}_ref`] = "";
+      // params[`${paramKey}_ref`] = "";
     }
-    updatedFilters(params, localData);
+    updateFilter(params, localData);
   };
   const badge = (key: string, value: any, paramKey: any) => {
     return (
@@ -115,7 +113,7 @@ export default function BadgesList(props: any) {
       )}
 
       {badge(
-        "AssigTo",
+        "Assigned To",
         appliedFilters.assigned_user ||
           appliedFilters.assigned_to ||
           local.assigned_user ||
