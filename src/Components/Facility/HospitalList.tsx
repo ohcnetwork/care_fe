@@ -127,7 +127,8 @@ const HospitalListPage = (props: any) => {
   const fetchStateName = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const res = await dispatchAction(getState(qParams.state));
+      const res =
+        qParams.state && (await dispatchAction(getState(qParams.state)));
       if (!status.aborted) {
         if (res && res.data) {
           setStateName(res.data.name);
@@ -148,7 +149,9 @@ const HospitalListPage = (props: any) => {
   const fetchDistrictName = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const res = await dispatchAction(getDistrict(qParams.district));
+      const res =
+        qParams.district &&
+        (await dispatchAction(getDistrict(qParams.district)));
       if (!status.aborted) {
         if (res && res.data) {
           setDistrictName(res.data.name);
@@ -169,9 +172,9 @@ const HospitalListPage = (props: any) => {
   const fetchLocalbodyName = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const res = await dispatchAction(
-        getLocalBody({ id: qParams.local_body })
-      );
+      const res =
+        qParams.local_body &&
+        (await dispatchAction(getLocalBody({ id: qParams.local_body })));
       if (!status.aborted) {
         if (res && res.data) {
           setLocalbodyName(res.data.name);
