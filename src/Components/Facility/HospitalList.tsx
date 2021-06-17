@@ -128,11 +128,10 @@ const HospitalListPage = (props: any) => {
     async (status: statusType) => {
       setIsLoading(true);
       const res =
-        qParams.state && (await dispatchAction(getState(qParams.state)));
+        Number(qParams.state) &&
+        (await dispatchAction(getState(qParams.state)));
       if (!status.aborted) {
-        if (res && res.data) {
-          setStateName(res.data.name);
-        }
+        setStateName(res?.data?.name);
         setIsLoading(false);
       }
     },
@@ -150,12 +149,10 @@ const HospitalListPage = (props: any) => {
     async (status: statusType) => {
       setIsLoading(true);
       const res =
-        qParams.district &&
+        Number(qParams.district) &&
         (await dispatchAction(getDistrict(qParams.district)));
       if (!status.aborted) {
-        if (res && res.data) {
-          setDistrictName(res.data.name);
-        }
+        setDistrictName(res?.data?.name);
         setIsLoading(false);
       }
     },
@@ -173,12 +170,10 @@ const HospitalListPage = (props: any) => {
     async (status: statusType) => {
       setIsLoading(true);
       const res =
-        qParams.local_body &&
+        Number(qParams.local_body) &&
         (await dispatchAction(getLocalBody({ id: qParams.local_body })));
       if (!status.aborted) {
-        if (res && res.data) {
-          setLocalbodyName(res.data.name);
-        }
+        setLocalbodyName(res?.data?.name);
         setIsLoading(false);
       }
     },
