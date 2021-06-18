@@ -154,6 +154,8 @@ export const PatientManager = (props: any) => {
       qParams.last_consultation_symptoms_onset_date_before || undefined,
     last_consultation_symptoms_onset_date_after:
       qParams.last_consultation_symptoms_onset_date_after || undefined,
+    last_consultation_is_telemedicine:
+      qParams.last_consultation_is_telemedicine || undefined,
   };
 
   let managePatients: any = null;
@@ -229,6 +231,7 @@ export const PatientManager = (props: any) => {
     qParams.date_of_result_after,
     qParams.last_consultation_symptoms_onset_date_before,
     qParams.last_consultation_symptoms_onset_date_after,
+    qParams.last_consultation_is_telemedicine,
   ]);
 
   const updateQuery = (params: any) => {
@@ -661,6 +664,11 @@ export const PatientManager = (props: any) => {
             "Onset of symptoms after",
             qParams.last_consultation_symptoms_onset_date_after,
             "last_consultation_symptoms_onset_date_after"
+          )}
+          {badge(
+            "Telemedicine",
+            qParams.last_consultation_is_telemedicine,
+            "last_consultation_is_telemedicine"
           )}
         </div>
       </div>
