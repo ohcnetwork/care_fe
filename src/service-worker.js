@@ -4,18 +4,18 @@ precacheAndRoute(self.__WB_MANIFEST);
 
 console.log("In custom service worker");
 self.addEventListener("push", async function (event) {
+  const data = JSON.parse(event.data.text());
+
   event.waitUntil(
-    self.registration.showNotification("Care - CoronaSafe", {
-      body: "title",
+    self.registration.showNotification("Care - CoronaSafe Network", {
+      body: data.title,
+      tag: data.external_id,
     })
   );
 });
 
 // Notification click event listener
 self.addEventListener("notificationclick", (e) => {
-  // !!! For testing, REMOVE in PRODUCTION !!!
-  const t_id = "dba42af0-9c23-405c-84bd-4d2229d5b4b8";
-
   console.log("on notification click");
   // Close the notification popout
   e.notification.close();
@@ -24,14 +24,14 @@ self.addEventListener("notificationclick", (e) => {
     clients.matchAll({ type: "window" }).then((clientsArr) => {
       // If a Window tab matching the targeted URL already exists, focus that;
       const hadWindowToFocus = clientsArr.some((windowClient) =>
-        windowClient.url === "/show_notification/".concat(t_id)
+        windowClient.url === "/show_notification/".concat(e.notification.tag)
           ? (windowClient.focus(), true)
           : false
       );
       // Otherwise, open a new tab to the applicable URL and focus it.
       if (!hadWindowToFocus)
         clients
-          .openWindow("/show_notification/".concat(t_id))
+          .openWindow("/show_notification/".concat(e.notification.tag))
           .then((windowClient) => (windowClient ? windowClient.focus() : null));
     })
   );

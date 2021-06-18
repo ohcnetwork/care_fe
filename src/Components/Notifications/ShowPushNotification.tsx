@@ -1,12 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import axios from "axios";
 
-export default function ShowPushNotification(props: { id: any }) {
+export default function ShowPushNotification(props: any) {
+  const [isLoading, setIsLoading] = useState(true);
+  const { data }: any = props;
   const getNotificationData = async () => {
-    // !!! For testing, REMOVE in PRODUCTION !!!
-    const t_id = "dba42af0-9c23-405c-84bd-4d2229d5b4b8";
-
-    const res = await axios.get(`/api/v1/notification/${t_id}/`, {
+    const res = await axios.get(`/api/v1/notification/${data.id}/`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("care_access_token")}`,
       },
@@ -15,6 +14,7 @@ export default function ShowPushNotification(props: { id: any }) {
   };
 
   let resultUrl = async () => {
+    setIsLoading(true);
     const res = await getNotificationData();
     const data = res.caused_objects;
     switch (res.event) {
@@ -38,7 +38,10 @@ export default function ShowPushNotification(props: { id: any }) {
   };
 
   resultUrl()
-    .then((url) => (window.location.href = url))
+    .then((url) => {
+      setIsLoading(false);
+      window.location.href = url;
+    })
     .catch((err) => console.log(err));
 
   return <></>;
