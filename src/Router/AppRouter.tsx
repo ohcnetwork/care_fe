@@ -49,6 +49,7 @@ import ShowInvestigation from "../Components/Facility/Investigations/ShowInvesti
 import InvestigationReports from "../Components/Facility/Investigations/Reports";
 import { withTranslation } from "react-i18next";
 import DeathReport from "../Components/DeathReport/DeathReport";
+import ShowPushNotification from "../Components/Notifications/ShowPushNotification";
 
 const get = require("lodash.get");
 const img = "https://cdn.coronasafe.network/light-logo.svg";
@@ -288,6 +289,9 @@ const routes = {
   "/external_results/upload": () => <ExternalResultUpload />,
   "/external_results/:id": ({ id }: any) => <ResultItem id={id} />,
   "/death_report/:id": ({ id }: any) => <DeathReport id={id} />,
+  "/show_notification/:id": (id: any) => (
+    <ShowPushNotification external_id={id} />
+  ),
 };
 
 let menus = [
