@@ -16,7 +16,7 @@
   height: 18px;
   margin: -8px 0 0;
   border-radius: 50%;
-  background: blue;
+  background: rgb(7, 109, 243);
   cursor: pointer;
   border: 0 !important;
 }
@@ -25,7 +25,7 @@
   height: 18px;
   margin: -8px 0 0;
   border-radius: 50%;
-  background: blue;
+  background: rgb(7, 109, 243);
   cursor: pointer;
   border: 0 !important;
 }
@@ -34,7 +34,7 @@
   height: 18px;
   margin: -8px 0 0;
   border-radius: 50%;
-  background: blue;
+  background: rgb(7, 109, 243);
   cursor: pointer;
   border: 0 !important;
 }
@@ -175,10 +175,10 @@
 }
 
 .range-labels .active {
-  color: blue;
+  color: rgb(7, 109, 243);
 }
 .range-labels .selected::before {
-  background: blue;
+  background: rgb(7, 109, 243);
 }
 .range-labels .active.selected::before {
   display: none;
