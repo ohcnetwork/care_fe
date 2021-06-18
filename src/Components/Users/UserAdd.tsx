@@ -367,10 +367,7 @@ export const UserAdd = (props: UserProps) => {
 
         case "alt_phone_number":
           let alt_is_valid: boolean = false;
-          if (state.form[field]) {
-            if (state.form[field] === "+91") {
-              return;
-            }
+          if (state.form[field] && state.form[field] !== "+91") {
             const altPhoneNumber = parsePhoneNumberFromString(
               state.form[field],
               "IN"
@@ -379,8 +376,11 @@ export const UserAdd = (props: UserProps) => {
               alt_is_valid = altPhoneNumber.isValid();
             }
           }
-
-          if (state.form[field] && !alt_is_valid) {
+          if (
+            state.form[field] &&
+            state.form[field] !== "+91" &&
+            !alt_is_valid
+          ) {
             errors[field] = "Please enter valid mobile number";
             invalidForm = true;
           }
@@ -439,9 +439,10 @@ export const UserAdd = (props: UserProps) => {
         phone_number: parsePhoneNumberFromString(
           state.form.phone_number
         )?.format("E.164"),
-        alt_phone_number: parsePhoneNumberFromString(
-          state.form.alt_phone_number
-        )?.format("E.164"),
+        alt_phone_number:
+          parsePhoneNumberFromString(state.form.alt_phone_number)?.format(
+            "E.164"
+          ) || "",
         date_of_birth: moment(state.form.date_of_birth).format("YYYY-MM-DD"),
         age: Number(moment().diff(state.form.date_of_birth, "years", false)),
       };

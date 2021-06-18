@@ -168,10 +168,7 @@ export default function UserProfile() {
           return;
         case "altPhoneNumber":
           let alt_is_valid: boolean = false;
-          if (states.form[field]) {
-            if (states.form[field] === "+91") {
-              return;
-            }
+          if (states.form[field] && states.form[field] !== "+91") {
             const altPhoneNumber = parsePhoneNumberFromString(
               states.form[field],
               "IN"
@@ -181,7 +178,11 @@ export default function UserProfile() {
             }
           }
 
-          if (states.form[field] && !alt_is_valid) {
+          if (
+            states.form[field] &&
+            states.form[field] !== "+91" &&
+            !alt_is_valid
+          ) {
             errors[field] = "Please enter valid mobile number";
             invalidForm = true;
           }
@@ -208,6 +209,12 @@ export default function UserProfile() {
     }
   };
 
+  const handleWhatsappNumChange = (phoneNo: any, name: string) => {
+    const form = { ...states.form };
+    form[name] = phoneNo;
+    dispatch({ type: "set_form", form });
+  };
+
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     const validForm = validateForm();
@@ -221,9 +228,10 @@ export default function UserProfile() {
         phone_number: parsePhoneNumberFromString(
           states.form.phoneNumber
         )?.format("E.164"),
-        alt_phone_number: parsePhoneNumberFromString(
-          states.form.altPhoneNumber
-        )?.format("E.164"),
+        alt_phone_number:
+          parsePhoneNumberFromString(states.form.altPhoneNumber)?.format(
+            "E.164"
+          ) || "",
         gender: Number(states.form.gender),
         age: states.form.age,
       };
@@ -510,9 +518,9 @@ export default function UserProfile() {
                           name="altPhoneNumber"
                           label="Whatsapp Number"
                           value={states.form.altPhoneNumber}
-                          onChange={(value: any) =>
-                            handleWhatsappNumberChange(value)
-                          }
+                          onChange={(value: any) => {
+                            handleWhatsappNumChange(value, "altPhoneNumber");
+                          }}
                           errors={states.errors.altPhoneNumber}
                         />
                       </div>
