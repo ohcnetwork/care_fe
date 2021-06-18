@@ -63,6 +63,24 @@ let limp_options :array<Options.t> = [
 
 ]
 
+let ventillator_mode_options :array<Options.t> = [
+    {
+        name: "ventillator_mode",
+        value: "vcv",
+        label: "VCV",
+    },
+    {
+        name: "ventillator_mode",
+        value: "pcv",
+        label: "PCV",
+    },
+    {
+        name: "ventillator_mode",
+        value: "prvc",
+        label: "PRVC",
+    }
+]
+
 let limps = ["Upper Extremity-Right", "Upper Extremity-Left", "Lower Extremity-Right", "Lower Extremity-Left"]
 
 let reaction_options :array<Options.t> = [
@@ -192,6 +210,8 @@ let glassgowComaScale :Options.glassgow_coma_scale = [
 
 let ventilator_parameters = ["PIP/PEEP", "Peak Pressure", "Mean Presure", "Resp. Rate. Vent/Patient", "Tidak Volume", "O2/Mode", "FiO2/SPO2"]
 let infusion_parameters = ["Atracurium (Inj)", "Fenta (Inj)", "Midaz (Inj)", "Colistin (Inj)"]
+let feed_parameters = ["RT Feed"]
+let output_parameters = ["Urine"]
 
 
 @react.component
@@ -217,7 +237,7 @@ let make = () => {
                 <CriticalCare__RadioButton options={reaction_options} horizontal=true/>
             </div>
         </div>
-        <div className="my-20 w-full h-1 bg-gray-300"></div>
+        <div className="my-15 w-full h-1 bg-gray-300"></div>
         <div>
             <div className="text-3xl font-bold">{str("Glasgow Coma Scale")}</div>
             <div>
@@ -238,7 +258,7 @@ let make = () => {
             </div>
         </div>
 
-        <div className="my-20 w-full h-1 bg-gray-300"></div>
+        <div className="my-15 w-full h-1 bg-gray-300"></div>
 
         <div>
             <div className="text-3xl font-bold">{str("Limp Response")}</div>
@@ -253,21 +273,49 @@ let make = () => {
             </div>
         </div>
 
-        <div className="my-20 w-full h-1 bg-gray-300"></div>
+        <div className="my-15 w-full h-1 bg-gray-300"></div>
 
          <div>
             <div className="text-3xl font-bold">{str("Ventillator Parameters")}</div>
+            <div className="grid grid-cols-2 my-5">
+                <div className="font-bold">{str("Ventillator Mode")}</div>
+                <div>
+                    <CriticalCare__RadioButton options={ventillator_mode_options} horizontal=true />
+                </div>
+            </div>
             <CriticalCare__NumberInput labels={ventilator_parameters} />
         </div>
 
-        <div className="my-20 w-full h-1 bg-gray-300"></div>
+        <div className="my-15 w-full h-1 bg-gray-300"></div>
 
          <div>
             <div className="text-3xl font-bold">{str("Infusions")}</div>
             <CriticalCare__NumberInput labels={infusion_parameters} />
         </div>
 
+        <div className="my-15 w-full h-1 bg-gray-300"></div>
 
+         <div>
+            <div className="text-3xl font-bold">{str("Feed")}</div>
+            <CriticalCare__NumberInput labels={feed_parameters} />
+            <div className="flex justify-between mt-4">
+                <div className="font-bold text-xl">{str("Total")}</div>
+                <div className="text-3xl text-blue-500 font-bold">{str("3")}</div>
+            </div>
+        </div>
+
+        <div className="my-15 w-full h-1 bg-gray-300"></div>
+
+         <div>
+            <div className="text-3xl font-bold">{str("Output")}</div>
+            <CriticalCare__NumberInput labels={output_parameters} />
+            <div className="flex justify-between mt-4">
+                <div className="font-bold text-xl">{str("Total")}</div>
+                <div className="text-3xl text-blue-500 font-bold">{str("3")}</div>
+            </div>
+        </div>
+
+        <input type_="submit" className="text-white h-10 w-full bg-blue-500 my-10 rounded"/>
 
     </div>
 }
