@@ -1,10 +1,7 @@
-import React, { useCallback } from "react";
-import { navigate, useQueryParams } from "raviger";
+import React, { useCallback, useState } from "react";
+import { navigate } from "raviger";
 import { SelectField } from "../../Common/HelperInputFields";
-import { useEffect, useState } from "react";
 import { CircularProgress } from "@material-ui/core";
-import DistrictSelect from "./DistrictSelect";
-import LocalBodySelect from "./LocalBodySelect";
 import { FACILITY_TYPES } from "../../../Common/constants";
 import {
   getStates,
@@ -12,7 +9,6 @@ import {
   getLocalbodyByDistrict,
 } from "../../../Redux/actions";
 import { useDispatch } from "react-redux";
-import { debounce } from "lodash";
 import { useAbortableEffect, statusType } from "../../../Common/utils";
 
 function useMergeState(initialState: any) {
@@ -31,7 +27,6 @@ const selectDistrict = [{ id: 0, name: "Please select your district" }];
 
 function FacillityFilter(props: any) {
   let { filter, onChange, closeFilter } = props;
-  const [isFacilityLoading, setFacilityLoading] = useState(false);
   const dispatchAction: any = useDispatch();
 
   const [isStateLoading, setIsStateLoading] = useState(false);
@@ -43,9 +38,7 @@ function FacillityFilter(props: any) {
   const [filterState, setFilterState] = useMergeState({
     state: filter.state || "",
     district: filter.district || "",
-    district_ref: null,
     local_body: filter.local_body || "",
-    local_body_ref: null,
     facility_type: filter.facility_type || "",
     kasp_empanelled: filter.kasp_empanelled || "",
   });
@@ -123,13 +116,6 @@ function FacillityFilter(props: any) {
     },
     [filterState.district]
   );
-
-  const setKeys = (selected: any, name: string) => {
-    const filterData: any = { ...filterState };
-    filterData[`${name}_ref`] = selected;
-    filterData[name] = (selected || {}).id;
-    setFilterState(filterData);
-  };
 
   const applyFilter = () => {
     const data = {
