@@ -183,7 +183,7 @@ export const FacilityHome = (props: any) => {
         open={openDeleteDialog}
         onClose={handleDeleteClose}
       >
-        <DialogTitle className="flex justify-center bg-green-100">
+        <DialogTitle className="flex justify-center bg-primary-100">
           Are you sure you want to delete {facilityData.name || "Facility"}
         </DialogTitle>
         <DialogContent>

@@ -103,7 +103,7 @@ const Pagination = (props: PaginationProps) => {
       <button
         disabled={disabled}
         onClick={(e) => handleChangePage(e, label.toLowerCase())}
-        className={`${classes} -ml-px relative bg-white text-gray-600 hover:text-gray-800 hover:bg-gray-200 inline-flex items-center px-4 py-2 border border-gray-300 text-sm leading-5 font-medium focus:z-10 focus:outline-none focus:border-green-300 focus:shadow-outline-green transition ease-in-out duration-150  ${
+        className={`${classes} -ml-px relative bg-white text-gray-600 hover:text-gray-800 hover:bg-gray-200 inline-flex items-center px-4 py-2 border border-gray-300 text-sm leading-5 font-medium focus:z-10 focus:outline-none focus:border-primary-300 focus:shadow-outline-primary transition ease-in-out duration-150  ${
           !disabled ? "cursor-pointer" : "cursor-not-allowed"
         }`}
       >
@@ -128,13 +128,13 @@ const Pagination = (props: PaginationProps) => {
       <div className="flex-1 flex justify-between sm:hidden">
         <a
           onClick={(e) => handleChangePage(e, "prev")}
-          className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm leading-5 font-medium rounded-md text-gray-700 bg-white hover:text-gray-500 focus:outline-none focus:shadow-outline-green focus:border-green-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150"
+          className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm leading-5 font-medium rounded-md text-gray-700 bg-white hover:text-gray-500 focus:outline-none focus:shadow-outline-primary focus:border-primary-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150"
         >
           Previous
         </a>
         <a
           onClick={(e) => handleChangePage(e, "next")}
-          className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm leading-5 font-medium rounded-md text-gray-700 bg-white hover:text-gray-500 focus:outline-none focus:shadow-outline-green focus:border-green-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150"
+          className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm leading-5 font-medium rounded-md text-gray-700 bg-white hover:text-gray-500 focus:outline-none focus:shadow-outline-primary focus:border-primary-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150"
         >
           Next
         </a>
@@ -148,9 +148,9 @@ const Pagination = (props: PaginationProps) => {
               <button
                 type="button"
                 key={`page_${pageNo}`}
-                className={`-ml-px relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm leading-5 font-medium focus:z-10 focus:outline-none focus:border-green-300 focus:shadow-outline-green transition ease-in-out duration-150 ${
+                className={`-ml-px relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm leading-5 font-medium focus:z-10 focus:outline-none focus:border-primary-300 focus:shadow-outline-primary transition ease-in-out duration-150 ${
                   currentPage === pageNo
-                    ? "bg-green-500 text-white"
+                    ? "bg-primary-500 text-white"
                     : "bg-white text-gray-600 hover:text-gray-800 hover:bg-gray-200"
                 }`}
                 onClick={(e) => goToPage(e, pageNo)}

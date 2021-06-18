@@ -126,7 +126,7 @@ const PatientNotes = (props: PatientNotesProps) => {
       <div className="flex w-full justify-end">
         <Button
           onClick={onAddNote}
-          className="border border-solid border-green-600 hover:border-green-700 text-green-600 hover:bg-white capitalize my-2 text-sm"
+          className="border border-solid border-primary-600 hover:border-primary-700 text-primary-600 hover:bg-white capitalize my-2 text-sm"
         >
           Post Your Note
         </Button>
