@@ -10,9 +10,9 @@ const OptimizeCssAssetsPlugin = require("optimize-css-assets-webpack-plugin");
 const safePostCssParser = require("postcss-safe-parser");
 
 const prodPlugins = (isDev) => {
-  // if (isDev) {
-  //   return [];
-  // }
+  if (isDev) {
+    return [];
+  }
 
   return [
     new WorkboxPlugin.InjectManifest({
