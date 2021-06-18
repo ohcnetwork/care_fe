@@ -598,10 +598,10 @@ export const PatientHome = (props: any) => {
       <div id="revamp">
         <PageTitle title={`Covid Suspect Details`} />
         <div className="relative mt-2">
-          <div className="max-w-screen-xl mx-auto py-3 px-3 sm:px-6 lg:px-8">
-            <div className="md:flex">
+          <div className="max-w-screen-xl mx-auto py-3">
+            <div className="flex flex-col gap-2 md:flex-row">
               {patientData?.last_consultation?.assigned_to_object && (
-                <p className="font-bold text-green-800 rounded-lg shadow bg-green-200 p-3 mx-3 flex-1 text-center">
+                <p className="font-bold text-green-800 rounded-lg shadow bg-green-200 p-3 mx-2 flex-1 text-center">
                   <span className="inline">
                     Assigned Doctor:{" "}
                     {
@@ -613,7 +613,7 @@ export const PatientHome = (props: any) => {
                 </p>
               )}
               {patientData.assigned_to_object && (
-                <p className="font-bold text-green-800 rounded-lg shadow bg-green-200 mx-3 p-3 flex-1 text-center">
+                <p className="font-bold text-green-800 rounded-lg shadow bg-green-200 mx-2 p-3 flex-1 text-center">
                   <span className="inline">
                     Assigned Volunteer:{" "}
                     {patientData.assigned_to_object.first_name}{" "}
@@ -650,7 +650,10 @@ export const PatientHome = (props: any) => {
             </div>
           </div>
         )}
-        <section className="md:flex items-center mt-4 space-y-2" data-testid="patient-dashboard">
+        <section
+          className="md:flex items-center mt-4 space-y-2"
+          data-testid="patient-dashboard"
+        >
           <div className="md:w-2/3 mx-2 h-full">
             <div className="bg-white rounded-lg shadow p-4 h-full">
               <h1 className="font-bold text-3xl">
