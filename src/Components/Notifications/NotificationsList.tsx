@@ -2,13 +2,17 @@ import loadable from "@loadable/component";
 import { navigate, useQueryParams } from "raviger";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { getNotifications } from "../../Redux/actions";
+import {
+  getNotifications,
+  getUserPnconfig,
+  updateUserPnconfig,
+  getPublicKey,
+} from "../../Redux/actions";
 import Pagination from "../Common/Pagination";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import { SelectField } from "../Common/HelperInputFields";
 import { InputLabel } from "@material-ui/core";
 import moment from "moment";
-import axios from "axios";
 import { useSelector } from "react-redux";
 import { Button, CircularProgress } from "@material-ui/core";
 import { NOTIFICATION_EVENTS } from "../../Common/constants";
@@ -37,11 +41,7 @@ export default function ResultList() {
   const [isSubscribing, setIsSubscribing] = useState(false);
 
   const intialSubscriptionState = async () => {
-    const res = await axios.get(`/api/v1/users/${username}/pnconfig/`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("care_access_token")}`,
-      },
-    });
+    const res = await dispatch(getUserPnconfig({ username: username }));
     const reg = await navigator.serviceWorker.ready;
     const subscription = await reg.pushManager.getSubscription();
     if (!subscription && !res.data.pf_endpoint) {
@@ -82,21 +82,15 @@ export default function ResultList() {
         subscription
           ?.unsubscribe()
           .then(async function (successful) {
-            const res = await axios.patch(
-              `/api/v1/users/${username}/pnconfig/`,
-              {
-                pf_endpoint: "",
-                pf_p256dh: "",
-                pf_auth: "",
-              },
-              {
-                headers: {
-                  Authorization: `Bearer ${localStorage.getItem(
-                    "care_access_token"
-                  )}`,
-                },
-              }
+            const data = {
+              pf_endpoint: "",
+              pf_p256dh: "",
+              pf_auth: "",
+            };
+            const res = await dispatch(
+              updateUserPnconfig(data, { username: username })
             );
+
             setIsSubscribed("NotSubscribed");
             setIsSubscribing(false);
           })
@@ -109,9 +103,8 @@ export default function ResultList() {
 
   async function subscribe() {
     setIsSubscribing(true);
-    const apiUrl = "/api/v1/notification/public_key/";
-    const reponse = await axios.get(apiUrl);
-    const public_key = reponse.data.public_key;
+    const response = await dispatch(getPublicKey());
+    const public_key = response.data.public_key;
     const sw = await navigator.serviceWorker.ready;
     const push = await sw.pushManager.subscribe({
       userVisibleOnly: true,
@@ -130,18 +123,14 @@ export default function ResultList() {
       )
     );
 
-    const res = await axios.patch(
-      `/api/v1/users/${username}/pnconfig/`,
-      {
-        pf_endpoint: push.endpoint,
-        pf_p256dh: p256dh,
-        pf_auth: auth,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("care_access_token")}`,
-        },
-      }
+    const data = {
+      pf_endpoint: push.endpoint,
+      pf_p256dh: p256dh,
+      pf_auth: auth,
+    };
+
+    const res = await dispatch(
+      updateUserPnconfig(data, { username: username })
     );
 
     if (res.status >= 200 && res.status <= 300) {

@@ -1,23 +1,16 @@
 import React, { useState } from "react";
-import axios from "axios";
+import { useDispatch } from "react-redux";
+import { getNotificationData } from "../../Redux/actions";
 
-export default function ShowPushNotification(props: any) {
+export default function ShowPushNotification({ external_id }: any) {
   const [isLoading, setIsLoading] = useState(true);
-  const { data }: any = props;
-  const getNotificationData = async () => {
-    const res = await axios.get(`/api/v1/notification/${data.id}/`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("care_access_token")}`,
-      },
-    });
-    return res.data;
-  };
+  const dispatch: any = useDispatch();
 
   let resultUrl = async () => {
     setIsLoading(true);
-    const res = await getNotificationData();
-    const data = res.caused_objects;
-    switch (res.event) {
+    const res = await dispatch(getNotificationData({ id: external_id.id }));
+    const data = res.data.caused_objects;
+    switch (res.data.event) {
       case "PATIENT_CREATED":
         return `/facility/${data.facility}/patient/${data.patient}`;
       case "PATIENT_UPDATED":
