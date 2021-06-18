@@ -29,6 +29,42 @@ let loc_options :array<Options.t> = [
 
 ]
 
+let limp_options :array<Options.t> = [
+    {
+        name: "limp",
+        value: "strong",
+        label: "Strong",
+    },
+    {
+        name: "limp",
+        value: "moderate",
+        label: "Moderate",
+    },
+    {
+        name: "limp",
+        value: "weak",
+        label: "Weak",
+    },
+    {
+        name: "limp",
+        value: "flexion",
+        label: "Flexion",
+    },
+    {
+        name: "limp",
+        value: "extension",
+        label: "Extension",
+    },
+    {
+        name: "limp",
+        value: "none",
+        label: "None",
+    }
+
+]
+
+let limps = ["Upper Extremity-Right", "Upper Extremity-Left", "Lower Extremity-Right", "Lower Extremity-Left"]
+
 let reaction_options :array<Options.t> = [
     {
         name: "reaction",
@@ -154,10 +190,13 @@ let glassgowComaScale :Options.glassgow_coma_scale = [
     }
 ]
 
+let ventilator_parameters = ["PIP/PEEP", "Peak Pressure", "Mean Presure", "Resp. Rate. Vent/Patient", "Tidak Volume", "O2/Mode", "FiO2/SPO2"]
+let infusion_parameters = ["Atracurium (Inj)", "Fenta (Inj)", "Midaz (Inj)", "Colistin (Inj)"]
+
 
 @react.component
 let make = () => {
-    <div className="w-10/12">
+    <div className="ml-36 w-8/12">
         <div className="my-10">
             <div className=" text-2xl font-bold my-2">{str("LOC")}</div>
             <CriticalCare__RadioButton options={loc_options} horizontal=true />
@@ -193,10 +232,42 @@ let make = () => {
             })
             |> React.array }
             </div>
-            <div className="flex justify-between">
+            <div className="flex justify-between mt-4">
                 <div className="font-bold text-xl">{str("Total")}</div>
                 <div className="text-3xl text-blue-500 font-bold">{str("3")}</div>
             </div>
         </div>
+
+        <div className="my-20 w-full h-1 bg-gray-300"></div>
+
+        <div>
+            <div className="text-3xl font-bold">{str("Limp Response")}</div>
+            <div>
+                {limps|>Array.map((x) => {
+                <>
+                    <div className="font-bold mt-8 mb-1">{str(x)}</div>
+                     <CriticalCare__RadioButton options={limp_options} horizontal=true />
+                </>
+            })
+            |> React.array }
+            </div>
+        </div>
+
+        <div className="my-20 w-full h-1 bg-gray-300"></div>
+
+         <div>
+            <div className="text-3xl font-bold">{str("Ventillator Parameters")}</div>
+            <CriticalCare__NumberInput labels={ventilator_parameters} />
+        </div>
+
+        <div className="my-20 w-full h-1 bg-gray-300"></div>
+
+         <div>
+            <div className="text-3xl font-bold">{str("Infusions")}</div>
+            <CriticalCare__NumberInput labels={infusion_parameters} />
+        </div>
+
+
+
     </div>
 }
