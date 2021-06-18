@@ -160,8 +160,12 @@ export const patchPatient = (params: object, pathParam: object) => {
 export const transferPatient = (params: object, pathParam: object) => {
   return fireRequest("transferPatient", [], params, pathParam);
 };
-export const getPatientNotes = (patientId: string , limit :number , offset : number) => {
-  return fireRequest("getPatientNotes", [], {limit , offset}, { patientId });
+export const getPatientNotes = (
+  patientId: string,
+  limit: number,
+  offset: number
+) => {
+  return fireRequest("getPatientNotes", [], { limit, offset }, { patientId });
 };
 export const addPatientNote = (patientId: string, params: object) => {
   return fireRequest("addPatientNote", [], params, { patientId });
@@ -172,6 +176,9 @@ export const getStates = () => {
 };
 export const getStatesByText = (params: object) => {
   return fireRequest("statesList", [], params);
+};
+export const getState = (id: number) => {
+  return fireRequest("getState", [], {}, { id: id });
 };
 
 // District/State/Local body/ward

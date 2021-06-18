@@ -417,6 +417,7 @@ const AppRouter = (props: any) => {
                       </a>
                     );
                   })}
+                  <NotificationsList />
                   <a
                     key="dashboard"
                     href="http://dashboard.coronasafe.network/"

@@ -7,6 +7,7 @@ import * as Notification from "../../Utils/Notifications.js";
 import moment from "moment";
 import PageTitle from "../Common/PageTitle";
 import Pagination from "../Common/Pagination";
+import { navigate } from "raviger";
 
 interface PatientNotesProps {
   patientId: any;
@@ -81,14 +82,29 @@ const PatientNotes = (props: PatientNotesProps) => {
                 {moment(note.created_date).format("LLL") || "-"}
               </span>
             </div>
-            <div className=" flex mr-auto bg-gray-100 border items-center rounded-md py-1 pl-2 pr-3">
-              <div className="flex justify-center items-center w-8 h-8 rounded-full bg-primary-700 uppercase text-white p-1">
-                {note.created_by_object?.first_name?.charAt(0) || "U"}
+
+            <div className="sm:flex space-y-2 sm:space-y-0">
+              <div className="mr-2 inline-flex bg-gray-100 border items-center rounded-md py-1 pl-2 pr-3">
+                <div className="flex justify-center items-center w-8 h-8 rounded-full">
+                  <i className="fas fa-user" />
+                </div>
+                <span className="text-gray-700 text-sm">
+                  {note.created_by_object?.first_name || "Unknown"}{" "}
+                  {note.created_by_object?.last_name}
+                </span>
               </div>
-              <span className="text-gray-700 text-sm pl-2">
-                {note.created_by_object?.first_name || "Unknown"}{" "}
-                {note.created_by_object?.last_name}
-              </span>
+
+              <div
+                className="inline-flex bg-gray-100 border items-center rounded-md py-1 pl-2 pr-3 cursor-pointer"
+                onClick={() => navigate(`/facility/${note.facility?.id}`)}
+              >
+                <div className="flex justify-center items-center w-8 h-8 rounded-full">
+                  <i className="fas fa-hospital" />
+                </div>
+                <span className="text-gray-700 text-sm">
+                  {note.facility?.name || "Unknown"}
+                </span>
+              </div>
             </div>
           </div>
         ))}
