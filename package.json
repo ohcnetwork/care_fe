@@ -80,7 +80,7 @@
     "postcss-safe-parser": "^4.0.2",
     "qrcode.react": "^1.0.1",
     "querystring": "^0.2.1",
-    "raviger": "^1.6.0",
+    "raviger": "^2.3.0",
     "react": "^17.0.2",
     "react-copy-to-clipboard": "^5.0.3",
     "react-csv": "^2.0.3",
@@ -183,7 +183,8 @@
     "webpack-dev-server": "^3.11.2",
     "webpack-hot-middleware": "^2.25.0",
     "webpack-manifest-plugin": "2.2.0",
-    "workbox-webpack-plugin": "^5.1.4"
+    "workbox-webpack-plugin": "^5.1.4",
+    "workbox-precaching": "^5.1.4"
   },
   "jest": {
     "roots": [
