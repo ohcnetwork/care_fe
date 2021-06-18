@@ -274,7 +274,7 @@ export default function UserProfile() {
               <button
                 onClick={(_) => setShowEdit(!showEdit)}
                 type="button"
-                className="relative inline-flex items-center px-4 py-2 border border-transparent text-sm leading-5 font-medium rounded-md text-white bg-brand-primary-600 hover:bg-brand-primary-500 focus:outline-none focus:shadow-outline-brand-primary focus:border-brand-primary-700 active:bg-brand-primary-700 mt-4"
+                className="relative inline-flex items-center px-4 py-2 border border-transparent text-sm leading-5 font-medium rounded-md text-white bg-primary-600 hover:bg-primary-500 focus:outline-none focus:shadow-outline-primary focus:border-primary-700 active:bg-primary-700 mt-4"
               >
                 {showEdit ? "Cancel" : "Edit User Profile"}
               </button>

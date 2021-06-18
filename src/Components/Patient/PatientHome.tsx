@@ -558,10 +558,10 @@ export const PatientHome = (props: any) => {
       <div id="revamp">
         <PageTitle title={`Covid Suspect Details`} />
         {patientData?.last_consultation?.assigned_to_object && (
-          <div className="relative rounded-lg shadow bg-brand-primary-200 mt-2">
+          <div className="relative rounded-lg shadow bg-primary-200 mt-2">
             <div className="max-w-screen-xl mx-auto py-3 px-3 sm:px-6 lg:px-8">
               <div className="pr-16 sm:text-center sm:px-16">
-                <p className="font-bold text-brand-primary-800">
+                <p className="font-bold text-primary-800">
                   <span className="inline">
                     Assigned to:{" "}
                     {
@@ -740,11 +740,7 @@ export const PatientHome = (props: any) => {
                 {patientData.allow_transfer ? (
                   <Badge color="yellow" icon="unlock" text="Transfer Allowed" />
                 ) : (
-                  <Badge
-                    color="brand-primary"
-                    icon="lock"
-                    text="Transfer Blocked"
-                  />
+                  <Badge color="primary" icon="lock" text="Transfer Blocked" />
                 )}
                 {patientData.is_antenatal && patientData.is_active && (
                   <Badge color="blue" icon="baby-carriage" text="Antenatal" />
@@ -1524,7 +1520,7 @@ export const PatientHome = (props: any) => {
         open={openDischargeDialog}
         onClose={handleDischargeClose}
       >
-        <DialogTitle className="flex justify-center bg-brand-primary-100">
+        <DialogTitle className="flex justify-center bg-primary-100">
           Before we discharge {patientData.name}
         </DialogTitle>
         <DialogContent className="px-20">

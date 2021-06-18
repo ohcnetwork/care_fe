@@ -46,7 +46,7 @@ const TestRow = ({ data, onChange, showForm, value, isChanged }: any) => {
       ? "number"
       : "string";
   return (
-    <StyledTableRow className={isChanged ? "bg-brand-primary-300" : ""}>
+    <StyledTableRow className={isChanged ? "bg-primary-300" : ""}>
       <TableCell className={tableClass}>
         {data?.investigation_object?.name || "---"}
       </TableCell>

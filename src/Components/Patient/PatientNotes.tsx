@@ -82,7 +82,7 @@ const PatientNotes = (props: PatientNotesProps) => {
               </span>
             </div>
             <div className=" flex mr-auto bg-gray-100 border items-center rounded-md py-1 pl-2 pr-3">
-              <div className="flex justify-center items-center w-8 h-8 rounded-full bg-brand-primary-700 uppercase text-white p-1">
+              <div className="flex justify-center items-center w-8 h-8 rounded-full bg-primary-700 uppercase text-white p-1">
                 {note.created_by_object?.first_name?.charAt(0) || "U"}
               </div>
               <span className="text-gray-700 text-sm pl-2">
@@ -110,7 +110,7 @@ const PatientNotes = (props: PatientNotesProps) => {
       <div className="flex w-full justify-end">
         <Button
           onClick={onAddNote}
-          className="border border-solid border-brand-primary-600 hover:border-brand-primary-700 text-brand-primary-600 hover:bg-white capitalize my-2 text-sm"
+          className="border border-solid border-primary-600 hover:border-primary-700 text-primary-600 hover:bg-white capitalize my-2 text-sm"
         >
           Post Your Note
         </Button>

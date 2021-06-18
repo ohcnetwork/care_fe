@@ -364,7 +364,7 @@ const AppRouter = (props: any) => {
             <div className="fixed inset-0">
               <div className="absolute inset-0 bg-gray-600 opacity-75"></div>
             </div>
-            <div className="relative flex-1 flex flex-col max-w-xs w-full pt-5 pb-4 bg-brand-primary-800">
+            <div className="relative flex-1 flex flex-col max-w-xs w-full pt-5 pb-4 bg-primary-800">
               <div className="absolute top-0 right-0 -mr-14 p-1">
                 <button
                   onClick={(_) => setDrawer(false)}
@@ -396,8 +396,8 @@ const AppRouter = (props: any) => {
                   {menus.map((item) => {
                     const parts = item.link.split("/");
                     const selectedClasses = url.includes(parts && parts[1])
-                      ? "mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-white rounded-md bg-brand-primary-900 focus:outline-none focus:bg-brand-primary-900 transition ease-in-out duration-150"
-                      : "mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-brand-primary-300 rounded-md hover:text-white hover:bg-brand-primary-700 focus:outline-none focus:bg-brand-primary-900 transition ease-in-out duration-150";
+                      ? "mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-white rounded-md bg-primary-900 focus:outline-none focus:bg-primary-900 transition ease-in-out duration-150"
+                      : "mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-primary-300 rounded-md hover:text-white hover:bg-primary-700 focus:outline-none focus:bg-primary-900 transition ease-in-out duration-150";
                     return (
                       <a
                         key={item.title}
@@ -409,8 +409,8 @@ const AppRouter = (props: any) => {
                             item.icon +
                             (url.includes(parts && parts[1])
                               ? " text-white"
-                              : " text-brand-primary-400") +
-                            " mr-3 text-md group-hover:text-brand-primary-300 group-focus:text-brand-primary-300 transition ease-in-out duration-150"
+                              : " text-primary-400") +
+                            " mr-3 text-md group-hover:text-primary-300 group-focus:text-primary-300 transition ease-in-out duration-150"
                           }
                         ></i>
                         {t(item.title)}
@@ -420,19 +420,19 @@ const AppRouter = (props: any) => {
                   <a
                     key="dashboard"
                     href="http://dashboard.coronasafe.network/"
-                    className="mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-brand-primary-300 rounded-md hover:text-white hover:bg-brand-primary-700 focus:outline-none focus:bg-brand-primary-900 transition ease-in-out duration-150"
+                    className="mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-primary-300 rounded-md hover:text-white hover:bg-primary-700 focus:outline-none focus:bg-primary-900 transition ease-in-out duration-150"
                   >
-                    <i className="fas fa-tachometer-alt text-brand-primary-400 mr-3 text-md group-hover:text-brand-primary-300 group-focus:text-brand-primary-300 transition ease-in-out duration-150"></i>
+                    <i className="fas fa-tachometer-alt text-primary-400 mr-3 text-md group-hover:text-primary-300 group-focus:text-primary-300 transition ease-in-out duration-150"></i>
                     {t("Dashboard")}
                   </a>
                 </nav>
               </div>
-              <div className="flex-shrink-0 flex border-t border-brand-primary-700 p-4">
+              <div className="flex-shrink-0 flex border-t border-primary-700 p-4">
                 <a href="#" className="flex-shrink-0 w-full group block">
                   <div className="flex items-center">
                     <div>
                       <div className="rounded-full h-8 w-8 flex items-center bg-white justify-center">
-                        <i className="inline-block fas fa-user text-xl text-brand-primary-700"></i>
+                        <i className="inline-block fas fa-user text-xl text-primary-700"></i>
                       </div>
                     </div>
                     <div className="ml-3">
@@ -446,7 +446,7 @@ const AppRouter = (props: any) => {
                           navigate("/login");
                           window.location.reload();
                         }}
-                        className="text-xs leading-4 font-medium text-brand-primary-300 group-hover:text-brand-primary-100 transition ease-in-out duration-150"
+                        className="text-xs leading-4 font-medium text-primary-300 group-hover:text-primary-100 transition ease-in-out duration-150"
                       >
                         {t("sign_out")}
                       </p>
@@ -461,19 +461,19 @@ const AppRouter = (props: any) => {
       )}
 
       <div className="hidden md:flex md:flex-shrink-0">
-        <div className="flex flex-col w-64 bg-brand-primary-800 pt-5">
+        <div className="flex flex-col w-64 bg-primary-800 pt-5">
           <div className="flex items-center flex-shrink-0 px-4">
             <a href="/">
               <img className="h-8 w-auto" src={img} alt="care logo" />
             </a>
           </div>
           <div className="mt-5 h-0 flex-1 flex flex-col overflow-y-auto">
-            <nav className="flex-1 px-2 bg-brand-primary-800">
+            <nav className="flex-1 px-2 bg-primary-800">
               {menus.map((item) => {
                 const parts = item.link.split("/");
                 const selectedClasses = url.includes(parts && parts[1])
-                  ? "mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-white rounded-md bg-brand-primary-900 focus:outline-none focus:bg-brand-primary-900 transition ease-in-out duration-150"
-                  : "mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-brand-primary-300 rounded-md hover:text-white hover:bg-brand-primary-700 focus:outline-none focus:bg-brand-primary-900 transition ease-in-out duration-150";
+                  ? "mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-white rounded-md bg-primary-900 focus:outline-none focus:bg-primary-900 transition ease-in-out duration-150"
+                  : "mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-primary-300 rounded-md hover:text-white hover:bg-primary-700 focus:outline-none focus:bg-primary-900 transition ease-in-out duration-150";
                 return (
                   <a
                     key={item.title}
@@ -486,8 +486,8 @@ const AppRouter = (props: any) => {
                         item.icon +
                         (url.includes(parts && parts[1])
                           ? " text-white"
-                          : " text-brand-primary-400") +
-                        " mr-3 text-lg group-hover:text-brand-primary-300 group-focus:text-brand-primary-300 transition ease-in-out duration-150"
+                          : " text-primary-400") +
+                        " mr-3 text-lg group-hover:text-primary-300 group-focus:text-primary-300 transition ease-in-out duration-150"
                       }
                     ></i>
                     {t(item.title)}
@@ -499,19 +499,19 @@ const AppRouter = (props: any) => {
                 key="dashboard"
                 href="http://dashboard.coronasafe.network/"
                 target="_blank"
-                className="mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-brand-primary-300 rounded-md hover:text-white hover:bg-brand-primary-700 focus:outline-none focus:bg-brand-primary-900 transition ease-in-out duration-150"
+                className="mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-primary-300 rounded-md hover:text-white hover:bg-primary-700 focus:outline-none focus:bg-primary-900 transition ease-in-out duration-150"
               >
-                <i className="fas fa-tachometer-alt text-brand-primary-400 mr-3 text-md group-hover:text-brand-primary-300 group-focus:text-brand-primary-300 transition ease-in-out duration-150"></i>
+                <i className="fas fa-tachometer-alt text-primary-400 mr-3 text-md group-hover:text-primary-300 group-focus:text-primary-300 transition ease-in-out duration-150"></i>
                 {t("Dashboard")}
               </a>
             </nav>
           </div>
-          <div className="flex-shrink-0 flex border-t border-brand-primary-700 p-4">
+          <div className="flex-shrink-0 flex border-t border-primary-700 p-4">
             <a href="#" className="flex-shrink-0 w-full group block">
               <div className="flex items-center">
                 <div>
                   <div className="rounded-full h-8 w-8 flex items-center bg-white justify-center">
-                    <i className="inline-block fas fa-user text-xl text-brand-primary-700"></i>
+                    <i className="inline-block fas fa-user text-xl text-primary-700"></i>
                   </div>
                 </div>
                 <div className="ml-3">
@@ -525,7 +525,7 @@ const AppRouter = (props: any) => {
                       navigate("/login");
                       window.location.reload();
                     }}
-                    className="text-xs leading-4 font-medium text-brand-primary-300 group-hover:text-brand-primary-100 transition ease-in-out duration-150"
+                    className="text-xs leading-4 font-medium text-primary-300 group-hover:text-primary-100 transition ease-in-out duration-150"
                   >
                     {t("sign_out")}
                   </p>

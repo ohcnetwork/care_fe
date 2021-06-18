@@ -169,7 +169,7 @@ export default function SampleViewAdmin(props: any) {
               item.result === "POSITIVE" ? "border-red-700 bg-red-100" : ""
             } ${
               item.result === "NEGATIVE"
-                ? "border-brand-primary-700 bg-brand-primary-100"
+                ? "border-primary-700 bg-primary-100"
                 : ""
             }`}
           >

@@ -348,11 +348,7 @@ export const PatientManager = (props: any) => {
               {patient.allow_transfer ? (
                 <Badge color="yellow" icon="unlock" text="Transfer Allowed" />
               ) : (
-                <Badge
-                  color="brand-primary"
-                  icon="lock"
-                  text="Transfer Blocked"
-                />
+                <Badge color="primary" icon="lock" text="Transfer Blocked" />
               )}
               {patient.disease_status === "POSITIVE" && (
                 <Badge color="red" icon="radiation" text="Positive" />
@@ -360,7 +356,7 @@ export const PatientManager = (props: any) => {
               {["NEGATIVE", "RECOVERED"].indexOf(patient.disease_status) >=
                 0 && (
                 <Badge
-                  color="brand-primary"
+                  color="primary"
                   icon="smile-beam"
                   text={patient.disease_status}
                 />

@@ -558,7 +558,7 @@ export const FileUpload = (props: FileUploadProps) => {
                     <a
                       href={downloadURL}
                       download
-                      className="text-white p-4 my-2 rounded m-2 bg-brand-primary-500"
+                      className="text-white p-4 my-2 rounded m-2 bg-primary-500"
                     >
                       <GetAppIcon>load</GetAppIcon>
                       Download

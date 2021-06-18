@@ -108,7 +108,7 @@ export const OnlineDoctorsSelect = (props: any) => {
                         ? moment()
                             .subtract(5, "minutes")
                             .isBefore(selectedDoctor?.last_login)
-                          ? "bg-brand-primary-400"
+                          ? "bg-primary-400"
                           : "bg-gray-300"
                         : "bg-blue-400")
                     }
@@ -176,7 +176,7 @@ export const OnlineDoctorsSelect = (props: any) => {
                           (moment()
                             .subtract(5, "minutes")
                             .isBefore(user.last_login)
-                            ? "bg-brand-primary-400"
+                            ? "bg-primary-400"
                             : "bg-gray-300")
                         }
                       ></span>

@@ -97,9 +97,9 @@ const LoginPage = (props: any) => {
   return (
     <div className="flex flex-col md:flex-row h-screen relative">
       <div className="absolute top-2 right-2">
-        <LanguageSelector className="md:bg-brand-primary-500 md:text-white bg-white" />
+        <LanguageSelector className="md:bg-primary-500 md:text-white bg-white" />
       </div>
-      <div className="flex flex-col justify-center h-1/2 md:w-1/2 md:h-full bg-brand-primary-500">
+      <div className="flex flex-col justify-center h-1/2 md:w-1/2 md:h-full bg-primary-500">
         <div className="pl-1/5">
           <a href={"/"}>
             <img
@@ -116,7 +116,7 @@ const LoginPage = (props: any) => {
 
       <div className="flex items-center justify-center w-full mt-4 md:mt-0 md:w-1/2 md:h-full">
         <div className="bg-white mt-4 md:mt-20 rounded-lg px-4 py-4">
-          <div className="text-2xl font-bold text-center pt-4 text-brand-primary-600">
+          <div className="text-2xl font-bold text-center pt-4 text-primary-600">
             {t("auth_login_title")}
           </div>
           <form onSubmit={(e) => handleSubmit(e)}>
@@ -173,14 +173,14 @@ const LoginPage = (props: any) => {
                 <div className="w-full flex justify-between items-center px-4 pb-4">
                   <a
                     href="/forgot-password"
-                    className="text-sm text-brand-primary-400 hover:text-brand-primary-500"
+                    className="text-sm text-primary-400 hover:text-primary-500"
                   >
                     {t("forget_password")}
                   </a>
                 </div>
 
                 <button
-                  className="w-full bg-brand-primary-500 btn text-white"
+                  className="w-full bg-primary-500 btn text-white"
                   onClick={(e) => handleSubmit(e)}
                 >
                   {t("login")}
