@@ -18,6 +18,7 @@ let handleClick = (val) => {
 @react.component
 let make = () => {
     <div>
+        <div className="font-bold mt-2">{str("Size")}</div>
         <div className="upper-label">
             <ul className="range-labels">
                 <li className="align-circles"><div className="pupil1"></div></li>
