@@ -9,7 +9,7 @@ let make = (~labels) => {
                     {str(x)}
                 </div>
                 <div>
-                    <input className="w-84 border-2 rounded border-gray-400" type_="number" name={x} id={x} />
+                    <input className="w-84 border-2 rounded border-gray-400 p-1" type_="number" name={x} id={x} />
                 </div>
             </div>
         })
