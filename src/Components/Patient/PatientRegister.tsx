@@ -298,6 +298,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   const fetchExtResultData = async (e: any) => {
     if (e) e.preventDefault();
     setIsLoading(true);
+    if (!careExtId) return;
     const res = await dispatchAction(externalResult({ id: careExtId }));
 
     if (res && res.data) {
