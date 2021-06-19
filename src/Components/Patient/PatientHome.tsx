@@ -220,30 +220,28 @@ export const PatientHome = (props: any) => {
   };
 
   const handleAssignedVolunteer = () => {
-    if (!assignedVolunteerObject) {
-      const errorField = Object.assign({}, errors);
-      errorField["assignedVolunteer"] = "Please select a volunteer";
-      setErrors(errorField);
-    } else {
-      dispatch(
-        patchPatient(
-          { assigned_to: assignedVolunteerObject.id },
-          { id: patientData.id }
-        )
-      ).then((response: any) => {
-        if ((response || {}).status === 200) {
-          let dummyPatientData = Object.assign({}, patientData);
-          dummyPatientData["assigned_to"] = assignedVolunteerObject;
-          setPatientData(dummyPatientData);
-          Notification.Success({
-            msg: "Volunteer assigned successfully.",
-          });
-          document.location.reload();
-        }
-      });
-      setOpenAssignVolunteerDialog(false);
-      if (errors["assignedVolunteer"]) delete errors["assignedVolunteer"];
-    }
+    dispatch(
+      patchPatient(
+        {
+          assigned_to: assignedVolunteerObject
+            ? assignedVolunteerObject.id
+            : null,
+        },
+        { id: patientData.id }
+      )
+    ).then((response: any) => {
+      if ((response || {}).status === 200) {
+        let dummyPatientData = Object.assign({}, patientData);
+        dummyPatientData["assigned_to"] = assignedVolunteerObject;
+        setPatientData(dummyPatientData);
+        Notification.Success({
+          msg: "Volunteer assigned successfully.",
+        });
+        document.location.reload();
+      }
+    });
+    setOpenAssignVolunteerDialog(false);
+    if (errors["assignedVolunteer"]) delete errors["assignedVolunteer"];
   };
 
   const handlePatientTransfer = (value: boolean) => {
