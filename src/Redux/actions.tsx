@@ -25,6 +25,14 @@ export const postForgotPassword = (form: object) => {
   return fireRequest("forgotPassword", [], form);
 };
 
+export const getUserPnconfig = (pathParams: object) => {
+  return fireRequest("getUserPnconfig", [], {}, pathParams);
+};
+
+export const updateUserPnconfig = (params: object, pathParams: object) => {
+  return fireRequest("updateUserPnconfig", [], params, pathParams);
+};
+
 // Facility
 export const createFacility = (params: object) => {
   return fireRequest("createFacility", [], params);
@@ -176,6 +184,9 @@ export const getStates = () => {
 };
 export const getStatesByText = (params: object) => {
   return fireRequest("statesList", [], params);
+};
+export const getState = (id: number) => {
+  return fireRequest("getState", [], {}, { id: id });
 };
 
 // District/State/Local body/ward
@@ -358,9 +369,18 @@ export const externalResultUploadCsv = (params: object) => {
 export const deleteExternalResult = (id: string) => {
   return fireRequest("deleteExternalResult", [id], {});
 };
+
 // Notifications
 export const getNotifications = (params: object) => {
   return fireRequest("getNotifications", [], params);
+};
+
+export const getNotificationData = (pathParam: object) => {
+  return fireRequest("getNotificationData", [], {}, pathParam);
+};
+
+export const getPublicKey = () => {
+  return fireRequest("getPublicKey", [], {}, {});
 };
 
 // FileUpload
