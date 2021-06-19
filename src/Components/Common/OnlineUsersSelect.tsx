@@ -108,7 +108,7 @@ export const OnlineUsersSelect = (props: any) => {
                         ? moment()
                             .subtract(5, "minutes")
                             .isBefore(selectedUser?.last_login)
-                          ? "bg-green-400"
+                          ? "bg-primary-400"
                           : "bg-gray-300"
                         : "bg-blue-400")
                     }
@@ -176,7 +176,7 @@ export const OnlineUsersSelect = (props: any) => {
                           (moment()
                             .subtract(5, "minutes")
                             .isBefore(user.last_login)
-                            ? "bg-green-400"
+                            ? "bg-primary-400"
                             : "bg-gray-300")
                         }
                       ></span>

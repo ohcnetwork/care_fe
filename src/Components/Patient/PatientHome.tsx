@@ -613,7 +613,7 @@ export const PatientHome = (props: any) => {
                 </p>
               )}
               {patientData.assigned_to_object && (
-                <p className="font-bold text-green-800 rounded-lg shadow bg-green-200 mx-3 p-3 flex-1 text-center">
+                <p className="font-bold text-primary-800 rounded-lg shadow bg-primary-200 mx-2 p-3 flex-1 text-center">
                   <span className="inline">
                     Assigned Volunteer:{" "}
                     {patientData.assigned_to_object.first_name}{" "}
@@ -650,7 +650,10 @@ export const PatientHome = (props: any) => {
             </div>
           </div>
         )}
-        <section className="md:flex items-center mt-4 space-y-2" data-testid="patient-dashboard">
+        <section
+          className="md:flex items-center mt-4 space-y-2"
+          data-testid="patient-dashboard"
+        >
           <div className="md:w-2/3 mx-2 h-full">
             <div className="bg-white rounded-lg shadow p-4 h-full">
               <h1 className="font-bold text-3xl">
@@ -789,7 +792,7 @@ export const PatientHome = (props: any) => {
                 {patientData.allow_transfer ? (
                   <Badge color="yellow" icon="unlock" text="Transfer Allowed" />
                 ) : (
-                  <Badge color="green" icon="lock" text="Transfer Blocked" />
+                  <Badge color="primary" icon="lock" text="Transfer Blocked" />
                 )}
                 {patientData.is_antenatal && patientData.is_active && (
                   <Badge color="blue" icon="baby-carriage" text="Antenatal" />
@@ -1615,7 +1618,7 @@ export const PatientHome = (props: any) => {
         open={openDischargeDialog}
         onClose={handleDischargeClose}
       >
-        <DialogTitle className="flex justify-center bg-green-100">
+        <DialogTitle className="flex justify-center bg-primary-100">
           Before we discharge {patientData.name}
         </DialogTitle>
         <DialogContent className="px-20">

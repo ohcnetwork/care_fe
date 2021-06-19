@@ -12,7 +12,7 @@ const TopBar = () => {
           </a>
         </div>
         <div>
-          <LanguageSelector className="bg-green-500 text-white" />
+          <LanguageSelector className="bg-primary-500 text-white" />
         </div>
       </div>
     </div>
