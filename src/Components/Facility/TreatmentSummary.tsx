@@ -95,7 +95,7 @@ const TreatmentSummary = (props: any) => {
             <h2 className="text-center text-lg">INTERIM TREATMENT SUMMARY</h2>
 
             <div className="text-right font-bold">
-              {date.getDate()}/{date.getMonth() + 1}/{date.getFullYear()}
+              {moment(date).format("DD/MM/YYYY")}
             </div>
 
             <div className="mt-2 mb-5 border border-gray-800">
