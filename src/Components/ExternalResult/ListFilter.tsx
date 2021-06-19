@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { AutoCompleteAsyncField, DateInputField } from "../Common/HelperInputFields";
+import {
+  AutoCompleteAsyncField,
+  DateInputField,
+} from "../Common/HelperInputFields";
 import { getAllLocalBodyByDistrict } from "../../Redux/actions";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "raviger";
@@ -7,12 +10,13 @@ import moment from "moment";
 
 function useMergeState(initialState: any) {
   const [state, setState] = useState(initialState);
-  const setMergedState = (newState: any) => setState((prevState: any) => Object.assign({}, prevState, newState));
+  const setMergedState = (newState: any) =>
+    setState((prevState: any) => Object.assign({}, prevState, newState));
   return [state, setMergedState];
 }
 
 export default function ListFilter(props: any) {
-  let { filter, onChange, closeFilter } = props;
+  let { filter, onChange, closeFilter, dataList } = props;
   const [wardList, setWardList] = useState<any[]>([]);
   const [lsgList, setLsgList] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -31,7 +35,6 @@ export default function ListFilter(props: any) {
     sample_collection_date_after: filter.sample_collection_date_after || null,
   });
 
-
   const handleChange = (event: any) => {
     let { name, value } = event.target;
 
@@ -49,7 +52,9 @@ export default function ListFilter(props: any) {
   };
 
   const formatDateTime = (dateTime: any) => {
-    return dateTime && moment(dateTime).isValid() ? moment(dateTime).format('YYYY-MM-DD') : ''
+    return dateTime && moment(dateTime).isValid()
+      ? moment(dateTime).format("YYYY-MM-DD")
+      : "";
   };
 
   const applyFilter = () => {
@@ -67,7 +72,7 @@ export default function ListFilter(props: any) {
       result_date_before,
       result_date_after,
       sample_collection_date_after,
-      sample_collection_date_before
+      sample_collection_date_before,
     } = filterState;
 
     const data = {
@@ -77,10 +82,15 @@ export default function ListFilter(props: any) {
       created_date_after: formatDateTime(created_date_after),
       result_date_before: formatDateTime(result_date_before),
       result_date_after: formatDateTime(result_date_after),
-      sample_collection_date_after: formatDateTime(sample_collection_date_after),
-      sample_collection_date_before: formatDateTime(sample_collection_date_before),
+      sample_collection_date_after: formatDateTime(
+        sample_collection_date_after
+      ),
+      sample_collection_date_before: formatDateTime(
+        sample_collection_date_before
+      ),
     };
     onChange(data);
+    dataList(selectedLsgs, wards);
   };
 
   const sortByName = (items: any) => {
@@ -96,15 +106,18 @@ export default function ListFilter(props: any) {
       let allWards: any[] = [];
       let allLsgs: any[] = [];
       res?.data?.forEach((local: any) => {
-        allLsgs = [
-          ...allLsgs,
-          { id: local.id, name: local.name },
-        ];
+        allLsgs = [...allLsgs, { id: local.id, name: local.name }];
         if (local.wards) {
           local.wards.forEach((ward: any) => {
             allWards = [
               ...allWards,
-              { id: ward.id, name: ward.number + ": " + ward.name, panchayath: local.name, number: ward.number, local_body_id: local.id },
+              {
+                id: ward.id,
+                name: ward.number + ": " + ward.name,
+                panchayath: local.name,
+                number: ward.number,
+                local_body_id: local.id,
+              },
             ];
           });
         }
@@ -117,8 +130,8 @@ export default function ListFilter(props: any) {
       let selectedWards: any =
         filteredWard && allWards
           ? allWards.filter(({ id }: { id: number }) => {
-            return filteredWard.includes(id);
-          })
+              return filteredWard.includes(id);
+            })
           : [];
       setWards(selectedWards);
 
@@ -126,8 +139,8 @@ export default function ListFilter(props: any) {
       let selectedLsgs: any =
         filteredLsgs && allLsgs
           ? allLsgs.filter(({ id }: { id: number }) => {
-            return filteredLsgs.includes(id);
-          })
+              return filteredLsgs.includes(id);
+            })
           : [];
       setSelectedLsgs(selectedLsgs);
       setLoading(false);
@@ -135,20 +148,19 @@ export default function ListFilter(props: any) {
     getWardList();
   }, []);
 
-
   const filterWards = () => {
     let selectedLsgIds: any = selectedLsgs.map((e) => {
-      return e.id
-    })
+      return e.id;
+    });
 
     let selectedwards: any =
-      (selectedLsgIds.length === 0)
+      selectedLsgIds.length === 0
         ? wardList
         : wardList.filter(({ local_body_id }: { local_body_id: number }) => {
-          return selectedLsgIds.includes(local_body_id);
-        })
+            return selectedLsgIds.includes(local_body_id);
+          });
 
-    return selectedwards
+    return selectedwards;
   };
 
   return (
@@ -224,8 +236,13 @@ export default function ListFilter(props: any) {
           margin="dense"
           errors=""
           value={filterState.created_date_after}
-          onChange={date => handleChange({ target: { name: "created_date_after", value: date } })}
-          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9" />
+          onChange={(date) =>
+            handleChange({
+              target: { name: "created_date_after", value: date },
+            })
+          }
+          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+        />
       </div>
       <div className="w-64 flex-none">
         <span className="text-sm font-semibold">Created Before</span>
@@ -236,8 +253,13 @@ export default function ListFilter(props: any) {
           margin="dense"
           errors=""
           value={filterState.created_date_before}
-          onChange={date => handleChange({ target: { name: "created_date_before", value: date } })}
-          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9" />
+          onChange={(date) =>
+            handleChange({
+              target: { name: "created_date_before", value: date },
+            })
+          }
+          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+        />
       </div>
       <div className="w-64 flex-none">
         <span className="text-sm font-semibold">Result After</span>
@@ -248,8 +270,11 @@ export default function ListFilter(props: any) {
           margin="dense"
           errors=""
           value={filterState.result_date_after}
-          onChange={date => handleChange({ target: { name: "result_date_after", value: date } })}
-          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9" />
+          onChange={(date) =>
+            handleChange({ target: { name: "result_date_after", value: date } })
+          }
+          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+        />
       </div>
 
       <div className="w-64 flex-none">
@@ -261,8 +286,13 @@ export default function ListFilter(props: any) {
           margin="dense"
           errors=""
           value={filterState.result_date_before}
-          onChange={date => handleChange({ target: { name: "result_date_before", value: date } })}
-          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9" />
+          onChange={(date) =>
+            handleChange({
+              target: { name: "result_date_before", value: date },
+            })
+          }
+          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+        />
       </div>
       <div className="w-64 flex-none">
         <span className="text-sm font-semibold">Sample Collection After</span>
@@ -273,8 +303,13 @@ export default function ListFilter(props: any) {
           margin="dense"
           errors=""
           value={filterState.sample_collection_date_before}
-          onChange={date => handleChange({ target: { name: "sample_collection_date_before", value: date } })}
-          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9" />
+          onChange={(date) =>
+            handleChange({
+              target: { name: "sample_collection_date_before", value: date },
+            })
+          }
+          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+        />
       </div>
       <div className="w-64 flex-none">
         <span className="text-sm font-semibold">Sample Collection Before</span>
@@ -285,8 +320,13 @@ export default function ListFilter(props: any) {
           margin="dense"
           errors=""
           value={filterState.sample_collection_date_after}
-          onChange={date => handleChange({ target: { name: "sample_collection_date_after", value: date } })}
-          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9" />
+          onChange={(date) =>
+            handleChange({
+              target: { name: "sample_collection_date_after", value: date },
+            })
+          }
+          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+        />
       </div>
     </div>
   );

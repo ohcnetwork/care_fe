@@ -21,10 +21,8 @@ const patientCategoryChoices = [...PATIENT_CATEGORY];
 export const DailyRoundListDetails = (props: any) => {
   const { facilityId, patientId, consultationId, id } = props;
   const dispatch: any = useDispatch();
-  const [
-    dailyRoundListDetailsData,
-    setDailyRoundListDetails,
-  ] = useState<DailyRoundsModel>({});
+  const [dailyRoundListDetailsData, setDailyRoundListDetails] =
+    useState<DailyRoundsModel>({});
   const [isLoading, setIsLoading] = useState(false);
 
   const fetchpatient = useCallback(

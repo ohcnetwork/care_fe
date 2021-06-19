@@ -263,6 +263,14 @@ export default {
     path: "/api/v1/patient/{id}/transfer/",
     method: "POST",
   },
+  getPatientNotes: {
+    path: "/api/v1/patient/{patientId}/notes/",
+    method: "GET",
+  },
+  addPatientNote: {
+    path: "/api/v1/patient/{patientId}/notes/",
+    method: "POST",
+  },
   sampleTestList: {
     path: "/api/v1/patient/{patientId}/test_sample/",
   },

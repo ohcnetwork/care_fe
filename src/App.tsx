@@ -7,6 +7,7 @@ import { getCurrentUser } from "./Redux/actions";
 import "./App.css";
 import { useAbortableEffect, statusType } from "./Common/utils";
 import axios from "axios";
+
 const Loading = loadable(() => import("./Components/Common/Loading"));
 
 const App: React.FC = () => {

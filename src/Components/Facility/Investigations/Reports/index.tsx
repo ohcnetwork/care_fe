@@ -18,7 +18,7 @@ import { InvestigationResponse } from "./types";
 import ReportTable from "./ReportTable";
 import * as Notification from "../../../../Utils/Notifications";
 
-const RESULT_PER_PAGE = 15;
+const RESULT_PER_PAGE = 14;
 
 const useStyle = makeStyles({
   button: {

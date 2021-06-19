@@ -64,7 +64,7 @@ const HospitalListPage = (props: any) => {
   const [downloadSelect, setdownloadSelect] = useState("Facility List");
   const [showFilters, setShowFilters] = useState(false);
   const { t } = props;
-  const limit = 15;
+  const limit = 14;
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -229,14 +229,14 @@ const HospitalListPage = (props: any) => {
           <div className="block rounded-lg bg-white shadow h-full hover:border-primary-500 overflow-hidden">
             <div className="h-full flex flex-col justify-between">
               <div className="px-6 py-4">
-                <div className="inline-flex items-center px-2.5 py-0.5 mr-4 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800">
-                  {facility.facility_type}
-                </div>
                 {facility.kasp_empanelled && (
                   <div className="mt-2 inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-yellow-100 text-yellow-800">
                     KASP
                   </div>
                 )}
+                <div className="inline-flex float-right items-center px-2.5 py-0.5 mt-2 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800">
+                  {facility.facility_type}
+                </div>
                 <div className="font-black text-2xl capitalize mt-2">
                   {facility.name}
                 </div>

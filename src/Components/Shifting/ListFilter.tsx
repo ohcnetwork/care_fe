@@ -148,9 +148,15 @@ export default function ListFilter(props: any) {
   };
 
   const setAssignedUser = (user: any) => {
+    const getPersonName = (user: any) => {
+      let personName = user.first_name + " " + user.last_name;
+
+      return personName.trim().length > 0 ? personName : user.username;
+    };
+
     const filterData: any = { ...filterState };
-    filterData.assigned_to = user.id;
-    filterData.assigned_user = user.username;
+    filterData.assigned_to = user ? user.id : "";
+    filterData.assigned_user = user ? getPersonName(user) : "";
     filterData.assigned_user_ref = user;
 
     setFilterState(filterData);

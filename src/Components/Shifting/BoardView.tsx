@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQueryParams, navigate } from "raviger";
 import ListFilter from "./ListFilter";
 import ShiftingBoard from "./ShiftingBoard";
@@ -59,6 +59,10 @@ export default function BoardView() {
     updateQuery(filter);
     setShowFilters(false);
   };
+
+  useEffect(() => {
+    applyFilter(local);
+  }, []);
 
   const appliedFilters = formatFilter(qParams);
 

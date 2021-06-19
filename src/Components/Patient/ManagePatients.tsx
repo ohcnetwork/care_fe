@@ -90,7 +90,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const RESULT_LIMIT = 15;
+const RESULT_LIMIT = 14;
 
 export const PatientManager = (props: any) => {
   const { facilityId } = props;
@@ -387,6 +387,20 @@ export const PatientManager = (props: any) => {
                   icon="exclamation-triangle"
                   text="Patient Expired"
                 />
+              )}
+              {(!patient.last_consultation ||
+                patient.last_consultation?.facility !== patient.facility) && (
+                <span className="relative inline-flex">
+                  <Badge
+                    color="red"
+                    icon="notes-medical"
+                    text="No Consultation Filed"
+                  />
+                  <span className="flex absolute h-3 w-3 top-0 right-0 -mt-1 -mr-1">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span>
+                  </span>
+                </span>
               )}
             </div>
             <div className="px-2">

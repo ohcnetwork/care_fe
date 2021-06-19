@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@material-ui/core";
 import moment from "moment";
 import loadable from "@loadable/component";
-import React, { useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getTestSample } from "../../Redux/actions";

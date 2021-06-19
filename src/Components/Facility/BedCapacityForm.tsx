@@ -8,7 +8,7 @@ import {
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { navigate } from "raviger";
 import loadable from "@loadable/component";
-import React, { useCallback, useEffect, useReducer, useState } from "react";
+import { useCallback, useEffect, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
 import { BED_TYPES } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -241,10 +241,14 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
             }}
           >
             <CardContent>
-              <InputLabel id="demo-simple-select-outlined-label">
+              <InputLabel
+                htmlFor="bed-type"
+                id="demo-simple-select-outlined-label"
+              >
                 Bed Type*
               </InputLabel>
               <NativeSelectField
+                id="bed-type"
                 name="bedType"
                 variant="outlined"
                 value={state.form.bedType}
@@ -255,10 +259,14 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
               <ErrorHelperText error={state.errors.bedType} />
             </CardContent>
             <CardContent>
-              <InputLabel id="demo-simple-select-outlined-label">
+              <InputLabel
+                htmlFor="total-capacity"
+                id="demo-simple-select-outlined-label"
+              >
                 Total Capacity*
               </InputLabel>
               <TextInputField
+                id="total-capacity"
                 name="totalCapacity"
                 variant="outlined"
                 margin="dense"
@@ -270,10 +278,14 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
               />
             </CardContent>
             <CardContent>
-              <InputLabel id="demo-simple-select-outlined-label">
+              <InputLabel
+                htmlFor="currently-occupied"
+                id="demo-simple-select-outlined-label"
+              >
                 Currently Occupied*
               </InputLabel>
               <TextInputField
+                id="currently-occupied"
                 name="currentOccupancy"
                 variant="outlined"
                 margin="dense"
@@ -290,6 +302,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
                 style={{ justifyContent: "space-between" }}
               >
                 <Button
+                  id="bed-capacity-cancel"
                   color="default"
                   variant="contained"
                   type="button"
@@ -298,6 +311,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
                   Cancel
                 </Button>
                 <Button
+                  id="bed-capacity-save"
                   color="primary"
                   variant="contained"
                   type="submit"
