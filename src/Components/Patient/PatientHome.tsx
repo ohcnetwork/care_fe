@@ -601,7 +601,7 @@ export const PatientHome = (props: any) => {
           <div className="max-w-screen-xl mx-auto py-3">
             <div className="flex flex-col gap-2 md:flex-row">
               {patientData?.last_consultation?.assigned_to_object && (
-                <p className="font-bold text-green-800 rounded-lg shadow bg-green-200 p-3 mx-2 flex-1 text-center">
+                <p className="font-bold text-primary-800 rounded-lg shadow bg-primary-200 p-3 mx-2 flex-1 text-center">
                   <span className="inline">
                     Assigned Doctor:{" "}
                     {
@@ -613,7 +613,7 @@ export const PatientHome = (props: any) => {
                 </p>
               )}
               {patientData.assigned_to_object && (
-                <p className="font-bold text-green-800 rounded-lg shadow bg-green-200 mx-2 p-3 flex-1 text-center">
+                <p className="font-bold text-primary-800 rounded-lg shadow bg-primary-200 mx-2 p-3 flex-1 text-center">
                   <span className="inline">
                     Assigned Volunteer:{" "}
                     {patientData.assigned_to_object.first_name}{" "}
@@ -792,7 +792,7 @@ export const PatientHome = (props: any) => {
                 {patientData.allow_transfer ? (
                   <Badge color="yellow" icon="unlock" text="Transfer Allowed" />
                 ) : (
-                  <Badge color="green" icon="lock" text="Transfer Blocked" />
+                  <Badge color="primary" icon="lock" text="Transfer Blocked" />
                 )}
                 {patientData.is_antenatal && patientData.is_active && (
                   <Badge color="blue" icon="baby-carriage" text="Antenatal" />
@@ -1618,7 +1618,7 @@ export const PatientHome = (props: any) => {
         open={openDischargeDialog}
         onClose={handleDischargeClose}
       >
-        <DialogTitle className="flex justify-center bg-green-100">
+        <DialogTitle className="flex justify-center bg-primary-100">
           Before we discharge {patientData.name}
         </DialogTitle>
         <DialogContent className="px-20">

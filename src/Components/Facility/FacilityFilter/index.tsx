@@ -1,10 +1,7 @@
-import React, { useCallback } from "react";
-import { navigate, useQueryParams } from "raviger";
+import React, { useCallback, useState } from "react";
+import { navigate } from "raviger";
 import { SelectField } from "../../Common/HelperInputFields";
-import { useEffect, useState } from "react";
 import { CircularProgress } from "@material-ui/core";
-import DistrictSelect from "./DistrictSelect";
-import LocalBodySelect from "./LocalBodySelect";
 import { FACILITY_TYPES } from "../../../Common/constants";
 import {
   getStates,
@@ -12,7 +9,7 @@ import {
   getLocalbodyByDistrict,
 } from "../../../Redux/actions";
 import { useDispatch } from "react-redux";
-import { debounce } from "lodash";
+import { useAbortableEffect, statusType } from "../../../Common/utils";
 
 function useMergeState(initialState: any) {
   const [state, setState] = useState(initialState);
@@ -30,7 +27,6 @@ const selectDistrict = [{ id: 0, name: "Please select your district" }];
 
 function FacillityFilter(props: any) {
   let { filter, onChange, closeFilter } = props;
-  const [isFacilityLoading, setFacilityLoading] = useState(false);
   const dispatchAction: any = useDispatch();
 
   const [isStateLoading, setIsStateLoading] = useState(false);
@@ -39,67 +35,87 @@ function FacillityFilter(props: any) {
   const [states, setStates] = useState(initialStates);
   const [districts, setDistricts] = useState(selectStates);
   const [localBody, setLocalBody] = useState(selectDistrict);
-
-  const fetchDistricts = useCallback(
-    async (id: string) => {
-      if (Number(id) > 0) {
-        setIsDistrictLoading(true);
-        const districtList = await dispatchAction(getDistrictByState({ id }));
-        setDistricts([...initialDistricts, ...districtList.data]);
-        setIsDistrictLoading(false);
-      } else {
-        setDistricts(selectStates);
-      }
-    },
-    [dispatchAction]
-  );
-
-  const fetchLocalBody = useCallback(
-    async (id: string) => {
-      if (Number(id) > 0) {
-        setIsLocalbodyLoading(true);
-        const localBodyList = await dispatchAction(
-          getLocalbodyByDistrict({ id })
-        );
-        setIsLocalbodyLoading(false);
-        if (localBodyList.data.length > 0) {
-          setLocalBody([...initialLocalbodies, ...localBodyList.data]);
-        } else {
-          setLocalBody([{ id: 0, name: "No local bodies found!" }]);
-        }
-      } else {
-        setLocalBody(selectDistrict);
-      }
-    },
-    [dispatchAction]
-  );
-
   const [filterState, setFilterState] = useMergeState({
     state: filter.state || "",
     district: filter.district || "",
-    district_ref: null,
     local_body: filter.local_body || "",
-    local_body_ref: null,
     facility_type: filter.facility_type || "",
     kasp_empanelled: filter.kasp_empanelled || "",
   });
 
-  const emptyFilterState = {
-    state: "",
-    district: "",
-    district_ref: null,
-    local_body: "",
-    local_body_ref: null,
-    facility_type: "",
-    kasp_empanelled: "",
-  };
+  const fetchStates = useCallback(
+    async (status) => {
+      setIsStateLoading(true);
+      const res = await dispatchAction(getStates());
+      if (!status.aborted) {
+        if (res && res.data) {
+          setStates([...initialStates, ...res.data.results]);
+        }
+        setIsStateLoading(false);
+      }
+    },
+    [dispatchAction]
+  );
 
-  const setKeys = (selected: any, name: string) => {
-    const filterData: any = { ...filterState };
-    filterData[`${name}_ref`] = selected;
-    filterData[name] = (selected || {}).id;
-    setFilterState(filterData);
-  };
+  useAbortableEffect((status: statusType) => {
+    fetchStates(status);
+  }, []);
+
+  const fetchDistricts = useCallback(
+    async (status) => {
+      setIsDistrictLoading(true);
+      const res =
+        Number(filterState.state) &&
+        (await dispatchAction(getDistrictByState({ id: filterState.state })));
+      if (!status.aborted) {
+        if (res && res.data) {
+          setDistricts([...initialDistricts, ...res.data]);
+        } else {
+          setDistricts(selectStates);
+        }
+        setIsDistrictLoading(false);
+      }
+    },
+    [dispatchAction, filterState.state]
+  );
+
+  useAbortableEffect(
+    (status: statusType) => {
+      fetchDistricts(status);
+    },
+    [filterState.state]
+  );
+
+  const fetchLocalbodies = useCallback(
+    async (status) => {
+      setIsLocalbodyLoading(true);
+      const res =
+        Number(filterState.district) &&
+        (await dispatchAction(
+          getLocalbodyByDistrict({ id: filterState.district })
+        ));
+      if (!status.aborted) {
+        if (res && res.data) {
+          if (res.data.length) {
+            setLocalBody([...initialLocalbodies, ...res.data]);
+          } else {
+            setLocalBody([{ id: 0, name: "No local bodies found!" }]);
+          }
+        } else {
+          setLocalBody(selectDistrict);
+        }
+        setIsLocalbodyLoading(false);
+      }
+    },
+    [dispatchAction, filterState.district]
+  );
+
+  useAbortableEffect(
+    (status: statusType) => {
+      fetchLocalbodies(status);
+    },
+    [filterState.district]
+  );
 
   const applyFilter = () => {
     const data = {
@@ -120,22 +136,6 @@ function FacillityFilter(props: any) {
     setFilterState(filterData);
   };
 
-  useEffect(() => {
-    setIsStateLoading(true);
-    loadStates();
-  }, []);
-
-  const loadStates = useCallback(
-    debounce(async () => {
-      const res = await dispatchAction(getStates());
-      if (res && res.data) {
-        setStates([...initialStates, ...res.data.results]);
-      }
-      setIsStateLoading(false);
-    }, 300),
-    []
-  );
-
   return (
     <div>
       <div className="flex justify-between">
@@ -146,8 +146,8 @@ function FacillityFilter(props: any) {
         <button
           className="btn btn-default"
           onClick={(_) => {
+            closeFilter();
             navigate("/facility");
-            setFilterState(emptyFilterState);
           }}
         >
           <i className="fas fa-times mr-2" />
@@ -174,10 +174,7 @@ function FacillityFilter(props: any) {
                 value={filterState.state}
                 options={states}
                 optionValue="name"
-                onChange={(e) => {
-                  handleChange(e);
-                  fetchDistricts(String(e.target.value));
-                }}
+                onChange={handleChange}
               />
             )}
           </div>
@@ -185,39 +182,40 @@ function FacillityFilter(props: any) {
 
         <div className="w-64 flex-none">
           <span className="text-sm font-semibold">District</span>
-          {isDistrictLoading ? (
-            <CircularProgress size={20} />
-          ) : (
-            <SelectField
-              name="district"
-              variant="outlined"
-              margin="dense"
-              value={filterState.district}
-              options={districts}
-              optionValue="name"
-              onChange={(e) => {
-                handleChange(e);
-                fetchLocalBody(String(e.target.value));
-              }}
-            />
-          )}
+          <div>
+            {isDistrictLoading ? (
+              <CircularProgress size={20} />
+            ) : (
+              <SelectField
+                name="district"
+                variant="outlined"
+                margin="dense"
+                value={filterState.district}
+                options={districts}
+                optionValue="name"
+                onChange={handleChange}
+              />
+            )}
+          </div>
         </div>
 
         <div className="w-64 flex-none">
           <span className="text-sm font-semibold">Local Body</span>
-          {isLocalbodyLoading ? (
-            <CircularProgress size={20} />
-          ) : (
-            <SelectField
-              name="local_body"
-              variant="outlined"
-              margin="dense"
-              value={filterState.local_body}
-              options={localBody}
-              optionValue="name"
-              onChange={handleChange}
-            />
-          )}
+          <div>
+            {isLocalbodyLoading ? (
+              <CircularProgress size={20} />
+            ) : (
+              <SelectField
+                name="local_body"
+                variant="outlined"
+                margin="dense"
+                value={filterState.local_body}
+                options={localBody}
+                optionValue="name"
+                onChange={handleChange}
+              />
+            )}
+          </div>
         </div>
 
         <div className="w-64 flex-none">

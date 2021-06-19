@@ -353,7 +353,7 @@ const HospitalListPage = (props: any) => {
                   <span className="inline-flex rounded-md shadow-sm">
                     <button
                       type="button"
-                      className="inline-flex items-center px-3 py-2 border border-green-500 text-sm leading-4 font-medium rounded-md text-green-700 bg-white hover:text-green-500 focus:outline-none focus:border-green-300 focus:shadow-outline-blue active:text-green-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                      className="inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:shadow-outline-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
                       onClick={() => navigate(`/facility/${facility.id}`)}
                     >
                       {t("View Facility")}
@@ -443,7 +443,7 @@ const HospitalListPage = (props: any) => {
                       }}
                     />
                     <button
-                      className="bg-green-600 hover:shadow-md px-2 ml-2 my-2  rounded"
+                      className="bg-primary-600 hover:shadow-md px-2 ml-2 my-2  rounded"
                       onClick={handleDownloader}
                     >
                       <svg
