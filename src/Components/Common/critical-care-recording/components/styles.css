@@ -44,6 +44,7 @@
   cursor: pointer;
   background: #b2b2b2;
 }
+
 .range input::-moz-range-track {
   width: 100%;
   height: 2px;
@@ -82,6 +83,32 @@
   cursor: pointer;
 }
 .range-labels .label::before {
+  position: absolute;
+  top: -25px;
+  right: 0;
+  left: 0;
+  content: "";
+  margin: 0 auto;
+  width: 9px;
+  height: 9px;
+  background: #b2b2b2;
+  border-radius: 50%;
+}
+.double-range-labels {
+  margin: 18px -41px 0;
+  padding: 0;
+  list-style: none;
+}
+.double-range-labels li {
+  position: relative;
+  float: left;
+  width: 45.25px;
+  text-align: center;
+  color: black;
+  font-size: 14px;
+  cursor: pointer;
+}
+.double-range-labels .label::before {
   position: absolute;
   top: -25px;
   right: 0;
@@ -194,4 +221,96 @@
 
 input[type="number"] {
   background-color: #fbfafc;
+}
+
+/* Copied CSS */
+
+.slider {
+  position: relative;
+  width: 200px;
+}
+
+.slider__track,
+.slider__range,
+.slider__left-value,
+.slider__right-value {
+  position: absolute;
+}
+
+.slider__track,
+.slider__range {
+  border-radius: 3px;
+  height: 5px;
+}
+
+.slider__track {
+  background-color: #1476d8;
+  width: 100%;
+  z-index: 1;
+}
+
+.slider__range {
+  background-color: #19ebe0;
+  z-index: 2;
+}
+
+.slider__left-value,
+.slider__right-value {
+  color: #1c85ee;
+  font-size: 12px;
+  margin-top: 20px;
+}
+
+.slider__left-value {
+  left: 6px;
+}
+
+.slider__right-value {
+  right: -4px;
+}
+
+/* Removing the default appearance */
+
+.thumb input {
+  pointer-events: none;
+  position: absolute;
+  height: 0;
+  width: 200px;
+  outline: none;
+}
+
+.thumb--left {
+  z-index: 3;
+}
+
+.thumb--right {
+  z-index: 4;
+}
+
+/* For Chrome browsers */
+.thumb input::-webkit-slider-thumb {
+  background-color: #242525;
+  border: none;
+  border-radius: 50%;
+  box-shadow: 0 0 1px 1px #0b2846;
+  cursor: pointer;
+  height: 18px;
+  width: 18px;
+  margin-top: 4px;
+  pointer-events: all;
+  position: relative;
+}
+
+/* For Firefox browsers */
+.thumb input::-moz-range-thumb {
+  background-color: #272b2c;
+  border: none;
+  border-radius: 50%;
+  box-shadow: 0 0 1px 1px #0d2d4d;
+  cursor: pointer;
+  height: 18px;
+  width: 18px;
+  margin-top: 4px;
+  pointer-events: all;
+  position: relative;
 }

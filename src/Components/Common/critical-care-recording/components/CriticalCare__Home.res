@@ -275,6 +275,12 @@ let make = () => {
 
         <div className="my-15 w-full h-1 bg-gray-300"></div>
 
+        <div>
+            <CriticalCare__DoubleRangeSlider />
+        </div>
+
+        <div className="my-15 w-full h-1 bg-gray-300"></div>
+
          <div>
             <div className="text-3xl font-bold">{str("Ventillator Parameters")}</div>
             <div className="grid grid-cols-2 my-5">
