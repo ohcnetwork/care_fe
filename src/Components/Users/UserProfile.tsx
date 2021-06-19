@@ -119,6 +119,12 @@ export default function UserProfile() {
     dispatch({ type: "set_form", form });
   };
 
+  const handleWhatsappNumberChange = (value: any) => {
+    let form = { ...states.form };
+    form["altPhoneNumber"] = value;
+    dispatch({ type: "set_form", form });
+  };
+
   const validateForm = () => {
     let errors = { ...initError };
     let invalidForm = false;
@@ -162,7 +168,7 @@ export default function UserProfile() {
           return;
         case "altPhoneNumber":
           let alt_is_valid: boolean = false;
-          if (states.form[field]) {
+          if (states.form[field] && states.form[field] !== "+91") {
             const altPhoneNumber = parsePhoneNumberFromString(
               states.form[field],
               "IN"
@@ -172,7 +178,11 @@ export default function UserProfile() {
             }
           }
 
-          if (!states.form[field] || !alt_is_valid) {
+          if (
+            states.form[field] &&
+            states.form[field] !== "+91" &&
+            !alt_is_valid
+          ) {
             errors[field] = "Please enter valid mobile number";
             invalidForm = true;
           }
@@ -199,6 +209,12 @@ export default function UserProfile() {
     }
   };
 
+  const handleWhatsappNumChange = (phoneNo: any, name: string) => {
+    const form = { ...states.form };
+    form[name] = phoneNo;
+    dispatch({ type: "set_form", form });
+  };
+
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     const validForm = validateForm();
@@ -212,9 +228,10 @@ export default function UserProfile() {
         phone_number: parsePhoneNumberFromString(
           states.form.phoneNumber
         )?.format("E.164"),
-        alt_phone_number: parsePhoneNumberFromString(
-          states.form.altPhoneNumber
-        )?.format("E.164"),
+        alt_phone_number:
+          parsePhoneNumberFromString(states.form.altPhoneNumber)?.format(
+            "E.164"
+          ) || "",
         gender: Number(states.form.gender),
         age: states.form.age,
       };
@@ -280,7 +297,7 @@ export default function UserProfile() {
               <button
                 onClick={(_) => setShowEdit(!showEdit)}
                 type="button"
-                className="relative inline-flex items-center px-4 py-2 border border-transparent text-sm leading-5 font-medium rounded-md text-white bg-green-600 hover:bg-green-500 focus:outline-none focus:shadow-outline-green focus:border-green-700 active:bg-green-700 mt-4"
+                className="relative inline-flex items-center px-4 py-2 border border-transparent text-sm leading-5 font-medium rounded-md text-white bg-primary-600 hover:bg-primary-500 focus:outline-none focus:shadow-outline-primary focus:border-primary-700 active:bg-primary-700 mt-4"
               >
                 {showEdit ? "Cancel" : "Edit User Profile"}
               </button>
@@ -498,10 +515,11 @@ export default function UserProfile() {
 
                       <div className="col-span-6 sm:col-span-3">
                         <PhoneNumberField
-                          label="Whatsapp Number*"
+                          name="altPhoneNumber"
+                          label="Whatsapp Number"
                           value={states.form.altPhoneNumber}
                           onChange={(value: any) => {
-                            handleValueChange(value, "altPhoneNumber");
+                            handleWhatsappNumChange(value, "altPhoneNumber");
                           }}
                           errors={states.errors.altPhoneNumber}
                         />

@@ -16,7 +16,7 @@ function useMergeState(initialState: any) {
 }
 
 export default function ListFilter(props: any) {
-  let { filter, onChange, closeFilter } = props;
+  let { filter, onChange, closeFilter, dataList } = props;
   const [wardList, setWardList] = useState<any[]>([]);
   const [lsgList, setLsgList] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -90,6 +90,7 @@ export default function ListFilter(props: any) {
       ),
     };
     onChange(data);
+    dataList(selectedLsgs, wards);
   };
 
   const sortByName = (items: any) => {

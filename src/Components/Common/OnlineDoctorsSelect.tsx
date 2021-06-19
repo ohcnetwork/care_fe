@@ -92,6 +92,7 @@ export const OnlineDoctorsSelect = (props: any) => {
                 })}
                 value={state.searchTerm}
                 onChange={handleSearchTermChange}
+                onKeyUp={(e) => e.preventDefault()}
               />
               <div
                 className={classNames("flex items-center justify-between", {
@@ -107,7 +108,7 @@ export const OnlineDoctorsSelect = (props: any) => {
                         ? moment()
                             .subtract(5, "minutes")
                             .isBefore(selectedDoctor?.last_login)
-                          ? "bg-green-400"
+                          ? "bg-primary-400"
                           : "bg-gray-300"
                         : "bg-blue-400")
                     }
@@ -175,7 +176,7 @@ export const OnlineDoctorsSelect = (props: any) => {
                           (moment()
                             .subtract(5, "minutes")
                             .isBefore(user.last_login)
-                            ? "bg-green-400"
+                            ? "bg-primary-400"
                             : "bg-gray-300")
                         }
                       ></span>

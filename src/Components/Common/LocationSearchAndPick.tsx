@@ -35,8 +35,9 @@ export const LocationSearchAndPick = (props: LocationSearchAndPickProps) => {
   const classes = useStyles();
   const [locationSearchResults, setLocationSearchResults] = useState<any[]>([]);
   const [locationSearchValue, setLocationSearchValue] = useState<string>("");
-  const [searchResultAnchorEl, setSearchResultAnchorEl] =
-    React.useState<(EventTarget & Element) | null>(null);
+  const [searchResultAnchorEl, setSearchResultAnchorEl] = React.useState<
+    (EventTarget & Element) | null
+  >(null);
   const [isLocationSearchInProgress, setIsLocationSearchInProgress] =
     useState(false);
   const [latitude, setLatitude] = useState<number>(props.latitude);

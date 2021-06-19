@@ -122,37 +122,27 @@ button:focus {
 }
 
 .btn-primary-ghost {
-  @apply bg-white text-green-500 border border-green-500;
+  @apply bg-white text-primary-500 border border-primary-500;
 }
 
 .btn-primary-ghost:hover {
-  @apply bg-green-100 text-green-600 border-green-400;
+  @apply bg-primary-100 text-primary-600 border-primary-400;
 }
 
 .btn-primary-ghost:focus {
-  @apply bg-green-800 text-white border-green-400;
+  @apply bg-primary-800 text-white border-primary-400;
 }
 
 .btn-primary {
-  @apply bg-green-500 text-white;
-  background-image: linear-gradient(
-    135deg,
-    rgba(56, 161, 105, 1) 0%,
-    rgba(47, 133, 90, 1) 100%
-  );
+  @apply bg-primary-500 text-white;
 }
 
 .btn-primary:hover {
-  @apply bg-green-600;
-  background-image: linear-gradient(
-    135deg,
-    rgba(72, 187, 120, 1) 0%,
-    rgba(56, 161, 105, 1) 100%
-  );
+  @apply bg-primary-600;
 }
 
 .btn-primary:focus {
-  @apply bg-green-800;
+  @apply bg-primary-800;
   background-image: none;
 }
 

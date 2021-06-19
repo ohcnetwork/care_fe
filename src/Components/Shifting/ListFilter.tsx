@@ -148,9 +148,15 @@ export default function ListFilter(props: any) {
   };
 
   const setAssignedUser = (user: any) => {
+    const getPersonName = (user: any) => {
+      let personName = user.first_name + " " + user.last_name;
+
+      return personName.trim().length > 0 ? personName : user.username;
+    };
+
     const filterData: any = { ...filterState };
     filterData.assigned_to = user ? user.id : "";
-    filterData.assigned_user = user ? user.username : "";
+    filterData.assigned_user = user ? getPersonName(user) : "";
     filterData.assigned_user_ref = user;
 
     setFilterState(filterData);
@@ -189,7 +195,6 @@ export default function ListFilter(props: any) {
       assigned_to,
       disease_status,
     } = filterState;
-    localStorage.setItem("shift-filters", JSON.stringify(filterState));
     const data = {
       orgin_facility: orgin_facility || "",
       shifting_approving_facility: shifting_approving_facility || "",
@@ -220,6 +225,10 @@ export default function ListFilter(props: any) {
       assigned_to: assigned_to || "",
       disease_status: disease_status || "",
     };
+    localStorage.setItem(
+      "shift-filters",
+      JSON.stringify({ ...filterState, ...data })
+    );
     onChange(data);
   };
 
