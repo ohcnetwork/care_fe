@@ -7,6 +7,7 @@ import { applyMiddleware, createStore } from "redux";
 import thunk from "redux-thunk";
 import { Provider } from "react-redux";
 import * as Sentry from "@sentry/browser";
+import * as serviceWorkerRegistration from "./serviceWorkerRegistration";
 require("./style/index.css");
 const store = createStore(reducer, applyMiddleware(thunk));
 Sentry.init({
@@ -31,8 +32,12 @@ ReactDOM.render(
   document.getElementById("root")
 );
 
+/*
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("/service-worker.js");
   });
 }
+*/
+
+serviceWorkerRegistration.register();

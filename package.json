@@ -108,7 +108,7 @@
     "prebuild": "npm run re:build && npm run generate-build-meta",
     "build:react": "react-scripts build",
     "build:tailwind": "postcss src/style/index.tailwind.css -o src/style/index.css",
-    "build": "cross-env NODE_ENV=production build:tailwind build:react",
+    "build": "cross-env NODE_ENV=production build:tailwind && cross-env NODE_ENV=production build:react",
     "start:react": "cross-env PORT=4000 react-scripts start",
     "start:tailwind": "postcss -w src/style/index.tailwind.css -o src/style/index.css",
     "start": "npm run re:build && run-p start:tailwind start:react",
