@@ -2,6 +2,7 @@ import React, { useState, useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { getDistrictByName, getStates } from "../../../Redux/actions";
 import { AutoCompleteAsyncField } from "../../Common/HelperInputFields";
+import { PAGE_LIMIT } from "../../../Common/constants.tsx";
 const debounce = require("lodash.debounce");
 
 interface DistrictSelectProps {
@@ -49,7 +50,7 @@ function DistrictSelect(props: DistrictSelectProps) {
   const onDistrictSearch = useCallback(
     debounce(async (text: string) => {
       if (text) {
-        const params = { limit: 50, offset: 0, district_name: text };
+        const params = { limit: PAGE_LIMIT, offset: 0, district_name: text };
         const res = await dispatchAction(getDistrictByName(params));
         if (res && res.data) {
           setDistrictList(res.data.results);

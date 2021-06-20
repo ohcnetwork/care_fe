@@ -6,6 +6,7 @@ import {
   DateInputField,
   TextInputField,
 } from "../Common/HelperInputFields";
+import { PAGE_LIMIT } from "../../Common/constants.tsx";
 import { SHIFTING_FILTER_ORDER, DISEASE_STATUS } from "../../Common/constants";
 import moment from "moment";
 import { getFacility, getUserList } from "../../Redux/actions";
@@ -117,10 +118,11 @@ export default function ListFilter(props: any) {
 
   useEffect(() => {
     async function fetchData() {
+      console.log("fetching assigned user");
       if (filter.assigned_user) {
         setAssignedUserLoading(true);
         const params = {
-          limit: 10,
+          limit: PAGE_LIMIT,
           offset: 0,
           username: filter.assigned_user,
         };

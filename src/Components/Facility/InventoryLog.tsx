@@ -12,7 +12,7 @@ import {
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import Pagination from "../Common/Pagination";
 import moment from "moment";
-import { PAGE_LIMIT } from "../../Common/constants.js";
+import { PAGE_LIMIT } from "../../Common/constants.tsx";
 
 export default function InventoryLog(props: any) {
   const { facilityId, inventoryId }: any = props;

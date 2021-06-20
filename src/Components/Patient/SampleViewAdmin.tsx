@@ -18,6 +18,7 @@ import Pagination from "../Common/Pagination";
 import { SampleTestModel } from "./models";
 import { InputSearchBox } from "../Common/SearchBox";
 import UpdateStatusDialog from "./UpdateStatusDialog";
+import { PAGE_LIMIT } from "../../Common/constants";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -47,7 +48,7 @@ export default function SampleViewAdmin(props: any) {
   const userType: "Staff" | "DistrictAdmin" | "StateLabAdmin" =
     currentUser.data.user_type;
 
-  const limit = 10;
+  const limit = PAGE_LIMIT;
 
   const fetchData = useCallback(
     async (status: statusType) => {

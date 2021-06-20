@@ -3,6 +3,7 @@ import { useDispatch } from "react-redux";
 import { getUserList } from "../../Redux/actions";
 import { AutoCompleteAsyncField } from "../Common/HelperInputFields";
 import { UserModal } from "../Users/models";
+import { PAGE_LIMIT } from "../../Common/constants.tsx";
 const debounce = require("lodash.debounce");
 interface UserSelectProps {
   margin?: string;
@@ -52,7 +53,7 @@ export const UserSelect = (props: UserSelectProps) => {
     debounce(async (text: string) => {
       if (text) {
         const params = {
-          limit: 50,
+          limit: PAGE_LIMIT,
           offset: 0,
           search_text: text,
         };

@@ -62,7 +62,7 @@ export default function ManageUsers(props: any) {
 
   const [selectedRole, setSelectedRole] = useState("");
 
-  const limit = userTypes.length ? 13 : PAGE_LIMIT;
+  const limit = userTypes.length ? PAGE_LIMIT - 1 : PAGE_LIMIT;
 
   const USER_TYPE_OPTIONS = ["Select", ...USER_TYPES].map((user) => {
     return {

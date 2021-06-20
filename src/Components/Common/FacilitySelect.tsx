@@ -3,6 +3,7 @@ import { useDispatch } from "react-redux";
 import { getAllFacilities, getFacilities } from "../../Redux/actions";
 import { AutoCompleteAsyncField } from "../Common/HelperInputFields";
 import { FacilityModel } from "../Facility/models";
+import { PAGE_LIMIT } from "../../Common/constants.tsx";
 const debounce = require("lodash.debounce");
 interface FacilitySelectProps {
   name: string;
@@ -56,7 +57,7 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
     debounce(async (text: string) => {
       if (text) {
         const params = {
-          limit: 50,
+          limit: PAGE_LIMIT,
           offset: 0,
           search_text: text,
           all: searchAll,

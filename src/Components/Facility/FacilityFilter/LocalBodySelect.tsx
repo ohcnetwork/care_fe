@@ -5,6 +5,7 @@ import {
   getLocalbodyByName,
 } from "../../../Redux/actions";
 import { AutoCompleteAsyncField } from "../../Common/HelperInputFields";
+import { PAGE_LIMIT } from "../../../Common/constants.tsx";
 const debounce = require("lodash.debounce");
 
 interface LocalBodySelectProps {
@@ -52,7 +53,7 @@ function LocalBodySelect(props: LocalBodySelectProps) {
   const onLocalBodySearch = useCallback(
     debounce(async (text: string) => {
       if (text) {
-        const params = { limit: 50, offset: 0, local_body_name: text };
+        const params = { limit: PAGE_LIMIT, offset: 0, local_body_name: text };
         const res = await dispatchAction(getLocalbodyByName(params));
         if (res && res.data) {
           setLocalBodyList(res.data.results);
