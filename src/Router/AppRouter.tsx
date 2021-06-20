@@ -50,6 +50,7 @@ import InvestigationReports from "../Components/Facility/Investigations/Reports"
 import { withTranslation } from "react-i18next";
 import DeathReport from "../Components/DeathReport/DeathReport";
 import ShowPushNotification from "../Components/Notifications/ShowPushNotification";
+import { AddLocationForm } from "../Components/Facility/AddLocationForm";
 
 const get = require("lodash.get");
 const img = "https://cdn.coronasafe.network/light-logo.svg";
@@ -241,6 +242,9 @@ const routes = {
   ),
   "/facility/:facilityId/inventory/add": ({ facilityId }: any) => (
     <AddInventoryForm facilityId={facilityId} />
+  ),
+  "/facility/:facilityId/location/add": ({ facilityId }: any) => (
+    <AddLocationForm facilityId={facilityId} />
   ),
   "/facility/:facilityId/inventory/min_quantity/set": ({ facilityId }: any) => (
     <SetInventoryForm facilityId={facilityId} />
