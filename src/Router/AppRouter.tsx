@@ -47,6 +47,7 @@ import Investigation from "../Components/Facility/Investigations";
 import ViewInvestigations from "../Components/Facility/Investigations/ViewInvestigations";
 import ShowInvestigation from "../Components/Facility/Investigations/ShowInvestigation";
 import InvestigationReports from "../Components/Facility/Investigations/Reports";
+import AssetCreate from "../Components/Facility/AssetCreate";
 import { withTranslation } from "react-i18next";
 import DeathReport from "../Components/DeathReport/DeathReport";
 import ShowPushNotification from "../Components/Notifications/ShowPushNotification";
@@ -270,6 +271,9 @@ const routes = {
       inventoryId={inventoryId}
       itemId={itemId}
     />
+  ),
+  "/facility/:facilityId/assets/new": ({ facilityId }: any) => (
+    <AssetCreate facilityId={facilityId} />
   ),
 
   "/shifting": () =>
