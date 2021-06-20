@@ -131,6 +131,13 @@ function FacillityFilter(props: any) {
   const handleChange = (event: any) => {
     const { name, value } = event.target;
     const filterData: any = { ...filterState };
+    if (name === "state" && value == 0) {
+      filterData["district"] = 0;
+      filterData["local_body"] = 0;
+    }
+    if (name === "district" && value == 0) {
+      filterData["local_body"] = 0;
+    }
     filterData[name] = value;
 
     setFilterState(filterData);
