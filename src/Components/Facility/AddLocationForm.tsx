@@ -61,7 +61,6 @@ export const AddLocationForm = (props: any) => {
       createFacilityAssetLocation(data, facilityId)
     );
     setIsLoading(false);
-    console.log(res);
     if (res && res.status === 201) {
       Notification.Success({
         msg: "Location created successfully",
