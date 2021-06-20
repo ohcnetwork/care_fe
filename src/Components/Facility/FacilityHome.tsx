@@ -183,7 +183,7 @@ export const FacilityHome = (props: any) => {
         open={openDeleteDialog}
         onClose={handleDeleteClose}
       >
-        <DialogTitle className="flex justify-center bg-green-100">
+        <DialogTitle className="flex justify-center bg-primary-100">
           Are you sure you want to delete {facilityData.name || "Facility"}
         </DialogTitle>
         <DialogContent>
@@ -299,6 +299,7 @@ export const FacilityHome = (props: any) => {
           <button
             className="btn-primary btn mt-2 mr-2 w-full md:w-auto"
             onClick={() => navigate(`/facility/${facilityId}/patient`)}
+            data-testid="add-patient-button"
           >
             <i className="fas fa-plus text-white mr-2"></i>
             Add Details of a Patient

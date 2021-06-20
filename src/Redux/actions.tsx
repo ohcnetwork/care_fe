@@ -25,6 +25,14 @@ export const postForgotPassword = (form: object) => {
   return fireRequest("forgotPassword", [], form);
 };
 
+export const getUserPnconfig = (pathParams: object) => {
+  return fireRequest("getUserPnconfig", [], {}, pathParams);
+};
+
+export const updateUserPnconfig = (params: object, pathParams: object) => {
+  return fireRequest("updateUserPnconfig", [], params, pathParams);
+};
+
 // Facility
 export const createFacility = (params: object) => {
   return fireRequest("createFacility", [], params);
@@ -160,8 +168,12 @@ export const patchPatient = (params: object, pathParam: object) => {
 export const transferPatient = (params: object, pathParam: object) => {
   return fireRequest("transferPatient", [], params, pathParam);
 };
-export const getPatientNotes = (patientId: string , limit :number , offset : number) => {
-  return fireRequest("getPatientNotes", [], {limit , offset}, { patientId });
+export const getPatientNotes = (
+  patientId: string,
+  limit: number,
+  offset: number
+) => {
+  return fireRequest("getPatientNotes", [], { limit, offset }, { patientId });
 };
 export const addPatientNote = (patientId: string, params: object) => {
   return fireRequest("addPatientNote", [], params, { patientId });
@@ -172,6 +184,9 @@ export const getStates = () => {
 };
 export const getStatesByText = (params: object) => {
   return fireRequest("statesList", [], params);
+};
+export const getState = (id: number) => {
+  return fireRequest("getState", [], {}, { id: id });
 };
 
 // District/State/Local body/ward
@@ -354,9 +369,18 @@ export const externalResultUploadCsv = (params: object) => {
 export const deleteExternalResult = (id: string) => {
   return fireRequest("deleteExternalResult", [id], {});
 };
+
 // Notifications
 export const getNotifications = (params: object) => {
   return fireRequest("getNotifications", [], params);
+};
+
+export const getNotificationData = (pathParam: object) => {
+  return fireRequest("getNotificationData", [], {}, pathParam);
+};
+
+export const getPublicKey = () => {
+  return fireRequest("getPublicKey", [], {}, {});
 };
 
 // FileUpload

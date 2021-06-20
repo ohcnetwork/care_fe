@@ -269,7 +269,15 @@ const InvestigationReports = ({ id }: any) => {
     setSessionPage(count);
     handleGenerateReports(count);
   };
+  const handleSelectAllClick = (prev: boolean) => {
+    const e = {
+      target: {
+        value: prev ? [] : investigationGroups.map((i) => i.external_id),
+      },
+    };
 
+    handleGroupSelect(e);
+  };
   const loadMoreDisabled =
     page - 1 >= totalPage || isLoading.tableData || isLoadMoreDisabled;
   const getTestDisabled =
@@ -301,6 +309,8 @@ const InvestigationReports = ({ id }: any) => {
               optionKey="external_id"
               onChange={handleGroupSelect}
               placeholder="Select Groups"
+              selectAll
+              onSelectAllClick={handleSelectAllClick}
             />
           </div>
           {!isLoading.investigationLoading && (

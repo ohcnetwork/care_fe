@@ -375,7 +375,7 @@ export default function ResultList() {
           </div>
           <div className="flex ml-auto  gap-2">
             <button
-              className="flex leading-none border-2 border-gray-200 bg-white rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-green-600 focus:text-green-600 focus:border-gray-400 hover:border-gray-400 rounded-r-full px-4 py-2 text-sm"
+              className="flex leading-none border-2 border-gray-200 bg-white rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 focus:text-primary-600 focus:border-gray-400 hover:border-gray-400 rounded-r-full px-4 py-2 text-sm"
               onClick={(_) => setShowFilters((show) => !show)}
             >
               <i className="fa fa-filter mr-1" aria-hidden="true"></i>

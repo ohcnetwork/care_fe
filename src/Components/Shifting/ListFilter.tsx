@@ -197,7 +197,6 @@ export default function ListFilter(props: any) {
       assigned_to,
       disease_status,
     } = filterState;
-    localStorage.setItem("shift-filters", JSON.stringify(filterState));
     const data = {
       orgin_facility: orgin_facility || "",
       shifting_approving_facility: shifting_approving_facility || "",
@@ -228,6 +227,10 @@ export default function ListFilter(props: any) {
       assigned_to: assigned_to || "",
       disease_status: disease_status || "",
     };
+    localStorage.setItem(
+      "shift-filters",
+      JSON.stringify({ ...filterState, ...data })
+    );
     onChange(data);
   };
 
