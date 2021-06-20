@@ -1,5 +1,5 @@
 import React, { useReducer, useState, useEffect } from "react";
-import { createAsset, getLocations } from "../../Redux/actions";
+import { createAsset, listFacilityAssetLocation } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import * as Notification from "../../Utils/Notifications.js";
 import loadable from "@loadable/component";
@@ -162,7 +162,9 @@ const AssetCreate = (props: AssetProps) => {
 
   useEffect(() => {
     setIsLocationsLoading(true);
-    dispatchAction(getLocations(facilityId)).then(({ data }: any) => {
+    dispatchAction(
+      listFacilityAssetLocation({}, { facility_external_id: facilityId })
+    ).then(({ data }: any) => {
       setLocations([...locations, ...data.results]);
       setIsLocationsLoading(false);
     });

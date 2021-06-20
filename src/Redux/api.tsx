@@ -270,16 +270,6 @@ const routes: Routes = {
     path: "/api/v1/facility/{facilityId}/patient_stats/{id}/",
   },
 
-  // Assets
-  getLocations: {
-    path: "/api/v1/facility/{facilityId}/asset_location/",
-  },
-
-  createAsset: {
-    path: "/api/v1/asset/",
-    method: "POST",
-  },
-
   // //Care Center
   // createCenter: {
   //     path: "/api/v1/carecenter/",
@@ -592,7 +582,7 @@ const routes: Routes = {
     method: "GET",
   },
   createAsset: {
-    path: "/api/v1/asset",
+    path: "/api/v1/asset/",
     method: "POST",
   },
   getAssetUserLocation: {
