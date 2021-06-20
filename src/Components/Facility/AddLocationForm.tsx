@@ -1,7 +1,7 @@
 import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
 import loadable from "@loadable/component";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
-import React, { useReducer, useState } from "react";
+import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { createFacilityAssetLocation } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
@@ -12,49 +12,23 @@ import {
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
-const initForm = {
-  name: "",
-  description: "",
-};
-const initialState = {
-  form: { ...initForm },
-};
-
-const locationFormReducer = (state = initialState, action: any) => {
-  switch (action.type) {
-    case "set_form": {
-      return {
-        ...state,
-        form: action.form,
-      };
-    }
-    case "set_error": {
-      return {
-        ...state,
-        errors: action.errors,
-      };
-    }
-    default:
-      return state;
-  }
-};
-
 const goBack = () => {
   window.history.go(-1);
 };
 
 export const AddLocationForm = (props: any) => {
-  const [state, dispatch] = useReducer(locationFormReducer, initialState);
   const { facilityId } = props;
   const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     setIsLoading(true);
     const data = {
-      name: state.form.name,
-      description: state.form.description,
+      name,
+      description,
     };
 
     const res = await dispatchAction(
@@ -67,12 +41,6 @@ export const AddLocationForm = (props: any) => {
       });
     }
     goBack();
-  };
-
-  const handleChange = (e: any) => {
-    let form = { ...state.form };
-    form[e.target.name] = e.target.value;
-    dispatch({ type: "set_form", form });
   };
 
   if (isLoading) {
@@ -94,8 +62,8 @@ export const AddLocationForm = (props: any) => {
                     variant="outlined"
                     margin="dense"
                     type="text"
-                    value={state.form.name}
-                    onChange={handleChange}
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
                     errors=""
                   />
                 </div>
@@ -107,8 +75,8 @@ export const AddLocationForm = (props: any) => {
                     variant="outlined"
                     margin="dense"
                     type="float"
-                    value={state.form.description}
-                    onChange={handleChange}
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
                     errors=""
                   />
                 </div>
