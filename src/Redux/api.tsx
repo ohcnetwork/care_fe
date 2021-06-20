@@ -553,6 +553,48 @@ const routes: Routes = {
     path: "/api/v1/resource/{id}/comment/",
     method: "POST",
   },
+
+  // Assets endpoints
+
+  listAssets: {
+    path: "/api/v1/asset",
+    method: "GET",
+  },
+  createAsset: {
+    path: "/api/v1/asset",
+    method: "POST",
+  },
+  getAssetUserLocation: {
+    path: "​/api/v1/asset​/get_default_user_location​/",
+    method: "GET",
+  },
+  createAssetUserLocation: {
+    path: "/api/v1/asset/set_default_user_location/",
+    method: "POST",
+  },
+  getAsset: {
+    path: "/api/v1/asset/{external_id}/",
+    method: "GET",
+  },
+  updateAsset: {
+    path: "/api/v1/asset/{external_id}/",
+    method: "PUT",
+  },
+  partialUpdateAsset: {
+    path: "/api/v1/asset/{external_id}/",
+    method: "PATCH",
+  },
+
+  // Asset transaction endpoints
+
+  listAssetTransaction: {
+    path: "/api/v1/asset_transaction/",
+    method: "GET",
+  },
+  getAssetTransaction: {
+    path: "/api/v1/asset_transaction/{id}",
+    method: "GET",
+  },
 };
 
 export default routes;
