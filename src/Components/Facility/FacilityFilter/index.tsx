@@ -119,9 +119,9 @@ function FacillityFilter(props: any) {
 
   const applyFilter = () => {
     const data = {
-      state: filterState.state || "",
-      district: filterState.district || "",
-      local_body: filterState.local_body || "",
+      state: Number(filterState.state) || "",
+      district: Number(filterState.district) || "",
+      local_body: Number(filterState.local_body) || "",
       facility_type: filterState.facility_type || "",
       kasp_empanelled: filterState.kasp_empanelled || "",
     };
