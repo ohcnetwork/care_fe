@@ -383,7 +383,6 @@ export const getPublicKey = () => {
   return fireRequest("getPublicKey", [], {}, {});
 };
 
-
 // FileUpload
 
 export const createUpload = (params: object) => {
@@ -485,3 +484,23 @@ export const getResourceComments = (id: string) => {
 export const addResourceComments = (id: string, params: object) => {
   return fireRequest("addResourceComments", [], params, { id });
 };
+
+export const listAssets = (params: object) =>
+  fireRequest("listAssets", [], params);
+export const createAsset = (params: object) =>
+  fireRequest("createAsset", [], params);
+export const getAssetUserLocation = (params: object) =>
+  fireRequest("getAssetUserLocation", [], params);
+export const createAssetUserLocation = (params: object) =>
+  fireRequest("createAssetUserLocation", [], params);
+export const getAsset = (id: string) =>
+  fireRequest("getAsset", [], {}, { external_id: id });
+export const updateAsset = (id: string) =>
+  fireRequest("updateAsset", [], {}, { external_id: id });
+export const partialUpdateAsset = (id: string) =>
+  fireRequest("partialUpdateAsset", [], {}, { external_id: id });
+
+export const listAssetTransaction = (params: object) =>
+  fireRequest("listAssetTransaction", [], params);
+export const getAssetTransaction = (id: string) =>
+  fireRequest("getAssetTransaction", [], {}, { id });
