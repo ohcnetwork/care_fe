@@ -1,4 +1,14 @@
-export default {
+interface Route {
+  path: string;
+  method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+  noAuth?: boolean;
+}
+
+interface Routes {
+  [name: string]: Route;
+}
+
+const routes: Routes = {
   // Auth Endpoints
   login: {
     path: "/api/v1/auth/login/",
@@ -274,11 +284,11 @@ export default {
   },
   getPatientNotes: {
     path: "/api/v1/patient/{patientId}/notes/",
-    method: "GET"
+    method: "GET",
   },
   addPatientNote: {
     path: "/api/v1/patient/{patientId}/notes/",
-    method: "POST"
+    method: "POST",
   },
   sampleTestList: {
     path: "/api/v1/patient/{patientId}/test_sample/",
@@ -544,3 +554,5 @@ export default {
     method: "POST",
   },
 };
+
+export default routes;
