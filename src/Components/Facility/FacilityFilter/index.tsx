@@ -119,9 +119,9 @@ function FacillityFilter(props: any) {
 
   const applyFilter = () => {
     const data = {
-      state: filterState.state || "",
-      district: filterState.district || "",
-      local_body: filterState.local_body || "",
+      state: Number(filterState.state) || "",
+      district: Number(filterState.district) || "",
+      local_body: Number(filterState.local_body) || "",
       facility_type: filterState.facility_type || "",
       kasp_empanelled: filterState.kasp_empanelled || "",
     };
@@ -131,6 +131,13 @@ function FacillityFilter(props: any) {
   const handleChange = (event: any) => {
     const { name, value } = event.target;
     const filterData: any = { ...filterState };
+    if (name === "state" && value == 0) {
+      filterData["district"] = 0;
+      filterData["local_body"] = 0;
+    }
+    if (name === "district" && value == 0) {
+      filterData["local_body"] = 0;
+    }
     filterData[name] = value;
 
     setFilterState(filterData);
