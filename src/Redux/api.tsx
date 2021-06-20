@@ -134,6 +134,27 @@ const routes: Routes = {
     path: "/api/v1/facility/{facility_id}/get_users/",
   },
 
+  listFacilityAssetLocation: {
+    path: "/api/v1/facility/{facility_external_id}/asset_location/",
+    method: "GET",
+  },
+  createFacilityAssetLocation: {
+    path: "/api/v1/facility/{facility_external_id}/asset_location/",
+    method: "POST",
+  },
+  getFacilityAssetLocation: {
+    path: "/api/v1/facility/{facility_external_id}/asset_location/{external_id}/",
+    method: "GET",
+  },
+  updateFacilityAssetLocation: {
+    path: "/api/v1/facility/{facility_external_id}/asset_location/{external_id}/",
+    method: "PUT",
+  },
+  partialUpdateFacilityAssetLocation: {
+    path: "/api/v1/facility/{facility_external_id}/asset_location/{external_id}/",
+    method: "PATCH",
+  },
+
   // Download Api
   deleteFacility: {
     path: "/api/v1/facility",

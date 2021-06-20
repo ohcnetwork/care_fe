@@ -77,6 +77,50 @@ export const getFacilityUsers = (id: string) => {
 export const getOnlineDoctors = () => {
   return fireRequest("getOnlineDoctors", [], {}, {});
 };
+
+export const listFacilityAssetLocation = (facility_id: string) =>
+  fireRequest(
+    "listFacilityAssetLocation",
+    [],
+    {},
+    { facility_external_id: facility_id }
+  );
+export const createFacilityAssetLocation = (
+  params: object,
+  facility_id: string
+) =>
+  fireRequest("createFacilityAssetLocation", [], params, {
+    facility_external_id: facility_id,
+  });
+export const getFacilityAssetLocation = (
+  facility_external_id: string,
+  external_id: string
+) =>
+  fireRequest(
+    "getFacilityAssetLocation",
+    [],
+    {},
+    { facility_external_id, external_id }
+  );
+export const updateFacilityAssetLocation = (
+  params: object,
+  facility_external_id: string,
+  external_id: string
+) =>
+  fireRequest("updateFacilityAssetLocation", [], params, {
+    facility_external_id,
+    external_id,
+  });
+export const partialUpdateFacilityAssetLocation = (
+  params: object,
+  facility_external_id: string,
+  external_id: string
+) =>
+  fireRequest("partialUpdateFacilityAssetLocation", [], params, {
+    facility_external_id,
+    external_id,
+  });
+
 // Download Actions
 export const downloadFacility = () => {
   return fireRequest("downloadFacility");
