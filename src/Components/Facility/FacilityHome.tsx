@@ -279,7 +279,7 @@ export const FacilityHome = (props: any) => {
               className="btn-primary btn mt-2"
               onClick={() => navigate(`/facility/${facilityId}/location`)}
             >
-              <i className="fas fa-dolly-flatbed text-white mr-2"></i>
+              <i className="fas fa-map-marker-alt text-white mr-2"></i>
               Location Management
             </button>
             <button

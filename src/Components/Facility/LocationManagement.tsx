@@ -3,7 +3,7 @@ import loadable from "@loadable/component";
 import { useDispatch } from "react-redux";
 import { Button } from "@material-ui/core";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getLocations, listFacilityAssetLocation } from "../../Redux/actions";
+import { listFacilityAssetLocation } from "../../Redux/actions";
 import { navigate } from "raviger";
 import Pagination from "../Common/Pagination";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
