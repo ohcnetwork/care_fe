@@ -78,13 +78,8 @@ export const getOnlineDoctors = () => {
   return fireRequest("getOnlineDoctors", [], {}, {});
 };
 
-export const listFacilityAssetLocation = (facility_id: string) =>
-  fireRequest(
-    "listFacilityAssetLocation",
-    [],
-    {},
-    { facility_external_id: facility_id }
-  );
+export const listFacilityAssetLocation = (params: object, pathParam: object) =>
+  fireRequest("listFacilityAssetLocation", [], params, pathParam);
 export const createFacilityAssetLocation = (
   params: object,
   facility_id: string

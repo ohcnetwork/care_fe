@@ -51,6 +51,7 @@ import { withTranslation } from "react-i18next";
 import DeathReport from "../Components/DeathReport/DeathReport";
 import ShowPushNotification from "../Components/Notifications/ShowPushNotification";
 import { AddLocationForm } from "../Components/Facility/AddLocationForm";
+import { LocationManagement } from "../Components/Facility/LocationManagement";
 
 const get = require("lodash.get");
 const img = "https://cdn.coronasafe.network/light-logo.svg";
@@ -239,6 +240,9 @@ const routes = {
   }: any) => <ShiftCreate facilityId={facilityId} patientId={patientId} />,
   "/facility/:facilityId/inventory": ({ facilityId }: any) => (
     <InventoryList facilityId={facilityId} />
+  ),
+  "/facility/:facilityId/location": ({ facilityId }: any) => (
+    <LocationManagement facilityId={facilityId} />
   ),
   "/facility/:facilityId/inventory/add": ({ facilityId }: any) => (
     <AddInventoryForm facilityId={facilityId} />

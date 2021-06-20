@@ -18,8 +18,6 @@ import {
   listDoctor,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 import BedTypeCard from "./BedTypeCard";
 import DoctorsCountCard from "./DoctorsCountCard";
 import {
@@ -29,6 +27,8 @@ import {
   PatientStatsModel,
 } from "./models";
 import moment from "moment";
+const Loading = loadable(() => import("../Common/Loading"));
+const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export const FacilityHome = (props: any) => {
   const { facilityId } = props;
@@ -274,6 +274,13 @@ export const FacilityHome = (props: any) => {
             >
               <i className="fas fa-dolly-flatbed text-white mr-2"></i>
               Inventory Management
+            </button>
+            <button
+              className="btn-primary btn mt-2"
+              onClick={() => navigate(`/facility/${facilityId}/location`)}
+            >
+              <i className="fas fa-dolly-flatbed text-white mr-2"></i>
+              Location Management
             </button>
             <button
               className="btn-primary btn mt-2"
