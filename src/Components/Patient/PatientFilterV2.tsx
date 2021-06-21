@@ -113,7 +113,7 @@ export default function PatientFilterV2(props: any) {
     created_date_after: null,
     modified_date_before: null,
     modified_date_after: null,
-    ordering: "Select",
+    ordering: "",
     category: null,
     gender: null,
     disease_status: null,
