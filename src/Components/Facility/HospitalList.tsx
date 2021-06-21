@@ -2,13 +2,16 @@ import { navigate, useQueryParams } from "raviger";
 import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { DOWNLOAD_TYPES } from "../../Common/constants";
+import { DOWNLOAD_TYPES, FACILITY_TYPES } from "../../Common/constants";
 import {
   getFacilities,
   downloadFacility,
   downloadFacilityCapacity,
   downloadFacilityDoctors,
   downloadFacilityTriage,
+  getState,
+  getDistrict,
+  getLocalBody,
 } from "../../Redux/actions";
 import loadable from "@loadable/component";
 import { SelectField } from "../Common/HelperInputFields";
@@ -64,8 +67,11 @@ const HospitalListPage = (props: any) => {
   const downloadTypes = [...DOWNLOAD_TYPES];
   const [downloadSelect, setdownloadSelect] = useState("Facility List");
   const [showFilters, setShowFilters] = useState(false);
+  const [stateName, setStateName] = useState("");
+  const [districtName, setDistrictName] = useState("");
+  const [localbodyName, setLocalbodyName] = useState("");
   const { t } = props;
-  const limit = 15;
+  const limit = 14;
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -118,6 +124,74 @@ const HospitalListPage = (props: any) => {
     },
     [fetchData]
   );
+
+  const fetchStateName = useCallback(
+    async (status: statusType) => {
+      setIsLoading(true);
+      const res =
+        Number(qParams.state) &&
+        (await dispatchAction(getState(qParams.state)));
+      if (!status.aborted) {
+        setStateName(res?.data?.name);
+        setIsLoading(false);
+      }
+    },
+    [dispatchAction, qParams.state]
+  );
+
+  useAbortableEffect(
+    (status: statusType) => {
+      fetchStateName(status);
+    },
+    [fetchStateName]
+  );
+
+  const fetchDistrictName = useCallback(
+    async (status: statusType) => {
+      setIsLoading(true);
+      const res =
+        Number(qParams.district) &&
+        (await dispatchAction(getDistrict(qParams.district)));
+      if (!status.aborted) {
+        setDistrictName(res?.data?.name);
+        setIsLoading(false);
+      }
+    },
+    [dispatchAction, qParams.district]
+  );
+
+  useAbortableEffect(
+    (status: statusType) => {
+      fetchDistrictName(status);
+    },
+    [fetchDistrictName]
+  );
+
+  const fetchLocalbodyName = useCallback(
+    async (status: statusType) => {
+      setIsLoading(true);
+      const res =
+        Number(qParams.local_body) &&
+        (await dispatchAction(getLocalBody({ id: qParams.local_body })));
+      if (!status.aborted) {
+        setLocalbodyName(res?.data?.name);
+        setIsLoading(false);
+      }
+    },
+    [dispatchAction, qParams.local_body]
+  );
+
+  useAbortableEffect(
+    (status: statusType) => {
+      fetchLocalbodyName(status);
+    },
+    [fetchLocalbodyName]
+  );
+
+  const findFacilityTypeById = (id: number) => {
+    const facility_type = FACILITY_TYPES.find((type) => type.id == id);
+    return facility_type?.text;
+  };
 
   const onSearchSuspects = (search: string) => {
     if (search !== "") setQueryParams({ search }, true);
@@ -230,14 +304,14 @@ const HospitalListPage = (props: any) => {
           <div className="block rounded-lg bg-white shadow h-full hover:border-primary-500 overflow-hidden">
             <div className="h-full flex flex-col justify-between">
               <div className="px-6 py-4">
-                <div className="inline-flex items-center px-2.5 py-0.5 mr-4 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800">
-                  {facility.facility_type}
-                </div>
                 {facility.kasp_empanelled && (
                   <div className="mt-2 inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-yellow-100 text-yellow-800">
                     {MJPJAY}
                   </div>
                 )}
+                <div className="inline-flex float-right items-center px-2.5 py-0.5 mt-2 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800">
+                  {facility.facility_type}
+                </div>
                 <div className="font-black text-2xl capitalize mt-2">
                   {facility.name}
                 </div>
@@ -280,7 +354,7 @@ const HospitalListPage = (props: any) => {
                   <span className="inline-flex rounded-md shadow-sm">
                     <button
                       type="button"
-                      className="inline-flex items-center px-3 py-2 border border-green-500 text-sm leading-4 font-medium rounded-md text-green-700 bg-white hover:text-green-500 focus:outline-none focus:border-green-300 focus:shadow-outline-blue active:text-green-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                      className="inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:shadow-outline-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
                       onClick={() => navigate(`/facility/${facility.id}`)}
                     >
                       {t("View Facility")}
@@ -370,7 +444,7 @@ const HospitalListPage = (props: any) => {
                       }}
                     />
                     <button
-                      className="bg-green-600 hover:shadow-md px-2 ml-2 my-2  rounded"
+                      className="bg-primary-600 hover:shadow-md px-2 ml-2 my-2  rounded"
                       onClick={handleDownloader}
                     >
                       <svg
@@ -508,10 +582,14 @@ const HospitalListPage = (props: any) => {
         </SlideOver>
       </div>
       <div className="flex space-x-2 mt-2 flex-wrap w-full col-span-3 space-y-1">
-        {badge("State", qParams.state, "state")}
-        {badge("District", qParams.district, "district")}
-        {badge("Local Body", qParams.local_body, "local_body")}
-        {badge("Facility Type", qParams.facility_type, "facility_type")}
+        {badge("State", stateName, "state")}
+        {badge("District", districtName, "district")}
+        {badge("Local Body", localbodyName, "local_body")}
+        {badge(
+          "Facility Type",
+          findFacilityTypeById(qParams.facility_type),
+          "facility_type"
+        )}
         {qParams.kasp_empanelled &&
           badge(
             "MJPJAY Empanelled",

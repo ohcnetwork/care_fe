@@ -76,6 +76,7 @@ const initForm: any = {
   is_telemedicine: "false",
   action: "PENDING",
   assigned_to: "",
+  assigned_to_object: null,
 };
 
 const initError = Object.assign(
@@ -136,10 +137,8 @@ export const ConsultationForm = (props: any) => {
   const { facilityId, patientId, id } = props;
   const [state, dispatch] = useReducer(consultationFormReducer, initialState);
   const [dischargeAdvice, setDischargeAdvice] = useState<Prescription_t[]>([]);
-  const [
-    selectedFacility,
-    setSelectedFacility,
-  ] = useState<FacilityModel | null>(null);
+  const [selectedFacility, setSelectedFacility] =
+    useState<FacilityModel | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const headerText = !id ? "Consultation" : "Edit Consultation";
@@ -400,9 +399,10 @@ export const ConsultationForm = (props: any) => {
     }
   };
 
-  const handleOnSelect = (id: string) => {
+  const handleDoctorSelect = (doctor: any) => {
     const form = { ...state.form };
-    form["assigned_to"] = id;
+    form["assigned_to"] = doctor.id;
+    form["assigned_to_object"] = doctor;
     dispatch({ type: "set_form", form });
   };
 
@@ -793,7 +793,8 @@ export const ConsultationForm = (props: any) => {
                 <div className="md:col-span-1">
                   <OnlineDoctorsSelect
                     userId={state.form.assigned_to}
-                    onSelect={handleOnSelect}
+                    selectedDoctor={state.form.assigned_to_object}
+                    onSelect={handleDoctorSelect}
                   />
                 </div>
               )}

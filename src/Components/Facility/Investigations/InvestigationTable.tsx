@@ -46,7 +46,7 @@ const TestRow = ({ data, onChange, showForm, value, isChanged }: any) => {
       ? "number"
       : "string";
   return (
-    <StyledTableRow className={isChanged ? "bg-green-300" : ""}>
+    <StyledTableRow className={isChanged ? "bg-primary-300" : ""}>
       <TableCell className={tableClass}>
         {data?.investigation_object?.name || "---"}
       </TableCell>
@@ -135,6 +135,15 @@ export const InvestigationTable = ({
         {title && <div className="font-bold text-xl">{title}</div>}
         <div>
           <Button
+            color="primary"
+            variant="outlined"
+            onClick={() => window.print()}
+            className="mr-2"
+            disabled={showForm}
+          >
+            Print Report
+          </Button>
+          <Button
             variant={showForm ? "outlined" : "contained"}
             color="primary"
             onClick={() => {
@@ -157,8 +166,7 @@ export const InvestigationTable = ({
           )}
         </div>
       </div>
-
-      <InputLabel>Search Test</InputLabel>
+      <InputLabel className="mt-4">Search Test</InputLabel>
       <TextInputField
         value={searchFilter}
         placeholder="Search test"
@@ -168,7 +176,7 @@ export const InvestigationTable = ({
         onChange={(e) => setSearchFilter(e.target.value)}
       />
       <br />
-      <TableContainer component={Paper}>
+      <TableContainer component={Paper} id="section-to-print">
         <Table aria-label="simple table" size="small">
           <TableHead>
             <TableRow>

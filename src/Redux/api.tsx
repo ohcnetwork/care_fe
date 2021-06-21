@@ -82,6 +82,15 @@ export default {
     path: "/api/v1/users/?user_type=Doctor&ordering=-last_login",
   },
 
+  getUserPnconfig: {
+    path: "/api/v1/users/{username}/pnconfig/",
+  },
+
+  updateUserPnconfig: {
+    path: "/api/v1/users/{username}/pnconfig/",
+    method: "PATCH",
+  },
+
   // Facility Endpoints
 
   listFacility: {
@@ -262,6 +271,14 @@ export default {
   transferPatient: {
     path: "/api/v1/patient/{id}/transfer/",
     method: "POST",
+  },
+  getPatientNotes: {
+    path: "/api/v1/patient/{patientId}/notes/",
+    method: "GET"
+  },
+  addPatientNote: {
+    path: "/api/v1/patient/{patientId}/notes/",
+    method: "POST"
   },
   sampleTestList: {
     path: "/api/v1/patient/{patientId}/test_sample/",
@@ -450,9 +467,15 @@ export default {
     method: "GET",
   },
 
-  // Notifications List
+  // Notifications
   getNotifications: {
     path: "/api/v1/notification/",
+  },
+  getNotificationData: {
+    path: "/api/v1/notification/{id}/",
+  },
+  getPublicKey: {
+    path: "/api/v1/notification/public_key/",
   },
 
   // FileUpload Create
