@@ -12,7 +12,12 @@ import React, { useEffect, useState, useCallback } from "react";
 import { CSVLink } from "react-csv";
 import { useDispatch } from "react-redux";
 import SwipeableViews from "react-swipeable-views";
-import { getAllPatient, getDistrict, getLocalBody } from "../../Redux/actions";
+import {
+  getAllPatient,
+  getDistrict,
+  getLocalBody,
+  getFacility,
+} from "../../Redux/actions";
 import { PhoneNumberField } from "../Common/HelperInputFields";
 import NavTabs from "../Common/NavTabs";
 import Pagination from "../Common/Pagination";
@@ -110,6 +115,7 @@ export const PatientManager = (props: any) => {
 
   const [districtName, setDistrictName] = useState("");
   const [localbodyName, setLocalbodyName] = useState("");
+  const [facilityName, setFacilityName] = useState("");
 
   const tabValue = qParams.is_active === "False" ? 1 : 0;
 
@@ -279,6 +285,25 @@ export const PatientManager = (props: any) => {
       fetchLocalbodyName(status);
     },
     [fetchLocalbodyName]
+  );
+
+  const fetchFacilityName = useCallback(
+    async (status: statusType) => {
+      setIsLoading(true);
+      const res = await dispatch(getFacility(qParams.facility));
+      if (!status.aborted) {
+        setFacilityName(res?.data?.name);
+        setIsLoading(false);
+      }
+    },
+    [dispatch, qParams.facility]
+  );
+
+  useAbortableEffect(
+    (status: statusType) => {
+      fetchFacilityName(status);
+    },
+    [fetchFacilityName]
   );
 
   const updateQuery = (params: any) => {
@@ -692,7 +717,7 @@ export const PatientManager = (props: any) => {
             )}
           {badge("COVIN ID", qParams.covin_id, "covin_id")}
 
-          {badge("Filtered By: Facility", qParams.facility, "facility")}
+          {badge("Facility", facilityName, "facility")}
           {badge("District", districtName, "district")}
           {badge("Ordering", qParams.ordering, "ordering")}
           {badge("Category", qParams.category, "category")}
