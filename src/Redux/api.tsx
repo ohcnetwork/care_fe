@@ -274,11 +274,11 @@ export default {
   },
   getPatientNotes: {
     path: "/api/v1/patient/{patientId}/notes/",
-    method: "GET"
+    method: "GET",
   },
   addPatientNote: {
     path: "/api/v1/patient/{patientId}/notes/",
-    method: "POST"
+    method: "POST",
   },
   sampleTestList: {
     path: "/api/v1/patient/{patientId}/test_sample/",
@@ -465,6 +465,10 @@ export default {
   },
   getPublicKey: {
     path: "/api/v1/notification/public_key/",
+  },
+  sendNotificationMessages: {
+    path: "/api/v1/notification/notify/",
+    method: "POST",
   },
 
   // FileUpload Create

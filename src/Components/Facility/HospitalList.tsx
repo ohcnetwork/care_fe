@@ -2,6 +2,7 @@ import { navigate, useQueryParams } from "raviger";
 import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
+import * as Notification from "../../Utils/Notifications.js";
 import { DOWNLOAD_TYPES, FACILITY_TYPES } from "../../Common/constants";
 import {
   getFacilities,
@@ -12,6 +13,7 @@ import {
   getState,
   getDistrict,
   getLocalBody,
+  sendNotificationMessages,
 } from "../../Redux/actions";
 import loadable from "@loadable/component";
 import { SelectField } from "../Common/HelperInputFields";
@@ -34,6 +36,7 @@ import { make as SlideOver } from "../Common/SlideOver.gen";
 import FacillityFilter from "./FacilityFilter";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { withTranslation } from "react-i18next";
+import { Modal } from "@material-ui/core";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -69,6 +72,8 @@ const HospitalListPage = (props: any) => {
   const [stateName, setStateName] = useState("");
   const [districtName, setDistrictName] = useState("");
   const [localbodyName, setLocalbodyName] = useState("");
+  const [openNotifyModal, setOpenNotifyModal] = useState(false);
+  const [notifyMessage, setNotifyMessage] = useState("Type your message...");
   const { t } = props;
   const limit = 14;
 
@@ -289,6 +294,21 @@ const HospitalListPage = (props: any) => {
     setOffset(offset);
   };
 
+  const handleNotifySubmit = async (id: any) => {
+    const data = {
+      facility: id,
+      message: notifyMessage,
+    };
+    const res = await dispatchAction(sendNotificationMessages(data));
+    if (res && res.status == 204) {
+      Notification.Success({
+        msg: "Facility Notified",
+      });
+    } else {
+      console.log("Notification NOT sent");
+    }
+  };
+
   const kaspOptionValues = [
     { id: "", text: "Not Selected" },
     { id: "true", text: "Yes" },
@@ -351,6 +371,48 @@ const HospitalListPage = (props: any) => {
                     </a>
                   </div>
                   <span className="inline-flex rounded-md shadow-sm">
+                    <button
+                      className="inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:shadow-outline-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow mr-5"
+                      onClick={(_) => setOpenNotifyModal(true)}
+                    >
+                      <Modal
+                        open={openNotifyModal}
+                        onClose={(_) => setOpenNotifyModal(false)}
+                        aria-labelledby="Notify This Facility"
+                        aria-describedby="Type a message and notify this facility"
+                        className=""
+                      >
+                        <div className="h-screen w-full absolute flex items-center justify-center bg-modal">
+                          <div className="bg-white rounded shadow p-8 m-4 max-w-sm max-h-full text-center flex flex-col">
+                            <div className="mb-4">
+                              <h1 className="text-2xl">
+                                Notify: {facility.name}
+                              </h1>
+                            </div>
+                            <div>
+                              <textarea
+                                id="NotifyModalMessageInput"
+                                className="h-32 w-full border p-2 shadow-lg"
+                                onChange={(e) =>
+                                  setNotifyMessage(e.target.value)
+                                }
+                              >
+                                Type your message...
+                              </textarea>
+                            </div>
+                            <div>
+                              <button
+                                className="btn-primary btn mt-4 mr-2 w-full md:w-auto"
+                                onClick={(_) => handleNotifySubmit(facility.id)}
+                              >
+                                Send Notification
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </Modal>
+                      <i className="far fa-comment-dots mr-1"></i> Notify
+                    </button>
                     <button
                       type="button"
                       className="inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:shadow-outline-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"

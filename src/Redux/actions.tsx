@@ -383,6 +383,9 @@ export const getPublicKey = () => {
   return fireRequest("getPublicKey", [], {}, {});
 };
 
+export const sendNotificationMessages = (params: object) => {
+  return fireRequest("sendNotificationMessages", [], params, {});
+};
 
 // FileUpload
 
