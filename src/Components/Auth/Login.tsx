@@ -101,8 +101,8 @@ const LoginPage = (props: any) => {
       <div className="absolute top-2 right-2">
         <LanguageSelector className="md:bg-primary-500 md:text-white bg-white" />
       </div>
-      <div className="flex flex-col justify-center h-1/2 md:w-1/2 md:h-full bg-primary-500">
-        <div className="pl-1/5">
+      <div className="flex flex-col justify-center items-center p-2 h-1/2 md:w-1/2 md:h-full bg-primary-500">
+        <div>
           <a href={"/"}>
             <img src={msinsLogo} className="my-auto max-h-36" alt="care logo" />{" "}
           </a>
