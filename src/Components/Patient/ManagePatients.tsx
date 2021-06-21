@@ -56,7 +56,7 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
-function Badge(props: { color: string; icon: string; text: string }) {
+export function Badge(props: { color: string; icon: string; text: string }) {
   return (
     <span
       className="m-1 inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-gray-100 text-gray-700"
