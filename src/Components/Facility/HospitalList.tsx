@@ -10,6 +10,7 @@ import {
   downloadFacilityDoctors,
   downloadFacilityTriage,
   getState,
+  getDivisionByState,
   getDistrict,
   getLocalBody,
 } from "../../Redux/actions";
@@ -35,6 +36,7 @@ import { make as SlideOver } from "../Common/SlideOver.gen";
 import FacillityFilter from "./FacilityFilter";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { withTranslation } from "react-i18next";
+import { any } from "cypress/types/bluebird";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -68,6 +70,7 @@ const HospitalListPage = (props: any) => {
   const [downloadSelect, setdownloadSelect] = useState("Facility List");
   const [showFilters, setShowFilters] = useState(false);
   const [stateName, setStateName] = useState("");
+  const [divisionName, setDivisionName] = useState("");
   const [districtName, setDistrictName] = useState("");
   const [localbodyName, setLocalbodyName] = useState("");
   const { t } = props;
@@ -82,6 +85,7 @@ const HospitalListPage = (props: any) => {
             offset,
             search_text: qParams.search,
             state: qParams.state,
+            division: qParams.division,
             district: qParams.district,
             local_body: qParams.local_body,
             facility_type: qParams.facility_type,
@@ -91,6 +95,7 @@ const HospitalListPage = (props: any) => {
             limit,
             offset,
             state: qParams.state,
+            division: qParams.division,
             district: qParams.district,
             local_body: qParams.local_body,
             facility_type: qParams.facility_type,
@@ -112,6 +117,7 @@ const HospitalListPage = (props: any) => {
       qParams.search,
       qParams.kasp_empanelled,
       qParams.state,
+      qParams.division,
       qParams.district,
       qParams.local_body,
       qParams.facility_type,
@@ -144,6 +150,30 @@ const HospitalListPage = (props: any) => {
       fetchStateName(status);
     },
     [fetchStateName]
+  );
+
+  const fetchDivisionName = useCallback(
+    async (status: statusType) => {
+      setIsLoading(true);
+      const res =
+        Number(qParams.division) &&
+        (await dispatchAction(getDivisionByState({ id: qParams.state })));
+      if (!status.aborted) {
+        let name = res?.data?.find(
+          (item: any) => item.id === Number(qParams.division)
+        );
+        setDivisionName(name?.name);
+        setIsLoading(false);
+      }
+    },
+    [dispatchAction, qParams.division]
+  );
+
+  useAbortableEffect(
+    (status: statusType) => {
+      fetchDivisionName(status);
+    },
+    [fetchDivisionName]
   );
 
   const fetchDistrictName = useCallback(
@@ -243,6 +273,7 @@ const HospitalListPage = (props: any) => {
   const hasFiltersApplied = (qParams: any) => {
     return (
       qParams.state ||
+      qParams.division ||
       qParams.district ||
       qParams.local_body ||
       qParams.facility_type ||
@@ -583,6 +614,7 @@ const HospitalListPage = (props: any) => {
       </div>
       <div className="flex space-x-2 mt-2 flex-wrap w-full col-span-3 space-y-1">
         {badge("State", stateName, "state")}
+        {badge("Division", divisionName, "division")}
         {badge("District", districtName, "district")}
         {badge("Local Body", localbodyName, "local_body")}
         {badge(
