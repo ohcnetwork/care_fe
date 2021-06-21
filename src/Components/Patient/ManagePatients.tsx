@@ -8,11 +8,11 @@ import ArrowDownwardIcon from "@material-ui/icons/ArrowDownward";
 import { navigate, useQueryParams } from "raviger";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import moment from "moment";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { CSVLink } from "react-csv";
 import { useDispatch } from "react-redux";
 import SwipeableViews from "react-swipeable-views";
-import { getAllPatient } from "../../Redux/actions";
+import { getAllPatient, getDistrict } from "../../Redux/actions";
 import { PhoneNumberField } from "../Common/HelperInputFields";
 import NavTabs from "../Common/NavTabs";
 import Pagination from "../Common/Pagination";
@@ -26,6 +26,7 @@ import {
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import PatientFilterV2 from "./PatientFilterV2";
 import { parseOptionId } from "../../Common/utils";
+import { statusType, useAbortableEffect } from "../../Common/utils";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -106,6 +107,8 @@ export const PatientManager = (props: any) => {
   const [DownloadFile, setDownloadFile] = useState("");
   const [qParams, setQueryParams] = useQueryParams();
   const [showFilters, setShowFilters] = useState(false);
+
+  const [districtName, setDistrictName] = useState("");
 
   const tabValue = qParams.is_active === "False" ? 1 : 0;
 
@@ -234,6 +237,27 @@ export const PatientManager = (props: any) => {
     qParams.last_consultation_symptoms_onset_date_after,
     qParams.last_consultation_is_telemedicine,
   ]);
+
+  const fetchDistrictName = useCallback(
+    async (status: statusType) => {
+      setIsLoading(true);
+      const res =
+        Number(qParams.district) &&
+        (await dispatch(getDistrict(qParams.district)));
+      if (!status.aborted) {
+        setDistrictName(res?.data?.name);
+        setIsLoading(false);
+      }
+    },
+    [dispatch, qParams.district]
+  );
+
+  useAbortableEffect(
+    (status: statusType) => {
+      fetchDistrictName(status);
+    },
+    [fetchDistrictName]
+  );
 
   const updateQuery = (params: any) => {
     const nParams = Object.assign({}, qParams, params);
@@ -647,7 +671,7 @@ export const PatientManager = (props: any) => {
           {badge("COVIN ID", qParams.covin_id, "covin_id")}
 
           {badge("Filtered By: Facility", qParams.facility, "facility")}
-          {badge("Filtered By: District", qParams.district, "district")}
+          {badge("District", districtName, "district")}
           {badge("Ordering", qParams.ordering, "ordering")}
           {badge("Category", qParams.category, "category")}
           {badge("Disease Status", qParams.disease_status, "disease_status")}
