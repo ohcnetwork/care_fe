@@ -2,7 +2,6 @@ import React, { useReducer, useState, useEffect } from "react";
 import { createAsset, listFacilityAssetLocation } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import * as Notification from "../../Utils/Notifications.js";
-import loadable from "@loadable/component";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import {
   Button,
@@ -22,7 +21,7 @@ import {
   MultilineInputField,
 } from "../Common/HelperInputFields";
 
-const PageTitle = loadable(() => import("../Common/PageTitle"));
+import PageTitle from "../Common/PageTitle";
 const initForm: any = {
   name: "",
   asset_type: "",
@@ -84,11 +83,6 @@ const AssetCreate = (props: AssetProps) => {
   };
 
   const { facilityId } = props;
-  // const handleValueChange = (value: any, name: string) => {
-  //   const form = { ...state.form };
-  //   form[name] = value;
-  //   dispatch({ type: "set_form", form });
-  // };
 
   const validateForm = () => {
     let errors = { ...initError };
