@@ -1,10 +1,7 @@
-import React, { useCallback } from "react";
-import { navigate, useQueryParams } from "raviger";
+import { navigate } from "raviger";
+import React, { useCallback, useState, useEffect } from "react";
 import { SelectField } from "../../Common/HelperInputFields";
-import { useEffect, useState } from "react";
 import { CircularProgress } from "@material-ui/core";
-import DistrictSelect from "./DistrictSelect";
-import LocalBodySelect from "./LocalBodySelect";
 import { FACILITY_TYPES } from "../../../Common/constants";
 import {
   getStates,
@@ -12,8 +9,8 @@ import {
   getDistrictByDivision,
   getLocalbodyByDistrict,
 } from "../../../Redux/actions";
-import { useDispatch } from "react-redux";
 import { debounce } from "lodash";
+import { useDispatch } from "react-redux";
 
 function useMergeState(initialState: any) {
   const [state, setState] = useState(initialState);
@@ -58,6 +55,7 @@ function FacillityFilter(props: any) {
     },
     [dispatchAction]
   );
+
   const fetchDistricts = useCallback(
     async (id: string) => {
       if (Number(id) > 0) {

@@ -102,9 +102,7 @@ export default function InventoryLog(props: any) {
           <div className="flex items-center">
             <div className="ml-3">
               <p className="text-gray-900 whitespace-no-wrap">
-                {moment(inventoryItem.created_date).format(
-                  "DD-MM-YYYY LTS"
-                )}
+                {moment(inventoryItem.created_date).format("DD-MM-YYYY LTS")}
               </p>
             </div>
           </div>
@@ -121,7 +119,7 @@ export default function InventoryLog(props: any) {
         <td className="px-5 py-5 border-b border-gray-200 text-sm hover:bg-gray-100">
           <p className="text-gray-900 whitespace-no-wrap lowercase">
             {inventoryItem.is_incoming ? (
-              <span className="ml-2 text-green-600">Added Stock</span>
+              <span className="ml-2 text-primary-600">Added Stock</span>
             ) : (
               <span className="ml-2 text-red-600">Used Stock</span>
             )}
@@ -134,7 +132,7 @@ export default function InventoryLog(props: any) {
             className="btn btn-default"
           >
             {inventoryItem.probable_accident ? (
-              <span className="text-green-500">
+              <span className="text-primary-500">
                 <i className="fas fa-exclamation-triangle pr-2"></i>UnMark
               </span>
             ) : (
@@ -172,16 +170,16 @@ export default function InventoryLog(props: any) {
             <table className="min-w-full leading-normal shadow rounded-lg overflow-hidden">
               <thead>
                 <tr>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-green-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-primary-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
                     Created On
                   </th>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-green-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-primary-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
                     Quantity
                   </th>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-green-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-primary-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-green-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-primary-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>

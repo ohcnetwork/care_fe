@@ -10,7 +10,7 @@ import {
   SelectField,
   TextInputField,
 } from "../Common/HelperInputFields";
-import { parsePhoneNumberFromString } from "libphonenumber-js";
+import { parsePhoneNumberFromString } from "libphonenumber-js/max";
 import { validateEmailAddress, phonePreg } from "../../Common/validation";
 import * as Notification from "../../Utils/Notifications.js";
 import { checkIfLatestBundle } from "../../Utils/build-meta-info";
@@ -23,6 +23,7 @@ const initForm: any = {
   gender: "",
   email: "",
   phoneNumber: "",
+  altPhoneNumber: "",
 };
 
 const initError = Object.assign(
@@ -93,6 +94,7 @@ export default function UserProfile() {
             })[0].id,
             email: res.data.email,
             phoneNumber: res.data.phone_number,
+            altPhoneNumber: res.data.alt_phone_number,
           };
           dispatch({
             type: "set_form",
@@ -117,6 +119,12 @@ export default function UserProfile() {
     dispatch({ type: "set_form", form });
   };
 
+  const handleWhatsappNumberChange = (value: any) => {
+    let form = { ...states.form };
+    form["altPhoneNumber"] = value;
+    dispatch({ type: "set_form", form });
+  };
+
   const validateForm = () => {
     let errors = { ...initError };
     let invalidForm = false;
@@ -125,7 +133,7 @@ export default function UserProfile() {
         case "firstName":
         case "lastName":
         case "gender":
-          if (!states.form[field]) {
+          if (!states.form[field] || states.form[field] === "0") {
             errors[field] = "Field is required";
             invalidForm = true;
           }
@@ -134,14 +142,48 @@ export default function UserProfile() {
           if (!states.form[field]) {
             errors[field] = "This field is required";
             invalidForm = true;
+          } else if (
+            states.form[field] <= 0 ||
+            !/^\d+$/.test(states.form[field])
+          ) {
+            errors[field] = "Age must be a number greater than 0";
+            invalidForm = true;
           }
           return;
         case "phoneNumber":
           const phoneNumber = parsePhoneNumberFromString(
-            states.form[field]
-          )?.number;
-          if (!states.form[field] || !phonePreg(String(phoneNumber))) {
+            states.form[field],
+            "IN"
+          );
+
+          let is_valid: boolean = false;
+          if (phoneNumber) {
+            is_valid = phoneNumber.isValid();
+          }
+
+          if (!states.form[field] || !is_valid) {
             errors[field] = "Please enter valid phone number";
+            invalidForm = true;
+          }
+          return;
+        case "altPhoneNumber":
+          let alt_is_valid: boolean = false;
+          if (states.form[field] && states.form[field] !== "+91") {
+            const altPhoneNumber = parsePhoneNumberFromString(
+              states.form[field],
+              "IN"
+            );
+            if (altPhoneNumber) {
+              alt_is_valid = altPhoneNumber.isValid();
+            }
+          }
+
+          if (
+            states.form[field] &&
+            states.form[field] !== "+91" &&
+            !alt_is_valid
+          ) {
+            errors[field] = "Please enter valid mobile number";
             invalidForm = true;
           }
           return;
@@ -167,6 +209,12 @@ export default function UserProfile() {
     }
   };
 
+  const handleWhatsappNumChange = (phoneNo: any, name: string) => {
+    const form = { ...states.form };
+    form[name] = phoneNo;
+    dispatch({ type: "set_form", form });
+  };
+
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     const validForm = validateForm();
@@ -180,6 +228,10 @@ export default function UserProfile() {
         phone_number: parsePhoneNumberFromString(
           states.form.phoneNumber
         )?.format("E.164"),
+        alt_phone_number:
+          parsePhoneNumberFromString(states.form.altPhoneNumber)?.format(
+            "E.164"
+          ) || "",
         gender: Number(states.form.gender),
         age: states.form.age,
       };
@@ -199,6 +251,7 @@ export default function UserProfile() {
           })[0].text,
           email: states.form.email,
           phone_number: states.form.phoneNumber,
+          alt_phone_number: states.form.altPhoneNumber,
         });
         setShowEdit(false);
       }
@@ -244,7 +297,7 @@ export default function UserProfile() {
               <button
                 onClick={(_) => setShowEdit(!showEdit)}
                 type="button"
-                className="relative inline-flex items-center px-4 py-2 border border-transparent text-sm leading-5 font-medium rounded-md text-white bg-green-600 hover:bg-green-500 focus:outline-none focus:shadow-outline-green focus:border-green-700 active:bg-green-700 mt-4"
+                className="relative inline-flex items-center px-4 py-2 border border-transparent text-sm leading-5 font-medium rounded-md text-white bg-primary-600 hover:bg-primary-500 focus:outline-none focus:shadow-outline-primary focus:border-primary-700 active:bg-primary-700 mt-4"
               >
                 {showEdit ? "Cancel" : "Edit User Profile"}
               </button>
@@ -268,6 +321,15 @@ export default function UserProfile() {
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.phone_number || "-"}
+                    </dd>
+                  </div>
+
+                  <div className="sm:col-span-1">
+                    <dt className="text-sm leading-5 font-medium text-gray-500">
+                      Whatsapp No
+                    </dt>
+                    <dd className="mt-1 text-sm leading-5 text-gray-900">
+                      {details.alt_phone_number || "-"}
                     </dd>
                   </div>
                   <div className="sm:col-span-1">
@@ -371,7 +433,7 @@ export default function UserProfile() {
                           htmlFor="firstName"
                           className="block text-sm font-medium leading-5 text-gray-700"
                         >
-                          First name
+                          First name*
                         </label>
                         <TextInputField
                           name="firstName"
@@ -390,7 +452,7 @@ export default function UserProfile() {
                           htmlFor="lastName"
                           className="block text-sm font-medium leading-5 text-gray-700"
                         >
-                          Last name
+                          Last name*
                         </label>
                         <TextInputField
                           name="lastName"
@@ -409,7 +471,7 @@ export default function UserProfile() {
                           htmlFor="age"
                           className="block text-sm font-medium leading-5 text-gray-700"
                         >
-                          Age
+                          Age*
                         </label>
                         <TextInputField
                           name="age"
@@ -427,7 +489,7 @@ export default function UserProfile() {
                           htmlFor="gender"
                           className="block text-sm font-medium leading-5 text-gray-700"
                         >
-                          Gender
+                          Gender*
                         </label>
                         <SelectField
                           name="gender"
@@ -444,14 +506,26 @@ export default function UserProfile() {
                         <PhoneNumberField
                           label="Phone Number*"
                           value={states.form.phoneNumber}
-                          onChange={(value: any) => [
-                            handleValueChange(value, "phoneNumber"),
-                          ]}
+                          onChange={(value: any) => {
+                            handleValueChange(value, "phoneNumber");
+                          }}
                           errors={states.errors.phoneNumber}
                         />
                       </div>
+
                       <div className="col-span-6 sm:col-span-3">
-                        <InputLabel id="email-label">Email*</InputLabel>
+                        <PhoneNumberField
+                          name="altPhoneNumber"
+                          label="Whatsapp Number"
+                          value={states.form.altPhoneNumber}
+                          onChange={(value: any) => {
+                            handleWhatsappNumChange(value, "altPhoneNumber");
+                          }}
+                          errors={states.errors.altPhoneNumber}
+                        />
+                      </div>
+                      <div className="col-span-6 sm:col-span-3">
+                        <InputLabel id="email-label">Email</InputLabel>
                         <TextInputField
                           name="email"
                           variant="outlined"

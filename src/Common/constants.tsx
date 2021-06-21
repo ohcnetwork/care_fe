@@ -1,5 +1,8 @@
 import { MJPJAY } from "./mahakavach";
 
+import keralaLogo from "../../public/images/kerala-logo.png";
+
+export const KeralaLogo = keralaLogo;
 export interface OptionsType {
   id: number;
   text: string;
@@ -352,6 +355,9 @@ export const SAMPLE_TYPE_CHOICES = [
   "Blood in EDTA",
   "Acute Sera",
   "Covalescent sera",
+  "Biopsy",
+  "AMR",
+  "Communicable Diseases",
   "OTHER TYPE",
 ];
 

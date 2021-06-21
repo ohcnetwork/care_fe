@@ -83,7 +83,10 @@ export default function ListView() {
   const fetchData = () => {
     setIsLoading(true);
     dispatch(
-      listResourceRequests(formatFilter({ ...qParams, offset }), "resource-list-call")
+      listResourceRequests(
+        formatFilter({ ...qParams, offset }),
+        "resource-list-call"
+      )
     ).then((res: any) => {
       if (res && res.data) {
         setData(res.data.results);
@@ -122,11 +125,7 @@ export default function ListView() {
     return data.map((resource: any) => (
       <div key={`resource_${resource.id}`} className="w-1/2 mt-6 md:px-4">
         <div className="overflow-hidden shadow rounded-lg bg-white h-full">
-          <div
-            className={
-              "p-4 h-full flex flex-col justify-between"
-            }
-          >
+          <div className={"p-4 h-full flex flex-col justify-between"}>
             <div>
               <div className="flex justify-between">
                 <div className="font-bold text-xl capitalize mb-2">
@@ -238,7 +237,7 @@ export default function ListView() {
         </div>
         <div>
           <button
-            className="px-4 py-2 rounded-full border-2 border-gray-200 text-sm bg-white text-gray-800 w-32 leading-none transition-colors duration-300 ease-in focus:outline-none hover:text-green-600 hover:border-gray-400 focus:text-green-600 focus:border-gray-400"
+            className="px-4 py-2 rounded-full border-2 border-gray-200 text-sm bg-white text-gray-800 w-32 leading-none transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 hover:border-gray-400 focus:text-primary-600 focus:border-gray-400"
             onClick={onBoardViewBtnClick}
           >
             <i
@@ -250,7 +249,7 @@ export default function ListView() {
         </div>
         <div className="flex items-start gap-2">
           <button
-            className="flex leading-none border-2 border-gray-200 bg-white rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-green-600 focus:text-green-600 focus:border-gray-400 hover:border-gray-400 rounded-r-full px-4 py-2 text-sm"
+            className="flex leading-none border-2 border-gray-200 bg-white rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 focus:text-primary-600 focus:border-gray-400 hover:border-gray-400 rounded-r-full px-4 py-2 text-sm"
             onClick={(_) => setShowFilters((show) => !show)}
           >
             <i className="fa fa-filter mr-1" aria-hidden="true"></i>
@@ -286,8 +285,7 @@ export default function ListView() {
         )}
         {badge(
           "Filtered By",
-          appliedFilters.approving_facility &&
-            "Resource Approving Facility"
+          appliedFilters.approving_facility && "Resource Approving Facility"
         )}
       </div>
 

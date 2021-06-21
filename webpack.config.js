@@ -15,9 +15,8 @@ const prodPlugins = (isDev) => {
   }
 
   return [
-    new WorkboxPlugin.GenerateSW({
-      clientsClaim: true,
-      skipWaiting: true,
+    new WorkboxPlugin.InjectManifest({
+      swSrc: "./src/service-worker.js",
       maximumFileSizeToCacheInBytes: 7340032,
       exclude: ["build-meta.json", /\.map$/],
     }),

@@ -90,7 +90,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const RESULT_LIMIT = 15;
+const RESULT_LIMIT = 14;
 
 export const PatientManager = (props: any) => {
   const { facilityId } = props;
@@ -154,6 +154,8 @@ export const PatientManager = (props: any) => {
       qParams.last_consultation_symptoms_onset_date_before || undefined,
     last_consultation_symptoms_onset_date_after:
       qParams.last_consultation_symptoms_onset_date_after || undefined,
+    last_consultation_is_telemedicine:
+      qParams.last_consultation_is_telemedicine || undefined,
   };
 
   let managePatients: any = null;
@@ -229,6 +231,7 @@ export const PatientManager = (props: any) => {
     qParams.date_of_result_after,
     qParams.last_consultation_symptoms_onset_date_before,
     qParams.last_consultation_symptoms_onset_date_after,
+    qParams.last_consultation_is_telemedicine,
   ]);
 
   const updateQuery = (params: any) => {
@@ -348,7 +351,7 @@ export const PatientManager = (props: any) => {
               {patient.allow_transfer ? (
                 <Badge color="yellow" icon="unlock" text="Transfer Allowed" />
               ) : (
-                <Badge color="green" icon="lock" text="Transfer Blocked" />
+                <Badge color="primary" icon="lock" text="Transfer Blocked" />
               )}
               {patient.disease_status === "POSITIVE" && (
                 <Badge color="red" icon="radiation" text="Positive" />
@@ -356,7 +359,7 @@ export const PatientManager = (props: any) => {
               {["NEGATIVE", "RECOVERED"].indexOf(patient.disease_status) >=
                 0 && (
                 <Badge
-                  color="green"
+                  color="primary"
                   icon="smile-beam"
                   text={patient.disease_status}
                 />
@@ -387,6 +390,20 @@ export const PatientManager = (props: any) => {
                   icon="exclamation-triangle"
                   text="Patient Expired"
                 />
+              )}
+              {(!patient.last_consultation ||
+                patient.last_consultation?.facility !== patient.facility) && (
+                <span className="relative inline-flex">
+                  <Badge
+                    color="red"
+                    icon="notes-medical"
+                    text="No Consultation Filed"
+                  />
+                  <span className="flex absolute h-3 w-3 top-0 right-0 -mt-1 -mr-1">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span>
+                  </span>
+                </span>
               )}
             </div>
             <div className="px-2">
@@ -647,6 +664,11 @@ export const PatientManager = (props: any) => {
             "Onset of symptoms after",
             qParams.last_consultation_symptoms_onset_date_after,
             "last_consultation_symptoms_onset_date_after"
+          )}
+          {badge(
+            "Telemedicine",
+            qParams.last_consultation_is_telemedicine,
+            "last_consultation_is_telemedicine"
           )}
         </div>
       </div>

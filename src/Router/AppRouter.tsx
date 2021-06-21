@@ -12,6 +12,7 @@ import { TriageForm } from "../Components/Facility/TriageForm";
 import { DailyRoundListDetails } from "../Components/Patient/DailyRoundListDetails";
 import { DailyRounds } from "../Components/Patient/DailyRounds";
 import { PatientManager } from "../Components/Patient/ManagePatients";
+import PatientNotes from "../Components/Patient/PatientNotes";
 import { PatientHome } from "../Components/Patient/PatientHome";
 import { PatientRegister } from "../Components/Patient/PatientRegister";
 import { SampleDetails } from "../Components/Patient/SampleDetails";
@@ -48,6 +49,7 @@ import ShowInvestigation from "../Components/Facility/Investigations/ShowInvesti
 import InvestigationReports from "../Components/Facility/Investigations/Reports";
 import { withTranslation } from "react-i18next";
 import DeathReport from "../Components/DeathReport/DeathReport";
+import ShowPushNotification from "../Components/Notifications/ShowPushNotification";
 
 const get = require("lodash.get");
 const img = "https://cdn.coronasafe.network/light-logo.svg";
@@ -108,6 +110,10 @@ const routes = {
   "/facility/:facilityId/patient/:patientId/sample/:id": ({ id }: any) => (
     <SampleDetails id={id} />
   ),
+  "/facility/:facilityId/patient/:patientId/notes/": ({
+    facilityId,
+    patientId,
+  }: any) => <PatientNotes patientId={patientId} facilityId={facilityId} />,
   "/facility/:facilityId/patient/:patientId/files/": ({
     facilityId,
     patientId,
@@ -142,14 +148,17 @@ const routes = {
   }: any) => (
     <ConsultationForm facilityId={facilityId} patientId={patientId} id={id} />
   ),
-  "/facility/:facilityId/patient/:patientId/consultation/:id":
-    ({ facilityId, patientId, id }: any) => (
-      <ConsultationDetails
-        facilityId={facilityId}
-        patientId={patientId}
-        consultationId={id}
-      />
-    ),
+  "/facility/:facilityId/patient/:patientId/consultation/:id": ({
+    facilityId,
+    patientId,
+    id,
+  }: any) => (
+    <ConsultationDetails
+      facilityId={facilityId}
+      patientId={patientId}
+      consultationId={id}
+    />
+  ),
   "/facility/:facilityId/patient/:patientId/consultation/:id/files/": ({
     facilityId,
     patientId,
@@ -165,8 +174,11 @@ const routes = {
       unspecified={true}
     />
   ),
-  "/facility/:facilityId/patient/:patientId/consultation/:id/investigation/": 
-  ({ facilityId, patientId, id }: any) => (
+  "/facility/:facilityId/patient/:patientId/consultation/:id/investigation/": ({
+    facilityId,
+    patientId,
+    id,
+  }: any) => (
     <Investigation
       consultationId={id}
       facilityId={facilityId}
@@ -174,7 +186,7 @@ const routes = {
     />
   ),
   "/facility/:facilityId/patient/:patientId/consultation/:id/investigationSessions":
-    ({ facilityId, patientId, id  }: any) => (
+    ({ facilityId, patientId, id }: any) => (
       <ViewInvestigations
         consultationId={id}
         facilityId={facilityId}
@@ -277,6 +289,9 @@ const routes = {
   "/external_results/upload": () => <ExternalResultUpload />,
   "/external_results/:id": ({ id }: any) => <ResultItem id={id} />,
   "/death_report/:id": ({ id }: any) => <DeathReport id={id} />,
+  "/show_notification/:id": (id: any) => (
+    <ShowPushNotification external_id={id} />
+  ),
 };
 
 let menus = [
@@ -353,7 +368,7 @@ const AppRouter = (props: any) => {
             <div className="fixed inset-0">
               <div className="absolute inset-0 bg-gray-600 opacity-75"></div>
             </div>
-            <div className="relative flex-1 flex flex-col max-w-xs w-full pt-5 pb-4 bg-green-800">
+            <div className="relative flex-1 flex flex-col max-w-xs w-full pt-5 pb-4 bg-primary-800">
               <div className="absolute top-0 right-0 -mr-14 p-1">
                 <button
                   onClick={(_) => setDrawer(false)}
@@ -385,8 +400,8 @@ const AppRouter = (props: any) => {
                   {menus.map((item) => {
                     const parts = item.link.split("/");
                     const selectedClasses = url.includes(parts && parts[1])
-                      ? "mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-white rounded-md bg-green-900 focus:outline-none focus:bg-green-900 transition ease-in-out duration-150"
-                      : "mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-green-300 rounded-md hover:text-white hover:bg-green-700 focus:outline-none focus:bg-green-900 transition ease-in-out duration-150";
+                      ? "mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-white rounded-md bg-primary-900 focus:outline-none focus:bg-primary-900 transition ease-in-out duration-150"
+                      : "mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-primary-300 rounded-md hover:text-white hover:bg-primary-700 focus:outline-none focus:bg-primary-900 transition ease-in-out duration-150";
                     return (
                       <a
                         key={item.title}
@@ -398,30 +413,31 @@ const AppRouter = (props: any) => {
                             item.icon +
                             (url.includes(parts && parts[1])
                               ? " text-white"
-                              : " text-green-400") +
-                            " mr-3 text-md group-hover:text-green-300 group-focus:text-green-300 transition ease-in-out duration-150"
+                              : " text-primary-400") +
+                            " mr-3 text-md group-hover:text-primary-300 group-focus:text-primary-300 transition ease-in-out duration-150"
                           }
                         ></i>
                         {t(item.title)}
                       </a>
                     );
                   })}
+                  <NotificationsList />
                   <a
                     key="dashboard"
-                    href="https://dashboard.mahakavach.in/"
-                    className="mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-green-300 rounded-md hover:text-white hover:bg-green-700 focus:outline-none focus:bg-green-900 transition ease-in-out duration-150"
+                    href="http://dashboard.coronasafe.network/"
+                    className="mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-primary-300 rounded-md hover:text-white hover:bg-primary-700 focus:outline-none focus:bg-primary-900 transition ease-in-out duration-150"
                   >
-                    <i className="fas fa-tachometer-alt text-green-400 mr-3 text-md group-hover:text-green-300 group-focus:text-green-300 transition ease-in-out duration-150"></i>
+                    <i className="fas fa-tachometer-alt text-primary-400 mr-3 text-md group-hover:text-primary-300 group-focus:text-primary-300 transition ease-in-out duration-150"></i>
                     {t("Dashboard")}
                   </a>
                 </nav>
               </div>
-              <div className="flex-shrink-0 flex border-t border-green-700 p-4">
+              <div className="flex-shrink-0 flex border-t border-primary-700 p-4">
                 <a href="#" className="flex-shrink-0 w-full group block">
                   <div className="flex items-center">
                     <div>
                       <div className="rounded-full h-8 w-8 flex items-center bg-white justify-center">
-                        <i className="inline-block fas fa-user text-xl text-green-700"></i>
+                        <i className="inline-block fas fa-user text-xl text-primary-700"></i>
                       </div>
                     </div>
                     <div className="ml-3">
@@ -435,7 +451,7 @@ const AppRouter = (props: any) => {
                           navigate("/login");
                           window.location.reload();
                         }}
-                        className="text-xs leading-4 font-medium text-green-300 group-hover:text-green-100 transition ease-in-out duration-150"
+                        className="text-xs leading-4 font-medium text-primary-300 group-hover:text-primary-100 transition ease-in-out duration-150"
                       >
                         {t("sign_out")}
                       </p>
@@ -450,19 +466,19 @@ const AppRouter = (props: any) => {
       )}
 
       <div className="hidden md:flex md:flex-shrink-0">
-        <div className="flex flex-col w-64 bg-green-800 pt-5">
+        <div className="flex flex-col w-64 bg-primary-800 pt-5">
           <div className="flex items-center flex-shrink-0 px-4">
             <a href="/">
               <img className="h-8 w-auto" src={img} alt="care logo" />
             </a>
           </div>
           <div className="mt-5 h-0 flex-1 flex flex-col overflow-y-auto">
-            <nav className="flex-1 px-2 bg-green-800">
+            <nav className="flex-1 px-2 bg-primary-800">
               {menus.map((item) => {
                 const parts = item.link.split("/");
                 const selectedClasses = url.includes(parts && parts[1])
-                  ? "mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-white rounded-md bg-green-900 focus:outline-none focus:bg-green-900 transition ease-in-out duration-150"
-                  : "mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-green-300 rounded-md hover:text-white hover:bg-green-700 focus:outline-none focus:bg-green-900 transition ease-in-out duration-150";
+                  ? "mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-white rounded-md bg-primary-900 focus:outline-none focus:bg-primary-900 transition ease-in-out duration-150"
+                  : "mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-primary-300 rounded-md hover:text-white hover:bg-primary-700 focus:outline-none focus:bg-primary-900 transition ease-in-out duration-150";
                 return (
                   <a
                     key={item.title}
@@ -475,8 +491,8 @@ const AppRouter = (props: any) => {
                         item.icon +
                         (url.includes(parts && parts[1])
                           ? " text-white"
-                          : " text-green-400") +
-                        " mr-3 text-lg group-hover:text-green-300 group-focus:text-green-300 transition ease-in-out duration-150"
+                          : " text-primary-400") +
+                        " mr-3 text-lg group-hover:text-primary-300 group-focus:text-primary-300 transition ease-in-out duration-150"
                       }
                     ></i>
                     {t(item.title)}
@@ -488,19 +504,19 @@ const AppRouter = (props: any) => {
                 key="dashboard"
                 href="https://dashboard.mahakavach.in/"
                 target="_blank"
-                className="mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-green-300 rounded-md hover:text-white hover:bg-green-700 focus:outline-none focus:bg-green-900 transition ease-in-out duration-150"
+                className="mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-primary-300 rounded-md hover:text-white hover:bg-primary-700 focus:outline-none focus:bg-primary-900 transition ease-in-out duration-150"
               >
-                <i className="fas fa-tachometer-alt text-green-400 mr-3 text-md group-hover:text-green-300 group-focus:text-green-300 transition ease-in-out duration-150"></i>
+                <i className="fas fa-tachometer-alt text-primary-400 mr-3 text-md group-hover:text-primary-300 group-focus:text-primary-300 transition ease-in-out duration-150"></i>
                 {t("Dashboard")}
               </a>
             </nav>
           </div>
-          <div className="flex-shrink-0 flex border-t border-green-700 p-4">
+          <div className="flex-shrink-0 flex border-t border-primary-700 p-4">
             <a href="#" className="flex-shrink-0 w-full group block">
               <div className="flex items-center">
                 <div>
                   <div className="rounded-full h-8 w-8 flex items-center bg-white justify-center">
-                    <i className="inline-block fas fa-user text-xl text-green-700"></i>
+                    <i className="inline-block fas fa-user text-xl text-primary-700"></i>
                   </div>
                 </div>
                 <div className="ml-3">
@@ -514,7 +530,7 @@ const AppRouter = (props: any) => {
                       navigate("/login");
                       window.location.reload();
                     }}
-                    className="text-xs leading-4 font-medium text-green-300 group-hover:text-green-100 transition ease-in-out duration-150"
+                    className="text-xs leading-4 font-medium text-primary-300 group-hover:text-primary-100 transition ease-in-out duration-150"
                   >
                     {t("sign_out")}
                   </p>
