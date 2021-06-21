@@ -12,7 +12,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { CSVLink } from "react-csv";
 import { useDispatch } from "react-redux";
 import SwipeableViews from "react-swipeable-views";
-import { getAllPatient, getDistrict } from "../../Redux/actions";
+import { getAllPatient, getDistrict, getLocalBody } from "../../Redux/actions";
 import { PhoneNumberField } from "../Common/HelperInputFields";
 import NavTabs from "../Common/NavTabs";
 import Pagination from "../Common/Pagination";
@@ -109,6 +109,7 @@ export const PatientManager = (props: any) => {
   const [showFilters, setShowFilters] = useState(false);
 
   const [districtName, setDistrictName] = useState("");
+  const [localbodyName, setLocalbodyName] = useState("");
 
   const tabValue = qParams.is_active === "False" ? 1 : 0;
 
@@ -257,6 +258,27 @@ export const PatientManager = (props: any) => {
       fetchDistrictName(status);
     },
     [fetchDistrictName]
+  );
+
+  const fetchLocalbodyName = useCallback(
+    async (status: statusType) => {
+      setIsLoading(true);
+      const res =
+        Number(qParams.lsgBody) &&
+        (await dispatch(getLocalBody({ id: qParams.lsgBody })));
+      if (!status.aborted) {
+        setLocalbodyName(res?.data?.name);
+        setIsLoading(false);
+      }
+    },
+    [dispatch, qParams.lsgBody]
+  );
+
+  useAbortableEffect(
+    (status: statusType) => {
+      fetchLocalbodyName(status);
+    },
+    [fetchLocalbodyName]
   );
 
   const updateQuery = (params: any) => {
@@ -688,7 +710,7 @@ export const PatientManager = (props: any) => {
           {badge("Age min", qParams.age_min, "age_min")}
           {badge("Age max", qParams.age_max, "age_max")}
           {badge("SRF ID", qParams.srf_id, "srf_id")}
-          {badge("LSG Body ID", qParams.lsgBody, "lsgBody")}
+          {badge("LSG Body", localbodyName, "lsgBody")}
           {badge(
             "Declared Status",
             qParams.is_declared_positive,
