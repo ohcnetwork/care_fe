@@ -16,7 +16,11 @@ import {
   Box,
   Radio,
 } from "@material-ui/core";
-import { SelectField, TextInputField } from "../Common/HelperInputFields";
+import {
+  SelectField,
+  TextInputField,
+  MultilineInputField,
+} from "../Common/HelperInputFields";
 
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const initForm: any = {
@@ -280,11 +284,12 @@ const AssetCreate = (props: AssetProps) => {
               />
             </div>
             <div>
-              <InputLabel htmlFor="serial_number" id="name=label">
+              <InputLabel htmlFor="description" id="name=label">
                 Description
               </InputLabel>
-              <TextInputField
+              <MultilineInputField
                 id="description"
+                rows={3}
                 fullWidth
                 name="description"
                 placeholder=""
