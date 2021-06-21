@@ -21,6 +21,7 @@ import {
   ADMITTED_TO,
   GENDER_TYPES,
   TELEMEDICINE_ACTIONS,
+  PATIENT_FILTER_ADMITTED_TO,
 } from "../../Common/constants";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import PatientFilterV2 from "./PatientFilterV2";
@@ -289,6 +290,42 @@ export const PatientManager = (props: any) => {
         </span>
       )
     );
+  };
+
+  const LastAdmittedToTypeBadges = () => {
+    const badge = (key: string, value: any, id: string) => {
+      return (
+        value && (
+          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
+            {key}
+            {": "}
+            {value}
+            <i
+              className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
+              onClick={(_) => {
+                const lcat = qParams.last_consultation_admitted_to_list
+                  .split(",")
+                  .filter((x: string) => x != id)
+                  .join(",");
+                updateQuery({
+                  ...qParams,
+                  last_consultation_admitted_to_list: lcat,
+                });
+              }}
+            ></i>
+          </span>
+        )
+      );
+    };
+
+    return qParams.last_consultation_admitted_to_list
+      .split(",")
+      .map((id: string) => {
+        const text = PATIENT_FILTER_ADMITTED_TO.find(
+          (obj) => obj.id == id
+        )?.text;
+        return badge("Bed Type", text, id);
+      });
   };
 
   let patientList: any[] = [];
@@ -593,6 +630,8 @@ export const PatientManager = (props: any) => {
             qParams.last_consultation_discharge_date_after,
             "last_consultation_discharge_date_after"
           )}
+          {qParams.last_consultation_admitted_to_list &&
+            LastAdmittedToTypeBadges()}
           {qParams.number_of_doses &&
             badge(
               "Number of Vaccination Doses",
