@@ -50,6 +50,7 @@ import InvestigationReports from "../Components/Facility/Investigations/Reports"
 import { withTranslation } from "react-i18next";
 import DeathReport from "../Components/DeathReport/DeathReport";
 import ShowPushNotification from "../Components/Notifications/ShowPushNotification";
+import AssetsList from "../Components/Assets/AssetsList";
 
 const get = require("lodash.get");
 const img = "https://cdn.coronasafe.network/light-logo.svg";
@@ -264,6 +265,8 @@ const routes = {
     />
   ),
 
+  "/assets": () => <AssetsList />,
+
   "/shifting": () =>
     localStorage.getItem("defaultShiftView") === "list" ? (
       <ShiftListView />
@@ -304,6 +307,11 @@ let menus = [
     title: "Patients",
     link: "/patients",
     icon: "fas fa-user-injured",
+  },
+  {
+    title: "Assets",
+    link: "/assets",
+    icon: "fas fa-shopping-cart",
   },
   {
     title: "Sample Test",
