@@ -6,16 +6,22 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 import { listFacilityAssetLocation } from "../../Redux/actions";
 import { navigate } from "raviger";
 import Pagination from "../Common/Pagination";
+import { LocationModel } from "./models";
+import { ReactElement } from "react";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
-export const LocationManagement = (props: any) => {
-  const { facilityId }: any = props;
+interface LocationManagementProps {
+  facilityId: string;
+}
+
+export const LocationManagement = (props: LocationManagementProps) => {
+  const { facilityId } = props;
   const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
-  let location: any = null;
-  let locationsList: any = [];
-  const [locations, setLocations] = useState<any[]>([]);
+  let location: ReactElement | null = null;
+  let locationsList: ReactElement[] | ReactElement = [];
+  const [locations, setLocations] = useState<LocationModel[]>([]);
   const [offset, setOffset] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
@@ -55,7 +61,7 @@ export const LocationManagement = (props: any) => {
   };
 
   if (locations && locations.length) {
-    locationsList = locations.map((locationItem: any) => (
+    locationsList = locations.map((locationItem: LocationModel) => (
       <tr key={locationItem.id} className="">
         <td className="px-5 py-5 border-b border-gray-200 text-sm ">
           <p className="text-gray-900">{locationItem.name}</p>

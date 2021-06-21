@@ -2,19 +2,14 @@ import React, { useReducer, useState, useEffect } from "react";
 import { createAsset, listFacilityAssetLocation } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import * as Notification from "../../Utils/Notifications.js";
-import loadable from "@loadable/component";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
+import PageTitle from "../Common/PageTitle";
 import {
   Button,
   Card,
   CardContent,
   CircularProgress,
   InputLabel,
-  IconButton,
-  RadioGroup,
-  FormControlLabel,
-  Box,
-  Radio,
 } from "@material-ui/core";
 import {
   SelectField,
@@ -22,7 +17,6 @@ import {
   MultilineInputField,
 } from "../Common/HelperInputFields";
 
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 const initForm: any = {
   name: "",
   asset_type: "",
@@ -77,18 +71,13 @@ const AssetCreate = (props: AssetProps) => {
   const dispatchAction: any = useDispatch();
   const [locations, setLocations] = useState([{ id: "0", name: "Select" }]);
 
-  const handleChange = (e: any) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let form = { ...state.form };
     form[e.target.name] = e.target.value;
     dispatch({ type: "set_form", form });
   };
 
   const { facilityId } = props;
-  // const handleValueChange = (value: any, name: string) => {
-  //   const form = { ...state.form };
-  //   form[name] = value;
-  //   dispatch({ type: "set_form", form });
-  // };
 
   const validateForm = () => {
     let errors = { ...initError };
@@ -138,7 +127,7 @@ const AssetCreate = (props: AssetProps) => {
     return true;
   };
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     const validated = validateForm();
     if (validated) {

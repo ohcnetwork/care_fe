@@ -16,14 +16,18 @@ const goBack = () => {
   window.history.go(-1);
 };
 
-export const AddLocationForm = (props: any) => {
+interface LocationFormProps {
+  facilityId: string;
+}
+
+export const AddLocationForm = (props: LocationFormProps) => {
   const { facilityId } = props;
   const dispatchAction: any = useDispatch();
-  const [isLoading, setIsLoading] = useState(false);
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [name, setName] = useState<string>("");
+  const [description, setDescription] = useState<string>("");
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     setIsLoading(true);
     const data = {
