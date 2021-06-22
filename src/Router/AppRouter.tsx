@@ -53,6 +53,7 @@ import DeathReport from "../Components/DeathReport/DeathReport";
 import ShowPushNotification from "../Components/Notifications/ShowPushNotification";
 import { AddLocationForm } from "../Components/Facility/AddLocationForm";
 import { LocationManagement } from "../Components/Facility/LocationManagement";
+import AssetsList from "../Components/Assets/AssetsList";
 
 const get = require("lodash.get");
 const img = "https://cdn.coronasafe.network/light-logo.svg";
@@ -276,6 +277,8 @@ const routes = {
     <AssetCreate facilityId={facilityId} />
   ),
 
+  "/assets": () => <AssetsList />,
+
   "/shifting": () =>
     localStorage.getItem("defaultShiftView") === "list" ? (
       <ShiftListView />
@@ -316,6 +319,11 @@ let menus = [
     title: "Patients",
     link: "/patients",
     icon: "fas fa-user-injured",
+  },
+  {
+    title: "Assets",
+    link: "/assets",
+    icon: "fas fa-shopping-cart",
   },
   {
     title: "Sample Test",
