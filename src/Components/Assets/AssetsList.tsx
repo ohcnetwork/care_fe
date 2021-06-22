@@ -4,8 +4,8 @@ import { useDispatch } from "react-redux";
 import PageTitle from "../Common/PageTitle";
 import { listAssets } from "../../Redux/actions";
 import { Badge } from "../Patient/ManagePatients";
-import React, { useState, useEffect } from "react";
 import { AssetData, AssetsResponse } from "./AssetTypes";
+import React, { useState, useEffect, MouseEvent } from "react";
 
 const AssetsList = () => {
   const [assets, setAssets] = useState<AssetData[]>([{}] as AssetData[]);
@@ -43,6 +43,11 @@ const AssetsList = () => {
     runner().catch(console.error);
   }, []);
 
+  const redirectToAsset = (asset: AssetData, e: MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    // TODO: Redirect to Asset page once it's done.
+  };
+
   return (
     <div className="px-2 pb-2">
       <PageTitle title="Assets" hideBack={true} />
@@ -62,6 +67,7 @@ const AssetsList = () => {
                 <div
                   key={asset.id}
                   className="w-full pb-2 cursor-pointer border-b md:flex justify-between items-center mb-3"
+                  onClick={(e) => redirectToAsset(asset, e)}
                 >
                   <div className="px-4 md:w-1/2">
                     <div className="md:flex justify-between w-full">
