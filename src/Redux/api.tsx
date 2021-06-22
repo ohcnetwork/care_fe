@@ -582,7 +582,7 @@ const routes: Routes = {
     method: "GET",
   },
   createAsset: {
-    path: "/api/v1/asset",
+    path: "/api/v1/asset/",
     method: "POST",
   },
   getAssetUserLocation: {
