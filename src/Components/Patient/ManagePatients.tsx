@@ -290,7 +290,8 @@ export const PatientManager = (props: any) => {
   const fetchFacilityName = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const res = await dispatch(getFacility(qParams.facility));
+      const res =
+        qParams.facility && (await dispatch(getFacility(qParams.facility)));
       if (!status.aborted) {
         setFacilityName(res?.data?.name);
         setIsLoading(false);
