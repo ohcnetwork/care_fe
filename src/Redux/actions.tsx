@@ -77,6 +77,45 @@ export const getFacilityUsers = (id: string) => {
 export const getOnlineDoctors = () => {
   return fireRequest("getOnlineDoctors", [], {}, {});
 };
+
+export const listFacilityAssetLocation = (params: object, pathParam: object) =>
+  fireRequest("listFacilityAssetLocation", [], params, pathParam);
+export const createFacilityAssetLocation = (
+  params: object,
+  facility_id: string
+) =>
+  fireRequest("createFacilityAssetLocation", [], params, {
+    facility_external_id: facility_id,
+  });
+export const getFacilityAssetLocation = (
+  facility_external_id: string,
+  external_id: string
+) =>
+  fireRequest(
+    "getFacilityAssetLocation",
+    [],
+    {},
+    { facility_external_id, external_id }
+  );
+export const updateFacilityAssetLocation = (
+  params: object,
+  facility_external_id: string,
+  external_id: string
+) =>
+  fireRequest("updateFacilityAssetLocation", [], params, {
+    facility_external_id,
+    external_id,
+  });
+export const partialUpdateFacilityAssetLocation = (
+  params: object,
+  facility_external_id: string,
+  external_id: string
+) =>
+  fireRequest("partialUpdateFacilityAssetLocation", [], params, {
+    facility_external_id,
+    external_id,
+  });
+
 // Download Actions
 export const downloadFacility = () => {
   return fireRequest("downloadFacility");
@@ -383,7 +422,6 @@ export const getPublicKey = () => {
   return fireRequest("getPublicKey", [], {}, {});
 };
 
-
 // FileUpload
 
 export const createUpload = (params: object) => {
@@ -485,3 +523,23 @@ export const getResourceComments = (id: string) => {
 export const addResourceComments = (id: string, params: object) => {
   return fireRequest("addResourceComments", [], params, { id });
 };
+
+export const listAssets = (params: object) =>
+  fireRequest("listAssets", [], params);
+export const createAsset = (params: object) =>
+  fireRequest("createAsset", [], params);
+export const getAssetUserLocation = (params: object) =>
+  fireRequest("getAssetUserLocation", [], params);
+export const createAssetUserLocation = (params: object) =>
+  fireRequest("createAssetUserLocation", [], params);
+export const getAsset = (id: string) =>
+  fireRequest("getAsset", [], {}, { external_id: id });
+export const updateAsset = (id: string) =>
+  fireRequest("updateAsset", [], {}, { external_id: id });
+export const partialUpdateAsset = (id: string) =>
+  fireRequest("partialUpdateAsset", [], {}, { external_id: id });
+
+export const listAssetTransaction = (params: object) =>
+  fireRequest("listAssetTransaction", [], params);
+export const getAssetTransaction = (id: string) =>
+  fireRequest("getAssetTransaction", [], {}, { id });
