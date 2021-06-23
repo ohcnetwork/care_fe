@@ -6,9 +6,12 @@ import { listAssets } from "../../Redux/actions";
 import { Badge } from "../Patient/ManagePatients";
 import { AssetData, AssetsResponse } from "./AssetTypes";
 import React, { useState, useEffect, MouseEvent } from "react";
+import loadable from "@loadable/component";
+import internal from "stream";
+const Loading = loadable(() => import("../Common/Loading"));
 
 const AssetsList = () => {
-  const [assets, setAssets] = useState<AssetData[]>([{}] as AssetData[]);
+  const [isLoading, setIsLoading] = useState(false);
   const [tab, setTab] = useState<number>(0);
   const [internalAssets, setInternalAssets] = useState<AssetData[]>([
     {},
@@ -18,26 +21,25 @@ const AssetsList = () => {
   ] as AssetData[]);
 
   const dispatch: any = useDispatch();
+  const assets = tab === 0 ? internalAssets : externalAssets;
   const assetsExist = assets.length > 0 && Object.keys(assets[0]).length > 0;
 
   useEffect(() => {
-    tab === 0 ? setAssets(internalAssets) : setAssets(externalAssets);
-  }, [tab]);
-
-  useEffect(() => {
     const runner = async () => {
+      setIsLoading(true);
       const response = await dispatch(listAssets({}));
-      const assets: AssetsResponse = response.data;
+      const assetsResponse: AssetsResponse = response.data;
 
-      const theInternalAssets = assets.results.filter(
+      const theInternalAssets = assetsResponse.results.filter(
         (result) => result.asset_type === "INTERNAL"
       );
-      const theExternalAssets = assets.results.filter(
+      const theExternalAssets = assetsResponse.results.filter(
         (result) => result.asset_type === "EXTERNAL"
       );
 
       setInternalAssets(theInternalAssets);
       setExternalAssets(theExternalAssets);
+      setIsLoading(false);
     };
 
     runner().catch(console.error);
@@ -48,6 +50,9 @@ const AssetsList = () => {
     // TODO: Redirect to Asset page once it's done.
   };
 
+  if (isLoading && !assetsExist) {
+    return <Loading />;
+  }
   return (
     <div className="px-2 pb-2">
       <PageTitle title="Assets" hideBack={true} />
