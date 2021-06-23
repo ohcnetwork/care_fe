@@ -69,6 +69,10 @@ const routes = {
     patientId,
     sampleId,
   }: any) => <SampleReport id={patientId} sampleId={sampleId} />,
+  "/patient/:patientId/test_sample/:sampleId/details": ({
+    patientId,
+    sampleId,
+  }: any) => <SampleDetails id={sampleId} patientId={patientId} />,
   "/facility": () => <HospitalList />,
   "/facility/create": () => <FacilityCreate />,
   "/facility/:facilityId/update": ({ facilityId }: any) => (

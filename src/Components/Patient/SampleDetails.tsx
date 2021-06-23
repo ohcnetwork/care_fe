@@ -1,4 +1,4 @@
-import { Card, CardContent } from "@material-ui/core";
+import { Card, CardContent, Box, Button } from "@material-ui/core";
 import moment from "moment";
 import loadable from "@loadable/component";
 import React, { useCallback, useState } from "react";
@@ -8,13 +8,16 @@ const Loading = loadable(() => import("../Common/Loading"));
 import { getTestSample } from "../../Redux/actions";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 import { FlowModel, SampleTestModel } from "./models";
+import { FileUpload } from "./FileUpload";
+import { navigate } from "raviger";
 
 interface SampleDetailsProps {
   id: number;
+  patientId?: string;
 }
 
 export const SampleDetails = (props: SampleDetailsProps) => {
-  const { id } = props;
+  const { id, patientId } = props;
   const dispatch: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [sampleDetails, setSampleDetails] = useState<SampleTestModel>({});
@@ -82,6 +85,18 @@ export const SampleDetails = (props: SampleDetailsProps) => {
   return (
     <div className="px-2 pb-2">
       <PageTitle title={`Sample Test Details`} />
+      <div className="flex justify-end">
+        <Button
+          color="primary"
+          variant="contained"
+          size="small"
+          onClick={() =>
+            navigate(`/patient/${patientId}/test_sample/${id}/icmr_sample`)
+          }
+        >
+          Print Report
+        </Button>
+      </div>
       <Card className="mt-4">
         <CardContent>
           <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
@@ -240,6 +255,17 @@ export const SampleDetails = (props: SampleDetailsProps) => {
       <PageTitle title="Sample Test History" hideBack={true} />
       {sampleDetails.flow &&
         sampleDetails.flow.map((flow: FlowModel) => renderFlow(flow))}
+
+      <FileUpload
+        sampleId={id}
+        patientId=""
+        facilityId=""
+        consultationId=""
+        type="SAMPLE_MANAGEMENT"
+        hideBack={true}
+        unspecified={true}
+        audio={false}
+      />
     </div>
   );
 };

@@ -116,6 +116,7 @@ interface FileUploadProps {
   hideBack: boolean;
   audio: boolean;
   unspecified: boolean;
+  sampleId?: any;
 }
 
 interface URLS {
@@ -141,6 +142,7 @@ export const FileUpload = (props: FileUploadProps) => {
     hideBack,
     audio,
     unspecified,
+    sampleId,
   } = props;
   const id = patientId;
   const dispatch: any = useDispatch();
@@ -216,10 +218,12 @@ export const FileUpload = (props: FileUploadProps) => {
   const UPLOAD_HEADING: { [index: string]: string } = {
     PATIENT: "Upload Patient Files",
     CONSULTATION: "Upload Consultation Files",
+    SAMPLE_MANAGEMENT: "Upload Sample Report",
   };
   const VIEW_HEADING: { [index: string]: string } = {
     PATIENT: "View Patient Files",
     CONSULTATION: "View Consultation Files",
+    SAMPLE_MANAGEMENT: "View Sample Report",
   };
 
   const handleClose = () => {
@@ -240,6 +244,9 @@ export const FileUpload = (props: FileUploadProps) => {
       }
       case "CONSULTATION": {
         return consultationId;
+      }
+      case "SAMPLE_MANAGEMENT": {
+        return sampleId;
       }
     }
   };

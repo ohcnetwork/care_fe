@@ -128,7 +128,7 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
           <button
             onClick={(e) =>
               navigate(
-                `/patient/${itemData.patient}/test_sample/${itemData.id}/icmr_sample`
+                `/patient/${patientId}/test_sample/${itemData.id}/details`
               )
             }
             className="px-4 py-2 shadow border bg-white rounded-md border border-grey-500 whitespace-no-wrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300 text-center"
