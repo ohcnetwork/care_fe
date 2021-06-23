@@ -1,8 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  AutoCompleteAsyncField,
-  DateInputField,
-} from "../Common/HelperInputFields";
+import { AutoCompleteAsyncField } from "../Common/HelperInputFields";
 import { DateRangePicker, getDate } from "../Common/DateRangePicker";
 import { getAllLocalBodyByDistrict } from "../../Redux/actions";
 import { useDispatch, useSelector } from "react-redux";
@@ -35,15 +32,6 @@ export default function ListFilter(props: any) {
     sample_collection_date_before: filter.sample_collection_date_before || null,
     sample_collection_date_after: filter.sample_collection_date_after || null,
   });
-
-  const handleChange = (event: any) => {
-    let { name, value } = event.target;
-
-    const filterData: any = { ...filterState };
-    filterData[name] = value;
-
-    setFilterState(filterData);
-  };
 
   const handleDateRangeChange = (
     startDateId: string,
