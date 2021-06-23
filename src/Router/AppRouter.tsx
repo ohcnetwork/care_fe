@@ -47,9 +47,13 @@ import Investigation from "../Components/Facility/Investigations";
 import ViewInvestigations from "../Components/Facility/Investigations/ViewInvestigations";
 import ShowInvestigation from "../Components/Facility/Investigations/ShowInvestigation";
 import InvestigationReports from "../Components/Facility/Investigations/Reports";
+import AssetCreate from "../Components/Facility/AssetCreate";
 import { withTranslation } from "react-i18next";
 import DeathReport from "../Components/DeathReport/DeathReport";
 import ShowPushNotification from "../Components/Notifications/ShowPushNotification";
+import { AddLocationForm } from "../Components/Facility/AddLocationForm";
+import { LocationManagement } from "../Components/Facility/LocationManagement";
+import AssetsList from "../Components/Assets/AssetsList";
 
 const get = require("lodash.get");
 const img = "https://cdn.coronasafe.network/light-logo.svg";
@@ -239,8 +243,14 @@ const routes = {
   "/facility/:facilityId/inventory": ({ facilityId }: any) => (
     <InventoryList facilityId={facilityId} />
   ),
+  "/facility/:facilityId/location": ({ facilityId }: any) => (
+    <LocationManagement facilityId={facilityId} />
+  ),
   "/facility/:facilityId/inventory/add": ({ facilityId }: any) => (
     <AddInventoryForm facilityId={facilityId} />
+  ),
+  "/facility/:facilityId/location/add": ({ facilityId }: any) => (
+    <AddLocationForm facilityId={facilityId} />
   ),
   "/facility/:facilityId/inventory/min_quantity/set": ({ facilityId }: any) => (
     <SetInventoryForm facilityId={facilityId} />
@@ -263,6 +273,11 @@ const routes = {
       itemId={itemId}
     />
   ),
+  "/facility/:facilityId/assets/new": ({ facilityId }: any) => (
+    <AssetCreate facilityId={facilityId} />
+  ),
+
+  "/assets": () => <AssetsList />,
 
   "/shifting": () =>
     localStorage.getItem("defaultShiftView") === "list" ? (
@@ -304,6 +319,11 @@ let menus = [
     title: "Patients",
     link: "/patients",
     icon: "fas fa-user-injured",
+  },
+  {
+    title: "Assets",
+    link: "/assets",
+    icon: "fas fa-shopping-cart",
   },
   {
     title: "Sample Test",
