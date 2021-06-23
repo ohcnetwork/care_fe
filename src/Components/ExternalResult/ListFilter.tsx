@@ -258,36 +258,16 @@ export default function ListFilter(props: any) {
         />
       </div>
       <div className="w-64 flex-none">
-        <span className="text-sm font-semibold">Result After</span>
-        <DateInputField
-          id="result_date_after"
-          name="result_date_after"
-          inputVariant="outlined"
-          margin="dense"
-          errors=""
-          value={filterState.result_date_after}
-          onChange={(date) =>
-            handleChange({ target: { name: "result_date_after", value: date } })
+        <DateRangePicker
+          startDate={getDate(filterState.result_date_after)}
+          endDate={getDate(filterState.result_date_before)}
+          onChange={(e) =>
+            handleDateRangeChange("result_date_after", "result_date_before", e)
           }
-          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-        />
-      </div>
-
-      <div className="w-64 flex-none">
-        <span className="text-sm font-semibold">Result Before</span>
-        <DateInputField
-          id="result_date_before"
-          name="result_date_before"
-          inputVariant="outlined"
-          margin="dense"
-          errors=""
-          value={filterState.result_date_before}
-          onChange={(date) =>
-            handleChange({
-              target: { name: "result_date_before", value: date },
-            })
-          }
-          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+          endDateId={"result_date_before"}
+          startDateId={"result_date_after"}
+          label={"Result Date"}
+          size="small"
         />
       </div>
       <div className="w-64 flex-none">
