@@ -271,37 +271,20 @@ export default function ListFilter(props: any) {
         />
       </div>
       <div className="w-64 flex-none">
-        <span className="text-sm font-semibold">Sample Collection After</span>
-        <DateInputField
-          id="sample_collection_date_before"
-          name="sample_collection_date_before"
-          inputVariant="outlined"
-          margin="dense"
-          errors=""
-          value={filterState.sample_collection_date_before}
-          onChange={(date) =>
-            handleChange({
-              target: { name: "sample_collection_date_before", value: date },
-            })
+        <DateRangePicker
+          startDate={getDate(filterState.sample_collection_date_after)}
+          endDate={getDate(filterState.sample_collection_date_before)}
+          onChange={(e) =>
+            handleDateRangeChange(
+              "sample_collection_date_after",
+              "sample_collection_date_before",
+              e
+            )
           }
-          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-        />
-      </div>
-      <div className="w-64 flex-none">
-        <span className="text-sm font-semibold">Sample Collection Before</span>
-        <DateInputField
-          id="sample_collection_date_after"
-          name="sample_collection_date_after"
-          inputVariant="outlined"
-          margin="dense"
-          errors=""
-          value={filterState.sample_collection_date_after}
-          onChange={(date) =>
-            handleChange({
-              target: { name: "sample_collection_date_after", value: date },
-            })
-          }
-          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+          endDateId={"sample_collection_date_before"}
+          startDateId={"sample_collection_date_after"}
+          label={"Sample Collection Date"}
+          size="small"
         />
       </div>
     </div>
