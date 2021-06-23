@@ -8,11 +8,16 @@ import ArrowDownwardIcon from "@material-ui/icons/ArrowDownward";
 import { navigate, useQueryParams } from "raviger";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import moment from "moment";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { CSVLink } from "react-csv";
 import { useDispatch } from "react-redux";
 import SwipeableViews from "react-swipeable-views";
-import { getAllPatient } from "../../Redux/actions";
+import {
+  getAllPatient,
+  getDistrict,
+  getLocalBody,
+  getFacility,
+} from "../../Redux/actions";
 import { PhoneNumberField } from "../Common/HelperInputFields";
 import NavTabs from "../Common/NavTabs";
 import Pagination from "../Common/Pagination";
@@ -21,10 +26,12 @@ import {
   ADMITTED_TO,
   GENDER_TYPES,
   TELEMEDICINE_ACTIONS,
+  PATIENT_FILTER_ADMITTED_TO,
 } from "../../Common/constants";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import PatientFilterV2 from "./PatientFilterV2";
 import { parseOptionId } from "../../Common/utils";
+import { statusType, useAbortableEffect } from "../../Common/utils";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -105,6 +112,10 @@ export const PatientManager = (props: any) => {
   const [DownloadFile, setDownloadFile] = useState("");
   const [qParams, setQueryParams] = useQueryParams();
   const [showFilters, setShowFilters] = useState(false);
+
+  const [districtName, setDistrictName] = useState("");
+  const [localbodyName, setLocalbodyName] = useState("");
+  const [facilityName, setFacilityName] = useState("");
 
   const tabValue = qParams.is_active === "False" ? 1 : 0;
 
@@ -234,6 +245,68 @@ export const PatientManager = (props: any) => {
     qParams.last_consultation_is_telemedicine,
   ]);
 
+  const fetchDistrictName = useCallback(
+    async (status: statusType) => {
+      setIsLoading(true);
+      const res =
+        Number(qParams.district) &&
+        (await dispatch(getDistrict(qParams.district)));
+      if (!status.aborted) {
+        setDistrictName(res?.data?.name);
+        setIsLoading(false);
+      }
+    },
+    [dispatch, qParams.district]
+  );
+
+  useAbortableEffect(
+    (status: statusType) => {
+      fetchDistrictName(status);
+    },
+    [fetchDistrictName]
+  );
+
+  const fetchLocalbodyName = useCallback(
+    async (status: statusType) => {
+      setIsLoading(true);
+      const res =
+        Number(qParams.lsgBody) &&
+        (await dispatch(getLocalBody({ id: qParams.lsgBody })));
+      if (!status.aborted) {
+        setLocalbodyName(res?.data?.name);
+        setIsLoading(false);
+      }
+    },
+    [dispatch, qParams.lsgBody]
+  );
+
+  useAbortableEffect(
+    (status: statusType) => {
+      fetchLocalbodyName(status);
+    },
+    [fetchLocalbodyName]
+  );
+
+  const fetchFacilityName = useCallback(
+    async (status: statusType) => {
+      setIsLoading(true);
+      const res =
+        qParams.facility && (await dispatch(getFacility(qParams.facility)));
+      if (!status.aborted) {
+        setFacilityName(res?.data?.name);
+        setIsLoading(false);
+      }
+    },
+    [dispatch, qParams.facility]
+  );
+
+  useAbortableEffect(
+    (status: statusType) => {
+      fetchFacilityName(status);
+    },
+    [fetchFacilityName]
+  );
+
   const updateQuery = (params: any) => {
     const nParams = Object.assign({}, qParams, params);
     setQueryParams(nParams, true);
@@ -289,6 +362,42 @@ export const PatientManager = (props: any) => {
         </span>
       )
     );
+  };
+
+  const LastAdmittedToTypeBadges = () => {
+    const badge = (key: string, value: any, id: string) => {
+      return (
+        value && (
+          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
+            {key}
+            {": "}
+            {value}
+            <i
+              className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
+              onClick={(_) => {
+                const lcat = qParams.last_consultation_admitted_to_list
+                  .split(",")
+                  .filter((x: string) => x != id)
+                  .join(",");
+                updateQuery({
+                  ...qParams,
+                  last_consultation_admitted_to_list: lcat,
+                });
+              }}
+            ></i>
+          </span>
+        )
+      );
+    };
+
+    return qParams.last_consultation_admitted_to_list
+      .split(",")
+      .map((id: string) => {
+        const text = PATIENT_FILTER_ADMITTED_TO.find(
+          (obj) => obj.id == id
+        )?.text;
+        return badge("Bed Type", text, id);
+      });
   };
 
   let patientList: any[] = [];
@@ -593,6 +702,8 @@ export const PatientManager = (props: any) => {
             qParams.last_consultation_discharge_date_after,
             "last_consultation_discharge_date_after"
           )}
+          {qParams.last_consultation_admitted_to_list &&
+            LastAdmittedToTypeBadges()}
           {qParams.number_of_doses &&
             badge(
               "Number of Vaccination Doses",
@@ -607,8 +718,8 @@ export const PatientManager = (props: any) => {
             )}
           {badge("COVIN ID", qParams.covin_id, "covin_id")}
 
-          {badge("Filtered By: Facility", qParams.facility, "facility")}
-          {badge("Filtered By: District", qParams.district, "district")}
+          {badge("Facility", facilityName, "facility")}
+          {badge("District", districtName, "district")}
           {badge("Ordering", qParams.ordering, "ordering")}
           {badge("Category", qParams.category, "category")}
           {badge("Disease Status", qParams.disease_status, "disease_status")}
@@ -625,7 +736,7 @@ export const PatientManager = (props: any) => {
           {badge("Age min", qParams.age_min, "age_min")}
           {badge("Age max", qParams.age_max, "age_max")}
           {badge("SRF ID", qParams.srf_id, "srf_id")}
-          {badge("LSG Body ID", qParams.lsgBody, "lsgBody")}
+          {badge("LSG Body", localbodyName, "lsgBody")}
           {badge(
             "Declared Status",
             qParams.is_declared_positive,
