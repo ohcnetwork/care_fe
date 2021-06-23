@@ -3,6 +3,7 @@ import {
   AutoCompleteAsyncField,
   DateInputField,
 } from "../Common/HelperInputFields";
+import { DateRangePicker, getDate } from "../Common/DateRangePicker";
 import { getAllLocalBodyByDistrict } from "../../Redux/actions";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "raviger";
@@ -40,6 +41,18 @@ export default function ListFilter(props: any) {
 
     const filterData: any = { ...filterState };
     filterData[name] = value;
+
+    setFilterState(filterData);
+  };
+
+  const handleDateRangeChange = (
+    startDateId: string,
+    endDateId: string,
+    { startDate, endDate }: any
+  ) => {
+    const filterData: any = { ...filterState };
+    filterData[startDateId] = startDate?.toString();
+    filterData[endDateId] = endDate?.toString();
 
     setFilterState(filterData);
   };
@@ -228,37 +241,20 @@ export default function ListFilter(props: any) {
         </div>
       </div>
       <div className="w-64 flex-none">
-        <span className="text-sm font-semibold">Created After</span>
-        <DateInputField
-          id="created_date_after"
-          name="created_date_after"
-          inputVariant="outlined"
-          margin="dense"
-          errors=""
-          value={filterState.created_date_after}
-          onChange={(date) =>
-            handleChange({
-              target: { name: "created_date_after", value: date },
-            })
+        <DateRangePicker
+          startDate={getDate(filterState.created_date_after)}
+          endDate={getDate(filterState.created_date_before)}
+          onChange={(e) =>
+            handleDateRangeChange(
+              "created_date_after",
+              "created_date_before",
+              e
+            )
           }
-          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-        />
-      </div>
-      <div className="w-64 flex-none">
-        <span className="text-sm font-semibold">Created Before</span>
-        <DateInputField
-          id="created_date_before"
-          name="created_date_before"
-          inputVariant="outlined"
-          margin="dense"
-          errors=""
-          value={filterState.created_date_before}
-          onChange={(date) =>
-            handleChange({
-              target: { name: "created_date_before", value: date },
-            })
-          }
-          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+          endDateId={"created_date_before"}
+          startDateId={"created_date_after"}
+          label={"Created Date"}
+          size="small"
         />
       </div>
       <div className="w-64 flex-none">
