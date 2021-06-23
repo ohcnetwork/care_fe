@@ -42,7 +42,7 @@ import {
 } from "../Common/HelperInputFields";
 import { make as PrescriptionBuilder } from "../Common/PrescriptionBuilder.gen";
 import { FacilityModel } from "./models";
-import { OnlineDoctorsSelect } from "../Common/OnlineDoctorsSelect";
+import { OnlineUsersSelect } from "../Common/OnlineUsersSelect";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -791,10 +791,11 @@ export const ConsultationForm = (props: any) => {
               </div>
               {JSON.parse(state.form.is_telemedicine) && (
                 <div className="md:col-span-1">
-                  <OnlineDoctorsSelect
+                  <OnlineUsersSelect
                     userId={state.form.assigned_to}
-                    selectedDoctor={state.form.assigned_to_object}
+                    selectedUser={state.form.assigned_to_object}
                     onSelect={handleDoctorSelect}
+                    user_type={"Doctor"}
                   />
                 </div>
               )}

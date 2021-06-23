@@ -131,3 +131,12 @@ export interface InventoryItemsModel {
     }
   ];
 }
+
+export interface LocationModel {
+  id?: string;
+  name?: string;
+  description?: string;
+  facility?: {
+    name: string;
+  };
+}
