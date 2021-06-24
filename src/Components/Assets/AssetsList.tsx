@@ -25,8 +25,9 @@ const AssetsList = () => {
 
   const fetchData = useCallback(
     async (status: statusType) => {
+      console.log("fetching again");
       setIsLoading(true);
-      const { data }: any = await dispatch(listAssets({}));
+      const { data }: any = await dispatch(listAssets({ offset, limit }));
       if (!status.aborted) {
         setIsLoading(false);
         if (!data)
@@ -36,6 +37,7 @@ const AssetsList = () => {
         else {
           setAssets(data.results);
           setTotalCount(data.count);
+          console.log(data);
         }
       }
     },
@@ -60,6 +62,18 @@ const AssetsList = () => {
   return (
     <div className="px-4 pb-2">
       <PageTitle title="Assets" hideBack={true} />
+      <div className="bg-white overflow-hidden md:w-1/4 shadow rounded-lg">
+        <div className="px-4 py-5 sm:p-6">
+          <dl>
+            <dt className="text-sm leading-5 font-medium text-gray-500 truncate">
+              Total Assets
+            </dt>
+            <dd className="mt-4 text-5xl leading-9 font-semibold text-gray-900">
+              {totalCount}
+            </dd>
+          </dl>
+        </div>
+      </div>
       <div className="flex-grow mt-10 bg-white">
         <div className="p-8">
           <div className="flex flex-wrap md:-mx-4">
@@ -114,14 +128,16 @@ const AssetsList = () => {
                 </p>
               </div>
             )}
-            <div className="mt-4 flex w-full justify-center">
-              <Pagination
-                cPage={currentPage}
-                defaultPerPage={limit}
-                data={{ totalCount }}
-                onChange={handlePagination}
-              />
-            </div>
+            {totalCount > limit && (
+              <div className="mt-4 flex w-full justify-center">
+                <Pagination
+                  cPage={currentPage}
+                  defaultPerPage={limit}
+                  data={{ totalCount }}
+                  onChange={handlePagination}
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>

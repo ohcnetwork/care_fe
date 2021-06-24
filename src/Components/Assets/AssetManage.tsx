@@ -211,14 +211,16 @@ const AssetManage = (props: AssetManageProps) => {
             </tbody>
           </table>
         </div>
-        <div className="mt-4 flex w-full justify-center">
-          <Pagination
-            cPage={currentPage}
-            defaultPerPage={limit}
-            data={{ totalCount }}
-            onChange={handlePagination}
-          />
-        </div>
+        {totalCount > limit && (
+          <div className="mt-4 flex w-full justify-center">
+            <Pagination
+              cPage={currentPage}
+              defaultPerPage={limit}
+              data={{ totalCount }}
+              onChange={handlePagination}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
