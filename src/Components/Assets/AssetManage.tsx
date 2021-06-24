@@ -129,11 +129,14 @@ const AssetManage = (props: AssetManageProps) => {
       );
     } else {
       setTransactionDetails(
-        <Grid item xs={12} md={12}>
-          <Grid container justify="center" alignItems="center">
-            <h5> No Results Found</h5>
-          </Grid>
-        </Grid>
+        <tr>
+          <td
+            className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-cool-gray-500 text-center"
+            colSpan={4}
+          >
+            <h5>No Transactions Found</h5>
+          </td>
+        </tr>
       );
     }
   };
