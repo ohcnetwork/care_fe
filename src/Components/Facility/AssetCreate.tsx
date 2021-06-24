@@ -66,7 +66,7 @@ const AssetCreate = (props: AssetProps) => {
   const [name, setName] = useState<string>("");
   const [asset_type, setAssetType] = useState<string>("");
   const [description, setDescription] = useState<string>("");
-  const [is_working, setIsWorking] = useState<string | boolean>();
+  const [is_working, setIsWorking] = useState<string>();
   const [serial_number, setSerialNumber] = useState<string>("");
   const [warranty_details, setWarrantyDetails] = useState<string>("");
   const [location, setLocation] = useState<string>("");
@@ -101,7 +101,7 @@ const AssetCreate = (props: AssetProps) => {
       setDescription(asset.description);
       setLocation(asset.location_object.id);
       setAssetType(asset.asset_type);
-      setIsWorking(asset.is_working);
+      setIsWorking(String(asset.is_working));
       setSerialNumber(asset.serial_number);
       setWarrantyDetails(asset.warranty_details);
     }
@@ -119,7 +119,7 @@ const AssetCreate = (props: AssetProps) => {
           }
           return;
         case "is_working":
-          if (is_working !== true && is_working !== false) {
+          if (is_working === "0") {
             errors[field] = "Field is required";
             invalidForm = true;
           }
@@ -280,15 +280,15 @@ const AssetCreate = (props: AssetProps) => {
                 margin="dense"
                 options={[
                   {
-                    id: 0,
+                    id: "0",
                     name: "Select",
                   },
                   {
-                    id: true,
+                    id: "true",
                     name: "Yes",
                   },
                   {
-                    id: false,
+                    id: "false",
                     name: "No",
                   },
                 ]}
