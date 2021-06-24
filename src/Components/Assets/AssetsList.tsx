@@ -1,12 +1,13 @@
 import moment from "moment";
 import { useDispatch } from "react-redux";
+import QrReader from "react-qr-reader";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import * as Notification from "../../Utils/Notifications.js";
 import PageTitle from "../Common/PageTitle";
 import { listAssets } from "../../Redux/actions";
 import { Badge } from "../Patient/ManagePatients";
-import { AssetData, AssetsResponse } from "./AssetTypes";
-import React, { useState, useEffect, useCallback } from "react";
+import { AssetData } from "./AssetTypes";
+import React, { useState, useCallback } from "react";
 import { navigate, useQueryParams } from "raviger";
 import loadable from "@loadable/component";
 import Pagination from "../Common/Pagination";
@@ -20,6 +21,7 @@ const AssetsList = (props: any) => {
   const [qParams, setQueryParams] = useQueryParams();
   const [assets, setAssets] = useState<AssetData[]>([{}] as AssetData[]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isScannerActive, setIsScannerActive] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [offset, setOffset] = useState<number>(0);
   const [totalCount, setTotalCount] = useState<number>(0);
@@ -90,6 +92,26 @@ const AssetsList = (props: any) => {
   };
 
   if (isLoading) return <Loading />;
+  if (isScannerActive)
+    return (
+      <div className="md:w-1/2 w-full my-2 mx-auto flex flex-col justify-start items-end">
+        <button
+          onClick={() => setIsScannerActive(false)}
+          className="btn btn-default mb-2"
+        >
+          <i className="fas fa-times mr-2"></i> Close Scanner
+        </button>
+        <QrReader
+          delay={300}
+          onScan={(assetId: any) =>
+            assetId ? navigate(`/assets/${assetId}`) : null
+          }
+          onError={(e: any) => console.error(e)}
+          style={{ width: "100%" }}
+        />
+        <h2 className="text-center text-lg self-center">Scan Asset QR!</h2>
+      </div>
+    );
 
   return (
     <div className="px-4 pb-2">
@@ -115,7 +137,7 @@ const AssetsList = (props: any) => {
             errors=""
           />
         </div>
-        <div className="flex-1 flex justify-end">
+        <div className="flex-1 flex flex-col justify-start items-end">
           <div>
             <div className="flex items-start mb-2">
               <button
@@ -155,6 +177,12 @@ const AssetsList = (props: any) => {
               </button>
             </div>
           </div>
+          <button
+            className="btn btn-primary md:w-1/3 w-full"
+            onClick={() => setIsScannerActive(true)}
+          >
+            <i className="fas fa-search mr-1"></i> Scan Asset QR
+          </button>
         </div>
       </div>
       <div>
