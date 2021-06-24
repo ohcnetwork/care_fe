@@ -1,4 +1,10 @@
-import React, { useState, useCallback, useEffect, ReactElement } from "react";
+import React, {
+  useState,
+  useCallback,
+  useEffect,
+  useRef,
+  ReactElement,
+} from "react";
 import Grid from "@material-ui/core/Grid";
 import loadable from "@loadable/component";
 import moment from "moment";
@@ -10,7 +16,7 @@ import { Typography } from "@material-ui/core";
 import { getAsset, listAssetTransaction } from "../../Redux/actions";
 import Pagination from "../Common/Pagination";
 import { navigate } from "raviger";
-import { InputSearchBox } from "../Common/SearchBox";
+import QRCode from "qrcode.react";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -21,6 +27,7 @@ interface AssetManageProps {
 const AssetManage = (props: AssetManageProps) => {
   const { assetId } = props;
   const [asset, setAsset] = useState<AssetData>();
+  const [isPrintMode, setIsPrintMode] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [offset, setOffset] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
@@ -30,6 +37,7 @@ const AssetManage = (props: AssetManageProps) => {
   >();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const dispatch = useDispatch();
+  const [QRbase, setQRBase] = useState("");
   const limit = 14;
 
   const fetchData = useCallback(
@@ -67,6 +75,39 @@ const AssetManage = (props: AssetManageProps) => {
     setCurrentPage(page);
     setOffset(offset);
   };
+
+  const parseQR = () => {
+    const qrCodeCanvas = document.querySelector("canvas");
+    const qrCodeDataUri = qrCodeCanvas?.toDataURL("image/jpg", 0.3)!;
+    setQRBase(qrCodeDataUri);
+  };
+
+  useEffect(() => {
+    if (isLoading === false) parseQR();
+  }, [isLoading]);
+
+  const PrintPreview = () => (
+    <div className="">
+      <div className="my-4 flex justify-end ">
+        <button
+          onClick={(_) => window.print()}
+          className="btn btn-primary mr-2"
+        >
+          <i className="fas fa-print mr-2"></i> Print QR Code
+        </button>
+        <button
+          onClick={(_) => setIsPrintMode(false)}
+          className="btn btn-default"
+        >
+          <i className="fas fa-times mr-2"></i> Close
+        </button>
+      </div>
+      <h2 className="text-center">Print Preview</h2>
+      <div id="section-to-print" className="print flex justify-center">
+        <img src={QRbase} />
+      </div>
+    </div>
+  );
 
   const working_status = (is_working: boolean | undefined) => {
     if (is_working)
@@ -148,6 +189,7 @@ const AssetManage = (props: AssetManageProps) => {
   }, [transactions]);
 
   if (isLoading) return <Loading />;
+  if (isPrintMode) return <PrintPreview />;
   return (
     <div className="px-2 pb-2">
       <PageTitle title={asset?.name || "Asset"} />
@@ -170,6 +212,21 @@ const AssetManage = (props: AssetManageProps) => {
             </Typography>
           </div>
           <div className="flex flex-col">
+            <div className="mb-1">
+              <QRCode
+                bgColor="#FFFFFF"
+                fgColor="#000000"
+                level="Q"
+                size={128}
+                value={asset?.id || ""}
+              />
+              <button
+                className="btn btn-primary mt-2 w-full"
+                onClick={() => setIsPrintMode(true)}
+              >
+                Print QR
+              </button>
+            </div>
             <button
               onClick={() =>
                 navigate(
