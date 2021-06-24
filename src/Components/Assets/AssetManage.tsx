@@ -37,7 +37,6 @@ const AssetManage = (props: AssetManageProps) => {
   >();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const dispatch = useDispatch();
-  const [QRbase, setQRBase] = useState("");
   const limit = 14;
 
   const fetchData = useCallback(
@@ -76,16 +75,6 @@ const AssetManage = (props: AssetManageProps) => {
     setOffset(offset);
   };
 
-  const parseQR = () => {
-    const qrCodeCanvas = document.querySelector("canvas");
-    const qrCodeDataUri = qrCodeCanvas?.toDataURL("image/jpg", 0.3)!;
-    setQRBase(qrCodeDataUri);
-  };
-
-  useEffect(() => {
-    if (isLoading === false) parseQR();
-  }, [isLoading]);
-
   const PrintPreview = () => (
     <div className="">
       <div className="my-4 flex justify-end ">
@@ -104,7 +93,7 @@ const AssetManage = (props: AssetManageProps) => {
       </div>
       <h2 className="text-center">Print Preview</h2>
       <div id="section-to-print" className="print flex justify-center">
-        <img src={QRbase} />
+        <QRCode size={200} value={asset?.id || ""} />
       </div>
     </div>
   );
