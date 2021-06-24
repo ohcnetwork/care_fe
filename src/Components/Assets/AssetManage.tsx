@@ -10,6 +10,7 @@ import { Typography } from "@material-ui/core";
 import { getAsset, listAssetTransaction } from "../../Redux/actions";
 import Pagination from "../Common/Pagination";
 import { navigate } from "raviger";
+import { InputSearchBox } from "../Common/SearchBox";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -153,9 +154,7 @@ const AssetManage = (props: AssetManageProps) => {
       <div className="bg-white rounded-lg md:p-6 p-3 shadow">
         <div className="md:flex justify-between">
           <div className="mb-2">
-            <div className="text-xl font-semibold">
-              {asset?.name} ({asset?.location_object.facility.name})
-            </div>
+            <div className="text-xl font-semibold">{asset?.name}</div>
             <Typography>Location : {asset?.location_object.name}</Typography>
             <Typography>
               Facility : {asset?.location_object.facility.name}
