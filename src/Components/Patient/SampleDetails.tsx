@@ -94,7 +94,7 @@ export const SampleDetails = (props: SampleDetailsProps) => {
             navigate(`/patient/${patientId}/test_sample/${id}/icmr_sample`)
           }
         >
-          Print Report
+          ICMR Specimen Referral Form
         </Button>
       </div>
       <Card className="mt-4">
@@ -264,7 +264,7 @@ export const SampleDetails = (props: SampleDetailsProps) => {
         type="SAMPLE_MANAGEMENT"
         hideBack={true}
         unspecified={true}
-        audio={false}
+        audio={true}
       />
     </div>
   );
