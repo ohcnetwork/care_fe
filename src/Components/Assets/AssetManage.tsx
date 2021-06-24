@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Typography } from "@material-ui/core";
 import { getAsset } from "../../Redux/actions";
 import { useEffect } from "react";
+import { navigate } from "raviger";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -106,7 +107,15 @@ const AssetManage = (props: AssetManageProps) => {
             </Typography>
           </div>
           <div className="flex flex-col">
-            <button id="update-asset" className="btn-primary btn">
+            <button
+              onClick={() =>
+                navigate(
+                  `/facility/${asset?.location_object.facility.id}/assets/${asset?.id}`
+                )
+              }
+              id="update-asset"
+              className="btn-primary btn"
+            >
               <i className="fas fa-pencil-alt text-white mr-2"></i>
               Update Asset
             </button>

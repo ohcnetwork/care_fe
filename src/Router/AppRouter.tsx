@@ -277,7 +277,9 @@ const routes = {
   "/facility/:facilityId/assets/new": ({ facilityId }: any) => (
     <AssetCreate facilityId={facilityId} />
   ),
-
+  "/facility/:facilityId/assets/:assetId": ({ facilityId, assetId }: any) => (
+    <AssetCreate facilityId={facilityId} assetId={assetId} />
+  ),
   "/assets": () => <AssetsList />,
   "/assets/:assetId": ({ assetId }: any) => <AssetManage assetId={assetId} />,
 

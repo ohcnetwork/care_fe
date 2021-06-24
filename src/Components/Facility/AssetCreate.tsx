@@ -1,5 +1,10 @@
 import React, { useReducer, useState, useEffect } from "react";
-import { createAsset, listFacilityAssetLocation } from "../../Redux/actions";
+import {
+  createAsset,
+  getAsset,
+  listFacilityAssetLocation,
+  updateAsset,
+} from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import * as Notification from "../../Utils/Notifications.js";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
@@ -16,39 +21,31 @@ import {
   TextInputField,
   MultilineInputField,
 } from "../Common/HelperInputFields";
+import { AssetData } from "../Assets/AssetTypes";
+import loadable from "@loadable/component";
+const Loading = loadable(() => import("../Common/Loading"));
 
-const initForm: any = {
+const initError: any = {
   name: "",
   asset_type: "",
   description: "",
   is_working: "",
   serial_number: "",
   warranty_details: "",
-  location: "0",
+  location: "",
 };
 
-const initError = Object.assign(
-  {},
-  ...Object.keys(initForm).map((k) => ({ [k]: "" }))
-);
-
 const initialState = {
-  form: { ...initForm },
   errors: { ...initError },
 };
 
 interface AssetProps {
   facilityId: string;
+  assetId?: string;
 }
 
 const asset_create_reducer = (state = initialState, action: any) => {
   switch (action.type) {
-    case "set_form": {
-      return {
-        ...state,
-        form: action.form,
-      };
-    }
     case "set_error": {
       return {
         ...state,
@@ -66,51 +63,75 @@ const goBack = () => {
 
 const AssetCreate = (props: AssetProps) => {
   const [state, dispatch] = useReducer(asset_create_reducer, initialState);
+  const [name, setName] = useState<string>("");
+  const [asset_type, setAssetType] = useState<string>("");
+  const [description, setDescription] = useState<string>("");
+  const [is_working, setIsWorking] = useState<string | boolean>();
+  const [serial_number, setSerialNumber] = useState<string>("");
+  const [warranty_details, setWarrantyDetails] = useState<string>("");
+  const [location, setLocation] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
-  const [isLocationsLoading, setIsLocationsLoading] = useState(false);
   const dispatchAction: any = useDispatch();
   const [locations, setLocations] = useState([{ id: "0", name: "Select" }]);
+  const [asset, setAsset] = useState<AssetData>();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let form = { ...state.form };
-    form[e.target.name] = e.target.value;
-    dispatch({ type: "set_form", form });
-  };
+  const { facilityId, assetId } = props;
+  useEffect(() => {
+    setIsLoading(true);
+    dispatchAction(
+      listFacilityAssetLocation({}, { facility_external_id: facilityId })
+    ).then(({ data }: any) => {
+      setLocations([...locations, ...data.results]);
+      setIsLoading(false);
+    });
 
-  const { facilityId } = props;
+    if (assetId) {
+      setIsLoading(true);
+      dispatchAction(getAsset(assetId)).then(({ data }: any) => {
+        console.log(data);
+        setAsset(data);
+        setIsLoading(false);
+      });
+    }
+  }, [assetId]);
+
+  useEffect(() => {
+    if (asset) {
+      setName(asset.name);
+      setDescription(asset.description);
+      setLocation(asset.location_object.id);
+      setAssetType(asset.asset_type);
+      setIsWorking(asset.is_working);
+      setSerialNumber(asset.serial_number);
+      setWarrantyDetails(asset.warranty_details);
+    }
+  }, [asset]);
 
   const validateForm = () => {
     let errors = { ...initError };
     let invalidForm = false;
-    Object.keys(state.form).forEach((field) => {
+    Object.keys(state.errors).forEach((field) => {
       switch (field) {
         case "name":
-          if (!state.form[field]) {
+          if (!name) {
             errors[field] = "Field is required";
             invalidForm = true;
           }
           return;
         case "is_working":
-          if (state.form[field] !== "true" && state.form[field] !== "false") {
+          if (is_working !== true && is_working !== false) {
             errors[field] = "Field is required";
             invalidForm = true;
           }
           return;
         case "location":
-          if (
-            !state.form[field] ||
-            state.form[field] === "0" ||
-            state.form[field] === ""
-          ) {
+          if (!location || location === "0" || location === "") {
             errors[field] = "Field is required";
             invalidForm = true;
           }
           return;
         case "asset_type":
-          if (
-            state.form[field] !== "INTERNAL" &&
-            state.form[field] !== "EXTERNAL"
-          ) {
+          if (asset_type !== "INTERNAL" && asset_type !== "EXTERNAL") {
             errors[field] = "Field is required";
             invalidForm = true;
           }
@@ -133,39 +154,41 @@ const AssetCreate = (props: AssetProps) => {
     if (validated) {
       setIsLoading(true);
       const data = {
-        name: state.form.name,
-        asset_type: state.form.asset_type,
-        description: state.form.description,
-        is_working: state.form.is_working,
-        serial_number: state.form.serial_number,
-        warranty_details: state.form.warranty_details,
-        location: state.form.location,
+        name: name,
+        asset_type: asset_type,
+        description: description,
+        is_working: is_working,
+        serial_number: serial_number,
+        warranty_details: warranty_details,
+        location: location,
       };
-      const res = await dispatchAction(createAsset(data));
-      if (res && res.data && res.status == 201) {
-        dispatch({ type: "set_form", form: initForm });
-        Notification.Success({
-          msg: "Asset created successfully",
-        });
-        goBack();
+      if (!assetId) {
+        const res = await dispatchAction(createAsset(data));
+        if (res && res.data && res.status === 201) {
+          Notification.Success({
+            msg: "Asset created successfully",
+          });
+          goBack();
+        }
+        setIsLoading(false);
+      } else {
+        const res = await dispatchAction(updateAsset(assetId, data));
+        if (res && res.data && res.status === 200) {
+          Notification.Success({
+            msg: "Asset updated successfully",
+          });
+          goBack();
+        }
+        setIsLoading(false);
       }
-      setIsLoading(false);
     }
   };
 
-  useEffect(() => {
-    setIsLocationsLoading(true);
-    dispatchAction(
-      listFacilityAssetLocation({}, { facility_external_id: facilityId })
-    ).then(({ data }: any) => {
-      setLocations([...locations, ...data.results]);
-      setIsLocationsLoading(false);
-    });
-  }, []);
+  if (isLoading) return <Loading />;
 
   return (
     <div className="px-6 pb-2">
-      <PageTitle title="Create New Asset" />
+      <PageTitle title={assetId ? "Update Asset" : "Create New Asset"} />
       <Card className="mt-4 max-w-lg m-auto">
         <CardContent>
           <form
@@ -183,8 +206,10 @@ const AssetCreate = (props: AssetProps) => {
                 placeholder=""
                 variant="outlined"
                 margin="dense"
-                value={state.form.name}
-                onChange={handleChange}
+                value={name}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setName(e.target.value)
+                }
                 errors={state.errors.name}
               />
             </div>
@@ -214,8 +239,10 @@ const AssetCreate = (props: AssetProps) => {
                   },
                 ]}
                 optionValue="name"
-                value={state.form.asset_type}
-                onChange={(e) => handleChange(e)}
+                value={asset_type}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setAssetType(e.target.value)
+                }
                 errors={state.errors.asset_type}
               />
             </div>
@@ -223,23 +250,22 @@ const AssetCreate = (props: AssetProps) => {
               <InputLabel htmlFor="location" id="name=label">
                 Location*
               </InputLabel>
-              {isLocationsLoading ? (
-                <CircularProgress size={20} />
-              ) : (
-                <SelectField
-                  id="location"
-                  fullWidth
-                  name="location"
-                  placeholder=""
-                  variant="outlined"
-                  margin="dense"
-                  options={locations}
-                  optionValue="name"
-                  value={state.form.location}
-                  onChange={(e) => handleChange(e)}
-                  errors={state.errors.location}
-                />
-              )}
+
+              <SelectField
+                id="location"
+                fullWidth
+                name="location"
+                placeholder=""
+                variant="outlined"
+                margin="dense"
+                options={locations}
+                optionValue="name"
+                value={location}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setLocation(e.target.value)
+                }
+                errors={state.errors.location}
+              />
             </div>
             <div>
               <InputLabel htmlFor="is_working" id="name=label">
@@ -258,17 +284,19 @@ const AssetCreate = (props: AssetProps) => {
                     name: "Select",
                   },
                   {
-                    id: "true",
+                    id: true,
                     name: "Yes",
                   },
                   {
-                    id: "false",
+                    id: false,
                     name: "No",
                   },
                 ]}
                 optionValue="name"
-                value={state.form.is_working}
-                onChange={handleChange}
+                value={is_working}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setIsWorking(e.target.value)
+                }
                 errors={state.errors.is_working}
               />
             </div>
@@ -284,8 +312,10 @@ const AssetCreate = (props: AssetProps) => {
                 placeholder=""
                 variant="outlined"
                 margin="dense"
-                value={state.form.description}
-                onChange={handleChange}
+                value={description}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setDescription(e.target.value)
+                }
                 errors={state.errors.description}
               />
             </div>
@@ -300,8 +330,10 @@ const AssetCreate = (props: AssetProps) => {
                 placeholder=""
                 variant="outlined"
                 margin="dense"
-                value={state.form.serial_number}
-                onChange={handleChange}
+                value={serial_number}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setSerialNumber(e.target.value)
+                }
                 errors={state.errors.serial_number}
               />
             </div>
@@ -316,8 +348,10 @@ const AssetCreate = (props: AssetProps) => {
                 placeholder=""
                 variant="outlined"
                 margin="dense"
-                value={state.form.warranty_details}
-                onChange={handleChange}
+                value={warranty_details}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setWarrantyDetails(e.target.value)
+                }
                 errors={state.errors.warranty_details}
               />
             </div>
