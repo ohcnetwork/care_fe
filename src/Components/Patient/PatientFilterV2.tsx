@@ -19,7 +19,7 @@ import { getAllLocalBody, getFacility, getDistrict } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { CircularProgress } from "@material-ui/core";
 import { navigate } from "raviger";
-import { DateRangePicker, getDate } from "../Common/DateRangePicker";
+import { DateTimeRangePicker, getDate } from "../Common/DateTimeRangePicker";
 import DistrictSelect from "../Facility/FacilityFilter/DistrictSelect";
 
 const debounce = require("lodash.debounce");
@@ -595,7 +595,7 @@ export default function PatientFilterV2(props: any) {
           />
         </div>
         <div className="w-64 flex-none">
-          <DateRangePicker
+          <DateTimeRangePicker
             startDate={getDate(filterState.date_of_result_after)}
             endDate={getDate(filterState.date_of_result_before)}
             onChange={(e) =>
@@ -610,7 +610,7 @@ export default function PatientFilterV2(props: any) {
             label={"Date of result"}
             size="small"
           />
-          <DateRangePicker
+          <DateTimeRangePicker
             startDate={getDate(filterState.date_declared_positive_after)}
             endDate={getDate(filterState.date_declared_positive_before)}
             onChange={(e) =>
@@ -626,7 +626,7 @@ export default function PatientFilterV2(props: any) {
             size="small"
           />
 
-          <DateRangePicker
+          <DateTimeRangePicker
             startDate={getDate(filterState.created_date_after)}
             endDate={getDate(filterState.created_date_before)}
             onChange={(e) =>
@@ -641,7 +641,7 @@ export default function PatientFilterV2(props: any) {
             label={"Created Date"}
             size="small"
           />
-          <DateRangePicker
+          <DateTimeRangePicker
             startDate={getDate(filterState.modified_date_after)}
             endDate={getDate(filterState.modified_date_before)}
             onChange={(e) =>
@@ -656,7 +656,7 @@ export default function PatientFilterV2(props: any) {
             label={"Modified Date"}
             size="small"
           />
-          <DateRangePicker
+          <DateTimeRangePicker
             startDate={getDate(
               filterState.last_consultation_admission_date_after
             )}
@@ -675,7 +675,7 @@ export default function PatientFilterV2(props: any) {
             label={"Admit Date"}
             size="small"
           />
-          <DateRangePicker
+          <DateTimeRangePicker
             startDate={getDate(
               filterState.last_consultation_discharge_date_after
             )}
@@ -694,7 +694,7 @@ export default function PatientFilterV2(props: any) {
             label={"Discharge Date"}
             size="small"
           />
-          <DateRangePicker
+          <DateTimeRangePicker
             startDate={getDate(
               filterState.last_consultation_symptoms_onset_date_after
             )}
