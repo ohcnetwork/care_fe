@@ -29,7 +29,6 @@ export const DateTimeRangePicker: React.FC<IDateTimeRangePickerProps> = ({
   startDateId = "start_date",
   size = "regular",
 }) => {
-  const [focusInput, setFocusInput] = React.useState<any>(null);
   return (
     <Box className="my-2">
       <div className="flex">
