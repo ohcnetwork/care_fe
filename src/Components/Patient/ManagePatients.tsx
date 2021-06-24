@@ -127,6 +127,11 @@ export const PatientManager = (props: any) => {
     phone_number: qParams.phone_number
       ? parsePhoneNumberFromString(qParams.phone_number)?.format("E.164")
       : undefined,
+    emergency_phone_number: qParams.emergency_phone_number
+      ? parsePhoneNumberFromString(qParams.emergency_phone_number)?.format(
+          "E.164"
+        )
+      : undefined,
     local_body: qParams.lsgBody || undefined,
     facility: facilityId || qParams.facility,
     district: qParams.district || undefined,
@@ -230,6 +235,7 @@ export const PatientManager = (props: any) => {
     qParams.name,
     qParams.page,
     qParams.phone_number,
+    qParams.emergency_phone_number,
     qParams.srf_id,
     qParams.covin_id,
     qParams.number_of_doses,
@@ -328,8 +334,8 @@ export const PatientManager = (props: any) => {
     updateQuery({ name: value, page: 1 });
   };
 
-  const searchByPhone = (value: string) => {
-    updateQuery({ phone_number: value, page: 1 });
+  const searchByPhone = (value: string, name: string) => {
+    updateQuery({ [name]: value, page: 1 });
   };
 
   const handleFilter = (value: string) => {
@@ -589,10 +595,23 @@ export const PatientManager = (props: any) => {
             />
           </div>
           <div>
-            <div className="text-sm font-semibold mt-2">Search by number</div>
+            <div className="text-sm font-semibold mt-2">Search by Number</div>
             <PhoneNumberField
               value={qParams.phone_number}
-              onChange={searchByPhone}
+              onChange={(value: string) => searchByPhone(value, "phone_number")}
+              turnOffAutoFormat={false}
+              errors=""
+            />
+          </div>
+          <div>
+            <div className="text-sm font-semibold mt-2">
+              Search by Emergency Number
+            </div>
+            <PhoneNumberField
+              value={qParams.emergency_phone_number}
+              onChange={(value: string) =>
+                searchByPhone(value, "emergency_phone_number")
+              }
               turnOffAutoFormat={false}
               errors=""
             />
@@ -660,6 +679,13 @@ export const PatientManager = (props: any) => {
         <div className="flex space-x-2 mt-2 flex-wrap w-full col-span-3 space-y-1">
           {qParams.phone_number?.trim().split(" ").length - 1
             ? badge("Phone Number", qParams.phone_number, "phone_number")
+            : null}
+          {qParams.emergency_phone_number?.trim().split(" ").length - 1
+            ? badge(
+                "Emergency Phone Number",
+                qParams.emergency_phone_number,
+                "emergency_phone_number"
+              )
             : null}
           {badge("Patient Name", qParams.name, "name")}
           {badge(
