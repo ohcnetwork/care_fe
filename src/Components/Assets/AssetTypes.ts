@@ -48,4 +48,6 @@ export interface AssetTransaction {
     email: string;
     user_type: string;
   };
+  created_date: string;
+  modified_date: string;
 }

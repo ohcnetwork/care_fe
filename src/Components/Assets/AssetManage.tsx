@@ -1,13 +1,14 @@
-import React from "react";
+import React, { useState, useCallback, useEffect, ReactElement } from "react";
+import Grid from "@material-ui/core/Grid";
 import loadable from "@loadable/component";
-import { useState, useCallback } from "react";
-import { AssetData } from "./AssetTypes";
+import moment from "moment";
+import { AssetData, AssetTransaction } from "./AssetTypes";
 import * as Notification from "../../Utils/Notifications.js";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { useDispatch, useSelector } from "react-redux";
 import { Typography } from "@material-ui/core";
-import { getAsset } from "../../Redux/actions";
-import { useEffect } from "react";
+import { getAsset, listAssetTransaction } from "../../Redux/actions";
+import Pagination from "../Common/Pagination";
 import { navigate } from "raviger";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
@@ -19,26 +20,38 @@ interface AssetManageProps {
 const AssetManage = (props: AssetManageProps) => {
   const { assetId } = props;
   const [asset, setAsset] = useState<AssetData>();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [offset, setOffset] = useState(0);
+  const [totalCount, setTotalCount] = useState(0);
+  const [transactions, setTransactions] = useState<AssetTransaction[]>([]);
+  const [transactionDetails, setTransactionDetails] = useState<
+    ReactElement | ReactElement[]
+  >();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const dispatch = useDispatch();
+  const limit = 14;
 
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const { data }: any = await dispatch(getAsset(assetId));
+      const [assetData, transactionsData]: any = await Promise.all([
+        dispatch(getAsset(assetId)),
+        dispatch(listAssetTransaction({ asset: assetId, limit, offset })),
+      ]);
       if (!status.aborted) {
         setIsLoading(false);
-        if (!data)
+        if (!assetData.data)
           Notification.Error({
             msg: "Something went wrong..!",
           });
         else {
-          console.log(data);
-          setAsset(data);
+          setAsset(assetData.data);
+          setTransactions(transactionsData.data.results);
+          setTotalCount(transactionsData.data.count);
         }
       }
     },
-    [dispatch, assetId]
+    [dispatch, assetId, offset]
   );
 
   useAbortableEffect(
@@ -48,9 +61,11 @@ const AssetManage = (props: AssetManageProps) => {
     [dispatch, fetchData]
   );
 
-  if (isLoading) {
-    return <Loading />;
-  }
+  const handlePagination = (page: number, limit: number) => {
+    const offset = (page - 1) * limit;
+    setCurrentPage(page);
+    setOffset(offset);
+  };
 
   const working_status = (is_working: boolean | undefined) => {
     if (is_working)
@@ -83,6 +98,52 @@ const AssetManage = (props: AssetManageProps) => {
     );
   };
 
+  const populateTableRows = (txns: AssetTransaction[]) => {
+    if (txns.length > 0) {
+      setTransactionDetails(
+        transactions.map((transaction: AssetTransaction) => (
+          <tr>
+            <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
+              <span className="text-cool-gray-900 font-medium">
+                {transaction.from_location.name}
+              </span>
+            </td>
+            <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
+              <span className="text-cool-gray-900 font-medium">
+                {transaction.to_location.name}
+              </span>
+            </td>
+            <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
+              <span className="text-cool-gray-900 font-medium">
+                {transaction.performed_by.first_name}{" "}
+                {transaction.performed_by.last_name}
+              </span>
+            </td>
+            <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
+              <span className="text-cool-gray-900 font-medium">
+                {moment(transaction.modified_date).format("lll")}
+              </span>
+            </td>
+          </tr>
+        ))
+      );
+    } else {
+      setTransactionDetails(
+        <Grid item xs={12} md={12}>
+          <Grid container justify="center" alignItems="center">
+            <h5> No Results Found</h5>
+          </Grid>
+        </Grid>
+      );
+    }
+  };
+
+  useEffect(() => {
+    populateTableRows(transactions);
+    console.log(transactions);
+  }, [transactions]);
+
+  if (isLoading) return <Loading />;
   return (
     <div className="px-2 pb-2">
       <PageTitle title={asset?.name || "Asset"} />
@@ -120,6 +181,40 @@ const AssetManage = (props: AssetManageProps) => {
               Update Asset
             </button>
           </div>
+        </div>
+      </div>
+      <div className="bg-white rounded-lg md:p-6 p-3 shadow mt-2">
+        <div className="text-xl font-semibold">Transaction History</div>
+        <div className="align-middle min-w-full overflow-x-auto shadow overflow-hidden sm:rounded-lg">
+          <table className="min-w-full divide-y divide-cool-gray-200">
+            <thead>
+              <tr>
+                <th className="px-6 py-3 bg-cool-gray-50 text-left text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
+                  Moved from
+                </th>
+                <th className="px-6 py-3 bg-cool-gray-50 text-left text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
+                  Moved to
+                </th>
+                <th className="px-6 py-3 bg-cool-gray-50 text-left text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
+                  Moved By
+                </th>
+                <th className="px-6 py-3 bg-cool-gray-50 text-left text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
+                  Moved On
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-cool-gray-200">
+              {transactionDetails}
+            </tbody>
+          </table>
+        </div>
+        <div className="mt-4 flex w-full justify-center">
+          <Pagination
+            cPage={currentPage}
+            defaultPerPage={limit}
+            data={{ totalCount }}
+            onChange={handlePagination}
+          />
         </div>
       </div>
     </div>
