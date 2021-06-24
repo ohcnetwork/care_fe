@@ -1,66 +1,66 @@
 import moment from "moment";
-import NavTabs from "../Common/NavTabs";
 import { useDispatch } from "react-redux";
+import { statusType, useAbortableEffect } from "../../Common/utils";
+import * as Notification from "../../Utils/Notifications.js";
 import PageTitle from "../Common/PageTitle";
 import { listAssets } from "../../Redux/actions";
 import { Badge } from "../Patient/ManagePatients";
 import { AssetData, AssetsResponse } from "./AssetTypes";
-import React, { useState, useEffect, MouseEvent } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { navigate } from "raviger";
+import loadable from "@loadable/component";
+import Pagination from "../Common/Pagination";
+
+const Loading = loadable(() => import("../Common/Loading"));
 
 const AssetsList = () => {
   const [assets, setAssets] = useState<AssetData[]>([{}] as AssetData[]);
-  const [tab, setTab] = useState<number>(0);
-  const [internalAssets, setInternalAssets] = useState<AssetData[]>([
-    {},
-  ] as AssetData[]);
-  const [externalAssets, setExternalAssets] = useState<AssetData[]>([
-    {},
-  ] as AssetData[]);
-
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [offset, setOffset] = useState<number>(0);
+  const [totalCount, setTotalCount] = useState<number>(0);
+  const limit = 14;
   const dispatch: any = useDispatch();
   const assetsExist = assets.length > 0 && Object.keys(assets[0]).length > 0;
 
-  useEffect(() => {
-    tab === 0 ? setAssets(internalAssets) : setAssets(externalAssets);
-  }, [tab]);
+  const fetchData = useCallback(
+    async (status: statusType) => {
+      setIsLoading(true);
+      const { data }: any = await dispatch(listAssets({}));
+      if (!status.aborted) {
+        setIsLoading(false);
+        if (!data)
+          Notification.Error({
+            msg: "Something went wrong..!",
+          });
+        else {
+          setAssets(data.results);
+          setTotalCount(data.count);
+        }
+      }
+    },
+    [dispatch, offset]
+  );
 
-  useEffect(() => {
-    const runner = async () => {
-      const response = await dispatch(listAssets({}));
-      const assets: AssetsResponse = response.data;
+  useAbortableEffect(
+    (status: statusType) => {
+      fetchData(status);
+    },
+    [dispatch, fetchData]
+  );
 
-      const theInternalAssets = assets.results.filter(
-        (result) => result.asset_type === "INTERNAL"
-      );
-      const theExternalAssets = assets.results.filter(
-        (result) => result.asset_type === "EXTERNAL"
-      );
-
-      setInternalAssets(theInternalAssets);
-      setExternalAssets(theExternalAssets);
-    };
-
-    runner().catch(console.error);
-  }, []);
-
-  const redirectToAsset = (asset: AssetData, e: MouseEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    // TODO: Redirect to Asset page once it's done.
+  const handlePagination = (page: number, limit: number) => {
+    const offset = (page - 1) * limit;
+    setCurrentPage(page);
+    setOffset(offset);
   };
 
+  if (isLoading) return <Loading />;
+
   return (
-    <div className="px-2 pb-2">
+    <div className="px-4 pb-2">
       <PageTitle title="Assets" hideBack={true} />
       <div className="flex-grow mt-10 bg-white">
-        <NavTabs
-          onChange={setTab}
-          options={[
-            { value: 0, label: "Internal" },
-            { value: 1, label: "External" },
-          ]}
-          active={tab}
-        />
         <div className="p-8">
           <div className="flex flex-wrap md:-mx-4">
             {assetsExist ? (
@@ -68,7 +68,7 @@ const AssetsList = () => {
                 <div
                   key={asset.id}
                   className="w-full pb-2 cursor-pointer border-b md:flex justify-between items-center mb-3"
-                  onClick={(e) => redirectToAsset(asset, e)}
+                  onClick={() => navigate(`/assets/${asset.id}`)}
                 >
                   <div className="px-4 md:w-1/2">
                     <div className="md:flex justify-between w-full">
@@ -114,6 +114,14 @@ const AssetsList = () => {
                 </p>
               </div>
             )}
+            <div className="mt-4 flex w-full justify-center">
+              <Pagination
+                cPage={currentPage}
+                defaultPerPage={limit}
+                data={{ totalCount }}
+                onChange={handlePagination}
+              />
+            </div>
           </div>
         </div>
       </div>
