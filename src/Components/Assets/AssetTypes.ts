@@ -4,6 +4,10 @@ export interface AssetLocationObject {
   description: string;
   created_date: string;
   modified_date: string;
+  facility: {
+    id: string;
+    name: string;
+  };
 }
 
 export interface AssetData {

@@ -6,6 +6,7 @@ import { listAssets } from "../../Redux/actions";
 import { Badge } from "../Patient/ManagePatients";
 import { AssetData, AssetsResponse } from "./AssetTypes";
 import React, { useState, useEffect, MouseEvent } from "react";
+import { navigate } from "raviger";
 
 const AssetsList = () => {
   const [assets, setAssets] = useState<AssetData[]>([{}] as AssetData[]);
@@ -63,7 +64,7 @@ const AssetsList = () => {
         <div className="p-8">
           <div className="flex flex-wrap md:-mx-4">
             {assetsExist ? (
-              assets.map((asset) => (
+              assets.map((asset: AssetData) => (
                 <div
                   key={asset.id}
                   className="w-full pb-2 cursor-pointer border-b md:flex justify-between items-center mb-3"
@@ -96,7 +97,12 @@ const AssetsList = () => {
                       />
                     </div>
                     <div className="px-2">
-                      <div className="btn btn-default bg-white">Details</div>
+                      <div
+                        onClick={() => navigate(`/assets/${asset.id}`)}
+                        className="btn btn-default bg-white"
+                      >
+                        Details
+                      </div>
                     </div>
                   </div>
                 </div>

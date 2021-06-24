@@ -54,6 +54,7 @@ import ShowPushNotification from "../Components/Notifications/ShowPushNotificati
 import { AddLocationForm } from "../Components/Facility/AddLocationForm";
 import { LocationManagement } from "../Components/Facility/LocationManagement";
 import AssetsList from "../Components/Assets/AssetsList";
+import AssetManage from "../Components/Assets/AssetManage";
 
 const get = require("lodash.get");
 const img = "https://cdn.coronasafe.network/light-logo.svg";
@@ -278,6 +279,7 @@ const routes = {
   ),
 
   "/assets": () => <AssetsList />,
+  "/assets/:assetId": ({ assetId }: any) => <AssetManage assetId={assetId} />,
 
   "/shifting": () =>
     localStorage.getItem("defaultShiftView") === "list" ? (
