@@ -106,7 +106,11 @@ const AssetsList = (props: any) => {
           onScan={(assetId: any) =>
             assetId ? navigate(`/assets/${assetId}`) : null
           }
-          onError={(e: any) => console.error(e)}
+          onError={(e: any) =>
+            Notification.Error({
+              msg: e.message,
+            })
+          }
           style={{ width: "100%" }}
         />
         <h2 className="text-center text-lg self-center">Scan Asset QR!</h2>
