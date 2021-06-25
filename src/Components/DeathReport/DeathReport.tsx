@@ -102,7 +102,7 @@ export default function PrintDeathReport(props: { id: string }) {
       <div className="my-4 flex justify-end ">
         <button
           onClick={(_) => window.print()}
-          className="bg-white btn btn-primary mr-2"
+          className="btn btn-primary mr-2"
         >
           <i className="fas fa-print mr-2"></i> Print Death Report
         </button>
@@ -114,7 +114,7 @@ export default function PrintDeathReport(props: { id: string }) {
         </button>
       </div>
 
-      <div id="section-to-print" className="print bg-white ">
+      <div id="section-to-print" className="print bg-white">
         <div></div>
         <div className="mx-20 p-4">
           <div className="font-bold text-xl text-center mt-6 mb-6">
@@ -641,7 +641,7 @@ export default function PrintDeathReport(props: { id: string }) {
           <div className="mt-6 w-1/2 md:w-1/4">
             <button
               onClick={(_) => setIsPrintMode(true)}
-              className="bg-white btn btn-primary"
+              className="btn btn-primary"
             >
               Preview
             </button>

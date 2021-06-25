@@ -3,6 +3,7 @@ import loadable from "@loadable/component";
 import { InputSearchBox } from "../Common/SearchBox";
 import { navigate, useQueryParams } from "raviger";
 import { useDispatch } from "react-redux";
+import BadgesList from "./BadgesList";
 import moment from "moment";
 import GetAppIcon from "@material-ui/icons/GetApp";
 import { CSVLink } from "react-csv";
@@ -137,6 +138,11 @@ export default function ListView() {
     qParams.disease_status,
     offset,
   ]);
+
+  const updateFilter = (params: any, local: any) => {
+    updateQuery(params);
+    localStorage.setItem("shift-filters", JSON.stringify(local));
+  };
 
   let showShiftingCardList = (data: any) => {
     if (data && !data.length) {
@@ -360,7 +366,7 @@ export default function ListView() {
         </div>
         <div>
           <button
-            className="px-4 py-2 rounded-full border-2 border-gray-200 text-sm bg-white text-gray-800 w-32 leading-none transition-colors duration-300 ease-in focus:outline-none hover:text-green-600 hover:border-gray-400 focus:text-green-600 focus:border-gray-400"
+            className="px-4 py-2 rounded-full border-2 border-gray-200 text-sm bg-white text-gray-800 w-32 leading-none transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 hover:border-gray-400 focus:text-primary-600 focus:border-gray-400"
             onClick={onBoardViewBtnClick}
           >
             <i
@@ -372,7 +378,7 @@ export default function ListView() {
         </div>
         <div className="flex items-start gap-2">
           <button
-            className="flex leading-none border-2 border-gray-200 bg-white rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-green-600 focus:text-green-600 focus:border-gray-400 hover:border-gray-400 rounded-r-full px-4 py-2 text-sm"
+            className="flex leading-none border-2 border-gray-200 bg-white rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 focus:text-primary-600 focus:border-gray-400 hover:border-gray-400 rounded-r-full px-4 py-2 text-sm"
             onClick={(_) => setShowFilters((show) => !show)}
           >
             <i className="fa fa-filter mr-1" aria-hidden="true"></i>
@@ -380,92 +386,12 @@ export default function ListView() {
           </button>
         </div>
       </div>
-
-      <div className="flex flex-wrap space-y-1 space-x-2 mt-2 ml-2">
-        {badge(
-          "status",
-          (appliedFilters.status != "--" && appliedFilters.status) ||
-            (local.status !== "--" && local.status)
-        )}
-        {badge(
-          "Emergency",
-          local.emergency === "yes" || appliedFilters.emergency === "true"
-            ? "yes"
-            : local.emergency === "no" || appliedFilters.emergency === "false"
-            ? "no"
-            : undefined
-        )}
-        {badge(
-          "Is KASP",
-          local.is_kasp === "yes" || appliedFilters.is_kasp === "true"
-            ? "yes"
-            : local.is_kasp === "no" || appliedFilters.is_kasp === "false"
-            ? "no"
-            : undefined
-        )}
-        {badge(
-          "Up Shift",
-          local.is_up_shift === "yes" || appliedFilters.is_up_shift === "true"
-            ? "yes"
-            : local.is_up_shift === "no" ||
-              appliedFilters.is_up_shift === "false"
-            ? "no"
-            : undefined
-        )}
-        {badge(
-          "Phone Number",
-          appliedFilters.patient_phone_number || local.patient_phone_number
-        )}
-        {badge(
-          "Patient Name",
-          appliedFilters.patient_name || local.patient_name
-        )}
-        {badge(
-          "Modified After",
-          appliedFilters.modified_date_after || local.modified_date_after
-        )}
-        {badge(
-          "Modified Before",
-          appliedFilters.modified_date_before || local.modified_date_before
-        )}
-        {badge(
-          "Created Before",
-          appliedFilters.created_date_before || local.created_date_before
-        )}
-        {badge(
-          "Created After",
-          appliedFilters.created_date_after || local.created_date_after
-        )}
-        {badge(
-          "Disease Status",
-          appliedFilters.disease_status || local.disease_status
-        )}
-
-        {badge(
-          "Assigned To",
-          appliedFilters.assigned_user ||
-            appliedFilters.assigned_to ||
-            local.assigned_user ||
-            local.assigned_to
-        )}
-        {badge(
-          "Filtered By",
-          (appliedFilters.assigned_facility || local.assigned_facility) &&
-            "Assigned Facility"
-        )}
-        {badge(
-          "Filtered By",
-          (appliedFilters.orgin_facility || local.orgin_facility) &&
-            "Origin Facility"
-        )}
-        {badge(
-          "Filtered By",
-          (appliedFilters.shifting_approving_facility ||
-            local.shifting_approving_facility) &&
-            "Shifting Approving Facility"
-        )}
-      </div>
-
+      <BadgesList
+        filterParams={qParams}
+        appliedFilters={appliedFilters}
+        local={local}
+        updateFilter={updateFilter}
+      />
       <div className="px-4">
         {isLoading ? (
           <Loading />

@@ -104,7 +104,7 @@ export default function BoardView() {
           </button>
         </div>
         <button
-          className="px-4 py-2 rounded-full border-2 border-gray-200 text-sm bg-white text-gray-800 w-32 leading-none transition-colors duration-300 ease-in focus:outline-none hover:text-green-600 hover:border-gray-400 focus:text-green-600 focus:border-gray-400"
+          className="px-4 py-2 rounded-full border-2 border-gray-200 text-sm bg-white text-gray-800 w-32 leading-none transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 hover:border-gray-400 focus:text-primary-600 focus:border-gray-400"
           onClick={onListViewBtnClick}
         >
           <i className="fa fa-list-ul mr-1" aria-hidden="true"></i>
@@ -112,7 +112,7 @@ export default function BoardView() {
         </button>
         <div className="flex items-start gap-2">
           <button
-            className="flex leading-none border-2 border-gray-200 bg-white rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-green-600 focus:text-green-600 focus:border-gray-400 hover:border-gray-400 rounded-r-full px-4 py-2 text-sm"
+            className="flex leading-none border-2 border-gray-200 bg-white rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 focus:text-primary-600 focus:border-gray-400 hover:border-gray-400 rounded-r-full px-4 py-2 text-sm"
             onClick={(_) => setShowFilters((show) => !show)}
           >
             <i className="fa fa-filter mr-1" aria-hidden="true"></i>
