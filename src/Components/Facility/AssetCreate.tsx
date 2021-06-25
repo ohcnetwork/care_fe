@@ -364,7 +364,7 @@ const AssetCreate = (props: AssetProps) => {
               onClick={(e) => handleSubmit(e)}
               startIcon={<CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>}
             >
-              Create
+              {assetId ? "Update" : "Create"}
             </Button>
           </form>
         </CardContent>
