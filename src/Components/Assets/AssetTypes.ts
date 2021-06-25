@@ -4,6 +4,10 @@ export interface AssetLocationObject {
   description: string;
   created_date: string;
   modified_date: string;
+  facility: {
+    id: string;
+    name: string;
+  };
 }
 
 export interface AssetData {
@@ -26,4 +30,24 @@ export interface AssetsResponse {
   next?: string;
   previous?: string;
   results: AssetData[];
+}
+
+export interface AssetTransaction {
+  id: string;
+  asset: {
+    id: string;
+    name: string;
+  };
+  from_location: AssetLocationObject;
+  to_location: AssetLocationObject;
+  performed_by: {
+    id: string;
+    first_name: string;
+    last_name: string;
+    username: string;
+    email: string;
+    user_type: string;
+  };
+  created_date: string;
+  modified_date: string;
 }

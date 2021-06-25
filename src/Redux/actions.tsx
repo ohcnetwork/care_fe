@@ -539,8 +539,8 @@ export const createAssetUserLocation = (params: object) =>
   fireRequest("createAssetUserLocation", [], params);
 export const getAsset = (id: string) =>
   fireRequest("getAsset", [], {}, { external_id: id });
-export const updateAsset = (id: string) =>
-  fireRequest("updateAsset", [], {}, { external_id: id });
+export const updateAsset = (id: string, params: object) =>
+  fireRequest("updateAsset", [], params, { external_id: id });
 export const partialUpdateAsset = (id: string) =>
   fireRequest("partialUpdateAsset", [], {}, { external_id: id });
 
