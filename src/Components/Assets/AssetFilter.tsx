@@ -14,8 +14,7 @@ function AssetFilter(props: any) {
   const [facilityId, setFacilityId] = useState<number | "">(filter.facility);
 
   useEffect(() => {
-    if (facility?.id) setFacilityId(facility?.id);
-    else setFacilityId("");
+    setFacilityId(facility?.id ? facility?.id : "");
   }, [facility]);
 
   const fetchFacility = useCallback(
@@ -39,9 +38,7 @@ function AssetFilter(props: any) {
   );
 
   useAbortableEffect((status: statusType) => {
-    if (filter.facility) {
-      fetchFacility(status);
-    }
+    filter.facility && fetchFacility(status);
   }, []);
   const applyFilter = () => {
     const data = {
@@ -51,10 +48,7 @@ function AssetFilter(props: any) {
   };
 
   const handleFacilitySelect = (selected: FacilityModel) => {
-    if (selected) setFacility(selected);
-    else {
-      setFacility({ name: "" });
-    }
+    setFacility(selected ? selected : { name: "" });
   };
 
   return (

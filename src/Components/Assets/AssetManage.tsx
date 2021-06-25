@@ -99,15 +99,12 @@ const AssetManage = (props: AssetManageProps) => {
   );
 
   const working_status = (is_working: boolean | undefined) => {
-    if (is_working)
-      return (
-        <span className="bg-green-500 text-white text-sm px-2 py-1 uppercase rounded-full">
-          Working
-        </span>
-      );
+    const bgColorClass = is_working ? "bg-green-500" : "bg-red-500";
     return (
-      <span className="bg-red-500 text-white text-sm px-2 py-1 uppercase rounded-full">
-        Not Working
+      <span
+        className={`${bgColorClass} text-white text-sm px-2 py-1 uppercase rounded-full`}
+      >
+        {!is_working && "Not "} Working
       </span>
     );
   };

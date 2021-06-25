@@ -15,6 +15,7 @@ import { InputSearchBox } from "../Common/SearchBox";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import AssetFilter from "./AssetFilter";
 import { FacilityModel } from "../Facility/models";
+import AdvancedFilterButton from "../Common/AdvancedFilterButton";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -186,45 +187,7 @@ const AssetsList = (props: any) => {
           />
         </div>
         <div className="flex-1 flex flex-col justify-start items-end">
-          <div>
-            <div className="flex items-start mb-2">
-              <button
-                className="btn btn-primary-ghost"
-                onClick={() => setShowFilters(true)}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="fill-current w-4 h-4 mr-2"
-                >
-                  <line x1="8" y1="6" x2="21" y2="6"></line>
-                  <line x1="8" y1="12" x2="21" y2="12">
-                    {" "}
-                  </line>
-                  <line x1="8" y1="18" x2="21" y2="18">
-                    {" "}
-                  </line>
-                  <line x1="3" y1="6" x2="3.01" y2="6">
-                    {" "}
-                  </line>
-                  <line x1="3" y1="12" x2="3.01" y2="12">
-                    {" "}
-                  </line>
-                  <line x1="3" y1="18" x2="3.01" y2="18">
-                    {" "}
-                  </line>
-                </svg>
-                <span>Advanced Filters</span>
-              </button>
-            </div>
-          </div>
+          <AdvancedFilterButton setShowFilters={setShowFilters} />
           <button
             className="btn btn-primary"
             onClick={() => setIsScannerActive(true)}
