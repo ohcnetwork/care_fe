@@ -79,6 +79,8 @@ const AssetsList = (props: any) => {
           setFacilityName(res?.data?.name);
           setIsLoading(false);
         }
+      } else {
+        setFacilityName("");
       }
     },
     [dispatch, qParams.facility]
