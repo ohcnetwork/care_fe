@@ -71,11 +71,13 @@ const AssetsList = (props: any) => {
 
   const fetchFacilityName = useCallback(
     async (status: statusType) => {
-      setIsLoading(true);
-      const res = await dispatch(getFacility(qParams.facility));
-      if (!status.aborted) {
-        setFacilityName(res?.data?.name);
-        setIsLoading(false);
+      if (qParams.facility) {
+        setIsLoading(true);
+        const res = await dispatch(getFacility(qParams.facility));
+        if (!status.aborted) {
+          setFacilityName(res?.data?.name);
+          setIsLoading(false);
+        }
       }
     },
     [dispatch, qParams.facility]
