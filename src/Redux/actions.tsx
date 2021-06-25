@@ -392,7 +392,12 @@ export const completeTransfer = (pathParams: object) => {
 export const downloadShiftRequests = (params: object) => {
   return fireRequest("downloadShiftRequests", [], params);
 };
-
+export const getShiftComments = (id: string) => {
+  return fireRequest("getShiftComments", [], {}, { id });
+};
+export const addShiftComments = (id: string, params: object) => {
+  return fireRequest("addShiftComments", [], params, { id });
+};
 // External Results
 export const externalResultList = (params: object, altKey: string) => {
   return fireRequest("externalResultList", [], params, null, altKey);
