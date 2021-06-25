@@ -11,24 +11,27 @@ function AssetFilter(props: any) {
   let { filter, onChange, closeFilter } = props;
   const dispatch: any = useDispatch();
   const [facility, setFacility] = useState<FacilityModel>({ name: "" });
-  const [facilityId, setFacilityId] = useState<number>(filter.facility);
+  const [facilityId, setFacilityId] = useState<number | "">(filter.facility);
 
   useEffect(() => {
     if (facility?.id) setFacilityId(facility?.id);
+    else setFacilityId("");
   }, [facility]);
 
   const fetchFacility = useCallback(
     async (status: statusType) => {
-      const [facilityData]: any = await Promise.all([
-        dispatch(getFacility(facilityId)),
-      ]);
-      if (!status.aborted) {
-        if (!facilityData.data)
-          Notification.Error({
-            msg: "Something went wrong..!",
-          });
-        else {
-          setFacility(facilityData.data);
+      if (facilityId !== "") {
+        const [facilityData]: any = await Promise.all([
+          dispatch(getFacility(facilityId)),
+        ]);
+        if (!status.aborted) {
+          if (!facilityData.data)
+            Notification.Error({
+              msg: "Something went wrong..!",
+            });
+          else {
+            setFacility(facilityData.data);
+          }
         }
       }
     },
@@ -45,6 +48,13 @@ function AssetFilter(props: any) {
       facility: facilityId,
     };
     onChange(data);
+  };
+
+  const handleFacilitySelect = (selected: FacilityModel) => {
+    if (selected) setFacility(selected);
+    else {
+      setFacility({ name: "" });
+    }
   };
 
   return (
@@ -76,7 +86,9 @@ function AssetFilter(props: any) {
           <span className="text-sm font-semibold">Facility</span>
           <FacilitySelect
             name="Facilities"
-            setSelected={(selected) => setFacility(selected as FacilityModel)}
+            setSelected={(selected) =>
+              handleFacilitySelect(selected as FacilityModel)
+            }
             selected={facility}
             errors=""
             showAll={false}

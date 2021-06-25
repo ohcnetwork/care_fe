@@ -178,7 +178,7 @@ const AssetsList = (props: any) => {
             </div>
           </div>
           <button
-            className="btn btn-primary md:w-1/3 w-full"
+            className="btn btn-primary"
             onClick={() => setIsScannerActive(true)}
           >
             <i className="fas fa-search mr-1"></i> Scan Asset QR
