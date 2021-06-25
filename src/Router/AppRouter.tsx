@@ -308,9 +308,7 @@ const routes = {
   "/external_results/upload": () => <ExternalResultUpload />,
   "/external_results/:id": ({ id }: any) => <ResultItem id={id} />,
   "/death_report/:id": ({ id }: any) => <DeathReport id={id} />,
-  "/show_notification/:id": (id: any) => (
-    <ShowPushNotification external_id={id} />
-  ),
+  "/notifications/:id": (id: any) => <ShowPushNotification external_id={id} />,
 };
 
 let menus = [

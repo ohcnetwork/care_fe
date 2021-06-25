@@ -24,14 +24,14 @@ self.addEventListener("notificationclick", (e) => {
     clients.matchAll({ type: "window" }).then((clientsArr) => {
       // If a Window tab matching the targeted URL already exists, focus that;
       const hadWindowToFocus = clientsArr.some((windowClient) =>
-        windowClient.url === "/show_notification/".concat(e.notification.tag)
+        windowClient.url === "/notifications/".concat(e.notification.tag)
           ? (windowClient.focus(), true)
           : false
       );
       // Otherwise, open a new tab to the applicable URL and focus it.
       if (!hadWindowToFocus)
         clients
-          .openWindow("/show_notification/".concat(e.notification.tag))
+          .openWindow("/notifications/".concat(e.notification.tag))
           .then((windowClient) => (windowClient ? windowClient.focus() : null));
     })
   );
