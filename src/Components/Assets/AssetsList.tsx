@@ -4,7 +4,7 @@ import QrReader from "react-qr-reader";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import * as Notification from "../../Utils/Notifications.js";
 import PageTitle from "../Common/PageTitle";
-import { listAssets } from "../../Redux/actions";
+import { getFacility, listAssets } from "../../Redux/actions";
 import { Badge } from "../Patient/ManagePatients";
 import { AssetData } from "./AssetTypes";
 import React, { useState, useCallback } from "react";
@@ -14,6 +14,7 @@ import Pagination from "../Common/Pagination";
 import { InputSearchBox } from "../Common/SearchBox";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import AssetFilter from "./AssetFilter";
+import { FacilityModel } from "../Facility/models";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -26,6 +27,7 @@ const AssetsList = (props: any) => {
   const [offset, setOffset] = useState<number>(0);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [showFilters, setShowFilters] = useState<boolean>(false);
+  const [facilityName, setFacilityName] = useState<string>();
   const limit = 14;
   const dispatch: any = useDispatch();
   const assetsExist = assets.length > 0 && Object.keys(assets[0]).length > 0;
@@ -66,6 +68,48 @@ const AssetsList = (props: any) => {
     },
     [dispatch, fetchData]
   );
+
+  const fetchFacilityName = useCallback(
+    async (status: statusType) => {
+      setIsLoading(true);
+      const res = await dispatch(getFacility(qParams.facility));
+      if (!status.aborted) {
+        setFacilityName(res?.data?.name);
+        setIsLoading(false);
+      }
+    },
+    [dispatch, qParams.facility]
+  );
+
+  useAbortableEffect(
+    (status: statusType) => {
+      fetchFacilityName(status);
+    },
+    [fetchFacilityName]
+  );
+
+  const badge = (key: string, value: any, paramKey: string) => {
+    return (
+      value && (
+        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
+          {key}
+          {": "}
+          {value}
+          <i
+            className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
+            onClick={(e) => removeFilter(paramKey)}
+          ></i>
+        </span>
+      )
+    );
+  };
+
+  const removeFilter = (paramKey: any) => {
+    updateQuery({
+      ...qParams,
+      [paramKey]: "",
+    });
+  };
 
   const onSearchSuspects = (search: string) => {
     if (search !== "") setQueryParams({ ...qParams, search }, true);
@@ -197,6 +241,9 @@ const AssetsList = (props: any) => {
             />
           </div>
         </SlideOver>
+      </div>
+      <div className="flex space-x-2 mt-2 flex-wrap w-full col-span-3 space-y-1">
+        {badge("Facility", facilityName, "facility")}
       </div>
       <div className="flex-grow mt-10 bg-white">
         <div className="p-8">
