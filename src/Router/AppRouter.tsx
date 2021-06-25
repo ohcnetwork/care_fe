@@ -548,6 +548,7 @@ const AppRouter = (props: any) => {
                     onClick={() => {
                       localStorage.removeItem("care_access_token");
                       localStorage.removeItem("care_refresh_token");
+                      localStorage.removeItem("shift-filters");
                       navigate("/login");
                       window.location.reload();
                     }}
