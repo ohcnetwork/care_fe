@@ -843,7 +843,7 @@ export default function ShiftDetails(props: { id: string }) {
         </div>
       )}
       <div className="mx-3 md:mx-8 mb-10">
-        <h4 className="mt-8"></h4>
+        <h4 className="mt-8">Comments</h4>
         <CommentSection id={props.id} />
       </div>
     </div>
