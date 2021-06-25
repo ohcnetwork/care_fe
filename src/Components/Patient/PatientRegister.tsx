@@ -981,7 +981,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   {" "}
                   Import From External Results
                 </button>
-                <div className="bg-red-100 text-red-800 p-2 rounded-lg shadow mb-4 mt-2 font-semibold text-xs">
+                <div className="bg-yellow-100 text-red-800 p-2 rounded-lg shadow mb-4 mt-2 font-semibold text-xs">
                   <div className="text-xl font-bold">
                     Please enter the correct date of birth for the patient
                   </div>
