@@ -70,8 +70,8 @@ const AssetsList = (props: any) => {
   );
 
   const onSearchSuspects = (search: string) => {
-    if (search !== "") setQueryParams({ search }, true);
-    else setQueryParams({ search: "" }, true);
+    if (search !== "") setQueryParams({ ...qParams, search }, true);
+    else setQueryParams({ ...qParams, search: "" }, true);
   };
 
   const handlePagination = (page: number, limit: number) => {
