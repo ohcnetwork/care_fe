@@ -31,7 +31,6 @@ const AssetsList = (props: any) => {
   const assetsExist = assets.length > 0 && Object.keys(assets[0]).length > 0;
   const fetchData = useCallback(
     async (status: statusType) => {
-      console.log("fetching again");
       setIsLoading(true);
       const params = qParams.search
         ? {
@@ -55,7 +54,6 @@ const AssetsList = (props: any) => {
         else {
           setAssets(data.results);
           setTotalCount(data.count);
-          console.log(data);
         }
       }
     },

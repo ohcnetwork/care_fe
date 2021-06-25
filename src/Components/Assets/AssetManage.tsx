@@ -174,7 +174,6 @@ const AssetManage = (props: AssetManageProps) => {
 
   useEffect(() => {
     populateTableRows(transactions);
-    console.log(transactions);
   }, [transactions]);
 
   if (isLoading) return <Loading />;
