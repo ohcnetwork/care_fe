@@ -33,14 +33,14 @@ export const DateTimeRangePicker: React.FC<IDateTimeRangePickerProps> = ({
     <Box className="my-2">
       <div className="flex">
         {label && <span className="text-sm font-semibold">{label}</span>}
-        <button
+        {(startDate || endDate) && <button
           className="text-xs font-semibold px-2 bg-red-200 hover:bg-red-300 rounded uppercase float-right mr-1 ml-auto"
           onClick={() => {
             onChange({ startDate: null, endDate: null });
           }}
         >
           X Clear
-        </button>
+        </button>}
       </div>
       <MuiPickersUtilsProvider utils={DateFnsUtils}>
         <div className="flex">
