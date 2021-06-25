@@ -225,6 +225,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   }>({ patientList: [] });
   const [sameAddress, setSameAddress] = useState(true);
   const [{ extId }, setQuery] = useQueryParams();
+  const [submittable, setSubmittable] = useState(false);
 
   useEffect(() => {
     if (extId) {
@@ -628,14 +629,16 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           return;
       }
     });
-    dispatch({ type: "set_error", errors });
-    return !invalidForm;
+
+    return [!invalidForm, errors];
   };
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
-    const validForm = validateForm();
-    if (validForm) {
+    const [validForm, errors] = validateForm();
+    if (!validForm) {
+      dispatch({ type: "set_error", errors });
+    } else {
       setIsLoading(true);
       let medical_history: Array<medicalHistoryModel> = [];
       state.form.medical_history.forEach((id: number) => {
@@ -818,6 +821,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     }
   };
 
+  const checkIfSubmittable = () => {
+    const [validForm, errors] = validateForm();
+    if (!validForm) setSubmittable(false);
+    else setSubmittable(true);
+  };
+
   const handleCheckboxFieldChange = (e: any) => {
     const form = { ...state.form };
     const { checked, name } = e.target;
@@ -969,7 +978,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               </div>
             </div>
           ) : (
-            <CardContent>
+            <CardContent onBlur={checkIfSubmittable}>
               <form onSubmit={(e) => handleSubmit(e)}>
                 <button
                   className="btn btn-primary"
@@ -1891,6 +1900,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     }
                     onClick={(e) => handleSubmit(e)}
                     data-testid="submit-button"
+                    disabled={!submittable}
                   >
                     {" "}
                     {buttonText}{" "}
