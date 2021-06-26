@@ -110,7 +110,7 @@ export default function PrintDeathReport(props: { id: string }) {
         </button>
         <button
           onClick={(_) => setIsPrintMode(false)}
-          className="bg-white btn btn-default"
+          className="btn btn-default"
         >
           <i className="fas fa-times mr-2"></i> Close
         </button>
