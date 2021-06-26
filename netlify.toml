@@ -1,5 +1,5 @@
 [build]
-publish = "dist/"
+publish = "build/"
 
 [[redirects]]
 from = "/api/*"
