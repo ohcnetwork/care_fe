@@ -1,7 +1,9 @@
 import React, { useState, useCallback } from "react";
+import loadable from "@loadable/component";
 import { useDispatch } from "react-redux";
 import { getPatient } from "../../Redux/actions";
 import { PatientModel } from "../Patient/models";
+const PageTitle = loadable(() => import("../Common/PageTitle"));
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { GENDER_TYPES } from "../../Common/constants";
 import {
@@ -280,9 +282,7 @@ export default function PrintDeathReport(props: { id: string }) {
         previewData()
       ) : (
         <div className="m-5 p-5 bg-gray-100 border rounded-xl shadow">
-          <div className="font-bold text-xl text-center mt-4 mb-5">
-            Covid-19 Death Reporting : Form 1
-          </div>
+          <PageTitle title={`Covid-19 Death Reporting : Form 1`} />
           <div className="grid grid-rows-11">
             <div className="grid grid-cols-1 mt-4 gap-10">
               <div>
