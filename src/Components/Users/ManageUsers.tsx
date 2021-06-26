@@ -322,6 +322,14 @@ export default function ManageUsers(props: any) {
                 </div>
                 <div className="font-black text-2xl capitalize mt-2">
                   {`${user.first_name} ${user.last_name}`}
+
+                  {user.last_login &&
+                  moment().subtract(5, "minutes").isBefore(user.last_login) ? (
+                    <i
+                      className="animate-pulse text-primary-500 fas fa-check ml-1 opacity-75"
+                      aria-label="Online"
+                    ></i>
+                  ) : null}
                 </div>
 
                 {user.user_type && (
