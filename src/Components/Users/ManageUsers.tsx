@@ -313,10 +313,21 @@ export default function ManageUsers(props: any) {
                   )}
                   <div className="flex-shrink-0 text-sm text-gray-600 mt-2 min-width-50">
                     Last Online:{" "}
-                    <span>
+                    <span
+                      aria-label="Online"
+                      className={
+                        "flex-shrink-0 inline-block h-2 w-2 rounded-full " +
+                        (moment()
+                          .subtract(5, "minutes")
+                          .isBefore(user.last_login)
+                          ? "bg-primary-400"
+                          : "bg-gray-300")
+                      }
+                    ></span>
+                    <span className="pl-2">
                       {user.last_login
-                        ? moment(user.last_login).format("lll")
-                        : "--"}
+                        ? moment(user.last_login).fromNow()
+                        : "Never"}
                     </span>
                   </div>
                 </div>
@@ -326,7 +337,7 @@ export default function ManageUsers(props: any) {
                   {user.last_login &&
                   moment().subtract(5, "minutes").isBefore(user.last_login) ? (
                     <i
-                      className="animate-pulse text-primary-500 fas fa-check ml-1 opacity-75"
+                      className="animate-pulse text-primary-500 fas fa-circle ml-1 opacity-75"
                       aria-label="Online"
                     ></i>
                   ) : null}
