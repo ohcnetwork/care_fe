@@ -145,7 +145,9 @@ export default function ResultList() {
   useEffect(() => {
     setIsLoading(true);
     if (showNotifications) {
-      dispatch(getNotifications({ offset, event: eventFilter }))
+      dispatch(
+        getNotifications({ offset, event: eventFilter, medium_sent: "SYSTEM" })
+      )
         .then((res: any) => {
           if (res && res.data) {
             setData(res.data.results);

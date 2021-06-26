@@ -1,5 +1,6 @@
 export const KeralaLogo = "images/kerala-logo.png";
 
+export const RESULTS_PER_PAGE_LIMIT = 14;
 export interface OptionsType {
   id: number;
   text: string;

@@ -8,6 +8,7 @@ import { getItems, postInventory } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { SelectField, TextInputField } from "../Common/HelperInputFields";
 import { InventoryItemsModel } from "./models";
+const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -103,7 +104,8 @@ export const AddInventoryForm = (props: any) => {
 
     const res = await dispatchAction(postInventory(data, { facilityId }));
     setIsLoading(false);
-    if (res && res.data) {
+    console.log("result : ", res);
+    if (res && res.data && (res.status === 200 || res.status === 201)) {
       Notification.Success({
         msg: "Inventory created successfully",
       });
