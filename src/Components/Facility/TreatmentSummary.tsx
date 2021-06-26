@@ -81,7 +81,7 @@ const TreatmentSummary = (props: any) => {
             </button>
             <button
               onClick={(_) => props.setIsPrintMode(false)}
-              className="bg-white btn btn-default"
+              className="btn btn-default"
             >
               <i className="fas fa-times mr-2"></i> Close
             </button>

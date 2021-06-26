@@ -261,7 +261,7 @@ export default function ResourceDetails(props: { id: string }) {
             <div>
               <button
                 onClick={(_) => setIsPrintMode(true)}
-                className="bg-white btn btn-primary"
+                className="btn btn-primary"
               >
                 <i className="fas fa-file-alt mr-2"></i> Approval Letter
               </button>
