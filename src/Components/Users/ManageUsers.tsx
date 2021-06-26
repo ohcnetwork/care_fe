@@ -2,6 +2,7 @@
 import React, { useCallback, useState } from "react";
 import loadable from "@loadable/component";
 import { useDispatch, useSelector } from "react-redux";
+import moment from "moment";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   addUserFacility,
@@ -304,11 +305,21 @@ export default function ManageUsers(props: any) {
           <div className="block rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 overflow-hidden">
             <div className="h-full flex flex-col justify-between">
               <div className="px-6 py-4">
-                {user.username && (
-                  <div className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800">
-                    {user.username}
+                <div className="flex justify-between">
+                  {user.username && (
+                    <div className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800">
+                      {user.username}
+                    </div>
+                  )}
+                  <div className="flex-shrink-0 text-sm text-gray-600 mt-2 min-width-50">
+                    Last Online:{" "}
+                    <span>
+                      {user.last_login
+                        ? moment(user.last_login).format("lll")
+                        : "--"}
+                    </span>
                   </div>
-                )}
+                </div>
                 <div className="font-black text-2xl capitalize mt-2">
                   {`${user.first_name} ${user.last_name}`}
                 </div>
