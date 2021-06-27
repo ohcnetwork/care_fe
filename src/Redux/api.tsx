@@ -339,6 +339,16 @@ const routes: Routes = {
     method: "DELETE",
   },
 
+  updateExternalResult: {
+    path: "/api/v1/external_result/{id}/",
+    method: "PUT",
+  },
+
+  partialUpdateExternalResult: {
+    path: "/api/v1/external_result/{id}/",
+    method: "PATCH",
+  },
+
   // States
   statesList: {
     path: "/api/v1/state/",
