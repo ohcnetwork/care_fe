@@ -179,6 +179,12 @@ export default function ListFilter(props: any) {
     return selectedwards;
   };
 
+  const clearFilters = () => {
+    localStorage.removeItem("external-filters");
+    localStorage.removeItem("lsg-ward-data");
+    closeFilter();
+  };
+
   return (
     <div>
       <div className="flex justify-between">
@@ -189,6 +195,7 @@ export default function ListFilter(props: any) {
         <Link
           href="/external_results"
           className="btn btn-default hover:text-gray-900"
+          onClick={clearFilters}
         >
           <i className="fas fa-times mr-2" />
           Clear Filters

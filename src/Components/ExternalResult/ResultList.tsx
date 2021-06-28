@@ -61,7 +61,7 @@ export default function ResultList() {
   let manageResults: any = null;
   const local = JSON.parse(localStorage.getItem("external-filters") || "{}");
   const localLsgWard = JSON.parse(
-    localStorage.getItem("lsg-ward-data") || "{}"
+    localStorage.getItem("lsg-ward-data") || '{"lsgList": [], "wardList": []}'
   );
 
   useEffect(() => {
