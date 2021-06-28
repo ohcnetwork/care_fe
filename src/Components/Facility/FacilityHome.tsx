@@ -293,8 +293,15 @@ export const FacilityHome = (props: any) => {
               className="btn-primary btn mt-2"
               onClick={() => navigate(`/facility/${facilityId}/assets/new`)}
             >
-              <i className="fas fa-boxes text-white mr-2"></i>
+              <i className="fas fa-plus-circle text-white mr-2"></i>
               Create Asset
+            </button>
+            <button
+              className="btn-primary btn mt-2"
+              onClick={() => navigate(`/assets?facility=${facilityId}`)}
+            >
+              <i className="fas fa-boxes text-white mr-2"></i>
+              View Assets
             </button>
             {(currentUser.data.user_type === "DistrictAdmin" ||
               currentUser.data.user_type === "StateAdmin") && (
