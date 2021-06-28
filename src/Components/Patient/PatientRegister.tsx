@@ -1075,7 +1075,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   {state.form.is_declared_positive === "true" && (
                     <div>
                       <InputLabel id="date_declared_positive-label">
-                        Date Patient is Declared Positive
+                        Date Patient is Declared Positive for COVID
                       </InputLabel>
                       <DateInputField
                         fullWidth={true}
