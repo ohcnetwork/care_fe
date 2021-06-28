@@ -4,6 +4,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import loadable from "@loadable/component";
 import { useDispatch } from "react-redux";
 const Loading = loadable(() => import("../Common/Loading"));
+const PageTitle = loadable(() => import("../Common/PageTitle"));
 import { sampleReport } from "../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { SampleReportModel } from "./models";
@@ -1751,5 +1752,10 @@ export default function SampleReport(props: samplePreviewProps) {
       </Box>
     );
   }
-  return <Paper className={classes.root}>{report}</Paper>;
+  return (
+    <Paper className={classes.root}>
+      <PageTitle title="Sample Report" />
+      {report}
+    </Paper>
+  );
 }
