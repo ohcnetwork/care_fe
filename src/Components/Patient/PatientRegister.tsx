@@ -1093,7 +1093,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
                   <div>
                     <InputLabel id="is_vaccinated">
-                      Is patient Vaccinated?
+                      Is patient Vaccinated for COVID?
                     </InputLabel>
                     <RadioGroup
                       aria-label="is_vaccinated"
