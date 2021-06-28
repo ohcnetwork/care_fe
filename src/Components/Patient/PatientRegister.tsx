@@ -1034,7 +1034,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
                   <div data-testid="disease-status">
                     <InputLabel id="disease_status-label">
-                      Disease Status*
+                      COVID Disease Status*
                     </InputLabel>
                     <SelectField
                       name="disease_status"
