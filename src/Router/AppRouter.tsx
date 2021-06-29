@@ -49,7 +49,8 @@ import ShowInvestigation from "../Components/Facility/Investigations/ShowInvesti
 import InvestigationReports from "../Components/Facility/Investigations/Reports";
 import { withTranslation } from "react-i18next";
 import DeathReport from "../Components/DeathReport/DeathReport";
-import { make as CriticalCareRecording } from "../Components/Common/CriticalCareRecording.gen";
+import { make as CriticalCareRecording } from "../Components/CriticalCareRecording/CriticalCareRecording.gen";
+import { make as NursingCare } from "../Components/CriticalCareRecording/NursingCare/CriticalCare__NursingCare.gen";
 
 const get = require("lodash.get");
 const img = "https://cdn.coronasafe.network/light-logo.svg";
@@ -294,6 +295,8 @@ const routes = {
   "/external_results/upload": () => <ExternalResultUpload />,
   "/external_results/:id": ({ id }: any) => <ResultItem id={id} />,
   "/death_report/:id": ({ id }: any) => <DeathReport id={id} />,
+
+  "/nursing-care": () => <NursingCare />,
 };
 
 let menus = [
