@@ -51,6 +51,7 @@ import { withTranslation } from "react-i18next";
 import DeathReport from "../Components/DeathReport/DeathReport";
 import { make as CriticalCareRecording } from "../Components/CriticalCareRecording/CriticalCareRecording.gen";
 import { make as NursingCare } from "../Components/CriticalCareRecording/NursingCare/CriticalCare__NursingCare.gen";
+import { make as VentilatorParametersEditor } from "../Components/CriticalCareRecording/VentilatorParametersEditor/CriticalCare__VentilatorParametersEditor.bs";
 
 const get = require("lodash.get");
 const img = "https://cdn.coronasafe.network/light-logo.svg";
@@ -60,6 +61,11 @@ const routes = {
   "/critical_care": () => (
     <>
       <CriticalCareRecording />
+    </>
+  ),
+  "/critical_care_ventilator": () => (
+    <>
+      <VentilatorParametersEditor />
     </>
   ),
   "/": () => <HospitalList />,
