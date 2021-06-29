@@ -16,7 +16,12 @@
   ],
   "suffix": ".bs.js",
   "namespace": true,
-  "bs-dependencies": ["@rescript/react", "@glennsl/bs-json", "bs-webapi"],
+  "bs-dependencies": [
+    "@rescript/react",
+    "@glennsl/bs-json",
+    "bs-webapi",
+    "@jsiebern/bs-material-ui"
+  ],
   "ppx-flags": [],
   "refmt": 3,
   "gentypeconfig": {

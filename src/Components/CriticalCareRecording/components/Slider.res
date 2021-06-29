@@ -27,7 +27,7 @@
 
 
 let s = React.string
-
+%%raw(`import ("./styles.css")`)
 
 
 @react.component
