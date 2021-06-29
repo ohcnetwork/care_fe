@@ -56,7 +56,11 @@ const img = "https://cdn.coronasafe.network/light-logo.svg";
 const logoBlack = "https://cdn.coronasafe.network/black-logo.svg";
 
 const routes = {
-  "/critical_care": () => <CriticalCareRecording />,
+  "/critical_care": () => (
+    <>
+      <CriticalCareRecording />
+    </>
+  ),
   "/": () => <HospitalList />,
   "/users": () => <ManageUsers />,
   "/user/add": () => <UserAdd />,

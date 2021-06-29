@@ -217,7 +217,7 @@ let output_parameters = ["Urine"]
 @react.component
 let make = () => {
     <div className="ml-36 w-8/12">
-        <div className="my-10">
+            <div className="my-10">
             <div className=" text-2xl font-bold my-2">{str("LOC")}</div>
             <CriticalCare__RadioButton options={loc_options} horizontal=true />
         </div>
