@@ -1,4 +1,3 @@
-import React from "react";
 import ReactDOM from "react-dom";
 import reducer from "../src/Redux/Reducer";
 import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
@@ -8,7 +7,8 @@ import { applyMiddleware, createStore } from "redux";
 import thunk from "redux-thunk";
 import { Provider } from "react-redux";
 import * as Sentry from "@sentry/browser";
-require("./tailwind.css");
+import * as serviceWorkerRegistration from "./serviceWorkerRegistration";
+require("./style/index.css");
 const store = createStore(reducer, applyMiddleware(thunk));
 Sentry.init({
   environment: process.env.NODE_ENV,
@@ -32,8 +32,12 @@ ReactDOM.render(
   document.getElementById("root")
 );
 
+/*
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("/service-worker.js");
   });
 }
+*/
+
+serviceWorkerRegistration.register();

@@ -7,9 +7,9 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getItems, setMinQuantity } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { SelectField, TextInputField } from "../Common/HelperInputFields";
+import { InventoryItemsModel } from "./models";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
-import { InventoryItemsModel } from "./models";
 
 const initForm = {
   id: "",
