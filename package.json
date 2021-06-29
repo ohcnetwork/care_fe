@@ -67,7 +67,7 @@
     "file-loader": "^6.2.0",
     "html-webpack-plugin": "^4.5.1",
     "i18next": "^20.3.1",
-    "i18next-browser-languagedetector": "^6.1.1",
+    "i18next-browser-languagedetector": "^6.1.2",
     "libphonenumber-js": "^1.9.19",
     "lodash.debounce": "^4.0.8",
     "lodash.get": "^4.4.2",
