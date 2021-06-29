@@ -77,6 +77,7 @@ export default function ResultList() {
       sample_collection_date_before:
         qParams.sample_collection_date_before || undefined,
       offset: (qParams.page ? qParams.page - 1 : 0) * RESULT_LIMIT,
+      srf_id: qParams.srf_id || undefined,
     };
 
     dispatch(externalResultList(params, "externalResultList"))
@@ -103,6 +104,7 @@ export default function ResultList() {
     qParams.sample_collection_date_after,
     qParams.sample_collection_date_before,
     qParams.local_bodies,
+    qParams.srf_id,
     dataList,
   ]);
 
@@ -416,6 +418,7 @@ export default function ResultList() {
           qParams.sample_collection_date_after,
           "sample_collection_date_after"
         )}
+        {badge("SRF ID", qParams.srf_id, "srf_id")}
       </div>
       <div className="align-middle min-w-full overflow-x-auto shadow overflow-hidden sm:rounded-lg">
         <table className="min-w-full divide-y divide-cool-gray-200">
