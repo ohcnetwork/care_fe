@@ -199,6 +199,47 @@ let cannot_be_assessed: array<Options.t> = [
     },
     ]
 
+let handleSubmit = (handleDone, state) => {
+	handleDone(state)
+}
+
+type action =
+| SetLossOfConciousness(string)
+| SetLeftPupilSize(string)
+| SetLeftPupilResponse(string)
+| SetRightPuilSize(string)
+| SetRightPupilResponse(string)
+| SetEyeOpen(string)
+| SetVerbalResponse(string)
+| SetMotorResponse(string)
+| SetTotalGlascowScale(string)
+| SetUpperExtremityR(string)
+| SetUpperExtremityL(string)
+| SetLowerExtremityR(string)
+| SetLowerExtremityL(string)
+
+
+let reducer = (state, action) => {
+    switch action {
+        | SetLossOfConciousness(lossOfConciousness) => {...state, NeurologicalMonitoringTypes.lossOfConciousness: lossOfConciousness}
+        | SetLeftPupilSize(leftPupilSize) => {...state, NeurologicalMonitoringTypes.leftPupilSize: leftPupilSize}
+        | SetLeftPupilResponse(leftPupilResponse) => {...state, NeurologicalMonitoringTypes.leftPupilResponse: leftPupilResponse}
+        | SetRightPuilSize(rightPuilSize) => {...state, NeurologicalMonitoringTypes.rightPuilSize: rightPuilSize}
+        | SetRightPupilResponse(rightPupilResponse) => {...state, NeurologicalMonitoringTypes.rightPupilResponse: rightPupilResponse}
+        | SetEyeOpen(eyeOpen) => {...state, NeurologicalMonitoringTypes.eyeOpen: eyeOpen}
+        | SetVerbalResponse(verbalResponse) => {...state, NeurologicalMonitoringTypes.verbalResponse: verbalResponse}
+        | SetMotorResponse(motorResponse) => {...state, NeurologicalMonitoringTypes.motorResponse: motorResponse}
+        | SetTotalGlascowScale(totalGlascowScale) => {...state, NeurologicalMonitoringTypes.totalGlascowScale: totalGlascowScale}
+        | SetUpperExtremityR(upperExtremityR) => {...state, NeurologicalMonitoringTypes.upperExtremityR: upperExtremityR}
+        | SetUpperExtremityL(upperExtremityL) => {...state, NeurologicalMonitoringTypes.upperExtremityL: upperExtremityL}
+        | SetLowerExtremityR(lowerExtremityR) => {...state, NeurologicalMonitoringTypes.lowerExtremityR: lowerExtremityR}
+        | SetLowerExtremityL(lowerExtremityL) => {...state, NeurologicalMonitoringTypes.lowerExtremityL: lowerExtremityL}
+    }
+}
+
+let getFieldValue = (event) => {
+	ReactEvent.Form.target(event)["value"]
+}
 
 @react.component
 let make = () => {
