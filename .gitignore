@@ -38,3 +38,6 @@ public/build-meta.json
 *.bs.js
 *.gen.tsx
 *.gen
+
+# Generated CSS file from Tailwind
+src/style/index.css

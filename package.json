@@ -15,6 +15,7 @@
     "coronasafe Contributors"
   ],
   "homepage": "https://care.coronasafe.in",
+  "proxy": "https://careapi.coronasafe.in",
   "main": "./src/index.tsx",
   "keywords": [
     "Coronasafe",
@@ -62,7 +63,6 @@
     "clean-webpack-plugin": "^4.0.0-alpha.0",
     "cross-env": "^7.0.3",
     "css-loader": "^5.2.6",
-    "cypress": "^7.5.0",
     "date-fns": "^2.16.1",
     "file-loader": "^6.2.0",
     "html-webpack-plugin": "^4.5.1",
@@ -91,7 +91,6 @@
     "react-phone-input-2": "^2.14.0",
     "react-qr-reader": "^2.2.1",
     "react-redux": "^7.2.4",
-    "react-scripts": "^4.0.3",
     "react-swipeable-views": "^0.13.9",
     "react-transition-group": "^4.4.1",
     "react-virtualized": "^9.22.3",
@@ -106,11 +105,15 @@
   },
   "scripts": {
     "prebuild": "npm run re:build && npm run generate-build-meta",
-    "start": "npm run re:build && webpack-dev-server -p --open --mode=development",
+    "build:react": "cross-env NODE_ENV=production react-scripts build",
+    "build:tailwind": "cross-env NODE_ENV=production postcss src/style/index.tailwind.css -o src/style/index.css",
+    "build": "npm run build:tailwind && INLINE_RUNTIME_CHUNK=false npm run build:react",
+    "start:react": "cross-env PORT=4000 react-scripts start",
+    "start:tailwind": "postcss -w src/style/index.tailwind.css -o src/style/index.css",
+    "start": "npm run re:build && run-p start:tailwind start:react",
     "start:Dev": "cross-env NODE_ENV=production http-server dist",
     "re:build": "bsb -make-world -clean-world",
     "re:watch": "bsb -make-world -clean-world -w",
-    "build": "cross-env NODE_ENV=production ./node_modules/.bin/webpack -p --mode=production",
     "generate-build-meta": "node ./build-scripts/generate-build-version.js",
     "test": "snyk test",
     "cypress:open": "cross-env NODE_ENV=development cypress open",
@@ -149,30 +152,24 @@
     "concurrently": "^6.2.0",
     "copy-webpack-plugin": "6.4.1",
     "cssnano": "^5.0.5",
+    "cypress": "^7.5.0",
     "gentype": "^4.1.0",
     "http-server": "^0.12.3",
     "husky": "^6.0.0",
-    "jest": "^27.0.2",
+    "jest": "^26.6.0",
     "jest-environment-jsdom-fourteen": "^1.0.1",
     "jest-resolve": "^27.0.2",
     "jest-watch-typeahead": "^0.6.4",
     "lint-staged": "^11.0.0",
     "local-cypress": "^1.2.1",
+    "npm-run-all": "^4.1.5",
     "optimize-css-assets-webpack-plugin": "5.0.4",
     "postcss-cli": "^7.1.2",
     "prettier": "^2.3.0",
+    "react-scripts": "^4.0.3",
     "redux-devtools-extension": "^2.13.9",
     "snyk": "^1.618.0",
-    "source-map-loader": "1.1.3",
-    "ts-loader": "8.0.14",
-    "webpack": "^4.46.0",
-    "webpack-cli": "^3.3.12",
-    "webpack-dev-middleware": "^3.7.3",
-    "webpack-dev-server": "^3.11.2",
-    "webpack-hot-middleware": "^2.25.0",
-    "webpack-manifest-plugin": "2.2.0",
-    "workbox-precaching": "^5.1.4",
-    "workbox-webpack-plugin": "^5.1.4"
+    "source-map-loader": "1.1.3"
   },
   "jest": {
     "roots": [
@@ -229,5 +226,10 @@
   },
   "lint-staged": {
     "**/*": "prettier --write --ignore-unknown"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app"
+    ]
   }
 }

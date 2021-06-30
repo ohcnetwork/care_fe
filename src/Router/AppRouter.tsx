@@ -473,6 +473,8 @@ const AppRouter = (props: any) => {
                           localStorage.removeItem("care_access_token");
                           localStorage.removeItem("care_refresh_token");
                           localStorage.removeItem("shift-filters");
+                          localStorage.removeItem("external-filters");
+                          localStorage.removeItem("lsg-ward-data");
                           navigate("/login");
                           window.location.reload();
                         }}
@@ -553,6 +555,8 @@ const AppRouter = (props: any) => {
                       localStorage.removeItem("care_access_token");
                       localStorage.removeItem("care_refresh_token");
                       localStorage.removeItem("shift-filters");
+                      localStorage.removeItem("external-filters");
+                      localStorage.removeItem("lsg-ward-data");
                       navigate("/login");
                       window.location.reload();
                     }}
