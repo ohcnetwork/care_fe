@@ -24,6 +24,7 @@ import { useDispatch } from "react-redux";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import Box from "@material-ui/core/Box";
 import Typography from "@material-ui/core/Typography";
+import { header_content_type, LinearProgressWithLabel } from "./FileUpload";
 
 interface Props {
   sample: SampleTestModel;
@@ -42,26 +43,6 @@ const styles = {
 interface URLS {
   [id: string]: string;
 }
-
-const header_content_type: URLS = {
-  pdf: "application/pdf",
-  txt: "text/plain",
-  jpeg: "image/jpeg",
-  jpg: "image/jpeg",
-  doc: "application/msword",
-  xls: "application/vnd.ms-excel",
-  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  epub: "application/epub+zip",
-  gif: "image/gif",
-  html: "text/html",
-  htm: "text/html",
-  mp4: "video/mp4",
-  png: "image/png",
-  ppt: "application/vnd.ms-powerpoint",
-  pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-  svg: "image/svg+xml",
-  xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-};
 
 const statusChoices = [...SAMPLE_TEST_STATUS];
 
@@ -101,21 +82,6 @@ const updateStatusReducer = (state = initialState, action: any) => {
   }
 };
 
-const LinearProgressWithLabel = (props: any) => {
-  return (
-    <Box display="flex" alignItems="center">
-      <Box width="100%" mr={1}>
-        <LinearProgress variant="determinate" {...props} />
-      </Box>
-      <Box minWidth={35}>
-        <Typography variant="body2" color="textSecondary">{`${Math.round(
-          props.value
-        )}%`}</Typography>
-      </Box>
-    </Box>
-  );
-};
-
 const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
   const { sample, handleOk, handleCancel, classes, userType } = props;
   const [state, dispatch] = useReducer(updateStatusReducer, initialState);
@@ -124,7 +90,6 @@ const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
   const [uploadPercent, setUploadPercent] = useState(0);
   const [uploadStarted, setUploadStarted] = useState<boolean>(false);
   const [uploadDone, setUploadDone] = useState<boolean>(false);
-  const [reload, setReload] = useState<boolean>(false);
   const redux_dispatch: any = useDispatch();
 
   const currentStatus = SAMPLE_TEST_STATUS.find(
@@ -187,7 +152,6 @@ const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
       .then((result) => {
         setUploadStarted(false);
         setUploadDone(true);
-        setReload(!reload);
         Notification.Success({
           msg: "File Uploaded Successfully",
         });

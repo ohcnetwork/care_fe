@@ -40,7 +40,7 @@ import { Close, ZoomIn, ZoomOut } from "@material-ui/icons";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
-const header_content_type: URLS = {
+export const header_content_type: URLS = {
   pdf: "application/pdf",
   txt: "text/plain",
   jpeg: "image/jpeg",
@@ -93,7 +93,7 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const LinearProgressWithLabel = (props: any) => {
+export const LinearProgressWithLabel = (props: any) => {
   return (
     <Box display="flex" alignItems="center">
       <Box width="100%" mr={1}>
@@ -116,7 +116,7 @@ interface FileUploadProps {
   hideBack: boolean;
   audio: boolean;
   unspecified: boolean;
-  sampleId?: any;
+  sampleId?: number;
 }
 
 interface URLS {
