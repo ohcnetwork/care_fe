@@ -27,6 +27,7 @@ type completionStatus =
 type state = {
   visibleEditor: option<editor>,
   nursingCare: NursingCare.t,
+  abgEditor: ABGAnalysisEditorTypes.t,
   neurologicalMonitoringStatus: string,
   hemodynamicParametersStatus: string,
   ventilatorParametersStatus: string,
@@ -42,6 +43,7 @@ type state = {
 type action =
   | ShowEditor(editor)
   | CloseEditor
+  | SetABGAnalysisEditor(ABGAnalysisEditorTypes.t)
   | SetNursingCare(NursingCare.t)
   | UpdateNursingCareStatus(string)
   | UpdateTotal(int)
@@ -115,6 +117,7 @@ let reducer = (state, action) => {
   switch action {
   | ShowEditor(editor) => {...state, visibleEditor: Some(editor)}
   | CloseEditor => {...state, visibleEditor: None}
+  | SetABGAnalysisEditor(editor) => {...state, abgEditor: editor}
   | SetNursingCare(nursingCare) => {...state, nursingCare: nursingCare}
   | UpdateNursingCareStatus(nursingCareStatus) => {
       ...state,
@@ -126,6 +129,7 @@ let reducer = (state, action) => {
 
 let initialState = {
   visibleEditor: None,
+  abgEditor: ABGAnalysisEditorTypes.init,
   nursingCare: {
     personalHygiene: "",
     positioning: "",
@@ -183,7 +187,10 @@ export make = () => {
           | HemodynamicParametersEditor
           | VentilatorParametersEditor =>
             <CriticalCare__VentilatorParametersEditor />
-          | ArterialBloodGasAnalysisEditor
+          | ArterialBloodGasAnalysisEditor =>
+            <CriticalCare__ABGAnalysisEditor
+              initialState={state.abgEditor} handleDone={data => send(SetABGAnalysisEditor(data))}
+            />
           | BloodSugarEditor
           | IOBalanceEditor
           | DialysisEditor
