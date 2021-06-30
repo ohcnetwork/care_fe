@@ -98,7 +98,7 @@ let make = ()=>{
                 />
                 {str({"Control Mechanical Ventilation (CMV)"})}
             </label>
-            <div className=`ml-6 ${active !== "cmv" ? "pointer-events-none opacity-50" : ""} `><CriticalCare__RadioButton options={cmvOptionsArray} horizontal={false} /></div>
+            // <div className=`ml-6 ${active !== "cmv" ? "pointer-events-none opacity-50" : ""} `><CriticalCare__RadioButton options={cmvOptionsArray} horizontal={false} /></div>
         </div>
         <div className="mb-4" >
             <label onClick={(_) => handleChange("simv")} >
@@ -111,7 +111,7 @@ let make = ()=>{
                 />
                 {str({"Synchronised Intermittent Mandatory Ventilation (SIMV)"})}
             </label>
-            <div className={`ml-6 ${active !== "simv" ? "pointer-events-none opacity-50" : ""} `} ><CriticalCare__RadioButton options={simvOptionArray} horizontal={false} /></div>
+            // <div className={`ml-6 ${active !== "simv" ? "pointer-events-none opacity-50" : ""} `} ><CriticalCare__RadioButton options={simvOptionArray} horizontal={false} /></div>
         </div>
         <div className="mb-4" >
             <label onClick={(_) => handleChange("psv")} >
