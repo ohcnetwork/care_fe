@@ -1,6 +1,5 @@
 let str = React.string
 @val external document: {..} = "document"
-%%raw(`import("./styles.css")`)
 open CriticalCare__Types
 type editor =
   | NeurologicalMonitoringEditor
@@ -27,7 +26,7 @@ type completionStatus =
 type state = {
   visibleEditor: option<editor>,
   nursingCare: NursingCare.t,
-  abgEditor: ABGAnalysisEditorTypes.t,
+  abgEditor: ABGAnalysis.t,
   neurologicalMonitoringStatus: string,
   hemodynamicParametersStatus: string,
   ventilatorParametersStatus: string,
@@ -43,7 +42,7 @@ type state = {
 type action =
   | ShowEditor(editor)
   | CloseEditor
-  | SetABGAnalysisEditor(ABGAnalysisEditorTypes.t)
+  | SetABGAnalysisEditor(ABGAnalysis.t)
   | SetNursingCare(NursingCare.t)
   | UpdateNursingCareStatus(string)
   | UpdateTotal(int)
@@ -129,7 +128,16 @@ let reducer = (state, action) => {
 
 let initialState = {
   visibleEditor: None,
-  abgEditor: ABGAnalysisEditorTypes.init,
+  abgEditor: {
+    po2: "",
+    pco2: "",
+    pH: "",
+    hco3: "",
+    baseExcess: "",
+    lactate: "",
+    sodium: "",
+    potassium: "",
+  },
   nursingCare: {
     personalHygiene: "",
     positioning: "",
