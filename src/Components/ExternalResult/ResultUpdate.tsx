@@ -26,8 +26,8 @@ const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 const initForm: any = {
-  name: "",
-  phone_number: "",
+  //name: "",
+  //phone_number: "",
   address: "",
   local_body: "",
   ward: "",
@@ -64,7 +64,7 @@ const FormReducer = (state = initialState, action: any) => {
 
 const initialLocalbodies = [{ id: 0, name: "Choose Localbody", number: 0 }];
 const initialWard = [{ id: 0, name: "Choose Ward", number: 0 }];
-const selectDistrict = [{ id: 0, name: "Please select your district" }];
+//const initialLocalbodies = [{ id: 0, name: "Please select your district" }];
 
 export default function UpdateResult(props: any) {
   const { id } = props;
@@ -74,7 +74,7 @@ export default function UpdateResult(props: any) {
   const [isLoading, setIsLoading] = useState(false);
   const [isLocalbodyLoading, setIsLocalbodyLoading] = useState(false);
   const [isWardLoading, setIsWardLoading] = useState(false);
-  const [localBody, setLocalBody] = useState(selectDistrict);
+  const [localBody, setLocalBody] = useState(initialLocalbodies);
   const [ward, setWard] = useState(initialLocalbodies);
 
   const fetchData = useCallback(
@@ -85,8 +85,8 @@ export default function UpdateResult(props: any) {
         if (res && res.data) {
           console.log(res.data);
           const form = { ...state.form };
-          form["name"] = res.data.name;
-          form["phone_number"] = res.data.mobile_number;
+          //form["name"] = res.data.name;
+          //form["phone_number"] = res.data.mobile_number;
           form["address"] = res.data.address;
           form["district"] = res.data.district_object.name;
           form["local_body"] = String(res.data.local_body);
@@ -115,7 +115,7 @@ export default function UpdateResult(props: any) {
         setIsLocalbodyLoading(false);
         setLocalBody([...initialLocalbodies, ...localBodyList.data]);
       } else {
-        setLocalBody(selectDistrict);
+        setLocalBody(initialLocalbodies);
       }
     },
     [dispatchAction]
@@ -206,7 +206,7 @@ export default function UpdateResult(props: any) {
 
       const res = await dispatchAction(partialUpdateExternalResult(id, data));
       setIsLoading(false);
-      if (res && res.data && res.status != 400) {
+      if (res && res.data) {
         dispatch({ type: "set_form", form: initForm });
         Notification.Success({
           msg: "Patient updated successfully",
@@ -225,32 +225,6 @@ export default function UpdateResult(props: any) {
       <CardContent>
         <form onSubmit={(e) => handleSubmit(e)}>
           <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
-            <div data-testid="name">
-              <InputLabel id="name-label">Name</InputLabel>
-              <TextInputField
-                name="name"
-                variant="outlined"
-                margin="dense"
-                type="text"
-                value={state.form.name}
-                onChange={handleChange}
-                errors={state.errors.name}
-                disabled={true}
-              />
-            </div>
-            <div data-testid="name">
-              <InputLabel id="name-label">Phone Number</InputLabel>
-              <TextInputField
-                name="phone_number"
-                variant="outlined"
-                margin="dense"
-                type="text"
-                value={state.form.phone_number}
-                onChange={handleChange}
-                errors={state.errors.phone_number}
-                disabled={true}
-              />
-            </div>
             <div data-testid="current-address">
               <InputLabel id="address-label">Current Address*</InputLabel>
               <MultilineInputField
