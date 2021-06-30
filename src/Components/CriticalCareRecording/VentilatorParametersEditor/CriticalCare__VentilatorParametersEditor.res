@@ -17,8 +17,16 @@ let ventilationInterfaceOptions = [
 
 @react.component
 let make = ()=>{
-  let (ventilationInterface,setVentilationInterface) = React.useState(_ => "")
+  let (ventilationInterface,setVentilationInterface) = React.useState(_ => "iv")
   let handleChange = (opt) => setVentilationInterface(_ => opt)
+
+  let editor = switch ventilationInterface {
+  | "iv" => <CriticalCare__VentilatorParametersEditor__Invasive/>
+  | "niv" =>  <CriticalCare__VentilatorParametersEditor__NonInvasive/>
+  | "none" => <CriticalCare__VentilatorParametersEditor__None/>
+  | "" => <CriticalCare__VentilatorParametersEditor__Invasive/>
+  }
+
   <div>
     <CriticalCare__PageTitle title="Ventilator Parameters" />
     <form className="p-6">
@@ -34,7 +42,8 @@ let make = ()=>{
                             type_="radio" 
                             name="ventilationInterface"
                             value={option["value"]} 
-                            id={option["value"]} 
+                            id={option["value"]}
+                            checked={option["value"]===ventilationInterface}
                           />
                           {str({option["name"]})}
                       </label>
@@ -42,10 +51,10 @@ let make = ()=>{
               })
               |> React.array }
             </div>
-            <CriticalCare__VentilatorParametersEditor__Invasive/>
+            {editor}
         </div>
       </div>
-      <input type_="submit" className="text-white h-10 w-full bg-blue-500 my-10 rounded"/>
+      <input type_="submit" className="text-white py-3 text-xl w-full bg-blue-500 hover:bg-blue-600 cursor-pointer my-10 rounded"/>
     </form>
   </div>
 }
