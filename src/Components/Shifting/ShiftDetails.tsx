@@ -16,6 +16,7 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import * as Notification from "../../Utils/Notifications.js";
 import ReactDOM from "react-dom";
 import { CopyToClipboard } from "react-copy-to-clipboard";
+import CommentSection from "./CommentsSection";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -555,13 +556,13 @@ export default function ShiftDetails(props: { id: string }) {
           <div className="my-4 flex justify-end ">
             <button
               onClick={(_) => window.print()}
-              className="bg-white btn btn-primary mr-2"
+              className="btn btn-primary mr-2"
             >
               <i className="fas fa-print mr-2"></i> Print Referral Letter
             </button>
             <button
               onClick={(_) => setIsPrintMode(false)}
-              className="bg-white btn btn-default"
+              className="btn btn-default"
             >
               <i className="fas fa-times mr-2"></i> Close
             </button>
@@ -575,17 +576,17 @@ export default function ShiftDetails(props: { id: string }) {
             <div>
               <button
                 onClick={(_) => setIsPrintMode(true)}
-                className="bg-white btn btn-primary"
+                className="btn btn-primary"
               >
                 <i className="fas fa-file-alt mr-2"></i> Referral Letter
               </button>
             </div>
           </div>
           {data.assigned_to_object && (
-            <div className="relative rounded-lg shadow bg-green-200">
+            <div className="relative rounded-lg shadow bg-primary-200">
               <div className="max-w-screen-xl mx-auto py-3 px-3 sm:px-6 lg:px-8">
                 <div className="pr-16 sm:text-center sm:px-16">
-                  <p className="font-bold text-green-800">
+                  <p className="font-bold text-primary-800">
                     <span className="inline">
                       Assigned to: {data.assigned_to_object.first_name}{" "}
                       {data.assigned_to_object.last_name} -{" "}
@@ -841,6 +842,10 @@ export default function ShiftDetails(props: { id: string }) {
           {showFacilityCard(data.shifting_approving_facility_object)}
         </div>
       )}
+      <div className="mx-3 md:mx-8 mb-10">
+        <h4 className="mt-8">Comments</h4>
+        <CommentSection id={props.id} />
+      </div>
     </div>
   );
 }
