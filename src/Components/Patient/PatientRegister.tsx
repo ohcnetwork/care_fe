@@ -1062,7 +1062,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
                   <div data-testid="disease-status" id="disease_status-div">
                     <InputLabel id="disease_status-label">
-                      Disease Status*
+                      COVID Disease Status*
                     </InputLabel>
                     <SelectField
                       name="disease_status"
@@ -1103,7 +1103,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   {state.form.is_declared_positive === "true" && (
                     <div id="date_declared_positive-div">
                       <InputLabel id="date_declared_positive-label">
-                        Date Patient is Declared Positive
+                        Date Patient is Declared Positive for COVID
                       </InputLabel>
                       <DateInputField
                         fullWidth={true}
@@ -1121,7 +1121,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
                   <div id="is_vaccinated-div">
                     <InputLabel id="is_vaccinated">
-                      Is patient Vaccinated?
+                      Is patient Vaccinated against COVID?
                     </InputLabel>
                     <RadioGroup
                       aria-label="is_vaccinated"
@@ -1225,9 +1225,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       />
                     </div>
                   )}
-
                   <div id="test_type-div">
-                    <InputLabel id="test_type-label">Test Type</InputLabel>
+                    <InputLabel id="test_type-label">
+                      COVID Test Type
+                    </InputLabel>    
                     <SelectField
                       name="test_type"
                       variant="outlined"
@@ -1240,7 +1241,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     />
                   </div>
                   <div id="srf_id-div">
-                    <InputLabel id="srf_id-label">SRF Id</InputLabel>
+                    <InputLabel id="srf_id-label">
+                      SRF Id for COVID Test
+                    </InputLabel>
                     <TextInputField
                       name="srf_id"
                       variant="outlined"
@@ -1252,8 +1255,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     />
                   </div>
                   <div id="date_of_test-div">
-                    <InputLabel id="date_of_test-label">
-                      Date of Sample given
+                    <InputLabel id="date_of_birth-label">
+                      Date of Sample given for COVID Test
                     </InputLabel>
                     <DateInputField
                       fullWidth={true}
@@ -1269,7 +1272,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   </div>
                   <div id="date_of_result-div">
                     <InputLabel id="date_of_result-label">
-                      Date of Result
+                      Date of Result for COVID Test
                     </InputLabel>
                     <DateInputField
                       fullWidth={true}
@@ -1788,7 +1791,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   )}
                   <div id="number_of_primary_contacts-div">
                     <InputLabel id="number_of_primary_contacts-label">
-                      Number Of Primary Contacts
+                      Number Of Primary Contacts for COVID
                     </InputLabel>
                     <TextInputField
                       name="number_of_primary_contacts"
@@ -1802,7 +1805,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   </div>
                   <div id="number_of_secondary_contacts-div">
                     <InputLabel id="number_of_secondary_contacts-label">
-                      Number Of Secondary Contacts
+                      Number Of Secondary Contacts for COVID
                     </InputLabel>
                     <TextInputField
                       name="number_of_secondary_contacts"

@@ -1,7 +1,8 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
-import React, { useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import loadable from "@loadable/component";
 import { useDispatch, useSelector } from "react-redux";
+import moment from "moment";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   addUserFacility,
@@ -13,19 +14,19 @@ import {
 } from "../../Redux/actions";
 import Pagination from "../Common/Pagination";
 import { navigate } from "raviger";
-import { USER_TYPES } from "../../Common/constants";
+import { USER_TYPES, RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import { InputSearchBox } from "../Common/SearchBox";
 import { FacilityModel } from "../Facility/models";
 import DeleteForeverIcon from "@material-ui/icons/DeleteForever";
 import { IconButton } from "@material-ui/core";
 import LinkFacilityDialog from "./LinkFacilityDialog";
+import { SelectField } from "../Common/HelperInputFields";
 import UserDeleteDialog from "./UserDeleteDialog";
+import * as Notification from "../../Utils/Notifications.js";
 import classNames from "classnames";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
-import { SelectField } from "../Common/HelperInputFields";
-import * as Notification from "../../Utils/Notifications.js";
 
 export default function ManageUsers(props: any) {
   const dispatch: any = useDispatch();
@@ -62,7 +63,7 @@ export default function ManageUsers(props: any) {
 
   const [selectedRole, setSelectedRole] = useState("");
 
-  const limit = userTypes.length ? 13 : 14;
+  const limit = RESULTS_PER_PAGE_LIMIT;
 
   const USER_TYPE_OPTIONS = ["Select", ...USER_TYPES].map((user) => {
     return {
@@ -304,13 +305,42 @@ export default function ManageUsers(props: any) {
           <div className="block rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 overflow-hidden">
             <div className="h-full flex flex-col justify-between">
               <div className="px-6 py-4">
-                {user.username && (
-                  <div className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800">
-                    {user.username}
+                <div className="flex justify-between">
+                  {user.username && (
+                    <div className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800">
+                      {user.username}
+                    </div>
+                  )}
+                  <div className="flex-shrink-0 text-sm text-gray-600 mt-2 min-width-50">
+                    Last Online:{" "}
+                    <span
+                      aria-label="Online"
+                      className={
+                        "flex-shrink-0 inline-block h-2 w-2 rounded-full " +
+                        (moment()
+                          .subtract(5, "minutes")
+                          .isBefore(user.last_login)
+                          ? "bg-primary-400"
+                          : "bg-gray-300")
+                      }
+                    ></span>
+                    <span className="pl-2">
+                      {user.last_login
+                        ? moment(user.last_login).fromNow()
+                        : "Never"}
+                    </span>
                   </div>
-                )}
+                </div>
                 <div className="font-black text-2xl capitalize mt-2">
                   {`${user.first_name} ${user.last_name}`}
+
+                  {user.last_login &&
+                  moment().subtract(5, "minutes").isBefore(user.last_login) ? (
+                    <i
+                      className="animate-pulse text-primary-500 fas fa-circle ml-1 opacity-75"
+                      aria-label="Online"
+                    ></i>
+                  ) : null}
                 </div>
 
                 {user.user_type && (

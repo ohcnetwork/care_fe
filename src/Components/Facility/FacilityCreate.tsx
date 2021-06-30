@@ -42,8 +42,8 @@ import {
   SelectField,
   TextInputField,
 } from "../Common/HelperInputFields";
-const Loading = loadable(() => import("../Common/Loading"));
 import { LocationSearchAndPick } from "../Common/LocationSearchAndPick";
+const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 const DEFAULT_MAP_LOCATION = [10.038394700000001, 76.5074145180173]; // Ernakulam

@@ -54,6 +54,7 @@ import ShowPushNotification from "../Components/Notifications/ShowPushNotificati
 import { AddLocationForm } from "../Components/Facility/AddLocationForm";
 import { LocationManagement } from "../Components/Facility/LocationManagement";
 import AssetsList from "../Components/Assets/AssetsList";
+import AssetManage from "../Components/Assets/AssetManage";
 
 const get = require("lodash.get");
 const img = "https://cdn.coronasafe.network/light-logo.svg";
@@ -276,8 +277,11 @@ const routes = {
   "/facility/:facilityId/assets/new": ({ facilityId }: any) => (
     <AssetCreate facilityId={facilityId} />
   ),
-
+  "/facility/:facilityId/assets/:assetId": ({ facilityId, assetId }: any) => (
+    <AssetCreate facilityId={facilityId} assetId={assetId} />
+  ),
   "/assets": () => <AssetsList />,
+  "/assets/:assetId": ({ assetId }: any) => <AssetManage assetId={assetId} />,
 
   "/shifting": () =>
     localStorage.getItem("defaultShiftView") === "list" ? (
@@ -304,9 +308,7 @@ const routes = {
   "/external_results/upload": () => <ExternalResultUpload />,
   "/external_results/:id": ({ id }: any) => <ResultItem id={id} />,
   "/death_report/:id": ({ id }: any) => <DeathReport id={id} />,
-  "/show_notification/:id": (id: any) => (
-    <ShowPushNotification external_id={id} />
-  ),
+  "/notifications/:id": (id: any) => <ShowPushNotification external_id={id} />,
 };
 
 let menus = [
@@ -468,6 +470,9 @@ const AppRouter = (props: any) => {
                         onClick={() => {
                           localStorage.removeItem("care_access_token");
                           localStorage.removeItem("care_refresh_token");
+                          localStorage.removeItem("shift-filters");
+                          localStorage.removeItem("external-filters");
+                          localStorage.removeItem("lsg-ward-data");
                           navigate("/login");
                           window.location.reload();
                         }}
@@ -547,6 +552,9 @@ const AppRouter = (props: any) => {
                     onClick={() => {
                       localStorage.removeItem("care_access_token");
                       localStorage.removeItem("care_refresh_token");
+                      localStorage.removeItem("shift-filters");
+                      localStorage.removeItem("external-filters");
+                      localStorage.removeItem("lsg-ward-data");
                       navigate("/login");
                       window.location.reload();
                     }}

@@ -486,7 +486,14 @@ const routes: Routes = {
     path: "/api/v1/shift/",
     method: "GET",
   },
-
+  getShiftComments: {
+    path: "/api/v1/shift/{id}/comment/",
+    method: "GET",
+  },
+  addShiftComments: {
+    path: "/api/v1/shift/{id}/comment/",
+    method: "POST",
+  },
   // Notifications
   getNotifications: {
     path: "/api/v1/notification/",

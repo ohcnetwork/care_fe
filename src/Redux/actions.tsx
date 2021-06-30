@@ -392,7 +392,12 @@ export const completeTransfer = (pathParams: object) => {
 export const downloadShiftRequests = (params: object) => {
   return fireRequest("downloadShiftRequests", [], params);
 };
-
+export const getShiftComments = (id: string) => {
+  return fireRequest("getShiftComments", [], {}, { id });
+};
+export const addShiftComments = (id: string, params: object) => {
+  return fireRequest("addShiftComments", [], params, { id });
+};
 // External Results
 export const externalResultList = (params: object, altKey: string) => {
   return fireRequest("externalResultList", [], params, null, altKey);
@@ -534,8 +539,8 @@ export const createAssetUserLocation = (params: object) =>
   fireRequest("createAssetUserLocation", [], params);
 export const getAsset = (id: string) =>
   fireRequest("getAsset", [], {}, { external_id: id });
-export const updateAsset = (id: string) =>
-  fireRequest("updateAsset", [], {}, { external_id: id });
+export const updateAsset = (id: string, params: object) =>
+  fireRequest("updateAsset", [], params, { external_id: id });
 export const partialUpdateAsset = (id: string) =>
   fireRequest("partialUpdateAsset", [], {}, { external_id: id });
 
