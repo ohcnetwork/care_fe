@@ -1,7 +1,9 @@
 @val external document: {..} = "document"
 
-let str = React.string
+
 %%raw("import './styles.css'")
+
+let str = React.string
 
 let handleClick = (val) => {
     let range = document["getElementById"]("pupil_slider")
