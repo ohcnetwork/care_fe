@@ -3,8 +3,7 @@ let str = React.string
 
 @react.component
 let make = (~title: string) => {
-	<div className="p-6">
-		<button className="text-lg" onClick={(_) => goBack(-1)}><i className="fas fa-arrow-left"></i>{str("  Go Back")}</button>
+	<div className="py-6">
 		<h2>{str(title)}</h2>
 	</div>
 }

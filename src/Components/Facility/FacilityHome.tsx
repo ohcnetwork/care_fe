@@ -18,8 +18,6 @@ import {
   listDoctor,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 import BedTypeCard from "./BedTypeCard";
 import DoctorsCountCard from "./DoctorsCountCard";
 import {
@@ -29,6 +27,8 @@ import {
   PatientStatsModel,
 } from "./models";
 import moment from "moment";
+const Loading = loadable(() => import("../Common/Loading"));
+const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export const FacilityHome = (props: any) => {
   const { facilityId } = props;
@@ -183,7 +183,7 @@ export const FacilityHome = (props: any) => {
         open={openDeleteDialog}
         onClose={handleDeleteClose}
       >
-        <DialogTitle className="flex justify-center bg-green-100">
+        <DialogTitle className="flex justify-center bg-primary-100">
           Are you sure you want to delete {facilityData.name || "Facility"}
         </DialogTitle>
         <DialogContent>
@@ -277,10 +277,31 @@ export const FacilityHome = (props: any) => {
             </button>
             <button
               className="btn-primary btn mt-2"
+              onClick={() => navigate(`/facility/${facilityId}/location`)}
+            >
+              <i className="fas fa-map-marker-alt text-white mr-2"></i>
+              Location Management
+            </button>
+            <button
+              className="btn-primary btn mt-2"
               onClick={() => navigate(`/facility/${facilityId}/resource/new`)}
             >
               <i className="fas fa-dolly-flatbed text-white mr-2"></i>
               Resource Request
+            </button>
+            <button
+              className="btn-primary btn mt-2"
+              onClick={() => navigate(`/facility/${facilityId}/assets/new`)}
+            >
+              <i className="fas fa-plus-circle text-white mr-2"></i>
+              Create Asset
+            </button>
+            <button
+              className="btn-primary btn mt-2"
+              onClick={() => navigate(`/assets?facility=${facilityId}`)}
+            >
+              <i className="fas fa-boxes text-white mr-2"></i>
+              View Assets
             </button>
             {(currentUser.data.user_type === "DistrictAdmin" ||
               currentUser.data.user_type === "StateAdmin") && (

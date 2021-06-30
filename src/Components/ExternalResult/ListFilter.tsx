@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
-import {
-  AutoCompleteAsyncField,
-  DateInputField,
-} from "../Common/HelperInputFields";
+import { AutoCompleteAsyncField } from "../Common/HelperInputFields";
+import { DateRangePicker, getDate } from "../Common/DateRangePicker";
 import { getAllLocalBodyByDistrict } from "../../Redux/actions";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "raviger";
@@ -16,7 +14,7 @@ function useMergeState(initialState: any) {
 }
 
 export default function ListFilter(props: any) {
-  let { filter, onChange, closeFilter, dataList } = props;
+  let { filter, onChange, closeFilter, dataList, local } = props;
   const [wardList, setWardList] = useState<any[]>([]);
   const [lsgList, setLsgList] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -27,19 +25,32 @@ export default function ListFilter(props: any) {
   const state: any = useSelector((state) => state);
   const { currentUser } = state;
   const [filterState, setFilterState] = useMergeState({
-    created_date_before: filter.created_date_before || null,
-    created_date_after: filter.created_date_after || null,
-    result_date_before: filter.result_date_before || null,
-    result_date_after: filter.result_date_after || null,
-    sample_collection_date_before: filter.sample_collection_date_before || null,
-    sample_collection_date_after: filter.sample_collection_date_after || null,
+    created_date_before:
+      filter.created_date_before || local.created_date_before || null,
+    created_date_after:
+      filter.created_date_after || local.created_date_after || null,
+    result_date_before:
+      filter.result_date_before || local.result_date_before || null,
+    result_date_after:
+      filter.result_date_after || local.result_date_after || null,
+    sample_collection_date_before:
+      filter.sample_collection_date_before ||
+      local.sample_collection_date_before ||
+      null,
+    sample_collection_date_after:
+      filter.sample_collection_date_after ||
+      local.sample_collection_date_after ||
+      null,
   });
 
-  const handleChange = (event: any) => {
-    let { name, value } = event.target;
-
+  const handleDateRangeChange = (
+    startDateId: string,
+    endDateId: string,
+    { startDate, endDate }: any
+  ) => {
     const filterData: any = { ...filterState };
-    filterData[name] = value;
+    filterData[startDateId] = startDate?.toString();
+    filterData[endDateId] = endDate?.toString();
 
     setFilterState(filterData);
   };
@@ -76,8 +87,8 @@ export default function ListFilter(props: any) {
     } = filterState;
 
     const data = {
-      wards: selectedWardIds.length ? selectedWardIds : undefined,
-      local_bodies: selectedLsgIds.length ? selectedLsgIds : undefined,
+      wards: selectedWardIds.length ? selectedWardIds : "",
+      local_bodies: selectedLsgIds.length ? selectedLsgIds : "",
       created_date_before: formatDateTime(created_date_before),
       created_date_after: formatDateTime(created_date_after),
       result_date_before: formatDateTime(result_date_before),
@@ -89,6 +100,11 @@ export default function ListFilter(props: any) {
         sample_collection_date_before
       ),
     };
+    localStorage.setItem("external-filters", JSON.stringify(data));
+    localStorage.setItem(
+      "lsg-ward-data",
+      JSON.stringify({ lsgList: selectedLsgs, wardList: wards })
+    );
     onChange(data);
     dataList(selectedLsgs, wards);
   };
@@ -163,6 +179,12 @@ export default function ListFilter(props: any) {
     return selectedwards;
   };
 
+  const clearFilters = () => {
+    localStorage.removeItem("external-filters");
+    localStorage.removeItem("lsg-ward-data");
+    closeFilter();
+  };
+
   return (
     <div>
       <div className="flex justify-between">
@@ -173,6 +195,7 @@ export default function ListFilter(props: any) {
         <Link
           href="/external_results"
           className="btn btn-default hover:text-gray-900"
+          onClick={clearFilters}
         >
           <i className="fas fa-times mr-2" />
           Clear Filters
@@ -228,104 +251,50 @@ export default function ListFilter(props: any) {
         </div>
       </div>
       <div className="w-64 flex-none">
-        <span className="text-sm font-semibold">Created After</span>
-        <DateInputField
-          id="created_date_after"
-          name="created_date_after"
-          inputVariant="outlined"
-          margin="dense"
-          errors=""
-          value={filterState.created_date_after}
-          onChange={(date) =>
-            handleChange({
-              target: { name: "created_date_after", value: date },
-            })
+        <DateRangePicker
+          startDate={getDate(filterState.created_date_after)}
+          endDate={getDate(filterState.created_date_before)}
+          onChange={(e) =>
+            handleDateRangeChange(
+              "created_date_after",
+              "created_date_before",
+              e
+            )
           }
-          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+          endDateId={"created_date_before"}
+          startDateId={"created_date_after"}
+          label={"Created Date"}
+          size="small"
         />
       </div>
       <div className="w-64 flex-none">
-        <span className="text-sm font-semibold">Created Before</span>
-        <DateInputField
-          id="created_date_before"
-          name="created_date_before"
-          inputVariant="outlined"
-          margin="dense"
-          errors=""
-          value={filterState.created_date_before}
-          onChange={(date) =>
-            handleChange({
-              target: { name: "created_date_before", value: date },
-            })
+        <DateRangePicker
+          startDate={getDate(filterState.result_date_after)}
+          endDate={getDate(filterState.result_date_before)}
+          onChange={(e) =>
+            handleDateRangeChange("result_date_after", "result_date_before", e)
           }
-          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+          endDateId={"result_date_before"}
+          startDateId={"result_date_after"}
+          label={"Result Date"}
+          size="small"
         />
       </div>
       <div className="w-64 flex-none">
-        <span className="text-sm font-semibold">Result After</span>
-        <DateInputField
-          id="result_date_after"
-          name="result_date_after"
-          inputVariant="outlined"
-          margin="dense"
-          errors=""
-          value={filterState.result_date_after}
-          onChange={(date) =>
-            handleChange({ target: { name: "result_date_after", value: date } })
+        <DateRangePicker
+          startDate={getDate(filterState.sample_collection_date_after)}
+          endDate={getDate(filterState.sample_collection_date_before)}
+          onChange={(e) =>
+            handleDateRangeChange(
+              "sample_collection_date_after",
+              "sample_collection_date_before",
+              e
+            )
           }
-          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-        />
-      </div>
-
-      <div className="w-64 flex-none">
-        <span className="text-sm font-semibold">Result Before</span>
-        <DateInputField
-          id="result_date_before"
-          name="result_date_before"
-          inputVariant="outlined"
-          margin="dense"
-          errors=""
-          value={filterState.result_date_before}
-          onChange={(date) =>
-            handleChange({
-              target: { name: "result_date_before", value: date },
-            })
-          }
-          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-        />
-      </div>
-      <div className="w-64 flex-none">
-        <span className="text-sm font-semibold">Sample Collection After</span>
-        <DateInputField
-          id="sample_collection_date_before"
-          name="sample_collection_date_before"
-          inputVariant="outlined"
-          margin="dense"
-          errors=""
-          value={filterState.sample_collection_date_before}
-          onChange={(date) =>
-            handleChange({
-              target: { name: "sample_collection_date_before", value: date },
-            })
-          }
-          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-        />
-      </div>
-      <div className="w-64 flex-none">
-        <span className="text-sm font-semibold">Sample Collection Before</span>
-        <DateInputField
-          id="sample_collection_date_after"
-          name="sample_collection_date_after"
-          inputVariant="outlined"
-          margin="dense"
-          errors=""
-          value={filterState.sample_collection_date_after}
-          onChange={(date) =>
-            handleChange({
-              target: { name: "sample_collection_date_after", value: date },
-            })
-          }
-          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+          endDateId={"sample_collection_date_before"}
+          startDateId={"sample_collection_date_after"}
+          label={"Sample Collection Date"}
+          size="small"
         />
       </div>
     </div>

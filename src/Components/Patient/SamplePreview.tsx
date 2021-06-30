@@ -1,13 +1,14 @@
-import React, { useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import { Box, Button, Paper, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import loadable from "@loadable/component";
 import { useDispatch } from "react-redux";
-const Loading = loadable(() => import("../Common/Loading"));
 import { sampleReport } from "../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { SampleReportModel } from "./models";
 import moment from "moment";
+const Loading = loadable(() => import("../Common/Loading"));
+const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 const useStyles = makeStyles({
   root: {
@@ -1751,5 +1752,10 @@ export default function SampleReport(props: samplePreviewProps) {
       </Box>
     );
   }
-  return <Paper className={classes.root}>{report}</Paper>;
+  return (
+    <Paper className={classes.root}>
+      <PageTitle title="Sample Report" />
+      {report}
+    </Paper>
+  );
 }

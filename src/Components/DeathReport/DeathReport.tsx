@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from "react";
+import loadable from "@loadable/component";
 import { useDispatch } from "react-redux";
 import { getPatient } from "../../Redux/actions";
 import { PatientModel } from "../Patient/models";
@@ -10,6 +11,7 @@ import {
 } from "../Common/HelperInputFields";
 import { InputLabel } from "@material-ui/core";
 import moment from "moment";
+const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export default function PrintDeathReport(props: { id: string }) {
   const initialState = {
@@ -102,19 +104,19 @@ export default function PrintDeathReport(props: { id: string }) {
       <div className="my-4 flex justify-end ">
         <button
           onClick={(_) => window.print()}
-          className="bg-white btn btn-primary mr-2"
+          className="btn btn-primary mr-2"
         >
           <i className="fas fa-print mr-2"></i> Print Death Report
         </button>
         <button
           onClick={(_) => setIsPrintMode(false)}
-          className="bg-white btn btn-default"
+          className="btn btn-default"
         >
           <i className="fas fa-times mr-2"></i> Close
         </button>
       </div>
 
-      <div id="section-to-print" className="print bg-white ">
+      <div id="section-to-print" className="print bg-white">
         <div></div>
         <div className="mx-20 p-4">
           <div className="font-bold text-xl text-center mt-6 mb-6">
@@ -280,9 +282,7 @@ export default function PrintDeathReport(props: { id: string }) {
         previewData()
       ) : (
         <div className="m-5 p-5 bg-gray-100 border rounded-xl shadow">
-          <div className="font-bold text-xl text-center mt-4 mb-5">
-            Covid-19 Death Reporting : Form 1
-          </div>
+          <PageTitle title={`Covid-19 Death Reporting : Form 1`} />
           <div className="grid grid-rows-11">
             <div className="grid grid-cols-1 mt-4 gap-10">
               <div>
@@ -641,7 +641,7 @@ export default function PrintDeathReport(props: { id: string }) {
           <div className="mt-6 w-1/2 md:w-1/4">
             <button
               onClick={(_) => setIsPrintMode(true)}
-              className="bg-white btn btn-primary"
+              className="btn btn-primary"
             >
               Preview
             </button>

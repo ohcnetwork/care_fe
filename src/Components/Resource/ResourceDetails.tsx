@@ -101,7 +101,10 @@ export default function ResourceDetails(props: { id: string }) {
     return (
       <div id="section-to-print" className="print bg-white">
         <div className="flex justify-center">
-          <img src={KeralaLogo} alt="kerala-logo" />
+          <img
+            src={`${process.env.PUBLIC_URL}/${KeralaLogo}`}
+            alt="kerala-logo"
+          />
         </div>
         <div className="mx-20 p-4">
           <div className="font-bold text-xl text-center mt-6">
@@ -241,13 +244,13 @@ export default function ResourceDetails(props: { id: string }) {
           <div className="my-4 flex justify-end ">
             <button
               onClick={(_) => window.print()}
-              className="bg-white btn btn-primary mr-2"
+              className="btn btn-primary mr-2"
             >
               <i className="fas fa-print mr-2"></i> Print Approval Letter
             </button>
             <button
               onClick={(_) => setIsPrintMode(false)}
-              className="bg-white btn btn-default"
+              className="btn btn-default"
             >
               <i className="fas fa-times mr-2"></i> Close
             </button>
@@ -261,17 +264,17 @@ export default function ResourceDetails(props: { id: string }) {
             <div>
               <button
                 onClick={(_) => setIsPrintMode(true)}
-                className="bg-white btn btn-primary"
+                className="btn btn-primary"
               >
                 <i className="fas fa-file-alt mr-2"></i> Approval Letter
               </button>
             </div>
           </div>
           {data.assigned_to_object && (
-            <div className="relative rounded-lg shadow bg-green-200">
+            <div className="relative rounded-lg shadow bg-primary-200">
               <div className="max-w-screen-xl mx-auto py-3 px-3 sm:px-6 lg:px-8">
                 <div className="pr-16 sm:text-center sm:px-16">
-                  <p className="font-bold text-green-800">
+                  <p className="font-bold text-primary-800">
                     <span className="inline">
                       Assigned to: {data.assigned_to_object.first_name}{" "}
                       {data.assigned_to_object.last_name} -{" "}

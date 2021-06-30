@@ -1,6 +1,6 @@
-import keralaLogo from "../../public/images/kerala-logo.png";
+export const KeralaLogo = "images/kerala-logo.png";
 
-export const KeralaLogo = keralaLogo;
+export const RESULTS_PER_PAGE_LIMIT = 14;
 export interface OptionsType {
   id: number;
   text: string;
