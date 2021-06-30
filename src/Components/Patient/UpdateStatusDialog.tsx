@@ -171,7 +171,7 @@ const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
     setcontentType(header_content_type[ext]);
     return e.target.files[0];
   };
-  const handleUpload = async (e: any) => {
+  const handleUpload = async () => {
     const f = file;
     if (f === undefined) return;
     const category = "UNSPECIFIED";
@@ -260,9 +260,7 @@ const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
                   startIcon={
                     <CloudUploadOutlineIcon>save</CloudUploadOutlineIcon>
                   }
-                  onClick={(e: any) => {
-                    handleUpload(e);
-                  }}
+                  onClick={handleUpload}
                   disabled={uploadDone}
                 >
                   Upload
