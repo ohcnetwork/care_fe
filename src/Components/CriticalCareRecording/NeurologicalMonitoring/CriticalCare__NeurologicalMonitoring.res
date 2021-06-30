@@ -202,116 +202,73 @@ let cannot_be_assessed: array<Options.t> = [
 
 @react.component
 let make = () => {
-    <div className="ml-36 w-8/12">
+    <div>
+        <CriticalCare__PageTitle title="Neurological Monitoring" />
+        <div className="my-4">
+// <div className="ml-36 w-8/12">
             <div className="my-10">
-            <div className=" text-2xl font-bold my-2">{str("Level Of Consciousness")}</div>
-            <CriticalCare__RadioButton options={loc_options} horizontal=true />
-        </div>
-        <div className="my-10">
-            <div className="text-2xl font-bold my-2 mb-4">{str("Pupil")}</div>
-            <div className="text-lg font-bold my-3">{str("Left Pupil")}</div>
-            <CriticalCare__PupilRangeSlider />
-            <CriticalCare__RadioButton options ={cannot_be_assessed} horizontal=true />
+                <div className=" text-2xl font-bold my-2">{str("Level Of Consciousness")}</div>
+                <CriticalCare__RadioButton options={loc_options} horizontal=true />
+            </div>
+            <div className="my-10">
+                <div className="text-2xl font-bold my-2 mb-4">{str("Pupil")}</div>
+                <div className="text-lg font-bold my-3">{str("Left Pupil")}</div>
+                <CriticalCare__PupilRangeSlider />
+                <CriticalCare__RadioButton options ={cannot_be_assessed} horizontal=true />
+                <div className="my-15 mb-8">
+                    <div className="font-bold my-4">{str("Reaction")}</div>
+                    <CriticalCare__RadioButton options={reaction_options} horizontal=true />
+                </div>
 
-            <div className="my-15 mb-8">
-                <div className="font-bold my-4">{str("Reaction")}</div>
-                <CriticalCare__RadioButton options={reaction_options} horizontal=true />
+                <div className="text-lg font-bold my-5">{str("Right Pupil")}</div>
+                <CriticalCare__PupilRangeSlider />
+                <CriticalCare__RadioButton options ={cannot_be_assessed} horizontal=true />
+                <div className="my-15 mb-8">
+                    <div className="font-bold my-4">{str("Reaction")}</div>
+                    <CriticalCare__RadioButton options={reaction_options} horizontal=true/>
+                </div>
             </div>
 
-            <div className="text-lg font-bold my-5">{str("Right Pupil")}</div>
-            <CriticalCare__PupilRangeSlider />
-            <CriticalCare__RadioButton options ={cannot_be_assessed} horizontal=true />
+            <div className="my-15 w-full h-1 bg-gray-300"></div>
 
-            <div className="my-15 mb-8">
-                <div className="font-bold my-4">{str("Reaction")}</div>
-                <CriticalCare__RadioButton options={reaction_options} horizontal=true/>
+            <div className="my-10">
+                <div className="text-3xl font-bold">{str("Glasgow Coma Scale")}</div>
+                <div>
+                    {glassgowComaScale|>Array.map((x) => {
+                    <>
+                        <div className="flex justify-between">
+                            <div className="font-bold mt-8">{str(Options.title(x))}</div>
+                            <div className="text-lg font-bold text-blue-500 mt-8">{str("1")}</div>
+                        </div>
+                            <CriticalCare__RadioButton options={Options.options(x)} horizontal=false />
+                    </>
+                })
+                |> React.array }
+                </div>
+                <div className="flex justify-between mt-4">
+                    <div className="font-bold text-xl">{str("Total")}</div>
+                    <div className="text-3xl text-blue-500 font-bold">{str("3")}</div>
+                </div>
             </div>
-        </div>
-        <div className="my-15 w-full h-1 bg-gray-300"></div>
-        <div>
-            <div className="text-3xl font-bold">{str("Glasgow Coma Scale")}</div>
-            <div>
-                {glassgowComaScale|>Array.map((x) => {
-                <>
-                    <div className="flex justify-between">
-                        <div className="font-bold mt-8">{str(Options.title(x))}</div>
-                        <div className="text-lg font-bold text-blue-500 mt-8">{str("1")}</div>
-                    </div>
-                     <CriticalCare__RadioButton options={Options.options(x)} horizontal=false />
-                </>
-            })
-            |> React.array }
+
+            <div className="my-15 w-full h-1 bg-gray-300"></div>
+
+            <div className="my-10">
+                <div className="text-3xl font-bold">{str("Limp Response")}</div>
+                <div>
+                    {limps|>Array.map((x) => {
+                    <>
+                        <div className="font-bold mt-8 mb-1">{str(x)}</div>
+                        <CriticalCare__RadioButton options={limp_options} horizontal=true />
+                    </>
+                })
+                |> React.array }
+                </div>
             </div>
-            <div className="flex justify-between mt-4">
-                <div className="font-bold text-xl">{str("Total")}</div>
-                <div className="text-3xl text-blue-500 font-bold">{str("3")}</div>
-            </div>
+
+            <div className="my-15 w-full h-1 bg-gray-300"></div>
+            <input type_="submit" className="text-white h-10 w-full bg-blue-500 my-10 rounded"/>
+
         </div>
-
-        <div className="my-15 w-full h-1 bg-gray-300"></div>
-
-        <div>
-            <div className="text-3xl font-bold">{str("Limp Response")}</div>
-            <div>
-                {limps|>Array.map((x) => {
-                <>
-                    <div className="font-bold mt-8 mb-1">{str(x)}</div>
-                     <CriticalCare__RadioButton options={limp_options} horizontal=true />
-                </>
-            })
-            |> React.array }
-            </div>
-        </div>
-
-        <div className="my-15 w-full h-1 bg-gray-300"></div>
-
-        <div>
-            <CriticalCare__DoubleRangeSlider />
-        </div>
-
-        <div className="my-15 w-full h-1 bg-gray-300"></div>
-
-         <div>
-            <div className="text-3xl font-bold">{str("Ventillator Parameters")}</div>
-            <div className="grid grid-cols-2 my-5">
-                <div className="font-bold">{str("Ventillator Mode")}</div>
-                // <div>
-                //     <CriticalCare__RadioButton options={ventillator_mode_options} horizontal=true />
-                // </div>
-            </div>
-            // <CriticalCare__NumberInput labels={ventilator_parameters} />
-        </div>
-
-        <div className="my-15 w-full h-1 bg-gray-300"></div>
-
-         <div>
-            <div className="text-3xl font-bold">{str("Infusions")}</div>
-            // <CriticalCare__NumberInput labels={infusion_parameters} />
-        </div>
-
-        <div className="my-15 w-full h-1 bg-gray-300"></div>
-
-         <div>
-            <div className="text-3xl font-bold">{str("Feed")}</div>
-            // <CriticalCare__NumberInput labels={feed_parameters} />
-            <div className="flex justify-between mt-4">
-                <div className="font-bold text-xl">{str("Total")}</div>
-                <div className="text-3xl text-blue-500 font-bold">{str("3")}</div>
-            </div>
-        </div>
-
-        <div className="my-15 w-full h-1 bg-gray-300"></div>
-
-         <div>
-            <div className="text-3xl font-bold">{str("Output")}</div>
-            // <CriticalCare__NumberInput labels={output_parameters} />
-            <div className="flex justify-between mt-4">
-                <div className="font-bold text-xl">{str("Total")}</div>
-                <div className="text-3xl text-blue-500 font-bold">{str("3")}</div>
-            </div>
-        </div>
-
-        <input type_="submit" className="text-white h-10 w-full bg-blue-500 my-10 rounded"/>
-
     </div>
 }
