@@ -13,14 +13,15 @@ type editor =
 
 type state = {
 	visibleEditor: option<editor>,
-	nursingCare: NursingCareTypes.t
-
+	nursingCare: NursingCareTypes.t,
+	abgEditor: ABGAnalysisEditorTypes.t
 }
 
 type action =
 | ShowEditor(editor)
 | CloseEditor
 | SetNursingCare(NursingCareTypes.t)
+| SetABGAnalysisEditor(ABGAnalysisEditorTypes.t)
 
 let showEditor = (editor, send) => {
 	send(ShowEditor(editor))
@@ -33,7 +34,7 @@ let editor = (state, send) => {
 				| NeurologicalMonitoringEditor
 				| HemodynamicParametersEditor
 				| VentilatorParametersEditor => <CriticalCare__VentilatorParametersEditor />
-				| ArterialBloodGasAnalysisEditor
+				| ArterialBloodGasAnalysisEditor => <CriticalCare__ABGAnalysisEditor initialState={state.abgEditor} handleDone={(data) => send(SetABGAnalysisEditor(data))} />
 				| BloodSugarEditor
 				| IOBalanceEditor
 				| DialysisEditor
@@ -58,12 +59,14 @@ switch action {
 | ShowEditor(editor) => {...state, visibleEditor: Some(editor)}
 | CloseEditor => {...state, visibleEditor: None}
 | SetNursingCare(nursingCare) => {...state, nursingCare: nursingCare}
+| SetABGAnalysisEditor(editor) => {...state, abgEditor: editor}
 }
 }
 
 let initialState = {
 	visibleEditor: None,
 	nursingCare: NursingCareTypes.init,
+	abgEditor: ABGAnalysisEditorTypes.init
 }
 
 @react.component
