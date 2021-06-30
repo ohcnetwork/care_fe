@@ -1,4 +1,7 @@
 let str = React.string
+@val external document: {..} = "document"
+%%raw(`import("./styles.css")`)
+
 
 type editor =
 | NeurologicalMonitoringEditor
@@ -29,7 +32,8 @@ let showEditor = (editor, send) => {
 let editor = (state, send) => {
 	switch state.visibleEditor {
 		| Some(editor) => {
-			switch editor {
+			<div id="editor">
+			{switch editor {
 				| NeurologicalMonitoringEditor
 				| HemodynamicParametersEditor
 				| VentilatorParametersEditor => <CriticalCare__VentilatorParametersEditor />
@@ -39,7 +43,8 @@ let editor = (state, send) => {
 				| DialysisEditor
 				| PressureSoreEditor
 				| NursingCareEditor => <CriticalCare__NursingCare initialState={state.nursingCare} handleDone={(data) => send(SetNursingCare(data))} />
-			}
+			}}
+			</div>
 		}
 		| None => React.null
 	}
@@ -48,7 +53,7 @@ let editor = (state, send) => {
 
 
 let editorToggle = (editorName, text, send) => {
-	<div id="editor" className="w-3/4 border-2 px-4 py-6 mx-auto my-4 cursor-pointer" onClick={(_) => showEditor(editorName, send)}>
+	<div id="editorToggle" className="w-3/4 border-2 px-4 py-6 mx-auto my-4 cursor-pointer" onClick={(_) => showEditor(editorName, send)}>
 		{str(text)}
 	</div>
 }
@@ -72,9 +77,18 @@ export make = () => {
     reducer,
     initialState,
   )
+
+	React.useEffect1(() => {
+		switch state.visibleEditor {
+		| Some(_) =>
+		document["getElementById"]("editor")["scrollIntoView"]()
+		| None => document["getElementById"]("closeEditor")["scrollIntoView"]()
+		}
+	}, [state.visibleEditor])
+
 	<div>
 		<div className="w-3/4 mx-auto my-4">
-		<button onClick={(_) => send(CloseEditor)}>{str("Close All")}</button>
+		<button id="closeEditor" onClick={(_) => send(CloseEditor)}>{str("Close All")}</button>
 		</div>
 		{editorToggle(NeurologicalMonitoringEditor, "Neurological Monitoring",  send)}
 		{editorToggle(HemodynamicParametersEditor, "Hemodynamic Parameters",  send)}
