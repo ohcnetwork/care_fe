@@ -1,4 +1,3 @@
-@@ -0,0 +1,308 @@
 let str = React.string
 
 let loc_options :array<Options.t> = [
@@ -190,22 +189,28 @@ let limp_options :array<Options.t> = [
     }
 
 ]
+
+let cannot_be_assessed: array<Options.t> = [
+    {
+        name: "",
+        value: "cannot_be_assessed",
+        label: "Cannot be assessed",
+    },
+    ]
+
+
 @react.component
 let make = () => {
     <div className="ml-36 w-8/12">
             <div className="my-10">
-            <div className=" text-2xl font-bold my-2">{str("LOC")}</div>
+            <div className=" text-2xl font-bold my-2">{str("Level Of Consciousness")}</div>
             <CriticalCare__RadioButton options={loc_options} horizontal=true />
         </div>
         <div className="my-10">
             <div className="text-2xl font-bold my-2 mb-4">{str("Pupil")}</div>
             <div className="text-lg font-bold my-3">{str("Left Pupil")}</div>
             <CriticalCare__PupilRangeSlider />
-            <CriticalCare__RadioButton options={[{
-        name: "",
-        value: "cannot_be_assessed",
-        label: "Cannot be assessed",
-    }]} horizontal=true />
+            <CriticalCare__RadioButton options ={cannot_be_assessed} horizontal=true />
 
             <div className="my-15 mb-8">
                 <div className="font-bold my-4">{str("Reaction")}</div>
@@ -214,6 +219,8 @@ let make = () => {
 
             <div className="text-lg font-bold my-5">{str("Right Pupil")}</div>
             <CriticalCare__PupilRangeSlider />
+            <CriticalCare__RadioButton options ={cannot_be_assessed} horizontal=true />
+
             <div className="my-15 mb-8">
                 <div className="font-bold my-4">{str("Reaction")}</div>
                 <CriticalCare__RadioButton options={reaction_options} horizontal=true/>
@@ -267,25 +274,25 @@ let make = () => {
             <div className="text-3xl font-bold">{str("Ventillator Parameters")}</div>
             <div className="grid grid-cols-2 my-5">
                 <div className="font-bold">{str("Ventillator Mode")}</div>
-                <div>
-                    <CriticalCare__RadioButton options={ventillator_mode_options} horizontal=true />
-                </div>
+                // <div>
+                //     <CriticalCare__RadioButton options={ventillator_mode_options} horizontal=true />
+                // </div>
             </div>
-            <CriticalCare__NumberInput labels={ventilator_parameters} />
+            // <CriticalCare__NumberInput labels={ventilator_parameters} />
         </div>
 
         <div className="my-15 w-full h-1 bg-gray-300"></div>
 
          <div>
             <div className="text-3xl font-bold">{str("Infusions")}</div>
-            <CriticalCare__NumberInput labels={infusion_parameters} />
+            // <CriticalCare__NumberInput labels={infusion_parameters} />
         </div>
 
         <div className="my-15 w-full h-1 bg-gray-300"></div>
 
          <div>
             <div className="text-3xl font-bold">{str("Feed")}</div>
-            <CriticalCare__NumberInput labels={feed_parameters} />
+            // <CriticalCare__NumberInput labels={feed_parameters} />
             <div className="flex justify-between mt-4">
                 <div className="font-bold text-xl">{str("Total")}</div>
                 <div className="text-3xl text-blue-500 font-bold">{str("3")}</div>
@@ -296,7 +303,7 @@ let make = () => {
 
          <div>
             <div className="text-3xl font-bold">{str("Output")}</div>
-            <CriticalCare__NumberInput labels={output_parameters} />
+            // <CriticalCare__NumberInput labels={output_parameters} />
             <div className="flex justify-between mt-4">
                 <div className="font-bold text-xl">{str("Total")}</div>
                 <div className="text-3xl text-blue-500 font-bold">{str("3")}</div>
