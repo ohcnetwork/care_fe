@@ -20,7 +20,7 @@ type t = {
 
 let po2 = t => t.po2
 let pco2 = t => t.pco2
-let ph = t => t.pH
+let pH = t => t.pH
 let hco3 = t => t.hco3
 let baseExcess = t => t.baseExcess
 let lactate = t => t.lactate
