@@ -30,7 +30,7 @@ let editor = (state, send) => {
 	switch state.visibleEditor {
 		| Some(editor) => {
 			switch editor {
-				| NeurologicalMonitoringEditor
+				| NeurologicalMonitoringEditor => <CriticalCare__NeurologicalMonitoring/>
 				| HemodynamicParametersEditor
 				| VentilatorParametersEditor => <CriticalCare__VentilatorParametersEditor />
 				| ArterialBloodGasAnalysisEditor
