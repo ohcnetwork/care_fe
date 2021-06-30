@@ -21,6 +21,7 @@ import {
   SelectField,
   TextInputField,
 } from "../Common/HelperInputFields";
+import { navigate } from "raviger";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -64,7 +65,6 @@ const FormReducer = (state = initialState, action: any) => {
 
 const initialLocalbodies = [{ id: 0, name: "Choose Localbody", number: 0 }];
 const initialWard = [{ id: 0, name: "Choose Ward", number: 0 }];
-//const initialLocalbodies = [{ id: 0, name: "Please select your district" }];
 
 export default function UpdateResult(props: any) {
   const { id } = props;
@@ -85,8 +85,10 @@ export default function UpdateResult(props: any) {
         if (res && res.data) {
           console.log(res.data);
           const form = { ...state.form };
-          //form["name"] = res.data.name;
-          //form["phone_number"] = res.data.mobile_number;
+          form["name"] = res.data.name;
+          form["age"] = res.data.age;
+          form["age_in"] = res.data.age_in;
+          form["srf_id"] = res.data.srf_id;
           form["address"] = res.data.address;
           form["district"] = res.data.district_object.name;
           form["local_body"] = String(res.data.local_body);
@@ -209,8 +211,9 @@ export default function UpdateResult(props: any) {
       if (res && res.data) {
         dispatch({ type: "set_form", form: initForm });
         Notification.Success({
-          msg: "Patient updated successfully",
+          msg: "External Result updated successfully",
         });
+        navigate(`/external_results/${id}`);
       }
     }
   };
@@ -223,8 +226,19 @@ export default function UpdateResult(props: any) {
     <div>
       <PageTitle title="Update External Result" className="px-6 mb-2" />
       <CardContent>
+        <div className="px-4 py-5 border-b border-gray-200 sm:px-6">
+          <h3 className="text-lg leading-6 font-medium text-gray-900">
+            {state.form.name} - {state.form.age} {state.form.age_in}
+          </h3>
+          <p className="mt-1 max-w-2xl text-sm leading-5 text-gray-500">
+            SRF ID: {state.form.srf_id}
+          </p>
+          <p className="mt-1 max-w-2xl text-sm leading-5 text-gray-500">
+            Care external results ID: {id}
+          </p>
+        </div>
         <form onSubmit={(e) => handleSubmit(e)}>
-          <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+          <div className="px-4 py-5 grid gap-4 grid-cols-1 md:grid-cols-2">
             <div data-testid="current-address">
               <InputLabel id="address-label">Current Address*</InputLabel>
               <MultilineInputField
