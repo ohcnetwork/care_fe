@@ -204,11 +204,11 @@ let handleSubmit = (handleDone, state) => {
 }
 
 type action =
-| SetLossOfConciousness(string)
+| SetLevelOfConciousness(string)
 | SetLeftPupilSize(string)
-| SetLeftPupilResponse(string)
+| SetLeftPupilReaction(string)
 | SetRightPuilSize(string)
-| SetRightPupilResponse(string)
+| SetRightPupilReaction(string)
 | SetEyeOpen(string)
 | SetVerbalResponse(string)
 | SetMotorResponse(string)
@@ -221,11 +221,11 @@ type action =
 
 let reducer = (state, action) => {
     switch action {
-        | SetLossOfConciousness(lossOfConciousness) => {...state, NeurologicalMonitoringTypes.lossOfConciousness: lossOfConciousness}
+        | SetLevelOfConciousness(levelOfConciousness) => {...state, NeurologicalMonitoringTypes.levelOfConciousness: levelOfConciousness}
         | SetLeftPupilSize(leftPupilSize) => {...state, NeurologicalMonitoringTypes.leftPupilSize: leftPupilSize}
-        | SetLeftPupilResponse(leftPupilResponse) => {...state, NeurologicalMonitoringTypes.leftPupilResponse: leftPupilResponse}
-        | SetRightPuilSize(rightPuilSize) => {...state, NeurologicalMonitoringTypes.rightPuilSize: rightPuilSize}
-        | SetRightPupilResponse(rightPupilResponse) => {...state, NeurologicalMonitoringTypes.rightPupilResponse: rightPupilResponse}
+        | SetLeftPupilReaction(leftPupilReaction) => {...state, NeurologicalMonitoringTypes.leftPupilReaction: leftPupilReaction}
+        | SetRightPupilSize(rightPupilSize) => {...state, NeurologicalMonitoringTypes.rightPupilSize: rightPupilSize}
+        | SetRightPupilReaction(rightPupilReaction) => {...state, NeurologicalMonitoringTypes.rightPupilReaction: rightPupilReaction}
         | SetEyeOpen(eyeOpen) => {...state, NeurologicalMonitoringTypes.eyeOpen: eyeOpen}
         | SetVerbalResponse(verbalResponse) => {...state, NeurologicalMonitoringTypes.verbalResponse: verbalResponse}
         | SetMotorResponse(motorResponse) => {...state, NeurologicalMonitoringTypes.motorResponse: motorResponse}
@@ -242,14 +242,15 @@ let getFieldValue = (event) => {
 }
 
 @react.component
-let make = () => {
+let make = (~handleDone, ~initialState) => {
+    let (state, send) = React.useReducer(reducer, initialState)
     <div>
         <CriticalCare__PageTitle title="Neurological Monitoring" />
         <div className="my-4">
 // <div className="ml-36 w-8/12">
             <div className="my-10">
                 <div className=" text-2xl font-bold my-2">{str("Level Of Consciousness")}</div>
-                <CriticalCare__RadioButton options={loc_options} horizontal=true />
+                // <CriticalCare__RadioButton options={loc_options} horizontal=true onChange={(event) =>  send(SetLevelOfConciousness(getFieldValue(event)))} />
             </div>
             <div className="my-10">
                 <div className="text-2xl font-bold my-2 mb-4">{str("Pupil")}</div>

@@ -1,9 +1,9 @@
 type t = {
-    lossOfConciousness: string,
+    levelOfConciousness: string,
     leftPupilSize: string,
-    leftPupilResponse: string,
-    rightPuilSize: string,
-    rightPupilResponse: string,
+    leftPupilReaction: string,
+    rightPupilSize: string,
+    rightPupilReaction: string,
     eyeOpen: string,
     verbalResponse: string,
     motorResponse: string,
@@ -14,11 +14,11 @@ type t = {
     lowerExtremityL: string,
 }
 
-let lossOfConciousness = t => t.lossOfConciousness
-let leftPupilSize = t => t.leftPupilResponse
-let leftPupilResponse = t => t.leftPupilResponse
-let rightPuilSize = t=> t.rightPuilSize
-let rightPupilResponse = t => t.rightPupilResponse
+let levelOfConciousness = t => t.levelOfConciousness
+let leftPupilSize = t => t.leftPupilSize
+let leftPupilReaction = t => t.leftPupilReaction
+let rightPupilSize = t=> t.rightPupilSize
+let rightPupilReaction = t => t.rightPupilReaction
 let eyeOpen = t => t.eyeOpen
 let verbalResponse = t => t.verbalResponse
 let motorResponse = t => t.motorResponse
@@ -29,11 +29,11 @@ let lowerExtremityR = t => t.lowerExtremityR
 let lowerExtremityL = t => t.lowerExtremityL
 
 let init = {
-    lossOfConciousness: "",
+    levelOfConciousness: "",
     leftPupilSize: "",
-    leftPupilResponse: "",
-    rightPuilSize: "",
-    rightPupilResponse: "",
+    leftPupilReaction: "",
+    rightPupilSize: "",
+    rightPupilReaction: "",
     eyeOpen: "",
     verbalResponse: "",
     motorResponse: "",
