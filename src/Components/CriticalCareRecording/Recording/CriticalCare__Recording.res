@@ -13,14 +13,15 @@ type editor =
 
 type state = {
 	visibleEditor: option<editor>,
-	nursingCare: NursingCareTypes.t
-
+	nursingCare: NursingCareTypes.t,
+	neurologicalMonitoring: NeurologicalMonitoringTypes.t,
 }
 
 type action =
 | ShowEditor(editor)
 | CloseEditor
 | SetNursingCare(NursingCareTypes.t)
+| SetNeurologicalMonitoring(NeurologicalMonitoringTypes.t)
 
 let showEditor = (editor, send) => {
 	send(ShowEditor(editor))
@@ -30,7 +31,7 @@ let editor = (state, send) => {
 	switch state.visibleEditor {
 		| Some(editor) => {
 			switch editor {
-				| NeurologicalMonitoringEditor => <CriticalCare__NeurologicalMonitoring/>
+				| NeurologicalMonitoringEditor => <CriticalCare__NeurologicalMonitoring initialState={state.neurologicalMonitoring} handleDone={(data) => send(SetNeurologicalMonitoring(data))}/>
 				| HemodynamicParametersEditor
 				| VentilatorParametersEditor => <CriticalCare__VentilatorParametersEditor />
 				| ArterialBloodGasAnalysisEditor
@@ -58,12 +59,15 @@ switch action {
 | ShowEditor(editor) => {...state, visibleEditor: Some(editor)}
 | CloseEditor => {...state, visibleEditor: None}
 | SetNursingCare(nursingCare) => {...state, nursingCare: nursingCare}
+| SetNeurologicalMonitoring(neurologicalMonitoring) => {...state, neurologicalMonitoring: neurologicalMonitoring}
 }
 }
 
 let initialState = {
 	visibleEditor: None,
 	nursingCare: NursingCareTypes.init,
+	neurologicalMonitoring: NeurologicalMonitoringTypes.init,
+
 }
 
 @react.component
@@ -72,6 +76,7 @@ export make = () => {
     reducer,
     initialState,
   )
+  Js.log(state)
 	<div>
 		<div className="w-3/4 mx-auto my-4">
 		<button onClick={(_) => send(CloseEditor)}>{str("Close All")}</button>
