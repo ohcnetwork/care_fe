@@ -317,6 +317,52 @@ let cannot_be_assessed: array<Options.t> = [
   },
 ]
 
+let right_reaction_options: array<Options.t> = [
+  {
+    name: "right_light_reaction",
+    value: "brisk",
+    label: "Brisk",
+  },
+  {
+    name: "right_light_reaction",
+    value: "sluggish",
+    label: "Sluggish",
+  },
+  {
+    name: "right_light_reaction",
+    value: "fixed",
+    label: "Fixed",
+  },
+  {
+    name: "right_light_reaction",
+    value: "cannot_be_assessed",
+    label: "Cannot Be Assessed",
+  },
+]
+
+let left_reaction_options: array<Options.t> = [
+  {
+    name: "left_light_reaction",
+    value: "brisk",
+    label: "Brisk",
+  },
+  {
+    name: "left_light_reaction",
+    value: "sluggish",
+    label: "Sluggish",
+  },
+  {
+    name: "left_light_reaction",
+    value: "fixed",
+    label: "Fixed",
+  },
+  {
+    name: "left_light_reaction",
+    value: "cannot be Assesed",
+    label: "Cannot Be Assessed",
+  },
+]
+
 let handleSubmit = (handleDone, state) => {
   handleDone(state)
 }
@@ -325,7 +371,9 @@ type action =
   | SetLevelOfConciousness(string)
   | SetLeftPupilSize(string)
   | SetLeftPupilReaction(string)
+  | SetLeftReactionDescription(string)
   | SetRightPupilSize(string)
+  | SetRightReactionDescription(string)
   | SetRightPupilReaction(string)
   | SetEyeOpen(string)
   | SetVerbalResponse(string)
@@ -350,6 +398,10 @@ let reducer = (state, action) => {
       ...state,
       leftPupilReaction: leftPupilReaction,
     }
+  | SetLeftReactionDescription(leftReactionDescription) => {
+      ...state,
+      leftReactionDescription: leftReactionDescription,
+    }
   | SetRightPupilSize(rightPupilSize) => {
       ...state,
       rightPupilSize: rightPupilSize,
@@ -357,6 +409,10 @@ let reducer = (state, action) => {
   | SetRightPupilReaction(rightPupilReaction) => {
       ...state,
       rightPupilReaction: rightPupilReaction,
+    }
+  | SetRightReactionDescription(rightReactionDescription) => {
+      ...state,
+      rightReactionDescription: rightReactionDescription,
     }
   | SetEyeOpen(eyeOpen) => {...state, eyeOpen: eyeOpen}
   | SetVerbalResponse(verbalResponse) => {
@@ -436,14 +492,40 @@ let make = (~handleDone, ~initialState) => {
         // <CriticalCare__RadioButton options ={cannot_be_assessed} horizontal=true />
         <div className="my-15 mb-8">
           <div className="font-bold my-4"> {str("Reaction")} </div>
-          // <CriticalCare__RadioButton options={reaction_options} horizontal=true />
+          <CriticalCare__RadioButton
+            options={right_reaction_options}
+            horizontal=true
+            onChange={event => send(SetLeftPupilReaction(getFieldValue(event)))}
+          />
+          {if NeurologicalMonitoring.leftPupilReaction(state) === "cannot_be_assessed" {
+            <CriticalCare__Description
+              name="left_reaction_description"
+              text={NeurologicalMonitoring.leftReactionDescription(state)}
+              onChange={event => send(SetLeftReactionDescription(getFieldValue(event)))}
+            />
+          } else {
+            <> </>
+          }}
         </div>
         <div className="text-lg font-bold my-5"> {str("Right Pupil")} </div>
         <CriticalCare__PupilRangeSlider />
         // <CriticalCare__RadioButton options ={cannot_be_assessed} horizontal=true />
         <div className="my-15 mb-8">
           <div className="font-bold my-4"> {str("Reaction")} </div>
-          // <CriticalCare__RadioButton options={reaction_options} horizontal=true/>
+          <CriticalCare__RadioButton
+            options={reaction_options}
+            horizontal=true
+            onChange={event => send(SetRightPupilReaction(getFieldValue(event)))}
+          />
+          {if NeurologicalMonitoring.rightPupilReaction(state) === "cannot_be_assessed" {
+            <CriticalCare__Description
+              name="right_reaction_description"
+              text={NeurologicalMonitoring.rightReactionDescription(state)}
+              onChange={event => send(SetRightReactionDescription(getFieldValue(event)))}
+            />
+          } else {
+            <> </>
+          }}
         </div>
       </div>
       <div className="my-15 w-full h-1 bg-gray-300" />
@@ -452,9 +534,6 @@ let make = (~handleDone, ~initialState) => {
         <div>
           {glassgowComaScale
           |> Array.map(x => {
-            // let action = glascowAction(Options.title_val(x), )
-            // {Js.log(Options.options(x))}
-            // {Js.log("jhbbk")}
             <div>
               <div className="flex justify-between">
                 <div className="font-bold mt-8"> {str(Options.title(x))} </div>
