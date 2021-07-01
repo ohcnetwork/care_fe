@@ -155,7 +155,15 @@ let initialState = {
     tracheostomyCare: "",
     stomaCare: "",
   },
-  hemodynamic_parameter_editor: HemodynamicParametersType.init,
+  hemodynamic_parameter_editor: {
+    bp_systolic: "",
+    bp_diastolic: "",
+    pulse: "",
+    temperature: "",
+    respiratory_rate: "",
+    rhythm: None,
+    description: "",
+  },
   neurologicalMonitoringStatus: "0",
   hemodynamicParametersStatus: "0",
   ventilatorParametersStatus: "0",
@@ -196,9 +204,12 @@ export make = () => {
           <button id="closeEditor" onClick={_ => send(CloseEditor)}> {str("Back")} </button>
           {switch editor {
           | NeurologicalMonitoringEditor
-          | HemodynamicParametersEditor
-          | VentilatorParametersEditor =>
-            <CriticalCare__VentilatorParametersEditor />
+          | HemodynamicParametersEditor =>
+            <CriticalCare__HemodynamicParameters
+              initialState={state.hemodynamic_parameter_editor}
+              handleDone={data => send(SetHemodynamicParametersEditor(data))}
+            />
+          | VentilatorParametersEditor => <CriticalCare__VentilatorParametersEditor />
           | ArterialBloodGasAnalysisEditor =>
             <CriticalCare__ABGAnalysisEditor
               initialState={state.abgEditor} handleDone={data => send(SetABGAnalysisEditor(data))}
