@@ -372,7 +372,7 @@ const HospitalListPage = (props: any) => {
                   </div>
                   <span className="inline-flex rounded-md shadow-sm">
                     <button
-                      className="inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:shadow-outline-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow mr-5"
+                      className="ml-2 md:ml-0 inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:shadow-outline-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow mr-5"
                       onClick={(_) => setModalFor(facility.id)}
                     >
                       <i className="far fa-comment-dots mr-1"></i> Notify
@@ -399,9 +399,12 @@ const HospitalListPage = (props: any) => {
                               placeholder="Type your message..."
                             ></textarea>
                           </div>
-                          <div>
-                            <button onClick={(_) => setModalFor(undefined)}>
-                              Close
+                          <div className="flex flex-row space-between">
+                            <button
+                              className="btn-danger btn mt-4 mr-2 w-full md:w-auto"
+                              onClick={(_) => setModalFor(undefined)}
+                            >
+                              Cancel
                             </button>
                             <button
                               className="btn-primary btn mt-4 mr-2 w-full md:w-auto"
