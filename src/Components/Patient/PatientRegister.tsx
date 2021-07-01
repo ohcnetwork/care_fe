@@ -1147,7 +1147,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
                   {state.form.is_vaccinated === "true" && (
                     <div id="covin_id-div">
-                      <InputLabel id="covin_id-label">COVIN Id</InputLabel>
+                      <InputLabel id="covin_id-label">COWIN ID</InputLabel>
                       <TextInputField
                         name="covin_id"
                         variant="outlined"
@@ -1228,7 +1228,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   <div id="test_type-div">
                     <InputLabel id="test_type-label">
                       COVID Test Type
-                    </InputLabel>    
+                    </InputLabel>
                     <SelectField
                       name="test_type"
                       variant="outlined"
