@@ -1302,7 +1302,7 @@ export const PatientHome = (props: any) => {
               {patientData.covin_id && (
                 <div className="sm:col-span-1">
                   <div className="text-sm leading-5 font-medium text-gray-500">
-                    Vaccinated (COVIN ID)
+                    Vaccinated (COWIN ID)
                   </div>
                   <div className="mt-1 text-sm leading-5 text-gray-900">
                     {patientData?.covin_id || "-"}
