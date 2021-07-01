@@ -188,6 +188,9 @@ export default function ResultList() {
     }
   };
 
+  let getNotificationTitle = (id: string) =>
+    NOTIFICATION_EVENTS.find((notification) => notification.id === id)?.text;
+
   let resultList: any[] = [];
   if (data && data.length) {
     resultList = data.map((result: any, idx: number) => {
@@ -200,7 +203,7 @@ export default function ResultList() {
           className="relative py-5 px-4 lg:px-8 hover:bg-gray-200 focus:bg-gray-200 transition ease-in-out duration-150 cursor-pointer"
         >
           <div className="text-lg font-bold">
-            {result.event.split("_").join(" ")}
+            {getNotificationTitle(result.event)}
           </div>
           <div className="text-sm">{result.message}</div>
           <div className="text-xs">
