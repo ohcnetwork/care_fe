@@ -27,6 +27,7 @@ type state = {
   visibleEditor: option<editor>,
   nursingCare: NursingCare.t,
   abgEditor: ABGAnalysis.t,
+  neurologicalMonitoring: NeurologicalMonitoring.t,
   neurologicalMonitoringStatus: string,
   hemodynamicParametersStatus: string,
   ventilatorParametersStatus: string,
@@ -44,6 +45,7 @@ type action =
   | CloseEditor
   | SetABGAnalysisEditor(ABGAnalysis.t)
   | SetNursingCare(NursingCare.t)
+  | SetNeurologicalMonitoring(NeurologicalMonitoring.t)
   | UpdateNursingCareStatus(string)
   | UpdateTotal(int)
 
@@ -118,6 +120,10 @@ let reducer = (state, action) => {
   | CloseEditor => {...state, visibleEditor: None}
   | SetABGAnalysisEditor(editor) => {...state, abgEditor: editor}
   | SetNursingCare(nursingCare) => {...state, nursingCare: nursingCare}
+  | SetNeurologicalMonitoring(neurologicalMonitoring) => {
+      ...state,
+      neurologicalMonitoring: neurologicalMonitoring,
+    }
   | UpdateNursingCareStatus(nursingCareStatus) => {
       ...state,
       nursingCareStatus: nursingCareStatus,
@@ -151,6 +157,21 @@ let initialState = {
     chestTubeCare: "",
     tracheostomyCare: "",
     stomaCare: "",
+  },
+  neurologicalMonitoring: {
+    levelOfConciousness: "",
+    leftPupilSize: "",
+    leftPupilReaction: "",
+    rightPupilSize: "",
+    rightPupilReaction: "",
+    eyeOpen: "",
+    verbalResponse: "",
+    motorResponse: "",
+    totalGlascowScale: "",
+    upperExtremityR: "",
+    upperExtremityL: "",
+    lowerExtremityR: "",
+    lowerExtremityL: "",
   },
   neurologicalMonitoringStatus: "0",
   hemodynamicParametersStatus: "0",
@@ -191,7 +212,11 @@ export make = () => {
         <div id="editor">
           <button id="closeEditor" onClick={_ => send(CloseEditor)}> {str("Back")} </button>
           {switch editor {
-          | NeurologicalMonitoringEditor
+          | NeurologicalMonitoringEditor =>
+            <CriticalCare__NeurologicalMonitoringEditor
+              initialState={state.neurologicalMonitoring}
+              handleDone={data => send(SetNeurologicalMonitoring(data))}
+            />
           | HemodynamicParametersEditor
           | VentilatorParametersEditor =>
             <CriticalCare__VentilatorParametersEditor />

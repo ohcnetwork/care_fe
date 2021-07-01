@@ -1,2 +1,3 @@
 module NursingCare = CriticalCare__NursingCare
 module ABGAnalysis = CriticalCare__ABGAnalysis
+module NeurologicalMonitoring = CriticalCare__NeurologicalMonitoring
