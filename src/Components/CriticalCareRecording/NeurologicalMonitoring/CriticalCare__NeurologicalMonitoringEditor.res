@@ -514,45 +514,58 @@ let make = (~handleDone, ~initialState) => {
       </div>
       <div className="my-10">
         <div className="text-2xl font-bold my-2 mb-4"> {str("Pupil")} </div>
-        <div className="text-lg font-bold my-3"> {str("Left Pupil")} </div>
-        <CriticalCare__PupilRangeSlider />
-        // <CriticalCare__RadioButton options ={cannot_be_assessed} horizontal=true />
-        <div className="my-15 mb-8">
-          <div className="font-bold my-4"> {str("Reaction")} </div>
-          <CriticalCare__RadioButton
-            options={right_reaction_options}
-            horizontal=true
-            onChange={event => send(SetLeftPupilReaction(getFieldValue(event)))}
+        <div>
+          <div className="text-lg font-bold my-3"> {str("Left Pupil")} </div>
+          <CriticalCare__PupilRangeSlider
+            name={"left_pupil_slider"}
+            val={NeurologicalMonitoring.leftPupilSize(state)}
+            onChange={event => send(SetLeftPupilSize(getFieldValue(event)))}
           />
-          {if NeurologicalMonitoring.leftPupilReaction(state) === "cannot_be_assessed" {
-            <CriticalCare__Description
-              name="left_reaction_description"
-              text={NeurologicalMonitoring.leftReactionDescription(state)}
-              onChange={event => send(SetLeftReactionDescription(getFieldValue(event)))}
+          <p> {str("dfdkf")} </p>
+          // <CriticalCare__RadioButton options ={cannot_be_assessed} horizontal=true />
+          <div className="my-15 mb-8">
+            <div className="font-bold my-4"> {str("Reaction")} </div>
+            <CriticalCare__RadioButton
+              options={right_reaction_options}
+              horizontal=true
+              onChange={event => send(SetLeftPupilReaction(getFieldValue(event)))}
             />
-          } else {
-            <> </>
-          }}
+            {if NeurologicalMonitoring.leftPupilReaction(state) === "cannot_be_assessed" {
+              <CriticalCare__Description
+                name="left_reaction_description"
+                text={NeurologicalMonitoring.leftReactionDescription(state)}
+                onChange={event => send(SetLeftReactionDescription(getFieldValue(event)))}
+              />
+            } else {
+              <> </>
+            }}
+          </div>
         </div>
-        <div className="text-lg font-bold my-5"> {str("Right Pupil")} </div>
-        <CriticalCare__PupilRangeSlider />
-        // <CriticalCare__RadioButton options ={cannot_be_assessed} horizontal=true />
-        <div className="my-15 mb-8">
-          <div className="font-bold my-4"> {str("Reaction")} </div>
-          <CriticalCare__RadioButton
-            options={reaction_options}
-            horizontal=true
-            onChange={event => send(SetRightPupilReaction(getFieldValue(event)))}
+        <div>
+          <div className="text-lg font-bold my-5"> {str("Right Pupil")} </div>
+          <CriticalCare__PupilRangeSlider
+            name={"right_pupil_slider"}
+            val={NeurologicalMonitoring.rightPupilSize(state)}
+            onChange={event => send(SetRightPupilSize(getFieldValue(event)))}
           />
-          {if NeurologicalMonitoring.rightPupilReaction(state) === "cannot_be_assessed" {
-            <CriticalCare__Description
-              name="right_reaction_description"
-              text={NeurologicalMonitoring.rightReactionDescription(state)}
-              onChange={event => send(SetRightReactionDescription(getFieldValue(event)))}
+          // <CriticalCare__RadioButton options ={cannot_be_assessed} horizontal=true />
+          <div className="my-15 mb-8">
+            <div className="font-bold my-4"> {str("Reaction")} </div>
+            <CriticalCare__RadioButton
+              options={reaction_options}
+              horizontal=true
+              onChange={event => send(SetRightPupilReaction(getFieldValue(event)))}
             />
-          } else {
-            <> </>
-          }}
+            {if NeurologicalMonitoring.rightPupilReaction(state) === "cannot_be_assessed" {
+              <CriticalCare__Description
+                name="right_reaction_description"
+                text={NeurologicalMonitoring.rightReactionDescription(state)}
+                onChange={event => send(SetRightReactionDescription(getFieldValue(event)))}
+              />
+            } else {
+              <> </>
+            }}
+          </div>
         </div>
       </div>
       <div className="my-15 w-full h-1 bg-gray-300" />
