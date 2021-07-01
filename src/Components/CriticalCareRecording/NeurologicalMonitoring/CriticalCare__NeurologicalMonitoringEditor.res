@@ -455,6 +455,15 @@ let glascowAction = (glascow, value) => {
   }
 }
 
+let getGlascowState = (glascow, state) => {
+  switch glascow {
+  | "eye_open" => NeurologicalMonitoring.eyeOpen(state)
+  | "verbal_response" => NeurologicalMonitoring.verbalResponse(state)
+  | "motor_response" => NeurologicalMonitoring.motorResponse(state)
+  | _ => "0"
+  }
+}
+
 let limpAction = (limp, value) => {
   switch limp {
   | "upper_extremity_right" => SetUpperExtremityR(value)
@@ -465,6 +474,15 @@ let limpAction = (limp, value) => {
   }
 }
 
+let totalGlascowScore = state => {
+  let count = Js.Array.reduce(
+    (acc, x) => acc + Js.Option.getWithDefault(0, Belt.Int.fromString(getGlascowState(x, state))),
+    0,
+    glascow_title_val,
+  )
+  Belt.Int.toString(count)
+}
+
 let getFieldValue = event => {
   ReactEvent.Form.target(event)["value"]
 }
@@ -472,6 +490,15 @@ let getFieldValue = event => {
 @react.component
 let make = (~handleDone, ~initialState) => {
   let (state, send) = React.useReducer(reducer, initialState)
+
+  React.useEffect3(() => {
+    let _ = send(SetTotalGlascowScale(totalGlascowScore(state)))
+    None
+  }, (
+    NeurologicalMonitoring.eyeOpen(state),
+    NeurologicalMonitoring.verbalResponse(state),
+    NeurologicalMonitoring.motorResponse(state),
+  ))
   Js.log(state)
   <div>
     <CriticalCare__PageTitle title="Neurological Monitoring" />
@@ -537,7 +564,9 @@ let make = (~handleDone, ~initialState) => {
             <div>
               <div className="flex justify-between">
                 <div className="font-bold mt-8"> {str(Options.title(x))} </div>
-                <div className="text-lg font-bold text-blue-500 mt-8"> {str("2")} </div>
+                <div className="text-lg font-bold text-blue-500 mt-8">
+                  {str(getGlascowState(Options.title_value(x), state))}
+                </div>
               </div>
               <CriticalCare__RadioButton
                 options={Options.options(x)}
@@ -551,7 +580,9 @@ let make = (~handleDone, ~initialState) => {
         </div>
         <div className="flex justify-between mt-4">
           <div className="font-bold text-xl"> {str("Total")} </div>
-          <div className="text-3xl text-blue-500 font-bold"> {str("3")} </div>
+          <div className="text-3xl text-blue-500 font-bold">
+            {str(NeurologicalMonitoring.totalGlascowScale(state))}
+          </div>
         </div>
       </div>
       <div className="my-15 w-full h-1 bg-gray-300" />
