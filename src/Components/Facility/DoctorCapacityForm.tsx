@@ -6,7 +6,6 @@ import React, { useCallback, useEffect, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
 import { DOCTOR_SPECIALIZATION } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-const Loading = loadable(() => import("../../Components/Common/Loading"));
 import { createDoctor, getDoctor, listDoctor } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import {
@@ -14,8 +13,9 @@ import {
   NativeSelectField,
   TextInputField,
 } from "../Common/HelperInputFields";
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 import { DoctorModal, OptionsType } from "./models";
+const Loading = loadable(() => import("../../Components/Common/Loading"));
+const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 interface DoctorCapacityProps extends DoctorModal {
   facilityId: number;

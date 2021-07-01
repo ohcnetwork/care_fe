@@ -1,13 +1,13 @@
-import React, { useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import loadable from "@loadable/component";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getMinQuantity } from "../../Redux/actions";
-const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 import Pagination from "../Common/Pagination";
 import { Button, ButtonBase } from "@material-ui/core";
 import { navigate } from "raviger";
+const Loading = loadable(() => import("../Common/Loading"));
+const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export default function MinQuantityList(props: any) {
   const { facilityId }: any = props;

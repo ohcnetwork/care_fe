@@ -101,7 +101,10 @@ export default function ResourceDetails(props: { id: string }) {
     return (
       <div id="section-to-print" className="print bg-white">
         <div className="flex justify-center">
-          <img src={KeralaLogo} alt="kerala-logo" />
+          <img
+            src={`${process.env.PUBLIC_URL}/${KeralaLogo}`}
+            alt="kerala-logo"
+          />
         </div>
         <div className="mx-20 p-4">
           <div className="font-bold text-xl text-center mt-6">

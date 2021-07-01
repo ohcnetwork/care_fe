@@ -5,9 +5,10 @@ import AppRouter from "./Router/AppRouter";
 import { useDispatch, useSelector } from "react-redux";
 import { getCurrentUser } from "./Redux/actions";
 import "./App.css";
-const Loading = loadable(() => import("./Components/Common/Loading"));
 import { useAbortableEffect, statusType } from "./Common/utils";
 import axios from "axios";
+
+const Loading = loadable(() => import("./Components/Common/Loading"));
 
 const App: React.FC = () => {
   const dispatch: any = useDispatch();

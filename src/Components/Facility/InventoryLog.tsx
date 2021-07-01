@@ -1,7 +1,5 @@
 import React, { useState, useCallback } from "react";
 import loadable from "@loadable/component";
-const PageTitle = loadable(() => import("../Common/PageTitle"));
-const Loading = loadable(() => import("../Common/Loading"));
 import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
 import {
@@ -12,6 +10,8 @@ import {
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import Pagination from "../Common/Pagination";
 import moment from "moment";
+const PageTitle = loadable(() => import("../Common/PageTitle"));
+const Loading = loadable(() => import("../Common/Loading"));
 
 export default function InventoryLog(props: any) {
   const { facilityId, inventoryId }: any = props;
