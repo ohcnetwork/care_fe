@@ -399,7 +399,7 @@ const HospitalListPage = (props: any) => {
                               placeholder="Type your message..."
                             ></textarea>
                           </div>
-                          <div className="flex flex-row space-between">
+                          <div className="flex flex-row justify-evenly">
                             <button
                               className="btn-danger btn mt-4 mr-2 w-full md:w-auto"
                               onClick={(_) => setModalFor(undefined)}
