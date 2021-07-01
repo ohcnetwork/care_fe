@@ -28,6 +28,7 @@ type state = {
   nursingCare: NursingCare.t,
   abgEditor: ABGAnalysis.t,
   hemodynamic_parameter_editor: HemodynamicParametersType.t,
+  bloodSugarEditor: BloodSugar.t,
   neurologicalMonitoringStatus: string,
   hemodynamicParametersStatus: string,
   ventilatorParametersStatus: string,
@@ -48,6 +49,8 @@ type action =
   | SetHemodynamicParametersEditor(HemodynamicParametersType.t)
   | UpdateNursingCareStatus(string)
   | UpdateTotal(int)
+  | SetBloodSugarEditor(BloodSugar.t)
+  | UpdateBloodSugarStatus(string)
 
 let showEditor = (editor, send) => {
   send(ShowEditor(editor))
@@ -62,8 +65,9 @@ let handleDone = (editorName, data, state, send) => {
     | HemodynamicParametersEditor => send(SetNursingCare(data))
     | VentilatorParametersEditor => send(SetNursingCare(data))
     | ArterialBloodGasAnalysisEditor => send(SetNursingCare(data))
-    | BloodSugarEditor => send(SetNursingCare(data))
-    | IOBalanceEditor => send(SetNursingCare(data))
+    | BloodSugarEditor
+    | IOBalanceEditor =>
+      send(SetNursingCare(data))
     | DialysisEditor => send(SetNursingCare(data))
     | PressureSoreEditor => send(SetNursingCare(data))
     | NursingCareEditor =>
@@ -126,6 +130,8 @@ let reducer = (state, action) => {
       nursingCareStatus: nursingCareStatus,
     }
   | UpdateTotal(total) => {...state, totalStatus: total}
+  | SetBloodSugarEditor(editor) => {...state, bloodSugarEditor: editor}
+  | UpdateBloodSugarStatus(bloodSugarStatus) => {...state, bloodSugarStatus: bloodSugarStatus}
   }
 }
 
@@ -174,6 +180,7 @@ let initialState = {
   pressureSoreStatus: "0",
   nursingCareStatus: "0",
   totalStatus: 0,
+  bloodSugarEditor: BloodSugar.init,
 }
 
 let editorButtons = (state, send) => {
@@ -214,7 +221,19 @@ export make = () => {
             <CriticalCare__ABGAnalysisEditor
               initialState={state.abgEditor} handleDone={data => send(SetABGAnalysisEditor(data))}
             />
-          | BloodSugarEditor
+          | BloodSugarEditor =>
+            <CriticalCare_BloodSugarEditor
+              initialState={state.bloodSugarEditor}
+              handleDone={data => {
+                send(CloseEditor)
+                send(SetBloodSugarEditor(data))
+                let status = BloodSugar.showStatus(data)
+                send(UpdateBloodSugarStatus(status))
+                if status == "100" {
+                  send(UpdateTotal(state.totalStatus + 1))
+                }
+              }}
+            />
           | IOBalanceEditor
           | DialysisEditor
           | PressureSoreEditor
