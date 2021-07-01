@@ -567,6 +567,22 @@ export default function PatientFilterV2(props: any) {
           />
         </div>
         <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">SRF ID</span>
+          <div className="flex justify-between">
+            <TextInputField
+              id="srf_id"
+              name="srf_id"
+              variant="outlined"
+              margin="dense"
+              errors=""
+              value={filterState.srf_id}
+              onChange={handleChange}
+              label="Srf id"
+              className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 mr-1"
+            />
+          </div>
+        </div>
+        <div className="w-64 flex-none">
           <span className="text-sm font-semibold">COVIN ID</span>
           <div className="flex justify-between">
             <TextInputField
@@ -739,22 +755,6 @@ export default function PatientFilterV2(props: any) {
               onChange={handleChange}
               label="Max Age"
               className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-            />
-          </div>
-        </div>
-        <div className="w-64 flex-none">
-          <span className="text-sm font-semibold">SRF ID</span>
-          <div className="flex justify-between">
-            <TextInputField
-              id="srf_id"
-              name="srf_id"
-              variant="outlined"
-              margin="dense"
-              errors=""
-              value={filterState.srf_id}
-              onChange={handleChange}
-              label="Srf id"
-              className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 mr-1"
             />
           </div>
         </div>
