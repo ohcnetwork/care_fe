@@ -69,11 +69,19 @@ export default function ResultItem(props: any) {
       )}
 
       <div className="mx-3 md:mx-8 mb-10 mt-4">
-        <div className="flex justify-end ">
+        <div className="flex justify-end">
+          <button
+            className="btn-primary btn mr-2"
+            onClick={() => navigate(`/external_results/${data.id}/update`)}
+          >
+            <i className="fas fa-pencil-alt text-white mr-2"></i>
+            Update Record
+          </button>
           <button
             className="btn btn-danger"
             onClick={() => setShowDeleteAlert(true)}
           >
+            <i className="fas fa-trash text-white mr-2"></i>
             Delete Record
           </button>
         </div>

@@ -41,6 +41,7 @@ import { ResourceDetailsUpdate } from "../Components/Resource/ResourceDetailsUpd
 import ResultList from "../Components/ExternalResult/ResultList";
 import ResultItem from "../Components/ExternalResult/ResultItem";
 import ExternalResultUpload from "../Components/ExternalResult/ExternalResultUpload";
+import ResultUpdate from "../Components/ExternalResult/ResultUpdate";
 import NotificationsList from "../Components/Notifications/NotificationsList";
 import { FileUpload } from "../Components/Patient/FileUpload";
 import Investigation from "../Components/Facility/Investigations";
@@ -307,6 +308,7 @@ const routes = {
   "/external_results": () => <ResultList />,
   "/external_results/upload": () => <ExternalResultUpload />,
   "/external_results/:id": ({ id }: any) => <ResultItem id={id} />,
+  "/external_results/:id/update": ({ id }: any) => <ResultUpdate id={id} />,
   "/death_report/:id": ({ id }: any) => <DeathReport id={id} />,
   "/notifications/:id": (id: any) => <ShowPushNotification external_id={id} />,
 };
