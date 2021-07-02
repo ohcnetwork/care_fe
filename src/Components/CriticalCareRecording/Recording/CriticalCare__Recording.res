@@ -169,45 +169,44 @@ let initialState = {
   },
   ventilatorParametersEditor: {
     ventilationInterface: "",
-    iv:{
+    iv: {
       ventilatorMode: "",
       ventilatorModeSubOption: {
-        cmv:"",
-        simv:"",
-        psv:""
+        cmv: "",
+        simv: "",
+        psv: "",
       },
-      peep:"",
-      peakInspiratoryPressure:"",
-      meanAirwayPressure:"",
-      respiratoryRateVentilator:"",
-      tidalVolume:"",
-      fio2:"",
-      spo2:"",
+      peep: "",
+      peakInspiratoryPressure: "",
+      meanAirwayPressure: "",
+      respiratoryRateVentilator: "",
+      tidalVolume: "",
+      fio2: "",
+      spo2: "",
     },
-    niv:{
+    niv: {
       ventilatorMode: "",
       ventilatorModeSubOption: {
-        cmv:"",
-        simv:"",
-        psv:""
+        cmv: "",
+        simv: "",
+        psv: "",
       },
-      peep:"",
-      peakInspiratoryPressure:"",
-      meanAirwayPressure:"",
-      respiratoryRateVentilator:"",
-      tidalVolume:"",
-
-      fio2:"",
-      spo2:"",
+      peep: "",
+      peakInspiratoryPressure: "",
+      meanAirwayPressure: "",
+      respiratoryRateVentilator: "",
+      tidalVolume: "",
+      fio2: "",
+      spo2: "",
     },
-    none:{
-      nasalProngs:Some(""),
-      simpleFaceMask:Some(""),
-      nonRebreathingMask:false,
-      highFlowNasalCannula:false,
-      fio2:"",
-      spo2:"",
-    }
+    none: {
+      nasalProngs: Some(""),
+      simpleFaceMask: Some(""),
+      nonRebreathingMask: false,
+      highFlowNasalCannula: false,
+      fio2: "",
+      spo2: "",
+    },
   },
   neurologicalMonitoringStatus: "0",
   hemodynamicParametersStatus: "0",
@@ -255,7 +254,6 @@ export make = () => {
               initialState={state.neurologicalMonitoring}
               handleDone={data => send(SetNeurologicalMonitoring(data))}
             />
-          | VentilatorParametersEditor => <CriticalCare__VentilatorParametersEditor />
           | HemodynamicParametersEditor =>
             <CriticalCare__HemodynamicParametersEditor
               initialState={state.hemodynamic_parameter_editor}

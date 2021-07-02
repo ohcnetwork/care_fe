@@ -104,7 +104,9 @@ let make = (~state: VentilatorParameters.iv, ~send: VentilatorParameters.action 
         className={`ml-6 ${state.ventilatorMode !== "cmv"
             ? "pointer-events-none opacity-50"
             : ""} `}>
-        <CriticalCare__RadioButton options={cmvOptionsArray} horizontal={false} />
+        <CriticalCare__RadioButton
+          onChange={_ => ()} options={cmvOptionsArray} horizontal={false}
+        />
       </div>
     </div>
     <div className="mb-4">
@@ -116,7 +118,9 @@ let make = (~state: VentilatorParameters.iv, ~send: VentilatorParameters.action 
         className={`ml-6 ${state.ventilatorMode !== "simv"
             ? "pointer-events-none opacity-50"
             : ""} `}>
-        <CriticalCare__RadioButton options={simvOptionArray} horizontal={false} />
+        <CriticalCare__RadioButton
+          onChange={_ => ()} options={simvOptionArray} horizontal={false}
+        />
       </div>
     </div>
     <div className="mb-4">
