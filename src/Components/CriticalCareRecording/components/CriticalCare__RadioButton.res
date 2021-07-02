@@ -10,7 +10,7 @@ let vertical_label_classes = "my-1 block"
 let make = (~options, ~horizontal) => {
     <div className={horizontal ? horizontal_div_classes : vertical_div_classes}>
         {options|>Array.map((x) => {
-            <div>
+            <div key={Options.value(x)} >
                 <label className={horizontal ? horizontal_label_classes : vertical_label_classes}>
                     <input className="mr-2" type_="radio" name={Options.name(x)} value={Options.value(x)} id={Options.value(x)} />
                     {str({Options.label(x)})}
