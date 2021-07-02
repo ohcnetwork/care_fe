@@ -601,8 +601,8 @@ let make = (~handleDone, ~initialState) => {
         <div className="text-3xl font-bold"> {str("Glasgow Coma Scale")} </div>
         <div>
           {glassgowComaScale
-          |> Array.map(x => {
-            <div>
+          |> Array.mapi((i, x) => {
+            <div key={`${Options.title_value(x)}_${i->Belt.Int.toString}`}>
               <div className="flex justify-between">
                 <div className="font-bold mt-8"> {str(Options.title(x))} </div>
                 <div className="text-lg font-bold text-blue-500 mt-8">
@@ -631,15 +631,15 @@ let make = (~handleDone, ~initialState) => {
         <div className="text-3xl font-bold"> {str("Limp Response")} </div>
         <div>
           {limp_options
-          |> Array.map(x => {
-            <>
+          |> Array.mapi((i, x) => {
+            <div key={`${Options.title_value(x)}_${i->Belt.Int.toString}`}>
               <div className="font-bold mt-8 mb-1"> {str(Options.title(x))} </div>
               <CriticalCare__RadioButton
                 options={Options.options(x)}
                 horizontal=true
                 onChange={event => send(limpAction(Options.title_value(x), getFieldValue(event)))}
               />
-            </>
+            </div>
           })
           |> React.array}
         </div>

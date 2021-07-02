@@ -19,6 +19,7 @@
   background: rgb(7, 109, 243);
   cursor: pointer;
   border: 0 !important;
+  z-index: 10;
 }
 .range input::-moz-range-thumb {
   width: 18px;
@@ -28,6 +29,7 @@
   background: rgb(7, 109, 243);
   cursor: pointer;
   border: 0 !important;
+  z-index: 10;
 }
 .range input::-ms-thumb {
   width: 18px;
@@ -37,12 +39,14 @@
   background: rgb(7, 109, 243);
   cursor: pointer;
   border: 0 !important;
+  z-index: 10;
 }
 .range input::-webkit-slider-runnable-track {
   width: 100%;
   height: 2px;
   cursor: pointer;
   background: #b2b2b2;
+  z-index: 1;
 }
 
 .range input::-moz-range-track {
@@ -50,12 +54,14 @@
   height: 2px;
   cursor: pointer;
   background: black;
+  z-index: 1;
 }
 .range input::-ms-track {
   width: 100%;
   height: 2px;
   cursor: pointer;
   background: #b2b2b2;
+  z-index: 1;
 }
 .range input:focus {
   background: none;
