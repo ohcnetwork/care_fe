@@ -27,6 +27,7 @@ type state = {
   pressureSoreStatus: string,
   nursingCareStatus: string,
   totalStatus: int,
+  bloodSugarEditor: BloodSugar.t
 }
 
 type action =
