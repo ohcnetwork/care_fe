@@ -52,7 +52,6 @@ import { withTranslation } from "react-i18next";
 import DeathReport from "../Components/DeathReport/DeathReport";
 import { make as CriticalCareRecording } from "../Components/CriticalCareRecording/CriticalCareRecording.gen";
 import { make as VentilatorParametersEditor } from "../Components/CriticalCareRecording/VentilatorParametersEditor/CriticalCare__VentilatorParametersEditor.bs";
-import { make as HemodynamicParameters } from "../Components/CriticalCareRecording/HemodynamicParameters/CriticalCare__HemodynamicParameters.bs";
 import ShowPushNotification from "../Components/Notifications/ShowPushNotification";
 import { AddLocationForm } from "../Components/Facility/AddLocationForm";
 import { LocationManagement } from "../Components/Facility/LocationManagement";
@@ -72,11 +71,6 @@ const routes = {
   "/critical_care_ventilator": () => (
     <>
       <VentilatorParametersEditor />
-    </>
-  ),
-  "/critical_care_hemodynamic": () => (
-    <>
-      <HemodynamicParameters />
     </>
   ),
   "/": () => <HospitalList />,

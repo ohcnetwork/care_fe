@@ -12,23 +12,11 @@ type editor =
   | PressureSoreEditor
   | NursingCareEditor
 
-type completionStatus =
-  | NeurologicalMonitoringStatus
-  | HemodynamicParametersStatus
-  | VentilatorParametersStatus
-  | ArterialBloodGasAnalysisStatus
-  | BloodSugarStatus
-  | IOBalanceStatus
-  | DialysisStatus
-  | PressureSoreStatus
-  | NursingCareStatus
-
 type state = {
   visibleEditor: option<editor>,
   nursingCare: NursingCare.t,
   abgEditor: ABGAnalysis.t,
-  hemodynamic_parameter_editor: HemodynamicParametersType.t,
-  bloodSugarEditor: BloodSugar.t,
+  hemodynamic_parameter_editor: CriticalCare__HemodynamicParameters.t,
   neurologicalMonitoringStatus: string,
   hemodynamicParametersStatus: string,
   ventilatorParametersStatus: string,
@@ -46,7 +34,7 @@ type action =
   | CloseEditor
   | SetABGAnalysisEditor(ABGAnalysis.t)
   | SetNursingCare(NursingCare.t)
-  | SetHemodynamicParametersEditor(HemodynamicParametersType.t)
+  | SetHemodynamicParametersEditor(CriticalCare__HemodynamicParameters.t)
   | UpdateNursingCareStatus(string)
   | UpdateTotal(int)
   | SetBloodSugarEditor(BloodSugar.t)
@@ -54,31 +42,6 @@ type action =
 
 let showEditor = (editor, send) => {
   send(ShowEditor(editor))
-}
-
-let handleDone = (editorName, data, state, send) => {
-  send(CloseEditor)
-
-  {
-    switch editorName {
-    | NeurologicalMonitoringEditor => send(SetNursingCare(data))
-    | HemodynamicParametersEditor => send(SetNursingCare(data))
-    | VentilatorParametersEditor => send(SetNursingCare(data))
-    | ArterialBloodGasAnalysisEditor => send(SetNursingCare(data))
-    | BloodSugarEditor
-    | IOBalanceEditor =>
-      send(SetNursingCare(data))
-    | DialysisEditor => send(SetNursingCare(data))
-    | PressureSoreEditor => send(SetNursingCare(data))
-    | NursingCareEditor =>
-      send(SetNursingCare(data))
-      let status = NursingCare.showStatus(data)
-      send(UpdateNursingCareStatus(status))
-      if status == "100" {
-        send(UpdateTotal(state.totalStatus + 1))
-      }
-    }
-  }
 }
 
 let showStatus = item => {
@@ -212,14 +175,21 @@ export make = () => {
           {switch editor {
           | NeurologicalMonitoringEditor
           | HemodynamicParametersEditor =>
-            <CriticalCare__HemodynamicParameters
+            <CriticalCare__HemodynamicParametersEditor
               initialState={state.hemodynamic_parameter_editor}
-              handleDone={data => send(SetHemodynamicParametersEditor(data))}
+              handleDone={data => {
+                send(SetHemodynamicParametersEditor(data))
+                send(CloseEditor)
+              }}
             />
           | VentilatorParametersEditor => <CriticalCare__VentilatorParametersEditor />
           | ArterialBloodGasAnalysisEditor =>
             <CriticalCare__ABGAnalysisEditor
-              initialState={state.abgEditor} handleDone={data => send(SetABGAnalysisEditor(data))}
+              initialState={state.abgEditor}
+              handleDone={data => {
+                send(SetABGAnalysisEditor(data))
+                send(CloseEditor)
+              }}
             />
           | BloodSugarEditor =>
             <CriticalCare_BloodSugarEditor
@@ -240,7 +210,14 @@ export make = () => {
           | NursingCareEditor =>
             <CriticalCare__NursingCareEditor
               initialState={state.nursingCare}
-              handleDone={data => handleDone(NursingCareEditor, data, state, send)}
+              handleDone={(data, status) => {
+                send(SetNursingCare(data))
+                send(UpdateNursingCareStatus(status))
+                send(CloseEditor)
+                if status === "100" {
+                  send(UpdateTotal(state.totalStatus + 1))
+                }
+              }}
             />
           }}
         </div>
