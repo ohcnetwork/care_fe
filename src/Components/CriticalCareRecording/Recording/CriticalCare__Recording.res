@@ -16,7 +16,7 @@ type state = {
   visibleEditor: option<editor>,
   nursingCare: NursingCare.t,
   abgEditor: ABGAnalysis.t,
-  hemodynamic_parameter_editor: HemodynamicParametersType.t,
+  hemodynamic_parameter_editor: CriticalCare__HemodynamicParameters.t,
   neurologicalMonitoringStatus: string,
   hemodynamicParametersStatus: string,
   ventilatorParametersStatus: string,
@@ -34,7 +34,7 @@ type action =
   | CloseEditor
   | SetABGAnalysisEditor(ABGAnalysis.t)
   | SetNursingCare(NursingCare.t)
-  | SetHemodynamicParametersEditor(HemodynamicParametersType.t)
+  | SetHemodynamicParametersEditor(CriticalCare__HemodynamicParameters.t)
   | UpdateNursingCareStatus(string)
   | UpdateTotal(int)
 
@@ -170,9 +170,12 @@ export make = () => {
           {switch editor {
           | NeurologicalMonitoringEditor
           | HemodynamicParametersEditor =>
-            <CriticalCare__HemodynamicParameters
+            <CriticalCare__HemodynamicParametersEditor
               initialState={state.hemodynamic_parameter_editor}
-              handleDone={data => send(SetHemodynamicParametersEditor(data))}
+              handleDone={data => {
+                send(SetHemodynamicParametersEditor(data))
+                send(CloseEditor)
+              }}
             />
           | VentilatorParametersEditor => <CriticalCare__VentilatorParametersEditor />
           | ArterialBloodGasAnalysisEditor =>
