@@ -1,4 +1,5 @@
 let str = React.string
+open CriticalCare__Types
 
 let cmvOptionsArray: array<Options.t> = [
   {label: "Volume Control Ventilation (VCV)", value: "VCV", name: "cmv"},
@@ -31,42 +32,6 @@ let handleSubmit = (handleDone, state) => {
   handleDone(state)
 }
 
-type action =
-  | SetBp_systolic(string)
-  | SetBp_diastolic(string)
-  | SetPulse(string)
-  | SetTemperature(string)
-  | SetRespiratory_rate(string)
-  | SetRhythm(CriticalCare__HemodynamicParametersRhythm.rhythmVar)
-  | SetDescription(string)
-
-let reducer = (state, action) => {
-  switch action {
-  | SetBp_systolic(bp_systolic) => {
-      ...state,
-      CriticalCare__HemodynamicParameters.bp_systolic: bp_systolic,
-    }
-  | SetBp_diastolic(bp_diastolic) => {
-      ...state,
-      CriticalCare__HemodynamicParameters.bp_diastolic: bp_diastolic,
-    }
-  | SetPulse(pulse) => {...state, CriticalCare__HemodynamicParameters.pulse: pulse}
-  | SetTemperature(temperature) => {
-      ...state,
-      CriticalCare__HemodynamicParameters.temperature: temperature,
-    }
-  | SetRespiratory_rate(respiratory_rate) => {
-      ...state,
-      CriticalCare__HemodynamicParameters.respiratory_rate: respiratory_rate,
-    }
-  | SetRhythm(rhythm) => {...state, CriticalCare__HemodynamicParameters.rhythm: rhythm}
-  | SetDescription(description) => {
-      ...state,
-      CriticalCare__HemodynamicParameters.description: description,
-    }
-  }
-}
-
 let psvOptionsArray = [
   {
     "title": "PEEP (cm/H2O)",
@@ -74,6 +39,7 @@ let psvOptionsArray = [
     "end": "30",
     "interval": "5",
     "step": 1.0,
+    "id":"peep"
   },
   {
     "title": "Peak Inspiratory Pressure (PIP) (cm H2O)",
@@ -81,6 +47,7 @@ let psvOptionsArray = [
     "end": "100",
     "interval": "10",
     "step": 1.0,
+       "id":"peakInspiratoryPressure"
   },
   {
     "title": "Mean Airway Pressure (cm H2O",
@@ -88,6 +55,7 @@ let psvOptionsArray = [
     "end": "40",
     "interval": "5",
     "step": 1.0,
+        "id":"meanAirwayPressure"
   },
   {
     "title": "Respiratory Rate Ventilator (bpm)",
@@ -95,6 +63,7 @@ let psvOptionsArray = [
     "end": "100",
     "interval": "10",
     "step": 1.0,
+    "id":"respiratoryRateVentilator"
   },
   {
     "title": "Tidal Volume (ml)",
@@ -102,6 +71,7 @@ let psvOptionsArray = [
     "end": "1000",
     "interval": "100",
     "step": 1.0,
+      "id":"tidalVolume"
   },
   {
     "title": "FiO2 (%)",
@@ -109,6 +79,7 @@ let psvOptionsArray = [
     "end": "100",
     "interval": "10",
     "step": 1.0,
+    "id":"fio2"
   },
   {
     "title": "SPO2 (%)",
@@ -116,52 +87,68 @@ let psvOptionsArray = [
     "end": "100",
     "interval": "10",
     "step": 1.0,
+    "id":"spo2"
   },
 ]
 
 @react.component
-let make = () => {
-  let (active, setActive) = React.useState(_ => "")
-  let (slider, setSlider) = React.useState(_ => "")
-
-  let handleChange = opt => setActive(_ => opt)
+let make = (~state:VentilatorParameters.iv,~send:VentilatorParameters.action => unit) => {
 
   <div>
     <h4 className="mb-4"> {str("Ventilator Mode")} </h4>
     <div className="mb-4">
-      <label onClick={_ => handleChange("cmv")}>
+      <label onClick={_ => send(SetIv({...state,ventilatorMode:"cmv"}))}>
         <input className="mr-2" type_="radio" name="ventilatorMode" value={"cmv"} id={"cmv"} />
         {str({"Control Mechanical Ventilation (CMV)"})}
       </label>
-      <div className={`ml-6 ${active !== "cmv" ? "pointer-events-none opacity-50" : ""} `}>
+      <div className={`ml-6 ${state.ventilatorMode !== "cmv" ? "pointer-events-none opacity-50" : ""} `}>
         <CriticalCare__RadioButton options={cmvOptionsArray} horizontal={false} />
       </div>
     </div>
     <div className="mb-4">
-      <label onClick={_ => handleChange("simv")}>
+      <label onClick={_ => send(SetIv({...state,ventilatorMode:"simv"}))}>
         <input className="mr-2" type_="radio" name="ventilatorMode" value={"simv"} id={"simv"} />
         {str({"Synchronised Intermittent Mandatory Ventilation (SIMV)"})}
       </label>
-      <div className={`ml-6 ${active !== "simv" ? "pointer-events-none opacity-50" : ""} `}>
+      <div className={`ml-6 ${state.ventilatorMode !== "simv" ? "pointer-events-none opacity-50" : ""} `}>
         <CriticalCare__RadioButton options={simvOptionArray} horizontal={false} />
       </div>
     </div>
     <div className="mb-4">
-      <label onClick={_ => handleChange("psv")}>
+      <label onClick={_ => send(SetIv({...state,ventilatorMode:"psv"}))}>
         <input className="mr-2" type_="radio" name="ventilatorMode" value={"psv"} id={"psv"} />
         {str({"C-PAP/ Pressure Support Ventilation (PSV)"})}
       </label>
-      <div className={`ml-6 ${active !== "psv" ? "pointer-events-none opacity-50" : ""} `}>
+      <div className={`ml-6 ${state.ventilatorMode !== "psv" ? "pointer-events-none opacity-50" : ""} `}>
         {psvOptionsArray
         |> Array.map(option => {
+          let value = switch option["id"] {
+            | "peep" => state.peep
+            | "peakInspiratoryPressure" => state.peakInspiratoryPressure
+            | "meanAirwayPressure" => state.meanAirwayPressure
+            | "respiratoryRateVentilator" => state.respiratoryRateVentilator
+            | "tidalVolume" => state.tidalVolume
+            | "fio2" => state.fio2
+            | "spo2" => state.spo2
+            | _ => ""
+            }
+          let newState =(s) => switch option["id"] {
+            | "peep" => {...state,peep:s}
+            | "peakInspiratoryPressure" => {...state,peakInspiratoryPressure:s}
+            | "meanAirwayPressure" => {...state,meanAirwayPressure:s}
+            | "respiratoryRateVentilator" => {...state,respiratoryRateVentilator:s}
+            | "tidalVolume" => {...state,tidalVolume:s}
+            | "fio2" => {...state,fio2:s}
+            | "spo2" => {...state,spo2:s}
+            }
           <Slider
             title={option["title"]}
             start={option["start"]}
             end={option["end"]}
             interval={option["interval"]}
             step={option["step"]}
-            value={slider}
-            setValue={s => setSlider(_ => s)}
+            value={value}
+            setValue={s => send(SetIvSubOptions(newState(s)))}
             getLabel={_ => ("Normal", "#ff0000")}
           />
         })
