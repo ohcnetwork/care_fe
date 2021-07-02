@@ -161,9 +161,11 @@ let initialState = {
   neurologicalMonitoring: {
     levelOfConciousness: "",
     leftPupilSize: "",
+    leftSizeDescription: "",
     leftPupilReaction: "",
     leftReactionDescription: "",
     rightPupilSize: "",
+    rightSizeDescription: "",
     rightPupilReaction: "",
     rightReactionDescription: "",
     eyeOpen: "",

@@ -1,9 +1,11 @@
 type t = {
   levelOfConciousness: string,
   leftPupilSize: string,
+  leftSizeDescription: string,
   leftPupilReaction: string,
   leftReactionDescription: string,
   rightPupilSize: string,
+  rightSizeDescription: string,
   rightPupilReaction: string,
   rightReactionDescription: string,
   eyeOpen: string,
@@ -18,9 +20,11 @@ type t = {
 
 let levelOfConciousness = t => t.levelOfConciousness
 let leftPupilSize = t => t.leftPupilSize
+let leftSizeDescription = t => t.leftSizeDescription
 let leftPupilReaction = t => t.leftPupilReaction
 let leftReactionDescription = t => t.leftReactionDescription
 let rightPupilSize = t => t.rightPupilSize
+let rightSizeDescription = t => t.rightSizeDescription
 let rightPupilReaction = t => t.rightPupilReaction
 let rightReactionDescription = t => t.rightReactionDescription
 let eyeOpen = t => t.eyeOpen
@@ -35,9 +39,11 @@ let lowerExtremityL = t => t.lowerExtremityL
 let init = {
   levelOfConciousness: "",
   leftPupilSize: "",
+  leftSizeDescription: "",
   leftPupilReaction: "",
   leftReactionDescription: "",
   rightPupilSize: "",
+  rightSizeDescription: "",
   rightPupilReaction: "",
   rightReactionDescription: "",
   eyeOpen: "",

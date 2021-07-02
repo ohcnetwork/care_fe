@@ -155,6 +155,7 @@ let limps = [
   "Lower Extremity-Right",
   "Lower Extremity-Left",
 ]
+
 let limps_title_val = [
   "upper_extremity_right",
   "upper_extremity_left",
@@ -164,156 +165,148 @@ let limps_title_val = [
 
 let limp_options: Options.limp_options = [
   {
-    title: "Upper Extremity-Right",
+    title: limps[0],
     title_value: limps_title_val[0],
     options: [
       {
         name: limps_title_val[0],
-        value: "strong",
+        value: "S",
         label: "Strong",
       },
       {
         name: limps_title_val[0],
-        value: "moderate",
+        value: "M",
         label: "Moderate",
       },
       {
         name: limps_title_val[0],
-        value: "weak",
+        value: "W",
         label: "Weak",
       },
       {
         name: limps_title_val[0],
-        value: "flexion",
+        value: "F",
         label: "Flexion",
       },
       {
         name: limps_title_val[0],
-        value: "extension",
+        value: "E",
         label: "Extension",
       },
       {
         name: limps_title_val[0],
-        value: "none",
+        value: "0",
         label: "None",
       },
     ],
   },
   {
-    title: "Upper Extremity-Left",
+    title: limps[1],
     title_value: limps_title_val[1],
     options: [
       {
         name: limps_title_val[1],
-        value: "strong",
+        value: "S",
         label: "Strong",
       },
       {
         name: limps_title_val[1],
-        value: "moderate",
+        value: "M",
         label: "Moderate",
       },
       {
         name: limps_title_val[1],
-        value: "weak",
+        value: "W",
         label: "Weak",
       },
       {
         name: limps_title_val[1],
-        value: "flexion",
+        value: "F",
         label: "Flexion",
       },
       {
         name: limps_title_val[1],
-        value: "extension",
+        value: "E",
         label: "Extension",
       },
       {
         name: limps_title_val[1],
-        value: "none",
+        value: "0",
         label: "None",
       },
     ],
   },
   {
-    title: "Lower Extremity-Right",
+    title: limps[2],
     title_value: limps_title_val[2],
     options: [
       {
         name: limps_title_val[2],
-        value: "strong",
+        value: "S",
         label: "Strong",
       },
       {
         name: limps_title_val[2],
-        value: "moderate",
+        value: "M",
         label: "Moderate",
       },
       {
         name: limps_title_val[2],
-        value: "weak",
+        value: "W",
         label: "Weak",
       },
       {
         name: limps_title_val[2],
-        value: "flexion",
+        value: "F",
         label: "Flexion",
       },
       {
         name: limps_title_val[2],
-        value: "extension",
+        value: "E",
         label: "Extension",
       },
       {
         name: limps_title_val[2],
-        value: "none",
+        value: "0",
         label: "None",
       },
     ],
   },
   {
-    title: "Lower Extremity-Left",
+    title: limps[3],
     title_value: limps_title_val[3],
     options: [
       {
         name: limps_title_val[3],
-        value: "strong",
+        value: "S",
         label: "Strong",
       },
       {
         name: limps_title_val[3],
-        value: "moderate",
+        value: "M",
         label: "Moderate",
       },
       {
         name: limps_title_val[3],
-        value: "weak",
+        value: "W",
         label: "Weak",
       },
       {
         name: limps_title_val[3],
-        value: "flexion",
+        value: "F",
         label: "Flexion",
       },
       {
         name: limps_title_val[3],
-        value: "extension",
+        value: "E",
         label: "Extension",
       },
       {
         name: limps_title_val[3],
-        value: "none",
+        value: "0",
         label: "None",
       },
     ],
-  },
-]
-
-let cannot_be_assessed: array<Options.t> = [
-  {
-    name: "",
-    value: "cannot_be_assessed",
-    label: "Cannot be assessed",
   },
 ]
 
@@ -370,9 +363,11 @@ let handleSubmit = (handleDone, state) => {
 type action =
   | SetLevelOfConciousness(string)
   | SetLeftPupilSize(string)
+  | SetLeftSizeDescription(string)
   | SetLeftPupilReaction(string)
   | SetLeftReactionDescription(string)
   | SetRightPupilSize(string)
+  | SetRightSizeDescription(string)
   | SetRightReactionDescription(string)
   | SetRightPupilReaction(string)
   | SetEyeOpen(string)
@@ -385,18 +380,27 @@ type action =
   | SetLowerExtremityL(string)
 
 let reducer = (state, action) => {
+  open NeurologicalMonitoring
   switch action {
   | SetLevelOfConciousness(levelOfConciousness) => {
       ...state,
-      NeurologicalMonitoring.levelOfConciousness: levelOfConciousness,
+      levelOfConciousness: levelOfConciousness,
     }
   | SetLeftPupilSize(leftPupilSize) => {
       ...state,
       leftPupilSize: leftPupilSize,
+      leftSizeDescription: leftPupilSize === "cannot_be_assessed" ? leftSizeDescription(state) : "",
+    }
+  | SetLeftSizeDescription(leftSizeDescription) => {
+      ...state,
+      leftSizeDescription: leftSizeDescription,
     }
   | SetLeftPupilReaction(leftPupilReaction) => {
       ...state,
       leftPupilReaction: leftPupilReaction,
+      leftReactionDescription: leftPupilReaction === "cannot_be_assessed"
+        ? leftReactionDescription(state)
+        : "",
     }
   | SetLeftReactionDescription(leftReactionDescription) => {
       ...state,
@@ -405,10 +409,20 @@ let reducer = (state, action) => {
   | SetRightPupilSize(rightPupilSize) => {
       ...state,
       rightPupilSize: rightPupilSize,
+      rightSizeDescription: rightPupilSize === "cannot_be_assessed"
+        ? rightSizeDescription(state)
+        : "",
+    }
+  | SetRightSizeDescription(rightSizeDescription) => {
+      ...state,
+      rightSizeDescription: rightSizeDescription,
     }
   | SetRightPupilReaction(rightPupilReaction) => {
       ...state,
       rightPupilReaction: rightPupilReaction,
+      rightReactionDescription: rightPupilReaction === "cannot_be_assessed"
+        ? rightReactionDescription(state)
+        : "",
     }
   | SetRightReactionDescription(rightReactionDescription) => {
       ...state,
@@ -503,7 +517,6 @@ let make = (~handleDone, ~initialState) => {
   <div>
     <CriticalCare__PageTitle title="Neurological Monitoring" />
     <div className="my-4">
-      // <div className="ml-36 w-8/12">
       <div className="my-10">
         <div className=" text-2xl font-bold my-2"> {str("Level Of Consciousness")} </div>
         <CriticalCare__RadioButton
@@ -521,8 +534,15 @@ let make = (~handleDone, ~initialState) => {
             val={NeurologicalMonitoring.leftPupilSize(state)}
             onChange={event => send(SetLeftPupilSize(getFieldValue(event)))}
           />
-          <p> {str("dfdkf")} </p>
-          // <CriticalCare__RadioButton options ={cannot_be_assessed} horizontal=true />
+          {if NeurologicalMonitoring.leftPupilSize(state) === "cannot_be_assessed" {
+            <CriticalCare__Description
+              name="left_size_description"
+              text={NeurologicalMonitoring.leftSizeDescription(state)}
+              onChange={event => send(SetLeftSizeDescription(getFieldValue(event)))}
+            />
+          } else {
+            <> </>
+          }}
           <div className="my-15 mb-8">
             <div className="font-bold my-4"> {str("Reaction")} </div>
             <CriticalCare__RadioButton
@@ -548,7 +568,15 @@ let make = (~handleDone, ~initialState) => {
             val={NeurologicalMonitoring.rightPupilSize(state)}
             onChange={event => send(SetRightPupilSize(getFieldValue(event)))}
           />
-          // <CriticalCare__RadioButton options ={cannot_be_assessed} horizontal=true />
+          {if NeurologicalMonitoring.rightPupilSize(state) === "cannot_be_assessed" {
+            <CriticalCare__Description
+              name="right_size_description"
+              text={NeurologicalMonitoring.rightSizeDescription(state)}
+              onChange={event => send(SetRightSizeDescription(getFieldValue(event)))}
+            />
+          } else {
+            <> </>
+          }}
           <div className="my-15 mb-8">
             <div className="font-bold my-4"> {str("Reaction")} </div>
             <CriticalCare__RadioButton
