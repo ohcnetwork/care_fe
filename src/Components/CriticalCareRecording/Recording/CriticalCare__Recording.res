@@ -16,6 +16,7 @@ type state = {
   visibleEditor: option<editor>,
   nursingCare: NursingCare.t,
   abgEditor: ABGAnalysis.t,
+  neurologicalMonitoring: NeurologicalMonitoring.t,
   hemodynamic_parameter_editor: CriticalCare__HemodynamicParameters.t,
   ventilatorParametersEditor: CriticalCare__VentilatorParameters.t,
   neurologicalMonitoringStatus: string,
@@ -35,6 +36,7 @@ type action =
   | CloseEditor
   | SetABGAnalysisEditor(ABGAnalysis.t)
   | SetNursingCare(NursingCare.t)
+  | SetNeurologicalMonitoring(NeurologicalMonitoring.t)
   | SetHemodynamicParametersEditor(CriticalCare__HemodynamicParameters.t)
   | SetVentilatorParametersEditor(CriticalCare__VentilatorParameters.t)
   | UpdateNursingCareStatus(string)
@@ -87,6 +89,10 @@ let reducer = (state, action) => {
   | CloseEditor => {...state, visibleEditor: None}
   | SetABGAnalysisEditor(editor) => {...state, abgEditor: editor}
   | SetNursingCare(nursingCare) => {...state, nursingCare: nursingCare}
+  | SetNeurologicalMonitoring(neurologicalMonitoring) => {
+      ...state,
+      neurologicalMonitoring: neurologicalMonitoring,
+    }
   | SetHemodynamicParametersEditor(editor) => {...state, hemodynamic_parameter_editor: editor}
   | SetVentilatorParametersEditor(editor) => {...state, ventilatorParametersEditor: editor}
   | UpdateNursingCareStatus(nursingCareStatus) => {
@@ -122,6 +128,25 @@ let initialState = {
     chestTubeCare: "",
     tracheostomyCare: "",
     stomaCare: "",
+  },
+  neurologicalMonitoring: {
+    levelOfConciousness: "",
+    leftPupilSize: "",
+    leftSizeDescription: "",
+    leftPupilReaction: "",
+    leftReactionDescription: "",
+    rightPupilSize: "",
+    rightSizeDescription: "",
+    rightPupilReaction: "",
+    rightReactionDescription: "",
+    eyeOpen: "",
+    verbalResponse: "",
+    motorResponse: "",
+    totalGlascowScale: "",
+    upperExtremityR: "",
+    upperExtremityL: "",
+    lowerExtremityR: "",
+    lowerExtremityL: "",
   },
   hemodynamic_parameter_editor: {
     bp_systolic: "",
@@ -213,7 +238,12 @@ export make = () => {
         <div id="editor">
           <button id="closeEditor" onClick={_ => send(CloseEditor)}> {str("Back")} </button>
           {switch editor {
-          | NeurologicalMonitoringEditor
+          | NeurologicalMonitoringEditor =>
+            <CriticalCare__NeurologicalMonitoringEditor
+              initialState={state.neurologicalMonitoring}
+              handleDone={data => send(SetNeurologicalMonitoring(data))}
+            />
+          | VentilatorParametersEditor => <CriticalCare__VentilatorParametersEditor />
           | HemodynamicParametersEditor =>
             <CriticalCare__HemodynamicParametersEditor
               initialState={state.hemodynamic_parameter_editor}

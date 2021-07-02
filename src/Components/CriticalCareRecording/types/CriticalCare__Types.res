@@ -2,3 +2,4 @@ module NursingCare = CriticalCare__NursingCare
 module HemodynamicParameters = CriticalCare__HemodynamicParameters
 module ABGAnalysis = CriticalCare__ABGAnalysis
 module VentilatorParameters = CriticalCare__VentilatorParameters
+module NeurologicalMonitoring = CriticalCare__NeurologicalMonitoring

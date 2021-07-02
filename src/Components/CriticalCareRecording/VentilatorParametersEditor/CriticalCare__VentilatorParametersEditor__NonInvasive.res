@@ -1,20 +1,20 @@
 let str = React.string
 open CriticalCare__Types
 
-let cmvOptionsArray:array<Options.t> = [
-  { label: "Volume Control Ventilation (VCV)", value: "VCV",name: "cmv" },
-  { label: "Pressure Control Ventilation (PCV)", value: "PCV",name: "cmv" },
-];
+let cmvOptionsArray: array<Options.t> = [
+  {label: "Volume Control Ventilation (VCV)", value: "VCV", name: "cmv"},
+  {label: "Pressure Control Ventilation (PCV)", value: "PCV", name: "cmv"},
+]
 
-let simvOptionArray:array<Options.t> = [
-  { label: "Volume Controlled SIMV (VC-SIMV)", value: "VC_SIMV",name: "simv" },
-  { label: "Pressure Controlled SIMV (PC-SIMV)", value: "PC_SIMV",name: "simv" },
-];
+let simvOptionArray: array<Options.t> = [
+  {label: "Volume Controlled SIMV (VC-SIMV)", value: "VC_SIMV", name: "simv"},
+  {label: "Pressure Controlled SIMV (PC-SIMV)", value: "PC_SIMV", name: "simv"},
+]
 
-let rhythmOptionArray:array<Options.t> = [
-  { label: "Regular", value: "regular",name: "rhythm" },
-  { label: "Irregular", value: "irregular",name: "rhythm" },
-];
+let rhythmOptionArray: array<Options.t> = [
+  {label: "Regular", value: "regular", name: "rhythm"},
+  {label: "Irregular", value: "irregular", name: "rhythm"},
+]
 
 let psvOptionsArray = [
   {
@@ -155,4 +155,5 @@ let make = (~state:VentilatorParameters.niv,~send:VentilatorParameters.action =>
             </div>
         </div>
     </div>
+  </div>
 }
