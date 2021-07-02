@@ -29,6 +29,8 @@ type state = {
   pressureSoreStatus: string,
   nursingCareStatus: string,
   totalStatus: int,
+  bloodSugarEditor: BloodSugar.t,
+  dialysisEditor: Dialysis.t,
 }
 
 type action =
@@ -41,6 +43,10 @@ type action =
   | SetVentilatorParametersEditor(CriticalCare__VentilatorParameters.t)
   | UpdateNursingCareStatus(string)
   | UpdateTotal(int)
+  | SetBloodSugarEditor(BloodSugar.t)
+  | UpdateBloodSugarStatus(string)
+  | SetDialysisEditor(Dialysis.t)
+  | UpdateDialysisStatus(string)
 
 let showEditor = (editor, send) => {
   send(ShowEditor(editor))
@@ -100,6 +106,10 @@ let reducer = (state, action) => {
       nursingCareStatus: nursingCareStatus,
     }
   | UpdateTotal(total) => {...state, totalStatus: total}
+  | SetBloodSugarEditor(editor) => {...state, bloodSugarEditor: editor}
+  | UpdateBloodSugarStatus(bloodSugarStatus) => {...state, bloodSugarStatus: bloodSugarStatus}
+  | SetDialysisEditor(editor) => {...state, dialysisEditor: editor}
+  | UpdateDialysisStatus(dialysisStatus) => {...state, dialysisStatus: dialysisStatus}
   }
 }
 
@@ -209,6 +219,8 @@ let initialState = {
   pressureSoreStatus: "0",
   nursingCareStatus: "0",
   totalStatus: 0,
+  bloodSugarEditor: BloodSugar.init,
+  dialysisEditor: Dialysis.init,
 }
 
 let editorButtons = (state, send) => {
@@ -268,9 +280,33 @@ export make = () => {
                 send(CloseEditor)
               }}
             />
-          | BloodSugarEditor
+          | BloodSugarEditor =>
+            <CriticalCare_BloodSugarEditor
+              initialState={state.bloodSugarEditor}
+              handleDone={data => {
+                send(CloseEditor)
+                send(SetBloodSugarEditor(data))
+                let status = BloodSugar.showStatus(data)
+                send(UpdateBloodSugarStatus(status))
+                if status == "100" {
+                  send(UpdateTotal(state.totalStatus + 1))
+                }
+              }}
+            />
           | IOBalanceEditor
-          | DialysisEditor
+          | DialysisEditor =>
+            <CriticalCare_DialysisEditor
+              initialState={state.dialysisEditor}
+              handleDone={data => {
+                send(CloseEditor)
+                send(SetDialysisEditor(data))
+                let status = Dialysis.showStatus(data)
+                send(UpdateDialysisStatus(status))
+                if status == "100" {
+                  send(UpdateTotal(state.totalStatus + 1))
+                }
+              }}
+            />
           | PressureSoreEditor
           | NursingCareEditor =>
             <CriticalCare__NursingCareEditor
