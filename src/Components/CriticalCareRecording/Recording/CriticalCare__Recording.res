@@ -27,7 +27,8 @@ type state = {
   pressureSoreStatus: string,
   nursingCareStatus: string,
   totalStatus: int,
-  bloodSugarEditor: BloodSugar.t
+  bloodSugarEditor: BloodSugar.t,
+  dialysisEditor: Dialysis.t,
 }
 
 type action =
@@ -40,6 +41,8 @@ type action =
   | UpdateTotal(int)
   | SetBloodSugarEditor(BloodSugar.t)
   | UpdateBloodSugarStatus(string)
+  | SetDialysisEditor(Dialysis.t)
+  | UpdateDialysisStatus(string)
 
 let showEditor = (editor, send) => {
   send(ShowEditor(editor))
@@ -96,6 +99,8 @@ let reducer = (state, action) => {
   | UpdateTotal(total) => {...state, totalStatus: total}
   | SetBloodSugarEditor(editor) => {...state, bloodSugarEditor: editor}
   | UpdateBloodSugarStatus(bloodSugarStatus) => {...state, bloodSugarStatus: bloodSugarStatus}
+  | SetDialysisEditor(editor) => {...state, dialysisEditor: editor}
+  | UpdateDialysisStatus(dialysisStatus) => {...state, dialysisStatus: dialysisStatus}
   }
 }
 
@@ -145,6 +150,7 @@ let initialState = {
   nursingCareStatus: "0",
   totalStatus: 0,
   bloodSugarEditor: BloodSugar.init,
+  dialysisEditor: Dialysis.init,
 }
 
 let editorButtons = (state, send) => {
@@ -206,7 +212,19 @@ export make = () => {
               }}
             />
           | IOBalanceEditor
-          | DialysisEditor
+          | DialysisEditor =>
+            <CriticalCare_DialysisEditor
+              initialState={state.dialysisEditor}
+              handleDone={data => {
+                send(CloseEditor)
+                send(SetDialysisEditor(data))
+                let status = Dialysis.showStatus(data)
+                send(UpdateDialysisStatus(status))
+                if status == "100" {
+                  send(UpdateTotal(state.totalStatus + 1))
+                }
+              }}
+            />
           | PressureSoreEditor
           | NursingCareEditor =>
             <CriticalCare__NursingCareEditor

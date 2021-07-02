@@ -7,8 +7,8 @@ let fluid_balance = t => t.fluid_balance
 let net_balance = t => t.net_balance
 
 let init = {
-  fluid_balance: "2500",
-  net_balance: "2500",
+  fluid_balance: "",
+  net_balance: "",
 }
 
 let showStatus = data => {
