@@ -2,7 +2,8 @@ let str = React.string
 open CriticalCare__Types
 
 let handleSubmit = (handleDone, state) => {
-  handleDone(state)
+  let status = NursingCare.showStatus(state)
+  handleDone(state, status)
 }
 
 type action =

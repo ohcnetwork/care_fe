@@ -332,7 +332,7 @@ input[type="number"] {
 .slider-container {
   position: relative;
   width: 100%;
-  max-width: 700px;
+  /* max-width: 700px; */
   display: flex;
   justify-content: center;
 }
@@ -357,8 +357,8 @@ input[type="number"] {
 
 .slider-box {
   width: 100%;
-  max-width: 700px;
-  padding: 20px 20px 60px 20px;
+  /* max-width: 700px; */
+  padding: 20px 10px 60px 10px;
   border-radius: 12px;
 }
 
@@ -367,16 +367,16 @@ input[type="number"] {
   justify-content: space-between;
   align-items: center;
   font-family: sans-serif;
-  margin-bottom: 2.8rem;
+  margin-bottom: 2rem;
 }
 
 .slider-head > h1 {
-  font-size: 2rem;
-  font-weight: 500;
+  font-size: 1rem;
+  font-weight: bold;
 }
 
 .slider-head input {
-  padding: 1.2rem 0.7rem;
+  padding: 0.5rem 0.7rem;
   border-radius: 8px;
   border: 1px solid #979aa0;
   margin-left: 12px;
@@ -388,5 +388,5 @@ input[type="number"] {
 .slider-head label {
   font-weight: 700;
   color: #2856ff;
-  font-size: 1.3rem;
+  font-size: 1rem;
 }
