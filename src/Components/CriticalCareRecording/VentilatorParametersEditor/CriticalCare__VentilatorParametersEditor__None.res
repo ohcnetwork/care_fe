@@ -45,7 +45,7 @@ module ShowOnChecked = {
 @react.component
 let make = (~title,~children,~onChange) => {
     let (checked,setChecked) = React.useState(_ => false)
-    let handleChange = (e) => {
+    let handleChange = (_) => {
         onChange(!checked)
         setChecked(prev =>  !prev) 
     }
@@ -72,11 +72,11 @@ let make = (~state:VentilatorParameters.none,~send:VentilatorParameters.action =
                         | _ => Some("")
                         }
                     let newState =(s) => switch option["id"] {
-                    | "nasalProngs" => {...state,nasalProngs:s}
-                    | "simpleFaceMask" => {...state,simpleFaceMask:s}
-                    | _ => state
-                    }
-                    <div>
+                        | "nasalProngs" => {...state,nasalProngs:s}
+                        | "simpleFaceMask" => {...state,simpleFaceMask:s}
+                        | _ => state
+                        }
+                    <div key={`none-check-${option["id"]}`} >
                         <ShowOnChecked title={option["checkboxTitle"]} onChange={prev=>send(SetNone(newState(prev ? Some("") : None)))} >
                             <Slider
                                 title={option["title"]}
@@ -133,6 +133,7 @@ let make = (~state:VentilatorParameters.none,~send:VentilatorParameters.action =
                     | _ => state
                 }
                 <Slider
+                    key={`none-${option["id"]}`}
                     title={option["title"]}
                     start={option["start"]}
                     end={option["end"]}

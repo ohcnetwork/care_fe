@@ -140,6 +140,7 @@ let make = (~state:VentilatorParameters.niv,~send:VentilatorParameters.action =>
                         | _ => state
                         }
                     <Slider
+                        key={`non-invasive-${option["id"]}`}
                         title={option["title"]}
                         start={option["start"]}
                         end={option["end"]}

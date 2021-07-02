@@ -140,8 +140,10 @@ let make = (~state:VentilatorParameters.iv,~send:VentilatorParameters.action => 
             | "tidalVolume" => {...state,tidalVolume:s}
             | "fio2" => {...state,fio2:s}
             | "spo2" => {...state,spo2:s}
+            | _ => state
             }
           <Slider
+            key={`invasive-${option["id"]}`}
             title={option["title"]}
             start={option["start"]}
             end={option["end"]}
