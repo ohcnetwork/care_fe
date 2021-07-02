@@ -3,3 +3,5 @@ module HemodynamicParameters = CriticalCare__HemodynamicParameters
 module ABGAnalysis = CriticalCare__ABGAnalysis
 module BloodSugar = CriticalCare_BloodSugar
 module Dialysis = CriticalCare_Dialysis
+module VentilatorParameters = CriticalCare__VentilatorParameters
+module NeurologicalMonitoring = CriticalCare__NeurologicalMonitoring
