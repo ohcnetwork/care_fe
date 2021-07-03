@@ -187,7 +187,7 @@ export make = () => {
               }}
             />
           | BloodSugarEditor
-          | IOBalanceEditor
+          | IOBalanceEditor => <CriticalCare__IOBalance />
           | DialysisEditor
           | PressureSoreEditor
           | NursingCareEditor =>
