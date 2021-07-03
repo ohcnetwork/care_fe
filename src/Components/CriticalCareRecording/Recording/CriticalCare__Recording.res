@@ -38,7 +38,7 @@ type action =
   | CloseEditor
   | SetABGAnalysisEditor(ABGAnalysis.t)
   | SetNursingCare(NursingCare.t)
-  | SetNeurologicalMonitoring(NeurologicalMonitoring.t)
+  | SetNeurologicalMonitoringEditor(NeurologicalMonitoring.t)
   | SetHemodynamicParametersEditor(CriticalCare__HemodynamicParameters.t)
   | SetVentilatorParametersEditor(CriticalCare__VentilatorParameters.t)
   | UpdateNursingCareStatus(string)
@@ -48,6 +48,7 @@ type action =
   | UpdateBloodSugarStatus(string)
   | SetDialysisEditor(Dialysis.t)
   | UpdateDialysisStatus(string)
+  | UpdateNeurologicalMonitoringStatus(string)
 
 let showEditor = (editor, send) => {
   send(ShowEditor(editor))
@@ -96,7 +97,7 @@ let reducer = (state, action) => {
   | CloseEditor => {...state, visibleEditor: None}
   | SetABGAnalysisEditor(editor) => {...state, abgEditor: editor}
   | SetNursingCare(nursingCare) => {...state, nursingCare: nursingCare}
-  | SetNeurologicalMonitoring(neurologicalMonitoring) => {
+  | SetNeurologicalMonitoringEditor(neurologicalMonitoring) => {
       ...state,
       neurologicalMonitoring: neurologicalMonitoring,
     }
@@ -115,6 +116,10 @@ let reducer = (state, action) => {
   | UpdateBloodSugarStatus(bloodSugarStatus) => {...state, bloodSugarStatus: bloodSugarStatus}
   | SetDialysisEditor(editor) => {...state, dialysisEditor: editor}
   | UpdateDialysisStatus(dialysisStatus) => {...state, dialysisStatus: dialysisStatus}
+  | UpdateNeurologicalMonitoringStatus(neurologicalMonitoringStatus) => {
+      ...state,
+      neurologicalMonitoringStatus: neurologicalMonitoringStatus,
+    }
   }
 }
 
@@ -145,6 +150,7 @@ let initialState = {
     stomaCare: "",
   },
   neurologicalMonitoring: {
+    pronePosition: false,
     levelOfConciousness: "",
     leftPupilSize: "",
     leftSizeDescription: "",
@@ -246,6 +252,7 @@ let editorButtons = (state, send) => {
 @react.component
 export make = () => {
   let (state, send) = React.useReducer(reducer, initialState)
+  Js.log2(state, initialState)
   <div>
     <div className="w-3/4 mx-auto my-4" />
     <div className="w-3/4 mx-auto my-4">
@@ -257,7 +264,14 @@ export make = () => {
           | NeurologicalMonitoringEditor =>
             <CriticalCare__NeurologicalMonitoringEditor
               initialState={state.neurologicalMonitoring}
-              handleDone={data => send(SetNeurologicalMonitoring(data))}
+              handleDone={(data, status) => {
+                send(SetNeurologicalMonitoringEditor(data))
+                send(UpdateNeurologicalMonitoringStatus(status))
+                send(CloseEditor)
+                if status === "100" {
+                  send(UpdateTotal(state.totalStatus + 1))
+                }
+              }}
             />
           | HemodynamicParametersEditor =>
             <CriticalCare__HemodynamicParametersEditor

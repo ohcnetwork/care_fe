@@ -357,10 +357,13 @@ let left_reaction_options: array<Options.t> = [
 ]
 
 let handleSubmit = (handleDone, state) => {
-  handleDone(state)
+  let status = NeurologicalMonitoring.showStatus(state)
+  let _ = Js.log2(status, state)
+  handleDone(state, status)
 }
 
 type action =
+  | SetPronePosition(bool)
   | SetLevelOfConciousness(string)
   | SetLeftPupilSize(string)
   | SetLeftSizeDescription(string)
@@ -382,6 +385,10 @@ type action =
 let reducer = (state, action) => {
   open NeurologicalMonitoring
   switch action {
+  | SetPronePosition(pronePosition) => {
+      ...state,
+      pronePosition: pronePosition,
+    }
   | SetLevelOfConciousness(levelOfConciousness) => {
       ...state,
       levelOfConciousness: levelOfConciousness,
@@ -501,6 +508,10 @@ let getFieldValue = event => {
   ReactEvent.Form.target(event)["value"]
 }
 
+let getToggleState = event => {
+  ReactEvent.Form.target(event)["checked"]
+}
+
 @react.component
 let make = (~handleDone, ~initialState) => {
   let (state, send) = React.useReducer(reducer, initialState)
@@ -514,9 +525,16 @@ let make = (~handleDone, ~initialState) => {
     NeurologicalMonitoring.motorResponse(state),
   ))
   Js.log(state)
+
   <div>
     <CriticalCare__PageTitle title="Neurological Monitoring" />
     <div className="my-4">
+      <div className="my-10">
+        <CriticalCare__Switch
+          checked={NeurologicalMonitoring.pronePosition(state)}
+          onChange={event => send(SetPronePosition(getToggleState(event)))}
+        />
+      </div>
       <div className="my-10">
         <div className=" text-2xl font-bold my-2"> {str("Level Of Consciousness")} </div>
         <CriticalCare__RadioButton
@@ -527,7 +545,7 @@ let make = (~handleDone, ~initialState) => {
       </div>
       <div className="my-10">
         <div className="text-2xl font-bold my-2 mb-4"> {str("Pupil")} </div>
-        <div>
+        <div className="mb-2">
           <div className="text-lg font-bold my-3"> {str("Left Pupil")} </div>
           <CriticalCare__PupilRangeSlider
             name={"left_pupil_slider"}
@@ -543,7 +561,7 @@ let make = (~handleDone, ~initialState) => {
           } else {
             <> </>
           }}
-          <div className="my-15 mb-8">
+          <div className="my-5 mb-8">
             <div className="font-bold my-4"> {str("Reaction")} </div>
             <CriticalCare__RadioButton
               options={right_reaction_options}
@@ -577,7 +595,7 @@ let make = (~handleDone, ~initialState) => {
           } else {
             <> </>
           }}
-          <div className="my-15 mb-8">
+          <div className="my-5 mb-8">
             <div className="font-bold my-4"> {str("Reaction")} </div>
             <CriticalCare__RadioButton
               options={reaction_options}

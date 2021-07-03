@@ -1,4 +1,5 @@
 type t = {
+  pronePosition: bool,
   levelOfConciousness: string,
   leftPupilSize: string,
   leftSizeDescription: string,
@@ -18,6 +19,7 @@ type t = {
   lowerExtremityL: string,
 }
 
+let pronePosition = t => t.pronePosition
 let levelOfConciousness = t => t.levelOfConciousness
 let leftPupilSize = t => t.leftPupilSize
 let leftSizeDescription = t => t.leftSizeDescription
@@ -36,22 +38,49 @@ let upperExtremityL = t => t.upperExtremityL
 let lowerExtremityR = t => t.lowerExtremityR
 let lowerExtremityL = t => t.lowerExtremityL
 
-let init = {
-  levelOfConciousness: "",
-  leftPupilSize: "",
-  leftSizeDescription: "",
-  leftPupilReaction: "",
-  leftReactionDescription: "",
-  rightPupilSize: "",
-  rightSizeDescription: "",
-  rightPupilReaction: "",
-  rightReactionDescription: "",
-  eyeOpen: "",
-  verbalResponse: "",
-  motorResponse: "",
-  totalGlascowScale: "",
-  upperExtremityR: "",
-  upperExtremityL: "",
-  lowerExtremityR: "",
-  lowerExtremityL: "",
+let showStatus = data => {
+  let total = 13.0
+  let count = ref(0.0)
+
+  if levelOfConciousness(data) !== "" {
+    count := count.contents +. 1.0
+  }
+  if leftPupilSize(data) !== "" {
+    count := count.contents +. 1.0
+  }
+  if leftPupilReaction(data) !== "" {
+    count := count.contents +. 1.0
+  }
+  if rightPupilSize(data) !== "" {
+    count := count.contents +. 1.0
+  }
+  if rightPupilReaction(data) !== "" {
+    count := count.contents +. 1.0
+  }
+  if eyeOpen(data) !== "" {
+    count := count.contents +. 1.0
+  }
+  if verbalResponse(data) !== "" {
+    count := count.contents +. 1.0
+  }
+  if motorResponse(data) !== "" {
+    count := count.contents +. 1.0
+  }
+  if totalGlascowScale(data) !== "" {
+    count := count.contents +. 1.0
+  }
+  if upperExtremityR(data) !== "" {
+    count := count.contents +. 1.0
+  }
+  if upperExtremityL(data) !== "" {
+    count := count.contents +. 1.0
+  }
+  if lowerExtremityR(data) !== "" {
+    count := count.contents +. 1.0
+  }
+  if lowerExtremityL(data) !== "" {
+    count := count.contents +. 1.0
+  }
+
+  Js.Float.toFixed(count.contents /. total *. 100.0)
 }
