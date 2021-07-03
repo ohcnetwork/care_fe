@@ -495,6 +495,16 @@ let limpAction = (limp, value) => {
   }
 }
 
+let getlimpState = (limp, state) => {
+  switch limp {
+  | "upper_extremity_right" => NeurologicalMonitoring.upperExtremityR(state)
+  | "upper_extremity_left" => NeurologicalMonitoring.upperExtremityL(state)
+  | "lower_extremity_right" => NeurologicalMonitoring.lowerExtremityR(state)
+  | "lower_extremity_left" => NeurologicalMonitoring.lowerExtremityL(state)
+  | _ => ""
+  }
+}
+
 let totalGlascowScore = state => {
   let count = Js.Array.reduce(
     (acc, x) => acc + Js.Option.getWithDefault(0, Belt.Int.fromString(getGlascowState(x, state))),
@@ -540,6 +550,7 @@ let make = (~handleDone, ~initialState) => {
         <CriticalCare__RadioButton
           options={loc_options}
           horizontal=true
+          defaultChecked={NeurologicalMonitoring.levelOfConciousness(state)}
           onChange={event => send(SetLevelOfConciousness(getFieldValue(event)))}
         />
       </div>
@@ -566,6 +577,7 @@ let make = (~handleDone, ~initialState) => {
             <CriticalCare__RadioButton
               options={right_reaction_options}
               horizontal=true
+              defaultChecked={NeurologicalMonitoring.leftPupilReaction(state)}
               onChange={event => send(SetLeftPupilReaction(getFieldValue(event)))}
             />
             {if NeurologicalMonitoring.leftPupilReaction(state) === "cannot_be_assessed" {
@@ -600,6 +612,7 @@ let make = (~handleDone, ~initialState) => {
             <CriticalCare__RadioButton
               options={reaction_options}
               horizontal=true
+              defaultChecked={NeurologicalMonitoring.rightPupilReaction(state)}
               onChange={event => send(SetRightPupilReaction(getFieldValue(event)))}
             />
             {if NeurologicalMonitoring.rightPupilReaction(state) === "cannot_be_assessed" {
@@ -630,6 +643,7 @@ let make = (~handleDone, ~initialState) => {
               <CriticalCare__RadioButton
                 options={Options.options(x)}
                 horizontal=false
+                defaultChecked={getGlascowState(Options.title_value(x), state)}
                 onChange={event =>
                   send(glascowAction(Options.title_value(x), getFieldValue(event)))}
               />
@@ -655,6 +669,7 @@ let make = (~handleDone, ~initialState) => {
               <CriticalCare__RadioButton
                 options={Options.options(x)}
                 horizontal=true
+                defaultChecked={getlimpState(Options.title_value(x), state)}
                 onChange={event => send(limpAction(Options.title_value(x), getFieldValue(event)))}
               />
             </div>
