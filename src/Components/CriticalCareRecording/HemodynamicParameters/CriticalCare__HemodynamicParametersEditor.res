@@ -1,7 +1,8 @@
 let str = React.string
 
 let handleSubmit = (handleDone, state) => {
-  handleDone(state)
+  let status = CriticalCare__HemodynamicParameters.showStatus(state)
+  handleDone(state, status)
 }
 
 type action =

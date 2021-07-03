@@ -1,5 +1,6 @@
 module NursingCare = CriticalCare__NursingCare
 module HemodynamicParameters = CriticalCare__HemodynamicParameters
+module HemoDynamicParametersRhythm = CriticalCare__HemodynamicParametersRhythm
 module ABGAnalysis = CriticalCare__ABGAnalysis
 module BloodSugar = CriticalCare_BloodSugar
 module Dialysis = CriticalCare_Dialysis

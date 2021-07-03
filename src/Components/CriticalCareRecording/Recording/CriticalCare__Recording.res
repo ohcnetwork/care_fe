@@ -42,6 +42,7 @@ type action =
   | SetHemodynamicParametersEditor(CriticalCare__HemodynamicParameters.t)
   | SetVentilatorParametersEditor(CriticalCare__VentilatorParameters.t)
   | UpdateNursingCareStatus(string)
+  | UpdateHemodynamicParameterStatus(string)
   | UpdateTotal(int)
   | SetBloodSugarEditor(BloodSugar.t)
   | UpdateBloodSugarStatus(string)
@@ -104,6 +105,10 @@ let reducer = (state, action) => {
   | UpdateNursingCareStatus(nursingCareStatus) => {
       ...state,
       nursingCareStatus: nursingCareStatus,
+    }
+  | UpdateHemodynamicParameterStatus(hemodynamicParametersStatus) => {
+      ...state,
+      hemodynamicParametersStatus: hemodynamicParametersStatus,
     }
   | UpdateTotal(total) => {...state, totalStatus: total}
   | SetBloodSugarEditor(editor) => {...state, bloodSugarEditor: editor}
@@ -257,9 +262,13 @@ export make = () => {
           | HemodynamicParametersEditor =>
             <CriticalCare__HemodynamicParametersEditor
               initialState={state.hemodynamic_parameter_editor}
-              handleDone={data => {
+              handleDone={(data, status) => {
                 send(SetHemodynamicParametersEditor(data))
+                send(UpdateHemodynamicParameterStatus(status))
                 send(CloseEditor)
+                if status === "100" {
+                  send(UpdateTotal(state.totalStatus + 1))
+                }
               }}
             />
           | VentilatorParametersEditor =>
