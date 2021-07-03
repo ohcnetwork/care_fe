@@ -229,8 +229,15 @@ let initialState = {
   pressureSoreStatus: "0",
   nursingCareStatus: "0",
   totalStatus: 0,
-  bloodSugarEditor: BloodSugar.init,
-  dialysisEditor: Dialysis.init,
+  bloodSugarEditor: {
+    blood_sugar_level: "",
+    dosage: "",
+    frequency: "OD",
+  },
+  dialysisEditor: {
+    fluid_balance: "",
+    net_balance: "",
+  },
 }
 
 let editorButtons = (state, send) => {
