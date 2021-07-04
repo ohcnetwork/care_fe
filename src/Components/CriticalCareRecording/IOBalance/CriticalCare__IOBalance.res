@@ -185,6 +185,7 @@ let initialState = {
 type action =
     | SetFieldValue(string, string, string, string)
     | SetSliderVisibility(string, string, string, bool)
+    | AddSlider(string, string, slider_type)
 
 
 let reducer = (state, action) => {
@@ -212,11 +213,13 @@ let reducer = (state, action) => {
                             let new_sliders = state.intake.feed.sliders->getChangedState
                             {...state, intake: {...state.intake, feed: {...state.intake.feed, sliders: new_sliders}}}
                         }
+                        | _ => state
                     }
                 | "outturn" => {
                     let new_sliders = state.outturn.sliders->getChangedState
                     {...state, outturn: {...state.outturn, sliders: new_sliders}}
                 }
+                | _ => state
             }
         }
         | SetSliderVisibility(section, subsection, name, value) => {
@@ -242,11 +245,43 @@ let reducer = (state, action) => {
                             let new_sliders = state.intake.feed.sliders->getChangedState
                             {...state, intake: {...state.intake, feed: {...state.intake.feed, sliders: new_sliders}}}
                         }
+                        | _ => state
                     }
                 | "outturn" => {
                     let new_sliders = state.outturn.sliders->getChangedState
                     {...state, outturn: {...state.outturn, sliders: new_sliders}}
                 }
+                | _ => state
+            }
+        }
+        | AddSlider(section, subsection, field) => {
+            let getChangedState = ({sliders, more_sliders}) => {
+                let new_more_sliders = more_sliders->Js.Array2.filter(slider => slider.name !== field.name)
+                let new_sliders = sliders->Belt.Array.concat([field])
+
+                (new_sliders, new_more_sliders)
+            }
+            switch section {
+                | "intake" => switch subsection {
+                        | "infusions" => {
+                            let (new_sliders, new_more_sliders) = state.intake.infusions->getChangedState
+                            {...state, intake: {...state.intake, infusions: {sliders: new_sliders, more_sliders: new_more_sliders}}}
+                        }
+                        | "iv fluid" => {
+                            let (new_sliders, new_more_sliders) = state.intake.iv_fluid->getChangedState
+                            {...state, intake: {...state.intake, iv_fluid: {sliders: new_sliders, more_sliders: new_more_sliders}}}
+                        }
+                        | "feed" => {
+                            let (new_sliders, new_more_sliders) = state.intake.feed->getChangedState
+                            {...state, intake: {...state.intake, feed: {sliders: new_sliders, more_sliders: new_more_sliders}}}
+                        }
+                        | _ => state
+                    }
+                | "outturn" => {
+                    let (new_sliders, new_more_sliders) = state.outturn->getChangedState
+                    {...state, outturn: {sliders: new_sliders, more_sliders: new_more_sliders}}
+                }
+                | _ => state
             }
         }
     }
@@ -264,6 +299,7 @@ let make = () => {
                 key="intake-infusions" 
                 changeFieldValue={(field, value) => SetFieldValue("intake", "infusions", field, value)->dispatch}
                 changeVisibility={(field, value) => SetSliderVisibility("intake", "infusions", field, value)->dispatch}
+                addSlider={field => AddSlider("intake", "infusions", field)->dispatch}
                 title="Infusions" 
                 sliders={state.intake.infusions.sliders}
                 moreSliders={state.intake.infusions.more_sliders} 
@@ -272,6 +308,7 @@ let make = () => {
                 key="intake-iv_fluid"
                 changeFieldValue={(field, value) => SetFieldValue("intake", "iv fluid", field, value)->dispatch}
                 changeVisibility={(field, value) => SetSliderVisibility("intake", "iv fluid", field, value)->dispatch}
+                addSlider={field => AddSlider("intake", "iv_fluid", field)->dispatch}
                 title="IV Fluid" 
                 sliders={state.intake.iv_fluid.sliders}
                 moreSliders={state.intake.iv_fluid.more_sliders}
@@ -280,6 +317,7 @@ let make = () => {
                 key="intake-feed"
                 changeFieldValue={(field, value) => SetFieldValue("intake", "feed", field, value)->dispatch}
                 changeVisibility={(field, value) => SetSliderVisibility("intake", "feed", field, value)->dispatch}
+                addSlider={field => AddSlider("intake", "feed", field)->dispatch}
                 title="Feed" 
                 sliders={state.intake.feed.sliders}
                 moreSliders={state.intake.feed.more_sliders}
@@ -292,6 +330,7 @@ let make = () => {
                 key="outturn"
                 changeFieldValue={(field, value) => SetFieldValue("outturn", "", field, value)->dispatch}
                 changeVisibility={(field, value) => SetSliderVisibility("outturn", "", field, value)->dispatch}
+                addSlider={field => AddSlider("outturn", "", field)->dispatch}
                 title="" 
                 sliders={state.outturn.sliders}
                 moreSliders={state.outturn.more_sliders}

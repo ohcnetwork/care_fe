@@ -5,7 +5,7 @@ type slider_type = IOBalance__AddMore.slider_type
 
 @react.component
 // ~setSlider, ~removeSlider
-let make = (~title, ~sliders, ~moreSliders, ~changeFieldValue, ~changeVisibility) => {
+let make = (~title, ~sliders, ~moreSliders, ~changeFieldValue, ~changeVisibility, ~addSlider) => {
     <div>
         <h4 className={title->Js.String2.length === 0 ? "hidden" : ""}>{str(title)}</h4>
         {
@@ -33,6 +33,6 @@ let make = (~title, ~sliders, ~moreSliders, ~changeFieldValue, ~changeVisibility
             </div>)->React.array
         }
 
-        <IOBalance__AddMore sliders={moreSliders} />
+        <IOBalance__AddMore sliders={moreSliders} addSlider={addSlider} />
     </div>
 }

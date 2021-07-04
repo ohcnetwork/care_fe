@@ -12,7 +12,7 @@ type slider_type = {
 } 
 
 @react.component
-let make = (~sliders) => {
+let make = (~sliders, ~addSlider) => {
     let (showDropdown, setShowDropdown) = React.useState(_ => false)
 
     // let selectOption = (option: string) => {
@@ -34,7 +34,7 @@ let make = (~sliders) => {
         <div className={showDropdown ? "m-2 origin-top-right absolute right-0 mt-2 rounded-md shadow-lg w-full ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 focus:outline-none z-10" : "hidden"}>
             <div className="grid grid-cols-1 justify-items-start">
                 {sliders->Belt.Array.map(slider => 
-                     <div onClick={_ => Js.log("clicked!")} className="p-2 bg-white flex w-full hover:bg-gray-200">
+                     <div onClick={_ => addSlider(slider)} className="p-2 bg-white flex w-full hover:bg-gray-200">
                         <span className="px-2 py-1">
                             {str(slider.name)}
                         </span>
