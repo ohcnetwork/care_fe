@@ -16,7 +16,9 @@ type state = {
   visibleEditor: option<editor>,
   nursingCare: NursingCare.t,
   abgEditor: ABGAnalysis.t,
+  neurologicalMonitoring: NeurologicalMonitoring.t,
   hemodynamic_parameter_editor: CriticalCare__HemodynamicParameters.t,
+  ventilatorParametersEditor: CriticalCare__VentilatorParameters.t,
   neurologicalMonitoringStatus: string,
   hemodynamicParametersStatus: string,
   ventilatorParametersStatus: string,
@@ -27,6 +29,8 @@ type state = {
   pressureSoreStatus: string,
   nursingCareStatus: string,
   totalStatus: int,
+  bloodSugarEditor: BloodSugar.t,
+  dialysisEditor: Dialysis.t,
 }
 
 type action =
@@ -34,9 +38,17 @@ type action =
   | CloseEditor
   | SetABGAnalysisEditor(ABGAnalysis.t)
   | SetNursingCare(NursingCare.t)
+  | SetNeurologicalMonitoringEditor(NeurologicalMonitoring.t)
   | SetHemodynamicParametersEditor(CriticalCare__HemodynamicParameters.t)
+  | SetVentilatorParametersEditor(CriticalCare__VentilatorParameters.t)
   | UpdateNursingCareStatus(string)
+  | UpdateHemodynamicParameterStatus(string)
   | UpdateTotal(int)
+  | SetBloodSugarEditor(BloodSugar.t)
+  | UpdateBloodSugarStatus(string)
+  | SetDialysisEditor(Dialysis.t)
+  | UpdateDialysisStatus(string)
+  | UpdateNeurologicalMonitoringStatus(string)
 
 let showEditor = (editor, send) => {
   send(ShowEditor(editor))
@@ -85,12 +97,29 @@ let reducer = (state, action) => {
   | CloseEditor => {...state, visibleEditor: None}
   | SetABGAnalysisEditor(editor) => {...state, abgEditor: editor}
   | SetNursingCare(nursingCare) => {...state, nursingCare: nursingCare}
+  | SetNeurologicalMonitoringEditor(neurologicalMonitoring) => {
+      ...state,
+      neurologicalMonitoring: neurologicalMonitoring,
+    }
   | SetHemodynamicParametersEditor(editor) => {...state, hemodynamic_parameter_editor: editor}
+  | SetVentilatorParametersEditor(editor) => {...state, ventilatorParametersEditor: editor}
   | UpdateNursingCareStatus(nursingCareStatus) => {
       ...state,
       nursingCareStatus: nursingCareStatus,
     }
+  | UpdateHemodynamicParameterStatus(hemodynamicParametersStatus) => {
+      ...state,
+      hemodynamicParametersStatus: hemodynamicParametersStatus,
+    }
   | UpdateTotal(total) => {...state, totalStatus: total}
+  | SetBloodSugarEditor(editor) => {...state, bloodSugarEditor: editor}
+  | UpdateBloodSugarStatus(bloodSugarStatus) => {...state, bloodSugarStatus: bloodSugarStatus}
+  | SetDialysisEditor(editor) => {...state, dialysisEditor: editor}
+  | UpdateDialysisStatus(dialysisStatus) => {...state, dialysisStatus: dialysisStatus}
+  | UpdateNeurologicalMonitoringStatus(neurologicalMonitoringStatus) => {
+      ...state,
+      neurologicalMonitoringStatus: neurologicalMonitoringStatus,
+    }
   }
 }
 
@@ -120,6 +149,26 @@ let initialState = {
     tracheostomyCare: "",
     stomaCare: "",
   },
+  neurologicalMonitoring: {
+    pronePosition: false,
+    levelOfConciousness: "",
+    leftPupilSize: "",
+    leftSizeDescription: "",
+    leftPupilReaction: "",
+    leftReactionDescription: "",
+    rightPupilSize: "",
+    rightSizeDescription: "",
+    rightPupilReaction: "",
+    rightReactionDescription: "",
+    eyeOpen: "",
+    verbalResponse: "",
+    motorResponse: "",
+    totalGlascowScale: "",
+    upperExtremityR: "",
+    upperExtremityL: "",
+    lowerExtremityR: "",
+    lowerExtremityL: "",
+  },
   hemodynamic_parameter_editor: {
     bp_systolic: "",
     bp_diastolic: "",
@@ -128,6 +177,47 @@ let initialState = {
     respiratory_rate: "",
     rhythm: None,
     description: "",
+  },
+  ventilatorParametersEditor: {
+    ventilationInterface: "",
+    iv: {
+      ventilatorMode: "",
+      ventilatorModeSubOption: {
+        cmv: "",
+        simv: "",
+        psv: "",
+      },
+      peep: "",
+      peakInspiratoryPressure: "",
+      meanAirwayPressure: "",
+      respiratoryRateVentilator: "",
+      tidalVolume: "",
+      fio2: "",
+      spo2: "",
+    },
+    niv: {
+      ventilatorMode: "",
+      ventilatorModeSubOption: {
+        cmv: "",
+        simv: "",
+        psv: "",
+      },
+      peep: "",
+      peakInspiratoryPressure: "",
+      meanAirwayPressure: "",
+      respiratoryRateVentilator: "",
+      tidalVolume: "",
+      fio2: "",
+      spo2: "",
+    },
+    none: {
+      nasalProngs: Some(""),
+      simpleFaceMask: Some(""),
+      nonRebreathingMask: false,
+      highFlowNasalCannula: false,
+      fio2: "",
+      spo2: "",
+    },
   },
   neurologicalMonitoringStatus: "0",
   hemodynamicParametersStatus: "0",
@@ -139,6 +229,15 @@ let initialState = {
   pressureSoreStatus: "0",
   nursingCareStatus: "0",
   totalStatus: 0,
+  bloodSugarEditor: {
+    blood_sugar_level: "",
+    dosage: "",
+    frequency: "OD",
+  },
+  dialysisEditor: {
+    fluid_balance: "",
+    net_balance: "",
+  },
 }
 
 let editorButtons = (state, send) => {
@@ -160,6 +259,7 @@ let editorButtons = (state, send) => {
 @react.component
 export make = () => {
   let (state, send) = React.useReducer(reducer, initialState)
+  Js.log2(state, initialState)
   <div>
     <div className="w-3/4 mx-auto my-4" />
     <div className="w-3/4 mx-auto my-4">
@@ -168,16 +268,38 @@ export make = () => {
         <div id="editor">
           <button id="closeEditor" onClick={_ => send(CloseEditor)}> {str("Back")} </button>
           {switch editor {
-          | NeurologicalMonitoringEditor
+          | NeurologicalMonitoringEditor =>
+            <CriticalCare__NeurologicalMonitoringEditor
+              initialState={state.neurologicalMonitoring}
+              handleDone={(data, status) => {
+                send(SetNeurologicalMonitoringEditor(data))
+                send(UpdateNeurologicalMonitoringStatus(status))
+                send(CloseEditor)
+                if status === "100" {
+                  send(UpdateTotal(state.totalStatus + 1))
+                }
+              }}
+            />
           | HemodynamicParametersEditor =>
             <CriticalCare__HemodynamicParametersEditor
               initialState={state.hemodynamic_parameter_editor}
-              handleDone={data => {
+              handleDone={(data, status) => {
                 send(SetHemodynamicParametersEditor(data))
+                send(UpdateHemodynamicParameterStatus(status))
+                send(CloseEditor)
+                if status === "100" {
+                  send(UpdateTotal(state.totalStatus + 1))
+                }
+              }}
+            />
+          | VentilatorParametersEditor =>
+            <CriticalCare__VentilatorParametersEditor
+              initialState={state.ventilatorParametersEditor}
+              handleDone={(data, status) => {
+                send(SetVentilatorParametersEditor(data))
                 send(CloseEditor)
               }}
             />
-          | VentilatorParametersEditor => <CriticalCare__VentilatorParametersEditor />
           | ArterialBloodGasAnalysisEditor =>
             <CriticalCare__ABGAnalysisEditor
               initialState={state.abgEditor}
@@ -186,9 +308,33 @@ export make = () => {
                 send(CloseEditor)
               }}
             />
-          | BloodSugarEditor
+          | BloodSugarEditor =>
+            <CriticalCare_BloodSugarEditor
+              initialState={state.bloodSugarEditor}
+              handleDone={data => {
+                send(CloseEditor)
+                send(SetBloodSugarEditor(data))
+                let status = BloodSugar.showStatus(data)
+                send(UpdateBloodSugarStatus(status))
+                if status == "100" {
+                  send(UpdateTotal(state.totalStatus + 1))
+                }
+              }}
+            />
           | IOBalanceEditor => <CriticalCare__IOBalance />
-          | DialysisEditor
+          | DialysisEditor =>
+            <CriticalCare_DialysisEditor
+              initialState={state.dialysisEditor}
+              handleDone={data => {
+                send(CloseEditor)
+                send(SetDialysisEditor(data))
+                let status = Dialysis.showStatus(data)
+                send(UpdateDialysisStatus(status))
+                if status == "100" {
+                  send(UpdateTotal(state.totalStatus + 1))
+                }
+              }}
+            />
           | PressureSoreEditor
           | NursingCareEditor =>
             <CriticalCare__NursingCareEditor
