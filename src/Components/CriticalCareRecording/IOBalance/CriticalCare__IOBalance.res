@@ -190,44 +190,64 @@ type action =
 let reducer = (state, action) => {
     switch action {
         | SetFieldValue(section, subsection, name, value) => {
-            let sliders = switch section {
-                | "intake" => switch subsection {
-                        | "infusions" => state.intake.infusions
-                        | "iv fluid" => state.intake.iv_fluid
-                        | "feed" => state.intake.feed
+            let getChangedState = (sliders: array<slider_type>) => {
+                sliders->Belt.Array.map(slider => {
+                    if(slider.name === name) {
+                        slider.value = value
                     }
-                | "outturn" => state.outturn
-                | _ => []
+                    slider
+                })
             }
-
-            let s = sliders->Belt.Array.map(slider => {
-                if(slider.name === name) {
-                    slider.value = value
+            switch section {
+                | "intake" => switch subsection {
+                        | "infusions" => {
+                            let new_sliders = state.intake.infusions.sliders->getChangedState
+                            {...state, intake: {...state.intake, infusions: {...state.intake.infusions, sliders: new_sliders}}}
+                        }
+                        | "iv fluid" => {
+                            let new_sliders = state.intake.iv_fluid.sliders->getChangedState
+                            {...state, intake: {...state.intake, iv_fluid: {...state.intake.iv_fluid, sliders: new_sliders}}}
+                        }
+                        | "feed" => {
+                            let new_sliders = state.intake.feed.sliders->getChangedState
+                            {...state, intake: {...state.intake, feed: {...state.intake.feed, sliders: new_sliders}}}
+                        }
+                    }
+                | "outturn" => {
+                    let new_sliders = state.outturn.sliders->getChangedState
+                    {...state, outturn: {...state.outturn, sliders: new_sliders}}
                 }
-                slider
-            })
-
-            {...state, intake: { ...state.intake, infusions: s} }
+            }
         }
         | SetSliderVisibility(section, subsection, name, value) => {
-            let sliders = switch section {
-                | "intake" => switch subsection {
-                        | "infusions" => state.intake.infusions
-                        | "iv fluid" => state.intake.iv_fluid
-                        | "feed" => state.intake.feed
+            let getChangedState = (sliders: array<slider_type>) => {
+                sliders->Belt.Array.map(slider => {
+                    if(slider.name === name) {
+                        slider.checked = value
                     }
-                | "outturn" => state.outturn
-                | _ => []
+                    slider
+                })
             }
-
-            let s = sliders->Belt.Array.map(slider => {
-                if(slider.name === name) {
-                    slider.checked = value
+            switch section {
+                | "intake" => switch subsection {
+                        | "infusions" => {
+                            let new_sliders = state.intake.infusions.sliders->getChangedState
+                            {...state, intake: {...state.intake, infusions: {...state.intake.infusions, sliders: new_sliders}}}
+                        }
+                        | "iv fluid" => {
+                            let new_sliders = state.intake.iv_fluid.sliders->getChangedState
+                            {...state, intake: {...state.intake, iv_fluid: {...state.intake.iv_fluid, sliders: new_sliders}}}
+                        }
+                        | "feed" => {
+                            let new_sliders = state.intake.feed.sliders->getChangedState
+                            {...state, intake: {...state.intake, feed: {...state.intake.feed, sliders: new_sliders}}}
+                        }
+                    }
+                | "outturn" => {
+                    let new_sliders = state.outturn.sliders->getChangedState
+                    {...state, outturn: {...state.outturn, sliders: new_sliders}}
                 }
-                slider
-            })
-
-            {...state, intake: { ...state.intake, infusions: s} }
+            }
         }
     }
 }
@@ -245,21 +265,21 @@ let make = () => {
                 changeFieldValue={(field, value) => SetFieldValue("intake", "infusions", field, value)->dispatch}
                 changeVisibility={(field, value) => SetSliderVisibility("intake", "infusions", field, value)->dispatch}
                 title="Infusions" 
-                sliders={state.intake.infusions} 
+                sliders={state.intake.infusions.sliders} 
             />
             <IOBalance__SliderGroup
                 key="intake-iv_fluid"
                 changeFieldValue={(field, value) => SetFieldValue("intake", "iv fluid", field, value)->dispatch}
                 changeVisibility={(field, value) => SetSliderVisibility("intake", "iv fluid", field, value)->dispatch}
                 title="IV Fluid" 
-                sliders={state.intake.iv_fluid} 
+                sliders={state.intake.iv_fluid.sliders} 
             />
             <IOBalance__SliderGroup
                 key="intake-feed"
                 changeFieldValue={(field, value) => SetFieldValue("intake", "feed", field, value)->dispatch}
                 changeVisibility={(field, value) => SetSliderVisibility("intake", "feed", field, value)->dispatch}
                 title="Feed" 
-                sliders={state.intake.feed} 
+                sliders={state.intake.feed.sliders} 
             />
         </div>
 
@@ -270,7 +290,7 @@ let make = () => {
                 changeFieldValue={(field, value) => SetFieldValue("outturn", "", field, value)->dispatch}
                 changeVisibility={(field, value) => SetSliderVisibility("outturn", "", field, value)->dispatch}
                 title="" 
-                sliders={state.outturn} 
+                sliders={state.outturn.sliders} 
             />
         </div>
     </div>
