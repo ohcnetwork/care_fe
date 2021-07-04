@@ -4,22 +4,153 @@ open CriticalCare__Types
 
 type slider_type = IOBalance__SliderGroup.slider_type
 
+type slider_group_type = {
+    sliders: array<slider_type>,
+    more_sliders: array<slider_type>
+}
+
 type intake_type = {
-    infusions: array<slider_type>,
-    iv_fluid: array<slider_type>,
-    feed: array<slider_type>
+    infusions: slider_group_type,
+    iv_fluid: slider_group_type,
+    feed: slider_group_type
 }
 
 type state_type = {
     intake: intake_type,
-    outturn: array<slider_type>
+    outturn: slider_group_type
 }
 
 let initialState = {
     intake: {
-        infusions: [
+        infusions: {
+            sliders: [
+                {
+                    name: "Adrenalin",
+                    checked: true,
+                    start: "0",
+                    end: "100",
+                    interval: "10",
+                    step: 1.0,
+                    value: "50"
+                },
+                {
+                    name: "Nor-Adrenalin",
+                    checked: false,
+                    start: "0",
+                    end: "100",
+                    interval: "10",
+                    step: 1.0,
+                    value: "50"
+                },
+                {
+                    name: "Vasopressin",
+                    checked: false,
+                    start: "0",
+                    end: "100",
+                    interval: "10",
+                    step: 1.0,
+                    value: "50"
+                },
+                {
+                    name: "Dopamine",
+                    checked: false,
+                    start: "0",
+                    end: "100",
+                    interval: "10",
+                    step: 1.0,
+                    value: "50"
+                },
+                {
+                    name: "Dobutamine",
+                    checked: false,
+                    start: "0",
+                    end: "100",
+                    interval: "10",
+                    step: 1.0,
+                    value: "50"
+                }
+            ],
+            more_sliders: [
+                {
+                    name: "MoreSlider1",
+                    checked: true,
+                    start: "0",
+                    end: "100",
+                    interval: "10",
+                    step: 1.0,
+                    value: "50"
+                },
+                {
+                    name: "MoreSlider2",
+                    checked: true,
+                    start: "0",
+                    end: "100",
+                    interval: "10",
+                    step: 1.0,
+                    value: "50"
+                }
+            ]
+        },
+        iv_fluid: {
+            sliders: [
+                {
+                    name: "RL",
+                    checked: false,
+                    start: "0",
+                    end: "100",
+                    interval: "10",
+                    step: 1.0,
+                    value: "50"
+                },
+                {
+                    name: "NL",
+                    checked: false,
+                    start: "0",
+                    end: "100",
+                    interval: "10",
+                    step: 1.0,
+                    value: "50"
+                },
+                {
+                    name: "DNS",
+                    checked: false,
+                    start: "0",
+                    end: "100",
+                    interval: "10",
+                    step: 1.0,
+                    value: "50"
+                }
+            ],
+            more_sliders: []
+        },
+        feed: {
+            sliders: [
+                {
+                    name: "Ryles Tube",
+                    checked: false,
+                    start: "0",
+                    end: "100",
+                    interval: "10",
+                    step: 1.0,
+                    value: "50"
+                },
+                {
+                    name: "Normal Feed",
+                    checked: false,
+                    start: "0",
+                    end: "100",
+                    interval: "10",
+                    step: 1.0,
+                    value: "50"
+                }
+            ],
+            more_sliders: []
+        }
+    },
+    outturn: {
+        sliders: [
             {
-                name: "Adrenalin",
+                name: "Urine",
                 checked: true,
                 start: "0",
                 end: "100",
@@ -28,8 +159,8 @@ let initialState = {
                 value: "50"
             },
             {
-                name: "Nor-Adrenalin",
-                checked: false,
+                name: "Rules Tube Aspiration",
+                checked: true,
                 start: "0",
                 end: "100",
                 interval: "10",
@@ -37,112 +168,17 @@ let initialState = {
                 value: "50"
             },
             {
-                name: "Vasopressin",
-                checked: false,
+                name: "ICD",
+                checked: true,
                 start: "0",
                 end: "100",
                 interval: "10",
                 step: 1.0,
                 value: "50"
             },
-            {
-                name: "Dopamine",
-                checked: false,
-                start: "0",
-                end: "100",
-                interval: "10",
-                step: 1.0,
-                value: "50"
-            },
-            {
-                name: "Dobutamine",
-                checked: false,
-                start: "0",
-                end: "100",
-                interval: "10",
-                step: 1.0,
-                value: "50"
-            }
         ],
-        iv_fluid: [
-            {
-                name: "RL",
-                checked: false,
-                start: "0",
-                end: "100",
-                interval: "10",
-                step: 1.0,
-                value: "50"
-            },
-            {
-                name: "NL",
-                checked: false,
-                start: "0",
-                end: "100",
-                interval: "10",
-                step: 1.0,
-                value: "50"
-            },
-            {
-                name: "DNS",
-                checked: false,
-                start: "0",
-                end: "100",
-                interval: "10",
-                step: 1.0,
-                value: "50"
-            }
-        ],
-        feed: [
-            {
-                name: "Ryles Tube",
-                checked: false,
-                start: "0",
-                end: "100",
-                interval: "10",
-                step: 1.0,
-                value: "50"
-            },
-            {
-                name: "Normal Feed",
-                checked: false,
-                start: "0",
-                end: "100",
-                interval: "10",
-                step: 1.0,
-                value: "50"
-            }
-        ]
-    },
-    outturn: [
-        {
-            name: "Urine",
-            checked: true,
-            start: "0",
-            end: "100",
-            interval: "10",
-            step: 1.0,
-            value: "50"
-        },
-        {
-            name: "Rules Tube Aspiration",
-            checked: true,
-            start: "0",
-            end: "100",
-            interval: "10",
-            step: 1.0,
-            value: "50"
-        },
-        {
-            name: "ICD",
-            checked: true,
-            start: "0",
-            end: "100",
-            interval: "10",
-            step: 1.0,
-            value: "50"
-        },
-    ]
+        more_sliders: []
+    }
 }
 
 
