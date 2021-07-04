@@ -13,14 +13,18 @@ type slider_type = {
 
 @react.component
 // ~setSlider, ~removeSlider
-let make = (~title, ~sliders, ~changeFieldValue) => {
-    let (state, setState) = React.useState(_ => "50")
+let make = (~title, ~sliders, ~changeFieldValue, ~changeVisibility) => {
     <div>
         <h4 className={title->Js.String2.length === 0 ? "hidden" : ""}>{str(title)}</h4>
         {
             sliders->Belt.Array.map((slider) => 
             <div className="flex items-center">
-                <input type_="checkbox" className="mr-4" checked={slider.checked} />
+                <input 
+                    type_="checkbox"
+                    className="mr-4"
+                    checked={slider.checked}
+                    onChange={(event) => changeVisibility(slider.name, ReactEvent.Synthetic.currentTarget(event)["checked"])}
+                />
                 {slider.checked ?
                     <Slider
                         title={slider.name}

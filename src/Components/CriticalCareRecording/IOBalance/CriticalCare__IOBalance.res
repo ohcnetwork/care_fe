@@ -148,6 +148,7 @@ let initialState = {
 
 type action =
     | SetFieldValue(string, string, string, string)
+    | SetSliderVisibility(string, string, string, bool)
 
 
 let reducer = (state, action) => {
@@ -160,11 +161,32 @@ let reducer = (state, action) => {
                         | "feed" => state.intake.feed
                     }
                 | "outturn" => state.outturn
+                | _ => []
             }
 
             let s = sliders->Belt.Array.map(slider => {
                 if(slider.name === name) {
                     slider.value = value
+                }
+                slider
+            })
+
+            {...state, intake: { ...state.intake, infusions: s} }
+        }
+        | SetSliderVisibility(section, subsection, name, value) => {
+            let sliders = switch section {
+                | "intake" => switch subsection {
+                        | "infusions" => state.intake.infusions
+                        | "iv fluid" => state.intake.iv_fluid
+                        | "feed" => state.intake.feed
+                    }
+                | "outturn" => state.outturn
+                | _ => []
+            }
+
+            let s = sliders->Belt.Array.map(slider => {
+                if(slider.name === name) {
+                    slider.checked = value
                 }
                 slider
             })
@@ -182,29 +204,37 @@ let make = () => {
 
         <div id="intake" className="">
             <h3>{str("Intake")}</h3>
-            <IOBalance__SliderGroup 
+            <IOBalance__SliderGroup
+                key="intake-infusions" 
                 changeFieldValue={(field, value) => SetFieldValue("intake", "infusions", field, value)->dispatch}
+                changeVisibility={(field, value) => SetSliderVisibility("intake", "infusions", field, value)->dispatch}
                 title="Infusions" 
-                sliders={initialState.intake.infusions} 
+                sliders={state.intake.infusions} 
             />
             <IOBalance__SliderGroup
+                key="intake-iv_fluid"
                 changeFieldValue={(field, value) => SetFieldValue("intake", "iv fluid", field, value)->dispatch}
+                changeVisibility={(field, value) => SetSliderVisibility("intake", "iv fluid", field, value)->dispatch}
                 title="IV Fluid" 
-                sliders={initialState.intake.iv_fluid} 
+                sliders={state.intake.iv_fluid} 
             />
             <IOBalance__SliderGroup
+                key="intake-feed"
                 changeFieldValue={(field, value) => SetFieldValue("intake", "feed", field, value)->dispatch}
+                changeVisibility={(field, value) => SetSliderVisibility("intake", "feed", field, value)->dispatch}
                 title="Feed" 
-                sliders={initialState.intake.feed} 
+                sliders={state.intake.feed} 
             />
         </div>
 
         <div id="outturn" className="">
             <h3>{str("Outturn")}</h3>
             <IOBalance__SliderGroup
+                key="outturn"
                 changeFieldValue={(field, value) => SetFieldValue("outturn", "", field, value)->dispatch}
+                changeVisibility={(field, value) => SetSliderVisibility("outturn", "", field, value)->dispatch}
                 title="" 
-                sliders={initialState.outturn} 
+                sliders={state.outturn} 
             />
         </div>
     </div>
