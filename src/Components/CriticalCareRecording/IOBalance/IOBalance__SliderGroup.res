@@ -1,23 +1,15 @@
 let str = React.string
 open CriticalCare__Types
 
-type slider_type = {
-    name: string,
-    mutable checked: bool,
-    start: string,
-    end: string,
-    interval: string,
-    step: float,
-    mutable value: string
-}
+type slider_type = IOBalance__AddMore.slider_type
 
 @react.component
 // ~setSlider, ~removeSlider
-let make = (~title, ~sliders, ~changeFieldValue, ~changeVisibility) => {
+let make = (~title, ~sliders, ~moreSliders, ~changeFieldValue, ~changeVisibility) => {
     <div>
         <h4 className={title->Js.String2.length === 0 ? "hidden" : ""}>{str(title)}</h4>
         {
-            sliders->Belt.Array.map((slider) => 
+            sliders->Belt.Array.map((slider: slider_type) => 
             <div className="flex items-center">
                 <input 
                     type_="checkbox"
@@ -38,8 +30,9 @@ let make = (~title, ~sliders, ~changeFieldValue, ~changeVisibility) => {
                     /> :
                     <h1 className="text-lg font-sans">{str(slider.name)}</h1>
                 }
-
             </div>)->React.array
         }
+
+        <IOBalance__AddMore sliders={moreSliders} />
     </div>
 }

@@ -265,21 +265,24 @@ let make = () => {
                 changeFieldValue={(field, value) => SetFieldValue("intake", "infusions", field, value)->dispatch}
                 changeVisibility={(field, value) => SetSliderVisibility("intake", "infusions", field, value)->dispatch}
                 title="Infusions" 
-                sliders={state.intake.infusions.sliders} 
+                sliders={state.intake.infusions.sliders}
+                moreSliders={state.intake.infusions.more_sliders} 
             />
             <IOBalance__SliderGroup
                 key="intake-iv_fluid"
                 changeFieldValue={(field, value) => SetFieldValue("intake", "iv fluid", field, value)->dispatch}
                 changeVisibility={(field, value) => SetSliderVisibility("intake", "iv fluid", field, value)->dispatch}
                 title="IV Fluid" 
-                sliders={state.intake.iv_fluid.sliders} 
+                sliders={state.intake.iv_fluid.sliders}
+                moreSliders={state.intake.iv_fluid.more_sliders}
             />
             <IOBalance__SliderGroup
                 key="intake-feed"
                 changeFieldValue={(field, value) => SetFieldValue("intake", "feed", field, value)->dispatch}
                 changeVisibility={(field, value) => SetSliderVisibility("intake", "feed", field, value)->dispatch}
                 title="Feed" 
-                sliders={state.intake.feed.sliders} 
+                sliders={state.intake.feed.sliders}
+                moreSliders={state.intake.feed.more_sliders}
             />
         </div>
 
@@ -290,7 +293,8 @@ let make = () => {
                 changeFieldValue={(field, value) => SetFieldValue("outturn", "", field, value)->dispatch}
                 changeVisibility={(field, value) => SetSliderVisibility("outturn", "", field, value)->dispatch}
                 title="" 
-                sliders={state.outturn.sliders} 
+                sliders={state.outturn.sliders}
+                moreSliders={state.outturn.more_sliders}
             />
         </div>
     </div>
