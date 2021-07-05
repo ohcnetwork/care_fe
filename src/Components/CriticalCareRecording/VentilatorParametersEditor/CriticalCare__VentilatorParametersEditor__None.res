@@ -43,8 +43,8 @@ let sliderConfig = [
 
 module ShowOnChecked = {
   @react.component
-  let make = (~title, ~children, ~onChange) => {
-    let (checked, setChecked) = React.useState(_ => false)
+  let make = (~title, ~children, ~onChange, ~defaultChecked=false) => {
+    let (checked, setChecked) = React.useState(_ => defaultChecked)
     let handleChange = _ => {
       onChange(!checked)
       setChecked(prev => !prev)
@@ -88,6 +88,7 @@ let make = (~state: VentilatorParameters.none, ~send: VentilatorParameters.actio
           }
         <div key={`none-check-${option["id"]}`}>
           <ShowOnChecked
+            defaultChecked={value !== Some("")}
             title={option["checkboxTitle"]}
             onChange={prev => send(SetNone(newState(prev ? Some("") : None)))}>
             <Slider

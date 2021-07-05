@@ -77,6 +77,12 @@ let psvOptionsArray = [
 
 @react.component
 let make = (~state: VentilatorParameters.niv, ~send: VentilatorParameters.action => unit) => {
+  let defaultChecked = switch state.ventilatorMode {
+  | "cmv" => state.ventilatorModeSubOption.cmv
+  | "simv" => state.ventilatorModeSubOption.simv
+  | "psv" => state.ventilatorModeSubOption.psv
+  | _ => ""
+  }
   <div>
     <h4 className="mb-4"> {str("Ventilator Mode")} </h4>
     <div className="mb-4">
@@ -97,6 +103,7 @@ let make = (~state: VentilatorParameters.niv, ~send: VentilatorParameters.action
             ? "pointer-events-none opacity-50"
             : ""} `}>
         <CriticalCare__RadioButton
+          defaultChecked
           onChange={e =>
             send(
               SetNivSubOptions({
@@ -131,6 +138,7 @@ let make = (~state: VentilatorParameters.niv, ~send: VentilatorParameters.action
             ? "pointer-events-none opacity-50"
             : ""} `}>
         <CriticalCare__RadioButton
+          defaultChecked
           onChange={e =>
             send(
               SetNivSubOptions({
