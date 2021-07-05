@@ -101,6 +101,17 @@ const routes: Routes = {
     method: "PATCH",
   },
 
+  // Skills endpoint
+  getAllSkills: {
+    path: "/api/v1/skill/",
+    method: "GET",
+  },
+
+  getSkill: {
+    path: "/api/v1/skill/{external_id}/",
+    method: "GET",
+  },
+
   // Facility Endpoints
 
   listFacility: {

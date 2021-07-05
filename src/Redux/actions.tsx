@@ -33,6 +33,15 @@ export const updateUserPnconfig = (params: object, pathParams: object) => {
   return fireRequest("updateUserPnconfig", [], params, pathParams);
 };
 
+// Skills
+export const getAllSkills = (params: object) => {
+  return fireRequest("getAllSkills", [], params);
+};
+
+export const getSkill = (id: string) => {
+  return fireRequest("getSkill", [], {}, { external_id: id });
+};
+
 // Facility
 export const createFacility = (params: object) => {
   return fireRequest("createFacility", [], params);
