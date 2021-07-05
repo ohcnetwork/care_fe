@@ -184,7 +184,7 @@ let initialState = {
     description: "",
   },
   ventilatorParametersEditor: {
-    ventilationInterface: "",
+    ventilationInterface: "iv",
     iv: {
       ventilatorMode: "",
       ventilatorModeSubOption: {
