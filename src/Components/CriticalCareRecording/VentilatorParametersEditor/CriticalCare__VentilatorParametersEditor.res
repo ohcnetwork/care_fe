@@ -1,8 +1,8 @@
 let str = React.string
 open CriticalCare__Types
 
-let handleSubmit = (handleDone, state) => {
-  handleDone(state, 1)
+let handleSubmit = (handleDone, state: VentilatorParameters.t) => {
+  handleDone(state, "1.0")
 }
 
 let reducer = (state, action) => {
@@ -11,7 +11,7 @@ let reducer = (state, action) => {
       ...state,
       VentilatorParameters.ventilationInterface: ventilationInterface,
     }
-  
+
   | SetIv(iv) => {
       ...state,
       VentilatorParameters.iv: iv,
@@ -24,15 +24,15 @@ let reducer = (state, action) => {
       ...state,
       VentilatorParameters.none: none,
     }
-  
+
   | SetIvSubOptions(iv) => {
       ...state,
-      iv:iv
+      iv: iv,
     }
-  
+
   | SetNivSubOptions(niv) => {
       ...state,
-      niv:niv
+      niv: niv,
     }
   | _ => state
   }
@@ -64,9 +64,9 @@ let make = (~initialState, ~handleDone) => {
   | "iv" => <CriticalCare__VentilatorParametersEditor__Invasive state={state.iv} send />
   | "niv" => <CriticalCare__VentilatorParametersEditor__NonInvasive state={state.niv} send />
   | "none" => <CriticalCare__VentilatorParametersEditor__None state={state.none} send />
-  | _ => <CriticalCare__VentilatorParametersEditor__Invasive state={state.iv} send/>
+  | _ => <CriticalCare__VentilatorParametersEditor__Invasive state={state.iv} send />
   }
-
+  Js.log({state})
   <div>
     <CriticalCare__PageTitle title="Ventilator Parameters" />
     <div className="p-6">
@@ -97,8 +97,7 @@ let make = (~initialState, ~handleDone) => {
       </div>
       <button
         onClick={_ => handleSubmit(handleDone, state)}
-        className="text-white py-3 text-xl w-full bg-blue-500 hover:bg-blue-600 cursor-pointer my-10 rounded"
-      >
+        className="text-white py-3 text-xl w-full bg-blue-500 hover:bg-blue-600 cursor-pointer my-10 rounded">
         {str("Submit")}
       </button>
     </div>
