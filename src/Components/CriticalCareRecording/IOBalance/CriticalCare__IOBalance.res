@@ -287,9 +287,78 @@ let reducer = (state, action) => {
     }
 }
 
+type summary_section_type = {
+    values: string,
+    total: string
+}
+
+type summary_type = {
+    intake: summary_section_type,
+    outturn: summary_section_type,
+    overall: summary_section_type,
+}
+
+let initialSummary = {
+    intake: {
+        values: "",
+        total: ""
+    },
+    outturn: {
+        values: "",
+        total: ""
+    },
+    overall: {
+        values: "",
+        total: ""
+    }
+}
+
+let toFloat = (svalue) => {
+    switch Belt.Float.fromString(svalue) {
+        | Some(x) => x
+        | None => 0.0
+    }
+}
+
+let toString = Belt.Float.toString
+
 @react.component
 let make = () => {
     let (state, dispatch) = React.useReducer(reducer, initialState)
+    let (summary, setSummary) = React.useState(_ => initialSummary)
+    
+    React.useEffect1(() => {
+        let infusions_total = state.intake.infusions.sliders->Belt.Array.reduce(0.0, (acc, slider) => acc +. slider.value->toFloat)
+        let iv_fluid_total = state.intake.iv_fluid.sliders->Belt.Array.reduce(0.0, (acc, slider) => acc +. slider.value->toFloat)
+        let feed_total = state.intake.feed.sliders->Belt.Array.reduce(0.0, (acc, slider) => acc +. slider.value->toFloat)
+        Js.log3(infusions_total, iv_fluid_total, feed_total)
+
+        setSummary(prev => {...prev, intake: {
+            values: [infusions_total, iv_fluid_total, feed_total]->Js.Array2.joinWith("+"), 
+            total: (infusions_total +. iv_fluid_total +. feed_total)->toString
+        }})
+        None
+    }, [state.intake])
+
+    React.useEffect1(() => {
+        let outturn_summary_values = state.outturn.sliders->Belt.Array.map(slider =>slider.value->toFloat)
+        let outturn_summary_total = outturn_summary_values->Belt.Array.reduce(0.0, (acc, value) => acc +. value)
+        
+        setSummary(prev => {...prev, outturn: {
+            values: outturn_summary_values->Js.Array2.joinWith("+"), 
+            total: outturn_summary_total->toString
+        }})
+        None
+    }, [state.outturn])
+
+    React.useEffect1(() => {
+        setSummary(prev => {...prev, overall: {
+            values: [prev.intake.total, prev.outturn.total]->Js.Array2.joinWith("-"), 
+            total: (prev.intake.total->toFloat -. prev.outturn.total->toFloat)->toString
+        }})
+        None
+    }, [])
+
     <div>
         <CriticalCare__PageTitle title="I/O Balance Editor" />
 
@@ -322,6 +391,12 @@ let make = () => {
                 sliders={state.intake.feed.sliders}
                 moreSliders={state.intake.feed.more_sliders}
             />
+
+            <IOBalance__Summary
+                leftMain="Total"
+                rightSub={summary.intake.values}
+                rightMain={summary.intake.total}
+            />
         </div>
 
         <div id="outturn" className="">
@@ -335,6 +410,19 @@ let make = () => {
                 sliders={state.outturn.sliders}
                 moreSliders={state.outturn.more_sliders}
             />
+
+            <IOBalance__Summary
+                leftMain="Total"
+                rightSub={summary.outturn.values}
+                rightMain={summary.outturn.total}
+            />
         </div>
+
+        <IOBalance__Summary
+            leftMain="I/O Balance"
+            rightSub={summary.overall.values}
+            rightMain={summary.overall.total}
+            noBorder={true}
+        />
     </div>
 }
