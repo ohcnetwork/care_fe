@@ -304,8 +304,9 @@ const HospitalListPage = (props: any) => {
       Notification.Success({
         msg: "Facility Notified",
       });
+      setModalFor(undefined);
     } else {
-      console.log("Notification NOT sent");
+      Notification.Error({ msg: "Something went wrong..." });
     }
   };
 
