@@ -7,7 +7,7 @@ let horizontal_label_classes = "flex flex-wrap items-center justify-center mr-20
 let vertical_label_classes = "my-1 block"
 
 @react.component
-let make = (~options, ~horizontal, ~onChange: ReactEvent.Form.t => unit) => {
+let make = (~options, ~horizontal, ~defaultChecked="", ~onChange: ReactEvent.Form.t => unit) => {
   <div className={horizontal ? horizontal_div_classes : vertical_div_classes}>
     {options
     |> Array.mapi((i, x) => {
@@ -20,6 +20,7 @@ let make = (~options, ~horizontal, ~onChange: ReactEvent.Form.t => unit) => {
             value={Options.value(x)}
             id={Options.value(x)}
             onChange
+            defaultChecked={Options.value(x) === defaultChecked}
           />
           {str({Options.label(x)})}
         </label>

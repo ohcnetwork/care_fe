@@ -23,11 +23,11 @@ let blood_sugar_level = t => t.blood_sugar_level
 let dosage = t => t.dosage
 let frequency = t => t.frequency
 
-let init = {
-  blood_sugar_level: "",
-  dosage: "",
-  frequency: "OD",
-}
+// let init = {
+//   blood_sugar_level: "",
+//   dosage: "",
+//   frequency: "OD",
+// }
 
 let showStatus = data => {
   let total = 3.0

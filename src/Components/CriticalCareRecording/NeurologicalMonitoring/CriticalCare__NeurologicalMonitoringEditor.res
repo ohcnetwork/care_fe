@@ -357,10 +357,13 @@ let left_reaction_options: array<Options.t> = [
 ]
 
 let handleSubmit = (handleDone, state) => {
-  handleDone(state)
+  let status = NeurologicalMonitoring.showStatus(state)
+  let _ = Js.log2(status, state)
+  handleDone(state, status)
 }
 
 type action =
+  | SetPronePosition(bool)
   | SetLevelOfConciousness(string)
   | SetLeftPupilSize(string)
   | SetLeftSizeDescription(string)
@@ -382,6 +385,10 @@ type action =
 let reducer = (state, action) => {
   open NeurologicalMonitoring
   switch action {
+  | SetPronePosition(pronePosition) => {
+      ...state,
+      pronePosition: pronePosition,
+    }
   | SetLevelOfConciousness(levelOfConciousness) => {
       ...state,
       levelOfConciousness: levelOfConciousness,
@@ -488,6 +495,16 @@ let limpAction = (limp, value) => {
   }
 }
 
+let getlimpState = (limp, state) => {
+  switch limp {
+  | "upper_extremity_right" => NeurologicalMonitoring.upperExtremityR(state)
+  | "upper_extremity_left" => NeurologicalMonitoring.upperExtremityL(state)
+  | "lower_extremity_right" => NeurologicalMonitoring.lowerExtremityR(state)
+  | "lower_extremity_left" => NeurologicalMonitoring.lowerExtremityL(state)
+  | _ => ""
+  }
+}
+
 let totalGlascowScore = state => {
   let count = Js.Array.reduce(
     (acc, x) => acc + Js.Option.getWithDefault(0, Belt.Int.fromString(getGlascowState(x, state))),
@@ -499,6 +516,10 @@ let totalGlascowScore = state => {
 
 let getFieldValue = event => {
   ReactEvent.Form.target(event)["value"]
+}
+
+let getToggleState = event => {
+  ReactEvent.Form.target(event)["checked"]
 }
 
 @react.component
@@ -514,20 +535,28 @@ let make = (~handleDone, ~initialState) => {
     NeurologicalMonitoring.motorResponse(state),
   ))
   Js.log(state)
+
   <div>
     <CriticalCare__PageTitle title="Neurological Monitoring" />
     <div className="my-4">
+      <div className="my-10">
+        <CriticalCare__Switch
+          checked={NeurologicalMonitoring.pronePosition(state)}
+          onChange={event => send(SetPronePosition(getToggleState(event)))}
+        />
+      </div>
       <div className="my-10">
         <div className=" text-2xl font-bold my-2"> {str("Level Of Consciousness")} </div>
         <CriticalCare__RadioButton
           options={loc_options}
           horizontal=true
+          defaultChecked={NeurologicalMonitoring.levelOfConciousness(state)}
           onChange={event => send(SetLevelOfConciousness(getFieldValue(event)))}
         />
       </div>
       <div className="my-10">
         <div className="text-2xl font-bold my-2 mb-4"> {str("Pupil")} </div>
-        <div>
+        <div className="mb-2">
           <div className="text-lg font-bold my-3"> {str("Left Pupil")} </div>
           <CriticalCare__PupilRangeSlider
             name={"left_pupil_slider"}
@@ -543,11 +572,12 @@ let make = (~handleDone, ~initialState) => {
           } else {
             <> </>
           }}
-          <div className="my-15 mb-8">
+          <div className="my-5 mb-8">
             <div className="font-bold my-4"> {str("Reaction")} </div>
             <CriticalCare__RadioButton
               options={right_reaction_options}
               horizontal=true
+              defaultChecked={NeurologicalMonitoring.leftPupilReaction(state)}
               onChange={event => send(SetLeftPupilReaction(getFieldValue(event)))}
             />
             {if NeurologicalMonitoring.leftPupilReaction(state) === "cannot_be_assessed" {
@@ -577,11 +607,12 @@ let make = (~handleDone, ~initialState) => {
           } else {
             <> </>
           }}
-          <div className="my-15 mb-8">
+          <div className="my-5 mb-8">
             <div className="font-bold my-4"> {str("Reaction")} </div>
             <CriticalCare__RadioButton
               options={reaction_options}
               horizontal=true
+              defaultChecked={NeurologicalMonitoring.rightPupilReaction(state)}
               onChange={event => send(SetRightPupilReaction(getFieldValue(event)))}
             />
             {if NeurologicalMonitoring.rightPupilReaction(state) === "cannot_be_assessed" {
@@ -612,6 +643,7 @@ let make = (~handleDone, ~initialState) => {
               <CriticalCare__RadioButton
                 options={Options.options(x)}
                 horizontal=false
+                defaultChecked={getGlascowState(Options.title_value(x), state)}
                 onChange={event =>
                   send(glascowAction(Options.title_value(x), getFieldValue(event)))}
               />
@@ -637,6 +669,7 @@ let make = (~handleDone, ~initialState) => {
               <CriticalCare__RadioButton
                 options={Options.options(x)}
                 horizontal=true
+                defaultChecked={getlimpState(Options.title_value(x), state)}
                 onChange={event => send(limpAction(Options.title_value(x), getFieldValue(event)))}
               />
             </div>
