@@ -29,12 +29,9 @@ export const NoticeBoard: any = () => {
   let notices: any[] = [];
   if (data && data.length) {
     notices = data.map((item) => (
-      <Card>
+      <Card className="my-4 mx-8 rounded-lg">
         <CardContent>
-          <div
-            key={`usr_${item.id}`}
-            className="py-5 px-4 lg:px-8 bg-gray-200 rounded-lg hover:bg-gray-300"
-          >
+          <div key={`usr_${item.id}`} className="">
             <div className="text-lg font-bold">{`Message From: ${item.caused_by.first_name} ${item.caused_by.last_name} - ${item.caused_by.user_type}`}</div>
             <div className="text-xs">
               On: {moment(item.created_date).format("lll")}
