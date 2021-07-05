@@ -89,11 +89,19 @@ let psvOptionsArray = [
 
 @react.component
 let make = (~state: VentilatorParameters.iv, ~send: VentilatorParameters.action => unit) => {
+  let defaultChecked = switch state.ventilatorMode {
+  | "cmv" => state.ventilatorModeSubOption.cmv
+  | "simv" => state.ventilatorModeSubOption.simv
+  | "psv" => state.ventilatorModeSubOption.psv
+  | _ => ""
+  }
+
   <div>
     <h4 className="mb-4"> {str("Ventilator Mode")} </h4>
     <div className="mb-4">
-      <label onClick={_ => send(SetIv({...state, ventilatorMode: "cmv"}))}>
+      <label>
         <input
+          onClick={_ => send(SetIv({...state, ventilatorMode: "cmv"}))}
           className="mr-2"
           type_="radio"
           name="ventilatorMode"
@@ -108,9 +116,10 @@ let make = (~state: VentilatorParameters.iv, ~send: VentilatorParameters.action 
             ? "pointer-events-none opacity-50"
             : ""} `}>
         <CriticalCare__RadioButton
-          onChange={e =>
+          defaultChecked
+          onChange={e => {
             send(
-              SetNivSubOptions({
+              SetIvSubOptions({
                 ...state,
                 ventilatorModeSubOption: {
                   cmv: ReactEvent.Form.target(e)["value"],
@@ -118,15 +127,17 @@ let make = (~state: VentilatorParameters.iv, ~send: VentilatorParameters.action 
                   simv: "",
                 },
               }),
-            )}
+            )
+          }}
           options={cmvOptionsArray}
           horizontal={false}
         />
       </div>
     </div>
     <div className="mb-4">
-      <label onClick={_ => send(SetIv({...state, ventilatorMode: "simv"}))}>
+      <label>
         <input
+          onClick={_ => send(SetIv({...state, ventilatorMode: "simv"}))}
           className="mr-2"
           type_="radio"
           name="ventilatorMode"
@@ -141,9 +152,10 @@ let make = (~state: VentilatorParameters.iv, ~send: VentilatorParameters.action 
             ? "pointer-events-none opacity-50"
             : ""} `}>
         <CriticalCare__RadioButton
+          defaultChecked
           onChange={e =>
             send(
-              SetNivSubOptions({
+              SetIvSubOptions({
                 ...state,
                 ventilatorModeSubOption: {
                   cmv: "",
@@ -158,8 +170,9 @@ let make = (~state: VentilatorParameters.iv, ~send: VentilatorParameters.action 
       </div>
     </div>
     <div className="mb-4">
-      <label onClick={_ => send(SetIv({...state, ventilatorMode: "psv"}))}>
+      <label>
         <input
+          onClick={_ => send(SetIv({...state, ventilatorMode: "psv"}))}
           className="mr-2"
           type_="radio"
           name="ventilatorMode"
