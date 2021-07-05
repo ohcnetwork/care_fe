@@ -583,7 +583,7 @@ export default function PatientFilterV2(props: any) {
           </div>
         </div>
         <div className="w-64 flex-none">
-          <span className="text-sm font-semibold">COVIN ID</span>
+          <span className="text-sm font-semibold">COWIN ID</span>
           <div className="flex justify-between">
             <TextInputField
               id="covin_id"
@@ -593,7 +593,7 @@ export default function PatientFilterV2(props: any) {
               errors=""
               value={filterState.covin_id}
               onChange={handleChange}
-              label="covin id"
+              label="COWIN ID"
               className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 mr-1"
             />
           </div>

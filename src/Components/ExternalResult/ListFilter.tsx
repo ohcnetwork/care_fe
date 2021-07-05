@@ -17,7 +17,7 @@ function useMergeState(initialState: any) {
 }
 
 export default function ListFilter(props: any) {
-  let { filter, onChange, closeFilter, dataList } = props;
+  let { filter, onChange, closeFilter, dataList, local } = props;
   const [wardList, setWardList] = useState<any[]>([]);
   const [lsgList, setLsgList] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -28,13 +28,23 @@ export default function ListFilter(props: any) {
   const state: any = useSelector((state) => state);
   const { currentUser } = state;
   const [filterState, setFilterState] = useMergeState({
-    created_date_before: filter.created_date_before || null,
-    created_date_after: filter.created_date_after || null,
-    result_date_before: filter.result_date_before || null,
-    result_date_after: filter.result_date_after || null,
-    sample_collection_date_before: filter.sample_collection_date_before || null,
-    sample_collection_date_after: filter.sample_collection_date_after || null,
-    srf_id: filter.srf_id || null,
+    created_date_before:
+      filter.created_date_before || local.created_date_before || null,
+    created_date_after:
+      filter.created_date_after || local.created_date_after || null,
+    result_date_before:
+      filter.result_date_before || local.result_date_before || null,
+    result_date_after:
+      filter.result_date_after || local.result_date_after || null,
+    sample_collection_date_before:
+      filter.sample_collection_date_before ||
+      local.sample_collection_date_before ||
+      null,
+    sample_collection_date_after:
+      filter.sample_collection_date_after ||
+      local.sample_collection_date_after ||
+      null,
+    srf_id: filter.srf_id || local.srf_id || null,
   });
 
   const handleDateRangeChange = (
@@ -82,8 +92,8 @@ export default function ListFilter(props: any) {
     } = filterState;
 
     const data = {
-      wards: selectedWardIds.length ? selectedWardIds : undefined,
-      local_bodies: selectedLsgIds.length ? selectedLsgIds : undefined,
+      wards: selectedWardIds.length ? selectedWardIds : "",
+      local_bodies: selectedLsgIds.length ? selectedLsgIds : "",
       created_date_before: formatDateTime(created_date_before),
       created_date_after: formatDateTime(created_date_after),
       result_date_before: formatDateTime(result_date_before),
@@ -96,6 +106,11 @@ export default function ListFilter(props: any) {
       ),
       srf_id: srf_id,
     };
+    localStorage.setItem("external-filters", JSON.stringify(data));
+    localStorage.setItem(
+      "lsg-ward-data",
+      JSON.stringify({ lsgList: selectedLsgs, wardList: wards })
+    );
     onChange(data);
     dataList(selectedLsgs, wards);
   };
@@ -179,6 +194,12 @@ export default function ListFilter(props: any) {
     setFilterState(filterData);
   };
 
+  const clearFilters = () => {
+    localStorage.removeItem("external-filters");
+    localStorage.removeItem("lsg-ward-data");
+    closeFilter();
+  };
+
   return (
     <div>
       <div className="flex justify-between">
@@ -189,6 +210,7 @@ export default function ListFilter(props: any) {
         <Link
           href="/external_results"
           className="btn btn-default hover:text-gray-900"
+          onClick={clearFilters}
         >
           <i className="fas fa-times mr-2" />
           Clear Filters
