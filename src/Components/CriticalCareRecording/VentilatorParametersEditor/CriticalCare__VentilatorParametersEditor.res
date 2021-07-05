@@ -2,7 +2,8 @@ let str = React.string
 open CriticalCare__Types
 
 let handleSubmit = (handleDone, state: VentilatorParameters.t) => {
-  handleDone(state, "1.0")
+  let status = VentilatorParameters.showStatus(state)
+  handleDone(state, status)
 }
 
 let reducer = (state, action) => {

@@ -48,18 +48,20 @@ type action =
   | SetNivSubOptions(ventilatorMode)
   | SetNone(oxygenModality)
 
-let ventilatorModeStatus = (count, data) => {
+let ventilatorModeStatus = (count, totalCount, data) => {
   switch data.ventilatorMode {
-  | _ => ()
   | "cmv" =>
+    totalCount := 1.0
     if data.ventilatorModeSubOption.cmv !== "" {
       count := count.contents +. 1.0
     }
   | "simv" =>
+    totalCount := 1.0
     if data.ventilatorModeSubOption.simv !== "" {
       count := count.contents +. 1.0
     }
   | "psv" => {
+      totalCount := 7.0
       if data.peep !== "" {
         count := count.contents +. 1.0
       }
@@ -82,21 +84,27 @@ let ventilatorModeStatus = (count, data) => {
         count := count.contents +. 1.0
       }
     }
-  }
-}
-
-let showStatus = (ventilationInterface, data) => {
-  let count = ref(0.0)
-  let falsyValues = [Some(""), None]
-  let totalCount = switch ventilationInterface {
-  | "iv" => 9.0
-  | "niv" => 9.0
-  | _ => 1.0
-  }
-  switch ventilationInterface {
-  | "iv" => ventilatorModeStatus(count, data.iv)
-  | "niv" => ventilatorModeStatus(count, data.niv)
   | _ => ()
   }
-  Js.Float.toFixed(count.contents /. totalCount *. 100.0)
+  ()
+}
+
+let showStatus = data => {
+  let count = ref(0.0)
+  let totalCount = ref(1.0)
+  switch data.ventilationInterface {
+  | "iv" => ventilatorModeStatus(count, totalCount, data.iv)
+  | "niv" => ventilatorModeStatus(count, totalCount, data.niv)
+  | "none" => {
+      totalCount := 2.0
+      if data.none.fio2 !== "" {
+        count := count.contents +. 1.0
+      }
+      if data.none.spo2 !== "" {
+        count := count.contents +. 1.0
+      }
+    }
+  | _ => ()
+  }
+  Js.Float.toFixed(count.contents /. totalCount.contents *. 100.0)
 }
