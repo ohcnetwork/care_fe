@@ -112,6 +112,21 @@ const routes: Routes = {
     method: "GET",
   },
 
+  getUserSkills: {
+    path: "/api/v1/users/{users_username}/skill/",
+    method: "GET",
+  },
+
+  updateUserSkills: {
+    path: "/api/v1/users/{users_username}/skill/",
+    method: "POST",
+  },
+
+  deleteUserSkill: {
+    path: "/api/v1/users/{users_username}/skill/{external_id}/",
+    method: "DELETE",
+  },
+
   // Facility Endpoints
 
   listFacility: {

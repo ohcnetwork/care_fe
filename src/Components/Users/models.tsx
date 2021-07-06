@@ -10,3 +10,9 @@ export interface UserModal {
   gender?: string;
   age?: number;
 }
+
+export interface SkillModel {
+  id?: string;
+  name?: string;
+  description?: string;
+}

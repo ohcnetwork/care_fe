@@ -42,6 +42,28 @@ export const getSkill = (id: string) => {
   return fireRequest("getSkill", [], {}, { external_id: id });
 };
 
+export const getUserSkills = (username: string) => {
+  return fireRequest("getUserSkills", [], {}, { users_username: username });
+};
+
+export const updateUserSkills = (username: string, params: object) => {
+  return fireRequest("updateUserSkills", [], params, {
+    users_username: username,
+  });
+};
+
+export const deleteUserSkill = (username: string, id: string) => {
+  return fireRequest(
+    "deleteUserSkill",
+    [],
+    {},
+    {
+      users_username: username,
+      external_id: id,
+    }
+  );
+};
+
 // Facility
 export const createFacility = (params: object) => {
   return fireRequest("createFacility", [], params);
