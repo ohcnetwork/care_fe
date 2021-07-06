@@ -576,7 +576,7 @@ let make = (~handleDone, ~initialState) => {
           <CriticalCare__PupilRangeSlider
             name={"left_pupil_slider"}
             val={NeurologicalMonitoring.leftPupilSize(state)}
-            onChange={event => send(SetLeftPupilSize(getFieldValue(event)))}
+            setValue={value => send(SetLeftPupilSize(value))}
           />
           {if NeurologicalMonitoring.leftPupilSize(state) === "cannot_be_assessed" {
             <CriticalCare__Description
@@ -611,7 +611,7 @@ let make = (~handleDone, ~initialState) => {
           <CriticalCare__PupilRangeSlider
             name={"right_pupil_slider"}
             val={NeurologicalMonitoring.rightPupilSize(state)}
-            onChange={event => send(SetRightPupilSize(getFieldValue(event)))}
+            setValue={value => send(SetRightPupilSize(value))}
           />
           {if NeurologicalMonitoring.rightPupilSize(state) === "cannot_be_assessed" {
             <CriticalCare__Description
