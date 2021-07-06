@@ -122,15 +122,15 @@ export default function ResultList() {
   };
 
   const handlePagination = (page: number, limit: number) => {
-    updateQuery({ page, limit });
+    updateQuery({ ...qParams, page, limit });
   };
 
   const searchByName = (value: string) => {
-    updateQuery({ name: value, page: 1 });
+    updateQuery({ ...qParams, name: value, page: 1 });
   };
 
   const searchByPhone = (value: string) => {
-    updateQuery({ mobile_number: value, page: 1 });
+    updateQuery({ ...qParams, mobile_number: value, page: 1 });
   };
 
   const handleFilter = (value: string) => {
