@@ -16,6 +16,7 @@ let make = (~name, ~text, ~onChange) => {
       value={TextField.Value.string(text)}
       onChange={onChange}
       className="w-full"
+      color=#Primary
     />
   </div>
 }

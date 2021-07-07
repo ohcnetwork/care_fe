@@ -157,6 +157,7 @@ let initialState = {
   neurologicalMonitoring: {
     pronePosition: false,
     levelOfConciousness: "",
+    locDescription: "",
     leftPupilSize: "",
     leftSizeDescription: "",
     leftPupilReaction: "",

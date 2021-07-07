@@ -5,7 +5,11 @@
 let str = React.string
 
 @react.component
-let make = (~name, ~val, ~onChange) => {
+let make = (~name, ~val, ~setValue) => {
+  let onChange = event => {
+    setValue(ReactEvent.Form.target(event)["value"])
+  }
+
   let number_array = ["1", "2", "3", "4", "5", "6", "7", "8"]
   <div className="flex flex-col">
     <div className="font-bold my-2"> {str("Size")} </div>
@@ -13,7 +17,7 @@ let make = (~name, ~val, ~onChange) => {
       <ul className="range-labels grid-cols-8">
         {number_array
         |> Array.map(x =>
-          <li key={`pupil_circle${x}`} className="align-circles">
+          <li key={`pupil_circle${x}`} className="align-circles" onClick={e => setValue(x)}>
             <div className={`pupil${x}`} />
           </li>
         )
