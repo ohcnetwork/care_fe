@@ -1,10 +1,6 @@
 let str = React.string
 open CriticalCare__Types
 
-let handleSubmit = (handleDone, state) => {
-  handleDone(state)
-}
-
 type action =
   | SetPO2(string)
   | SetPCO2(string)
@@ -26,6 +22,11 @@ let reducer = (state, action) => {
   | SetSodium(sodium) => {...state, sodium: sodium}
   | SetPotassium(potassium) => {...state, potassium: potassium}
   }
+}
+
+let handleSubmit = (handleDone, state) => {
+  let status = ABGAnalysis.showStatus(state)
+  handleDone(state, status)
 }
 
 let getFieldValue = event => {
