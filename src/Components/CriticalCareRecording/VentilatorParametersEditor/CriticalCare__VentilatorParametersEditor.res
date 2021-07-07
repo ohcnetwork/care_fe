@@ -70,7 +70,7 @@ let make = (~initialState, ~handleDone) => {
   Js.log({state})
   <div>
     <CriticalCare__PageTitle title="Ventilator Parameters" />
-    <div className="p-6">
+    <div className="py-6">
       <div className="mb-6">
         <h4> {str("Ventilation Interface")} </h4>
         <div>
