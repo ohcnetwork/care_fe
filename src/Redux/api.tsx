@@ -514,6 +514,10 @@ const routes: Routes = {
   getPublicKey: {
     path: "/api/v1/notification/public_key/",
   },
+  sendNotificationMessages: {
+    path: "/api/v1/notification/notify/",
+    method: "POST",
+  },
 
   // FileUpload Create
   createUpload: {
