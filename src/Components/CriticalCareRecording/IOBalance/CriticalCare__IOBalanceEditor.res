@@ -86,5 +86,11 @@ let make = (~initialState, ~handleDone) => {
             rightMain={state.summary.overall.total}
             noBorder={true}
         />
+
+        <button
+            className="flex w-full bg-blue-600 text-white p-2 text-lg hover:bg-blue-800 justify-center items-center rounded-md"
+            onClick={_ => state->handleDone}>
+            {str("Done")}
+        </button>
     </div>
 }

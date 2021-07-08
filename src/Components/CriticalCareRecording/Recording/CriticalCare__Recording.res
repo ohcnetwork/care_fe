@@ -332,7 +332,10 @@ export make = () => {
           | IOBalanceEditor => 
             <CriticalCare__IOBalanceEditor
               initialState={state.ioBalanceData}
-              handleDone={data => data->SetIOBalaceData->send}
+              handleDone={data => {
+                CloseEditor->send
+                data->SetIOBalaceData->send
+              }}
             />
           | DialysisEditor =>
             <CriticalCare_DialysisEditor
