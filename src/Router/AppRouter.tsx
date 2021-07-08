@@ -56,6 +56,7 @@ import { AddLocationForm } from "../Components/Facility/AddLocationForm";
 import { LocationManagement } from "../Components/Facility/LocationManagement";
 import AssetsList from "../Components/Assets/AssetsList";
 import AssetManage from "../Components/Assets/AssetManage";
+import UserSkillAdd from "../Components/Users/UserSkillAdd";
 
 const get = require("lodash.get");
 const img = "https://cdn.coronasafe.network/light-logo.svg";
@@ -66,6 +67,9 @@ const routes = {
   "/users": () => <ManageUsers />,
   "/user/add": () => <UserAdd />,
   "/user/profile": () => <UserProfile />,
+  "/user/:username/skills": ({ username }: any) => (
+    <UserSkillAdd username={username} />
+  ),
   "/patients": () => <PatientManager />,
   "/patient/:id": ({ id }: any) => <PatientHome id={id} />,
   "/patient/:id/investigation_reports": ({ id }: any) => (
