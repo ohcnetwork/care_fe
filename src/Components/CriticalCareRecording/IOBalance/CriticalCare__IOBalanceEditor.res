@@ -10,7 +10,6 @@ let make = (~initialState, ~handleDone) => {
     let (state, dispatch) = React.useReducer(IOBalance.reducer, initialState: state_type)
     
     React.useEffect1(() => {
-        Js.log("intake useeffect")
         IOBalance.EvaluateSummary("intake")->dispatch
         None
     }, [state.intake])

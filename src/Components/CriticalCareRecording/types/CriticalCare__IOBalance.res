@@ -47,7 +47,7 @@ let initialState = {
                     end: "100",
                     interval: "10",
                     step: 1.0,
-                    value: "50"
+                    value: ""
                 },
                 {
                     name: "Nor-Adrenalin",
@@ -56,7 +56,7 @@ let initialState = {
                     end: "100",
                     interval: "10",
                     step: 1.0,
-                    value: "50"
+                    value: ""
                 },
                 {
                     name: "Vasopressin",
@@ -65,7 +65,7 @@ let initialState = {
                     end: "100",
                     interval: "10",
                     step: 1.0,
-                    value: "50"
+                    value: ""
                 },
                 {
                     name: "Dopamine",
@@ -74,7 +74,7 @@ let initialState = {
                     end: "100",
                     interval: "10",
                     step: 1.0,
-                    value: "50"
+                    value: ""
                 },
                 {
                     name: "Dobutamine",
@@ -83,7 +83,7 @@ let initialState = {
                     end: "100",
                     interval: "10",
                     step: 1.0,
-                    value: "50"
+                    value: ""
                 }
             ],
             more_sliders: [
@@ -94,7 +94,7 @@ let initialState = {
                     end: "100",
                     interval: "10",
                     step: 1.0,
-                    value: "50"
+                    value: ""
                 },
                 {
                     name: "MoreSlider2",
@@ -103,7 +103,7 @@ let initialState = {
                     end: "100",
                     interval: "10",
                     step: 1.0,
-                    value: "50"
+                    value: ""
                 }
             ]
         },
@@ -116,7 +116,7 @@ let initialState = {
                     end: "100",
                     interval: "10",
                     step: 1.0,
-                    value: "50"
+                    value: ""
                 },
                 {
                     name: "NL",
@@ -125,7 +125,7 @@ let initialState = {
                     end: "100",
                     interval: "10",
                     step: 1.0,
-                    value: "50"
+                    value: ""
                 },
                 {
                     name: "DNS",
@@ -134,7 +134,7 @@ let initialState = {
                     end: "100",
                     interval: "10",
                     step: 1.0,
-                    value: "50"
+                    value: ""
                 }
             ],
             more_sliders: []
@@ -148,7 +148,7 @@ let initialState = {
                     end: "100",
                     interval: "10",
                     step: 1.0,
-                    value: "50"
+                    value: ""
                 },
                 {
                     name: "Normal Feed",
@@ -157,7 +157,7 @@ let initialState = {
                     end: "100",
                     interval: "10",
                     step: 1.0,
-                    value: "50"
+                    value: ""
                 }
             ],
             more_sliders: []
@@ -172,7 +172,7 @@ let initialState = {
                 end: "100",
                 interval: "10",
                 step: 1.0,
-                value: "50"
+                value: ""
             },
             {
                 name: "Rules Tube Aspiration",
@@ -181,7 +181,7 @@ let initialState = {
                 end: "100",
                 interval: "10",
                 step: 1.0,
-                value: "50"
+                value: ""
             },
             {
                 name: "ICD",
@@ -190,7 +190,7 @@ let initialState = {
                 end: "100",
                 interval: "10",
                 step: 1.0,
-                value: "50"
+                value: ""
             },
         ],
         more_sliders: []

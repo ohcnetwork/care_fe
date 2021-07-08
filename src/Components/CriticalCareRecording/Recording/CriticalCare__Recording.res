@@ -25,6 +25,7 @@ type state = {
   arterialBloodGasAnalysisStatus: string,
   bloodSugarStatus: string,
   ioBalanceData: IOBalance.t,
+  ioBalanceStatus: string,
   dialysisStatus: string,
   pressureSoreStatus: string,
   nursingCareStatus: string,
@@ -51,6 +52,7 @@ type action =
   | UpdateDialysisStatus(string)
   | UpdateNeurologicalMonitoringStatus(string)
   | SetIOBalaceData(IOBalance.t)
+  | SetIOBalaceStatus(IOBalance.t)
 
 let showEditor = (editor, send) => {
   send(ShowEditor(editor))
@@ -84,7 +86,7 @@ let editorToggle = (editorName, state, send) => {
       | VentilatorParametersEditor => showStatus(state.ventilatorParametersStatus)
       | ArterialBloodGasAnalysisEditor => showStatus(state.arterialBloodGasAnalysisStatus)
       | BloodSugarEditor => showStatus(state.bloodSugarStatus)
-      | IOBalanceEditor => showStatus("100%")
+      | IOBalanceEditor => showStatus(state.ioBalanceStatus)
       | DialysisEditor => showStatus(state.dialysisStatus)
       | PressureSoreEditor => showStatus(state.pressureSoreStatus)
       | NursingCareEditor => showStatus(state.nursingCareStatus)
@@ -127,6 +129,22 @@ let reducer = (state, action) => {
       neurologicalMonitoringStatus: neurologicalMonitoringStatus,
     }
   | SetIOBalaceData(data) => {...state, ioBalanceData: data}
+  | SetIOBalaceStatus(iobState) => {
+    let statusOf = (sliders: array< IOBalance.slider_type>) => {
+      let length = Belt.Array.length
+      (sliders->Belt.Array.reduce(0, (acc, slider) => slider.value === "" ? acc : acc + 1),  sliders->length)
+    }
+    let (inf_done, inf_total) = statusOf(iobState.intake.infusions.sliders)
+    let (ivf_done, ivf_total) = statusOf(iobState.intake.iv_fluid.sliders)
+    let (feed_done, feed_total) = statusOf(iobState.intake.feed.sliders)
+    let (out_done, out_total) = statusOf(iobState.outturn.sliders)
+    
+    let toFloat = Belt.Int.toFloat
+    let toInt = Belt.Int.fromFloat
+    let toString = Belt.Int.toString
+    let status = (inf_done + ivf_done + feed_done + out_done)->toFloat /. (inf_total + ivf_total + feed_total + out_total)->toFloat
+    {...state, ioBalanceStatus: (status *. 100.0)->toInt->toString}
+  }
   }
 }
 
@@ -232,6 +250,7 @@ let initialState = {
   arterialBloodGasAnalysisStatus: "0",
   bloodSugarStatus: "0",
   ioBalanceData: IOBalance.initialState,
+  ioBalanceStatus: "0",
   dialysisStatus: "0",
   pressureSoreStatus: "0",
   nursingCareStatus: "0",
@@ -334,6 +353,7 @@ export make = () => {
               initialState={state.ioBalanceData}
               handleDone={data => {
                 CloseEditor->send
+                data->SetIOBalaceStatus->send
                 data->SetIOBalaceData->send
               }}
             />
