@@ -93,6 +93,8 @@ export default function PatientFilterV2(props: any) {
       filter.last_consultation_symptoms_onset_date_before || null,
     last_consultation_symptoms_onset_date_after:
       filter.last_consultation_symptoms_onset_date_after || null,
+    last_consultation_is_telemedicine:
+      filter.last_consultation_is_telemedicine || null,
   });
   const dispatch: any = useDispatch();
 
@@ -111,7 +113,7 @@ export default function PatientFilterV2(props: any) {
     created_date_after: null,
     modified_date_before: null,
     modified_date_after: null,
-    ordering: "Select",
+    ordering: "",
     category: null,
     gender: null,
     disease_status: null,
@@ -124,13 +126,14 @@ export default function PatientFilterV2(props: any) {
     last_consultation_discharge_date_before: null,
     last_consultation_discharge_date_after: null,
     last_consultation_admitted_to_list: [],
-    srf_id: null,
+    srf_id: "",
     number_of_doses: null,
-    covin_id: null,
+    covin_id: "",
     is_kasp: null,
     is_declared_positive: null,
     last_consultation_symptoms_onset_date_before: null,
     last_consultation_symptoms_onset_date_after: null,
+    last_consultation_is_telemedicine: null,
   };
 
   useEffect(() => {
@@ -182,6 +185,12 @@ export default function PatientFilterV2(props: any) {
     { id: "", text: "Show All" },
     { id: "false", text: "Not Declared" },
     { id: "true", text: "Declared" },
+  ];
+
+  const TELEMEDICINE_FILTER = [
+    { id: "", text: "Show All" },
+    { id: "true", text: "Yes" },
+    { id: "false", text: "No" },
   ];
 
   const setFacility = (selected: any, name: string) => {
@@ -264,6 +273,7 @@ export default function PatientFilterV2(props: any) {
       is_declared_positive,
       last_consultation_symptoms_onset_date_before,
       last_consultation_symptoms_onset_date_after,
+      last_consultation_is_telemedicine,
     } = filterState;
     const data = {
       district: district || "",
@@ -355,6 +365,8 @@ export default function PatientFilterV2(props: any) {
               "YYYY-MM-DD"
             )
           : "",
+      last_consultation_is_telemedicine:
+        last_consultation_is_telemedicine || "",
     };
     onChange(data);
   };
@@ -543,7 +555,35 @@ export default function PatientFilterV2(props: any) {
           />
         </div>
         <div className="w-64 flex-none">
-          <span className="text-sm font-semibold">COVIN ID</span>
+          <span className="text-sm font-semibold">Telemedicine</span>
+          <SelectField
+            name="last_consultation_is_telemedicine"
+            variant="outlined"
+            margin="dense"
+            value={filterState.last_consultation_is_telemedicine}
+            options={TELEMEDICINE_FILTER}
+            onChange={handleChange}
+            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+          />
+        </div>
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">SRF ID</span>
+          <div className="flex justify-between">
+            <TextInputField
+              id="srf_id"
+              name="srf_id"
+              variant="outlined"
+              margin="dense"
+              errors=""
+              value={filterState.srf_id}
+              onChange={handleChange}
+              label="Srf id"
+              className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 mr-1"
+            />
+          </div>
+        </div>
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">COWIN ID</span>
           <div className="flex justify-between">
             <TextInputField
               id="covin_id"
@@ -553,7 +593,7 @@ export default function PatientFilterV2(props: any) {
               errors=""
               value={filterState.covin_id}
               onChange={handleChange}
-              label="covin id"
+              label="COWIN ID"
               className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 mr-1"
             />
           </div>
@@ -715,22 +755,6 @@ export default function PatientFilterV2(props: any) {
               onChange={handleChange}
               label="Max Age"
               className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-            />
-          </div>
-        </div>
-        <div className="w-64 flex-none">
-          <span className="text-sm font-semibold">SRF ID</span>
-          <div className="flex justify-between">
-            <TextInputField
-              id="srf_id"
-              name="srf_id"
-              variant="outlined"
-              margin="dense"
-              errors=""
-              value={filterState.srf_id}
-              onChange={handleChange}
-              label="Srf id"
-              className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 mr-1"
             />
           </div>
         </div>

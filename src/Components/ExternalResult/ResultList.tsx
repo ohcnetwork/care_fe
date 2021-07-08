@@ -37,7 +37,7 @@ function Badge(props: { color: string; icon: string; text: string }) {
   );
 }
 
-const RESULT_LIMIT = 15;
+const RESULT_LIMIT = 14;
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
 export default function ResultList() {
@@ -53,8 +53,16 @@ export default function ResultList() {
     name: "",
   });
   const [resultId, setResultId] = useState(-1);
+  const [dataList, setDataList] = useState({
+    lsgList: [],
+    wardList: [],
+  });
 
   let manageResults: any = null;
+  const local = JSON.parse(localStorage.getItem("external-filters") || "{}");
+  const localLsgWard = JSON.parse(
+    localStorage.getItem("lsg-ward-data") || '{"lsgList": [], "wardList": []}'
+  );
 
   useEffect(() => {
     setIsLoading(true);
@@ -73,6 +81,7 @@ export default function ResultList() {
       sample_collection_date_before:
         qParams.sample_collection_date_before || undefined,
       offset: (qParams.page ? qParams.page - 1 : 0) * RESULT_LIMIT,
+      srf_id: qParams.srf_id || undefined,
     };
 
     dispatch(externalResultList(params, "externalResultList"))
@@ -99,6 +108,8 @@ export default function ResultList() {
     qParams.sample_collection_date_after,
     qParams.sample_collection_date_before,
     qParams.local_bodies,
+    qParams.srf_id,
+    dataList,
   ]);
 
   const updateQuery = (filter: any) => {
@@ -134,12 +145,116 @@ export default function ResultList() {
     setShowFilters(false);
   };
 
+  useEffect(() => {
+    applyFilter(local);
+    setDataList({ ...localLsgWard });
+  }, []);
+
+  const removeFilter = (paramKey: any) => {
+    const localData: any = { ...local };
+
+    updateQuery({
+      ...qParams,
+      [paramKey]: "",
+    });
+    localData[paramKey] = "";
+
+    localStorage.setItem("external-filters", JSON.stringify(localData));
+  };
+
+  const removeLSGFilter = (paramKey: any, id: any) => {
+    const updatedLsgList = dataList.lsgList.filter((x: any) => x.id !== id);
+    const lsgParams = updatedLsgList.map((x: any) => x.id);
+    const localData: any = { ...local };
+
+    const updatedWardList = dataList.wardList.filter(
+      (x: any) => x.local_body_id !== id
+    );
+    const wardParams = updatedWardList.map((x: any) => x.id);
+
+    updateQuery({
+      ...qParams,
+      [paramKey]: lsgParams,
+      ["wards"]: wardParams,
+    });
+    localData[paramKey] = lsgParams.length ? lsgParams : "";
+    localData["wards"] = wardParams.length ? wardParams : "";
+
+    localStorage.setItem("external-filters", JSON.stringify(localData));
+    localStorage.setItem(
+      "lsg-ward-data",
+      JSON.stringify({ lsgList: updatedLsgList, wardList: updatedWardList })
+    );
+    setDataList({ lsgList: updatedLsgList, wardList: updatedWardList });
+  };
+
+  const removeWardFilter = (paramKey: any, id: any) => {
+    const updatedList = dataList.wardList.filter((x: any) => x.id !== id);
+    const params = updatedList.map((x: any) => x.id);
+    const localData: any = { ...local };
+
+    updateQuery({
+      ...qParams,
+      [paramKey]: params,
+    });
+    localData[paramKey] = params.length ? params : "";
+
+    localStorage.setItem("external-filters", JSON.stringify(localData));
+    localStorage.setItem(
+      "lsg-ward-data",
+      JSON.stringify({ ...dataList, wardList: updatedList })
+    );
+    setDataList({ ...dataList, wardList: updatedList });
+  };
+
+  const lsgWardData = (lsgs: any, wards: any) => {
+    setDataList({ lsgList: lsgs, wardList: wards });
+  };
+
   const triggerDownload = async () => {
     const res = await dispatch(
       externalResultList({ ...qParams, csv: true }, "externalResultList")
     );
     setDownloadFile(res?.data);
     document.getElementById(`downloadCSV`)?.click();
+  };
+
+  const badge = (key: string, value: any, paramKey: string) => {
+    return (
+      value && (
+        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
+          {key}
+          {": "}
+          {value}
+          <i
+            className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
+            onClick={(e) => removeFilter(paramKey)}
+          ></i>
+        </span>
+      )
+    );
+  };
+
+  const lsgWardBadge = (key: string, value: any, paramKey: string) => {
+    return (
+      value && (
+        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
+          {key}
+          {": "}
+          {value.name}
+          <i
+            className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
+            onClick={(e) =>
+              paramKey === "local_bodies"
+                ? removeLSGFilter(paramKey, value.id)
+                : paramKey === "wards"
+                ? removeWardFilter(paramKey, value.id)
+                : null
+            }
+          ></i>
+        </span>
+      )
+    );
   };
 
   let resultList: any[] = [];
@@ -295,7 +410,7 @@ export default function ResultList() {
           </div>
           <div className="flex ml-auto  gap-2">
             <button
-              className="flex leading-none border-2 border-gray-200 bg-white rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-green-600 focus:text-green-600 focus:border-gray-400 hover:border-gray-400 rounded-r-full px-4 py-2 text-sm"
+              className="flex leading-none border-2 border-gray-200 bg-white rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 focus:text-primary-600 focus:border-gray-400 hover:border-gray-400 rounded-r-full px-4 py-2 text-sm"
               onClick={(_) => setShowFilters((show) => !show)}
             >
               <i className="fa fa-filter mr-1" aria-hidden="true"></i>
@@ -303,6 +418,47 @@ export default function ResultList() {
             </button>
           </div>
         </div>
+      </div>
+      <div className="flex space-x-2 my-2 flex-wrap w-full col-span-3 space-y-1">
+        {dataList.lsgList.map((x) => lsgWardBadge("LSG", x, "local_bodies"))}
+      </div>
+      <div className="flex space-x-2 my-2 flex-wrap w-full col-span-3 space-y-1">
+        {dataList.wardList.map((x) => lsgWardBadge("Ward", x, "wards"))}
+      </div>
+      <div className="flex space-x-2 my-2 flex-wrap w-full col-span-3 space-y-1">
+        {badge(
+          "Created before",
+          qParams.created_date_before || local.created_date_before,
+          "created_date_before"
+        )}
+        {badge(
+          "Created after",
+          qParams.created_date_after || local.created_date_after,
+          "created_date_after"
+        )}
+        {badge(
+          "Result before",
+          qParams.result_date_before || local.result_date_before,
+          "result_date_before"
+        )}
+        {badge(
+          "Result after",
+          qParams.result_date_after || local.result_date_after,
+          "result_date_after"
+        )}
+        {badge(
+          "Sample created before",
+          qParams.sample_collection_date_before ||
+            local.sample_collection_date_before,
+          "sample_collection_date_before"
+        )}
+        {badge(
+          "Sample created after",
+          qParams.sample_collection_date_after ||
+            local.sample_collection_date_after,
+          "sample_collection_date_after"
+        )}
+        {badge("SRF ID", qParams.srf_id, "srf_id")}
       </div>
       <div className="align-middle min-w-full overflow-x-auto shadow overflow-hidden sm:rounded-lg">
         <table className="min-w-full divide-y divide-cool-gray-200">
@@ -343,6 +499,8 @@ export default function ResultList() {
             filter={qParams}
             onChange={applyFilter}
             closeFilter={() => setShowFilters(false)}
+            dataList={lsgWardData}
+            local={local}
           />
         </div>
       </SlideOver>

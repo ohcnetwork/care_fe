@@ -1,13 +1,13 @@
-import React, { useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import loadable from "@loadable/component";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getMinQuantity } from "../../Redux/actions";
-const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 import Pagination from "../Common/Pagination";
 import { Button, ButtonBase } from "@material-ui/core";
 import { navigate } from "raviger";
+const Loading = loadable(() => import("../Common/Loading"));
+const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export default function MinQuantityList(props: any) {
   const { facilityId }: any = props;
@@ -72,7 +72,7 @@ export default function MinQuantityList(props: any) {
         </td>
         <td className="px-5 py-5 border-b border-gray-200 text-sm ">
           <Button
-            className="ml-2 bg-green-400 hover:bg-green-600"
+            className="ml-2 bg-primary-400 hover:bg-primary-600"
             onClick={() =>
               navigate(
                 `/facility/${facilityId}/inventory/${inventoryItem.id}/update/${inventoryItem.item_object?.id}`
@@ -109,13 +109,13 @@ export default function MinQuantityList(props: any) {
             <table className="min-w-full leading-normal shadow rounded-lg overflow-hidden">
               <thead>
                 <tr>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-green-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-primary-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
                     Item
                   </th>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-green-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-primary-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
                     Minimum Quantity
                   </th>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-green-400 text-left text-xs font-semibold text-white uppercase tracking-wider"></th>
+                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-primary-400 text-left text-xs font-semibold text-white uppercase tracking-wider"></th>
                 </tr>
               </thead>
               <tbody>{inventoryList}</tbody>

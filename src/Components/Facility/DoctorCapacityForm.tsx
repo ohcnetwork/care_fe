@@ -6,7 +6,6 @@ import React, { useCallback, useEffect, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
 import { DOCTOR_SPECIALIZATION } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-const Loading = loadable(() => import("../../Components/Common/Loading"));
 import { createDoctor, getDoctor, listDoctor } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import {
@@ -14,8 +13,9 @@ import {
   NativeSelectField,
   TextInputField,
 } from "../Common/HelperInputFields";
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 import { DoctorModal, OptionsType } from "./models";
+const Loading = loadable(() => import("../../Components/Common/Loading"));
+const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 interface DoctorCapacityProps extends DoctorModal {
   facilityId: number;
@@ -219,10 +219,14 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
             }}
           >
             <CardContent>
-              <InputLabel id="demo-simple-select-outlined-label">
+              <InputLabel
+                htmlFor="area-of-specialization"
+                id="demo-simple-select-outlined-label"
+              >
                 Area of specialization*
               </InputLabel>
               <NativeSelectField
+                id="area-of-specialization"
                 name="area"
                 variant="outlined"
                 value={state.form.area}
@@ -233,10 +237,14 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
               <ErrorHelperText error={state.errors.area} />
             </CardContent>
             <CardContent>
-              <InputLabel id="demo-simple-select-outlined-label">
+              <InputLabel
+                htmlFor="count"
+                id="demo-simple-select-outlined-label"
+              >
                 Count*
               </InputLabel>
               <TextInputField
+                id="count"
                 name="count"
                 variant="outlined"
                 margin="dense"
@@ -250,12 +258,18 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
             <CardContent>
               <Grid container justify="space-between" spacing={5}>
                 <Grid item>
-                  <Button color="default" variant="contained" onClick={goBack}>
+                  <Button
+                    id="doctor-cancel"
+                    color="default"
+                    variant="contained"
+                    onClick={goBack}
+                  >
                     Cancel
                   </Button>
                 </Grid>
                 <Grid item>
                   <Button
+                    id="doctor-save"
                     color="primary"
                     variant="contained"
                     type="submit"

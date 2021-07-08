@@ -168,7 +168,9 @@ export default function SampleViewAdmin(props: any) {
             className={`block border rounded-lg bg-white shadow h-full hover:border-primary-500 text-black ${
               item.result === "POSITIVE" ? "border-red-700 bg-red-100" : ""
             } ${
-              item.result === "NEGATIVE" ? "border-green-700 bg-green-100" : ""
+              item.result === "NEGATIVE"
+                ? "border-primary-700 bg-primary-100"
+                : ""
             }`}
           >
             <div className="px-6 py-4 h-full flex flex-col justify-between">
@@ -252,7 +254,7 @@ export default function SampleViewAdmin(props: any) {
               </div>
 
               <div className="mt-2">
-                {!!validStatusChoices.length && (
+                {item.result === "AWAITING" && (
                   <div className="mt-2">
                     <button
                       onClick={(e) => showUpdateStatus(item)}

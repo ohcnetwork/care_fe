@@ -58,6 +58,9 @@ export interface MultiSelectInputProps extends Omit<SelectProps, "onChange"> {
   optionValue?: string;
   onChange?: (e: any, child?: any) => void;
   errors?: string;
+  selectAllId?: string;
+  selectAll?: boolean;
+  onSelectAllClick?: (prev: boolean) => void;
 }
 
 export interface DefaultNativeSelectInputProps extends NativeSelectInputProps {
@@ -364,10 +367,14 @@ export const MultiSelectField = (props: MultiSelectInputProps) => {
     margin,
     optionKey,
     optionValue,
+    selectAllId = "selectAllId",
+    selectAll = false,
+    onSelectAllClick,
     ...restProps
   } = props;
   const optKey = optionKey ? optionKey : "id";
   const optVal = optionValue ? optionValue : "text";
+
   return (
     <>
       <FormControl className="w-full" variant={variant} margin={margin}>
@@ -387,6 +394,29 @@ export const MultiSelectField = (props: MultiSelectInputProps) => {
             </div>
           )}
         >
+          {selectAll && (
+            <MenuItem
+              key={selectAllId}
+              id={selectAllId}
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+              onClickCapture={(e) => {
+                e.stopPropagation();
+                onSelectAllClick &&
+                  onSelectAllClick((value as any[])?.length === options.length);
+              }}
+            >
+              <Checkbox
+                checked={(value as any[])?.length === options.length}
+                onClick={(e) => e.stopPropagation()}
+              />
+              <ListItemText
+                primary={"Select All"}
+                onClick={(e) => e.stopPropagation()}
+              />
+            </MenuItem>
+          )}
           {options.map((opt: any) => {
             const selected = value as Array<any>;
             return (

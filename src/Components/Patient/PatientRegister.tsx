@@ -198,6 +198,11 @@ const goBack = () => {
   window.history.go(-1);
 };
 
+const scrollTo = (id: any) => {
+  const element = document.querySelector(`#${id}-div`);
+  element?.scrollIntoView({ behavior: "smooth", block: "center" });
+};
+
 export const PatientRegister = (props: PatientRegisterProps) => {
   const dispatchAction: any = useDispatch();
   const { facilityId, id } = props;
@@ -298,6 +303,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   const fetchExtResultData = async (e: any) => {
     if (e) e.preventDefault();
     setIsLoading(true);
+    if (!careExtId) return;
     const res = await dispatchAction(externalResult({ id: careExtId }));
 
     if (res && res.data) {
@@ -435,7 +441,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               ? String(res.data.number_of_doses)
               : "1",
             vaccine_name: res.data.vaccine_name ? res.data.vaccine_name : null,
-            last_vaccinated_date: res.data.last_vaccinated_date ? res.data.last_vaccinated_date : null,
+            last_vaccinated_date: res.data.last_vaccinated_date
+              ? res.data.last_vaccinated_date
+              : null,
           };
           res.data.medical_history.forEach((i: any) => {
             const medicalHistory = medicalHistoryTypes.find(
@@ -490,6 +498,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   const validateForm = () => {
     let errors = { ...initError };
     let invalidForm = false;
+    let error_div = "";
+
     Object.keys(state.form).forEach((field, i) => {
       switch (field) {
         case "address":
@@ -497,6 +507,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         case "gender":
           if (!state.form[field]) {
             errors[field] = "Field is required";
+            if (!error_div) error_div = field;
             invalidForm = true;
           }
           return;
@@ -504,6 +515,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           if (!sameAddress) {
             if (!state.form[field]) {
               errors[field] = "Field is required";
+              if (!error_div) error_div = field;
               invalidForm = true;
             }
           }
@@ -511,24 +523,29 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         case "date_of_birth":
           if (!state.form[field]) {
             errors[field] = "Please enter date in DD/MM/YYYY format";
+            if (!error_div) error_div = field;
             invalidForm = true;
           }
           return;
         case "local_body":
           if (state.form.nationality === "India" && !state.form[field]) {
             errors[field] = "Please select local body";
+            if (!error_div) error_div = field;
             invalidForm = true;
           }
           return;
         case "ward":
           if (state.form.nationality === "India" && !state.form[field]) {
             errors[field] = "Please select ward";
+            if (!error_div) error_div = field;
             invalidForm = true;
           }
           return;
         case "district":
           if (state.form.nationality === "India" && !state.form[field]) {
             errors[field] = "Please select district";
+            if (!error_div) error_div = field;
+            invalidForm = true;
           }
           return;
         case "state":
@@ -537,18 +554,21 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             !Number(state.form[field])
           ) {
             errors[field] = "Please enter the state";
+            if (!error_div) error_div = field;
             invalidForm = true;
           }
           return;
         case "pincode":
           if (!validatePincode(state.form[field])) {
             errors[field] = "Please enter valid pincode";
+            if (!error_div) error_div = field;
             invalidForm = true;
           }
           return;
         case "passport_no":
           if (state.form.nationality !== "India" && !state.form[field]) {
             errors[field] = "Please enter the passport number";
+            if (!error_div) error_div = field;
             invalidForm = true;
           }
           return;
@@ -556,6 +576,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           const phoneNumber = parsePhoneNumberFromString(state.form[field]);
           if (!state.form[field] || !phoneNumber?.isPossible()) {
             errors[field] = "Please enter valid phone number";
+            if (!error_div) error_div = field;
             invalidForm = true;
           }
           return;
@@ -565,18 +586,21 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           );
           if (!state.form[field] || !emergency_phone_number?.isPossible()) {
             errors[field] = "Please enter valid phone number";
+            if (!error_div) error_div = field;
             invalidForm = true;
           }
           return;
         case "countries_travelled":
           if (state.form.past_travel && !state.form[field].length) {
             errors[field] = "Please enter the list of countries visited";
+            if (!error_div) error_div = field;
             invalidForm = true;
           }
           return;
         case "date_of_return":
           if (state.form.past_travel && !state.form[field]) {
             errors[field] = "Please enter the date of return from travel";
+            if (!error_div) error_div = field;
             invalidForm = true;
           }
           return;
@@ -587,6 +611,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           ) {
             if (!state.form[field]) {
               errors[field] = "Please enter the estimated date of contact";
+              if (!error_div) error_div = field;
               invalidForm = true;
             }
           }
@@ -598,6 +623,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           ) {
             if (!state.form[field]) {
               errors[field] = "Please enter the name / cluster of the contact";
+              if (!error_div) error_div = field;
               invalidForm = true;
             }
           }
@@ -605,6 +631,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         case "blood_group":
           if (!state.form[field]) {
             errors[field] = "Please select a blood group";
+            if (!error_div) error_div = field;
             invalidForm = true;
           }
           return;
@@ -616,6 +643,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               state.form.vaccine_name === "Select"
             ) {
               errors["vaccine_name"] = "Please select vaccine name";
+              if (!error_div) error_div = field;
               invalidForm = true;
             }
           }
@@ -625,14 +653,17 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           return;
       }
     });
+
     dispatch({ type: "set_error", errors });
-    return !invalidForm;
+    return [!invalidForm, error_div];
   };
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
-    const validForm = validateForm();
-    if (validForm) {
+    const [validForm, error_div] = validateForm();
+    if (!validForm) {
+      scrollTo(error_div);
+    } else {
       setIsLoading(true);
       let medical_history: Array<medicalHistoryModel> = [];
       state.form.medical_history.forEach((id: number) => {
@@ -978,7 +1009,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   {" "}
                   Import From External Results
                 </button>
-                <div className="bg-red-100 text-red-800 p-2 rounded-lg shadow mb-4 mt-2 font-semibold text-xs">
+                <div className="bg-yellow-100 text-red-800 p-2 rounded-lg shadow mb-4 mt-2 font-semibold text-xs">
                   <div className="text-xl font-bold">
                     Please enter the correct date of birth for the patient
                   </div>
@@ -987,7 +1018,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   result in duplication of patient records.
                 </div>
                 <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
-                  <div>
+                  <div data-testid="phone-number" id="phone_number-div">
                     <PhoneNumberField
                       label="Phone Number*"
                       value={state.form.phone_number}
@@ -998,7 +1029,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       errors={state.errors.phone_number}
                     />
                   </div>
-                  <div>
+                  <div data-testid="date-of-birth" id="date_of_birth-div">
                     <InputLabel id="date_of_birth-label">
                       Date of birth*
                     </InputLabel>
@@ -1016,7 +1047,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     />
                   </div>
 
-                  <div>
+                  <div data-testid="name" id="name-div">
                     <InputLabel id="name-label">Name*</InputLabel>
                     <TextInputField
                       name="name"
@@ -1029,9 +1060,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     />
                   </div>
 
-                  <div>
+                  <div data-testid="disease-status" id="disease_status-div">
                     <InputLabel id="disease_status-label">
-                      Disease Status*
+                      COVID Disease Status*
                     </InputLabel>
                     <SelectField
                       name="disease_status"
@@ -1044,7 +1075,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       errors={state.errors.disease_status}
                     />
                   </div>
-                  <div>
+                  <div id="is_declared_positive-div">
                     <InputLabel id="is_declared_positive">
                       Is patient declared covid postive by state?
                     </InputLabel>
@@ -1070,9 +1101,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     </RadioGroup>
                   </div>
                   {state.form.is_declared_positive === "true" && (
-                    <div>
+                    <div id="date_declared_positive-div">
                       <InputLabel id="date_declared_positive-label">
-                        Date Patient is Declared Positive
+                        Date Patient is Declared Positive for COVID
                       </InputLabel>
                       <DateInputField
                         fullWidth={true}
@@ -1088,9 +1119,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     </div>
                   )}
 
-                  <div>
+                  <div id="is_vaccinated-div">
                     <InputLabel id="is_vaccinated">
-                      Is patient Vaccinated?
+                      Is patient Vaccinated against COVID?
                     </InputLabel>
                     <RadioGroup
                       aria-label="is_vaccinated"
@@ -1115,8 +1146,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   </div>
 
                   {state.form.is_vaccinated === "true" && (
-                    <div>
-                      <InputLabel id="covin_id-label">COVIN Id</InputLabel>
+                    <div id="covin_id-div">
+                      <InputLabel id="covin_id-label">COWIN ID</InputLabel>
                       <TextInputField
                         name="covin_id"
                         variant="outlined"
@@ -1130,7 +1161,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   )}
 
                   {state.form.is_vaccinated === "true" && (
-                    <div>
+                    <div id="number_of_doses-div">
                       <InputLabel id="doses-label">
                         Number of doses *
                       </InputLabel>
@@ -1158,7 +1189,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   )}
 
                   {state.form.is_vaccinated === "true" && (
-                    <div>
+                    <div id="vaccine_name-div">
                       <InputLabel id="vaccine-name-label">
                         Vaccine Name *
                       </InputLabel>
@@ -1176,7 +1207,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   )}
 
                   {state.form.is_vaccinated === "true" && (
-                    <div>
+                    <div id="last_vaccinated_date-div">
                       <InputLabel id="last_vaccinated_date-label">
                         Last Date of Vaccination
                       </InputLabel>
@@ -1194,9 +1225,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       />
                     </div>
                   )}
-
-                  <div>
-                    <InputLabel id="test_type-label">Test Type</InputLabel>
+                  <div id="test_type-div">
+                    <InputLabel id="test_type-label">
+                      COVID Test Type
+                    </InputLabel>
                     <SelectField
                       name="test_type"
                       variant="outlined"
@@ -1208,8 +1240,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       errors={state.errors.test_type}
                     />
                   </div>
-                  <div>
-                    <InputLabel id="srf_id-label">SRF Id</InputLabel>
+                  <div id="srf_id-div">
+                    <InputLabel id="srf_id-label">
+                      SRF Id for COVID Test
+                    </InputLabel>
                     <TextInputField
                       name="srf_id"
                       variant="outlined"
@@ -1220,9 +1254,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       errors={state.errors.name}
                     />
                   </div>
-                  <div>
+                  <div id="date_of_test-div">
                     <InputLabel id="date_of_birth-label">
-                      Date of Sample given
+                      Date of Sample given for COVID Test
                     </InputLabel>
                     <DateInputField
                       fullWidth={true}
@@ -1236,9 +1270,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       disableFuture={true}
                     />
                   </div>
-                  <div>
+                  <div id="date_of_result-div">
                     <InputLabel id="date_of_result-label">
-                      Date of Result
+                      Date of Result for COVID Test
                     </InputLabel>
                     <DateInputField
                       fullWidth={true}
@@ -1252,7 +1286,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       disableFuture={true}
                     />
                   </div>
-                  <div>
+                  <div data-testid="Gender" id="gender-div">
                     <InputLabel id="gender-label">Gender*</InputLabel>
                     <SelectField
                       name="gender"
@@ -1265,7 +1299,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     />
                   </div>
 
-                  <div>
+                  <div id="is_medical_worker-div">
                     <InputLabel id="is_medical_worker">
                       Medical Worker
                     </InputLabel>
@@ -1293,7 +1327,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
                   {state.form.is_medical_worker === "true" && (
                     <>
-                      <div>
+                      <div id="designation_of_health_care_worker-div">
                         <InputLabel id="designation_of_health_care_worker-label">
                           Designation of Medical Worker
                         </InputLabel>
@@ -1310,7 +1344,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           }
                         />
                       </div>
-                      <div>
+                      <div id="instituion_of_health_care_worker-div">
                         <InputLabel id="institution_of_health_care_worker-label">
                           Institution of Medical Worker{" "}
                         </InputLabel>
@@ -1326,7 +1360,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       </div>
                     </>
                   )}
-                  <div>
+                  <div id="frontline_worker-div">
                     <InputLabel id="frontline_worker-label">
                       Frontline Worker
                     </InputLabel>
@@ -1341,7 +1375,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       errors={state.errors.frontline_worker}
                     />
                   </div>
-                  <div>
+                  <div id="nationality-div">
                     <InputLabel id="nationality-label">Nationality*</InputLabel>
                     <SelectField
                       name="nationality"
@@ -1357,8 +1391,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
                   {state.form.nationality === "India" ? (
                     <>
-                      <div>
-                        <InputLabel id="gender-label">State*</InputLabel>
+                      <div data-testid="state" id="state-div">
+                        <InputLabel id="state-label">State*</InputLabel>
                         {isStateLoading ? (
                           <CircularProgress size={20} />
                         ) : (
@@ -1378,7 +1412,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         )}
                       </div>
 
-                      <div>
+                      <div data-testid="district" id="district-div">
                         <InputLabel id="district-label">District*</InputLabel>
                         {isDistrictLoading ? (
                           <CircularProgress size={20} />
@@ -1399,7 +1433,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         )}
                       </div>
 
-                      <div>
+                      <div data-testid="localbody" id="local_body-div">
                         <InputLabel id="local_body-label">
                           Localbody*
                         </InputLabel>
@@ -1423,7 +1457,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       </div>
                     </>
                   ) : (
-                    <div>
+                    <div id="passport_no-div">
                       <InputLabel id="passport-label">
                         Passport Number*
                       </InputLabel>
@@ -1438,7 +1472,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     </div>
                   )}
 
-                  <div>
+                  <div data-testid="current-address" id="address-div">
                     <InputLabel id="address-label">Current Address*</InputLabel>
                     <MultilineInputField
                       rows={2}
@@ -1452,7 +1486,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       errors={state.errors.address}
                     />
                   </div>
-                  <div>
+                  <div
+                    data-testid="permanent-address"
+                    id="permanent_address-div"
+                  >
                     <InputLabel id="permanent-address-label">
                       Permanent Address*
                     </InputLabel>
@@ -1475,7 +1512,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       />
                     )}
                   </div>
-                  <div>
+                  <div data-testid="ward-respective-lsgi" id="ward-div">
                     <InputLabel id="ward-label">
                       Ward/Division of respective LSGI*
                     </InputLabel>
@@ -1498,7 +1535,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       />
                     )}
                   </div>
-                  <div>
+                  <div id="village-div">
                     <InputLabel id="name-label">Village</InputLabel>
                     <TextInputField
                       name="village"
@@ -1510,7 +1547,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       errors={state.errors.village}
                     />
                   </div>
-                  <div>
+                  <div data-testid="pincode" id="pincode-div">
                     <InputLabel id="name-label">Pincode*</InputLabel>
                     <TextInputField
                       name="pincode"
@@ -1522,7 +1559,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       errors={state.errors.pincode}
                     />
                   </div>
-                  <div>
+                  <div data-testid="blood-group" id="blood_group-div">
                     <InputLabel id="blood_group-label">Blood Group*</InputLabel>
                     <SelectField
                       name="blood_group"
@@ -1536,7 +1573,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       errors={state.errors.blood_group}
                     />
                   </div>
-                  <div>
+                  <div
+                    data-testid="emergency-phone-number"
+                    id="emergency_phone_number-div"
+                  >
                     <PhoneNumberField
                       label="Emergency contact number*"
                       value={state.form.emergency_phone_number}
@@ -1550,7 +1590,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
                 <div className="grid gap-4 grid-cols-1 md:grid-cols-2 mt-4">
                   {state.form.gender === "2" && (
-                    <div>
+                    <div id="is_antenatal-div">
                       <InputLabel id="is_antenatal">Is antenatal ? </InputLabel>
                       <RadioGroup
                         aria-label="is_antenatal"
@@ -1574,7 +1614,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       </RadioGroup>
                     </div>
                   )}
-                  <div>
+                  <div id="is_migrant_worker-div">
                     <InputLabel id="is_migrant_worker">
                       Is a Guest workers?
                     </InputLabel>
@@ -1600,7 +1640,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     </RadioGroup>
                   </div>
 
-                  <div>
+                  <div id="contact_with_confirmed_carrier-div">
                     <InputLabel id="contact_with_confirmed_carrier">
                       Contact with confirmed Covid patient?
                     </InputLabel>
@@ -1626,7 +1666,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     </RadioGroup>
                   </div>
 
-                  <div>
+                  <div id="contact_with_suspected_carrier-div">
                     <InputLabel id="contact_with_suspected_carrier">
                       Contact with Covid suspect?
                     </InputLabel>
@@ -1654,7 +1694,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
                   {(JSON.parse(state.form.contact_with_confirmed_carrier) ||
                     JSON.parse(state.form.contact_with_suspected_carrier)) && (
-                    <div>
+                    <div id="estimated_contact_date-div">
                       <DateInputField
                         fullWidth={true}
                         label="Estimate date of contact*"
@@ -1672,7 +1712,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
                   {(JSON.parse(state.form.contact_with_confirmed_carrier) ||
                     JSON.parse(state.form.contact_with_suspected_carrier)) && (
-                    <div>
+                    <div id="cluster_name-div">
                       <InputLabel id="cluster_name-label">
                         Name / Cluster of Contact*
                       </InputLabel>
@@ -1688,7 +1728,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       />
                     </div>
                   )}
-                  <div className="md:col-span-2">
+                  <div className="md:col-span-2" id="past_travel-div">
                     <CheckboxField
                       checked={state.form.past_travel}
                       onChange={handleCheckboxFieldChange}
@@ -1699,7 +1739,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
                   {state.form.past_travel && (
                     <>
-                      <div className="md:col-span-2">
+                      <div
+                        className="md:col-span-2"
+                        id="countries_travelled-div"
+                      >
                         <AutoCompleteMultiField
                           id="countries-travelled"
                           options={placesList}
@@ -1713,7 +1756,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           errors={state.errors.countries_travelled}
                         />
                       </div>
-                      <div>
+                      <div id="transit_details-div">
                         <InputLabel id="transit_details-label">
                           Transit_details
                         </InputLabel>
@@ -1728,7 +1771,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           errors={state.errors.transit_details}
                         />
                       </div>
-                      <div>
+                      <div id="date_of_return-div">
                         <InputLabel id="date_of_return-label">
                           Estimated date of Arrival*
                         </InputLabel>
@@ -1746,9 +1789,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       </div>
                     </>
                   )}
-                  <div>
+                  <div id="number_of_primary_contacts-div">
                     <InputLabel id="number_of_primary_contacts-label">
-                      Number Of Primary Contacts
+                      Number Of Primary Contacts for COVID
                     </InputLabel>
                     <TextInputField
                       name="number_of_primary_contacts"
@@ -1760,9 +1803,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       errors={state.errors.number_of_primary_contacts}
                     />
                   </div>
-                  <div>
+                  <div id="number_of_secondary_contacts-div">
                     <InputLabel id="number_of_secondary_contacts-label">
-                      Number Of Secondary Contacts
+                      Number Of Secondary Contacts for COVID
                     </InputLabel>
                     <TextInputField
                       name="number_of_secondary_contacts"
@@ -1788,7 +1831,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     </div>
                   </div>
 
-                  <div>
+                  <div id="present_health-div">
                     <InputLabel id="present_health-label">
                       Present Health Condition
                     </InputLabel>
@@ -1805,7 +1848,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     />
                   </div>
 
-                  <div>
+                  <div id="ongoing_medication-div">
                     <InputLabel id="ongoing_medication-label">
                       Ongoing Medication
                     </InputLabel>
@@ -1822,7 +1865,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     />
                   </div>
 
-                  <div>
+                  <div id="allergies-div">
                     <InputLabel id="allergies_label">Allergies</InputLabel>
                     <MultilineInputField
                       rows={2}
@@ -1836,7 +1879,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       errors={state.errors.allergies}
                     />
                   </div>
-                  <div>
+                  <div id="number_of_aged_dependents-div">
                     <InputLabel id="number_of_aged_dependents-label">
                       Number Of Aged Dependents (Above 60)
                     </InputLabel>
@@ -1851,7 +1894,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     />
                   </div>
 
-                  <div>
+                  <div id="number_of_chronic_diseased_dependents-div">
                     <InputLabel id="number_of_chronic_diseased_dependents-label">
                       Number Of Chronic Diseased Dependents
                     </InputLabel>
@@ -1887,6 +1930,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
                     }
                     onClick={(e) => handleSubmit(e)}
+                    data-testid="submit-button"
                   >
                     {" "}
                     {buttonText}{" "}

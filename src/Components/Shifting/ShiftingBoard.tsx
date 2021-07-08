@@ -12,7 +12,7 @@ import { Modal } from "@material-ui/core";
 import { CSVLink } from "react-csv";
 import GetAppIcon from "@material-ui/icons/GetApp";
 
-const limit = 15;
+const limit = 14;
 
 interface boardProps {
   board: string;
@@ -347,7 +347,7 @@ export default function ListView({
           {renderBoardTitle(board)}{" "}
           <GetAppIcon className="cursor-pointer" onClick={triggerDownload} />
         </h3>
-        <span className="rounded-lg ml-2 bg-green-500 text-white px-2">
+        <span className="rounded-lg ml-2 bg-primary-500 text-white px-2">
           {totalCount || "0"}
         </span>
       </div>

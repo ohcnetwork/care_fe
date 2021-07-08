@@ -18,8 +18,6 @@ import {
   listDoctor,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 import BedTypeCard from "./BedTypeCard";
 import DoctorsCountCard from "./DoctorsCountCard";
 import {
@@ -28,6 +26,9 @@ import {
   FacilityModel,
   PatientStatsModel,
 } from "./models";
+import moment from "moment";
+const Loading = loadable(() => import("../Common/Loading"));
+const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export const FacilityHome = (props: any) => {
   const { facilityId } = props;
@@ -182,7 +183,7 @@ export const FacilityHome = (props: any) => {
         open={openDeleteDialog}
         onClose={handleDeleteClose}
       >
-        <DialogTitle className="flex justify-center bg-green-100">
+        <DialogTitle className="flex justify-center bg-primary-100">
           Are you sure you want to delete {facilityData.name || "Facility"}
         </DialogTitle>
         <DialogContent>
@@ -194,7 +195,11 @@ export const FacilityHome = (props: any) => {
           <button onClick={handleDeleteClose} className="btn btn-primary">
             Cancel
           </button>
-          <button onClick={handleDeleteSubmit} className="btn btn-danger">
+          <button
+            onClick={handleDeleteSubmit}
+            id="facility-delete-confirm"
+            className="btn btn-danger"
+          >
             Delete
           </button>
         </DialogActions>
@@ -211,7 +216,15 @@ export const FacilityHome = (props: any) => {
             <Typography>
               Local Body : {facilityData?.local_body_object?.name}
             </Typography>
-
+            <Typography>
+              Last Updated:{" "}
+              {
+                // @ts-ignore
+                facilityData?.modified_date &&
+                  // @ts-ignore
+                  moment(facilityData?.modified_date).fromNow()
+              }
+            </Typography>
             {facilityData?.ward_object && (
               <Typography>
                 Ward :
@@ -248,6 +261,7 @@ export const FacilityHome = (props: any) => {
           </div>
           <div className="flex flex-col">
             <button
+              id="update-facility"
               className="btn-primary btn"
               onClick={() => navigate(`/facility/${facilityId}/update`)}
             >
@@ -263,14 +277,36 @@ export const FacilityHome = (props: any) => {
             </button>
             <button
               className="btn-primary btn mt-2"
+              onClick={() => navigate(`/facility/${facilityId}/location`)}
+            >
+              <i className="fas fa-map-marker-alt text-white mr-2"></i>
+              Location Management
+            </button>
+            <button
+              className="btn-primary btn mt-2"
               onClick={() => navigate(`/facility/${facilityId}/resource/new`)}
             >
               <i className="fas fa-dolly-flatbed text-white mr-2"></i>
               Resource Request
             </button>
+            <button
+              className="btn-primary btn mt-2"
+              onClick={() => navigate(`/facility/${facilityId}/assets/new`)}
+            >
+              <i className="fas fa-plus-circle text-white mr-2"></i>
+              Create Asset
+            </button>
+            <button
+              className="btn-primary btn mt-2"
+              onClick={() => navigate(`/assets?facility=${facilityId}`)}
+            >
+              <i className="fas fa-boxes text-white mr-2"></i>
+              View Assets
+            </button>
             {(currentUser.data.user_type === "DistrictAdmin" ||
               currentUser.data.user_type === "StateAdmin") && (
               <button
+                id="facility-delete"
                 className="btn-danger btn mt-2"
                 onClick={() => setOpenDeleteDialog(true)}
               >
@@ -284,6 +320,7 @@ export const FacilityHome = (props: any) => {
           <button
             className="btn-primary btn mt-2 mr-2 w-full md:w-auto"
             onClick={() => navigate(`/facility/${facilityId}/patient`)}
+            data-testid="add-patient-button"
           >
             <i className="fas fa-plus text-white mr-2"></i>
             Add Details of a Patient

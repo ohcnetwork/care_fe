@@ -103,6 +103,8 @@ export interface PatientModel {
   is_declared_positive?: boolean;
   last_edited?: { first_name?: string; username?: string; last_name?: string };
   created_by?: { first_name?: string; username?: string; last_name?: string };
+  assigned_to?: { first_name?: string; username?: string; last_name?: string };
+  assigned_to_object?: AssignedToObjectModel;
 }
 
 export interface SampleTestModel {

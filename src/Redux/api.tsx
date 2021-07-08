@@ -1,4 +1,14 @@
-export default {
+interface Route {
+  path: string;
+  method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+  noAuth?: boolean;
+}
+
+interface Routes {
+  [name: string]: Route;
+}
+
+const routes: Routes = {
   // Auth Endpoints
   login: {
     path: "/api/v1/auth/login/",
@@ -82,6 +92,15 @@ export default {
     path: "/api/v1/users/?user_type=Doctor&ordering=-last_login",
   },
 
+  getUserPnconfig: {
+    path: "/api/v1/users/{username}/pnconfig/",
+  },
+
+  updateUserPnconfig: {
+    path: "/api/v1/users/{username}/pnconfig/",
+    method: "PATCH",
+  },
+
   // Facility Endpoints
 
   listFacility: {
@@ -113,6 +132,27 @@ export default {
 
   getFacilityUsers: {
     path: "/api/v1/facility/{facility_id}/get_users/",
+  },
+
+  listFacilityAssetLocation: {
+    path: "/api/v1/facility/{facility_external_id}/asset_location/",
+    method: "GET",
+  },
+  createFacilityAssetLocation: {
+    path: "/api/v1/facility/{facility_external_id}/asset_location/",
+    method: "POST",
+  },
+  getFacilityAssetLocation: {
+    path: "/api/v1/facility/{facility_external_id}/asset_location/{external_id}/",
+    method: "GET",
+  },
+  updateFacilityAssetLocation: {
+    path: "/api/v1/facility/{facility_external_id}/asset_location/{external_id}/",
+    method: "PUT",
+  },
+  partialUpdateFacilityAssetLocation: {
+    path: "/api/v1/facility/{facility_external_id}/asset_location/{external_id}/",
+    method: "PATCH",
   },
 
   // Download Api
@@ -263,6 +303,14 @@ export default {
     path: "/api/v1/patient/{id}/transfer/",
     method: "POST",
   },
+  getPatientNotes: {
+    path: "/api/v1/patient/{patientId}/notes/",
+    method: "GET",
+  },
+  addPatientNote: {
+    path: "/api/v1/patient/{patientId}/notes/",
+    method: "POST",
+  },
   sampleTestList: {
     path: "/api/v1/patient/{patientId}/test_sample/",
   },
@@ -289,6 +337,16 @@ export default {
   deleteExternalResult: {
     path: "/api/v1/external_result",
     method: "DELETE",
+  },
+
+  updateExternalResult: {
+    path: "/api/v1/external_result/{id}/",
+    method: "PUT",
+  },
+
+  partialUpdateExternalResult: {
+    path: "/api/v1/external_result/{id}/",
+    method: "PATCH",
   },
 
   // States
@@ -438,10 +496,23 @@ export default {
     path: "/api/v1/shift/",
     method: "GET",
   },
-
-  // Notifications List
+  getShiftComments: {
+    path: "/api/v1/shift/{id}/comment/",
+    method: "GET",
+  },
+  addShiftComments: {
+    path: "/api/v1/shift/{id}/comment/",
+    method: "POST",
+  },
+  // Notifications
   getNotifications: {
     path: "/api/v1/notification/",
+  },
+  getNotificationData: {
+    path: "/api/v1/notification/{id}/",
+  },
+  getPublicKey: {
+    path: "/api/v1/notification/public_key/",
   },
 
   // FileUpload Create
@@ -520,4 +591,48 @@ export default {
     path: "/api/v1/resource/{id}/comment/",
     method: "POST",
   },
+
+  // Assets endpoints
+
+  listAssets: {
+    path: "/api/v1/asset",
+    method: "GET",
+  },
+  createAsset: {
+    path: "/api/v1/asset/",
+    method: "POST",
+  },
+  getAssetUserLocation: {
+    path: "​/api/v1/asset​/get_default_user_location​/",
+    method: "GET",
+  },
+  createAssetUserLocation: {
+    path: "/api/v1/asset/set_default_user_location/",
+    method: "POST",
+  },
+  getAsset: {
+    path: "/api/v1/asset/{external_id}/",
+    method: "GET",
+  },
+  updateAsset: {
+    path: "/api/v1/asset/{external_id}/",
+    method: "PUT",
+  },
+  partialUpdateAsset: {
+    path: "/api/v1/asset/{external_id}/",
+    method: "PATCH",
+  },
+
+  // Asset transaction endpoints
+
+  listAssetTransaction: {
+    path: "/api/v1/asset_transaction/",
+    method: "GET",
+  },
+  getAssetTransaction: {
+    path: "/api/v1/asset_transaction/{id}",
+    method: "GET",
+  },
 };
+
+export default routes;

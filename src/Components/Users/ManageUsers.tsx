@@ -1,7 +1,8 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
-import React, { useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import loadable from "@loadable/component";
 import { useDispatch, useSelector } from "react-redux";
+import moment from "moment";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   addUserFacility,
@@ -9,18 +10,23 @@ import {
   getUserList,
   getUserListFacility,
   searchUser,
+  deleteUser,
 } from "../../Redux/actions";
 import Pagination from "../Common/Pagination";
 import { navigate } from "raviger";
-import { USER_TYPES } from "../../Common/constants";
+import { USER_TYPES, RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import { InputSearchBox } from "../Common/SearchBox";
 import { FacilityModel } from "../Facility/models";
 import DeleteForeverIcon from "@material-ui/icons/DeleteForever";
 import { IconButton } from "@material-ui/core";
 import LinkFacilityDialog from "./LinkFacilityDialog";
+import { SelectField } from "../Common/HelperInputFields";
+import UserDeleteDialog from "./UserDeleteDialog";
+import * as Notification from "../../Utils/Notifications.js";
+import classNames from "classnames";
+
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
-import { SelectField } from "../Common/HelperInputFields";
 
 export default function ManageUsers(props: any) {
   const dispatch: any = useDispatch();
@@ -41,14 +47,23 @@ export default function ManageUsers(props: any) {
   const userTypes = isSuperuser
     ? [...USER_TYPES]
     : USER_TYPES.slice(0, userIndex + 1);
+  const deleteUserTypes = isSuperuser
+    ? [...USER_TYPES]
+    : USER_TYPES.slice(0, userIndex);
   const [linkFacility, setLinkFacility] = useState<{
     show: boolean;
     username: string;
   }>({ show: false, username: "" });
 
+  const [userData, setUserData] = useState<{
+    show: boolean;
+    username: string;
+    name: string;
+  }>({ show: false, username: "", name: "" });
+
   const [selectedRole, setSelectedRole] = useState("");
 
-  const limit = userTypes.length ? 13 : 14;
+  const limit = RESULTS_PER_PAGE_LIMIT;
 
   const USER_TYPE_OPTIONS = ["Select", ...USER_TYPES].map((user) => {
     return {
@@ -136,7 +151,7 @@ export default function ManageUsers(props: any) {
 
   const addUser = (
     <button
-      className="px-4 py-1 rounded-md bg-green-500 mt-4 text-white text-lg font-semibold rounded shadow"
+      className="px-4 py-1 rounded-md bg-primary-500 mt-4 text-white text-lg font-semibold rounded shadow"
       onClick={() => navigate("/user/add")}
     >
       <i className="fas fa-plus mr-2"></i>
@@ -185,15 +200,42 @@ export default function ManageUsers(props: any) {
     });
   };
 
+  const handleCancel = () => {
+    setUserData({ show: false, username: "", name: "" });
+  };
+
+  const handleSubmit = async () => {
+    let username = userData.username;
+    let res = await dispatch(deleteUser(username));
+    if (res.status >= 200) {
+      Notification.Success({
+        msg: "User deleted successfully",
+      });
+    }
+
+    setUserData({ show: false, username: "", name: "" });
+    window.location.reload();
+  };
+
+  const handleDelete = (user: any) => {
+    setUserData({
+      show: true,
+      username: user.username,
+      name: `${user.first_name} ${user.last_name}`,
+    });
+  };
+
+  const facilityClassname = classNames({
+    "align-baseline font-bold text-sm": true,
+    "text-blue-500 hover:text-blue-800": !isFacilityLoading,
+    "text-gray-500": isFacilityLoading,
+  });
+
   const showLinkFacility = (username: string) => {
     return (
       <a
         onClick={() => showLinkFacilityModal(username)}
-        className={`align-baseline font-bold text-sm ${
-          !isFacilityLoading
-            ? "text-blue-500 hover:text-blue-800"
-            : "text-gray-500"
-        }`}
+        className={facilityClassname}
         href="#"
       >
         Link new facility
@@ -212,8 +254,8 @@ export default function ManageUsers(props: any) {
     }
     return (
       <>
-        {facilities.map((facility) => (
-          <div className="flex items-center mb-2">
+        {facilities.map((facility, i) => (
+          <div key={`facility_${i}`} className="flex items-center mb-2">
             <div className="font-semibold">{facility.name}</div>
             <IconButton
               size="small"
@@ -238,6 +280,23 @@ export default function ManageUsers(props: any) {
     loadFacilities(username);
   };
 
+  const showDelete = (user: any) => {
+    const STATE_ADMIN_LEVEL = USER_TYPES.indexOf("StateLabAdmin");
+    const STATE_READ_ONLY_ADMIN_LEVEL =
+      USER_TYPES.indexOf("StateReadOnlyAdmin");
+    const DISTRICT_ADMIN_LEVEL = USER_TYPES.indexOf("DistrictAdmin");
+    const level = USER_TYPES.indexOf(user.user_type);
+    const currentUserLevel = USER_TYPES.indexOf(currentUser.data.user_type);
+    if (
+      currentUserLevel >= STATE_ADMIN_LEVEL &&
+      currentUserLevel < STATE_READ_ONLY_ADMIN_LEVEL
+    )
+      return user.state_object.id === currentUser.data.state;
+    if (currentUserLevel >= DISTRICT_ADMIN_LEVEL && currentUserLevel > level)
+      return user.district_object.id === currentUser.data.district;
+    return false;
+  };
+
   let userList: any[] = [];
   if (users && users.length) {
     userList = users.map((user: any, idx: number) => {
@@ -246,13 +305,42 @@ export default function ManageUsers(props: any) {
           <div className="block rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 overflow-hidden">
             <div className="h-full flex flex-col justify-between">
               <div className="px-6 py-4">
-                {user.username && (
-                  <div className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800">
-                    {user.username}
+                <div className="flex justify-between">
+                  {user.username && (
+                    <div className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800">
+                      {user.username}
+                    </div>
+                  )}
+                  <div className="flex-shrink-0 text-sm text-gray-600 mt-2 min-width-50">
+                    Last Online:{" "}
+                    <span
+                      aria-label="Online"
+                      className={
+                        "flex-shrink-0 inline-block h-2 w-2 rounded-full " +
+                        (moment()
+                          .subtract(5, "minutes")
+                          .isBefore(user.last_login)
+                          ? "bg-primary-400"
+                          : "bg-gray-300")
+                      }
+                    ></span>
+                    <span className="pl-2">
+                      {user.last_login
+                        ? moment(user.last_login).fromNow()
+                        : "Never"}
+                    </span>
                   </div>
-                )}
+                </div>
                 <div className="font-black text-2xl capitalize mt-2">
                   {`${user.first_name} ${user.last_name}`}
+
+                  {user.last_login &&
+                  moment().subtract(5, "minutes").isBefore(user.last_login) ? (
+                    <i
+                      className="animate-pulse text-primary-500 fas fa-circle ml-1 opacity-75"
+                      aria-label="Online"
+                    ></i>
+                  ) : null}
                 </div>
 
                 {user.user_type && (
@@ -293,11 +381,7 @@ export default function ManageUsers(props: any) {
                     {!user.facilities && (
                       <a
                         onClick={() => loadFacilities(user.username)}
-                        className={`inline-block align-baseline font-bold text-sm ${
-                          !isFacilityLoading
-                            ? "text-blue-500 hover:text-blue-800"
-                            : "text-gray-500"
-                        }`}
+                        className={`inline-block ${facilityClassname}`}
                         href="#"
                       >
                         Click here to show
@@ -322,6 +406,15 @@ export default function ManageUsers(props: any) {
                     </div>
                   </div>
                 </div>
+              )}
+              {showDelete(user) && (
+                <button
+                  type="button"
+                  className="m-3 px-3 py-2 self-end w-20 border border-red-500 text-center text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:text-red-500 focus:outline-none focus:border-red-300 focus:shadow-outline-blue active:text-red-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                  onClick={() => handleDelete(user)}
+                >
+                  Delete
+                </button>
               )}
             </div>
           </div>
@@ -431,6 +524,13 @@ export default function ManageUsers(props: any) {
       <div className="px-3 md:px-8">
         <div>{manageUsers}</div>
       </div>
+      {userData.show && (
+        <UserDeleteDialog
+          name={userData.name}
+          handleCancel={handleCancel}
+          handleOk={handleSubmit}
+        />
+      )}
     </div>
   );
 }

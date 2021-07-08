@@ -13,6 +13,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { GENDER_TYPES, DISEASE_STATUS } from "../../Common/constants";
 import loadable from "@loadable/component";
 import { statusType, useAbortableEffect } from "../../Common/utils";
+import { OnlineUsersSelect } from "../Common/OnlineUsersSelect";
 import {
   getConsultationList,
   listShiftRequests,
@@ -36,7 +37,11 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import { TextInputField, DateInputField } from "../Common/HelperInputFields";
+import {
+  TextInputField,
+  DateInputField,
+  ErrorHelperText,
+} from "../Common/HelperInputFields";
 import { validateEmailAddress } from "../../Common/validation";
 import Radio from "@material-ui/core/Radio";
 import RadioGroup from "@material-ui/core/RadioGroup";
@@ -85,7 +90,7 @@ interface preDischargeFormInterface {
   donatePlasma: donatePlasmaOptionType;
   disease_status?: string;
   srf_id?: string;
-  date_of_test?: string;
+  date_of_test: any;
 }
 
 export const PatientHome = (props: any) => {
@@ -103,6 +108,8 @@ export const PatientHome = (props: any) => {
     []
   );
   const [activeShiftingData, setActiveShiftingData] = useState<Array<any>>([]);
+  const [assignedVolunteerObject, setAssignedVolunteerObject] =
+    useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [totalConsultationCount, setTotalConsultationCount] = useState(0);
   const [currentConsultationPage, setCurrentConsultationPage] = useState(1);
@@ -128,6 +135,8 @@ export const PatientHome = (props: any) => {
   });
   const [open, setOpen] = React.useState(false);
   const [openDischargeDialog, setOpenDischargeDialog] = React.useState(false);
+  const [openAssignVolunteerDialog, setOpenAssignVolunteerDialog] =
+    React.useState(false);
   const state: any = useSelector((state) => state);
   const { currentUser } = state;
 
@@ -162,6 +171,7 @@ export const PatientHome = (props: any) => {
 
   const initPreDischargeForm: preDischargeFormInterface = {
     donatePlasma: null,
+    date_of_test: null,
   };
 
   const [isSendingDischargeApi, setIsSendingDischargeApi] = useState(false);
@@ -207,6 +217,36 @@ export const PatientHome = (props: any) => {
       });
       setOpen(false);
     }
+  };
+
+  const handleAssignedVolunteer = () => {
+    dispatch(
+      patchPatient(
+        {
+          assigned_to: assignedVolunteerObject
+            ? assignedVolunteerObject.id
+            : null,
+        },
+        { id: patientData.id }
+      )
+    ).then((response: any) => {
+      if ((response || {}).status === 200) {
+        let dummyPatientData = Object.assign({}, patientData);
+        dummyPatientData["assigned_to"] = assignedVolunteerObject;
+        setPatientData(dummyPatientData);
+        if (assignedVolunteerObject)
+          Notification.Success({
+            msg: "Volunteer assigned successfully.",
+          });
+        else
+          Notification.Success({
+            msg: "Volunteer unassigned successfully.",
+          });
+        document.location.reload();
+      }
+    });
+    setOpenAssignVolunteerDialog(false);
+    if (errors["assignedVolunteer"]) delete errors["assignedVolunteer"];
   };
 
   const handlePatientTransfer = (value: boolean) => {
@@ -305,6 +345,10 @@ export const PatientHome = (props: any) => {
 
   const dischargeSummaryFormSetUserEmail = () => {
     setDischargeSummaryForm({ email: currentUser.data.email });
+  };
+
+  const handleVolunteerSelect = (volunteer: any) => {
+    setAssignedVolunteerObject(volunteer);
   };
 
   const handleClickOpen = () => {
@@ -556,13 +600,13 @@ export const PatientHome = (props: any) => {
 
       <div id="revamp">
         <PageTitle title={`Covid Suspect Details`} />
-        {patientData?.last_consultation?.assigned_to_object && (
-          <div className="relative rounded-lg shadow bg-green-200 mt-2">
-            <div className="max-w-screen-xl mx-auto py-3 px-3 sm:px-6 lg:px-8">
-              <div className="pr-16 sm:text-center sm:px-16">
-                <p className="font-bold text-green-800">
+        <div className="relative mt-2">
+          <div className="max-w-screen-xl mx-auto py-3 px-3 sm:px-6 lg:px-8">
+            <div className="md:flex">
+              {patientData?.last_consultation?.assigned_to_object && (
+                <p className="font-bold text-green-800 rounded-lg shadow bg-green-200 p-3 mx-3 flex-1 text-center">
                   <span className="inline">
-                    Assigned to:{" "}
+                    Assigned Doctor:{" "}
                     {
                       patientData.last_consultation.assigned_to_object
                         .first_name
@@ -570,10 +614,19 @@ export const PatientHome = (props: any) => {
                     {patientData.last_consultation.assigned_to_object.last_name}
                   </span>
                 </p>
-              </div>
+              )}
+              {patientData.assigned_to_object && (
+                <p className="font-bold text-primary-800 rounded-lg shadow bg-primary-200 mx-2 p-3 flex-1 text-center">
+                  <span className="inline">
+                    Assigned Volunteer:{" "}
+                    {patientData.assigned_to_object.first_name}{" "}
+                    {patientData.assigned_to_object.last_name}
+                  </span>
+                </p>
+              )}
             </div>
           </div>
-        )}
+        </div>
         {patientData?.facility != patientData?.last_consultation?.facility && (
           <div className="relative mt-2">
             <div className="max-w-screen-xl mx-auto py-3 px-3 sm:px-6 lg:px-8 rounded-lg shadow bg-red-200 ">
@@ -600,7 +653,10 @@ export const PatientHome = (props: any) => {
             </div>
           </div>
         )}
-        <section className="md:flex items-center mt-4 space-y-2">
+        <section
+          className="md:flex items-center mt-4 space-y-2"
+          data-testid="patient-dashboard"
+        >
           <div className="md:w-2/3 mx-2 h-full">
             <div className="bg-white rounded-lg shadow p-4 h-full">
               <h1 className="font-bold text-3xl">
@@ -739,7 +795,7 @@ export const PatientHome = (props: any) => {
                 {patientData.allow_transfer ? (
                   <Badge color="yellow" icon="unlock" text="Transfer Allowed" />
                 ) : (
-                  <Badge color="green" icon="lock" text="Transfer Blocked" />
+                  <Badge color="primary" icon="lock" text="Transfer Blocked" />
                 )}
                 {patientData.is_antenatal && patientData.is_active && (
                   <Badge color="blue" icon="baby-carriage" text="Antenatal" />
@@ -852,7 +908,6 @@ export const PatientHome = (props: any) => {
                     <button
                       className="btn btn-primary w-full"
                       name="death_report"
-                      disabled={!patientData.is_active}
                       onClick={() => navigate(`/death_report/${id}`)}
                     >
                       <i className="fas fa-file-download mr-2" />
@@ -1247,7 +1302,7 @@ export const PatientHome = (props: any) => {
               {patientData.covin_id && (
                 <div className="sm:col-span-1">
                   <div className="text-sm leading-5 font-medium text-gray-500">
-                    Vaccinated (COVIN ID)
+                    Vaccinated (COWIN ID)
                   </div>
                   <div className="mt-1 text-sm leading-5 text-gray-900">
                     {patientData?.covin_id || "-"}
@@ -1433,6 +1488,16 @@ export const PatientHome = (props: any) => {
                 <div>
                   <button
                     className="btn btn-primary w-full"
+                    onClick={() =>
+                      navigate(`/facility/${facilityId}/patient/${id}/notes/`)
+                    }
+                  >
+                    View Patient Notes
+                  </button>
+                </div>
+                <div>
+                  <button
+                    className="btn btn-primary w-full"
                     onClick={handleClickOpen}
                   >
                     Discharge Summary
@@ -1448,6 +1513,15 @@ export const PatientHome = (props: any) => {
                     }
                   >
                     Discharge from CARE
+                  </button>
+                </div>
+                <div>
+                  <button
+                    className="btn btn-primary w-full"
+                    onClick={() => setOpenAssignVolunteerDialog(true)}
+                    disabled={false}
+                  >
+                    Assign to a volunteer
                   </button>
                 </div>
               </div>
@@ -1505,12 +1579,49 @@ export const PatientHome = (props: any) => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <Dialog
+        maxWidth={"md"}
+        open={openAssignVolunteerDialog}
+        onClose={() => setOpenAssignVolunteerDialog(false)}
+      >
+        <div className="mx-10 my-5">
+          <DialogTitle id="form-dialog-title">
+            Assign a volunteer to {patientData.name}
+          </DialogTitle>
+
+          <div>
+            <OnlineUsersSelect
+              userId={assignedVolunteerObject?.id || patientData.assigned_to}
+              selectedUser={
+                assignedVolunteerObject || patientData.assigned_to_object
+              }
+              onSelect={handleVolunteerSelect}
+              user_type={"Volunteer"}
+            />
+            <ErrorHelperText error={errors.assignedVolunteer} />
+          </div>
+
+          <DialogActions>
+            <Button
+              onClick={() => setOpenAssignVolunteerDialog(false)}
+              color="primary"
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleAssignedVolunteer} color="primary">
+              Submit
+            </Button>
+          </DialogActions>
+        </div>
+      </Dialog>
+
       <Dialog
         maxWidth={"md"}
         open={openDischargeDialog}
         onClose={handleDischargeClose}
       >
-        <DialogTitle className="flex justify-center bg-green-100">
+        <DialogTitle className="flex justify-center bg-primary-100">
           Before we discharge {patientData.name}
         </DialogTitle>
         <DialogContent className="px-20">
@@ -1580,7 +1691,7 @@ export const PatientHome = (props: any) => {
                   margin="dense"
                   type="text"
                   placeholder="SRF ID"
-                  value={preDischargeForm.srf_id || patientData.srf_id}
+                  value={preDischargeForm.srf_id}
                   onChange={(event) =>
                     handlePreDischargeFormChange("srf_id", event)
                   }
@@ -1591,10 +1702,7 @@ export const PatientHome = (props: any) => {
                   className="flex flex-1 ml-5"
                   fullWidth={true}
                   label="Date of test"
-                  value={
-                    preDischargeForm.date_of_test ||
-                    (patientData.date_of_test as string)
-                  }
+                  value={preDischargeForm.date_of_test}
                   onChange={(event) =>
                     handlePreDischargeFormChange("date_of_test", event)
                   }
