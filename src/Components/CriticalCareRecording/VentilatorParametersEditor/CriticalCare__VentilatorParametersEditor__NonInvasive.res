@@ -24,6 +24,8 @@ let psvOptionsArray = [
     "interval": "5",
     "step": 1.0,
     "id": "peep",
+    "min": "10",
+    "max": "30",
   },
   {
     "title": "Peak Inspiratory Pressure (PIP) (cm H2O)",
@@ -32,6 +34,8 @@ let psvOptionsArray = [
     "interval": "10",
     "step": 1.0,
     "id": "peakInspiratoryPressure",
+    "min": "12",
+    "max": "30",
   },
   {
     "title": "Mean Airway Pressure (cm H2O",
@@ -40,6 +44,8 @@ let psvOptionsArray = [
     "interval": "5",
     "step": 1.0,
     "id": "meanAirwayPressure",
+    "min": "12",
+    "max": "25",
   },
   {
     "title": "Respiratory Rate Ventilator (bpm)",
@@ -48,6 +54,8 @@ let psvOptionsArray = [
     "interval": "10",
     "step": 1.0,
     "id": "respiratoryRateVentilator",
+    "min": "40",
+    "max": "60",
   },
   {
     "title": "Tidal Volume (ml)",
@@ -56,14 +64,18 @@ let psvOptionsArray = [
     "interval": "100",
     "step": 1.0,
     "id": "tidalVolume",
+    "min": "0",
+    "max": "1000",
   },
   {
     "title": "FiO2 (%)",
-    "start": "20",
+    "start": "21",
     "end": "100",
     "interval": "10",
     "step": 1.0,
     "id": "fio2",
+    "min": "21",
+    "max": "60",
   },
   {
     "title": "SPO2 (%)",
@@ -72,6 +84,8 @@ let psvOptionsArray = [
     "interval": "10",
     "step": 1.0,
     "id": "spo2",
+    "min": "90",
+    "max": "100",
   },
 ]
 
@@ -98,10 +112,7 @@ let make = (~state: VentilatorParameters.niv, ~send: VentilatorParameters.action
         />
         {str({"Control Mechanical Ventilation (CMV)"})}
       </label>
-      <div
-        className={`ml-6 ${state.ventilatorMode !== "cmv"
-            ? "pointer-events-none opacity-50"
-            : ""} `}>
+      <div className={`ml-6 ${state.ventilatorMode !== "cmv" ? "hidden" : ""} `}>
         <CriticalCare__RadioButton
           defaultChecked
           onChange={e =>
@@ -133,10 +144,7 @@ let make = (~state: VentilatorParameters.niv, ~send: VentilatorParameters.action
         />
         {str({"Synchronised Intermittent Mandatory Ventilation (SIMV)"})}
       </label>
-      <div
-        className={`ml-6 ${state.ventilatorMode !== "simv"
-            ? "pointer-events-none opacity-50"
-            : ""} `}>
+      <div className={`ml-6 ${state.ventilatorMode !== "simv" ? "hidden" : ""} `}>
         <CriticalCare__RadioButton
           defaultChecked
           onChange={e =>
@@ -168,10 +176,7 @@ let make = (~state: VentilatorParameters.niv, ~send: VentilatorParameters.action
         />
         {str({"C-PAP/ Pressure Support Ventilation (PSV)"})}
       </label>
-      <div
-        className={`ml-6 ${state.ventilatorMode !== "psv"
-            ? "pointer-events-none opacity-50"
-            : ""} `}>
+      <div className={`ml-6 ${state.ventilatorMode !== "psv" ? "hidden" : ""} `}>
         {psvOptionsArray
         |> Array.map(option => {
           let value = switch option["id"] {

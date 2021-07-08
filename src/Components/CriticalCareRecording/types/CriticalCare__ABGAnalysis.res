@@ -15,7 +15,7 @@ type t = {
   baseExcess: string,
   lactate: string,
   sodium: string,
-  potassium: string
+  potassium: string,
 }
 
 let po2 = t => t.po2
@@ -35,5 +35,37 @@ let init = {
   baseExcess: "",
   lactate: "",
   sodium: "",
-  potassium: ""
+  potassium: "",
+}
+
+let showStatus = data => {
+  let total = 8.0
+  let count = ref(0.0)
+
+  if po2(data) !== "" {
+    count := count.contents +. 1.0
+  }
+  if pco2(data) !== "" {
+    count := count.contents +. 1.0
+  }
+  if pH(data) !== "" {
+    count := count.contents +. 1.0
+  }
+  if hco3(data) !== "" {
+    count := count.contents +. 1.0
+  }
+  if baseExcess(data) !== "" {
+    count := count.contents +. 1.0
+  }
+  if lactate(data) !== "" {
+    count := count.contents +. 1.0
+  }
+  if sodium(data) !== "" {
+    count := count.contents +. 1.0
+  }
+  if potassium(data) !== "" {
+    count := count.contents +. 1.0
+  }
+
+  Js.Float.toFixed(count.contents /. total *. 100.0)
 }

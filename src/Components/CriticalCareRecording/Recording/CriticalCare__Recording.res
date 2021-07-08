@@ -45,6 +45,7 @@ type action =
   | UpdateNursingCareStatus(string)
   | UpdateVentilatorParametersStatus(string)
   | UpdateHemodynamicParameterStatus(string)
+  | UpdateABGAnalysisStatus(string)
   | UpdateTotal(int)
   | SetBloodSugarEditor(BloodSugar.t)
   | UpdateBloodSugarStatus(string)
@@ -145,6 +146,10 @@ let reducer = (state, action) => {
     let status = (inf_done + ivf_done + feed_done + out_done)->toFloat /. (inf_total + ivf_total + feed_total + out_total)->toFloat
     {...state, ioBalanceStatus: (status *. 100.0)->toInt->toString}
   }
+  | UpdateABGAnalysisStatus(arterialBloodGasAnalysisStatus) => {
+      ...state,
+      arterialBloodGasAnalysisStatus: arterialBloodGasAnalysisStatus,
+    }
   }
 }
 
@@ -177,6 +182,7 @@ let initialState = {
   neurologicalMonitoring: {
     pronePosition: false,
     levelOfConciousness: "",
+    locDescription: "",
     leftPupilSize: "",
     leftSizeDescription: "",
     leftPupilReaction: "",
@@ -330,9 +336,13 @@ export make = () => {
           | ArterialBloodGasAnalysisEditor =>
             <CriticalCare__ABGAnalysisEditor
               initialState={state.abgEditor}
-              handleDone={data => {
+              handleDone={(data, status) => {
                 send(SetABGAnalysisEditor(data))
+                send(UpdateABGAnalysisStatus(status))
                 send(CloseEditor)
+                if status === "100" {
+                  send(UpdateTotal(state.totalStatus + 1))
+                }
               }}
             />
           | BloodSugarEditor =>

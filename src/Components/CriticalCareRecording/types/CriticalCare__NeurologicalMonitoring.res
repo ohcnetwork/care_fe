@@ -1,6 +1,7 @@
 type t = {
   pronePosition: bool,
   levelOfConciousness: string,
+  locDescription: string,
   leftPupilSize: string,
   leftSizeDescription: string,
   leftPupilReaction: string,
@@ -21,6 +22,7 @@ type t = {
 
 let pronePosition = t => t.pronePosition
 let levelOfConciousness = t => t.levelOfConciousness
+let locDescription = t => t.locDescription
 let leftPupilSize = t => t.leftPupilSize
 let leftSizeDescription = t => t.leftSizeDescription
 let leftPupilReaction = t => t.leftPupilReaction

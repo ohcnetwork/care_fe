@@ -365,6 +365,7 @@ let handleSubmit = (handleDone, state) => {
 type action =
   | SetPronePosition(bool)
   | SetLevelOfConciousness(string)
+  | SetLocDescription(string)
   | SetLeftPupilSize(string)
   | SetLeftSizeDescription(string)
   | SetLeftPupilReaction(string)
@@ -392,6 +393,11 @@ let reducer = (state, action) => {
   | SetLevelOfConciousness(levelOfConciousness) => {
       ...state,
       levelOfConciousness: levelOfConciousness,
+      locDescription: levelOfConciousness === "cannot_be_assessed" ? locDescription(state) : "",
+    }
+  | SetLocDescription(locDescription) => {
+      ...state,
+      locDescription: locDescription,
     }
   | SetLeftPupilSize(leftPupilSize) => {
       ...state,
@@ -553,6 +559,15 @@ let make = (~handleDone, ~initialState) => {
           defaultChecked={NeurologicalMonitoring.levelOfConciousness(state)}
           onChange={event => send(SetLevelOfConciousness(getFieldValue(event)))}
         />
+        {if NeurologicalMonitoring.levelOfConciousness(state) === "cannot_be_assessed" {
+          <CriticalCare__Description
+            name="loc_description"
+            text={NeurologicalMonitoring.locDescription(state)}
+            onChange={event => send(SetLocDescription(getFieldValue(event)))}
+          />
+        } else {
+          <> </>
+        }}
       </div>
       <div className="my-10">
         <div className="text-2xl font-bold my-2 mb-4"> {str("Pupil")} </div>
@@ -561,7 +576,7 @@ let make = (~handleDone, ~initialState) => {
           <CriticalCare__PupilRangeSlider
             name={"left_pupil_slider"}
             val={NeurologicalMonitoring.leftPupilSize(state)}
-            onChange={event => send(SetLeftPupilSize(getFieldValue(event)))}
+            setValue={value => send(SetLeftPupilSize(value))}
           />
           {if NeurologicalMonitoring.leftPupilSize(state) === "cannot_be_assessed" {
             <CriticalCare__Description
@@ -596,7 +611,7 @@ let make = (~handleDone, ~initialState) => {
           <CriticalCare__PupilRangeSlider
             name={"right_pupil_slider"}
             val={NeurologicalMonitoring.rightPupilSize(state)}
-            onChange={event => send(SetRightPupilSize(getFieldValue(event)))}
+            setValue={value => send(SetRightPupilSize(value))}
           />
           {if NeurologicalMonitoring.rightPupilSize(state) === "cannot_be_assessed" {
             <CriticalCare__Description

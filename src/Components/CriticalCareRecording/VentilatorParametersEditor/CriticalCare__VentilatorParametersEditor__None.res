@@ -10,6 +10,8 @@ let checkBoxSliderConfig = [
     "interval": "5",
     "step": 1.0,
     "id": "nasalProngs",
+    "min": "1",
+    "max": "4",
   },
   {
     "checkboxTitle": "Simple Face Mask",
@@ -19,17 +21,21 @@ let checkBoxSliderConfig = [
     "interval": "5",
     "step": 1.0,
     "id": "simpleFaceMask",
+    "min": "5",
+    "max": "10",
   },
 ]
 
 let sliderConfig = [
   {
     "title": "FiO2 (%)",
-    "start": "20",
+    "start": "21",
     "end": "100",
     "interval": "10",
     "step": 1.0,
     "id": "fio2",
+    "min": "21",
+    "max": "60",
   },
   {
     "title": "SPO2 (%)",
@@ -38,6 +44,8 @@ let sliderConfig = [
     "interval": "10",
     "step": 1.0,
     "id": "spo2",
+    "min": "90",
+    "max": "100",
   },
 ]
 
