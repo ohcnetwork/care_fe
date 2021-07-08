@@ -280,7 +280,7 @@ export default function ManageUsers(props: any) {
     loadFacilities(username);
   };
 
-  const showDelete = (user: any) => {
+  const showUserAccess = (user: any) => {
     const STATE_ADMIN_LEVEL = USER_TYPES.indexOf("StateLabAdmin");
     const STATE_READ_ONLY_ADMIN_LEVEL =
       USER_TYPES.indexOf("StateReadOnlyAdmin");
@@ -407,14 +407,23 @@ export default function ManageUsers(props: any) {
                   </div>
                 </div>
               )}
-              {showDelete(user) && (
-                <button
-                  type="button"
-                  className="m-3 px-3 py-2 self-end w-20 border border-red-500 text-center text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:text-red-500 focus:outline-none focus:border-red-300 focus:shadow-outline-blue active:text-red-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
-                  onClick={() => handleDelete(user)}
-                >
-                  Delete
-                </button>
+              {showUserAccess(user) && (
+                <div className="flex flex-row justify-end">
+                  <button
+                    onClick={(_) => navigate(`/user/${user.username}/skills`)}
+                    type="button"
+                    className="my-3 mx-1 px-3 py-2 self-end w-50 border border-primary-500 text-center text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:shadow-outline-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                  >
+                    View/Edit Skills
+                  </button>
+                  <button
+                    type="button"
+                    className="m-3 px-3 py-2 self-end w-20 border border-red-500 text-center text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:text-red-500 focus:outline-none focus:border-red-300 focus:shadow-outline-blue active:text-red-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                    onClick={() => handleDelete(user)}
+                  >
+                    Delete
+                  </button>
+                </div>
               )}
             </div>
           </div>

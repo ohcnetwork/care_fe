@@ -13,6 +13,7 @@ import {
 import { parsePhoneNumberFromString } from "libphonenumber-js/max";
 import { validateEmailAddress, phonePreg } from "../../Common/validation";
 import * as Notification from "../../Utils/Notifications.js";
+import { navigate } from "raviger";
 import { checkIfLatestBundle } from "../../Utils/build-meta-info";
 import LanguageSelector from "../../Components/Common/LanguageSelector";
 
@@ -294,13 +295,23 @@ export default function UserProfile() {
               <p className="mt-1 text-sm leading-5 text-gray-600">
                 Local Body, District and State are Non Editable Settings.
               </p>
-              <button
-                onClick={(_) => setShowEdit(!showEdit)}
-                type="button"
-                className="relative inline-flex items-center px-4 py-2 border border-transparent text-sm leading-5 font-medium rounded-md text-white bg-primary-600 hover:bg-primary-500 focus:outline-none focus:shadow-outline-primary focus:border-primary-700 active:bg-primary-700 mt-4"
-              >
-                {showEdit ? "Cancel" : "Edit User Profile"}
-              </button>
+              <div className="flex flex-row md:flex-col w-1/2 space-x-2 md:space-x-0">
+                <button
+                  onClick={(_) => setShowEdit(!showEdit)}
+                  type="button"
+                  className="items-center px-2 py-2 border border-transparent text-sm leading-5 font-medium rounded-md text-white bg-primary-600 hover:bg-primary-500 focus:outline-none focus:shadow-outline-primary focus:border-primary-700 active:bg-primary-700 mt-4"
+                >
+                  {showEdit ? "Cancel" : "Edit User Profile"}
+                </button>
+
+                <button
+                  onClick={(_) => navigate(`/user/${details.username}/skills`)}
+                  type="button"
+                  className="items-center px-2 py-2 border border-transparent text-sm leading-5 font-medium rounded-md text-white bg-primary-600 hover:bg-primary-500 focus:outline-none focus:shadow-outline-primary focus:border-primary-700 active:bg-primary-700 mt-4"
+                >
+                  View/Edit Skills
+                </button>
+              </div>
             </div>
           </div>
           <div className="mt-5 md:mt-0 md:col-span-2">
