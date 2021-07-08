@@ -1,26 +1,11 @@
 let str = React.string
 open CriticalCare__Types
 
-type slider_type = {
-    name: string,
-    mutable checked: bool,
-    start: string,
-    end: string,
-    interval: string,
-    step: float,
-    mutable value: string
-} 
+type slider_type = IOBalance.slider_type
 
 @react.component
-let make = (~sliders, ~addSlider) => {
+let make = (~sliders: array<slider_type>, ~addSlider) => {
     let (showDropdown, setShowDropdown) = React.useState(_ => false)
-
-    // let selectOption = (option: string) => {
-    //     let options = state->Js.Array2.filter(value => option !== value)
-    //     setState(_ => options)
-
-    //     // call the function which is passed into props from its parent component (handleDropdownSelect)
-    // }
 
     <div className={sliders->Belt.Array.length == 0 ? "hidden" : "relative inline-block text-left p-2"}>
         <>

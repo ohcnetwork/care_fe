@@ -6,3 +6,4 @@ module BloodSugar = CriticalCare_BloodSugar
 module Dialysis = CriticalCare_Dialysis
 module VentilatorParameters = CriticalCare__VentilatorParameters
 module NeurologicalMonitoring = CriticalCare__NeurologicalMonitoring
+module IOBalance = CriticalCare__IOBalance

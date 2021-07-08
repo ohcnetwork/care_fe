@@ -24,7 +24,7 @@ type state = {
   ventilatorParametersStatus: string,
   arterialBloodGasAnalysisStatus: string,
   bloodSugarStatus: string,
-  ioBalanceStatus: string,
+  ioBalanceData: IOBalance.t,
   dialysisStatus: string,
   pressureSoreStatus: string,
   nursingCareStatus: string,
@@ -50,6 +50,7 @@ type action =
   | SetDialysisEditor(Dialysis.t)
   | UpdateDialysisStatus(string)
   | UpdateNeurologicalMonitoringStatus(string)
+  | SetIOBalaceData(IOBalance.t)
 
 let showEditor = (editor, send) => {
   send(ShowEditor(editor))
@@ -83,7 +84,7 @@ let editorToggle = (editorName, state, send) => {
       | VentilatorParametersEditor => showStatus(state.ventilatorParametersStatus)
       | ArterialBloodGasAnalysisEditor => showStatus(state.arterialBloodGasAnalysisStatus)
       | BloodSugarEditor => showStatus(state.bloodSugarStatus)
-      | IOBalanceEditor => showStatus(state.ioBalanceStatus)
+      | IOBalanceEditor => showStatus("100%")
       | DialysisEditor => showStatus(state.dialysisStatus)
       | PressureSoreEditor => showStatus(state.pressureSoreStatus)
       | NursingCareEditor => showStatus(state.nursingCareStatus)
@@ -125,6 +126,7 @@ let reducer = (state, action) => {
       ...state,
       neurologicalMonitoringStatus: neurologicalMonitoringStatus,
     }
+  | SetIOBalaceData(data) => {...state, ioBalanceData: data}
   }
 }
 
@@ -229,7 +231,7 @@ let initialState = {
   ventilatorParametersStatus: "0",
   arterialBloodGasAnalysisStatus: "0",
   bloodSugarStatus: "0",
-  ioBalanceStatus: "0",
+  ioBalanceData: IOBalance.initialState,
   dialysisStatus: "0",
   pressureSoreStatus: "0",
   nursingCareStatus: "0",
@@ -327,7 +329,11 @@ export make = () => {
                 }
               }}
             />
-          | IOBalanceEditor => <CriticalCare__IOBalance />
+          | IOBalanceEditor => 
+            <CriticalCare__IOBalanceEditor
+              initialState={state.ioBalanceData}
+              handleDone={data => data->SetIOBalaceData->send}
+            />
           | DialysisEditor =>
             <CriticalCare_DialysisEditor
               initialState={state.dialysisEditor}

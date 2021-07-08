@@ -1,10 +1,9 @@
 let str = React.string
 open CriticalCare__Types
 
-type slider_type = IOBalance__AddMore.slider_type
+type slider_type = IOBalance.slider_type
 
 @react.component
-// ~setSlider, ~removeSlider
 let make = (~title, ~sliders, ~moreSliders, ~changeFieldValue, ~changeVisibility, ~addSlider) => {
     <div>
         <h4 className={title->Js.String2.length === 0 ? "hidden" : ""}>{str(title)}</h4>
