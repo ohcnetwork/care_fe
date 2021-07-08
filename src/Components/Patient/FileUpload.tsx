@@ -299,7 +299,7 @@ export const FileUpload = (props: FileUploadProps) => {
   // Function to extract the extension of the file and check if its image or not
   const getExtension = (url: string) => {
     const div1 = url.split("?")[0].split(".");
-    const ext: string = div1[div1.length - 1];
+    const ext: string = div1[div1.length - 1].toLowerCase();
     if (ExtImage[ext] && ExtImage[ext] === "1") {
       return true;
     }
