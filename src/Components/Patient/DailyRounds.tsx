@@ -312,12 +312,12 @@ export const DailyRounds = (props: any) => {
                       errors={state.errors.temperature}
                     />
                   </div>
-                  {state.form.temperature && (
+                  {state.form.temperature.trim() && (
                     <div className="mb-2 -mt-1">
                       <DateTimeFiled
                         label="Temperature Measured At"
                         margin="dense"
-                        disabled={!state.form.temperature}
+                        disabled={!state.form.temperature.trim()}
                         value={state.form.temperature_measured_at || new Date()}
                         disableFuture={true}
                         showTodayButton={true}
