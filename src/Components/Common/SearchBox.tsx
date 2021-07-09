@@ -14,10 +14,12 @@ export const InputSearchBox = (props: TextFieldPropsExtended) => {
   const handler = useCallback(debounce(search, 500), [search]);
 
   const handleKeyDown = (event: any) => {
-    const value = event.target.value;
-    setSearchValue(value);
-    if (value.length === 0 || value.length > 2) {
-      handler(value);
+    if (event.key == "Enter") {
+      const value = event.target.value;
+      setSearchValue(value);
+      if (value.length === 0 || value.length > 2) {
+        handler(value);
+      }
     }
   };
 
@@ -32,8 +34,7 @@ export const InputSearchBox = (props: TextFieldPropsExtended) => {
 
   const inputProps = {
     placeholder,
-    onChange: handleKeyDown,
-    value: searchValue,
+    onKeyDown: handleKeyDown,
   };
 
   return (
