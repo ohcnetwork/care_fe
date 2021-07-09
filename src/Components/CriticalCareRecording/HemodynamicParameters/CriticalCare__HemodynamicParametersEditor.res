@@ -52,33 +52,62 @@ let reducer = (state, action) => {
   }
 }
 
+let convertToFloat = value => {
+  switch Belt.Float.fromString(value) {
+  | Some(value) => value
+  | None => 0.0
+  }
+}
+
 @react.component
 let make = (~handleDone, ~initialState) => {
   let (state, send) = React.useReducer(reducer, initialState)
+  let (meanArterialPressure, setMeanArterialPressure) = React.useState(() => 0.0)
+
+  React.useEffect2(() => {
+    let systolic = convertToFloat(HemodynamicParameters.bp_systolic(state))
+    let diastolic = convertToFloat(HemodynamicParameters.bp_diastolic(state))
+    let map = (systolic +. 2.0 *. diastolic) /. 3.0
+    setMeanArterialPressure(_ => map)
+    None
+  }, (HemodynamicParameters.bp_systolic(state), HemodynamicParameters.bp_diastolic(state)))
 
   <div>
     <h2> {str("Hemodynamic Parameters")} </h2>
     <div className="flex items-center flex-col">
-      <Slider
-        title={"Systolic"}
-        start={"50"}
-        end={"250"}
-        interval={"10"}
-        step={0.1}
-        value={HemodynamicParameters.bp_systolic(state)}
-        setValue={s => send(SetBp_systolic(s))}
-        getLabel={getStatus(100.0, "Low", 140.0, "High")}
-      />
-      <Slider
-        title={"Diastolic"}
-        start={"30"}
-        end={"180"}
-        interval={"10"}
-        step={0.1}
-        value={HemodynamicParameters.bp_diastolic(state)}
-        setValue={s => send(SetBp_diastolic(s))}
-        getLabel={getStatus(50.0, "Low", 90.0, "High")}
-      />
+      <div className="w-full">
+        <div className="mx-2 mt-5 md:flex justify-between">
+          <h4 className=""> {str("BP (mm hg)")} </h4>
+          <p>
+            {str(
+              `Mean Arterial Pressure: ${Js.Float.toFixedWithPrecision(
+                  meanArterialPressure,
+                  ~digits=2,
+                )}`,
+            )}
+          </p>
+        </div>
+        <Slider
+          title={"Systolic"}
+          start={"50"}
+          end={"250"}
+          interval={"10"}
+          step={0.1}
+          value={HemodynamicParameters.bp_systolic(state)}
+          setValue={s => send(SetBp_systolic(s))}
+          getLabel={getStatus(100.0, "Low", 140.0, "High")}
+        />
+        <Slider
+          title={"Diastolic"}
+          start={"30"}
+          end={"180"}
+          interval={"10"}
+          step={0.1}
+          value={HemodynamicParameters.bp_diastolic(state)}
+          setValue={s => send(SetBp_diastolic(s))}
+          getLabel={getStatus(50.0, "Low", 90.0, "High")}
+        />
+      </div>
       <Slider
         title={"Pulse (bpm)"}
         start={"0"}
