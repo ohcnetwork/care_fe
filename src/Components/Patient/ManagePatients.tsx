@@ -743,7 +743,7 @@ export const PatientManager = (props: any) => {
               qParams.is_kasp === "true" ? "KASP" : "Non KASP",
               "is_kasp"
             )}
-          {badge("COVIN ID", qParams.covin_id, "covin_id")}
+          {badge("COWIN ID", qParams.covin_id, "covin_id")}
 
           {badge("Facility", facilityName, "facility")}
           {badge("District", districtName, "district")}

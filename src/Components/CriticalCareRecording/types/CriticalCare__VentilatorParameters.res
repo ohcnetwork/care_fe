@@ -108,3 +108,13 @@ let showStatus = data => {
   }
   Js.Float.toFixed(count.contents /. totalCount.contents *. 100.0)
 }
+
+let getStatus = (min, max, val) => {
+  if val > min && val < max {
+    ("Normal", "#059669")
+  } else if val < min {
+    ("Low", "#DC2626")
+  } else {
+    ("High", "#DC2626")
+  }
+}

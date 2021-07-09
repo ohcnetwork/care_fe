@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { AutoCompleteAsyncField } from "../Common/HelperInputFields";
+import {
+  AutoCompleteAsyncField,
+  TextInputField,
+} from "../Common/HelperInputFields";
 import { DateRangePicker, getDate } from "../Common/DateRangePicker";
 import { getAllLocalBodyByDistrict } from "../../Redux/actions";
 import { useDispatch, useSelector } from "react-redux";
@@ -41,6 +44,7 @@ export default function ListFilter(props: any) {
       filter.sample_collection_date_after ||
       local.sample_collection_date_after ||
       null,
+    srf_id: filter.srf_id || local.srf_id || null,
   });
 
   const handleDateRangeChange = (
@@ -84,6 +88,7 @@ export default function ListFilter(props: any) {
       result_date_after,
       sample_collection_date_after,
       sample_collection_date_before,
+      srf_id,
     } = filterState;
 
     const data = {
@@ -99,6 +104,7 @@ export default function ListFilter(props: any) {
       sample_collection_date_before: formatDateTime(
         sample_collection_date_before
       ),
+      srf_id: srf_id,
     };
     localStorage.setItem("external-filters", JSON.stringify(data));
     localStorage.setItem(
@@ -177,6 +183,15 @@ export default function ListFilter(props: any) {
           });
 
     return selectedwards;
+  };
+
+  const handleChange = (event: any) => {
+    const { name, value } = event.target;
+
+    const filterData: any = { ...filterState };
+    filterData[name] = value;
+
+    setFilterState(filterData);
   };
 
   const clearFilters = () => {
@@ -295,6 +310,20 @@ export default function ListFilter(props: any) {
           startDateId={"sample_collection_date_after"}
           label={"Sample Collection Date"}
           size="small"
+        />
+      </div>
+      <div className="w-64 flex-none">
+        <span className="text-sm font-semibold">SRF ID</span>
+        <TextInputField
+          id="srf_id"
+          name="srf_id"
+          variant="outlined"
+          margin="dense"
+          errors=""
+          value={filterState.srf_id}
+          onChange={handleChange}
+          label="Srf id"
+          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 mr-1"
         />
       </div>
     </div>

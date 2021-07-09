@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useAbortableEffect, statusType } from "../../Common/utils";
-import { navigate } from "raviger";
+import { navigate, useQueryParams } from "raviger";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FacilityModel } from "../Facility/models";
 import { useDispatch } from "react-redux";
@@ -12,10 +12,15 @@ function AssetFilter(props: any) {
   const dispatch: any = useDispatch();
   const [facility, setFacility] = useState<FacilityModel>({ name: "" });
   const [facilityId, setFacilityId] = useState<number | "">(filter.facility);
-
+  const [qParams, _] = useQueryParams();
   useEffect(() => {
     setFacilityId(facility?.id ? facility?.id : "");
   }, [facility]);
+  const handleClearFilter = useCallback(() => {
+    closeFilter();
+    const searchQuery = qParams?.search && `?search=${qParams?.search}`;
+    navigate(`/assets${searchQuery}`);
+  }, [qParams]);
 
   const fetchFacility = useCallback(
     async (status: statusType) => {
@@ -58,13 +63,7 @@ function AssetFilter(props: any) {
           <i className="fas fa-times mr-2" />
           Cancel
         </button>
-        <button
-          className="btn btn-default"
-          onClick={(_) => {
-            closeFilter();
-            navigate("/assets");
-          }}
-        >
+        <button className="btn btn-default" onClick={handleClearFilter}>
           <i className="fas fa-times mr-2" />
           Clear Filter
         </button>
