@@ -12,7 +12,6 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 import moment from "moment";
 import { getUserList } from "../../Redux/actions";
 import classNames from "classnames";
-const Loading = loadable(() => import("../Common/Loading"));
 
 export const OnlineUsersSelect = (props: any) => {
   const dispatchAction: any = useDispatch();
