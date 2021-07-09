@@ -41,6 +41,16 @@ export const NoticeBoard: any = () => {
         </CardContent>
       </Card>
     ));
+  } else {
+    notices.push(
+      <Card className="my-4 mx-8 rounded-lg">
+        <CardContent>
+          <div className="text-xl text-center semibold">
+            No notices for you.
+          </div>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (

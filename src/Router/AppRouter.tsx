@@ -365,6 +365,11 @@ let menus = [
     link: "/user/profile",
     icon: "fas fa-user-secret",
   },
+  {
+    title: "Notice Board",
+    link: "/notice_board/",
+    icon: "fas fa-comment-alt",
+  },
 ];
 
 const AppRouter = (props: any) => {
