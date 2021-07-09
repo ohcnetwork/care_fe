@@ -68,8 +68,8 @@ export default function ResultList() {
     setIsLoading(true);
     const params = {
       page: qParams.page || 1,
-      name: qParams.name || undefined,
-      mobile_number: qParams.mobile_number ? qParams.mobile_number : undefined,
+      name: qParams.name || "",
+      mobile_number: qParams.mobile_number ? qParams.mobile_number : "",
       wards: qParams.wards || undefined,
       local_bodies: qParams.local_bodies || undefined,
       created_date_before: qParams.created_date_before || undefined,
