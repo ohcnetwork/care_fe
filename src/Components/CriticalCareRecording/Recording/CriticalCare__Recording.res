@@ -385,7 +385,7 @@ export make = () => {
                 }
               }}
             />
-          | PressureSoreEditor
+          | PressureSoreEditor => <CriticalCare__PressureSore />
           | NursingCareEditor =>
             <CriticalCare__NursingCareEditor
               initialState={state.nursingCare}
