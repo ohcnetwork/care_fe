@@ -76,7 +76,7 @@ export const OnlineUsersSelect = (props: any) => {
         <div className="relative">
           <span className="inline-block w-full rounded-md shadow-sm">
             <button
-              onClick={(_) => setIsExpanded(!isExpanded)}
+              onClick={(_) => setIsExpanded(true)}
               type="button"
               aria-haspopup="listbox"
               aria-expanded="true"
