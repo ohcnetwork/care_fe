@@ -29,28 +29,6 @@ let loc_options: array<Options.t> = [
   },
 ]
 
-let reaction_options: array<Options.t> = [
-  {
-    name: "reaction",
-    value: "brisk",
-    label: "Brisk",
-  },
-  {
-    name: "reaction",
-    value: "sluggish",
-    label: "Sluggish",
-  },
-  {
-    name: "reaction",
-    value: "fixed",
-    label: "Fixed",
-  },
-  {
-    name: "reaction",
-    value: "cannot_be_assessed",
-    label: "Cannot be assessed",
-  },
-]
 let glascow_title_val = ["eye_open", "verbal_response", "motor_response"]
 
 let glassgowComaScale: Options.glassgow_coma_scale = [
@@ -310,86 +288,44 @@ let limp_options: Options.limp_options = [
   },
 ]
 
-let right_reaction_options: array<Options.t> = [
-  {
-    name: "right_light_reaction",
-    value: "brisk",
-    label: "Brisk",
-  },
-  {
-    name: "right_light_reaction",
-    value: "sluggish",
-    label: "Sluggish",
-  },
-  {
-    name: "right_light_reaction",
-    value: "fixed",
-    label: "Fixed",
-  },
-  {
-    name: "right_light_reaction",
-    value: "cannot_be_assessed",
-    label: "Cannot Be Assessed",
-  },
-]
-
-let left_reaction_options: array<Options.t> = [
-  {
-    name: "left_light_reaction",
-    value: "brisk",
-    label: "Brisk",
-  },
-  {
-    name: "left_light_reaction",
-    value: "sluggish",
-    label: "Sluggish",
-  },
-  {
-    name: "left_light_reaction",
-    value: "fixed",
-    label: "Fixed",
-  },
-  {
-    name: "left_light_reaction",
-    value: "cannot be Assesed",
-    label: "Cannot Be Assessed",
-  },
-]
-
 let handleSubmit = (handleDone, state) => {
   let status = NeurologicalMonitoring.showStatus(state)
   let _ = Js.log2(status, state)
   handleDone(state, status)
 }
 
-type action =
-  | SetPronePosition(bool)
-  | SetLevelOfConciousness(string)
-  | SetLocDescription(string)
-  | SetLeftPupilSize(string)
-  | SetLeftSizeDescription(string)
-  | SetLeftPupilReaction(string)
-  | SetLeftReactionDescription(string)
-  | SetRightPupilSize(string)
-  | SetRightSizeDescription(string)
-  | SetRightReactionDescription(string)
-  | SetRightPupilReaction(string)
-  | SetEyeOpen(string)
-  | SetVerbalResponse(string)
-  | SetMotorResponse(string)
-  | SetTotalGlascowScale(string)
-  | SetUpperExtremityR(string)
-  | SetUpperExtremityL(string)
-  | SetLowerExtremityR(string)
-  | SetLowerExtremityL(string)
-
 let reducer = (state, action) => {
   open NeurologicalMonitoring
   switch action {
-  | SetPronePosition(pronePosition) => {
-      ...state,
-      pronePosition: pronePosition,
+  | SetPronePosition(pronePosition) =>
+    if pronePosition === true {
+      {
+        ...state,
+        pronePosition: pronePosition,
+        leftPupilSize: None,
+        leftSizeDescription: None,
+        leftPupilReaction: None,
+        leftReactionDescription: None,
+        rightPupilSize: None,
+        rightSizeDescription: None,
+        rightPupilReaction: None,
+        rightReactionDescription: None,
+      }
+    } else {
+      {
+        ...state,
+        pronePosition: pronePosition,
+        leftPupilSize: Some(""),
+        leftSizeDescription: Some(""),
+        leftPupilReaction: Some(""),
+        leftReactionDescription: Some(""),
+        rightPupilSize: Some(""),
+        rightSizeDescription: Some(""),
+        rightPupilReaction: Some(""),
+        rightReactionDescription: Some(""),
+      }
     }
+
   | SetLevelOfConciousness(levelOfConciousness) => {
       ...state,
       levelOfConciousness: levelOfConciousness,
@@ -402,7 +338,9 @@ let reducer = (state, action) => {
   | SetLeftPupilSize(leftPupilSize) => {
       ...state,
       leftPupilSize: leftPupilSize,
-      leftSizeDescription: leftPupilSize === "cannot_be_assessed" ? leftSizeDescription(state) : "",
+      leftSizeDescription: leftPupilSize === Some("cannot_be_assessed")
+        ? leftSizeDescription(state)
+        : Some(""),
     }
   | SetLeftSizeDescription(leftSizeDescription) => {
       ...state,
@@ -411,9 +349,9 @@ let reducer = (state, action) => {
   | SetLeftPupilReaction(leftPupilReaction) => {
       ...state,
       leftPupilReaction: leftPupilReaction,
-      leftReactionDescription: leftPupilReaction === "cannot_be_assessed"
+      leftReactionDescription: leftPupilReaction === Some("cannot_be_assessed")
         ? leftReactionDescription(state)
-        : "",
+        : Some(""),
     }
   | SetLeftReactionDescription(leftReactionDescription) => {
       ...state,
@@ -422,9 +360,9 @@ let reducer = (state, action) => {
   | SetRightPupilSize(rightPupilSize) => {
       ...state,
       rightPupilSize: rightPupilSize,
-      rightSizeDescription: rightPupilSize === "cannot_be_assessed"
+      rightSizeDescription: rightPupilSize === Some("cannot_be_assessed")
         ? rightSizeDescription(state)
-        : "",
+        : Some(""),
     }
   | SetRightSizeDescription(rightSizeDescription) => {
       ...state,
@@ -433,9 +371,9 @@ let reducer = (state, action) => {
   | SetRightPupilReaction(rightPupilReaction) => {
       ...state,
       rightPupilReaction: rightPupilReaction,
-      rightReactionDescription: rightPupilReaction === "cannot_be_assessed"
+      rightReactionDescription: rightPupilReaction === Some("cannot_be_assessed")
         ? rightReactionDescription(state)
-        : "",
+        : Some(""),
     }
   | SetRightReactionDescription(rightReactionDescription) => {
       ...state,
@@ -475,7 +413,7 @@ let reducer = (state, action) => {
 
 let glascowAction = (glascow, value) => {
   switch glascow {
-  | "eye_open" => SetEyeOpen(value)
+  | "eye_open" => NeurologicalMonitoring.SetEyeOpen(value)
   | "verbal_response" => SetVerbalResponse(value)
   | "motor_response" => SetMotorResponse(value)
   | _ => SetMotorResponse(value)
@@ -493,7 +431,7 @@ let getGlascowState = (glascow, state) => {
 
 let limpAction = (limp, value) => {
   switch limp {
-  | "upper_extremity_right" => SetUpperExtremityR(value)
+  | "upper_extremity_right" => NeurologicalMonitoring.SetUpperExtremityR(value)
   | "upper_extremity_left" => SetUpperExtremityL(value)
   | "lower_extremity_right" => SetLowerExtremityR(value)
   | "lower_extremity_left" => SetLowerExtremityL(value)
@@ -569,79 +507,11 @@ let make = (~handleDone, ~initialState) => {
           <> </>
         }}
       </div>
-      <div className="my-10">
-        <div className="text-2xl font-bold my-2 mb-4"> {str("Pupil")} </div>
-        <div className="mb-2">
-          <div className="text-lg font-bold my-3"> {str("Left Pupil")} </div>
-          <CriticalCare__PupilRangeSlider
-            name={"left_pupil_slider"}
-            val={NeurologicalMonitoring.leftPupilSize(state)}
-            setValue={value => send(SetLeftPupilSize(value))}
-          />
-          {if NeurologicalMonitoring.leftPupilSize(state) === "cannot_be_assessed" {
-            <CriticalCare__Description
-              name="left_size_description"
-              text={NeurologicalMonitoring.leftSizeDescription(state)}
-              onChange={event => send(SetLeftSizeDescription(getFieldValue(event)))}
-            />
-          } else {
-            <> </>
-          }}
-          <div className="my-5 mb-8">
-            <div className="font-bold my-4"> {str("Reaction")} </div>
-            <CriticalCare__RadioButton
-              options={right_reaction_options}
-              horizontal=true
-              defaultChecked={NeurologicalMonitoring.leftPupilReaction(state)}
-              onChange={event => send(SetLeftPupilReaction(getFieldValue(event)))}
-            />
-            {if NeurologicalMonitoring.leftPupilReaction(state) === "cannot_be_assessed" {
-              <CriticalCare__Description
-                name="left_reaction_description"
-                text={NeurologicalMonitoring.leftReactionDescription(state)}
-                onChange={event => send(SetLeftReactionDescription(getFieldValue(event)))}
-              />
-            } else {
-              <> </>
-            }}
-          </div>
-        </div>
-        <div>
-          <div className="text-lg font-bold my-5"> {str("Right Pupil")} </div>
-          <CriticalCare__PupilRangeSlider
-            name={"right_pupil_slider"}
-            val={NeurologicalMonitoring.rightPupilSize(state)}
-            setValue={value => send(SetRightPupilSize(value))}
-          />
-          {if NeurologicalMonitoring.rightPupilSize(state) === "cannot_be_assessed" {
-            <CriticalCare__Description
-              name="right_size_description"
-              text={NeurologicalMonitoring.rightSizeDescription(state)}
-              onChange={event => send(SetRightSizeDescription(getFieldValue(event)))}
-            />
-          } else {
-            <> </>
-          }}
-          <div className="my-5 mb-8">
-            <div className="font-bold my-4"> {str("Reaction")} </div>
-            <CriticalCare__RadioButton
-              options={reaction_options}
-              horizontal=true
-              defaultChecked={NeurologicalMonitoring.rightPupilReaction(state)}
-              onChange={event => send(SetRightPupilReaction(getFieldValue(event)))}
-            />
-            {if NeurologicalMonitoring.rightPupilReaction(state) === "cannot_be_assessed" {
-              <CriticalCare__Description
-                name="right_reaction_description"
-                text={NeurologicalMonitoring.rightReactionDescription(state)}
-                onChange={event => send(SetRightReactionDescription(getFieldValue(event)))}
-              />
-            } else {
-              <> </>
-            }}
-          </div>
-        </div>
-      </div>
+      {if NeurologicalMonitoring.pronePosition(state) === false {
+        <CriticalCare__Pupil state={state} send={send} />
+      } else {
+        <> </>
+      }}
       <div className="my-15 w-full h-1 bg-gray-300" />
       <div className="my-10">
         <div className="text-3xl font-bold"> {str("Glasgow Coma Scale")} </div>
