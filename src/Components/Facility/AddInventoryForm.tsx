@@ -103,7 +103,7 @@ export const AddInventoryForm = (props: any) => {
 
     const res = await dispatchAction(postInventory(data, { facilityId }));
     setIsLoading(false);
-    console.log("result : ", res);
+
     if (res && res.data && (res.status === 200 || res.status === 201)) {
       Notification.Success({
         msg: "Inventory created successfully",

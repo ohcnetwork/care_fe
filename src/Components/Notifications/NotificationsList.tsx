@@ -134,7 +134,6 @@ export default function ResultList() {
     );
 
     if (res.status >= 200 && res.status <= 300) {
-      console.log("subscribed");
       setIsSubscribed("SubscribedOnThisDevice");
     } else {
       console.log("Error saving web push info.");

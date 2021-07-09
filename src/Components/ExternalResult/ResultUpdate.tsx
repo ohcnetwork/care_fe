@@ -88,7 +88,6 @@ export default function UpdateResult(props: any) {
       const res = await dispatchAction(externalResult({ id: id }));
       if (!status.aborted) {
         if (res && res.data) {
-          console.log(res.data);
           const form = { ...state.form };
           form["name"] = res.data.name;
           form["age"] = res.data.age;
@@ -153,9 +152,8 @@ export default function UpdateResult(props: any) {
   const validateForm = () => {
     let errors = { ...initError };
     let invalidForm = false;
-    console.log("fields", state.form);
+
     Object.keys(state.form).forEach((field, i) => {
-      console.log("field", field);
       switch (field) {
         case "address":
           if (!state.form[field]) {
@@ -166,10 +164,10 @@ export default function UpdateResult(props: any) {
         case "local_body":
           if (!state.form[field] || state.form[field] === "0") {
             errors[field] = "Please select local body";
-            console.log("yes");
+
             invalidForm = true;
           }
-          console.log("l", invalidForm);
+
           return;
         case "ward":
           if (!state.form[field] || state.form[field] === "0") {
@@ -209,7 +207,7 @@ export default function UpdateResult(props: any) {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     const validForm = validateForm();
-    console.log(validForm, state.form.local_body);
+
     if (validForm) {
       setIsLoading(true);
       const data = {
@@ -346,7 +344,7 @@ export default function UpdateResult(props: any) {
               {" "}
               Cancel{" "}
             </Button>
-            {console.log("form", state.form)}
+
             <Button
               color="primary"
               variant="contained"
