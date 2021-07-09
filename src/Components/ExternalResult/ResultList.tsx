@@ -287,6 +287,11 @@ export default function ResultList() {
             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium leading-4 bg-blue-100 text-blue-800 capitalize">
               {result.result}
             </span>
+            {result.patient_created ? (
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium leading-4 bg-green-100 text-green-800 capitalize">
+                Patient Created
+              </span>
+            ) : null}
           </td>
           <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
             {result.result_date || "-"}
