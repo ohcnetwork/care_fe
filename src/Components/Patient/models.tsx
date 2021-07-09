@@ -244,7 +244,7 @@ export interface DailyRoundsModel {
   medication_given?: Array<any>;
   additional_symptoms_text?: string;
   current_health?: string;
-  id?: number;
+  id?: any;
   other_symptoms?: string;
   admitted_to?: string;
   patient_category?: string;
