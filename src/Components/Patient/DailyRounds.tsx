@@ -312,20 +312,22 @@ export const DailyRounds = (props: any) => {
                       errors={state.errors.temperature}
                     />
                   </div>
-                  <div>
-                    <DateTimeFiled
-                      label="Temperature Measured At"
-                      margin="dense"
-                      disabled={!state.form.temperature}
-                      value={state.form.temperature_measured_at}
-                      disableFuture={true}
-                      showTodayButton={true}
-                      onChange={(date) =>
-                        handleDateChange(date, "temperature_measured_at")
-                      }
-                      errors={state.errors.temperature_measured_at}
-                    />
-                  </div>
+                  {state.form.temperature && (
+                    <div className="mb-2 -mt-1">
+                      <DateTimeFiled
+                        label="Temperature Measured At"
+                        margin="dense"
+                        disabled={!state.form.temperature}
+                        value={state.form.temperature_measured_at || new Date()}
+                        disableFuture={true}
+                        showTodayButton={true}
+                        onChange={(date) =>
+                          handleDateChange(date, "temperature_measured_at")
+                        }
+                        errors={state.errors.temperature_measured_at}
+                      />
+                    </div>
+                  )}
                 </div>
                 <div>
                   <InputLabel id="physical-examination-info-label">
