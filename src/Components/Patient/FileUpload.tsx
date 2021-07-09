@@ -37,6 +37,9 @@ import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
 import Modal from "@material-ui/core/Modal";
 import { Close, ZoomIn, ZoomOut } from "@material-ui/icons";
 
+import Pagination from "../Common/Pagination";
+import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
+
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -170,6 +173,17 @@ export const FileUpload = (props: FileUploadProps) => {
   };
   const [file_state, setFileState] = useState<StateInterface>(initialState);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [offset, setOffset] = useState(0);
+  const limit = RESULTS_PER_PAGE_LIMIT;
+
+  const handlePagination = (page: number, limit: number) => {
+    const offset = (page - 1) * limit;
+    setCurrentPage(page);
+    setOffset(offset);
+  };
+
   const zoom_values = [
     "h-1/6 my-40",
     "h-2/6 my-32",
@@ -254,17 +268,23 @@ export const FileUpload = (props: FileUploadProps) => {
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      var data = { file_type: type, associating_id: getAssociatedId() };
+      var data = {
+        file_type: type,
+        associating_id: getAssociatedId(),
+        limit: limit,
+        offset: offset,
+      };
       const res = await dispatch(viewUpload(data));
       if (!status.aborted) {
         if (res && res.data) {
           audio_urls(res.data.results);
           setuploadedFiles(res.data.results);
+          setTotalCount(res.data.count);
         }
         setIsLoading(false);
       }
     },
-    [dispatch, id]
+    [dispatch, id, offset]
   );
 
   // Store all audio urls for each audio file
@@ -697,6 +717,16 @@ export const FileUpload = (props: FileUploadProps) => {
       <PageTitle title={`${VIEW_HEADING[type]}`} hideBack={true} />
       {uploadedFiles.length > 0 &&
         uploadedFiles.map((item: FileUploadModel) => renderFileUpload(item))}
+      {totalCount > limit && (
+        <div className="mt-4 flex w-full justify-center">
+          <Pagination
+            cPage={currentPage}
+            defaultPerPage={limit}
+            data={{ totalCount }}
+            onChange={handlePagination}
+          />
+        </div>
+      )}
     </div>
   );
 };
