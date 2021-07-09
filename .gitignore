@@ -12,6 +12,7 @@
 /build
 
 src/index.css
+src/style/index.css
 
 # misc
 .DS_Store

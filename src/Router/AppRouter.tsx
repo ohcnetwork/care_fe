@@ -41,6 +41,7 @@ import { ResourceDetailsUpdate } from "../Components/Resource/ResourceDetailsUpd
 import ResultList from "../Components/ExternalResult/ResultList";
 import ResultItem from "../Components/ExternalResult/ResultItem";
 import ExternalResultUpload from "../Components/ExternalResult/ExternalResultUpload";
+import ResultUpdate from "../Components/ExternalResult/ResultUpdate";
 import NotificationsList from "../Components/Notifications/NotificationsList";
 import { FileUpload } from "../Components/Patient/FileUpload";
 import Investigation from "../Components/Facility/Investigations";
@@ -53,6 +54,7 @@ import DeathReport from "../Components/DeathReport/DeathReport";
 import { make as CriticalCareRecording } from "../Components/CriticalCareRecording/CriticalCareRecording.gen";
 import { make as VentilatorParametersEditor } from "../Components/CriticalCareRecording/VentilatorParametersEditor/CriticalCare__VentilatorParametersEditor.bs";
 import ShowPushNotification from "../Components/Notifications/ShowPushNotification";
+import { NoticeBoard } from "../Components/Notifications/NoticeBoard";
 import { AddLocationForm } from "../Components/Facility/AddLocationForm";
 import { LocationManagement } from "../Components/Facility/LocationManagement";
 import AssetsList from "../Components/Assets/AssetsList";
@@ -88,6 +90,10 @@ const routes = {
     patientId,
     sampleId,
   }: any) => <SampleReport id={patientId} sampleId={sampleId} />,
+  "/patient/:patientId/test_sample/:sampleId/details": ({
+    patientId,
+    sampleId,
+  }: any) => <SampleDetails id={sampleId} patientId={patientId} />,
   "/facility": () => <HospitalList />,
   "/facility/create": () => <FacilityCreate />,
   "/facility/:facilityId/update": ({ facilityId }: any) => (
@@ -319,8 +325,10 @@ const routes = {
   "/external_results": () => <ResultList />,
   "/external_results/upload": () => <ExternalResultUpload />,
   "/external_results/:id": ({ id }: any) => <ResultItem id={id} />,
+  "/external_results/:id/update": ({ id }: any) => <ResultUpdate id={id} />,
   "/death_report/:id": ({ id }: any) => <DeathReport id={id} />,
   "/notifications/:id": (id: any) => <ShowPushNotification external_id={id} />,
+  "/notice_board/": () => <NoticeBoard />,
 };
 
 let menus = [

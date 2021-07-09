@@ -40,7 +40,7 @@ import { Close, ZoomIn, ZoomOut } from "@material-ui/icons";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
-const header_content_type: URLS = {
+export const header_content_type: URLS = {
   pdf: "application/pdf",
   txt: "text/plain",
   jpeg: "image/jpeg",
@@ -93,7 +93,7 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const LinearProgressWithLabel = (props: any) => {
+export const LinearProgressWithLabel = (props: any) => {
   return (
     <Box display="flex" alignItems="center">
       <Box width="100%" mr={1}>
@@ -116,6 +116,7 @@ interface FileUploadProps {
   hideBack: boolean;
   audio: boolean;
   unspecified: boolean;
+  sampleId?: number;
 }
 
 interface URLS {
@@ -141,6 +142,7 @@ export const FileUpload = (props: FileUploadProps) => {
     hideBack,
     audio,
     unspecified,
+    sampleId,
   } = props;
   const id = patientId;
   const dispatch: any = useDispatch();
@@ -216,10 +218,12 @@ export const FileUpload = (props: FileUploadProps) => {
   const UPLOAD_HEADING: { [index: string]: string } = {
     PATIENT: "Upload Patient Files",
     CONSULTATION: "Upload Consultation Files",
+    SAMPLE_MANAGEMENT: "Upload Sample Report",
   };
   const VIEW_HEADING: { [index: string]: string } = {
     PATIENT: "View Patient Files",
     CONSULTATION: "View Consultation Files",
+    SAMPLE_MANAGEMENT: "View Sample Report",
   };
 
   const handleClose = () => {
@@ -240,6 +244,9 @@ export const FileUpload = (props: FileUploadProps) => {
       }
       case "CONSULTATION": {
         return consultationId;
+      }
+      case "SAMPLE_MANAGEMENT": {
+        return sampleId;
       }
     }
   };
@@ -292,7 +299,7 @@ export const FileUpload = (props: FileUploadProps) => {
   // Function to extract the extension of the file and check if its image or not
   const getExtension = (url: string) => {
     const div1 = url.split("?")[0].split(".");
-    const ext: string = div1[div1.length - 1];
+    const ext: string = div1[div1.length - 1].toLowerCase();
     if (ExtImage[ext] && ExtImage[ext] === "1") {
       return true;
     }
