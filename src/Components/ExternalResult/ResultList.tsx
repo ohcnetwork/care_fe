@@ -68,8 +68,8 @@ export default function ResultList() {
     setIsLoading(true);
     const params = {
       page: qParams.page || 1,
-      name: qParams.name || undefined,
-      mobile_number: qParams.mobile_number ? qParams.mobile_number : undefined,
+      name: qParams.name || "",
+      mobile_number: qParams.mobile_number ? qParams.mobile_number : "",
       wards: qParams.wards || undefined,
       local_bodies: qParams.local_bodies || undefined,
       created_date_before: qParams.created_date_before || undefined,
@@ -124,15 +124,15 @@ export default function ResultList() {
   };
 
   const handlePagination = (page: number, limit: number) => {
-    updateQuery({ page, limit });
+    updateQuery({ ...qParams, page, limit });
   };
 
   const searchByName = (value: string) => {
-    updateQuery({ name: value, page: 1 });
+    updateQuery({ ...qParams, name: value, page: 1 });
   };
 
   const searchByPhone = (value: string) => {
-    updateQuery({ mobile_number: value, page: 1 });
+    updateQuery({ ...qParams, mobile_number: value, page: 1 });
   };
 
   const handleFilter = (value: string) => {
