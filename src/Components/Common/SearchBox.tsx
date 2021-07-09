@@ -17,9 +17,7 @@ export const InputSearchBox = (props: TextFieldPropsExtended) => {
     if (event.key == "Enter") {
       const value = event.target.value;
       setSearchValue(value);
-      if (value.length === 0 || value.length > 2) {
-        handler(value);
-      }
+      handler(value);
     }
   };
 
