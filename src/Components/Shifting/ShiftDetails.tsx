@@ -126,7 +126,7 @@ export default function ShiftDetails(props: { id: string }) {
 
     return (
       <div className="border rounded-lg bg-white shadow h-full text-black mt-2 p-4">
-        <div className="grid gap-2 grid-cols-1 md:grid-cols-2 mt-2">
+        <div className="mt-2">
           <div>
             <span className="font-semibold leading-relaxed">Name: </span>
             <Link href={`/patient/${patientData.id}`}>{patientData.name}</Link>
@@ -571,9 +571,22 @@ export default function ShiftDetails(props: { id: string }) {
         </div>
       ) : (
         <div className="mx-3 md:mx-8 mb-10">
-          <div className="my-4 flex justify-between items-center">
+          <div className="my-4 md:flex justify-between items-center mx-1">
             <PageTitle title={"Shifting details"} />
-            <div>
+            <div className="md:flex items-center space-y-2 md:space-y-0 md:space-x-2">
+              <div className="">
+                <Button
+                  fullWidth
+                  variant="contained"
+                  color="primary"
+                  size="medium"
+                  onClick={() =>
+                    navigate(`/shifting/${data.external_id}/update`)
+                  }
+                >
+                  Update Status/Details
+                </Button>
+              </div>
               <button
                 onClick={(_) => setIsPrintMode(true)}
                 className="btn btn-primary"
@@ -598,38 +611,15 @@ export default function ShiftDetails(props: { id: string }) {
             </div>
           )}
           <div className="border rounded-lg bg-white shadow h-full text-black mt-4 p-4">
-            <div className="flex justify-between">
-              <div className="grid gap-2 grid-cols-1">
-                <div className="flex items-baseline">
-                  <div>
-                    <span className="font-semibold leading-relaxed">
-                      Patient name:{" "}
-                    </span>
-                    <Link href={`/patient/${data.patient_object?.id}`}>
-                      {data.patient_object?.name}
-                    </Link>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <div className="mt-2">
-                  <Button
-                    fullWidth
-                    variant="contained"
-                    color="primary"
-                    size="small"
-                    onClick={() =>
-                      navigate(`/shifting/${data.external_id}/update`)
-                    }
-                  >
-                    Update Status/Details
-                  </Button>
-                </div>
-              </div>
-            </div>
-
             <div className="grid gap-2 grid-cols-1 md:grid-cols-2">
+              <div>
+                <span className="font-semibold leading-relaxed">
+                  Patient name:{" "}
+                </span>
+                <Link href={`/patient/${data.patient_object?.id}`}>
+                  {data.patient_object?.name}
+                </Link>
+              </div>
               <div>
                 <span className="font-semibold leading-relaxed">Status: </span>
                 <span className="badge badge-pill badge-primary py-1 px-2">
@@ -720,13 +710,15 @@ export default function ShiftDetails(props: { id: string }) {
               </div>
 
               <div className="md:row-span-2 md:col-span-2">
-                <div className="font-semibold leading-relaxed">Reason: </div>
-                <div className="ml-2">{data.reason || "--"}</div>
+                <span className="font-semibold leading-relaxed">Reason: </span>
+                <span className="ml-2">{data.reason || "--"}</span>
               </div>
 
               <div className="md:row-span-2 md:col-span-2">
-                <div className="font-semibold leading-relaxed">Comments: </div>
-                <div className="ml-2">{data.comments || "--"}</div>
+                <span className="font-semibold leading-relaxed">
+                  Comments:{" "}
+                </span>
+                <span className="ml-2">{data.comments || "--"}</span>
               </div>
 
               <div>
@@ -789,63 +781,74 @@ export default function ShiftDetails(props: { id: string }) {
               </div>
             </div>
           </div>
-          <h4 className="mt-8">Audit Log</h4>
 
-          <div className="flex justify-between p-2 bg-white rounded-lg shadow text-center px-4 mt-2">
-            <div className="w-1/2 border-r-2 truncate">
-              <div className="text-sm leading-5 font-medium text-gray-500">
-                Created
+          <div className="md:grid grid-cols-5 gap-2">
+            <div className="col-span-3">
+              <div>
+                <h4 className="mt-8">
+                  Details of patient {showCopyToclipBoard(data)}
+                </h4>
+                {showPatientCard(data.patient_object)}
               </div>
-              <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-pre">
-                <div className="text-sm">
-                  {data?.created_by_object?.first_name}{" "}
-                  {data?.created_by_object?.last_name}
-                </div>
-                <div className="text-xs">
-                  {data.created_date && moment(data.created_date).format("lll")}
-                </div>
+              <div className="mx-3 md:mx-8 mb-10">
+                <h4 className="mt-8">Comments</h4>
+                <CommentSection id={props.id} />
               </div>
             </div>
-            <div className="w-1/2 truncate">
-              <div className="text-sm leading-5 font-medium text-gray-500">
-                Last Edited
+
+            <div className="col-span-2">
+              <h4 className="mt-8">Audit Log</h4>
+
+              <div className="p-2 bg-white rounded-lg shadow text-center px-4 mt-2">
+                <div className="border-r-2">
+                  <div className="text-sm leading-5 font-medium text-gray-500">
+                    Created
+                  </div>
+                  <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-pre">
+                    <div className="text-sm">
+                      {data?.created_by_object?.first_name}
+                      {data?.created_by_object?.last_name}
+                    </div>
+                    <div className="text-xs">
+                      {data.created_date &&
+                        moment(data.created_date).format("lll")}
+                    </div>
+                  </div>
+                </div>
+                <div className="">
+                  <div className="text-sm leading-5 font-medium text-gray-500">
+                    Last Edited
+                  </div>
+                  <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-pre">
+                    <div className="text-sm">
+                      {data?.last_edited_by_object?.first_name}
+                      {data?.last_edited_by_object?.last_name}
+                    </div>
+                    <div className="text-xs">
+                      {data.modified_date &&
+                        moment(data.modified_date).format("lll")}
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-pre">
-                <div className="text-sm">
-                  {data?.last_edited_by_object?.first_name}{" "}
-                  {data?.last_edited_by_object?.last_name}
-                </div>
-                <div className="text-xs">
-                  {data.modified_date &&
-                    moment(data.modified_date).format("lll")}
-                </div>
+              <div>
+                <h4 className="mt-8">Details of orgin facility</h4>
+
+                {showFacilityCard(data.orgin_facility_object)}
+              </div>
+              <div>
+                <h4 className="mt-8">Details of assigned facility</h4>
+                {showFacilityCard(data.assigned_facility_object)}
+              </div>
+
+              <div>
+                <h4 className="mt-8">Details of shifting approving facility</h4>
+                {showFacilityCard(data.shifting_approving_facility_object)}
               </div>
             </div>
           </div>
-
-          <h4 className="mt-8">
-            Details of patient {showCopyToclipBoard(data)}
-          </h4>
-
-          {showPatientCard(data.patient_object)}
-
-          <h4 className="mt-8">Details of orgin facility</h4>
-
-          {showFacilityCard(data.orgin_facility_object)}
-
-          <h4 className="mt-8">Details of assigned facility</h4>
-
-          {showFacilityCard(data.assigned_facility_object)}
-
-          <h4 className="mt-8">Details of shifting approving facility</h4>
-
-          {showFacilityCard(data.shifting_approving_facility_object)}
         </div>
       )}
-      <div className="mx-3 md:mx-8 mb-10">
-        <h4 className="mt-8">Comments</h4>
-        <CommentSection id={props.id} />
-      </div>
     </div>
   );
 }
