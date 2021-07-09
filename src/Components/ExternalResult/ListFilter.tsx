@@ -182,6 +182,7 @@ export default function ListFilter(props: any) {
   const clearFilters = () => {
     localStorage.removeItem("external-filters");
     localStorage.removeItem("lsg-ward-data");
+    dataList([], []);
     closeFilter();
   };
 
