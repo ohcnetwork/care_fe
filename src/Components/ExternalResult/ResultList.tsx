@@ -288,7 +288,7 @@ export default function ResultList() {
               {result.result}
             </span>
             {result.patient_created ? (
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium leading-4 bg-green-100 text-green-800 capitalize">
+              <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium leading-4 bg-green-100 text-green-800 capitalize">
                 Patient Created
               </span>
             ) : null}
