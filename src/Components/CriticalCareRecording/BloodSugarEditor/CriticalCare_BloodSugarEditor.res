@@ -20,6 +20,16 @@ let reducer = (state, action) => {
   }
 }
 
+let getStatus = (min, max, val) => {
+  if val >= min && val <= max {
+    ("Normal", "#059669")
+  } else if val < min {
+    ("Low", "#DC2626")
+  } else {
+    ("High", "#DC2626")
+  }
+}
+
 @react.component
 let make = (~handleDone, ~initialState) => {
   let (state, send) = React.useReducer(reducer, initialState)
@@ -35,7 +45,7 @@ let make = (~handleDone, ~initialState) => {
         step={0.1}
         value={BloodSugar.blood_sugar_level(state)}
         setValue={s => send(SetBloodSugarLevel(s))}
-        getLabel={_ => ("Normal", "#ff0000")}
+        getLabel={getStatus(70.0, 110.0)}
       />
       <h3> {str("Insuline Intake")} </h3>
       <Slider

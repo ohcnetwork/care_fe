@@ -6,6 +6,16 @@ let handleSubmit = (handleDone, state) => {
   handleDone(state, status)
 }
 
+let getStatus = (min, minText, max, maxText, val) => {
+  if val >= min && val <= max {
+    ("Normal", "#059669")
+  } else if val < min {
+    (minText, "#DC2626")
+  } else {
+    (maxText, "#DC2626")
+  }
+}
+
 type action =
   | SetBp_systolic(string)
   | SetBp_diastolic(string)
@@ -57,7 +67,7 @@ let make = (~handleDone, ~initialState) => {
         step={0.1}
         value={HemodynamicParameters.bp_systolic(state)}
         setValue={s => send(SetBp_systolic(s))}
-        getLabel={_ => ("Normal", "#ff0000")}
+        getLabel={getStatus(100.0, "Low", 140.0, "High")}
       />
       <Slider
         title={"Diastolic"}
@@ -67,37 +77,37 @@ let make = (~handleDone, ~initialState) => {
         step={0.1}
         value={HemodynamicParameters.bp_diastolic(state)}
         setValue={s => send(SetBp_diastolic(s))}
-        getLabel={_ => ("Normal", "#ff0000")}
+        getLabel={getStatus(50.0, "Low", 90.0, "High")}
       />
       <Slider
         title={"Pulse (bpm)"}
         start={"0"}
         end={"200"}
         interval={"10"}
-        step={0.1}
+        step={1.0}
         value={HemodynamicParameters.pulse(state)}
         setValue={s => send(SetPulse(s))}
-        getLabel={_ => ("Normal", "#ff0000")}
+        getLabel={getStatus(40.0, "Bradycardia", 100.0, "Tachycardia")}
       />
       <Slider
         title={"Temperature (F)"}
         start={"95"}
         end={"106"}
-        interval={"1"}
+        interval={"10"}
         step={0.1}
         value={HemodynamicParameters.temperature(state)}
         setValue={s => send(SetTemperature(s))}
-        getLabel={_ => ("Normal", "#ff0000")}
+        getLabel={getStatus(97.6, "Low", 99.6, "High")}
       />
       <Slider
         title={"Respiratory Rate (bpm)"}
         start={"10"}
         end={"50"}
         interval={"5"}
-        step={0.1}
+        step={1.0}
         value={HemodynamicParameters.respiratory_rate(state)}
         setValue={s => send(SetRespiratory_rate(s))}
-        getLabel={_ => ("Normal", "#ff0000")}
+        getLabel={getStatus(12.0, "Low", 16.0, "High")}
       />
       <div className="w-full mb-10 px-3">
         <label className="block mb-2 font-bold"> {str("Rhythm")} </label>
