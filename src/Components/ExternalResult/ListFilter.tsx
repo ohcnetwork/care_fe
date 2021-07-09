@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { AutoCompleteAsyncField } from "../Common/HelperInputFields";
+import {
+  AutoCompleteAsyncField,
+  TextInputField,
+} from "../Common/HelperInputFields";
 import { DateRangePicker, getDate } from "../Common/DateRangePicker";
 import { getAllLocalBodyByDistrict } from "../../Redux/actions";
 import { useDispatch, useSelector } from "react-redux";
@@ -14,7 +17,7 @@ function useMergeState(initialState: any) {
 }
 
 export default function ListFilter(props: any) {
-  let { filter, onChange, closeFilter, dataList } = props;
+  let { filter, onChange, closeFilter, dataList, local } = props;
   const [wardList, setWardList] = useState<any[]>([]);
   const [lsgList, setLsgList] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -25,12 +28,23 @@ export default function ListFilter(props: any) {
   const state: any = useSelector((state) => state);
   const { currentUser } = state;
   const [filterState, setFilterState] = useMergeState({
-    created_date_before: filter.created_date_before || null,
-    created_date_after: filter.created_date_after || null,
-    result_date_before: filter.result_date_before || null,
-    result_date_after: filter.result_date_after || null,
-    sample_collection_date_before: filter.sample_collection_date_before || null,
-    sample_collection_date_after: filter.sample_collection_date_after || null,
+    created_date_before:
+      filter.created_date_before || local.created_date_before || null,
+    created_date_after:
+      filter.created_date_after || local.created_date_after || null,
+    result_date_before:
+      filter.result_date_before || local.result_date_before || null,
+    result_date_after:
+      filter.result_date_after || local.result_date_after || null,
+    sample_collection_date_before:
+      filter.sample_collection_date_before ||
+      local.sample_collection_date_before ||
+      null,
+    sample_collection_date_after:
+      filter.sample_collection_date_after ||
+      local.sample_collection_date_after ||
+      null,
+    srf_id: filter.srf_id || local.srf_id || null,
   });
 
   const handleDateRangeChange = (
@@ -74,11 +88,12 @@ export default function ListFilter(props: any) {
       result_date_after,
       sample_collection_date_after,
       sample_collection_date_before,
+      srf_id,
     } = filterState;
 
     const data = {
-      wards: selectedWardIds.length ? selectedWardIds : undefined,
-      local_bodies: selectedLsgIds.length ? selectedLsgIds : undefined,
+      wards: selectedWardIds.length ? selectedWardIds : "",
+      local_bodies: selectedLsgIds.length ? selectedLsgIds : "",
       created_date_before: formatDateTime(created_date_before),
       created_date_after: formatDateTime(created_date_after),
       result_date_before: formatDateTime(result_date_before),
@@ -89,7 +104,13 @@ export default function ListFilter(props: any) {
       sample_collection_date_before: formatDateTime(
         sample_collection_date_before
       ),
+      srf_id: srf_id,
     };
+    localStorage.setItem("external-filters", JSON.stringify(data));
+    localStorage.setItem(
+      "lsg-ward-data",
+      JSON.stringify({ lsgList: selectedLsgs, wardList: wards })
+    );
     onChange(data);
     dataList(selectedLsgs, wards);
   };
@@ -164,6 +185,22 @@ export default function ListFilter(props: any) {
     return selectedwards;
   };
 
+  const handleChange = (event: any) => {
+    const { name, value } = event.target;
+
+    const filterData: any = { ...filterState };
+    filterData[name] = value;
+
+    setFilterState(filterData);
+  };
+
+  const clearFilters = () => {
+    localStorage.removeItem("external-filters");
+    localStorage.removeItem("lsg-ward-data");
+    dataList([], []);
+    closeFilter();
+  };
+
   return (
     <div>
       <div className="flex justify-between">
@@ -174,6 +211,7 @@ export default function ListFilter(props: any) {
         <Link
           href="/external_results"
           className="btn btn-default hover:text-gray-900"
+          onClick={clearFilters}
         >
           <i className="fas fa-times mr-2" />
           Clear Filters
@@ -273,6 +311,20 @@ export default function ListFilter(props: any) {
           startDateId={"sample_collection_date_after"}
           label={"Sample Collection Date"}
           size="small"
+        />
+      </div>
+      <div className="w-64 flex-none">
+        <span className="text-sm font-semibold">SRF ID</span>
+        <TextInputField
+          id="srf_id"
+          name="srf_id"
+          variant="outlined"
+          margin="dense"
+          errors=""
+          value={filterState.srf_id}
+          onChange={handleChange}
+          label="Srf id"
+          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 mr-1"
         />
       </div>
     </div>

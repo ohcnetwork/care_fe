@@ -12,6 +12,7 @@
 /build
 
 src/index.css
+src/style/index.css
 
 # misc
 .DS_Store
@@ -38,3 +39,6 @@ public/build-meta.json
 *.bs.js
 *.gen.tsx
 *.gen
+
+# Generated CSS file from Tailwind
+src/style/index.css

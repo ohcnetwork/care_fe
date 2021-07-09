@@ -414,6 +414,14 @@ export const deleteExternalResult = (id: string) => {
   return fireRequest("deleteExternalResult", [id], {});
 };
 
+export const updateExternalResult = (id: number, params: object) => {
+  return fireRequest("updateExternalResult", [], params, { id });
+};
+
+export const partialUpdateExternalResult = (id: number, params: object) => {
+  return fireRequest("partialUpdateExternalResult", [], params, { id });
+};
+
 // Notifications
 export const getNotifications = (params: object) => {
   return fireRequest("getNotifications", [], params);
@@ -425,6 +433,10 @@ export const getNotificationData = (pathParam: object) => {
 
 export const getPublicKey = () => {
   return fireRequest("getPublicKey", [], {}, {});
+};
+
+export const sendNotificationMessages = (params: object) => {
+  return fireRequest("sendNotificationMessages", [], params, {});
 };
 
 // FileUpload

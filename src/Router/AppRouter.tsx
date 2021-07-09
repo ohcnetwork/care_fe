@@ -41,6 +41,7 @@ import { ResourceDetailsUpdate } from "../Components/Resource/ResourceDetailsUpd
 import ResultList from "../Components/ExternalResult/ResultList";
 import ResultItem from "../Components/ExternalResult/ResultItem";
 import ExternalResultUpload from "../Components/ExternalResult/ExternalResultUpload";
+import ResultUpdate from "../Components/ExternalResult/ResultUpdate";
 import NotificationsList from "../Components/Notifications/NotificationsList";
 import { FileUpload } from "../Components/Patient/FileUpload";
 import Investigation from "../Components/Facility/Investigations";
@@ -51,6 +52,7 @@ import AssetCreate from "../Components/Facility/AssetCreate";
 import { withTranslation } from "react-i18next";
 import DeathReport from "../Components/DeathReport/DeathReport";
 import ShowPushNotification from "../Components/Notifications/ShowPushNotification";
+import { NoticeBoard } from "../Components/Notifications/NoticeBoard";
 import { AddLocationForm } from "../Components/Facility/AddLocationForm";
 import { LocationManagement } from "../Components/Facility/LocationManagement";
 import AssetsList from "../Components/Assets/AssetsList";
@@ -307,8 +309,10 @@ const routes = {
   "/external_results": () => <ResultList />,
   "/external_results/upload": () => <ExternalResultUpload />,
   "/external_results/:id": ({ id }: any) => <ResultItem id={id} />,
+  "/external_results/:id/update": ({ id }: any) => <ResultUpdate id={id} />,
   "/death_report/:id": ({ id }: any) => <DeathReport id={id} />,
   "/notifications/:id": (id: any) => <ShowPushNotification external_id={id} />,
+  "/notice_board/": () => <NoticeBoard />,
 };
 
 let menus = [
@@ -356,6 +360,11 @@ let menus = [
     title: "Profile",
     link: "/user/profile",
     icon: "fas fa-user-secret",
+  },
+  {
+    title: "Notice Board",
+    link: "/notice_board/",
+    icon: "fas fa-comment-alt",
   },
 ];
 
@@ -471,6 +480,8 @@ const AppRouter = (props: any) => {
                           localStorage.removeItem("care_access_token");
                           localStorage.removeItem("care_refresh_token");
                           localStorage.removeItem("shift-filters");
+                          localStorage.removeItem("external-filters");
+                          localStorage.removeItem("lsg-ward-data");
                           navigate("/login");
                           window.location.reload();
                         }}
@@ -551,6 +562,8 @@ const AppRouter = (props: any) => {
                       localStorage.removeItem("care_access_token");
                       localStorage.removeItem("care_refresh_token");
                       localStorage.removeItem("shift-filters");
+                      localStorage.removeItem("external-filters");
+                      localStorage.removeItem("lsg-ward-data");
                       navigate("/login");
                       window.location.reload();
                     }}

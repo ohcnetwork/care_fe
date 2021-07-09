@@ -37,10 +37,13 @@ import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
 import Modal from "@material-ui/core/Modal";
 import { Close, ZoomIn, ZoomOut } from "@material-ui/icons";
 
+import Pagination from "../Common/Pagination";
+import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
+
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
-const header_content_type: URLS = {
+export const header_content_type: URLS = {
   pdf: "application/pdf",
   txt: "text/plain",
   jpeg: "image/jpeg",
@@ -93,7 +96,7 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const LinearProgressWithLabel = (props: any) => {
+export const LinearProgressWithLabel = (props: any) => {
   return (
     <Box display="flex" alignItems="center">
       <Box width="100%" mr={1}>
@@ -116,6 +119,7 @@ interface FileUploadProps {
   hideBack: boolean;
   audio: boolean;
   unspecified: boolean;
+  sampleId?: number;
 }
 
 interface URLS {
@@ -141,6 +145,7 @@ export const FileUpload = (props: FileUploadProps) => {
     hideBack,
     audio,
     unspecified,
+    sampleId,
   } = props;
   const id = patientId;
   const dispatch: any = useDispatch();
@@ -167,6 +172,17 @@ export const FileUpload = (props: FileUploadProps) => {
     isZoomOutDisabled: false,
   };
   const [file_state, setFileState] = useState<StateInterface>(initialState);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [offset, setOffset] = useState(0);
+  const limit = RESULTS_PER_PAGE_LIMIT;
+
+  const handlePagination = (page: number, limit: number) => {
+    const offset = (page - 1) * limit;
+    setCurrentPage(page);
+    setOffset(offset);
+  };
 
   const zoom_values = [
     "h-1/6 my-40",
@@ -216,10 +232,12 @@ export const FileUpload = (props: FileUploadProps) => {
   const UPLOAD_HEADING: { [index: string]: string } = {
     PATIENT: "Upload Patient Files",
     CONSULTATION: "Upload Consultation Files",
+    SAMPLE_MANAGEMENT: "Upload Sample Report",
   };
   const VIEW_HEADING: { [index: string]: string } = {
     PATIENT: "View Patient Files",
     CONSULTATION: "View Consultation Files",
+    SAMPLE_MANAGEMENT: "View Sample Report",
   };
 
   const handleClose = () => {
@@ -241,23 +259,32 @@ export const FileUpload = (props: FileUploadProps) => {
       case "CONSULTATION": {
         return consultationId;
       }
+      case "SAMPLE_MANAGEMENT": {
+        return sampleId;
+      }
     }
   };
 
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      var data = { file_type: type, associating_id: getAssociatedId() };
+      var data = {
+        file_type: type,
+        associating_id: getAssociatedId(),
+        limit: limit,
+        offset: offset,
+      };
       const res = await dispatch(viewUpload(data));
       if (!status.aborted) {
         if (res && res.data) {
           audio_urls(res.data.results);
           setuploadedFiles(res.data.results);
+          setTotalCount(res.data.count);
         }
         setIsLoading(false);
       }
     },
-    [dispatch, id]
+    [dispatch, id, offset]
   );
 
   // Store all audio urls for each audio file
@@ -292,7 +319,7 @@ export const FileUpload = (props: FileUploadProps) => {
   // Function to extract the extension of the file and check if its image or not
   const getExtension = (url: string) => {
     const div1 = url.split("?")[0].split(".");
-    const ext: string = div1[div1.length - 1];
+    const ext: string = div1[div1.length - 1].toLowerCase();
     if (ExtImage[ext] && ExtImage[ext] === "1") {
       return true;
     }
@@ -690,6 +717,16 @@ export const FileUpload = (props: FileUploadProps) => {
       <PageTitle title={`${VIEW_HEADING[type]}`} hideBack={true} />
       {uploadedFiles.length > 0 &&
         uploadedFiles.map((item: FileUploadModel) => renderFileUpload(item))}
+      {totalCount > limit && (
+        <div className="mt-4 flex w-full justify-center">
+          <Pagination
+            cPage={currentPage}
+            defaultPerPage={limit}
+            data={{ totalCount }}
+            onChange={handlePagination}
+          />
+        </div>
+      )}
     </div>
   );
 };

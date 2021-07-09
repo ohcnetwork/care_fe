@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
-import React, { useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import loadable from "@loadable/component";
 import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
@@ -20,13 +20,13 @@ import { FacilityModel } from "../Facility/models";
 import DeleteForeverIcon from "@material-ui/icons/DeleteForever";
 import { IconButton } from "@material-ui/core";
 import LinkFacilityDialog from "./LinkFacilityDialog";
+import { SelectField } from "../Common/HelperInputFields";
 import UserDeleteDialog from "./UserDeleteDialog";
+import * as Notification from "../../Utils/Notifications.js";
 import classNames from "classnames";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
-import { SelectField } from "../Common/HelperInputFields";
-import * as Notification from "../../Utils/Notifications.js";
 
 export default function ManageUsers(props: any) {
   const dispatch: any = useDispatch();
