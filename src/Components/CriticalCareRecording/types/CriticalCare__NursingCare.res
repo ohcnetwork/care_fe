@@ -1,16 +1,16 @@
 type t = {
-  personalHygiene: string,
-  positioning: string,
-  suctioning: string,
-  rylesTubeCare: string,
-  iVSitecare: string,
-  nubulisation: string,
-  dressing: string,
-  dVTPumpStocking: string,
-  restrain: string,
-  chestTubeCare: string,
-  tracheostomyCare: string,
-  stomaCare: string,
+  personalHygiene: option<string>,
+  positioning: option<string>,
+  suctioning: option<string>,
+  rylesTubeCare: option<string>,
+  iVSitecare: option<string>,
+  nubulisation: option<string>,
+  dressing: option<string>,
+  dVTPumpStocking: option<string>,
+  restrain: option<string>,
+  chestTubeCare: option<string>,
+  tracheostomyCare: option<string>,
+  stomaCare: option<string>,
 }
 
 let personalHygiene = t => t.personalHygiene
@@ -29,42 +29,70 @@ let stomaCare = t => t.stomaCare
 let showStatus = data => {
   let total = 12.0
   let count = ref(0.0)
-  if personalHygiene(data) !== "" {
+  if personalHygiene(data) !== None {
     count := count.contents +. 1.0
   }
-  if positioning(data) !== "" {
+  if positioning(data) !== None {
     count := count.contents +. 1.0
   }
-  if suctioning(data) !== "" {
+  if suctioning(data) !== None {
     count := count.contents +. 1.0
   }
-  if rylesTubeCare(data) !== "" {
+  if rylesTubeCare(data) !== None {
     count := count.contents +. 1.0
   }
-  if iVSitecare(data) !== "" {
+  if iVSitecare(data) !== None {
     count := count.contents +. 1.0
   }
-  if dressing(data) !== "" {
+  if dressing(data) !== None {
     count := count.contents +. 1.0
   }
-  if nubulisation(data) !== "" {
+  if nubulisation(data) !== None {
     count := count.contents +. 1.0
   }
-  if dVTPumpStocking(data) !== "" {
+  if dVTPumpStocking(data) !== None {
     count := count.contents +. 1.0
   }
-  if restrain(data) !== "" {
+  if restrain(data) !== None {
     count := count.contents +. 1.0
   }
-  if chestTubeCare(data) !== "" {
+  if chestTubeCare(data) !== None {
     count := count.contents +. 1.0
   }
-  if tracheostomyCare(data) !== "" {
+  if tracheostomyCare(data) !== None {
     count := count.contents +. 1.0
   }
-  if stomaCare(data) !== "" {
+  if stomaCare(data) !== None {
     count := count.contents +. 1.0
   }
 
   Js.Float.toFixed(count.contents /. total *. 100.0)
+}
+
+let create = (
+  personalHygiene,
+  positioning,
+  suctioning,
+  rylesTubeCare,
+  iVSitecare,
+  nubulisation,
+  dressing,
+  dVTPumpStocking,
+  restrain,
+  chestTubeCare,
+  tracheostomyCare,
+  stomaCare,
+) => {
+  personalHygiene: personalHygiene,
+  positioning: positioning,
+  suctioning: suctioning,
+  rylesTubeCare: rylesTubeCare,
+  iVSitecare: iVSitecare,
+  nubulisation: nubulisation,
+  dressing: dressing,
+  dVTPumpStocking: dVTPumpStocking,
+  restrain: restrain,
+  chestTubeCare: chestTubeCare,
+  tracheostomyCare: tracheostomyCare,
+  stomaCare: stomaCare,
 }
