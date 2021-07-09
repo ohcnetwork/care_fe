@@ -10,8 +10,8 @@ let checkBoxSliderConfig = [
     "interval": "5",
     "step": 1.0,
     "id": "nasalProngs",
-    "min": "1",
-    "max": "4",
+    "min": 1.0,
+    "max": 4.0,
   },
   {
     "checkboxTitle": "Simple Face Mask",
@@ -21,8 +21,8 @@ let checkBoxSliderConfig = [
     "interval": "5",
     "step": 1.0,
     "id": "simpleFaceMask",
-    "min": "5",
-    "max": "10",
+    "min": 5.0,
+    "max": 10.0,
   },
 ]
 
@@ -34,8 +34,8 @@ let sliderConfig = [
     "interval": "10",
     "step": 1.0,
     "id": "fio2",
-    "min": "21",
-    "max": "60",
+    "min": 21.0,
+    "max": 60.0,
   },
   {
     "title": "SPO2 (%)",
@@ -44,10 +44,20 @@ let sliderConfig = [
     "interval": "10",
     "step": 1.0,
     "id": "spo2",
-    "min": "90",
-    "max": "100",
+    "min": 90.0,
+    "max": 100.0,
   },
 ]
+
+let getStatus = (min, max, val) => {
+  if val > min && val < max {
+    ("Normal", "#059669")
+  } else if val < min {
+    ("Low", "#DC2626")
+  } else {
+    ("High", "#DC2626")
+  }
+}
 
 module ShowOnChecked = {
   @react.component
@@ -110,7 +120,7 @@ let make = (~state: VentilatorParameters.none, ~send: VentilatorParameters.actio
               | _ => ""
               }}
               setValue={s => send(SetNone(newState(Some(s))))}
-              getLabel={_ => ("Normal", "#ff0000")}
+              getLabel={VentilatorParameters.getStatus(option["min"], option["max"])}
             />
           </ShowOnChecked>
         </div>
@@ -166,7 +176,7 @@ let make = (~state: VentilatorParameters.none, ~send: VentilatorParameters.actio
           step={option["step"]}
           value={value}
           setValue={s => send(SetNone(newState(s)))}
-          getLabel={_ => ("Normal", "#ff0000")}
+          getLabel={VentilatorParameters.getStatus(option["min"], option["max"])}
         />
       })
       |> React.array}

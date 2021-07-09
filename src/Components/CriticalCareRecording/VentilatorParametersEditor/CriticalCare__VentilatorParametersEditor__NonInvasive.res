@@ -24,8 +24,8 @@ let psvOptionsArray = [
     "interval": "5",
     "step": 1.0,
     "id": "peep",
-    "min": "10",
-    "max": "30",
+    "min": 10.0,
+    "max": 30.0,
   },
   {
     "title": "Peak Inspiratory Pressure (PIP) (cm H2O)",
@@ -34,8 +34,8 @@ let psvOptionsArray = [
     "interval": "10",
     "step": 1.0,
     "id": "peakInspiratoryPressure",
-    "min": "12",
-    "max": "30",
+    "min": 12.0,
+    "max": 30.0,
   },
   {
     "title": "Mean Airway Pressure (cm H2O",
@@ -44,8 +44,8 @@ let psvOptionsArray = [
     "interval": "5",
     "step": 1.0,
     "id": "meanAirwayPressure",
-    "min": "12",
-    "max": "25",
+    "min": 12.0,
+    "max": 25.0,
   },
   {
     "title": "Respiratory Rate Ventilator (bpm)",
@@ -54,8 +54,8 @@ let psvOptionsArray = [
     "interval": "10",
     "step": 1.0,
     "id": "respiratoryRateVentilator",
-    "min": "40",
-    "max": "60",
+    "min": 40.0,
+    "max": 60.0,
   },
   {
     "title": "Tidal Volume (ml)",
@@ -64,8 +64,8 @@ let psvOptionsArray = [
     "interval": "100",
     "step": 1.0,
     "id": "tidalVolume",
-    "min": "0",
-    "max": "1000",
+    "min": 0.0,
+    "max": 1000.0,
   },
   {
     "title": "FiO2 (%)",
@@ -74,8 +74,8 @@ let psvOptionsArray = [
     "interval": "10",
     "step": 1.0,
     "id": "fio2",
-    "min": "21",
-    "max": "60",
+    "min": 21.0,
+    "max": 60.0,
   },
   {
     "title": "SPO2 (%)",
@@ -84,8 +84,8 @@ let psvOptionsArray = [
     "interval": "10",
     "step": 1.0,
     "id": "spo2",
-    "min": "90",
-    "max": "100",
+    "min": 90.0,
+    "max": 100.0,
   },
 ]
 
@@ -209,7 +209,7 @@ let make = (~state: VentilatorParameters.niv, ~send: VentilatorParameters.action
             step={option["step"]}
             value={value}
             setValue={s => send(SetNivSubOptions(newState(s)))}
-            getLabel={_ => ("Normal", "#ff0000")}
+            getLabel={VentilatorParameters.getStatus(option["min"], option["max"])}
           />
         })
         |> React.array}
