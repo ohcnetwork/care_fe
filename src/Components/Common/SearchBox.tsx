@@ -14,7 +14,7 @@ export const InputSearchBox = (props: TextFieldPropsExtended) => {
   const handler = useCallback(debounce(search, 500), [search]);
 
   const handleKeyDown = (event: any) => {
-    if (event.key === "Enter") {
+    if (event.key == "Enter") {
       const value = event.target.value;
       setSearchValue(value);
       handler(value);
