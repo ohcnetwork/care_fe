@@ -90,10 +90,6 @@ const routes = {
     patientId,
     sampleId,
   }: any) => <SampleReport id={patientId} sampleId={sampleId} />,
-  "/patient/:patientId/test_sample/:sampleId/details": ({
-    patientId,
-    sampleId,
-  }: any) => <SampleDetails id={sampleId} patientId={patientId} />,
   "/facility": () => <HospitalList />,
   "/facility/create": () => <FacilityCreate />,
   "/facility/:facilityId/update": ({ facilityId }: any) => (
@@ -376,6 +372,11 @@ let menus = [
     title: "Profile",
     link: "/user/profile",
     icon: "fas fa-user-secret",
+  },
+  {
+    title: "Notice Board",
+    link: "/notice_board/",
+    icon: "fas fa-comment-alt",
   },
 ];
 

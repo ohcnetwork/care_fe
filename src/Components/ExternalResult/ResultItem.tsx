@@ -96,6 +96,11 @@ export default function ResultItem(props: any) {
             <p className="mt-1 max-w-2xl text-sm leading-5 text-gray-500">
               Care external results ID: {data.id}
             </p>
+            {data.patient_created ? (
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium leading-4 bg-green-100 text-green-800 capitalize">
+                Patient Created
+              </span>
+            ) : null}
           </div>
           <div className="px-4 py-5 sm:p-0">
             <dl>

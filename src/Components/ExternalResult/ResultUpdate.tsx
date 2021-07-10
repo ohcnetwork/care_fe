@@ -4,6 +4,10 @@ import {
   CardContent,
   CircularProgress,
   InputLabel,
+  Radio,
+  RadioGroup,
+  Box,
+  FormControlLabel,
 } from "@material-ui/core";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import loadable from "@loadable/component";
@@ -32,6 +36,7 @@ const initForm: any = {
   address: "",
   local_body: "",
   ward: "",
+  patient_created: "false",
 };
 
 const initError = Object.assign(
@@ -83,7 +88,6 @@ export default function UpdateResult(props: any) {
       const res = await dispatchAction(externalResult({ id: id }));
       if (!status.aborted) {
         if (res && res.data) {
-          console.log(res.data);
           const form = { ...state.form };
           form["name"] = res.data.name;
           form["age"] = res.data.age;
@@ -93,6 +97,7 @@ export default function UpdateResult(props: any) {
           form["district"] = res.data.district_object.name;
           form["local_body"] = String(res.data.local_body);
           form["ward"] = String(res.data.ward);
+          form["patient_created"] = res.data.patient_created;
 
           dispatch({ type: "set_form", form });
 
@@ -147,9 +152,8 @@ export default function UpdateResult(props: any) {
   const validateForm = () => {
     let errors = { ...initError };
     let invalidForm = false;
-    console.log("fields", state.form);
+
     Object.keys(state.form).forEach((field, i) => {
-      console.log("field", field);
       switch (field) {
         case "address":
           if (!state.form[field]) {
@@ -160,10 +164,10 @@ export default function UpdateResult(props: any) {
         case "local_body":
           if (!state.form[field] || state.form[field] === "0") {
             errors[field] = "Please select local body";
-            console.log("yes");
+
             invalidForm = true;
           }
-          console.log("l", invalidForm);
+
           return;
         case "ward":
           if (!state.form[field] || state.form[field] === "0") {
@@ -171,11 +175,17 @@ export default function UpdateResult(props: any) {
             invalidForm = true;
           }
           return;
+        case "patient_created":
+          if (!state.form[field] || state.form[field] === "0") {
+            errors[field] = "Please select an option if the patient is created";
+            invalidForm = true;
+          }
+          return;
         default:
           return;
       }
     });
-    console.log(errors);
+
     if (invalidForm) {
       dispatch({ type: "set_error", errors });
       return false;
@@ -197,13 +207,14 @@ export default function UpdateResult(props: any) {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     const validForm = validateForm();
-    console.log(validForm, state.form.local_body);
+
     if (validForm) {
       setIsLoading(true);
       const data = {
         address: state.form.address ? state.form.address : undefined,
         local_body: state.form.local_body ? state.form.local_body : undefined,
         ward: state.form.ward,
+        patient_created: [true, "true"].includes(state.form.patient_created),
       };
 
       const res = await dispatchAction(partialUpdateExternalResult(id, data));
@@ -296,6 +307,32 @@ export default function UpdateResult(props: any) {
                 />
               )}
             </div>
+            <div data-testid="patient_created">
+              <InputLabel id="patient_created-label">
+                Is the patient created?
+              </InputLabel>
+
+              <RadioGroup
+                aria-label="patient_created"
+                name="patient_created"
+                value={[true, "true"].includes(state.form.patient_created)}
+                onChange={handleChange}
+                style={{ padding: "0px 5px" }}
+              >
+                <Box display="flex" flexDirection="row">
+                  <FormControlLabel
+                    value={true}
+                    control={<Radio />}
+                    label="Yes"
+                  />
+                  <FormControlLabel
+                    value={false}
+                    control={<Radio />}
+                    label="No"
+                  />
+                </Box>
+              </RadioGroup>
+            </div>
           </div>
           <div className="flex justify-end mt-4">
             <Button
@@ -307,7 +344,7 @@ export default function UpdateResult(props: any) {
               {" "}
               Cancel{" "}
             </Button>
-            {console.log("form", state.form)}
+
             <Button
               color="primary"
               variant="contained"

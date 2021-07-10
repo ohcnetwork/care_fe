@@ -94,7 +94,6 @@ self.addEventListener("push", async function (event) {
 
 // Notification click event listener
 self.addEventListener("notificationclick", (e) => {
-  console.log("on notification click");
   // Close the notification popout
   e.notification.close();
   // Get all the Window clients
