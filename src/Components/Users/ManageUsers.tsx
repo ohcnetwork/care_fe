@@ -13,7 +13,7 @@ import {
   deleteUser,
 } from "../../Redux/actions";
 import Pagination from "../Common/Pagination";
-import { navigate } from "raviger";
+import { navigate, useQueryParams } from "raviger";
 import { USER_TYPES, RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import { InputSearchBox } from "../Common/SearchBox";
 import { FacilityModel } from "../Facility/models";
@@ -29,6 +29,7 @@ const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export default function ManageUsers(props: any) {
+  const [qParams, setQueryParams] = useQueryParams();
   const dispatch: any = useDispatch();
   const initialData: any[] = [];
   let manageUsers: any = null;
@@ -74,7 +75,15 @@ export default function ManageUsers(props: any) {
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const res = await dispatch(getUserList({ limit, offset }));
+      const params = {
+        limit,
+        offset,
+        username: qParams.username,
+        first_name: qParams.name,
+        phone_number: qParams.phone_number,
+        user_type: qParams.user_type,
+      };
+      const res = await dispatch(getUserList(params));
       if (!status.aborted) {
         if (res && res.data) {
           setUsers(res.data.results);
@@ -83,7 +92,15 @@ export default function ManageUsers(props: any) {
         setIsLoading(false);
       }
     },
-    [dispatch, limit, offset]
+    [
+      dispatch,
+      limit,
+      offset,
+      qParams.user_type,
+      qParams.username,
+      qParams.name,
+      qParams.phone_number,
+    ]
   );
 
   useAbortableEffect(
@@ -99,54 +116,15 @@ export default function ManageUsers(props: any) {
     setOffset(offset);
   };
 
-  const searchByUserName = async (searchValue: string) => {
-    setIsLoading(true);
-    const res = await dispatch(
-      searchUser({ limit, offset, username: searchValue })
-    );
-    if (res && res.data) {
-      setUsers(res.data.results);
-      setTotalCount(res.data.count);
-    }
-    setIsLoading(false);
+  const onNameChange = (value: string) => {
+    setQueryParams({ ...qParams, name: value });
   };
 
-  const searchByName = async (searchValue: string) => {
-    setIsLoading(true);
-    const res = await dispatch(
-      searchUser({ limit, offset, first_name: searchValue })
-    );
-    if (res && res.data) {
-      setUsers(res.data.results);
-      setTotalCount(res.data.count);
-    }
-    setIsLoading(false);
+  const onUserNameChange = (value: string) => {
+    setQueryParams({ ...qParams, username: value });
   };
-
-  const searchByPhone = async (searchValue: string) => {
-    setIsLoading(true);
-    const res = await dispatch(
-      searchUser({ limit, offset, phone_number: encodeURI(searchValue) })
-    );
-    if (res && res.data) {
-      setUsers(res.data.results);
-      setTotalCount(res.data.count);
-    }
-    setIsLoading(false);
-  };
-
-  const filterByRole = async (role: string) => {
-    setIsLoading(true);
-    setSelectedRole(role);
-    role = role === "Select" ? "" : role;
-    const res = await dispatch(
-      searchUser({ limit, offset, user_type: encodeURI(role) })
-    );
-    if (res && res.data) {
-      setUsers(res.data.results);
-      setTotalCount(res.data.count);
-    }
-    setIsLoading(false);
+  const onPhoneNumberChange = (value: string) => {
+    setQueryParams({ ...qParams, phone_number: value });
   };
 
   const addUser = (
@@ -471,7 +449,8 @@ export default function ManageUsers(props: any) {
         <div className="md:px-4">
           <div className="text-sm font-semibold mb-2">Search by User Name</div>
           <InputSearchBox
-            search={searchByUserName}
+            search={onUserNameChange}
+            value={qParams.username}
             placeholder="Search by User Name"
             errors=""
           />
@@ -479,7 +458,8 @@ export default function ManageUsers(props: any) {
         <div className="md:px-4">
           <div className="text-sm font-semibold mb-2">Search by Name</div>
           <InputSearchBox
-            search={searchByName}
+            search={onNameChange}
+            value={qParams.first_name}
             placeholder="Search by First Name"
             errors=""
           />
@@ -487,7 +467,8 @@ export default function ManageUsers(props: any) {
         <div>
           <div className="text-sm font-semibold mb-2">Search by number</div>
           <InputSearchBox
-            search={searchByPhone}
+            search={onPhoneNumberChange}
+            value={qParams.phone_number}
             placeholder="+919876543210"
             errors=""
           />
@@ -498,10 +479,11 @@ export default function ManageUsers(props: any) {
             name="role"
             variant="outlined"
             margin="dense"
-            value={selectedRole}
+            value={qParams.user_type || ""}
             options={USER_TYPE_OPTIONS}
             onChange={(e) => {
-              filterByRole(e.target.value);
+              let value = e.target.value === "Select" ? "" : e.target.value;
+              setQueryParams({ ...qParams, user_type: value });
             }}
             errors=""
           />
