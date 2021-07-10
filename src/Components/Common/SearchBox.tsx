@@ -11,14 +11,12 @@ type TextFieldPropsExtended = TextFieldProps & {
 export const InputSearchBox = (props: TextFieldPropsExtended) => {
   const { search, placeholder, value } = props;
   const [searchValue, setSearchValue] = useState(value);
-  const handler = useCallback(debounce(search, 500), [search]);
+  const handler = useCallback(debounce(search, 700), [search]);
 
   const handleKeyDown = (event: any) => {
     const value = event.target.value;
     setSearchValue(value);
-    if (value.length === 0 || value.length > 2) {
-      handler(value);
-    }
+    handler(value);
   };
 
   useEffect(() => {
