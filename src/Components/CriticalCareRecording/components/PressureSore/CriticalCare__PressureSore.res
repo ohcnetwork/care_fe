@@ -201,6 +201,18 @@ let make = () => {
         |> React.array}
       </svg>
     </div>
+    <div className="flex flex-col">
+      <Slider
+        title={"Braden Scale (Risk Severity)"}
+        start={"1"}
+        end={"5"}
+        interval={"1"}
+        value={"3"}
+        step={1.0}
+        setValue={_ => ()}
+        getLabel={_ => ("", "#ff0000")}
+      />
+    </div>
     <div className="text-2xl font-bold mt-10"> {str("Back")} </div>
     <div className="flex justify-center max-w-2xl mx-auto">
       <svg
@@ -220,5 +232,22 @@ let make = () => {
         |> React.array}
       </svg>
     </div>
+    <div className="flex flex-col">
+      <Slider
+        title={"Braden Scale (Risk Severity)"}
+        start={"1"}
+        end={"5"}
+        interval={"1"}
+        value={"3"}
+        step={1.0}
+        setValue={_ => ()}
+        getLabel={_ => ("", "#ff0000")}
+      />
+    </div>
+    <button
+      className="flex w-full bg-blue-600 text-white p-2 text-lg hover:bg-blue-800 justify-center items-center rounded-md"
+      onClick={_ => ()}>
+      {str("Done")}
+    </button>
   </div>
 }
