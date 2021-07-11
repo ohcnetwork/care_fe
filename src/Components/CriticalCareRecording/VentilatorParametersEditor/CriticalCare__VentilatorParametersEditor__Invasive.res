@@ -141,7 +141,7 @@ let make = (~state: VentilatorParameters.iv, ~send: VentilatorParameters.action 
             )
           }}
           options={cmvOptionsArray}
-          horizontal={false}
+          ishorizontal={false}
         />
       </div>
     </div>
@@ -173,7 +173,7 @@ let make = (~state: VentilatorParameters.iv, ~send: VentilatorParameters.action 
               }),
             )}
           options={simvOptionArray}
-          horizontal={false}
+          ishorizontal={false}
         />
       </div>
     </div>

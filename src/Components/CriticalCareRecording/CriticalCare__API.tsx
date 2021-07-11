@@ -6,15 +6,20 @@ export const loadDailyRound = (
   successCB: any = () => {},
   errorCB: any = () => {}
 ) => {
-  let successCallback = (data: any) => {
-    console.log("success", data);
-    successCB(data);
-  };
-  let errorCallback = (data: any) => {
-    console.log("error", data);
-    errorCB(data);
-  };
-  fireRequestV2("getDailyReport", [], {}, successCallback, errorCallback, {
+  fireRequestV2("getDailyReport", [], {}, successCB, errorCB, {
+    consultationId,
+    id,
+  });
+};
+
+export const updateDailyRound = (
+  consultationId: string,
+  id: string,
+  params: object,
+  successCB: any = () => {},
+  errorCB: any = () => {}
+) => {
+  fireRequestV2("updateDailyRound", [], params, successCB, errorCB, {
     consultationId,
     id,
   });
