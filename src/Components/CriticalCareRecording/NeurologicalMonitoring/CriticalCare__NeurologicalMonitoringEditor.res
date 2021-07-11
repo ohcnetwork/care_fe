@@ -290,7 +290,7 @@ let limp_options: Options.limp_options = [
 
 let handleSubmit = (handleDone, state) => {
   let status = NeurologicalMonitoring.showStatus(state)
-  let _ = Js.log2(status, state)
+  // let _ = Js.log2(status, state)
   handleDone(state, status)
 }
 

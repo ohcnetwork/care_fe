@@ -1,6 +1,7 @@
 let str = React.string
-@val external document: {..} = "document"
+
 open CriticalCare__Types
+
 type editor =
   | NeurologicalMonitoringEditor
   | HemodynamicParametersEditor
@@ -64,7 +65,7 @@ let showStatus = item => {
 }
 
 let editorToggle = (editorName, state, send) => {
-  Js.log(state)
+  // Js.log(state)
   <div
     id="editorToggle"
     className="w-3/4 border-2 px-4 py-6 mx-auto my-4 cursor-pointer flex justify-between items-center"
@@ -294,9 +295,10 @@ let editorButtons = (state, send) => {
 }
 
 @react.component
-export make = () => {
+export make = (~id, ~facilityId, ~patientId, ~consultationId) => {
   let (state, send) = React.useReducer(reducer, initialState)
-  Js.log2(state, initialState)
+
+  // Js.log2(state, initialState)
   <div>
     <div className="w-3/4 mx-auto my-4" />
     <div className="w-3/4 mx-auto my-4">
