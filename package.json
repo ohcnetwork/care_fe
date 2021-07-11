@@ -65,6 +65,7 @@
     "cross-env": "^7.0.3",
     "css-loader": "^5.2.6",
     "date-fns": "^2.16.1",
+    "date-fns-tz": "^1.0.10",
     "file-loader": "^6.2.0",
     "html-webpack-plugin": "^4.5.1",
     "i18next": "^20.3.1",
