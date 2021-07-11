@@ -51,6 +51,8 @@ const initForm: any = {
   review_time: 0,
   admitted_to: "",
   medication_given: [],
+  taken_at: new Date(),
+  rounds_type: "NORMAL",
 };
 
 const initError = Object.assign(
@@ -187,7 +189,7 @@ export const DailyRounds = (props: any) => {
           : undefined,
         spo2: state.form.spo2 ? state.form.spo2 : undefined,
         admitted_to:
-          (state.form.admitted == "Select"
+          (state.form.admitted === "Select"
             ? undefined
             : state.form.admitted_to) || undefined,
         temperature: state.form.temperature
@@ -205,6 +207,8 @@ export const DailyRounds = (props: any) => {
         action: state.form.action,
         review_time: state.form.review_time,
         medication_given: prescriptions,
+        taken_at: state.form.taken_at,
+        rounds_type: state.form.rounds_type,
       };
 
       let res;
@@ -284,7 +288,20 @@ export const DailyRounds = (props: any) => {
         <div className="bg-white rounded shadow">
           <form onSubmit={(e) => handleSubmit(e)}>
             <CardContent>
-              <div className="md:grid gap-4 grid-cols-1 md:grid-cols-2">
+              <div>
+                <div>
+                  <DateTimeFiled
+                    label="Measured At"
+                    margin="dense"
+                    value={state.form.taken_at}
+                    disableFuture={true}
+                    showTodayButton={true}
+                    onChange={(date) => handleDateChange(date, "taken_at")}
+                    errors={state.errors.taken_at}
+                  />
+                </div>
+              </div>
+              <div className="md:grid gap-4 grid-cols-1 md:grid-cols-2 mt-4">
                 <div>
                   <InputLabel id="spo2-label">SpO2</InputLabel>
                   <TextInputField
