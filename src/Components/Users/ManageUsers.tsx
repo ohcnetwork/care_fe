@@ -9,7 +9,6 @@ import {
   deleteUserFacility,
   getUserList,
   getUserListFacility,
-  searchUser,
   deleteUser,
 } from "../../Redux/actions";
 import Pagination from "../Common/Pagination";
@@ -20,10 +19,11 @@ import { FacilityModel } from "../Facility/models";
 import DeleteForeverIcon from "@material-ui/icons/DeleteForever";
 import { IconButton } from "@material-ui/core";
 import LinkFacilityDialog from "./LinkFacilityDialog";
-import { SelectField } from "../Common/HelperInputFields";
 import UserDeleteDialog from "./UserDeleteDialog";
 import * as Notification from "../../Utils/Notifications.js";
 import classNames from "classnames";
+import UserFilter from "./UserFilter";
+import { make as SlideOver } from "../Common/SlideOver.gen";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -39,6 +39,7 @@ export default function ManageUsers(props: any) {
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [offset, setOffset] = useState(0);
+  const [showFilters, setShowFilters] = useState(false);
 
   const state: any = useSelector((state) => state);
   const { currentUser } = state;
@@ -48,9 +49,6 @@ export default function ManageUsers(props: any) {
   const userTypes = isSuperuser
     ? [...USER_TYPES]
     : USER_TYPES.slice(0, userIndex + 1);
-  const deleteUserTypes = isSuperuser
-    ? [...USER_TYPES]
-    : USER_TYPES.slice(0, userIndex);
   const [linkFacility, setLinkFacility] = useState<{
     show: boolean;
     username: string;
@@ -62,15 +60,18 @@ export default function ManageUsers(props: any) {
     name: string;
   }>({ show: false, username: "", name: "" });
 
-  const [selectedRole, setSelectedRole] = useState("");
-
   const limit = RESULTS_PER_PAGE_LIMIT;
 
-  const USER_TYPE_OPTIONS = ["Select", ...USER_TYPES].map((user) => {
-    return {
-      text: user,
-    };
-  });
+  const applyFilter = (data: any) => {
+    const filter = { ...qParams, ...data };
+    updateQuery(filter);
+    setShowFilters(false);
+  };
+
+  const updateQuery = (params: any) => {
+    const nParams = Object.assign({}, qParams, params);
+    setQueryParams(nParams, true);
+  };
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -79,8 +80,10 @@ export default function ManageUsers(props: any) {
         limit,
         offset,
         username: qParams.username,
-        first_name: qParams.name,
+        first_name: qParams.first_name,
+        last_name: qParams.last_name,
         phone_number: qParams.phone_number,
+        alt_phone_number: qParams.alt_phone_number,
         user_type: qParams.user_type,
       };
       const res = await dispatch(getUserList(params));
@@ -98,8 +101,10 @@ export default function ManageUsers(props: any) {
       offset,
       qParams.user_type,
       qParams.username,
-      qParams.name,
+      qParams.first_name,
+      qParams.last_name,
       qParams.phone_number,
+      qParams.alt_phone_number,
     ]
   );
 
@@ -116,15 +121,8 @@ export default function ManageUsers(props: any) {
     setOffset(offset);
   };
 
-  const onNameChange = (value: string) => {
-    setQueryParams({ ...qParams, name: value });
-  };
-
   const onUserNameChange = (value: string) => {
     setQueryParams({ ...qParams, username: value });
-  };
-  const onPhoneNumberChange = (value: string) => {
-    setQueryParams({ ...qParams, phone_number: value });
   };
 
   const addUser = (
@@ -445,52 +443,9 @@ export default function ManageUsers(props: any) {
         hideBack={true}
         className="mx-3 md:mx-8"
       />
-      <div className="flex flex-col md:flex-row px-4 md:px-8">
-        <div className="md:px-4">
-          <div className="text-sm font-semibold mb-2">Search by User Name</div>
-          <InputSearchBox
-            search={onUserNameChange}
-            value={qParams.username}
-            placeholder="Search by User Name"
-            errors=""
-          />
-        </div>
-        <div className="md:px-4">
-          <div className="text-sm font-semibold mb-2">Search by Name</div>
-          <InputSearchBox
-            search={onNameChange}
-            value={qParams.first_name}
-            placeholder="Search by First Name"
-            errors=""
-          />
-        </div>
-        <div>
-          <div className="text-sm font-semibold mb-2">Search by number</div>
-          <InputSearchBox
-            search={onPhoneNumberChange}
-            value={qParams.phone_number}
-            placeholder="+919876543210"
-            errors=""
-          />
-        </div>
-        <div className="px-4">
-          <div className="text-sm font-semibold">Filter By Role</div>
-          <SelectField
-            name="role"
-            variant="outlined"
-            margin="dense"
-            value={qParams.user_type || ""}
-            options={USER_TYPE_OPTIONS}
-            onChange={(e) => {
-              let value = e.target.value === "Select" ? "" : e.target.value;
-              setQueryParams({ ...qParams, user_type: value });
-            }}
-            errors=""
-          />
-        </div>
-      </div>
-      <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3 m-4 md:px-4">
-        <div className="bg-white overflow-hidden shadow rounded-lg">
+
+      <div className="mt-5 grid grid-cols-1 md:gap-5 sm:grid-cols-3 m-4 md:px-4">
+        <div className="bg-white overflow-hidden shadow col-span-1 rounded-lg">
           <div className="px-4 py-5 sm:p-6">
             <dl>
               <dt className="text-sm leading-5 font-medium text-gray-500 truncate">
@@ -501,6 +456,65 @@ export default function ManageUsers(props: any) {
               </dd>
             </dl>
           </div>
+        </div>
+        <div className="flex flex-col md:flex-row justify-between col-span-2 md:px-3 space-y-3 md:space-y-0 md:space-x-4 my-2">
+          <div className="w-full">
+            <InputSearchBox
+              search={onUserNameChange}
+              value={qParams.username}
+              placeholder="Search by User Name"
+              errors=""
+            />
+          </div>
+
+          <div>
+            <div className="flex items-start mb-2">
+              <button
+                className="btn btn-primary-ghost"
+                onClick={(_) => setShowFilters((show) => !show)}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="fill-current w-4 h-4 mr-2"
+                >
+                  <line x1="8" y1="6" x2="21" y2="6"></line>
+                  <line x1="8" y1="12" x2="21" y2="12">
+                    {" "}
+                  </line>
+                  <line x1="8" y1="18" x2="21" y2="18">
+                    {" "}
+                  </line>
+                  <line x1="3" y1="6" x2="3.01" y2="6">
+                    {" "}
+                  </line>
+                  <line x1="3" y1="12" x2="3.01" y2="12">
+                    {" "}
+                  </line>
+                  <line x1="3" y1="18" x2="3.01" y2="18">
+                    {" "}
+                  </line>
+                </svg>
+                <span>Advanced Filters</span>
+              </button>
+            </div>
+          </div>
+          <SlideOver show={showFilters} setShow={setShowFilters}>
+            <div className="bg-white min-h-screen p-4">
+              <UserFilter
+                filter={qParams}
+                onChange={applyFilter}
+                closeFilter={() => setShowFilters(false)}
+              />
+            </div>
+          </SlideOver>
         </div>
       </div>
       <div className="px-3 md:px-8">
