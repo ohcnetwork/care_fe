@@ -59,33 +59,6 @@ let getStatus = (min, max, val) => {
   }
 }
 
-module ShowOnChecked = {
-  @react.component
-  let make = (~title, ~children, ~onChange, ~defaultChecked=false) => {
-    let (checked, setChecked) = React.useState(_ => defaultChecked)
-    let handleChange = _ => {
-      onChange(!checked)
-      setChecked(prev => !prev)
-    }
-
-    <>
-      <label htmlFor={title} className="mb-6 block">
-        <input
-          type_="checkbox"
-          className="mr-6 inline-block"
-          id={title}
-          name={title}
-          value={title}
-          checked
-          onChange={handleChange}
-        />
-        {str(title)}
-      </label>
-      {checked ? children : React.null}
-    </>
-  }
-}
-
 @react.component
 let make = (~state: VentilatorParameters.none, ~send: VentilatorParameters.action => unit) => {
   <div>
