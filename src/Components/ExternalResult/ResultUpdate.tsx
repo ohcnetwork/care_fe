@@ -97,7 +97,7 @@ export default function UpdateResult(props: any) {
           form["district"] = res.data.district_object.name;
           form["local_body"] = String(res.data.local_body);
           form["ward"] = String(res.data.ward);
-          form["patient_created"] = res.data.patient_created;
+          form["patient_created"] = String(res.data.patient_created);
 
           dispatch({ type: "set_form", form });
 
@@ -176,7 +176,7 @@ export default function UpdateResult(props: any) {
           }
           return;
         case "patient_created":
-          if (!state.form[field] || state.form[field] === "0") {
+          if (state.form[field] !== "true" && state.form[field] !== "false") {
             errors[field] = "Please select an option if the patient is created";
             invalidForm = true;
           }
