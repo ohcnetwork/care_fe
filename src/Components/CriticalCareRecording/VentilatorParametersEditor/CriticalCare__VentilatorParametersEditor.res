@@ -67,7 +67,7 @@ let make = (~initialState, ~handleDone) => {
   | "none" => <CriticalCare__VentilatorParametersEditor__None state={state.none} send />
   | _ => <CriticalCare__VentilatorParametersEditor__Invasive state={state.iv} send />
   }
-  Js.log({state})
+  // Js.log({state})
   <div>
     <CriticalCare__PageTitle title="Ventilator Parameters" />
     <div className="py-6">

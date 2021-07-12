@@ -213,6 +213,10 @@ const routes: Routes = {
     path: "/api/v1/consultation/{consultationId}/daily_rounds/{id}/",
     method: "PUT",
   },
+  updateDailyRound: {
+    path: "/api/v1/consultation/{consultationId}/daily_rounds/{id}/",
+    method: "PATCH",
+  },
   getDailyReports: {
     path: "/api/v1/consultation/{consultationId}/daily_rounds/",
   },

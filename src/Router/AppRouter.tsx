@@ -65,11 +65,6 @@ const img = "https://cdn.coronasafe.network/light-logo.svg";
 const logoBlack = "https://cdn.coronasafe.network/black-logo.svg";
 
 const routes = {
-  "/critical_care": () => (
-    <>
-      <CriticalCareRecording />
-    </>
-  ),
   "/critical_care_ventilator": () => (
     <>
       <VentilatorParametersEditor />
@@ -244,6 +239,16 @@ const routes = {
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily-rounds/:id":
     ({ facilityId, patientId, consultationId, id }: any) => (
       <DailyRoundListDetails
+        facilityId={facilityId}
+        patientId={patientId}
+        consultationId={consultationId}
+        id={id}
+      />
+    ),
+
+  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily_rounds/:id":
+    ({ facilityId, patientId, consultationId, id }: any) => (
+      <CriticalCareRecording
         facilityId={facilityId}
         patientId={patientId}
         consultationId={consultationId}

@@ -218,7 +218,7 @@
 //     <div className="ml-36 w-8/12">
 //             <div className="my-10">
 //             <div className=" text-2xl font-bold my-2">{str("LOC")}</div>
-//             //<CriticalCare__RadioButton options={loc_options} horizontal=true />
+//             //<CriticalCare__RadioButton options={loc_options} ishorizontal=true />
 //         </div>
 //         <div className="my-10">
 //             <div className="text-2xl font-bold my-2 mb-4">{str("Pupil")}</div>
@@ -226,14 +226,14 @@
 //             <CriticalCare__PupilRangeSlider />
 //             <div className="my-15 mb-8">
 //                 <div className="font-bold my-4">{str("Reaction")}</div>
-//                 //<CriticalCare__RadioButton options={reaction_options} horizontal=true />
+//                 //<CriticalCare__RadioButton options={reaction_options} ishorizontal=true />
 //             </div>
 
 //             <div className="text-lg font-bold my-5">{str("Right Pupil")}</div>
 //             <CriticalCare__PupilRangeSlider />
 //             <div className="my-15 mb-8">
 //                 <div className="font-bold my-4">{str("Reaction")}</div>
-//                 //<CriticalCare__RadioButton options={reaction_options} horizontal=true/>
+//                 //<CriticalCare__RadioButton options={reaction_options} ishorizontal=true/>
 //             </div>
 //         </div>
 //         <div className="my-15 w-full h-1 bg-gray-300"></div>
@@ -246,7 +246,7 @@
 //                         <div className="font-bold mt-8">{str(Options.title(x))}</div>
 //                         <div className="text-lg font-bold text-blue-500 mt-8">{str("1")}</div>
 //                     </div>
-//                      //<CriticalCare__RadioButton options={Options.options(x)} horizontal=false />
+//                      //<CriticalCare__RadioButton options={Options.options(x)} ishorizontal=false />
 //                 </>
 //             })
 //             |> React.array }
@@ -265,7 +265,7 @@
 //                 {limps|>Array.map((x) => {
 //                 <>
 //                     <div className="font-bold mt-8 mb-1">{str(x)}</div>
-//                      //<CriticalCare__RadioButton options={limp_options} horizontal=true />
+//                      //<CriticalCare__RadioButton options={limp_options} ishorizontal=true />
 //                 </>
 //             })
 //             |> React.array }
@@ -285,7 +285,7 @@
 //             <div className="grid grid-cols-2 my-5">
 //                 <div className="font-bold">{str("Ventillator Mode")}</div>
 //                 <div>
-//                     //<CriticalCare__RadioButton options={ventillator_mode_options} horizontal=true />
+//                     //<CriticalCare__RadioButton options={ventillator_mode_options} ishorizontal=true />
 //                 </div>
 //             </div>
 //             <CriticalCare__NumberInput labels={ventilator_parameters} />
@@ -324,4 +324,3 @@
 
 //     </div>
 // }
-

@@ -24,7 +24,7 @@
 //         }
 //     }
 
-let s = React.string
+let str = React.string
 %%raw(`import ("./styles.css")`)
 
 @react.component
@@ -56,10 +56,10 @@ let make = (
   <>
     <section className="slider-box">
       <div className="slider-head">
-        <h1> {title->s} </h1>
+        <h1> {title->str} </h1>
         <label htmlFor="measure" style={ReactDOM.Style.make(~color=textColor, ())}>
           {switch value->Belt.Float.fromString {
-          | Some(_) => text->s
+          | Some(_) => text->str
           | None => React.null
           }}
           <input
@@ -92,6 +92,9 @@ let make = (
             )}
           />
         </div>
+      </div>
+      <div className="flex justify-between pt-2">
+        <div className="pt-2"> {str(start)} </div> <div className="pt-2"> {str(end)} </div>
       </div>
     </section>
   </>

@@ -1,18 +1,23 @@
 let str = React.string
 
-let horizontal_div_classes = "flex flex-wrap w-full"
-let vertical_div_classes = "my-3"
+let divClasses = isIsHorizontal => {
+  isIsHorizontal ? "flex flex-wrap w-full" : "my-3"
+}
 
-let horizontal_label_classes = "flex flex-wrap items-center justify-center mr-20 mt-2"
-let vertical_label_classes = "my-1 block"
+let labelClasses = ishorizontal => {
+  ishorizontal ? "flex flex-wrap items-center justify-center mr-20 mt-2" : "my-1 block"
+}
 
 @react.component
-let make = (~options, ~horizontal, ~defaultChecked="", ~onChange: ReactEvent.Form.t => unit) => {
-  <div className={horizontal ? horizontal_div_classes : vertical_div_classes}>
-    {options
-    |> Array.mapi((i, x) => {
-      <div key={`${Options.name(x)}_${i->Belt.Int.toString}`}>
-        <label className={horizontal ? horizontal_label_classes : vertical_label_classes}>
+let make = (
+  ~options,
+  ~ishorizontal=true,
+  ~defaultChecked="",
+  ~onChange: ReactEvent.Form.t => unit,
+) => {
+  <div className={divClasses(ishorizontal)}> {Js.Array.mapi((x, i) => {
+      <div key={`${Options.name(x)}_${string_of_int(i)}`}>
+        <label className={labelClasses(ishorizontal)}>
           <input
             className="mr-2"
             type_="radio"
@@ -25,7 +30,5 @@ let make = (~options, ~horizontal, ~defaultChecked="", ~onChange: ReactEvent.For
           {str({Options.label(x)})}
         </label>
       </div>
-    })
-    |> React.array}
-  </div>
+    }, options)->React.array} </div>
 }

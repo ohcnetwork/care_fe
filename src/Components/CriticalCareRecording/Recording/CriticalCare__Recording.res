@@ -1,6 +1,7 @@
 let str = React.string
-@val external document: {..} = "document"
+
 open CriticalCare__Types
+
 type editor =
   | NeurologicalMonitoringEditor
   | HemodynamicParametersEditor
@@ -14,10 +15,9 @@ type editor =
 
 type state = {
   visibleEditor: option<editor>,
+  dailyRound: CriticalCare__DailyRound.t,
   nursingCare: NursingCare.t,
   abgEditor: ABGAnalysis.t,
-  neurologicalMonitoring: NeurologicalMonitoring.t,
-  hemodynamic_parameter_editor: CriticalCare__HemodynamicParameters.t,
   ventilatorParametersEditor: CriticalCare__VentilatorParameters.t,
   neurologicalMonitoringStatus: string,
   hemodynamicParametersStatus: string,
@@ -39,8 +39,6 @@ type action =
   | CloseEditor
   | SetABGAnalysisEditor(ABGAnalysis.t)
   | SetNursingCare(NursingCare.t)
-  | SetNeurologicalMonitoringEditor(NeurologicalMonitoring.t)
-  | SetHemodynamicParametersEditor(CriticalCare__HemodynamicParameters.t)
   | SetVentilatorParametersEditor(CriticalCare__VentilatorParameters.t)
   | UpdateNursingCareStatus(string)
   | UpdateVentilatorParametersStatus(string)
@@ -54,6 +52,7 @@ type action =
   | UpdateNeurologicalMonitoringStatus(string)
   | SetIOBalaceData(IOBalance.t)
   | SetIOBalaceStatus(IOBalance.t)
+  | UpdateDailyRound(CriticalCare__DailyRound.t)
 
 let showEditor = (editor, send) => {
   send(ShowEditor(editor))
@@ -64,7 +63,6 @@ let showStatus = item => {
 }
 
 let editorToggle = (editorName, state, send) => {
-  Js.log(state)
   <div
     id="editorToggle"
     className="w-3/4 border-2 px-4 py-6 mx-auto my-4 cursor-pointer flex justify-between items-center"
@@ -102,11 +100,6 @@ let reducer = (state, action) => {
   | CloseEditor => {...state, visibleEditor: None}
   | SetABGAnalysisEditor(editor) => {...state, abgEditor: editor}
   | SetNursingCare(nursingCare) => {...state, nursingCare: nursingCare}
-  | SetNeurologicalMonitoringEditor(neurologicalMonitoring) => {
-      ...state,
-      neurologicalMonitoring: neurologicalMonitoring,
-    }
-  | SetHemodynamicParametersEditor(editor) => {...state, hemodynamic_parameter_editor: editor}
   | SetVentilatorParametersEditor(editor) => {...state, ventilatorParametersEditor: editor}
   | UpdateNursingCareStatus(nursingCareStatus) => {
       ...state,
@@ -155,11 +148,13 @@ let reducer = (state, action) => {
       ...state,
       arterialBloodGasAnalysisStatus: arterialBloodGasAnalysisStatus,
     }
+  | UpdateDailyRound(dailyRound) => {...state, dailyRound: dailyRound, visibleEditor: None}
   }
 }
 
-let initialState = {
+let initialState = dailyRound => {
   visibleEditor: None,
+  dailyRound: dailyRound,
   abgEditor: {
     po2: "",
     pco2: "",
@@ -183,36 +178,6 @@ let initialState = {
     chestTubeCare: None,
     tracheostomyCare: None,
     stomaCare: None,
-  },
-  neurologicalMonitoring: {
-    pronePosition: false,
-    levelOfConciousness: "",
-    locDescription: "",
-    leftPupilSize: Some(""),
-    leftSizeDescription: Some(""),
-    leftPupilReaction: Some(""),
-    leftReactionDescription: Some(""),
-    rightPupilSize: Some(""),
-    rightSizeDescription: Some(""),
-    rightPupilReaction: Some(""),
-    rightReactionDescription: Some(""),
-    eyeOpen: "",
-    verbalResponse: "",
-    motorResponse: "",
-    totalGlascowScale: "",
-    upperExtremityR: "",
-    upperExtremityL: "",
-    lowerExtremityR: "",
-    lowerExtremityL: "",
-  },
-  hemodynamic_parameter_editor: {
-    bp_systolic: "",
-    bp_diastolic: "",
-    pulse: "",
-    temperature: "",
-    respiratory_rate: "",
-    rhythm: None,
-    description: "",
   },
   ventilatorParametersEditor: {
     ventilationInterface: "iv",
@@ -293,10 +258,15 @@ let editorButtons = (state, send) => {
     ])->React.array} </div>
 }
 
+let updateDailyRound = (send, dailyRound) => {
+  send(UpdateDailyRound(dailyRound))
+}
+
 @react.component
-export make = () => {
-  let (state, send) = React.useReducer(reducer, initialState)
-  Js.log2(state, initialState)
+export make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
+  let (state, send) = React.useReducer(reducer, initialState(dailyRound))
+
+  // Js.log2(state, initialState)
   <div>
     <div className="w-3/4 mx-auto my-4" />
     <div className="w-3/4 mx-auto my-4">
@@ -307,27 +277,21 @@ export make = () => {
           {switch editor {
           | NeurologicalMonitoringEditor =>
             <CriticalCare__NeurologicalMonitoringEditor
-              initialState={state.neurologicalMonitoring}
-              handleDone={(data, status) => {
-                send(SetNeurologicalMonitoringEditor(data))
-                send(UpdateNeurologicalMonitoringStatus(status))
-                send(CloseEditor)
-                if status === "100" {
-                  send(UpdateTotal(state.totalStatus + 1))
-                }
-              }}
+              neurologicalMonitoring={CriticalCare__DailyRound.neurologicalMonitoring(
+                state.dailyRound,
+              )}
+              updateCB={updateDailyRound(send)}
+              id
+              consultationId
             />
           | HemodynamicParametersEditor =>
             <CriticalCare__HemodynamicParametersEditor
-              initialState={state.hemodynamic_parameter_editor}
-              handleDone={(data, status) => {
-                send(SetHemodynamicParametersEditor(data))
-                send(UpdateHemodynamicParameterStatus(status))
-                send(CloseEditor)
-                if status === "100" {
-                  send(UpdateTotal(state.totalStatus + 1))
-                }
-              }}
+              hemodynamicParameter={CriticalCare__DailyRound.hemodynamicParameters(
+                state.dailyRound,
+              )}
+              updateCB={updateDailyRound(send)}
+              id
+              consultationId
             />
           | VentilatorParametersEditor =>
             <CriticalCare__VentilatorParametersEditor
