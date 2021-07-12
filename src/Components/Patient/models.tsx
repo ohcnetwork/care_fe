@@ -251,6 +251,8 @@ export interface DailyRoundsModel {
   recommend_discharge?: boolean;
   created_date?: string;
   modified_date?: string;
+  taken_at?: string;
+  rounds_type?: string;
   last_updated_by_telemedicine?: boolean;
   created_by_telemedicine?: boolean;
 }

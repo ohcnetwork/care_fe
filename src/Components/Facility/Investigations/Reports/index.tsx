@@ -264,7 +264,7 @@ const InvestigationReports = ({ id }: any) => {
   );
 
   const handleSessionPage = (go: "NEXT" | "PREV") => {
-    const count = go === "NEXT" ? sessionPage + 1 : sessionPage - 1;
+    const count = go === "PREV" ? sessionPage + 1 : sessionPage - 1;
     setSessionPage(count);
     handleGenerateReports(count);
   };
@@ -393,16 +393,16 @@ const InvestigationReports = ({ id }: any) => {
                   className={className.button}
                 >
                   <Button
-                    onClick={() => handleSessionPage("PREV")}
+                    onClick={() => handleSessionPage("NEXT")}
                     disabled={prevSessionDisabled}
                   >
-                    {isLoading.tableData ? "Loading..." : "Prev Sessions"}
+                    {isLoading.tableData ? "Loading..." : "Next Sessions"}
                   </Button>
                   <Button
-                    onClick={() => handleSessionPage("NEXT")}
+                    onClick={() => handleSessionPage("PREV")}
                     disabled={nextSessionDisabled}
                   >
-                    {isLoading.tableData ? "Loading..." : "Next Sessions"}
+                    {isLoading.tableData ? "Loading..." : "Prev Sessions"}
                   </Button>
                 </ButtonGroup>
 
