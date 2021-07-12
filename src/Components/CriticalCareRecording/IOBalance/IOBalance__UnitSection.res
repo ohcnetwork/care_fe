@@ -1,15 +1,18 @@
 let str = React.string
 
-let params = ["Adrenelin", "Nor-Adrenelin", "Vessopersin"]
 
 type unit_type = {
-  field: string,
-  value: float
+    field: string,
+    value: float
 }
-type units_type = array<unit_type>
+
+type unit_section_type = {
+    units: array<unit_type>,
+    params: array<string>
+}
 
 let findAndReplace = (index, f, array) =>
-  array |> Array.mapi((i, value) => i == index ? f(value) : value)
+  array |> Array.mapi((i, item) => i == index ? f(item) : item)
 
 type action =
   | UpdateField(string, int)
@@ -17,19 +20,35 @@ type action =
   | DeleteUnit(int)
   | AddUnit
 
+let changeField = (field, t) => {...t, field: field}
+let changeValue = (value, t) => {...t, value: value}
 
-let reducer = (units, action) =>
+let reducer = (state, action) => {
   switch action {
-    | UpdateField(field, index) => units |> findAndReplace(index, ((field, t) => {...t, field: field})(field))
-    | UpdateValue(value, index) => units |> findAndReplace(index, ((value, t) => {...t, value: value})(value))
-    | AddUnit => units->Js.Array.concat([{field: "", value: 0.0}])
-    | DeleteUnit(index) => units|>Js.Array.filteri((_, i) => i != index)
+    | UpdateField(field, index) => {
+      let new_units = state.units |> findAndReplace(index, changeField(field))
+      let new_params = state.params->Js.Array2.filter(param => param !== field)
+      {units: new_units, params: new_params}
+    }
+    | UpdateValue(value, index) => {
+      let new_units = state.units |> findAndReplace(index, changeValue(value))
+      {...state, units: new_units}
+    }
+    | AddUnit => {
+      let new_units = state.units |> Js.Array.concat([{field: "", value: 0.0}])
+      {...state, units: new_units}
+    }
+    | DeleteUnit(index) => {
+      let new_units = state.units |> Js.Array.filteri((_, i) => i != index)
+      {...state, units: new_units}
+    }
   }
+}
 
 let getField = (t) => t.field
 let getValue = (t) => t.value
 
-let showUnit = (item, index, send) =>
+let showUnit = (item, params, index, send) =>
   <div className="flex justify-between items-center" key={index |> string_of_int}>
     <div className="m-1 rounded-md shadow-sm w-4/6">
       <IOBalance__UnitPicker
@@ -59,11 +78,13 @@ let showUnit = (item, index, send) =>
   </div>
 
 @react.component
-let make = (~units, ~selectCB) => {
-  let send = action => reducer(units, action) |> selectCB
+let make = (~name, ~units, ~params, ~selectCB) => {
+  let send = action => reducer({units: units, params: params}, action) |> selectCB
+  let showAdd = !(params->Array.length === 0 || (units->Array.length > 0 ? (units[units->Array.length - 1].field === "") : false))
+
   <div
     className="bg-white px-4 py-5 border-b border-gray-200 sm:px-6 max-w-3xl mx-auto border mt-4">
-    <h3 className="text-lg leading-6 font-medium text-gray-900"> {"Unit"->str} </h3>
+    <h3 className={name === "" ? "hidden" : "text-lg leading-6 font-medium text-gray-900"}> {name->str} </h3>
     <div className="flex justify-between mt-4">
       <div className="m-1 rounded-md shadow-sm w-8/12">
         <label htmlFor="Field" className="block text-sm font-medium leading-5 text-gray-700">
@@ -82,14 +103,14 @@ let make = (~units, ~selectCB) => {
       </div>
     </div>
     {units
-    |> Array.mapi((index, item) => showUnit(item, index, send))
+    |> Array.mapi((index, item) => showUnit(item, params, index, send))
     |> React.array}
-    <div className="m-1 rounded-md shadow-sm bg-gray-200 rounded">
+    <div className={showAdd ? "m-1 rounded-md shadow-sm bg-gray-200 rounded" : "hidden"}>
       <button
         type_="button"
         onClick={_ => AddUnit->send}
         className="w-full font-bold block px-4 py-2 text-sm leading-5 text-left text-gray-700 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:bg-gray-100 focus:text-gray-900">
-        {"+ Add medicine" |> str}
+        {"+ Add a field" |> str}
       </button>
     </div>
   </div>

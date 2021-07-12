@@ -59,7 +59,7 @@ let renderDropdown = results =>
 @react.component
 let make = (~id, ~value, ~updateCB, ~placeholder, ~selectables) => {
   let (searchTerm, setSearchTerm) = React.useState(_ => value)
-  let (showDropdown, setShowDropdown) = React.useState(_ => false)
+  let (showDropdown, setShowDropdown) = React.useState(_ => true)
   let results = searchResult(searchTerm, updateCB, selectables, setSearchTerm)
 
   React.useEffect1(() => {
@@ -79,6 +79,7 @@ let make = (~id, ~value, ~updateCB, ~placeholder, ~selectables) => {
   <div className="relative inline-block text-left w-full">
     <input
       id
+      autoFocus={true}
       value={searchTerm}
       autoComplete="false"
       onClick={_ => setShowDropdown(_ => !showDropdown)}
