@@ -169,6 +169,29 @@ export default function ManageUsers(props: any) {
     });
   };
 
+  const removeFilter = (paramKey: any) => {
+    updateQuery({
+      ...qParams,
+      [paramKey]: "",
+    });
+  };
+
+  const badge = (key: string, value: any, paramKey: string) => {
+    return (
+      value && (
+        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
+          {key}
+          {": "}
+          {value}
+          <i
+            className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
+            onClick={(e) => removeFilter(paramKey)}
+          ></i>
+        </span>
+      )
+    );
+  };
+
   const hideLinkFacilityModal = () => {
     setLinkFacility({
       show: false,
@@ -506,6 +529,7 @@ export default function ManageUsers(props: any) {
               </button>
             </div>
           </div>
+
           <SlideOver show={showFilters} setShow={setShowFilters}>
             <div className="bg-white min-h-screen p-4">
               <UserFilter
@@ -517,6 +541,26 @@ export default function ManageUsers(props: any) {
           </SlideOver>
         </div>
       </div>
+
+      <div className="flex space-x-2 mt-2 mx-5 flex-wrap w-full col-span-3 space-y-1">
+        {badge("Username", qParams.username, "username")}
+        {badge("First Name", qParams.first_name, "first_name")}
+        {badge("Last Name", qParams.last_name, "last_name")}
+        {qParams.phone_number?.trim()
+          ? badge("Phone Number", qParams.phone_number, "phone_number")
+          : null}
+        {qParams.alt_phone_number?.trim()
+          ? badge(
+              "Alternate Phone Number",
+              qParams.alt_phone_number,
+              "alt_phone_number"
+            )
+          : null}
+        {qParams.user_type
+          ? badge("Role", qParams.user_type, "user_type")
+          : null}
+      </div>
+
       <div className="px-3 md:px-8">
         <div>{manageUsers}</div>
       </div>
