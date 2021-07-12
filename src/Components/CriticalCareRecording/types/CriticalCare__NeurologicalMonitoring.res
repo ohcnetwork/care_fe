@@ -1,6 +1,6 @@
 type consciousnessLevel = Alert | Drowsy | Stuporous | Comatose | CannotBeAssessed | Unknown
 type lightReaction = Brisk | Sluggish | Fixed | CannotBeAssessed | Unknown
-type limpResponse = Strong | Moderate | Weak | Flexion | Extension | CannotBeAssessed | Unknown
+type limpResponse = Strong | Moderate | Weak | Flexion | Extension | NONE_ | Unknown
 
 export type t = {
   inPronePosition: option<bool>,
@@ -119,7 +119,7 @@ let makeLimpResponse = limpResponse => {
   | "WEAK" => Weak
   | "FLEXION" => Flexion
   | "EXTENSION" => Extension
-  | "CANNOT_BE_ASSESSED" => CannotBeAssessed
+  | "NONE" => NONE_
   | "UNKNOWN"
   | _ =>
     Unknown
@@ -133,7 +133,7 @@ let encodeLimpResponse = limbResponse => {
   | Weak => "WEAK"
   | Flexion => "FLEXION"
   | Extension => "EXTENSION"
-  | CannotBeAssessed => "CANNOT_BE_ASSESSED"
+  | NONE_ => "NONE"
   | Unknown => "UNKNOWN"
   }
 }
@@ -166,8 +166,8 @@ let limpResponseToString = limpResponse => {
   | Weak => "Weak"
   | Flexion => "Flexion"
   | Extension => "Extension"
-  | CannotBeAssessed => "Cannot be assessed"
-  | Unknown => "None"
+  | NONE_ => "None"
+  | Unknown => "Unknown"
   }
 }
 
@@ -206,21 +206,21 @@ let verbalResposneToString = eyeOpen => {
 
 let makeFromJs = dailyRound => {
   make(
-    ~inPronePosition=dailyRound["in_prone_position"],
+    ~inPronePosition=dailyRound["in_prone_position"]->Js.Nullable.toOption,
     ~consciousnessLevel=makeConsciousnessLevel(dailyRound["consciousness_level"]),
-    ~consciousnessLevelDetails=dailyRound["consciousness_level_detail"],
-    ~leftPupilSize=dailyRound["left_pupil_size"],
-    ~leftPupilSizeDetails=dailyRound["left_pupil_size_detail"],
+    ~consciousnessLevelDetails=dailyRound["consciousness_level_detail"]->Js.Nullable.toOption,
+    ~leftPupilSize=dailyRound["left_pupil_size"]->Js.Nullable.toOption,
+    ~leftPupilSizeDetails=dailyRound["left_pupil_size_detail"]->Js.Nullable.toOption,
     ~leftPupilLightReaction=makeLightReaction(dailyRound["left_pupil_light_reaction"]),
-    ~leftPupilLightReactionDetails=dailyRound["left_pupil_light_reaction_detail"],
-    ~rightPupilSize=dailyRound["right_pupil_size"],
-    ~rightPupilSizeDetails=dailyRound["right_pupil_size_detail"],
+    ~leftPupilLightReactionDetails=dailyRound["left_pupil_light_reaction_detail"]->Js.Nullable.toOption,
+    ~rightPupilSize=dailyRound["right_pupil_size"]->Js.Nullable.toOption,
+    ~rightPupilSizeDetails=dailyRound["right_pupil_size_detail"]->Js.Nullable.toOption,
     ~rightPupilLightReaction=makeLightReaction(dailyRound["right_pupil_light_reaction"]),
-    ~rightPupilLightReactionDetails=dailyRound["right_pupil_light_reaction_detail"],
-    ~glasgowEyeOpen=dailyRound["glasgow_eye_open"],
-    ~glasgowVerbalResponse=dailyRound["glasgow_verbal_response"],
-    ~glasgowMotorResponse=dailyRound["glasgow_motor_response"],
-    ~glasgowTotalCalculated=dailyRound["glasgow_total_calculated"],
+    ~rightPupilLightReactionDetails=dailyRound["right_pupil_light_reaction_detail"]->Js.Nullable.toOption,
+    ~glasgowEyeOpen=dailyRound["glasgow_eye_open"]->Js.Nullable.toOption,
+    ~glasgowVerbalResponse=dailyRound["glasgow_verbal_response"]->Js.Nullable.toOption,
+    ~glasgowMotorResponse=dailyRound["glasgow_motor_response"]->Js.Nullable.toOption,
+    ~glasgowTotalCalculated=dailyRound["glasgow_total_calculated"]->Js.Nullable.toOption,
     ~limbResponseUpperExtremityRight=makeLimpResponse(
       dailyRound["limb_response_upper_extremity_right"],
     ),

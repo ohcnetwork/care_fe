@@ -59,12 +59,12 @@ let make = (~bp, ~pulse, ~temperature, ~resp, ~rhythm, ~rhythmDetails) => {
 
 let makeFromJs = dailyRound => {
   make(
-    ~bp=dailyRound["bp"],
-    ~pulse=dailyRound["pulse"],
-    ~temperature=dailyRound["temperature"],
-    ~resp=dailyRound["resp"],
+    ~bp=dailyRound["bp"]->Js.Nullable.toOption,
+    ~pulse=dailyRound["pulse"]->Js.Nullable.toOption,
+    ~temperature=dailyRound["temperature"]->Js.Nullable.toOption,
+    ~resp=dailyRound["resp"]->Js.Nullable.toOption,
     ~rhythm=makeRhythm(dailyRound["rhythm"]),
-    ~rhythmDetails=dailyRound["rhythm_detail"],
+    ~rhythmDetails=dailyRound["rhythm_detail"]->Js.Nullable.toOption,
   )
 }
 

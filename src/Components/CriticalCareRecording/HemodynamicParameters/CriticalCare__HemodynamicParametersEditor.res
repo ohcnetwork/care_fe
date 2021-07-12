@@ -217,6 +217,7 @@ let make = (~hemodynamicParameter, ~updateCB, ~id, ~consultationId) => {
           {Js.Array.map(
             r =>
               <Radio
+                key={"Rhythm" ++ HemodynamicParameters.rhythmToString(r)}
                 id={"Rhythm" ++ HemodynamicParameters.rhythmToString(r)}
                 label={HemodynamicParameters.rhythmToString(r)}
                 checked={r === state.rhythm}

@@ -28,7 +28,6 @@ export make = (~id, ~facilityId, ~patientId, ~consultationId) => {
     None
   }, [id])
 
-  Js.log(state.loading)
   <div>
     {state.loading
       ? <div> {str("Loading...")} </div>
