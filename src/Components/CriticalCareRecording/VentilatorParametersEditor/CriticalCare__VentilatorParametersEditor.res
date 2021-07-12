@@ -98,8 +98,8 @@ let make = (~initialState, ~handleDone) => {
       </div>
       <button
         onClick={_ => handleSubmit(handleDone, state)}
-        className="text-white py-3 text-xl w-full bg-blue-500 hover:bg-blue-600 cursor-pointer my-10 rounded">
-        {str("Submit")}
+        className="flex w-full bg-primary-600 text-white p-2 text-lg hover:bg-primary-800 justify-center items-center rounded-md">
+        {str("Update Details")}
       </button>
     </div>
   </div>
