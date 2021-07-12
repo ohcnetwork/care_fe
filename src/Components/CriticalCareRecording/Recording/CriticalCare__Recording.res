@@ -18,7 +18,6 @@ type state = {
   dailyRound: CriticalCare__DailyRound.t,
   nursingCare: NursingCare.t,
   abgEditor: ABGAnalysis.t,
-  hemodynamic_parameter_editor: CriticalCare__HemodynamicParameters.t,
   ventilatorParametersEditor: CriticalCare__VentilatorParameters.t,
   neurologicalMonitoringStatus: string,
   hemodynamicParametersStatus: string,
@@ -40,7 +39,6 @@ type action =
   | CloseEditor
   | SetABGAnalysisEditor(ABGAnalysis.t)
   | SetNursingCare(NursingCare.t)
-  | SetHemodynamicParametersEditor(CriticalCare__HemodynamicParameters.t)
   | SetVentilatorParametersEditor(CriticalCare__VentilatorParameters.t)
   | UpdateNursingCareStatus(string)
   | UpdateVentilatorParametersStatus(string)
@@ -102,7 +100,6 @@ let reducer = (state, action) => {
   | CloseEditor => {...state, visibleEditor: None}
   | SetABGAnalysisEditor(editor) => {...state, abgEditor: editor}
   | SetNursingCare(nursingCare) => {...state, nursingCare: nursingCare}
-  | SetHemodynamicParametersEditor(editor) => {...state, hemodynamic_parameter_editor: editor}
   | SetVentilatorParametersEditor(editor) => {...state, ventilatorParametersEditor: editor}
   | UpdateNursingCareStatus(nursingCareStatus) => {
       ...state,
@@ -181,15 +178,6 @@ let initialState = dailyRound => {
     chestTubeCare: None,
     tracheostomyCare: None,
     stomaCare: None,
-  },
-  hemodynamic_parameter_editor: {
-    bp_systolic: "",
-    bp_diastolic: "",
-    pulse: "",
-    temperature: "",
-    respiratory_rate: "",
-    rhythm: None,
-    description: "",
   },
   ventilatorParametersEditor: {
     ventilationInterface: "iv",
@@ -298,15 +286,12 @@ export make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
             />
           | HemodynamicParametersEditor =>
             <CriticalCare__HemodynamicParametersEditor
-              initialState={state.hemodynamic_parameter_editor}
-              handleDone={(data, status) => {
-                send(SetHemodynamicParametersEditor(data))
-                send(UpdateHemodynamicParameterStatus(status))
-                send(CloseEditor)
-                if status === "100" {
-                  send(UpdateTotal(state.totalStatus + 1))
-                }
-              }}
+              hemodynamicParameter={CriticalCare__DailyRound.hemodynamicParameters(
+                state.dailyRound,
+              )}
+              updateCB={updateDailyRound(send)}
+              id
+              consultationId
             />
           | VentilatorParametersEditor =>
             <CriticalCare__VentilatorParametersEditor

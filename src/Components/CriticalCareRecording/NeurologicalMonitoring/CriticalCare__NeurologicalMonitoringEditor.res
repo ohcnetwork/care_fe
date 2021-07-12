@@ -372,12 +372,16 @@ let makePayload = state => {
     Js.Json.string(NeurologicalMonitoring.encodeConConsciousnessLevel(state.consciousnessLevel)),
   )
 
-  setOptionalString("consciousness_level_detail", state.consciousnessLevelDetails, payload)
+  DictUtils.setOptionalString(
+    "consciousness_level_detail",
+    state.consciousnessLevelDetails,
+    payload,
+  )
 
   if !state.inPronePosition {
-    setOptionalNumber("left_pupil_size", state.leftPupilSize, payload)
-    setOptionalString("left_pupil_size_detail", state.leftPupilSizeDetails, payload)
-    setOptionalString(
+    DictUtils.setOptionalNumber("left_pupil_size", state.leftPupilSize, payload)
+    DictUtils.setOptionalString("left_pupil_size_detail", state.leftPupilSizeDetails, payload)
+    DictUtils.setOptionalString(
       "left_pupil_light_reaction_detail",
       state.leftPupilLightReactionDetails,
       payload,
@@ -388,9 +392,9 @@ let makePayload = state => {
       Js.Json.string(NeurologicalMonitoring.encodeLightReaction(state.leftPupilLightReaction)),
     )
 
-    setOptionalNumber("right_pupil_size", state.rightPupilSize, payload)
-    setOptionalString("right_pupil_size_detail", state.rightPupilSizeDetails, payload)
-    setOptionalString(
+    DictUtils.setOptionalNumber("right_pupil_size", state.rightPupilSize, payload)
+    DictUtils.setOptionalString("right_pupil_size_detail", state.rightPupilSizeDetails, payload)
+    DictUtils.setOptionalString(
       "right_pupil_light_reaction_detail",
       state.rightPupilLightReactionDetails,
       payload,
@@ -401,9 +405,9 @@ let makePayload = state => {
       Js.Json.string(NeurologicalMonitoring.encodeLightReaction(state.rightPupilLightReaction)),
     )
   }
-  setOptionalNumber("glasgow_eye_open", state.glasgowEyeOpen, payload)
-  setOptionalNumber("glasgow_verbal_response", state.glasgowVerbalResponse, payload)
-  setOptionalNumber("glasgow_motor_response", state.glasgowMotorResponse, payload)
+  DictUtils.setOptionalNumber("glasgow_eye_open", state.glasgowEyeOpen, payload)
+  DictUtils.setOptionalNumber("glasgow_verbal_response", state.glasgowVerbalResponse, payload)
+  DictUtils.setOptionalNumber("glasgow_motor_response", state.glasgowMotorResponse, payload)
 
   Js.Dict.set(
     payload,
@@ -564,9 +568,9 @@ let make = (~updateCB, ~neurologicalMonitoring, ~id, ~consultationId) => {
       <div className="my-15 w-full h-1 bg-gray-300" />
       <button
         disabled={state.saving || !state.dirty}
-        className="flex w-full bg-blue-600 text-white p-2 text-lg hover:bg-blue-800 justify-center items-center rounded-md"
+        className="flex w-full bg-primary-600 text-white p-2 text-lg hover:bg-primary-800 justify-center items-center rounded-md"
         onClick={_ => saveData(id, consultationId, state, send, updateCB)}>
-        {str("Done")}
+        {str("Update Details")}
       </button>
     </div>}
   </div>
