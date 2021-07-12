@@ -15,7 +15,6 @@
     }
   ],
   "suffix": ".bs.js",
-  "namespace": true,
   "bs-dependencies": [
     "@rescript/react",
     "@glennsl/bs-json",
