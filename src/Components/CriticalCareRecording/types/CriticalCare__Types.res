@@ -7,3 +7,4 @@ module Dialysis = CriticalCare_Dialysis
 module VentilatorParameters = CriticalCare__VentilatorParameters
 module NeurologicalMonitoring = CriticalCare__NeurologicalMonitoring
 module IOBalance = CriticalCare__IOBalance
+module DailyRound = CriticalCare__DailyRound
