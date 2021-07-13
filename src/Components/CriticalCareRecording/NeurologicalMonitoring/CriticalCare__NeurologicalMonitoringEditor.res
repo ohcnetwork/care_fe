@@ -205,10 +205,6 @@ let initialState = neurologicalMonitoring => {
   dirty: false,
 }
 
-let getFieldValue = event => {
-  ReactEvent.Form.target(event)["value"]
-}
-
 let renderLightReaction = (
   ~input,
   ~onInputChange,
@@ -221,6 +217,7 @@ let renderLightReaction = (
     <div className="flex md:flex-row flex-col md:space-y-0 space-y-2 space-x-0 md:space-x-4">
       {Js.Array.map(lightReaction => {
         <Radio
+          key={label ++ NeurologicalMonitoring.lightReactionToString(lightReaction)}
           id={label ++ NeurologicalMonitoring.lightReactionToString(lightReaction)}
           label={NeurologicalMonitoring.lightReactionToString(lightReaction)}
           checked={lightReaction === input}
@@ -232,7 +229,7 @@ let renderLightReaction = (
       <CriticalCare__Description
         name={`${label}_reaction_description`}
         text={inputDetails}
-        onChange={event => onInputDetailsChange(getFieldValue(event))}
+        onChange={value => onInputDetailsChange(value)}
       />,
       input === NeurologicalMonitoring.CannotBeAssessed,
     )}
@@ -245,12 +242,13 @@ let renderLimpResponse = (~input, ~onInputChange, ~label) => {
     <div className="mt-2 flex md:flex-row flex-col md:space-y-0 space-y-2 space-x-0 md:space-x-4">
       {Js.Array.map(limpResponse => {
         <Radio
+          key={label ++ NeurologicalMonitoring.limpResponseToString(limpResponse)}
           id={label ++ NeurologicalMonitoring.limpResponseToString(limpResponse)}
           label={NeurologicalMonitoring.limpResponseToString(limpResponse)}
           checked={limpResponse === input}
           onChange={_ => onInputChange(limpResponse)}
         />
-      }, [Strong, Moderate, Weak, Flexion, Extension, CannotBeAssessed])->React.array}
+      }, [Strong, Moderate, Weak, Flexion, Extension, NONE_])->React.array}
     </div>
   </div>
 }
@@ -267,6 +265,7 @@ let renderConsciousnessLevel = (
     <div className="flex md:flex-row flex-col md:space-y-0 space-y-2 space-x-0 md:space-x-4">
       {Js.Array.map(consciousnessLevel => {
         <Radio
+          key={label ++ NeurologicalMonitoring.consciousnessLevelToString(consciousnessLevel)}
           id={label ++ NeurologicalMonitoring.consciousnessLevelToString(consciousnessLevel)}
           label={NeurologicalMonitoring.consciousnessLevelToString(consciousnessLevel)}
           checked={consciousnessLevel === input}
@@ -278,7 +277,7 @@ let renderConsciousnessLevel = (
       <CriticalCare__Description
         name={`${label}_reaction_description`}
         text={inputDetails}
-        onChange={event => onInputDetailsChange(getFieldValue(event))}
+        onChange={event => onInputDetailsChange(event)}
       />,
       input === NeurologicalMonitoring.CannotBeAssessed,
     )}
@@ -299,7 +298,7 @@ let renderPupil = (state, send) => {
         <CriticalCare__Description
           name="left_size_description"
           text={state.leftPupilSizeDetails}
-          onChange={event => send(SetLeftPupilSizeDetails(getFieldValue(event)))}
+          onChange={event => send(SetLeftPupilSizeDetails(event))}
         />,
         state.leftPupilSize === Some(0),
       )}
@@ -309,8 +308,6 @@ let renderPupil = (state, send) => {
         ~inputDetails={state.leftPupilLightReactionDetails},
         ~onInputDetailsChange={
           value => {
-            Js.log2("V", value)
-
             send(SetLeftPupilLightReactionDetails(value))
           }
         },
@@ -328,7 +325,7 @@ let renderPupil = (state, send) => {
         <CriticalCare__Description
           name="right_size_description"
           text={state.rightPupilSizeDetails}
-          onChange={event => send(SetRightPupilSizeDetails(getFieldValue(event)))}
+          onChange={event => send(SetRightPupilSizeDetails(event))}
         />,
         state.rightPupilSize === Some(0),
       )}
@@ -461,7 +458,6 @@ let saveData = (id, consultationId, state, send, updateCB) => {
 @react.component
 let make = (~updateCB, ~neurologicalMonitoring, ~id, ~consultationId) => {
   let (state, send) = React.useReducer(reducer, initialState(neurologicalMonitoring))
-  Js.log2("ss", state.leftPupilLightReactionDetails)
   <div>
     <CriticalCare__PageTitle title="Neurological Monitoring" />
     {<div className="my-4">

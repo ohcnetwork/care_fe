@@ -123,27 +123,7 @@ let reducer = (state, action) => {
       neurologicalMonitoringStatus: neurologicalMonitoringStatus,
     }
   | SetIOBalaceData(data) => {...state, ioBalanceData: data}
-  | SetIOBalaceStatus(iobState) => {
-      let statusOf = (sliders: array<IOBalance.slider_type>) => {
-        let length = Belt.Array.length
-        (
-          sliders->Belt.Array.reduce(0, (acc, slider) => slider.value === "" ? acc : acc + 1),
-          sliders->length,
-        )
-      }
-      let (inf_done, inf_total) = statusOf(iobState.intake.infusions.sliders)
-      let (ivf_done, ivf_total) = statusOf(iobState.intake.iv_fluid.sliders)
-      let (feed_done, feed_total) = statusOf(iobState.intake.feed.sliders)
-      let (out_done, out_total) = statusOf(iobState.outturn.sliders)
-
-      let toFloat = Belt.Int.toFloat
-      let toInt = Belt.Int.fromFloat
-      let toString = Belt.Int.toString
-      let status =
-        (inf_done + ivf_done + feed_done + out_done)->toFloat /.
-          (inf_total + ivf_total + feed_total + out_total)->toFloat
-      {...state, ioBalanceStatus: (status *. 100.0)->toInt->toString}
-    }
+  | SetIOBalaceStatus(iobState) => {...state, ioBalanceStatus: "100"}
   | UpdateABGAnalysisStatus(arterialBloodGasAnalysisStatus) => {
       ...state,
       arterialBloodGasAnalysisStatus: arterialBloodGasAnalysisStatus,

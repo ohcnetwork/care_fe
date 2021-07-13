@@ -1,95 +1,137 @@
-let str = React.string
 open CriticalCare__Types
+let str = React.string
 
-type slider_type = IOBalance.slider_type
+type unit_type = IOBalance.unit_type
+type unit_section_type = IOBalance.unit_section_type
 type state_type = IOBalance.t
 
+type summary_section_type = {
+    values: string,
+    total: string
+}
+
+type summary_type = {
+    intake: summary_section_type,
+    outturn: summary_section_type,
+    overall: summary_section_type,
+}
+
+let initialSummary = {
+    intake: {
+        values: "",
+        total: ""
+    },
+    outturn: {
+        values: "",
+        total: ""
+    },
+    overall: {
+        values: "",
+        total: ""
+    }
+}
+
+let toFloat = (svalue) => {
+    switch Belt.Float.fromString(svalue) {
+        | Some(x) => x
+        | None => 0.0
+    }
+}
+
+let toString = Belt.Float.toString
 
 @react.component
-let make = (~initialState, ~handleDone) => {
-    let (state, dispatch) = React.useReducer(IOBalance.reducer, initialState: state_type)
-    
+let make = (~initialState: state_type, ~handleDone) => {
+    // let (state, send) = React.useReducer(reducer, initialState)
+    let (state, setState) = React.useState(_ => initialState)
+    Js.log(state)
+    let (summary, setSummary) = React.useState(_ => initialSummary)
+
     React.useEffect1(() => {
-        IOBalance.EvaluateSummary("intake")->dispatch
+        let infusions_total = state.intake.infusions.units->Belt.Array.reduce(0.0, (acc, unit) => acc +. unit.value)
+        let iv_fluid_total = state.intake.iv_fluid.units->Belt.Array.reduce(0.0, (acc, unit) => acc +. unit.value)
+        let feed_total = state.intake.feed.units->Belt.Array.reduce(0.0, (acc, unit) => acc +. unit.value)
+        
+        Js.log3(infusions_total, iv_fluid_total, feed_total)
+        setSummary(prev => {...prev, intake: {
+            values: [infusions_total, iv_fluid_total, feed_total]->Js.Array2.joinWith("+"), 
+            total: (infusions_total +. iv_fluid_total +. feed_total)->toString
+        }})
         None
     }, [state.intake])
 
     React.useEffect1(() => {
-        IOBalance.EvaluateSummary("outturn")->dispatch
+        let outturn_summary_values = state.outturn.units->Belt.Array.map(unit => unit.value)
+        let outturn_summary_total = outturn_summary_values->Belt.Array.reduce(0.0, (acc, value) => acc +. value)
+
+        setSummary(prev => {...prev, outturn: {
+            values: outturn_summary_values->Js.Array2.joinWith("+"), 
+            total: outturn_summary_total->toString
+        }})
         None
     }, [state.outturn])
 
+    React.useEffect1(() => {
+        setSummary(prev => {...prev, overall: {
+            values: [prev.intake.total, prev.outturn.total]->Js.Array2.joinWith("-"), 
+            total: (prev.intake.total->toFloat -. prev.outturn.total->toFloat)->toString
+        }})
+        None
+    }, [])
 
     <div>
         <CriticalCare__PageTitle title="I/O Balance Editor" />
 
-        <div id="intake" className="">
+        <div id="intake" className="pb-3">
             <h3>{str("Intake")}</h3>
-            <IOBalance__SliderGroup
-                key="intake-infusions" 
-                changeFieldValue={(field, value) => IOBalance.SetFieldValue("intake", "infusions", field, value)->dispatch}
-                changeVisibility={(field, value) => IOBalance.SetSliderVisibility("intake", "infusions", field, value)->dispatch}
-                addSlider={field => IOBalance.AddSlider("intake", "infusions", field)->dispatch}
-                title="Infusions" 
-                sliders={state.intake.infusions.sliders}
-                moreSliders={state.intake.infusions.more_sliders} 
+            
+            <IOBalance__UnitSection
+                name="Infusions"
+                units={state.intake.infusions.units}
+                params={state.intake.infusions.params}
+                selectCB={(s) => setState(prev => {...prev, intake: {...prev.intake, infusions: s}})}
             />
-            <IOBalance__SliderGroup
-                key="intake-iv_fluid"
-                changeFieldValue={(field, value) => IOBalance.SetFieldValue("intake", "iv fluid", field, value)->dispatch}
-                changeVisibility={(field, value) => IOBalance.SetSliderVisibility("intake", "iv fluid", field, value)->dispatch}
-                addSlider={field => IOBalance.AddSlider("intake", "iv_fluid", field)->dispatch}
-                title="IV Fluid" 
-                sliders={state.intake.iv_fluid.sliders}
-                moreSliders={state.intake.iv_fluid.more_sliders}
+            <IOBalance__UnitSection
+                name="IV Fluid"
+                units={state.intake.iv_fluid.units}
+                params={state.intake.iv_fluid.params}
+                selectCB={(s) => setState(prev => {...prev, intake: {...prev.intake, iv_fluid: s}})}
             />
-            <IOBalance__SliderGroup
-                key="intake-feed"
-                changeFieldValue={(field, value) => IOBalance.SetFieldValue("intake", "feed", field, value)->dispatch}
-                changeVisibility={(field, value) => IOBalance.SetSliderVisibility("intake", "feed", field, value)->dispatch}
-                addSlider={field => IOBalance.AddSlider("intake", "feed", field)->dispatch}
-                title="Feed" 
-                sliders={state.intake.feed.sliders}
-                moreSliders={state.intake.feed.more_sliders}
+            <IOBalance__UnitSection
+                name="Feed"
+                units={state.intake.feed.units}
+                params={state.intake.feed.params}
+                selectCB={(s) => setState(prev => {...prev, intake: {...prev.intake, feed: s}})}
             />
 
             <IOBalance__Summary
                 leftMain="Total"
-                rightSub={state.summary.intake.values}
-                rightMain={state.summary.intake.total}
+                rightSub={summary.intake.values}
+                rightMain={summary.intake.total}
             />
         </div>
 
-        <div id="outturn" className="">
+        <div id="outturn" className="pt-3">
             <h3>{str("Outturn")}</h3>
-            <IOBalance__SliderGroup
-                key="outturn"
-                changeFieldValue={(field, value) => IOBalance.SetFieldValue("outturn", "", field, value)->dispatch}
-                changeVisibility={(field, value) => IOBalance.SetSliderVisibility("outturn", "", field, value)->dispatch}
-                addSlider={field => IOBalance.AddSlider("outturn", "", field)->dispatch}
-                title="" 
-                sliders={state.outturn.sliders}
-                moreSliders={state.outturn.more_sliders}
+            <IOBalance__UnitSection
+                name=""
+                units={state.outturn.units}
+                params={state.outturn.params}
+                selectCB={(s) => setState(prev => {...prev, outturn: s})}
             />
 
             <IOBalance__Summary
                 leftMain="Total"
-                rightSub={state.summary.outturn.values}
-                rightMain={state.summary.outturn.total}
+                rightSub={summary.outturn.values}
+                rightMain={summary.outturn.total}
             />
-        </div>
+        </div> 
 
         <IOBalance__Summary
             leftMain="I/O Balance"
-            rightSub={state.summary.overall.values}
-            rightMain={state.summary.overall.total}
+            rightSub={summary.overall.values}
+            rightMain={summary.overall.total}
             noBorder={true}
         />
-
-        <button
-            className="flex w-full bg-blue-600 text-white p-2 text-lg hover:bg-blue-800 justify-center items-center rounded-md"
-            onClick={_ => state->handleDone}>
-            {str("Done")}
-        </button>
     </div>
 }
