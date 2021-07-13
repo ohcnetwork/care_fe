@@ -44,7 +44,6 @@ let toString = Belt.Float.toString
 let make = (~initialState: state_type, ~handleDone) => {
     // let (state, send) = React.useReducer(reducer, initialState)
     let (state, setState) = React.useState(_ => initialState)
-    Js.log(state)
     let (summary, setSummary) = React.useState(_ => initialSummary)
 
     React.useEffect1(() => {
@@ -52,7 +51,6 @@ let make = (~initialState: state_type, ~handleDone) => {
         let iv_fluid_total = state.intake.iv_fluid.units->Belt.Array.reduce(0.0, (acc, unit) => acc +. unit.value)
         let feed_total = state.intake.feed.units->Belt.Array.reduce(0.0, (acc, unit) => acc +. unit.value)
         
-        Js.log3(infusions_total, iv_fluid_total, feed_total)
         setSummary(prev => {...prev, intake: {
             values: [infusions_total, iv_fluid_total, feed_total]->Js.Array2.joinWith("+"), 
             total: (infusions_total +. iv_fluid_total +. feed_total)->toString
@@ -72,12 +70,13 @@ let make = (~initialState: state_type, ~handleDone) => {
     }, [state.outturn])
 
     React.useEffect1(() => {
+        Js.log("effect")
         setSummary(prev => {...prev, overall: {
             values: [prev.intake.total, prev.outturn.total]->Js.Array2.joinWith("-"), 
             total: (prev.intake.total->toFloat -. prev.outturn.total->toFloat)->toString
         }})
         None
-    }, [])
+    }, [state])
 
     <div>
         <CriticalCare__PageTitle title="I/O Balance Editor" />
@@ -133,5 +132,11 @@ let make = (~initialState: state_type, ~handleDone) => {
             rightMain={summary.overall.total}
             noBorder={true}
         />
+
+        <button
+            className="flex w-full bg-blue-600 text-white mt-6 p-2 text-lg hover:bg-blue-800 justify-center items-center rounded-md"
+            onClick={_ => state->handleDone}>
+            {str("Done")}
+        </button>
     </div>
 }
