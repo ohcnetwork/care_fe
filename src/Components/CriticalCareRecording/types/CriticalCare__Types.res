@@ -8,3 +8,4 @@ module VentilatorParameters = CriticalCare__VentilatorParameters
 module NeurologicalMonitoring = CriticalCare__NeurologicalMonitoring
 module IOBalance = CriticalCare__IOBalance
 module DailyRound = CriticalCare__DailyRound
+module PressureSore = CriticalCare__PressureSore

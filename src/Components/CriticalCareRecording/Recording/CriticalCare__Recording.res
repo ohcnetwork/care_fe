@@ -216,6 +216,10 @@ let initialState = dailyRound => {
     dosage: "",
     frequency: "OD",
   },
+  pressureSore: {
+    braden_scale_front: 0,
+    braden_scale_back: 0,
+  },
   dialysisEditor: {
     fluid_balance: "",
     net_balance: "",

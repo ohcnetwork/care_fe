@@ -1,6 +1,7 @@
 let str = React.string
+open CriticalCare__Types
 
-let front_parts: array<Options.typ> = [
+let front_parts: array<PressureSore.typ> = [
   {
     d: "M443,135.809",
     transform: "translate(-362.967 -95.599)",
@@ -8,10 +9,12 @@ let front_parts: array<Options.typ> = [
   {
     d: "M535.244,212.572c32.253.43,32.684-31.823,32.684-31.823,9.891-.215,14.191-19.783,13.331-23.653s-7.526-1.5-7.526-1.5c3.656-30.1-9.676-48.38-17.847-53.756S535.244,95.6,535.244,95.6h.43s-12.472.86-20.643,6.236-21.5,23.653-17.846,53.756c0,0-6.666-2.365-7.526,1.5s3.44,23.438,13.331,23.653c0,0,.43,32.253,32.684,31.823Z",
     transform: "translate(-362.967 -95.599)",
+    // label: "Head",
   },
   {
     d: "M512.129,213.97s31.608,4.954,47.574-1.394v14.456s-26.287,4.355-47.574,0Z",
     transform: "translate(-362.967 -95.599)",
+    // label: "Neck",
   },
   {
     d: "M505.355,231.279s-56.766,25.8-69.452,34.4c0,0,15.7,20.857,21.072,66.872C456.975,332.555,469.417,246.838,505.355,231.279Z",
@@ -20,6 +23,7 @@ let front_parts: array<Options.typ> = [
   {
     d: "M526.482,232.838l.806,137.346s-46.607-22.2-67.745,18.762C459.543,388.946,455.685,234.612,526.482,232.838Z",
     transform: "translate(-362.967 -95.599)",
+    // label: "Right Chest",
   },
   {
     d: "M433.108,269.768s34.728,55.552,18.279,141.992c0,0-19.57-9.107-33.761-7.333,0,0-1.613-106.276,0-110.952S429.721,271.058,433.108,269.768Z",
@@ -40,6 +44,7 @@ let front_parts: array<Options.typ> = [
   {
     d: "M544.705,232.838h19.137s18.062,15.643,20,19.513,29.888,42.79,26.878,128.154c0,0-16.557-16.556-31.178-15.051,0,0,2.365-33.114-34.834-34.619Z",
     transform: "translate(-362.967 -95.599)",
+    // label: "Left Chest",
   },
   {
     d: "M569.432,231.279s61.927,31.824,65.153,35.694c0,0-12.9,9.752-18.707,73.791C615.878,340.764,610.072,268.048,569.432,231.279Z",
@@ -91,7 +96,7 @@ let front_parts: array<Options.typ> = [
   },
 ]
 
-let back_parts: array<Options.typ> = [
+let back_parts: array<PressureSore.typ> = [
   {
     d: "M 506.9838 158.0121 C 509.6029 173.1336 512.1258 187.9477 521.5039 184.4407 C 517.7283 191.6346 525.6919 202.9266 528.0919 210.8841 C 544.9623 208.3461 562.3174 208.3461 579.1878 210.8841 C 581.5893 202.9236 589.5363 191.6662 585.7863 184.4511 C 595.6744 187.4586 596.8188 174.3021 600.3813 158.5926 C 600.1173 156.4611 595.9999 158.5806 594.7788 159.0816 C 597.7384 128.3122 591.2088 97.1811 553.7104 97.22 C 516.1444 97.1497 509.5249 128.2116 512.5008 159.0891 C 511.0564 158.4651 508.4914 157.0971 506.9838 158.0121 Z",
     transform: "translate(-390.349 -94.472)",
@@ -103,10 +108,6 @@ let back_parts: array<Options.typ> = [
   {
     d: "M532.993,209.3",
     transform: "translate(-390.349 -94.472)",
-  },
-  {
-    d: "MNaN NaN A3.4 NaN 0 0 1 NaN NaN A3.4 NaN 0 0 1 NaN NaN A3.4 NaN 0 0 1 NaN NaN z",
-    transform: "",
   },
   {
     d: "M545.584,228.037V361.6s-13.6,10.828-25.282,13.145c-10.077,2-36.162,3.374-36.766-.857S478.9,239.117,545.584,228.037Z",
@@ -178,8 +179,35 @@ let back_parts: array<Options.typ> = [
   },
 ]
 
+type action =
+  | SetFrontViewBradenScale(int)
+  | SetBackViewBradenScale(int)
+  | AddIndexToSelectedFrontParts(int)
+  | AddIndexToSelectedBackParts(int)
+
+let reducer = (state, action) => {
+  switch action {
+  | SetFrontViewBradenScale(risk_severity_value) => {
+      ...state,
+      braden_scale_front: risk_severity_value,
+    }
+  | SetBackViewBradenScale(risk_severity_value) => {
+      ...state,
+      braden_scale_back: risk_severity_value,
+    }
+  }
+}
+
 @react.component
 let make = () => {
+  let initialState = {
+    braden_scale_front: 0,
+    braden_scale_back: 0,
+    front_parts_selected: [],
+    back_parts_selected: [],
+  }
+  let (state, send) = React.useReducer(reducer, initialState)
+
   let (front_parts_selected, setFrontPartsSelected) = React.useState(_ => [])
   let (back_parts_selected, setBackPartsSelected) = React.useState(_ => [])
   <div className="my-5">
@@ -191,8 +219,8 @@ let make = () => {
         |> Array.mapi((renderIndex, part) => {
           <path
             key={"part1" ++ Belt.Int.toString(renderIndex)}
-            d={Options.d(part)}
-            transform={Options.transform(part)}
+            d={PressureSore.d(part)}
+            transform={PressureSore.transform(part)}
             className={Js.Array.includes(renderIndex, front_parts_selected)
               ? "text-blue-500"
               : "text-gray-400  hover:text-blue-400"}
@@ -232,8 +260,8 @@ let make = () => {
         |> Array.mapi((renderIndex, part) => {
           <path
             key={"part2" ++ Belt.Int.toString(renderIndex)}
-            d={Options.d(part)}
-            transform={Options.transform(part)}
+            d={PressureSore.d(part)}
+            transform={PressureSore.transform(part)}
             className={Js.Array.includes(renderIndex, back_parts_selected)
               ? "text-blue-500"
               : "text-gray-400  hover:text-blue-400"}
