@@ -16,7 +16,7 @@ import {
 } from "../../Redux/actions";
 import loadable from "@loadable/component";
 import { SelectField } from "../Common/HelperInputFields";
-import { CircularProgress, InputLabel } from "@material-ui/core";
+import { CircularProgress, InputLabel, TextField } from "@material-ui/core";
 import Pagination from "../Common/Pagination";
 import { FacilityModel } from "./models";
 import { InputSearchBox } from "../Common/SearchBox";
@@ -380,21 +380,24 @@ const HospitalListPage = (props: any) => {
                       className=""
                     >
                       <div className="h-screen w-full absolute flex items-center justify-center bg-modal">
-                        <div className="bg-white rounded shadow p-8 m-4 max-w-sm max-h-full text-center flex flex-col">
+                        <div className="bg-white rounded shadow p-8 m-4 max-h-full text-center flex flex-col max-w-lg w-2/3 min-w-max-content">
                           <div className="mb-4">
                             <h1 className="text-2xl">
                               Notify: {facility.name}
                             </h1>
                           </div>
                           <div>
-                            <textarea
+                            <TextField
                               id="NotifyModalMessageInput"
-                              className="h-32 w-full border p-2 shadow-lg"
+                              rows={6}
+                              multiline
+                              className="w-full border p-2 max-h-64"
                               onChange={(e) => setNotifyMessage(e.target.value)}
                               placeholder="Type your message..."
-                            ></textarea>
+                              variant="outlined"
+                            />
                           </div>
-                          <div className="flex flex-row justify-evenly">
+                          <div className="flex flex-row justify-end">
                             <button
                               className="btn-danger btn mt-4 mr-2 w-full md:w-auto"
                               onClick={(_) => setModalFor(undefined)}

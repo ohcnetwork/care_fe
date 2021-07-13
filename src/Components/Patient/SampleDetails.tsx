@@ -85,14 +85,16 @@ export const SampleDetails = (props: SampleDetailsProps) => {
   return (
     <div className="px-2 pb-2">
       <PageTitle title={`Sample Test Details`} />
-      {patientId && (
+      {sampleDetails.patient && (
         <div className="flex justify-end">
           <Button
             color="primary"
             variant="contained"
             size="small"
             onClick={() =>
-              navigate(`/patient/${patientId}/test_sample/${id}/icmr_sample`)
+              navigate(
+                `/patient/${sampleDetails.patient}/test_sample/${id}/icmr_sample`
+              )
             }
           >
             ICMR Specimen Referral Form
