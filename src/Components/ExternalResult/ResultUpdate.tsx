@@ -214,9 +214,8 @@ export default function UpdateResult(props: any) {
         address: state.form.address ? state.form.address : undefined,
         local_body: state.form.local_body ? state.form.local_body : undefined,
         ward: state.form.ward,
-        patient_created: [true, "true"].includes(state.form.patient_created),
+        patient_created: state.form.patient_created === "true",
       };
-
       const res = await dispatchAction(partialUpdateExternalResult(id, data));
       setIsLoading(false);
       if (res && res.data) {
@@ -315,7 +314,7 @@ export default function UpdateResult(props: any) {
               <RadioGroup
                 aria-label="patient_created"
                 name="patient_created"
-                value={[true, "true"].includes(state.form.patient_created)}
+                value={state.form.patient_created === "true"}
                 onChange={handleChange}
                 style={{ padding: "0px 5px" }}
               >
