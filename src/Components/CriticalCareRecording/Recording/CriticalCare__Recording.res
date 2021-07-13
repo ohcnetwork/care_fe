@@ -28,6 +28,7 @@ type state = {
   ioBalanceStatus: string,
   dialysisStatus: string,
   pressureSoreStatus: string,
+  pressureSoreEditor: PressureSore.t,
   nursingCareStatus: string,
   totalStatus: int,
   bloodSugarEditor: BloodSugar.t,
@@ -53,6 +54,8 @@ type action =
   | SetIOBalaceData(IOBalance.t)
   | SetIOBalaceStatus(IOBalance.t)
   | UpdateDailyRound(CriticalCare__DailyRound.t)
+  | SetPressureSoreEditor(PressureSore.t)
+  | UpdatePressureSoreStatus(string)
 
 let showEditor = (editor, send) => {
   send(ShowEditor(editor))
@@ -116,6 +119,11 @@ let reducer = (state, action) => {
   | UpdateTotal(total) => {...state, totalStatus: total}
   | SetBloodSugarEditor(editor) => {...state, bloodSugarEditor: editor}
   | UpdateBloodSugarStatus(bloodSugarStatus) => {...state, bloodSugarStatus: bloodSugarStatus}
+  | SetPressureSoreEditor(editor) => {...state, pressureSoreEditor: editor}
+  | UpdatePressureSoreStatus(pressureSoreStatus) => {
+      ...state,
+      pressureSoreStatus: pressureSoreStatus,
+    }
   | SetDialysisEditor(editor) => {...state, dialysisEditor: editor}
   | UpdateDialysisStatus(dialysisStatus) => {...state, dialysisStatus: dialysisStatus}
   | UpdateNeurologicalMonitoringStatus(neurologicalMonitoringStatus) => {
@@ -208,7 +216,6 @@ let initialState = dailyRound => {
   ioBalanceData: IOBalance.initialState,
   ioBalanceStatus: "0",
   dialysisStatus: "0",
-  pressureSoreStatus: "0",
   nursingCareStatus: "0",
   totalStatus: 0,
   bloodSugarEditor: {
@@ -216,9 +223,12 @@ let initialState = dailyRound => {
     dosage: "",
     frequency: "OD",
   },
-  pressureSore: {
-    braden_scale_front: 0,
-    braden_scale_back: 0,
+  pressureSoreStatus: "0",
+  pressureSoreEditor: {
+    braden_scale_front: "",
+    braden_scale_back: "",
+    front_parts_selected: [],
+    back_parts_selected: [],
   },
   dialysisEditor: {
     fluid_balance: "",
@@ -333,7 +343,15 @@ export make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
                 }
               }}
             />
-          | PressureSoreEditor => <CriticalCare__PressureSore />
+          | PressureSoreEditor =>
+            <CriticalCare__PressureSoreEditor
+              initialState={state.pressureSoreEditor}
+              handleDone={(data, status) => {
+                send(SetPressureSoreEditor(data))
+                send(UpdatePressureSoreStatus(status))
+                send(CloseEditor)
+              }}
+            />
           | NursingCareEditor =>
             <CriticalCare__NursingCareEditor
               initialState={state.nursingCare}

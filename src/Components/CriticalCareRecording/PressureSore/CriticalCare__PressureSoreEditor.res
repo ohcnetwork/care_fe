@@ -180,8 +180,8 @@ let back_parts: array<PressureSore.typ> = [
 ]
 
 type action =
-  | SetFrontViewBradenScale(int)
-  | SetBackViewBradenScale(int)
+  | SetFrontViewBradenScale(string)
+  | SetBackViewBradenScale(string)
   | AddIndexToSelectedFrontParts(int)
   | AddIndexToSelectedBackParts(int)
 
@@ -189,23 +189,17 @@ let reducer = (state, action) => {
   switch action {
   | SetFrontViewBradenScale(risk_severity_value) => {
       ...state,
-      braden_scale_front: risk_severity_value,
+      PressureSore.braden_scale_front: risk_severity_value,
     }
   | SetBackViewBradenScale(risk_severity_value) => {
       ...state,
-      braden_scale_back: risk_severity_value,
+      PressureSore.braden_scale_back: risk_severity_value,
     }
   }
 }
 
 @react.component
-let make = () => {
-  let initialState = {
-    braden_scale_front: 0,
-    braden_scale_back: 0,
-    front_parts_selected: [],
-    back_parts_selected: [],
-  }
+let make = (~handleDone, ~initialState) => {
   let (state, send) = React.useReducer(reducer, initialState)
 
   let (front_parts_selected, setFrontPartsSelected) = React.useState(_ => [])
@@ -246,9 +240,9 @@ let make = () => {
         start={"1"}
         end={"5"}
         interval={"1"}
-        value={"3"}
+        value={PressureSore.braden_scale_front(state)}
         step={1.0}
-        setValue={_ => ()}
+        setValue={s => send(SetFrontViewBradenScale(s))}
         getLabel={_ => ("", "#ff0000")}
       />
     </div>
@@ -287,9 +281,9 @@ let make = () => {
         start={"1"}
         end={"5"}
         interval={"1"}
-        value={"3"}
+        value={PressureSore.braden_scale_back(state)}
         step={1.0}
-        setValue={_ => ()}
+        setValue={s => send(SetBackViewBradenScale(s))}
         getLabel={_ => ("", "#ff0000")}
       />
     </div>

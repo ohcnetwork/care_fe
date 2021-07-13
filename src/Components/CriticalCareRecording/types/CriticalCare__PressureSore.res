@@ -3,8 +3,8 @@ let d = typ => typ.d
 let transform = typ => typ.transform
 
 type t = {
-  braden_scale_front: int,
-  braden_scale_back: int,
+  braden_scale_front: string,
+  braden_scale_back: string,
   front_parts_selected: array<int>,
   back_parts_selected: array<int>,
 }
