@@ -1,18 +1,27 @@
 let str = React.string
 
-
 type unit_type = {
-    field: string,
-    value: float
+  field: string,
+  value: float
 }
 
 type unit_section_type = {
-    units: array<unit_type>,
-    params: array<string>
+  units: array<unit_type>,
+  params: array<string>
 }
 
 let findAndReplace = (index, f, array) =>
   array |> Array.mapi((i, item) => i == index ? f(item) : item)
+
+let toFloat = (svalue) => {
+  switch Belt.Float.fromString(svalue) {
+    | Some(x) => x
+    | None => 0.0
+  }
+}
+
+let changeField = (field, t) => {...t, field: field}
+let changeValue = (value, t) => {...t, value: value}
 
 type action =
   | UpdateField(string, int)
@@ -20,8 +29,6 @@ type action =
   | DeleteUnit(int)
   | AddUnit
 
-let changeField = (field, t) => {...t, field: field}
-let changeValue = (value, t) => {...t, value: value}
 
 let reducer = (state, action) => {
   switch action {
@@ -45,9 +52,6 @@ let reducer = (state, action) => {
   }
 }
 
-let getField = (t) => t.field
-let getValue = (t) => t.value
-
 let showUnit = (item, params, index, send) =>
   <div className="flex justify-between items-center" key={index |> string_of_int}>
     <div className="m-1 rounded-md shadow-sm w-4/6">
@@ -64,7 +68,7 @@ let showUnit = (item, params, index, send) =>
         id={"value" ++ (index->string_of_int)}
         className="appearance-none h-10 mt-1 block w-full border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white focus:border-gray-600"
         placeholder="Value"
-        onChange={e => UpdateValue(ReactEvent.Form.target(e)["value"], index)->send}
+        onChange={e => UpdateValue(ReactEvent.Form.target(e)["value"]->toFloat, index)->send}
         value={item.value->Belt.Float.toString}
         type_="number"
         required=true

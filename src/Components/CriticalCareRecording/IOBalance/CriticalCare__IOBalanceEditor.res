@@ -1,57 +1,88 @@
-let str = React.string
 open CriticalCare__Types
+let str = React.string
 
-type slider_type = IOBalance.slider_type
-// type state_type = IOBalance.t
+type unit_type = IOBalance.unit_type
+type unit_section_type = IOBalance.unit_section_type
+type state_type = IOBalance.t
 
-type unit_type = IOBalance__UnitSection.unit_type
-type unit_section_type = IOBalance__UnitSection.unit_section_type
-
-type intake_type = {
-    infusions: unit_section_type,
-    iv_fluid: unit_section_type,
-    feed: unit_section_type
+type summary_section_type = {
+    values: string,
+    total: string
 }
 
-type state_type = {
-    intake: intake_type,
-    outturn: unit_section_type
+type summary_type = {
+    intake: summary_section_type,
+    outturn: summary_section_type,
+    overall: summary_section_type,
 }
 
-let initialStat = {
+let initialSummary = {
     intake: {
-        infusions: {
-            units: [],
-            params: ["Infusion1", "Infusion2", "Infusion3"]
-        },
-        iv_fluid: {
-            units: [],
-            params: ["iv_fluid1", "iv_fluid2", "iv_fluid3"]
-        },
-        feed: {
-            units: [],
-            params: ["feed1", "feed2", "feed3"]
-        },
+        values: "",
+        total: ""
     },
     outturn: {
-        units: [],
-        params: ["outturn1", "outturn2", "outturn3"]
+        values: "",
+        total: ""
     },
+    overall: {
+        values: "",
+        total: ""
+    }
 }
 
+let toFloat = (svalue) => {
+    switch Belt.Float.fromString(svalue) {
+        | Some(x) => x
+        | None => 0.0
+    }
+}
 
+let toString = Belt.Float.toString
 
 @react.component
-let make = (~initialState, ~handleDone) => {
+let make = (~initialState: state_type, ~handleDone) => {
     // let (state, send) = React.useReducer(reducer, initialState)
-    let (state, setState) = React.useState(_ => initialStat)
-    Js.log2(state, "hello")
-    Js.log("worthy")
+    let (state, setState) = React.useState(_ => initialState)
+    Js.log(state)
+    let (summary, setSummary) = React.useState(_ => initialSummary)
+
+    React.useEffect1(() => {
+        let infusions_total = state.intake.infusions.units->Belt.Array.reduce(0.0, (acc, unit) => acc +. unit.value)
+        let iv_fluid_total = state.intake.iv_fluid.units->Belt.Array.reduce(0.0, (acc, unit) => acc +. unit.value)
+        let feed_total = state.intake.feed.units->Belt.Array.reduce(0.0, (acc, unit) => acc +. unit.value)
+        
+        Js.log3(infusions_total, iv_fluid_total, feed_total)
+        setSummary(prev => {...prev, intake: {
+            values: [infusions_total, iv_fluid_total, feed_total]->Js.Array2.joinWith("+"), 
+            total: (infusions_total +. iv_fluid_total +. feed_total)->toString
+        }})
+        None
+    }, [state.intake])
+
+    React.useEffect1(() => {
+        let outturn_summary_values = state.outturn.units->Belt.Array.map(unit => unit.value)
+        let outturn_summary_total = outturn_summary_values->Belt.Array.reduce(0.0, (acc, value) => acc +. value)
+
+        setSummary(prev => {...prev, outturn: {
+            values: outturn_summary_values->Js.Array2.joinWith("+"), 
+            total: outturn_summary_total->toString
+        }})
+        None
+    }, [state.outturn])
+
+    React.useEffect1(() => {
+        setSummary(prev => {...prev, overall: {
+            values: [prev.intake.total, prev.outturn.total]->Js.Array2.joinWith("-"), 
+            total: (prev.intake.total->toFloat -. prev.outturn.total->toFloat)->toString
+        }})
+        None
+    }, [])
 
     <div>
         <CriticalCare__PageTitle title="I/O Balance Editor" />
 
-        <div id="intake" className="">
+        <div id="intake" className="pb-3">
             <h3>{str("Intake")}</h3>
             
             <IOBalance__UnitSection
@@ -72,9 +103,15 @@ let make = (~initialState, ~handleDone) => {
                 params={state.intake.feed.params}
                 selectCB={(s) => setState(prev => {...prev, intake: {...prev.intake, feed: s}})}
             />
+
+            <IOBalance__Summary
+                leftMain="Total"
+                rightSub={summary.intake.values}
+                rightMain={summary.intake.total}
+            />
         </div>
 
-        <div id="outturn" className="">
+        <div id="outturn" className="pt-3">
             <h3>{str("Outturn")}</h3>
             <IOBalance__UnitSection
                 name=""
@@ -82,6 +119,19 @@ let make = (~initialState, ~handleDone) => {
                 params={state.outturn.params}
                 selectCB={(s) => setState(prev => {...prev, outturn: s})}
             />
-        </div>   
+
+            <IOBalance__Summary
+                leftMain="Total"
+                rightSub={summary.outturn.values}
+                rightMain={summary.outturn.total}
+            />
+        </div> 
+
+        <IOBalance__Summary
+            leftMain="I/O Balance"
+            rightSub={summary.overall.values}
+            rightMain={summary.overall.total}
+            noBorder={true}
+        />
     </div>
 }
