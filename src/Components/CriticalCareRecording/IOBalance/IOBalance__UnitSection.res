@@ -47,7 +47,8 @@ let reducer = (state, action) => {
     }
     | DeleteUnit(index) => {
       let new_units = state.units |> Js.Array.filteri((_, i) => i != index)
-      {...state, units: new_units}
+      let new_params = [state.units[index].field] |> Belt.Array.concat(state.params)
+      {units: new_units, params: new_params}
     }
   }
 }
