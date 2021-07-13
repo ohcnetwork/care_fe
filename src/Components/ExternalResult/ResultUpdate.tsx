@@ -31,8 +31,6 @@ const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 const initForm: any = {
-  //name: "",
-  //phone_number: "",
   address: "",
   local_body: "",
   ward: "",
@@ -164,10 +162,8 @@ export default function UpdateResult(props: any) {
         case "local_body":
           if (!state.form[field] || state.form[field] === "0") {
             errors[field] = "Please select local body";
-
             invalidForm = true;
           }
-
           return;
         case "ward":
           if (!state.form[field] || state.form[field] === "0") {
@@ -344,7 +340,6 @@ export default function UpdateResult(props: any) {
               {" "}
               Cancel{" "}
             </Button>
-
             <Button
               color="primary"
               variant="contained"
