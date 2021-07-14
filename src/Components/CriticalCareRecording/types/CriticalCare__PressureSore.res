@@ -1,6 +1,7 @@
-type typ = {d: string, transform: string}
+type typ = {d: string, transform: string, label: string}
 let d = typ => typ.d
 let transform = typ => typ.transform
+let label = typ => typ.label
 
 type ty = {
   braden_scale_front: string,
