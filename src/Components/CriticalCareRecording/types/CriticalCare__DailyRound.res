@@ -4,6 +4,7 @@ export type t = {
   createdByTelemedicine: bool,
   neurologicalMonitoring: CriticalCare__NeurologicalMonitoring.t,
   hemodynamicParameter: CriticalCare__HemodynamicParameters.t,
+  arterialBloodGasAnalysis: CriticalCare__ABGAnalysis.t,
 }
 
 let make = (
@@ -12,16 +13,19 @@ let make = (
   ~createdByTelemedicine,
   ~neurologicalMonitoring,
   ~hemodynamicParameter,
+  ~arterialBloodGasAnalysis,
 ) => {
   createdAt: createdAt,
   admittedTo: admittedTo,
   createdByTelemedicine: createdByTelemedicine,
   neurologicalMonitoring: neurologicalMonitoring,
   hemodynamicParameter: hemodynamicParameter,
+  arterialBloodGasAnalysis: arterialBloodGasAnalysis,
 }
 
 let neurologicalMonitoring = t => t.neurologicalMonitoring
 let hemodynamicParameters = t => t.hemodynamicParameter
+let arterialBloodGasAnalysis = t => t.arterialBloodGasAnalysis
 
 let makeFromJs = dailyRound => {
   make(
@@ -30,5 +34,6 @@ let makeFromJs = dailyRound => {
     ~createdByTelemedicine=dailyRound["created_by_telemedicine"],
     ~neurologicalMonitoring=CriticalCare__NeurologicalMonitoring.makeFromJs(dailyRound),
     ~hemodynamicParameter=CriticalCare__HemodynamicParameters.makeFromJs(dailyRound),
+    ~arterialBloodGasAnalysis=CriticalCare__ABGAnalysis.makeFromJs(dailyRound),
   )
 }
