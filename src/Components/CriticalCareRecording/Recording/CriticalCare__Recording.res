@@ -28,7 +28,7 @@ type state = {
   ioBalanceStatus: string,
   dialysisStatus: string,
   pressureSoreStatus: string,
-  pressureSoreEditor: PressureSore.t,
+  pressureSoreEditor: PressureSore.ty,
   nursingCareStatus: string,
   totalStatus: int,
   bloodSugarEditor: BloodSugar.t,
@@ -54,7 +54,7 @@ type action =
   | SetIOBalaceData(IOBalance.t)
   | SetIOBalaceStatus(IOBalance.t)
   | UpdateDailyRound(CriticalCare__DailyRound.t)
-  | SetPressureSoreEditor(PressureSore.t)
+  | SetPressureSoreEditor(PressureSore.ty)
   | UpdatePressureSoreStatus(string)
 
 let showEditor = (editor, send) => {
@@ -227,8 +227,8 @@ let initialState = dailyRound => {
   pressureSoreEditor: {
     braden_scale_front: "",
     braden_scale_back: "",
-    front_parts_selected: [],
-    back_parts_selected: [],
+    front_parts_selected: Js.Dict.empty(),
+    back_parts_selected: Js.Dict.empty(),
   },
   dialysisEditor: {
     fluid_balance: "",

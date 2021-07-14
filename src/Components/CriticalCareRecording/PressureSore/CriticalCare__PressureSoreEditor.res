@@ -195,6 +195,34 @@ let reducer = (state, action) => {
       ...state,
       PressureSore.braden_scale_back: risk_severity_value,
     }
+  | AddIndexToSelectedFrontParts(ind) => {
+      let val = PressureSore.front_parts_selected(state)
+      let str = Belt.Int.toString(ind)
+      let tmp = Js.Array.includes(str, Js.Dict.keys(val))
+      if tmp {
+        Js.Dict.unsafeDeleteKey(. val, str)
+      } else {
+        Js.Dict.set(val, str, "1")
+      }
+      {
+        ...state,
+        PressureSore.front_parts_selected: val,
+      }
+    }
+  | AddIndexToSelectedBackParts(ind) => {
+      let val = PressureSore.back_parts_selected(state)
+      let str = Belt.Int.toString(ind)
+      let tmp = Js.Array.includes(str, Js.Dict.keys(val))
+      if tmp {
+        Js.Dict.unsafeDeleteKey(. val, str)
+      } else {
+        Js.Dict.set(val, str, "1")
+      }
+      {
+        ...state,
+        PressureSore.back_parts_selected: val,
+      }
+    }
   }
 }
 
@@ -215,19 +243,15 @@ let make = (~handleDone, ~initialState) => {
             key={"part1" ++ Belt.Int.toString(renderIndex)}
             d={PressureSore.d(part)}
             transform={PressureSore.transform(part)}
-            className={Js.Array.includes(renderIndex, front_parts_selected)
+            className={Js.Array.includes(
+              Js.Int.toString(renderIndex),
+              Js.Dict.keys(PressureSore.front_parts_selected(state)),
+            )
               ? "text-blue-500"
               : "text-gray-400  hover:text-blue-400"}
             fill="currentColor"
             onClick={_ => {
-              if Js.Array.includes(renderIndex, front_parts_selected) {
-                let tmp = Js.Array.filter(x => x != renderIndex, front_parts_selected)
-                setFrontPartsSelected(_ => tmp)
-              } else {
-                let tmp = front_parts_selected
-                let _ = Js.Array.push(renderIndex, tmp)
-                setFrontPartsSelected(_ => tmp)
-              }
+              send(AddIndexToSelectedFrontParts(renderIndex))
             }}
           />
         })
@@ -256,19 +280,15 @@ let make = (~handleDone, ~initialState) => {
             key={"part2" ++ Belt.Int.toString(renderIndex)}
             d={PressureSore.d(part)}
             transform={PressureSore.transform(part)}
-            className={Js.Array.includes(renderIndex, back_parts_selected)
+            className={Js.Array.includes(
+              Js.Int.toString(renderIndex),
+              Js.Dict.keys(PressureSore.back_parts_selected(state)),
+            )
               ? "text-blue-500"
               : "text-gray-400  hover:text-blue-400"}
             fill="currentColor"
             onClick={_ => {
-              if Js.Array.includes(renderIndex, back_parts_selected) {
-                let tmp = Js.Array.filter(x => x != renderIndex, back_parts_selected)
-                setBackPartsSelected(_ => tmp)
-              } else {
-                let tmp = back_parts_selected
-                let _ = Js.Array.push(renderIndex, tmp)
-                setBackPartsSelected(_ => tmp)
-              }
+              send(AddIndexToSelectedBackParts(renderIndex))
             }}
           />
         })
