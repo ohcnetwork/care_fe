@@ -5,6 +5,8 @@ let str = React.string
 external updateDailyRound: (string, string, Js.Json.t, _ => unit, _ => unit) => unit =
   "updateDailyRound"
 
+let getValueAsString = data => Belt.Option.mapWithDefault(data, "", Js.Float.toString)
+
 type state = {
   po2: option<float>,
   pco2: option<float>,
@@ -81,7 +83,39 @@ let errorCB = (send, _error) => {
   send(ClearSaving)
 }
 
-let saveData = (id, consultationId, state, send, updateCB) => {
+let showStatus = data => {
+  let total = 8.0
+  let count = ref(0.0)
+
+  if getValueAsString(data.po2) !== "" {
+    count := count.contents +. 1.0
+  }
+  if getValueAsString(data.pco2) !== "" {
+    count := count.contents +. 1.0
+  }
+  if getValueAsString(data.pH) !== "" {
+    count := count.contents +. 1.0
+  }
+  if getValueAsString(data.hco3) !== "" {
+    count := count.contents +. 1.0
+  }
+  if getValueAsString(data.baseExcess) !== "" {
+    count := count.contents +. 1.0
+  }
+  if getValueAsString(data.lactate) !== "" {
+    count := count.contents +. 1.0
+  }
+  if getValueAsString(data.sodium) !== "" {
+    count := count.contents +. 1.0
+  }
+  if getValueAsString(data.potassium) !== "" {
+    count := count.contents +. 1.0
+  }
+
+  Js.Float.toFixed(count.contents /. total *. 100.0)
+}
+
+let saveData = (id, consultationId, state, send, updateCB, percentCompleteCB) => {
   send(SetSaving)
   updateDailyRound(
     consultationId,
@@ -90,6 +124,7 @@ let saveData = (id, consultationId, state, send, updateCB) => {
     successCB(send, updateCB),
     errorCB(send),
   )
+  percentCompleteCB(showStatus(state))
 }
 
 let getStatus = (min, minText, max, maxText, val) => {
@@ -103,7 +138,7 @@ let getStatus = (min, minText, max, maxText, val) => {
 }
 
 @react.component
-let make = (~arterialBloodGasAnalysis, ~updateCB, ~id, ~consultationId) => {
+let make = (~arterialBloodGasAnalysis, ~updateCB, ~percentCompleteCB, ~id, ~consultationId) => {
   let (state, send) = React.useReducer(reducer, initialState(arterialBloodGasAnalysis))
 
   <div>
@@ -115,7 +150,7 @@ let make = (~arterialBloodGasAnalysis, ~updateCB, ~id, ~consultationId) => {
         end={"400"}
         interval={"50"}
         step={0.1}
-        value={Belt.Option.mapWithDefault(state.po2, "", Js.Float.toString)}
+        value={getValueAsString(state.po2)}
         setValue={s => send(SetPO2(float_of_string(s)))}
         getLabel={getStatus(50.0, "Low", 200.0, "High")}
       />
@@ -125,7 +160,7 @@ let make = (~arterialBloodGasAnalysis, ~updateCB, ~id, ~consultationId) => {
         end={"200"}
         interval={"20"}
         step={0.1}
-        value={Belt.Option.mapWithDefault(state.pco2, "", Js.Float.toString)}
+        value={getValueAsString(state.pco2)}
         setValue={s => send(SetPCO2(float_of_string(s)))}
         getLabel={getStatus(35.0, "Low", 45.0, "High")}
       />
@@ -135,7 +170,7 @@ let make = (~arterialBloodGasAnalysis, ~updateCB, ~id, ~consultationId) => {
         end={"10.00"}
         interval={"1.00"}
         step={0.1}
-        value={Belt.Option.mapWithDefault(state.pH, "", Js.Float.toString)}
+        value={getValueAsString(state.pH)}
         setValue={s => send(SetpH(float_of_string(s)))}
         getLabel={getStatus(7.35, "Low", 7.45, "High")}
       />
@@ -145,7 +180,7 @@ let make = (~arterialBloodGasAnalysis, ~updateCB, ~id, ~consultationId) => {
         end={"80"}
         interval={"5"}
         step={0.1}
-        value={Belt.Option.mapWithDefault(state.hco3, "", Js.Float.toString)}
+        value={getValueAsString(state.hco3)}
         setValue={s => send(SetHCO3(float_of_string(s)))}
         getLabel={getStatus(22.0, "Low", 26.0, "High")}
       />
@@ -155,7 +190,7 @@ let make = (~arterialBloodGasAnalysis, ~updateCB, ~id, ~consultationId) => {
         end={"20"}
         interval={"5"}
         step={0.1}
-        value={Belt.Option.mapWithDefault(state.baseExcess, "", Js.Float.toString)}
+        value={getValueAsString(state.baseExcess)}
         setValue={s => send(SetBaseExcess(float_of_string(s)))}
         getLabel={getStatus(-2.0, "Low", 2.0, "High")}
       />
@@ -165,7 +200,7 @@ let make = (~arterialBloodGasAnalysis, ~updateCB, ~id, ~consultationId) => {
         end={"20"}
         interval={"2"}
         step={0.1}
-        value={Belt.Option.mapWithDefault(state.lactate, "", Js.Float.toString)}
+        value={getValueAsString(state.lactate)}
         setValue={s => send(SetLactate(float_of_string(s)))}
         getLabel={getStatus(0.0, "Low", 2.0, "High")}
       />
@@ -175,7 +210,7 @@ let make = (~arterialBloodGasAnalysis, ~updateCB, ~id, ~consultationId) => {
         end={"170"}
         interval={"10"}
         step={0.1}
-        value={Belt.Option.mapWithDefault(state.sodium, "", Js.Float.toString)}
+        value={getValueAsString(state.sodium)}
         setValue={s => send(SetSodium(float_of_string(s)))}
         getLabel={getStatus(135.0, "Low", 145.0, "High")}
       />
@@ -185,7 +220,7 @@ let make = (~arterialBloodGasAnalysis, ~updateCB, ~id, ~consultationId) => {
         end={"10"}
         interval={"1"}
         step={0.1}
-        value={Belt.Option.mapWithDefault(state.potassium, "", Js.Float.toString)}
+        value={getValueAsString(state.potassium)}
         setValue={s => send(SetPotassium(float_of_string(s)))}
         getLabel={getStatus(3.5, "Low", 5.5, "High")}
       />
@@ -193,7 +228,7 @@ let make = (~arterialBloodGasAnalysis, ~updateCB, ~id, ~consultationId) => {
     <button
       disabled={state.saving || !state.dirty}
       className="flex w-full bg-primary-600 text-white p-2 text-lg hover:bg-primary-800 justify-center items-center rounded-md"
-      onClick={_ => saveData(id, consultationId, state, send, updateCB)}>
+      onClick={_ => saveData(id, consultationId, state, send, updateCB, percentCompleteCB)}>
       {str("Update Details")}
     </button>
   </div>

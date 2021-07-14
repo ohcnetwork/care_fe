@@ -275,6 +275,7 @@ export make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
                 state.dailyRound,
               )}
               updateCB={updateDailyRound(send)}
+              percentCompleteCB={status => send(UpdateABGAnalysisStatus(status))}
               id
               consultationId
             />

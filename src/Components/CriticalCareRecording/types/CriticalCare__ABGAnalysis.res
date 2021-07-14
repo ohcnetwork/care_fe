@@ -41,35 +41,3 @@ let baseExcess = t => t.baseExcess
 let lactate = t => t.lactate
 let sodium = t => t.sodium
 let potassium = t => t.potassium
-
-let showStatus = data => {
-  let total = 8.0
-  let count = ref(0.0)
-
-  // if po2(data) !== "" {
-  //   count := count.contents +. 1.0
-  // }
-  // if pco2(data) !== "" {
-  //   count := count.contents +. 1.0
-  // }
-  // if pH(data) !== "" {
-  //   count := count.contents +. 1.0
-  // }
-  // if hco3(data) !== "" {
-  //   count := count.contents +. 1.0
-  // }
-  // if baseExcess(data) !== "" {
-  //   count := count.contents +. 1.0
-  // }
-  // if lactate(data) !== "" {
-  //   count := count.contents +. 1.0
-  // }
-  // if sodium(data) !== "" {
-  //   count := count.contents +. 1.0
-  // }
-  // if potassium(data) !== "" {
-  //   count := count.contents +. 1.0
-  // }
-
-  Js.Float.toFixed(count.contents /. total *. 100.0)
-}
