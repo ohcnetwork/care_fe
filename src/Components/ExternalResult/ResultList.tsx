@@ -433,6 +433,11 @@ export default function ResultList() {
       <div className="flex space-x-2 my-2 flex-wrap w-full col-span-3 space-y-1">
         {badge("Name", qParams.name || local.name, "name")}
         {badge(
+          "Phone Number",
+          qParams.mobile_number || local.mobile_number,
+          "mobile_number"
+        )}
+        {badge(
           "Created before",
           qParams.created_date_before || local.created_date_before,
           "created_date_before"
