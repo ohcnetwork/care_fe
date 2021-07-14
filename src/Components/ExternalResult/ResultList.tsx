@@ -431,6 +431,7 @@ export default function ResultList() {
         {dataList.wardList.map((x) => lsgWardBadge("Ward", x, "wards"))}
       </div>
       <div className="flex space-x-2 my-2 flex-wrap w-full col-span-3 space-y-1">
+        {badge("Name", qParams.name || local.name, "name")}
         {badge(
           "Created before",
           qParams.created_date_before || local.created_date_before,
