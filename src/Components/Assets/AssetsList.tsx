@@ -211,6 +211,7 @@ const AssetsList = (props: any) => {
       </div>
       <div className="flex space-x-2 mt-2 flex-wrap w-full col-span-3 space-y-1">
         {badge("Facility", facilityName, "facility")}
+        {badge("Asset Name", qParams.search, "search")}
       </div>
       <div className="flex-grow mt-10 bg-white">
         <div className="p-8">
