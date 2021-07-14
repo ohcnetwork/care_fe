@@ -418,6 +418,7 @@ export default function SampleViewAdmin(props: any) {
       </div>
       <div className="flex space-x-2 mt-2 flex-wrap w-full col-span-3 space-y-1">
         {badge("Patient Name", qParams.patient_name, "patient_name")}
+        {badge("District Name", qParams.district_name, "district_name")}
       </div>
       <div className="px-3 md:px-8">
         <div className="flex flex-wrap md:-mx-4">{manageSamples}</div>
