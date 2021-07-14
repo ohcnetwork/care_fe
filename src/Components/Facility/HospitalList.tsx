@@ -644,6 +644,7 @@ const HospitalListPage = (props: any) => {
         </SlideOver>
       </div>
       <div className="flex space-x-2 mt-2 flex-wrap w-full col-span-3 space-y-1">
+        {badge("Facility/District Name", qParams.search, "search")}
         {badge("State", stateName, "state")}
         {badge("District", districtName, "district")}
         {badge("Local Body", localbodyName, "local_body")}
