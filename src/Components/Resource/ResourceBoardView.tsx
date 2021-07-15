@@ -142,6 +142,7 @@ export default function BoardView() {
         </div>
       </div>
       <div className="flex flex-wrap space-x-2 mt-2 ml-2 space-y-1">
+        {badge("Ordering", appliedFilters.ordering, "ordering")}
         {badge(
           "Emergency",
           appliedFilters.emergency === "true"
