@@ -69,19 +69,19 @@ let showStatus = data => {
   Js.Float.toFixed(count.contents /. total *. 100.0)
 }
 
-let create = (
-  personalHygiene,
-  positioning,
-  suctioning,
-  rylesTubeCare,
-  iVSitecare,
-  nubulisation,
-  dressing,
-  dVTPumpStocking,
-  restrain,
-  chestTubeCare,
-  tracheostomyCare,
-  stomaCare,
+let make = (
+  ~personalHygiene,
+  ~positioning,
+  ~suctioning,
+  ~rylesTubeCare,
+  ~iVSitecare,
+  ~nubulisation,
+  ~dressing,
+  ~dVTPumpStocking,
+  ~restrain,
+  ~chestTubeCare,
+  ~tracheostomyCare,
+  ~stomaCare,
 ) => {
   personalHygiene: personalHygiene,
   positioning: positioning,
@@ -95,4 +95,21 @@ let create = (
   chestTubeCare: chestTubeCare,
   tracheostomyCare: tracheostomyCare,
   stomaCare: stomaCare,
+}
+
+let makeFromJs = dailyRound => {
+  make(
+    ~personalHygiene=dailyRound["personal_hygiene"]->Js.Nullable.toOption,
+    ~positioning=dailyRound["positioning"]->Js.Nullable.toOption,
+    ~suctioning=dailyRound["suctioning"]->Js.Nullable.toOption,
+    ~rylesTubeCare=dailyRound["ryles_tube_care"]->Js.Nullable.toOption,
+    ~iVSitecare=dailyRound["i_v_sitecare"]->Js.Nullable.toOption,
+    ~nubulisation=dailyRound["nubulisation"]->Js.Nullable.toOption,
+    ~dressing=dailyRound["dressing"]->Js.Nullable.toOption,
+    ~dVTPumpStocking=dailyRound["d_v_t_pump_stocking"]->Js.Nullable.toOption,
+    ~restrain=dailyRound["restrain"]->Js.Nullable.toOption,
+    ~chestTubeCare=dailyRound["chest_tube_care"]->Js.Nullable.toOption,
+    ~tracheostomyCare=dailyRound["tracheostomy_care"]->Js.Nullable.toOption,
+    ~stomaCare=dailyRound["stoma_care"]->Js.Nullable.toOption,
+  )
 }
