@@ -59,7 +59,7 @@ let showStatus = item => {
 let editorToggle = (editorName, state, send) => {
   <div
     id="editorToggle"
-    className="w-3/4 border-2 px-4 py-6 mx-auto my-4 cursor-pointer flex justify-between items-center"
+    className="border-2 px-4 py-6 mx-auto my-4 cursor-pointer flex justify-between items-center"
     onClick={_ => showEditor(editorName, send)}>
     {switch editorName {
     | NeurologicalMonitoringEditor => str("Neurological Monitoring")
@@ -222,10 +222,9 @@ let updateDailyRound = (send, dailyRound) => {
 export make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
   let (state, send) = React.useReducer(reducer, initialState(dailyRound))
 
-  
-  <div>
-    <div className="w-3/4 mx-auto my-4" />
-    <div className="w-3/4 mx-auto my-4">
+  <div
+    className="bg-white px-4 py-5 border-b border-gray-200 sm:px-6 max-w-3xl mx-auto border mt-4 shadow rounded-lg">
+    <div className="p-4">
       {switch state.visibleEditor {
       | Some(editor) =>
         <div id="editor">
@@ -288,9 +287,7 @@ export make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
             />
           | IOBalanceEditor =>
             <CriticalCare__IOBalanceEditor
-              ioBalance={CriticalCare__DailyRound.ioBalance(
-                state.dailyRound,
-              )}
+              ioBalance={CriticalCare__DailyRound.ioBalance(state.dailyRound)}
               updateCB={updateDailyRound(send)}
               id
               consultationId
