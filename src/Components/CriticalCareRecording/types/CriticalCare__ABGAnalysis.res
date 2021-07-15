@@ -1,9 +1,9 @@
 export type t = {
-  po2: option<float>,
-  pco2: option<float>,
+  po2: option<int>,
+  pco2: option<int>,
   pH: option<float>,
   hco3: option<float>,
-  baseExcess: option<float>,
+  baseExcess: option<int>,
   lactate: option<float>,
   sodium: option<float>,
   potassium: option<float>,
@@ -41,5 +41,3 @@ let baseExcess = t => t.baseExcess
 let lactate = t => t.lactate
 let sodium = t => t.sodium
 let potassium = t => t.potassium
-
-let getParams = [po2, pco2, pH, hco3, baseExcess, lactate, sodium, potassium]
