@@ -150,7 +150,7 @@ let make = (~arterialBloodGasAnalysis, ~updateCB, ~percentCompleteCB, ~id, ~cons
         start={"10"}
         end={"400"}
         interval={"50"}
-        step={0.1}
+        step={1.0}
         value={string_of_int(state.po2)}
         setValue={s => send(SetPO2(int_of_string(s)))}
         getLabel={getStatus(50.0, "Low", 200.0, "High")}
@@ -160,7 +160,7 @@ let make = (~arterialBloodGasAnalysis, ~updateCB, ~percentCompleteCB, ~id, ~cons
         start={"10"}
         end={"200"}
         interval={"20"}
-        step={0.1}
+        step={1.0}
         value={string_of_int(state.pco2)}
         setValue={s => send(SetPCO2(int_of_string(s)))}
         getLabel={getStatus(35.0, "Low", 45.0, "High")}
@@ -190,7 +190,7 @@ let make = (~arterialBloodGasAnalysis, ~updateCB, ~percentCompleteCB, ~id, ~cons
         start={"-20"}
         end={"20"}
         interval={"5"}
-        step={0.1}
+        step={1.0}
         value={string_of_int(state.baseExcess)}
         setValue={s => send(SetBaseExcess(int_of_string(s)))}
         getLabel={getStatus(-2.0, "Low", 2.0, "High")}
