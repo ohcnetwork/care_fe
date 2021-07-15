@@ -17,7 +17,6 @@ type state = {
   visibleEditor: option<editor>,
   dailyRound: CriticalCare__DailyRound.t,
   nursingCare: NursingCare.t,
-  abgEditor: ABGAnalysis.t,
   ventilatorParametersEditor: CriticalCare__VentilatorParameters.t,
   neurologicalMonitoringStatus: string,
   hemodynamicParametersStatus: string,
@@ -37,7 +36,6 @@ type state = {
 type action =
   | ShowEditor(editor)
   | CloseEditor
-  | SetABGAnalysisEditor(ABGAnalysis.t)
   | SetNursingCare(NursingCare.t)
   | SetVentilatorParametersEditor(CriticalCare__VentilatorParameters.t)
   | UpdateNursingCareStatus(string)
@@ -98,7 +96,6 @@ let reducer = (state, action) => {
   switch action {
   | ShowEditor(editor) => {...state, visibleEditor: Some(editor)}
   | CloseEditor => {...state, visibleEditor: None}
-  | SetABGAnalysisEditor(editor) => {...state, abgEditor: editor}
   | SetNursingCare(nursingCare) => {...state, nursingCare: nursingCare}
   | SetVentilatorParametersEditor(editor) => {...state, ventilatorParametersEditor: editor}
   | UpdateNursingCareStatus(nursingCareStatus) => {
@@ -135,16 +132,6 @@ let reducer = (state, action) => {
 let initialState = dailyRound => {
   visibleEditor: None,
   dailyRound: dailyRound,
-  abgEditor: {
-    po2: "",
-    pco2: "",
-    pH: "",
-    hco3: "",
-    baseExcess: "",
-    lactate: "",
-    sodium: "",
-    potassium: "",
-  },
   nursingCare: {
     personalHygiene: None,
     positioning: None,
@@ -284,15 +271,18 @@ export make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
             />
           | ArterialBloodGasAnalysisEditor =>
             <CriticalCare__ABGAnalysisEditor
-              initialState={state.abgEditor}
-              handleDone={(data, status) => {
-                send(SetABGAnalysisEditor(data))
+              arterialBloodGasAnalysis={CriticalCare__DailyRound.arterialBloodGasAnalysis(
+                state.dailyRound,
+              )}
+              updateCB={updateDailyRound(send)}
+              percentCompleteCB={status => {
                 send(UpdateABGAnalysisStatus(status))
-                send(CloseEditor)
-                if status === "100" {
+                if status == "100" {
                   send(UpdateTotal(state.totalStatus + 1))
                 }
               }}
+              id
+              consultationId
             />
           | BloodSugarEditor =>
             <CriticalCare_BloodSugarEditor
