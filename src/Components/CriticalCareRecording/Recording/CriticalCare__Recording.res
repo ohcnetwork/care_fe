@@ -23,7 +23,6 @@ type state = {
   ventilatorParametersStatus: string,
   arterialBloodGasAnalysisStatus: string,
   bloodSugarStatus: string,
-  ioBalanceData: IOBalance.t,
   ioBalanceStatus: string,
   dialysisStatus: string,
   pressureSoreStatus: string,
@@ -48,7 +47,6 @@ type action =
   | SetDialysisEditor(Dialysis.t)
   | UpdateDialysisStatus(string)
   | UpdateNeurologicalMonitoringStatus(string)
-  | SetIOBalaceData(IOBalance.t)
   | SetIOBalaceStatus(IOBalance.t)
   | UpdateDailyRound(CriticalCare__DailyRound.t)
 
@@ -119,7 +117,6 @@ let reducer = (state, action) => {
       ...state,
       neurologicalMonitoringStatus: neurologicalMonitoringStatus,
     }
-  | SetIOBalaceData(data) => {...state, ioBalanceData: data}
   | SetIOBalaceStatus(iobState) => {...state, ioBalanceStatus: "100"}
   | UpdateABGAnalysisStatus(arterialBloodGasAnalysisStatus) => {
       ...state,
@@ -192,7 +189,6 @@ let initialState = dailyRound => {
   ventilatorParametersStatus: "0",
   arterialBloodGasAnalysisStatus: "0",
   bloodSugarStatus: "0",
-  ioBalanceData: IOBalance.initialState,
   ioBalanceStatus: "0",
   dialysisStatus: "0",
   pressureSoreStatus: "0",
@@ -294,12 +290,12 @@ export make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
             />
           | IOBalanceEditor =>
             <CriticalCare__IOBalanceEditor
-              initialState={state.ioBalanceData}
-              handleDone={data => {
-                CloseEditor->send
-                data->SetIOBalaceStatus->send
-                data->SetIOBalaceData->send
-              }}
+              ioBalance={CriticalCare__DailyRound.ioBalance(
+                state.dailyRound,
+              )}
+              updateCB={updateDailyRound(send)}
+              id
+              consultationId
             />
           | DialysisEditor =>
             <CriticalCare_DialysisEditor
