@@ -103,7 +103,8 @@ let make = (~dialysisParameters, ~updateCB, ~id, ~consultationId) => {
         />
       </div>
       <button
-        className="flex w-full bg-blue-600 text-white p-2 text-lg hover:bg-blue-800 justify-center items-center rounded-md"
+        disabled={state.saving || !state.dirty}
+        className="flex w-full bg-primary-600 text-white p-2 text-lg hover:bg-primary-800 justify-center items-center rounded-md"
         onClick={_ => saveData(id, consultationId, state, send, updateCB)}>
         {str("Update Details")}
       </button>

@@ -6,11 +6,6 @@ export type t = {
 let fluid_balance = t => t.fluid_balance
 let net_balance = t => t.net_balance
 
-// let init = {
-//   fluid_balance: "",
-//   net_balance: "",
-// }
-
 let make = (~fluid_balance, ~net_balance) => {
   fluid_balance: fluid_balance,
   net_balance: net_balance,
