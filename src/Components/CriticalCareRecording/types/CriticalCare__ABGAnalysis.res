@@ -1,21 +1,36 @@
-// PO2(mmHg)
-// PCO2(mmHg)
-// pH
-// HCO3(mmol/L)
-// Base Excess(mmol/L)
-// Lactate(mmol/L)
-// Sodium(mmol/L)
-// Potassium(mmol/L)
+export type t = {
+  po2: option<float>,
+  pco2: option<float>,
+  pH: option<float>,
+  hco3: option<float>,
+  baseExcess: option<float>,
+  lactate: option<float>,
+  sodium: option<float>,
+  potassium: option<float>,
+}
 
-type t = {
-  po2: string,
-  pco2: string,
-  pH: string,
-  hco3: string,
-  baseExcess: string,
-  lactate: string,
-  sodium: string,
-  potassium: string,
+let make = (~po2, ~pco2, ~pH, ~hco3, ~baseExcess, ~lactate, ~sodium, ~potassium) => {
+  po2: po2,
+  pco2: pco2,
+  pH: pH,
+  hco3: hco3,
+  baseExcess: baseExcess,
+  lactate: lactate,
+  sodium: sodium,
+  potassium: potassium,
+}
+
+let makeFromJs = dailyRound => {
+  make(
+    ~po2=dailyRound["po2"]->Js.Nullable.toOption,
+    ~pco2=dailyRound["pco2"]->Js.Nullable.toOption,
+    ~pH=dailyRound["ph"]->Js.Nullable.toOption,
+    ~hco3=dailyRound["hco3"]->Js.Nullable.toOption,
+    ~baseExcess=dailyRound["base_excess"]->Js.Nullable.toOption,
+    ~lactate=dailyRound["lactate"]->Js.Nullable.toOption,
+    ~sodium=dailyRound["sodium"]->Js.Nullable.toOption,
+    ~potassium=dailyRound["potassium"]->Js.Nullable.toOption,
+  )
 }
 
 let po2 = t => t.po2
@@ -26,46 +41,3 @@ let baseExcess = t => t.baseExcess
 let lactate = t => t.lactate
 let sodium = t => t.sodium
 let potassium = t => t.potassium
-
-let init = {
-  po2: "",
-  pco2: "",
-  pH: "",
-  hco3: "",
-  baseExcess: "",
-  lactate: "",
-  sodium: "",
-  potassium: "",
-}
-
-let showStatus = data => {
-  let total = 8.0
-  let count = ref(0.0)
-
-  if po2(data) !== "" {
-    count := count.contents +. 1.0
-  }
-  if pco2(data) !== "" {
-    count := count.contents +. 1.0
-  }
-  if pH(data) !== "" {
-    count := count.contents +. 1.0
-  }
-  if hco3(data) !== "" {
-    count := count.contents +. 1.0
-  }
-  if baseExcess(data) !== "" {
-    count := count.contents +. 1.0
-  }
-  if lactate(data) !== "" {
-    count := count.contents +. 1.0
-  }
-  if sodium(data) !== "" {
-    count := count.contents +. 1.0
-  }
-  if potassium(data) !== "" {
-    count := count.contents +. 1.0
-  }
-
-  Js.Float.toFixed(count.contents /. total *. 100.0)
-}
