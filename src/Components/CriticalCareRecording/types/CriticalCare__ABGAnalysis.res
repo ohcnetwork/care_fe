@@ -41,5 +41,3 @@ let baseExcess = t => t.baseExcess
 let lactate = t => t.lactate
 let sodium = t => t.sodium
 let potassium = t => t.potassium
-
-let getParams = [po2, pco2, pH, hco3, baseExcess, lactate, sodium, potassium]

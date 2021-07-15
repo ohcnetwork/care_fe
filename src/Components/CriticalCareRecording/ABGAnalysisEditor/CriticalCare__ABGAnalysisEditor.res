@@ -8,7 +8,14 @@ external updateDailyRound: (string, string, Js.Json.t, _ => unit, _ => unit) => 
 let getValueAsString = data => Belt.Option.mapWithDefault(data, "", Js.Float.toString)
 
 type state = {
-  fields: CriticalCare__ABGAnalysis.t,
+  po2: option<float>,
+  pco2: option<float>,
+  pH: option<float>,
+  hco3: option<float>,
+  baseExcess: option<float>,
+  lactate: option<float>,
+  sodium: option<float>,
+  potassium: option<float>,
   dirty: bool,
   saving: bool,
 }
@@ -27,26 +34,14 @@ type action =
 
 let reducer = (state, action) => {
   switch action {
-  | SetPO2(po2) => {...state, fields: {...state.fields, po2: Some(po2)}, dirty: true}
-  | SetPCO2(pco2) => {...state, fields: {...state.fields, pco2: Some(pco2)}, dirty: true}
-  | SetpH(pH) => {...state, fields: {...state.fields, pH: Some(pH)}, dirty: true}
-  | SetHCO3(hco3) => {...state, fields: {...state.fields, hco3: Some(hco3)}, dirty: true}
-  | SetBaseExcess(baseExcess) => {
-      ...state,
-      fields: {...state.fields, baseExcess: Some(baseExcess)},
-      dirty: true,
-    }
-  | SetLactate(lactate) => {
-      ...state,
-      fields: {...state.fields, lactate: Some(lactate)},
-      dirty: true,
-    }
-  | SetSodium(sodium) => {...state, fields: {...state.fields, sodium: Some(sodium)}, dirty: true}
-  | SetPotassium(potassium) => {
-      ...state,
-      fields: {...state.fields, potassium: Some(potassium)},
-      dirty: true,
-    }
+  | SetPO2(po2) => {...state, po2: Some(po2), dirty: true}
+  | SetPCO2(pco2) => {...state, pco2: Some(pco2), dirty: true}
+  | SetpH(pH) => {...state, pH: Some(pH), dirty: true}
+  | SetHCO3(hco3) => {...state, hco3: Some(hco3), dirty: true}
+  | SetBaseExcess(baseExcess) => {...state, baseExcess: Some(baseExcess), dirty: true}
+  | SetLactate(lactate) => {...state, lactate: Some(lactate), dirty: true}
+  | SetSodium(sodium) => {...state, sodium: Some(sodium), dirty: true}
+  | SetPotassium(potassium) => {...state, potassium: Some(potassium), dirty: true}
   | SetSaving => {...state, saving: true}
   | ClearSaving => {...state, saving: false}
   }
@@ -54,16 +49,14 @@ let reducer = (state, action) => {
 
 let initialState = abg => {
   {
-    fields: {
-      po2: ABGAnalysis.po2(abg),
-      pco2: ABGAnalysis.pco2(abg),
-      pH: ABGAnalysis.pH(abg),
-      hco3: ABGAnalysis.hco3(abg),
-      baseExcess: ABGAnalysis.baseExcess(abg),
-      lactate: ABGAnalysis.lactate(abg),
-      sodium: ABGAnalysis.sodium(abg),
-      potassium: ABGAnalysis.potassium(abg),
-    },
+    po2: ABGAnalysis.po2(abg),
+    pco2: ABGAnalysis.pco2(abg),
+    pH: ABGAnalysis.pH(abg),
+    hco3: ABGAnalysis.hco3(abg),
+    baseExcess: ABGAnalysis.baseExcess(abg),
+    lactate: ABGAnalysis.lactate(abg),
+    sodium: ABGAnalysis.sodium(abg),
+    potassium: ABGAnalysis.potassium(abg),
     saving: false,
     dirty: false,
   }
@@ -71,13 +64,13 @@ let initialState = abg => {
 
 let makePayload = state => {
   let payload = Js.Dict.empty()
-  DictUtils.setOptionalFloat("po2", state.fields.po2, payload)
-  DictUtils.setOptionalFloat("pco2", state.fields.pco2, payload)
-  DictUtils.setOptionalFloat("hco3", state.fields.hco3, payload)
-  DictUtils.setOptionalFloat("base_excess", state.fields.baseExcess, payload)
-  DictUtils.setOptionalFloat("lactate", state.fields.lactate, payload)
-  DictUtils.setOptionalFloat("sodium", state.fields.sodium, payload)
-  DictUtils.setOptionalFloat("potassium", state.fields.potassium, payload)
+  DictUtils.setOptionalFloat("po2", state.po2, payload)
+  DictUtils.setOptionalFloat("pco2", state.pco2, payload)
+  DictUtils.setOptionalFloat("hco3", state.hco3, payload)
+  DictUtils.setOptionalFloat("base_excess", state.baseExcess, payload)
+  DictUtils.setOptionalFloat("lactate", state.lactate, payload)
+  DictUtils.setOptionalFloat("sodium", state.sodium, payload)
+  DictUtils.setOptionalFloat("potassium", state.potassium, payload)
   payload
 }
 
@@ -91,16 +84,35 @@ let errorCB = (send, _error) => {
 }
 
 let showStatus = data => {
-  let total = Js.Array.length(CriticalCare__ABGAnalysis.getParams)
-  let fieldsData = data.fields
-  let count = Js.Array.reduce((acc, getParam) => {
-    if getValueAsString(fieldsData->getParam) !== "" {
-      acc +. 1.0
-    } else {
-      acc
-    }
-  }, 0.0, CriticalCare__ABGAnalysis.getParams)
-  Js.Float.toFixed(count /. float_of_int(total) *. 100.0)
+  let total = 8.0
+  let count = ref(0.0)
+
+  if getValueAsString(data.po2) !== "" {
+    count := count.contents +. 1.0
+  }
+  if getValueAsString(data.pco2) !== "" {
+    count := count.contents +. 1.0
+  }
+  if getValueAsString(data.pH) !== "" {
+    count := count.contents +. 1.0
+  }
+  if getValueAsString(data.hco3) !== "" {
+    count := count.contents +. 1.0
+  }
+  if getValueAsString(data.baseExcess) !== "" {
+    count := count.contents +. 1.0
+  }
+  if getValueAsString(data.lactate) !== "" {
+    count := count.contents +. 1.0
+  }
+  if getValueAsString(data.sodium) !== "" {
+    count := count.contents +. 1.0
+  }
+  if getValueAsString(data.potassium) !== "" {
+    count := count.contents +. 1.0
+  }
+
+  Js.Float.toFixed(count.contents /. total *. 100.0)
 }
 
 let saveData = (id, consultationId, state, send, updateCB, percentCompleteCB) => {
@@ -138,7 +150,7 @@ let make = (~arterialBloodGasAnalysis, ~updateCB, ~percentCompleteCB, ~id, ~cons
         end={"400"}
         interval={"50"}
         step={0.1}
-        value={getValueAsString(state.fields.po2)}
+        value={getValueAsString(state.po2)}
         setValue={s => send(SetPO2(float_of_string(s)))}
         getLabel={getStatus(50.0, "Low", 200.0, "High")}
       />
@@ -148,7 +160,7 @@ let make = (~arterialBloodGasAnalysis, ~updateCB, ~percentCompleteCB, ~id, ~cons
         end={"200"}
         interval={"20"}
         step={0.1}
-        value={getValueAsString(state.fields.pco2)}
+        value={getValueAsString(state.pco2)}
         setValue={s => send(SetPCO2(float_of_string(s)))}
         getLabel={getStatus(35.0, "Low", 45.0, "High")}
       />
@@ -158,7 +170,7 @@ let make = (~arterialBloodGasAnalysis, ~updateCB, ~percentCompleteCB, ~id, ~cons
         end={"10.00"}
         interval={"1.00"}
         step={0.1}
-        value={getValueAsString(state.fields.pH)}
+        value={getValueAsString(state.pH)}
         setValue={s => send(SetpH(float_of_string(s)))}
         getLabel={getStatus(7.35, "Low", 7.45, "High")}
       />
@@ -168,7 +180,7 @@ let make = (~arterialBloodGasAnalysis, ~updateCB, ~percentCompleteCB, ~id, ~cons
         end={"80"}
         interval={"5"}
         step={0.1}
-        value={getValueAsString(state.fields.hco3)}
+        value={getValueAsString(state.hco3)}
         setValue={s => send(SetHCO3(float_of_string(s)))}
         getLabel={getStatus(22.0, "Low", 26.0, "High")}
       />
@@ -178,7 +190,7 @@ let make = (~arterialBloodGasAnalysis, ~updateCB, ~percentCompleteCB, ~id, ~cons
         end={"20"}
         interval={"5"}
         step={0.1}
-        value={getValueAsString(state.fields.baseExcess)}
+        value={getValueAsString(state.baseExcess)}
         setValue={s => send(SetBaseExcess(float_of_string(s)))}
         getLabel={getStatus(-2.0, "Low", 2.0, "High")}
       />
@@ -188,7 +200,7 @@ let make = (~arterialBloodGasAnalysis, ~updateCB, ~percentCompleteCB, ~id, ~cons
         end={"20"}
         interval={"2"}
         step={0.1}
-        value={getValueAsString(state.fields.lactate)}
+        value={getValueAsString(state.lactate)}
         setValue={s => send(SetLactate(float_of_string(s)))}
         getLabel={getStatus(0.0, "Low", 2.0, "High")}
       />
@@ -198,7 +210,7 @@ let make = (~arterialBloodGasAnalysis, ~updateCB, ~percentCompleteCB, ~id, ~cons
         end={"170"}
         interval={"10"}
         step={0.1}
-        value={getValueAsString(state.fields.sodium)}
+        value={getValueAsString(state.sodium)}
         setValue={s => send(SetSodium(float_of_string(s)))}
         getLabel={getStatus(135.0, "Low", 145.0, "High")}
       />
@@ -208,7 +220,7 @@ let make = (~arterialBloodGasAnalysis, ~updateCB, ~percentCompleteCB, ~id, ~cons
         end={"10"}
         interval={"1"}
         step={0.1}
-        value={getValueAsString(state.fields.potassium)}
+        value={getValueAsString(state.potassium)}
         setValue={s => send(SetPotassium(float_of_string(s)))}
         getLabel={getStatus(3.5, "Low", 5.5, "High")}
       />
