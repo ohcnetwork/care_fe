@@ -1,7 +1,7 @@
 let str = React.string
 open CriticalCare__Types
 
-let front_parts: array<PressureSore.typ> = [
+let front_parts: array<PressureSore.type_for_path> = [
   {
     d: "M443,135.809",
     transform: "translate(-362.967 -95.599)",
@@ -114,7 +114,7 @@ let front_parts: array<PressureSore.typ> = [
   },
 ]
 
-let back_parts: array<PressureSore.typ> = [
+let back_parts: array<PressureSore.type_for_path> = [
   {
     d: "M 506.9838 158.0121 C 509.6029 173.1336 512.1258 187.9477 521.5039 184.4407 C 517.7283 191.6346 525.6919 202.9266 528.0919 210.8841 C 544.9623 208.3461 562.3174 208.3461 579.1878 210.8841 C 581.5893 202.9236 589.5363 191.6662 585.7863 184.4511 C 595.6744 187.4586 596.8188 174.3021 600.3813 158.5926 C 600.1173 156.4611 595.9999 158.5806 594.7788 159.0816 C 597.7384 128.3122 591.2088 97.1811 553.7104 97.22 C 516.1444 97.1497 509.5249 128.2116 512.5008 159.0891 C 511.0564 158.4651 508.4914 157.0971 506.9838 158.0121 Z",
     transform: "translate(-390.349 -94.472)",

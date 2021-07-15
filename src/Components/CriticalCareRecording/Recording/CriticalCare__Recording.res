@@ -27,7 +27,7 @@ type state = {
   ioBalanceStatus: string,
   dialysisStatus: string,
   pressureSoreStatus: string,
-  pressureSoreEditor: PressureSore.ty,
+  pressureSoreEditor: PressureSore.t,
   nursingCareStatus: string,
   totalStatus: int,
   bloodSugarEditor: BloodSugar.t,
@@ -52,7 +52,7 @@ type action =
   | SetIOBalaceData(IOBalance.t)
   | SetIOBalaceStatus(IOBalance.t)
   | UpdateDailyRound(CriticalCare__DailyRound.t)
-  | SetPressureSoreEditor(PressureSore.ty)
+  | SetPressureSoreEditor(PressureSore.t)
   | UpdatePressureSoreStatus(string)
 
 let showEditor = (editor, send) => {
