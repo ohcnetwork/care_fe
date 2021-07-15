@@ -275,7 +275,12 @@ export make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
                 state.dailyRound,
               )}
               updateCB={updateDailyRound(send)}
-              percentCompleteCB={status => send(UpdateABGAnalysisStatus(status))}
+              percentCompleteCB={status => {
+                send(UpdateABGAnalysisStatus(status))
+                if status == "100" {
+                  send(UpdateTotal(state.totalStatus + 1))
+                }
+              }}
               id
               consultationId
             />
@@ -317,15 +322,10 @@ export make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
           | PressureSoreEditor => <CriticalCare__PressureSore />
           | NursingCareEditor =>
             <CriticalCare__NursingCareEditor
-              initialState={state.nursingCare}
-              handleDone={(data, status) => {
-                send(SetNursingCare(data))
-                send(UpdateNursingCareStatus(status))
-                send(CloseEditor)
-                if status === "100" {
-                  send(UpdateTotal(state.totalStatus + 1))
-                }
-              }}
+              nursingCare={CriticalCare__DailyRound.nursingCare(state.dailyRound)}
+              updateCB={updateDailyRound(send)}
+              id
+              consultationId
             />
           }}
         </div>
