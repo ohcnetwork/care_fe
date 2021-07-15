@@ -275,7 +275,12 @@ export make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
                 state.dailyRound,
               )}
               updateCB={updateDailyRound(send)}
-              percentCompleteCB={status => send(UpdateABGAnalysisStatus(status))}
+              percentCompleteCB={status => {
+                send(UpdateABGAnalysisStatus(status))
+                if status == "100" {
+                  send(UpdateTotal(state.totalStatus + 1))
+                }
+              }}
               id
               consultationId
             />
