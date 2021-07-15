@@ -29,7 +29,6 @@ type state = {
   nursingCareStatus: string,
   totalStatus: int,
   bloodSugarEditor: BloodSugar.t,
-  dialysisEditor: Dialysis.t,
 }
 
 type action =
@@ -44,7 +43,6 @@ type action =
   | UpdateTotal(int)
   | SetBloodSugarEditor(BloodSugar.t)
   | UpdateBloodSugarStatus(string)
-  | SetDialysisEditor(Dialysis.t)
   | UpdateDialysisStatus(string)
   | UpdateNeurologicalMonitoringStatus(string)
   | SetIOBalaceStatus(IOBalance.t)
@@ -111,7 +109,6 @@ let reducer = (state, action) => {
   | UpdateTotal(total) => {...state, totalStatus: total}
   | SetBloodSugarEditor(editor) => {...state, bloodSugarEditor: editor}
   | UpdateBloodSugarStatus(bloodSugarStatus) => {...state, bloodSugarStatus: bloodSugarStatus}
-  | SetDialysisEditor(editor) => {...state, dialysisEditor: editor}
   | UpdateDialysisStatus(dialysisStatus) => {...state, dialysisStatus: dialysisStatus}
   | UpdateNeurologicalMonitoringStatus(neurologicalMonitoringStatus) => {
       ...state,
@@ -199,10 +196,6 @@ let initialState = dailyRound => {
     dosage: "",
     frequency: "OD",
   },
-  dialysisEditor: {
-    fluid_balance: "",
-    net_balance: "",
-  },
 }
 
 let editorButtons = (state, send) => {
@@ -229,7 +222,7 @@ let updateDailyRound = (send, dailyRound) => {
 export make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
   let (state, send) = React.useReducer(reducer, initialState(dailyRound))
 
-  // Js.log2(state, initialState)
+  
   <div>
     <div className="w-3/4 mx-auto my-4" />
     <div className="w-3/4 mx-auto my-4">
@@ -304,16 +297,10 @@ export make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
             />
           | DialysisEditor =>
             <CriticalCare_DialysisEditor
-              initialState={state.dialysisEditor}
-              handleDone={data => {
-                send(CloseEditor)
-                send(SetDialysisEditor(data))
-                let status = Dialysis.showStatus(data)
-                send(UpdateDialysisStatus(status))
-                if status == "100" {
-                  send(UpdateTotal(state.totalStatus + 1))
-                }
-              }}
+              dialysisParameters={CriticalCare__DailyRound.dialysis(state.dailyRound)}
+              updateCB={updateDailyRound(send)}
+              id
+              consultationId
             />
           | PressureSoreEditor => <CriticalCare__PressureSore />
           | NursingCareEditor =>

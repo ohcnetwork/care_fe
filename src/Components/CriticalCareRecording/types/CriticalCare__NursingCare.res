@@ -1,4 +1,4 @@
-type t = {
+export type t = {
   personalHygiene: option<string>,
   positioning: option<string>,
   suctioning: option<string>,
