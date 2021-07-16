@@ -16,7 +16,6 @@ type editor =
 type state = {
   visibleEditor: option<editor>,
   dailyRound: CriticalCare__DailyRound.t,
-  nursingCare: NursingCare.t,
   ventilatorParametersEditor: CriticalCare__VentilatorParameters.t,
   neurologicalMonitoringStatus: string,
   hemodynamicParametersStatus: string,
@@ -34,7 +33,6 @@ type state = {
 type action =
   | ShowEditor(editor)
   | CloseEditor
-  | SetNursingCare(NursingCare.t)
   | SetVentilatorParametersEditor(CriticalCare__VentilatorParameters.t)
   | UpdateNursingCareStatus(string)
   | UpdateVentilatorParametersStatus(string)
@@ -92,7 +90,6 @@ let reducer = (state, action) => {
   switch action {
   | ShowEditor(editor) => {...state, visibleEditor: Some(editor)}
   | CloseEditor => {...state, visibleEditor: None}
-  | SetNursingCare(nursingCare) => {...state, nursingCare: nursingCare}
   | SetVentilatorParametersEditor(editor) => {...state, ventilatorParametersEditor: editor}
   | UpdateNursingCareStatus(nursingCareStatus) => {
       ...state,
@@ -126,20 +123,6 @@ let reducer = (state, action) => {
 let initialState = dailyRound => {
   visibleEditor: None,
   dailyRound: dailyRound,
-  nursingCare: {
-    personalHygiene: None,
-    positioning: None,
-    suctioning: None,
-    rylesTubeCare: None,
-    iVSitecare: None,
-    nubulisation: None,
-    dressing: None,
-    dVTPumpStocking: None,
-    restrain: None,
-    chestTubeCare: None,
-    tracheostomyCare: None,
-    stomaCare: None,
-  },
   ventilatorParametersEditor: {
     ventilationInterface: "iv",
     iv: {

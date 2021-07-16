@@ -40,3 +40,5 @@ let swapUp = (i, t) =>
 let swapDown = (i, t) => swapUp(i + 1, t)
 
 let last = t => t->Js.Array.unsafe_get(Js.Array.length(t) - 1)
+
+let findAndReplace = (index, f, array) => array |> Array.mapi((i, p) => i == index ? f(p) : p)
