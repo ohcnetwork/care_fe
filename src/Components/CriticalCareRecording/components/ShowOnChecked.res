@@ -11,23 +11,23 @@ let make = (
   ~defaultChecked=false,
 ) => {
   let (checked, setChecked) = React.useState(_ => defaultChecked)
-  let handleChange = _ => {
+  let handleChange: ReactEvent.Form.t => unit = _ => {
     onChange(!checked)
     setChecked(prev => !prev)
   }
 
   <>
     <label htmlFor={title} className="mb-6 block">
-      <input
-        type_="checkbox"
-        className="custom-checkbox mr-6 inline-block"
-        id={id}
-        name={name}
-        value={value}
-        checked
-        onChange={handleChange}
-      />
-      {str(title)}
+      // <input
+      //   type_="checkbox"
+      //   className="custom-checkbox mr-6 inline-block"
+      //   id={id}
+      //   name={name}
+      //   value={value}
+      //   checked
+      //   onChange={handleChange}
+      // />
+      <Checkbox id={id} label={title} checked={checked} onChange={handleChange} />
     </label>
     {checked ? children : React.null}
   </>
