@@ -1,9 +1,9 @@
 export type t = {
-  po2: option<float>,
-  pco2: option<float>,
+  po2: option<int>,
+  pco2: option<int>,
   pH: option<float>,
   hco3: option<float>,
-  baseExcess: option<float>,
+  baseExcess: option<int>,
   lactate: option<float>,
   sodium: option<float>,
   potassium: option<float>,

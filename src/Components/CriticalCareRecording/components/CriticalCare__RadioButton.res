@@ -16,19 +16,26 @@ let make = (
   ~onChange: ReactEvent.Form.t => unit,
 ) => {
   <div className={divClasses(ishorizontal)}> {Js.Array.mapi((x, i) => {
-      <div key={`${Options.name(x)}_${string_of_int(i)}`}>
-        <label className={labelClasses(ishorizontal)}>
-          <input
-            className="mr-2"
-            type_="radio"
-            name={Options.name(x)}
-            value={Options.value(x)}
-            id={Options.value(x)}
-            onChange
-            defaultChecked={Options.value(x) === defaultChecked}
-          />
-          {str({Options.label(x)})}
-        </label>
+      <div key={`${Options.name(x)}_${string_of_int(i)}`} className={ishorizontal ? "mr-4" : ""}>
+        // <label className={labelClasses(ishorizontal)}>
+        // <input
+        //   className="mr-2"
+        //   type_="radio"
+        //   name={Options.name(x)}
+        //   value={Options.value(x)}
+        //   id={Options.value(x)}
+        //   onChange
+        //   defaultChecked={Options.value(x) === defaultChecked}
+        // />
+        //   {str({Options.label(x)})}
+        // </label>
+        <Radio
+          key={i->Belt.Int.toString}
+          id={Options.value(x)}
+          label={Options.label(x)}
+          checked={Options.value(x) === defaultChecked}
+          onChange
+        />
       </div>
     }, options)->React.array} </div>
 }

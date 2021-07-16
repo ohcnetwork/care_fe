@@ -1,5 +1,6 @@
 @module("./CriticalCare__API")
 external loadDailyRound: (string, string, _ => unit, _ => unit) => unit = "loadDailyRound"
+
 open CriticalCare__Types
 let str = React.string
 
@@ -30,14 +31,17 @@ export make = (~id, ~facilityId, ~patientId, ~consultationId) => {
 
   <div>
     {state.loading
-      ? <div> {str("Loading...")} </div>
+      ? <CriticalCare__Loader />
       : switch state.dailyRound {
         | Some(dailyRound) => {
             Js.log(dailyRound)
             <CriticalCare__Recording id facilityId patientId consultationId dailyRound />
           }
 
-        | None => <div> {str("Unable to laod consultation update")} </div>
+        | None => {
+            Notifications.error({msg: "Unable to load data"})
+            <> </>
+          }
         }}
   </div>
 }

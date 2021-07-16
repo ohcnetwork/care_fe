@@ -1,142 +1,160 @@
 open CriticalCare__Types
 let str = React.string
 
-type unit_type = IOBalance.unit_type
-type unit_section_type = IOBalance.unit_section_type
-type state_type = IOBalance.t
+@module("../CriticalCare__API")
+external updateDailyRound: (string, string, Js.Json.t, _ => unit, _ => unit) => unit =
+  "updateDailyRound"
 
-type summary_section_type = {
-    values: string,
-    total: string
+type state = {
+  infusions: array<IOBalance.item>,
+  ivfluids: array<IOBalance.item>,
+  feeds: array<IOBalance.item>,
+  outputs: array<IOBalance.item>,
+  dirty: bool,
+  saving: bool,
 }
 
-type summary_type = {
-    intake: summary_section_type,
-    outturn: summary_section_type,
-    overall: summary_section_type,
+let infusionCollection = ["Adrenalin", "Nor-adrenalin", "Vasopressin", "Dopamine", "Dobutamine"]
+let ivfluidsCollection = ["RL", "NS", "DNS"]
+let feedsCollection = ["Ryles Tube", "Normal Feed"]
+let outputsCollection = ["Urine", "Rules Tube Aspiration", "ICD"]
+
+type action =
+  | SetInfusions(array<IOBalance.item>)
+  | SetIVFluid(array<IOBalance.item>)
+  | SetFeed(array<IOBalance.item>)
+  | SetOutput(array<IOBalance.item>)
+  | SetSaving
+  | ClearSaving
+
+let reducer = (state, action) => {
+  switch action {
+  | SetInfusions(infusions) => {...state, infusions: infusions}
+  | SetIVFluid(ivfluids) => {...state, ivfluids: ivfluids}
+  | SetFeed(feeds) => {...state, feeds: feeds}
+  | SetOutput(outputs) => {...state, outputs: outputs}
+  | SetSaving => {...state, saving: true}
+  | ClearSaving => {...state, saving: false}
+  }
 }
 
-let initialSummary = {
-    intake: {
-        values: "",
-        total: ""
-    },
-    outturn: {
-        values: "",
-        total: ""
-    },
-    overall: {
-        values: "",
-        total: ""
-    }
+let initialState = iob => {
+  {
+    infusions: IOBalance.infusions(iob),
+    ivfluids: IOBalance.ivFluid(iob),
+    feeds: IOBalance.feed(iob),
+    outputs: IOBalance.output(iob),
+    dirty: false,
+    saving: false,
+  }
 }
 
-let toFloat = (svalue) => {
-    switch Belt.Float.fromString(svalue) {
-        | Some(x) => x
-        | None => 0.0
-    }
+let makeUnitsPayload = items => {
+  Js.Array.map(item => {
+    let p = Js.Dict.empty()
+    Js.Dict.set(p, "name", Js.Json.string(IOBalance.name(item)))
+    Js.Dict.set(p, "quantity", Js.Json.number(IOBalance.quantity(item)))
+    p
+  }, items)
 }
 
-let toString = Belt.Float.toString
+let makePayload = state => {
+  let payload = Js.Dict.empty()
+  Js.Dict.set(payload, "infusions", Js.Json.objectArray(makeUnitsPayload(state.infusions)))
+  Js.Dict.set(payload, "iv_fluids", Js.Json.objectArray(makeUnitsPayload(state.ivfluids)))
+  Js.Dict.set(payload, "feeds", Js.Json.objectArray(makeUnitsPayload(state.feeds)))
+  Js.Dict.set(payload, "output", Js.Json.objectArray(makeUnitsPayload(state.outputs)))
+
+  payload
+}
+
+let successCB = (send, updateCB, data) => {
+  updateCB(CriticalCare__DailyRound.makeFromJs(data))
+  send(ClearSaving)
+}
+
+let errorCB = (send, _error) => {
+  Js.log(_error)
+  send(ClearSaving)
+}
+
+let saveData = (id, consultationId, state, send, updateCB) => {
+  send(SetSaving)
+  updateDailyRound(
+    consultationId,
+    id,
+    Js.Json.object_(makePayload(state)),
+    successCB(send, updateCB),
+    errorCB(send),
+  )
+}
+
+let sumOfArray = items => {
+  Js.Array.reduce(\"+.", 0.0, Js.Array.map(IOBalance.quantity, items))
+}
 
 @react.component
-let make = (~initialState: state_type, ~handleDone) => {
-    // let (state, send) = React.useReducer(reducer, initialState)
-    let (state, setState) = React.useState(_ => initialState)
-    let (summary, setSummary) = React.useState(_ => initialSummary)
+let make = (~ioBalance, ~updateCB, ~id, ~consultationId) => {
+  let (state, send) = React.useReducer(reducer, initialState(ioBalance))
 
-    React.useEffect1(() => {
-        let infusions_total = state.intake.infusions.units->Belt.Array.reduce(0.0, (acc, unit) => acc +. unit.value)
-        let iv_fluid_total = state.intake.iv_fluid.units->Belt.Array.reduce(0.0, (acc, unit) => acc +. unit.value)
-        let feed_total = state.intake.feed.units->Belt.Array.reduce(0.0, (acc, unit) => acc +. unit.value)
-        
-        setSummary(prev => {...prev, intake: {
-            values: [infusions_total, iv_fluid_total, feed_total]->Js.Array2.joinWith("+"), 
-            total: (infusions_total +. iv_fluid_total +. feed_total)->toString
-        }})
-        None
-    }, [state.intake])
+  let outputsTotal = sumOfArray(state.outputs)
+  let totalInput = sumOfArray(ArrayUtils.flatten([state.infusions, state.ivfluids, state.feeds]))
 
-    React.useEffect1(() => {
-        let outturn_summary_values = state.outturn.units->Belt.Array.map(unit => unit.value)
-        let outturn_summary_total = outturn_summary_values->Belt.Array.reduce(0.0, (acc, value) => acc +. value)
-
-        setSummary(prev => {...prev, outturn: {
-            values: outturn_summary_values->Js.Array2.joinWith("+"), 
-            total: outturn_summary_total->toString
-        }})
-        None
-    }, [state.outturn])
-
-    React.useEffect1(() => {
-        Js.log("effect")
-        setSummary(prev => {...prev, overall: {
-            values: [prev.intake.total, prev.outturn.total]->Js.Array2.joinWith("-"), 
-            total: (prev.intake.total->toFloat -. prev.outturn.total->toFloat)->toString
-        }})
-        None
-    }, [state])
-
-    <div>
-        <CriticalCare__PageTitle title="I/O Balance Editor" />
-
-        <div id="intake" className="pb-3">
-            <h3>{str("Intake")}</h3>
-            
-            <IOBalance__UnitSection
-                name="Infusions"
-                units={state.intake.infusions.units}
-                params={state.intake.infusions.params}
-                selectCB={(s) => setState(prev => {...prev, intake: {...prev.intake, infusions: s}})}
-            />
-            <IOBalance__UnitSection
-                name="IV Fluid"
-                units={state.intake.iv_fluid.units}
-                params={state.intake.iv_fluid.params}
-                selectCB={(s) => setState(prev => {...prev, intake: {...prev.intake, iv_fluid: s}})}
-            />
-            <IOBalance__UnitSection
-                name="Feed"
-                units={state.intake.feed.units}
-                params={state.intake.feed.params}
-                selectCB={(s) => setState(prev => {...prev, intake: {...prev.intake, feed: s}})}
-            />
-
-            <IOBalance__Summary
-                leftMain="Total"
-                rightSub={summary.intake.values}
-                rightMain={summary.intake.total}
-            />
-        </div>
-
-        <div id="outturn" className="pt-3">
-            <h3>{str("Outturn")}</h3>
-            <IOBalance__UnitSection
-                name=""
-                units={state.outturn.units}
-                params={state.outturn.params}
-                selectCB={(s) => setState(prev => {...prev, outturn: s})}
-            />
-
-            <IOBalance__Summary
-                leftMain="Total"
-                rightSub={summary.outturn.values}
-                rightMain={summary.outturn.total}
-            />
-        </div> 
-
-        <IOBalance__Summary
-            leftMain="I/O Balance"
-            rightSub={summary.overall.values}
-            rightMain={summary.overall.total}
-            noBorder={true}
-        />
-
-        <button
-            className="flex w-full bg-blue-600 text-white mt-6 p-2 text-lg hover:bg-blue-800 justify-center items-center rounded-md"
-            onClick={_ => state->handleDone}>
-            {str("Done")}
-        </button>
+  <div>
+    <CriticalCare__PageTitle title="I/O Balance Editor" />
+    <div id="intake" className="pb-3">
+      <h3> {str("Intake")} </h3>
+      <IOBalance__UnitSection
+        name="Infusions"
+        items={state.infusions}
+        collection={infusionCollection}
+        updateCB={infusions => send(SetInfusions(infusions))}
+      />
+      <IOBalance__UnitSection
+        name="IV Fluid"
+        items={state.ivfluids}
+        collection={ivfluidsCollection}
+        updateCB={ivfluid => send(SetIVFluid(ivfluid))}
+      />
+      <IOBalance__UnitSection
+        name="Feed"
+        items={state.feeds}
+        collection={feedsCollection}
+        updateCB={feed => send(SetFeed(feed))}
+      />
+      <IOBalance__Summary
+        leftMain="Total"
+        rightSub={Js.Array.map(
+          IOBalance.quantity,
+          ArrayUtils.flatten([state.infusions, state.ivfluids, state.feeds]),
+        )->Js.Array2.joinWith("+")}
+        rightMain={Js.Float.toString(totalInput)}
+      />
     </div>
+    <div id="outturn" className="pt-3">
+      <h3> {str("Outturn")} </h3>
+      <IOBalance__UnitSection
+        name="Output"
+        items={state.outputs}
+        collection={outputsCollection}
+        updateCB={output => send(SetOutput(output))}
+      />
+      <IOBalance__Summary
+        leftMain="Total"
+        rightSub={Js.Array.map(IOBalance.quantity, state.outputs)->Js.Array2.joinWith("+")}
+        rightMain={Js.Float.toString(outputsTotal)}
+      />
+    </div>
+    <IOBalance__Summary
+      leftMain="I/O Balance"
+      rightSub={Js.Float.toString(totalInput) ++ "-" ++ Js.Float.toString(outputsTotal)}
+      rightMain={Js.Float.toString(totalInput -. outputsTotal)}
+      noBorder={true}
+    />
+    <button
+      className="flex w-full bg-primary-600 text-white p-2 text-lg hover:bg-primary-800 justify-center items-center rounded-md"
+      onClick={_ => saveData(id, consultationId, state, send, updateCB)}>
+      {str("Update Details")}
+    </button>
+  </div>
 }

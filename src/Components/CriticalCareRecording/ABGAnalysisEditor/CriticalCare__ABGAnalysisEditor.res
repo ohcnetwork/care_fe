@@ -5,14 +5,15 @@ let str = React.string
 external updateDailyRound: (string, string, Js.Json.t, _ => unit, _ => unit) => unit =
   "updateDailyRound"
 
-let getValueAsString = data => Belt.Option.mapWithDefault(data, "", Js.Float.toString)
+let string_of_float = data => Belt.Option.mapWithDefault(data, "", Js.Float.toString)
+let string_of_int = data => Belt.Option.mapWithDefault(data, "", Js.Int.toString)
 
 type state = {
-  po2: option<float>,
-  pco2: option<float>,
+  po2: option<int>,
+  pco2: option<int>,
   pH: option<float>,
   hco3: option<float>,
-  baseExcess: option<float>,
+  baseExcess: option<int>,
   lactate: option<float>,
   sodium: option<float>,
   potassium: option<float>,
@@ -21,11 +22,11 @@ type state = {
 }
 
 type action =
-  | SetPO2(float)
-  | SetPCO2(float)
+  | SetPO2(int)
+  | SetPCO2(int)
   | SetpH(float)
   | SetHCO3(float)
-  | SetBaseExcess(float)
+  | SetBaseExcess(int)
   | SetLactate(float)
   | SetSodium(float)
   | SetPotassium(float)
@@ -64,10 +65,10 @@ let initialState = abg => {
 
 let makePayload = state => {
   let payload = Js.Dict.empty()
-  DictUtils.setOptionalFloat("po2", state.po2, payload)
-  DictUtils.setOptionalFloat("pco2", state.pco2, payload)
+  DictUtils.setOptionalNumber("po2", state.po2, payload)
+  DictUtils.setOptionalNumber("pco2", state.pco2, payload)
   DictUtils.setOptionalFloat("hco3", state.hco3, payload)
-  DictUtils.setOptionalFloat("base_excess", state.baseExcess, payload)
+  DictUtils.setOptionalNumber("base_excess", state.baseExcess, payload)
   DictUtils.setOptionalFloat("lactate", state.lactate, payload)
   DictUtils.setOptionalFloat("sodium", state.sodium, payload)
   DictUtils.setOptionalFloat("potassium", state.potassium, payload)
@@ -87,28 +88,28 @@ let showStatus = data => {
   let total = 8.0
   let count = ref(0.0)
 
-  if getValueAsString(data.po2) !== "" {
+  if string_of_int(data.po2) !== "" {
     count := count.contents +. 1.0
   }
-  if getValueAsString(data.pco2) !== "" {
+  if string_of_int(data.pco2) !== "" {
     count := count.contents +. 1.0
   }
-  if getValueAsString(data.pH) !== "" {
+  if string_of_float(data.pH) !== "" {
     count := count.contents +. 1.0
   }
-  if getValueAsString(data.hco3) !== "" {
+  if string_of_float(data.hco3) !== "" {
     count := count.contents +. 1.0
   }
-  if getValueAsString(data.baseExcess) !== "" {
+  if string_of_int(data.baseExcess) !== "" {
     count := count.contents +. 1.0
   }
-  if getValueAsString(data.lactate) !== "" {
+  if string_of_float(data.lactate) !== "" {
     count := count.contents +. 1.0
   }
-  if getValueAsString(data.sodium) !== "" {
+  if string_of_float(data.sodium) !== "" {
     count := count.contents +. 1.0
   }
-  if getValueAsString(data.potassium) !== "" {
+  if string_of_float(data.potassium) !== "" {
     count := count.contents +. 1.0
   }
 
@@ -149,9 +150,9 @@ let make = (~arterialBloodGasAnalysis, ~updateCB, ~percentCompleteCB, ~id, ~cons
         start={"10"}
         end={"400"}
         interval={"50"}
-        step={0.1}
-        value={getValueAsString(state.po2)}
-        setValue={s => send(SetPO2(float_of_string(s)))}
+        step={1.0}
+        value={string_of_int(state.po2)}
+        setValue={s => send(SetPO2(int_of_string(s)))}
         getLabel={getStatus(50.0, "Low", 200.0, "High")}
       />
       <Slider
@@ -159,9 +160,9 @@ let make = (~arterialBloodGasAnalysis, ~updateCB, ~percentCompleteCB, ~id, ~cons
         start={"10"}
         end={"200"}
         interval={"20"}
-        step={0.1}
-        value={getValueAsString(state.pco2)}
-        setValue={s => send(SetPCO2(float_of_string(s)))}
+        step={1.0}
+        value={string_of_int(state.pco2)}
+        setValue={s => send(SetPCO2(int_of_string(s)))}
         getLabel={getStatus(35.0, "Low", 45.0, "High")}
       />
       <Slider
@@ -170,7 +171,7 @@ let make = (~arterialBloodGasAnalysis, ~updateCB, ~percentCompleteCB, ~id, ~cons
         end={"10.00"}
         interval={"1.00"}
         step={0.1}
-        value={getValueAsString(state.pH)}
+        value={string_of_float(state.pH)}
         setValue={s => send(SetpH(float_of_string(s)))}
         getLabel={getStatus(7.35, "Low", 7.45, "High")}
       />
@@ -180,7 +181,7 @@ let make = (~arterialBloodGasAnalysis, ~updateCB, ~percentCompleteCB, ~id, ~cons
         end={"80"}
         interval={"5"}
         step={0.1}
-        value={getValueAsString(state.hco3)}
+        value={string_of_float(state.hco3)}
         setValue={s => send(SetHCO3(float_of_string(s)))}
         getLabel={getStatus(22.0, "Low", 26.0, "High")}
       />
@@ -189,9 +190,9 @@ let make = (~arterialBloodGasAnalysis, ~updateCB, ~percentCompleteCB, ~id, ~cons
         start={"-20"}
         end={"20"}
         interval={"5"}
-        step={0.1}
-        value={getValueAsString(state.baseExcess)}
-        setValue={s => send(SetBaseExcess(float_of_string(s)))}
+        step={1.0}
+        value={string_of_int(state.baseExcess)}
+        setValue={s => send(SetBaseExcess(int_of_string(s)))}
         getLabel={getStatus(-2.0, "Low", 2.0, "High")}
       />
       <Slider
@@ -200,7 +201,7 @@ let make = (~arterialBloodGasAnalysis, ~updateCB, ~percentCompleteCB, ~id, ~cons
         end={"20"}
         interval={"2"}
         step={0.1}
-        value={getValueAsString(state.lactate)}
+        value={string_of_float(state.lactate)}
         setValue={s => send(SetLactate(float_of_string(s)))}
         getLabel={getStatus(0.0, "Low", 2.0, "High")}
       />
@@ -210,7 +211,7 @@ let make = (~arterialBloodGasAnalysis, ~updateCB, ~percentCompleteCB, ~id, ~cons
         end={"170"}
         interval={"10"}
         step={0.1}
-        value={getValueAsString(state.sodium)}
+        value={string_of_float(state.sodium)}
         setValue={s => send(SetSodium(float_of_string(s)))}
         getLabel={getStatus(135.0, "Low", 145.0, "High")}
       />
@@ -220,7 +221,7 @@ let make = (~arterialBloodGasAnalysis, ~updateCB, ~percentCompleteCB, ~id, ~cons
         end={"10"}
         interval={"1"}
         step={0.1}
-        value={getValueAsString(state.potassium)}
+        value={string_of_float(state.potassium)}
         setValue={s => send(SetPotassium(float_of_string(s)))}
         getLabel={getStatus(3.5, "Low", 5.5, "High")}
       />

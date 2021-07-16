@@ -16,14 +16,12 @@ type editor =
 type state = {
   visibleEditor: option<editor>,
   dailyRound: CriticalCare__DailyRound.t,
-  nursingCare: NursingCare.t,
   ventilatorParametersEditor: CriticalCare__VentilatorParameters.t,
   neurologicalMonitoringStatus: string,
   hemodynamicParametersStatus: string,
   ventilatorParametersStatus: string,
   arterialBloodGasAnalysisStatus: string,
   bloodSugarStatus: string,
-  ioBalanceData: IOBalance.t,
   ioBalanceStatus: string,
   dialysisStatus: string,
   pressureSoreStatus: string,
@@ -31,13 +29,11 @@ type state = {
   nursingCareStatus: string,
   totalStatus: int,
   bloodSugarEditor: BloodSugar.t,
-  dialysisEditor: Dialysis.t,
 }
 
 type action =
   | ShowEditor(editor)
   | CloseEditor
-  | SetNursingCare(NursingCare.t)
   | SetVentilatorParametersEditor(CriticalCare__VentilatorParameters.t)
   | UpdateNursingCareStatus(string)
   | UpdateVentilatorParametersStatus(string)
@@ -46,10 +42,8 @@ type action =
   | UpdateTotal(int)
   | SetBloodSugarEditor(BloodSugar.t)
   | UpdateBloodSugarStatus(string)
-  | SetDialysisEditor(Dialysis.t)
   | UpdateDialysisStatus(string)
   | UpdateNeurologicalMonitoringStatus(string)
-  | SetIOBalaceData(IOBalance.t)
   | SetIOBalaceStatus(IOBalance.t)
   | UpdateDailyRound(CriticalCare__DailyRound.t)
   | SetPressureSoreEditor(PressureSore.t)
@@ -66,7 +60,7 @@ let showStatus = item => {
 let editorToggle = (editorName, state, send) => {
   <div
     id="editorToggle"
-    className="w-3/4 border-2 px-4 py-6 mx-auto my-4 cursor-pointer flex justify-between items-center"
+    className="border-2 px-4 py-6 mx-auto my-4 cursor-pointer flex justify-between items-center"
     onClick={_ => showEditor(editorName, send)}>
     {switch editorName {
     | NeurologicalMonitoringEditor => str("Neurological Monitoring")
@@ -99,7 +93,6 @@ let reducer = (state, action) => {
   switch action {
   | ShowEditor(editor) => {...state, visibleEditor: Some(editor)}
   | CloseEditor => {...state, visibleEditor: None}
-  | SetNursingCare(nursingCare) => {...state, nursingCare: nursingCare}
   | SetVentilatorParametersEditor(editor) => {...state, ventilatorParametersEditor: editor}
   | UpdateNursingCareStatus(nursingCareStatus) => {
       ...state,
@@ -127,7 +120,6 @@ let reducer = (state, action) => {
       ...state,
       neurologicalMonitoringStatus: neurologicalMonitoringStatus,
     }
-  | SetIOBalaceData(data) => {...state, ioBalanceData: data}
   | SetIOBalaceStatus(iobState) => {...state, ioBalanceStatus: "100"}
   | UpdateABGAnalysisStatus(arterialBloodGasAnalysisStatus) => {
       ...state,
@@ -140,20 +132,6 @@ let reducer = (state, action) => {
 let initialState = dailyRound => {
   visibleEditor: None,
   dailyRound: dailyRound,
-  nursingCare: {
-    personalHygiene: None,
-    positioning: None,
-    suctioning: None,
-    rylesTubeCare: None,
-    iVSitecare: None,
-    nubulisation: None,
-    dressing: None,
-    dVTPumpStocking: None,
-    restrain: None,
-    chestTubeCare: None,
-    tracheostomyCare: None,
-    stomaCare: None,
-  },
   ventilatorParametersEditor: {
     ventilationInterface: "iv",
     iv: {
@@ -200,7 +178,6 @@ let initialState = dailyRound => {
   ventilatorParametersStatus: "0",
   arterialBloodGasAnalysisStatus: "0",
   bloodSugarStatus: "0",
-  ioBalanceData: IOBalance.initialState,
   ioBalanceStatus: "0",
   dialysisStatus: "0",
   nursingCareStatus: "0",
@@ -247,10 +224,9 @@ let updateDailyRound = (send, dailyRound) => {
 export make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
   let (state, send) = React.useReducer(reducer, initialState(dailyRound))
 
-  // Js.log2(state, initialState)
-  <div>
-    <div className="w-3/4 mx-auto my-4" />
-    <div className="w-3/4 mx-auto my-4">
+  <div
+    className="bg-white px-4 py-5 border-b border-gray-200 sm:px-6 max-w-3xl mx-auto border mt-4 shadow rounded-lg">
+    <div className="p-4">
       {switch state.visibleEditor {
       | Some(editor) =>
         <div id="editor">
@@ -289,7 +265,12 @@ export make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
                 state.dailyRound,
               )}
               updateCB={updateDailyRound(send)}
-              percentCompleteCB={status => send(UpdateABGAnalysisStatus(status))}
+              percentCompleteCB={status => {
+                send(UpdateABGAnalysisStatus(status))
+                if status == "100" {
+                  send(UpdateTotal(state.totalStatus + 1))
+                }
+              }}
               id
               consultationId
             />
@@ -308,25 +289,17 @@ export make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
             />
           | IOBalanceEditor =>
             <CriticalCare__IOBalanceEditor
-              initialState={state.ioBalanceData}
-              handleDone={data => {
-                CloseEditor->send
-                data->SetIOBalaceStatus->send
-                data->SetIOBalaceData->send
-              }}
+              ioBalance={CriticalCare__DailyRound.ioBalance(state.dailyRound)}
+              updateCB={updateDailyRound(send)}
+              id
+              consultationId
             />
           | DialysisEditor =>
             <CriticalCare_DialysisEditor
-              initialState={state.dialysisEditor}
-              handleDone={data => {
-                send(CloseEditor)
-                send(SetDialysisEditor(data))
-                let status = Dialysis.showStatus(data)
-                send(UpdateDialysisStatus(status))
-                if status == "100" {
-                  send(UpdateTotal(state.totalStatus + 1))
-                }
-              }}
+              dialysisParameters={CriticalCare__DailyRound.dialysis(state.dailyRound)}
+              updateCB={updateDailyRound(send)}
+              id
+              consultationId
             />
           | PressureSoreEditor =>
             <CriticalCare__PressureSoreEditor
@@ -339,15 +312,10 @@ export make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
             />
           | NursingCareEditor =>
             <CriticalCare__NursingCareEditor
-              initialState={state.nursingCare}
-              handleDone={(data, status) => {
-                send(SetNursingCare(data))
-                send(UpdateNursingCareStatus(status))
-                send(CloseEditor)
-                if status === "100" {
-                  send(UpdateTotal(state.totalStatus + 1))
-                }
-              }}
+              nursingCare={CriticalCare__DailyRound.nursingCare(state.dailyRound)}
+              updateCB={updateDailyRound(send)}
+              id
+              consultationId
             />
           }}
         </div>

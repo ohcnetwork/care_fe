@@ -39,18 +39,21 @@ let reducer = (state, action) => {
   }
 }
 
-let ventilationInterfaceOptions = [
+let ventilationInterfaceOptions: array<Options.t> = [
   {
-    "name": "Invasive (IV)",
-    "value": "iv",
+    label: "Invasive (IV)",
+    value: "iv",
+    name: "ventilationInterface",
   },
   {
-    "name": "Non-Invasive (NIV)",
-    "value": "niv",
+    label: "Non-Invasive (NIV)",
+    value: "niv",
+    name: "ventilationInterface",
   },
   {
-    "name": "None",
-    "value": "none",
+    label: "None",
+    value: "none",
+    name: "ventilationInterface",
   },
 ]
 
@@ -75,23 +78,29 @@ let make = (~initialState, ~handleDone) => {
         <h4> {str("Ventilation Interface")} </h4>
         <div>
           <div className="flex items-center py-4 mb-4">
-            {ventilationInterfaceOptions
-            |> Array.map(option => {
-              <div key={option["value"]} className="mr-4">
-                <label onClick={_ => send(SetVentilationInterface(option["value"]))}>
-                  <input
-                    className="mr-2"
-                    type_="radio"
-                    name="ventilationInterface"
-                    value={option["value"]}
-                    id={option["value"]}
-                    checked={option["value"] === state.VentilatorParameters.ventilationInterface}
-                  />
-                  {str({option["name"]})}
-                </label>
-              </div>
-            })
-            |> React.array}
+            <CriticalCare__RadioButton
+              defaultChecked={state.VentilatorParameters.ventilationInterface}
+              onChange={e => send(SetVentilationInterface(ReactEvent.Form.target(e)["id"]))}
+              options={ventilationInterfaceOptions}
+              ishorizontal={true}
+            />
+            //   {ventilationInterfaceOptions
+            //   |> Array.map(option => {
+            //     <div key={option["value"]} className="mr-4">
+            //       <label onClick={_ => send(SetVentilationInterface(option["value"]))}>
+            //         <input
+            //           className="mr-2"
+            //           type_="radio"
+            //           name="ventilationInterface"
+            //           value={option["value"]}
+            //           id={option["value"]}
+            //           checked={option["value"] === state.VentilatorParameters.ventilationInterface}
+            //         />
+            //         {str({option["name"]})}
+            //       </label>
+            //     </div>
+            //   })
+            //   |> React.array}
           </div>
           {editor}
         </div>
