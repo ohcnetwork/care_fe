@@ -1,6 +1,19 @@
 let str = React.string
 open CriticalCare__Types
 
+@module("../CriticalCare__API")
+external updateDailyRound: (string, string, Js.Json.t, _ => unit, _ => unit) => unit =
+  "updateDailyRound"
+
+type state = {
+  braden_scale_front: option<int>,
+  braden_scale_back: option<int>,
+  front_parts_selected: Js.Dict.t<string>,
+  back_parts_selected: Js.Dict.t<string>,
+  saving: bool,
+  dirty: bool,
+}
+
 let front_parts: array<PressureSore.type_for_path> = [
   {
     d: "M443,135.809",
@@ -218,23 +231,27 @@ let back_parts: array<PressureSore.type_for_path> = [
 ]
 
 type action =
-  | SetFrontViewBradenScale(string)
-  | SetBackViewBradenScale(string)
+  | SetFrontViewBradenScale(int)
+  | SetBackViewBradenScale(int)
   | AddIndexToSelectedFrontParts(int)
   | AddIndexToSelectedBackParts(int)
+  | SetSaving
+  | ClearSaving
 
 let reducer = (state, action) => {
   switch action {
   | SetFrontViewBradenScale(risk_severity_value) => {
       ...state,
-      PressureSore.braden_scale_front: risk_severity_value,
+      braden_scale_front: Some(risk_severity_value),
+      dirty: true,
     }
   | SetBackViewBradenScale(risk_severity_value) => {
       ...state,
-      PressureSore.braden_scale_back: risk_severity_value,
+      braden_scale_back: Some(risk_severity_value),
+      dirty: true,
     }
   | AddIndexToSelectedFrontParts(ind) => {
-      let val = PressureSore.front_parts_selected(state)
+      let val = state.front_parts_selected
       let str = Belt.Int.toString(ind)
       let tmp = Js.Array.includes(str, Js.Dict.keys(val))
       if tmp {
@@ -244,11 +261,12 @@ let reducer = (state, action) => {
       }
       {
         ...state,
-        PressureSore.front_parts_selected: val,
+        front_parts_selected: val,
+        dirty: true,
       }
     }
   | AddIndexToSelectedBackParts(ind) => {
-      let val = PressureSore.back_parts_selected(state)
+      let val = state.back_parts_selected
       let str = Belt.Int.toString(ind)
       let tmp = Js.Array.includes(str, Js.Dict.keys(val))
       if tmp {
@@ -258,18 +276,50 @@ let reducer = (state, action) => {
       }
       {
         ...state,
-        PressureSore.back_parts_selected: val,
+        back_parts_selected: val,
+        dirty: true,
       }
     }
+  | SetSaving => {...state, saving: true}
+  | ClearSaving => {...state, saving: false}
+  }
+}
+
+let successCB = (send, updateCB, data) => {
+  send(ClearSaving)
+  updateCB(CriticalCare__DailyRound.makeFromJs(data))
+}
+
+let errorCB = (send, _error) => {
+  send(ClearSaving)
+}
+
+let saveData = (id, consultationId, state, send, updateCB) => {
+  send(SetSaving)
+  updateDailyRound(
+    consultationId,
+    id,
+    Js.Json.object_(makePayload(state)),
+    successCB(send, updateCB),
+    errorCB(send),
+  )
+}
+
+let initialState = psp => {
+  {
+    braden_scale_front: PressureSore.braden_scale_front(psp),
+    braden_scale_back: PressureSore.braden_scale_back(psp),
+    front_parts_selected: PressureSore.front_parts_selected(psp),
+    back_parts_selected: PressureSore.front_parts_selected(psp),
+    saving: false,
+    dirty: false,
   }
 }
 
 @react.component
-let make = (~handleDone, ~initialState) => {
-  let (state, send) = React.useReducer(reducer, initialState)
+let make = (~pressureSoreParameter, ~updateCB, ~id, ~consultationId) => {
+  let (state, send) = React.useReducer(reducer, initialState(pressureSoreParameter))
 
-  let (front_parts_selected, setFrontPartsSelected) = React.useState(_ => [])
-  let (back_parts_selected, setBackPartsSelected) = React.useState(_ => [])
   <div className="my-5">
     <h2> {str("Pressure Sore")} </h2>
     <div className="text-2xl font-bold mt-10"> {str("Front")} </div>
@@ -283,7 +333,7 @@ let make = (~handleDone, ~initialState) => {
             transform={PressureSore.transform(part)}
             className={Js.Array.includes(
               Js.Int.toString(renderIndex),
-              Js.Dict.keys(PressureSore.front_parts_selected(state)),
+              Js.Dict.keys(state.front_parts_selected),
             )
               ? "text-blue-500 tooltip"
               : "text-gray-400  hover:text-blue-400 tooltip"}
@@ -303,9 +353,9 @@ let make = (~handleDone, ~initialState) => {
         start={"1"}
         end={"5"}
         interval={"1"}
-        value={PressureSore.braden_scale_front(state)}
+        value={Belt.Option.mapWithDefault(state.braden_scale_front, "", string_of_int)}
         step={1.0}
-        setValue={s => send(SetFrontViewBradenScale(s))}
+        setValue={s => send(SetFrontViewBradenScale(int_of_string(s)))}
         getLabel={_ => ("", "#ff0000")}
       />
     </div>
@@ -321,7 +371,7 @@ let make = (~handleDone, ~initialState) => {
             transform={PressureSore.transform(part)}
             className={Js.Array.includes(
               Js.Int.toString(renderIndex),
-              Js.Dict.keys(PressureSore.back_parts_selected(state)),
+              Js.Dict.keys(state.back_parts_selected),
             )
               ? "text-blue-500 tooltip"
               : "text-gray-400  hover:text-blue-400 tooltip"}
@@ -341,9 +391,9 @@ let make = (~handleDone, ~initialState) => {
         start={"1"}
         end={"5"}
         interval={"1"}
-        value={PressureSore.braden_scale_back(state)}
+        value={Belt.Option.mapWithDefault(state.braden_scale_back, "", string_of_int)}
         step={1.0}
-        setValue={s => send(SetBackViewBradenScale(s))}
+        setValue={s => send(SetBackViewBradenScale(int_of_string(s)))}
         getLabel={_ => ("", "#ff0000")}
       />
     </div>

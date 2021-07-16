@@ -25,7 +25,6 @@ type state = {
   ioBalanceStatus: string,
   dialysisStatus: string,
   pressureSoreStatus: string,
-  pressureSoreEditor: PressureSore.t,
   nursingCareStatus: string,
   totalStatus: int,
   bloodSugarEditor: BloodSugar.t,
@@ -46,7 +45,6 @@ type action =
   | UpdateNeurologicalMonitoringStatus(string)
   | SetIOBalaceStatus(IOBalance.t)
   | UpdateDailyRound(CriticalCare__DailyRound.t)
-  | SetPressureSoreEditor(PressureSore.t)
   | UpdatePressureSoreStatus(string)
 
 let showEditor = (editor, send) => {
@@ -109,12 +107,10 @@ let reducer = (state, action) => {
   | UpdateTotal(total) => {...state, totalStatus: total}
   | SetBloodSugarEditor(editor) => {...state, bloodSugarEditor: editor}
   | UpdateBloodSugarStatus(bloodSugarStatus) => {...state, bloodSugarStatus: bloodSugarStatus}
-  | SetPressureSoreEditor(editor) => {...state, pressureSoreEditor: editor}
   | UpdatePressureSoreStatus(pressureSoreStatus) => {
       ...state,
       pressureSoreStatus: pressureSoreStatus,
     }
-  | SetDialysisEditor(editor) => {...state, dialysisEditor: editor}
   | UpdateDialysisStatus(dialysisStatus) => {...state, dialysisStatus: dialysisStatus}
   | UpdateNeurologicalMonitoringStatus(neurologicalMonitoringStatus) => {
       ...state,
@@ -188,16 +184,6 @@ let initialState = dailyRound => {
     frequency: "OD",
   },
   pressureSoreStatus: "0",
-  pressureSoreEditor: {
-    braden_scale_front: "",
-    braden_scale_back: "",
-    front_parts_selected: Js.Dict.empty(),
-    back_parts_selected: Js.Dict.empty(),
-  },
-  dialysisEditor: {
-    fluid_balance: "",
-    net_balance: "",
-  },
 }
 
 let editorButtons = (state, send) => {
@@ -303,12 +289,12 @@ export make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
             />
           | PressureSoreEditor =>
             <CriticalCare__PressureSoreEditor
-              initialState={state.pressureSoreEditor}
-              handleDone={(data, status) => {
-                send(SetPressureSoreEditor(data))
-                send(UpdatePressureSoreStatus(status))
-                send(CloseEditor)
-              }}
+              pressureSoreParameter={CriticalCare__DailyRound.pressureSoreParameter(
+                state.dailyRound,
+              )}
+              updateCB={updateDailyRound(send)}
+              id
+              consultationId
             />
           | NursingCareEditor =>
             <CriticalCare__NursingCareEditor
