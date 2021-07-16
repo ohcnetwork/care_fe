@@ -113,27 +113,33 @@ let make = (~state: VentilatorParameters.iv, ~send: VentilatorParameters.action 
   <div>
     <h4 className="mb-4"> {str("Ventilator Mode")} </h4>
     <div className="mb-4">
-      <label>
-        <input
-          onClick={_ => send(SetIv({...state, ventilatorMode: "cmv"}))}
-          className="mr-2"
-          type_="radio"
-          name="ventilatorMode"
-          value={"cmv"}
-          id={"cmv"}
-          checked={state.ventilatorMode === "cmv"}
-        />
-        {str({"Control Mechanical Ventilation (CMV)"})}
-      </label>
+      // <label>
+      //   <input
+      //     onClick={_ => send(SetIv({...state, ventilatorMode: "cmv"}))}
+      //     className="mr-2"
+      //     type_="radio"
+      //     name="ventilatorMode"
+      //     value={"cmv"}
+      //     id={"cmv"}
+      //     checked={state.ventilatorMode === "cmv"}
+      //   />
+      //   {str({"Control Mechanical Ventilation (CMV)"})}
+      // </label>
+      <Radio
+        id={"cmv"}
+        label={"Control Mechanical Ventilation (CMV)"}
+        checked={state.ventilatorMode === "cmv"}
+        onChange={_ => send(SetIv({...state, ventilatorMode: "cmv"}))}
+      />
       <div className={`ml-6 ${state.ventilatorMode !== "cmv" ? "hidden" : ""} `}>
         <CriticalCare__RadioButton
-          defaultChecked
+          defaultChecked={state.ventilatorModeSubOption.cmv}
           onChange={e => {
             send(
               SetIvSubOptions({
                 ...state,
                 ventilatorModeSubOption: {
-                  cmv: ReactEvent.Form.target(e)["value"],
+                  cmv: ReactEvent.Form.target(e)["id"],
                   psv: "",
                   simv: "",
                 },
@@ -146,18 +152,24 @@ let make = (~state: VentilatorParameters.iv, ~send: VentilatorParameters.action 
       </div>
     </div>
     <div className="mb-4">
-      <label>
-        <input
-          onClick={_ => send(SetIv({...state, ventilatorMode: "simv"}))}
-          className="mr-2"
-          type_="radio"
-          name="ventilatorMode"
-          value={"simv"}
-          id={"simv"}
-          checked={state.ventilatorMode === "simv"}
-        />
-        {str({"Synchronised Intermittent Mandatory Ventilation (SIMV)"})}
-      </label>
+      // <label>
+      //   <input
+      //     onClick={_ => send(SetIv({...state, ventilatorMode: "simv"}))}
+      //     className="mr-2"
+      //     type_="radio"
+      //     name="ventilatorMode"
+      //     value={"simv"}
+      //     id={"simv"}
+      //     checked={state.ventilatorMode === "simv"}
+      //   />
+      //   {str({"Synchronised Intermittent Mandatory Ventilation (SIMV)"})}
+      // </label>
+      <Radio
+        id={"simv"}
+        label={"Synchronised Intermittent Mandatory Ventilation (SIMV)"}
+        checked={state.ventilatorMode === "simv"}
+        onChange={_ => send(SetIv({...state, ventilatorMode: "simv"}))}
+      />
       <div className={`ml-6 ${state.ventilatorMode !== "simv" ? "hidden" : ""} `}>
         <CriticalCare__RadioButton
           defaultChecked
@@ -168,7 +180,7 @@ let make = (~state: VentilatorParameters.iv, ~send: VentilatorParameters.action 
                 ventilatorModeSubOption: {
                   cmv: "",
                   psv: "",
-                  simv: ReactEvent.Form.target(e)["value"],
+                  simv: ReactEvent.Form.target(e)["id"],
                 },
               }),
             )}
@@ -178,18 +190,24 @@ let make = (~state: VentilatorParameters.iv, ~send: VentilatorParameters.action 
       </div>
     </div>
     <div className="mb-4">
-      <label>
-        <input
-          onClick={_ => send(SetIv({...state, ventilatorMode: "psv"}))}
-          className="mr-2"
-          type_="radio"
-          name="ventilatorMode"
-          value={"psv"}
-          id={"psv"}
-          checked={state.ventilatorMode === "psv"}
-        />
-        {str({"C-PAP/ Pressure Support Ventilation (PSV)"})}
-      </label>
+      // <label>
+      //   <input
+      //     onClick={_ => send(SetIv({...state, ventilatorMode: "psv"}))}
+      //     className="mr-2"
+      //     type_="radio"
+      //     name="ventilatorMode"
+      //     value={"psv"}
+      //     id={"psv"}
+      //     checked={state.ventilatorMode === "psv"}
+      //   />
+      //   {str({"C-PAP/ Pressure Support Ventilation (PSV)"})}
+      // </label>
+      <Radio
+        id={"psv"}
+        label={"C-PAP/ Pressure Support Ventilation (PSV)"}
+        checked={state.ventilatorMode === "psv"}
+        onChange={_ => send(SetIv({...state, ventilatorMode: "psv"}))}
+      />
       <div className={`ml-6 ${state.ventilatorMode !== "psv" ? "hidden" : ""} `}>
         {psvOptionsArray
         |> Array.map(option => {

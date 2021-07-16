@@ -101,30 +101,36 @@ let make = (~state: VentilatorParameters.none, ~send: VentilatorParameters.actio
       |> React.array}
     </div>
     <div className={`ml-6`}>
-      <label htmlFor={"Non-Rebreathing Mask"} className="mb-6 block">
-        <input
-          type_="checkbox"
-          className="mr-6 inline-block"
-          id={"Non-Rebreathing Mask"}
-          name={"Non-Rebreathing Mask"}
+      <div className="mb-6">
+        <Checkbox
+          id={"nonRebreathingMask"}
+          label={"Non-Rebreathing Mask"}
           checked={state.nonRebreathingMask}
           onChange={e =>
             send(SetNone({...state, nonRebreathingMask: ReactEvent.Form.target(e)["checked"]}))}
         />
-        {str("Non-Rebreathing Mask")}
-      </label>
-      <label htmlFor={"highFlowNasalCannula"} className="mb-6 block">
-        <input
-          type_="checkbox"
-          className="mr-6 inline-block"
+      </div>
+      <div className="mb-6">
+        <Checkbox
           id={"highFlowNasalCannula"}
-          name={"highFlowNasalCannula"}
+          label={"High Flow Nasal Cannula"}
           checked={state.highFlowNasalCannula}
           onChange={e =>
             send(SetNone({...state, highFlowNasalCannula: ReactEvent.Form.target(e)["checked"]}))}
         />
-        {str("High Flow Nasal Cannula")}
-      </label>
+      </div>
+      // <label htmlFor={"highFlowNasalCannula"} className="mb-6 block">
+      //   <input
+      //     type_="checkbox"
+      //     className="mr-6 inline-block"
+      //     id={"highFlowNasalCannula"}
+      //     name={"highFlowNasalCannula"}
+      //     checked={state.highFlowNasalCannula}
+      //     onChange={e =>
+      //       send(SetNone({...state, highFlowNasalCannula: ReactEvent.Form.target(e)["checked"]}))}
+      //   />
+      //   {str("High Flow Nasal Cannula")}
+      // </label>
     </div>
     <div className={`ml-6`}>
       {sliderConfig
