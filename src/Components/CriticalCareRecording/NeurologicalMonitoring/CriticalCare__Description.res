@@ -6,9 +6,9 @@ let handleOnChange = (onChange, event) => {
 }
 
 @react.component
-let make = (~name, ~text, ~onChange) => {
+let make = (~name, ~text, ~onChange, ~label=name) => {
   <div className="mt-4">
-    <label htmlFor={name} className="block mt-2"> {str(name)} </label>
+    <label htmlFor={name} className="block mt-2"> {str(label)} </label>
     <textarea
       id={name}
       className="block w-full border-gray-500 border-2 rounded px-2 py-1 mt-2"
