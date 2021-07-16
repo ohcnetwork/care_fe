@@ -138,6 +138,15 @@ let getStatus = (min, minText, max, maxText, val) => {
   }
 }
 
+let isInvalidInput = (min, max, val) => {
+  let value = Js.Option.getWithDefault(min, val)
+  if value < min || value > max {
+    ("Input outside range", true)
+  } else {
+    ("", false)
+  }
+}
+
 @react.component
 let make = (~arterialBloodGasAnalysis, ~updateCB, ~percentCompleteCB, ~id, ~consultationId) => {
   let (state, send) = React.useReducer(reducer, initialState(arterialBloodGasAnalysis))
@@ -154,6 +163,7 @@ let make = (~arterialBloodGasAnalysis, ~updateCB, ~percentCompleteCB, ~id, ~cons
         value={string_of_int(state.po2)}
         setValue={s => send(SetPO2(int_of_string(s)))}
         getLabel={getStatus(50.0, "Low", 200.0, "High")}
+        getInputFieldMessage={isInvalidInput(10.0, 400.0)}
       />
       <Slider
         title={"PCO2 (mm Hg)"}
@@ -164,16 +174,18 @@ let make = (~arterialBloodGasAnalysis, ~updateCB, ~percentCompleteCB, ~id, ~cons
         value={string_of_int(state.pco2)}
         setValue={s => send(SetPCO2(int_of_string(s)))}
         getLabel={getStatus(35.0, "Low", 45.0, "High")}
+        getInputFieldMessage={isInvalidInput(10.0, 200.0)}
       />
       <Slider
         title={"pH"}
         start={"0.00"}
         end={"10.00"}
         interval={"1.00"}
-        step={0.1}
+        step={0.01}
         value={string_of_float(state.pH)}
         setValue={s => send(SetpH(float_of_string(s)))}
         getLabel={getStatus(7.35, "Low", 7.45, "High")}
+        getInputFieldMessage={isInvalidInput(0.0, 10.0)}
       />
       <Slider
         title={"HCO3 (mmol/L)"}
@@ -184,6 +196,7 @@ let make = (~arterialBloodGasAnalysis, ~updateCB, ~percentCompleteCB, ~id, ~cons
         value={string_of_float(state.hco3)}
         setValue={s => send(SetHCO3(float_of_string(s)))}
         getLabel={getStatus(22.0, "Low", 26.0, "High")}
+        getInputFieldMessage={isInvalidInput(5.0, 80.0)}
       />
       <Slider
         title={"Base Excess (mmol/L)"}
@@ -194,6 +207,7 @@ let make = (~arterialBloodGasAnalysis, ~updateCB, ~percentCompleteCB, ~id, ~cons
         value={string_of_int(state.baseExcess)}
         setValue={s => send(SetBaseExcess(int_of_string(s)))}
         getLabel={getStatus(-2.0, "Low", 2.0, "High")}
+        getInputFieldMessage={isInvalidInput(-20.0, 20.0)}
       />
       <Slider
         title={"Lactate (mmol/L)"}
@@ -204,6 +218,7 @@ let make = (~arterialBloodGasAnalysis, ~updateCB, ~percentCompleteCB, ~id, ~cons
         value={string_of_float(state.lactate)}
         setValue={s => send(SetLactate(float_of_string(s)))}
         getLabel={getStatus(0.0, "Low", 2.0, "High")}
+        getInputFieldMessage={isInvalidInput(0.0, 20.0)}
       />
       <Slider
         title={"Sodium (mmol/L)"}
@@ -214,6 +229,7 @@ let make = (~arterialBloodGasAnalysis, ~updateCB, ~percentCompleteCB, ~id, ~cons
         value={string_of_float(state.sodium)}
         setValue={s => send(SetSodium(float_of_string(s)))}
         getLabel={getStatus(135.0, "Low", 145.0, "High")}
+        getInputFieldMessage={isInvalidInput(100.0, 170.0)}
       />
       <Slider
         title={"Potassium (mmol/L)"}
@@ -224,6 +240,7 @@ let make = (~arterialBloodGasAnalysis, ~updateCB, ~percentCompleteCB, ~id, ~cons
         value={string_of_float(state.potassium)}
         setValue={s => send(SetPotassium(float_of_string(s)))}
         getLabel={getStatus(3.5, "Low", 5.5, "High")}
+        getInputFieldMessage={isInvalidInput(1.0, 10.0)}
       />
     </div>
     <button

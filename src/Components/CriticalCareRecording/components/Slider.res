@@ -37,9 +37,14 @@ let make = (
   ~setValue: string => unit,
   ~getLabel: float => (string, string),
   ~interval: string,
+  ~getInputFieldMessage: option<float> => (string, bool),
 ) => {
   let (textColor, setColor) = React.useState(() => "#2856ff")
   let (text, setText) = React.useState(() => "Normal")
+
+  let (inputFieldMessage, setInputFieldMessage) = React.useState(() => "")
+  let (isMessageActive, setIsMessageActive) = React.useState(() => false)
+
   let e = end->Belt.Int.fromString->Belt.Option.getWithDefault(0)
   let i = interval->Belt.Int.fromString->Belt.Option.getWithDefault(0)
 
@@ -49,6 +54,9 @@ let make = (
     let (text, color) = getLabel(value->Belt.Float.fromString->Belt.Option.getWithDefault(0.0))
     setColor(_ => color)
     setText(_ => text)
+    let (message, isActive) = getInputFieldMessage(value->Belt.Float.fromString)
+    setInputFieldMessage(_ => message)
+    setIsMessageActive(_ => isActive)
 
     None
   }, [value])
@@ -71,6 +79,7 @@ let make = (
             value={value}
             onChange={event => setValue(ReactEvent.Form.target(event)["value"])}
           />
+          <CriticalCare__InputGroupError message=inputFieldMessage active=isMessageActive />
         </label>
       </div>
       <div className="slider-container">
