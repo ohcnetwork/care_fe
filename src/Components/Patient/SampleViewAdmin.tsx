@@ -341,7 +341,7 @@ export default function SampleViewAdmin(props: any) {
   const badge = (key: string, value: any, paramKey: string) => {
     return (
       value && (
-        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
+        <span className="inline-flex h-full items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
           {key}
           {": "}
           {value}
@@ -415,10 +415,10 @@ export default function SampleViewAdmin(props: any) {
         {/*      errors=''*/}
         {/*  />*/}
         {/*</div>*/}
-      </div>
-      <div className="flex space-x-2 mt-2 flex-wrap w-full col-span-3 space-y-1">
-        {badge("Patient Name", qParams.patient_name, "patient_name")}
-        {badge("District Name", qParams.district_name, "district_name")}
+        <div className="flex items-center space-x-2 mt-2 flex-wrap w-full col-span-3">
+          {badge("Patient Name", qParams.patient_name, "patient_name")}
+          {badge("District Name", qParams.district_name, "district_name")}
+        </div>
       </div>
       <div className="px-3 md:px-8">
         <div className="flex flex-wrap md:-mx-4">{manageSamples}</div>
