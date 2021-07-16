@@ -3,7 +3,7 @@ import { Button, CardContent, InputLabel } from "@material-ui/core";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { navigate } from "raviger";
 import loadable from "@loadable/component";
-import React, { useCallback, useReducer, useState } from "react";
+import React, { useCallback, useReducer, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import {
   CURRENT_HEALTH_CHANGE,
@@ -106,6 +106,20 @@ export const DailyRounds = (props: any) => {
   const [state, dispatch] = useReducer(DailyRoundsFormReducer, initialState);
   const [prescriptions, setPrescriptions] = useState<Prescription_t[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [inCelcius, setInCelcius] = useState(false);
+
+  const FtoC = (temp: string | number) =>
+    ((Number(temp) - 32) * (5 / 9)).toFixed(2);
+  const CtoF = (temp: string | number) =>
+    ((Number(temp) * 9) / 5 + 32).toFixed(2);
+  useEffect(() => {
+    const prev_temp = state.form?.temperature || "";
+    const res_temp = inCelcius ? FtoC(prev_temp) : CtoF(prev_temp);
+    dispatch({
+      type: "set_form",
+      form: { ...state.form, temperature: String(res_temp) },
+    });
+  }, [inCelcius]);
 
   const headerText = !id
     ? "Add Consultation Update"
@@ -193,7 +207,9 @@ export const DailyRounds = (props: any) => {
             ? undefined
             : state.form.admitted_to) || undefined,
         temperature: state.form.temperature
-          ? state.form.temperature
+          ? inCelcius
+            ? CtoF(state.form.temperature).toString()
+            : state.form.temperature
           : undefined,
         temperature_measured_at: state.form.temperature
           ? state.form.temperature_measured_at
@@ -318,16 +334,26 @@ export const DailyRounds = (props: any) => {
                 <div className="col-span-2 md:flex justify-between">
                   <div>
                     <InputLabel id="temperature-label">Temperature</InputLabel>
-                    <TextInputField
-                      name="temperature"
-                      variant="outlined"
-                      margin="dense"
-                      type="text"
-                      InputLabelProps={{ shrink: !!state.form.temperature }}
-                      value={state.form.temperature}
-                      onChange={handleChange}
-                      errors={state.errors.temperature}
-                    />
+                    <div className="flex items-center">
+                      <TextInputField
+                        name="temperature"
+                        variant="outlined"
+                        margin="dense"
+                        type="text"
+                        InputLabelProps={{ shrink: !!state.form.temperature }}
+                        value={state.form.temperature}
+                        onChange={handleChange}
+                        errors={state.errors.temperature}
+                      />
+                      <div
+                        className="flex items-center ml-1 mt-1 border border-gray-400 rounded px-4 h-10 cursor-pointer hover:bg-gray-200"
+                        onClick={(_) => setInCelcius(!inCelcius)}
+                      >
+                        <span className="text-blue-700">
+                          &deg;{inCelcius ? "C" : "F"}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                   <div>
                     <DateTimeFiled
