@@ -1,4 +1,4 @@
-import { Box, Typography } from "@material-ui/core";
+import { Box } from "@material-ui/core";
 import { Close } from "@material-ui/icons";
 import moment from "moment";
 import React from "react";

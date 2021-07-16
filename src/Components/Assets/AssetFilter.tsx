@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAbortableEffect, statusType } from "../../Common/utils";
 import { navigate, useQueryParams } from "raviger";
 import { FacilitySelect } from "../Common/FacilitySelect";
@@ -12,7 +12,7 @@ function AssetFilter(props: any) {
   const dispatch: any = useDispatch();
   const [facility, setFacility] = useState<FacilityModel>({ name: "" });
   const [facilityId, setFacilityId] = useState<number | "">(filter.facility);
-  const [qParams, _] = useQueryParams();
+  const [qParams, _setQParams] = useQueryParams();
   useEffect(() => {
     setFacilityId(facility?.id ? facility?.id : "");
   }, [facility]);
