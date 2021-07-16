@@ -347,6 +347,7 @@ export default function ResultList() {
     );
   }
 
+  console.log(qParams);
   return (
     <div className="px-6">
       {showDialog && (
@@ -380,7 +381,7 @@ export default function ResultList() {
             <div className="text-sm font-semibold mb-2">Search by Name</div>
             <InputSearchBox
               search={searchByName}
-              value={qParams.name}
+              value={qParams.name || ""}
               placeholder="Search by Patient Name"
               errors=""
             />
@@ -388,7 +389,7 @@ export default function ResultList() {
           <div>
             <div className="text-sm font-semibold mt-2">Search by number</div>
             <InputSearchBox
-              value={qParams.mobile_number}
+              value={qParams.mobile_number || ""}
               search={searchByPhone}
               placeholder="Search by Phone Number"
               errors=""
