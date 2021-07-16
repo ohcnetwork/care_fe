@@ -207,10 +207,11 @@ let initialState = neurologicalMonitoring => {
 
 let renderLightReaction = (
   ~input,
+  ~name,
+  ~label=name,
   ~onInputChange,
   ~inputDetails,
   ~onInputDetailsChange,
-  ~label,
 ) => {
   <div className="my-5 mb-8">
     <div className="font-bold mt-4"> {str("Reaction")} </div>
@@ -227,7 +228,8 @@ let renderLightReaction = (
     </div>
     {ReactUtils.nullUnless(
       <CriticalCare__Description
-        name={`${label}_reaction_description`}
+        name={`${name}_reaction_description`}
+        label={`${label} Reaction Description`}
         text={inputDetails}
         onChange={value => onInputDetailsChange(value)}
       />,
@@ -255,10 +257,11 @@ let renderLimpResponse = (~input, ~onInputChange, ~label) => {
 
 let renderConsciousnessLevel = (
   ~input,
+  ~name,
+  ~label=name,
   ~onInputChange,
   ~inputDetails,
   ~onInputDetailsChange,
-  ~label,
 ) => {
   <div className="my-10">
     <div className=" text-2xl font-bold my-2"> {str("Level Of Consciousness")} </div>
@@ -275,7 +278,8 @@ let renderConsciousnessLevel = (
     </div>
     {ReactUtils.nullUnless(
       <CriticalCare__Description
-        name={`${label}_reaction_description`}
+        name={`${name}_reaction_description`}
+        label={`${label} Reaction Description`}
         text={inputDetails}
         onChange={event => onInputDetailsChange(event)}
       />,
@@ -297,6 +301,7 @@ let renderPupil = (state, send) => {
       {ReactUtils.nullUnless(
         <CriticalCare__Description
           name="left_size_description"
+          label="Left Pupil Size Description"
           text={state.leftPupilSizeDetails}
           onChange={event => send(SetLeftPupilSizeDetails(event))}
         />,
@@ -311,7 +316,8 @@ let renderPupil = (state, send) => {
             send(SetLeftPupilLightReactionDetails(value))
           }
         },
-        ~label="left",
+        ~label="Left",
+        ~name="left",
       )}
     </div>
     <div>
@@ -324,6 +330,7 @@ let renderPupil = (state, send) => {
       {ReactUtils.nullUnless(
         <CriticalCare__Description
           name="right_size_description"
+          label="Right Pupil Size Description"
           text={state.rightPupilSizeDetails}
           onChange={event => send(SetRightPupilSizeDetails(event))}
         />,
@@ -334,7 +341,8 @@ let renderPupil = (state, send) => {
         ~onInputChange={value => send(SetRightPupilLightReaction(value))},
         ~inputDetails={state.rightPupilLightReactionDetails},
         ~onInputDetailsChange={value => send(SetRightPupilLightReactionDetails(value))},
-        ~label="right",
+        ~label="Right",
+        ~name="right",
       )}
     </div>
   </div>
@@ -469,7 +477,8 @@ let make = (~updateCB, ~neurologicalMonitoring, ~id, ~consultationId) => {
         ~onInputChange={value => send(SetConsciousnessLevel(value))},
         ~inputDetails={state.consciousnessLevelDetails},
         ~onInputDetailsChange={value => send(SetConsciousnessLevelDetails(value))},
-        ~label="consciousness_level",
+        ~label="Consciousness Level",
+        ~name="consciousness_level",
       )}
       {ReactUtils.nullIf(renderPupil(state, send), state.inPronePosition)}
       <div className="my-15 w-full h-1 bg-gray-300" />
