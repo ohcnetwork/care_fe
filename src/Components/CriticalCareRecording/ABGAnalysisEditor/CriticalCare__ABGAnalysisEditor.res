@@ -7,6 +7,8 @@ external updateDailyRound: (string, string, Js.Json.t, _ => unit, _ => unit) => 
 
 let string_of_float = data => Belt.Option.mapWithDefault(data, "", Js.Float.toString)
 let string_of_int = data => Belt.Option.mapWithDefault(data, "", Js.Int.toString)
+let int_of_string = data => data->Belt.Int.fromString
+let float_of_string = data => data->Belt.Float.fromString
 
 type state = {
   po2: option<int>,
@@ -22,27 +24,27 @@ type state = {
 }
 
 type action =
-  | SetPO2(int)
-  | SetPCO2(int)
-  | SetpH(float)
-  | SetHCO3(float)
-  | SetBaseExcess(int)
-  | SetLactate(float)
-  | SetSodium(float)
-  | SetPotassium(float)
+  | SetPO2(option<int>)
+  | SetPCO2(option<int>)
+  | SetpH(option<float>)
+  | SetHCO3(option<float>)
+  | SetBaseExcess(option<int>)
+  | SetLactate(option<float>)
+  | SetSodium(option<float>)
+  | SetPotassium(option<float>)
   | SetSaving
   | ClearSaving
 
 let reducer = (state, action) => {
   switch action {
-  | SetPO2(po2) => {...state, po2: Some(po2), dirty: true}
-  | SetPCO2(pco2) => {...state, pco2: Some(pco2), dirty: true}
-  | SetpH(pH) => {...state, pH: Some(pH), dirty: true}
-  | SetHCO3(hco3) => {...state, hco3: Some(hco3), dirty: true}
-  | SetBaseExcess(baseExcess) => {...state, baseExcess: Some(baseExcess), dirty: true}
-  | SetLactate(lactate) => {...state, lactate: Some(lactate), dirty: true}
-  | SetSodium(sodium) => {...state, sodium: Some(sodium), dirty: true}
-  | SetPotassium(potassium) => {...state, potassium: Some(potassium), dirty: true}
+  | SetPO2(po2) => {...state, po2: po2, dirty: true}
+  | SetPCO2(pco2) => {...state, pco2: pco2, dirty: true}
+  | SetpH(pH) => {...state, pH: pH, dirty: true}
+  | SetHCO3(hco3) => {...state, hco3: hco3, dirty: true}
+  | SetBaseExcess(baseExcess) => {...state, baseExcess: baseExcess, dirty: true}
+  | SetLactate(lactate) => {...state, lactate: lactate, dirty: true}
+  | SetSodium(sodium) => {...state, sodium: sodium, dirty: true}
+  | SetPotassium(potassium) => {...state, potassium: potassium, dirty: true}
   | SetSaving => {...state, saving: true}
   | ClearSaving => {...state, saving: false}
   }
@@ -118,6 +120,7 @@ let showStatus = data => {
 
 let saveData = (id, consultationId, state, send, updateCB, percentCompleteCB) => {
   send(SetSaving)
+  Js.log(Js.Json.object_(makePayload(state)))
   updateDailyRound(
     consultationId,
     id,
