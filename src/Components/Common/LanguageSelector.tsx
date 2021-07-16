@@ -1,4 +1,4 @@
-import React, { createRef, useEffect } from "react";
+import { useEffect } from "react";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { useTranslation } from "react-i18next";
 import { LANGUAGE_NAMES } from "../../Locale/config";
@@ -8,7 +8,7 @@ export const LanguageSelector = (props: any) => {
 
   useEffect(() => {
     document.documentElement.setAttribute("lang", i18n.language);
-  }, []);
+  }, [i18n]);
 
   const handleLanguage = (value: string) => {
     i18n.changeLanguage(value);

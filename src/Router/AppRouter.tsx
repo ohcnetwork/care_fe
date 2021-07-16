@@ -1,5 +1,5 @@
 import { useRedirect, useRoutes, navigate, usePath } from "raviger";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { BedCapacityForm } from "../Components/Facility/BedCapacityForm";
 import { ConsultationDetails } from "../Components/Facility/ConsultationDetails";

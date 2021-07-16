@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useAbortableEffect, statusType } from "../../Common/utils";
 
 interface PaginationProps {
@@ -126,18 +126,18 @@ const Pagination = (props: PaginationProps) => {
   return (
     <div className="mx-auto mb-4">
       <div className="flex-1 flex justify-between sm:hidden">
-        <a
+        <div
           onClick={(e) => handleChangePage(e, "prev")}
           className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm leading-5 font-medium rounded-md text-gray-700 bg-white hover:text-gray-500 focus:outline-none focus:shadow-outline-primary focus:border-primary-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150"
         >
           Previous
-        </a>
-        <a
+        </div>
+        <div
           onClick={(e) => handleChangePage(e, "next")}
           className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm leading-5 font-medium rounded-md text-gray-700 bg-white hover:text-gray-500 focus:outline-none focus:shadow-outline-primary focus:border-primary-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150"
         >
           Next
-        </a>
+        </div>
       </div>
       <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
         <div>
