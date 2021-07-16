@@ -252,7 +252,7 @@ const HospitalListPage = (props: any) => {
   const badge = (key: string, value: any, paramKey: string) => {
     return (
       value && (
-        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
+        <span className="inline-flex h-full items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
           {t(key)}
           {": "}
           {value}
@@ -643,7 +643,7 @@ const HospitalListPage = (props: any) => {
           </div>
         </SlideOver>
       </div>
-      <div className="flex space-x-2 mt-2 flex-wrap w-full col-span-3 space-y-1">
+      <div className="flex items-center space-x-2 mt-2 flex-wrap w-full col-span-3">
         {badge("Facility/District Name", qParams.search, "search")}
         {badge("State", stateName, "state")}
         {badge("District", districtName, "district")}
