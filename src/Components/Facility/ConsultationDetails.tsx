@@ -17,6 +17,7 @@ import { DailyRoundsModel } from "../Patient/models";
 import { PATIENT_CATEGORY, SYMPTOM_CHOICES } from "../../Common/constants";
 import { FileUpload } from "../Patient/FileUpload";
 import TreatmentSummary from "./TreatmentSummary";
+import { PrimaryParametersPlot } from "./Consultations/PrimaryParametersPlot";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const symptomChoices = [...SYMPTOM_CHOICES];
@@ -567,6 +568,14 @@ export const ConsultationDetails = (props: any) => {
               </div>
             </div>
           )}
+          <div className="mt-4">
+            <PageTitle title="Primary Parameters Plot" hideBack={true} />
+            <PrimaryParametersPlot
+              facilityId={facilityId}
+              patientId={patientId}
+              consultationId={consultationId}
+            ></PrimaryParametersPlot>
+          </div>
           <div>
             <PageTitle title="Consultation Update" hideBack={true} />
             {isLastConsultation && (

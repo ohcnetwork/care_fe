@@ -224,6 +224,10 @@ const routes: Routes = {
   getDailyReport: {
     path: "/api/v1/consultation/{consultationId}/daily_rounds/{id}/",
   },
+  dailyRoundsAnalyse: {
+    path: "/api/v1/consultation/{consultationId}/daily_rounds/analyse/",
+    method: "POST",
+  },
 
   // Hospital Beds
   createCapacity: {
