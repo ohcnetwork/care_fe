@@ -59,7 +59,7 @@ let make = (~name, ~items, ~collection, ~updateCB) => {
     collection,
   )
   <div
-    className="bg-white px-4 py-5 border-b border-gray-200 sm:px-6 max-w-3xl mx-auto border mt-4">
+    className="bg-white px-4 py-5 border-b border-gray-200 sm:px-6 max-w-5xl mx-auto border mt-4">
     <h3 className={name === "" ? "hidden" : "text-lg leading-6 font-medium text-gray-900"}>
       {name->str}
     </h3>

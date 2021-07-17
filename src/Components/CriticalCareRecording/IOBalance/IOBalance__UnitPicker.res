@@ -21,21 +21,18 @@ let search = (searchString, selectables) =>
     |> Js.String.includes(searchString |> String.lowercase_ascii) && selection != searchString
   ))->Belt.SortArray.stableSortBy((x, y) => String.compare(x, y))
 
-let renderSelectables = (selections, updateCB, setSearchTerm) =>
+let renderSelectables = (selections, updateCB) =>
   selections |> Array.mapi((index, selection) =>
     <button
       type_="button"
       key={index |> string_of_int}
-      onClick={_ => {
-        setSearchTerm(_ => selection)
-        updateCB(selection)
-      }}
+      onClick={_ => updateCB(selection)}
       className="w-full block px-4 py-2 text-sm leading-5 text-left text-gray-700 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:bg-gray-100 focus:text-gray-900">
       {selection |> str}
     </button>
   )
 
-let searchResult = (searchInput, updateCB, selectables, setSearchTerm) => {
+let searchResult = (searchInput, updateCB, selectables) => {
   // Remove all excess space characters from the user input.
   let normalizedString =
     searchInput
@@ -45,7 +42,7 @@ let searchResult = (searchInput, updateCB, selectables, setSearchTerm) => {
   | "" => []
   | searchString =>
     let matchingSelections = search(searchString, selectables)
-    renderSelectables(matchingSelections, updateCB, setSearchTerm)
+    renderSelectables(matchingSelections, updateCB)
   }
 }
 
@@ -58,10 +55,8 @@ let renderDropdown = results =>
 
 @react.component
 let make = (~id, ~value, ~updateCB, ~placeholder, ~selectables) => {
-  let (searchTerm, setSearchTerm) = React.useState(_ => value)
-  let (showDropdown, setShowDropdown) = React.useState(_ => true)
-  let results = searchResult(searchTerm, updateCB, selectables, setSearchTerm)
-
+  let results = searchResult(value, updateCB, selectables)
+  let (showDropdown, setShowDropdown) = React.useState(_ => false)
   React.useEffect1(() => {
     let curriedFunction = onWindowClick(showDropdown, setShowDropdown)
 
@@ -79,18 +74,17 @@ let make = (~id, ~value, ~updateCB, ~placeholder, ~selectables) => {
   <div className="relative inline-block text-left w-full">
     <input
       id
-      autoFocus={true}
-      value={searchTerm}
-      autoComplete="false"
+      value
+      autoComplete="off"
       onClick={_ => setShowDropdown(_ => !showDropdown)}
-      onChange={e => setSearchTerm(_ => ReactEvent.Form.target(e)["value"])}
+      onChange={e => updateCB(ReactEvent.Form.target(e)["value"])}
       className="appearance-none h-10 mt-1 block w-full border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white focus:border-gray-600"
       placeholder
       required=true
     />
     {results |> Array.length == 0
       ? switch showDropdown {
-        | true => renderDropdown(renderSelectables(selectables, updateCB, setSearchTerm))
+        | true => renderDropdown(renderSelectables(selectables, updateCB))
         | false => React.null
         }
       : switch showDropdown {

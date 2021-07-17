@@ -104,20 +104,24 @@ export const DailyRoundsList = (props: any) => {
                     </Grid>
                   )}
                   <Grid item xs={6}>
-                    <Typography>
+                    <div className="text-xs">
                       <span className="text-gray-700">Created At:</span>{" "}
-                      {itemData.created_date
-                        ? moment(itemData.created_date).format("lll")
-                        : "-"}
-                    </Typography>
+                      <div className="text-xs">
+                        {itemData.created_date
+                          ? moment(itemData.created_date).format("lll")
+                          : "-"}
+                      </div>
+                    </div>
                   </Grid>
                   <Grid item xs={6}>
-                    <Typography>
+                    <div className="text-xs">
                       <span className="text-gray-700">Updated At:</span>{" "}
-                      {itemData.modified_date
-                        ? moment(itemData.modified_date).format("lll")
-                        : "-"}
-                    </Typography>
+                      <div className="text-xs">
+                        {itemData.modified_date
+                          ? moment(itemData.modified_date).format("lll")
+                          : "-"}
+                      </div>
+                    </div>
                   </Grid>
 
                   {itemData.physical_examination_info && (
@@ -175,7 +179,7 @@ export const DailyRoundsList = (props: any) => {
     <div>
       <div>
         <PageTitle title="Consultation Update" hideBack={true} />
-        <div className="flex flex-wrap mt-4">
+        <div className="flex flex-wrap">
           {roundsList}
           {!isDailyRoundLoading && totalCount > limit && (
             <div className="mt-4 flex w-full justify-center">

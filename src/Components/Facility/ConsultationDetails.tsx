@@ -1,50 +1,32 @@
-import { CircularProgress, Grid, Typography } from "@material-ui/core";
-import Button from "@material-ui/core/Button";
 import { navigate } from "raviger";
 import moment from "moment";
-import React, { useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import {
-  getConsultation,
-  getDailyReport,
-  getPatient,
-} from "../../Redux/actions";
+import { getConsultation } from "../../Redux/actions";
 import loadable from "@loadable/component";
-import Pagination from "../Common/Pagination";
 import { ConsultationModel } from "./models";
-import { DailyRoundsModel } from "../Patient/models";
 import { PATIENT_CATEGORY, SYMPTOM_CHOICES } from "../../Common/constants";
 import { FileUpload } from "../Patient/FileUpload";
 import TreatmentSummary from "./TreatmentSummary";
 import { PrimaryParametersPlot } from "./Consultations/PrimaryParametersPlot";
 import { DailyRoundsList } from "./Consultations/DailyRoundsList";
+import { make as Link } from "../Common/components/Link.gen";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const symptomChoices = [...SYMPTOM_CHOICES];
 const patientCategoryChoices = [...PATIENT_CATEGORY];
 
-type tab = "SUMMARY" | "FILES" | "UPDATES" | "MEDICINES";
-
 export const ConsultationDetails = (props: any) => {
   const { facilityId, patientId, consultationId } = props;
   const dispatch: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [tab, setTab] = useState("SUMMARY");
-  const [isDailyRoundLoading, setIsDailyRoundLoading] = useState(false);
   const [isPrintMode, setIsPrintMode] = useState(false);
   const [consultationData, setConsultationData] = useState<ConsultationModel>(
     {}
   );
-  const [isLastConsultation, setIsLastConsultation] = useState(false);
-  const [dailyRoundsListData, setDailyRoundsListData] = useState<
-    Array<DailyRoundsModel>
-  >([]);
-  const [totalCount, setTotalCount] = useState(0);
-  const [offset, setOffset] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
-  const limit = 14;
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -80,50 +62,9 @@ export const ConsultationDetails = (props: any) => {
     [consultationId, dispatch]
   );
 
-  const fetchDailyRounds = useCallback(
-    async (status: statusType) => {
-      setIsDailyRoundLoading(true);
-      const res = await dispatch(
-        getDailyReport({ limit, offset }, { consultationId })
-      );
-      if (!status.aborted) {
-        if (res && res.data) {
-          setDailyRoundsListData(res.data.results);
-          setTotalCount(res.data.count);
-        }
-        setIsDailyRoundLoading(false);
-      }
-    },
-    [consultationId, dispatch, offset]
-  );
-
-  const fetchIsLastConsultation = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const res = await dispatch(getPatient({ id: patientId }));
-      if (!status.aborted) {
-        if (res && res.data) {
-          if (res.data.last_consultation?.id === consultationId)
-            setIsLastConsultation(true);
-          else setIsLastConsultation(false);
-        }
-        setIsLoading(false);
-      }
-    },
-    [consultationId, dispatch, patientId]
-  );
-
   useAbortableEffect((status: statusType) => {
     fetchData(status);
-    fetchDailyRounds(status);
-    fetchIsLastConsultation(status);
   }, []);
-
-  const handlePagination = (page: number, limit: number) => {
-    const offset = (page - 1) * limit;
-    setCurrentPage(page);
-    setOffset(offset);
-  };
 
   if (isLoading) {
     return <Loading />;
@@ -140,13 +81,19 @@ export const ConsultationDetails = (props: any) => {
         <TreatmentSummary
           setIsPrintMode={setIsPrintMode}
           consultationData={consultationData}
-          dailyRoundsListData={dailyRoundsListData}
+          dailyRoundsListData={[]}
           patientId={patientId}
         />
       ) : (
         <div className="px-2 pb-2">
-          <PageTitle title={`Consultation #${consultationId}`} />
-          <div className="flex md:flex-row flex-col w-full">
+          <Link
+            className="btn btn-default bg-white mt-2"
+            href={`/facility/${facilityId}/patient/${patientId}`}
+          >
+            <i className="fas fa-chevron-left  rounded-md p-2 hover:bg-gray-200 mr-1"></i>
+            {"Go back to Patient Page"}
+          </Link>
+          <div className="flex md:flex-row flex-col w-full mt-2">
             <div className="border rounded-lg bg-white shadow h-full text-black p-4 w-full">
               <div className="flex md:flex-row flex-col justify-between">
                 <div>
@@ -172,8 +119,8 @@ export const ConsultationDetails = (props: any) => {
                       </div>
                     )}
                   </div>
-                  <div className="mt-2 border p-2 bg-gray-100">
-                    <span className="font-semibold leading-relaxed text-gray-800">
+                  <div className="mt-1 border p-2 bg-gray-100">
+                    <span className="font-semibold leading-relaxed text-gray-800 text-xs">
                       Symptoms from{" "}
                       {moment(consultationData.symptoms_onset_date).format(
                         "lll"
@@ -217,9 +164,9 @@ export const ConsultationDetails = (props: any) => {
                 )}
               </div>
 
-              <div className="grid gap-2 grid-cols-1 md:grid-cols-2 mt-2">
+              <div className="mt-2">
                 {consultationData.other_symptoms && (
-                  <div className="md:col-span-2 capitalize">
+                  <div className="capitalize">
                     <span className="font-semibold leading-relaxed">
                       Other Symptoms:{" "}
                     </span>
@@ -228,7 +175,7 @@ export const ConsultationDetails = (props: any) => {
                 )}
 
                 {consultationData.diagnosis && (
-                  <div className="md:col-span-2 capitalize">
+                  <div className="text-sm w-full">
                     <span className="font-semibold leading-relaxed">
                       Diagnosis:{" "}
                     </span>
@@ -236,7 +183,7 @@ export const ConsultationDetails = (props: any) => {
                   </div>
                 )}
                 {consultationData.verified_by && (
-                  <div className="md:col-span-2 capitalize">
+                  <div className="text-sm mt-2">
                     <span className="font-semibold leading-relaxed">
                       Verified By:{" "}
                     </span>
@@ -246,15 +193,13 @@ export const ConsultationDetails = (props: any) => {
                   </div>
                 )}
               </div>
-
-              <div className="flex flex-col mt-6">
+              <div className="flex flex-col mt-2">
                 <div className="text-sm text-gray-700">
                   Created on{" "}
                   {moment(consultationData.created_date).format("lll")}
                   {consultationData.created_by && (
                     <span>
-                      by{" "}
-                      {`${consultationData.created_by?.first_name} ${consultationData.created_by?.last_name} @${consultationData.created_by?.username} (${consultationData.created_by?.user_type})`}
+                      {`by ${consultationData.created_by?.first_name} ${consultationData.created_by?.last_name} @${consultationData.created_by?.username} (${consultationData.created_by?.user_type})`}
                     </span>
                   )}
                 </div>
@@ -271,9 +216,9 @@ export const ConsultationDetails = (props: any) => {
                 </div>
               </div>
             </div>
-            <div className="p-2">
+            <div className="md:px-2 px-0 md:py-0 py-2">
               <div className="border rounded-lg bg-white shadow h-full p-4 w-full">
-                <div className="mt-2">
+                <div>
                   <button
                     className="btn btn-primary w-full"
                     onClick={() =>
