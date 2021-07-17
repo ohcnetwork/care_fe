@@ -15,8 +15,8 @@ let front_parts_selected = t => t.front_parts_selected
 let back_parts_selected = t => t.back_parts_selected
 
 let make = (~braden_scale_front, ~braden_scale_back, ~front_parts_selected, ~back_parts_selected) => {
-  braden_scale_front: braden_scale_front
-  braden_scale_back: braden_scale_back
+  braden_scale_front: braden_scale_front,
+  braden_scale_back: braden_scale_back,
   front_parts_selected: front_parts_selected,
   back_parts_selected: back_parts_selected
 }
