@@ -1,11 +1,5 @@
-import React from "react";
 import loadable from "@loadable/component";
-import {
-  ForgotPassword,
-  Login,
-  Register,
-  ResetPassword,
-} from "../Components/Auth";
+import { ForgotPassword, Login, ResetPassword } from "../Components/Auth";
 import { useRoutes } from "raviger";
 import { PublicDashboard } from "../Components/Dashboard/PublicDashboard";
 import { withTranslation } from "react-i18next";
@@ -15,7 +9,6 @@ const routes = {
   "/": () => <Login />,
   "/login": () => <Login />,
   "/dashboard": () => <PublicDashboard />,
-  "/register": () => <Register />,
   "/forgot-password": () => <ForgotPassword />,
   "/password_reset/:token": ({ token }: any) => <ResetPassword token={token} />,
 };
@@ -38,7 +31,7 @@ const SessionRouter = (props: any) => {
         {content}
       </div>
       <div className="bg-white flex items-center">
-        <div className="max-w-5xl mx-auto flex md:flex-row flex-col p-4 f-full flex items-center">
+        <div className="max-w-5xl mx-auto flex md:flex-row flex-col p-4 f-full items-center">
           <div className="mx-auto p-2">
             <img
               className="h-20"

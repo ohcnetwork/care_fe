@@ -37,9 +37,11 @@ let make = (
   ~setValue: string => unit,
   ~getLabel: float => (string, string),
   ~interval: string,
+  ~hasError=None,
 ) => {
   let (textColor, setColor) = React.useState(() => "#2856ff")
   let (text, setText) = React.useState(() => "Normal")
+
   let e = end->Belt.Int.fromString->Belt.Option.getWithDefault(0)
   let i = interval->Belt.Int.fromString->Belt.Option.getWithDefault(0)
 
@@ -57,21 +59,26 @@ let make = (
     <section className="slider-box">
       <div className="slider-head">
         <h1> {title->str} </h1>
-        <label htmlFor="measure" style={ReactDOM.Style.make(~color=textColor, ())}>
-          {switch value->Belt.Float.fromString {
-          | Some(_) => text->str
-          | None => React.null
-          }}
-          <input
-            name="measure"
-            type_="number"
-            step={step}
-            max={end}
-            min={start}
-            value={value}
-            onChange={event => setValue(ReactEvent.Form.target(event)["value"])}
+        <div className="flex flex-col">
+          <label htmlFor="measure" style={ReactDOM.Style.make(~color=textColor, ())}>
+            {switch value->Belt.Float.fromString {
+            | Some(_) => text->str
+            | None => React.null
+            }}
+            <input
+              name="measure"
+              type_="number"
+              step={step}
+              max={end}
+              min={start}
+              value={value}
+              onChange={event => setValue(ReactEvent.Form.target(event)["value"])}
+            />
+          </label>
+          <CriticalCare__InputGroupError
+            message={Belt.Option.getWithDefault(hasError, "")} active={Belt.Option.isSome(hasError)}
           />
-        </label>
+        </div>
       </div>
       <div className="slider-container">
         <input
