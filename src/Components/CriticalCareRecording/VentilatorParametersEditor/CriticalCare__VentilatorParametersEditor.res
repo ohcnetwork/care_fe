@@ -88,7 +88,7 @@ let ventilatorInterfaceOptions: array<Options.t> = [
 ]
 
 let initialState: VentilatorParameters.t = {
-  ventilator_interface: UNKNOWN,
+  ventilator_interface: INVASIVE,
   ventilator_mode: UNKNOWN,
   ventilator_oxygen_modality: UNKNOWN,
   ventilator_peep: None,
