@@ -27,10 +27,17 @@ let make = (
 }
 
 let makeFromJs = dailyRound => {
-  Js.log(dailyRound)
-
-  Js.Array.map(
-    d => make(~braden_scale_front=d["braden_sclae_front"], ~description=d["description"]),
-    dailyRound["pressure_sore"],
-  )
+  Js.Array.length(dailyRound["pressure_sore"]) > 0
+    ? make(
+        ~braden_scale_front=dailyRound["pressure_sore"][0]["braden_scale_front"]->Js.Nullable.toOption,
+        ~braden_scale_back=dailyRound["pressure_sore"][0]["braden_scale_back"]->Js.Nullable.toOption,
+        ~front_parts_selected=dailyRound["pressure_sore"][0]["front_parts_selected"],
+        ~back_parts_selected=dailyRound["pressure_sore"][0]["back_parts_selected"],
+      )
+    : make(
+        ~braden_scale_front=None,
+        ~braden_scale_back=None,
+        ~front_parts_selected=[],
+        ~back_parts_selected=[],
+      )
 }

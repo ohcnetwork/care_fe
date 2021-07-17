@@ -310,19 +310,26 @@ let saveData = (id, consultationId, state, send, updateCB) => {
 }
 
 let initialSelected = endValue => {
-  let initialPartsSelected = []
-  for i in 0 to endValue {
-    initialPartsSelected[i] = false
+  let initialPartsSelected = ref([])
+  let i = ref(0)
+  while i.contents <= endValue {
+    initialPartsSelected.contents = Js.Array.concat([false], initialPartsSelected.contents)
+    i := i.contents + 1
   }
-  initialPartsSelected
+  Js.log2("New Array: ", initialPartsSelected.contents)
+  initialPartsSelected.contents
 }
 
 let initialState = psp => {
   {
     braden_scale_front: PressureSore.braden_scale_front(psp),
     braden_scale_back: PressureSore.braden_scale_back(psp),
-    front_parts_selected: initialSelected(22),
-    back_parts_selected: initialSelected(20),
+    front_parts_selected: Js.Array.length(PressureSore.front_parts_selected(psp)) > 0
+      ? PressureSore.front_parts_selected(psp)
+      : initialSelected(23),
+    back_parts_selected: Js.Array.length(PressureSore.back_parts_selected(psp)) > 0
+      ? PressureSore.back_parts_selected(psp)
+      : initialSelected(21),
     saving: false,
     dirty: false,
   }
