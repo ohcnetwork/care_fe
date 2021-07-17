@@ -316,7 +316,6 @@ let initialSelected = endValue => {
     initialPartsSelected.contents = Js.Array.concat([false], initialPartsSelected.contents)
     i := i.contents + 1
   }
-  Js.log2("New Array: ", initialPartsSelected.contents)
   initialPartsSelected.contents
 }
 
