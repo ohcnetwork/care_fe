@@ -69,6 +69,7 @@ let makePayload = state => {
   let payload = Js.Dict.empty()
   DictUtils.setOptionalNumber("po2", state.po2, payload)
   DictUtils.setOptionalNumber("pco2", state.pco2, payload)
+  DictUtils.setOptionalFloat("ph", state.pH, payload)
   DictUtils.setOptionalFloat("hco3", state.hco3, payload)
   DictUtils.setOptionalNumber("base_excess", state.baseExcess, payload)
   DictUtils.setOptionalFloat("lactate", state.lactate, payload)
@@ -119,6 +120,7 @@ let showStatus = data => {
 }
 
 let saveData = (id, consultationId, state, send, updateCB, percentCompleteCB) => {
+  Js.log(Js.Json.object_(makePayload(state)))
   send(SetSaving)
   updateDailyRound(
     consultationId,
