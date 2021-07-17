@@ -54,5 +54,6 @@ let makeFromJs = dailyRound => {
     ~arterialBloodGasAnalysis=CriticalCare__ABGAnalysis.makeFromJs(dailyRound),
     ~ioBalance=CriticalCare__IOBalance.makeFromJs(dailyRound),
     ~dialysis=CriticalCare_Dialysis.makeFromJs(dailyRound),
+    ~pressureSoreParameter=CriticalCare__PressureSore.makeFromJs(dailyRound),
   )
 }

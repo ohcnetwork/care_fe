@@ -8,8 +8,8 @@ external updateDailyRound: (string, string, Js.Json.t, _ => unit, _ => unit) => 
 type state = {
   braden_scale_front: option<int>,
   braden_scale_back: option<int>,
-  front_parts_selected: Js.Dict.t<string>,
-  back_parts_selected: Js.Dict.t<string>,
+  front_parts_selected: array<bool>,
+  back_parts_selected: array<bool>,
   saving: bool,
   dirty: bool,
 }
@@ -251,38 +251,36 @@ let reducer = (state, action) => {
       dirty: true,
     }
   | AddIndexToSelectedFrontParts(ind) => {
-      let val = state.front_parts_selected
-      let str = Belt.Int.toString(ind)
-      let tmp = Js.Array.includes(str, Js.Dict.keys(val))
-      if tmp {
-        Js.Dict.unsafeDeleteKey(. val, str)
-      } else {
-        Js.Dict.set(val, str, "1")
-      }
+      let tmp = state.front_parts_selected
+      tmp[ind] = !tmp[ind]
       {
         ...state,
-        front_parts_selected: val,
+        front_parts_selected: tmp,
         dirty: true,
       }
     }
   | AddIndexToSelectedBackParts(ind) => {
-      let val = state.back_parts_selected
-      let str = Belt.Int.toString(ind)
-      let tmp = Js.Array.includes(str, Js.Dict.keys(val))
-      if tmp {
-        Js.Dict.unsafeDeleteKey(. val, str)
-      } else {
-        Js.Dict.set(val, str, "1")
-      }
+      let tmp = state.back_parts_selected
+      tmp[ind] = !tmp[ind]
       {
         ...state,
-        back_parts_selected: val,
+        back_parts_selected: tmp,
         dirty: true,
       }
     }
   | SetSaving => {...state, saving: true}
   | ClearSaving => {...state, saving: false}
   }
+}
+
+let makePayload = state => {
+  let payload = Js.Dict.empty()
+
+  DictUtils.setOptionalNumber("braden_scale_front", state.braden_scale_front, payload)
+  DictUtils.setOptionalNumber("braden_scale_back", state.braden_scale_back, payload)
+  Js.Dict.set(payload, "front_parts_selected", Js.Json.booleanArray(state.front_parts_selected))
+  Js.Dict.set(payload, "back_parts_selected", Js.Json.booleanArray(state.back_parts_selected))
+  payload
 }
 
 let successCB = (send, updateCB, data) => {
@@ -305,12 +303,20 @@ let saveData = (id, consultationId, state, send, updateCB) => {
   )
 }
 
+let initialSelected = endValue => {
+  let initialPartsSelected = []
+  for i in 0 to endValue {
+    initialPartsSelected[i] = false
+  }
+  initialPartsSelected
+}
+
 let initialState = psp => {
   {
     braden_scale_front: PressureSore.braden_scale_front(psp),
     braden_scale_back: PressureSore.braden_scale_back(psp),
-    front_parts_selected: PressureSore.front_parts_selected(psp),
-    back_parts_selected: PressureSore.front_parts_selected(psp),
+    front_parts_selected: initialSelected(22),
+    back_parts_selected: initialSelected(20),
     saving: false,
     dirty: false,
   }
@@ -331,10 +337,7 @@ let make = (~pressureSoreParameter, ~updateCB, ~id, ~consultationId) => {
             key={"part1" ++ Belt.Int.toString(renderIndex)}
             d={PressureSore.d(part)}
             transform={PressureSore.transform(part)}
-            className={Js.Array.includes(
-              Js.Int.toString(renderIndex),
-              Js.Dict.keys(state.front_parts_selected),
-            )
+            className={state.front_parts_selected[renderIndex]
               ? "text-blue-500 tooltip"
               : "text-gray-400  hover:text-blue-400 tooltip"}
             fill="currentColor"
@@ -369,10 +372,7 @@ let make = (~pressureSoreParameter, ~updateCB, ~id, ~consultationId) => {
             key={"part2" ++ Belt.Int.toString(renderIndex)}
             d={PressureSore.d(part)}
             transform={PressureSore.transform(part)}
-            className={Js.Array.includes(
-              Js.Int.toString(renderIndex),
-              Js.Dict.keys(state.back_parts_selected),
-            )
+            className={state.back_parts_selected[renderIndex]
               ? "text-blue-500 tooltip"
               : "text-gray-400  hover:text-blue-400 tooltip"}
             fill="currentColor"
@@ -399,7 +399,7 @@ let make = (~pressureSoreParameter, ~updateCB, ~id, ~consultationId) => {
     </div>
     <button
       className="flex w-full bg-blue-600 text-white p-2 text-lg hover:bg-blue-800 justify-center items-center rounded-md"
-      onClick={_ => ()}>
+      onClick={_ => saveData(id, consultationId, state, send, updateCB)}>
       {str("Done")}
     </button>
   </div>
