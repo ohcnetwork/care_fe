@@ -9,6 +9,7 @@ export type t = {
   ioBalance: CriticalCare__IOBalance.t,
   dialysis: CriticalCare_Dialysis.t,
   pressureSoreParameter: CriticalCare__PressureSore.t,
+  bloodSugar: CriticalCare_BloodSugar.t,
 }
 
 let make = (
@@ -22,6 +23,7 @@ let make = (
   ~ioBalance,
   ~dialysis,
   ~pressureSoreParameter,
+  ~bloodSugar,
 ) => {
   createdAt: createdAt,
   admittedTo: admittedTo,
@@ -33,6 +35,7 @@ let make = (
   ioBalance: ioBalance,
   dialysis: dialysis,
   pressureSoreParameter: pressureSoreParameter,
+  bloodSugar: bloodSugar,
 }
 
 let neurologicalMonitoring = t => t.neurologicalMonitoring
@@ -42,6 +45,7 @@ let arterialBloodGasAnalysis = t => t.arterialBloodGasAnalysis
 let ioBalance = t => t.ioBalance
 let dialysis = t => t.dialysis
 let pressureSoreParameter = t => t.pressureSoreParameter
+let bloodSugar = t => t.bloodSugar
 
 let makeFromJs = dailyRound => {
   make(
@@ -55,5 +59,6 @@ let makeFromJs = dailyRound => {
     ~ioBalance=CriticalCare__IOBalance.makeFromJs(dailyRound),
     ~dialysis=CriticalCare_Dialysis.makeFromJs(dailyRound),
     ~pressureSoreParameter=CriticalCare__PressureSore.makeFromJs(dailyRound),
+    ~bloodSugar=CriticalCare_BloodSugar.makeFromJs(dailyRound),
   )
 }

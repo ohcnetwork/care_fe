@@ -18,14 +18,3 @@ let makeFromJs = dailyRound => {
   )
 }
 
-// let showStatus = data => {
-//   let total = 2.0
-//   let count = ref(0.0)
-//   if Js.Option.isSome(fluid_balance(data)) {
-//     count := count.contents +. 1.0
-//   }
-//   if Js.Option.isSome(Some(net_balance(data)) {
-//     count := count.contents +. 1.0
-//   }
-//   Js.Float.toFixed(count.contents /. total *. 100.0)
-// }

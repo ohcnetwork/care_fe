@@ -27,7 +27,6 @@ type state = {
   pressureSoreStatus: string,
   nursingCareStatus: string,
   totalStatus: int,
-  bloodSugarEditor: BloodSugar.t,
 }
 
 type action =
@@ -39,7 +38,6 @@ type action =
   | UpdateHemodynamicParameterStatus(string)
   | UpdateABGAnalysisStatus(string)
   | UpdateTotal(int)
-  | SetBloodSugarEditor(BloodSugar.t)
   | UpdateBloodSugarStatus(string)
   | UpdateDialysisStatus(string)
   | UpdateNeurologicalMonitoringStatus(string)
@@ -105,7 +103,6 @@ let reducer = (state, action) => {
       hemodynamicParametersStatus: hemodynamicParametersStatus,
     }
   | UpdateTotal(total) => {...state, totalStatus: total}
-  | SetBloodSugarEditor(editor) => {...state, bloodSugarEditor: editor}
   | UpdateBloodSugarStatus(bloodSugarStatus) => {...state, bloodSugarStatus: bloodSugarStatus}
   | UpdatePressureSoreStatus(pressureSoreStatus) => {
       ...state,
@@ -178,11 +175,6 @@ let initialState = dailyRound => {
   dialysisStatus: "0",
   nursingCareStatus: "0",
   totalStatus: 0,
-  bloodSugarEditor: {
-    blood_sugar_level: "",
-    dosage: "",
-    frequency: "OD",
-  },
   pressureSoreStatus: "0",
 }
 
@@ -262,16 +254,10 @@ export make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
             />
           | BloodSugarEditor =>
             <CriticalCare_BloodSugarEditor
-              initialState={state.bloodSugarEditor}
-              handleDone={data => {
-                send(CloseEditor)
-                send(SetBloodSugarEditor(data))
-                let status = BloodSugar.showStatus(data)
-                send(UpdateBloodSugarStatus(status))
-                if status == "100" {
-                  send(UpdateTotal(state.totalStatus + 1))
-                }
-              }}
+              bloodsugarParameters={CriticalCare__DailyRound.bloodSugar(state.dailyRound)}
+              updateCB={updateDailyRound(send)}
+              id
+              consultationId
             />
           | IOBalanceEditor =>
             <CriticalCare__IOBalanceEditor
@@ -286,6 +272,12 @@ export make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
               updateCB={updateDailyRound(send)}
               id
               consultationId
+              percentCompleteCB={status => {
+                send(UpdateDialysisStatus(status))
+                if status == "100" {
+                  send(UpdateTotal(state.totalStatus + 1))
+                }
+              }}
             />
           | PressureSoreEditor =>
             <CriticalCare__PressureSoreEditor
