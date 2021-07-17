@@ -267,6 +267,12 @@ export make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
               updateCB={updateDailyRound(send)}
               id
               consultationId
+              percentCompleteCB={status => {
+                send(UpdateDialysisStatus(status))
+                if status == "100" {
+                  send(UpdateTotal(state.totalStatus + 1))
+                }
+              }}
             />
           | PressureSoreEditor => <CriticalCare__PressureSore />
           | NursingCareEditor =>

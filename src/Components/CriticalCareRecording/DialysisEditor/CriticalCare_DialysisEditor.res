@@ -62,7 +62,19 @@ let errorCB = (send, _error) => {
   send(ClearSaving)
 }
 
-let saveData = (id, consultationId, state, send, updateCB) => {
+let showStatus = data => {
+  let total = 2.0
+  let count = ref(0.0)
+  if Js.Option.isSome(data.dialysis_fluid_balance) {
+    count := count.contents +. 1.0
+  }
+  if Js.Option.isSome(data.dialysis_net_balance) {
+    count := count.contents +. 1.0
+  }
+  Js.Float.toFixed(count.contents /. total *. 100.0)
+}
+
+let saveData = (id, consultationId, state, send, updateCB, percentCompleteCB) => {
   send(SetSaving)
   updateDailyRound(
     consultationId,
@@ -71,10 +83,11 @@ let saveData = (id, consultationId, state, send, updateCB) => {
     successCB(send, updateCB),
     errorCB(send),
   )
+  percentCompleteCB(showStatus(state))
 }
 
 @react.component
-let make = (~dialysisParameters, ~updateCB, ~id, ~consultationId) => {
+let make = (~dialysisParameters, ~updateCB, ~id, ~consultationId, ~percentCompleteCB) => {
   let (state, send) = React.useReducer(reducer, initialState(dialysisParameters))
 
   <div>
@@ -105,7 +118,7 @@ let make = (~dialysisParameters, ~updateCB, ~id, ~consultationId) => {
       <button
         disabled={state.saving || !state.dirty}
         className="flex w-full bg-primary-600 text-white p-2 text-lg hover:bg-primary-800 justify-center items-center rounded-md"
-        onClick={_ => saveData(id, consultationId, state, send, updateCB)}>
+        onClick={_ => saveData(id, consultationId, state, send, updateCB, percentCompleteCB)}>
         {str("Update Details")}
       </button>
     </div>

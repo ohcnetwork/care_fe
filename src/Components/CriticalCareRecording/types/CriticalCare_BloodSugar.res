@@ -1,18 +1,3 @@
-// let frequencyOptions = [
-//   {
-//     "name": "Once a Day(OD)",
-//     "value": "OD",
-//   },
-//   {
-//     "name": "Twice a day(BD)",
-//     "value": "BD",
-//   },
-//   {
-//     "name": "Thrice in a day(TD)",
-//     "value": "TD",
-//   },
-// ]
-
 type frequency =
   | UNKNOWN
   | OD
