@@ -273,13 +273,19 @@ let reducer = (state, action) => {
   }
 }
 
+let setPayload = state => {
+  let fields = Js.Dict.empty()
+
+  DictUtils.setOptionalNumber("braden_scale_front", state.braden_scale_front, fields)
+  DictUtils.setOptionalNumber("braden_scale_back", state.braden_scale_back, fields)
+  Js.Dict.set(fields, "front_parts_selected", Js.Json.booleanArray(state.front_parts_selected))
+  Js.Dict.set(fields, "back_parts_selected", Js.Json.booleanArray(state.back_parts_selected))
+  [fields]
+}
+
 let makePayload = state => {
   let payload = Js.Dict.empty()
-
-  DictUtils.setOptionalNumber("braden_scale_front", state.braden_scale_front, payload)
-  DictUtils.setOptionalNumber("braden_scale_back", state.braden_scale_back, payload)
-  Js.Dict.set(payload, "front_parts_selected", Js.Json.booleanArray(state.front_parts_selected))
-  Js.Dict.set(payload, "back_parts_selected", Js.Json.booleanArray(state.back_parts_selected))
+  Js.Dict.set(payload, "pressure_sore", Js.Json.objectArray(setPayload(state)))
   payload
 }
 
