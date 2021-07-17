@@ -16,7 +16,7 @@ type editor =
 type state = {
   visibleEditor: option<editor>,
   dailyRound: CriticalCare__DailyRound.t,
-  ventilatorParametersEditor: CriticalCare__VentilatorParameters.t,
+  // ventilatorParametersEditor: CriticalCare__VentilatorParameters.t,
   neurologicalMonitoringStatus: string,
   hemodynamicParametersStatus: string,
   ventilatorParametersStatus: string,
@@ -88,7 +88,9 @@ let reducer = (state, action) => {
   switch action {
   | ShowEditor(editor) => {...state, visibleEditor: Some(editor)}
   | CloseEditor => {...state, visibleEditor: None}
-  | SetVentilatorParametersEditor(editor) => {...state, ventilatorParametersEditor: editor}
+  | SetVentilatorParametersEditor(
+      editor,
+    ) => state /* {...state,, ventilatorParametersEditor: editor} */
   | UpdateNursingCareStatus(nursingCareStatus) => {
       ...state,
       nursingCareStatus: nursingCareStatus,
@@ -120,47 +122,47 @@ let reducer = (state, action) => {
 let initialState = dailyRound => {
   visibleEditor: None,
   dailyRound: dailyRound,
-  ventilatorParametersEditor: {
-    ventilationInterface: "iv",
-    iv: {
-      ventilatorMode: "",
-      ventilatorModeSubOption: {
-        cmv: "",
-        simv: "",
-        psv: "",
-      },
-      peep: "",
-      peakInspiratoryPressure: "",
-      meanAirwayPressure: "",
-      respiratoryRateVentilator: "",
-      tidalVolume: "",
-      fio2: "",
-      spo2: "",
-    },
-    niv: {
-      ventilatorMode: "",
-      ventilatorModeSubOption: {
-        cmv: "",
-        simv: "",
-        psv: "",
-      },
-      peep: "",
-      peakInspiratoryPressure: "",
-      meanAirwayPressure: "",
-      respiratoryRateVentilator: "",
-      tidalVolume: "",
-      fio2: "",
-      spo2: "",
-    },
-    none: {
-      nasalProngs: Some(""),
-      simpleFaceMask: Some(""),
-      nonRebreathingMask: false,
-      highFlowNasalCannula: false,
-      fio2: "",
-      spo2: "",
-    },
-  },
+  // ventilatorParametersEditor: {
+  //   ventilationInterface: "iv",
+  //   iv: {
+  //     ventilatorMode: "",
+  //     ventilatorModeSubOption: {
+  //       cmv: "",
+  //       simv: "",
+  //       psv: "",
+  //     },
+  //     peep: "",
+  //     peakInspiratoryPressure: "",
+  //     meanAirwayPressure: "",
+  //     respiratoryRateVentilator: "",
+  //     tidalVolume: "",
+  //     fio2: "",
+  //     spo2: "",
+  //   },
+  //   niv: {
+  //     ventilatorMode: "",
+  //     ventilatorModeSubOption: {
+  //       cmv: "",
+  //       simv: "",
+  //       psv: "",
+  //     },
+  //     peep: "",
+  //     peakInspiratoryPressure: "",
+  //     meanAirwayPressure: "",
+  //     respiratoryRateVentilator: "",
+  //     tidalVolume: "",
+  //     fio2: "",
+  //     spo2: "",
+  //   },
+  //   none: {
+  //     nasalProngs: Some(""),
+  //     simpleFaceMask: Some(""),
+  //     nonRebreathingMask: false,
+  //     highFlowNasalCannula: false,
+  //     fio2: "",
+  //     spo2: "",
+  //   },
+  // },
   neurologicalMonitoringStatus: "0",
   hemodynamicParametersStatus: "0",
   ventilatorParametersStatus: "0",
@@ -225,10 +227,10 @@ export make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
             />
           | VentilatorParametersEditor =>
             <CriticalCare__VentilatorParametersEditor
-              initialState={state.ventilatorParametersEditor}
-              handleDone={(data, status) => {
+            // initialState={state.ventilatorParametersEditor}
+              handleDone={(data, _) => {
                 send(SetVentilatorParametersEditor(data))
-                send(UpdateVentilatorParametersStatus(status))
+                send(UpdateVentilatorParametersStatus(""))
                 send(CloseEditor)
               }}
             />
