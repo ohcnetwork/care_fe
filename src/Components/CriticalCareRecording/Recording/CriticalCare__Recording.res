@@ -43,6 +43,7 @@ type action =
   | UpdateNeurologicalMonitoringStatus(string)
   | SetIOBalaceStatus(IOBalance.t)
   | UpdateDailyRound(CriticalCare__DailyRound.t)
+  | UpdatePressureSoreStatus(string)
 
 let showEditor = (editor, send) => {
   send(ShowEditor(editor))
@@ -105,6 +106,10 @@ let reducer = (state, action) => {
     }
   | UpdateTotal(total) => {...state, totalStatus: total}
   | UpdateBloodSugarStatus(bloodSugarStatus) => {...state, bloodSugarStatus: bloodSugarStatus}
+  | UpdatePressureSoreStatus(pressureSoreStatus) => {
+      ...state,
+      pressureSoreStatus: pressureSoreStatus,
+    }
   | UpdateDialysisStatus(dialysisStatus) => {...state, dialysisStatus: dialysisStatus}
   | UpdateNeurologicalMonitoringStatus(neurologicalMonitoringStatus) => {
       ...state,
@@ -170,9 +175,9 @@ let initialState = dailyRound => {
   bloodSugarStatus: "0",
   ioBalanceStatus: "0",
   dialysisStatus: "0",
-  pressureSoreStatus: "0",
   nursingCareStatus: "0",
   totalStatus: 0,
+  pressureSoreStatus: "0",
 }
 
 let editorButtons = (state, send) => {
@@ -276,7 +281,15 @@ export make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
                 }
               }}
             />
-          | PressureSoreEditor => <CriticalCare__PressureSore />
+          | PressureSoreEditor =>
+            <CriticalCare__PressureSoreEditor
+              pressureSoreParameter={CriticalCare__DailyRound.pressureSoreParameter(
+                state.dailyRound,
+              )}
+              updateCB={updateDailyRound(send)}
+              id
+              consultationId
+            />
           | NursingCareEditor =>
             <CriticalCare__NursingCareEditor
               nursingCare={CriticalCare__DailyRound.nursingCare(state.dailyRound)}
