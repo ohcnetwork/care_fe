@@ -332,6 +332,18 @@ export const ConsultationDetails = (props: any) => {
                     </button>
                   </div>
                 )}
+                <div className="mt-2">
+                  <button
+                    className="btn btn-primary w-full"
+                    onClick={() =>
+                      navigate(
+                        `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds`
+                      )
+                    }
+                  >
+                    Log Update
+                  </button>
+                </div>
               </div>
             </div>
           </div>

@@ -73,7 +73,7 @@ export const DailyRoundsList = (props: any) => {
           <div
             className={`block border rounded-lg ${
               telemedicine_doctor_update ? "bg-purple-200" : "bg-white"
-            }  shadow h-full cursor-pointer hover:border-primary-500 text-black`}
+            }  shadow h-full cursor-pointer`}
           >
             <div className="p-4">
               <Grid container justify="space-between" alignItems="center">
@@ -91,42 +91,18 @@ export const DailyRoundsList = (props: any) => {
                       </Typography>
                     </Grid>
                   ) : null}
-                  <Grid item xs={6}>
-                    <Typography>
-                      <span className="text-gray-700">Temperature:</span>{" "}
-                      {itemData.temperature}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography>
-                      <span className="text-gray-700">Taken at :</span>{" "}
-                      {itemData.temperature_measured_at
-                        ? moment(itemData.temperature_measured_at).format("lll")
-                        : "-"}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography>
-                      <span className="text-gray-700">SpO2:</span>{" "}
-                      {itemData.spo2}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography>
-                      <span className="text-gray-700">Admitted To:</span>{" "}
-                      {itemData.admitted_to || "-"}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Typography>
-                      <span className="text-gray-700">Category: </span>
-                      <span className="badge badge-pill badge-warning">
-                        {patientCategoryChoices.find(
-                          (i) => i.id === itemData.patient_category
-                        )?.text || "-"}
-                      </span>
-                    </Typography>
-                  </Grid>
+                  {itemData.patient_category && (
+                    <Grid item xs={12}>
+                      <Typography>
+                        <span className="text-gray-700">Category: </span>
+                        <span className="badge badge-pill badge-warning">
+                          {patientCategoryChoices.find(
+                            (i) => i.id === itemData.patient_category
+                          )?.text || "-"}
+                        </span>
+                      </Typography>
+                    </Grid>
+                  )}
                   <Grid item xs={6}>
                     <Typography>
                       <span className="text-gray-700">Created At:</span>{" "}
@@ -144,35 +120,49 @@ export const DailyRoundsList = (props: any) => {
                     </Typography>
                   </Grid>
 
-                  <Grid item xs={12}>
-                    <Typography>
-                      <span className="text-gray-700">
-                        Physical Examination Info:
-                      </span>{" "}
-                      {itemData.physical_examination_info}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Typography>
-                      <span className="text-gray-700">Other Details:</span>{" "}
-                      {itemData.other_details}
-                    </Typography>
-                  </Grid>
+                  {itemData.physical_examination_info && (
+                    <Grid item xs={12}>
+                      <Typography>
+                        <span className="text-gray-700">
+                          Physical Examination Info:
+                        </span>{" "}
+                        {itemData.physical_examination_info}
+                      </Typography>
+                    </Grid>
+                  )}
+                  {itemData.other_details && (
+                    <Grid item xs={12}>
+                      <Typography>
+                        <span className="text-gray-700">Other Details:</span>{" "}
+                        {itemData.other_details}
+                      </Typography>
+                    </Grid>
+                  )}
                 </Grid>
               </Grid>
-              <div className="mt-2">
-                <Button
-                  size="small"
-                  variant="outlined"
-                  fullWidth
+              <div className="mt-2 flex md:flex-row flex-col md:space-y-0 space-y-2 space-x-0 md:space-x-2">
+                <button
+                  className="btn btn-default"
                   onClick={(e) =>
                     navigate(
                       `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${itemData.id}`
                     )
                   }
                 >
+                  <i className="fas fa-eye mr-2" />
                   View Consultation Update Details
-                </Button>
+                </button>
+                <button
+                  className="btn btn-default"
+                  onClick={(e) =>
+                    navigate(
+                      `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${itemData.id}/update`
+                    )
+                  }
+                >
+                  <i className="fas fa-pencil-alt mr-2" />
+                  Update Log
+                </button>
               </div>
             </div>
           </div>

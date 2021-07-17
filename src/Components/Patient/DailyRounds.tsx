@@ -232,7 +232,9 @@ export const DailyRounds = (props: any) => {
           Notification.Success({
             msg: "Consultation Updates details created successfully",
           });
-          navigate(`/facility/${facilityId}/patient/${patientId}`);
+          navigate(
+            `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${res.data.external_id}/update`
+          );
         }
       } else {
         setIsLoading(false);
@@ -302,48 +304,6 @@ export const DailyRounds = (props: any) => {
                 </div>
               </div>
               <div className="md:grid gap-4 grid-cols-1 md:grid-cols-2 mt-4">
-                <div>
-                  <InputLabel id="spo2-label">SpO2</InputLabel>
-                  <TextInputField
-                    name="spo2"
-                    variant="outlined"
-                    margin="dense"
-                    type="number"
-                    InputLabelProps={{ shrink: !!state.form.spo2 }}
-                    value={state.form.spo2}
-                    onChange={handleChange}
-                    errors={state.errors.spo2}
-                  />
-                </div>
-                <div className="col-span-2 md:flex justify-between">
-                  <div>
-                    <InputLabel id="temperature-label">Temperature</InputLabel>
-                    <TextInputField
-                      name="temperature"
-                      variant="outlined"
-                      margin="dense"
-                      type="text"
-                      InputLabelProps={{ shrink: !!state.form.temperature }}
-                      value={state.form.temperature}
-                      onChange={handleChange}
-                      errors={state.errors.temperature}
-                    />
-                  </div>
-                  <div>
-                    <DateTimeFiled
-                      label="Temperature Measured At"
-                      margin="dense"
-                      disabled={!state.form.temperature}
-                      value={state.form.temperature_measured_at}
-                      disableFuture={true}
-                      showTodayButton={true}
-                      onChange={(date) =>
-                        handleDateChange(date, "temperature_measured_at")
-                      }
-                      errors={state.errors.temperature_measured_at}
-                    />
-                  </div>
-                </div>
                 <div>
                   <InputLabel id="physical-examination-info-label">
                     Physical Examination Info
@@ -467,15 +427,6 @@ export const DailyRounds = (props: any) => {
                   <ErrorHelperText error={state.errors.action} />
                 </div>
               </div>
-
-              <div className="my-4">
-                <InputLabel>Medication</InputLabel>
-                <PrescriptionBuilder
-                  prescriptions={prescriptions}
-                  setPrescriptions={setPrescriptions}
-                />
-              </div>
-
               <div className="md:grid gap-4 grid-cols-1 md:grid-cols-2">
                 <div className="flex-1">
                   <InputLabel id="review_time-label">Review After </InputLabel>

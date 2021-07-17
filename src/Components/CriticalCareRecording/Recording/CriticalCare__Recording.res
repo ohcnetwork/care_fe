@@ -204,6 +204,9 @@ export make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
 
   <div
     className="bg-white px-4 py-5 border-b border-gray-200 sm:px-6 max-w-3xl mx-auto border mt-4 shadow rounded-lg">
+    <a href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`}>
+      {str("Back")}
+    </a>
     <div className="p-4">
       {switch state.visibleEditor {
       | Some(editor) =>
