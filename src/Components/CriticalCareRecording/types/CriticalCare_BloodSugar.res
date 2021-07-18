@@ -54,18 +54,3 @@ let makeFromJs = dailyRound => {
     ~frequency=makeFrequency(dailyRound["insulin_intake_frequency"]),
   )
 }
-
-// let showStatus = data => {
-//   let total = 3.0
-//   let count = ref(0.0)
-//   if bloodsugar_level(data) !== "" {
-//     count := count.contents +. 1.0
-//   }
-//   if dosage(data) !== "" {
-//     count := count.contents +. 1.0
-//   }
-//   if frequency(data) !== "" {
-//     count := count.contents +. 1.0
-//   }
-//   Js.Float.toFixed(count.contents /. total *. 100.0)
-// }
