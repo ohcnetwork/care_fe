@@ -131,7 +131,7 @@ let decodeVetilatorOxygenModalityType = ventilatorOxygenModalityType => {
 //   spo2: string,
 // }
 
-type t = {
+export type t = {
   ventilator_interface: ventilatorInterfaceType,
   ventilator_mode: ventilatorModeType,
   ventilator_oxygen_modality: ventilatorOxygenModalityType,
@@ -145,6 +145,22 @@ type t = {
   ventilator_oxygen_modality_flow_rate: option<int>,
   ventilator_fi02: option<int>,
   ventilator_spo2: option<int>,
+}
+type state = {
+  ventilator_interface: ventilatorInterfaceType,
+  ventilator_mode: ventilatorModeType,
+  ventilator_oxygen_modality: ventilatorOxygenModalityType,
+  ventilator_peep: option<int>,
+  ventilator_pip: option<int>,
+  ventilator_mean_airway_pressure: option<int>,
+  ventilator_resp_rate: option<int>,
+  ventilator_pressure_support: option<int>,
+  ventilator_tidal_volume: option<int>,
+  ventilator_oxygen_modality_oxygen_rate: option<int>,
+  ventilator_oxygen_modality_flow_rate: option<int>,
+  ventilator_fi02: option<int>,
+  ventilator_spo2: option<int>,
+  saving: bool,
 }
 
 let ventilatorInterface = t => t.ventilator_interface
@@ -190,6 +206,58 @@ type action =
   | SetOxygenModalityFlowRate(option<int>)
   | SetFIO2(option<int>)
   | SetSPO2(option<int>)
+  | SetSaving
+  | ClearSaving
+
+let make = (
+  ~ventilator_interface,
+  ~ventilator_mode,
+  ~ventilator_oxygen_modality,
+  ~ventilator_peep,
+  ~ventilator_pip,
+  ~ventilator_mean_airway_pressure,
+  ~ventilator_resp_rate,
+  ~ventilator_pressure_support,
+  ~ventilator_tidal_volume,
+  ~ventilator_oxygen_modality_oxygen_rate,
+  ~ventilator_oxygen_modality_flow_rate,
+  ~ventilator_fi02,
+  ~ventilator_spo2,
+) => {
+  ventilator_interface: ventilator_interface,
+  ventilator_mode: ventilator_mode,
+  ventilator_oxygen_modality: ventilator_oxygen_modality,
+  ventilator_peep: ventilator_peep,
+  ventilator_pip: ventilator_pip,
+  ventilator_mean_airway_pressure: ventilator_mean_airway_pressure,
+  ventilator_resp_rate: ventilator_resp_rate,
+  ventilator_pressure_support: ventilator_pressure_support,
+  ventilator_tidal_volume: ventilator_tidal_volume,
+  ventilator_oxygen_modality_oxygen_rate: ventilator_oxygen_modality_oxygen_rate,
+  ventilator_oxygen_modality_flow_rate: ventilator_oxygen_modality_flow_rate,
+  ventilator_fi02: ventilator_fi02,
+  ventilator_spo2: ventilator_spo2,
+}
+
+let makeFromJs = dailyRound => {
+  make(
+    ~ventilator_interface=decodeVentilatorInterfaceType(dailyRound["ventilator_interface"]),
+    ~ventilator_mode=decodeVentilatorModeType(dailyRound["ventilator_mode"]),
+    ~ventilator_oxygen_modality=decodeVetilatorOxygenModalityType(
+      dailyRound["ventilator_oxygen_modality"],
+    ),
+    ~ventilator_peep=dailyRound["ventilator_peep"],
+    ~ventilator_pip=dailyRound["ventilator_pip"],
+    ~ventilator_mean_airway_pressure=dailyRound["ventilator_mean_airway_pressure"],
+    ~ventilator_resp_rate=dailyRound["ventilator_resp_rate"],
+    ~ventilator_pressure_support=dailyRound["ventilator_pressure_support"],
+    ~ventilator_tidal_volume=dailyRound["ventilator_tidal_volume"],
+    ~ventilator_oxygen_modality_oxygen_rate=dailyRound["ventilator_oxygen_modality_oxygen_rate"],
+    ~ventilator_oxygen_modality_flow_rate=dailyRound["ventilator_oxygen_modality_flow_rate"],
+    ~ventilator_fi02=dailyRound["ventilator_fi02"],
+    ~ventilator_spo2=dailyRound["ventilator_spo2"],
+  )
+}
 
 let ventilatorModeStatus = (count, totalCount, data) => {
   // switch data.ventilatorMode {
