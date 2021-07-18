@@ -12,7 +12,6 @@ type state = {
 }
 
 type action =
-  | UpdatePart(PressureSore.part)
   | AutoManageScale(PressureSore.part)
   | AddPressureSore(PressureSore.region)
   | SetSaving
@@ -20,22 +19,17 @@ type action =
 
 let reducer = (state, action) => {
   switch action {
-  | UpdatePart(part) => {
-      ...state,
-      parts: Js.Array.map(
-        p => PressureSore.region(p) === PressureSore.region(part) ? part : p,
-        state.parts,
-      ),
-      dirty: true,
-    }
   | AutoManageScale(part) => {
-      ...state,
-      parts: Js.Array.map(
+      let newParts = Js.Array.map(
         p =>
           PressureSore.region(p) === PressureSore.region(part) ? PressureSore.autoScale(part) : p,
         state.parts,
-      ),
-      dirty: true,
+      )
+      {
+        ...state,
+        parts: Js.Array.filter(f => PressureSore.scale(f) !== 0, newParts),
+        dirty: true,
+      }
     }
   | AddPressureSore(region) => {
       ...state,
