@@ -11,7 +11,6 @@ export const NursingPlot = (props: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const [offset, setOffset] = useState(0);
   const [results, setResults] = useState<any>({});
-  const limit = 14;
 
   const fetchDailyRounds = useCallback(
     async (status: statusType) => {
@@ -19,7 +18,6 @@ export const NursingPlot = (props: any) => {
       const res = await dispatch(
         dailyRoundsAnalyse(
           {
-            limit,
             offset,
             fields: ["nursing"],
           },
@@ -41,7 +39,6 @@ export const NursingPlot = (props: any) => {
   }, []);
 
   const data = Object.entries(results).map((key: any) => {
-    console.log(key);
     return {
       date: moment(key[0]).format("LLL"),
       nursing: key[1]["nursing"],
@@ -62,13 +59,13 @@ export const NursingPlot = (props: any) => {
       <div>
         <div className="space-y-2">
           {NURSING_CARE_FIELDS.map((f: any) => (
-            <div className="p-4 bg-white border rounded-lg shadow">
+            <div key={f.desc} className="p-4 bg-white border rounded-lg shadow">
               <div className="text-xl font-semibold">{f.desc}</div>
               <div className="space-y-2">
                 {dataToDisplay
                   .filter((i: any) => i.procedure === f.text)
-                  .map((care: any) => (
-                    <div>
+                  .map((care: any, index: number) => (
+                    <div key={index}>
                       <div className="text-sm font-semibold">{`- ${care.date}`}</div>
                       <div className="text-cool-gray-800 pl-2">
                         {care.description}

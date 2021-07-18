@@ -99,7 +99,6 @@ export const ABGPlots = (props: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const [offset, setOffset] = useState(0);
   const [results, setResults] = useState({});
-  const limit = 14;
 
   const fetchDailyRounds = useCallback(
     async (status: statusType) => {
@@ -107,7 +106,6 @@ export const ABGPlots = (props: any) => {
       const res = await dispatch(
         dailyRoundsAnalyse(
           {
-            limit,
             offset,
             fields: [
               "ph",
@@ -137,21 +135,11 @@ export const ABGPlots = (props: any) => {
     fetchDailyRounds(status);
   }, []);
 
-  if (Object.keys(results).length !== 0) {
-    console.log(results);
-  }
-
   const dates = Object.keys(results)
     .map((p: string) => moment(p).format("LLL"))
     .reverse();
 
   const yAxisData = (name: string) => {
-    console.log(
-      name,
-      Object.values(results)
-        .map((p: any) => p[name])
-        .reverse()
-    );
     return Object.values(results)
       .map((p: any) => p[name])
       .reverse();

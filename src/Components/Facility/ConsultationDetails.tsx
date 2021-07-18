@@ -309,6 +309,7 @@ export const ConsultationDetails = (props: any) => {
                     "NURSING",
                   ].map((p: string) => (
                     <Link
+                      key={p}
                       className={tabButtonClasses(tab === p)}
                       href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/${p.toLocaleLowerCase()}`}
                     >

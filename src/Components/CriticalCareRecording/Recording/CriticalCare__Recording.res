@@ -42,10 +42,25 @@ let basicEditor = (~facilityId, ~patientId, ~consultationId, ~id) => {
     <div> <i className="text-3xl fas fa-check-circle text-green-500" /> </div>
   </Link>
 }
+let editorNameToString = editor => {
+  switch editor {
+  | NeurologicalMonitoringEditor => "Neurological Monitoring"
+  | HemodynamicParametersEditor => "Hemodynamic Parameters"
+  | VentilatorParametersEditor => "Ventilator Parameters"
+  | ArterialBloodGasAnalysisEditor => "Arterial Blood Gas Analysis"
+  | BloodSugarEditor => "Blood Sugar"
+  | IOBalanceEditor => "I/O Balance"
+  | DialysisEditor => "Dialysis"
+  | PressureSoreEditor => "Pressure Sore"
+  | NursingCareEditor => "Nursing Care"
+  | MedicineEditor => "Medicine"
+  }
+}
 
 let editorToggle = (editorName, state, send) => {
   let editorUpdated = Js.Array.find(f => f === editorName, state.updatedEditors)
   <div
+    key={editorNameToString(editorName)}
     id="editorToggle"
     className={`rounded-lg border px-4 py-2 mt-4 mx-auto cursor-pointer flex justify-between items-center ${Belt.Option.isNone(
         editorUpdated,
@@ -63,18 +78,7 @@ let editorToggle = (editorName, state, send) => {
         className={`font-semibold text-xl  ${Belt.Option.isNone(editorUpdated)
             ? "text-gray-800"
             : "text-green-500"}`}>
-        {switch editorName {
-        | NeurologicalMonitoringEditor => str("Neurological Monitoring")
-        | HemodynamicParametersEditor => str("Hemodynamic Parameters")
-        | VentilatorParametersEditor => str("Ventilator Parameters")
-        | ArterialBloodGasAnalysisEditor => str("Arterial Blood Gas Analysis")
-        | BloodSugarEditor => str("Blood Sugar")
-        | IOBalanceEditor => str("I/O Balance")
-        | DialysisEditor => str("Dialysis")
-        | PressureSoreEditor => str("Pressure Sore")
-        | NursingCareEditor => str("Nursing Care")
-        | MedicineEditor => str("Medicine")
-        }}
+        {str(editorNameToString(editorName))}
       </div>
     </div>
     <div>
