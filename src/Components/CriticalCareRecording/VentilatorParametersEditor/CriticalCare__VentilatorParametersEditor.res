@@ -5,12 +5,9 @@ open CriticalCare__Types
 external updateDailyRound: (string, string, Js.Json.t, _ => unit, _ => unit) => unit =
   "updateDailyRound"
 
-let handleSubmit = (handleDone, state: VentilatorParameters.t) => {
-  let status = VentilatorParameters.showStatus(state)
-  handleDone(state, status)
-}
+open VentilatorParameters
 
-let reducer = (state: VentilatorParameters.t, action: VentilatorParameters.action) => {
+let reducer = (state: VentilatorParameters.state, action: VentilatorParameters.action) => {
   switch action {
   | SetVentilatorInterface(ventilator_interface) => {
       ...state,
@@ -65,8 +62,81 @@ let reducer = (state: VentilatorParameters.t, action: VentilatorParameters.actio
       ...state,
       ventilator_spo2: spo2,
     }
+  | SetSaving => {...state, saving: true}
+  | ClearSaving => {...state, saving: false}
   | _ => state
   }
+}
+
+let handleSubmit = (handleDone, state: VentilatorParameters.t) => {
+  let status = VentilatorParameters.showStatus(state)
+  handleDone(state, status)
+}
+
+let makePayload = (state: VentilatorParameters.state) => {
+  let payload = Js.Dict.empty()
+  DictUtils.setOptionalString(
+    "ventilator_interface",
+    VentilatorParameters.encodeVentilatorInterfaceType(state.ventilator_interface),
+    payload,
+  )
+  DictUtils.setOptionalString(
+    "ventilator_mode",
+    VentilatorParameters.encodeVentilatorModeType(state.ventilator_mode),
+    payload,
+  )
+  DictUtils.setOptionalString(
+    "ventilator_oxygen_modality",
+    VentilatorParameters.encodeVentilatorOxygenModalityType(state.ventilator_oxygen_modality),
+    payload,
+  )
+  DictUtils.setOptionalNumber("ventilator_peep", state.ventilator_peep, payload)
+  DictUtils.setOptionalNumber("ventilator_pip", state.ventilator_pip, payload)
+  DictUtils.setOptionalNumber(
+    "ventilator_mean_airway_pressure",
+    state.ventilator_mean_airway_pressure,
+    payload,
+  )
+  DictUtils.setOptionalNumber("ventilator_resp_rate", state.ventilator_resp_rate, payload)
+  DictUtils.setOptionalNumber(
+    "ventilator_pressure_support",
+    state.ventilator_pressure_support,
+    payload,
+  )
+  DictUtils.setOptionalNumber("ventilator_tidal_volume", state.ventilator_tidal_volume, payload)
+  DictUtils.setOptionalNumber(
+    "ventilator_oxygen_modality_oxygen_rate",
+    state.ventilator_oxygen_modality_oxygen_rate,
+    payload,
+  )
+  DictUtils.setOptionalNumber(
+    "ventilator_oxygen_modality_flow_rate",
+    state.ventilator_oxygen_modality_flow_rate,
+    payload,
+  )
+  DictUtils.setOptionalNumber("ventilator_fi02", state.ventilator_fi02, payload)
+  DictUtils.setOptionalNumber("ventilator_spo2", state.ventilator_spo2, payload)
+
+  payload
+}
+
+let successCB = (send, updateCB, data) => {
+  updateCB(CriticalCare__DailyRound.makeFromJs(data))
+}
+
+let errorCB = (send, _error) => {
+  send(ClearSaving)
+}
+
+let saveData = (id, consultationId, state, send, updateCB) => {
+  send(SetSaving)
+  updateDailyRound(
+    consultationId,
+    id,
+    Js.Json.object_(makePayload(state)),
+    successCB(send, updateCB),
+    errorCB(send),
+  )
 }
 
 let ventilatorInterfaceOptions: array<Options.t> = [
@@ -87,25 +157,28 @@ let ventilatorInterfaceOptions: array<Options.t> = [
   },
 ]
 
-let initialState: VentilatorParameters.t = {
-  ventilator_interface: INVASIVE,
-  ventilator_mode: UNKNOWN,
-  ventilator_oxygen_modality: UNKNOWN,
-  ventilator_peep: None,
-  ventilator_pip: None,
-  ventilator_mean_airway_pressure: None,
-  ventilator_resp_rate: None,
-  ventilator_pressure_support: None,
-  ventilator_tidal_volume: None,
-  ventilator_oxygen_modality_oxygen_rate: None,
-  ventilator_oxygen_modality_flow_rate: None,
-  ventilator_fi02: None,
-  ventilator_spo2: None,
+let initialState: VentilatorParameters.t => VentilatorParameters.state = ventilatorParameters => {
+  {
+    ventilator_interface: ventilatorParameters.ventilator_interface,
+    ventilator_mode: ventilatorParameters.ventilator_mode,
+    ventilator_oxygen_modality: ventilatorParameters.ventilator_oxygen_modality,
+    ventilator_peep: ventilatorParameters.ventilator_peep,
+    ventilator_pip: ventilatorParameters.ventilator_pip,
+    ventilator_mean_airway_pressure: ventilatorParameters.ventilator_mean_airway_pressure,
+    ventilator_resp_rate: ventilatorParameters.ventilator_resp_rate,
+    ventilator_pressure_support: ventilatorParameters.ventilator_pressure_support,
+    ventilator_tidal_volume: ventilatorParameters.ventilator_tidal_volume,
+    ventilator_oxygen_modality_oxygen_rate: ventilatorParameters.ventilator_oxygen_modality_oxygen_rate,
+    ventilator_oxygen_modality_flow_rate: ventilatorParameters.ventilator_oxygen_modality_flow_rate,
+    ventilator_fi02: ventilatorParameters.ventilator_fi02,
+    ventilator_spo2: ventilatorParameters.ventilator_spo2,
+    saving: false,
+  }
 }
 
 @react.component
-let make = (~handleDone) => {
-  let (state, send) = React.useReducer(reducer, (initialState: VentilatorParameters.t))
+let make = (~ventilatorParameters: VentilatorParameters.t, ~id, ~consultationId, ~updateCB) => {
+  let (state, send) = React.useReducer(reducer, initialState(ventilatorParameters))
 
   let editor = switch state.ventilator_interface {
   | INVASIVE => <CriticalCare__VentilatorParametersEditor__Invasive state send />
@@ -158,7 +231,9 @@ let make = (~handleDone) => {
         </div>
       </div>
       <button
-        onClick={_ => handleSubmit(handleDone, state)} className="btn btn-primary btn-large w-full">
+        disabled={state.saving}
+        onClick={_ => saveData(id, consultationId, state, send, updateCB)}
+        className="btn btn-primary btn-large w-full">
         {str("Update Details")}
       </button>
     </div>
