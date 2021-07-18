@@ -167,27 +167,37 @@ export const DailyRounds = (props: any) => {
     const validForm = validateForm();
     if (validForm) {
       setIsLoading(true);
-      const data = {
-        additional_symptoms: state.form.additional_symptoms,
-        other_symptoms: state.form.otherSymptom
-          ? state.form.other_symptoms
-          : undefined,
-        admitted_to:
-          (state.form.admitted === "Select"
-            ? undefined
-            : state.form.admitted_to) || undefined,
-        physical_examination_info: state.form.physical_examination_info,
-        other_details: state.form.other_details,
-        consultation: consultationId,
-        patient_category: state.form.category,
-        current_health: state.form.current_health,
-        recommend_discharge: JSON.parse(state.form.recommend_discharge),
-        action: state.form.action,
-        review_time: state.form.review_time,
+      let baseData = {
         taken_at: state.form.taken_at,
-        rounds_type: state.form.rounds_type,
         clone_last: state.form.clone_last === "true" ? true : false,
+        rounds_type: state.form.rounds_type,
       };
+
+      let data: any;
+
+      if (state.form.clone_last !== "true") {
+        data = {
+          ...baseData,
+          additional_symptoms: state.form.additional_symptoms,
+          other_symptoms: state.form.otherSymptom
+            ? state.form.other_symptoms
+            : undefined,
+          admitted_to:
+            (state.form.admitted === "Select"
+              ? undefined
+              : state.form.admitted_to) || undefined,
+          physical_examination_info: state.form.physical_examination_info,
+          other_details: state.form.other_details,
+          consultation: consultationId,
+          patient_category: state.form.category,
+          current_health: state.form.current_health,
+          recommend_discharge: JSON.parse(state.form.recommend_discharge),
+          action: state.form.action,
+          review_time: state.form.review_time,
+        };
+      } else {
+        data = baseData;
+      }
 
       let res;
       if (id) {
