@@ -107,7 +107,7 @@ let silderOptionArray = [
 ]
 
 @react.component
-let make = (~state: VentilatorParameters.t, ~send: VentilatorParameters.action => unit) => {
+let make = (~state: VentilatorParameters.state, ~send: VentilatorParameters.action => unit) => {
   let defaultChecked = VentilatorParameters.getParentVentilatorMode(state.ventilator_mode)
   let (parentVentilatorMode, setParentVentilatorMode) = React.useState(() => defaultChecked)
 
