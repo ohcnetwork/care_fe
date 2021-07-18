@@ -220,16 +220,16 @@ let makeFromJs = dailyRound => {
     ~ventilator_oxygen_modality=decodeVetilatorOxygenModalityType(
       dailyRound["ventilator_oxygen_modality"],
     ),
-    ~ventilator_peep=dailyRound["ventilator_peep"],
-    ~ventilator_pip=dailyRound["ventilator_pip"],
-    ~ventilator_mean_airway_pressure=dailyRound["ventilator_mean_airway_pressure"],
-    ~ventilator_resp_rate=dailyRound["ventilator_resp_rate"],
-    ~ventilator_pressure_support=dailyRound["ventilator_pressure_support"],
-    ~ventilator_tidal_volume=dailyRound["ventilator_tidal_volume"],
-    ~ventilator_oxygen_modality_oxygen_rate=dailyRound["ventilator_oxygen_modality_oxygen_rate"],
-    ~ventilator_oxygen_modality_flow_rate=dailyRound["ventilator_oxygen_modality_flow_rate"],
-    ~ventilator_fi02=dailyRound["ventilator_fi02"],
-    ~ventilator_spo2=dailyRound["ventilator_spo2"],
+    ~ventilator_peep=dailyRound["ventilator_peep"]->Js.Nullable.toOption,
+    ~ventilator_pip=dailyRound["ventilator_pip"]->Js.Nullable.toOption,
+    ~ventilator_mean_airway_pressure=dailyRound["ventilator_mean_airway_pressure"]->Js.Nullable.toOption,
+    ~ventilator_resp_rate=dailyRound["ventilator_resp_rate"]->Js.Nullable.toOption,
+    ~ventilator_pressure_support=dailyRound["ventilator_pressure_support"]->Js.Nullable.toOption,
+    ~ventilator_tidal_volume=dailyRound["ventilator_tidal_volume"]->Js.Nullable.toOption,
+    ~ventilator_oxygen_modality_oxygen_rate=dailyRound["ventilator_oxygen_modality_oxygen_rate"]->Js.Nullable.toOption,
+    ~ventilator_oxygen_modality_flow_rate=dailyRound["ventilator_oxygen_modality_flow_rate"]->Js.Nullable.toOption,
+    ~ventilator_fi02=dailyRound["ventilator_fi02"]->Js.Nullable.toOption,
+    ~ventilator_spo2=dailyRound["ventilator_spo2"]->Js.Nullable.toOption,
   )
 }
 
