@@ -13,6 +13,7 @@ import { PrimaryParametersPlot } from "./Consultations/PrimaryParametersPlot";
 import { ABGPlots } from "./Consultations/ABGPlots";
 import { DailyRoundsList } from "./Consultations/DailyRoundsList";
 import { make as Link } from "../Common/components/Link.gen";
+import { NursingPlot } from "./Consultations/NursingPlot";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -387,6 +388,12 @@ export const ConsultationDetails = (props: any) => {
                 patientId={patientId}
                 consultationId={consultationId}
               ></ABGPlots>
+              <PageTitle title="Nursing Analysis" hideBack={true} />
+              <NursingPlot
+                facilityId={facilityId}
+                patientId={patientId}
+                consultationId={consultationId}
+              ></NursingPlot>
             </div>
           )}
           {tab === "UPDATES" && (
