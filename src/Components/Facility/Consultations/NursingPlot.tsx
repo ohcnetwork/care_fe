@@ -48,30 +48,37 @@ export const NursingPlot = (props: any) => {
     };
   });
 
+  let dataToDisplay = data
+    .map((x) =>
+      x.nursing.map((f: any) => {
+        f["date"] = x.date;
+        return f;
+      })
+    )
+    .reduce((accumulator, value) => accumulator.concat(value), []);
+
   return (
     <div className="grid md:grid-cols-full gap-4">
-      <div className="pt-4 px-4 bg-white border rounded-lg shadow">
-        {data.map((x) => (
-          <div className="flex border-b-2">
-            <div className="p-2">
-              {x.date}
-              <div>Description</div>
-            </div>
-
-            {x.nursing.map((care: any) => (
-              <div className="p-2">
-                <div className="font-bold">
-                  {
-                    NURSING_CARE_FIELDS.find(
-                      (field) => field.text === care.procedure
-                    )?.desc
-                  }
-                </div>
-                <div>{care.description}</div>
+      <div>
+        <div className="space-y-2">
+          {NURSING_CARE_FIELDS.map((f: any) => (
+            <div className="p-4 bg-white border rounded-lg shadow">
+              <div className="text-xl font-semibold">{f.desc}</div>
+              <div className="space-y-2">
+                {dataToDisplay
+                  .filter((i: any) => i.procedure === f.text)
+                  .map((care: any) => (
+                    <div>
+                      <div className="text-sm font-semibold">{`- ${care.date}`}</div>
+                      <div className="text-cool-gray-800 pl-2">
+                        {care.description}
+                      </div>
+                    </div>
+                  ))}
               </div>
-            ))}
-          </div>
-        ))}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

@@ -298,7 +298,7 @@ export const ConsultationDetails = (props: any) => {
           <div className="border-b-2 border-gray-200 mt-4">
             <div className="sm:flex sm:items-baseline">
               <div className="mt-4 sm:mt-0">
-                <nav className="-mb-px flex space-x-8">
+                <nav className="pl-2 flex space-x-8 overflow-y-auto pb-2">
                   <div
                     className={tabButtonClasses(tab === "INFO")}
                     onClick={(_) => setTab("INFO")}
@@ -328,6 +328,18 @@ export const ConsultationDetails = (props: any) => {
                     onClick={(_) => setTab("FILES")}
                   >
                     Files
+                  </div>
+                  <div
+                    className={tabButtonClasses(tab === "ABG")}
+                    onClick={(_) => setTab("ABG")}
+                  >
+                    ABG
+                  </div>
+                  <div
+                    className={tabButtonClasses(tab === "NURSING")}
+                    onClick={(_) => setTab("NURSING")}
+                  >
+                    Nursing
                   </div>
                 </nav>
               </div>
@@ -382,18 +394,6 @@ export const ConsultationDetails = (props: any) => {
                 patientId={patientId}
                 consultationId={consultationId}
               ></PrimaryParametersPlot>
-              <PageTitle title="ABG Analysis Plot" hideBack={true} />
-              <ABGPlots
-                facilityId={facilityId}
-                patientId={patientId}
-                consultationId={consultationId}
-              ></ABGPlots>
-              <PageTitle title="Nursing Analysis" hideBack={true} />
-              <NursingPlot
-                facilityId={facilityId}
-                patientId={patientId}
-                consultationId={consultationId}
-              ></NursingPlot>
             </div>
           )}
           {tab === "UPDATES" && (
@@ -476,6 +476,27 @@ export const ConsultationDetails = (props: any) => {
                 audio={true}
                 unspecified={true}
               />
+            </div>
+          )}
+
+          {tab === "ABG" && (
+            <div>
+              <PageTitle title="ABG Analysis Plot" hideBack={true} />
+              <ABGPlots
+                facilityId={facilityId}
+                patientId={patientId}
+                consultationId={consultationId}
+              ></ABGPlots>
+            </div>
+          )}
+          {tab === "NURSING" && (
+            <div>
+              <PageTitle title="Nursing Analysis" hideBack={true} />
+              <NursingPlot
+                facilityId={facilityId}
+                patientId={patientId}
+                consultationId={consultationId}
+              ></NursingPlot>
             </div>
           )}
         </div>
