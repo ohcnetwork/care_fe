@@ -1,74 +1,117 @@
 let str = React.string
 open CriticalCare__Types
 
+@module("../CriticalCare__API")
+external updateDailyRound: (string, string, Js.Json.t, _ => unit, _ => unit) => unit =
+  "updateDailyRound"
+
 let handleSubmit = (handleDone, state: VentilatorParameters.t) => {
   let status = VentilatorParameters.showStatus(state)
   handleDone(state, status)
 }
 
-let reducer = (state, action) => {
+let reducer = (state: VentilatorParameters.t, action: VentilatorParameters.action) => {
   switch action {
-  | VentilatorParameters.SetVentilationInterface(ventilationInterface) => {
+  | SetVentilatorInterface(ventilator_interface) => {
       ...state,
-      VentilatorParameters.ventilationInterface: ventilationInterface,
+      ventilator_interface: ventilator_interface,
+    }
+  | SetVentilatorMode(ventilator_mode) => {
+      ...state,
+      ventilator_mode: ventilator_mode,
     }
 
-  | SetIv(iv) => {
+  | SetOxygenModality(oxygen_modality) => {
       ...state,
-      VentilatorParameters.iv: iv,
+      ventilator_oxygen_modality: oxygen_modality,
     }
-  | SetNiv(niv) => {
+  | SetPeep(peep) => {
       ...state,
-      VentilatorParameters.niv: niv,
+      ventilator_peep: peep,
     }
-  | SetNone(none) => {
+  | SetPIP(pip) => {
       ...state,
-      VentilatorParameters.none: none,
+      ventilator_pip: pip,
     }
-
-  | SetIvSubOptions(iv) => {
+  | SetMeanAirwayPressure(mean_airway_pressure) => {
       ...state,
-      iv: iv,
+      ventilator_mean_airway_pressure: mean_airway_pressure,
     }
-
-  | SetNivSubOptions(niv) => {
+  | SetRespiratoryRate(respiratory_rate) => {
       ...state,
-      niv: niv,
+      ventilator_resp_rate: respiratory_rate,
+    }
+  | SetPressureSupport(pressure_support) => {
+      ...state,
+      ventilator_pressure_support: pressure_support,
+    }
+  | SetTidalVolume(tidal_volume) => {
+      ...state,
+      ventilator_tidal_volume: tidal_volume,
+    }
+  | SetOxygenModalityOxygenRate(ventilator_oxygen_modality_oxygen_rate) => {
+      ...state,
+      ventilator_oxygen_modality_oxygen_rate: ventilator_oxygen_modality_oxygen_rate,
+    }
+  | SetOxygenModalityFlowRate(oxygen_modality_flow_rate) => {
+      ...state,
+      ventilator_oxygen_modality_flow_rate: oxygen_modality_flow_rate,
+    }
+  | SetFIO2(fio2) => {
+      ...state,
+      ventilator_fi02: fio2,
+    }
+  | SetSPO2(spo2) => {
+      ...state,
+      ventilator_spo2: spo2,
     }
   | _ => state
   }
 }
 
-let ventilationInterfaceOptions: array<Options.t> = [
+let ventilatorInterfaceOptions: array<Options.t> = [
   {
     label: "Invasive (IV)",
-    value: "iv",
-    name: "ventilationInterface",
+    value: "INVASIVE",
+    name: "ventilator_interface",
   },
   {
     label: "Non-Invasive (NIV)",
-    value: "niv",
-    name: "ventilationInterface",
+    value: "NON_INVASIVE",
+    name: "ventilator_interface",
   },
   {
     label: "None",
-    value: "none",
-    name: "ventilationInterface",
+    value: "UNKNOWN",
+    name: "ventilator_interface",
   },
 ]
 
-@react.component
-let make = (~initialState, ~handleDone) => {
-  let (state, send) = React.useReducer(
-    reducer,
-    (initialState: CriticalCare__VentilatorParameters.t),
-  )
+let initialState: VentilatorParameters.t = {
+  ventilator_interface: INVASIVE,
+  ventilator_mode: UNKNOWN,
+  ventilator_oxygen_modality: UNKNOWN,
+  ventilator_peep: None,
+  ventilator_pip: None,
+  ventilator_mean_airway_pressure: None,
+  ventilator_resp_rate: None,
+  ventilator_pressure_support: None,
+  ventilator_tidal_volume: None,
+  ventilator_oxygen_modality_oxygen_rate: None,
+  ventilator_oxygen_modality_flow_rate: None,
+  ventilator_fi02: None,
+  ventilator_spo2: None,
+}
 
-  let editor = switch state.VentilatorParameters.ventilationInterface {
-  | "iv" => <CriticalCare__VentilatorParametersEditor__Invasive state={state.iv} send />
-  | "niv" => <CriticalCare__VentilatorParametersEditor__NonInvasive state={state.niv} send />
-  | "none" => <CriticalCare__VentilatorParametersEditor__None state={state.none} send />
-  | _ => <CriticalCare__VentilatorParametersEditor__Invasive state={state.iv} send />
+@react.component
+let make = (~handleDone) => {
+  let (state, send) = React.useReducer(reducer, (initialState: VentilatorParameters.t))
+
+  let editor = switch state.ventilator_interface {
+  | INVASIVE => <CriticalCare__VentilatorParametersEditor__Invasive state send />
+  | NON_INVASIVE => <CriticalCare__VentilatorParametersEditor__NonInvasive state send />
+  | UNKNOWN => <CriticalCare__VentilatorParametersEditor__None state send />
+  | _ => <CriticalCare__VentilatorParametersEditor__Invasive state send />
   }
   // Js.log({state})
   <div>
@@ -79,9 +122,18 @@ let make = (~initialState, ~handleDone) => {
         <div>
           <div className="flex items-center py-4 mb-4">
             <CriticalCare__RadioButton
-              defaultChecked={state.VentilatorParameters.ventilationInterface}
-              onChange={e => send(SetVentilationInterface(ReactEvent.Form.target(e)["id"]))}
-              options={ventilationInterfaceOptions}
+              defaultChecked={VentilatorParameters.encodeVentilatorInterfaceType(
+                state.ventilator_interface,
+              )}
+              onChange={e =>
+                send(
+                  SetVentilatorInterface(
+                    VentilatorParameters.decodeVentilatorInterfaceType(
+                      ReactEvent.Form.target(e)["id"],
+                    ),
+                  ),
+                )}
+              options={ventilatorInterfaceOptions}
               ishorizontal={true}
             />
             //   {ventilationInterfaceOptions
@@ -106,8 +158,7 @@ let make = (~initialState, ~handleDone) => {
         </div>
       </div>
       <button
-        onClick={_ => handleSubmit(handleDone, state)}
-        className="flex w-full bg-primary-600 text-white p-2 text-lg hover:bg-primary-800 justify-center items-center rounded-md">
+        onClick={_ => handleSubmit(handleDone, state)} className="btn btn-primary btn-large w-full">
         {str("Update Details")}
       </button>
     </div>

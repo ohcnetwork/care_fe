@@ -26,6 +26,7 @@ let reducer = (state, action) => {
         p => PressureSore.region(p) === PressureSore.region(part) ? part : p,
         state.parts,
       ),
+      dirty: true,
     }
   | AutoManageScale(part) => {
       ...state,
@@ -34,10 +35,12 @@ let reducer = (state, action) => {
           PressureSore.region(p) === PressureSore.region(part) ? PressureSore.autoScale(part) : p,
         state.parts,
       ),
+      dirty: true,
     }
   | AddPressureSore(region) => {
       ...state,
       parts: Js.Array.concat(state.parts, [PressureSore.makeDefault(region)]),
+      dirty: true,
     }
   | SetSaving => {...state, saving: true}
   | ClearSaving => {...state, saving: false}
@@ -108,32 +111,35 @@ let selectedClass = part => {
   }
 }
 
-let renderBody = (state, send, partPaths) => {
-  <div className="flex justify-center max-w-2xl mx-auto">
-    <svg className="h-screen py-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 344.7 932.661">
-      {Js.Array.mapi((part, renderIndex) => {
-        let selectedPart = Js.Array.find(
-          p => PressureSore.region(p) === PressureSore.regionForPath(part),
-          state.parts,
-        )
-        <path
-          key={"part1" ++ Belt.Int.toString(renderIndex)}
-          d={PressureSore.d(part)}
-          transform={PressureSore.transform(part)}
-          className={selectedClass(selectedPart)}
-          fill="currentColor"
-          onClick={_ => {
-            switch selectedPart {
-            | Some(p) => send(AutoManageScale(p))
-            | None => send(AddPressureSore(PressureSore.regionForPath(part)))
-            }
-          }}>
-          <title className="">
-            {str(PressureSore.regionToString(PressureSore.regionForPath(part)))}
-          </title>
-        </path>
-      }, partPaths)->React.array}
-    </svg>
+let renderBody = (state, send, title, partPaths) => {
+  <div className="w-full text-center">
+    <div className="text-2xl font-bold mt-10"> {str(title)} </div>
+    <div className="flex justify-center max-w-lg mx-auto">
+      <svg className="h-screen py-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 344.7 932.661">
+        {Js.Array.mapi((part, renderIndex) => {
+          let selectedPart = Js.Array.find(
+            p => PressureSore.region(p) === PressureSore.regionForPath(part),
+            state.parts,
+          )
+          <path
+            key={"part1" ++ Belt.Int.toString(renderIndex)}
+            d={PressureSore.d(part)}
+            transform={PressureSore.transform(part)}
+            className={selectedClass(selectedPart)}
+            fill="currentColor"
+            onClick={_ => {
+              switch selectedPart {
+              | Some(p) => send(AutoManageScale(p))
+              | None => send(AddPressureSore(PressureSore.regionForPath(part)))
+              }
+            }}>
+            <title className="">
+              {str(PressureSore.regionToString(PressureSore.regionForPath(part)))}
+            </title>
+          </path>
+        }, partPaths)->React.array}
+      </svg>
+    </div>
   </div>
 }
 
@@ -143,10 +149,10 @@ let make = (~pressureSoreParameter, ~updateCB, ~id, ~consultationId) => {
 
   <div className="my-5">
     <h2> {str("Pressure Sore")} </h2>
-    <div className="text-2xl font-bold mt-10"> {str("Front")} </div>
-    {renderBody(state, send, PressureSore.anteriorParts)}
-    <div className="text-2xl font-bold mt-10"> {str("Back")} </div>
-    {renderBody(state, send, PressureSore.posteriorParts)}
+    <div className="flex md:flex-row flex-col justify-between">
+      {renderBody(state, send, "Front", PressureSore.anteriorParts)}
+      {renderBody(state, send, "Back", PressureSore.posteriorParts)}
+    </div>
     <div className="space-y-2">
       <div className="text-xl font-bold "> {str("Braden Scale (Risk Severity)")} </div>
       {Js.Array.map(p => {
@@ -160,7 +166,7 @@ let make = (~pressureSoreParameter, ~updateCB, ~id, ~consultationId) => {
     </div>
     <button
       disabled={state.saving || !state.dirty}
-      className="mt-4 flex w-full bg-green-600 text-white p-2 text-lg hover:bg-green-800 justify-center items-center rounded-md"
+      className="mt-4 btn btn-primary btn-large w-full"
       onClick={_ => saveData(id, consultationId, state, send, updateCB)}>
       {str("Done")}
     </button>

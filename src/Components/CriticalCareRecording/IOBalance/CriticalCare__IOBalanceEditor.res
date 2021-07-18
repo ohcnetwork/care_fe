@@ -152,7 +152,7 @@ let make = (~ioBalance, ~updateCB, ~id, ~consultationId) => {
       noBorder={true}
     />
     <button
-      className="flex w-full bg-primary-600 text-white p-2 text-lg hover:bg-primary-800 justify-center items-center rounded-md"
+      className="btn btn-primary btn-large w-full"
       onClick={_ => saveData(id, consultationId, state, send, updateCB)}>
       {str("Update Details")}
     </button>

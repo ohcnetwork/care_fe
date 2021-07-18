@@ -87,40 +87,7 @@ let errorCB = (send, _error) => {
   send(ClearSaving)
 }
 
-let showStatus = data => {
-  let total = 8.0
-  let count = ref(0.0)
-
-  if string_of_int(data.po2) !== "" {
-    count := count.contents +. 1.0
-  }
-  if string_of_int(data.pco2) !== "" {
-    count := count.contents +. 1.0
-  }
-  if string_of_float(data.pH) !== "" {
-    count := count.contents +. 1.0
-  }
-  if string_of_float(data.hco3) !== "" {
-    count := count.contents +. 1.0
-  }
-  if string_of_int(data.baseExcess) !== "" {
-    count := count.contents +. 1.0
-  }
-  if string_of_float(data.lactate) !== "" {
-    count := count.contents +. 1.0
-  }
-  if string_of_float(data.sodium) !== "" {
-    count := count.contents +. 1.0
-  }
-  if string_of_float(data.potassium) !== "" {
-    count := count.contents +. 1.0
-  }
-
-  Js.Float.toFixed(count.contents /. total *. 100.0)
-}
-
-let saveData = (id, consultationId, state, send, updateCB, percentCompleteCB) => {
-  Js.log(Js.Json.object_(makePayload(state)))
+let saveData = (id, consultationId, state, send, updateCB) => {
   send(SetSaving)
   updateDailyRound(
     consultationId,
@@ -129,7 +96,6 @@ let saveData = (id, consultationId, state, send, updateCB, percentCompleteCB) =>
     successCB(send, updateCB),
     errorCB(send),
   )
-  percentCompleteCB(showStatus(state))
 }
 
 let getStatus = (min, minText, max, maxText, val) => {
@@ -152,7 +118,7 @@ let isInvalidInput = (min, max, val) => {
 }
 
 @react.component
-let make = (~arterialBloodGasAnalysis, ~updateCB, ~percentCompleteCB, ~id, ~consultationId) => {
+let make = (~arterialBloodGasAnalysis, ~updateCB, ~id, ~consultationId) => {
   let (state, send) = React.useReducer(reducer, initialState(arterialBloodGasAnalysis))
 
   <div>
@@ -249,8 +215,8 @@ let make = (~arterialBloodGasAnalysis, ~updateCB, ~percentCompleteCB, ~id, ~cons
     </div>
     <button
       disabled={state.saving || !state.dirty}
-      className="flex w-full bg-primary-600 text-white p-2 text-lg hover:bg-primary-800 justify-center items-center rounded-md"
-      onClick={_ => saveData(id, consultationId, state, send, updateCB, percentCompleteCB)}>
+      className="btn btn-primary btn-large w-full"
+      onClick={_ => saveData(id, consultationId, state, send, updateCB)}>
       {str("Update Details")}
     </button>
   </div>

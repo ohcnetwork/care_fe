@@ -255,6 +255,15 @@ const routes = {
         id={id}
       />
     ),
+  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily_rounds/:id/update":
+    ({ facilityId, patientId, consultationId, id }: any) => (
+      <CriticalCareRecording
+        facilityId={facilityId}
+        patientId={patientId}
+        consultationId={consultationId}
+        id={id}
+      />
+    ),
   "/facility/:facilityId/patient/:patientId/shift/new": ({
     facilityId,
     patientId,

@@ -573,7 +573,7 @@ let make = (~updateCB, ~neurologicalMonitoring, ~id, ~consultationId) => {
       <div className="my-15 w-full h-1 bg-gray-300" />
       <button
         disabled={state.saving || !state.dirty}
-        className="flex w-full bg-primary-600 text-white p-2 text-lg hover:bg-primary-800 justify-center items-center rounded-md"
+        className="btn btn-primary btn-large w-full"
         onClick={_ => saveData(id, consultationId, state, send, updateCB)}>
         {str("Update Details")}
       </button>
