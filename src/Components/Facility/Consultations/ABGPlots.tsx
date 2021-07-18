@@ -158,7 +158,7 @@ export const ABGPlots = (props: any) => {
   };
 
   return (
-    <div className="grid md:grid-cols-2 gap-4">
+    <div className="grid grid-row-1 md:grid-cols-2 gap-4">
       <div className="pt-4 px-4 bg-white border rounded-lg shadow">
         <LinePlot
           title="PH"

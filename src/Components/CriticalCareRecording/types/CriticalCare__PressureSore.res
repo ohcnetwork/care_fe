@@ -195,7 +195,6 @@ let scale = part => part.scale
 let makeDefault = region => {region: region, scale: 1}
 
 let autoScale = part => {
-  Js.log(mod(part.scale + 1, 6))
   {...part, scale: mod(part.scale + 1, 6)}
 }
 

@@ -122,13 +122,16 @@ export make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
       </div>,
       Belt.Option.isNone(state.visibleEditor),
     )}
-    <div
-      className="bg-white md:px-4 py-5 border-b border-gray-200 sm:px-6 max-w-5xl mx-auto border mt-4 shadow rounded-lg">
-      <div className="p-2 md:p-4">
-        {switch state.visibleEditor {
-        | Some(editor) =>
-          <div id="editor">
-            <button id="closeEditor" onClick={_ => send(CloseEditor)}> {str("Back")} </button>
+    <div>
+      {switch state.visibleEditor {
+      | Some(editor) =>
+        <div id="editor">
+          <button
+            className="btn btn-default bg-white" id="closeEditor" onClick={_ => send(CloseEditor)}>
+            {str("Back")}
+          </button>
+          <div
+            className="bg-white px-2 md:px-6 py-5 border-b border-gray-200 sm:px-6 max-w-5xl mx-auto border mt-4 shadow rounded-lg">
             {switch editor {
             | NeurologicalMonitoringEditor =>
               <CriticalCare__NeurologicalMonitoringEditor
@@ -213,32 +216,33 @@ export make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
               />
             }}
           </div>
-        | None =>
+        </div>
+      | None =>
+        <div
+          className="bg-white px-2 md:px-6 py-5 border-b border-gray-200 sm:px-6 max-w-5xl mx-auto border mt-4 shadow rounded-lg">
+          <h2> {str("Record Updates")} </h2>
           <div>
-            <h2> {str("Record Updates")} </h2>
-            <div>
-              {basicEditor(~facilityId, ~patientId, ~consultationId, ~id)} {Js.Array.map(editor => {
-                editorToggle(editor, state, send)
-              }, [
-                NeurologicalMonitoringEditor,
-                HemodynamicParametersEditor,
-                VentilatorParametersEditor,
-                ArterialBloodGasAnalysisEditor,
-                BloodSugarEditor,
-                IOBalanceEditor,
-                DialysisEditor,
-                PressureSoreEditor,
-                NursingCareEditor,
-                MedicineEditor,
-              ])->React.array}
-            </div>
-            <Link
-              href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`}>
-              <div className="btn btn-primary w-full mt-6"> {str("Complete")} </div>
-            </Link>
+            {basicEditor(~facilityId, ~patientId, ~consultationId, ~id)} {Js.Array.map(editor => {
+              editorToggle(editor, state, send)
+            }, [
+              NeurologicalMonitoringEditor,
+              HemodynamicParametersEditor,
+              VentilatorParametersEditor,
+              ArterialBloodGasAnalysisEditor,
+              BloodSugarEditor,
+              IOBalanceEditor,
+              DialysisEditor,
+              PressureSoreEditor,
+              NursingCareEditor,
+              MedicineEditor,
+            ])->React.array}
           </div>
-        }}
-      </div>
+          <Link
+            href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`}>
+            <div className="btn btn-primary w-full mt-6"> {str("Complete")} </div>
+          </Link>
+        </div>
+      }}
     </div>
   </div>
 }

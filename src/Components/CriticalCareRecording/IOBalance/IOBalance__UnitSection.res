@@ -58,8 +58,7 @@ let make = (~name, ~items, ~collection, ~updateCB) => {
     p => Belt.Option.isNone(Js.Array.find(f => p === IOBalance.name(f), items)),
     collection,
   )
-  <div
-    className="bg-white px-4 py-5 border-b border-gray-200 sm:px-6 max-w-5xl mx-auto border mt-4">
+  <div className="px-2 py-5 sm:px-4 max-w-5xl  mt-4">
     <h3 className={name === "" ? "hidden" : "text-lg leading-6 font-medium text-gray-900"}>
       {name->str}
     </h3>
@@ -69,9 +68,9 @@ let make = (~name, ~items, ~collection, ~updateCB) => {
           {"Field"->str}
         </label>
       </div>
-      <div className="m-1 rounded-md shadow-sm w-2/12">
+      <div className="m-1 rounded-md shadow-sm w-3/12">
         <label htmlFor="Value" className="block text-sm font-medium leading-5 text-gray-700">
-          {"Value"->str}
+          {"Value (ml)"->str}
         </label>
       </div>
     </div>

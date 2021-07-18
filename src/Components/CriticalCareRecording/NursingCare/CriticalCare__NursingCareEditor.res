@@ -147,7 +147,7 @@ let make = (~nursingCare, ~updateCB, ~id, ~consultationId) => {
       ])->React.array} </div>
     <button
       disabled={state.saving || !state.dirty}
-      className="btn btn-primary btn-large w-full"
+      className="btn btn-primary btn-large w-full mt-4"
       onClick={_ => saveData(id, consultationId, state, send, updateCB)}>
       {str("Done")}
     </button>

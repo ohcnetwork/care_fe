@@ -22,9 +22,9 @@ const patientCategoryChoices = [...PATIENT_CATEGORY];
 
 export const ConsultationDetails = (props: any) => {
   const { facilityId, patientId, consultationId } = props;
+  const tab = props.tab.toUpperCase();
   const dispatch: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
-  const [tab, setTab] = useState("SUMMARY");
   const [isPrintMode, setIsPrintMode] = useState(false);
   const [consultationData, setConsultationData] = useState<ConsultationModel>(
     {}
@@ -73,7 +73,7 @@ export const ConsultationDetails = (props: any) => {
   }
 
   const tabButtonClasses = (selected: boolean) =>
-    `cursor-pointer border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300 font-bold ${
+    `capitalize cursor-pointer border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300 font-bold ${
       selected === true ? "border-primary-500 text-primary-600 border-b-2" : ""
     }`;
 
@@ -299,48 +299,22 @@ export const ConsultationDetails = (props: any) => {
             <div className="sm:flex sm:items-baseline">
               <div className="mt-4 sm:mt-0">
                 <nav className="pl-2 flex space-x-8 overflow-y-auto pb-2">
-                  <div
-                    className={tabButtonClasses(tab === "INFO")}
-                    onClick={(_) => setTab("INFO")}
-                  >
-                    Info
-                  </div>
-                  <div
-                    className={tabButtonClasses(tab === "SUMMARY")}
-                    onClick={(_) => setTab("SUMMARY")}
-                  >
-                    Summary
-                  </div>
-                  <div
-                    className={tabButtonClasses(tab === "UPDATES")}
-                    onClick={(_) => setTab("UPDATES")}
-                  >
-                    Updates
-                  </div>
-                  <div
-                    className={tabButtonClasses(tab === "MEDICINES")}
-                    onClick={(_) => setTab("MEDICINES")}
-                  >
-                    Medicines
-                  </div>
-                  <div
-                    className={tabButtonClasses(tab === "FILES")}
-                    onClick={(_) => setTab("FILES")}
-                  >
-                    Files
-                  </div>
-                  <div
-                    className={tabButtonClasses(tab === "ABG")}
-                    onClick={(_) => setTab("ABG")}
-                  >
-                    ABG
-                  </div>
-                  <div
-                    className={tabButtonClasses(tab === "NURSING")}
-                    onClick={(_) => setTab("NURSING")}
-                  >
-                    Nursing
-                  </div>
+                  {[
+                    "INFO",
+                    "SUMMARY",
+                    "UPDATES",
+                    "MEDICINES",
+                    "FILES",
+                    "ABG",
+                    "NURSING",
+                  ].map((p: string) => (
+                    <Link
+                      className={tabButtonClasses(tab === p)}
+                      href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/${p.toLocaleLowerCase()}`}
+                    >
+                      {p.toLocaleLowerCase()}
+                    </Link>
+                  ))}
                 </nav>
               </div>
             </div>

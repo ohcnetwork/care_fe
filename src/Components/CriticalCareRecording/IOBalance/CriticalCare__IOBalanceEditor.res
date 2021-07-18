@@ -74,7 +74,6 @@ let successCB = (send, updateCB, data) => {
 }
 
 let errorCB = (send, _error) => {
-  Js.log(_error)
   send(ClearSaving)
 }
 

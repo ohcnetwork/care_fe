@@ -1,5 +1,4 @@
-import { CircularProgress, Grid, Typography } from "@material-ui/core";
-import Button from "@material-ui/core/Button";
+import { Grid, Typography } from "@material-ui/core";
 import { navigate } from "raviger";
 import moment from "moment";
 import { useCallback, useState } from "react";
@@ -10,6 +9,7 @@ import loadable from "@loadable/component";
 import Pagination from "../../Common/Pagination";
 import { DailyRoundsModel } from "../../Patient/models";
 import { PATIENT_CATEGORY } from "../../../Common/constants";
+import { smallCard } from "../../Common/components/SkeletonLoading.gen";
 
 const PageTitle = loadable(() => import("../../Common/PageTitle"));
 
@@ -57,7 +57,7 @@ export const DailyRoundsList = (props: any) => {
   let roundsList: any;
 
   if (isDailyRoundLoading) {
-    roundsList = <CircularProgress size={20} />;
+    roundsList = smallCard();
   } else if (dailyRoundsListData.length === 0) {
     roundsList = (
       <Typography>No Consultation Update data is available.</Typography>
