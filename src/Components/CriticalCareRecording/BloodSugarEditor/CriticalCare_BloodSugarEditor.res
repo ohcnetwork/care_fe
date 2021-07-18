@@ -104,7 +104,7 @@ let make = (~bloodsugarParameters, ~updateCB, ~id, ~consultationId) => {
         setValue={s => send(SetBloodSugarLevel(int_of_string(s)))}
         getLabel={getStatus(70.0, 110.0)}
       />
-      <h4> {str("Insulin Intake")} </h4>
+      <h4 className="self-start"> {str("Insulin Intake")} </h4>
       <Slider
         title={"Dosage(units)"}
         start={"0"}
@@ -115,7 +115,6 @@ let make = (~bloodsugarParameters, ~updateCB, ~id, ~consultationId) => {
         setValue={s => send(SetDosage(float_of_string(s)))}
         getLabel={_ => ("", "#ff0000")}
       />
-      <h4> {str("Frequency")} </h4>
       <div className="w-full mb-10 px-3">
         <label className="block mb-2 font-bold"> {str("Frequency")} </label>
         <div className="flex md:flex-row flex-col md:space-y-0 space-y-2 space-x-0 md:space-x-4">

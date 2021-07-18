@@ -1,5 +1,4 @@
 let str = React.string
-open CriticalCare__Types
 
 type editor =
   | NeurologicalMonitoringEditor

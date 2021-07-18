@@ -184,7 +184,6 @@ let make = (~ventilatorParameters: VentilatorParameters.t, ~id, ~consultationId,
   | INVASIVE => <CriticalCare__VentilatorParametersEditor__Invasive state send />
   | NON_INVASIVE => <CriticalCare__VentilatorParametersEditor__NonInvasive state send />
   | UNKNOWN => <CriticalCare__VentilatorParametersEditor__None state send />
-  | _ => <CriticalCare__VentilatorParametersEditor__Invasive state send />
   }
   // Js.log({state})
   <div>
