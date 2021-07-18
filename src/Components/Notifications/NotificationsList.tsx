@@ -134,7 +134,6 @@ export default function ResultList() {
     );
 
     if (res.status >= 200 && res.status <= 300) {
-      console.log("subscribed");
       setIsSubscribed("SubscribedOnThisDevice");
     } else {
       console.log("Error saving web push info.");
@@ -183,10 +182,15 @@ export default function ResultList() {
         return `/facility/${data.facility}/patient/${data.patient}/consultation/${data.consultation}/daily-rounds/${data.daily_round}`;
       case "INVESTIGATION_SESSION_CREATED":
         return `/facility/${data.facility}/patient/${data.patient}/consultation/${data.consultation}/investigation/${data.session}`;
+      case "MESSAGE":
+        return `/notice_board/`;
       default:
         return "#";
     }
   };
+
+  let getNotificationTitle = (id: string) =>
+    NOTIFICATION_EVENTS.find((notification) => notification.id === id)?.text;
 
   let resultList: any[] = [];
   if (data && data.length) {
@@ -199,7 +203,9 @@ export default function ResultList() {
           }
           className="relative py-5 px-4 lg:px-8 hover:bg-gray-200 focus:bg-gray-200 transition ease-in-out duration-150 cursor-pointer"
         >
-          <div className="text-lg font-bold">{result.event}</div>
+          <div className="text-lg font-bold">
+            {getNotificationTitle(result.event)}
+          </div>
           <div className="text-sm">{result.message}</div>
           <div className="text-xs">
             {moment(result.created_date).format("lll")}

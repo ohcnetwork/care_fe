@@ -244,13 +244,15 @@ export interface DailyRoundsModel {
   medication_given?: Array<any>;
   additional_symptoms_text?: string;
   current_health?: string;
-  id?: number;
+  id?: any;
   other_symptoms?: string;
   admitted_to?: string;
   patient_category?: string;
   recommend_discharge?: boolean;
   created_date?: string;
   modified_date?: string;
+  taken_at?: string;
+  rounds_type?: string;
   last_updated_by_telemedicine?: boolean;
   created_by_telemedicine?: boolean;
 }

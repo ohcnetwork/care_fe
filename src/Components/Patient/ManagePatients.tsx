@@ -253,13 +253,11 @@ export const PatientManager = (props: any) => {
 
   const fetchDistrictName = useCallback(
     async (status: statusType) => {
-      setIsLoading(true);
       const res =
         Number(qParams.district) &&
         (await dispatch(getDistrict(qParams.district)));
       if (!status.aborted) {
         setDistrictName(res?.data?.name);
-        setIsLoading(false);
       }
     },
     [dispatch, qParams.district]
@@ -274,13 +272,11 @@ export const PatientManager = (props: any) => {
 
   const fetchLocalbodyName = useCallback(
     async (status: statusType) => {
-      setIsLoading(true);
       const res =
         Number(qParams.lsgBody) &&
         (await dispatch(getLocalBody({ id: qParams.lsgBody })));
       if (!status.aborted) {
         setLocalbodyName(res?.data?.name);
-        setIsLoading(false);
       }
     },
     [dispatch, qParams.lsgBody]
@@ -295,12 +291,10 @@ export const PatientManager = (props: any) => {
 
   const fetchFacilityName = useCallback(
     async (status: statusType) => {
-      setIsLoading(true);
       const res =
         qParams.facility && (await dispatch(getFacility(qParams.facility)));
       if (!status.aborted) {
         setFacilityName(res?.data?.name);
-        setIsLoading(false);
       }
     },
     [dispatch, qParams.facility]
@@ -743,7 +737,7 @@ export const PatientManager = (props: any) => {
               qParams.is_kasp === "true" ? "KASP" : "Non KASP",
               "is_kasp"
             )}
-          {badge("COVIN ID", qParams.covin_id, "covin_id")}
+          {badge("COWIN ID", qParams.covin_id, "covin_id")}
 
           {badge("Facility", facilityName, "facility")}
           {badge("District", districtName, "district")}

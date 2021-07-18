@@ -68,8 +68,8 @@ export default function ResultList() {
     setIsLoading(true);
     const params = {
       page: qParams.page || 1,
-      name: qParams.name || undefined,
-      mobile_number: qParams.mobile_number ? qParams.mobile_number : undefined,
+      name: qParams.name || "",
+      mobile_number: qParams.mobile_number ? qParams.mobile_number : "",
       wards: qParams.wards || undefined,
       local_bodies: qParams.local_bodies || undefined,
       created_date_before: qParams.created_date_before || undefined,
@@ -81,6 +81,7 @@ export default function ResultList() {
       sample_collection_date_before:
         qParams.sample_collection_date_before || undefined,
       offset: (qParams.page ? qParams.page - 1 : 0) * RESULT_LIMIT,
+      srf_id: qParams.srf_id || undefined,
     };
 
     dispatch(externalResultList(params, "externalResultList"))
@@ -107,6 +108,7 @@ export default function ResultList() {
     qParams.sample_collection_date_after,
     qParams.sample_collection_date_before,
     qParams.local_bodies,
+    qParams.srf_id,
     dataList,
   ]);
 
@@ -122,15 +124,15 @@ export default function ResultList() {
   };
 
   const handlePagination = (page: number, limit: number) => {
-    updateQuery({ page, limit });
+    updateQuery({ ...qParams, page, limit });
   };
 
   const searchByName = (value: string) => {
-    updateQuery({ name: value, page: 1 });
+    updateQuery({ ...qParams, name: value, page: 1 });
   };
 
   const searchByPhone = (value: string) => {
-    updateQuery({ mobile_number: value, page: 1 });
+    updateQuery({ ...qParams, mobile_number: value, page: 1 });
   };
 
   const handleFilter = (value: string) => {
@@ -285,6 +287,11 @@ export default function ResultList() {
             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium leading-4 bg-blue-100 text-blue-800 capitalize">
               {result.result}
             </span>
+            {result.patient_created ? (
+              <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium leading-4 bg-green-100 text-green-800 capitalize">
+                Patient Created
+              </span>
+            ) : null}
           </td>
           <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
             {result.result_date || "-"}
@@ -456,6 +463,7 @@ export default function ResultList() {
             local.sample_collection_date_after,
           "sample_collection_date_after"
         )}
+        {badge("SRF ID", qParams.srf_id, "srf_id")}
       </div>
       <div className="align-middle min-w-full overflow-x-auto shadow overflow-hidden sm:rounded-lg">
         <table className="min-w-full divide-y divide-cool-gray-200">

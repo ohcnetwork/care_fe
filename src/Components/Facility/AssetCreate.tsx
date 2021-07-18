@@ -88,7 +88,6 @@ const AssetCreate = (props: AssetProps) => {
     if (assetId) {
       setIsLoading(true);
       dispatchAction(getAsset(assetId)).then(({ data }: any) => {
-        console.log(data);
         setAsset(data);
         setIsLoading(false);
       });

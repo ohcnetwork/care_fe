@@ -12,10 +12,11 @@ import {
   getState,
   getDistrict,
   getLocalBody,
+  sendNotificationMessages,
 } from "../../Redux/actions";
 import loadable from "@loadable/component";
 import { SelectField } from "../Common/HelperInputFields";
-import { CircularProgress, InputLabel } from "@material-ui/core";
+import { CircularProgress, InputLabel, TextField } from "@material-ui/core";
 import Pagination from "../Common/Pagination";
 import { FacilityModel } from "./models";
 import { InputSearchBox } from "../Common/SearchBox";
@@ -32,6 +33,8 @@ import { make as SlideOver } from "../Common/SlideOver.gen";
 import FacillityFilter from "./FacilityFilter";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { withTranslation } from "react-i18next";
+import * as Notification from "../../Utils/Notifications.js";
+import { Modal } from "@material-ui/core";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -69,6 +72,8 @@ const HospitalListPage = (props: any) => {
   const [stateName, setStateName] = useState("");
   const [districtName, setDistrictName] = useState("");
   const [localbodyName, setLocalbodyName] = useState("");
+  const [notifyMessage, setNotifyMessage] = useState("");
+  const [modalFor, setModalFor] = useState(undefined);
   const { t } = props;
   const limit = 14;
 
@@ -126,13 +131,11 @@ const HospitalListPage = (props: any) => {
 
   const fetchStateName = useCallback(
     async (status: statusType) => {
-      setIsLoading(true);
       const res =
         Number(qParams.state) &&
         (await dispatchAction(getState(qParams.state)));
       if (!status.aborted) {
         setStateName(res?.data?.name);
-        setIsLoading(false);
       }
     },
     [dispatchAction, qParams.state]
@@ -147,13 +150,11 @@ const HospitalListPage = (props: any) => {
 
   const fetchDistrictName = useCallback(
     async (status: statusType) => {
-      setIsLoading(true);
       const res =
         Number(qParams.district) &&
         (await dispatchAction(getDistrict(qParams.district)));
       if (!status.aborted) {
         setDistrictName(res?.data?.name);
-        setIsLoading(false);
       }
     },
     [dispatchAction, qParams.district]
@@ -168,13 +169,11 @@ const HospitalListPage = (props: any) => {
 
   const fetchLocalbodyName = useCallback(
     async (status: statusType) => {
-      setIsLoading(true);
       const res =
         Number(qParams.local_body) &&
         (await dispatchAction(getLocalBody({ id: qParams.local_body })));
       if (!status.aborted) {
         setLocalbodyName(res?.data?.name);
-        setIsLoading(false);
       }
     },
     [dispatchAction, qParams.local_body]
@@ -289,6 +288,22 @@ const HospitalListPage = (props: any) => {
     setOffset(offset);
   };
 
+  const handleNotifySubmit = async (id: any) => {
+    const data = {
+      facility: id,
+      message: notifyMessage,
+    };
+    const res = await dispatchAction(sendNotificationMessages(data));
+    if (res && res.status == 204) {
+      Notification.Success({
+        msg: "Facility Notified",
+      });
+      setModalFor(undefined);
+    } else {
+      Notification.Error({ msg: "Something went wrong..." });
+    }
+  };
+
   const kaspOptionValues = [
     { id: "", text: "Not Selected" },
     { id: "true", text: "Yes" },
@@ -351,6 +366,54 @@ const HospitalListPage = (props: any) => {
                     </a>
                   </div>
                   <span className="inline-flex rounded-md shadow-sm">
+                    <button
+                      className="ml-2 md:ml-0 inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:shadow-outline-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow mr-5"
+                      onClick={(_) => setModalFor(facility.id)}
+                    >
+                      <i className="far fa-comment-dots mr-1"></i> Notify
+                    </button>
+                    <Modal
+                      open={modalFor === facility.id}
+                      onClose={(_) => setModalFor(undefined)}
+                      aria-labelledby="Notify This Facility"
+                      aria-describedby="Type a message and notify this facility"
+                      className=""
+                    >
+                      <div className="h-screen w-full absolute flex items-center justify-center bg-modal">
+                        <div className="bg-white rounded shadow p-8 m-4 max-h-full text-center flex flex-col max-w-lg w-2/3 min-w-max-content">
+                          <div className="mb-4">
+                            <h1 className="text-2xl">
+                              Notify: {facility.name}
+                            </h1>
+                          </div>
+                          <div>
+                            <TextField
+                              id="NotifyModalMessageInput"
+                              rows={6}
+                              multiline
+                              className="w-full border p-2 max-h-64"
+                              onChange={(e) => setNotifyMessage(e.target.value)}
+                              placeholder="Type your message..."
+                              variant="outlined"
+                            />
+                          </div>
+                          <div className="flex flex-row justify-end">
+                            <button
+                              className="btn-danger btn mt-4 mr-2 w-full md:w-auto"
+                              onClick={(_) => setModalFor(undefined)}
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              className="btn-primary btn mt-4 mr-2 w-full md:w-auto"
+                              onClick={(_) => handleNotifySubmit(modalFor)}
+                            >
+                              Send Notification
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </Modal>
                     <button
                       type="button"
                       className="inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:shadow-outline-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"

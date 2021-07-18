@@ -25,6 +25,8 @@ export default function ShowPushNotification({ external_id }: any) {
         return `/facility/${data.facility}/patient/${data.patient}/consultation/${data.consultation}/daily-rounds/${data.daily_round}`;
       case "INVESTIGATION_SESSION_CREATED":
         return `/facility/${data.facility}/patient/${data.patient}/consultation/${data.consultation}/investigation/${data.session}`;
+      case "MESSAGE":
+        return `/notice_board/`;
       default:
         return "#";
     }
