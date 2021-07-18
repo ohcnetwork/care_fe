@@ -68,11 +68,6 @@ let reducer = (state: VentilatorParameters.state, action: VentilatorParameters.a
   }
 }
 
-let handleSubmit = (handleDone, state: VentilatorParameters.t) => {
-  let status = VentilatorParameters.showStatus(state)
-  handleDone(state, status)
-}
-
 let makePayload = (state: VentilatorParameters.state) => {
   let payload = Js.Dict.empty()
   DictUtils.setOptionalString(
@@ -185,7 +180,7 @@ let make = (~ventilatorParameters: VentilatorParameters.t, ~id, ~consultationId,
   | NON_INVASIVE => <CriticalCare__VentilatorParametersEditor__NonInvasive state send />
   | UNKNOWN => <CriticalCare__VentilatorParametersEditor__None state send />
   }
-  // Js.log({state})
+
   <div>
     <CriticalCare__PageTitle title="Ventilator Parameters" />
     <div className="py-6">
@@ -208,23 +203,6 @@ let make = (~ventilatorParameters: VentilatorParameters.t, ~id, ~consultationId,
               options={ventilatorInterfaceOptions}
               ishorizontal={true}
             />
-            //   {ventilationInterfaceOptions
-            //   |> Array.map(option => {
-            //     <div key={option["value"]} className="mr-4">
-            //       <label onClick={_ => send(SetVentilationInterface(option["value"]))}>
-            //         <input
-            //           className="mr-2"
-            //           type_="radio"
-            //           name="ventilationInterface"
-            //           value={option["value"]}
-            //           id={option["value"]}
-            //           checked={option["value"] === state.VentilatorParameters.ventilationInterface}
-            //         />
-            //         {str({option["name"]})}
-            //       </label>
-            //     </div>
-            //   })
-            //   |> React.array}
           </div>
           {editor}
         </div>
