@@ -203,7 +203,11 @@ let make = (~state: VentilatorParameters.t, ~send: VentilatorParameters.action =
           | "ventilator_spo2" => state.ventilator_spo2
           | _ => None
           }
-          let handleChange: option<int> => VentilatorParameters.action = s =>
+
+          // SUPRESSED WARNING ADDED AT TOP OF THE FILE
+          // Partial match: missing cases in pattern-matching.
+          @warning("-8")
+          let handleChange: option<int> => VentilatorParameters.action = s => {
             switch option["id"] {
             | "ventilator_peep" => SetPeep(s)
             | "ventilator_pip" => SetPIP(s)
@@ -214,6 +218,7 @@ let make = (~state: VentilatorParameters.t, ~send: VentilatorParameters.action =
             | "ventilator_fi02" => SetFIO2(s)
             | "ventilator_spo2" => SetSPO2(s)
             }
+          }
           <Slider
             key={`non-invasive-${option["id"]}`}
             title={option["title"]}

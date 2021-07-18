@@ -65,7 +65,6 @@ let reducer = (state: VentilatorParameters.t, action: VentilatorParameters.actio
       ...state,
       ventilator_spo2: spo2,
     }
-  | _ => state
   }
 }
 
@@ -111,7 +110,6 @@ let make = (~handleDone) => {
   | INVASIVE => <CriticalCare__VentilatorParametersEditor__Invasive state send />
   | NON_INVASIVE => <CriticalCare__VentilatorParametersEditor__NonInvasive state send />
   | UNKNOWN => <CriticalCare__VentilatorParametersEditor__None state send />
-  | _ => <CriticalCare__VentilatorParametersEditor__Invasive state send />
   }
   // Js.log({state})
   <div>

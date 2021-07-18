@@ -29,7 +29,6 @@ let encodeParentventilatorModeType = parentventilatorModeType => {
   | CMV => "CMV"
   | SIMV => "SIMV"
   | UNKNOWN => "UNKNOWN"
-  | _ => "UNKNOWN"
   }
 }
 
@@ -173,7 +172,6 @@ let getParentVentilatorMode = ventilatorModeType => {
   | ASV => SIMV
   | PSV => UNKNOWN
   | UNKNOWN => UNKNOWN
-  | _ => UNKNOWN
   }
 }
 type action =

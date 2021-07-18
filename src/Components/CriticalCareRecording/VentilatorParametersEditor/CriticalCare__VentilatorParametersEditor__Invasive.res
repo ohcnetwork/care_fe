@@ -223,6 +223,10 @@ let make = (~state: VentilatorParameters.t, ~send: VentilatorParameters.action =
           | "ventilator_spo2" => state.ventilator_spo2
           | _ => None
           }
+
+          // SUPRESSED WARNING ADDED AT TOP OF THE FILE
+          // Partial match: missing cases in pattern-matching.
+          @warning("-8")
           let handleChange: option<int> => VentilatorParameters.action = s =>
             switch option["id"] {
             | "ventilator_peep" => SetPeep(s)
