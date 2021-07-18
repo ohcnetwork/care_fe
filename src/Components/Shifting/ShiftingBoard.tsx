@@ -341,15 +341,17 @@ export default function ListView({
       ));
   };
   return (
-    <div className="bg-gray-200 py-2 mr-2 flex-shrink-0 w-3/4 md:w-1/2 lg:w-1/3 xl:w-1/4 pb-4 h-full overflow-y-auto rounded-md">
-      <div className="flex justify-between sticky top-0 p-4 rounded mx-2 bg-white shadow items-center">
-        <h3 className="text-xs flex items-center h-8">
-          {renderBoardTitle(board)}{" "}
-          <GetAppIcon className="cursor-pointer" onClick={triggerDownload} />
-        </h3>
-        <span className="rounded-lg ml-2 bg-primary-500 text-white px-2">
-          {totalCount || "0"}
-        </span>
+    <div className="bg-gray-200 mr-2 flex-shrink-0 w-3/4 md:w-1/2 lg:w-1/3 xl:w-1/4 pb-4 h-full overflow-y-auto rounded-md">
+      <div className="sticky top-0 pt-2 bg-gray-200 rounded mx-2">
+        <div className="flex justify-between p-4 rounded bg-white shadow items-center">
+          <h3 className="text-xs flex items-center h-8">
+            {renderBoardTitle(board)}{" "}
+            <GetAppIcon className="cursor-pointer" onClick={triggerDownload} />
+          </h3>
+          <span className="rounded-lg ml-2 bg-primary-500 text-white px-2">
+            {totalCount || "0"}
+          </span>
+        </div>
       </div>
       <div className="text-sm mt-2 pb-2 flex flex-col">
         {isLoading.board ? (
