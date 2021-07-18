@@ -95,10 +95,10 @@ let silderOptionArray = [
 ]
 
 @react.component
-let make = (~state: VentilatorParameters.t, ~send: VentilatorParameters.action => unit) => {
+let make = (~state: VentilatorParameters.state, ~send: VentilatorParameters.action => unit) => {
   let defaultChecked = VentilatorParameters.getParentVentilatorMode(state.ventilator_mode)
   let (parentVentilatorMode, setParentVentilatorMode) = React.useState(() => defaultChecked)
-  Js.log(state)
+
   <div>
     <h4 className="mb-4"> {str("Ventilator Mode")} </h4>
     <div className="mb-4">
@@ -122,7 +122,7 @@ let make = (~state: VentilatorParameters.t, ~send: VentilatorParameters.action =
       />
       <div className={`ml-6 ${parentVentilatorMode !== CMV ? "hidden" : ""} `}>
         <CriticalCare__RadioButton
-          defaultChecked={VentilatorParameters.encodeParentventilatorModeType(defaultChecked)}
+          defaultChecked={VentilatorParameters.encodeVentilatorModeType(state.ventilator_mode)}
           onChange={e =>
             send(
               SetVentilatorMode(
@@ -155,7 +155,7 @@ let make = (~state: VentilatorParameters.t, ~send: VentilatorParameters.action =
       />
       <div className={`ml-6 ${parentVentilatorMode !== SIMV ? "hidden" : ""} `}>
         <CriticalCare__RadioButton
-          defaultChecked={VentilatorParameters.encodeParentventilatorModeType(defaultChecked)}
+          defaultChecked={VentilatorParameters.encodeVentilatorModeType(state.ventilator_mode)}
           onChange={e =>
             send(
               SetVentilatorMode(
