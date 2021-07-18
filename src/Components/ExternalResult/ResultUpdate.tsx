@@ -95,7 +95,7 @@ export default function UpdateResult(props: any) {
           form["district"] = res.data.district_object.name;
           form["local_body"] = String(res.data.local_body);
           form["ward"] = String(res.data.ward);
-          form["patient_created"] = res.data.patient_created;
+          form["patient_created"] = String(res.data.patient_created);
 
           dispatch({ type: "set_form", form });
 
@@ -172,7 +172,7 @@ export default function UpdateResult(props: any) {
           }
           return;
         case "patient_created":
-          if (!state.form[field] || state.form[field] === "0") {
+          if (state.form[field] !== "true" && state.form[field] !== "false") {
             errors[field] = "Please select an option if the patient is created";
             invalidForm = true;
           }
@@ -210,9 +210,8 @@ export default function UpdateResult(props: any) {
         address: state.form.address ? state.form.address : undefined,
         local_body: state.form.local_body ? state.form.local_body : undefined,
         ward: state.form.ward,
-        patient_created: [true, "true"].includes(state.form.patient_created),
+        patient_created: state.form.patient_created === "true",
       };
-
       const res = await dispatchAction(partialUpdateExternalResult(id, data));
       setIsLoading(false);
       if (res && res.data) {
@@ -311,7 +310,7 @@ export default function UpdateResult(props: any) {
               <RadioGroup
                 aria-label="patient_created"
                 name="patient_created"
-                value={[true, "true"].includes(state.form.patient_created)}
+                value={state.form.patient_created === "true"}
                 onChange={handleChange}
                 style={{ padding: "0px 5px" }}
               >
