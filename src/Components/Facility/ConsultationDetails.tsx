@@ -18,6 +18,7 @@ import { PATIENT_CATEGORY, SYMPTOM_CHOICES } from "../../Common/constants";
 import { FileUpload } from "../Patient/FileUpload";
 import TreatmentSummary from "./TreatmentSummary";
 import { PrimaryParametersPlot } from "./Consultations/PrimaryParametersPlot";
+import { ABGPlots } from "./Consultations/ABGPlots";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const symptomChoices = [...SYMPTOM_CHOICES];
@@ -575,6 +576,12 @@ export const ConsultationDetails = (props: any) => {
               patientId={patientId}
               consultationId={consultationId}
             ></PrimaryParametersPlot>
+            <PageTitle title="ABG Analysis Plot" hideBack={true} />
+            <ABGPlots
+              facilityId={facilityId}
+              patientId={patientId}
+              consultationId={consultationId}
+            ></ABGPlots>
           </div>
           <div>
             <PageTitle title="Consultation Update" hideBack={true} />
