@@ -1,11 +1,10 @@
 import loadable from "@loadable/component";
-import React, { useCallback, useReducer, useState } from "react";
+import { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import moment from "moment";
 
 import { getFacilityUsers } from "../../Redux/actions";
-const Loading = loadable(() => import("../Common/Loading"));
 
 export const UserSelect = (props: any) => {
   const dispatchAction: any = useDispatch();
@@ -32,7 +31,8 @@ export const UserSelect = (props: any) => {
     fetchUsers(status);
   }, []);
 
-  const selectedUser = users.find((item: any) => item.id == userId);
+  const selectedUser = users.find((item: any) => item.id === userId);
+
   return (
     <div className="px-2 pb-2">
       <div className="space-y-1">
@@ -106,8 +106,6 @@ export const UserSelect = (props: any) => {
             <div className="absolute mt-1 w-full rounded-md bg-white shadow-lg z-40">
               <ul
                 role="listbox"
-                aria-labelledby="listbox-label"
-                aria-activedescendant="listbox-item-3"
                 className="max-h-60 rounded-md py-1 text-base leading-6 shadow-xs overflow-auto focus:outline-none sm:text-sm sm:leading-5"
               >
                 {users.map((user: any) => {
@@ -118,7 +116,6 @@ export const UserSelect = (props: any) => {
                         onSelect(user.id);
                       }}
                       id="listbox-item-0"
-                      role="option"
                       className="text-gray-900 cursor-default select-none relative py-2 pl-3 pr-9"
                     >
                       <div className="flex items-center space-x-3">
@@ -147,7 +144,7 @@ export const UserSelect = (props: any) => {
                             fill="currentColor"
                           >
                             <path
-                              fill-rule="evenodd"
+                              fillRule="evenodd"
                               d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
                               clip-rule="evenodd"
                             />

@@ -1,5 +1,5 @@
 import { useRedirect, useRoutes, navigate, usePath } from "raviger";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { BedCapacityForm } from "../Components/Facility/BedCapacityForm";
 import { ConsultationDetails } from "../Components/Facility/ConsultationDetails";
@@ -51,6 +51,8 @@ import InvestigationReports from "../Components/Facility/Investigations/Reports"
 import AssetCreate from "../Components/Facility/AssetCreate";
 import { withTranslation } from "react-i18next";
 import DeathReport from "../Components/DeathReport/DeathReport";
+import { make as CriticalCareRecording } from "../Components/CriticalCareRecording/CriticalCareRecording.gen";
+import { make as VentilatorParametersEditor } from "../Components/CriticalCareRecording/VentilatorParametersEditor/CriticalCare__VentilatorParametersEditor.bs";
 import ShowPushNotification from "../Components/Notifications/ShowPushNotification";
 import { NoticeBoard } from "../Components/Notifications/NoticeBoard";
 import { AddLocationForm } from "../Components/Facility/AddLocationForm";
@@ -63,6 +65,11 @@ const img = "https://cdn.coronasafe.network/light-logo.svg";
 const logoBlack = "https://cdn.coronasafe.network/black-logo.svg";
 
 const routes = {
+  "/critical_care_ventilator": () => (
+    <>
+      <VentilatorParametersEditor />
+    </>
+  ),
   "/": () => <HospitalList />,
   "/users": () => <ManageUsers />,
   "/user/add": () => <UserAdd />,
@@ -155,17 +162,6 @@ const routes = {
   }: any) => (
     <ConsultationForm facilityId={facilityId} patientId={patientId} id={id} />
   ),
-  "/facility/:facilityId/patient/:patientId/consultation/:id": ({
-    facilityId,
-    patientId,
-    id,
-  }: any) => (
-    <ConsultationDetails
-      facilityId={facilityId}
-      patientId={patientId}
-      consultationId={id}
-    />
-  ),
   "/facility/:facilityId/patient/:patientId/consultation/:id/files/": ({
     facilityId,
     patientId,
@@ -232,6 +228,25 @@ const routes = {
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily-rounds/:id":
     ({ facilityId, patientId, consultationId, id }: any) => (
       <DailyRoundListDetails
+        facilityId={facilityId}
+        patientId={patientId}
+        consultationId={consultationId}
+        id={id}
+      />
+    ),
+
+  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily_rounds/:id":
+    ({ facilityId, patientId, consultationId, id }: any) => (
+      <CriticalCareRecording
+        facilityId={facilityId}
+        patientId={patientId}
+        consultationId={consultationId}
+        id={id}
+      />
+    ),
+  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily_rounds/:id/update":
+    ({ facilityId, patientId, consultationId, id }: any) => (
+      <CriticalCareRecording
         facilityId={facilityId}
         patientId={patientId}
         consultationId={consultationId}
@@ -313,6 +328,31 @@ const routes = {
   "/death_report/:id": ({ id }: any) => <DeathReport id={id} />,
   "/notifications/:id": (id: any) => <ShowPushNotification external_id={id} />,
   "/notice_board/": () => <NoticeBoard />,
+  "/facility/:facilityId/patient/:patientId/consultation/:id": ({
+    facilityId,
+    patientId,
+    id,
+  }: any) => (
+    <ConsultationDetails
+      facilityId={facilityId}
+      patientId={patientId}
+      consultationId={id}
+      tab={"summary"}
+    />
+  ),
+  "/facility/:facilityId/patient/:patientId/consultation/:id/:tab": ({
+    facilityId,
+    patientId,
+    id,
+    tab,
+  }: any) => (
+    <ConsultationDetails
+      facilityId={facilityId}
+      patientId={patientId}
+      consultationId={id}
+      tab={tab}
+    />
+  ),
 };
 
 let menus = [
