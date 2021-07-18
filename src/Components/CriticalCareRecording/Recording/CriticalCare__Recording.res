@@ -1,5 +1,4 @@
 let str = React.string
-open CriticalCare__Types
 
 type editor =
   | NeurologicalMonitoringEditor
@@ -152,9 +151,12 @@ export make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
             | VentilatorParametersEditor =>
               // This need to updated
               <CriticalCare__VentilatorParametersEditor
-                handleDone={(data, _) => {
-                  send(CloseEditor)
-                }}
+                ventilatorParameters={CriticalCare__DailyRound.ventilatorParameters(
+                  state.dailyRound,
+                )}
+                updateCB={updateDailyRound(send, VentilatorParametersEditor)}
+                id
+                consultationId
               />
             | ArterialBloodGasAnalysisEditor =>
               <CriticalCare__ABGAnalysisEditor

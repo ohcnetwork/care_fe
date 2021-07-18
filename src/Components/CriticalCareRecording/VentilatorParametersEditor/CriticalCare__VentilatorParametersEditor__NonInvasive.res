@@ -95,25 +95,13 @@ let silderOptionArray = [
 ]
 
 @react.component
-let make = (~state: VentilatorParameters.t, ~send: VentilatorParameters.action => unit) => {
+let make = (~state: VentilatorParameters.state, ~send: VentilatorParameters.action => unit) => {
   let defaultChecked = VentilatorParameters.getParentVentilatorMode(state.ventilator_mode)
   let (parentVentilatorMode, setParentVentilatorMode) = React.useState(() => defaultChecked)
-  Js.log(state)
+
   <div>
     <h4 className="mb-4"> {str("Ventilator Mode")} </h4>
     <div className="mb-4">
-      // <label>
-      //   <input
-      //     className="mr-2"
-      //     type_="radio"
-      //     name="ventilatorMode"
-      //     value={"cmv"}
-      //     id={"cmv"}
-      //     checked={state.ventilatorMode === "cmv"}
-      //     onClick={_ => send(SetNiv({...state, ventilatorMode: "cmv"}))}
-      //   />
-      //   {str({"Control Mechanical Ventilation (CMV)"})}
-      // </label>
       <Radio
         id={"cmv"}
         label={"Control Mechanical Ventilation (CMV)"}
@@ -122,7 +110,7 @@ let make = (~state: VentilatorParameters.t, ~send: VentilatorParameters.action =
       />
       <div className={`ml-6 ${parentVentilatorMode !== CMV ? "hidden" : ""} `}>
         <CriticalCare__RadioButton
-          defaultChecked={VentilatorParameters.encodeParentventilatorModeType(defaultChecked)}
+          defaultChecked={VentilatorParameters.encodeVentilatorModeType(state.ventilator_mode)}
           onChange={e =>
             send(
               SetVentilatorMode(
@@ -135,18 +123,6 @@ let make = (~state: VentilatorParameters.t, ~send: VentilatorParameters.action =
       </div>
     </div>
     <div className="mb-4">
-      // <label>
-      //   <input
-      //     className="mr-2"
-      //     type_="radio"
-      //     name="ventilatorMode"
-      //     value={"simv"}
-      //     id={"simv"}
-      //     checked={state.ventilatorMode === "simv"}
-      //     onClick={_ => send(SetNiv({...state, ventilatorMode: "simv"}))}
-      //   />
-      //   {str({"Synchronised Intermittent Mandatory Ventilation (SIMV)"})}
-      // </label>
       <Radio
         id={"simv"}
         label={"Synchronised Intermittent Mandatory Ventilation (SIMV)"}
@@ -155,7 +131,7 @@ let make = (~state: VentilatorParameters.t, ~send: VentilatorParameters.action =
       />
       <div className={`ml-6 ${parentVentilatorMode !== SIMV ? "hidden" : ""} `}>
         <CriticalCare__RadioButton
-          defaultChecked={VentilatorParameters.encodeParentventilatorModeType(defaultChecked)}
+          defaultChecked={VentilatorParameters.encodeVentilatorModeType(state.ventilator_mode)}
           onChange={e =>
             send(
               SetVentilatorMode(
@@ -168,18 +144,6 @@ let make = (~state: VentilatorParameters.t, ~send: VentilatorParameters.action =
       </div>
     </div>
     <div className="mb-4">
-      // <label>
-      //   <input
-      //     className="mr-2"
-      //     type_="radio"
-      //     name="ventilatorMode"
-      //     value={"psv"}
-      //     id={"psv"}
-      //     checked={state.ventilatorMode === "psv"}
-      //     onClick={_ => send(SetNiv({...state, ventilatorMode: "psv"}))}
-      //   />
-      //   {str({"C-PAP/ Pressure Support Ventilation (PSV)"})}
-      // </label>
       <Radio
         id={"psv"}
         label={"C-PAP/ Pressure Support Ventilation (PSV)"}
@@ -203,7 +167,12 @@ let make = (~state: VentilatorParameters.t, ~send: VentilatorParameters.action =
           | "ventilator_spo2" => state.ventilator_spo2
           | _ => None
           }
-          let handleChange: option<int> => VentilatorParameters.action = s =>
+
+          // SUPRESSED WARNING ADDED AT TOP OF THE FILE
+          // Partial match: missing cases in pattern-matching.
+
+          @warning("-8")
+          let handleChange: option<int> => VentilatorParameters.action = s => {
             switch option["id"] {
             | "ventilator_peep" => SetPeep(s)
             | "ventilator_pip" => SetPIP(s)
@@ -214,6 +183,7 @@ let make = (~state: VentilatorParameters.t, ~send: VentilatorParameters.action =
             | "ventilator_fi02" => SetFIO2(s)
             | "ventilator_spo2" => SetSPO2(s)
             }
+          }
           <Slider
             key={`non-invasive-${option["id"]}`}
             title={option["title"]}
