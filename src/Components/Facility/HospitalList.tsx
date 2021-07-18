@@ -472,8 +472,8 @@ const HospitalListPage = (props: any) => {
 
   return (
     <div className="px-6">
-      <div className="grid grid-cols-2 ">
-        <PageTitle title={t("Facilities")} hideBack={true} className="mx-3 " />
+      <div className="grid grid-cols-2">
+        <PageTitle title={t("Facilities")} hideBack={true} className="mx-3" />
 
         <div className="flex justify-end w-full mt-4">
           <div>
@@ -567,7 +567,7 @@ const HospitalListPage = (props: any) => {
         </div>
       </div>
 
-      <div className="md:flex mt-5 space-y-2">
+      <div className="md:flex my-4 space-y-2">
         <div className="bg-white overflow-hidden shadow rounded-lg flex-1 md:mr-2">
           <div className="px-4 py-5 sm:p-6">
             <dl>
@@ -643,7 +643,7 @@ const HospitalListPage = (props: any) => {
           </div>
         </SlideOver>
       </div>
-      <div className="flex items-center space-x-2 mt-2 flex-wrap w-full col-span-3">
+      <div className="flex items-center space-x-2 my-2 flex-wrap w-full col-span-3">
         {badge("Facility/District Name", qParams.search, "search")}
         {badge("State", stateName, "state")}
         {badge("District", districtName, "district")}
@@ -660,7 +660,7 @@ const HospitalListPage = (props: any) => {
             "kasp_empanelled"
           )}
       </div>
-      <div>
+      <div className="mt-4">
         <div>{manageFacilities}</div>
       </div>
     </div>
