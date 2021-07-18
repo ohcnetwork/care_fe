@@ -52,7 +52,7 @@ const initForm: any = {
   actions: null,
   review_time: 0,
   admitted_to: "",
-  taken_at: new Date(),
+  taken_at: null,
   rounds_type: "NORMAL",
   clone_last: null,
 };
@@ -168,9 +168,11 @@ export const DailyRounds = (props: any) => {
     if (validForm) {
       setIsLoading(true);
       let baseData = {
-        taken_at: state.form.taken_at,
         clone_last: state.form.clone_last === "true" ? true : false,
         rounds_type: state.form.rounds_type,
+        taken_at: state.form.taken_at
+          ? state.form.taken_at
+          : new Date().toISOString(),
       };
 
       let data: any;
