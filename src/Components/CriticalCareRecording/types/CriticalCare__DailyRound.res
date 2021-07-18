@@ -10,6 +10,7 @@ export type t = {
   dialysis: CriticalCare_Dialysis.t,
   pressureSoreParameter: CriticalCare__PressureSore.t,
   bloodSugar: CriticalCare_BloodSugar.t,
+  ventilatorParameters: CriticalCare__VentilatorParameters.t,
   medicine: array<Prescription__Prescription.t>,
 }
 
@@ -26,6 +27,7 @@ let make = (
   ~pressureSoreParameter,
   ~bloodSugar,
   ~medicine,
+  ~ventilatorParameters,
 ) => {
   createdAt: createdAt,
   admittedTo: admittedTo,
@@ -39,6 +41,7 @@ let make = (
   pressureSoreParameter: pressureSoreParameter,
   bloodSugar: bloodSugar,
   medicine: medicine,
+  ventilatorParameters: ventilatorParameters,
 }
 
 let neurologicalMonitoring = t => t.neurologicalMonitoring
@@ -50,6 +53,7 @@ let dialysis = t => t.dialysis
 let pressureSoreParameter = t => t.pressureSoreParameter
 let bloodSugar = t => t.bloodSugar
 let medicine = t => t.medicine
+let ventilatorParameters = t => t.ventilatorParameters
 
 let makeFromJs = dailyRound => {
   make(
@@ -65,5 +69,6 @@ let makeFromJs = dailyRound => {
     ~pressureSoreParameter=CriticalCare__PressureSore.makeFromJs(dailyRound),
     ~bloodSugar=CriticalCare_BloodSugar.makeFromJs(dailyRound),
     ~medicine=Prescription__Prescription.makeFromJs(dailyRound["medication_given"]),
+    ~ventilatorParameters=CriticalCare__VentilatorParameters.makeFromJs(dailyRound),
   )
 }
