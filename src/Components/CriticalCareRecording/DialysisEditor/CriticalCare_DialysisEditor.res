@@ -84,8 +84,8 @@ let make = (~dialysisParameters, ~updateCB, ~id, ~consultationId) => {
         <Slider
           title={"Dialysis Fluid Balance (ml/h)"}
           start={"0"}
-          end={"700"}
-          interval={"100"}
+          end={"5000"}
+          interval={"1000"}
           step={1.0}
           value={Belt.Option.mapWithDefault(state.dialysis_fluid_balance, "", string_of_int)}
           setValue={s => send(SetFluidBalance(int_of_string(s)))}
@@ -94,8 +94,8 @@ let make = (~dialysisParameters, ~updateCB, ~id, ~consultationId) => {
         <Slider
           title={"Dialysis Net Balance (ml/h)"}
           start={"0"}
-          end={"700"}
-          interval={"100"}
+          end={"5000"}
+          interval={"1000"}
           step={1.0}
           value={Belt.Option.mapWithDefault(state.dialysis_net_balance, "", string_of_int)}
           setValue={s => send(SetNetBalance(int_of_string(s)))}
