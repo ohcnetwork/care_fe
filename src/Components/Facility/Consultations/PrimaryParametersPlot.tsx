@@ -20,7 +20,20 @@ export const PrimaryParametersPlot = (props: any) => {
       setIsLoading(true);
       const res = await dispatch(
         dailyRoundsAnalyse(
-          { offset, fields: ["bp", "pulse", "temperature", "resp"] },
+          {
+            offset,
+            fields: [
+              "bp",
+              "pulse",
+              "temperature",
+              "resp",
+              "blood_sugar_level",
+              "insulin_intake_frequency",
+              "insulin_intake_dose",
+              "spo2",
+              "ventilator_fi02",
+            ],
+          },
           { consultationId }
         )
       );
@@ -78,6 +91,27 @@ export const PrimaryParametersPlot = (props: any) => {
     },
   ];
 
+  const InsulinData = [
+    {
+      name: "Blood Sugar Level",
+      data: Object.values(results)
+        .map((p: any) => p.blood_sugar_level)
+        .reverse(),
+    },
+    {
+      name: "Insulin Intake Frequency",
+      data: Object.values(results)
+        .map((p: any) => p.insulin_intake_frequency)
+        .reverse(),
+    },
+    {
+      name: "Insulin Dose",
+      data: Object.values(results)
+        .map((p: any) => p.insulin_intake_dose)
+        .reverse(),
+    },
+  ];
+
   return (
     <div className="grid grid-row-1 md:grid-cols-2 gap-4">
       <div className="pt-4 px-4 bg-white border rounded-lg shadow">
@@ -107,6 +141,29 @@ export const PrimaryParametersPlot = (props: any) => {
           name="Resp"
           xData={dates}
           yData={yAxisData("resp")}
+        />
+      </div>
+      <div className="pt-4 px-4 bg-white border rounded-lg shadow">
+        <StackedLinePlot title="Insulin" xData={dates} yData={InsulinData} />
+      </div>
+      <div className="pt-4 px-4 bg-white border rounded-lg shadow">
+        <LinePlot
+          title="SPO2 (%)"
+          name="spo2"
+          xData={dates}
+          yData={yAxisData("spo2")}
+          low={90}
+          high={100}
+        />
+      </div>
+      <div className="pt-4 px-4 bg-white border rounded-lg shadow">
+        <LinePlot
+          title="Ventilator FIO2 (%)"
+          name="fio2"
+          xData={dates}
+          yData={yAxisData("ventilator_fi02")}
+          low={21}
+          high={60}
         />
       </div>
     </div>
