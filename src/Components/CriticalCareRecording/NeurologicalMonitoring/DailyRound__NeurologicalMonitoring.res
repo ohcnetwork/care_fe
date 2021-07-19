@@ -46,18 +46,72 @@ let make = (
           "Pupil Size Description",
           NeurologicalMonitoring.rightPupilSizeDetails(neurologicalMonitoring),
         )}
+        {renderLine(
+          "Light Reaction",
+          NeurologicalMonitoring.lightReactionToString(
+            NeurologicalMonitoring.leftPupilLightReaction(neurologicalMonitoring),
+          ),
+        )}
+        {renderOptionalDescription(
+          "Light Reaction Description",
+          NeurologicalMonitoring.leftPupilLightReactionDetails(neurologicalMonitoring),
+        )}
       </div>
     </div>
-    {renderLine(
-      "Light Reaction",
-      NeurologicalMonitoring.lightReactionToString(
-        NeurologicalMonitoring.leftPupilLightReaction(neurologicalMonitoring),
-      ),
+    {renderOptionalInt(
+      "Glasgow Eye Open",
+      NeurologicalMonitoring.glasgowEyeOpen(neurologicalMonitoring),
     )}
-    {renderOptionalDescription(
-      "Light Reaction Description",
-      NeurologicalMonitoring.leftPupilLightReactionDetails(neurologicalMonitoring),
+    {renderOptionalInt(
+      "Glasgow Verbal Response",
+      NeurologicalMonitoring.glasgowVerbalResponse(neurologicalMonitoring),
     )}
-    {str("...add more")}
+    {renderOptionalInt(
+      "Glasgow Motor Response",
+      NeurologicalMonitoring.glasgowMotorResponse(neurologicalMonitoring),
+    )}
+    {renderOptionalInt(
+      "Glasgow Total Calculated",
+      NeurologicalMonitoring.glasgowTotalCalculated(neurologicalMonitoring),
+    )}
+    <div>
+      {title("Limb Response")}
+      <div className="flex md:flex-no-wrap flex-wrap">
+        <div className="border md:w-1/2 w-full p-6 text-center bg-gray-100 hover:bg-gray-300">
+          {renderLine(
+            "Upper Left",
+            NeurologicalMonitoring.limpResponseToString(
+              NeurologicalMonitoring.limbResponseUpperExtremityLeft(neurologicalMonitoring),
+            ),
+          )}
+        </div>
+        <div className="border md:w-1/2 w-full p-6 text-center bg-gray-100 hover:bg-gray-300">
+          {renderLine(
+            "Upper Right",
+            NeurologicalMonitoring.limpResponseToString(
+              NeurologicalMonitoring.limbResponseUpperExtremityRight(neurologicalMonitoring),
+            ),
+          )}
+        </div>
+      </div>
+      <div className="flex md:flex-no-wrap flex-wrap">
+        <div className="border md:w-1/2 w-full p-6 text-center bg-gray-100 hover:bg-gray-300">
+          {renderLine(
+            "Lower Left",
+            NeurologicalMonitoring.limpResponseToString(
+              NeurologicalMonitoring.limbResponseLowerExtremityLeft(neurologicalMonitoring),
+            ),
+          )}
+        </div>
+        <div className="border md:w-1/2 w-full p-6 text-center bg-gray-100 hover:bg-gray-300">
+          {renderLine(
+            "Lower Right",
+            NeurologicalMonitoring.limpResponseToString(
+              NeurologicalMonitoring.limbResponseLowerExtremityRight(neurologicalMonitoring),
+            ),
+          )}
+        </div>
+      </div>
+    </div>
   </div>
 }
