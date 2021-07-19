@@ -229,7 +229,7 @@ let renderLightReaction = (
     {ReactUtils.nullUnless(
       <CriticalCare__Description
         name={`${name}_reaction_description`}
-        label={`${label} Reaction Description`}
+        label={`${label} Light Reaction Description`}
         text={inputDetails}
         onChange={value => onInputDetailsChange(value)}
       />,

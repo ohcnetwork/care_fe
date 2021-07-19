@@ -242,6 +242,7 @@ const routes = {
         patientId={patientId}
         consultationId={consultationId}
         id={id}
+        preview={true}
       />
     ),
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily_rounds/:id/update":
@@ -251,6 +252,7 @@ const routes = {
         patientId={patientId}
         consultationId={consultationId}
         id={id}
+        preview={false}
       />
     ),
   "/facility/:facilityId/patient/:patientId/shift/new": ({
