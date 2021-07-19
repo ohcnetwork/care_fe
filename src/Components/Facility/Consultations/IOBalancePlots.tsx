@@ -27,7 +27,7 @@ export const IOBalancePlots = (props: any) => {
               "iv_fluids",
               "feeds",
               "total_intake_calculated",
-              "ph",
+              "total_output_calculated",
             ],
           },
           { consultationId }
@@ -276,6 +276,26 @@ export const IOBalancePlots = (props: any) => {
     ],
   };
 
+  const totalOutputOptions = {
+    ...generalOptions,
+    title: {
+      text: "Total output",
+    },
+    legend: {
+      data: ["Total output"],
+    },
+    series: [
+      {
+        name: "Total output",
+        type: "line",
+        stack: "Total output",
+        smooth: true,
+        data: Object.values(results).map((p: any) => p.total_output_calculated),
+        areaStyle: {},
+      },
+    ],
+  };
+
   return (
     <div className="grid grid-cols-2 gap-4">
       <div className="pt-4 px-4 bg-white border rounded-lg shadow">
@@ -289,6 +309,9 @@ export const IOBalancePlots = (props: any) => {
       </div>
       <div className="pt-4 px-4 bg-white border rounded-lg shadow">
         <ReactECharts option={totalIntakeOptions} />
+      </div>
+      <div className="pt-4 px-4 bg-white border rounded-lg shadow">
+        <ReactECharts option={totalOutputOptions} />
       </div>
     </div>
   );
