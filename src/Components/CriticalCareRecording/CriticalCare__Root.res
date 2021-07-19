@@ -33,7 +33,8 @@ export make = (~id, ~facilityId, ~patientId, ~consultationId, ~preview) => {
     {state.loading
       ? <CriticalCare__Loader />
       : switch state.dailyRound {
-        | Some(dailyRound) => preview
+        | Some(dailyRound) =>
+          preview
             ? <CriticalCare__Index id facilityId patientId consultationId dailyRound />
             : <CriticalCare__Recording id facilityId patientId consultationId dailyRound />
 

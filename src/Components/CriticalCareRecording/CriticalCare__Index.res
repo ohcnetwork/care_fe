@@ -44,6 +44,10 @@ export make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
   let ventilatorParameters = DailyRound.ventilatorParameters(dailyRound)
   let medicine = DailyRound.medicine(dailyRound)
   let others = DailyRound.others(dailyRound)
+  React.useEffect(() => {
+    Js.log(dailyRound)
+    None
+  })
 
   <div className=" px-4 py-5sm:px-6 max-w-5xl mx-auto mt-4">
     <div>
@@ -57,6 +61,10 @@ export make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
       <div
         className="bg-white px-2 md:px-6 py-5 border-b border-gray-200 sm:px-6 max-w-5xl mx-auto border mt-4 shadow rounded-lg">
         <div className="text-5xl"> {str("Consultation Update")} </div>
+        <div>
+          <CriticalCare__PageTitle title="General" />
+          <DailyRound__General others title renderOptionalDescription />
+        </div>
         <div>
           <CriticalCare__PageTitle title="Neurological Monitoring" />
           <DailyRound__NeurologicalMonitoring
