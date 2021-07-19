@@ -300,10 +300,33 @@ export const DailyRounds = (props: any) => {
                     errors={state.errors.taken_at}
                   />
                 </div>
+                <div className="mt-4">
+                  <InputLabel id="rounds_type">Round Type</InputLabel>
+                  <SelectField
+                    className="md:w-1/2"
+                    name="rounds_type"
+                    variant="standard"
+                    margin="dense"
+                    options={[
+                      {
+                        id: "NORMAL",
+                        name: "Normal",
+                      },
+                      {
+                        id: "VENTILATOR",
+                        name: "Critical Care",
+                      },
+                    ]}
+                    optionValue="name"
+                    value={state.form.rounds_type}
+                    onChange={handleChange}
+                    errors={state.errors.rounds_type}
+                  />
+                </div>
               </div>
               {!id && (
                 <div id="clone_last-div" className="mt-4">
-                  <InputLabel id="is_decclone_lastlared_positive">
+                  <InputLabel id="clone_last">
                     Do you want to copy Values from Previous Log?
                   </InputLabel>
                   <RadioGroup
