@@ -97,6 +97,10 @@ export make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
           <CriticalCare__PageTitle title="Nursing Care" />
           <DailyRound__NursingCare nursingCare renderLine />
         </div>
+        <div>
+          <CriticalCare__PageTitle title="Pressure Sore" />
+          <DailyRound__PressureSore pressureSoreParameter />
+        </div>
       </div>
     </div>
   </div>
