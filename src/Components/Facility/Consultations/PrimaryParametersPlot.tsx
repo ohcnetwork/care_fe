@@ -1,4 +1,3 @@
-import { navigate } from "raviger";
 import moment from "moment";
 import { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -6,6 +5,16 @@ import { statusType, useAbortableEffect } from "../../../Common/utils";
 import { dailyRoundsAnalyse } from "../../../Redux/actions";
 
 import ReactECharts from "echarts-for-react";
+import {
+  TableCell,
+  TableContainer,
+  Table,
+  TableHead,
+  TableRow,
+  TableBody,
+} from "@material-ui/core";
+import Paper from "@material-ui/core/Paper";
+import { withStyles } from "@material-ui/core/styles";
 
 export const PrimaryParametersPlot = (props: any) => {
   const { facilityId, patientId, consultationId } = props;
@@ -20,7 +29,17 @@ export const PrimaryParametersPlot = (props: any) => {
       setIsLoading(true);
       const res = await dispatch(
         dailyRoundsAnalyse(
-          { offset, fields: ["bp", "pulse", "temperature", "resp"] },
+          {
+            offset,
+            fields: [
+              "bp",
+              "pulse",
+              "temperature",
+              "resp",
+              "rhythm",
+              "rhythm_detail",
+            ],
+          },
           { consultationId }
         )
       );
@@ -40,6 +59,21 @@ export const PrimaryParametersPlot = (props: any) => {
     },
     [consultationId]
   );
+
+  const StyledTableCell = withStyles((theme) => ({
+    head: {
+      backgroundColor: theme.palette.action.hover,
+      fontSize: 17,
+    },
+  }))(TableCell);
+
+  const StyledTableRow = withStyles((theme) => ({
+    root: {
+      "&:nth-of-type(even)": {
+        backgroundColor: theme.palette.action.hover,
+      },
+    },
+  }))(TableRow);
 
   const handlePagination = (page: number, limit: number) => {
     const offset = (page - 1) * limit;
@@ -162,18 +196,48 @@ export const PrimaryParametersPlot = (props: any) => {
   };
 
   return (
-    <div className="grid grid-row-1 md:grid-cols-2 gap-4">
-      <div className="pt-4 px-4 bg-white border rounded-lg shadow">
-        <ReactECharts option={BPOptions} />
+    <div>
+      <div className="grid grid-row-1 md:grid-cols-2 gap-4">
+        <div className="pt-4 px-4 bg-white border rounded-lg shadow">
+          <ReactECharts option={BPOptions} />
+        </div>
+        <div className="pt-4 px-4 bg-white border rounded-lg shadow">
+          <ReactECharts option={temperatureOptions} />
+        </div>
+        <div className="pt-4 px-4 bg-white border rounded-lg shadow">
+          <ReactECharts option={pulseOptions} />
+        </div>
+        <div className="pt-4 px-4 bg-white border rounded-lg shadow">
+          <ReactECharts option={respOptions} />
+        </div>
       </div>
-      <div className="pt-4 px-4 bg-white border rounded-lg shadow">
-        <ReactECharts option={temperatureOptions} />
-      </div>
-      <div className="pt-4 px-4 bg-white border rounded-lg shadow">
-        <ReactECharts option={pulseOptions} />
-      </div>
-      <div className="pt-4 px-4 bg-white border rounded-lg shadow">
-        <ReactECharts option={respOptions} />
+      <div className="m-2">
+        <h4 className="mx-2">Rhythm</h4>
+        <TableContainer component={Paper}>
+          <Table aria-label="customized table">
+            <TableHead>
+              <StyledTableRow className="font-bold">
+                <StyledTableCell>Date</StyledTableCell>
+                <StyledTableCell>Rhythm</StyledTableCell>
+                <StyledTableCell>Description</StyledTableCell>
+              </StyledTableRow>
+            </TableHead>
+            <TableBody>
+              {Object.entries(results).map(
+                (obj: any) =>
+                  obj[1].rhythm > 0 && (
+                    <StyledTableRow>
+                      <TableCell>{moment(obj[0]).format("LLL")}</TableCell>
+                      <TableCell>
+                        {obj[1].rhythm === 5 ? "Regular" : "Ir regular"}
+                      </TableCell>
+                      <TableCell>{obj[1].rhythm_detail || "---"}</TableCell>
+                    </StyledTableRow>
+                  )
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </div>
     </div>
   );
