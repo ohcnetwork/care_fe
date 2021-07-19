@@ -31,5 +31,6 @@ let make = (~dailyRound, ~facilityId, ~patientId, ~consultationId) => {
     <DailyRound__BloodSugar bloodSugar />
     <DailyRound__Dialysis dialysis />
     <DailyRound__HemodynamicParameters hemodynamicParameter />
+    <DailyRound__IOBalance ioBalance />
   </div>
 }
