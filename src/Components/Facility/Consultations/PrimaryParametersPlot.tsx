@@ -4,8 +4,8 @@ import { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
 import { dailyRoundsAnalyse } from "../../../Redux/actions";
-
-import ReactECharts from "echarts-for-react";
+import { LinePlot } from "./components/LinePlot";
+import { StackedLinePlot } from "./components/StackedLinePlot";
 
 export const PrimaryParametersPlot = (props: any) => {
   const { facilityId, patientId, consultationId } = props;
@@ -47,133 +47,67 @@ export const PrimaryParametersPlot = (props: any) => {
     setOffset(offset);
   };
 
-  const generalOptions = {
-    tooltip: {
-      trigger: "axis",
-    },
-    toolbox: {
-      show: true,
-      feature: {
-        dataZoom: {
-          yAxisIndex: "none",
-        },
-        magicType: { type: ["line", "bar"] },
-        saveAsImage: {},
-      },
-    },
-    xAxis: {
-      type: "category",
-      boundaryGap: false,
-      data: Object.keys(results).map((p: string) => moment(p).format("LLL")),
-    },
-    yAxis: {
-      type: "value",
-    },
+  const dates = Object.keys(results)
+    .map((p: string) => moment(p).format("LLL"))
+    .reverse();
+
+  const yAxisData = (name: string) => {
+    return Object.values(results)
+      .map((p: any) => p[name])
+      .reverse();
   };
 
-  const temperatureOptions = {
-    ...generalOptions,
-    title: {
-      text: "Temperature (F)",
+  const BPData = [
+    {
+      name: "diastolic",
+      data: Object.values(results)
+        .map((p: any) => p.bp && p.bp.diastolic)
+        .reverse(),
     },
-    legend: {
-      data: ["temperature"],
+    {
+      name: "systolic",
+      data: Object.values(results)
+        .map((p: any) => p.bp && p.bp.systolic)
+        .reverse(),
     },
-    yAxis: {
-      type: "value",
+    {
+      name: "mean",
+      data: Object.values(results)
+        .map((p: any) => p.bp && p.bp.mean)
+        .reverse(),
     },
-    series: [
-      {
-        name: "temperature",
-        type: "line",
-        data: Object.values(results).map((p: any) => p.temperature),
-        areaStyle: {},
-      },
-    ],
-  };
-
-  const BPOptions = {
-    ...generalOptions,
-    title: {
-      text: "Blood pressure",
-    },
-    legend: {
-      data: ["diastolic", "systolic", "mean"],
-    },
-
-    series: [
-      {
-        name: "diastolic",
-        type: "line",
-        stack: "diastolic",
-        data: Object.values(results).map((p: any) => p.bp && p.bp.diastolic),
-      },
-      {
-        name: "systolic",
-        type: "line",
-        stack: "systolic",
-        data: Object.values(results).map((p: any) => p.bp && p.bp.systolic),
-      },
-      {
-        name: "mean",
-        type: "line",
-        stack: "mean",
-        data: Object.values(results).map((p: any) => p.bp && p.bp.mean),
-      },
-    ],
-  };
-
-  const pulseOptions = {
-    ...generalOptions,
-    title: {
-      text: "Pulse",
-    },
-    legend: {
-      data: ["Pulse"],
-    },
-
-    series: [
-      {
-        name: "Pulse",
-        type: "line",
-        stack: "Pulse",
-        data: Object.values(results).map((p: any) => p.pulse),
-      },
-    ],
-  };
-
-  const respOptions = {
-    ...generalOptions,
-    title: {
-      text: "Resp",
-    },
-    legend: {
-      data: ["Resp"],
-    },
-
-    series: [
-      {
-        name: "Resp",
-        type: "line",
-        stack: "Resp",
-        data: Object.values(results).map((p: any) => p.resp),
-      },
-    ],
-  };
+  ];
 
   return (
     <div className="grid grid-row-1 md:grid-cols-2 gap-4">
       <div className="pt-4 px-4 bg-white border rounded-lg shadow">
-        <ReactECharts option={BPOptions} />
+        <StackedLinePlot title="BP" xData={dates} yData={BPData} />
       </div>
       <div className="pt-4 px-4 bg-white border rounded-lg shadow">
-        <ReactECharts option={temperatureOptions} />
+        <LinePlot
+          title="Pulse"
+          name="Pulse"
+          xData={dates}
+          yData={yAxisData("pulse")}
+          low={40}
+          high={100}
+        />
       </div>
       <div className="pt-4 px-4 bg-white border rounded-lg shadow">
-        <ReactECharts option={pulseOptions} />
+        <LinePlot
+          title="Temperature (F)"
+          name="Temperature"
+          xData={dates}
+          yData={yAxisData("temperature")}
+        />
       </div>
       <div className="pt-4 px-4 bg-white border rounded-lg shadow">
-        <ReactECharts option={respOptions} />
+        <LinePlot
+          title="Resp"
+          name="Resp"
+          xData={dates}
+          yData={yAxisData("resp")}
+        />
       </div>
     </div>
   );
