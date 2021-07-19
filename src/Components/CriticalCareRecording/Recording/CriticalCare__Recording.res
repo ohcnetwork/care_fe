@@ -117,7 +117,7 @@ let updateDailyRound = (send, editor, dailyRound) => {
 export make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
   let (state, send) = React.useReducer(reducer, initialState(dailyRound))
 
-  <div className=" px-4 py-5sm:px-6 max-w-5xl mx-auto mt-4">
+  <div className=" px-4 py-5 sm:px-6 max-w-5xl mx-auto mt-4">
     {ReactUtils.nullUnless(
       <div>
         <Link

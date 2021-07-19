@@ -92,6 +92,16 @@ let silderOptionArray = [
     "min": 90.0,
     "max": 100.0,
   },
+  {
+    "title": "EtCO2 (mm Hg)",
+    "start": "0",
+    "end": "200",
+    "interval": "10",
+    "step": 1.0,
+    "id": "ventilator_etco2",
+    "min": 35.0,
+    "max": 45.0,
+  },
 ]
 
 @react.component
@@ -165,6 +175,7 @@ let make = (~state: VentilatorParameters.state, ~send: VentilatorParameters.acti
           | "ventilator_tidal_volume" => state.ventilator_tidal_volume
           | "ventilator_fi02" => state.ventilator_fi02
           | "ventilator_spo2" => state.ventilator_spo2
+          | "ventilator_etco2" => state.ventilator_etco2
           | _ => None
           }
 
@@ -182,6 +193,7 @@ let make = (~state: VentilatorParameters.state, ~send: VentilatorParameters.acti
             | "ventilator_tidal_volume" => SetTidalVolume(s)
             | "ventilator_fi02" => SetFIO2(s)
             | "ventilator_spo2" => SetSPO2(s)
+            | "ventilator_etco2" => SetETCO2(s)
             }
           }
           <Slider

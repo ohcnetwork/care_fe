@@ -22,7 +22,7 @@ let loadData = (setState, consultationId, id) => {
 }
 
 @react.component
-export make = (~id, ~facilityId, ~patientId, ~consultationId) => {
+export make = (~id, ~facilityId, ~patientId, ~consultationId, ~preview) => {
   let (state, setState) = React.useState(() => {loading: true, dailyRound: None})
   React.useEffect1(() => {
     loadData(setState, consultationId, id)
@@ -33,13 +33,13 @@ export make = (~id, ~facilityId, ~patientId, ~consultationId) => {
     {state.loading
       ? <CriticalCare__Loader />
       : switch state.dailyRound {
-        | Some(dailyRound) => <CriticalCare__Recording
-            id facilityId patientId consultationId dailyRound
-          />
+        | Some(dailyRound) => preview
+            ? <CriticalCare__Index id facilityId patientId consultationId dailyRound />
+            : <CriticalCare__Recording id facilityId patientId consultationId dailyRound />
 
         | None => {
-            Notifications.error({msg: "Unable to load data"})
-            <> </>
+            Notifications.error({msg: "No Data "})
+            React.null
           }
         }}
   </div>

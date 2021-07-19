@@ -142,7 +142,7 @@ const AssetsList = (props: any) => {
   const badge = (key: string, value: any, paramKey: string[]) => {
     return (
       value && (
-        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
+        <span className="inline-flex h-full items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
           {key}
           {": "}
           {value}
@@ -259,6 +259,7 @@ const AssetsList = (props: any) => {
       </div>
       <div className="flex space-x-2 mt-2 flex-wrap w-full col-span-3 space-y-1">
         {badge("Facility", facilityName, ["facility", "location"])}
+        {badge("Asset Name", qParams.search, ["search"])}
         {badge("Location", locationName, ["location"])}
         {badge("Asset Type", asset_type, ["asset_type"])}
       </div>

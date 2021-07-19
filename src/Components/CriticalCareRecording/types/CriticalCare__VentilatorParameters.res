@@ -106,6 +106,39 @@ let decodeVetilatorOxygenModalityType = ventilatorOxygenModalityType => {
   }
 }
 
+let ventilatorInterfaceTypeToString = ventilatorInterfaceType => {
+  switch ventilatorInterfaceType {
+  | INVASIVE => "Invasive"
+  | NON_INVASIVE => "Non Invasive"
+  | UNKNOWN => "Unknown"
+  }
+}
+
+let ventilatorModeTypeToString = ventilatorModeType => {
+  switch ventilatorModeType {
+  | VCV => "VCV"
+  | PCV => "PCV"
+  | PRVC => "PRVC"
+  | APRV => "APRV"
+  | VC_SIMV => "VC SIMV"
+  | PC_SIMV => "PC SIMV"
+  | PRVC_SIMV => "PRVC SIMV"
+  | ASV => "ASV"
+  | PSV => "PSV"
+  | _ => "Unknown"
+  }
+}
+
+let ventilatorOxygenModalityTypeToString = ventilatorOxygenModalityType => {
+  switch ventilatorOxygenModalityType {
+  | NASAL_PRONGS => "Nasal Prongs"
+  | SIMPLE_FACE_MASK => "Simple Face Mask"
+  | NON_REBREATHING_MASK => "Non Rebreathing Mask"
+  | HIGH_FLOW_NASAL_CANNULA => "High Flow Nasal Cannula"
+  | _ => "Unknown"
+  }
+}
+
 export type t = {
   ventilator_interface: ventilatorInterfaceType,
   ventilator_mode: ventilatorModeType,
@@ -120,22 +153,7 @@ export type t = {
   ventilator_oxygen_modality_flow_rate: option<int>,
   ventilator_fi02: option<int>,
   ventilator_spo2: option<int>,
-}
-type state = {
-  ventilator_interface: ventilatorInterfaceType,
-  ventilator_mode: ventilatorModeType,
-  ventilator_oxygen_modality: ventilatorOxygenModalityType,
-  ventilator_peep: option<int>,
-  ventilator_pip: option<int>,
-  ventilator_mean_airway_pressure: option<int>,
-  ventilator_resp_rate: option<int>,
-  ventilator_pressure_support: option<int>,
-  ventilator_tidal_volume: option<int>,
-  ventilator_oxygen_modality_oxygen_rate: option<int>,
-  ventilator_oxygen_modality_flow_rate: option<int>,
-  ventilator_fi02: option<int>,
-  ventilator_spo2: option<int>,
-  saving: bool,
+  ventilator_etco2: option<int>,
 }
 
 let ventilatorInterface = t => t.ventilator_interface
@@ -151,6 +169,7 @@ let oxygenModalityOxygenRate = t => t.ventilator_oxygen_modality_oxygen_rate
 let oxygenModalityFlowRate = t => t.ventilator_oxygen_modality_flow_rate
 let fio2 = t => t.ventilator_fi02
 let spo2 = t => t.ventilator_spo2
+let etco2 = t => t.ventilator_etco2
 
 let getParentVentilatorMode = ventilatorModeType => {
   switch ventilatorModeType {
@@ -166,6 +185,24 @@ let getParentVentilatorMode = ventilatorModeType => {
   | UNKNOWN => UNKNOWN
   }
 }
+type state = {
+  ventilator_interface: ventilatorInterfaceType,
+  ventilator_mode: ventilatorModeType,
+  ventilator_oxygen_modality: ventilatorOxygenModalityType,
+  ventilator_peep: option<int>,
+  ventilator_pip: option<int>,
+  ventilator_mean_airway_pressure: option<int>,
+  ventilator_resp_rate: option<int>,
+  ventilator_pressure_support: option<int>,
+  ventilator_tidal_volume: option<int>,
+  ventilator_oxygen_modality_oxygen_rate: option<int>,
+  ventilator_oxygen_modality_flow_rate: option<int>,
+  ventilator_fi02: option<int>,
+  ventilator_spo2: option<int>,
+  ventilator_etco2: option<int>,
+  saving: bool,
+}
+
 type action =
   | SetVentilatorInterface(ventilatorInterfaceType)
   | SetVentilatorMode(ventilatorModeType)
@@ -180,6 +217,7 @@ type action =
   | SetOxygenModalityFlowRate(option<int>)
   | SetFIO2(option<int>)
   | SetSPO2(option<int>)
+  | SetETCO2(option<int>)
   | SetSaving
   | ClearSaving
 
@@ -197,6 +235,7 @@ let make = (
   ~ventilator_oxygen_modality_flow_rate,
   ~ventilator_fi02,
   ~ventilator_spo2,
+  ~ventilator_etco2,
 ) => {
   ventilator_interface: ventilator_interface,
   ventilator_mode: ventilator_mode,
@@ -211,6 +250,7 @@ let make = (
   ventilator_oxygen_modality_flow_rate: ventilator_oxygen_modality_flow_rate,
   ventilator_fi02: ventilator_fi02,
   ventilator_spo2: ventilator_spo2,
+  ventilator_etco2: ventilator_etco2,
 }
 
 let makeFromJs = dailyRound => {
@@ -230,6 +270,7 @@ let makeFromJs = dailyRound => {
     ~ventilator_oxygen_modality_flow_rate=dailyRound["ventilator_oxygen_modality_flow_rate"]->Js.Nullable.toOption,
     ~ventilator_fi02=dailyRound["ventilator_fi02"]->Js.Nullable.toOption,
     ~ventilator_spo2=dailyRound["ventilator_spo2"]->Js.Nullable.toOption,
+    ~ventilator_etco2=dailyRound["ventilator_etco2"]->Js.Nullable.toOption,
   )
 }
 
