@@ -109,9 +109,6 @@ let make = (
         <output> {str(value)} </output>
         <div className="range-slider__progress" />
       </div>
-      <div className="flex justify-between pt-2">
-        <div className="pt-2"> {str(start)} </div> <div className="pt-2"> {str(end)} </div>
-      </div>
     </section>
   </>
 }
