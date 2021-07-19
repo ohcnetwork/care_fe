@@ -4,7 +4,7 @@ let str = React.string
 let make = (~bloodSugar) => {
   <div
     className="border rounded-lg bg-white shadow h-full hover:border-primary-500 text-black mt-4 p-4">
-    <h2> {str("Blood Sugar")} </h2>
+    <h3> {str("Blood Sugar")} </h3>
     <div>
       <span className="font-semibold leading-relaxed"> {str("Blood Sugar Level: ")} </span>
       {switch CriticalCare_BloodSugar.bloodsugar_level(bloodSugar) {

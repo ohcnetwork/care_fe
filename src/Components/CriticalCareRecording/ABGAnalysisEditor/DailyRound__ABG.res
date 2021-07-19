@@ -4,7 +4,7 @@ let str = React.string
 let make = (~arterialBloodGasAnalysis) => {
   <div
     className="border rounded-lg bg-white shadow h-full hover:border-primary-500 text-black mt-4 p-4">
-    <h2> {str("Arterial Blood Gas Analysis")} </h2>
+    <h3> {str("Arterial Blood Gas Analysis")} </h3>
     <div>
       <span className="font-semibold leading-relaxed"> {str("PO2: ")} </span>
       {switch CriticalCare__ABGAnalysis.po2(arterialBloodGasAnalysis) {
