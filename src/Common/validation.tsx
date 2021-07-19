@@ -20,7 +20,7 @@ export const getArrayValueByKey = (
   value: string | number
 ) => {
   for (let i = 0; i < arr.length; i++) {
-    if (arr[i][attr] == value) {
+    if (arr[i][attr] === value) {
       return i;
     }
   }

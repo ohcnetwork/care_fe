@@ -1,0 +1,390 @@
+.range {
+  position: relative;
+  width: 644px;
+  height: 5px;
+}
+.range input {
+  width: 100%;
+  position: absolute;
+  top: 2px;
+  height: 0;
+  -webkit-appearance: none;
+}
+.range input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  margin: -8px 0 0;
+  border-radius: 50%;
+  background: rgb(7, 109, 243);
+  cursor: pointer;
+  border: 0 !important;
+  z-index: 10;
+}
+.range input::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  margin: -8px 0 0;
+  border-radius: 50%;
+  background: rgb(7, 109, 243);
+  cursor: pointer;
+  border: 0 !important;
+  z-index: 10;
+}
+.range input::-ms-thumb {
+  width: 18px;
+  height: 18px;
+  margin: -8px 0 0;
+  border-radius: 50%;
+  background: rgb(7, 109, 243);
+  cursor: pointer;
+  border: 0 !important;
+  z-index: 10;
+}
+.range input::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 2px;
+  cursor: pointer;
+  background: #b2b2b2;
+  z-index: 1;
+}
+
+.range input::-moz-range-track {
+  width: 100%;
+  height: 2px;
+  cursor: pointer;
+  background: black;
+  z-index: 1;
+}
+.range input::-ms-track {
+  width: 100%;
+  height: 2px;
+  cursor: pointer;
+  background: #b2b2b2;
+  z-index: 1;
+}
+.range input:focus {
+  background: none;
+  outline: none;
+}
+.range input::-ms-track {
+  width: 100%;
+  cursor: pointer;
+  background: transparent;
+  border-color: transparent;
+  color: transparent;
+}
+.range-labels {
+  margin: 18px -41px 0;
+  padding: 0;
+  list-style: none;
+}
+.range-labels li {
+  position: relative;
+  float: left;
+  width: 90.25px;
+  text-align: center;
+  color: black;
+  font-size: 14px;
+  cursor: pointer;
+}
+.range-labels .label::before {
+  position: absolute;
+  top: -25px;
+  right: 0;
+  left: 0;
+  content: "";
+  margin: 0 auto;
+  width: 9px;
+  height: 9px;
+  background: #b2b2b2;
+  border-radius: 50%;
+}
+.double-range-labels {
+  margin: 18px -41px 0;
+  padding: 0;
+  list-style: none;
+}
+.double-range-labels li {
+  position: relative;
+  float: left;
+  width: 45.25px;
+  text-align: center;
+  color: black;
+  font-size: 14px;
+  cursor: pointer;
+}
+.double-range-labels .label::before {
+  position: absolute;
+  top: -25px;
+  right: 0;
+  left: 0;
+  content: "";
+  margin: 0 auto;
+  width: 9px;
+  height: 9px;
+  background: #b2b2b2;
+  border-radius: 50%;
+}
+.upper-label {
+  height: 10px;
+  margin-bottom: 10px;
+}
+.pupil1 {
+  bottom: 0;
+  margin: 0 auto;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background-color: black;
+}
+.pupil2 {
+  bottom: 0;
+  margin: 0 auto;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background-color: black;
+}
+
+.pupil3 {
+  bottom: 0;
+  margin: 0 auto;
+  width: 21px;
+  height: 21px;
+  border-radius: 50%;
+  background-color: black;
+}
+
+.pupil4 {
+  bottom: 0;
+  margin: 0 auto;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background-color: black;
+}
+
+.pupil5 {
+  bottom: 0;
+  margin: 0 auto;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: black;
+}
+
+.pupil6 {
+  bottom: 0;
+  margin: 0 auto;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  background-color: black;
+}
+
+.pupil7 {
+  bottom: 0;
+  margin: 0 auto;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background-color: black;
+}
+
+.pupil8 {
+  width: 41px;
+  height: 41px;
+  border-radius: 50%;
+  background-color: black;
+}
+
+.range-labels .active {
+  color: rgb(7, 109, 243);
+}
+.range-labels .selected::before {
+  background: rgb(7, 109, 243);
+}
+.range-labels .active.selected::before {
+  display: none;
+}
+
+.align-circles {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  height: 41px;
+  vertical-align: baseline;
+}
+
+input[type="number"] {
+  background-color: #fbfafc;
+}
+
+/* Copied CSS */
+
+.slider {
+  position: relative;
+  width: 200px;
+}
+
+.slider__track,
+.slider__range,
+.slider__left-value,
+.slider__right-value {
+  position: absolute;
+}
+
+.slider__track,
+.slider__range {
+  border-radius: 3px;
+  height: 5px;
+}
+
+.slider__track {
+  background-color: #1476d8;
+  width: 100%;
+  z-index: 1;
+}
+
+.slider__range {
+  background-color: #19ebe0;
+  z-index: 2;
+}
+
+.slider__left-value,
+.slider__right-value {
+  color: #1c85ee;
+  font-size: 12px;
+  margin-top: 20px;
+}
+
+.slider__left-value {
+  left: 6px;
+}
+
+.slider__right-value {
+  right: -4px;
+}
+
+/* Removing the default appearance */
+
+.thumb input {
+  pointer-events: none;
+  position: absolute;
+  height: 0;
+  width: 200px;
+  outline: none;
+}
+
+.thumb--left {
+  z-index: 3;
+}
+
+.thumb--right {
+  z-index: 4;
+}
+
+/* For Chrome browsers */
+.thumb input::-webkit-slider-thumb {
+  background-color: #242525;
+  border: none;
+  border-radius: 50%;
+  box-shadow: 0 0 1px 1px #0b2846;
+  cursor: pointer;
+  height: 18px;
+  width: 18px;
+  margin-top: 4px;
+  pointer-events: all;
+  position: relative;
+}
+
+/* For Firefox browsers */
+.thumb input::-moz-range-thumb {
+  background-color: #272b2c;
+  border: none;
+  border-radius: 50%;
+  box-shadow: 0 0 1px 1px #0d2d4d;
+  cursor: pointer;
+  height: 18px;
+  width: 18px;
+  margin-top: 4px;
+  pointer-events: all;
+  position: relative;
+}
+
+.slider {
+  appearance: none;
+  background-color: #dee0e4;
+  width: 100%;
+  height: 4px;
+  margin: 0;
+  padding: 0;
+  z-index: 2;
+}
+
+.slider::-webkit-slider-thumb {
+  cursor: pointer;
+}
+
+.slider-container {
+  position: relative;
+  width: 100%;
+  /* max-width: 700px; */
+  display: flex;
+  justify-content: center;
+}
+
+.indicators {
+  position: absolute;
+  top: -200%;
+  width: 100%;
+  height: 20px;
+  border-left: 2px solid #dee0e4;
+}
+
+.tick {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: linear-gradient(to left, #dee0e4 2px, transparent 2px);
+}
+
+.slider-box {
+  width: 100%;
+  /* max-width: 700px; */
+  padding: 20px 10px 60px 10px;
+  border-radius: 12px;
+}
+
+.slider-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: sans-serif;
+  margin-bottom: 2rem;
+}
+
+.slider-head > h1 {
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.slider-head input {
+  padding: 0.5rem 0.7rem;
+  border-radius: 8px;
+  border: 1px solid #979aa0;
+  margin-left: 12px;
+  font-size: 1.1rem;
+  color: #383a3e;
+  letter-spacing: 1px;
+}
+
+.slider-head label {
+  font-weight: 700;
+  color: #2856ff;
+  font-size: 1rem;
+}

@@ -1,5 +1,3 @@
-import React from "react";
-
 interface TabValue {
   value: number;
   label: string;
@@ -24,7 +22,9 @@ export default function NavTabs(props: NavTabsProps) {
           onChange={(e) => onChange(Number(e.target.value))}
         >
           {options?.map((option: TabValue) => (
-            <option value={option.value}>{option.label}</option>
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
           ))}
         </select>
       </div>
@@ -33,6 +33,7 @@ export default function NavTabs(props: NavTabsProps) {
           <nav className="-mb-px flex justify-around">
             {options?.map((option: TabValue) => (
               <button
+                key={option.value}
                 className={
                   option.value === active
                     ? "whitespace-no-wrap ml-8 py-4 px-1 border-b-2 border-indigo-500 font-medium text-sm leading-5 text-indigo-600 focus:outline-none focus:text-indigo-800 focus:border-indigo-700"
