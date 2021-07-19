@@ -19,8 +19,8 @@ let silderOptionArray = [
     "interval": "5",
     "step": 1.0,
     "id": "ventilator_peep",
-    "min": 10.0,
-    "max": 30.0,
+    "min": 5.0,
+    "max": 10.0,
   },
   {
     "title": "Peak Inspiratory Pressure (PIP) (cm H2O)",
@@ -91,6 +91,16 @@ let silderOptionArray = [
     "id": "ventilator_spo2",
     "min": 90.0,
     "max": 100.0,
+  },
+  {
+    "title": "EtCO2 (mm Hg)",
+    "start": "0",
+    "end": "200",
+    "interval": "10",
+    "step": 1.0,
+    "id": "ventilator_etco2",
+    "min": 35.0,
+    "max": 45.0,
   },
 ]
 
@@ -165,6 +175,7 @@ let make = (~state: VentilatorParameters.state, ~send: VentilatorParameters.acti
           | "ventilator_tidal_volume" => state.ventilator_tidal_volume
           | "ventilator_fi02" => state.ventilator_fi02
           | "ventilator_spo2" => state.ventilator_spo2
+          | "ventilator_etco2" => state.ventilator_etco2
           | _ => None
           }
 
@@ -182,6 +193,7 @@ let make = (~state: VentilatorParameters.state, ~send: VentilatorParameters.acti
             | "ventilator_tidal_volume" => SetTidalVolume(s)
             | "ventilator_fi02" => SetFIO2(s)
             | "ventilator_spo2" => SetSPO2(s)
+            | "ventilator_etco2" => SetETCO2(s)
             }
           }
           <Slider
@@ -198,7 +210,7 @@ let make = (~state: VentilatorParameters.state, ~send: VentilatorParameters.acti
               },
             )}
             setValue={s => send(handleChange(Belt.Int.fromString(s)))}
-            getLabel={VentilatorParameters.getStatus(option["min"], option["max"])}
+            getLabel={VentilatorParameters.getStatus(option["min"], "Low", option["max"], "High")}
           />
         })
         |> React.array}
