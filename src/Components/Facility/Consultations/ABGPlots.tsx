@@ -3,95 +3,7 @@ import { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
 import { dailyRoundsAnalyse } from "../../../Redux/actions";
-
-import ReactECharts from "echarts-for-react";
-
-const LinePlot = (props: any) => {
-  const { title, name, xData, yData, low = null, high = null } = props;
-  const generalOptions = {
-    title: {
-      text: title,
-    },
-    legend: {
-      data: [name],
-    },
-    tooltip: {
-      trigger: "axis",
-    },
-    toolbox: {
-      show: true,
-      feature: {
-        dataZoom: {
-          yAxisIndex: "none",
-        },
-        magicType: { type: ["line", "bar"] },
-        saveAsImage: {},
-      },
-    },
-    xAxis: {
-      type: "category",
-      boundaryGap: false,
-      data: xData,
-      axisLabel: {
-        width: 100,
-        overflow: "break",
-      },
-    },
-    yAxis: {
-      type: "value",
-    },
-    series: [
-      {
-        name: name,
-        type: "line",
-        stack: name,
-        data: yData,
-        areaStyle: {
-          color: {
-            type: "linear",
-            x: 0,
-            y: 0,
-            x2: 0,
-            y2: 1,
-            opacity: 0.5,
-            colorStops: [
-              {
-                offset: 0,
-                color: "blue",
-              },
-              {
-                offset: 1,
-                color: "white",
-              },
-            ],
-          },
-        },
-        connectNulls: true,
-      },
-    ],
-    visualMap: {
-      type: "piecewise",
-      show: false,
-      dimension: 1,
-      pieces: [
-        {
-          gt: high,
-          color: "red",
-        },
-        {
-          lte: high,
-          gte: low,
-          color: "blue",
-        },
-        {
-          lt: low,
-          color: "red",
-        },
-      ],
-    },
-  };
-  return <ReactECharts option={generalOptions} />;
-};
+import { LinePlot } from "./components/LinePlot";
 
 export const ABGPlots = (props: any) => {
   const { facilityId, patientId, consultationId } = props;
@@ -150,7 +62,7 @@ export const ABGPlots = (props: any) => {
       <div className="pt-4 px-4 bg-white border rounded-lg shadow">
         <LinePlot
           title="PH"
-          name="ph"
+          name="PH"
           xData={dates}
           yData={yAxisData("ph")}
           low={7.35}
