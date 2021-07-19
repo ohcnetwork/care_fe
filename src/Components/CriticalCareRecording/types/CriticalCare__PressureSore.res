@@ -407,4 +407,3 @@ let posteriorParts = [
     region: PosteriorRightFoot,
   },
 ]
-{"mode": "full", "isActive": false}

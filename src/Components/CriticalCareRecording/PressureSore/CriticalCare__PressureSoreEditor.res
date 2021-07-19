@@ -1,3 +1,5 @@
+@val external document: 'a = "document"
+
 let str = React.string
 open CriticalCare__Types
 
@@ -105,10 +107,67 @@ let selectedClass = part => {
   }
 }
 
-let renderBody = (state, send, title, partPaths) => {
-  <div className="w-full text-center">
+let selectedLabelClass = part => {
+  switch part {
+  | Some(p) =>
+    switch PressureSore.scale(p) {
+    | 1 => "bg-green-400 text-white"
+    | 2 => "bg-green-600 text-white"
+    | 3 => "bg-yellow-300 text-white"
+    | 4 => "bg-red-600 text-white"
+    | 5 => "bg-red-700 text-white"
+    | _ => "bg-gray-300 text-green-400"
+    }
+  | None => "bg-gray-300 text-green-400"
+  }
+}
+
+let renderBody = (state, send, title, partPaths, substr) => {
+  <div className="w-full text-center mx-2">
     <div className="text-2xl font-bold mt-10"> {str(title)} </div>
-    <div className="flex justify-center max-w-lg mx-auto">
+    <div className="sticky top-0 justify-center max-w-md mx-auto overflow-x-scroll my-3 border-2">
+      <div className="grid grid-rows-1 grid-flow-col gap-3 text-center border-2">
+        {Js.Array.mapi((part, renderIndex) => {
+          let selectedPart = Js.Array.find(
+            p => PressureSore.region(p) === PressureSore.regionForPath(part),
+            state.parts,
+          )
+          let bradenScaleValue = switch selectedPart {
+          | Some(p) =>
+            switch PressureSore.scale(p) {
+            | 1 => "1"
+            | 2 => "2"
+            | 3 => "3"
+            | 4 => "4"
+            | 5 => "5"
+            | _ => "0"
+            }
+          | None => Js.Int.toString(0)
+          }
+          <div
+            className={"grid grid-flow-col grid-rows-2 auto-cols-max border-2 p-2 justify-items-center border-gray-400  my-2 " ++
+            selectedLabelClass(selectedPart)}
+            id={PressureSore.regionToString(PressureSore.regionForPath(part))}
+            onClick={_ => {
+              switch selectedPart {
+              | Some(p) => send(AutoManageScale(p))
+              | None => send(AddPressureSore(PressureSore.regionForPath(part)))
+              }
+            }}>
+            <div className="border-2 px-2 flex justify-center items-center border-gray-400">
+              {str(
+                Js.String.sliceToEnd(
+                  ~from=substr,
+                  PressureSore.regionToString(PressureSore.regionForPath(part)),
+                ),
+              )}
+            </div>
+            <div className="flex justify-center items-center"> {str(bradenScaleValue)} </div>
+          </div>
+        }, partPaths)->React.array}
+      </div>
+    </div>
+    <div className="flex justify-center max-w-lg mx-auto border-2">
       <svg className="h-screen py-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 344.7 932.661">
         {Js.Array.mapi((part, renderIndex) => {
           let selectedPart = Js.Array.find(
@@ -122,6 +181,14 @@ let renderBody = (state, send, title, partPaths) => {
             className={selectedClass(selectedPart)}
             fill="currentColor"
             onClick={_ => {
+              document["getElementById"](
+                PressureSore.regionToString(PressureSore.regionForPath(part)),
+              )["scrollIntoView"](
+                ~alignToTop=true,
+                ~behavior="smooth",
+                ~block="center",
+                ~inline="center",
+              )
               switch selectedPart {
               | Some(p) => send(AutoManageScale(p))
               | None => send(AddPressureSore(PressureSore.regionForPath(part)))
@@ -144,8 +211,8 @@ let make = (~pressureSoreParameter, ~updateCB, ~id, ~consultationId) => {
   <div className="my-5">
     <h2> {str("Pressure Sore")} </h2>
     <div className="flex md:flex-row flex-col justify-between">
-      {renderBody(state, send, "Front", PressureSore.anteriorParts)}
-      {renderBody(state, send, "Back", PressureSore.posteriorParts)}
+      {renderBody(state, send, "Front", PressureSore.anteriorParts, 8)}
+      {renderBody(state, send, "Back", PressureSore.posteriorParts, 9)}
     </div>
     <div className="space-y-2">
       <div className="text-xl font-bold "> {str("Braden Scale (Risk Severity)")} </div>
