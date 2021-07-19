@@ -54,27 +54,40 @@ export const NursingPlot = (props: any) => {
     )
     .reduce((accumulator, value) => accumulator.concat(value), []);
 
+  const filterEmpty = (field: any) => {
+    const filtered = dataToDisplay.filter(
+      (i: any) => i.procedure === field.text
+    );
+    return filtered.length > 0;
+  };
+
   return (
     <div className="grid md:grid-cols-full gap-4">
       <div>
         <div className="space-y-2">
-          {NURSING_CARE_FIELDS.map((f: any) => (
-            <div key={f.desc} className="p-4 bg-white border rounded-lg shadow">
-              <div className="text-xl font-semibold">{f.desc}</div>
-              <div className="space-y-2">
-                {dataToDisplay
-                  .filter((i: any) => i.procedure === f.text)
-                  .map((care: any, index: number) => (
-                    <div key={index}>
-                      <div className="text-sm font-semibold">{`- ${care.date}`}</div>
-                      <div className="text-cool-gray-800 pl-2">
-                        {care.description}
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            </div>
-          ))}
+          {NURSING_CARE_FIELDS.map(
+            (f: any) =>
+              filterEmpty(f) && (
+                <div
+                  key={f.desc}
+                  className="p-4 bg-white border rounded-lg shadow"
+                >
+                  <div className="text-xl font-semibold">{f.desc}</div>
+                  <div className="space-y-2">
+                    {dataToDisplay
+                      .filter((i: any) => i.procedure === f.text)
+                      .map((care: any, index: number) => (
+                        <div key={index}>
+                          <div className="text-sm font-semibold">{`- ${care.date}`}</div>
+                          <div className="text-cool-gray-800 pl-2">
+                            {care.description}
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              )
+          )}
         </div>
       </div>
     </div>
