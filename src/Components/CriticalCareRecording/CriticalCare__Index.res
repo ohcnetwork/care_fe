@@ -93,6 +93,10 @@ export make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
           <CriticalCare__PageTitle title="I/O Balance" />
           <DailyRound__IOBalance ioBalance title renderOptionalDescription />
         </div>
+        <div>
+          <CriticalCare__PageTitle title="Nursing Care" />
+          <DailyRound__NursingCare nursingCare renderLine />
+        </div>
       </div>
     </div>
   </div>
