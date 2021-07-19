@@ -62,10 +62,6 @@ let reducer = (state: VentilatorParameters.state, action: VentilatorParameters.a
       ...state,
       ventilator_spo2: spo2,
     }
-  | SetETCO2(etco2) => {
-      ...state,
-      ventilator_etco2: etco2,
-    }
   | SetSaving => {...state, saving: true}
   | ClearSaving => {...state, saving: false}
   | _ => state
@@ -115,7 +111,6 @@ let makePayload = (state: VentilatorParameters.state) => {
   )
   DictUtils.setOptionalNumber("ventilator_fi02", state.ventilator_fi02, payload)
   DictUtils.setOptionalNumber("ventilator_spo2", state.ventilator_spo2, payload)
-  DictUtils.setOptionalNumber("etco2", state.ventilator_etco2, payload)
 
   payload
 }
@@ -172,7 +167,6 @@ let initialState: VentilatorParameters.t => VentilatorParameters.state = ventila
     ventilator_oxygen_modality_flow_rate: ventilatorParameters.ventilator_oxygen_modality_flow_rate,
     ventilator_fi02: ventilatorParameters.ventilator_fi02,
     ventilator_spo2: ventilatorParameters.ventilator_spo2,
-    ventilator_etco2: ventilatorParameters.ventilator_etco2,
     saving: false,
   }
 }
