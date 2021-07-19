@@ -76,32 +76,3 @@ let temperature = t => t.temperature
 let resp = t => t.resp
 let rhythm = t => t.rhythm
 let rhythmDetails = t => t.rhythmDetails
-
-let showStatus = data => {
-  let total = 7.0
-  let count = ref(0.0)
-
-  // if bp_systolic(data) !== "" {
-  //   count := count.contents +. 1.0
-  // }
-  // if bp_diastolic(data) !== "" {
-  //   count := count.contents +. 1.0
-  // }
-  // if pulse(data) !== "" {
-  //   count := count.contents +. 1.0
-  // }
-  // if temperature(data) !== "" {
-  //   count := count.contents +. 1.0
-  // }
-  // if respiratory_rate(data) !== "" {
-  //   count := count.contents +. 1.0
-  // }
-  // if rhythm(data) !== None {
-  //   count := count.contents +. 1.0
-  // }
-  // if description(data) !== "" {
-  //   count := count.contents +. 1.0
-  // }
-
-  Js.Float.toFixed(count.contents /. total *. 100.0)
-}

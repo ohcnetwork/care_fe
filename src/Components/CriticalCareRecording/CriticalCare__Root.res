@@ -10,11 +10,11 @@ type state = {
 }
 
 let successCB = (setState, dailyRound) => {
-  setState(state => {loading: false, dailyRound: Some(DailyRound.makeFromJs(dailyRound))})
+  setState(_state => {loading: false, dailyRound: Some(DailyRound.makeFromJs(dailyRound))})
 }
 
-let errorCB = (setState, error) => {
-  setState(state => {dailyRound: None, loading: false})
+let errorCB = (setState, _error) => {
+  setState(_state => {dailyRound: None, loading: false})
 }
 
 let loadData = (setState, consultationId, id) => {
@@ -33,10 +33,9 @@ export make = (~id, ~facilityId, ~patientId, ~consultationId) => {
     {state.loading
       ? <CriticalCare__Loader />
       : switch state.dailyRound {
-        | Some(dailyRound) => {
-            Js.log(dailyRound)
-            <CriticalCare__Recording id facilityId patientId consultationId dailyRound />
-          }
+        | Some(dailyRound) => <CriticalCare__Recording
+            id facilityId patientId consultationId dailyRound
+          />
 
         | None => {
             Notifications.error({msg: "Unable to load data"})

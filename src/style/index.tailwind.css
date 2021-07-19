@@ -2,14 +2,31 @@
 @tailwind components;
 
 html {
-  width: 100%;
-  height: 100%;
+  @apply w-full h-full;
 }
 
 body {
   font-family: "Open Sans", sans-serif;
   color: #453c52;
-  @apply w-full h-full antialiased;
+  @apply font-sans text-gray-900 w-full h-full antialiased;
+}
+
+@screen md {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: theme("colors.gray.500") theme("colors.gray.100");
+  }
+  ::-webkit-scrollbar {
+    width: 12px;
+  }
+  ::-webkit-scrollbar-track {
+    background: theme("colors.gray.100");
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: theme("colors.gray.500");
+    border-radius: 6px;
+    border: 3px solid theme("colors.gray.100");
+  }
 }
 
 h1,
@@ -191,20 +208,6 @@ button:focus {
   background-image: none;
 }
 
-button:disabled,
-.disabled {
-  @apply cursor-not-allowed bg-gray-300 text-gray-500 shadow-none border-transparent;
-  background-image: none;
-}
-
-button:disabled:hover,
-.disabled:hover,
-button:disabled:focus,
-.disabled:focus {
-  @apply bg-gray-300 text-gray-500 border-transparent shadow-none;
-  background-image: none;
-}
-
 .btn-small {
   @apply py-1 px-3 text-xs h-7 leading-normal;
 }
@@ -346,5 +349,47 @@ button:disabled:focus,
 @keyframes wave {
   50% {
     transform: scale(0.9);
+  }
+}
+
+input:disabled,
+.disabled {
+  @apply cursor-not-allowed bg-gray-200 text-gray-700;
+}
+
+button:disabled,
+.disabled {
+  @apply cursor-not-allowed bg-gray-300 text-gray-500 shadow-none border-transparent;
+  background-image: none;
+}
+
+/* Styling skeleton loading */
+
+.skeleton-placeholder__line-sm {
+  @apply rounded-full bg-gray-100;
+  height: 0.625rem;
+}
+
+.skeleton-placeholder__line-md {
+  @apply rounded-full bg-gray-100;
+  height: 1rem;
+}
+
+.skeleton-placeholder__image {
+  @apply mt-5 h-48 rounded-lg bg-gray-100;
+}
+
+.skeleton-animate {
+  animation: skeletonShimmer 3s infinite linear;
+  background: linear-gradient(to right, #f5f3f7 10%, #fbfafc 40%, #f5f3f7 70%);
+  background-size: 1000px 100%;
+}
+
+@keyframes skeletonShimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
   }
 }

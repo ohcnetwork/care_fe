@@ -162,17 +162,6 @@ const routes = {
   }: any) => (
     <ConsultationForm facilityId={facilityId} patientId={patientId} id={id} />
   ),
-  "/facility/:facilityId/patient/:patientId/consultation/:id": ({
-    facilityId,
-    patientId,
-    id,
-  }: any) => (
-    <ConsultationDetails
-      facilityId={facilityId}
-      patientId={patientId}
-      consultationId={id}
-    />
-  ),
   "/facility/:facilityId/patient/:patientId/consultation/:id/files/": ({
     facilityId,
     patientId,
@@ -247,6 +236,15 @@ const routes = {
     ),
 
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily_rounds/:id":
+    ({ facilityId, patientId, consultationId, id }: any) => (
+      <CriticalCareRecording
+        facilityId={facilityId}
+        patientId={patientId}
+        consultationId={consultationId}
+        id={id}
+      />
+    ),
+  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily_rounds/:id/update":
     ({ facilityId, patientId, consultationId, id }: any) => (
       <CriticalCareRecording
         facilityId={facilityId}
@@ -330,6 +328,31 @@ const routes = {
   "/death_report/:id": ({ id }: any) => <DeathReport id={id} />,
   "/notifications/:id": (id: any) => <ShowPushNotification external_id={id} />,
   "/notice_board/": () => <NoticeBoard />,
+  "/facility/:facilityId/patient/:patientId/consultation/:id": ({
+    facilityId,
+    patientId,
+    id,
+  }: any) => (
+    <ConsultationDetails
+      facilityId={facilityId}
+      patientId={patientId}
+      consultationId={id}
+      tab={"summary"}
+    />
+  ),
+  "/facility/:facilityId/patient/:patientId/consultation/:id/:tab": ({
+    facilityId,
+    patientId,
+    id,
+    tab,
+  }: any) => (
+    <ConsultationDetails
+      facilityId={facilityId}
+      patientId={patientId}
+      consultationId={id}
+      tab={tab}
+    />
+  ),
 };
 
 let menus = [

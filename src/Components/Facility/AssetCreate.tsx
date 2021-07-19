@@ -225,7 +225,7 @@ const AssetCreate = (props: AssetProps) => {
                 margin="dense"
                 options={[
                   {
-                    id: 0,
+                    id: "",
                     name: "Select",
                   },
                   {

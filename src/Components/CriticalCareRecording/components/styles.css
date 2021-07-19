@@ -131,7 +131,6 @@
   margin-bottom: 10px;
 }
 .pupil1 {
-  position: absolute;
   bottom: 0;
   margin: 0 auto;
   width: 9px;
@@ -140,7 +139,6 @@
   background-color: black;
 }
 .pupil2 {
-  position: absolute;
   bottom: 0;
   margin: 0 auto;
   width: 15px;
@@ -150,7 +148,6 @@
 }
 
 .pupil3 {
-  position: absolute;
   bottom: 0;
   margin: 0 auto;
   width: 21px;
@@ -160,7 +157,6 @@
 }
 
 .pupil4 {
-  position: absolute;
   bottom: 0;
   margin: 0 auto;
   width: 25px;
@@ -170,7 +166,6 @@
 }
 
 .pupil5 {
-  position: absolute;
   bottom: 0;
   margin: 0 auto;
   width: 30px;
@@ -180,7 +175,6 @@
 }
 
 .pupil6 {
-  position: absolute;
   bottom: 0;
   margin: 0 auto;
   width: 35px;
@@ -190,7 +184,6 @@
 }
 
 .pupil7 {
-  position: absolute;
   bottom: 0;
   margin: 0 auto;
   width: 38px;
@@ -200,7 +193,6 @@
 }
 
 .pupil8 {
-  margin: 0 auto;
   width: 41px;
   height: 41px;
   border-radius: 50%;

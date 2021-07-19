@@ -2,40 +2,35 @@ let str = React.string
 open CriticalCare__Types
 
 let cmvOptionsArray: array<Options.t> = [
-  {label: "Volume Control Ventilation (VCV)", value: "vcv", name: "cmv"},
-  {label: "Pressure Control Ventilation (PCV)", value: "pcv", name: "cmv"},
+  {label: "Volume Control Ventilation (VCV)", value: "VCV", name: "cmv"},
+  {label: "Pressure Control Ventilation (PCV)", value: "PCV", name: "cmv"},
   {
     label: "Pressure Regulated Volume Controlled Ventilation (PRVC)",
     value: "PRVC",
     name: "cmv",
   },
-  {label: "Airway Pressure Release Ventilation (APRV)", value: "aprv", name: "cmv"},
+  {label: "Airway Pressure Release Ventilation (APRV)", value: "APRV", name: "cmv"},
 ]
 
 let simvOptionArray: array<Options.t> = [
-  {label: "Volume Controlled SIMV (VC-SIMV)", value: "vc_simv", name: "simv"},
-  {label: "Pressure Controlled SIMV (PC-SIMV)", value: "pc_simv", name: "simv"},
+  {label: "Volume Controlled SIMV (VC-SIMV)", value: "VC_SIMV", name: "simv"},
+  {label: "Pressure Controlled SIMV (PC-SIMV)", value: "PC_SIMV", name: "simv"},
   {
     label: "Pressure Regulated Volume Controlled SIMV (PRVC-SIMV)",
-    value: "prvc_simv",
+    value: "PRVC_SIMV",
     name: "simv",
   },
-  {label: "Adapative Support Ventilation (ASV)", value: "asv", name: "simv"},
+  {label: "Adapative Support Ventilation (ASV)", value: "ASV", name: "simv"},
 ]
 
-let rhythmOptionArray: array<Options.t> = [
-  {label: "Regular", value: "regular", name: "rhythm"},
-  {label: "Irregular", value: "irregular", name: "rhythm"},
-]
-
-let psvOptionsArray = [
+let silderOptionArray = [
   {
     "title": "PEEP (cm/H2O)",
     "start": "0",
     "end": "30",
     "interval": "5",
     "step": 1.0,
-    "id": "peep",
+    "id": "ventilator_peep",
     "min": 10.0,
     "max": 30.0,
   },
@@ -45,7 +40,7 @@ let psvOptionsArray = [
     "end": "100",
     "interval": "10",
     "step": 1.0,
-    "id": "peakInspiratoryPressure",
+    "id": "ventilator_pip",
     "min": 12.0,
     "max": 30.0,
   },
@@ -55,7 +50,7 @@ let psvOptionsArray = [
     "end": "40",
     "interval": "5",
     "step": 1.0,
-    "id": "meanAirwayPressure",
+    "id": "ventilator_mean_airway_pressure",
     "min": 12.0,
     "max": 25.0,
   },
@@ -65,9 +60,19 @@ let psvOptionsArray = [
     "end": "100",
     "interval": "10",
     "step": 1.0,
-    "id": "respiratoryRateVentilator",
+    "id": "ventilator_resp_rate",
     "min": 40.0,
     "max": 60.0,
+  },
+  {
+    "title": "Pressure Support",
+    "start": "0",
+    "end": "40",
+    "interval": "5",
+    "step": 1.0,
+    "id": "ventilator_pressure_support",
+    "min": 5.0,
+    "max": 15.0,
   },
   {
     "title": "Tidal Volume (ml)",
@@ -75,7 +80,7 @@ let psvOptionsArray = [
     "end": "1000",
     "interval": "100",
     "step": 1.0,
-    "id": "tidalVolume",
+    "id": "ventilator_tidal_volume",
     "min": 0.0,
     "max": 1000.0,
   },
@@ -85,7 +90,7 @@ let psvOptionsArray = [
     "end": "100",
     "interval": "10",
     "step": 1.0,
-    "id": "fio2",
+    "id": "ventilator_fi02",
     "min": 21.0,
     "max": 60.0,
   },
@@ -95,55 +100,37 @@ let psvOptionsArray = [
     "end": "100",
     "interval": "10",
     "step": 1.0,
-    "id": "spo2",
+    "id": "ventilator_spo2",
     "min": 90.0,
     "max": 100.0,
   },
 ]
 
 @react.component
-let make = (~state: VentilatorParameters.iv, ~send: VentilatorParameters.action => unit) => {
-  let defaultChecked = switch state.ventilatorMode {
-  | "cmv" => state.ventilatorModeSubOption.cmv
-  | "simv" => state.ventilatorModeSubOption.simv
-  | "psv" => state.ventilatorModeSubOption.psv
-  | _ => ""
-  }
+let make = (~state: VentilatorParameters.state, ~send: VentilatorParameters.action => unit) => {
+  let defaultChecked = VentilatorParameters.getParentVentilatorMode(state.ventilator_mode)
+  let (parentVentilatorMode, setParentVentilatorMode) = React.useState(() => defaultChecked)
 
   <div>
     <h4 className="mb-4"> {str("Ventilator Mode")} </h4>
     <div className="mb-4">
-      // <label>
-      //   <input
-      //     onClick={_ => send(SetIv({...state, ventilatorMode: "cmv"}))}
-      //     className="mr-2"
-      //     type_="radio"
-      //     name="ventilatorMode"
-      //     value={"cmv"}
-      //     id={"cmv"}
-      //     checked={state.ventilatorMode === "cmv"}
-      //   />
-      //   {str({"Control Mechanical Ventilation (CMV)"})}
-      // </label>
       <Radio
         id={"cmv"}
         label={"Control Mechanical Ventilation (CMV)"}
-        checked={state.ventilatorMode === "cmv"}
-        onChange={_ => send(SetIv({...state, ventilatorMode: "cmv"}))}
+        checked={parentVentilatorMode == CMV}
+        onChange={_ => {
+          setParentVentilatorMode(_ => CMV)
+          send(SetVentilatorMode(UNKNOWN))
+        }}
       />
-      <div className={`ml-6 ${state.ventilatorMode !== "cmv" ? "hidden" : ""} `}>
+      <div className={`ml-6 ${parentVentilatorMode !== CMV ? "hidden" : ""} `}>
         <CriticalCare__RadioButton
-          defaultChecked={state.ventilatorModeSubOption.cmv}
+          defaultChecked={VentilatorParameters.encodeVentilatorModeType(state.ventilator_mode)}
           onChange={e => {
             send(
-              SetIvSubOptions({
-                ...state,
-                ventilatorModeSubOption: {
-                  cmv: ReactEvent.Form.target(e)["id"],
-                  psv: "",
-                  simv: "",
-                },
-              }),
+              SetVentilatorMode(
+                VentilatorParameters.decodeVentilatorModeType(ReactEvent.Form.target(e)["id"]),
+              ),
             )
           }}
           options={cmvOptionsArray}
@@ -152,95 +139,84 @@ let make = (~state: VentilatorParameters.iv, ~send: VentilatorParameters.action 
       </div>
     </div>
     <div className="mb-4">
-      // <label>
-      //   <input
-      //     onClick={_ => send(SetIv({...state, ventilatorMode: "simv"}))}
-      //     className="mr-2"
-      //     type_="radio"
-      //     name="ventilatorMode"
-      //     value={"simv"}
-      //     id={"simv"}
-      //     checked={state.ventilatorMode === "simv"}
-      //   />
-      //   {str({"Synchronised Intermittent Mandatory Ventilation (SIMV)"})}
-      // </label>
       <Radio
         id={"simv"}
         label={"Synchronised Intermittent Mandatory Ventilation (SIMV)"}
-        checked={state.ventilatorMode === "simv"}
-        onChange={_ => send(SetIv({...state, ventilatorMode: "simv"}))}
+        checked={parentVentilatorMode == SIMV}
+        onChange={_ => {
+          setParentVentilatorMode(_ => SIMV)
+          send(SetVentilatorMode(UNKNOWN))
+        }}
       />
-      <div className={`ml-6 ${state.ventilatorMode !== "simv" ? "hidden" : ""} `}>
+      <div className={`ml-6 ${parentVentilatorMode !== SIMV ? "hidden" : ""} `}>
         <CriticalCare__RadioButton
-          defaultChecked
-          onChange={e =>
+          defaultChecked={VentilatorParameters.encodeVentilatorModeType(state.ventilator_mode)}
+          onChange={e => {
             send(
-              SetIvSubOptions({
-                ...state,
-                ventilatorModeSubOption: {
-                  cmv: "",
-                  psv: "",
-                  simv: ReactEvent.Form.target(e)["id"],
-                },
-              }),
-            )}
+              SetVentilatorMode(
+                VentilatorParameters.decodeVentilatorModeType(ReactEvent.Form.target(e)["id"]),
+              ),
+            )
+          }}
           options={simvOptionArray}
           ishorizontal={false}
         />
       </div>
     </div>
     <div className="mb-4">
-      // <label>
-      //   <input
-      //     onClick={_ => send(SetIv({...state, ventilatorMode: "psv"}))}
-      //     className="mr-2"
-      //     type_="radio"
-      //     name="ventilatorMode"
-      //     value={"psv"}
-      //     id={"psv"}
-      //     checked={state.ventilatorMode === "psv"}
-      //   />
-      //   {str({"C-PAP/ Pressure Support Ventilation (PSV)"})}
-      // </label>
       <Radio
         id={"psv"}
         label={"C-PAP/ Pressure Support Ventilation (PSV)"}
-        checked={state.ventilatorMode === "psv"}
-        onChange={_ => send(SetIv({...state, ventilatorMode: "psv"}))}
+        checked={state.ventilator_mode == PSV}
+        onChange={_ => {
+          setParentVentilatorMode(_ => UNKNOWN)
+          send(SetVentilatorMode(PSV))
+        }}
       />
-      <div className={`ml-6 ${state.ventilatorMode !== "psv" ? "hidden" : ""} `}>
-        {psvOptionsArray
+      <div className={`ml-6`}>
+        {silderOptionArray
         |> Array.map(option => {
-          let value = switch option["id"] {
-          | "peep" => state.peep
-          | "peakInspiratoryPressure" => state.peakInspiratoryPressure
-          | "meanAirwayPressure" => state.meanAirwayPressure
-          | "respiratoryRateVentilator" => state.respiratoryRateVentilator
-          | "tidalVolume" => state.tidalVolume
-          | "fio2" => state.fio2
-          | "spo2" => state.spo2
-          | _ => ""
+          let value: option<int> = switch option["id"] {
+          | "ventilator_peep" => state.ventilator_peep
+          | "ventilator_pip" => state.ventilator_pip
+          | "ventilator_mean_airway_pressure" => state.ventilator_mean_airway_pressure
+          | "ventilator_resp_rate" => state.ventilator_resp_rate
+          | "ventilator_pressure_support" => state.ventilator_pressure_support
+          | "ventilator_tidal_volume" => state.ventilator_tidal_volume
+          | "ventilator_fi02" => state.ventilator_fi02
+          | "ventilator_spo2" => state.ventilator_spo2
+          | _ => None
           }
-          let newState = s =>
+
+          // SUPRESSED WARNING ADDED AT TOP OF THE FILE
+          // Partial match: missing cases in pattern-matching.
+
+          @warning("-8")
+          let handleChange: option<int> => VentilatorParameters.action = s =>
             switch option["id"] {
-            | "peep" => {...state, peep: s}
-            | "peakInspiratoryPressure" => {...state, peakInspiratoryPressure: s}
-            | "meanAirwayPressure" => {...state, meanAirwayPressure: s}
-            | "respiratoryRateVentilator" => {...state, respiratoryRateVentilator: s}
-            | "tidalVolume" => {...state, tidalVolume: s}
-            | "fio2" => {...state, fio2: s}
-            | "spo2" => {...state, spo2: s}
-            | _ => state
+            | "ventilator_peep" => SetPeep(s)
+            | "ventilator_pip" => SetPIP(s)
+            | "ventilator_mean_airway_pressure" => SetMeanAirwayPressure(s)
+            | "ventilator_resp_rate" => SetRespiratoryRate(s)
+            | "ventilator_pressure_support" => SetPressureSupport(s)
+            | "ventilator_tidal_volume" => SetTidalVolume(s)
+            | "ventilator_fi02" => SetFIO2(s)
+            | "ventilator_spo2" => SetSPO2(s)
             }
           <Slider
-            key={`invasive-${option["id"]}`}
+            key={`non-invasive-${option["id"]}`}
             title={option["title"]}
             start={option["start"]}
             end={option["end"]}
             interval={option["interval"]}
             step={option["step"]}
-            value={value}
-            setValue={s => send(SetIvSubOptions(newState(s)))}
+            value={Belt.Int.toString(
+              switch value {
+              | Some(value) => value
+              | _ => 0
+              },
+            )}
+            setValue={s => send(handleChange(Belt.Int.fromString(s)))}
             getLabel={VentilatorParameters.getStatus(option["min"], option["max"])}
           />
         })

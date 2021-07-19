@@ -1,7 +1,5 @@
 let str = React.string
 
-open CriticalCare__Types
-
 type editor =
   | NeurologicalMonitoringEditor
   | HemodynamicParametersEditor
@@ -12,38 +10,18 @@ type editor =
   | DialysisEditor
   | PressureSoreEditor
   | NursingCareEditor
+  | MedicineEditor
 
 type state = {
   visibleEditor: option<editor>,
   dailyRound: CriticalCare__DailyRound.t,
-  ventilatorParametersEditor: CriticalCare__VentilatorParameters.t,
-  neurologicalMonitoringStatus: string,
-  hemodynamicParametersStatus: string,
-  ventilatorParametersStatus: string,
-  arterialBloodGasAnalysisStatus: string,
-  bloodSugarStatus: string,
-  ioBalanceStatus: string,
-  dialysisStatus: string,
-  pressureSoreStatus: string,
-  nursingCareStatus: string,
-  totalStatus: int,
+  updatedEditors: array<editor>,
 }
 
 type action =
   | ShowEditor(editor)
   | CloseEditor
-  | SetVentilatorParametersEditor(CriticalCare__VentilatorParameters.t)
-  | UpdateNursingCareStatus(string)
-  | UpdateVentilatorParametersStatus(string)
-  | UpdateHemodynamicParameterStatus(string)
-  | UpdateABGAnalysisStatus(string)
-  | UpdateTotal(int)
-  | UpdateBloodSugarStatus(string)
-  | UpdateDialysisStatus(string)
-  | UpdateNeurologicalMonitoringStatus(string)
-  | SetIOBalaceStatus(IOBalance.t)
-  | UpdateDailyRound(CriticalCare__DailyRound.t)
-  | UpdatePressureSoreStatus(string)
+  | UpdateDailyRound(CriticalCare__DailyRound.t, editor)
 
 let showEditor = (editor, send) => {
   send(ShowEditor(editor))
@@ -53,34 +31,60 @@ let showStatus = item => {
   str("Completed " ++ item ++ "%")
 }
 
+let basicEditor = (~facilityId, ~patientId, ~consultationId, ~id) => {
+  <Link
+    className={`rounded-lg border px-4 py-2 mt-4 mx-auto cursor-pointer flex justify-between items-center bg-green-100 border-green-500`}
+    href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${id}/update`}>
+    <div className="flex items-center">
+      <i className={"text-xl fas fa-user-nurse mr-4 text-green-500"} />
+      <div className={`font-semibold text-xl text-green-500`}> {str("Basic Editor")} </div>
+    </div>
+    <div> <i className="text-3xl fas fa-check-circle text-green-500" /> </div>
+  </Link>
+}
+let editorNameToString = editor => {
+  switch editor {
+  | NeurologicalMonitoringEditor => "Neurological Monitoring"
+  | HemodynamicParametersEditor => "Hemodynamic Parameters"
+  | VentilatorParametersEditor => "Ventilator Parameters"
+  | ArterialBloodGasAnalysisEditor => "Arterial Blood Gas Analysis"
+  | BloodSugarEditor => "Blood Sugar"
+  | IOBalanceEditor => "I/O Balance"
+  | DialysisEditor => "Dialysis"
+  | PressureSoreEditor => "Pressure Sore"
+  | NursingCareEditor => "Nursing Care"
+  | MedicineEditor => "Medicine"
+  }
+}
+
 let editorToggle = (editorName, state, send) => {
+  let editorUpdated = Js.Array.find(f => f === editorName, state.updatedEditors)
   <div
+    key={editorNameToString(editorName)}
     id="editorToggle"
-    className="border-2 px-4 py-6 mx-auto my-4 cursor-pointer flex justify-between items-center"
+    className={`rounded-lg border px-4 py-2 mt-4 mx-auto cursor-pointer flex justify-between items-center ${Belt.Option.isNone(
+        editorUpdated,
+      )
+        ? ""
+        : "bg-green-100 border-green-500"}`}
     onClick={_ => showEditor(editorName, send)}>
-    {switch editorName {
-    | NeurologicalMonitoringEditor => str("Neurological Monitoring")
-    | HemodynamicParametersEditor => str("Hemodynamic Parameters")
-    | VentilatorParametersEditor => str("Ventilator Parameters")
-    | ArterialBloodGasAnalysisEditor => str("Arterial Blood Gas Analysis")
-    | BloodSugarEditor => str("Blood Sugar")
-    | IOBalanceEditor => str("I/O Balance")
-    | DialysisEditor => str("Dialysis")
-    | PressureSoreEditor => str("Pressure Sore")
-    | NursingCareEditor => str("Nursing Care")
-    }}
+    <div className="flex items-center">
+      <i
+        className={`text-xl fas fa-user-nurse mr-4 ${Belt.Option.isNone(editorUpdated)
+            ? "text-gray-400"
+            : "text-green-500"}`}
+      />
+      <div
+        className={`font-semibold text-xl  ${Belt.Option.isNone(editorUpdated)
+            ? "text-gray-800"
+            : "text-green-500"}`}>
+        {str(editorNameToString(editorName))}
+      </div>
+    </div>
     <div>
-      {switch editorName {
-      | NeurologicalMonitoringEditor => showStatus(state.neurologicalMonitoringStatus)
-      | HemodynamicParametersEditor => showStatus(state.hemodynamicParametersStatus)
-      | VentilatorParametersEditor => showStatus(state.ventilatorParametersStatus)
-      | ArterialBloodGasAnalysisEditor => showStatus(state.arterialBloodGasAnalysisStatus)
-      | BloodSugarEditor => showStatus(state.bloodSugarStatus)
-      | IOBalanceEditor => showStatus(state.ioBalanceStatus)
-      | DialysisEditor => showStatus(state.dialysisStatus)
-      | PressureSoreEditor => showStatus(state.pressureSoreStatus)
-      | NursingCareEditor => showStatus(state.nursingCareStatus)
-      }}
+      {Belt.Option.isNone(editorUpdated)
+        ? <i className="text-3xl fas fa-check-circle text-gray-300" />
+        : <i className="text-3xl fas fa-check-circle text-green-500" />}
     </div>
   </div>
 }
@@ -89,215 +93,159 @@ let reducer = (state, action) => {
   switch action {
   | ShowEditor(editor) => {...state, visibleEditor: Some(editor)}
   | CloseEditor => {...state, visibleEditor: None}
-  | SetVentilatorParametersEditor(editor) => {...state, ventilatorParametersEditor: editor}
-  | UpdateNursingCareStatus(nursingCareStatus) => {
-      ...state,
-      nursingCareStatus: nursingCareStatus,
+  | UpdateDailyRound(dailyRound, editor) => {
+      dailyRound: dailyRound,
+      visibleEditor: None,
+      updatedEditors: Js.Array.concat([editor], state.updatedEditors),
     }
-  | UpdateVentilatorParametersStatus(status) => {
-      ...state,
-      ventilatorParametersStatus: status,
-    }
-  | UpdateHemodynamicParameterStatus(hemodynamicParametersStatus) => {
-      ...state,
-      hemodynamicParametersStatus: hemodynamicParametersStatus,
-    }
-  | UpdateTotal(total) => {...state, totalStatus: total}
-  | UpdateBloodSugarStatus(bloodSugarStatus) => {...state, bloodSugarStatus: bloodSugarStatus}
-  | UpdatePressureSoreStatus(pressureSoreStatus) => {
-      ...state,
-      pressureSoreStatus: pressureSoreStatus,
-    }
-  | UpdateDialysisStatus(dialysisStatus) => {...state, dialysisStatus: dialysisStatus}
-  | UpdateNeurologicalMonitoringStatus(neurologicalMonitoringStatus) => {
-      ...state,
-      neurologicalMonitoringStatus: neurologicalMonitoringStatus,
-    }
-  | SetIOBalaceStatus(iobState) => {...state, ioBalanceStatus: "100"}
-  | UpdateABGAnalysisStatus(arterialBloodGasAnalysisStatus) => {
-      ...state,
-      arterialBloodGasAnalysisStatus: arterialBloodGasAnalysisStatus,
-    }
-  | UpdateDailyRound(dailyRound) => {...state, dailyRound: dailyRound, visibleEditor: None}
   }
 }
 
 let initialState = dailyRound => {
   visibleEditor: None,
   dailyRound: dailyRound,
-  ventilatorParametersEditor: {
-    ventilationInterface: "iv",
-    iv: {
-      ventilatorMode: "",
-      ventilatorModeSubOption: {
-        cmv: "",
-        simv: "",
-        psv: "",
-      },
-      peep: "",
-      peakInspiratoryPressure: "",
-      meanAirwayPressure: "",
-      respiratoryRateVentilator: "",
-      tidalVolume: "",
-      fio2: "",
-      spo2: "",
-    },
-    niv: {
-      ventilatorMode: "",
-      ventilatorModeSubOption: {
-        cmv: "",
-        simv: "",
-        psv: "",
-      },
-      peep: "",
-      peakInspiratoryPressure: "",
-      meanAirwayPressure: "",
-      respiratoryRateVentilator: "",
-      tidalVolume: "",
-      fio2: "",
-      spo2: "",
-    },
-    none: {
-      nasalProngs: Some(""),
-      simpleFaceMask: Some(""),
-      nonRebreathingMask: false,
-      highFlowNasalCannula: false,
-      fio2: "",
-      spo2: "",
-    },
-  },
-  neurologicalMonitoringStatus: "0",
-  hemodynamicParametersStatus: "0",
-  ventilatorParametersStatus: "0",
-  arterialBloodGasAnalysisStatus: "0",
-  bloodSugarStatus: "0",
-  ioBalanceStatus: "0",
-  dialysisStatus: "0",
-  nursingCareStatus: "0",
-  totalStatus: 0,
-  pressureSoreStatus: "0",
+  updatedEditors: [],
 }
 
-let editorButtons = (state, send) => {
-  <div> {Js.Array.map(editor => {
-      editorToggle(editor, state, send)
-    }, [
-      NeurologicalMonitoringEditor,
-      HemodynamicParametersEditor,
-      VentilatorParametersEditor,
-      ArterialBloodGasAnalysisEditor,
-      BloodSugarEditor,
-      IOBalanceEditor,
-      DialysisEditor,
-      PressureSoreEditor,
-      NursingCareEditor,
-    ])->React.array} </div>
-}
-
-let updateDailyRound = (send, dailyRound) => {
-  send(UpdateDailyRound(dailyRound))
+let updateDailyRound = (send, editor, dailyRound) => {
+  send(UpdateDailyRound(dailyRound, editor))
 }
 
 @react.component
 export make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
   let (state, send) = React.useReducer(reducer, initialState(dailyRound))
 
-  <div
-    className="bg-white px-4 py-5 border-b border-gray-200 sm:px-6 max-w-3xl mx-auto border mt-4 shadow rounded-lg">
-    <div className="p-4">
+  <div className=" px-4 py-5sm:px-6 max-w-5xl mx-auto mt-4">
+    {ReactUtils.nullUnless(
+      <div>
+        <Link
+          className="btn btn-default bg-white"
+          href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`}>
+          {str("Go back to Consultation")}
+        </Link>
+      </div>,
+      Belt.Option.isNone(state.visibleEditor),
+    )}
+    <div>
       {switch state.visibleEditor {
       | Some(editor) =>
         <div id="editor">
-          <button id="closeEditor" onClick={_ => send(CloseEditor)}> {str("Back")} </button>
-          {switch editor {
-          | NeurologicalMonitoringEditor =>
-            <CriticalCare__NeurologicalMonitoringEditor
-              neurologicalMonitoring={CriticalCare__DailyRound.neurologicalMonitoring(
-                state.dailyRound,
-              )}
-              updateCB={updateDailyRound(send)}
-              id
-              consultationId
-            />
-          | HemodynamicParametersEditor =>
-            <CriticalCare__HemodynamicParametersEditor
-              hemodynamicParameter={CriticalCare__DailyRound.hemodynamicParameters(
-                state.dailyRound,
-              )}
-              updateCB={updateDailyRound(send)}
-              id
-              consultationId
-            />
-          | VentilatorParametersEditor =>
-            <CriticalCare__VentilatorParametersEditor
-              initialState={state.ventilatorParametersEditor}
-              handleDone={(data, status) => {
-                send(SetVentilatorParametersEditor(data))
-                send(UpdateVentilatorParametersStatus(status))
-                send(CloseEditor)
-              }}
-            />
-          | ArterialBloodGasAnalysisEditor =>
-            <CriticalCare__ABGAnalysisEditor
-              arterialBloodGasAnalysis={CriticalCare__DailyRound.arterialBloodGasAnalysis(
-                state.dailyRound,
-              )}
-              updateCB={updateDailyRound(send)}
-              percentCompleteCB={status => {
-                send(UpdateABGAnalysisStatus(status))
-                if status == "100" {
-                  send(UpdateTotal(state.totalStatus + 1))
-                }
-              }}
-              id
-              consultationId
-            />
-          | BloodSugarEditor =>
-            <CriticalCare_BloodSugarEditor
-              bloodsugarParameters={CriticalCare__DailyRound.bloodSugar(state.dailyRound)}
-              updateCB={updateDailyRound(send)}
-              id
-              consultationId
-            />
-          | IOBalanceEditor =>
-            <CriticalCare__IOBalanceEditor
-              ioBalance={CriticalCare__DailyRound.ioBalance(state.dailyRound)}
-              updateCB={updateDailyRound(send)}
-              id
-              consultationId
-            />
-          | DialysisEditor =>
-            <CriticalCare_DialysisEditor
-              dialysisParameters={CriticalCare__DailyRound.dialysis(state.dailyRound)}
-              updateCB={updateDailyRound(send)}
-              id
-              consultationId
-              percentCompleteCB={status => {
-                send(UpdateDialysisStatus(status))
-                if status == "100" {
-                  send(UpdateTotal(state.totalStatus + 1))
-                }
-              }}
-            />
-          | PressureSoreEditor =>
-            <CriticalCare__PressureSoreEditor
-              pressureSoreParameter={CriticalCare__DailyRound.pressureSoreParameter(
-                state.dailyRound,
-              )}
-              updateCB={updateDailyRound(send)}
-              id
-              consultationId
-            />
-          | NursingCareEditor =>
-            <CriticalCare__NursingCareEditor
-              nursingCare={CriticalCare__DailyRound.nursingCare(state.dailyRound)}
-              updateCB={updateDailyRound(send)}
-              id
-              consultationId
-            />
-          }}
+          <button
+            className="btn btn-default bg-white" id="closeEditor" onClick={_ => send(CloseEditor)}>
+            {str("Back")}
+          </button>
+          <div
+            className="bg-white px-2 md:px-6 py-5 border-b border-gray-200 sm:px-6 max-w-5xl mx-auto border mt-4 shadow rounded-lg">
+            {switch editor {
+            | NeurologicalMonitoringEditor =>
+              <CriticalCare__NeurologicalMonitoringEditor
+                neurologicalMonitoring={CriticalCare__DailyRound.neurologicalMonitoring(
+                  state.dailyRound,
+                )}
+                updateCB={updateDailyRound(send, NeurologicalMonitoringEditor)}
+                id
+                consultationId
+              />
+            | HemodynamicParametersEditor =>
+              <CriticalCare__HemodynamicParametersEditor
+                hemodynamicParameter={CriticalCare__DailyRound.hemodynamicParameters(
+                  state.dailyRound,
+                )}
+                updateCB={updateDailyRound(send, HemodynamicParametersEditor)}
+                id
+                consultationId
+              />
+            | VentilatorParametersEditor =>
+              // This need to updated
+              <CriticalCare__VentilatorParametersEditor
+                ventilatorParameters={CriticalCare__DailyRound.ventilatorParameters(
+                  state.dailyRound,
+                )}
+                updateCB={updateDailyRound(send, VentilatorParametersEditor)}
+                id
+                consultationId
+              />
+            | ArterialBloodGasAnalysisEditor =>
+              <CriticalCare__ABGAnalysisEditor
+                arterialBloodGasAnalysis={CriticalCare__DailyRound.arterialBloodGasAnalysis(
+                  state.dailyRound,
+                )}
+                updateCB={updateDailyRound(send, ArterialBloodGasAnalysisEditor)}
+                id
+                consultationId
+              />
+            | BloodSugarEditor =>
+              <CriticalCare_BloodSugarEditor
+                bloodsugarParameters={CriticalCare__DailyRound.bloodSugar(state.dailyRound)}
+                updateCB={updateDailyRound(send, BloodSugarEditor)}
+                id
+                consultationId
+              />
+            | IOBalanceEditor =>
+              <CriticalCare__IOBalanceEditor
+                ioBalance={CriticalCare__DailyRound.ioBalance(state.dailyRound)}
+                updateCB={updateDailyRound(send, IOBalanceEditor)}
+                id
+                consultationId
+              />
+            | DialysisEditor =>
+              <CriticalCare_DialysisEditor
+                dialysisParameters={CriticalCare__DailyRound.dialysis(state.dailyRound)}
+                updateCB={updateDailyRound(send, DialysisEditor)}
+                id
+                consultationId
+              />
+            | PressureSoreEditor =>
+              <CriticalCare__PressureSoreEditor
+                pressureSoreParameter={CriticalCare__DailyRound.pressureSoreParameter(
+                  state.dailyRound,
+                )}
+                updateCB={updateDailyRound(send, PressureSoreEditor)}
+                id
+                consultationId
+              />
+            | NursingCareEditor =>
+              <CriticalCare__NursingCareEditor
+                nursingCare={CriticalCare__DailyRound.nursingCare(state.dailyRound)}
+                updateCB={updateDailyRound(send, NursingCareEditor)}
+                id
+                consultationId
+              />
+            | MedicineEditor =>
+              <CriticalCare__MedicineEditor
+                medicines={CriticalCare__DailyRound.medicine(state.dailyRound)}
+                updateCB={updateDailyRound(send, MedicineEditor)}
+                id
+                consultationId
+              />
+            }}
+          </div>
         </div>
-      | None => editorButtons(state, send)
+      | None =>
+        <div
+          className="bg-white px-2 md:px-6 py-5 border-b border-gray-200 sm:px-6 max-w-5xl mx-auto border mt-4 shadow rounded-lg">
+          <h2> {str("Record Updates")} </h2>
+          <div>
+            {basicEditor(~facilityId, ~patientId, ~consultationId, ~id)} {Js.Array.map(editor => {
+              editorToggle(editor, state, send)
+            }, [
+              NeurologicalMonitoringEditor,
+              HemodynamicParametersEditor,
+              VentilatorParametersEditor,
+              ArterialBloodGasAnalysisEditor,
+              BloodSugarEditor,
+              IOBalanceEditor,
+              DialysisEditor,
+              PressureSoreEditor,
+              NursingCareEditor,
+              MedicineEditor,
+            ])->React.array}
+          </div>
+          <Link
+            href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`}>
+            <div className="btn btn-primary w-full mt-6"> {str("Complete")} </div>
+          </Link>
+        </div>
       }}
     </div>
   </div>

@@ -14,14 +14,13 @@ export const PrimaryParametersPlot = (props: any) => {
   const [offset, setOffset] = useState(0);
   const [results, setResults] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
-  const limit = 14;
 
   const fetchDailyRounds = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
       const res = await dispatch(
         dailyRoundsAnalyse(
-          { limit, offset, fields: ["bp", "pulse", "temperature", "resp"] },
+          { offset, fields: ["bp", "pulse", "temperature", "resp"] },
           { consultationId }
         )
       );
@@ -35,9 +34,12 @@ export const PrimaryParametersPlot = (props: any) => {
     [consultationId, dispatch, offset]
   );
 
-  useAbortableEffect((status: statusType) => {
-    fetchDailyRounds(status);
-  }, []);
+  useAbortableEffect(
+    (status: statusType) => {
+      fetchDailyRounds(status);
+    },
+    [consultationId]
+  );
 
   const handlePagination = (page: number, limit: number) => {
     const offset = (page - 1) * limit;
@@ -159,13 +161,8 @@ export const PrimaryParametersPlot = (props: any) => {
     ],
   };
 
-  if (Object.keys(results).length !== 0) {
-    console.log(Object.keys(results));
-    console.log(Object.values(results).map((p: any) => p.resp));
-  }
-
   return (
-    <div className="grid grid-cols-2 gap-4">
+    <div className="grid grid-row-1 md:grid-cols-2 gap-4">
       <div className="pt-4 px-4 bg-white border rounded-lg shadow">
         <ReactECharts option={BPOptions} />
       </div>

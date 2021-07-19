@@ -478,3 +478,18 @@ export const RESOURCE_FILTER_ORDER: Array<OptionsType> = [
   { id: 3, text: "modified_date", desc: "ASC Modified Date" },
   { id: 4, text: "-modified_date", desc: "DESC Modified Date" },
 ];
+
+export const NURSING_CARE_FIELDS: Array<OptionsType> = [
+  { id: 1, text: "personal_hygiene", desc: "Personal Hygiene" },
+  { id: 2, text: "positioning", desc: "Positioning" },
+  { id: 3, text: "suctioning", desc: "Suctioning" },
+  { id: 4, text: "ryles_tube_care", desc: "Ryles Tube Care" },
+  { id: 5, text: "iv_sitecare", desc: "IV Site Care" },
+  { id: 6, text: "nubulisation", desc: "Nubulisation" },
+  { id: 7, text: "dressing", desc: "Dressing" },
+  { id: 8, text: "dvt_pump_stocking", desc: "DVT Pump Stocking" },
+  { id: 9, text: "restrain", desc: "Restrain" },
+  { id: 10, text: "chest_tube_care", desc: "Chest Tube Care" },
+  { id: 11, text: "tracheostomy_care", desc: "Tracheostomy Care" },
+  { id: 12, text: "stoma_care", desc: "Stoma Care" },
+];

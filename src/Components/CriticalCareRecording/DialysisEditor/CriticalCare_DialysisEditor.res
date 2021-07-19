@@ -62,19 +62,7 @@ let errorCB = (send, _error) => {
   send(ClearSaving)
 }
 
-let showStatus = data => {
-  let total = 2.0
-  let count = ref(0.0)
-  if Js.Option.isSome(data.dialysis_fluid_balance) {
-    count := count.contents +. 1.0
-  }
-  if Js.Option.isSome(data.dialysis_net_balance) {
-    count := count.contents +. 1.0
-  }
-  Js.Float.toFixed(count.contents /. total *. 100.0)
-}
-
-let saveData = (id, consultationId, state, send, updateCB, percentCompleteCB) => {
+let saveData = (id, consultationId, state, send, updateCB) => {
   send(SetSaving)
   updateDailyRound(
     consultationId,
@@ -83,11 +71,10 @@ let saveData = (id, consultationId, state, send, updateCB, percentCompleteCB) =>
     successCB(send, updateCB),
     errorCB(send),
   )
-  percentCompleteCB(showStatus(state))
 }
 
 @react.component
-let make = (~dialysisParameters, ~updateCB, ~id, ~consultationId, ~percentCompleteCB) => {
+let make = (~dialysisParameters, ~updateCB, ~id, ~consultationId) => {
   let (state, send) = React.useReducer(reducer, initialState(dialysisParameters))
 
   <div>
@@ -97,8 +84,8 @@ let make = (~dialysisParameters, ~updateCB, ~id, ~consultationId, ~percentComple
         <Slider
           title={"Dialysis Fluid Balance (ml/h)"}
           start={"0"}
-          end={"700"}
-          interval={"100"}
+          end={"5000"}
+          interval={"1000"}
           step={1.0}
           value={Belt.Option.mapWithDefault(state.dialysis_fluid_balance, "", string_of_int)}
           setValue={s => send(SetFluidBalance(int_of_string(s)))}
@@ -107,8 +94,8 @@ let make = (~dialysisParameters, ~updateCB, ~id, ~consultationId, ~percentComple
         <Slider
           title={"Dialysis Net Balance (ml/h)"}
           start={"0"}
-          end={"700"}
-          interval={"100"}
+          end={"5000"}
+          interval={"1000"}
           step={1.0}
           value={Belt.Option.mapWithDefault(state.dialysis_net_balance, "", string_of_int)}
           setValue={s => send(SetNetBalance(int_of_string(s)))}
@@ -117,8 +104,8 @@ let make = (~dialysisParameters, ~updateCB, ~id, ~consultationId, ~percentComple
       </div>
       <button
         disabled={state.saving || !state.dirty}
-        className="flex w-full bg-primary-600 text-white p-2 text-lg hover:bg-primary-800 justify-center items-center rounded-md"
-        onClick={_ => saveData(id, consultationId, state, send, updateCB, percentCompleteCB)}>
+        className="btn btn-primary btn-large w-full"
+        onClick={_ => saveData(id, consultationId, state, send, updateCB)}>
         {str("Update Details")}
       </button>
     </div>
