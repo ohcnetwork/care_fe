@@ -33,7 +33,7 @@ export make = (~id, ~facilityId, ~patientId, ~consultationId) => {
     {state.loading
       ? <CriticalCare__Loader />
       : switch state.dailyRound {
-        | Some(dailyRound) => <DailyRound__Root dailyRound facilityId patientId consultationId />
+        | Some(dailyRound) => <DailyRound__Root dailyRound facilityId patientId consultationId id />
         | None => {
             Notifications.error({msg: "Unable to load data"})
             <> </>

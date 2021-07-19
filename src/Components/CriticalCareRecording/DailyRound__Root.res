@@ -1,8 +1,7 @@
 let str = React.string
-open CriticalCare__Types
 
 @react.component
-let make = (~dailyRound, ~facilityId, ~patientId, ~consultationId) => {
+let make = (~dailyRound, ~facilityId, ~patientId, ~consultationId, ~id) => {
   let neurologicalMonitoring = CriticalCare__DailyRound.neurologicalMonitoring(dailyRound)
   let hemodynamicParameter = CriticalCare__DailyRound.hemodynamicParameters(dailyRound)
   let nursingCare = CriticalCare__DailyRound.nursingCare(dailyRound)
@@ -26,11 +25,17 @@ let make = (~dailyRound, ~facilityId, ~patientId, ~consultationId) => {
         href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/updates`}>
         {str("Go back")}
       </Link>
+      <Link
+        className="btn btn-default text-white bg-primary-400"
+        href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_round/${id}`}>
+        {str("Update")}
+      </Link>
     </div>
-    <DailyRound__ABG arterialBloodGasAnalysis />
-    <DailyRound__BloodSugar bloodSugar />
-    <DailyRound__Dialysis dialysis />
-    <DailyRound__HemodynamicParameters hemodynamicParameter />
-    <DailyRound__IOBalance ioBalance />
+    // <DailyRound__ABG arterialBloodGasAnalysis />
+    // <DailyRound__BloodSugar bloodSugar />
+    // <DailyRound__Dialysis dialysis />
+    // <DailyRound__HemodynamicParameters hemodynamicParameter />
+    // <DailyRound__IOBalance ioBalance />
+    // <DailyRound__NeurologicalMonitoring neurologicalMonitoring />
   </div>
 }

@@ -58,7 +58,7 @@ import { AddLocationForm } from "../Components/Facility/AddLocationForm";
 import { LocationManagement } from "../Components/Facility/LocationManagement";
 import AssetsList from "../Components/Assets/AssetsList";
 import AssetManage from "../Components/Assets/AssetManage";
-import { make as DailyRoundListDetails } from "../Components/CriticalCareRecording/DailyRound__Details.gen";
+import { DailyRoundListDetails } from "../Components/Patient/DailyRoundListDetails";
 
 const get = require("lodash.get");
 const img = "https://cdn.coronasafe.network/light-logo.svg";

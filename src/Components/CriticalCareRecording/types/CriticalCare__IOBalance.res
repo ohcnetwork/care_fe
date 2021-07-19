@@ -8,8 +8,8 @@ export type t = {
   ivFluid: array<item>,
   feed: array<item>,
   output: array<item>,
-  total_intake_calculated: option<float>,
-  total_output_calculated: option<float>,
+  total_intake_calculated: option<string>,
+  total_output_calculated: option<string>,
 }
 
 let make = (
