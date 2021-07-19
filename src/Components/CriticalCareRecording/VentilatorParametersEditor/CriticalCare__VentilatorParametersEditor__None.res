@@ -39,25 +39,25 @@ let silderOptionArray = [
     "min": 90.0,
     "max": 100.0,
   },
+  {
+    "title": "EtCO2 (mm Hg)",
+    "start": "0",
+    "end": "200",
+    "interval": "10",
+    "step": 1.0,
+    "id": "ventilator_etco2",
+    "min": 35.0,
+    "max": 45.0,
+  },
 ]
-
-let getStatus = (min, max, val) => {
-  if val > min && val < max {
-    ("Normal", "#059669")
-  } else if val < min {
-    ("Low", "#DC2626")
-  } else {
-    ("High", "#DC2626")
-  }
-}
 
 @react.component
 let make = (~state: VentilatorParameters.state, ~send: VentilatorParameters.action => unit) => {
   let getOxygenFlowRateLabel = switch state.ventilator_oxygen_modality {
-  | NASAL_PRONGS => VentilatorParameters.getStatus(1.0, 4.0)
-  | SIMPLE_FACE_MASK => VentilatorParameters.getStatus(5.0, 10.0)
-  | NON_REBREATHING_MASK => VentilatorParameters.getStatus(11.0, 15.0)
-  | _ => VentilatorParameters.getStatus(0.0, 50.0)
+  | NASAL_PRONGS => VentilatorParameters.getStatus(1.0, "Low", 4.0, "High")
+  | SIMPLE_FACE_MASK => VentilatorParameters.getStatus(5.0, "Low", 10.0, "High")
+  | NON_REBREATHING_MASK => VentilatorParameters.getStatus(11.0, "Low", 15.0, "High")
+  | _ => VentilatorParameters.getStatus(0.0, "Low", 50.0, "High")
   }
   <div>
     <h4 className="mb-4"> {str("Oxygen Modality")} </h4>
@@ -96,6 +96,7 @@ let make = (~state: VentilatorParameters.state, ~send: VentilatorParameters.acti
       | "ventilator_oxygen_modality_flow_rate" => state.ventilator_oxygen_modality_flow_rate
       | "ventilator_fi02" => state.ventilator_fi02
       | "ventilator_spo2" => state.ventilator_spo2
+      | "ventilator_etco2" => state.ventilator_etco2
       | _ => None
       }
       let handleChange: option<int> => VentilatorParameters.action = s =>
@@ -103,6 +104,7 @@ let make = (~state: VentilatorParameters.state, ~send: VentilatorParameters.acti
         | "ventilator_oxygen_modality_flow_rate" => SetOxygenModalityFlowRate(s)
         | "ventilator_fi02" => SetFIO2(s)
         | "ventilator_spo2" => SetSPO2(s)
+        | "ventilator_etco2" => SetETCO2(s)
         }
       <Slider
         key={`none-${option["id"]}`}
@@ -118,7 +120,7 @@ let make = (~state: VentilatorParameters.state, ~send: VentilatorParameters.acti
           },
         )}
         setValue={s => send(handleChange(Belt.Int.fromString(s)))}
-        getLabel={VentilatorParameters.getStatus(option["min"], option["max"])}
+        getLabel={VentilatorParameters.getStatus(option["min"], "Low", option["max"], "High")}
       />
     })
     |> React.array}
