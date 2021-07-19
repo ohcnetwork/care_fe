@@ -25,7 +25,8 @@
 //     }
 
 let str = React.string
-%%raw(`import ("./styles.css")`)
+// %%raw(`import ("./styles.css")`)
+%%raw(`import ('@yaireo/ui-range')`)
 
 @react.component
 let make = (
@@ -80,25 +81,33 @@ let make = (
           />
         </div>
       </div>
-      <div className="slider-container">
+      <div
+        className="range-slider min-w-full"
+        style={ReactDOM.Style.unsafeAddStyle(
+          ReactDOM.Style.make(),
+          {
+            "--min": start,
+            "--max": end,
+            "--fill-color": "#0e9f6e",
+            "--primary-color": "#0e9f6e",
+            "--value-background-hover": "#0e9f6e",
+            "--value": value,
+            "--text-value": value,
+          },
+        )}>
         <input
           type_="range"
           step={step}
           max={end}
           min={start}
           value={value}
-          className="slider"
-          onChange={event => setValue(ReactEvent.Form.target(event)["value"])}
+          onInput={event => setValue(ReactEvent.Form.target(event)["value"])}
+          onChange={event => {
+            setValue(ReactEvent.Form.target(event)["value"])
+          }}
         />
-        <div className="indicators">
-          <div
-            className="tick"
-            style={ReactDOM.Style.make(
-              ~backgroundSize=`${iterations->Belt.Float.toString}% 100%`,
-              (),
-            )}
-          />
-        </div>
+        <output> {str(value)} </output>
+        <div className="range-slider__progress" />
       </div>
       <div className="flex justify-between pt-2">
         <div className="pt-2"> {str(start)} </div> <div className="pt-2"> {str(end)} </div>
