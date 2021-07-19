@@ -43,6 +43,7 @@ export make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
   let bloodSugar = DailyRound.bloodSugar(dailyRound)
   let ventilatorParameters = DailyRound.ventilatorParameters(dailyRound)
   let medicine = DailyRound.medicine(dailyRound)
+  let others = DailyRound.others(dailyRound)
 
   <div className=" px-4 py-5sm:px-6 max-w-5xl mx-auto mt-4">
     <div>
@@ -104,6 +105,9 @@ export make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
         <div>
           <CriticalCare__PageTitle title="Ventilator Parameters" />
           <DailyRound__VentilatorParameters ventilatorParameters renderOptionalInt renderLine />
+        </div>
+        <div>
+          <CriticalCare__PageTitle title="Others" /> <DailyRound__Others others renderOptionalInt />
         </div>
       </div>
     </div>
