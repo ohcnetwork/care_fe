@@ -9,3 +9,4 @@ module NeurologicalMonitoring = CriticalCare__NeurologicalMonitoring
 module IOBalance = CriticalCare__IOBalance
 module DailyRound = CriticalCare__DailyRound
 module PressureSore = CriticalCare__PressureSore
+module Others = CriticalCare__Others
