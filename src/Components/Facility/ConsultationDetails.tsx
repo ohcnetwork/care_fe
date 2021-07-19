@@ -14,6 +14,7 @@ import { ABGPlots } from "./Consultations/ABGPlots";
 import { DailyRoundsList } from "./Consultations/DailyRoundsList";
 import { make as Link } from "../Common/components/Link.gen";
 import { NursingPlot } from "./Consultations/NursingPlot";
+import { IOBalancePlots } from "./Consultations/IOBalancePlots";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -306,6 +307,7 @@ export const ConsultationDetails = (props: any) => {
                     "MEDICINES",
                     "FILES",
                     "ABG",
+                    "IO BALANCE",
                     "NURSING",
                   ].map((p: string) => (
                     <Link
@@ -464,14 +466,20 @@ export const ConsultationDetails = (props: any) => {
               ></ABGPlots>
             </div>
           )}
-          {tab === "NURSING" && (
+          {tab === "IO%20BALANCE" && (
             <div>
-              <PageTitle title="Nursing Analysis" hideBack={true} />
-              <NursingPlot
+              <PageTitle title="IO Balance plots" hideBack={true} />
+              <IOBalancePlots
                 facilityId={facilityId}
                 patientId={patientId}
                 consultationId={consultationId}
-              ></NursingPlot>
+              ></IOBalancePlots>
+            </div>
+          )}
+          {tab === "NURSING" && (
+            <div>
+              <PageTitle title="Nursing Analysis" hideBack={true} />
+              <NursingPlot consultationId={consultationId}></NursingPlot>
             </div>
           )}
         </div>
