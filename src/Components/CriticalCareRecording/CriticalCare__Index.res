@@ -101,6 +101,10 @@ export make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
           <CriticalCare__PageTitle title="Pressure Sore" />
           <DailyRound__PressureSore pressureSoreParameter />
         </div>
+        <div>
+          <CriticalCare__PageTitle title="Ventilator Parameters" />
+          <DailyRound__VentilatorParameters ventilatorParameters renderOptionalInt renderLine />
+        </div>
       </div>
     </div>
   </div>
