@@ -162,7 +162,8 @@ let renderBody = (state, send, title, partPaths, substr) => {
     </div>
     // Braden Scale Divs
     <div className="mx-auto overflow-x-scroll max-w-md my-3 border-2">
-      <div className="grid grid-rows-6 grid-flow-col gap-2 auto-cols-max justify-items-center p-2">
+      <div
+        className="grid grid-rows-3 md:grid-rows-6 grid-flow-col gap-2 auto-cols-max justify-items-center p-2">
         {Js.Array.mapi((part, index) => {
           let regionType = PressureSore.regionForPath(part)
           let selectedPart = Js.Array.find(p => PressureSore.region(p) === regionType, state.parts)
