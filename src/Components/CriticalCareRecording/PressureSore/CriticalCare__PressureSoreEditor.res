@@ -143,14 +143,14 @@ let bradenScaleValue = selectedPart => {
   switch selectedPart {
   | Some(p) =>
     switch PressureSore.scale(p) {
-    | 1 => "1"
-    | 2 => "2"
-    | 3 => "3"
-    | 4 => "4"
-    | 5 => "5"
-    | _ => "0"
+    | 1 => ": 1"
+    | 2 => ": 2"
+    | 3 => ": 3"
+    | 4 => ": 4"
+    | 5 => ": 5"
+    | _ => ""
     }
-  | None => Js.Int.toString(0)
+  | None => ""
   }
 }
 
@@ -183,9 +183,7 @@ let renderBody = (state, send, title, partPaths, substr) => {
                 {str(
                   Js.String.sliceToEnd(
                     ~from=substr,
-                    PressureSore.regionToString(regionType) ++
-                    ": " ++
-                    bradenScaleValue(selectedPart),
+                    PressureSore.regionToString(regionType) ++ bradenScaleValue(selectedPart),
                   ),
                 )}
               </div>
