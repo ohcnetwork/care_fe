@@ -23,6 +23,7 @@ type state = {
 type action =
   | AutoManageScale(PressureSore.part)
   | AddPressureSore(PressureSore.region)
+  | RemoveFromSelectedParts(PressureSore.part)
   | SetSaving
   | ClearSaving
 
@@ -39,6 +40,14 @@ let reducer = (state, action) => {
         parts: Js.Array.filter(f => PressureSore.scale(f) !== 0, newParts),
         dirty: true,
       }
+    }
+  | RemoveFromSelectedParts(part) => {
+      ...state,
+      parts: Js.Array.filter(
+        p => PressureSore.region(p) !== PressureSore.region(part),
+        state.parts,
+      ),
+      dirty: true,
     }
   | AddPressureSore(region) => {
       ...state,
@@ -103,30 +112,29 @@ let selectedClass = part => {
   switch part {
   | Some(p) =>
     switch PressureSore.scale(p) {
-    | 1 => "text-red-200 tooltip"
-    | 2 => "text-red-400 tooltip"
-    | 3 => "text-red-500 tooltip"
-    | 4 => "text-red-600 tooltip"
-    | 5 => "text-red-700 tooltip"
-    | _ => "text-gray-400 tooltip"
+    | 1 => "text-red-200 hover:bg-red-400 tooltip"
+    | 2 => "text-red-400 hover:bg-red-500 tooltip"
+    | 3 => "text-red-500 hover:bg-red-600 tooltip"
+    | 4 => "text-red-600 hover:bg-red-700 tooltip"
+    | 5 => "text-red-700 hover:bg-gray-400 tooltip"
+    | _ => "text-gray-400 hover:bg-red-400 tooltip"
     }
-  | None => "text-gray-400 hover:text-red-100 tooltip"
+  | None => "text-gray-400 hover:text-red-200 tooltip"
   }
 }
-
 // UI for each Label
 let selectedLabelClass = part => {
   switch part {
   | Some(p) =>
     switch PressureSore.scale(p) {
-    | 1 => "bg-red-200 text-white hover:bg-red-800"
-    | 2 => "bg-red-400 text-white hover:bg-red-800"
-    | 3 => "bg-red-500 text-white hover:bg-red-800"
-    | 4 => "bg-red-600 text-white hover:bg-red-800"
-    | 5 => "bg-red-700 text-white hover:bg-red-800"
+    | 1 => "bg-red-200 text-red-700 hover:bg-red-400"
+    | 2 => "bg-red-400 text-white hover:bg-red-500"
+    | 3 => "bg-red-500 text-white hover:bg-red-600"
+    | 4 => "bg-red-600 text-white hover:bg-red-700"
+    | 5 => "bg-red-700 text-white hover:bg-red-200"
     | _ => "bg-gray-300 text-black hover:bg-gray-400"
     }
-  | None => "bg-gray-300 text-black hover:bg-gray-400"
+  | None => "bg-gray-300 text-black hover:bg-red-200"
   }
 }
 
@@ -154,13 +162,14 @@ let renderBody = (state, send, title, partPaths, substr) => {
     </div>
     // Braden Scale Divs
     <div className="mx-auto overflow-x-scroll max-w-md my-3 border-2">
-      <div className="grid grid-rows-3 grid-flow-col auto-cols-max gap-3 p-2">
-        {Js.Array.mapi((part, _) => {
+      <div className="grid grid-rows-6 grid-flow-col gap-2 auto-cols-max justify-items-center p-2">
+        {Js.Array.mapi((part, index) => {
           let regionType = PressureSore.regionForPath(part)
           let selectedPart = Js.Array.find(p => PressureSore.region(p) === regionType, state.parts)
 
           <div
-            className={"col-auto px-2 py-1 rounded m-1 cursor-pointer  " ++
+            key={string_of_int(index)}
+            className={"p-1 col-auto text-sm rounded m-1 cursor-pointer " ++
             selectedLabelClass(selectedPart)}
             id={PressureSore.regionToString(regionType)}
             onClick={_ => {
@@ -169,12 +178,27 @@ let renderBody = (state, send, title, partPaths, substr) => {
               | None => send(AddPressureSore(regionType))
               }
             }}>
-            {str(
-              Js.String.sliceToEnd(
-                ~from=substr,
-                PressureSore.regionToString(regionType) ++ " | " ++ bradenScaleValue(selectedPart),
-              ),
-            )}
+            <div className="flex">
+              <div className="border-white border-r-2 px-1">
+                {str(
+                  Js.String.sliceToEnd(
+                    ~from=substr,
+                    PressureSore.regionToString(regionType) ++
+                    ": " ++
+                    bradenScaleValue(selectedPart),
+                  ),
+                )}
+              </div>
+              <i
+                className="fas fa-times p-1"
+                onClick={_ => {
+                  switch selectedPart {
+                  | Some(p) => send(RemoveFromSelectedParts(p))
+                  | None => ()
+                  }
+                }}
+              />
+            </div>
           </div>
         }, partPaths)->React.array}
       </div>
