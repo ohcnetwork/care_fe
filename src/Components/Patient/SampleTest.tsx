@@ -85,17 +85,28 @@ export const SampleTest = (props: any) => {
 
   const fetchFacilityName = useCallback(
     async (status: statusType) => {
-      const facility_type = 950;
-      const FacilityNameList = await dispatchAction(
-        getAllFacilities({ facility_type })
+      const coronaLabType = 950;
+      const labType = 9;
+      const LabList = await dispatchAction(
+        getAllFacilities({ facility_type: labType })
       );
-      if (!status.aborted && FacilityNameList.data.results) {
-        setFacilityName([...FacilityNameList.data.results]);
+      const CoronaLabList = await dispatchAction(
+        getAllFacilities({ facility_type: coronaLabType })
+      );
+      if (
+        !status.aborted &&
+        LabList.data.results &&
+        CoronaLabList.data.results
+      ) {
+        setFacilityName([
+          ...LabList.data.results,
+          ...CoronaLabList.data.results,
+        ]);
         dispatch({
           type: "set_form",
           form: {
             ...state.form,
-            testing_facility: FacilityNameList.data.results[0]?.id,
+            testing_facility: LabList.data.results[0]?.id,
           },
         });
       }
