@@ -8,6 +8,8 @@ export const LinePlot = (props: any) => {
     },
     legend: {
       data: [name],
+      type: "scroll",
+      bottom: "3%",
     },
     tooltip: {
       trigger: "axis",
