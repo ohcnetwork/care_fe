@@ -14,6 +14,7 @@ import { ABGPlots } from "./Consultations/ABGPlots";
 import { DailyRoundsList } from "./Consultations/DailyRoundsList";
 import { make as Link } from "../Common/components/Link.gen";
 import { NursingPlot } from "./Consultations/NursingPlot";
+import { NeurologicalTable } from "./Consultations/NeurologicalTables";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -307,6 +308,7 @@ export const ConsultationDetails = (props: any) => {
                     "FILES",
                     "ABG",
                     "NURSING",
+                    "NEUROLOGICAL_MONITORING",
                   ].map((p: string) => (
                     <Link
                       key={p}
@@ -472,6 +474,16 @@ export const ConsultationDetails = (props: any) => {
                 patientId={patientId}
                 consultationId={consultationId}
               ></NursingPlot>
+            </div>
+          )}
+          {tab === "NEUROLOGICAL_MONITORING" && (
+            <div>
+              <PageTitle title="Nursing Analysis" hideBack={true} />
+              <NeurologicalTable
+                facilityId={facilityId}
+                patientId={patientId}
+                consultationId={consultationId}
+              ></NeurologicalTable>
             </div>
           )}
         </div>
