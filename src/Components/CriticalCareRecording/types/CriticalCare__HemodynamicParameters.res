@@ -1,7 +1,7 @@
 type bp = {
   systolic: int,
   diastolic: int,
-  mean: int,
+  mean: float,
 }
 
 type rhythm =

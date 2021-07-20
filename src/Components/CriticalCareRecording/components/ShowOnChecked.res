@@ -1,7 +1,7 @@
 let str = React.string
 
 @react.component
-let make = (
+export make = (
   ~title,
   ~id=title,
   ~name=title,
@@ -11,22 +11,13 @@ let make = (
   ~defaultChecked=false,
 ) => {
   let (checked, setChecked) = React.useState(_ => defaultChecked)
-  let handleChange: ReactEvent.Form.t => unit = _ => {
+  let handleChange = _ => {
     onChange(!checked)
     setChecked(prev => !prev)
   }
 
   <>
     <label htmlFor={title} className="mb-6 block">
-      // <input
-      //   type_="checkbox"
-      //   className="custom-checkbox mr-6 inline-block"
-      //   id={id}
-      //   name={name}
-      //   value={value}
-      //   checked
-      //   onChange={handleChange}
-      // />
       <Checkbox id={id} label={title} checked={checked} onChange={handleChange} />
     </label>
     {checked ? children : React.null}

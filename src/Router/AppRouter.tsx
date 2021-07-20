@@ -9,7 +9,6 @@ import { FacilityCreate } from "../Components/Facility/FacilityCreate";
 import { FacilityHome } from "../Components/Facility/FacilityHome";
 import { HospitalList } from "../Components/Facility/HospitalList";
 import { TriageForm } from "../Components/Facility/TriageForm";
-import { DailyRoundListDetails } from "../Components/Patient/DailyRoundListDetails";
 import { DailyRounds } from "../Components/Patient/DailyRounds";
 import { PatientManager } from "../Components/Patient/ManagePatients";
 import PatientNotes from "../Components/Patient/PatientNotes";
@@ -59,6 +58,7 @@ import { AddLocationForm } from "../Components/Facility/AddLocationForm";
 import { LocationManagement } from "../Components/Facility/LocationManagement";
 import AssetsList from "../Components/Assets/AssetsList";
 import AssetManage from "../Components/Assets/AssetManage";
+import { DailyRoundListDetails } from "../Components/Patient/DailyRoundListDetails";
 
 const get = require("lodash.get");
 const img = "https://cdn.coronasafe.network/light-logo.svg";
@@ -242,6 +242,7 @@ const routes = {
         patientId={patientId}
         consultationId={consultationId}
         id={id}
+        preview={true}
       />
     ),
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily_rounds/:id/update":
@@ -251,6 +252,7 @@ const routes = {
         patientId={patientId}
         consultationId={consultationId}
         id={id}
+        preview={false}
       />
     ),
   "/facility/:facilityId/patient/:patientId/shift/new": ({

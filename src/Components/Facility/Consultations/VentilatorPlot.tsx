@@ -5,7 +5,7 @@ import { statusType, useAbortableEffect } from "../../../Common/utils";
 import { dailyRoundsAnalyse } from "../../../Redux/actions";
 import { LinePlot } from "./components/LinePlot";
 
-export const ABGPlots = (props: any) => {
+export const VentilatorPlot = (props: any) => {
   const { facilityId, patientId, consultationId } = props;
   const dispatch: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
@@ -20,14 +20,11 @@ export const ABGPlots = (props: any) => {
           {
             offset,
             fields: [
-              "ph",
-              "pco2",
-              "po2",
-              "hco3",
-              "base_excess",
-              "lactate",
-              "sodium",
-              "potassium",
+              "ventilator_pip",
+              "ventilator_mean_airway_pressure",
+              "ventilator_resp_rate",
+              "ventilator_pressure_support",
+              "ventilator_tidal_volume",
             ],
           },
           { consultationId }
@@ -61,83 +58,50 @@ export const ABGPlots = (props: any) => {
     <div className="grid grid-row-1 md:grid-cols-2 gap-4">
       <div className="pt-4 px-4 bg-white border rounded-lg shadow">
         <LinePlot
-          title="PH"
-          name="PH"
+          title="PIP"
+          name="PIP"
           xData={dates}
-          yData={yAxisData("ph")}
-          low={7.35}
-          high={7.45}
+          yData={yAxisData("ventilator_pip")}
+          low={12}
+          high={30}
         />
       </div>
       <div className="pt-4 px-4 bg-white border rounded-lg shadow">
         <LinePlot
-          title="PCO2 (mm Hg)"
-          name="PCO2"
+          title="MAP"
+          name="MAP"
           xData={dates}
-          yData={yAxisData("pco2")}
-          low={35}
-          high={45}
+          yData={yAxisData("ventilator_mean_airway_pressure")}
+          low={12}
+          high={25}
         />
       </div>
       <div className="pt-4 px-4 bg-white border rounded-lg shadow">
         <LinePlot
-          title="PO2 (mm Hg)"
-          name="PO2"
+          title="Resp Rate"
+          name="resp"
           xData={dates}
-          yData={yAxisData("po2")}
-          low={50}
-          high={200}
+          yData={yAxisData("ventilator_resp_rate")}
+          low={12}
+          high={20}
         />
       </div>
       <div className="pt-4 px-4 bg-white border rounded-lg shadow">
         <LinePlot
-          title="HCO3  (mmol/L)"
-          name="HCO3"
+          title="Pressure Support"
+          name="Pressure Support"
           xData={dates}
-          yData={yAxisData("hco3")}
-          low={22}
-          high={26}
+          yData={yAxisData("ventilator_pressure_support")}
+          low={5}
+          high={15}
         />
       </div>
       <div className="pt-4 px-4 bg-white border rounded-lg shadow">
         <LinePlot
-          title="Base Excess  (mmol/L)"
-          name="Base Excess"
+          title="Tidal Volume"
+          name="Tidal Volume"
           xData={dates}
-          yData={yAxisData("base_excess")}
-          low={-2}
-          high={2}
-        />
-      </div>
-      <div className="pt-4 px-4 bg-white border rounded-lg shadow">
-        <LinePlot
-          title="Lactate  (mmol/L)"
-          name="Lactate"
-          xData={dates}
-          yData={yAxisData("lactate")}
-          max={20}
-          low={0}
-          high={2}
-        />
-      </div>
-      <div className="pt-4 px-4 bg-white border rounded-lg shadow">
-        <LinePlot
-          title="Sodium  (mmol/L)"
-          name="Sodium"
-          xData={dates}
-          yData={yAxisData("sodium")}
-          low={135}
-          high={145}
-        />
-      </div>
-      <div className="pt-4 px-4 bg-white border rounded-lg shadow">
-        <LinePlot
-          title="Potassium  (mmol/L)"
-          name="Potassium"
-          xData={dates}
-          yData={yAxisData("potassium")}
-          low={3.5}
-          high={5.5}
+          yData={yAxisData("ventilator_tidal_volume")}
         />
       </div>
     </div>

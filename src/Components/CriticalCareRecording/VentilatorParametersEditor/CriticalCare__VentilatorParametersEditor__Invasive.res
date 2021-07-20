@@ -217,7 +217,7 @@ let make = (~state: VentilatorParameters.state, ~send: VentilatorParameters.acti
               },
             )}
             setValue={s => send(handleChange(Belt.Int.fromString(s)))}
-            getLabel={VentilatorParameters.getStatus(option["min"], option["max"])}
+            getLabel={VentilatorParameters.getStatus(option["min"], "Low", option["max"], "High")}
           />
         })
         |> React.array}

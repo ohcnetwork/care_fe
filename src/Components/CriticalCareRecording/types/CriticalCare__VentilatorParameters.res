@@ -106,6 +106,39 @@ let decodeVetilatorOxygenModalityType = ventilatorOxygenModalityType => {
   }
 }
 
+let ventilatorInterfaceTypeToString = ventilatorInterfaceType => {
+  switch ventilatorInterfaceType {
+  | INVASIVE => "Invasive"
+  | NON_INVASIVE => "Non Invasive"
+  | UNKNOWN => "Unknown"
+  }
+}
+
+let ventilatorModeTypeToString = ventilatorModeType => {
+  switch ventilatorModeType {
+  | VCV => "VCV"
+  | PCV => "PCV"
+  | PRVC => "PRVC"
+  | APRV => "APRV"
+  | VC_SIMV => "VC SIMV"
+  | PC_SIMV => "PC SIMV"
+  | PRVC_SIMV => "PRVC SIMV"
+  | ASV => "ASV"
+  | PSV => "PSV"
+  | _ => "Unknown"
+  }
+}
+
+let ventilatorOxygenModalityTypeToString = ventilatorOxygenModalityType => {
+  switch ventilatorOxygenModalityType {
+  | NASAL_PRONGS => "Nasal Prongs"
+  | SIMPLE_FACE_MASK => "Simple Face Mask"
+  | NON_REBREATHING_MASK => "Non Rebreathing Mask"
+  | HIGH_FLOW_NASAL_CANNULA => "High Flow Nasal Cannula"
+  | _ => "Unknown"
+  }
+}
+
 export type t = {
   ventilator_interface: ventilatorInterfaceType,
   ventilator_mode: ventilatorModeType,
@@ -120,22 +153,6 @@ export type t = {
   ventilator_oxygen_modality_flow_rate: option<int>,
   ventilator_fi02: option<int>,
   ventilator_spo2: option<int>,
-}
-type state = {
-  ventilator_interface: ventilatorInterfaceType,
-  ventilator_mode: ventilatorModeType,
-  ventilator_oxygen_modality: ventilatorOxygenModalityType,
-  ventilator_peep: option<int>,
-  ventilator_pip: option<int>,
-  ventilator_mean_airway_pressure: option<int>,
-  ventilator_resp_rate: option<int>,
-  ventilator_pressure_support: option<int>,
-  ventilator_tidal_volume: option<int>,
-  ventilator_oxygen_modality_oxygen_rate: option<int>,
-  ventilator_oxygen_modality_flow_rate: option<int>,
-  ventilator_fi02: option<int>,
-  ventilator_spo2: option<int>,
-  saving: bool,
 }
 
 let ventilatorInterface = t => t.ventilator_interface
@@ -166,6 +183,23 @@ let getParentVentilatorMode = ventilatorModeType => {
   | UNKNOWN => UNKNOWN
   }
 }
+type state = {
+  ventilator_interface: ventilatorInterfaceType,
+  ventilator_mode: ventilatorModeType,
+  ventilator_oxygen_modality: ventilatorOxygenModalityType,
+  ventilator_peep: option<int>,
+  ventilator_pip: option<int>,
+  ventilator_mean_airway_pressure: option<int>,
+  ventilator_resp_rate: option<int>,
+  ventilator_pressure_support: option<int>,
+  ventilator_tidal_volume: option<int>,
+  ventilator_oxygen_modality_oxygen_rate: option<int>,
+  ventilator_oxygen_modality_flow_rate: option<int>,
+  ventilator_fi02: option<int>,
+  ventilator_spo2: option<int>,
+  saving: bool,
+}
+
 type action =
   | SetVentilatorInterface(ventilatorInterfaceType)
   | SetVentilatorMode(ventilatorModeType)
@@ -233,12 +267,12 @@ let makeFromJs = dailyRound => {
   )
 }
 
-let getStatus = (min, max, val) => {
-  if val > min && val < max {
+let getStatus = (min, minText, max, maxText, val) => {
+  if val >= min && val <= max {
     ("Normal", "#059669")
   } else if val < min {
-    ("Low", "#DC2626")
+    (minText, "#DC2626")
   } else {
-    ("High", "#DC2626")
+    (maxText, "#DC2626")
   }
 }

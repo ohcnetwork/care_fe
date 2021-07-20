@@ -1,4 +1,4 @@
 @react.component
-export make = (~id, ~facilityId, ~patientId, ~consultationId) => {
-  <div> <CriticalCare__Root id facilityId patientId consultationId /> </div>
+export make = (~id, ~facilityId, ~patientId, ~consultationId, ~preview) => {
+  <div> <CriticalCare__Root id facilityId patientId consultationId preview /> </div>
 }
