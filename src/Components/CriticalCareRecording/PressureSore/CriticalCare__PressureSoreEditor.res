@@ -7,6 +7,12 @@ open CriticalCare__Types
 external updateDailyRound: (string, string, Js.Json.t, _ => unit, _ => unit) => unit =
   "updateDailyRound"
 
+type scrollIntoView = {
+  behavior: string,
+  block: string,
+  inline: string,
+}
+
 type state = {
   parts: array<PressureSore.part>,
   saving: bool,
@@ -111,95 +117,101 @@ let selectedLabelClass = part => {
   switch part {
   | Some(p) =>
     switch PressureSore.scale(p) {
-    | 1 => "bg-green-400 text-white"
-    | 2 => "bg-green-600 text-white"
-    | 3 => "bg-yellow-300 text-white"
-    | 4 => "bg-red-600 text-white"
-    | 5 => "bg-red-700 text-white"
-    | _ => "bg-gray-300 text-green-400"
+    | 1 => "bg-red-200 text-white hover:bg-red-800"
+    | 2 => "bg-red-400 text-white hover:bg-red-800"
+    | 3 => "bg-red-500 text-white hover:bg-red-800"
+    | 4 => "bg-red-600 text-white hover:bg-red-800"
+    | 5 => "bg-red-700 text-white hover:bg-red-800"
+    | _ => "bg-gray-300 text-black hover:bg-gray-400"
     }
-  | None => "bg-gray-300 text-green-400"
+  | None => "bg-gray-300 text-black hover:bg-gray-400"
   }
 }
 
 let renderBody = (state, send, title, partPaths, substr) => {
-  <div className="w-full text-center mx-2">
+  <div className=" w-full text-center mx-2">
     <div className="text-2xl font-bold mt-10"> {str(title)} </div>
-    <div className="sticky top-0 justify-center max-w-md mx-auto overflow-x-scroll my-3 border-2">
-      <div className="grid grid-rows-1 grid-flow-col gap-3 text-center border-2">
-        {Js.Array.mapi((part, renderIndex) => {
-          let selectedPart = Js.Array.find(
-            p => PressureSore.region(p) === PressureSore.regionForPath(part),
-            state.parts,
-          )
-          let bradenScaleValue = switch selectedPart {
-          | Some(p) =>
-            switch PressureSore.scale(p) {
-            | 1 => "1"
-            | 2 => "2"
-            | 3 => "3"
-            | 4 => "4"
-            | 5 => "5"
-            | _ => "0"
-            }
-          | None => Js.Int.toString(0)
-          }
-          <div
-            className={"grid grid-flow-col grid-rows-2 auto-cols-max border-2 p-2 justify-items-center border-gray-400  my-2 " ++
-            selectedLabelClass(selectedPart)}
-            id={PressureSore.regionToString(PressureSore.regionForPath(part))}
-            onClick={_ => {
-              switch selectedPart {
-              | Some(p) => send(AutoManageScale(p))
-              | None => send(AddPressureSore(PressureSore.regionForPath(part)))
+    <div className="text-left font-bold mx-auto mt-5">
+      {str("Braden Scale (Risk Severity) (" ++ title ++ ")")}
+    </div>
+    <div>
+      <div className="mx-auto overflow-x-scroll max-w-md my-3 border-2">
+        <div className="grid grid-rows-3 grid-flow-col auto-cols-max gap-3 p-2">
+          {Js.Array.mapi((part, _) => {
+            let selectedPart = Js.Array.find(
+              p => PressureSore.region(p) === PressureSore.regionForPath(part),
+              state.parts,
+            )
+            let bradenScaleValue = switch selectedPart {
+            | Some(p) =>
+              switch PressureSore.scale(p) {
+              | 1 => "1"
+              | 2 => "2"
+              | 3 => "3"
+              | 4 => "4"
+              | 5 => "5"
+              | _ => "0"
               }
-            }}>
-            <div className="border-2 px-2 flex justify-center items-center border-gray-400">
+            | None => Js.Int.toString(0)
+            }
+            <div
+              className={"col-auto px-2 py-1 rounded m-1 cursor-pointer  " ++
+              selectedLabelClass(selectedPart)}
+              id={PressureSore.regionToString(PressureSore.regionForPath(part))}
+              onClick={_ => {
+                switch selectedPart {
+                | Some(p) => send(AutoManageScale(p))
+                | None => send(AddPressureSore(PressureSore.regionForPath(part)))
+                }
+              }}>
               {str(
                 Js.String.sliceToEnd(
                   ~from=substr,
-                  PressureSore.regionToString(PressureSore.regionForPath(part)),
+                  PressureSore.regionToString(PressureSore.regionForPath(part)) ++
+                  " | " ++
+                  bradenScaleValue,
                 ),
               )}
             </div>
-            <div className="flex justify-center items-center"> {str(bradenScaleValue)} </div>
-          </div>
-        }, partPaths)->React.array}
+          }, partPaths)->React.array}
+        </div>
       </div>
-    </div>
-    <div className="flex justify-center max-w-lg mx-auto border-2">
-      <svg className="h-screen py-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 344.7 932.661">
-        {Js.Array.mapi((part, renderIndex) => {
-          let selectedPart = Js.Array.find(
-            p => PressureSore.region(p) === PressureSore.regionForPath(part),
-            state.parts,
-          )
-          <path
-            key={"part1" ++ Belt.Int.toString(renderIndex)}
-            d={PressureSore.d(part)}
-            transform={PressureSore.transform(part)}
-            className={selectedClass(selectedPart)}
-            fill="currentColor"
-            onClick={_ => {
-              document["getElementById"](
-                PressureSore.regionToString(PressureSore.regionForPath(part)),
-              )["scrollIntoView"](
-                ~alignToTop=true,
-                ~behavior="smooth",
-                ~block="center",
-                ~inline="center",
-              )
-              switch selectedPart {
-              | Some(p) => send(AutoManageScale(p))
-              | None => send(AddPressureSore(PressureSore.regionForPath(part)))
-              }
-            }}>
-            <title className="">
-              {str(PressureSore.regionToString(PressureSore.regionForPath(part)))}
-            </title>
-          </path>
-        }, partPaths)->React.array}
-      </svg>
+      <div className="flex justify-center max-w-lg mx-auto border-2">
+        <svg
+          className="h-screen py-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 344.7 932.661">
+          {Js.Array.mapi((part, renderIndex) => {
+            let selectedPart = Js.Array.find(
+              p => PressureSore.region(p) === PressureSore.regionForPath(part),
+              state.parts,
+            )
+            <path
+              key={"part1" ++ Belt.Int.toString(renderIndex)}
+              d={PressureSore.d(part)}
+              transform={PressureSore.transform(part)}
+              className={selectedClass(selectedPart)}
+              fill="currentColor"
+              onClick={_ => {
+                let values: scrollIntoView = {
+                  behavior: "smooth",
+                  block: "nearest",
+                  inline: "center",
+                }
+
+                document["getElementById"](
+                  PressureSore.regionToString(PressureSore.regionForPath(part)),
+                )["scrollIntoView"](~scrollIntoViewOptions=values)
+                switch selectedPart {
+                | Some(p) => send(AutoManageScale(p))
+                | None => send(AddPressureSore(PressureSore.regionForPath(part)))
+                }
+              }}>
+              <title className="">
+                {str(PressureSore.regionToString(PressureSore.regionForPath(part)))}
+              </title>
+            </path>
+          }, partPaths)->React.array}
+        </svg>
+      </div>
     </div>
   </div>
 }
@@ -214,17 +226,17 @@ let make = (~pressureSoreParameter, ~updateCB, ~id, ~consultationId) => {
       {renderBody(state, send, "Front", PressureSore.anteriorParts, 8)}
       {renderBody(state, send, "Back", PressureSore.posteriorParts, 9)}
     </div>
-    <div className="space-y-2">
-      <div className="text-xl font-bold "> {str("Braden Scale (Risk Severity)")} </div>
-      {Js.Array.map(p => {
-        <div className="flex" key={PressureSore.regionToString(PressureSore.region(p))}>
-          <div className="font-semibold text-gray-800">
-            {str(PressureSore.regionToString(PressureSore.region(p)) ++ ": ")}
-          </div>
-          <div className="pl-2 text-gray-800"> {str(string_of_int(PressureSore.scale(p)))} </div>
-        </div>
-      }, state.parts)->React.array}
-    </div>
+    // <div className="space-y-2">
+    //   <div className="text-xl font-bold "> {str("Braden Scale (Risk Severity)")} </div>
+    //   {Js.Array.map(p => {
+    //     <div className="flex" key={PressureSore.regionToString(PressureSore.region(p))}>
+    //       <div className="font-semibold text-gray-800">
+    //         {str(PressureSore.regionToString(PressureSore.region(p)) ++ ": ")}
+    //       </div>
+    //       <div className="pl-2 text-gray-800"> {str(string_of_int(PressureSore.scale(p)))} </div>
+    //     </div>
+    //   }, state.parts)->React.array}
+    // </div>
     <button
       disabled={state.saving || !state.dirty}
       className="mt-4 btn btn-primary btn-large w-full"
