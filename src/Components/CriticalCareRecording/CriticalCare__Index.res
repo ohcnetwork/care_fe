@@ -32,7 +32,13 @@ let title = text => {
 }
 
 @react.component
-export make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
+export make = (
+  ~id,
+  ~facilityId,
+  ~patientId,
+  ~consultationId,
+  ~dailyRound: CriticalCare__DailyRound.t,
+) => {
   let neurologicalMonitoring = DailyRound.neurologicalMonitoring(dailyRound)
   let hemodynamicParameter = DailyRound.hemodynamicParameters(dailyRound)
   let nursingCare = DailyRound.nursingCare(dailyRound)
