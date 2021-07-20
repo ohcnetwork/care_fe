@@ -27,10 +27,10 @@ let make = (
 
 let makeFromJs = dailyRound => {
   make(
-    ~etco2=dailyRound["etco2"],
-    ~physical_examination_info=dailyRound["physical_examination_info"],
-    ~other_details=dailyRound["other_details"],
+    ~etco2=dailyRound["etco2"]->Js.Nullable.toOption,
+    ~physical_examination_info=dailyRound["physical_examination_info"]->Js.Nullable.toOption,
+    ~other_details=dailyRound["other_details"]->Js.Nullable.toOption,
     ~additional_symptoms=dailyRound["additional_symptoms"],
-    ~other_symptoms=dailyRound["other_symptoms"],
+    ~other_symptoms=dailyRound["other_symptoms"]->Js.Nullable.toOption,
   )
 }
