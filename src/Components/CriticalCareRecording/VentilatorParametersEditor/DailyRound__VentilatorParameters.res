@@ -47,6 +47,5 @@ let make = (~ventilatorParameters: VentilatorParameters.t, ~renderOptionalInt, ~
     )}
     {renderOptionalInt("FIO2", VentilatorParameters.fio2(ventilatorParameters))}
     {renderOptionalInt("SPO2", VentilatorParameters.spo2(ventilatorParameters))}
-    {renderOptionalInt("ETCO2", VentilatorParameters.etco2(ventilatorParameters))}
   </div>
 }

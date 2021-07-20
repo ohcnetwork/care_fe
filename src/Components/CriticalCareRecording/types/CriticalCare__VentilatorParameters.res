@@ -153,7 +153,6 @@ export type t = {
   ventilator_oxygen_modality_flow_rate: option<int>,
   ventilator_fi02: option<int>,
   ventilator_spo2: option<int>,
-  ventilator_etco2: option<int>,
 }
 
 let ventilatorInterface = t => t.ventilator_interface
@@ -169,7 +168,6 @@ let oxygenModalityOxygenRate = t => t.ventilator_oxygen_modality_oxygen_rate
 let oxygenModalityFlowRate = t => t.ventilator_oxygen_modality_flow_rate
 let fio2 = t => t.ventilator_fi02
 let spo2 = t => t.ventilator_spo2
-let etco2 = t => t.ventilator_etco2
 
 let getParentVentilatorMode = ventilatorModeType => {
   switch ventilatorModeType {
@@ -199,7 +197,6 @@ type state = {
   ventilator_oxygen_modality_flow_rate: option<int>,
   ventilator_fi02: option<int>,
   ventilator_spo2: option<int>,
-  ventilator_etco2: option<int>,
   saving: bool,
 }
 
@@ -217,7 +214,6 @@ type action =
   | SetOxygenModalityFlowRate(option<int>)
   | SetFIO2(option<int>)
   | SetSPO2(option<int>)
-  | SetETCO2(option<int>)
   | SetSaving
   | ClearSaving
 
@@ -235,7 +231,6 @@ let make = (
   ~ventilator_oxygen_modality_flow_rate,
   ~ventilator_fi02,
   ~ventilator_spo2,
-  ~ventilator_etco2,
 ) => {
   ventilator_interface: ventilator_interface,
   ventilator_mode: ventilator_mode,
@@ -250,7 +245,6 @@ let make = (
   ventilator_oxygen_modality_flow_rate: ventilator_oxygen_modality_flow_rate,
   ventilator_fi02: ventilator_fi02,
   ventilator_spo2: ventilator_spo2,
-  ventilator_etco2: ventilator_etco2,
 }
 
 let makeFromJs = dailyRound => {
@@ -270,7 +264,6 @@ let makeFromJs = dailyRound => {
     ~ventilator_oxygen_modality_flow_rate=dailyRound["ventilator_oxygen_modality_flow_rate"]->Js.Nullable.toOption,
     ~ventilator_fi02=dailyRound["ventilator_fi02"]->Js.Nullable.toOption,
     ~ventilator_spo2=dailyRound["ventilator_spo2"]->Js.Nullable.toOption,
-    ~ventilator_etco2=dailyRound["ventilator_etco2"]->Js.Nullable.toOption,
   )
 }
 
