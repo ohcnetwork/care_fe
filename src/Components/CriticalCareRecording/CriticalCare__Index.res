@@ -50,10 +50,6 @@ export make = (
   let ventilatorParameters = DailyRound.ventilatorParameters(dailyRound)
   let medicine = DailyRound.medicine(dailyRound)
   let others = DailyRound.others(dailyRound)
-  React.useEffect(() => {
-    Js.log(dailyRound)
-    None
-  })
 
   <div className=" px-4 py-5sm:px-6 max-w-5xl mx-auto mt-4">
     <div>

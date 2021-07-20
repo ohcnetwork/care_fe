@@ -1,4 +1,4 @@
-type t = {
+export type t = {
   etco2: option<int>,
   physical_examination_info: option<string>,
   additional_symptoms: array<int>,

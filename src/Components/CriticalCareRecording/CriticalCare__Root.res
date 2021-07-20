@@ -40,7 +40,7 @@ export make = (~id, ~facilityId, ~patientId, ~consultationId, ~preview) => {
 
         | None => {
             Notifications.error({msg: "No Data "})
-            React.null
+            <> </>
           }
         }}
   </div>
