@@ -18,6 +18,8 @@ export const StackedLinePlot = (props: any) => {
 
     legend: {
       data: yData.map((x: any) => x.name),
+      type: "scroll",
+      bottom: "3%",
     },
     tooltip: {
       trigger: "axis",
