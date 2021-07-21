@@ -1,5 +1,4 @@
 import moment from "moment";
-import { type } from "os";
 import { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
@@ -76,8 +75,6 @@ export const VentilatorPlot = (props: any) => {
       .map((p: any) => p[name])
       .reverse();
   };
-
-  console.log(results);
 
   return (
     <div className="grid grid-row-1 md:grid-cols-2 gap-4">
