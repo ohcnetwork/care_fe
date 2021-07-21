@@ -46,6 +46,7 @@ export const VentilatorPlot = (props: any) => {
               "ventilator_tidal_volume",
               "ventilator_peep",
               "ventilator_fi02",
+              "ventilator_spo2",
             ],
           },
           { consultationId }
@@ -153,8 +154,14 @@ export const VentilatorPlot = (props: any) => {
           name="FiO2"
           xData={dates}
           yData={yAxisData("ventilator_fi02")}
-          low={5}
-          high={10}
+        />
+      </div>
+      <div className="pt-4 px-4 bg-white border rounded-lg shadow">
+        <LinePlot
+          title="SpO2"
+          name="SpO2"
+          xData={dates}
+          yData={yAxisData("ventilator_spo2")}
         />
       </div>
     </div>
