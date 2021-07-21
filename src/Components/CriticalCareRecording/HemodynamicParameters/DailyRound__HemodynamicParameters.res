@@ -7,8 +7,10 @@ let make = (
   ~title,
   ~renderOptionalDescription,
   ~renderLine,
-  ~renderOptionalFloat,
-  ~renderOptionalInt,
+  ~renderIntWithIndicators,
+  ~renderOptionalIntWithIndicators,
+  ~renderFloatWithIndicators,
+  ~renderOptionalFloatWithIndicators,
 ) => {
   <div>
     <div>
@@ -16,26 +18,38 @@ let make = (
       | Some(data) =>
         <div className="px-4 py-2 border bg-gray-100 m-1 rounded-lg shadow md:w-1/2 w-full">
           {title("Blood Pressure: ")}
-          <div>
-            <span className="font-semibold leading-relaxed"> {str("Systolic: ")} </span>
-            {React.int(data.systolic)}
-          </div>
-          <div>
-            <span className="font-semibold leading-relaxed"> {str("Diastolic: ")} </span>
-            {React.int(data.diastolic)}
-          </div>
-          <div>
-            <span className="font-semibold leading-relaxed"> {str("Mean: ")} </span>
-            {str(Js.Float.toFixedWithPrecision(data.mean, ~digits=2))}
-          </div>
+          {renderIntWithIndicators("Systolic", data.systolic, 100, 140, "Low", "High")}
+          {renderIntWithIndicators("Diastolic", data.diastolic, 50, 90, "Low", "High")}
+          {renderFloatWithIndicators("Mean", data.mean, 65.0, 75.0, "Low", "High")}
         </div>
 
       | None => React.null
       }}
     </div>
-    {renderOptionalInt("Pulse", HemodynamicParameters.pulse(hemodynamicParameter))}
-    {renderOptionalFloat("Temperature", HemodynamicParameters.temperature(hemodynamicParameter))}
-    {renderOptionalInt("Respiratory Rate", HemodynamicParameters.resp(hemodynamicParameter))}
+    {renderOptionalIntWithIndicators(
+      "Pulse",
+      HemodynamicParameters.pulse(hemodynamicParameter),
+      40,
+      100,
+      "Bradycardia",
+      "Tachycardia",
+    )}
+    {renderOptionalFloatWithIndicators(
+      "Temperature",
+      HemodynamicParameters.temperature(hemodynamicParameter),
+      97.6,
+      99.6,
+      "Low",
+      "High",
+    )}
+    {renderOptionalIntWithIndicators(
+      "Respiratory Rate",
+      HemodynamicParameters.resp(hemodynamicParameter),
+      12,
+      16,
+      "Low",
+      "High",
+    )}
     {renderLine(
       "Rhythm",
       HemodynamicParameters.rhythmToString(HemodynamicParameters.rhythm(hemodynamicParameter)),
