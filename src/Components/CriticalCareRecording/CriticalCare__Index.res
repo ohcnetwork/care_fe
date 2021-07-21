@@ -166,7 +166,9 @@ export make = (
         </div>
         <div>
           <CriticalCare__PageTitle title="Ventilator Parameters" />
-          <DailyRound__VentilatorParameters ventilatorParameters renderOptionalInt renderLine />
+          <DailyRound__VentilatorParameters
+            ventilatorParameters renderOptionalInt renderOptionalIntWithIndicators renderLine
+          />
         </div>
         <div>
           <CriticalCare__PageTitle title="Others" />
