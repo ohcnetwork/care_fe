@@ -1,6 +1,7 @@
 import moment from "moment";
 import { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
+import { setTimeout } from "timers/promises";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
 import { dailyRoundsAnalyse } from "../../../Redux/actions";
 import { anteriorParts, posteriorParts } from "./PressureSoreConstants";
@@ -15,6 +16,7 @@ export const PressureSoreDiagrams = (props: any) => {
     region: [],
     scale: [],
   });
+  const [currentPart, setPart] = useState<any>();
 
   const fetchDailyRounds = useCallback(
     async (status: statusType) => {
@@ -65,19 +67,59 @@ export const PressureSoreDiagrams = (props: any) => {
   const selectedClass = (scale: Number) => {
     switch (scale) {
       case 1:
-        return "text-red-200 hover:bg-red-400";
+        return "text-red-200 hover:text-red-400 tooltip cursor-pointer";
       case 2:
-        return "text-red-400 hover:bg-red-500";
+        return "text-red-400 hover:text-red-500 tooltip cursor-pointer";
       case 3:
-        return "text-red-500 hover:bg-red-600";
+        return "text-red-500 hover:text-red-600 tooltip cursor-pointer";
       case 4:
-        return "text-red-600 hover:bg-red-700";
+        return "text-red-600 hover:text-red-700 tooltip cursor-pointer";
       case 5:
-        return "text-red-700 hover:bg-gray-400";
+        return "text-red-700 hover:text-gray-400 tooltip cursor-pointer";
 
       default:
-        return "text-gray-400 hover:bg-red-400";
+        return "text-gray-400 hover:text-red-200 tooltip cursor-pointer";
     }
+  };
+  const getIntoView = (region: string, isPart: boolean) => {
+    if (currentPart && currentPart.timerId && currentPart.timerId > 0) {
+      window.clearTimeout(currentPart.timerId);
+      currentPart.label.classList.remove("border-2");
+      currentPart.label.classList.remove("border-red-700");
+
+      currentPart.part.classList.remove("text-red-900");
+    }
+
+    // Label
+    let ele = document.getElementById(region);
+    if (isPart) {
+      ele?.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+        inline: "center",
+      });
+    }
+    ele?.classList.add("border-2");
+    ele?.classList.add("border-red-700");
+
+    //Part
+    let part = document.getElementById(`part${region}`);
+    if (!isPart) {
+      part?.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+        inline: "center",
+      });
+    }
+    part?.classList.add("text-red-900");
+
+    let id = window.setTimeout(() => {
+      ele?.classList.remove("border-2");
+      ele?.classList.remove("border-red-700");
+
+      part?.classList.remove("text-red-900");
+    }, 1000);
+    setPart({ timerId: id, label: ele, part: part });
   };
 
   const selectedLabelClass = (scale: Number) => {
@@ -116,10 +158,12 @@ export const PressureSoreDiagrams = (props: any) => {
               return (
                 <div
                   key={i}
-                  className={`p-1 col-auto text-sm rounded m-1 border-2 ${classSelected}`}
+                  className={`p-1 cursor-pointer col-auto text-sm rounded m-1 border-2 ${classSelected}`}
                   id={p.region}
+                  onClick={() => getIntoView(p.region, false)}
                 >
                   {p.label}
+                  {ind > -1 ? ` | ${selectedData.scale[ind]}` : ""}
                 </div>
               );
             })}
@@ -146,6 +190,7 @@ export const PressureSoreDiagrams = (props: any) => {
                   fill="currentColor"
                   className={classSelected}
                   id={`part${p.region}`}
+                  onClick={() => getIntoView(p.region, true)}
                 >
                   <title>{p.label}</title>
                 </path>
