@@ -34,18 +34,10 @@ export const PressureSoreDiagrams = (props: any) => {
         if (res && res.data) {
           console.log("Data is ", res.data);
           setResults(res.data);
-          let keys = Object.keys(res.data);
-          let obj = res.data[keys[0]].pressure_sore;
-          let regions: Array<string> = [],
-            scales: Array<Number> = [];
-          obj.forEach((x: any) => {
-            regions.push(x.region);
-            scales.push(x.scale);
-          });
-          setData({
-            region: regions,
-            scale: scales,
-          });
+          let keys = Object.keys(results);
+          if (keys.length > 0) {
+            setSelectedDateData(res.data, keys[0]);
+          }
         }
         setIsLoading(false);
       }
@@ -60,6 +52,22 @@ export const PressureSoreDiagrams = (props: any) => {
     [consultationId]
   );
 
+  const setSelectedDateData = (results: any, key: any) => {
+    console.log("Dt is ", results[key]);
+    let obj = results[key].pressure_sore;
+    let regions: Array<string> = [],
+      scales: Array<Number> = [];
+    obj.forEach((x: any) => {
+      regions.push(x.region);
+      scales.push(x.scale);
+    });
+    setData({
+      region: regions,
+      scale: scales,
+    });
+  };
+
+  const original_dates = Object.keys(results);
   const dates = Object.keys(results)
     .map((p: string) => moment(p).format("LLL"))
     .reverse();
@@ -80,6 +88,39 @@ export const PressureSoreDiagrams = (props: any) => {
       default:
         return "text-gray-400 hover:text-red-200 tooltip cursor-pointer";
     }
+  };
+
+  const dropdown = (dates: Array<any>) => {
+    return dates && dates.length > 0 ? (
+      <div className="mx-auto">
+        <select
+          title="date"
+          className="border-2 border-gray-800 p-2"
+          onChange={(e) => {
+            console.log("Value is ", e.target.value);
+            setSelectedDateData(results, e.target.value);
+          }}
+        >
+          {dates.map((x, i) => {
+            return (
+              <option key={i} value={original_dates[i]}>
+                {x}
+              </option>
+            );
+          })}
+        </select>
+      </div>
+    ) : (
+      <div>
+        <select
+          title="date"
+          className="border-2 border-gray-400 p-2"
+          disabled={true}
+        >
+          <option>No Data Found</option>
+        </select>
+      </div>
+    );
   };
   const getIntoView = (region: string, isPart: boolean) => {
     if (currentPart && currentPart.timerId && currentPart.timerId > 0) {
@@ -204,15 +245,7 @@ export const PressureSoreDiagrams = (props: any) => {
 
   return (
     <div>
-      <select title="date">
-        {dates.map((x, i) => {
-          return (
-            <option key={i} value={x}>
-              {x}
-            </option>
-          );
-        })}
-      </select>
+      {dates && dropdown(dates)}
       {!isLoading && (
         <div className="flex md:flex-row flex-col justify-between">
           {renderBody("Front", anteriorParts)}
