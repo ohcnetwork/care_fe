@@ -54,7 +54,19 @@ export const PressureSoreDiagrams = (props: any) => {
           Braden Scale (Risk Severity) ({title})
         </div>
         <div className="mx-auto overflow-x-scroll max-w-md my-3 border-2">
-          <div className="grid grid-rows-3 md:grid-rows-6 grid-flow-col gap-2 auto-cols-max justify-items-center p-2"></div>
+          <div className="grid grid-rows-3 md:grid-rows-6 grid-flow-col gap-2 auto-cols-max justify-items-center p-2">
+            {parts.map((p, i) => {
+              return (
+                <div
+                  key={i}
+                  className="p-1 col-auto text-sm rounded m-1 cursor-pointer border-2"
+                  id={p.region}
+                >
+                  {p.label}
+                </div>
+              );
+            })}
+          </div>
         </div>
         {/* Diagram */}
         <div className="flex justify-center max-w-lg mx-auto border-2">
