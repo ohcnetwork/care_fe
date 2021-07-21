@@ -7,13 +7,13 @@ external updateDailyRound: (string, string, Js.Json.t, _ => unit, _ => unit) => 
 
 let fahrenheitToCelcius = (temp: option<float>) => {
   switch temp {
-    |Some(x) => Js.Float.toPrecisionWithPrecision((x -. 32.0) *. (5.0 /. 9.0), ~digits=2)->Belt.Float.fromString
+    |Some(x) => Js.Float.toFixedWithPrecision((x -. 32.0) *. (5.0 /. 9.0), ~digits=2)->Belt.Float.fromString
     |None => None
   }
 }
 let celciusToFahrenheit = (temp: option<float>) => {
   switch temp {
-    |Some(x) => Js.Float.toPrecisionWithPrecision((x *. 9.0) /. 5.0 +. 32.0, ~digits=2)->Belt.Float.fromString
+    |Some(x) => Js.Float.toFixedWithPrecision((x *. 9.0) /. 5.0 +. 32.0, ~digits=2)->Belt.Float.fromString
     |None => None
   }
 }
