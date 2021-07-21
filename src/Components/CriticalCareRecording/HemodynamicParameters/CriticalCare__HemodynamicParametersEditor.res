@@ -5,6 +5,19 @@ let str = React.string
 external updateDailyRound: (string, string, Js.Json.t, _ => unit, _ => unit) => unit =
   "updateDailyRound"
 
+let fahrenheitToCelcius = (temp: option<float>) => {
+  switch temp {
+    |Some(x) => Js.Float.toPrecisionWithPrecision((x -. 32.0) *. (5.0 /. 9.0), ~digits=2)->Belt.Float.fromString
+    |None => None
+  }
+}
+let celciusToFahrenheit = (temp: option<float>) => {
+  switch temp {
+    |Some(x) => Js.Float.toPrecisionWithPrecision((x *. 9.0) /. 5.0 +. 32.0, ~digits=2)->Belt.Float.fromString
+    |None => None
+  }
+}
+
 type state = {
   systolic: option<int>,
   diastolic: option<int>,
@@ -13,6 +26,7 @@ type state = {
   resp: option<int>,
   rhythm: HemodynamicParameters.rhythm,
   rhythmDetails: string,
+  tempInCelcius: bool,
   dirty: bool,
   saving: bool,
 }
@@ -22,6 +36,7 @@ type action =
   | SetDiastolic(int)
   | SetPulse(int)
   | SetTemperature(float)
+  | ToggleTemperatureUnit
   | SetResp(int)
   | SetRhythm(HemodynamicParameters.rhythm)
   | SetRhythmDetails(string)
@@ -45,6 +60,11 @@ let reducer = (state, action) => {
       ...state,
       temperature: Some(temperature),
       dirty: true,
+    }
+  | ToggleTemperatureUnit => {
+      ...state,
+      temperature: state.tempInCelcius ? state.temperature->celciusToFahrenheit : state.temperature->fahrenheitToCelcius,
+      tempInCelcius: !state.tempInCelcius,
     }
   | SetResp(resp) => {
       ...state,
@@ -73,6 +93,7 @@ let initialState = hdp => {
     resp: HemodynamicParameters.resp(hdp),
     rhythm: HemodynamicParameters.rhythm(hdp),
     rhythmDetails: Belt.Option.getWithDefault(HemodynamicParameters.rhythmDetails(hdp), ""),
+    tempInCelcius: false,
     saving: false,
     dirty: false,
   }
@@ -99,7 +120,7 @@ let makePayload = state => {
   | (_, _) => ()
   }
   DictUtils.setOptionalNumber("pulse", state.pulse, payload)
-  DictUtils.setOptionalFloat("temperature", state.temperature, payload)
+  DictUtils.setOptionalFloat("temperature", state.tempInCelcius ? state.temperature->celciusToFahrenheit : state.temperature, payload)
   DictUtils.setOptionalNumber("resp", state.resp, payload)
   Js.Dict.set(payload, "rhythm", Js.Json.string(HemodynamicParameters.encodeRhythm(state.rhythm)))
   DictUtils.setOptionalString("rhythm_detail", state.rhythmDetails, payload)
@@ -192,14 +213,24 @@ let make = (~hemodynamicParameter, ~updateCB, ~id, ~consultationId) => {
         getLabel={getStatus(40.0, "Bradycardia", 100.0, "Tachycardia")}
       />
       <Slider
-        title={"Temperature (F)"}
-        start={"95"}
-        end={"106"}
+        title={"Temperature"}
+        titleNeighbour={
+          <div
+            className="flex items-center ml-1 border border-gray-400 rounded px-4 h-10 cursor-pointer hover:bg-gray-200"
+            onClick={_ => ToggleTemperatureUnit->send}
+          >
+            <span className="text-blue-700">
+              {state.tempInCelcius ? "C"->str : "F"->str}
+            </span>
+          </div>
+        }
+        start={state.tempInCelcius ? "35" : "95"}
+        end={state.tempInCelcius ? "41" : "106"}
         interval={"10"}
         step={0.1}
         value={Belt.Option.mapWithDefault(state.temperature, "", Js.Float.toString)}
         setValue={s => send(SetTemperature(float_of_string(s)))}
-        getLabel={getStatus(97.6, "Low", 99.6, "High")}
+        getLabel={state.tempInCelcius ? getStatus(36.4, "Low", 37.5, "High") : getStatus(97.6, "Low", 99.6, "High")}
       />
       <Slider
         title={"Respiratory Rate (bpm)"}
