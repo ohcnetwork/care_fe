@@ -47,6 +47,8 @@ export const VentilatorPlot = (props: any) => {
               "ventilator_fi02",
               "ventilator_spo2",
               "etco2",
+              "ventilator_oxygen_modality_oxygen_rate",
+              "ventilator_oxygen_modality_flow_rate",
             ],
           },
           { consultationId }
@@ -164,6 +166,22 @@ export const VentilatorPlot = (props: any) => {
           yData={yAxisData("etco2")}
           low={35}
           high={45}
+        />
+      </div>
+      <div className="pt-4 px-4 bg-white border rounded-lg shadow">
+        <LinePlot
+          title="Oxygen Rate"
+          name="Oxygen Rate"
+          xData={dates}
+          yData={yAxisData("ventilator_oxygen_modality_oxygen_rate")}
+        />
+      </div>
+      <div className="pt-4 px-4 bg-white border rounded-lg shadow">
+        <LinePlot
+          title="Oxygen Flow Rate"
+          name="Oxygen Flow Rate"
+          xData={dates}
+          yData={yAxisData("ventilator_oxygen_modality_flow_rate")}
         />
       </div>
     </div>
