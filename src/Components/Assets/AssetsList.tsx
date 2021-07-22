@@ -28,6 +28,7 @@ interface qParamModel {
   facility?: string;
   asset_type?: string;
   location?: string;
+  status?: string;
 }
 
 const AssetsList = (props: any) => {
@@ -56,6 +57,7 @@ const AssetsList = (props: any) => {
             facility: qParams.facility,
             asset_type: qParams.asset_type,
             location: qParams.location,
+            status: qParams.status,
           }
         : {
             limit,
@@ -63,6 +65,7 @@ const AssetsList = (props: any) => {
             facility: qParams.facility,
             asset_type: qParams.asset_type,
             location: qParams.location,
+            status: qParams.status,
           };
       const { data }: any = await dispatch(listAssets(params));
       if (!status.aborted) {
@@ -84,6 +87,7 @@ const AssetsList = (props: any) => {
       qParams.facility,
       qParams.asset_type,
       qParams.location,
+      qParams.status,
     ]
   );
 
@@ -257,11 +261,12 @@ const AssetsList = (props: any) => {
           </div>
         </SlideOver>
       </div>
-      <div className="flex space-x-2 mt-2 flex-wrap w-full col-span-3 space-y-1">
+      <div className="flex space-x-2 mt-2 flex-wrap w-full col-span-3">
         {badge("Facility", facilityName, ["facility", "location"])}
         {badge("Asset Name", qParams.search, ["search"])}
         {badge("Location", locationName, ["location"])}
         {badge("Asset Type", asset_type, ["asset_type"])}
+        {badge("Status", qParams.status, ["status"])}
       </div>
       <div className="flex-grow mt-10 bg-white">
         <div className="p-8">
