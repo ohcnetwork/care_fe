@@ -34,7 +34,7 @@ export const PressureSoreDiagrams = (props: any) => {
         if (res && res.data) {
           console.log("Data is ", res.data);
           setResults(res.data);
-          let keys = Object.keys(results);
+          let keys = Object.keys(results).reverse();
           if (keys.length > 0) {
             setSelectedDateData(res.data, keys[0]);
           }
