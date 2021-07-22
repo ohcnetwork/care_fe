@@ -7,37 +7,40 @@ import { dailyRoundsAnalyse } from "../../../Redux/actions";
 import { LinePlot } from "./components/LinePlot";
 
 const DataTable = (props: any) => {
-  const { data } = props;
+  const { title, data } = props;
   return (
-    <div className="flex flex-row shadow overflow-hidden sm:rounded-lg divide-y divide-cool-gray-200 my-4">
-      <div className="flex flex-col justify-between w-1/4">
-        <div className="px-6 py-3 bg-cool-gray-50 text-center text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
-          Time
-        </div>
-        <div className="px-6 py-3 bg-cool-gray-50 text-center text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
-          Left
-        </div>
-        <div className="px-6 py-3 bg-cool-gray-50 text-center text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
-          Right
-        </div>
-      </div>
-      <div className="flex flex-row overflow-x-auto">
-        {data.map((x: any) => (
-          <div
-            style={{ direction: "rtl" }}
-            className="flex flex-col w-1/6 min-w-max-content"
-          >
-            <div className="px-6 py-3 bg-cool-gray-50 text-center text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
-              {x.date}
-            </div>
-            <div className="px-6 py-4 bg-white text-center whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
-              {x.left}
-            </div>
-            <div className="px-6 py-4 bg-white text-center whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
-              {x.right}
-            </div>
+    <div>
+      <div className="text-xl font-semibold">{title}</div>
+      <div className="flex flex-row shadow overflow-hidden sm:rounded-lg divide-y divide-cool-gray-200 my-4">
+        <div className="flex flex-col justify-between w-1/4">
+          <div className="px-6 py-3 bg-cool-gray-50 text-center text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
+            Time
           </div>
-        ))}
+          <div className="px-6 py-3 bg-cool-gray-50 text-center text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
+            Left
+          </div>
+          <div className="px-6 py-3 bg-cool-gray-50 text-center text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
+            Right
+          </div>
+        </div>
+        <div
+          style={{ direction: "rtl" }}
+          className="flex flex-row overflow-x-auto"
+        >
+          {data.map((x: any) => (
+            <div className="flex flex-col w-1/6 min-w-max-content divide-x divide-cool-gray-200">
+              <div className="px-6 py-3 bg-cool-gray-50 text-center text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
+                {x.date}
+              </div>
+              <div className="px-6 py-4 bg-white text-center whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
+                {x.left}
+              </div>
+              <div className="px-6 py-4 bg-white text-center whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
+                {x.right}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -76,6 +79,8 @@ export const NeurologicalTable = (props: any) => {
           {
             offset,
             fields: [
+              "consciousness_level",
+              "consciousness_level_detail",
               "left_pupil_size",
               "left_pupil_size_detail",
               "right_pupil_size",
@@ -108,21 +113,83 @@ export const NeurologicalTable = (props: any) => {
   }, []);
   console.log(results);
 
+  const locData: any = [];
   const sizeData: any = [];
+  const reactionData: any = [];
+  const upperLimbData: any = [];
+  const lowerLimbData: any = [];
   Object.entries(results).map((x: any) => {
+    locData.push({
+      date: moment(x[0]).format("LLL"),
+      loc: x[1].consciousness_level,
+    });
+
     sizeData.push({
       date: moment(x[0]).format("LLL"),
       left: x[1].left_pupil_size || "--",
       right: x[1].right_pupil_size || "--",
     });
+    reactionData.push({
+      date: moment(x[0]).format("LLL"),
+      left:
+        REACTION_OPTIONS.find(
+          (item) => item.id === x[1].left_pupil_light_reaction
+        )?.value || "--",
+      right:
+        REACTION_OPTIONS.find(
+          (item) => item.id === x[1].right_pupil_light_reaction
+        )?.value || "--",
+    });
+    upperLimbData.push({
+      date: moment(x[0]).format("LLL"),
+      left:
+        LIMP_OPTIONS.find(
+          (item) => item.id === x[1].limb_response_upper_extremity_left
+        )?.value || "--",
+      right:
+        LIMP_OPTIONS.find(
+          (item) => item.id === x[1].limb_response_upper_extremity_right
+        )?.value || "--",
+    });
+    lowerLimbData.push({
+      date: moment(x[0]).format("LLL"),
+      left:
+        LIMP_OPTIONS.find(
+          (item) => item.id === x[1].limb_response_lower_extremity_left
+        )?.value || "--",
+      right:
+        LIMP_OPTIONS.find(
+          (item) => item.id === x[1].limb_response_lower_extremity_right
+        )?.value || "--",
+    });
   });
 
   return (
-    <div>
+    <div className="mt-4">
       <div>
-        <div className="text-xl font-semibold">Pupil Size</div>
-        <DataTable data={sizeData.reverse()} />
+        <div className="text-xl font-semibold">{"Level Of Consciousness"}</div>
+        <div className="flex flex-row shadow overflow-hidden sm:rounded-lg divide-y divide-cool-gray-200 my-4">
+          <div
+            style={{ direction: "rtl" }}
+            className="flex flex-row overflow-x-auto"
+          >
+            {locData.reverse().map((x: any) => (
+              <div className="flex flex-col w-1/6 min-w-max-content divide-x divide-cool-gray-200">
+                <div className="px-6 py-3 bg-cool-gray-50 text-center text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
+                  {x.date}
+                </div>
+                <div className="px-6 py-4 bg-white text-center whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
+                  {x.loc}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
+      <DataTable title={"Pupil Size"} data={sizeData.reverse()} />
+      <DataTable title={"Pupil Reaction"} data={reactionData.reverse()} />
+      <DataTable title={"Upper Extremity"} data={upperLimbData.reverse()} />
+      <DataTable title={"Lower Extremity"} data={lowerLimbData.reverse()} />
     </div>
   );
 };
