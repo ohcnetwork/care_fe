@@ -4,7 +4,6 @@ import { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
 import { dailyRoundsAnalyse } from "../../../Redux/actions";
-import { LinePlot } from "./components/LinePlot";
 
 const DataTable = (props: any) => {
   const { title, data } = props;
@@ -27,20 +26,44 @@ const DataTable = (props: any) => {
           style={{ direction: "rtl" }}
           className="flex flex-row overflow-x-auto"
         >
-          {data.map((x: any) => (
-            <div className="flex flex-col w-1/6 min-w-max-content divide-x divide-cool-gray-200">
-              <div className="px-6 py-3 bg-cool-gray-50 text-center text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
-                {x.date}
-              </div>
-              <div className="px-6 py-4 bg-white text-center whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
-                {x.left}
-              </div>
-              <div className="px-6 py-4 bg-white text-center whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
-                {x.right}
-              </div>
-            </div>
-          ))}
+          {data.map((x: any) => {
+            if (x.date || x.left) {
+              return (
+                <div className="flex flex-col w-1/6 min-w-max-content divide-x divide-cool-gray-200">
+                  <div className="px-6 py-3 bg-cool-gray-50 text-center text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
+                    {x.date}
+                  </div>
+                  <div className="px-6 py-4 bg-white text-center whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
+                    {x.left}
+                  </div>
+                  <div className="px-6 py-4 bg-white text-center whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
+                    {x.right}
+                  </div>
+                </div>
+              );
+            }
+          })}
         </div>
+      </div>
+    </div>
+  );
+};
+
+const DataDescription = (props: any) => {
+  const { title, data } = props;
+  return (
+    <div>
+      <div className="text-xl font-semibold">{title}</div>
+      <div className="p-4 bg-white border rounded-lg shadow">
+        {data.map((x: any) => {
+          if (x.left_description || x.right_description) {
+            <div>
+              <div className="text-sm font-semibold">{`- ${x.date}`}</div>
+              <div className="text-cool-gray-800 pl-2">{`Left: ${x.left_description}`}</div>
+              <div className="text-cool-gray-800 pl-2">{`Left: ${x.left_description}`}</div>
+            </div>;
+          }
+        })}
       </div>
     </div>
   );
@@ -128,6 +151,8 @@ export const NeurologicalTable = (props: any) => {
       date: moment(x[0]).format("LLL"),
       left: x[1].left_pupil_size || "--",
       right: x[1].right_pupil_size || "--",
+      left_description: x[1].left_pupil_size_detail,
+      right_description: x[1].right_pupil_size_detail,
     });
     reactionData.push({
       date: moment(x[0]).format("LLL"),
@@ -139,6 +164,8 @@ export const NeurologicalTable = (props: any) => {
         REACTION_OPTIONS.find(
           (item) => item.id === x[1].right_pupil_light_reaction
         )?.value || "--",
+      left_description: x[1].left_pupil_light_reaction_detail,
+      right_description: x[1].right_pupil_light_reaction_detail,
     });
     upperLimbData.push({
       date: moment(x[0]).format("LLL"),
@@ -167,14 +194,14 @@ export const NeurologicalTable = (props: any) => {
   return (
     <div className="mt-4">
       <div>
-        <div className="text-xl font-semibold">{"Level Of Consciousness"}</div>
+        <div className="text-xl font-semibold">Level Of Consciousness</div>
         <div className="flex flex-row shadow overflow-hidden sm:rounded-lg divide-y divide-cool-gray-200 my-4">
           <div
             style={{ direction: "rtl" }}
             className="flex flex-row overflow-x-auto"
           >
-            {locData.reverse().map((x: any) => (
-              <div className="flex flex-col w-1/6 min-w-max-content divide-x divide-cool-gray-200">
+            {locData.map((x: any) => (
+              <div className="flex flex-col  w-1/6 min-w-max-content  divide-x divide-cool-gray-200">
                 <div className="px-6 py-3 bg-cool-gray-50 text-center text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
                   {x.date}
                 </div>
@@ -186,10 +213,15 @@ export const NeurologicalTable = (props: any) => {
           </div>
         </div>
       </div>
-      <DataTable title={"Pupil Size"} data={sizeData.reverse()} />
-      <DataTable title={"Pupil Reaction"} data={reactionData.reverse()} />
-      <DataTable title={"Upper Extremity"} data={upperLimbData.reverse()} />
-      <DataTable title={"Lower Extremity"} data={lowerLimbData.reverse()} />
+      <DataTable title={"Pupil Size"} data={sizeData} />
+      <DataDescription title={"Pupil Size Description"} data={sizeData} />
+      <DataTable title={"Pupil Reaction"} data={reactionData} />
+      <DataDescription
+        title={"Pupil Reaction Description"}
+        data={reactionData}
+      />
+      <DataTable title={"Upper Extremity"} data={upperLimbData} />
+      <DataTable title={"Lower Extremity"} data={lowerLimbData} />
     </div>
   );
 };
