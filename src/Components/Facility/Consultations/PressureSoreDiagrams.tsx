@@ -67,7 +67,7 @@ export const PressureSoreDiagrams = (props: any) => {
     });
   };
 
-  const original_dates = Object.keys(results);
+  const original_dates = Object.keys(results).reverse();
   const dates = Object.keys(results)
     .map((p: string) => moment(p).format("LLL"))
     .reverse();
