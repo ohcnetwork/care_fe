@@ -303,6 +303,9 @@ export const getDailyReport = (params: object, pathParam: object) => {
 export const getConsultationDailyRoundsDetails = (pathParam: object) => {
   return fireRequest("getDailyReport", [], {}, pathParam);
 };
+export const dailyRoundsAnalyse = (params: object, pathParam: object) => {
+  return fireRequest("dailyRoundsAnalyse", [], params, pathParam);
+};
 
 // Consultation
 export const createConsultation = (params: object) => {

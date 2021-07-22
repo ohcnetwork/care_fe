@@ -2,8 +2,8 @@ export interface AssetLocationObject {
   id: string;
   name: string;
   description: string;
-  created_date: string;
-  modified_date: string;
+  created_date?: string;
+  modified_date?: string;
   facility: {
     id: string;
     name: string;

@@ -72,7 +72,7 @@ let showPrescriptionForm = (item, index, send) =>
 let make = (~prescriptions, ~selectCB) => {
   let send = action => reducer(prescriptions, action) |> selectCB
   <div
-    className="bg-white px-4 py-5 border-b border-gray-200 sm:px-6 max-w-3xl mx-auto border mt-4">
+    className="bg-white px-4 py-5 border-b border-gray-200 sm:px-6 max-w-5xl mx-auto border mt-4">
     <h3 className="text-lg leading-6 font-medium text-gray-900"> {"Prescription" |> str} </h3>
     <div className="flex justify-between mt-4">
       <div className="m-1 rounded-md shadow-sm w-4/6">

@@ -1,11 +1,5 @@
-import React, {
-  useState,
-  useCallback,
-  useEffect,
-  useRef,
-  ReactElement,
-} from "react";
-import Grid from "@material-ui/core/Grid";
+import React, { useState, useCallback, useEffect, ReactElement } from "react";
+
 import loadable from "@loadable/component";
 import moment from "moment";
 import { AssetData, AssetTransaction } from "./AssetTypes";

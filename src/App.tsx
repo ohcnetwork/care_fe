@@ -42,7 +42,7 @@ const App: React.FC = () => {
   useEffect(() => {
     updateRefreshToken();
     setInterval(updateRefreshToken, 5 * 60 * 1000);
-  }, [0]);
+  }, [user]);
 
   useAbortableEffect(
     async (status: statusType) => {

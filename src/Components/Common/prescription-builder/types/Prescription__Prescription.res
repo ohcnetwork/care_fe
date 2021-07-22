@@ -43,3 +43,7 @@ let encodeArray = prescriptions =>
     open Json.Encode
     array(encode)
   }
+
+let makeFromJs = json => {
+  Js.Array.isArray(json) ? Js.Array.map(p => make(p["medicine"], p["dosage"], p["days"]), json) : []
+}
