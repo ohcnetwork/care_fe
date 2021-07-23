@@ -460,6 +460,7 @@ export const ConsultationForm = (props: any) => {
                 {state.form.hasSymptom && (
                   <div>
                     <DateInputField
+                      className="w-1/2"
                       label="Date of onset of the symptoms*"
                       value={state.form.symptoms_onset_date}
                       onChange={(date) =>
