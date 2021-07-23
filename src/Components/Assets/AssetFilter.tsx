@@ -29,6 +29,7 @@ function AssetFilter(props: any) {
   const [asset_type, setAssetType] = useState<string>(
     filter.asset_type ? filter.asset_type : ""
   );
+  const [asset_status, setAssetStatus] = useState<string>(filter.status || "");
   const [facilityId, setFacilityId] = useState<number | "">(filter.facility);
   const [locationId, setLocationId] = useState<string | "">(filter.location);
   const [qParams, _] = useQueryParams();
@@ -96,6 +97,7 @@ function AssetFilter(props: any) {
     const data = {
       facility: facilityId,
       asset_type: asset_type,
+      status: asset_status,
       location: locationId,
     };
     onChange(data);
@@ -183,6 +185,37 @@ function AssetFilter(props: any) {
             value={asset_type}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               setAssetType(e.target.value)
+            }
+          />
+        </div>
+
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">Asset Status</span>
+          <SelectField
+            id="asset-status"
+            fullWidth
+            name="asset_status"
+            placeholder=""
+            variant="outlined"
+            margin="dense"
+            options={[
+              {
+                id: "",
+                name: "Select",
+              },
+              {
+                id: "ACTIVE",
+                name: "ACTIVE",
+              },
+              {
+                id: "TRANSFER_IN_PROGRESS",
+                name: "TRANSFER_IN_PROGRESS",
+              },
+            ]}
+            optionValue="name"
+            value={asset_status}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setAssetStatus(e.target.value)
             }
           />
         </div>
