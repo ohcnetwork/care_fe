@@ -1,7 +1,7 @@
 type bp = {
   systolic: int,
   diastolic: int,
-  mean: int,
+  mean: float,
 }
 
 type rhythm =
@@ -57,9 +57,14 @@ let make = (~bp, ~pulse, ~temperature, ~resp, ~rhythm, ~rhythmDetails) => {
   rhythmDetails: rhythmDetails,
 }
 
+let makeBPFromJs = bp => {
+  ArrayUtils.isEmpty(Js.Obj.keys(bp))
+    ? None
+    : Some(makeBP(~diastolic=bp["diastolic"], ~systolic=bp["systolic"], ~mean=bp["mean"]))
+}
 let makeFromJs = dailyRound => {
   make(
-    ~bp=dailyRound["bp"]->Js.Nullable.toOption,
+    ~bp=makeBPFromJs(dailyRound["bp"]),
     ~pulse=dailyRound["pulse"]->Js.Nullable.toOption,
     ~temperature=dailyRound["temperature"]->Js.Nullable.toOption,
     ~resp=dailyRound["resp"]->Js.Nullable.toOption,

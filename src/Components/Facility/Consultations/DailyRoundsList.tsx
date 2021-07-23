@@ -149,7 +149,7 @@ export const DailyRoundsList = (props: any) => {
                   className="btn btn-default"
                   onClick={(e) =>
                     navigate(
-                      `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${itemData.id}`
+                      `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${itemData.id}`
                     )
                   }
                 >

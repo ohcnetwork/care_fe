@@ -8,8 +8,56 @@ let renderLine = (title, value) => {
   </div>
 }
 
+let renderIndicators = (title, value, isMin, isMax, minText, maxText) => {
+  let indicator = if isMax {
+    <span className="inline-block bg-red-200 rounded-full px-2 mx-3 my-1 text-xs py-1 text-red-800">
+      <i className="fas fa-exclamation-triangle mr-2" /> {str(maxText)}
+    </span>
+  } else if isMin {
+    <span
+      className="inline-block bg-yellow-200 rounded-full px-2 mx-3 my-1 text-xs py-1 text-yellow-800">
+      <i className="fas fa-exclamation-triangle mr-2" /> {str(minText)}
+    </span>
+  } else {
+    <span
+      className="inline-block bg-green-200 rounded-full px-2 mx-3 my-1 text-xs py-1 text-green-800">
+      <i className="far fa-check-circle mr-2" /> {str("Normal")}
+    </span>
+  }
+
+  <div className="flex items-center">
+    <span className="font-semibold"> {str(`${title}:`)} </span>
+    <span className="pl-2"> {str(value)} </span>
+    {indicator}
+  </div>
+}
+
+let renderOptionalIntWithIndicators = (title, value, min, max, minText, maxText) => {
+  Belt.Option.mapWithDefault(value, React.null, v => {
+    renderIndicators(title, string_of_int(v), v < min, v > max, minText, maxText)
+  })
+}
+
+let renderOptionalFloatWithIndicators = (title, value, min, max, minText, maxText) => {
+  Belt.Option.mapWithDefault(value, React.null, v =>
+    renderIndicators(title, Js.Float.toString(v), v < min, v > max, minText, maxText)
+  )
+}
+
+let renderIntWithIndicators = (title, value, min, max, minText, maxText) => {
+  renderIndicators(title, string_of_int(value), value < min, value > max, minText, maxText)
+}
+
+let renderFloatWithIndicators = (title, value, min, max, minText, maxText) => {
+  renderIndicators(title, Js.Float.toString(value), value < min, value > max, minText, maxText)
+}
+
 let renderOptionalInt = (title, value) => {
   Belt.Option.mapWithDefault(value, React.null, v => renderLine(title, string_of_int(v)))
+}
+
+let renderOptionalFloat = (title, value) => {
+  Belt.Option.mapWithDefault(value, React.null, v => renderLine(title, Js.Float.toString(v)))
 }
 
 let renderOptionalDescription = (title, value) => {
@@ -27,108 +75,26 @@ let title = text => {
   <div className="text-lg font-bold mt-2"> {str(text)} </div>
 }
 
-let renderCriticalCare = neurologicalMonitoring => {
-  <div className="space-y-2">
-    {renderLine(
-      "Level of Consciousness",
-      NeurologicalMonitoring.consciousnessLevelToString(
-        NeurologicalMonitoring.consciousnessLevel(neurologicalMonitoring),
-      ),
-    )}
-    {renderOptionalDescription(
-      "Consciousness Level Reaction Description",
-      NeurologicalMonitoring.consciousnessLevelDetails(neurologicalMonitoring),
-    )}
-    <div className="flex md:flex-row flex-col mt-2">
-      <div className="px-4 py-2 border bg-gray-100 m-1 rounded-lg shadow md:w-1/2 w-full">
-        {title("Left Pupil")}
-        {renderOptionalInt("Size", NeurologicalMonitoring.leftPupilSize(neurologicalMonitoring))}
-        {renderOptionalDescription(
-          "Pupil Size Description",
-          NeurologicalMonitoring.leftPupilSizeDetails(neurologicalMonitoring),
-        )}
-        {renderLine(
-          "Light Reaction",
-          NeurologicalMonitoring.lightReactionToString(
-            NeurologicalMonitoring.leftPupilLightReaction(neurologicalMonitoring),
-          ),
-        )}
-        {renderOptionalDescription(
-          "Light Reaction Description",
-          NeurologicalMonitoring.leftPupilLightReactionDetails(neurologicalMonitoring),
-        )}
-      </div>
-      <div className="px-4 py-2 border bg-gray-100 m-1 rounded-lg shadow md:w-1/2 w-full">
-        {title("Right Pupil")}
-        {renderOptionalInt("Size", NeurologicalMonitoring.rightPupilSize(neurologicalMonitoring))}
-        {renderOptionalDescription(
-          "Pupil Size Description",
-          NeurologicalMonitoring.rightPupilSizeDetails(neurologicalMonitoring),
-        )}
-      </div>
-    </div>
-    {renderLine(
-      "Light Reaction",
-      NeurologicalMonitoring.lightReactionToString(
-        NeurologicalMonitoring.leftPupilLightReaction(neurologicalMonitoring),
-      ),
-    )}
-    {renderOptionalDescription(
-      "Light Reaction Description",
-      NeurologicalMonitoring.leftPupilLightReactionDetails(neurologicalMonitoring),
-    )}
-    {str("...add more")}
-  </div>
-}
-
-let renderPrescription = prescriptions => {
-  <div>
-    {ArrayUtils.isEmpty(prescriptions)
-      ? <div> {str("No Medicines Prescribed")} </div>
-      : <div className="flex flex-col">
-          <div className="-my-2 py-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
-            <div
-              className="align-middle inline-block min-w-full shadow overflow-hidden sm:rounded-lg border-b border-gray-200">
-              <table className="min-w-full">
-                <thead>
-                  <tr>
-                    <th
-                      className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
-                      {str("Medicine")}
-                    </th>
-                    <th
-                      className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
-                      {str("Dosage")}
-                    </th>
-                    <th
-                      className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
-                      {str("Days")}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody> {Js.Array.mapi((p, index) => {
-                    <tr className="bg-white" key={string_of_int(index)}>
-                      <td
-                        className="px-6 py-4 whitespace-no-wrap text-sm leading-5 font-medium text-gray-900">
-                        {str(Prescription__Prescription.medicine(p))}
-                      </td>
-                      <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-gray-500">
-                        {str(Prescription__Prescription.dosage(p))}
-                      </td>
-                      <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-gray-500">
-                        {str(string_of_int(Prescription__Prescription.days(p)))}
-                      </td>
-                    </tr>
-                  }, prescriptions)->React.array} </tbody>
-              </table>
-            </div>
-          </div>
-        </div>}
-  </div>
-}
-
 @react.component
-export make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
+export make = (
+  ~id,
+  ~facilityId,
+  ~patientId,
+  ~consultationId,
+  ~dailyRound: CriticalCare__DailyRound.t,
+) => {
+  let neurologicalMonitoring = DailyRound.neurologicalMonitoring(dailyRound)
+  let hemodynamicParameter = DailyRound.hemodynamicParameters(dailyRound)
+  let nursingCare = DailyRound.nursingCare(dailyRound)
+  let arterialBloodGasAnalysis = DailyRound.arterialBloodGasAnalysis(dailyRound)
+  let ioBalance = DailyRound.ioBalance(dailyRound)
+  let dialysis = DailyRound.dialysis(dailyRound)
+  let pressureSoreParameter = DailyRound.pressureSoreParameter(dailyRound)
+  let bloodSugar = DailyRound.bloodSugar(dailyRound)
+  let ventilatorParameters = DailyRound.ventilatorParameters(dailyRound)
+  let medicine = DailyRound.medicine(dailyRound)
+  let others = DailyRound.others(dailyRound)
+
   <div className=" px-4 py-5sm:px-6 max-w-5xl mx-auto mt-4">
     <div>
       <Link
@@ -142,12 +108,71 @@ export make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
         className="bg-white px-2 md:px-6 py-5 border-b border-gray-200 sm:px-6 max-w-5xl mx-auto border mt-4 shadow rounded-lg">
         <div className="text-5xl"> {str("Consultation Update")} </div>
         <div>
+          <CriticalCare__PageTitle title="General" />
+          <DailyRound__General others title renderOptionalDescription />
+        </div>
+        <div>
           <CriticalCare__PageTitle title="Neurological Monitoring" />
-          {renderCriticalCare(CriticalCare__DailyRound.neurologicalMonitoring(dailyRound))}
+          <DailyRound__NeurologicalMonitoring
+            neurologicalMonitoring title renderLine renderOptionalDescription renderOptionalInt
+          />
         </div>
         <div>
           <CriticalCare__PageTitle title="Medicines" />
-          {renderPrescription(CriticalCare__DailyRound.medicine(dailyRound))}
+          <DailyRound__Medicines prescriptions={medicine} />
+        </div>
+        <div>
+          <CriticalCare__PageTitle title="Arterial Blood Gas Analysis" />
+          <DailyRound__ABG
+            arterialBloodGasAnalysis
+            renderOptionalIntWithIndicators
+            renderOptionalFloatWithIndicators
+          />
+        </div>
+        <div>
+          <CriticalCare__PageTitle title="Blood Sugar" />
+          <DailyRound__BloodSugar
+            bloodSugar renderOptionalIntWithIndicators renderOptionalFloat renderLine
+          />
+        </div>
+        <div>
+          <CriticalCare__PageTitle title="Dialysis" />
+          <DailyRound__Dialysis dialysis renderOptionalInt />
+        </div>
+        <div>
+          <CriticalCare__PageTitle title="Hemodynamic Parameters" />
+          <DailyRound__HemodynamicParameters
+            hemodynamicParameter
+            renderOptionalIntWithIndicators
+            renderIntWithIndicators
+            renderOptionalFloatWithIndicators
+            renderFloatWithIndicators
+            renderLine
+            renderOptionalDescription
+            title
+          />
+        </div>
+        <div>
+          <CriticalCare__PageTitle title="I/O Balance" />
+          <DailyRound__IOBalance ioBalance title renderOptionalDescription />
+        </div>
+        <div>
+          <CriticalCare__PageTitle title="Nursing Care" />
+          <DailyRound__NursingCare nursingCare renderLine />
+        </div>
+        <div>
+          <CriticalCare__PageTitle title="Pressure Sore" />
+          <DailyRound__PressureSore pressureSoreParameter />
+        </div>
+        <div>
+          <CriticalCare__PageTitle title="Ventilator Parameters" />
+          <DailyRound__VentilatorParameters
+            ventilatorParameters renderOptionalInt renderOptionalIntWithIndicators renderLine
+          />
+        </div>
+        <div>
+          <CriticalCare__PageTitle title="Others" />
+          <DailyRound__Others others renderOptionalIntWithIndicators />
         </div>
       </div>
     </div>

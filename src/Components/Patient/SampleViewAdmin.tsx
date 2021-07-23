@@ -320,6 +320,29 @@ export default function SampleViewAdmin(props: any) {
     );
   }
 
+  const removeFilter = (paramKey: any) => {
+    updateQuery({
+      ...qParams,
+      [paramKey]: "",
+    });
+  };
+
+  const badge = (key: string, value: any, paramKey: string) => {
+    return (
+      value && (
+        <span className="inline-flex h-full items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
+          {key}
+          {": "}
+          {value}
+          <i
+            className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
+            onClick={(e) => removeFilter(paramKey)}
+          ></i>
+        </span>
+      )
+    );
+  };
+
   return (
     <div>
       {statusDialog.show && (
@@ -381,6 +404,10 @@ export default function SampleViewAdmin(props: any) {
         {/*      errors=''*/}
         {/*  />*/}
         {/*</div>*/}
+        <div className="flex items-center space-x-2 mt-2 flex-wrap w-full col-span-3">
+          {badge("Patient Name", qParams.patient_name, "patient_name")}
+          {badge("District Name", qParams.district_name, "district_name")}
+        </div>
       </div>
       <div className="px-3 md:px-8">
         <div className="flex flex-wrap md:-mx-4">{manageSamples}</div>

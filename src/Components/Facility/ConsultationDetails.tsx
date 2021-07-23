@@ -15,6 +15,8 @@ import { DailyRoundsList } from "./Consultations/DailyRoundsList";
 import { make as Link } from "../Common/components/Link.gen";
 import { NursingPlot } from "./Consultations/NursingPlot";
 import { NeurologicalTable } from "./Consultations/NeurologicalTables";
+import { VentilatorPlot } from "./Consultations/VentilatorPlot";
+import { IOBalancePlots } from "./Consultations/IOBalancePlots";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -309,6 +311,8 @@ export const ConsultationDetails = (props: any) => {
                     "ABG",
                     "NURSING",
                     "NEUROLOGICAL_MONITORING",
+                    "VENTILATOR",
+                    "IO_BALANCE",
                   ].map((p: string) => (
                     <Link
                       key={p}
@@ -478,12 +482,28 @@ export const ConsultationDetails = (props: any) => {
           )}
           {tab === "NEUROLOGICAL_MONITORING" && (
             <div>
-              <PageTitle title="Nursing Analysis" hideBack={true} />
+              <PageTitle title="Neurological Monitoring" hideBack={true} />
               <NeurologicalTable
                 facilityId={facilityId}
                 patientId={patientId}
                 consultationId={consultationId}
               ></NeurologicalTable>
+            </div>
+          )}
+          {tab === "VENTILATOR" && (
+            <div>
+              <PageTitle title="Ventilator Parameters" hideBack={true} />
+              <VentilatorPlot
+                facilityId={facilityId}
+                patientId={patientId}
+                consultationId={consultationId}
+              ></VentilatorPlot>
+            </div>
+          )}
+          {tab === "IO_BALANCE" && (
+            <div>
+              <PageTitle title="IO Balance Plots" hideBack={true} />
+              <IOBalancePlots consultationId={consultationId}></IOBalancePlots>
             </div>
           )}
         </div>

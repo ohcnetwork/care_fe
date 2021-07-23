@@ -32,6 +32,8 @@ export const PrimaryParametersPlot = (props: any) => {
               "insulin_intake_dose",
               "spo2",
               "ventilator_fi02",
+              "rhythm",
+              "rhythm_detail",
             ],
           },
           { consultationId }
@@ -39,7 +41,7 @@ export const PrimaryParametersPlot = (props: any) => {
       );
       if (!status.aborted) {
         if (res && res.data) {
-          setResults(res.data);
+          setResults(res.data.results);
         }
         setIsLoading(false);
       }
@@ -112,59 +114,118 @@ export const PrimaryParametersPlot = (props: any) => {
     },
   ];
 
+  let rhythmValues: any = {};
+  Object.entries(results).map((obj: any) => {
+    if (obj[1].rhythm && obj[1].rhythm > 0) {
+      const key: string = moment(obj[0]).format("LL");
+      const lst: Array<any> = rhythmValues.hasOwnProperty(key)
+        ? rhythmValues[key]
+        : [];
+      const value: any = {};
+      value["time"] = moment(obj[0]).format("LT");
+      value["rhythm"] = obj[1].rhythm;
+      lst.push(value);
+      rhythmValues[key] = lst;
+    }
+  });
+
   return (
-    <div className="grid grid-row-1 md:grid-cols-2 gap-4">
-      <div className="pt-4 px-4 bg-white border rounded-lg shadow">
-        <StackedLinePlot title="BP" xData={dates} yData={BPData} />
+    <div>
+      <div className="grid grid-row-1 md:grid-cols-2 gap-4">
+        <div className="pt-4 px-4 bg-white border rounded-lg shadow">
+          <StackedLinePlot title="BP" xData={dates} yData={BPData} />
+        </div>
+        <div className="pt-4 px-4 bg-white border rounded-lg shadow">
+          <LinePlot
+            title="Pulse"
+            name="Pulse"
+            xData={dates}
+            yData={yAxisData("pulse")}
+            low={40}
+            high={100}
+          />
+        </div>
+        <div className="pt-4 px-4 bg-white border rounded-lg shadow">
+          <LinePlot
+            title="Temperature (F)"
+            name="Temperature"
+            xData={dates}
+            yData={yAxisData("temperature")}
+          />
+        </div>
+        <div className="pt-4 px-4 bg-white border rounded-lg shadow">
+          <LinePlot
+            title="Resp"
+            name="Resp"
+            xData={dates}
+            yData={yAxisData("resp")}
+          />
+        </div>
+        <div className="pt-4 px-4 bg-white border rounded-lg shadow">
+          <StackedLinePlot title="Insulin" xData={dates} yData={InsulinData} />
+        </div>
+        <div className="pt-4 px-4 bg-white border rounded-lg shadow">
+          <LinePlot
+            title="SPO2 (%)"
+            name="spo2"
+            xData={dates}
+            yData={yAxisData("spo2")}
+            low={90}
+            high={100}
+          />
+        </div>
+        <div className="pt-4 px-4 bg-white border rounded-lg shadow">
+          <LinePlot
+            title="Ventilator FIO2 (%)"
+            name="fio2"
+            xData={dates}
+            yData={yAxisData("ventilator_fi02")}
+            low={21}
+            high={60}
+          />
+        </div>
       </div>
-      <div className="pt-4 px-4 bg-white border rounded-lg shadow">
-        <LinePlot
-          title="Pulse"
-          name="Pulse"
-          xData={dates}
-          yData={yAxisData("pulse")}
-          low={40}
-          high={100}
-        />
+      <div className="py-2 px-3">
+        <h3 className="text-lg">Rhythm</h3>
+        {Object.entries(rhythmValues).map((obj: any) => {
+          if (obj[1].length > 0) {
+            return (
+              <div className="px-3 text-sm">
+                <h4 className="text-base my-3">{obj[0]}</h4>
+                <div className="grid grid-cols-6">
+                  {obj[1].map((item: any) => {
+                    return (
+                      <div className="border-2 border-gray-800 text-center">
+                        <div className="py-3 px-2 border-b-2 border-gray-800">
+                          {item["time"]}
+                        </div>
+                        <div className="py-3 px-2">
+                          {item["rhythm"] === 5 ? "Regular" : "Ir regular"}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          }
+        })}
       </div>
-      <div className="pt-4 px-4 bg-white border rounded-lg shadow">
-        <LinePlot
-          title="Temperature (F)"
-          name="Temperature"
-          xData={dates}
-          yData={yAxisData("temperature")}
-        />
-      </div>
-      <div className="pt-4 px-4 bg-white border rounded-lg shadow">
-        <LinePlot
-          title="Resp"
-          name="Resp"
-          xData={dates}
-          yData={yAxisData("resp")}
-        />
-      </div>
-      <div className="pt-4 px-4 bg-white border rounded-lg shadow">
-        <StackedLinePlot title="Insulin" xData={dates} yData={InsulinData} />
-      </div>
-      <div className="pt-4 px-4 bg-white border rounded-lg shadow">
-        <LinePlot
-          title="SPO2 (%)"
-          name="spo2"
-          xData={dates}
-          yData={yAxisData("spo2")}
-          low={90}
-          high={100}
-        />
-      </div>
-      <div className="pt-4 px-4 bg-white border rounded-lg shadow">
-        <LinePlot
-          title="Ventilator FIO2 (%)"
-          name="fio2"
-          xData={dates}
-          yData={yAxisData("ventilator_fi02")}
-          low={21}
-          high={60}
-        />
+
+      <div className="pt-4 px-4 mx-2 my-2 bg-white border rounded-lg shadow">
+        <h3 className="text-lg">Rhythm description</h3>
+        {Object.entries(results).map((obj: any) => {
+          if (obj[1].rhythm_detail) {
+            return (
+              <div className="mx-2 my-1">
+                <h4 className="text-sm">- {moment(obj[0]).format("LLL")}</h4>
+                <div className="px-5 text-sm">
+                  <div>{obj[1].rhythm_detail}</div>
+                </div>
+              </div>
+            );
+          }
+        })}
       </div>
     </div>
   );

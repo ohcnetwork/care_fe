@@ -24,7 +24,7 @@ const PageTitle = loadable(() => import("../Common/PageTitle"));
 function Badge(props: { color: string; icon: string; text: string }) {
   return (
     <span
-      className="m-1 inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-gray-100 text-gray-700"
+      className="m-1 h-full inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-gray-100 text-gray-700"
       title={props.text}
     >
       <i
@@ -222,7 +222,7 @@ export default function ResultList() {
   const badge = (key: string, value: any, paramKey: string) => {
     return (
       value && (
-        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
+        <span className="inline-flex h-full items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
           {key}
           {": "}
           {value}
@@ -238,7 +238,7 @@ export default function ResultList() {
   const lsgWardBadge = (key: string, value: any, paramKey: string) => {
     return (
       value && (
-        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
+        <span className="inline-flex h-full items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
           {key}
           {": "}
           {value.name}
@@ -347,6 +347,7 @@ export default function ResultList() {
     );
   }
 
+  console.log(qParams);
   return (
     <div className="px-6">
       {showDialog && (
@@ -380,7 +381,7 @@ export default function ResultList() {
             <div className="text-sm font-semibold mb-2">Search by Name</div>
             <InputSearchBox
               search={searchByName}
-              value={qParams.name}
+              value={qParams.name || ""}
               placeholder="Search by Patient Name"
               errors=""
             />
@@ -388,7 +389,7 @@ export default function ResultList() {
           <div>
             <div className="text-sm font-semibold mt-2">Search by number</div>
             <InputSearchBox
-              value={qParams.mobile_number}
+              value={qParams.mobile_number || ""}
               search={searchByPhone}
               placeholder="Search by Phone Number"
               errors=""
@@ -424,13 +425,19 @@ export default function ResultList() {
           </div>
         </div>
       </div>
-      <div className="flex space-x-2 my-2 flex-wrap w-full col-span-3 space-y-1">
+      <div className="flex items-center space-x-2 my-2 flex-wrap w-full col-span-3">
         {dataList.lsgList.map((x) => lsgWardBadge("LSG", x, "local_bodies"))}
       </div>
-      <div className="flex space-x-2 my-2 flex-wrap w-full col-span-3 space-y-1">
+      <div className="flex items-center space-x-2 my-2 flex-wrap w-full col-span-3">
         {dataList.wardList.map((x) => lsgWardBadge("Ward", x, "wards"))}
       </div>
-      <div className="flex space-x-2 my-2 flex-wrap w-full col-span-3 space-y-1">
+      <div className="flex items-center space-x-2 my-2 flex-wrap w-full col-span-3">
+        {badge("Name", qParams.name || local.name, "name")}
+        {badge(
+          "Phone Number",
+          qParams.mobile_number || local.mobile_number,
+          "mobile_number"
+        )}
         {badge(
           "Created before",
           qParams.created_date_before || local.created_date_before,

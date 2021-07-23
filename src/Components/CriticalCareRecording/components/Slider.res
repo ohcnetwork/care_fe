@@ -93,6 +93,7 @@ let make = (
             "--value-background-hover": "#0e9f6e",
             "--value": value,
             "--text-value": value,
+            "--step": interval,
           },
         )}>
         <input

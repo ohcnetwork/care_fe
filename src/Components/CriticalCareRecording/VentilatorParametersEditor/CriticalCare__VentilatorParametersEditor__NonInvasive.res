@@ -19,8 +19,8 @@ let silderOptionArray = [
     "interval": "5",
     "step": 1.0,
     "id": "ventilator_peep",
-    "min": 10.0,
-    "max": 30.0,
+    "min": 5.0,
+    "max": 10.0,
   },
   {
     "title": "Peak Inspiratory Pressure (PIP) (cm H2O)",
@@ -198,7 +198,7 @@ let make = (~state: VentilatorParameters.state, ~send: VentilatorParameters.acti
               },
             )}
             setValue={s => send(handleChange(Belt.Int.fromString(s)))}
-            getLabel={VentilatorParameters.getStatus(option["min"], option["max"])}
+            getLabel={VentilatorParameters.getStatus(option["min"], "Low", option["max"], "High")}
           />
         })
         |> React.array}

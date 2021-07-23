@@ -41,23 +41,13 @@ let silderOptionArray = [
   },
 ]
 
-let getStatus = (min, max, val) => {
-  if val > min && val < max {
-    ("Normal", "#059669")
-  } else if val < min {
-    ("Low", "#DC2626")
-  } else {
-    ("High", "#DC2626")
-  }
-}
-
 @react.component
 let make = (~state: VentilatorParameters.state, ~send: VentilatorParameters.action => unit) => {
   let getOxygenFlowRateLabel = switch state.ventilator_oxygen_modality {
-  | NASAL_PRONGS => VentilatorParameters.getStatus(1.0, 4.0)
-  | SIMPLE_FACE_MASK => VentilatorParameters.getStatus(5.0, 10.0)
-  | NON_REBREATHING_MASK => VentilatorParameters.getStatus(11.0, 15.0)
-  | _ => VentilatorParameters.getStatus(0.0, 50.0)
+  | NASAL_PRONGS => VentilatorParameters.getStatus(1.0, "Low", 4.0, "High")
+  | SIMPLE_FACE_MASK => VentilatorParameters.getStatus(5.0, "Low", 10.0, "High")
+  | NON_REBREATHING_MASK => VentilatorParameters.getStatus(11.0, "Low", 15.0, "High")
+  | _ => VentilatorParameters.getStatus(0.0, "Low", 50.0, "High")
   }
   <div>
     <h4 className="mb-4"> {str("Oxygen Modality")} </h4>
@@ -118,7 +108,7 @@ let make = (~state: VentilatorParameters.state, ~send: VentilatorParameters.acti
           },
         )}
         setValue={s => send(handleChange(Belt.Int.fromString(s)))}
-        getLabel={VentilatorParameters.getStatus(option["min"], option["max"])}
+        getLabel={VentilatorParameters.getStatus(option["min"], "Low", option["max"], "High")}
       />
     })
     |> React.array}

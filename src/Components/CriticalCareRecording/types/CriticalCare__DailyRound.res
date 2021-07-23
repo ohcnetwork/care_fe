@@ -12,6 +12,7 @@ export type t = {
   bloodSugar: CriticalCare_BloodSugar.t,
   ventilatorParameters: CriticalCare__VentilatorParameters.t,
   medicine: array<Prescription__Prescription.t>,
+  others: CriticalCare__Others.t,
 }
 
 let make = (
@@ -28,6 +29,7 @@ let make = (
   ~bloodSugar,
   ~medicine,
   ~ventilatorParameters,
+  ~others,
 ) => {
   createdAt: createdAt,
   admittedTo: admittedTo,
@@ -42,6 +44,7 @@ let make = (
   bloodSugar: bloodSugar,
   medicine: medicine,
   ventilatorParameters: ventilatorParameters,
+  others: others,
 }
 
 let neurologicalMonitoring = t => t.neurologicalMonitoring
@@ -54,6 +57,7 @@ let pressureSoreParameter = t => t.pressureSoreParameter
 let bloodSugar = t => t.bloodSugar
 let medicine = t => t.medicine
 let ventilatorParameters = t => t.ventilatorParameters
+let others = t => t.others
 
 let makeFromJs = dailyRound => {
   make(
@@ -70,5 +74,6 @@ let makeFromJs = dailyRound => {
     ~bloodSugar=CriticalCare_BloodSugar.makeFromJs(dailyRound),
     ~medicine=Prescription__Prescription.makeFromJs(dailyRound["medication_given"]),
     ~ventilatorParameters=CriticalCare__VentilatorParameters.makeFromJs(dailyRound),
+    ~others=CriticalCare__Others.makeFromJs(dailyRound),
   )
 }
