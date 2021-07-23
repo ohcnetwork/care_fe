@@ -26,22 +26,23 @@ const DataTable = (props: any) => {
           style={{ direction: "rtl" }}
           className="flex flex-row overflow-x-auto"
         >
-          {data.map((x: any) => {
-            if (x.date || x.left) {
-              return (
-                <div className="flex flex-col w-1/6 min-w-max-content divide-x divide-cool-gray-200">
-                  <div className="px-6 py-3 bg-cool-gray-50 text-center text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
-                    {x.date}
-                  </div>
-                  <div className="px-6 py-4 bg-white text-center whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
-                    {x.left}
-                  </div>
-                  <div className="px-6 py-4 bg-white text-center whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
-                    {x.right}
-                  </div>
+          {data.map((x: any, i: any) => {
+            return (
+              <div
+                key={`${title}_${i}`}
+                className="flex flex-col w-1/6 min-w-max-content divide-x divide-cool-gray-200"
+              >
+                <div className="px-6 py-3 bg-cool-gray-50 text-center text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
+                  {x.date}
                 </div>
-              );
-            }
+                <div className="px-6 py-4 bg-white text-center whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
+                  {x.left}
+                </div>
+                <div className="px-6 py-4 bg-white text-center whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
+                  {x.right}
+                </div>
+              </div>
+            );
           })}
         </div>
       </div>
@@ -55,9 +56,9 @@ const DataDescription = (props: any) => {
     <div>
       <div className="text-xl font-semibold">{title}</div>
       <div className="p-4 bg-white border rounded-lg shadow">
-        {data.map((x: any) => (
-          <div className="mb-2">
-            <div className="text-sm font-semibold">{`- ${x.date}`}</div>
+        {data.map((x: any, i: any) => (
+          <div key={`${title}_${i}`} className="mb-2">
+            <div className="text-sm font-bold">{`- ${x.date}`}</div>
             <div className="text-cool-gray-800 pl-2">
               <span className="font-semibold">Left: </span>
               {x.left}
@@ -257,8 +258,11 @@ export const NeurologicalTable = (props: any) => {
             style={{ direction: "rtl" }}
             className="flex flex-row overflow-x-auto"
           >
-            {locData.map((x: any) => (
-              <div className="flex flex-col  w-1/6 min-w-max-content  divide-x divide-cool-gray-200">
+            {locData.map((x: any, i: any) => (
+              <div
+                key={`loc_${i}`}
+                className="flex flex-col  w-1/6 min-w-max-content  divide-x divide-cool-gray-200"
+              >
                 <div className="px-6 py-3 bg-cool-gray-50 text-center text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
                   {x.date}
                 </div>
@@ -274,8 +278,8 @@ export const NeurologicalTable = (props: any) => {
             Level Of Consciousness Description
           </div>
           <div className="p-4 bg-white border rounded-lg shadow">
-            {locDescription.map((x: any) => (
-              <div className="mb-2">
+            {locDescription.map((x: any, i: any) => (
+              <div key={`loc_desc_${i}`} className="mb-2">
                 <div className="text-sm font-semibold">{`- ${x.date}`}</div>
                 <div className="text-cool-gray-800 pl-2">{x.loc}</div>
               </div>
