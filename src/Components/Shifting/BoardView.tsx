@@ -95,7 +95,7 @@ export default function BoardView() {
         </div>
         <div className="md:px-4">
           <InputSearchBox
-            value={qParams.patient_name}
+            value={qParams.patient_name || ""}
             search={searchByName}
             placeholder="Patient Name"
             errors=""
