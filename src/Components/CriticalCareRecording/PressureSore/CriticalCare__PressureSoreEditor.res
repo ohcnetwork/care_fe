@@ -162,8 +162,7 @@ let renderBody = (state, send, title, partPaths, substr) => {
     </div>
     // Braden Scale Divs
     <div className="mx-auto overflow-x-scroll max-w-md my-3 border-2">
-      <div
-        className="grid grid-rows-3 md:grid-rows-6 grid-flow-col gap-2 auto-cols-max justify-items-center p-2">
+      <div className="grid grid-rows-3 grid-flow-col auto-cols-max md:flex md:flex-wrap">
         {Js.Array.mapi((part, index) => {
           let regionType = PressureSore.regionForPath(part)
           let selectedPart = Js.Array.find(p => PressureSore.region(p) === regionType, state.parts)
@@ -180,7 +179,7 @@ let renderBody = (state, send, title, partPaths, substr) => {
               }
             }}>
             <div className="flex">
-              <div className="border-white border-r-2 px-1">
+              <div className="border-white px-1">
                 {str(
                   Js.String.sliceToEnd(
                     ~from=substr,
@@ -188,15 +187,14 @@ let renderBody = (state, send, title, partPaths, substr) => {
                   ),
                 )}
               </div>
-              <i
-                className="fas fa-times p-1"
-                onClick={_ => {
-                  switch selectedPart {
-                  | Some(p) => send(RemoveFromSelectedParts(p))
-                  | None => ()
-                  }
-                }}
-              />
+              {switch selectedPart {
+              | Some(p) =>
+                <i
+                  className="border-l-2 fas fa-times p-1"
+                  onClick={_ => send(RemoveFromSelectedParts(p))}
+                />
+              | None => React.null
+              }}
             </div>
           </div>
         }, partPaths)->React.array}
