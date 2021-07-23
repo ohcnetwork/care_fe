@@ -192,12 +192,12 @@ export const PrimaryParametersPlot = (props: any) => {
             return (
               <div className="px-3 text-sm">
                 <h4 className="text-base my-3">{obj[0]}</h4>
-                <div className="grid grid-cols-6">
+                <div className="flex bg-white border shadow rounded-lg">
                   {obj[1].map((item: any) => {
                     return (
-                      <div className="border-2 border-gray-800 text-center">
-                        <div className="py-3 px-2 border-b-2 border-gray-800">
-                          {item["time"]}
+                      <div className="border border-gray-300 text-center">
+                        <div className="py-3 px-2 border-b border-gray-300">
+                          <div className="text-xs">{item["time"]}</div>
                         </div>
                         <div className="py-3 px-2">
                           {item["rhythm"] === 5 ? "Regular" : "Ir regular"}
@@ -212,20 +212,22 @@ export const PrimaryParametersPlot = (props: any) => {
         })}
       </div>
 
-      <div className="pt-4 px-4 mx-2 my-2 bg-white border rounded-lg shadow">
+      <div className="py-2 px-3">
         <h3 className="text-lg">Rhythm description</h3>
-        {Object.entries(results).map((obj: any) => {
-          if (obj[1].rhythm_detail) {
-            return (
-              <div className="mx-2 my-1">
-                <h4 className="text-sm">- {moment(obj[0]).format("LLL")}</h4>
-                <div className="px-5 text-sm">
-                  <div>{obj[1].rhythm_detail}</div>
+        <div className="mt-4 bg-white rounded-lg p-2">
+          {Object.entries(results).map((obj: any) => {
+            if (obj[1].rhythm_detail) {
+              return (
+                <div className="mx-2 my-1">
+                  <h4 className="text-sm">- {moment(obj[0]).format("LLL")}</h4>
+                  <div className="px-5 text-sm">
+                    <div>{obj[1].rhythm_detail}</div>
+                  </div>
                 </div>
-              </div>
-            );
-          }
-        })}
+              );
+            }
+          })}
+        </div>
       </div>
     </div>
   );

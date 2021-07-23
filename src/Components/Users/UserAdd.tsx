@@ -156,7 +156,9 @@ export const UserAdd = (props: UserProps) => {
       if (Number(id) > 0) {
         setIsDistrictLoading(true);
         const districtList = await dispatchAction(getDistrictByState({ id }));
-        setDistricts([...initialDistricts, ...districtList.data]);
+        if (districtList) {
+          setDistricts([...initialDistricts, ...districtList.data]);
+        }
         setIsDistrictLoading(false);
       } else {
         setDistricts(selectStates);
@@ -173,7 +175,9 @@ export const UserAdd = (props: UserProps) => {
           getLocalbodyByDistrict({ id })
         );
         setIsLocalbodyLoading(false);
-        setLocalBody([...initialLocalbodies, ...localBodyList.data]);
+        if (localBodyList) {
+          setLocalBody([...initialLocalbodies, ...localBodyList.data]);
+        }
       } else {
         setLocalBody(selectDistrict);
       }
