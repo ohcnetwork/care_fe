@@ -610,7 +610,7 @@ export const PatientManager = (props: any) => {
               Search by Primary Number
             </div>
             <PhoneNumberField
-              value={qParams.phone_number}
+              value={qParams.phone_number || "+91"}
               onChange={(value: string) => searchByPhone(value, "phone_number")}
               turnOffAutoFormat={false}
               errors=""
@@ -662,7 +662,7 @@ export const PatientManager = (props: any) => {
               Search by Emergency Number
             </div>
             <PhoneNumberField
-              value={qParams.emergency_phone_number}
+              value={qParams.emergency_phone_number || "+91"}
               onChange={(value: string) =>
                 searchByPhone(value, "emergency_phone_number")
               }
@@ -671,7 +671,7 @@ export const PatientManager = (props: any) => {
             />
           </div>
         </div>
-        <div className="flex space-x-2 mt-2 flex-wrap w-full col-span-3 space-y-1">
+        <div className="flex space-x-2 mt-2 flex-wrap w-full col-span-3">
           {qParams.phone_number?.trim().split(" ").length - 1
             ? badge("Primary Number", qParams.phone_number, "phone_number")
             : null}
