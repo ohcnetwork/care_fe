@@ -459,16 +459,18 @@ export const ConsultationForm = (props: any) => {
 
                 {state.form.hasSymptom && (
                   <div>
-                    <DateInputField
-                      className="w-1/2"
-                      label="Date of onset of the symptoms*"
-                      value={state.form.symptoms_onset_date}
-                      onChange={(date) =>
-                        handleDateChange(date, "symptoms_onset_date")
-                      }
-                      disableFuture={true}
-                      errors={state.errors.symptoms_onset_date}
-                    />
+                    <div className="w-2/5 pr-4 min-w-max-content">
+                      <DateInputField
+                        fullWidth={true}
+                        label="Date of onset of the symptoms*"
+                        value={state.form.symptoms_onset_date}
+                        onChange={(date) =>
+                          handleDateChange(date, "symptoms_onset_date")
+                        }
+                        disableFuture={true}
+                        errors={state.errors.symptoms_onset_date}
+                      />
+                    </div>
                   </div>
                 )}
                 <div>
