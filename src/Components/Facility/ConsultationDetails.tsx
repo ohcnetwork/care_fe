@@ -14,6 +14,7 @@ import { ABGPlots } from "./Consultations/ABGPlots";
 import { DailyRoundsList } from "./Consultations/DailyRoundsList";
 import { make as Link } from "../Common/components/Link.gen";
 import { NursingPlot } from "./Consultations/NursingPlot";
+import { NeurologicalTable } from "./Consultations/NeurologicalTables";
 import { VentilatorPlot } from "./Consultations/VentilatorPlot";
 import { IOBalancePlots } from "./Consultations/IOBalancePlots";
 
@@ -309,6 +310,7 @@ export const ConsultationDetails = (props: any) => {
                     "FILES",
                     "ABG",
                     "NURSING",
+                    "NEUROLOGICAL_MONITORING",
                     "VENTILATOR",
                     "IO_BALANCE",
                   ].map((p: string) => (
@@ -476,6 +478,16 @@ export const ConsultationDetails = (props: any) => {
                 patientId={patientId}
                 consultationId={consultationId}
               ></NursingPlot>
+            </div>
+          )}
+          {tab === "NEUROLOGICAL_MONITORING" && (
+            <div>
+              <PageTitle title="Neurological Monitoring" hideBack={true} />
+              <NeurologicalTable
+                facilityId={facilityId}
+                patientId={patientId}
+                consultationId={consultationId}
+              ></NeurologicalTable>
             </div>
           )}
           {tab === "VENTILATOR" && (
