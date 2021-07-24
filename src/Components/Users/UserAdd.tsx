@@ -263,6 +263,9 @@ export const UserAdd = (props: UserProps) => {
     if (name === "username") {
       form[name] = value.toLowerCase();
     }
+    if (name === "state") {
+      form["district"] = "";
+    }
     dispatch({ type: "set_form", form });
   };
 
@@ -406,7 +409,13 @@ export const UserAdd = (props: UserProps) => {
           return;
         case "state":
           if (!Number(state.form[field])) {
-            errors[field] = "Please enter the state";
+            errors[field] = "Please select the state";
+            invalidForm = true;
+          }
+          return;
+        case "district":
+          if (!Number(state.form[field]) || state.form[field] === "") {
+            errors[field] = "Please select the district";
             invalidForm = true;
           }
           return;
