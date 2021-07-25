@@ -147,7 +147,9 @@ export const FacilityCreate = (props: FacilityProps) => {
       if (Number(id) > 0) {
         setIsDistrictLoading(true);
         const districtList = await dispatchAction(getDistrictByState({ id }));
-        setDistricts([...initialDistricts, ...districtList.data]);
+        if (districtList) {
+          setDistricts([...initialDistricts, ...districtList.data]);
+        }
         setIsDistrictLoading(false);
       } else {
         setDistricts(selectStates);
@@ -164,7 +166,9 @@ export const FacilityCreate = (props: FacilityProps) => {
           getLocalbodyByDistrict({ id })
         );
         setIsLocalbodyLoading(false);
-        setLocalBody([...initialLocalbodies, ...localBodyList.data]);
+        if (localBodyList) {
+          setLocalBody([...initialLocalbodies, ...localBodyList.data]);
+        }
       } else {
         setLocalBody(selectDistrict);
       }
@@ -178,7 +182,9 @@ export const FacilityCreate = (props: FacilityProps) => {
         setIsWardLoading(true);
         const wardList = await dispatchAction(getWardByLocalBody({ id }));
         setIsWardLoading(false);
-        setWard([...initialWards, ...wardList.data.results]);
+        if (wardList) {
+          setWard([...initialWards, ...wardList.data.results]);
+        }
       } else {
         setWard(selectLocalBody);
       }
