@@ -11,7 +11,7 @@ type TextFieldPropsExtended = TextFieldProps & {
 export const InputSearchBox = (props: TextFieldPropsExtended) => {
   const { search, placeholder, value } = props;
   const [searchValue, setSearchValue] = useState(value);
-  const handler = useCallback(debounce(search, 1500), [search]);
+  const handler = useCallback(debounce(search, 1200), [search]);
 
   const handleKeyDown = (event: any) => {
     const value = event.target.value;
