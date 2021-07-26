@@ -12,6 +12,29 @@ export const GlasgowTables = (props: any) => {
   const [offset, setOffset] = useState(0);
   const [results, setResults] = useState({});
 
+  const EYE_OPEN_SCALE = [
+    { value: 4, text: "Spontaneous" },
+    { value: 3, text: "To Speech" },
+    { value: 2, text: "Pain" },
+    { value: 1, text: "None" },
+  ];
+
+  const VERBAL_RESPONSE_SCALE = [
+    { value: 5, text: "Oriented/Coos/Babbles" },
+    { value: 4, text: "Confused/Irritable" },
+    { value: 3, text: "Inappropriate words/Cry to Pain" },
+    { value: 2, text: "Incomprehensible words/Moans to pain" },
+    { value: 1, text: "None" },
+  ];
+
+  const MOTOR_RESPONSE_SCALE = [
+    { value: 6, text: "Obeying commands" },
+    { value: 5, text: "Moves to localised pain" },
+    { value: 4, text: "Flexion withdrawal from pain" },
+    { value: 3, text: "Abnormal Flexion(decorticate)" },
+    { value: 2, text: "Abnormal Extension(decerebrate)" },
+    { value: 1, text: "No Response" },
+  ];
   const fetchDailyRounds = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
@@ -48,7 +71,6 @@ export const GlasgowTables = (props: any) => {
   Object.entries(results).map((item) => {
     const date = item[0];
     const value: any = item[1];
-    console.log(date, value);
     if (
       value.glasgow_eye_open ||
       value.glasgow_verbal_response ||
@@ -63,7 +85,6 @@ export const GlasgowTables = (props: any) => {
       });
     }
   });
-  console.log(results, data);
 
   return (
     <div className="mt-2">
@@ -114,6 +135,53 @@ export const GlasgowTables = (props: any) => {
                 </div>
               );
             })}
+          </div>
+        </div>
+      </div>
+      <div className="mb-6">
+        <div className="text-xl font-semibold my-2">Scale Description</div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="px-4 py-2 bg-white border rounded-lg shadow">
+            <div className="text-xl font-semibold mb-2">Eye Open</div>
+            <div>
+              {EYE_OPEN_SCALE.map((x: any) => (
+                <div
+                  key={`eye_${x.value}`}
+                  className="text-cool-gray-800 pl-2 leading-relaxed"
+                >
+                  <span className="text-sm font-semibold">{x.value}</span> -{" "}
+                  {x.text}
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="px-4 py-2 bg-white border rounded-lg shadow">
+            <div className="text-xl font-semibold mb-2">Verbal Response</div>
+            <div>
+              {VERBAL_RESPONSE_SCALE.map((x: any) => (
+                <div
+                  key={`verbal_${x.value}`}
+                  className="text-cool-gray-800 pl-2 leading-relaxed"
+                >
+                  <span className="text-sm font-semibold">{x.value}</span> -{" "}
+                  {x.text}
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="px-4 py-2 bg-white border rounded-lg shadow">
+            <div className="text-xl font-semibold mb-2">Motor Response</div>
+            <div>
+              {MOTOR_RESPONSE_SCALE.map((x: any) => (
+                <div
+                  key={`motor_${x.value}`}
+                  className="text-cool-gray-800 pl-2 leading-relaxed"
+                >
+                  <span className="text-sm font-semibold">{x.value}</span> -{" "}
+                  {x.text}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
