@@ -1604,7 +1604,10 @@ export const PatientHome = (props: any) => {
 
           <DialogActions>
             <Button
-              onClick={() => setOpenAssignVolunteerDialog(false)}
+              onClick={() => {
+                handleVolunteerSelect("");
+                setOpenAssignVolunteerDialog(false);
+              }}
               color="primary"
             >
               Cancel
