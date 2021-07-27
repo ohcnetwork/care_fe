@@ -197,6 +197,9 @@ export default function UpdateResult(props: any) {
   const handleChange = (e: any) => {
     const form = { ...state.form };
     form[e.target.name] = e.target.value;
+    if (e.target.name === "local_body") {
+      form["ward"] = "0";
+    }
     dispatch({ type: "set_form", form });
   };
 

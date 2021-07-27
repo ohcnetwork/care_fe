@@ -8,6 +8,50 @@ let renderLine = (title, value) => {
   </div>
 }
 
+let renderIndicators = (title, value, isMin, isMax, minText, maxText) => {
+  let indicator = if isMax {
+    <span className="inline-block bg-red-200 rounded-full px-2 mx-3 my-1 text-xs py-1 text-red-800">
+      <i className="fas fa-exclamation-triangle mr-2" /> {str(maxText)}
+    </span>
+  } else if isMin {
+    <span
+      className="inline-block bg-yellow-200 rounded-full px-2 mx-3 my-1 text-xs py-1 text-yellow-800">
+      <i className="fas fa-exclamation-triangle mr-2" /> {str(minText)}
+    </span>
+  } else {
+    <span
+      className="inline-block bg-green-200 rounded-full px-2 mx-3 my-1 text-xs py-1 text-green-800">
+      <i className="far fa-check-circle mr-2" /> {str("Normal")}
+    </span>
+  }
+
+  <div className="flex items-center">
+    <span className="font-semibold"> {str(`${title}:`)} </span>
+    <span className="pl-2"> {str(value)} </span>
+    {indicator}
+  </div>
+}
+
+let renderOptionalIntWithIndicators = (title, value, min, max, minText, maxText) => {
+  Belt.Option.mapWithDefault(value, React.null, v => {
+    renderIndicators(title, string_of_int(v), v < min, v > max, minText, maxText)
+  })
+}
+
+let renderOptionalFloatWithIndicators = (title, value, min, max, minText, maxText) => {
+  Belt.Option.mapWithDefault(value, React.null, v =>
+    renderIndicators(title, Js.Float.toString(v), v < min, v > max, minText, maxText)
+  )
+}
+
+let renderIntWithIndicators = (title, value, min, max, minText, maxText) => {
+  renderIndicators(title, string_of_int(value), value < min, value > max, minText, maxText)
+}
+
+let renderFloatWithIndicators = (title, value, min, max, minText, maxText) => {
+  renderIndicators(title, Js.Float.toString(value), value < min, value > max, minText, maxText)
+}
+
 let renderOptionalInt = (title, value) => {
   Belt.Option.mapWithDefault(value, React.null, v => renderLine(title, string_of_int(v)))
 }
@@ -79,11 +123,17 @@ export make = (
         </div>
         <div>
           <CriticalCare__PageTitle title="Arterial Blood Gas Analysis" />
-          <DailyRound__ABG arterialBloodGasAnalysis renderOptionalInt renderOptionalFloat />
+          <DailyRound__ABG
+            arterialBloodGasAnalysis
+            renderOptionalIntWithIndicators
+            renderOptionalFloatWithIndicators
+          />
         </div>
         <div>
           <CriticalCare__PageTitle title="Blood Sugar" />
-          <DailyRound__BloodSugar bloodSugar renderOptionalInt renderOptionalFloat renderLine />
+          <DailyRound__BloodSugar
+            bloodSugar renderOptionalIntWithIndicators renderOptionalFloat renderLine
+          />
         </div>
         <div>
           <CriticalCare__PageTitle title="Dialysis" />
@@ -93,10 +143,12 @@ export make = (
           <CriticalCare__PageTitle title="Hemodynamic Parameters" />
           <DailyRound__HemodynamicParameters
             hemodynamicParameter
-            renderOptionalInt
+            renderOptionalIntWithIndicators
+            renderIntWithIndicators
+            renderOptionalFloatWithIndicators
+            renderFloatWithIndicators
             renderLine
             renderOptionalDescription
-            renderOptionalFloat
             title
           />
         </div>
@@ -114,10 +166,13 @@ export make = (
         </div>
         <div>
           <CriticalCare__PageTitle title="Ventilator Parameters" />
-          <DailyRound__VentilatorParameters ventilatorParameters renderOptionalInt renderLine />
+          <DailyRound__VentilatorParameters
+            ventilatorParameters renderOptionalInt renderOptionalIntWithIndicators renderLine
+          />
         </div>
         <div>
-          <CriticalCare__PageTitle title="Others" /> <DailyRound__Others others renderOptionalInt />
+          <CriticalCare__PageTitle title="Others" />
+          <DailyRound__Others others renderOptionalIntWithIndicators />
         </div>
       </div>
     </div>

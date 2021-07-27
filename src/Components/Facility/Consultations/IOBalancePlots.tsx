@@ -34,7 +34,7 @@ export const IOBalancePlots = (props: any) => {
       );
       if (!status.aborted) {
         if (res && res.data) {
-          setResults(res.data);
+          setResults(res.data.results);
         }
         setIsLoading(false);
       }

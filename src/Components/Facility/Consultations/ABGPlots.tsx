@@ -28,6 +28,7 @@ export const ABGPlots = (props: any) => {
               "lactate",
               "sodium",
               "potassium",
+              "ventilator_fi02",
             ],
           },
           { consultationId }
@@ -35,7 +36,7 @@ export const ABGPlots = (props: any) => {
       );
       if (!status.aborted) {
         if (res && res.data) {
-          setResults(res.data);
+          setResults(res.data.results);
         }
         setIsLoading(false);
       }
@@ -138,6 +139,16 @@ export const ABGPlots = (props: any) => {
           yData={yAxisData("potassium")}
           low={3.5}
           high={5.5}
+        />
+      </div>
+      <div className="pt-4 px-4 bg-white border rounded-lg shadow">
+        <LinePlot
+          title="FIO2(Ventilator)(%)"
+          name="fio2"
+          xData={dates}
+          yData={yAxisData("ventilator_fi02")}
+          low={21}
+          high={60}
         />
       </div>
     </div>
