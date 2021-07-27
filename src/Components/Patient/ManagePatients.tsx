@@ -191,9 +191,6 @@ export const PatientManager = (props: any) => {
       document.getElementById("downloadlink")?.click();
     }
   };
-  const handleDownloadAll = async () => {
-    await handleDownload(false);
-  };
   const handleDownloadFiltered = async () => {
     await handleDownload(true);
   };
@@ -574,14 +571,6 @@ export const PatientManager = (props: any) => {
               target="_blank"
             ></CSVLink>
           </div>
-          <Button
-            color="primary"
-            onClick={handleDownloadAll}
-            size="small"
-            startIcon={<ArrowDownwardIcon>download</ArrowDownwardIcon>}
-          >
-            Download All Patients
-          </Button>
         </div>
         <div className="bg-white overflow-hidden shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">
