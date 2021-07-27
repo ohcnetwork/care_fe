@@ -64,13 +64,18 @@ export default function UserFilter(props: any) {
       <div className="font-light text-md mt-2">Filter By:</div>
       <div className="flex flex-wrap gap-2">
         <div className="">
-          <div className="text-sm font-semibold">Role</div>
+          <div className="text-sm font-semibold">Status</div>
           <SelectField
             name="status"
             variant="outlined"
             margin="dense"
             value={filterState.status || 0}
-            options={[{ id: "", text: "SELECT" }, ...SAMPLE_TEST_STATUS]}
+            options={[
+              { id: "", text: "SELECT" },
+              ...SAMPLE_TEST_STATUS.map(({ id, text }) => {
+                return { id, text: text.replaceAll("_", " ") };
+              }),
+            ]}
             onChange={handleChange}
             errors=""
           />
