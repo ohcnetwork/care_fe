@@ -42,7 +42,7 @@ export default function BadgesList(props: any) {
     );
   };
   return (
-    <div className="flex flex-wrap space-y-1 space-x-2 mt-2 ml-2">
+    <div className="flex flex-wrap space-x-2 mt-2 ml-2">
       {badge(
         "status",
         (appliedFilters.status != "--" && appliedFilters.status) ||

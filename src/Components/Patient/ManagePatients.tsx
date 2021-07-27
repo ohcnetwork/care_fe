@@ -610,7 +610,7 @@ export const PatientManager = (props: any) => {
               Search by Primary Number
             </div>
             <PhoneNumberField
-              value={qParams.phone_number}
+              value={qParams.phone_number || "+91"}
               onChange={(value: string) => searchByPhone(value, "phone_number")}
               turnOffAutoFormat={false}
               errors=""
@@ -662,7 +662,7 @@ export const PatientManager = (props: any) => {
               Search by Emergency Number
             </div>
             <PhoneNumberField
-              value={qParams.emergency_phone_number}
+              value={qParams.emergency_phone_number || "+91"}
               onChange={(value: string) =>
                 searchByPhone(value, "emergency_phone_number")
               }

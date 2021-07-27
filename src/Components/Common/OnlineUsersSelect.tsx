@@ -168,7 +168,7 @@ export const OnlineUsersSelect = (props: any) => {
                       }}
                       id="listbox-item-0"
                       role="option"
-                      className="flex text-xs py-1 items-center w-full hover:bg-gray-200 focus:outline-none focus:bg-gray-200"
+                      className="flex text-xs py-1 items-center justify-between w-full hover:bg-gray-200 focus:outline-none focus:bg-gray-200"
                     >
                       <div className="flex items-center space-x-3">
                         <span
@@ -187,7 +187,7 @@ export const OnlineUsersSelect = (props: any) => {
                         </span>
                       </div>
                       {user.id == userId && (
-                        <span className="absolute inset-y-0 right-0 flex items-center pr-4">
+                        <span className="flex items-center">
                           <svg
                             className="h-5 w-5"
                             xmlns="http://www.w3.org/2000/svg"
