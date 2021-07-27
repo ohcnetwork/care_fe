@@ -1,4 +1,8 @@
+@val external setTimeout: (unit => unit, int) => float = "setTimeout"
+@val external clearTimeout: float => unit = "clearTimeout"
+
 @val external document: 'a = "document"
+%%raw("import './styles.css'")
 
 let str = React.string
 open CriticalCare__Types
@@ -14,9 +18,16 @@ type scrollIntoView = {
   inline: string,
 }
 
+type hoverDiagram = {
+  timerId: float,
+  label: string,
+  part: string,
+}
+
 type state = {
   parts: array<PressureSore.part>,
   saving: bool,
+  currentPart: hoverDiagram,
   dirty: bool,
 }
 
@@ -26,6 +37,7 @@ type action =
   | RemoveFromSelectedParts(PressureSore.part)
   | SetSaving
   | ClearSaving
+  | SetCurrentPart(hoverDiagram)
 
 let reducer = (state, action) => {
   switch action {
@@ -56,6 +68,7 @@ let reducer = (state, action) => {
     }
   | SetSaving => {...state, saving: true}
   | ClearSaving => {...state, saving: false}
+  | SetCurrentPart(part) => {...state, currentPart: part}
   }
 }
 
@@ -105,6 +118,11 @@ let initialState = psp => {
     parts: psp,
     saving: false,
     dirty: false,
+    currentPart: {
+      timerId: 0.0,
+      label: "",
+      part: "",
+    },
   }
 }
 
@@ -154,7 +172,49 @@ let bradenScaleValue = selectedPart => {
   }
 }
 
-let renderBody = (state, send, title, partPaths, substr) => {
+let getIntoView = (region: string, isPart: bool, state) => {
+  if state.currentPart.timerId > 0.0 {
+    clearTimeout(state.currentPart.timerId)
+    let currentPartLabel = document["getElementById"](state.currentPart.label)
+    currentPartLabel["classList"]["remove"]("border-2")
+    currentPartLabel["classList"]["remove"]("border-red-700")
+
+    let currentPartSelect = document["getElementById"](state.currentPart.part)
+    currentPartSelect["classList"]["remove"]("text-red-900")
+  }
+  let scrollValues: scrollIntoView = {
+    behavior: "smooth",
+    block: "nearest",
+    inline: "center",
+  }
+
+  // Label
+  let ele = document["getElementById"](region)
+  if isPart {
+    ele["scrollIntoView"](~scrollIntoViewOptions=scrollValues)
+  }
+  ele["classList"]["add"]("border-2")
+  ele["classList"]["add"]("border-red-700")
+
+  //Part
+  let part = document["getElementById"](`part${region}`)
+  if !isPart {
+    part["scrollIntoView"](~scrollIntoViewOptions=scrollValues)
+  }
+  part["classList"]["add"]("text-red-900")
+
+  let id = setTimeout(() => {
+    ele["classList"]["remove"]("border-2")
+    ele["classList"]["remove"]("border-red-700")
+
+    part["classList"]["remove"]("text-red-900")
+  }, 1000)
+
+  let new_values: hoverDiagram = {timerId: id, label: region, part: `part${region}`}
+  let _ = SetCurrentPart(new_values)
+}
+
+let renderBody = (state, send, title, partPaths, substr, previewMode) => {
   <div className=" w-full text-center mx-2">
     <div className="text-2xl font-bold mt-10"> {str(title)} </div>
     <div className="text-left font-bold mx-auto mt-5">
@@ -172,12 +232,14 @@ let renderBody = (state, send, title, partPaths, substr) => {
             className={"p-1 col-auto text-sm rounded m-1 cursor-pointer " ++
             selectedLabelClass(selectedPart)}
             id={PressureSore.regionToString(regionType)}
-            onClick={_ => {
-              switch selectedPart {
-              | Some(p) => send(AutoManageScale(p))
-              | None => send(AddPressureSore(regionType))
-              }
-            }}>
+            onClick={previewMode
+              ? _ => getIntoView(PressureSore.regionToString(regionType), false, state)
+              : _ => {
+                  switch selectedPart {
+                  | Some(p) => send(AutoManageScale(p))
+                  | None => send(AddPressureSore(regionType))
+                  }
+                }}>
             <div className="flex">
               <div className="border-white px-1">
                 {str(
@@ -212,22 +274,25 @@ let renderBody = (state, send, title, partPaths, substr) => {
             transform={PressureSore.transform(part)}
             className={selectedClass(selectedPart)}
             fill="currentColor"
-            onClick={_ => {
-              let values: scrollIntoView = {
-                behavior: "smooth",
-                block: "nearest",
-                inline: "center",
-              }
+            id={"part" ++ PressureSore.regionToString(regionType)}
+            onClick={previewMode
+              ? _ => getIntoView(PressureSore.regionToString(regionType), true, state)
+              : _ => {
+                  let values: scrollIntoView = {
+                    behavior: "smooth",
+                    block: "nearest",
+                    inline: "center",
+                  }
 
-              document["getElementById"](PressureSore.regionToString(regionType))["scrollIntoView"](
-                ~scrollIntoViewOptions=values,
-              )
+                  document["getElementById"](
+                    PressureSore.regionToString(regionType),
+                  )["scrollIntoView"](~scrollIntoViewOptions=values)
 
-              switch selectedPart {
-              | Some(p) => send(AutoManageScale(p))
-              | None => send(AddPressureSore(regionType))
-              }
-            }}>
+                  switch selectedPart {
+                  | Some(p) => send(AutoManageScale(p))
+                  | None => send(AddPressureSore(regionType))
+                  }
+                }}>
             <title className=""> {str(PressureSore.regionToString(regionType))} </title>
           </path>
         }, partPaths)->React.array}
@@ -239,12 +304,42 @@ let renderBody = (state, send, title, partPaths, substr) => {
 @react.component
 let make = (~pressureSoreParameter, ~updateCB, ~id, ~consultationId) => {
   let (state, send) = React.useReducer(reducer, initialState(pressureSoreParameter))
+  let (previewMode, setMode) = React.useState(_ => false)
 
   <div className="my-5">
     <h2> {str("Pressure Sore")} </h2>
+    <div className="flex items-center justify-center w-full mb-12">
+      <label className="flex items-center cursor-pointer">
+        // Toggle
+
+        //Toggle Button
+        <div className="relative">
+          <input
+            type_="checkbox"
+            id="toggleB"
+            className="sr-only"
+            onClick={_ => {
+              Js.log2("Mode is ", previewMode)
+              setMode(_ => !previewMode)
+            }}
+          />
+          <div
+            className={"block w-14 h-8 rounded-full " ++ (
+              previewMode ? "bg-green-300" : "bg-gray-400"
+            )}
+          />
+          <div
+            className="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full checked:bg-green-300 transition"
+          />
+        </div>
+        <div className="ml-3 text-gray-700 font-medium">
+          {str(previewMode ? "Preview Mode" : "Edit Mode")}
+        </div>
+      </label>
+    </div>
     <div className="flex md:flex-row flex-col justify-between">
-      {renderBody(state, send, "Front", PressureSore.anteriorParts, 8)}
-      {renderBody(state, send, "Back", PressureSore.posteriorParts, 9)}
+      {renderBody(state, send, "Front", PressureSore.anteriorParts, 8, previewMode)}
+      {renderBody(state, send, "Back", PressureSore.posteriorParts, 9, previewMode)}
     </div>
     <button
       disabled={state.saving || !state.dirty}
