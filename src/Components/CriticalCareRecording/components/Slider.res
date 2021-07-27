@@ -31,6 +31,7 @@ let str = React.string
 @react.component
 let make = (
   ~title: string,
+  ~titleNeighbour: React.element = <div className="hidden"></div>,
   ~start: string,
   ~end: string,
   ~step: float,
@@ -59,7 +60,10 @@ let make = (
   <>
     <section className="slider-box">
       <div className="slider-head">
-        <h1> {title->str} </h1>
+        <div className="flex items-center">
+          <h1 className="m-2"> {title->str} </h1>
+          titleNeighbour
+        </div>
         <div className="flex flex-col">
           <label htmlFor="measure" style={ReactDOM.Style.make(~color=textColor, ())}>
             {switch value->Belt.Float.fromString {

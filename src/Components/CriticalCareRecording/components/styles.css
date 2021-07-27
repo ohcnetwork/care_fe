@@ -368,7 +368,7 @@ input[type="number"] {
   margin-bottom: 2rem;
 }
 
-.slider-head > h1 {
+.slider-head > div > h1 {
   font-size: 1rem;
   font-weight: bold;
 }
