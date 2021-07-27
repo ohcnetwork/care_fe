@@ -472,6 +472,13 @@ export default function SampleViewAdmin(props: any) {
         <div className="flex items-center space-x-2 mt-2 flex-wrap w-full col-span-3">
           {badge("Patient Name", qParams.patient_name, "patient_name")}
           {badge("District Name", qParams.district_name, "district_name")}
+          {badge(
+            "Status",
+            SAMPLE_TEST_STATUS.find(
+              (status) => status.id == qParams.status
+            )?.text.replaceAll("_", " "),
+            "status"
+          )}
         </div>
       </div>
       <div className="px-3 md:px-8">
