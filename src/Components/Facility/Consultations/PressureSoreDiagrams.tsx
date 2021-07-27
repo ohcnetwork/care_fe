@@ -1,5 +1,5 @@
 import moment from "moment";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
 import { dailyRoundsAnalyse } from "../../../Redux/actions";
@@ -50,6 +50,11 @@ export const PressureSoreDiagrams = (props: any) => {
     [consultationId]
   );
 
+  useEffect(() => {
+    if (Object.keys(results).length > 0)
+      setSelectedDateData(results, Object.keys(results?.["results"])[0]);
+  }, [results]);
+
   const setSelectedDateData = (results: any, key: any) => {
     let obj = results["results"][key]?.["pressure_sore"];
     let regions: Array<string> = [],
@@ -64,8 +69,10 @@ export const PressureSoreDiagrams = (props: any) => {
     });
   };
 
-  const dates = Object.keys(results?.["results"]);
-
+  let dates: any = [];
+  if (Object.keys(results).length > 0) {
+    dates = Object.keys(results?.["results"]);
+  }
   const selectedClass = (scale: Number) => {
     switch (scale) {
       case 1:
