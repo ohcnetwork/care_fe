@@ -242,6 +242,7 @@ let renderBody = (state, send, title, partPaths, substr, previewMode) => {
         {Js.Array.mapi((part, renderIndex) => {
           let regionType = PressureSore.regionForPath(part)
           let selectedPart = Js.Array.find(p => PressureSore.region(p) === regionType, state.parts)
+          let _ = Js.log2("Part is ", selectedPart)
           <path
             key={"part1" ++ Belt.Int.toString(renderIndex)}
             d={PressureSore.d(part)}
@@ -266,49 +267,63 @@ let renderBody = (state, send, title, partPaths, substr, previewMode) => {
 }
 
 @react.component
-let make = (~pressureSoreParameter, ~updateCB, ~id, ~consultationId) => {
-  let (state, send) = React.useReducer(reducer, initialState(pressureSoreParameter))
-  let (previewMode, setMode) = React.useState(_ => false)
+let make = (~pressureSoreParameter, ~updateCB, ~id, ~consultationId, ~mode) => {
+  let pressureSoreParameterValues = if !mode {
+    CriticalCare__PressureSore.makeFromJsUpdateSection(pressureSoreParameter)
+  } else {
+    []
+  }
+
+  let (state, send) = React.useReducer(
+    reducer,
+    initialState(!mode ? pressureSoreParameterValues : pressureSoreParameter),
+  )
+  let (previewMode, setMode) = React.useState(_ => !mode)
+  let _ = Js.log2("State is ", state)
 
   <div className="my-5">
     <div className="flex justify-between">
       <h2> {str("Pressure Sore")} </h2>
-      <label className="flex items-center cursor-pointer">
-        // Toggle
+      {mode
+        ? <label className="flex items-center cursor-pointer">
+            // Toggle
 
-        //Toggle Button
-        <div className="relative">
-          <input
-            type_="checkbox"
-            id="toggleB"
-            className="sr-only"
-            onClick={_ => {
-              setMode(_ => !previewMode)
-            }}
-          />
-          <div
-            className={"block w-14 h-8 rounded-full " ++ (
-              previewMode ? "bg-green-300" : "bg-gray-400"
-            )}
-          />
-          <div
-            className="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full checked:bg-green-300 transition"
-          />
-        </div>
-        <div className="ml-3 text-gray-700 font-medium">
-          {str(previewMode ? "Preview Mode" : "Edit Mode")}
-        </div>
-      </label>
+            //Toggle Button
+            <div className="relative">
+              <input
+                type_="checkbox"
+                id="toggleB"
+                className="sr-only"
+                onClick={_ => {
+                  setMode(_ => !previewMode)
+                }}
+              />
+              <div
+                className={"block w-14 h-8 rounded-full " ++ (
+                  previewMode ? "bg-green-300" : "bg-gray-400"
+                )}
+              />
+              <div
+                className="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full checked:bg-green-300 transition"
+              />
+            </div>
+            <div className="ml-3 text-gray-700 font-medium">
+              {str(previewMode ? "Preview Mode" : "Edit Mode")}
+            </div>
+          </label>
+        : <div />}
     </div>
     <div className="flex md:flex-row flex-col justify-between">
       {renderBody(state, send, "Front", PressureSore.anteriorParts, 8, previewMode)}
       {renderBody(state, send, "Back", PressureSore.posteriorParts, 9, previewMode)}
     </div>
-    <button
-      disabled={state.saving || !state.dirty}
-      className="mt-4 btn btn-primary btn-large w-full"
-      onClick={_ => saveData(id, consultationId, state, send, updateCB)}>
-      {str("Done")}
-    </button>
+    {mode
+      ? <button
+          disabled={state.saving || !state.dirty}
+          className="mt-4 btn btn-primary btn-large w-full"
+          onClick={_ => saveData(id, consultationId, state, send, updateCB)}>
+          {str("Done")}
+        </button>
+      : React.null}
   </div>
 }
