@@ -252,16 +252,6 @@ let renderBody = (state, send, title, partPaths, substr, previewMode) => {
             onClick={previewMode
               ? _ => getIntoView(PressureSore.regionToString(regionType), true, state)
               : _ => {
-                  let values: scrollIntoView = {
-                    behavior: "smooth",
-                    block: "nearest",
-                    inline: "center",
-                  }
-
-                  document["getElementById"](
-                    PressureSore.regionToString(regionType),
-                  )["scrollIntoView"](~scrollIntoViewOptions=values)
-
                   switch selectedPart {
                   | Some(p) => send(AutoManageScale(p))
                   | None => send(AddPressureSore(regionType))
