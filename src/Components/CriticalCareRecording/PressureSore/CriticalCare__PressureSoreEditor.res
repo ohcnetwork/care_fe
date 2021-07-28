@@ -18,16 +18,9 @@ type scrollIntoView = {
   inline: string,
 }
 
-type hoverDiagram = {
-  timerId: float,
-  label: string,
-  part: string,
-}
-
 type state = {
   parts: array<PressureSore.part>,
   saving: bool,
-  currentPart: hoverDiagram,
   dirty: bool,
 }
 
@@ -37,7 +30,6 @@ type action =
   | RemoveFromSelectedParts(PressureSore.part)
   | SetSaving
   | ClearSaving
-  | SetCurrentPart(hoverDiagram)
 
 let reducer = (state, action) => {
   switch action {
@@ -68,7 +60,6 @@ let reducer = (state, action) => {
     }
   | SetSaving => {...state, saving: true}
   | ClearSaving => {...state, saving: false}
-  | SetCurrentPart(part) => {...state, currentPart: part}
   }
 }
 
@@ -118,11 +109,6 @@ let initialState = psp => {
     parts: psp,
     saving: false,
     dirty: false,
-    currentPart: {
-      timerId: 0.0,
-      label: "",
-      part: "",
-    },
   }
 }
 
@@ -173,15 +159,6 @@ let bradenScaleValue = selectedPart => {
 }
 
 let getIntoView = (region: string, isPart: bool, state) => {
-  if state.currentPart.timerId > 0.0 {
-    clearTimeout(state.currentPart.timerId)
-    let currentPartLabel = document["getElementById"](state.currentPart.label)
-    currentPartLabel["classList"]["remove"]("border-2")
-    currentPartLabel["classList"]["remove"]("border-red-700")
-
-    let currentPartSelect = document["getElementById"](state.currentPart.part)
-    currentPartSelect["classList"]["remove"]("text-red-900")
-  }
   let scrollValues: scrollIntoView = {
     behavior: "smooth",
     block: "nearest",
@@ -208,15 +185,12 @@ let getIntoView = (region: string, isPart: bool, state) => {
     ele["classList"]["remove"]("border-red-700")
 
     part["classList"]["remove"]("text-red-900")
-  }, 1000)
-
-  let new_values: hoverDiagram = {timerId: id, label: region, part: `part${region}`}
-  let _ = SetCurrentPart(new_values)
+  }, 900)
 }
 
 let renderBody = (state, send, title, partPaths, substr, previewMode) => {
   <div className=" w-full text-center mx-2">
-    <div className="text-2xl font-bold mt-10"> {str(title)} </div>
+    <div className="text-2xl font-bold mt-8"> {str(title)} </div>
     <div className="text-left font-bold mx-auto mt-5">
       {str("Braden Scale (Risk Severity) (" ++ title ++ ")")}
     </div>
@@ -307,8 +281,8 @@ let make = (~pressureSoreParameter, ~updateCB, ~id, ~consultationId) => {
   let (previewMode, setMode) = React.useState(_ => false)
 
   <div className="my-5">
-    <h2> {str("Pressure Sore")} </h2>
-    <div className="flex items-center justify-center w-full mb-12">
+    <div className="flex justify-between">
+      <h2> {str("Pressure Sore")} </h2>
       <label className="flex items-center cursor-pointer">
         // Toggle
 
@@ -319,7 +293,6 @@ let make = (~pressureSoreParameter, ~updateCB, ~id, ~consultationId) => {
             id="toggleB"
             className="sr-only"
             onClick={_ => {
-              Js.log2("Mode is ", previewMode)
               setMode(_ => !previewMode)
             }}
           />

@@ -57,10 +57,11 @@ export const PressureSoreDiagrams = (props: any) => {
     let obj = results[key].pressure_sore;
     let regions: Array<string> = [],
       scales: Array<Number> = [];
-    obj.forEach((x: any) => {
-      regions.push(x.region);
-      scales.push(x.scale);
-    });
+    obj &&
+      obj.forEach((x: any) => {
+        regions.push(x.region);
+        scales.push(x.scale);
+      });
     setData({
       region: regions,
       scale: scales,
