@@ -5,6 +5,7 @@ import { NURSING_CARE_FIELDS } from "../../../Common/constants";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
 import { dailyRoundsAnalyse } from "../../../Redux/actions";
 import Pagination from "../../Common/Pagination";
+import { PAGINATION_LIMIT } from "../../../Common/constants";
 
 export const NursingPlot = (props: any) => {
   const { facilityId, patientId, consultationId } = props;
@@ -102,14 +103,17 @@ export const NursingPlot = (props: any) => {
           </div>
         </div>
       </div>
-      <div className="mt-4 flex w-full justify-center">
-        <Pagination
-          cPage={currentPage}
-          defaultPerPage={36}
-          data={{ totalCount }}
-          onChange={handlePagination}
-        />
-      </div>
+
+      {totalCount > PAGINATION_LIMIT && (
+        <div className="mt-4 flex w-full justify-center">
+          <Pagination
+            cPage={currentPage}
+            defaultPerPage={PAGINATION_LIMIT}
+            data={{ totalCount }}
+            onChange={handlePagination}
+          />
+        </div>
+      )}
     </div>
   );
 };

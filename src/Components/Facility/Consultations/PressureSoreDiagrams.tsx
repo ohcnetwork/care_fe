@@ -6,6 +6,7 @@ import { statusType, useAbortableEffect } from "../../../Common/utils";
 import { dailyRoundsAnalyse } from "../../../Redux/actions";
 import { anteriorParts, posteriorParts } from "./PressureSoreConstants";
 import Pagination from "../../Common/Pagination";
+import { PAGINATION_LIMIT } from "../../../Common/constants";
 
 export const PressureSoreDiagrams = (props: any) => {
   const { consultationId } = props;
@@ -258,14 +259,16 @@ export const PressureSoreDiagrams = (props: any) => {
           {renderBody("Back", posteriorParts)}
         </div>
       )}
-      <div className="mt-4 flex w-full justify-center">
-        <Pagination
-          cPage={currentPage}
-          defaultPerPage={36}
-          data={{ totalCount }}
-          onChange={handlePagination}
-        />
-      </div>
+      {totalCount > PAGINATION_LIMIT && (
+        <div className="mt-4 flex w-full justify-center">
+          <Pagination
+            cPage={currentPage}
+            defaultPerPage={PAGINATION_LIMIT}
+            data={{ totalCount }}
+            onChange={handlePagination}
+          />
+        </div>
+      )}
     </div>
   );
 };

@@ -7,6 +7,7 @@ import { dailyRoundsAnalyse } from "../../../Redux/actions";
 import { LinePlot } from "./components/LinePlot";
 import { StackedLinePlot } from "./components/StackedLinePlot";
 import Pagination from "../../Common/Pagination";
+import { PAGINATION_LIMIT } from "../../../Common/constants";
 
 export const PrimaryParametersPlot = (props: any) => {
   const { facilityId, patientId, consultationId } = props;
@@ -233,14 +234,16 @@ export const PrimaryParametersPlot = (props: any) => {
         </div>
       </div>
 
-      <div className="mt-4 flex w-full justify-center">
-        <Pagination
-          cPage={currentPage}
-          defaultPerPage={36}
-          data={{ totalCount }}
-          onChange={handlePagination}
-        />
-      </div>
+      {totalCount > PAGINATION_LIMIT && (
+        <div className="mt-4 flex w-full justify-center">
+          <Pagination
+            cPage={currentPage}
+            defaultPerPage={PAGINATION_LIMIT}
+            data={{ totalCount }}
+            onChange={handlePagination}
+          />
+        </div>
+      )}
     </div>
   );
 };

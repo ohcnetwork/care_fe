@@ -5,6 +5,7 @@ import { statusType, useAbortableEffect } from "../../../Common/utils";
 import { dailyRoundsAnalyse } from "../../../Redux/actions";
 import { LinePlot } from "./components/LinePlot";
 import Pagination from "../../Common/Pagination";
+import { PAGINATION_LIMIT } from "../../../Common/constants";
 
 interface ModalityType {
   id: number;
@@ -196,14 +197,17 @@ export const VentilatorPlot = (props: any) => {
           />
         </div>
       </div>
-      <div className="mt-4 flex w-full justify-center">
-        <Pagination
-          cPage={currentPage}
-          defaultPerPage={36}
-          data={{ totalCount }}
-          onChange={handlePagination}
-        />
-      </div>
+
+      {totalCount > PAGINATION_LIMIT && (
+        <div className="mt-4 flex w-full justify-center">
+          <Pagination
+            cPage={currentPage}
+            defaultPerPage={PAGINATION_LIMIT}
+            data={{ totalCount }}
+            onChange={handlePagination}
+          />
+        </div>
+      )}
     </div>
   );
 };

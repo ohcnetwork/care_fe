@@ -5,6 +5,7 @@ import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
 import { dailyRoundsAnalyse } from "../../../Redux/actions";
 import Pagination from "../../Common/Pagination";
+import { PAGINATION_LIMIT } from "../../../Common/constants";
 
 const DataTable = (props: any) => {
   const { title, data } = props;
@@ -315,14 +316,17 @@ export const NeurologicalTable = (props: any) => {
         <DataTable title={"Upper Extremity"} data={upperLimbData} />
         <DataTable title={"Lower Extremity"} data={lowerLimbData} />
       </div>
-      <div className="mt-4 flex w-full justify-center">
-        <Pagination
-          cPage={currentPage}
-          defaultPerPage={36}
-          data={{ totalCount }}
-          onChange={handlePagination}
-        />
-      </div>
+
+      {totalCount > PAGINATION_LIMIT && (
+        <div className="mt-4 flex w-full justify-center">
+          <Pagination
+            cPage={currentPage}
+            defaultPerPage={PAGINATION_LIMIT}
+            data={{ totalCount }}
+            onChange={handlePagination}
+          />
+        </div>
+      )}
     </div>
   );
 };
