@@ -22,12 +22,16 @@ type state = {
   parts: array<PressureSore.part>,
   saving: bool,
   dirty: bool,
+  previewMode: bool,
 }
 
 type action =
   | AutoManageScale(PressureSore.part)
   | AddPressureSore(PressureSore.region)
   | RemoveFromSelectedParts(PressureSore.part)
+  | Update(array<PressureSore.part>)
+  | SetPreviewMode
+  | ClearPreviewMode
   | SetSaving
   | ClearSaving
 
@@ -60,6 +64,12 @@ let reducer = (state, action) => {
     }
   | SetSaving => {...state, saving: true}
   | ClearSaving => {...state, saving: false}
+  | Update(parts) => {
+      ...state,
+      parts: parts,
+    }
+  | SetPreviewMode => {...state, previewMode: true}
+  | ClearPreviewMode => {...state, previewMode: false}
   }
 }
 
@@ -104,11 +114,12 @@ let initialSelected = endValue => {
   initialPartsSelected.contents
 }
 
-let initialState = psp => {
+let initialState = (psp, previewMode) => {
   {
     parts: psp,
     saving: false,
     dirty: false,
+    previewMode: previewMode,
   }
 }
 
@@ -267,24 +278,20 @@ let renderBody = (state, send, title, partPaths, substr, previewMode) => {
 }
 
 @react.component
-let make = (~pressureSoreParameter, ~updateCB, ~id, ~consultationId, ~mode) => {
-  let pressureSoreParameterValues = if !mode {
-    CriticalCare__PressureSore.makeFromJsUpdateSection(pressureSoreParameter)
-  } else {
-    []
-  }
+let make = (~pressureSoreParameter, ~updateCB, ~id, ~consultationId, ~previewMode) => {
+  let (state, send) = React.useReducer(reducer, initialState(pressureSoreParameter, previewMode))
 
-  let (state, send) = React.useReducer(
-    reducer,
-    initialState(!mode ? pressureSoreParameterValues : pressureSoreParameter),
-  )
-  let (previewMode, setMode) = React.useState(_ => !mode)
   let _ = Js.log2("State is ", state)
+
+  React.useEffect1(() => {
+    send(Update(pressureSoreParameter))
+    None
+  }, [pressureSoreParameter])
 
   <div className="my-5">
     <div className="flex justify-between">
       <h2> {str("Pressure Sore")} </h2>
-      {mode
+      {previewMode
         ? <label className="flex items-center cursor-pointer">
             // Toggle
 
@@ -294,9 +301,7 @@ let make = (~pressureSoreParameter, ~updateCB, ~id, ~consultationId, ~mode) => {
                 type_="checkbox"
                 id="toggleB"
                 className="sr-only"
-                onClick={_ => {
-                  setMode(_ => !previewMode)
-                }}
+                onClick={_ => send(state.previewMode ? ClearPreviewMode : SetPreviewMode)}
               />
               <div
                 className={"block w-14 h-8 rounded-full " ++ (
@@ -317,7 +322,7 @@ let make = (~pressureSoreParameter, ~updateCB, ~id, ~consultationId, ~mode) => {
       {renderBody(state, send, "Front", PressureSore.anteriorParts, 8, previewMode)}
       {renderBody(state, send, "Back", PressureSore.posteriorParts, 9, previewMode)}
     </div>
-    {mode
+    {previewMode
       ? <button
           disabled={state.saving || !state.dirty}
           className="mt-4 btn btn-primary btn-large w-full"

@@ -202,6 +202,10 @@ let makeFromJs = dailyRound => {
   Js.Array.map(p => makePart(p), dailyRound["pressure_sore"])
 }
 
+let makeFromJsx = ps => {
+  Js.Array.map(p => makePart(p), ps)
+}
+
 let makeFromJsUpdateSection = dailyRound => {
   Js.Array.map(p => makePart(p), dailyRound)
 }

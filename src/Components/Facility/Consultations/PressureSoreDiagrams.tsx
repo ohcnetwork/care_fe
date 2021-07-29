@@ -3,7 +3,7 @@ import { useCallback, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
 import { dailyRoundsAnalyse } from "../../../Redux/actions";
-import { make as CriticalCare__PressureSoreEditor } from "../../CriticalCareRecording/PressureSore/CriticalCare__PressureSoreEditor.bs.js";
+import { make as CriticalCare__PressureScoreViewer } from "../../CriticalCareRecording/PressureSore/CriticalCare__PressureScoreViewer.gen";
 
 export const PressureSoreDiagrams = (props: any) => {
   const { consultationId } = props;
@@ -105,12 +105,10 @@ export const PressureSoreDiagrams = (props: any) => {
     <div>
       {dates && dropdown(dates)}
       {!isLoading && (
-        <CriticalCare__PressureSoreEditor
+        <CriticalCare__PressureScoreViewer
           pressureSoreParameter={selectedData.data}
-          updateCB={() => {}}
           id={selectedData.id}
           consultationId={consultationId}
-          mode={false}
         />
       )}
     </div>
