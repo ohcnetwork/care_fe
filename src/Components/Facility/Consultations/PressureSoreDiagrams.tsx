@@ -5,11 +5,11 @@ import { setTimeout } from "timers/promises";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
 import { dailyRoundsAnalyse } from "../../../Redux/actions";
 import { anteriorParts, posteriorParts } from "./PressureSoreConstants";
+import Pagination from "../../Common/Pagination";
 
 export const PressureSoreDiagrams = (props: any) => {
   const { consultationId } = props;
   const dispatch: any = useDispatch();
-  const [offset, setOffset] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState({});
   const [selectedData, setData] = useState<any>({
@@ -17,6 +17,8 @@ export const PressureSoreDiagrams = (props: any) => {
     scale: [],
   });
   const [currentPart, setPart] = useState<any>();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
 
   const fetchDailyRounds = useCallback(
     async (status: statusType) => {
@@ -24,7 +26,7 @@ export const PressureSoreDiagrams = (props: any) => {
       const res = await dispatch(
         dailyRoundsAnalyse(
           {
-            offset,
+            page: currentPage,
             fields: ["pressure_sore"],
           },
           { consultationId }
@@ -32,8 +34,8 @@ export const PressureSoreDiagrams = (props: any) => {
       );
       if (!status.aborted) {
         if (res && res.data) {
-          console.log("Data is ", res.data);
           setResults(res.data);
+          setTotalCount(res.data.count);
           let keys = Object.keys(results).reverse();
           if (keys.length > 0) {
             setSelectedDateData(res.data, keys[0]);
@@ -42,15 +44,19 @@ export const PressureSoreDiagrams = (props: any) => {
         setIsLoading(false);
       }
     },
-    [consultationId, dispatch, offset]
+    [consultationId, dispatch, currentPage]
   );
 
   useAbortableEffect(
     (status: statusType) => {
       fetchDailyRounds(status);
     },
-    [consultationId]
+    [consultationId, currentPage]
   );
+
+  const handlePagination = (page: number, limit: number) => {
+    setCurrentPage(page);
+  };
 
   const setSelectedDateData = (results: any, key: any) => {
     console.log("Dt is ", results[key]);
@@ -252,6 +258,14 @@ export const PressureSoreDiagrams = (props: any) => {
           {renderBody("Back", posteriorParts)}
         </div>
       )}
+      <div className="mt-4 flex w-full justify-center">
+        <Pagination
+          cPage={currentPage}
+          defaultPerPage={36}
+          data={{ totalCount }}
+          onChange={handlePagination}
+        />
+      </div>
     </div>
   );
 };
