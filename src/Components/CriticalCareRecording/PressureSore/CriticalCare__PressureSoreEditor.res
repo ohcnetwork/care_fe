@@ -255,7 +255,6 @@ let renderBody = (state, send, title, partPaths, substr) => {
         {Js.Array.mapi((part, renderIndex) => {
           let regionType = PressureSore.regionForPath(part)
           let selectedPart = Js.Array.find(p => PressureSore.region(p) === regionType, state.parts)
-          let _ = Js.log2("Part is ", selectedPart)
           <path
             key={"part1" ++ Belt.Int.toString(renderIndex)}
             d={PressureSore.d(part)}

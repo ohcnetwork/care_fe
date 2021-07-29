@@ -30,7 +30,6 @@ export const PressureSoreDiagrams = (props: any) => {
       );
       if (!status.aborted) {
         if (res && res.data) {
-          console.log("Data is ", res.data);
           setResults(res.data);
           let keys = Object.keys(res.data);
           if (keys.length > 0) {
@@ -56,8 +55,6 @@ export const PressureSoreDiagrams = (props: any) => {
   );
 
   const setSelectedDateData = (results: any, key: any) => {
-    console.log("Dt is ", results["results"][key]?.["pressure_sore"]);
-
     setData({
       data: results["results"][key]?.["pressure_sore"],
       id: results["results"][key]?.["id"],
