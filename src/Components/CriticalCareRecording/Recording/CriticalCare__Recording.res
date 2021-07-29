@@ -205,7 +205,7 @@ export make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
                 updateCB={updateDailyRound(send, PressureSoreEditor)}
                 id
                 consultationId
-                previewMode={true}
+                previewMode={false}
               />
             | NursingCareEditor =>
               <CriticalCare__NursingCareEditor

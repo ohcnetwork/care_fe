@@ -169,7 +169,7 @@ let bradenScaleValue = selectedPart => {
   }
 }
 
-let getIntoView = (region: string, isPart: bool, state) => {
+let getIntoView = (region: string, isPart: bool) => {
   let scrollValues: scrollIntoView = {
     behavior: "smooth",
     block: "nearest",
@@ -199,7 +199,7 @@ let getIntoView = (region: string, isPart: bool, state) => {
   }, 900)
 }
 
-let renderBody = (state, send, title, partPaths, substr, previewMode) => {
+let renderBody = (state, send, title, partPaths, substr) => {
   <div className=" w-full text-center mx-2">
     <div className="text-2xl font-bold mt-8"> {str(title)} </div>
     <div className="text-left font-bold mx-auto mt-5">
@@ -217,8 +217,8 @@ let renderBody = (state, send, title, partPaths, substr, previewMode) => {
             className={"p-1 col-auto text-sm rounded m-1 cursor-pointer " ++
             selectedLabelClass(selectedPart)}
             id={PressureSore.regionToString(regionType)}
-            onClick={previewMode
-              ? _ => getIntoView(PressureSore.regionToString(regionType), false, state)
+            onClick={state.previewMode
+              ? _ => getIntoView(PressureSore.regionToString(regionType), false)
               : _ => {
                   switch selectedPart {
                   | Some(p) => send(AutoManageScale(p))
@@ -261,8 +261,8 @@ let renderBody = (state, send, title, partPaths, substr, previewMode) => {
             className={selectedClass(selectedPart)}
             fill="currentColor"
             id={"part" ++ PressureSore.regionToString(regionType)}
-            onClick={previewMode
-              ? _ => getIntoView(PressureSore.regionToString(regionType), true, state)
+            onClick={state.previewMode
+              ? _ => getIntoView(PressureSore.regionToString(regionType), true)
               : _ => {
                   switch selectedPart {
                   | Some(p) => send(AutoManageScale(p))
@@ -290,39 +290,41 @@ let make = (~pressureSoreParameter, ~updateCB, ~id, ~consultationId, ~previewMod
 
   <div className="my-5">
     <div className="flex justify-between">
-      <h2> {str("Pressure Sore")} </h2>
-      {previewMode
-        ? <label className="flex items-center cursor-pointer">
-            // Toggle
+      {!previewMode
+        ? <>
+            <h2> {str("Pressure Sore")} </h2>
+            <label className="flex items-center cursor-pointer">
+              // Toggle
 
-            //Toggle Button
-            <div className="relative">
-              <input
-                type_="checkbox"
-                id="toggleB"
-                className="sr-only"
-                onClick={_ => send(state.previewMode ? ClearPreviewMode : SetPreviewMode)}
-              />
-              <div
-                className={"block w-14 h-8 rounded-full " ++ (
-                  previewMode ? "bg-green-300" : "bg-gray-400"
-                )}
-              />
-              <div
-                className="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full checked:bg-green-300 transition"
-              />
-            </div>
-            <div className="ml-3 text-gray-700 font-medium">
-              {str(previewMode ? "Preview Mode" : "Edit Mode")}
-            </div>
-          </label>
-        : <div />}
+              //Toggle Button
+              <div className="relative">
+                <input
+                  type_="checkbox"
+                  id="toggleB"
+                  className="sr-only"
+                  onClick={_ => send(state.previewMode ? ClearPreviewMode : SetPreviewMode)}
+                />
+                <div
+                  className={"block w-14 h-8 rounded-full " ++ (
+                    state.previewMode ? "bg-green-300" : "bg-gray-400"
+                  )}
+                />
+                <div
+                  className="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full checked:bg-green-300 transition"
+                />
+              </div>
+              <div className="ml-3 text-gray-700 font-medium">
+                {str(state.previewMode ? "Preview Mode" : "Edit Mode")}
+              </div>
+            </label>
+          </>
+        : React.null}
     </div>
     <div className="flex md:flex-row flex-col justify-between">
-      {renderBody(state, send, "Front", PressureSore.anteriorParts, 8, previewMode)}
-      {renderBody(state, send, "Back", PressureSore.posteriorParts, 9, previewMode)}
+      {renderBody(state, send, "Front", PressureSore.anteriorParts, 8)}
+      {renderBody(state, send, "Back", PressureSore.posteriorParts, 9)}
     </div>
-    {previewMode
+    {!previewMode
       ? <button
           disabled={state.saving || !state.dirty}
           className="mt-4 btn btn-primary btn-large w-full"

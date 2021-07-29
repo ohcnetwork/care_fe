@@ -71,7 +71,8 @@ export const PressureSoreDiagrams = (props: any) => {
 
   const dropdown = (dates: Array<any>) => {
     return dates && dates.length > 0 ? (
-      <div className="mx-auto">
+      <div className="flex mx-auto">
+        <div className="p-2">Choose Date and Time</div>
         <select
           title="date"
           className="border-2 border-gray-800 p-2"
