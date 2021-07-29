@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
 import { dailyRoundsAnalyse } from "../../../Redux/actions";
+import Pagination from "../../Common/Pagination";
 
 const DataTable = (props: any) => {
   const { title, data } = props;
@@ -78,8 +79,9 @@ export const NeurologicalTable = (props: any) => {
   const { facilityId, patientId, consultationId } = props;
   const dispatch: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
-  const [offset, setOffset] = useState(0);
   const [results, setResults] = useState({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
 
   const LOC_OPTIONS = [
     { id: 0, value: "Unknown" },
@@ -114,7 +116,7 @@ export const NeurologicalTable = (props: any) => {
       const res = await dispatch(
         dailyRoundsAnalyse(
           {
-            offset,
+            page: currentPage,
             fields: [
               "consciousness_level",
               "consciousness_level_detail",
@@ -138,16 +140,24 @@ export const NeurologicalTable = (props: any) => {
       if (!status.aborted) {
         if (res && res.data && res.data.results) {
           setResults(res.data.results);
+          setTotalCount(res.data.count);
         }
         setIsLoading(false);
       }
     },
-    [consultationId, dispatch, offset]
+    [consultationId, dispatch, currentPage]
   );
 
-  useAbortableEffect((status: statusType) => {
-    fetchDailyRounds(status);
-  }, []);
+  useAbortableEffect(
+    (status: statusType) => {
+      fetchDailyRounds(status);
+    },
+    [currentPage]
+  );
+
+  const handlePagination = (page: number, limit: number) => {
+    setCurrentPage(page);
+  };
 
   const locData: any = [];
   const locDescription: any = [];
@@ -304,6 +314,14 @@ export const NeurologicalTable = (props: any) => {
       <div className="mb-6">
         <DataTable title={"Upper Extremity"} data={upperLimbData} />
         <DataTable title={"Lower Extremity"} data={lowerLimbData} />
+      </div>
+      <div className="mt-4 flex w-full justify-center">
+        <Pagination
+          cPage={currentPage}
+          defaultPerPage={36}
+          data={{ totalCount }}
+          onChange={handlePagination}
+        />
       </div>
     </div>
   );
