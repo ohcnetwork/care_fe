@@ -225,7 +225,7 @@ let renderBody = (state, send, title, partPaths, substr) => {
                   | None => send(AddPressureSore(regionType))
                   }
                 }}>
-            <div className="flex">
+            <div className="flex justify-between">
               <div className="border-white px-1">
                 {str(
                   Js.String.sliceToEnd(
@@ -238,7 +238,9 @@ let renderBody = (state, send, title, partPaths, substr) => {
               | Some(p) =>
                 <i
                   className="border-l-2 fas fa-times p-1"
-                  onClick={_ => send(RemoveFromSelectedParts(p))}
+                  onClick={state.previewMode
+                    ? _ => getIntoView(PressureSore.regionToString(regionType), false)
+                    : _ => send(RemoveFromSelectedParts(p))}
                 />
               | None => React.null
               }}
