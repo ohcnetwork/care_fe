@@ -311,10 +311,10 @@ export const ConsultationDetails = (props: any) => {
                     "FILES",
                     "ABG",
                     "NURSING",
-                    "NEUROLOGICAL MONITORING",
+                    "NEUROLOGICAL_MONITORING",
                     "VENTILATOR",
-                    "IO BALANCE",
-                    "PRESSURE SORE",
+                    "IO_BALANCE",
+                    "PRESSURE_SORE",
                   ].map((p: string) => (
                     <Link
                       key={p}
