@@ -281,8 +281,6 @@ let renderBody = (state, send, title, partPaths, substr) => {
 let make = (~pressureSoreParameter, ~updateCB, ~id, ~consultationId, ~previewMode) => {
   let (state, send) = React.useReducer(reducer, initialState(pressureSoreParameter, previewMode))
 
-  let _ = Js.log2("State is ", state)
-
   React.useEffect1(() => {
     send(Update(pressureSoreParameter))
     None
@@ -297,6 +295,9 @@ let make = (~pressureSoreParameter, ~updateCB, ~id, ~consultationId, ~previewMod
               // Toggle
 
               //Toggle Button
+              <div className="transition duration-150 ease-in-out mr-3 text-gray-700 font-medium">
+                {str(state.previewMode ? "Preview Mode" : "Edit Mode")}
+              </div>
               <div className="relative">
                 <input
                   type_="checkbox"
@@ -310,11 +311,8 @@ let make = (~pressureSoreParameter, ~updateCB, ~id, ~consultationId, ~previewMod
                   )}
                 />
                 <div
-                  className="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full checked:bg-green-300 transition"
+                  className="transition duration-150 ease-in-out dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full checked:bg-green-300"
                 />
-              </div>
-              <div className="ml-3 text-gray-700 font-medium">
-                {str(state.previewMode ? "Preview Mode" : "Edit Mode")}
               </div>
             </label>
           </>
