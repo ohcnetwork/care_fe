@@ -4,6 +4,11 @@ import { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
 import { dailyRoundsAnalyse } from "../../../Redux/actions";
+import {
+  EYE_OPEN_SCALE,
+  VERBAL_RESPONSE_SCALE,
+  MOTOR_RESPONSE_SCALE,
+} from "../../../Common/constants";
 
 export const GlasgowTables = (props: any) => {
   const { facilityId, patientId, consultationId } = props;
@@ -12,29 +17,6 @@ export const GlasgowTables = (props: any) => {
   const [offset, setOffset] = useState(0);
   const [results, setResults] = useState({});
 
-  const EYE_OPEN_SCALE = [
-    { value: 4, text: "Spontaneous" },
-    { value: 3, text: "To Speech" },
-    { value: 2, text: "Pain" },
-    { value: 1, text: "None" },
-  ];
-
-  const VERBAL_RESPONSE_SCALE = [
-    { value: 5, text: "Oriented/Coos/Babbles" },
-    { value: 4, text: "Confused/Irritable" },
-    { value: 3, text: "Inappropriate words/Cry to Pain" },
-    { value: 2, text: "Incomprehensible words/Moans to pain" },
-    { value: 1, text: "None" },
-  ];
-
-  const MOTOR_RESPONSE_SCALE = [
-    { value: 6, text: "Obeying commands" },
-    { value: 5, text: "Moves to localised pain" },
-    { value: 4, text: "Flexion withdrawal from pain" },
-    { value: 3, text: "Abnormal Flexion(decorticate)" },
-    { value: 2, text: "Abnormal Extension(decerebrate)" },
-    { value: 1, text: "No Response" },
-  ];
   const fetchDailyRounds = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
@@ -89,7 +71,7 @@ export const GlasgowTables = (props: any) => {
   return (
     <div className="mt-2">
       <div className="mb-6">
-        <div className="flex flex-row shadow overflow-hidden sm:rounded-lg divide-y divide-cool-gray-200 mb-4">
+        <div className="flex flex-row shadow overflow-hidden sm:rounded-lg divide-y divide-cool-gray-200 mb-4 w-max-content max-w-full">
           <div className="flex flex-col min-w-max-content w-50">
             <div className="px-6 py-3 bg-cool-gray-50 text-center text-sm leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
               Time
