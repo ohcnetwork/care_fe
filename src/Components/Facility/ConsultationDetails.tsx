@@ -301,7 +301,7 @@ export const ConsultationDetails = (props: any) => {
           </div>
 
           <div className="border-b-2 border-gray-200 mt-4 w-full">
-            <div className="sm:flex sm:items-baseline overflow-x-auto ">
+            <div className="sm:flex sm:items-baseline overflow-x-auto">
               <div className="mt-4 sm:mt-0">
                 <nav className="pl-2 flex space-x-8 overflow-y-auto pb-2">
                   {[

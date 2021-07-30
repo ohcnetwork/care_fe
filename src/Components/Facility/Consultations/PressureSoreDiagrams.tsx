@@ -1,7 +1,6 @@
 import moment from "moment";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { setTimeout } from "timers/promises";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
 import { dailyRoundsAnalyse } from "../../../Redux/actions";
 import { anteriorParts, posteriorParts } from "./PressureSoreConstants";
@@ -11,7 +10,7 @@ export const PressureSoreDiagrams = (props: any) => {
   const dispatch: any = useDispatch();
   const [offset, setOffset] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const [results, setResults] = useState({});
+  const [results, setResults] = useState<any>({});
   const [selectedData, setData] = useState<any>({
     region: [],
     scale: [],
@@ -32,7 +31,6 @@ export const PressureSoreDiagrams = (props: any) => {
       );
       if (!status.aborted) {
         if (res && res.data) {
-          console.log("Data is ", res.data);
           setResults(res.data);
           let keys = Object.keys(results).reverse();
           if (keys.length > 0) {
@@ -52,12 +50,16 @@ export const PressureSoreDiagrams = (props: any) => {
     [consultationId]
   );
 
+  useEffect(() => {
+    if (Object.keys(results).length > 0)
+      setSelectedDateData(results, Object.keys(results?.["results"])[0]);
+  }, [results]);
+
   const setSelectedDateData = (results: any, key: any) => {
-    console.log("Dt is ", results[key]);
-    let obj = results[key].pressure_sore;
+    let obj = results["results"][key]?.["pressure_sore"];
     let regions: Array<string> = [],
       scales: Array<Number> = [];
-    obj.forEach((x: any) => {
+    obj?.forEach((x: any) => {
       regions.push(x.region);
       scales.push(x.scale);
     });
@@ -67,11 +69,10 @@ export const PressureSoreDiagrams = (props: any) => {
     });
   };
 
-  const original_dates = Object.keys(results).reverse();
-  const dates = Object.keys(results)
-    .map((p: string) => moment(p).format("LLL"))
-    .reverse();
-
+  let dates: any = [];
+  if (Object.keys(results).length > 0) {
+    dates = Object.keys(results?.["results"]);
+  }
   const selectedClass = (scale: Number) => {
     switch (scale) {
       case 1:
@@ -97,14 +98,13 @@ export const PressureSoreDiagrams = (props: any) => {
           title="date"
           className="border-2 border-gray-800 p-2"
           onChange={(e) => {
-            console.log("Value is ", e.target.value);
             setSelectedDateData(results, e.target.value);
           }}
         >
-          {dates.map((x, i) => {
+          {dates.map((key) => {
             return (
-              <option key={i} value={original_dates[i]}>
-                {x}
+              <option key={key} value={key}>
+                {moment(key).format("LLL")}
               </option>
             );
           })}
