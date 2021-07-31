@@ -18,6 +18,7 @@ import { NeurologicalTable } from "./Consultations/NeurologicalTables";
 import { VentilatorPlot } from "./Consultations/VentilatorPlot";
 import { IOBalancePlots } from "./Consultations/IOBalancePlots";
 import { PressureSoreDiagrams } from "./Consultations/PressureSoreDiagrams";
+import { DialysisPlots } from "./Consultations/DialysisPlots";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -315,6 +316,7 @@ export const ConsultationDetails = (props: any) => {
                     "VENTILATOR",
                     "IO_BALANCE",
                     "PRESSURE_SORE",
+                    "DIALYSIS",
                   ].map((p: string) => (
                     <Link
                       key={p}
@@ -514,6 +516,12 @@ export const ConsultationDetails = (props: any) => {
               <PressureSoreDiagrams
                 consultationId={consultationId}
               ></PressureSoreDiagrams>
+            </div>
+          )}
+          {tab === "DIALYSIS" && (
+            <div>
+              <PageTitle title="Dialysis Plots" hideBack={true} />
+              <DialysisPlots consultationId={consultationId}></DialysisPlots>
             </div>
           )}
         </div>

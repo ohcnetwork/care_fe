@@ -27,6 +27,7 @@ export const IOBalancePlots = (props: any) => {
               "feeds",
               "total_intake_calculated",
               "total_output_calculated",
+              "insulin_intake_dose",
             ],
           },
           { consultationId }
@@ -73,6 +74,15 @@ export const IOBalancePlots = (props: any) => {
           name="Total Output"
           xData={dates}
           yData={yAxisData("total_output_calculated")}
+        />
+      </div>
+
+      <div className="pt-4 px-4 bg-white border rounded-lg shadow">
+        <LinePlot
+          title="Insulin Intake"
+          name="Dosage"
+          xData={dates}
+          yData={yAxisData("insulin_intake_dose")}
         />
       </div>
 
