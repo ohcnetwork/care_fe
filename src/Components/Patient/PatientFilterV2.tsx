@@ -3,7 +3,6 @@ import { FacilitySelect } from "../Common/FacilitySelect";
 import {
   SelectField,
   MultiSelectField,
-  DateInputField,
   TextInputField,
   AutoCompleteAsyncField,
 } from "../Common/HelperInputFields";
@@ -17,7 +16,6 @@ import {
 import moment from "moment";
 import { getAllLocalBody, getFacility, getDistrict } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
-import { CircularProgress } from "@material-ui/core";
 import { navigate } from "raviger";
 import { DateRangePicker, getDate } from "../Common/DateRangePicker";
 import DistrictSelect from "../Facility/FacilityFilter/DistrictSelect";
@@ -93,6 +91,8 @@ export default function PatientFilterV2(props: any) {
       filter.last_consultation_symptoms_onset_date_before || null,
     last_consultation_symptoms_onset_date_after:
       filter.last_consultation_symptoms_onset_date_after || null,
+    last_vaccinated_date_before: filter.last_vaccinated_date_before || null,
+    last_vaccinated_date_after: filter.last_vaccinated_date_after || null,
     last_consultation_is_telemedicine:
       filter.last_consultation_is_telemedicine || null,
   });
@@ -133,6 +133,8 @@ export default function PatientFilterV2(props: any) {
     is_declared_positive: null,
     last_consultation_symptoms_onset_date_before: null,
     last_consultation_symptoms_onset_date_after: null,
+    last_vaccinated_date_before: null,
+    last_vaccinated_date_after: null,
     last_consultation_is_telemedicine: null,
   };
 
@@ -273,6 +275,8 @@ export default function PatientFilterV2(props: any) {
       is_declared_positive,
       last_consultation_symptoms_onset_date_before,
       last_consultation_symptoms_onset_date_after,
+      last_vaccinated_date_before,
+      last_vaccinated_date_after,
       last_consultation_is_telemedicine,
     } = filterState;
     const data = {
@@ -364,6 +368,16 @@ export default function PatientFilterV2(props: any) {
           ? moment(last_consultation_symptoms_onset_date_after).format(
               "YYYY-MM-DD"
             )
+          : "",
+      last_vaccinated_date_before:
+        last_vaccinated_date_before &&
+        moment(last_vaccinated_date_before).isValid()
+          ? moment(last_vaccinated_date_before).format("YYYY-MM-DD")
+          : "",
+      last_vaccinated_date_after:
+        last_vaccinated_date_after &&
+        moment(last_vaccinated_date_after).isValid()
+          ? moment(last_vaccinated_date_after).format("YYYY-MM-DD")
           : "",
       last_consultation_is_telemedicine:
         last_consultation_is_telemedicine || "",
@@ -727,6 +741,21 @@ export default function PatientFilterV2(props: any) {
             endDateId={"last_consultation_symptoms_onset_date_before"}
             startDateId={"last_consultation_symptoms_onset_date_after"}
             label={"Onset of Symptoms Date"}
+            size="small"
+          />
+          <DateRangePicker
+            startDate={getDate(filterState.last_vaccinated_date_after)}
+            endDate={getDate(filterState.last_vaccinated_date_before)}
+            onChange={(e) =>
+              handleDateRangeChange(
+                "last_vaccinated_date_after",
+                "last_vaccinated_date_before",
+                e
+              )
+            }
+            endDateId={"last_vaccinated_date_before"}
+            startDateId={"last_vaccinated_date_after"}
+            label={"Vaccination Date"}
             size="small"
           />
         </div>
