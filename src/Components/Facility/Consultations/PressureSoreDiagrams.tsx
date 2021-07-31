@@ -4,17 +4,21 @@ import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
 import { dailyRoundsAnalyse } from "../../../Redux/actions";
 import { make as CriticalCare__PressureScoreViewer } from "../../CriticalCareRecording/PressureSore/CriticalCare__PressureSoreViewer.gen";
+import Pagination from "../../Common/Pagination";
+import { PAGINATION_LIMIT } from "../../../Common/constants";
 
 export const PressureSoreDiagrams = (props: any) => {
   const { consultationId } = props;
   const dispatch: any = useDispatch();
-  const [offset, setOffset] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<any>({});
   const [selectedData, setData] = useState<any>({
     data: [],
     id: "",
   });
+  const [currentPart, setPart] = useState<any>();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
 
   const fetchDailyRounds = useCallback(
     async (status: statusType) => {
@@ -22,7 +26,7 @@ export const PressureSoreDiagrams = (props: any) => {
       const res = await dispatch(
         dailyRoundsAnalyse(
           {
-            offset,
+            page: currentPage,
             fields: ["pressure_sore"],
           },
           { consultationId }
@@ -39,7 +43,7 @@ export const PressureSoreDiagrams = (props: any) => {
         setIsLoading(false);
       }
     },
-    [consultationId, dispatch, offset]
+    [consultationId, dispatch, currentPage]
   );
 
   useEffect(() => {
@@ -51,8 +55,17 @@ export const PressureSoreDiagrams = (props: any) => {
     (status: statusType) => {
       fetchDailyRounds(status);
     },
-    [consultationId]
+    [consultationId, currentPage]
   );
+
+  const handlePagination = (page: number, limit: number) => {
+    setCurrentPage(page);
+  };
+
+  useEffect(() => {
+    if (Object.keys(results).length > 0)
+      setSelectedDateData(results, Object.keys(results?.["results"])[0]);
+  }, [results]);
 
   const setSelectedDateData = (results: any, key: any) => {
     setData({
@@ -108,6 +121,16 @@ export const PressureSoreDiagrams = (props: any) => {
           id={selectedData.id}
           consultationId={consultationId}
         />
+      )}
+      {totalCount > PAGINATION_LIMIT && (
+        <div className="mt-4 flex w-full justify-center">
+          <Pagination
+            cPage={currentPage}
+            defaultPerPage={PAGINATION_LIMIT}
+            data={{ totalCount }}
+            onChange={handlePagination}
+          />
+        </div>
       )}
     </div>
   );

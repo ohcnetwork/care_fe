@@ -4,13 +4,15 @@ import { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
 import { dailyRoundsAnalyse } from "../../../Redux/actions";
+import Pagination from "../../Common/Pagination";
+import { PAGINATION_LIMIT } from "../../../Common/constants";
 
 const DataTable = (props: any) => {
   const { title, data } = props;
   return (
     <div>
       <div className="text-xl font-semibold">{title}</div>
-      <div className="flex flex-row shadow overflow-hidden sm:rounded-lg divide-y divide-cool-gray-200 mb-4 w-max-content">
+      <div className="flex flex-row shadow overflow-hidden sm:rounded-lg divide-y divide-cool-gray-200 mb-4 w-max-content max-w-full">
         <div className="flex flex-col justify-between min-w-max-content w-50">
           <div className="px-6 py-3 bg-cool-gray-50 text-center text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
             Time
@@ -78,8 +80,9 @@ export const NeurologicalTable = (props: any) => {
   const { facilityId, patientId, consultationId } = props;
   const dispatch: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
-  const [offset, setOffset] = useState(0);
   const [results, setResults] = useState({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
 
   const LOC_OPTIONS = [
     { id: 0, value: "Unknown" },
@@ -114,7 +117,7 @@ export const NeurologicalTable = (props: any) => {
       const res = await dispatch(
         dailyRoundsAnalyse(
           {
-            offset,
+            page: currentPage,
             fields: [
               "consciousness_level",
               "consciousness_level_detail",
@@ -138,16 +141,24 @@ export const NeurologicalTable = (props: any) => {
       if (!status.aborted) {
         if (res && res.data && res.data.results) {
           setResults(res.data.results);
+          setTotalCount(res.data.count);
         }
         setIsLoading(false);
       }
     },
-    [consultationId, dispatch, offset]
+    [consultationId, dispatch, currentPage]
   );
 
-  useAbortableEffect((status: statusType) => {
-    fetchDailyRounds(status);
-  }, []);
+  useAbortableEffect(
+    (status: statusType) => {
+      fetchDailyRounds(status);
+    },
+    [currentPage]
+  );
+
+  const handlePagination = (page: number, limit: number) => {
+    setCurrentPage(page);
+  };
 
   const locData: any = [];
   const locDescription: any = [];
@@ -253,7 +264,7 @@ export const NeurologicalTable = (props: any) => {
     <div className="mt-2">
       <div className="mb-6">
         <div className="text-xl font-semibold">Level Of Consciousness</div>
-        <div className="flex flex-row shadow overflow-hidden sm:rounded-lg divide-y divide-cool-gray-200 my-4 w-max-content">
+        <div className="flex flex-row shadow overflow-hidden sm:rounded-lg divide-y divide-cool-gray-200 my-4 w-max-content max-w-full">
           <div
             style={{ direction: "rtl" }}
             className="flex flex-row overflow-x-auto"
@@ -305,6 +316,17 @@ export const NeurologicalTable = (props: any) => {
         <DataTable title={"Upper Extremity"} data={upperLimbData} />
         <DataTable title={"Lower Extremity"} data={lowerLimbData} />
       </div>
+
+      {totalCount > PAGINATION_LIMIT && (
+        <div className="mt-4 flex w-full justify-center">
+          <Pagination
+            cPage={currentPage}
+            defaultPerPage={PAGINATION_LIMIT}
+            data={{ totalCount }}
+            onChange={handlePagination}
+          />
+        </div>
+      )}
     </div>
   );
 };
