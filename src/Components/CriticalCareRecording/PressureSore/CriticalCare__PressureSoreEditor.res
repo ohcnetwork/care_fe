@@ -105,13 +105,7 @@ let saveData = (id, consultationId, state, send, updateCB) => {
 }
 
 let initialSelected = endValue => {
-  let initialPartsSelected = ref([])
-  let i = ref(0)
-  while i.contents <= endValue {
-    initialPartsSelected.contents = Js.Array.concat([false], initialPartsSelected.contents)
-    i := i.contents + 1
-  }
-  initialPartsSelected.contents
+  Belt.Array.make(endValue, false)
 }
 
 let initialState = (psp, previewMode) => {
@@ -191,7 +185,7 @@ let getIntoView = (region: string, isPart: bool) => {
   }
   part["classList"]["add"]("text-red-900")
 
-  let id = setTimeout(() => {
+  let _id = setTimeout(() => {
     ele["classList"]["remove"]("border-2")
     ele["classList"]["remove"]("border-red-700")
 
