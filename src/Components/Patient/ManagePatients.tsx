@@ -170,6 +170,9 @@ export const PatientManager = (props: any) => {
       qParams.last_consultation_symptoms_onset_date_before || undefined,
     last_consultation_symptoms_onset_date_after:
       qParams.last_consultation_symptoms_onset_date_after || undefined,
+    last_vaccinated_date_before:
+      qParams.last_vaccinated_date_before || undefined,
+    last_vaccinated_date_after: qParams.last_vaccinated_date_after || undefined,
     last_consultation_is_telemedicine:
       qParams.last_consultation_is_telemedicine || undefined,
   };
@@ -248,6 +251,8 @@ export const PatientManager = (props: any) => {
     qParams.date_of_result_after,
     qParams.last_consultation_symptoms_onset_date_before,
     qParams.last_consultation_symptoms_onset_date_after,
+    qParams.last_vaccinated_date_before,
+    qParams.last_vaccinated_date_after,
     qParams.last_consultation_is_telemedicine,
   ]);
 
@@ -796,6 +801,17 @@ export const PatientManager = (props: any) => {
             "Onset of symptoms after",
             qParams.last_consultation_symptoms_onset_date_after,
             "last_consultation_symptoms_onset_date_after"
+          )}
+          {badge(
+            "Vaccinated Date before",
+            qParams.last_vaccinated_date_before,
+            "last_vaccinated_date_before"
+          )}
+
+          {badge(
+            "Vaccinated Date after",
+            qParams.last_vaccinated_date_after,
+            "last_vaccinated_date_after"
           )}
           {badge(
             "Telemedicine",
