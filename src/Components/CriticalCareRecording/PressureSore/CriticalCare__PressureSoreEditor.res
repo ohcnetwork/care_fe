@@ -104,10 +104,6 @@ let saveData = (id, consultationId, state, send, updateCB) => {
   )
 }
 
-let initialSelected = endValue => {
-  Belt.Array.make(endValue, false)
-}
-
 let initialState = (psp, previewMode) => {
   {
     parts: psp,
