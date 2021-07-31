@@ -10,6 +10,7 @@ import { PATIENT_CATEGORY, SYMPTOM_CHOICES } from "../../Common/constants";
 import { FileUpload } from "../Patient/FileUpload";
 import TreatmentSummary from "./TreatmentSummary";
 import { PrimaryParametersPlot } from "./Consultations/PrimaryParametersPlot";
+import { MedicineTables } from "./Consultations/MedicineTables";
 import { ABGPlots } from "./Consultations/ABGPlots";
 import { DailyRoundsList } from "./Consultations/DailyRoundsList";
 import { make as Link } from "../Common/components/Link.gen";
@@ -79,7 +80,7 @@ export const ConsultationDetails = (props: any) => {
   }
 
   const tabButtonClasses = (selected: boolean) =>
-    `capitalize cursor-pointer border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300 font-bold ${
+    `capitalize min-w-max-content cursor-pointer border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300 font-bold ${
       selected === true ? "border-primary-500 text-primary-600 border-b-2" : ""
     }`;
 
@@ -304,7 +305,7 @@ export const ConsultationDetails = (props: any) => {
           <div className="border-b-2 border-gray-200 mt-4 w-full">
             <div className="sm:flex sm:items-baseline overflow-x-auto">
               <div className="mt-4 sm:mt-0">
-                <nav className="pl-2 flex space-x-8 overflow-y-auto pb-2">
+                <nav className="pl-2 flex space-x-6 overflow-x-auto pb-2 ">
                   {[
                     "INFO",
                     "SUMMARY",
@@ -314,9 +315,9 @@ export const ConsultationDetails = (props: any) => {
                     "ABG",
                     "NURSING",
                     "NEUROLOGICAL_MONITORING",
-                    "GLASGOW_COMA_SCALE",
+                    "G_C_S",
                     "VENTILATOR",
-                    "IO_BALANCE",
+                    "NUTRITION",
                     "PRESSURE_SORE",
                     "DIALYSIS",
                   ].map((p: string) => (
@@ -325,7 +326,7 @@ export const ConsultationDetails = (props: any) => {
                       className={tabButtonClasses(tab === p)}
                       href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/${p.toLocaleLowerCase()}`}
                     >
-                      {p.replace("_", " ").toLocaleLowerCase()}
+                      {p.replaceAll("_", " ").toLocaleLowerCase()}
                     </Link>
                   ))}
                 </nav>
@@ -450,6 +451,12 @@ export const ConsultationDetails = (props: any) => {
                   </div>
                 </div>
               )}
+
+              <MedicineTables
+                facilityId={facilityId}
+                patientId={patientId}
+                consultationId={consultationId}
+              />
             </div>
           )}
           {tab === "FILES" && (
@@ -496,7 +503,7 @@ export const ConsultationDetails = (props: any) => {
               ></NeurologicalTable>
             </div>
           )}
-          {tab === "GLASGOW_COMA_SCALE" && (
+          {tab === "G_C_S" && (
             <div>
               <PageTitle title="Glasgow Coma Scale" hideBack={true} />
               <GlasgowTables
@@ -516,7 +523,7 @@ export const ConsultationDetails = (props: any) => {
               ></VentilatorPlot>
             </div>
           )}
-          {tab === "IO_BALANCE" && (
+          {tab === "NUTRITION" && (
             <div>
               <PageTitle title="IO Balance Plots" hideBack={true} />
               <IOBalancePlots consultationId={consultationId}></IOBalancePlots>

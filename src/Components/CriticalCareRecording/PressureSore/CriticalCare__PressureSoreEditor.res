@@ -196,7 +196,7 @@ let renderBody = (state, send, title, partPaths, substr) => {
       {str("Braden Scale (Risk Severity) (" ++ title ++ ")")}
     </div>
     // Braden Scale Divs
-    <div className="mx-auto overflow-x-scroll max-w-md my-3 border-2">
+    <div className="mx-auto overflow-x-scroll my-3 border-2">
       <div className="grid grid-rows-3 grid-flow-col auto-cols-max md:flex md:flex-wrap">
         {Js.Array.mapi((part, index) => {
           let regionType = PressureSore.regionForPath(part)
@@ -240,7 +240,7 @@ let renderBody = (state, send, title, partPaths, substr) => {
       </div>
     </div>
     // Diagram
-    <div className="flex justify-center max-w-lg mx-auto border-2">
+    <div className="flex justify-center mx-auto border-2">
       <svg className="h-screen py-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 344.7 932.661">
         {Js.Array.mapi((part, renderIndex) => {
           let regionType = PressureSore.regionForPath(part)

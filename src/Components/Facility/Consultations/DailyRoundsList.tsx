@@ -44,9 +44,12 @@ export const DailyRoundsList = (props: any) => {
     [consultationId, dispatch, offset]
   );
 
-  useAbortableEffect((status: statusType) => {
-    fetchDailyRounds(status);
-  }, []);
+  useAbortableEffect(
+    (status: statusType) => {
+      fetchDailyRounds(status);
+    },
+    [currentPage]
+  );
 
   const handlePagination = (page: number, limit: number) => {
     const offset = (page - 1) * limit;

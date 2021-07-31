@@ -26,6 +26,7 @@ export const IOBalancePlots = (props: any) => {
               "infusions",
               "iv_fluids",
               "feeds",
+              "output",
               "total_intake_calculated",
               "total_output_calculated",
               "insulin_intake_dose",
@@ -85,6 +86,8 @@ export const IOBalancePlots = (props: any) => {
             yData={yAxisData("total_output_calculated")}
           />
         </div>
+      </div>
+      <div className="grid grid-row-1 md:grid-cols-4 gap-4">
         <div className="pt-4 px-4 bg-white border rounded-lg shadow">
           <h3 className="text-lg">Infusions:</h3>
           {Object.entries(results).map((obj: any) => {
@@ -132,6 +135,25 @@ export const IOBalancePlots = (props: any) => {
                   <h4 className="text-sm">- {moment(obj[0]).format("LLL")}</h4>
                   <div className="px-5 text-sm">
                     {obj[1].feeds.map((o: any) => (
+                      <div>
+                        {o.name} - {o.quantity}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            }
+          })}
+        </div>
+        <div className="pt-4 px-4 bg-white border rounded-lg shadow">
+          <h3 className="text-lg">Output:</h3>
+          {Object.entries(results).map((obj: any) => {
+            if (obj[1].output && obj[1].output.length > 0) {
+              return (
+                <div>
+                  <h4 className="text-sm">- {moment(obj[0]).format("LLL")}</h4>
+                  <div className="px-5 text-sm">
+                    {obj[1].output.map((o: any) => (
                       <div>
                         {o.name} - {o.quantity}
                       </div>

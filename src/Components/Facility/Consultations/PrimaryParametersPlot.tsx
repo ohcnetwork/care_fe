@@ -196,7 +196,7 @@ export const PrimaryParametersPlot = (props: any) => {
             return (
               <div className="px-3 text-sm">
                 <h4 className="text-base my-3">{obj[0]}</h4>
-                <div className="flex bg-white border shadow rounded-lg">
+                <div className="flex bg-white border shadow rounded-lg overflow-x-auto">
                   {obj[1].map((item: any) => {
                     return (
                       <div className="border border-gray-300 text-center">

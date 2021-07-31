@@ -72,20 +72,20 @@ export const GlasgowTables = (props: any) => {
     <div className="mt-2">
       <div className="mb-6">
         <div className="flex flex-row shadow overflow-hidden sm:rounded-lg divide-y divide-cool-gray-200 mb-4 w-max-content max-w-full">
-          <div className="flex flex-col min-w-max-content w-50">
-            <div className="px-6 py-3 bg-cool-gray-50 text-center text-sm leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
+          <div className="flex flex-col ">
+            <div className="px-2 py-12 bg-cool-gray-50 text-center text-sm leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
               Time
             </div>
-            <div className="px-6 py-4 bg-cool-gray-50 text-center text-sm leading-5 font-medium text-cool-gray-500 uppercase tracking-wider">
+            <div className="px-2 py-4 bg-cool-gray-50 text-center text-sm leading-5 font-medium text-cool-gray-500 uppercase tracking-wider">
               Eye
             </div>
-            <div className="px-6 py-4 bg-cool-gray-50 text-center text-sm leading-5 font-medium text-cool-gray-500 uppercase tracking-wider">
+            <div className="px-2 py-4 bg-cool-gray-50 text-center text-sm leading-5 font-medium text-cool-gray-500 uppercase tracking-wider">
               Verbal
             </div>
-            <div className="px-6 py-4 bg-cool-gray-50 text-center text-sm leading-5 font-medium text-cool-gray-500 uppercase tracking-wider">
+            <div className="px-2 py-4 bg-cool-gray-50 text-center text-sm leading-5 font-medium text-cool-gray-500 uppercase tracking-wider">
               Motor
             </div>
-            <div className="px-6 py-4 bg-cool-gray-50 text-center text-sm leading-5 font-medium text-cool-gray-500 uppercase tracking-wider">
+            <div className="px-2 py-4 bg-cool-gray-50 text-center text-sm leading-5 font-medium text-cool-gray-500 uppercase tracking-wider">
               Total
             </div>
           </div>
@@ -97,9 +97,9 @@ export const GlasgowTables = (props: any) => {
               return (
                 <div
                   key={`glascow_${i}`}
-                  className="flex flex-col w-1/6 min-w-max-content divide-x divide-cool-gray-200"
+                  className="flex flex-col divide-x divide-cool-gray-200"
                 >
-                  <div className="px-6 py-3 bg-cool-gray-50 text-center text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
+                  <div className="px-6 py-3 bg-cool-gray-50 text-center text-xs leading-4 font-medium text-cool-gray-500">
                     {x.date}
                   </div>
                   <div className="px-6 py-4 bg-white text-center whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
