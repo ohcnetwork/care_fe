@@ -132,6 +132,11 @@ const goBack = () => {
   window.history.go(-1);
 };
 
+const scrollTo = (id: any) => {
+  const element = document.querySelector(`#${id}-div`);
+  element?.scrollIntoView({ behavior: "smooth", block: "center" });
+};
+
 export const ConsultationForm = (props: any) => {
   const dispatchAction: any = useDispatch();
   const { facilityId, patientId, id } = props;
@@ -203,35 +208,42 @@ export const ConsultationForm = (props: any) => {
   const validateForm = () => {
     let errors = { ...initError };
     let invalidForm = false;
+    let error_div = "";
+
     Object.keys(state.form).forEach((field, i) => {
       switch (field) {
         case "symptoms":
           if (!state.form[field] || !state.form[field].length) {
             errors[field] = "Please select the symptoms";
+            if (!error_div) error_div = field;
             invalidForm = true;
           }
           return;
         case "category":
           if (!state.form[field] || !state.form[field].length) {
             errors[field] = "Please select the category";
+            if (!error_div) error_div = field;
             invalidForm = true;
           }
           return;
         case "suggestion":
           if (!state.form[field]) {
             errors[field] = "Please enter the decision";
+            if (!error_div) error_div = field;
             invalidForm = true;
           }
           return;
         case "other_symptoms":
           if (state.form.otherSymptom && !state.form[field]) {
             errors[field] = "Please enter the other symptom details";
+            if (!error_div) error_div = field;
             invalidForm = true;
           }
           return;
         case "symptoms_onset_date":
           if (state.form.hasSymptom && !state.form[field]) {
             errors[field] = "Please enter date of onset of the above symptoms";
+            if (!error_div) error_div = field;
             invalidForm = true;
           }
           return;
@@ -239,18 +251,21 @@ export const ConsultationForm = (props: any) => {
         case "admission_date":
           if (JSON.parse(state.form.admitted) && !state.form[field]) {
             errors[field] = "Field is required as person is admitted";
+            if (!error_div) error_div = field;
             invalidForm = true;
           }
           return;
         case "referred_to":
           if (state.form.suggestion === "R" && !state.form[field]) {
             errors[field] = "Please select the referred to facility";
+            if (!error_div) error_div = field;
             invalidForm = true;
           }
           return;
         case "OPconsultation":
           if (state.form.suggestion === "OP" && !state.form[field]) {
             errors[field] = "Please enter OP consultation Details";
+            if (!error_div) error_div = field;
             invalidForm = true;
           }
           return;
@@ -261,12 +276,14 @@ export const ConsultationForm = (props: any) => {
           ) {
             errors[field] =
               "Telemedicine should be `Yes` when Admitted To is Home Isolation";
+            if (!error_div) error_div = field;
             invalidForm = true;
           }
           return;
         case "is_kasp":
           if (!state.form[field]) {
             errors[field] = "Please select an option, Kasp is mandatory";
+            if (!error_div) error_div = field;
             invalidForm = true;
           }
           return;
@@ -274,18 +291,17 @@ export const ConsultationForm = (props: any) => {
           return;
       }
     });
-    if (invalidForm) {
-      dispatch({ type: "set_error", errors });
-      return false;
-    }
     dispatch({ type: "set_error", errors });
-    return true;
+    return [!invalidForm, error_div];
   };
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
-    const validForm = validateForm();
-    if (validForm) {
+    const [validForm, error_div] = validateForm();
+    console.log(error_div);
+    if (!validForm) {
+      scrollTo(error_div);
+    } else {
       setIsLoading(true);
       const data = {
         symptoms: state.form.symptoms,
@@ -425,7 +441,7 @@ export const ConsultationForm = (props: any) => {
           <form onSubmit={(e) => handleSubmit(e)}>
             <CardContent>
               <div className="grid gap-4 grid-cols-1">
-                <div>
+                <div id="symptoms-div">
                   <InputLabel id="symptoms-label">Symptoms*</InputLabel>
                   <MultiSelectField
                     name="symptoms"
@@ -438,7 +454,7 @@ export const ConsultationForm = (props: any) => {
                 </div>
 
                 {state.form.otherSymptom && (
-                  <div>
+                  <div id="other_symptoms-div">
                     <InputLabel id="other-symptoms-label">
                       Other Symptom Details
                     </InputLabel>
@@ -458,7 +474,7 @@ export const ConsultationForm = (props: any) => {
                 )}
 
                 {state.form.hasSymptom && (
-                  <div>
+                  <div id="symptoms_onset_date-div">
                     <DateInputField
                       label="Date of onset of the symptoms*"
                       value={state.form.symptoms_onset_date}
@@ -470,7 +486,7 @@ export const ConsultationForm = (props: any) => {
                     />
                   </div>
                 )}
-                <div>
+                <div id="existing-medication-div">
                   <InputLabel id="existing-medication-label">
                     History of present illness
                   </InputLabel>
@@ -490,7 +506,7 @@ export const ConsultationForm = (props: any) => {
                   />
                 </div>
 
-                <div>
+                <div id="examination_details-div">
                   <InputLabel id="exam-details-label">
                     Examination details and Clinical conditions
                   </InputLabel>
@@ -510,7 +526,7 @@ export const ConsultationForm = (props: any) => {
                   />
                 </div>
 
-                <div>
+                <div id="prescribed_medication-div">
                   <InputLabel id="prescribed-medication-label">
                     Treatment Summary
                   </InputLabel>
@@ -529,7 +545,7 @@ export const ConsultationForm = (props: any) => {
                     errors={state.errors.prescribed_medication}
                   />
                 </div>
-                <div className="flex-1">
+                <div className="flex-1" id="category-div">
                   <InputLabel id="category-label">Category *</InputLabel>
                   <SelectField
                     name="category"
@@ -541,7 +557,7 @@ export const ConsultationForm = (props: any) => {
                   />
                 </div>
 
-                <div>
+                <div id="suggestion-div">
                   <InputLabel
                     id="suggestion-label"
                     style={{ fontWeight: "bold", fontSize: "18px" }}
@@ -559,7 +575,7 @@ export const ConsultationForm = (props: any) => {
                 </div>
 
                 {state.form.suggestion === "R" && (
-                  <div>
+                  <div id="referred_to-div">
                     <InputLabel>Referred To Facility</InputLabel>
                     <FacilitySelect
                       name="referred_to"
@@ -571,7 +587,7 @@ export const ConsultationForm = (props: any) => {
                   </div>
                 )}
                 <div className="flex">
-                  <div className="flex-1">
+                  <div className="flex-1" id="admitted-div">
                     <InputLabel id="admitted-label">Admitted</InputLabel>
                     <RadioGroup
                       aria-label="covid"
@@ -597,7 +613,7 @@ export const ConsultationForm = (props: any) => {
                   </div>
 
                   {JSON.parse(state.form.admitted) && (
-                    <div className="flex-1">
+                    <div className="flex-1" id="admitted_to-div">
                       <SelectField
                         optionArray={true}
                         name="admitted_to"
@@ -615,7 +631,7 @@ export const ConsultationForm = (props: any) => {
 
                 {JSON.parse(state.form.admitted) && (
                   <div className="flex">
-                    <div className="flex-1">
+                    <div className="flex-1" id="admission_date-div">
                       <DateInputField
                         id="admission_date"
                         label="Admission Date"
@@ -632,7 +648,7 @@ export const ConsultationForm = (props: any) => {
                 )}
               </div>
 
-              <div className="mt-4">
+              <div className="mt-4" id="OPconsultation-div">
                 <InputLabel>Advice</InputLabel>
                 <MultilineInputField
                   rows={5}
@@ -658,7 +674,7 @@ export const ConsultationForm = (props: any) => {
                 />
               </div>
 
-              <div>
+              <div id="ip_no-div">
                 <InputLabel id="refered-label">IP number</InputLabel>
                 <TextInputField
                   name="ip_no"
@@ -671,7 +687,7 @@ export const ConsultationForm = (props: any) => {
                   errors={state.errors.ip_no}
                 />
               </div>
-              <div>
+              <div id="test_id-div">
                 <InputLabel id="refered-label">State Test ID</InputLabel>
                 <TextInputField
                   name="test_id"
@@ -684,7 +700,7 @@ export const ConsultationForm = (props: any) => {
                   errors={state.errors.test_id}
                 />
               </div>
-              <div>
+              <div id="verified_by-div">
                 <InputLabel id="exam-details-label">Verified By</InputLabel>
                 <MultilineInputField
                   rows={3}
@@ -701,7 +717,7 @@ export const ConsultationForm = (props: any) => {
                   errors={state.errors.verified_by}
                 />
               </div>
-              <div>
+              <div id="diagnosis-div">
                 <InputLabel id="exam-details-label">Diagnosis</InputLabel>
                 <MultilineInputField
                   rows={5}
@@ -719,7 +735,7 @@ export const ConsultationForm = (props: any) => {
                 />
               </div>
 
-              <div className="flex-1">
+              <div className="flex-1" id="is_kasp-div">
                 <InputLabel id="admitted-label">Kasp*</InputLabel>
                 <RadioGroup
                   aria-label="covid"
@@ -745,7 +761,7 @@ export const ConsultationForm = (props: any) => {
               </div>
               {/* Telemedicine Fields */}
               <div className="flex">
-                <div className="flex-1">
+                <div className="flex-1" id="is_telemedicine-div">
                   <InputLabel id="admitted-label">Telemedicine</InputLabel>
                   <RadioGroup
                     aria-label="covid"
@@ -771,7 +787,7 @@ export const ConsultationForm = (props: any) => {
                 </div>
 
                 {JSON.parse(state.form.is_telemedicine) && (
-                  <div className="flex-1">
+                  <div className="flex-1" id="review_time">
                     <InputLabel id="review_time-label">
                       Review After{" "}
                     </InputLabel>
@@ -790,7 +806,7 @@ export const ConsultationForm = (props: any) => {
                 )}
               </div>
               {JSON.parse(state.form.is_telemedicine) && (
-                <div className="md:col-span-1">
+                <div className="md:col-span-1" id="assigned_to-div">
                   <OnlineUsersSelect
                     userId={state.form.assigned_to}
                     selectedUser={state.form.assigned_to_object}
@@ -800,7 +816,7 @@ export const ConsultationForm = (props: any) => {
                 </div>
               )}
               {JSON.parse(state.form.is_telemedicine) && (
-                <div>
+                <div id="action-div">
                   <InputLabel
                     id="action-label"
                     style={{ fontWeight: "bold", fontSize: "18px" }}
