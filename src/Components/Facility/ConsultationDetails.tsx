@@ -434,7 +434,7 @@ export const ConsultationDetails = (props: any) => {
                                     {med.dosage}
                                   </td>
                                   <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-gray-500">
-                                    {med.dosage}
+                                    {med.days}
                                   </td>
                                 </tr>
                               )
