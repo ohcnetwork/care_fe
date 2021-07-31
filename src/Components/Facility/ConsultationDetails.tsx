@@ -321,7 +321,7 @@ export const ConsultationDetails = (props: any) => {
                       className={tabButtonClasses(tab === p)}
                       href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/${p.toLocaleLowerCase()}`}
                     >
-                      {p.toLocaleLowerCase()}
+                      {p.replace("_", " ").toLocaleLowerCase()}
                     </Link>
                   ))}
                 </nav>
