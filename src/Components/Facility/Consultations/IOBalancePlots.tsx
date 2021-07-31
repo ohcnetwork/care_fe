@@ -28,6 +28,7 @@ export const IOBalancePlots = (props: any) => {
               "feeds",
               "total_intake_calculated",
               "total_output_calculated",
+              "insulin_intake_dose",
             ],
           },
           { consultationId }

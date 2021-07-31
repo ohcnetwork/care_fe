@@ -17,7 +17,9 @@ import { NursingPlot } from "./Consultations/NursingPlot";
 import { NeurologicalTable } from "./Consultations/NeurologicalTables";
 import { VentilatorPlot } from "./Consultations/VentilatorPlot";
 import { IOBalancePlots } from "./Consultations/IOBalancePlots";
+import { GlasgowTables } from "./Consultations/GlasgowTables";
 import { PressureSoreDiagrams } from "./Consultations/PressureSoreDiagrams";
+import { DialysisPlots } from "./Consultations/DialysisPlots";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -299,8 +301,8 @@ export const ConsultationDetails = (props: any) => {
             </div>
           </div>
 
-          <div className="border-b-2 border-gray-200 mt-4">
-            <div className="sm:flex sm:items-baseline">
+          <div className="border-b-2 border-gray-200 mt-4 w-full">
+            <div className="sm:flex sm:items-baseline overflow-x-auto">
               <div className="mt-4 sm:mt-0">
                 <nav className="pl-2 flex space-x-8 overflow-y-auto pb-2">
                   {[
@@ -312,16 +314,18 @@ export const ConsultationDetails = (props: any) => {
                     "ABG",
                     "NURSING",
                     "NEUROLOGICAL_MONITORING",
+                    "GLASGOW_COMA_SCALE",
                     "VENTILATOR",
                     "IO_BALANCE",
                     "PRESSURE_SORE",
+                    "DIALYSIS",
                   ].map((p: string) => (
                     <Link
                       key={p}
                       className={tabButtonClasses(tab === p)}
                       href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/${p.toLocaleLowerCase()}`}
                     >
-                      {p.toLocaleLowerCase()}
+                      {p.replace("_", " ").toLocaleLowerCase()}
                     </Link>
                   ))}
                 </nav>
@@ -434,7 +438,7 @@ export const ConsultationDetails = (props: any) => {
                                     {med.dosage}
                                   </td>
                                   <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-gray-500">
-                                    {med.dosage}
+                                    {med.days}
                                   </td>
                                 </tr>
                               )
@@ -492,6 +496,16 @@ export const ConsultationDetails = (props: any) => {
               ></NeurologicalTable>
             </div>
           )}
+          {tab === "GLASGOW_COMA_SCALE" && (
+            <div>
+              <PageTitle title="Glasgow Coma Scale" hideBack={true} />
+              <GlasgowTables
+                facilityId={facilityId}
+                patientId={patientId}
+                consultationId={consultationId}
+              />
+            </div>
+          )}
           {tab === "VENTILATOR" && (
             <div>
               <PageTitle title="Ventilator Parameters" hideBack={true} />
@@ -514,6 +528,12 @@ export const ConsultationDetails = (props: any) => {
               <PressureSoreDiagrams
                 consultationId={consultationId}
               ></PressureSoreDiagrams>
+            </div>
+          )}
+          {tab === "DIALYSIS" && (
+            <div>
+              <PageTitle title="Dialysis Plots" hideBack={true} />
+              <DialysisPlots consultationId={consultationId}></DialysisPlots>
             </div>
           )}
         </div>

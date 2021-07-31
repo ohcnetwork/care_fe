@@ -12,7 +12,7 @@ const DataTable = (props: any) => {
   return (
     <div>
       <div className="text-xl font-semibold">{title}</div>
-      <div className="flex flex-row shadow overflow-hidden sm:rounded-lg divide-y divide-cool-gray-200 mb-4 w-max-content">
+      <div className="flex flex-row shadow overflow-hidden sm:rounded-lg divide-y divide-cool-gray-200 mb-4 w-max-content max-w-full">
         <div className="flex flex-col justify-between min-w-max-content w-50">
           <div className="px-6 py-3 bg-cool-gray-50 text-center text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
             Time
@@ -264,7 +264,7 @@ export const NeurologicalTable = (props: any) => {
     <div className="mt-2">
       <div className="mb-6">
         <div className="text-xl font-semibold">Level Of Consciousness</div>
-        <div className="flex flex-row shadow overflow-hidden sm:rounded-lg divide-y divide-cool-gray-200 my-4 w-max-content">
+        <div className="flex flex-row shadow overflow-hidden sm:rounded-lg divide-y divide-cool-gray-200 my-4 w-max-content max-w-full">
           <div
             style={{ direction: "rtl" }}
             className="flex flex-row overflow-x-auto"

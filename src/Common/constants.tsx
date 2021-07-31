@@ -494,3 +494,27 @@ export const NURSING_CARE_FIELDS: Array<OptionsType> = [
   { id: 11, text: "tracheostomy_care", desc: "Tracheostomy Care" },
   { id: 12, text: "stoma_care", desc: "Stoma Care" },
 ];
+
+export const EYE_OPEN_SCALE = [
+  { value: 4, text: "Spontaneous" },
+  { value: 3, text: "To Speech" },
+  { value: 2, text: "Pain" },
+  { value: 1, text: "None" },
+];
+
+export const VERBAL_RESPONSE_SCALE = [
+  { value: 5, text: "Oriented/Coos/Babbles" },
+  { value: 4, text: "Confused/Irritable" },
+  { value: 3, text: "Inappropriate words/Cry to Pain" },
+  { value: 2, text: "Incomprehensible words/Moans to pain" },
+  { value: 1, text: "None" },
+];
+
+export const MOTOR_RESPONSE_SCALE = [
+  { value: 6, text: "Obeying commands" },
+  { value: 5, text: "Moves to localised pain" },
+  { value: 4, text: "Flexion withdrawal from pain" },
+  { value: 3, text: "Abnormal Flexion(decorticate)" },
+  { value: 2, text: "Abnormal Extension(decerebrate)" },
+  { value: 1, text: "No Response" },
+];
