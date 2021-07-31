@@ -649,7 +649,7 @@ export const ConsultationForm = (props: any) => {
               </div>
 
               <div className="mt-4" id="OPconsultation-div">
-                <InputLabel>Advice</InputLabel>
+                <InputLabel>Advice*</InputLabel>
                 <MultilineInputField
                   rows={5}
                   className="mt-2"
