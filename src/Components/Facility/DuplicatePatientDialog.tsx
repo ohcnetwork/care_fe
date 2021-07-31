@@ -68,7 +68,7 @@ const DuplicatePatientDialog = (props: Props & WithStyles<typeof styles>) => {
         className=" font-semibold text-3xl"
         id="font-semibold text-3xl"
       >
-        Patent Record Found
+        Patient Record Found
       </DialogTitle>
       <DialogContent>
         <div className="grid gap-4 grid-cols-1">
