@@ -4,11 +4,12 @@ import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
 import { dailyRoundsAnalyse } from "../../../Redux/actions";
 import { anteriorParts, posteriorParts } from "./PressureSoreConstants";
+import Pagination from "../../Common/Pagination";
+import { PAGINATION_LIMIT } from "../../../Common/constants";
 
 export const PressureSoreDiagrams = (props: any) => {
   const { consultationId } = props;
   const dispatch: any = useDispatch();
-  const [offset, setOffset] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<any>({});
   const [selectedData, setData] = useState<any>({
@@ -16,6 +17,8 @@ export const PressureSoreDiagrams = (props: any) => {
     scale: [],
   });
   const [currentPart, setPart] = useState<any>();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
 
   const fetchDailyRounds = useCallback(
     async (status: statusType) => {
@@ -23,7 +26,7 @@ export const PressureSoreDiagrams = (props: any) => {
       const res = await dispatch(
         dailyRoundsAnalyse(
           {
-            offset,
+            page: currentPage,
             fields: ["pressure_sore"],
           },
           { consultationId }
@@ -32,6 +35,7 @@ export const PressureSoreDiagrams = (props: any) => {
       if (!status.aborted) {
         if (res && res.data) {
           setResults(res.data);
+          setTotalCount(res.data.count);
           let keys = Object.keys(results).reverse();
           if (keys.length > 0) {
             setSelectedDateData(res.data, keys[0]);
@@ -40,15 +44,19 @@ export const PressureSoreDiagrams = (props: any) => {
         setIsLoading(false);
       }
     },
-    [consultationId, dispatch, offset]
+    [consultationId, dispatch, currentPage]
   );
 
   useAbortableEffect(
     (status: statusType) => {
       fetchDailyRounds(status);
     },
-    [consultationId]
+    [consultationId, currentPage]
   );
+
+  const handlePagination = (page: number, limit: number) => {
+    setCurrentPage(page);
+  };
 
   useEffect(() => {
     if (Object.keys(results).length > 0)
@@ -250,6 +258,16 @@ export const PressureSoreDiagrams = (props: any) => {
         <div className="flex md:flex-row flex-col justify-between">
           {renderBody("Front", anteriorParts)}
           {renderBody("Back", posteriorParts)}
+        </div>
+      )}
+      {totalCount > PAGINATION_LIMIT && (
+        <div className="mt-4 flex w-full justify-center">
+          <Pagination
+            cPage={currentPage}
+            defaultPerPage={PAGINATION_LIMIT}
+            data={{ totalCount }}
+            onChange={handlePagination}
+          />
         </div>
       )}
     </div>
