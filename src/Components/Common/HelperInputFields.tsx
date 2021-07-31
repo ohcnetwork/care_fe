@@ -17,7 +17,6 @@ import {
 } from "@material-ui/core";
 import Box from "@material-ui/core/Box";
 import FormControl from "@material-ui/core/FormControl";
-import { makeStyles } from "@material-ui/core/styles";
 import { NativeSelectInputProps } from "@material-ui/core/NativeSelect/NativeSelectInput";
 import { SelectProps } from "@material-ui/core/Select";
 import Autocomplete from "@material-ui/lab/Autocomplete";
@@ -180,14 +179,6 @@ export const DateTimeFiled = (props: DateInputFieldProps) => {
   );
 };
 
-const useStyles = makeStyles((theme) => ({
-  input: {
-    "& .MuiInputBase-input": {
-      paddingRight: 15,
-    },
-  },
-}));
-
 export const DateInputField = (props: DateInputFieldProps) => {
   const {
     value,
@@ -199,9 +190,6 @@ export const DateInputField = (props: DateInputFieldProps) => {
     margin,
     ...restProps
   } = props;
-
-  const classes = useStyles();
-
   return (
     <MuiPickersUtilsProvider utils={DateFnsUtils}>
       <KeyboardDatePicker
@@ -215,7 +203,6 @@ export const DateInputField = (props: DateInputFieldProps) => {
         KeyboardButtonProps={{
           "aria-label": "change date",
         }}
-        className={classes.input}
         {...restProps}
       />
       <ErrorHelperText error={errors} />

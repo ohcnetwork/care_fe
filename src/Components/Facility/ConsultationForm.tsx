@@ -467,6 +467,7 @@ export const ConsultationForm = (props: any) => {
                       }
                       disableFuture={true}
                       errors={state.errors.symptoms_onset_date}
+                      InputLabelProps={{ shrink: true }}
                     />
                   </div>
                 )}
