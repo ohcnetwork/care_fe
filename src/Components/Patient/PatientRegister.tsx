@@ -1057,6 +1057,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       value={state.form.name}
                       onChange={handleChange}
                       errors={state.errors.name}
+                      inputProps={{
+                        autoComplete: "new-password",
+                      }}
                     />
                   </div>
 
