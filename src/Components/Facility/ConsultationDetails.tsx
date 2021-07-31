@@ -21,6 +21,7 @@ import { IOBalancePlots } from "./Consultations/IOBalancePlots";
 import { GlasgowTables } from "./Consultations/GlasgowTables";
 import { PressureSoreDiagrams } from "./Consultations/PressureSoreDiagrams";
 import { DialysisPlots } from "./Consultations/DialysisPlots";
+import ViewInvestigations from "./Investigations/ViewInvestigations";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -251,30 +252,6 @@ export const ConsultationDetails = (props: any) => {
                     SHIFT PATIENT
                   </button>
                 </div>
-                <div className="mt-2">
-                  <button
-                    className="btn btn-primary w-full"
-                    onClick={() =>
-                      navigate(
-                        `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/investigation/`
-                      )
-                    }
-                  >
-                    Create Investigation
-                  </button>
-                </div>
-                <div className="mt-2">
-                  <button
-                    className="btn btn-primary w-full"
-                    onClick={() =>
-                      navigate(
-                        `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/investigationSessions`
-                      )
-                    }
-                  >
-                    View Investigations
-                  </button>
-                </div>
 
                 {!consultationData.discharge_date && (
                   <div className="mt-2">
@@ -307,11 +284,11 @@ export const ConsultationDetails = (props: any) => {
               <div className="mt-4 sm:mt-0">
                 <nav className="pl-2 flex space-x-6 overflow-x-auto pb-2 ">
                   {[
-                    "INFO",
-                    "SUMMARY",
                     "UPDATES",
+                    "SUMMARY",
                     "MEDICINES",
                     "FILES",
+                    "INVESTIGATIONS",
                     "ABG",
                     "NURSING",
                     "NEUROLOGICAL_MONITORING",
@@ -333,45 +310,57 @@ export const ConsultationDetails = (props: any) => {
               </div>
             </div>
           </div>
-          {tab === "INFO" && (
-            <div>
-              {consultationData.examination_details && (
-                <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
-                  <div className="px-4 py-5 sm:p-6">
-                    <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-                      Examination details and Clinical conditions:{" "}
-                    </h3>
-                    <div className="mt-2">
-                      {consultationData.examination_details || "-"}
+          {tab === "UPDATES" && (
+            <div className="flex md:flex-row flex-col">
+              <div className="md:w-2/3">
+                <PageTitle title="Info" hideBack={true} />
+                {consultationData.examination_details && (
+                  <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
+                    <div className="px-4 py-5 sm:p-6">
+                      <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                        Examination details and Clinical conditions:{" "}
+                      </h3>
+                      <div className="mt-2">
+                        {consultationData.examination_details || "-"}
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
-              {consultationData.prescribed_medication && (
-                <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
-                  <div className="px-4 py-5 sm:p-6">
-                    <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-                      Treatment Summary
-                    </h3>
-                    <div className="mt-2">
-                      {consultationData.prescribed_medication || "-"}
+                )}
+                {consultationData.prescribed_medication && (
+                  <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
+                    <div className="px-4 py-5 sm:p-6">
+                      <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                        Treatment Summary
+                      </h3>
+                      <div className="mt-2">
+                        {consultationData.prescribed_medication || "-"}
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {consultationData.consultation_notes && (
-                <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
-                  <div className="px-4 py-5 sm:p-6">
-                    <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-                      Advice
-                    </h3>
-                    <div className="mt-2">
-                      {consultationData.consultation_notes || "-"}
+                {consultationData.consultation_notes && (
+                  <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
+                    <div className="px-4 py-5 sm:p-6">
+                      <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                        Advice
+                      </h3>
+                      <div className="mt-2">
+                        {consultationData.consultation_notes || "-"}
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
+              <div className="md:w-1/3">
+                <PageTitle title="Updates" hideBack={true} />
+                <DailyRoundsList
+                  facilityId={facilityId}
+                  patientId={patientId}
+                  consultationId={consultationId}
+                  consultationData={consultationData}
+                />
+              </div>
             </div>
           )}
           {tab === "SUMMARY" && (
@@ -383,14 +372,6 @@ export const ConsultationDetails = (props: any) => {
                 consultationId={consultationId}
               ></PrimaryParametersPlot>
             </div>
-          )}
-          {tab === "UPDATES" && (
-            <DailyRoundsList
-              facilityId={facilityId}
-              patientId={patientId}
-              consultationId={consultationId}
-              consultationData={consultationData}
-            />
           )}
           {tab === "MEDICINES" && (
             <div>
@@ -541,6 +522,30 @@ export const ConsultationDetails = (props: any) => {
             <div>
               <PageTitle title="Dialysis Plots" hideBack={true} />
               <DialysisPlots consultationId={consultationId}></DialysisPlots>
+            </div>
+          )}
+          {tab === "INVESTIGATIONS" && (
+            <div>
+              <div className="flex justify-between">
+                <PageTitle title="Investigations" hideBack={true} />
+                <div className="pt-6">
+                  <button
+                    className="btn btn-primary w-full"
+                    onClick={() =>
+                      navigate(
+                        `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/investigation/`
+                      )
+                    }
+                  >
+                    Create Investigation
+                  </button>
+                </div>
+              </div>
+              <ViewInvestigations
+                consultationId={consultationId}
+                facilityId={facilityId}
+                patientId={patientId}
+              />
             </div>
           )}
         </div>

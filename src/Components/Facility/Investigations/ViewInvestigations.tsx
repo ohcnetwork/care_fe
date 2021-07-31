@@ -42,12 +42,7 @@ export default function ViewInvestigations(props: any) {
   );
 
   return (
-    <div className="max-w-7xl mx-auto px-4">
-      <PageTitle
-        title="View Investigations"
-        hideBack={false}
-        className="mx-3 md:mx-8"
-      />
+    <div className="max-w-7xl mx-auto">
       {isLoading ? (
         <Loading />
       ) : (
