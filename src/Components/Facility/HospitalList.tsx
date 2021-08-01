@@ -16,7 +16,7 @@ import {
 } from "../../Redux/actions";
 import loadable from "@loadable/component";
 import { SelectField } from "../Common/HelperInputFields";
-import { CircularProgress, InputLabel } from "@material-ui/core";
+import { CircularProgress, InputLabel, TextField } from "@material-ui/core";
 import Pagination from "../Common/Pagination";
 import { FacilityModel } from "./models";
 import { InputSearchBox } from "../Common/SearchBox";
@@ -131,13 +131,11 @@ const HospitalListPage = (props: any) => {
 
   const fetchStateName = useCallback(
     async (status: statusType) => {
-      setIsLoading(true);
       const res =
         Number(qParams.state) &&
         (await dispatchAction(getState(qParams.state)));
       if (!status.aborted) {
         setStateName(res?.data?.name);
-        setIsLoading(false);
       }
     },
     [dispatchAction, qParams.state]
@@ -152,13 +150,11 @@ const HospitalListPage = (props: any) => {
 
   const fetchDistrictName = useCallback(
     async (status: statusType) => {
-      setIsLoading(true);
       const res =
         Number(qParams.district) &&
         (await dispatchAction(getDistrict(qParams.district)));
       if (!status.aborted) {
         setDistrictName(res?.data?.name);
-        setIsLoading(false);
       }
     },
     [dispatchAction, qParams.district]
@@ -173,13 +169,11 @@ const HospitalListPage = (props: any) => {
 
   const fetchLocalbodyName = useCallback(
     async (status: statusType) => {
-      setIsLoading(true);
       const res =
         Number(qParams.local_body) &&
         (await dispatchAction(getLocalBody({ id: qParams.local_body })));
       if (!status.aborted) {
         setLocalbodyName(res?.data?.name);
-        setIsLoading(false);
       }
     },
     [dispatchAction, qParams.local_body]
@@ -258,7 +252,7 @@ const HospitalListPage = (props: any) => {
   const badge = (key: string, value: any, paramKey: string) => {
     return (
       value && (
-        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
+        <span className="inline-flex h-full items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
           {t(key)}
           {": "}
           {value}
@@ -386,21 +380,24 @@ const HospitalListPage = (props: any) => {
                       className=""
                     >
                       <div className="h-screen w-full absolute flex items-center justify-center bg-modal">
-                        <div className="bg-white rounded shadow p-8 m-4 max-w-sm max-h-full text-center flex flex-col">
+                        <div className="bg-white rounded shadow p-8 m-4 max-h-full text-center flex flex-col max-w-lg w-2/3 min-w-max-content">
                           <div className="mb-4">
                             <h1 className="text-2xl">
                               Notify: {facility.name}
                             </h1>
                           </div>
                           <div>
-                            <textarea
+                            <TextField
                               id="NotifyModalMessageInput"
-                              className="h-32 w-full border p-2 shadow-lg"
+                              rows={6}
+                              multiline
+                              className="w-full border p-2 max-h-64"
                               onChange={(e) => setNotifyMessage(e.target.value)}
                               placeholder="Type your message..."
-                            ></textarea>
+                              variant="outlined"
+                            />
                           </div>
-                          <div className="flex flex-row justify-evenly">
+                          <div className="flex flex-row justify-end">
                             <button
                               className="btn-danger btn mt-4 mr-2 w-full md:w-auto"
                               onClick={(_) => setModalFor(undefined)}
@@ -475,8 +472,8 @@ const HospitalListPage = (props: any) => {
 
   return (
     <div className="px-6">
-      <div className="grid grid-cols-2 ">
-        <PageTitle title={t("Facilities")} hideBack={true} className="mx-3 " />
+      <div className="grid grid-cols-2">
+        <PageTitle title={t("Facilities")} hideBack={true} className="mx-3" />
 
         <div className="flex justify-end w-full mt-4">
           <div>
@@ -519,15 +516,15 @@ const HospitalListPage = (props: any) => {
                         xmlns="http://www.w3.org/2000/svg"
                       >
                         <path
-                          fill-rule="evenodd"
+                          fillRule="evenodd"
                           d="M.5 8a.5.5 0 0 1 .5.5V12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8.5a.5.5 0 0 1 1 0V12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V8.5A.5.5 0 0 1 .5 8z"
                         />
                         <path
-                          fill-rule="evenodd"
+                          fillRule="evenodd"
                           d="M5 7.5a.5.5 0 0 1 .707 0L8 9.793 10.293 7.5a.5.5 0 1 1 .707.707l-2.646 2.647a.5.5 0 0 1-.708 0L5 8.207A.5.5 0 0 1 5 7.5z"
                         />
                         <path
-                          fill-rule="evenodd"
+                          fillRule="evenodd"
                           d="M8 1a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0v-8A.5.5 0 0 1 8 1z"
                         />
                       </svg>
@@ -570,7 +567,7 @@ const HospitalListPage = (props: any) => {
         </div>
       </div>
 
-      <div className="md:flex mt-5 space-y-2">
+      <div className="md:flex my-4 space-y-2">
         <div className="bg-white overflow-hidden shadow rounded-lg flex-1 md:mr-2">
           <div className="px-4 py-5 sm:p-6">
             <dl>
@@ -646,7 +643,8 @@ const HospitalListPage = (props: any) => {
           </div>
         </SlideOver>
       </div>
-      <div className="flex space-x-2 mt-2 flex-wrap w-full col-span-3 space-y-1">
+      <div className="flex items-center space-x-2 my-2 flex-wrap w-full col-span-3">
+        {badge("Facility/District Name", qParams.search, "search")}
         {badge("State", stateName, "state")}
         {badge("District", districtName, "district")}
         {badge("Local Body", localbodyName, "local_body")}
@@ -662,7 +660,7 @@ const HospitalListPage = (props: any) => {
             "kasp_empanelled"
           )}
       </div>
-      <div>
+      <div className="mt-4">
         <div>{manageFacilities}</div>
       </div>
     </div>

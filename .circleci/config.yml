@@ -21,7 +21,7 @@ workflows:
           cluster-name: "${EKS_CLUSTER_NAME}"
           aws-region: "${AWS_DEFAULT_REGION}"
           container-image-updates: "${EKS_CONTAINER_NAME}=${AWS_ECR_ACCOUNT_URL}/${ECR_REPO_NAME}:${CIRCLE_SHA1}"
-          resource-name: "${EKS_STAGING_RESOURCE_NAME}"
+          resource-name: "deployment/care-fe-staging-deployment"
           requires:
             - aws-ecr/build-and-push-image
   deploy-to-production:
@@ -40,6 +40,6 @@ workflows:
           cluster-name: "${EKS_CLUSTER_NAME}"
           aws-region: "${AWS_DEFAULT_REGION}"
           container-image-updates: "${EKS_CONTAINER_NAME}=${AWS_ECR_ACCOUNT_URL}/${ECR_REPO_NAME}:${CIRCLE_SHA1}"
-          resource-name: "${EKS_PRODUCTION_RESOURCE_NAME}"
+          resource-name: "deployment/care-fe-production-deployment"
           requires:
             - aws-ecr/build-and-push-image

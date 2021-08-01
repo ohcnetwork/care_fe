@@ -1,5 +1,5 @@
 import { useRedirect, useRoutes, navigate, usePath } from "raviger";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { BedCapacityForm } from "../Components/Facility/BedCapacityForm";
 import { ConsultationDetails } from "../Components/Facility/ConsultationDetails";
@@ -9,7 +9,6 @@ import { FacilityCreate } from "../Components/Facility/FacilityCreate";
 import { FacilityHome } from "../Components/Facility/FacilityHome";
 import { HospitalList } from "../Components/Facility/HospitalList";
 import { TriageForm } from "../Components/Facility/TriageForm";
-import { DailyRoundListDetails } from "../Components/Patient/DailyRoundListDetails";
 import { DailyRounds } from "../Components/Patient/DailyRounds";
 import { PatientManager } from "../Components/Patient/ManagePatients";
 import PatientNotes from "../Components/Patient/PatientNotes";
@@ -45,24 +44,31 @@ import ResultUpdate from "../Components/ExternalResult/ResultUpdate";
 import NotificationsList from "../Components/Notifications/NotificationsList";
 import { FileUpload } from "../Components/Patient/FileUpload";
 import Investigation from "../Components/Facility/Investigations";
-import ViewInvestigations from "../Components/Facility/Investigations/ViewInvestigations";
 import ShowInvestigation from "../Components/Facility/Investigations/ShowInvestigation";
 import InvestigationReports from "../Components/Facility/Investigations/Reports";
 import AssetCreate from "../Components/Facility/AssetCreate";
 import { withTranslation } from "react-i18next";
 import DeathReport from "../Components/DeathReport/DeathReport";
+import { make as CriticalCareRecording } from "../Components/CriticalCareRecording/CriticalCareRecording.gen";
+import { make as VentilatorParametersEditor } from "../Components/CriticalCareRecording/VentilatorParametersEditor/CriticalCare__VentilatorParametersEditor.bs";
 import ShowPushNotification from "../Components/Notifications/ShowPushNotification";
 import { NoticeBoard } from "../Components/Notifications/NoticeBoard";
 import { AddLocationForm } from "../Components/Facility/AddLocationForm";
 import { LocationManagement } from "../Components/Facility/LocationManagement";
 import AssetsList from "../Components/Assets/AssetsList";
 import AssetManage from "../Components/Assets/AssetManage";
+import { DailyRoundListDetails } from "../Components/Patient/DailyRoundListDetails";
 
 const get = require("lodash.get");
 const img = "https://cdn.coronasafe.network/light-logo.svg";
 const logoBlack = "https://cdn.coronasafe.network/black-logo.svg";
 
 const routes = {
+  "/critical_care_ventilator": () => (
+    <>
+      <VentilatorParametersEditor />
+    </>
+  ),
   "/": () => <HospitalList />,
   "/users": () => <ManageUsers />,
   "/user/add": () => <UserAdd />,
@@ -155,17 +161,6 @@ const routes = {
   }: any) => (
     <ConsultationForm facilityId={facilityId} patientId={patientId} id={id} />
   ),
-  "/facility/:facilityId/patient/:patientId/consultation/:id": ({
-    facilityId,
-    patientId,
-    id,
-  }: any) => (
-    <ConsultationDetails
-      facilityId={facilityId}
-      patientId={patientId}
-      consultationId={id}
-    />
-  ),
   "/facility/:facilityId/patient/:patientId/consultation/:id/files/": ({
     facilityId,
     patientId,
@@ -192,14 +187,6 @@ const routes = {
       patientId={patientId}
     />
   ),
-  "/facility/:facilityId/patient/:patientId/consultation/:id/investigationSessions":
-    ({ facilityId, patientId, id }: any) => (
-      <ViewInvestigations
-        consultationId={id}
-        facilityId={facilityId}
-        patientId={patientId}
-      />
-    ),
   "/facility/:facilityId/patient/:patientId/consultation/:id/investigation/:sessionId":
     ({ facilityId, patientId, id, sessionId }: any) => (
       <ShowInvestigation
@@ -236,6 +223,27 @@ const routes = {
         patientId={patientId}
         consultationId={consultationId}
         id={id}
+      />
+    ),
+
+  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily_rounds/:id":
+    ({ facilityId, patientId, consultationId, id }: any) => (
+      <CriticalCareRecording
+        facilityId={facilityId}
+        patientId={patientId}
+        consultationId={consultationId}
+        id={id}
+        preview={true}
+      />
+    ),
+  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily_rounds/:id/update":
+    ({ facilityId, patientId, consultationId, id }: any) => (
+      <CriticalCareRecording
+        facilityId={facilityId}
+        patientId={patientId}
+        consultationId={consultationId}
+        id={id}
+        preview={false}
       />
     ),
   "/facility/:facilityId/patient/:patientId/shift/new": ({
@@ -313,6 +321,31 @@ const routes = {
   "/death_report/:id": ({ id }: any) => <DeathReport id={id} />,
   "/notifications/:id": (id: any) => <ShowPushNotification external_id={id} />,
   "/notice_board/": () => <NoticeBoard />,
+  "/facility/:facilityId/patient/:patientId/consultation/:id": ({
+    facilityId,
+    patientId,
+    id,
+  }: any) => (
+    <ConsultationDetails
+      facilityId={facilityId}
+      patientId={patientId}
+      consultationId={id}
+      tab={"updates"}
+    />
+  ),
+  "/facility/:facilityId/patient/:patientId/consultation/:id/:tab": ({
+    facilityId,
+    patientId,
+    id,
+    tab,
+  }: any) => (
+    <ConsultationDetails
+      facilityId={facilityId}
+      patientId={patientId}
+      consultationId={id}
+      tab={tab}
+    />
+  ),
 };
 
 let menus = [
@@ -538,6 +571,7 @@ const AppRouter = (props: any) => {
                 key="dashboard"
                 href="http://dashboard.coronasafe.network/"
                 target="_blank"
+                rel="noreferrer"
                 className="mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-primary-300 rounded-md hover:text-white hover:bg-primary-700 focus:outline-none focus:bg-primary-900 transition ease-in-out duration-150"
               >
                 <i className="fas fa-tachometer-alt text-primary-400 mr-3 text-md group-hover:text-primary-300 group-focus:text-primary-300 transition ease-in-out duration-150"></i>

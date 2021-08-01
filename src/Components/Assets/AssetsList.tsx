@@ -4,10 +4,14 @@ import QrReader from "react-qr-reader";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import * as Notification from "../../Utils/Notifications.js";
 import PageTitle from "../Common/PageTitle";
-import { getFacility, listAssets } from "../../Redux/actions";
+import {
+  getFacility,
+  listAssets,
+  getFacilityAssetLocation,
+} from "../../Redux/actions";
 import { Badge } from "../Patient/ManagePatients";
 import { AssetData } from "./AssetTypes";
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { navigate, useQueryParams } from "raviger";
 import loadable from "@loadable/component";
 import Pagination from "../Common/Pagination";
@@ -19,6 +23,14 @@ import AdvancedFilterButton from "../Common/AdvancedFilterButton";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
+interface qParamModel {
+  search?: string;
+  facility?: string;
+  asset_type?: string;
+  location?: string;
+  status?: string;
+}
+
 const AssetsList = (props: any) => {
   const [qParams, setQueryParams] = useQueryParams();
   const [assets, setAssets] = useState<AssetData[]>([{}] as AssetData[]);
@@ -29,6 +41,8 @@ const AssetsList = (props: any) => {
   const [totalCount, setTotalCount] = useState<number>(0);
   const [showFilters, setShowFilters] = useState<boolean>(false);
   const [facilityName, setFacilityName] = useState<string>();
+  const [asset_type, setAssetType] = useState<string>();
+  const [locationName, setLocationName] = useState<string>();
   const limit = 14;
   const dispatch: any = useDispatch();
   const assetsExist = assets.length > 0 && Object.keys(assets[0]).length > 0;
@@ -41,11 +55,17 @@ const AssetsList = (props: any) => {
             offset,
             search_text: qParams.search,
             facility: qParams.facility,
+            asset_type: qParams.asset_type,
+            location: qParams.location,
+            status: qParams.status,
           }
         : {
             limit,
             offset,
             facility: qParams.facility,
+            asset_type: qParams.asset_type,
+            location: qParams.location,
+            status: qParams.status,
           };
       const { data }: any = await dispatch(listAssets(params));
       if (!status.aborted) {
@@ -60,8 +80,20 @@ const AssetsList = (props: any) => {
         }
       }
     },
-    [dispatch, offset, qParams.search, qParams.facility]
+    [
+      dispatch,
+      offset,
+      qParams.search,
+      qParams.facility,
+      qParams.asset_type,
+      qParams.location,
+      qParams.status,
+    ]
   );
+
+  useEffect(() => {
+    setAssetType(qParams.asset_type);
+  }, [qParams.asset_type]);
 
   useAbortableEffect(
     (status: statusType) => {
@@ -85,34 +117,53 @@ const AssetsList = (props: any) => {
     },
     [dispatch, qParams.facility]
   );
+  const fetchLocationName = useCallback(
+    async (status: statusType) => {
+      if (qParams.location) {
+        setIsLoading(true);
+        const res = await dispatch(
+          getFacilityAssetLocation(qParams.facility, qParams.location)
+        );
+        if (!status.aborted) {
+          setLocationName(res?.data?.name);
+          setIsLoading(false);
+        }
+      } else {
+        setLocationName("");
+      }
+    },
+    [dispatch, qParams.location]
+  );
 
   useAbortableEffect(
     (status: statusType) => {
       fetchFacilityName(status);
+      fetchLocationName(status);
     },
-    [fetchFacilityName]
+    [fetchFacilityName, fetchLocationName]
   );
 
-  const badge = (key: string, value: any, paramKey: string) => {
+  const badge = (key: string, value: any, paramKey: string[]) => {
     return (
       value && (
-        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
+        <span className="inline-flex h-full items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
           {key}
           {": "}
           {value}
           <i
             className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
-            onClick={(e) => removeFilter(paramKey)}
+            onClick={() => removeFilter(paramKey)}
           ></i>
         </span>
       )
     );
   };
 
-  const removeFilter = (paramKey: any) => {
+  const removeFilter = (paramKey: string[]) => {
+    const emptyObj: qParamModel = { ...qParams };
+    paramKey.forEach((p) => ((emptyObj as any)[p] = ""));
     updateQuery({
-      ...qParams,
-      [paramKey]: "",
+      ...emptyObj,
     });
   };
 
@@ -130,6 +181,7 @@ const AssetsList = (props: any) => {
   const updateQuery = (params: any) => {
     const nParams = Object.assign({}, qParams, params);
     setQueryParams(nParams, true);
+    console.log(qParams);
   };
 
   const applyFilter = (data: any) => {
@@ -209,8 +261,12 @@ const AssetsList = (props: any) => {
           </div>
         </SlideOver>
       </div>
-      <div className="flex space-x-2 mt-2 flex-wrap w-full col-span-3 space-y-1">
-        {badge("Facility", facilityName, "facility")}
+      <div className="flex space-x-2 mt-2 flex-wrap w-full col-span-3">
+        {badge("Facility", facilityName, ["facility", "location"])}
+        {badge("Asset Name", qParams.search, ["search"])}
+        {badge("Location", locationName, ["location"])}
+        {badge("Asset Type", asset_type, ["asset_type"])}
+        {badge("Status", qParams.status, ["status"])}
       </div>
       <div className="flex-grow mt-10 bg-white">
         <div className="p-8">

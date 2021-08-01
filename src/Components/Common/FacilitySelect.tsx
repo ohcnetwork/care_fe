@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { getAllFacilities, getFacilities } from "../../Redux/actions";
 import { AutoCompleteAsyncField } from "../Common/HelperInputFields";

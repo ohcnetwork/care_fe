@@ -1,6 +1,8 @@
 import { Grid } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import WarningRoundedIcon from "@material-ui/icons/WarningRounded";
+import { make as SlideOver } from "../Common/SlideOver.gen";
+import SampleFilter from "./SampleFilters";
 import { navigate, useQueryParams } from "raviger";
 import moment from "moment";
 import loadable from "@loadable/component";
@@ -38,6 +40,7 @@ export default function SampleViewAdmin(props: any) {
   const [currentPage, setCurrentPage] = useState(1);
   const [offset, setOffset] = useState(0);
   const [fetchFlag, callFetchData] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
   const [statusDialog, setStatusDialog] = useState<{
     show: boolean;
     sample: SampleTestModel;
@@ -58,6 +61,7 @@ export default function SampleViewAdmin(props: any) {
           offset,
           patient_name: qParams.patient_name || undefined,
           district_name: qParams.district_name || undefined,
+          status: qParams.status || undefined,
         })
       );
       if (!status.aborted) {
@@ -68,8 +72,20 @@ export default function SampleViewAdmin(props: any) {
         setIsLoading(false);
       }
     },
-    [dispatch, offset, qParams.district_name, qParams.patient_name]
+    [
+      dispatch,
+      offset,
+      qParams.district_name,
+      qParams.patient_name,
+      qParams.status,
+    ]
   );
+
+  const applyFilter = (data: any) => {
+    const filter = { ...qParams, ...data };
+    updateQuery(filter);
+    setShowFilters(false);
+  };
 
   useAbortableEffect(
     (status: statusType) => {
@@ -264,18 +280,7 @@ export default function SampleViewAdmin(props: any) {
                     </button>
                   </div>
                 )}
-                <div className="mt-2">
-                  <button
-                    onClick={(e) =>
-                      navigate(
-                        `/patient/${item.patient}/test_sample/${item.id}/icmr_sample`
-                      )
-                    }
-                    className="w-full text-sm bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow text-center"
-                  >
-                    View Sample Report
-                  </button>
-                </div>
+
                 <div className="grid gap-2 grid-cols-2 mt-2">
                   <button
                     onClick={(e) =>
@@ -331,6 +336,29 @@ export default function SampleViewAdmin(props: any) {
     );
   }
 
+  const removeFilter = (paramKey: any) => {
+    updateQuery({
+      ...qParams,
+      [paramKey]: "",
+    });
+  };
+
+  const badge = (key: string, value: any, paramKey: string) => {
+    return (
+      value && (
+        <span className="inline-flex h-full items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
+          {key}
+          {": "}
+          {value}
+          <i
+            className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
+            onClick={(e) => removeFilter(paramKey)}
+          ></i>
+        </span>
+      )
+    );
+  };
+
   return (
     <div>
       {statusDialog.show && (
@@ -372,15 +400,64 @@ export default function SampleViewAdmin(props: any) {
               errors=""
             />
           </div>
+          <div>
+            <div className="text-sm font-semibold mb-2">Search by Name</div>
+            <InputSearchBox
+              value={qParams.patient_name}
+              search={searchByName}
+              placeholder="Search by Patient Name"
+              errors=""
+            />
+          </div>
         </div>
-        <div className="md:px-4">
-          <div className="text-sm font-semibold mb-2">Search by Name</div>
-          <InputSearchBox
-            value={qParams.patient_name}
-            search={searchByName}
-            placeholder="Search by Patient Name"
-            errors=""
-          />
+
+        <div>
+          <div className="flex items-start mb-2">
+            <button
+              className="btn btn-primary-ghost md:mt-7 "
+              onClick={(_) => setShowFilters((show) => !show)}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="fill-current w-4 h-4 mr-2"
+              >
+                <line x1="8" y1="6" x2="21" y2="6"></line>
+                <line x1="8" y1="12" x2="21" y2="12">
+                  {" "}
+                </line>
+                <line x1="8" y1="18" x2="21" y2="18">
+                  {" "}
+                </line>
+                <line x1="3" y1="6" x2="3.01" y2="6">
+                  {" "}
+                </line>
+                <line x1="3" y1="12" x2="3.01" y2="12">
+                  {" "}
+                </line>
+                <line x1="3" y1="18" x2="3.01" y2="18">
+                  {" "}
+                </line>
+              </svg>
+              <span>Advanced Filters</span>
+            </button>
+          </div>
+          <SlideOver show={showFilters} setShow={setShowFilters}>
+            <div className="bg-white min-h-screen p-4">
+              <SampleFilter
+                filter={qParams}
+                onChange={applyFilter}
+                closeFilter={() => setShowFilters(false)}
+              />
+            </div>
+          </SlideOver>
         </div>
         {/*<div>*/}
         {/*  <div className="text-sm font-semibold mb-2">*/}
@@ -392,6 +469,17 @@ export default function SampleViewAdmin(props: any) {
         {/*      errors=''*/}
         {/*  />*/}
         {/*</div>*/}
+        <div className="flex items-center space-x-2 mt-2 flex-wrap w-full col-span-3">
+          {badge("Patient Name", qParams.patient_name, "patient_name")}
+          {badge("District Name", qParams.district_name, "district_name")}
+          {badge(
+            "Status",
+            SAMPLE_TEST_STATUS.find(
+              (status) => status.id == qParams.status
+            )?.text.replaceAll("_", " "),
+            "status"
+          )}
+        </div>
       </div>
       <div className="px-3 md:px-8">
         <div className="flex flex-wrap md:-mx-4">{manageSamples}</div>

@@ -1,6 +1,7 @@
 export const KeralaLogo = "images/kerala-logo.png";
 
 export const RESULTS_PER_PAGE_LIMIT = 14;
+export const PAGINATION_LIMIT = 36;
 export interface OptionsType {
   id: number;
   text: string;
@@ -477,4 +478,43 @@ export const RESOURCE_FILTER_ORDER: Array<OptionsType> = [
   { id: 2, text: "-created_date", desc: "DESC Created Date" },
   { id: 3, text: "modified_date", desc: "ASC Modified Date" },
   { id: 4, text: "-modified_date", desc: "DESC Modified Date" },
+];
+
+export const NURSING_CARE_FIELDS: Array<OptionsType> = [
+  { id: 1, text: "personal_hygiene", desc: "Personal Hygiene" },
+  { id: 2, text: "positioning", desc: "Positioning" },
+  { id: 3, text: "suctioning", desc: "Suctioning" },
+  { id: 4, text: "ryles_tube_care", desc: "Ryles Tube Care" },
+  { id: 5, text: "iv_sitecare", desc: "IV Site Care" },
+  { id: 6, text: "nubulisation", desc: "Nubulisation" },
+  { id: 7, text: "dressing", desc: "Dressing" },
+  { id: 8, text: "dvt_pump_stocking", desc: "DVT Pump Stocking" },
+  { id: 9, text: "restrain", desc: "Restrain" },
+  { id: 10, text: "chest_tube_care", desc: "Chest Tube Care" },
+  { id: 11, text: "tracheostomy_care", desc: "Tracheostomy Care" },
+  { id: 12, text: "stoma_care", desc: "Stoma Care" },
+];
+
+export const EYE_OPEN_SCALE = [
+  { value: 4, text: "Spontaneous" },
+  { value: 3, text: "To Speech" },
+  { value: 2, text: "Pain" },
+  { value: 1, text: "None" },
+];
+
+export const VERBAL_RESPONSE_SCALE = [
+  { value: 5, text: "Oriented/Coos/Babbles" },
+  { value: 4, text: "Confused/Irritable" },
+  { value: 3, text: "Inappropriate words/Cry to Pain" },
+  { value: 2, text: "Incomprehensible words/Moans to pain" },
+  { value: 1, text: "None" },
+];
+
+export const MOTOR_RESPONSE_SCALE = [
+  { value: 6, text: "Obeying commands" },
+  { value: 5, text: "Moves to localised pain" },
+  { value: 4, text: "Flexion withdrawal from pain" },
+  { value: 3, text: "Abnormal Flexion(decorticate)" },
+  { value: 2, text: "Abnormal Extension(decerebrate)" },
+  { value: 1, text: "No Response" },
 ];

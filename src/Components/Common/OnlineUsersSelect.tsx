@@ -1,4 +1,5 @@
 import loadable from "@loadable/component";
+import { CircularProgress } from "@material-ui/core";
 import React, {
   useCallback,
   useReducer,
@@ -75,7 +76,7 @@ export const OnlineUsersSelect = (props: any) => {
         <div className="relative">
           <span className="inline-block w-full rounded-md shadow-sm">
             <button
-              onClick={(_) => setIsExpanded(!isExpanded)}
+              onClick={(_) => setIsExpanded(true)}
               type="button"
               aria-haspopup="listbox"
               aria-expanded="true"
@@ -155,54 +156,60 @@ export const OnlineUsersSelect = (props: any) => {
               aria-activedescendant="listbox-item-3"
               className="multiselect-dropdown__search-dropdown w-full border border-gray-400 bg-white mt-1 rounded-lg shadow-lg px-4 py-2 z-50"
             >
-              {state.users.map((user: any) => {
-                return (
-                  <button
-                    key={user.id}
-                    onClick={(_) => {
-                      setIsExpanded(false);
-                      onSelect(user);
-                      setState({ ...state, searchTerm: "" });
-                    }}
-                    id="listbox-item-0"
-                    role="option"
-                    className="flex text-xs py-1 items-center w-full hover:bg-gray-200 focus:outline-none focus:bg-gray-200"
-                  >
-                    <div className="flex items-center space-x-3">
-                      <span
-                        aria-label="Online"
-                        className={
-                          "flex-shrink-0 inline-block h-2 w-2 rounded-full " +
-                          (moment()
-                            .subtract(5, "minutes")
-                            .isBefore(user.last_login)
-                            ? "bg-primary-400"
-                            : "bg-gray-300")
-                        }
-                      ></span>
-                      <span className="font-normal block truncate">
-                        {user.first_name} {user.last_name}
-                      </span>
-                    </div>
-                    {user.id == userId && (
-                      <span className="absolute inset-y-0 right-0 flex items-center pr-4">
-                        <svg
-                          className="h-5 w-5"
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                        >
-                          <path
-                            fill-rule="evenodd"
-                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                            clip-rule="evenodd"
-                          />
-                        </svg>
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
+              {!state.loading ? (
+                state.users.map((user: any) => {
+                  return (
+                    <button
+                      key={user.id}
+                      onClick={(_) => {
+                        setIsExpanded(false);
+                        onSelect(user);
+                        setState({ ...state, searchTerm: "" });
+                      }}
+                      id="listbox-item-0"
+                      role="option"
+                      className="flex text-xs py-1 items-center justify-between w-full hover:bg-gray-200 focus:outline-none focus:bg-gray-200"
+                    >
+                      <div className="flex items-center space-x-3">
+                        <span
+                          aria-label="Online"
+                          className={
+                            "flex-shrink-0 inline-block h-2 w-2 rounded-full " +
+                            (moment()
+                              .subtract(5, "minutes")
+                              .isBefore(user.last_login)
+                              ? "bg-primary-400"
+                              : "bg-gray-300")
+                          }
+                        ></span>
+                        <span className="font-normal block truncate">
+                          {user.first_name} {user.last_name}
+                        </span>
+                      </div>
+                      {user.id == userId && (
+                        <span className="flex items-center">
+                          <svg
+                            className="h-5 w-5"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                              clip-rule="evenodd"
+                            />
+                          </svg>
+                        </span>
+                      )}
+                    </button>
+                  );
+                })
+              ) : (
+                <div className="w-1/12 mx-auto">
+                  <CircularProgress />
+                </div>
+              )}
             </div>
           )}
         </div>
