@@ -18,7 +18,6 @@ import { NursingPlot } from "./Consultations/NursingPlot";
 import { NeurologicalTable } from "./Consultations/NeurologicalTables";
 import { VentilatorPlot } from "./Consultations/VentilatorPlot";
 import { NutritionPlots } from "./Consultations/NutritionPlots";
-import { GlasgowTables } from "./Consultations/GlasgowTables";
 import { PressureSoreDiagrams } from "./Consultations/PressureSoreDiagrams";
 import { DialysisPlots } from "./Consultations/DialysisPlots";
 import ViewInvestigations from "./Investigations/ViewInvestigations";
@@ -292,7 +291,6 @@ export const ConsultationDetails = (props: any) => {
                     "ABG",
                     "NURSING",
                     "NEUROLOGICAL_MONITORING",
-                    "G_C_S",
                     "VENTILATOR",
                     "NUTRITION",
                     "PRESSURE_SORE",
@@ -482,16 +480,6 @@ export const ConsultationDetails = (props: any) => {
                 patientId={patientId}
                 consultationId={consultationId}
               ></NeurologicalTable>
-            </div>
-          )}
-          {tab === "G_C_S" && (
-            <div>
-              <PageTitle title="Glasgow Coma Scale" hideBack={true} />
-              <GlasgowTables
-                facilityId={facilityId}
-                patientId={patientId}
-                consultationId={consultationId}
-              />
             </div>
           )}
           {tab === "VENTILATOR" && (
