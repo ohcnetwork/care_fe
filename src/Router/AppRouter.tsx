@@ -330,7 +330,7 @@ const routes = {
       facilityId={facilityId}
       patientId={patientId}
       consultationId={id}
-      tab={"summary"}
+      tab={"updates"}
     />
   ),
   "/facility/:facilityId/patient/:patientId/consultation/:id/:tab": ({
