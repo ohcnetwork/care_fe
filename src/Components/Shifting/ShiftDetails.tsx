@@ -125,7 +125,7 @@ export default function ShiftDetails(props: { id: string }) {
     )?.text;
 
     return (
-      <div className="border rounded-lg bg-white shadow h-full text-black mt-2 p-4">
+      <div className="border rounded-lg bg-white shadow h-full text-black mt-2 mr-3 md:mr-8 p-4">
         <div className="mt-2">
           <div>
             <span className="font-semibold leading-relaxed">Name: </span>
