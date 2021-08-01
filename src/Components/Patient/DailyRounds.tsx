@@ -36,6 +36,7 @@ import {
   updateDailyReport,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
+import { make as Link } from "../Common/components/Link.gen";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const admittedToChoices = ["Select", ...ADMITTED_TO];
@@ -513,14 +514,23 @@ export const DailyRounds = (props: any) => {
               )}
 
               <div className="mt-4 flex justify-between">
-                <Button
-                  color="default"
-                  variant="contained"
-                  type="button"
-                  onClick={(e) => goBack()}
-                >
-                  Cancel
-                </Button>
+                {id && (
+                  <Link
+                    className="btn btn-default bg-white mt-2"
+                    href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${id}/update`}
+                  >
+                    Back
+                  </Link>
+                )}
+                {!id && (
+                  <Link
+                    className="btn btn-default bg-white mt-2"
+                    href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/updates`}
+                  >
+                    Back
+                  </Link>
+                )}
+
                 <Button
                   color="primary"
                   variant="contained"
