@@ -475,7 +475,7 @@ export const FileUpload = (props: FileUploadProps) => {
 
   const uploadAudiofile = (response: any) => {
     var url = response.data.signed_url;
-    var internal_name = response.data.internal_name + ".mp3";
+    const internal_name = response.data.internal_name;
     const f = audioBlob;
     if (f === undefined) return;
     const newFile = new File([f], `${internal_name}`, { type: "audio/mpeg" });
@@ -510,7 +510,7 @@ export const FileUpload = (props: FileUploadProps) => {
     if (f === undefined) return;
     const category = "AUDIO";
     const filename = Date.now().toString();
-    let name = "audio";
+    let name = "audio.mp3";
     setUploadStarted(true);
     setUploadSuccess(false);
     const requestData = {
