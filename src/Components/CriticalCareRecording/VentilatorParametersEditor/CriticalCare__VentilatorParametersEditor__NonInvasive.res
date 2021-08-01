@@ -151,11 +151,11 @@ let make = (~state: VentilatorParameters.state, ~send: VentilatorParameters.acti
           end={"30"}
           interval={"5"}
           step={0.1}
-          value={Belt.Float.toString(
+          value={Js.Float.toFixedWithPrecision(
             switch state.ventilator_peep {
             | Some(value) => value
             | _ => 0.0
-            },
+            }, ~digits=1
           )}
           setValue={s => send(SetPeep(Belt.Float.fromString(s)))}
           getLabel={VentilatorParameters.getStatus(10.0, "Low", 30.0, "High")}
