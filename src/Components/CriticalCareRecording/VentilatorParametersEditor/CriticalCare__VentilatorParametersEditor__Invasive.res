@@ -29,7 +29,7 @@ let silderOptionArray = [
     "start": "0",
     "end": "30",
     "interval": "5",
-    "step": 1.0,
+    "step": 0.1,
     "id": "ventilator_peep",
     "min": 10.0,
     "max": 30.0,
@@ -174,10 +174,26 @@ let make = (~state: VentilatorParameters.state, ~send: VentilatorParameters.acti
         }}
       />
       <div className={`ml-6`}>
+        <Slider
+          key={"non-invasive-ventilator_peep"}
+          title={"PEEP (cm/H2O)"}
+          start={"0"}
+          end={"30"}
+          interval={"5"}
+          step={0.1}
+          value={Belt.Float.toString(
+            switch state.ventilator_peep {
+            | Some(value) => value
+            | _ => 0.0
+            },
+          )}
+          setValue={s => send(SetPeep(Belt.Float.fromString(s)))}
+          getLabel={VentilatorParameters.getStatus(10.0, "Low", 30.0, "High")}
+        />
+
         {silderOptionArray
         |> Array.map(option => {
           let value: option<int> = switch option["id"] {
-          | "ventilator_peep" => state.ventilator_peep
           | "ventilator_pip" => state.ventilator_pip
           | "ventilator_mean_airway_pressure" => state.ventilator_mean_airway_pressure
           | "ventilator_resp_rate" => state.ventilator_resp_rate
@@ -194,7 +210,6 @@ let make = (~state: VentilatorParameters.state, ~send: VentilatorParameters.acti
           @warning("-8")
           let handleChange: option<int> => VentilatorParameters.action = s =>
             switch option["id"] {
-            | "ventilator_peep" => SetPeep(s)
             | "ventilator_pip" => SetPIP(s)
             | "ventilator_mean_airway_pressure" => SetMeanAirwayPressure(s)
             | "ventilator_resp_rate" => SetRespiratoryRate(s)

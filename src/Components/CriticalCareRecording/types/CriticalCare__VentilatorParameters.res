@@ -143,7 +143,7 @@ export type t = {
   ventilator_interface: ventilatorInterfaceType,
   ventilator_mode: ventilatorModeType,
   ventilator_oxygen_modality: ventilatorOxygenModalityType,
-  ventilator_peep: option<int>,
+  ventilator_peep: option<float>,
   ventilator_pip: option<int>,
   ventilator_mean_airway_pressure: option<int>,
   ventilator_resp_rate: option<int>,
@@ -187,7 +187,7 @@ type state = {
   ventilator_interface: ventilatorInterfaceType,
   ventilator_mode: ventilatorModeType,
   ventilator_oxygen_modality: ventilatorOxygenModalityType,
-  ventilator_peep: option<int>,
+  ventilator_peep: option<float>,
   ventilator_pip: option<int>,
   ventilator_mean_airway_pressure: option<int>,
   ventilator_resp_rate: option<int>,
@@ -204,7 +204,7 @@ type action =
   | SetVentilatorInterface(ventilatorInterfaceType)
   | SetVentilatorMode(ventilatorModeType)
   | SetOxygenModality(ventilatorOxygenModalityType)
-  | SetPeep(option<int>)
+  | SetPeep(option<float>)
   | SetPIP(option<int>)
   | SetMeanAirwayPressure(option<int>)
   | SetRespiratoryRate(option<int>)

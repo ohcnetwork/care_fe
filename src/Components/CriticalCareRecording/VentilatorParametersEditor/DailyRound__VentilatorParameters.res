@@ -5,6 +5,7 @@ open CriticalCare__Types
 let make = (
   ~ventilatorParameters,
   ~renderOptionalIntWithIndicators,
+  ~renderOptionalFloatWithIndicators,
   ~renderOptionalInt,
   ~renderLine,
 ) => {
@@ -27,11 +28,11 @@ let make = (
         VentilatorParameters.oxygenModality(ventilatorParameters),
       ),
     )}
-    {renderOptionalIntWithIndicators(
+    {renderOptionalFloatWithIndicators(
       "PEEP",
       VentilatorParameters.peep(ventilatorParameters),
-      5,
-      10,
+      5.0,
+      10.0,
       "Low",
       "High",
     )}
