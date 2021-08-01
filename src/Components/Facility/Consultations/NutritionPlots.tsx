@@ -14,8 +14,9 @@ export const NutritionPlots = (props: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const [offset, setOffset] = useState(0);
   const [results, setResults] = useState({});
-  const [showIO, setShowIO] = useState(false);
+  const [showIO, setShowIO] = useState(true);
   const [showIntake, setShowIntake] = useState(false);
+  const [showOutput, setShowOutput] = useState(false);
   const limit = 14;
 
   const fetchDailyRounds = useCallback(
@@ -90,8 +91,7 @@ export const NutritionPlots = (props: any) => {
   Object.values(results)
     .reverse()
     .map((p: any, i: any) => {
-      const infusions = p.infusions;
-      infusions.map((infusion: any) => {
+      p.infusions.map((infusion: any) => {
         const item = infusionsData[infusion.name];
         item.data[i] = infusion.quantity;
       });
@@ -117,8 +117,7 @@ export const NutritionPlots = (props: any) => {
   Object.values(results)
     .reverse()
     .map((p: any, i: any) => {
-      const iv_fluids = p.iv_fluids;
-      iv_fluids.map((iv_fluid: any) => {
+      p.iv_fluids.map((iv_fluid: any) => {
         const item = IVFluidsData[iv_fluid.name];
         item.data[i] = iv_fluid.quantity;
       });
@@ -150,7 +149,32 @@ export const NutritionPlots = (props: any) => {
       });
     });
 
-  console.log(results, IVFluidsData);
+  //Feeds
+  const OutputList: any = [];
+  Object.values(results).map((p: any) =>
+    p.output.map((x: any) =>
+      OutputList.indexOf(x.name) === -1 ? OutputList.push(x.name) : null
+    )
+  );
+
+  let OutputData: any = {};
+  OutputList.map(
+    (x: any) =>
+      (OutputData[x] = {
+        name: x,
+        data: [...Array(Object.keys(results).length).fill(undefined)],
+      })
+  );
+
+  Object.values(results)
+    .reverse()
+    .map((p: any, i: any) => {
+      p.output.map((x: any) => {
+        const item = OutputData[x.name];
+        item.data[i] = x.quantity;
+      });
+    });
+  console.log(results, OutputList, OutputData);
 
   return (
     <div>
@@ -162,6 +186,7 @@ export const NutritionPlots = (props: any) => {
           <div> IO Balance Plots</div>
           {showIO ? <ExpandLessIcon /> : <ExpandMoreIcon />}
         </div>
+
         <div
           className={showIO ? "grid grid-row-1 md:grid-cols-2 gap-4" : "hidden"}
         >
@@ -173,21 +198,7 @@ export const NutritionPlots = (props: any) => {
               yData={IOvalues}
             />
           </div>
-        </div>
-      </section>
-      <section className="rounded-lg shadow p-4 h-full space-y-2 text-gray-100 my-4">
-        <div
-          className="flex justify-between border-b border-dashed text-gray-900 font-semibold text-left text-lg pb-2"
-          onClick={() => setShowIntake(!showIntake)}
-        >
-          <div>Total Intake</div>
-          {showIntake ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-        </div>
-        <div
-          className={
-            showIntake ? "grid grid-row-1 md:grid-cols-2 gap-4" : "hidden"
-          }
-        >
+          <div />
           <div className="pt-4 px-4 bg-white border rounded-lg shadow">
             <LinePlot
               title="Total Intake"
@@ -197,11 +208,62 @@ export const NutritionPlots = (props: any) => {
             />
           </div>
           <div className="pt-4 px-4 bg-white border rounded-lg shadow">
+            <LinePlot
+              title="Total Output"
+              name="Total Output"
+              xData={dates}
+              yData={yAxisData("total_output_calculated")}
+            />
+          </div>
+        </div>
+      </section>
+      <section className="rounded-lg shadow p-4 h-full space-y-2 text-gray-100 my-4 h-44">
+        <div
+          className="flex justify-between border-b border-dashed text-gray-900 font-semibold text-left text-lg pb-2"
+          onClick={() => setShowIntake(!showIntake)}
+        >
+          <div>Intake</div>
+          {showIntake ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+        </div>
+        <div className={showIntake ? "grid md:grid-cols-2 gap-4" : "hidden"}>
+          <div className="pt-4 px-4 bg-white border rounded-lg shadow">
+            <LinePlot
+              title="Total Intake"
+              name="Total Intake"
+              xData={dates}
+              yData={yAxisData("total_intake_calculated")}
+            />
+          </div>
+          <div />
+          <div className="pt-4 px-4 bg-white border rounded-lg shadow ">
             <StackedLinePlot
               title="Infusions"
               xData={dates}
               yData={Object.values(infusionsData)}
             />
+          </div>
+          <div className="pt-4 px-4 bg-white border rounded-lg shadow text-gray-900">
+            <h3 className="text-lg">Infusions:</h3>
+            <div className="overflow-y-auto pb-2 h-72">
+              {Object.entries(results).map((obj: any) => {
+                if (obj[1].infusions && obj[1].infusions.length > 0) {
+                  return (
+                    <div>
+                      <h4 className="text-sm">
+                        - {moment(obj[0]).format("LLL")}
+                      </h4>
+                      <div className="px-5 text-sm">
+                        {obj[1].infusions.map((o: any) => (
+                          <div>
+                            {o.name} - {o.quantity}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                }
+              })}
+            </div>
           </div>
           <div className="pt-4 px-4 bg-white border rounded-lg shadow">
             <StackedLinePlot
@@ -210,12 +272,112 @@ export const NutritionPlots = (props: any) => {
               yData={Object.values(IVFluidsData)}
             />
           </div>
+          <div className="pt-4 px-4 bg-white border rounded-lg shadow text-gray-900">
+            <h3 className="text-lg">IV Fluids:</h3>
+            <div className="overflow-y-auto pb-2 h-72">
+              {Object.entries(results).map((obj: any) => {
+                if (obj[1].iv_fluids && obj[1].iv_fluids.length > 0) {
+                  return (
+                    <div>
+                      <h4 className="text-sm">
+                        - {moment(obj[0]).format("LLL")}
+                      </h4>
+                      <div className="px-5 text-sm">
+                        {obj[1].iv_fluids.map((o: any) => (
+                          <div>
+                            {o.name} - {o.quantity}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                }
+              })}
+            </div>
+          </div>
           <div className="pt-4 px-4 bg-white border rounded-lg shadow">
             <StackedLinePlot
               title="Feeds"
               xData={dates}
               yData={Object.values(FeedsData)}
             />
+          </div>
+          <div className="pt-4 px-4 bg-white border rounded-lg shadow text-gray-900">
+            <h3 className="text-lg">Feeds:</h3>
+            <div className="overflow-y-auto pb-2 h-72">
+              {Object.entries(results).map((obj: any) => {
+                if (obj[1].feeds && obj[1].feeds.length > 0) {
+                  return (
+                    <div>
+                      <h4 className="text-sm">
+                        - {moment(obj[0]).format("LLL")}
+                      </h4>
+                      <div className="px-5 text-sm">
+                        {obj[1].feeds.map((o: any) => (
+                          <div>
+                            {o.name} - {o.quantity}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                }
+              })}
+            </div>
+          </div>
+        </div>
+      </section>
+      <section className="rounded-lg shadow p-4 h-full space-y-2 text-gray-100 my-4">
+        <div
+          className="flex justify-between border-b border-dashed text-gray-900 font-semibold text-left text-lg pb-2"
+          onClick={() => setShowOutput(!showOutput)}
+        >
+          <div> Output</div>
+          {showOutput ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+        </div>
+        <div
+          className={
+            showOutput ? "grid grid-row-1 md:grid-cols-2 gap-4" : "hidden"
+          }
+        >
+          <div className="pt-4 px-4 bg-white border rounded-lg shadow">
+            <LinePlot
+              title="Total Output"
+              name="Total Output"
+              xData={dates}
+              yData={yAxisData("total_output_calculated")}
+            />
+          </div>
+          <div />
+          <div className="pt-4 px-4 bg-white border rounded-lg shadow">
+            <StackedLinePlot
+              title="Output"
+              xData={dates}
+              yData={Object.values(OutputData)}
+            />
+          </div>
+          <div className="pt-4 px-4 bg-white border rounded-lg shadow text-gray-900">
+            <h3 className="text-lg">Output:</h3>
+            <div className="overflow-y-auto pb-2 h-72">
+              {Object.entries(results).map((obj: any) => {
+                if (obj[1].output && obj[1].output.length > 0) {
+                  return (
+                    <div>
+                      <h4 className="text-sm">
+                        - {moment(obj[0]).format("LLL")}
+                      </h4>
+                      <div className="px-5 text-sm">
+                        {obj[1].output.map((o: any) => (
+                          <div>
+                            {o.name} - {o.quantity}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                }
+              })}
+            </div>
           </div>
         </div>
       </section>
