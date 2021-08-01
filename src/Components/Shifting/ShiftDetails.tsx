@@ -790,7 +790,7 @@ export default function ShiftDetails(props: { id: string }) {
                 </h4>
                 {showPatientCard(data.patient_object)}
               </div>
-              <div className="mx-3 md:mx-8 mb-10">
+              <div className="mr-3 md:mr-8 mb-10">
                 <h4 className="mt-8">Comments</h4>
                 <CommentSection id={props.id} />
               </div>
