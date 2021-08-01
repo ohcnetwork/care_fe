@@ -6,6 +6,8 @@ import { statusType, useAbortableEffect } from "../../../Common/utils";
 import { dailyRoundsAnalyse } from "../../../Redux/actions";
 import { LinePlot } from "./components/LinePlot";
 import { StackedLinePlot } from "./components/StackedLinePlot";
+import Pagination from "../../Common/Pagination";
+import { PAGINATION_LIMIT } from "../../../Common/constants";
 
 export const PrimaryParametersPlot = (props: any) => {
   const { facilityId, patientId, consultationId } = props;
@@ -14,6 +16,7 @@ export const PrimaryParametersPlot = (props: any) => {
   const [offset, setOffset] = useState(0);
   const [results, setResults] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
 
   const fetchDailyRounds = useCallback(
     async (status: statusType) => {
@@ -21,7 +24,7 @@ export const PrimaryParametersPlot = (props: any) => {
       const res = await dispatch(
         dailyRoundsAnalyse(
           {
-            offset,
+            page: currentPage,
             fields: [
               "bp",
               "pulse",
@@ -42,18 +45,19 @@ export const PrimaryParametersPlot = (props: any) => {
       if (!status.aborted) {
         if (res && res.data) {
           setResults(res.data.results);
+          setTotalCount(res.data.count);
         }
         setIsLoading(false);
       }
     },
-    [consultationId, dispatch, offset]
+    [consultationId, dispatch, currentPage]
   );
 
   useAbortableEffect(
     (status: statusType) => {
       fetchDailyRounds(status);
     },
-    [consultationId]
+    [consultationId, currentPage]
   );
 
   const handlePagination = (page: number, limit: number) => {
@@ -192,7 +196,7 @@ export const PrimaryParametersPlot = (props: any) => {
             return (
               <div className="px-3 text-sm">
                 <h4 className="text-base my-3">{obj[0]}</h4>
-                <div className="flex bg-white border shadow rounded-lg">
+                <div className="flex bg-white border shadow rounded-lg overflow-x-auto">
                   {obj[1].map((item: any) => {
                     return (
                       <div className="border border-gray-300 text-center">
@@ -229,6 +233,17 @@ export const PrimaryParametersPlot = (props: any) => {
           })}
         </div>
       </div>
+
+      {totalCount > PAGINATION_LIMIT && (
+        <div className="mt-4 flex w-full justify-center">
+          <Pagination
+            cPage={currentPage}
+            defaultPerPage={PAGINATION_LIMIT}
+            data={{ totalCount }}
+            onChange={handlePagination}
+          />
+        </div>
+      )}
     </div>
   );
 };

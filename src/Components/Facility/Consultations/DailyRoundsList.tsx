@@ -44,9 +44,12 @@ export const DailyRoundsList = (props: any) => {
     [consultationId, dispatch, offset]
   );
 
-  useAbortableEffect((status: statusType) => {
-    fetchDailyRounds(status);
-  }, []);
+  useAbortableEffect(
+    (status: statusType) => {
+      fetchDailyRounds(status);
+    },
+    [currentPage]
+  );
 
   const handlePagination = (page: number, limit: number) => {
     const offset = (page - 1) * limit;
@@ -75,7 +78,7 @@ export const DailyRoundsList = (props: any) => {
               telemedicine_doctor_update ? "bg-purple-200" : "bg-white"
             }  shadow h-full cursor-pointer`}
           >
-            <div className="p-4">
+            <div className="p-2">
               <Grid container justify="space-between" alignItems="center">
                 <Grid item xs={11} container spacing={1}>
                   {telemedicine_doctor_update ? (
@@ -154,7 +157,7 @@ export const DailyRoundsList = (props: any) => {
                   }
                 >
                   <i className="fas fa-eye mr-2" />
-                  View Consultation Update Details
+                  View Details
                 </button>
                 <button
                   className="btn btn-default"
@@ -178,8 +181,10 @@ export const DailyRoundsList = (props: any) => {
   return (
     <div>
       <div>
-        <PageTitle title="Consultation Update" hideBack={true} />
-        <div className="flex flex-wrap">
+        <div className="md:hidden">
+          <PageTitle title="Consultation Update" hideBack={true} />
+        </div>
+        <div className="flex flex-wrap overflow-y-auto md:h-screen">
           {roundsList}
           {!isDailyRoundLoading && totalCount > limit && (
             <div className="mt-4 flex w-full justify-center">

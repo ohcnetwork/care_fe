@@ -10,6 +10,7 @@ import { PATIENT_CATEGORY, SYMPTOM_CHOICES } from "../../Common/constants";
 import { FileUpload } from "../Patient/FileUpload";
 import TreatmentSummary from "./TreatmentSummary";
 import { PrimaryParametersPlot } from "./Consultations/PrimaryParametersPlot";
+import { MedicineTables } from "./Consultations/MedicineTables";
 import { ABGPlots } from "./Consultations/ABGPlots";
 import { DailyRoundsList } from "./Consultations/DailyRoundsList";
 import { make as Link } from "../Common/components/Link.gen";
@@ -18,7 +19,10 @@ import { NeurologicalTable } from "./Consultations/NeurologicalTables";
 import { VentilatorPlot } from "./Consultations/VentilatorPlot";
 import { IOBalancePlots } from "./Consultations/IOBalancePlots";
 import { NutritionPlots } from "./Consultations/NutritionPlots";
+import { GlasgowTables } from "./Consultations/GlasgowTables";
 import { PressureSoreDiagrams } from "./Consultations/PressureSoreDiagrams";
+import { DialysisPlots } from "./Consultations/DialysisPlots";
+import ViewInvestigations from "./Investigations/ViewInvestigations";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -78,7 +82,7 @@ export const ConsultationDetails = (props: any) => {
   }
 
   const tabButtonClasses = (selected: boolean) =>
-    `capitalize cursor-pointer border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300 font-bold ${
+    `capitalize min-w-max-content cursor-pointer border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300 font-bold ${
       selected === true ? "border-primary-500 text-primary-600 border-b-2" : ""
     }`;
 
@@ -249,30 +253,6 @@ export const ConsultationDetails = (props: any) => {
                     SHIFT PATIENT
                   </button>
                 </div>
-                <div className="mt-2">
-                  <button
-                    className="btn btn-primary w-full"
-                    onClick={() =>
-                      navigate(
-                        `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/investigation/`
-                      )
-                    }
-                  >
-                    Create Investigation
-                  </button>
-                </div>
-                <div className="mt-2">
-                  <button
-                    className="btn btn-primary w-full"
-                    onClick={() =>
-                      navigate(
-                        `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/investigationSessions`
-                      )
-                    }
-                  >
-                    View Investigations
-                  </button>
-                </div>
 
                 {!consultationData.discharge_date && (
                   <div className="mt-2">
@@ -303,72 +283,86 @@ export const ConsultationDetails = (props: any) => {
           <div className="border-b-2 border-gray-200 mt-4 w-full">
             <div className="sm:flex sm:items-baseline overflow-x-auto">
               <div className="mt-4 sm:mt-0">
-                <nav className="pl-2 flex space-x-8 overflow-y-auto pb-2">
+                <nav className="pl-2 flex space-x-6 overflow-x-auto pb-2 ">
                   {[
-                    "INFO",
-                    "SUMMARY",
                     "UPDATES",
+                    "SUMMARY",
                     "MEDICINES",
                     "FILES",
+                    "INVESTIGATIONS",
                     "ABG",
                     "NURSING",
                     "NEUROLOGICAL_MONITORING",
+                    "G_C_S",
                     "VENTILATOR",
                     "IO_BALANCE",
                     "NUTRITION",
                     "PRESSURE_SORE",
+                    "DIALYSIS",
                   ].map((p: string) => (
                     <Link
                       key={p}
                       className={tabButtonClasses(tab === p)}
                       href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/${p.toLocaleLowerCase()}`}
                     >
-                      {p.toLocaleLowerCase()}
+                      {p.replaceAll("_", " ").toLocaleLowerCase()}
                     </Link>
                   ))}
                 </nav>
               </div>
             </div>
           </div>
-          {tab === "INFO" && (
-            <div>
-              {consultationData.examination_details && (
-                <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
-                  <div className="px-4 py-5 sm:p-6">
-                    <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-                      Examination details and Clinical conditions:{" "}
-                    </h3>
-                    <div className="mt-2">
-                      {consultationData.examination_details || "-"}
+          {tab === "UPDATES" && (
+            <div className="flex md:flex-row flex-col">
+              <div className="md:w-2/3">
+                <PageTitle title="Info" hideBack={true} />
+                {consultationData.examination_details && (
+                  <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
+                    <div className="px-4 py-5 sm:p-6">
+                      <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                        Examination details and Clinical conditions:{" "}
+                      </h3>
+                      <div className="mt-2">
+                        {consultationData.examination_details || "-"}
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
-              {consultationData.prescribed_medication && (
-                <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
-                  <div className="px-4 py-5 sm:p-6">
-                    <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-                      Treatment Summary
-                    </h3>
-                    <div className="mt-2">
-                      {consultationData.prescribed_medication || "-"}
+                )}
+                {consultationData.prescribed_medication && (
+                  <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
+                    <div className="px-4 py-5 sm:p-6">
+                      <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                        Treatment Summary
+                      </h3>
+                      <div className="mt-2">
+                        {consultationData.prescribed_medication || "-"}
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {consultationData.consultation_notes && (
-                <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
-                  <div className="px-4 py-5 sm:p-6">
-                    <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-                      Advice
-                    </h3>
-                    <div className="mt-2">
-                      {consultationData.consultation_notes || "-"}
+                {consultationData.consultation_notes && (
+                  <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
+                    <div className="px-4 py-5 sm:p-6">
+                      <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                        Advice
+                      </h3>
+                      <div className="mt-2">
+                        {consultationData.consultation_notes || "-"}
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
+              <div className="md:w-1/3">
+                <PageTitle title="Updates" hideBack={true} />
+                <DailyRoundsList
+                  facilityId={facilityId}
+                  patientId={patientId}
+                  consultationId={consultationId}
+                  consultationData={consultationData}
+                />
+              </div>
             </div>
           )}
           {tab === "SUMMARY" && (
@@ -380,14 +374,6 @@ export const ConsultationDetails = (props: any) => {
                 consultationId={consultationId}
               ></PrimaryParametersPlot>
             </div>
-          )}
-          {tab === "UPDATES" && (
-            <DailyRoundsList
-              facilityId={facilityId}
-              patientId={patientId}
-              consultationId={consultationId}
-              consultationData={consultationData}
-            />
           )}
           {tab === "MEDICINES" && (
             <div>
@@ -436,7 +422,7 @@ export const ConsultationDetails = (props: any) => {
                                     {med.dosage}
                                   </td>
                                   <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-gray-500">
-                                    {med.dosage}
+                                    {med.days}
                                   </td>
                                 </tr>
                               )
@@ -448,6 +434,12 @@ export const ConsultationDetails = (props: any) => {
                   </div>
                 </div>
               )}
+
+              <MedicineTables
+                facilityId={facilityId}
+                patientId={patientId}
+                consultationId={consultationId}
+              />
             </div>
           )}
           {tab === "FILES" && (
@@ -494,6 +486,16 @@ export const ConsultationDetails = (props: any) => {
               ></NeurologicalTable>
             </div>
           )}
+          {tab === "G_C_S" && (
+            <div>
+              <PageTitle title="Glasgow Coma Scale" hideBack={true} />
+              <GlasgowTables
+                facilityId={facilityId}
+                patientId={patientId}
+                consultationId={consultationId}
+              />
+            </div>
+          )}
           {tab === "VENTILATOR" && (
             <div>
               <PageTitle title="Ventilator Parameters" hideBack={true} />
@@ -504,7 +506,7 @@ export const ConsultationDetails = (props: any) => {
               ></VentilatorPlot>
             </div>
           )}
-          {tab === "IO_BALANCE" && (
+          {tab === "NUTRITION" && (
             <div>
               <PageTitle title="IO Balance Plots" hideBack={true} />
               <IOBalancePlots consultationId={consultationId}></IOBalancePlots>
@@ -526,6 +528,36 @@ export const ConsultationDetails = (props: any) => {
               <PressureSoreDiagrams
                 consultationId={consultationId}
               ></PressureSoreDiagrams>
+            </div>
+          )}
+          {tab === "DIALYSIS" && (
+            <div>
+              <PageTitle title="Dialysis Plots" hideBack={true} />
+              <DialysisPlots consultationId={consultationId}></DialysisPlots>
+            </div>
+          )}
+          {tab === "INVESTIGATIONS" && (
+            <div>
+              <div className="flex justify-between">
+                <PageTitle title="Investigations" hideBack={true} />
+                <div className="pt-6">
+                  <button
+                    className="btn btn-primary w-full"
+                    onClick={() =>
+                      navigate(
+                        `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/investigation/`
+                      )
+                    }
+                  >
+                    Create Investigation
+                  </button>
+                </div>
+              </div>
+              <ViewInvestigations
+                consultationId={consultationId}
+                facilityId={facilityId}
+                patientId={patientId}
+              />
             </div>
           )}
         </div>
