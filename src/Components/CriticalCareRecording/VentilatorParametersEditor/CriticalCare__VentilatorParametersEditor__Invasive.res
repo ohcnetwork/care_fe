@@ -25,16 +25,6 @@ let simvOptionArray: array<Options.t> = [
 
 let silderOptionArray = [
   {
-    "title": "PEEP (cm/H2O)",
-    "start": "0",
-    "end": "30",
-    "interval": "5",
-    "step": 0.1,
-    "id": "ventilator_peep",
-    "min": 10.0,
-    "max": 30.0,
-  },
-  {
     "title": "Peak Inspiratory Pressure (PIP) (cm H2O)",
     "start": "0",
     "end": "100",
