@@ -183,7 +183,7 @@ let make = (~hemodynamicParameter, ~updateCB, ~id, ~consultationId) => {
         </div>
         <Slider
           title={"Systolic"}
-          start={"50"}
+          start={"0"}
           end={"250"}
           interval={"10"}
           step={1.0}
