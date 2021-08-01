@@ -45,7 +45,7 @@ let silderOptionArray = [
     "max": 30.0,
   },
   {
-    "title": "Mean Airway Pressure (cm H2O",
+    "title": "Mean Airway Pressure (cm H2O)",
     "start": "0",
     "end": "40",
     "interval": "5",
