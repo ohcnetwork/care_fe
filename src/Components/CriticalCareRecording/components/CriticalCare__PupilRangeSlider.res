@@ -12,11 +12,25 @@ let circleClasses = bool => {
   )
 }
 
+let inference = value => {
+  if value === 0 {
+    ""
+  } else if value <= 2 {
+    "Constricted"
+  } else if value <= 6 {
+    "Normal"
+  } else {
+    "Dialated"
+  }
+}
+
 @react.component
 let make = (~name, ~value, ~setValueCB) => {
   let pupilSizes = [1, 2, 3, 4, 5, 6, 7, 8]
   <div className="flex flex-col">
-    <div className="font-bold my-2"> {str("Size")} </div>
+    <div className="my-2 flex justify-between">
+      <div className="font-bold"> {str("Size")} </div> <div> {str(inference(value))} </div>
+    </div>
     <div className="">
       <div className="flex flex-row flex-wrap items-center">
         {Js.Array.map(
