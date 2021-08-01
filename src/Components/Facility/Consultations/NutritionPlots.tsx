@@ -7,17 +7,19 @@ import { LinePlot } from "./components/LinePlot";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import { StackedLinePlot } from "./components/StackedLinePlot";
+import Pagination from "../../Common/Pagination";
+import { PAGINATION_LIMIT } from "../../../Common/constants";
 
 export const NutritionPlots = (props: any) => {
   const { facilityId, patientId, consultationId } = props;
   const dispatch: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
-  const [offset, setOffset] = useState(0);
   const [results, setResults] = useState({});
   const [showIO, setShowIO] = useState(true);
   const [showIntake, setShowIntake] = useState(false);
   const [showOutput, setShowOutput] = useState(false);
-  const limit = 14;
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
 
   const fetchDailyRounds = useCallback(
     async (status: statusType) => {
@@ -25,8 +27,7 @@ export const NutritionPlots = (props: any) => {
       const res = await dispatch(
         dailyRoundsAnalyse(
           {
-            limit,
-            offset,
+            page: currentPage,
             fields: [
               "infusions",
               "iv_fluids",
@@ -41,18 +42,25 @@ export const NutritionPlots = (props: any) => {
       );
       if (!status.aborted) {
         if (res && res.data) {
-          console.log(res.data);
           setResults(res.data.results);
+          setTotalCount(res.data.count);
         }
         setIsLoading(false);
       }
     },
-    [consultationId, dispatch, offset]
+    [consultationId, dispatch, currentPage]
   );
 
-  useAbortableEffect((status: statusType) => {
-    fetchDailyRounds(status);
-  }, []);
+  useAbortableEffect(
+    (status: statusType) => {
+      fetchDailyRounds(status);
+    },
+    [currentPage]
+  );
+
+  const handlePagination = (page: number, limit: number) => {
+    setCurrentPage(page);
+  };
 
   const dates = Object.keys(results)
     .map((p: string) => moment(p).format("LLL"))
@@ -174,7 +182,6 @@ export const NutritionPlots = (props: any) => {
         item.data[i] = x.quantity;
       });
     });
-  console.log(results, OutputList, OutputData);
 
   return (
     <div>
@@ -381,6 +388,17 @@ export const NutritionPlots = (props: any) => {
           </div>
         </div>
       </section>
+
+      {totalCount > PAGINATION_LIMIT && (
+        <div className="mt-4 flex w-full justify-center">
+          <Pagination
+            cPage={currentPage}
+            defaultPerPage={PAGINATION_LIMIT}
+            data={{ totalCount }}
+            onChange={handlePagination}
+          />
+        </div>
+      )}
     </div>
   );
 };
