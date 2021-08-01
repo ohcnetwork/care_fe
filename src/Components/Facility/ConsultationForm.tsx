@@ -341,7 +341,9 @@ export const ConsultationForm = (props: any) => {
             msg: "Consultation created successfully",
           });
         }
-        navigate(`/facility/${facilityId}/patient/${patientId}`);
+        navigate(
+          `/facility/${facilityId}/patient/${patientId}/consultation/${id}`
+        );
       }
     }
   };
@@ -826,7 +828,9 @@ export const ConsultationForm = (props: any) => {
                   variant="contained"
                   type="button"
                   onClick={(_) =>
-                    navigate(`/facility/${facilityId}/patient/${patientId}`)
+                    navigate(
+                      `/facility/${facilityId}/patient/${patientId}/consultation/${id}`
+                    )
                   }
                 >
                   Cancel{" "}
