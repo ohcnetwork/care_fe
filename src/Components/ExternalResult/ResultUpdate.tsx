@@ -206,7 +206,6 @@ export default function UpdateResult(props: any) {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     const validForm = validateForm();
-
     if (validForm) {
       setIsLoading(true);
       const data = {

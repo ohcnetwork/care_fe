@@ -8,6 +8,7 @@ export default function ShowPushNotification({ external_id }: any) {
 
   let resultUrl = async () => {
     setIsLoading(true);
+    console.log("ID:", external_id.id);
     const res = await dispatch(getNotificationData({ id: external_id.id }));
     const data = res.data.caused_objects;
     switch (res.data.event) {
