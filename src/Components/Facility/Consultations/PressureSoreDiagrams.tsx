@@ -115,7 +115,7 @@ export const PressureSoreDiagrams = (props: any) => {
   return (
     <div>
       {dates && dropdown(dates)}
-      {!isLoading && (
+      {!isLoading && selectedData.data && (
         <CriticalCare__PressureScoreViewer
           pressureSoreParameter={selectedData.data}
           id={selectedData.id}
