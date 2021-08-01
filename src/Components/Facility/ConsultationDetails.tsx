@@ -17,7 +17,6 @@ import { make as Link } from "../Common/components/Link.gen";
 import { NursingPlot } from "./Consultations/NursingPlot";
 import { NeurologicalTable } from "./Consultations/NeurologicalTables";
 import { VentilatorPlot } from "./Consultations/VentilatorPlot";
-import { IOBalancePlots } from "./Consultations/IOBalancePlots";
 import { NutritionPlots } from "./Consultations/NutritionPlots";
 import { GlasgowTables } from "./Consultations/GlasgowTables";
 import { PressureSoreDiagrams } from "./Consultations/PressureSoreDiagrams";
@@ -295,7 +294,6 @@ export const ConsultationDetails = (props: any) => {
                     "NEUROLOGICAL_MONITORING",
                     "G_C_S",
                     "VENTILATOR",
-                    "IO_BALANCE",
                     "NUTRITION",
                     "PRESSURE_SORE",
                     "DIALYSIS",
@@ -504,12 +502,6 @@ export const ConsultationDetails = (props: any) => {
                 patientId={patientId}
                 consultationId={consultationId}
               ></VentilatorPlot>
-            </div>
-          )}
-          {tab === "NUTRITION" && (
-            <div>
-              <PageTitle title="IO Balance Plots" hideBack={true} />
-              <IOBalancePlots consultationId={consultationId}></IOBalancePlots>
             </div>
           )}
           {tab === "NUTRITION" && (
