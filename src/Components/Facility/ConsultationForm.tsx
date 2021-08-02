@@ -77,6 +77,8 @@ const initForm: any = {
   action: "PENDING",
   assigned_to: "",
   assigned_to_object: null,
+  weight: "",
+  height: "",
 };
 
 const initError = Object.assign(
@@ -185,6 +187,8 @@ export const ConsultationForm = (props: any) => {
             is_telemedicine: `${res.data.is_telemedicine}`,
             is_kasp: `${res.data.is_kasp}`,
             assigned_to: res.data.assigned_to || "",
+            weight: res.data.weight ? res.data.weight : "",
+            height: res.data.height ? res.data.height : "",
           };
           dispatch({ type: "set_form", form: formData });
         } else {
@@ -341,6 +345,8 @@ export const ConsultationForm = (props: any) => {
         review_time: state.form.review_time,
         assigned_to:
           state.form.is_telemedicine === "true" ? state.form.assigned_to : "",
+        weight: Number(state.form.weight),
+        height: Number(state.form.height),
       };
       const res = await dispatchAction(
         id ? updateConsultation(id, data) : createConsultation(data)
@@ -443,6 +449,42 @@ export const ConsultationForm = (props: any) => {
           <form onSubmit={(e) => handleSubmit(e)}>
             <CardContent>
               <div className="grid gap-4 grid-cols-1">
+                <div className="flex flex-col md:flex-row justify-between md:gap-5">
+                  <div id="weight-div" className="flex-1">
+                    <InputLabel id="refered-label">Weight (in Kg)</InputLabel>
+                    <TextInputField
+                      name="weight"
+                      variant="outlined"
+                      margin="dense"
+                      type="string"
+                      InputLabelProps={{ shrink: !!state.form.weight }}
+                      value={state.form.weight}
+                      onChange={handleChange}
+                      errors={state.errors.weight}
+                    />
+                  </div>
+                  <div id="height-div" className="flex-1">
+                    <InputLabel id="refered-label">Height (in cm)</InputLabel>
+                    <TextInputField
+                      name="height"
+                      variant="outlined"
+                      margin="dense"
+                      type="string"
+                      InputLabelProps={{ shrink: !!state.form.height }}
+                      value={state.form.height}
+                      onChange={handleChange}
+                      errors={state.errors.height}
+                    />
+                  </div>
+                </div>
+                <div id="body_surface-div" className="flex-1">
+                  Body Surface area :{" "}
+                  {Math.sqrt(
+                    (Number(state.form.weight) * Number(state.form.height)) /
+                      3600
+                  ).toFixed(2)}{" "}
+                  m<sup>2</sup>
+                </div>
                 <div id="symptoms-div">
                   <InputLabel id="symptoms-label">Symptoms*</InputLabel>
                   <MultiSelectField
