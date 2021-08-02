@@ -2,6 +2,8 @@ import React, { useEffect, useReducer, useState } from "react";
 import { MultiSelectField } from "../../Common/HelperInputFields";
 import { TestTable } from "./Table";
 import { useDispatch } from "react-redux";
+import Autocomplete from "@material-ui/lab/Autocomplete";
+import { Checkbox, TextField, InputLabel } from "@material-ui/core";
 import {
   createInvestigation,
   listInvestigationGroups,
@@ -73,6 +75,9 @@ const Investigation = (props: {
   const [state, setState] = useReducer(testFormReducer, initialState);
   const [investigations, setInvestigations] = useState<InvestigationType[]>([]);
   const [investigationGroups, setInvestigationGroups] = useState<Group[]>([]);
+  const [selectedInvestigations, setSelectedInvestigations] = useState<
+    InvestigationType[]
+  >([]);
   const [isLoading, setIsLoading] = useState({
     investigationLoading: false,
     investigationGroupLoading: false,
@@ -187,14 +192,61 @@ const Investigation = (props: {
         <label className="text-sm" id="investigation-group-label">
           Select Investigation Groups
         </label>
-        <MultiSelectField
-          id="investigation-group-label"
-          options={investigationGroups}
-          value={selectedGroup}
-          optionValue="name"
-          optionKey="external_id"
-          onChange={handleGroupSelect}
-        />
+        <div className="flex justify-between">
+          <MultiSelectField
+            id="investigation-group-label"
+            options={investigationGroups}
+            value={selectedGroup}
+            optionValue="name"
+            optionKey="external_id"
+            onChange={handleGroupSelect}
+          />
+          <div className="mx-2 px-2"> </div>
+          <Autocomplete
+            multiple
+            id="search-by-test"
+            fullWidth={true}
+            options={investigations}
+            value={selectedInvestigations}
+            disableCloseOnSelect
+            getOptionLabel={(option) =>
+              option.name + `( ${option.groups.map((e) => e.name).join(", ")})`
+            }
+            renderOption={(option, { selected }) => (
+              <React.Fragment>
+                <Checkbox
+                  style={{ marginRight: 8 }}
+                  checked={selected}
+                  color="primary"
+                />
+                {option.name + " | " + option.groups.join(", ")}
+              </React.Fragment>
+            )}
+            renderInput={(params) => (
+              <>
+                <InputLabel>Search by Test</InputLabel>
+
+                <TextField
+                  margin="dense"
+                  {...params}
+                  placeholder="Select Investigations"
+                />
+              </>
+            )}
+            onChange={(_: any, options: InvestigationType[]) => {
+              setSelectedInvestigations(options);
+              handleGroupSelect({
+                target: {
+                  value: options.reduce<string[]>(
+                    (acc, option) =>
+                      acc.concat(option.groups.map((e) => e.external_id)),
+                    []
+                  ),
+                },
+              });
+            }}
+          />
+        </div>
       </div>
       {selectedGroup.map((group_id: string) => {
         const filteredInvestigations = listOfInvestigations(
