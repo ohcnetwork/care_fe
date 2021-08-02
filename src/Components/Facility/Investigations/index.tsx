@@ -219,7 +219,14 @@ const Investigation = (props: {
                   checked={selected}
                   color="primary"
                 />
-                {option.name + " | " + option.groups.join(", ")}
+                {option.name} |{" "}
+                {option.groups.map((e) => {
+                  return (
+                    <div className="px-2 py-1 text-xs font-bold bg-gray-300 rounded-full">
+                      {e.name}
+                    </div>
+                  );
+                })}
               </React.Fragment>
             )}
             renderInput={(params) => (
