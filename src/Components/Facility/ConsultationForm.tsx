@@ -77,6 +77,8 @@ const initForm: any = {
   action: "PENDING",
   assigned_to: "",
   assigned_to_object: null,
+  cpk_mb: 0,
+  operation: "",
 };
 
 const initError = Object.assign(
@@ -185,6 +187,8 @@ export const ConsultationForm = (props: any) => {
             is_telemedicine: `${res.data.is_telemedicine}`,
             is_kasp: `${res.data.is_kasp}`,
             assigned_to: res.data.assigned_to || "",
+            cpk_mb: res.data.cpk_mb || "",
+            operation: res.data.operation || "",
           };
           dispatch({ type: "set_form", form: formData });
         } else {
@@ -287,6 +291,15 @@ export const ConsultationForm = (props: any) => {
             invalidForm = true;
           }
           return;
+        case "cpk_mb":
+          if (
+            state.form[field] &&
+            (state.form[field] < 0 || state.form[field] > 100)
+          ) {
+            errors[field] = "Value should be between 0 and 100.";
+            invalidForm = true;
+          }
+          return;
         default:
           return;
       }
@@ -341,6 +354,8 @@ export const ConsultationForm = (props: any) => {
         review_time: state.form.review_time,
         assigned_to:
           state.form.is_telemedicine === "true" ? state.form.assigned_to : "",
+        cpk_mb: state.form.cpk_mb ? Number(state.form.cpk_mb) : 0,
+        operation: state.form.operation,
       };
       const res = await dispatchAction(
         id ? updateConsultation(id, data) : createConsultation(data)
@@ -841,6 +856,36 @@ export const ConsultationForm = (props: any) => {
                   <ErrorHelperText error={state.errors.action} />
                 </div>
               )}
+              <div id="cpk_mb-div">
+                <InputLabel id="cpk_mb-label">CPK/MB</InputLabel>
+                <TextInputField
+                  id="cpk_mb"
+                  name="cpk_mb"
+                  type="number"
+                  variant="outlined"
+                  margin="dense"
+                  onChange={handleChange}
+                  value={state.form.cpk_mb}
+                  errors={state.errors.cpk_mb}
+                />
+              </div>
+              <div id="operation-div">
+                <InputLabel id="exam-details-label">Operation</InputLabel>
+                <MultilineInputField
+                  rows={5}
+                  name="operation"
+                  variant="outlined"
+                  margin="dense"
+                  type="text"
+                  placeholder="Information optional"
+                  InputLabelProps={{
+                    shrink: !!state.form.operation,
+                  }}
+                  value={state.form.operation}
+                  onChange={handleChange}
+                  errors={state.errors.operation}
+                />
+              </div>
               {/* End of Telemedicine fields */}
               <div className="mt-4 flex justify-between">
                 <Button
