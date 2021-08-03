@@ -56,6 +56,7 @@ export interface PatientModel {
     facility: string;
     assigned_to_object?: AssignedToObjectModel;
     is_telemedicine?: boolean;
+    consultation_notes: string;
   };
   address?: string;
   village?: string;
