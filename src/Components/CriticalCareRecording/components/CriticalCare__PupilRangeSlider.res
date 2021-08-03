@@ -27,14 +27,11 @@ let inference = value => {
 @react.component
 let make = (~name, ~value, ~setValueCB) => {
   let pupilSizes = [1, 2, 3, 4, 5, 6, 7, 8]
-  let val = switch value {
-  | Some(value) => value
-  | None => -1
-  }
 
   <div className="flex flex-col">
     <div className="my-2 flex justify-between">
-      <div className="font-bold"> {str("Size")} </div> <div> {str(inference(val))} </div>
+      <div className="font-bold"> {str("Size")} </div>
+      <div> {str(Belt.Option.mapWithDefault(value, "", val => inference(val)))} </div>
     </div>
     <div className="">
       <div className="flex flex-row flex-wrap items-center">
@@ -42,7 +39,7 @@ let make = (~name, ~value, ~setValueCB) => {
           x =>
             <div
               key={`pupil_circle${string_of_int(x)}`}
-              className={circleClasses(x === val)}
+              className={circleClasses(Belt.Option.mapWithDefault(value, false, val => x === val))}
               onClick={e => setValueCB(x)}>
               <div className={`pupil${string_of_int(x)}`} /> <div> {str(string_of_int(x))} </div>
             </div>,
@@ -56,7 +53,7 @@ let make = (~name, ~value, ~setValueCB) => {
           label="Cannot Be Assessed"
           id={`${name}_radio`}
           onChange={_ => setValueCB(0)}
-          checked={val === 0}
+          checked={Belt.Option.mapWithDefault(value, false, val => val === 0)}
         />
       </label>
     </div>
