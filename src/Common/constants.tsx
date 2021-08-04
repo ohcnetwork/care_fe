@@ -333,7 +333,6 @@ export const VACCINES = [
   "CoviShield",
   "Covaxin",
   "Sputnik",
-  "Astrazeneca",
   "Moderna",
   "Pfizer",
   "Janssen",
