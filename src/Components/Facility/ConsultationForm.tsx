@@ -41,6 +41,7 @@ import {
   TextInputField,
 } from "../Common/HelperInputFields";
 import { make as PrescriptionBuilder } from "../Common/PrescriptionBuilder.gen";
+import { make as Slider } from "../CriticalCareRecording/components/Slider.gen";
 import { FacilityModel } from "./models";
 import { OnlineUsersSelect } from "../Common/OnlineUsersSelect";
 
@@ -79,6 +80,10 @@ const initForm: any = {
   assigned_to_object: null,
   cpk_mb: 0,
   operation: "",
+  intubation_start_date: null,
+  intubation_end_date: null,
+  ett_tt: 3,
+  cuff_pressure: 0,
 };
 
 const initError = Object.assign(
@@ -147,6 +152,7 @@ export const ConsultationForm = (props: any) => {
   const [selectedFacility, setSelectedFacility] =
     useState<FacilityModel | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isMmhgUnit, setIsMmhgUnit] = useState(true);
 
   const headerText = !id ? "Consultation" : "Edit Consultation";
   const buttonText = !id ? "Add Consultation" : "Update Consultation";
@@ -189,6 +195,10 @@ export const ConsultationForm = (props: any) => {
             assigned_to: res.data.assigned_to || "",
             cpk_mb: res.data.cpk_mb || "",
             operation: res.data.operation || "",
+            ett_tt: res.data.ett_tt ? Number(res.data.ett_tt) : 3,
+            cuff_pressure: res.data.cuff_pressure
+              ? Number(res.data.cuff_pressure)
+              : 0,
           };
           dispatch({ type: "set_form", form: formData });
         } else {
@@ -308,6 +318,14 @@ export const ConsultationForm = (props: any) => {
     return [!invalidForm, error_div];
   };
 
+  const mmHgTocmH2o = (val: any) => {
+    return (val * 1.35951).toFixed();
+  };
+
+  const cmH2oTommHg = (val: any) => {
+    return (val * 0.73556).toFixed();
+  };
+
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     const [validForm, error_div] = validateForm();
@@ -356,6 +374,12 @@ export const ConsultationForm = (props: any) => {
           state.form.is_telemedicine === "true" ? state.form.assigned_to : "",
         cpk_mb: state.form.cpk_mb ? Number(state.form.cpk_mb) : 0,
         operation: state.form.operation,
+        intubation_start_date: state.form.intubation_start_date,
+        intubation_end_date: state.form.intubation_end_date,
+        ett_tt: state.form.ett_tt,
+        cuff_pressure: isMmhgUnit
+          ? state.form.cuff_pressure
+          : cmH2oTommHg(state.form.cuff_pressure),
       };
       const res = await dispatchAction(
         id ? updateConsultation(id, data) : createConsultation(data)
@@ -447,6 +471,21 @@ export const ConsultationForm = (props: any) => {
     const form = { ...state.form };
     form.referred_to = selected ? (selected as FacilityModel).id : "";
     dispatch({ type: "set_form", form });
+  };
+
+  const handleSliderChange = (value: any, key: string) => {
+    const form = { ...state.form };
+    form[key] = value;
+    dispatch({ type: "set_form", form });
+  };
+
+  const toggleCuffUnit = () => {
+    const form = { ...state.form };
+    form.cuff_pressure = isMmhgUnit
+      ? mmHgTocmH2o(form.cuff_pressure)
+      : cmH2oTommHg(form.cuff_pressure);
+    dispatch({ type: "set_form", form });
+    setIsMmhgUnit(!isMmhgUnit);
   };
 
   if (isLoading) {
@@ -884,6 +923,69 @@ export const ConsultationForm = (props: any) => {
                   value={state.form.operation}
                   onChange={handleChange}
                   errors={state.errors.operation}
+                />
+              </div>
+              <div className="mt-4">
+                <h3 className="text-lg leading-relaxed font-semibold text-gray-900">
+                  Date/Size/LL
+                </h3>
+                <div className="flex flex-row justify-between px-4">
+                  <div id="intubation_start_date-div">
+                    <DateInputField
+                      id="intubation_start_date"
+                      label="Intubated On"
+                      margin="dense"
+                      value={state.form.intubation_start_date}
+                      disableFuture={true}
+                      onChange={(date) =>
+                        handleDateChange(date, "intubation_start_date")
+                      }
+                      errors={state.errors.intubation_start_date}
+                    />
+                  </div>
+                  <div id="intubation_end_date-div">
+                    <DateInputField
+                      id="intubation_end_date"
+                      label="Exhubated On"
+                      margin="dense"
+                      value={state.form.intubation_end_date}
+                      disableFuture={true}
+                      onChange={(date) =>
+                        handleDateChange(date, "intubation_end_date")
+                      }
+                      errors={state.errors.intubation_start_date}
+                    />
+                  </div>
+                </div>
+                <Slider
+                  title={"ETT/TT (mmid)"}
+                  start={"3"}
+                  end={"10"}
+                  interval={"1"}
+                  step={0.1}
+                  value={state.form.ett_tt}
+                  setValue={(val) => handleSliderChange(val, "ett_tt")}
+                  getLabel={(s) => ["", "#059669"]}
+                />
+                <Slider
+                  title={"Cuff Pressure"}
+                  titleNeighbour={
+                    <div
+                      className="flex items-center ml-1 border border-gray-400 rounded px-4 h-10 cursor-pointer hover:bg-gray-200"
+                      onClick={(_) => toggleCuffUnit()}
+                    >
+                      <span className="text-primary-600">
+                        {isMmhgUnit ? "mmHg" : "cmH2O"}
+                      </span>
+                    </div>
+                  }
+                  start={"0"}
+                  end={"60"}
+                  interval={"1"}
+                  step={1.0}
+                  value={state.form.cuff_pressure}
+                  setValue={(val) => handleSliderChange(val, "cuff_pressure")}
+                  getLabel={(s) => ["", "#059669"]}
                 />
               </div>
               {/* End of Telemedicine fields */}
