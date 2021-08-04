@@ -202,25 +202,34 @@ export const ConsultationDetails = (props: any) => {
                   </div>
                 )}
               </div>
-              <div className="flex flex-col mt-2">
-                <div className="text-sm text-gray-700">
-                  Created on{" "}
-                  {moment(consultationData.created_date).format("lll")}
+              <div className="flex flex-col mt-2 space-y-1">
+                <div className="text-sm text-gray-700 font-semibold leading-relaxed">
+                  <span className="text-gray-900">Created: </span>
+                  {moment(consultationData.created_date).format("lll")} |
                   {consultationData.created_by && (
-                    <span>
-                      {`by ${consultationData.created_by?.first_name} ${consultationData.created_by?.last_name} @${consultationData.created_by?.username} (${consultationData.created_by?.user_type})`}
-                    </span>
+                    <div className="block md:inline">
+                      <span className="font-bold">
+                        {` ${consultationData.created_by?.first_name} ${consultationData.created_by?.last_name}  `}
+                      </span>
+                      <span className="badge badge-pill badge-warning">
+                        {`@${consultationData.created_by?.username} (${consultationData.created_by?.user_type})`}
+                      </span>
+                    </div>
                   )}
                 </div>
 
-                <div className="text-sm text-gray-700">
-                  Last Modified on{" "}
-                  {moment(consultationData.modified_date).format("lll")}{" "}
+                <div className="text-sm text-gray-700 font-semibold leading-relaxed">
+                  <span className="text-gray-900">Last Modified: </span>
+                  {moment(consultationData.modified_date).format("lll")} |
                   {consultationData.last_edited_by && (
-                    <span>
-                      by{" "}
-                      {`${consultationData.last_edited_by?.first_name} ${consultationData.last_edited_by?.last_name} @${consultationData.last_edited_by?.username} (${consultationData.last_edited_by?.user_type})`}
-                    </span>
+                    <div className="block md:inline">
+                      <span className="font-bold">
+                        {` ${consultationData.last_edited_by?.first_name} ${consultationData.last_edited_by?.last_name}  `}
+                      </span>
+                      <span className="badge badge-pill badge-warning">
+                        {`@${consultationData.last_edited_by?.username} (${consultationData.last_edited_by?.user_type})`}
+                      </span>
+                    </div>
                   )}
                 </div>
               </div>
