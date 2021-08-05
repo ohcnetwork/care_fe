@@ -61,7 +61,7 @@ let renderOptionalFloat = (title, value) => {
 }
 
 let renderOptionalBool = (title, value) => {
-  Belt.Option.mapWithDefault(value, React.null, v => renderLine(title, string_of_bool(v)))
+  Belt.Option.mapWithDefault(value, React.null, v => renderLine(title, v ? "Yes" : "No"))
 }
 
 let renderOptionalDescription = (title, value) => {

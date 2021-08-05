@@ -100,15 +100,15 @@ let make = (~others, ~updateCB, ~id, ~consultationId) => {
   <div>
     <CriticalCare__PageTitle title="Others" />
     <div>
-      <div className="my-10">
-        <div className=" text-2xl font-bold my-2"> {str("Bilateral Air Entry")} </div>
+      <div className="px-5 my-10">
+        <div className=" text-xl font-bold my-2"> {str("Bilateral Air Entry")} </div>
         <div className="flex md:flex-row flex-col md:space-y-0 space-y-2 space-x-0 md:space-x-4">
           <Radio
             key="bilateral-air-entry-yes"
             id="bilateral-air-entry-yes"
             label="Yes"
             checked={switch state.bilateral_air_entry {
-              | Some(bae) => bae === true ? true : false
+              | Some(bae) => bae
               | None => false
             }}
             onChange={_ => send(SetBilateralAirEntry(Some(true)))}
@@ -119,7 +119,7 @@ let make = (~others, ~updateCB, ~id, ~consultationId) => {
             id="bilateral-air-entry-no"
             label="No"
             checked={switch state.bilateral_air_entry {
-              | Some(bae) => bae === false ? true : false
+              | Some(bae) => !bae
               | None => false
             }}
             onChange={_ => send(SetBilateralAirEntry(Some(false)))}
