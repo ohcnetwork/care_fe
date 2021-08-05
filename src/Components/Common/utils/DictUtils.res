@@ -17,3 +17,10 @@ let setOptionalFloat = (key, value, payload) => {
   | None => ()
   }
 }
+
+let setOptionalBool = (key, value, payload) => {
+  switch value {
+  | Some(v) => Js.Dict.set(payload, key, Js.Json.boolean(v))
+  | None => ()
+  }
+}
