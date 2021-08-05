@@ -449,42 +449,6 @@ export const ConsultationForm = (props: any) => {
           <form onSubmit={(e) => handleSubmit(e)}>
             <CardContent>
               <div className="grid gap-4 grid-cols-1">
-                <div className="flex flex-col md:flex-row justify-between md:gap-5">
-                  <div id="weight-div" className="flex-1">
-                    <InputLabel id="refered-label">Weight (in Kg)</InputLabel>
-                    <TextInputField
-                      name="weight"
-                      variant="outlined"
-                      margin="dense"
-                      type="string"
-                      InputLabelProps={{ shrink: !!state.form.weight }}
-                      value={state.form.weight}
-                      onChange={handleChange}
-                      errors={state.errors.weight}
-                    />
-                  </div>
-                  <div id="height-div" className="flex-1">
-                    <InputLabel id="refered-label">Height (in cm)</InputLabel>
-                    <TextInputField
-                      name="height"
-                      variant="outlined"
-                      margin="dense"
-                      type="string"
-                      InputLabelProps={{ shrink: !!state.form.height }}
-                      value={state.form.height}
-                      onChange={handleChange}
-                      errors={state.errors.height}
-                    />
-                  </div>
-                </div>
-                <div id="body_surface-div" className="flex-1">
-                  Body Surface area :{" "}
-                  {Math.sqrt(
-                    (Number(state.form.weight) * Number(state.form.height)) /
-                      3600
-                  ).toFixed(2)}{" "}
-                  m<sup>2</sup>
-                </div>
                 <div id="symptoms-div">
                   <InputLabel id="symptoms-label">Symptoms*</InputLabel>
                   <MultiSelectField
@@ -880,6 +844,41 @@ export const ConsultationForm = (props: any) => {
                   <ErrorHelperText error={state.errors.action} />
                 </div>
               )}
+              <div className="flex flex-col md:flex-row justify-between md:gap-5">
+                <div id="weight-div" className="flex-1">
+                  <InputLabel id="refered-label">Weight (in Kg)</InputLabel>
+                  <TextInputField
+                    name="weight"
+                    variant="outlined"
+                    margin="dense"
+                    type="string"
+                    InputLabelProps={{ shrink: !!state.form.weight }}
+                    value={state.form.weight}
+                    onChange={handleChange}
+                    errors={state.errors.weight}
+                  />
+                </div>
+                <div id="height-div" className="flex-1">
+                  <InputLabel id="refered-label">Height (in cm)</InputLabel>
+                  <TextInputField
+                    name="height"
+                    variant="outlined"
+                    margin="dense"
+                    type="string"
+                    InputLabelProps={{ shrink: !!state.form.height }}
+                    value={state.form.height}
+                    onChange={handleChange}
+                    errors={state.errors.height}
+                  />
+                </div>
+              </div>
+              <div id="body_surface-div" className="flex-1">
+                Body Surface area :{" "}
+                {Math.sqrt(
+                  (Number(state.form.weight) * Number(state.form.height)) / 3600
+                ).toFixed(2)}{" "}
+                m<sup>2</sup>
+              </div>
               {/* End of Telemedicine fields */}
               <div className="mt-4 flex justify-between">
                 <Button
