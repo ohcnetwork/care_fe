@@ -106,7 +106,7 @@ let make = (~others, ~updateCB, ~id, ~consultationId) => {
           <Radio
             key="bilateral-air-entry-yes"
             id="bilateral-air-entry-yes"
-            label="yes"
+            label="Yes"
             checked={switch state.bilateral_air_entry {
               | Some(bae) => bae === true ? true : false
               | None => false
@@ -117,7 +117,7 @@ let make = (~others, ~updateCB, ~id, ~consultationId) => {
           <Radio
             key="bilateral-air-entry-no"
             id="bilateral-air-entry-no"
-            label="no"
+            label="No"
             checked={switch state.bilateral_air_entry {
               | Some(bae) => bae === false ? true : false
               | None => false
