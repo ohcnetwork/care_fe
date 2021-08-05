@@ -60,6 +60,10 @@ let renderOptionalFloat = (title, value) => {
   Belt.Option.mapWithDefault(value, React.null, v => renderLine(title, Js.Float.toString(v)))
 }
 
+let renderOptionalBool = (title, value) => {
+  Belt.Option.mapWithDefault(value, React.null, v => renderLine(title, string_of_bool(v)))
+}
+
 let renderOptionalDescription = (title, value) => {
   switch value {
   | Some(v) =>
@@ -172,7 +176,7 @@ export make = (
         </div>
         <div>
           <CriticalCare__PageTitle title="Others" />
-          <DailyRound__Others others renderOptionalIntWithIndicators />
+          <DailyRound__Others others renderOptionalIntWithIndicators renderOptionalBool />
         </div>
       </div>
     </div>
