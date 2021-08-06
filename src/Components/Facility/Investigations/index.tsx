@@ -71,7 +71,7 @@ const Investigation = (props: {
   facilityId: string;
 }) => {
   const dispatch: any = useDispatch();
-  const [selectedGroup, setSelectedGroup] = useState([]);
+  const [selectedGroup, setSelectedGroup] = useState<string[]>([]);
   const [state, setState] = useReducer(testFormReducer, initialState);
   const [investigations, setInvestigations] = useState<InvestigationType[]>([]);
   const [investigationGroups, setInvestigationGroups] = useState<Group[]>([]);
@@ -112,10 +112,8 @@ const Investigation = (props: {
     setSession(new Date().toString());
   }, [props.consultationId]);
 
-  const handleGroupSelect = (e: any, child?: any) => {
-    const { value } = e?.target;
-
-    let investigationsArray = value.map((group_id: string) => {
+  const initialiseForm = () => {
+    let investigationsArray = selectedGroup.map((group_id: string) => {
       return listOfInvestigations(group_id, investigations);
     });
 
@@ -135,12 +133,11 @@ const Investigation = (props: {
                 investigation_type: i.investigation_type,
               })
     );
-
-    setSelectedGroup(value);
     setState({ type: "set_form", form });
   };
 
   const handleSubmit = async (e: any) => {
+    initialiseForm();
     if (!saving) {
       setSaving(true);
 
@@ -200,7 +197,7 @@ const Investigation = (props: {
             value={selectedGroup}
             optionValue="name"
             optionKey="external_id"
-            onChange={handleGroupSelect}
+            onChange={(e, c) => setSelectedGroup(e.target.value)}
           />
           <div className="mx-2 px-2"> </div>
           <Autocomplete
@@ -249,24 +246,23 @@ const Investigation = (props: {
             )}
             onChange={(_: any, options: InvestigationType[]) => {
               setSelectedInvestigations(options);
-              handleGroupSelect({
-                target: {
-                  value: options.reduce<string[]>(
-                    (acc, option) =>
-                      acc.concat(option.groups.map((e) => e.external_id)),
-                    []
-                  ),
-                },
-              });
+              setSelectedGroup(
+                options.reduce<string[]>(
+                  (acc, option) =>
+                    acc.concat(option.groups.map((e) => e.external_id)),
+                  []
+                )
+              );
             }}
           />
         </div>
       </div>
-      {selectedGroup.map((group_id: string) => {
-        const filteredInvestigations = listOfInvestigations(
-          group_id,
-          investigations
-        );
+      {selectedGroup.map((group_id) => {
+        const filteredInvestigations = selectedInvestigations.length
+          ? selectedInvestigations.filter((e) =>
+              e.groups.map((e) => e.external_id).includes(group_id)
+            )
+          : listOfInvestigations(group_id, investigations);
         const group = findGroup(group_id, investigationGroups);
         return (
           <TestTable
