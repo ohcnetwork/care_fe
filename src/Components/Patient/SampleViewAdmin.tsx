@@ -10,6 +10,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   SAMPLE_TEST_STATUS,
+  SAMPLE_TEST_RESULT,
   ROLE_STATUS_MAP,
   SAMPLE_FLOW_RULES,
 } from "../../Common/constants";
@@ -62,6 +63,7 @@ export default function SampleViewAdmin(props: any) {
           patient_name: qParams.patient_name || undefined,
           district_name: qParams.district_name || undefined,
           status: qParams.status || undefined,
+          result: qParams.result || undefined,
         })
       );
       if (!status.aborted) {
@@ -78,6 +80,7 @@ export default function SampleViewAdmin(props: any) {
       qParams.district_name,
       qParams.patient_name,
       qParams.status,
+      qParams.result,
     ]
   );
 
@@ -478,6 +481,12 @@ export default function SampleViewAdmin(props: any) {
               (status) => status.id == qParams.status
             )?.text.replaceAll("_", " "),
             "status"
+          )}
+          {badge(
+            "Result",
+            SAMPLE_TEST_RESULT.find((result) => result.id == qParams.result)
+              ?.text,
+            "result"
           )}
         </div>
       </div>
