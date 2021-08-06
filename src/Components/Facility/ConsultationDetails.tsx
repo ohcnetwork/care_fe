@@ -196,9 +196,8 @@ export const ConsultationDetails = (props: any) => {
                     <span className="font-semibold leading-relaxed">
                       Verified By:{" "}
                     </span>
-                    <span className="badge badge-pill badge-primary">
-                      {consultationData.verified_by}
-                    </span>
+                    {consultationData.verified_by}
+                    <i className="fas fa-check-circle fill-current text-lg text-green-500 ml-2"></i>
                   </div>
                 )}
               </div>
