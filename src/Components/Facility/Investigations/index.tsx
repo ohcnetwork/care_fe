@@ -78,6 +78,7 @@ const Investigation = (props: {
   const [selectedInvestigations, setSelectedInvestigations] = useState<
     InvestigationType[]
   >([]);
+  const [searchInputValue, setSearchInputValue] = useState<string>("");
   const [isLoading, setIsLoading] = useState({
     investigationLoading: false,
     investigationGroupLoading: false,
@@ -209,9 +210,15 @@ const Investigation = (props: {
             options={investigations}
             value={selectedInvestigations}
             disableCloseOnSelect
+            inputValue={searchInputValue}
             getOptionLabel={(option) =>
               option.name + `( ${option.groups.map((e) => e.name).join(", ")})`
             }
+            onInputChange={(e, value, reason) => {
+              if (reason === "input" || reason === "clear") {
+                setSearchInputValue(value);
+              }
+            }}
             renderOption={(option, { selected }) => (
               <React.Fragment>
                 <Checkbox
