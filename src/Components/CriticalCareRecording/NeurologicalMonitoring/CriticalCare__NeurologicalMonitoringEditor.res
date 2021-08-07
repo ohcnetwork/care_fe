@@ -295,7 +295,7 @@ let renderPupil = (state, send) => {
       <div className="text-lg font-bold my-3"> {str("Left Pupil")} </div>
       <CriticalCare__PupilRangeSlider
         name={"left_pupil_slider"}
-        value={Belt.Option.getWithDefault(state.leftPupilSize, 1)}
+        value={state.leftPupilSize}
         setValueCB={value => send(SetLeftPupilSize(value))}
       />
       {ReactUtils.nullUnless(
@@ -324,7 +324,7 @@ let renderPupil = (state, send) => {
       <div className="text-lg font-bold my-5"> {str("Right Pupil")} </div>
       <CriticalCare__PupilRangeSlider
         name={"right_pupil_slider"}
-        value={Belt.Option.getWithDefault(state.rightPupilSize, 1)}
+        value={state.rightPupilSize}
         setValueCB={value => send(SetRightPupilSize(value))}
       />
       {ReactUtils.nullUnless(
