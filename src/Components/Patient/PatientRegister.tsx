@@ -1054,12 +1054,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       variant="outlined"
                       margin="dense"
                       type="text"
+                      autoComplete="no"
                       value={state.form.name}
                       onChange={handleChange}
                       errors={state.errors.name}
-                      inputProps={{
-                        autoComplete: "new-password",
-                      }}
                     />
                   </div>
 
