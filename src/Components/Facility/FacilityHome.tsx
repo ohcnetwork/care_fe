@@ -336,7 +336,7 @@ export const FacilityHome = (props: any) => {
         </div>
         <div className="mt-4">
           <div className="md:flex justify-between  md:border-b md:pb-2">
-            <div className="font-semibold text-xl">Total Capacity</div>
+            <div className="font-semibold text-xl">Bed Capacity</div>
             <button
               className="btn-primary btn w-full md:w-auto"
               onClick={() => navigate(`/facility/${facilityId}/bed`)}

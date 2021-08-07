@@ -94,7 +94,9 @@ let make = (~state: VentilatorParameters.state, ~send: VentilatorParameters.acti
         | "ventilator_fi02" => SetFIO2(s)
         | "ventilator_spo2" => SetSPO2(s)
         }
+      let className = option["id"] === "ventilator_fi02" && state.ventilator_oxygen_modality !== HIGH_FLOW_NASAL_CANNULA ? "hidden" : ""
       <Slider
+        className
         key={`none-${option["id"]}`}
         title={option["title"]}
         start={option["start"]}

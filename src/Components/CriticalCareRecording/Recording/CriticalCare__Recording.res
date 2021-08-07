@@ -46,7 +46,7 @@ let basicEditor = (~facilityId, ~patientId, ~consultationId, ~id) => {
 let editorNameToString = editor => {
   switch editor {
   | NeurologicalMonitoringEditor => "Neurological Monitoring"
-  | HemodynamicParametersEditor => "Hemodynamic Parameters"
+  | HemodynamicParametersEditor => "Hemodynamic Parameters (Vitals)"
   | VentilatorParametersEditor => "Ventilator Parameters"
   | ArterialBloodGasAnalysisEditor => "Arterial Blood Gas Analysis"
   | BloodSugarEditor => "Blood Sugar"
@@ -239,8 +239,8 @@ export make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
             {basicEditor(~facilityId, ~patientId, ~consultationId, ~id)} {Js.Array.map(editor => {
               editorToggle(editor, state, send)
             }, [
-              NeurologicalMonitoringEditor,
               HemodynamicParametersEditor,
+              NeurologicalMonitoringEditor,
               VentilatorParametersEditor,
               ArterialBloodGasAnalysisEditor,
               BloodSugarEditor,
