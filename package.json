@@ -42,7 +42,7 @@
     "@material-ui/styles": "^4.11.4",
     "@material-ui/types": "^5.1.0",
     "@rescript/react": "^0.10.3",
-    "@sentry/browser": "^6.4.1",
+    "@sentry/browser": "^6.11.0",
     "@svgr/webpack": "^5.5.0",
     "@tailwindcss/ui": "^0.5.0",
     "@types/echarts": "^4.9.9",
