@@ -1,22 +1,39 @@
 import { CircularProgress } from "@material-ui/core";
-import { useCallback, useState, useEffect, useRef } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import moment from "moment";
 import { getUserList } from "../../Redux/actions";
 import classNames from "classnames";
 
-export const OnlineUsersSelect = (props: any) => {
+type State = {
+  loading: boolean;
+  isExpanded: boolean;
+  users: Array<any>;
+  searchTerm: string;
+  searchFieldRef: React.RefObject<HTMLInputElement>;
+};
+
+type Props = {
+  selectedUser: any;
+  userId: string;
+  onSelect: any;
+  user_type: string;
+};
+
+const initialState: State = {
+  loading: false,
+  isExpanded: false,
+  users: new Array<any>(),
+  searchTerm: "",
+  searchFieldRef: React.createRef<HTMLInputElement>(),
+};
+
+export const OnlineUsersSelect = (props: Props) => {
   const dispatchAction: any = useDispatch();
   const { selectedUser, userId, onSelect, user_type } = props;
-  const initialState = {
-    loading: false,
-    users: new Array<any>(),
-    searchTerm: "",
-  };
   const [state, setState] = useState(initialState);
-  const [isExpanded, setIsExpanded] = useState(false);
-  const searchFieldRef = useRef<any>(null);
+  const { loading, isExpanded, users, searchTerm, searchFieldRef } = state;
 
   const fetchUsers = useCallback(
     async (status: statusType) => {
@@ -24,7 +41,7 @@ export const OnlineUsersSelect = (props: any) => {
       const params = {
         user_type: user_type,
         ordering: "-last-login",
-        search_text: state.searchTerm,
+        search_text: searchTerm,
       };
       const res = await dispatchAction(getUserList(params));
       if (!status.aborted) {
@@ -33,7 +50,7 @@ export const OnlineUsersSelect = (props: any) => {
         }
       }
     },
-    [dispatchAction, state.searchTerm]
+    [dispatchAction, searchTerm]
   );
 
   useAbortableEffect(
@@ -43,7 +60,7 @@ export const OnlineUsersSelect = (props: any) => {
       }, 1000);
       return () => clearTimeout(debounce_timer);
     },
-    [state.searchTerm]
+    [searchTerm]
   );
 
   useEffect(() => {
@@ -69,7 +86,7 @@ export const OnlineUsersSelect = (props: any) => {
         <div className="relative">
           <span className="inline-block w-full rounded-md shadow-sm">
             <button
-              onClick={(_) => setIsExpanded(true)}
+              onClick={(_) => setState({ ...state, isExpanded: true })}
               type="button"
               aria-haspopup="listbox"
               aria-expanded="true"
@@ -84,7 +101,7 @@ export const OnlineUsersSelect = (props: any) => {
                 className={classNames("py-2 pl-3 w-full outline-none", {
                   hidden: !isExpanded,
                 })}
-                value={state.searchTerm}
+                value={searchTerm}
                 onChange={handleSearchTermChange}
                 onKeyUp={(e) => e.preventDefault()}
               />
@@ -149,15 +166,18 @@ export const OnlineUsersSelect = (props: any) => {
               aria-activedescendant="listbox-item-3"
               className="multiselect-dropdown__search-dropdown w-full border border-gray-400 bg-white mt-1 rounded-lg shadow-lg px-4 py-2 z-50"
             >
-              {!state.loading ? (
-                state.users.map((user: any) => {
+              {!loading ? (
+                users.map((user: any) => {
                   return (
                     <button
                       key={user.id}
                       onClick={(_) => {
-                        setIsExpanded(false);
                         onSelect(user);
-                        setState({ ...state, searchTerm: "" });
+                        setState({
+                          ...state,
+                          searchTerm: "",
+                          isExpanded: false,
+                        });
                       }}
                       id="listbox-item-0"
                       role="option"
