@@ -1,3 +1,5 @@
+export type roundsType = NormalRound | ICURound | VentilatorRound
+
 export type t = {
   createdAt: Js.Date.t,
   admittedTo: string,
@@ -13,6 +15,7 @@ export type t = {
   ventilatorParameters: CriticalCare__VentilatorParameters.t,
   medicine: array<Prescription__Prescription.t>,
   others: CriticalCare__Others.t,
+  roundsType: roundsType,
 }
 
 let make = (
@@ -30,6 +33,7 @@ let make = (
   ~medicine,
   ~ventilatorParameters,
   ~others,
+  ~roundsType,
 ) => {
   createdAt: createdAt,
   admittedTo: admittedTo,
@@ -45,6 +49,7 @@ let make = (
   medicine: medicine,
   ventilatorParameters: ventilatorParameters,
   others: others,
+  roundsType: roundsType,
 }
 
 let neurologicalMonitoring = t => t.neurologicalMonitoring
@@ -58,6 +63,16 @@ let bloodSugar = t => t.bloodSugar
 let medicine = t => t.medicine
 let ventilatorParameters = t => t.ventilatorParameters
 let others = t => t.others
+let roundsType = t => t.roundsType
+
+let makeRoundsType = d => {
+  switch d["rounds_type"] {
+  | "NORMAL" => NormalRound
+  | "ICU" => ICURound
+  | "VENTILATOR" => VentilatorRound
+  | _ => NormalRound
+  }
+}
 
 let makeFromJs = dailyRound => {
   make(
@@ -75,5 +90,6 @@ let makeFromJs = dailyRound => {
     ~medicine=Prescription__Prescription.makeFromJs(dailyRound["medication_given"]),
     ~ventilatorParameters=CriticalCare__VentilatorParameters.makeFromJs(dailyRound),
     ~others=CriticalCare__Others.makeFromJs(dailyRound),
+    ~roundsType=makeRoundsType(dailyRound),
   )
 }
