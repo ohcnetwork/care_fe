@@ -64,7 +64,7 @@ export const OnlineUsersSelect = (props: Props) => {
   );
 
   useEffect(() => {
-    if (isExpanded) {
+    if (isExpanded && searchFieldRef.current) {
       searchFieldRef.current.focus();
     }
   }, [isExpanded]);
