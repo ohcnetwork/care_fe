@@ -1,12 +1,5 @@
-import loadable from "@loadable/component";
 import { CircularProgress } from "@material-ui/core";
-import React, {
-  useCallback,
-  useReducer,
-  useState,
-  useEffect,
-  useRef,
-} from "react";
+import { useCallback, useState, useEffect, useRef } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import moment from "moment";
@@ -16,12 +9,12 @@ import classNames from "classnames";
 export const OnlineUsersSelect = (props: any) => {
   const dispatchAction: any = useDispatch();
   const { selectedUser, userId, onSelect, user_type } = props;
-  const initalState = {
+  const initialState = {
     loading: false,
     users: new Array<any>(),
     searchTerm: "",
   };
-  const [state, setState] = useState(initalState);
+  const [state, setState] = useState(initialState);
   const [isExpanded, setIsExpanded] = useState(false);
   const searchFieldRef = useRef<any>(null);
 
