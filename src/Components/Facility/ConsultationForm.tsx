@@ -358,14 +358,17 @@ export const ConsultationForm = (props: any) => {
           Notification.Success({
             msg: "Consultation updated successfully",
           });
+          navigate(
+            `/facility/${facilityId}/patient/${patientId}/consultation/${id}`
+          );
         } else {
           Notification.Success({
             msg: "Consultation created successfully",
           });
+          navigate(
+            `/facility/${facilityId}/patient/${patientId}/consultation/${res.data.id}`
+          );
         }
-        navigate(
-          `/facility/${facilityId}/patient/${patientId}/consultation/${id}`
-        );
       }
     }
   };

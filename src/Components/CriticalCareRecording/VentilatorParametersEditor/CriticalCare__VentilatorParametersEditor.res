@@ -85,7 +85,7 @@ let makePayload = (state: VentilatorParameters.state) => {
     VentilatorParameters.encodeVentilatorOxygenModalityType(state.ventilator_oxygen_modality),
     payload,
   )
-  DictUtils.setOptionalNumber("ventilator_peep", state.ventilator_peep, payload)
+  DictUtils.setOptionalFloat("ventilator_peep", state.ventilator_peep, payload)
   DictUtils.setOptionalNumber("ventilator_pip", state.ventilator_pip, payload)
   DictUtils.setOptionalNumber(
     "ventilator_mean_airway_pressure",

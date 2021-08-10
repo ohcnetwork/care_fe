@@ -645,7 +645,9 @@ export const PatientHome = (props: any) => {
                 className="btn btn-primary w-full"
                 disabled={!patientData.is_active}
                 onClick={() =>
-                  navigate(`/facility/${facilityId}/patient/${id}/consultation`)
+                  navigate(
+                    `/facility/${patientData?.facility}/patient/${id}/consultation`
+                  )
                 }
               >
                 Create Consultation
@@ -920,7 +922,9 @@ export const PatientHome = (props: any) => {
                     className="btn btn-primary w-full"
                     disabled={!patientData.is_active}
                     onClick={() =>
-                      navigate(`/facility/${facilityId}/patient/${id}/update`)
+                      navigate(
+                        `/facility/${patientData?.facility}/patient/${id}/update`
+                      )
                     }
                   >
                     <i className="fas fa-pencil-alt mr-2" />
@@ -1426,7 +1430,7 @@ export const PatientHome = (props: any) => {
                     disabled={!patientData.is_active}
                     onClick={() =>
                       navigate(
-                        `/facility/${facilityId}/patient/${id}/consultation`
+                        `/facility/${patientData?.facility}/patient/${id}/consultation`
                       )
                     }
                   >
@@ -1447,7 +1451,9 @@ export const PatientHome = (props: any) => {
                   <button
                     className="btn btn-primary w-full"
                     onClick={() =>
-                      navigate(`/facility/${facilityId}/patient/${id}/files/`)
+                      navigate(
+                        `/facility/${patientData?.facility}/patient/${id}/files/`
+                      )
                     }
                   >
                     View/Upload Patient Files
@@ -1478,7 +1484,7 @@ export const PatientHome = (props: any) => {
                     }
                     onClick={() =>
                       navigate(
-                        `/facility/${facilityId}/patient/${id}/sample-test`
+                        `/facility/${patientData?.facility}/patient/${id}/sample-test`
                       )
                     }
                   >
@@ -1489,7 +1495,9 @@ export const PatientHome = (props: any) => {
                   <button
                     className="btn btn-primary w-full"
                     onClick={() =>
-                      navigate(`/facility/${facilityId}/patient/${id}/notes/`)
+                      navigate(
+                        `/facility/${patientData?.facility}/patient/${id}/notes/`
+                      )
                     }
                   >
                     View Patient Notes
