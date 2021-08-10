@@ -11,18 +11,25 @@ let int_of_string = data => data->Belt.Int.fromString
 let float_of_string = data => data->Belt.Float.fromString
 
 type state = {
+  bilateral_air_entry: option<bool>,
   etco2: option<int>,
   saving: bool,
   dirty: bool,
 }
 
 type action =
+  | SetBilateralAirEntry(option<bool>)
   | SetETCO2(option<int>)
   | SetSaving
   | ClearSaving
 
 let reducer = (state, action) => {
   switch action {
+  | SetBilateralAirEntry(bilateral_air_entry) => {
+      ...state,
+      bilateral_air_entry: bilateral_air_entry,
+      dirty: true,
+    }
   | SetETCO2(etco2) => {
       ...state,
       etco2: etco2,
@@ -35,6 +42,7 @@ let reducer = (state, action) => {
 
 let initialState = others => {
   {
+    bilateral_air_entry: Others.bilateral_air_entry(others),
     etco2: Others.etco2(others),
     saving: false,
     dirty: false,
@@ -43,6 +51,7 @@ let initialState = others => {
 
 let makePayload = state => {
   let payload = Js.Dict.empty()
+  DictUtils.setOptionalBool("bilateral_air_entry", state.bilateral_air_entry, payload)
   DictUtils.setOptionalNumber("etco2", state.etco2, payload)
   payload
 }
@@ -91,6 +100,32 @@ let make = (~others, ~updateCB, ~id, ~consultationId) => {
   <div>
     <CriticalCare__PageTitle title="Others" />
     <div>
+      <div className="px-5 my-10">
+        <div className=" text-xl font-bold my-2"> {str("Bilateral Air Entry")} </div>
+        <div className="flex md:flex-row flex-col md:space-y-0 space-y-2 space-x-0 md:space-x-4">
+          <Radio
+            key="bilateral-air-entry-yes"
+            id="bilateral-air-entry-yes"
+            label="Yes"
+            checked={switch state.bilateral_air_entry {
+              | Some(bae) => bae
+              | None => false
+            }}
+            onChange={_ => send(SetBilateralAirEntry(Some(true)))}
+          />
+          
+          <Radio
+            key="bilateral-air-entry-no"
+            id="bilateral-air-entry-no"
+            label="No"
+            checked={switch state.bilateral_air_entry {
+              | Some(bae) => !bae
+              | None => false
+            }}
+            onChange={_ => send(SetBilateralAirEntry(Some(false)))}
+          />
+        </div>
+      </div>
       <Slider
         title={"EtCO2 (mm Hg)"}
         start={"0"}
