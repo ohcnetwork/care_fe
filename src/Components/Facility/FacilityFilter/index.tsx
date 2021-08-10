@@ -2,7 +2,7 @@ import React, { useCallback, useState } from "react";
 import { navigate } from "raviger";
 import { SelectField } from "../../Common/HelperInputFields";
 import { CircularProgress } from "@material-ui/core";
-import { FACILITY_TYPES } from "../../../Common/constants";
+import { FACILITY_TYPES, KASP_STRING } from "../../../Common/constants";
 import {
   getStates,
   getDistrictByState,
@@ -239,7 +239,9 @@ function FacillityFilter(props: any) {
         </div>
 
         <div className="w-64 flex-none">
-          <span className="text-sm font-semibold">KASP Empanelled</span>
+          <span className="text-sm font-semibold">
+            {KASP_STRING} Empanelled
+          </span>
           <SelectField
             name="kasp_empanelled"
             variant="outlined"

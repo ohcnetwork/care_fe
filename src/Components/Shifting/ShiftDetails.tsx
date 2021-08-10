@@ -6,7 +6,11 @@ import { getShiftDetails, deleteShiftRecord } from "../../Redux/actions";
 import { navigate, Link } from "raviger";
 import Button from "@material-ui/core/Button";
 import QRCode from "qrcode.react";
-import { GENDER_TYPES, TEST_TYPE_CHOICES } from "../../Common/constants";
+import {
+  GENDER_TYPES,
+  KASP_FULL_STRING,
+  TEST_TYPE_CHOICES,
+} from "../../Common/constants";
 import moment from "moment";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
@@ -683,7 +687,7 @@ export default function ShiftDetails(props: { id: string }) {
               </div>
               <div>
                 <span className="font-semibold leading-relaxed">
-                  Karunya Arogya Suraksha Padhathi:{" "}
+                  {KASP_FULL_STRING}:{" "}
                 </span>
                 <span className="badge badge-pill badge-warning py-1 px-2">
                   {" "}
