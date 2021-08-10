@@ -160,10 +160,6 @@ const AssetCreate = (props: AssetProps) => {
         serial_number: serial_number,
         warranty_details: warranty_details,
         location: location,
-        vendor_name: "XYZ",
-        customer_support: "ABC",
-        contact: "000",
-        email: "abc@xyz.com",
       };
       if (!assetId) {
         const res = await dispatchAction(createAsset(data));
