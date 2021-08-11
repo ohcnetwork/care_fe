@@ -6,9 +6,8 @@ import moment from "moment";
 import { getUserList } from "../../Redux/actions";
 import classNames from "classnames";
 
-type State = {
+type UserFetchState = {
   loading: boolean;
-  isExpanded: boolean;
   users: Array<any>;
   searchTerm: string;
   searchFieldRef: React.RefObject<HTMLInputElement>;
@@ -21,9 +20,8 @@ type Props = {
   user_type: string;
 };
 
-const initialState: State = {
+const initialState: UserFetchState = {
   loading: false,
-  isExpanded: false,
   users: new Array<any>(),
   searchTerm: "",
   searchFieldRef: React.createRef<HTMLInputElement>(),
@@ -33,7 +31,8 @@ export const OnlineUsersSelect = (props: Props) => {
   const dispatchAction: any = useDispatch();
   const { selectedUser, userId, onSelect, user_type } = props;
   const [state, setState] = useState(initialState);
-  const { loading, isExpanded, users, searchTerm, searchFieldRef } = state;
+  const { loading, users, searchTerm, searchFieldRef } = state;
+  const [isDropdownExpanded, setDropdownExpand] = useState(false);
 
   const fetchUsers = useCallback(
     async (status: statusType) => {
@@ -64,10 +63,10 @@ export const OnlineUsersSelect = (props: Props) => {
   );
 
   useEffect(() => {
-    if (isExpanded && searchFieldRef.current) {
+    if (isDropdownExpanded && searchFieldRef.current) {
       searchFieldRef.current.focus();
     }
-  }, [isExpanded]);
+  }, [isDropdownExpanded]);
 
   const handleSearchTermChange = (e: any) => {
     const { value } = e.target;
@@ -86,7 +85,7 @@ export const OnlineUsersSelect = (props: Props) => {
         <div className="relative">
           <span className="inline-block w-full rounded-md shadow-sm">
             <button
-              onClick={(_) => setState({ ...state, isExpanded: true })}
+              onClick={(_) => setDropdownExpand(true)}
               type="button"
               aria-haspopup="listbox"
               aria-expanded="true"
@@ -99,7 +98,7 @@ export const OnlineUsersSelect = (props: Props) => {
                 type="text"
                 placeholder="Search by name or username"
                 className={classNames("py-2 pl-3 w-full outline-none", {
-                  hidden: !isExpanded,
+                  hidden: !isDropdownExpanded,
                 })}
                 value={searchTerm}
                 onChange={handleSearchTermChange}
@@ -107,7 +106,7 @@ export const OnlineUsersSelect = (props: Props) => {
               />
               <div
                 className={classNames("flex items-center justify-between", {
-                  hidden: isExpanded,
+                  hidden: isDropdownExpanded,
                 })}
               >
                 <div className="space-x-3 flex items-center">
@@ -159,7 +158,7 @@ export const OnlineUsersSelect = (props: Props) => {
               </span>
             </button>
           </span>
-          {isExpanded && (
+          {isDropdownExpanded && (
             <div
               role="listbox"
               aria-labelledby="listbox-label"
@@ -172,11 +171,11 @@ export const OnlineUsersSelect = (props: Props) => {
                     <button
                       key={user.id}
                       onClick={(_) => {
+                        setDropdownExpand(false);
                         onSelect(user);
                         setState({
                           ...state,
                           searchTerm: "",
-                          isExpanded: false,
                         });
                       }}
                       id="listbox-item-0"
