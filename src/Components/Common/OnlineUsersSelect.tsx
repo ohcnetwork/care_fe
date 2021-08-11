@@ -5,25 +5,25 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 import moment from "moment";
 import { getUserList } from "../../Redux/actions";
 import classNames from "classnames";
-import { UserModal } from "../Users/models";
+import { UserModel } from "../Users/models";
 
 type UserFetchState = {
   loading: boolean;
-  users: Array<UserModal>;
+  users: Array<UserModel>;
   searchTerm: string;
   searchFieldRef: React.RefObject<HTMLInputElement>;
 };
 
 type Props = {
-  selectedUser: UserModal;
+  selectedUser: UserModel;
   userId: string;
-  onSelect: (user: string) => void;
+  onSelect: (user: UserModel | null) => void;
   user_type: string;
 };
 
 const initialState: UserFetchState = {
   loading: false,
-  users: new Array<any>(),
+  users: new Array<UserModel>(),
   searchTerm: "",
   searchFieldRef: React.createRef<HTMLInputElement>(),
 };
@@ -131,9 +131,7 @@ export const OnlineUsersSelect = (props: Props) => {
                 </div>
                 <div
                   className="btn btn-default"
-                  onClick={(_) => {
-                    onSelect("");
-                  }}
+                  onClick={(_) => onSelect(null)}
                 >
                   {" "}
                   Clear
@@ -164,7 +162,7 @@ export const OnlineUsersSelect = (props: Props) => {
               className="multiselect-dropdown__search-dropdown w-full border border-gray-400 bg-white mt-1 rounded-lg shadow-lg px-4 py-2 z-50"
             >
               {!loading ? (
-                users.map((user: any) => {
+                users.map((user: UserModel) => {
                   return (
                     <button
                       key={user.id}
@@ -196,7 +194,7 @@ export const OnlineUsersSelect = (props: Props) => {
                           {user.first_name} {user.last_name}
                         </span>
                       </div>
-                      {user.id == userId && (
+                      {user.id?.toString() == userId && (
                         <span className="flex items-center">
                           <svg
                             className="h-5 w-5"

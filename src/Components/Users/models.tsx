@@ -1,4 +1,4 @@
-export interface UserModal {
+export interface UserModel {
   id?: number;
   username?: string;
   first_name?: string;
