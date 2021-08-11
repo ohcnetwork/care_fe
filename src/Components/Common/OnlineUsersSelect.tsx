@@ -5,18 +5,19 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 import moment from "moment";
 import { getUserList } from "../../Redux/actions";
 import classNames from "classnames";
+import { UserModal } from "../Users/models";
 
 type UserFetchState = {
   loading: boolean;
-  users: Array<any>;
+  users: Array<UserModal>;
   searchTerm: string;
   searchFieldRef: React.RefObject<HTMLInputElement>;
 };
 
 type Props = {
-  selectedUser: any;
+  selectedUser: UserModal;
   userId: string;
-  onSelect: any;
+  onSelect: (user: string) => void;
   user_type: string;
 };
 
@@ -68,11 +69,6 @@ export const OnlineUsersSelect = (props: Props) => {
     }
   }, [isDropdownExpanded]);
 
-  const handleSearchTermChange = (e: any) => {
-    const { value } = e.target;
-    setState({ ...state, searchTerm: value });
-  };
-
   return (
     <div className="pb-2">
       <div className="space-y-1">
@@ -101,7 +97,9 @@ export const OnlineUsersSelect = (props: Props) => {
                   hidden: !isDropdownExpanded,
                 })}
                 value={searchTerm}
-                onChange={handleSearchTermChange}
+                onChange={(e) =>
+                  setState({ ...state, searchTerm: e.target.value })
+                }
                 onKeyUp={(e) => e.preventDefault()}
               />
               <div
