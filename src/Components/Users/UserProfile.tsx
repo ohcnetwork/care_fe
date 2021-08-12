@@ -1,3 +1,4 @@
+import loadable from "@loadable/component";
 import React, { useState, useCallback, useReducer } from "react";
 import { InputLabel, Button } from "@material-ui/core";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
@@ -15,6 +16,7 @@ import { validateEmailAddress, phonePreg } from "../../Common/validation";
 import * as Notification from "../../Utils/Notifications.js";
 import { checkIfLatestBundle } from "../../Utils/build-meta-info";
 import LanguageSelector from "../../Components/Common/LanguageSelector";
+const Loading = loadable(() => import("../Common/Loading"));
 
 type EditForm = {
   firstName: string;
@@ -130,16 +132,6 @@ export default function UserProfile() {
     [fetchData]
   );
 
-  const handleChangeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let form: EditForm = { ...states.form, [e.target.name]: e.target.value };
-    dispatch({ type: "set_form", form });
-  };
-
-  const handleWhatsappNumberChange = (value: string) => {
-    let form: EditForm = { ...states.form, altPhoneNumber: value };
-    dispatch({ type: "set_form", form });
-  };
-
   const validateForm = () => {
     let errors = { ...initError };
     let invalidForm = false;
@@ -208,12 +200,15 @@ export default function UserProfile() {
             invalidForm = true;
           }
           return;
-        default:
-          return;
       }
     });
     dispatch({ type: "set_error", errors });
     return !invalidForm;
+  };
+
+  const handleChangeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let form: EditForm = { ...states.form, [e.target.name]: e.target.value };
+    dispatch({ type: "set_form", form });
   };
 
   const handleValueChange = (phoneNo: string, name: string) => {
@@ -294,7 +289,9 @@ export default function UserProfile() {
       setTimeout(() => setUpdateBtnText("Update"), 1000);
     }
   };
-
+  if (isLoading) {
+    return <Loading />;
+  }
   return (
     <div>
       <div className="md:p-20 p-10">
