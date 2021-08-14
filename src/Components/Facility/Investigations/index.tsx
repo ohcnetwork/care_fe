@@ -240,20 +240,22 @@ const Investigation = (props: {
           onChange={(_: any, options: SearchItem[]) => {
             selectItems(options);
             setSelectedInvestigations(options.filter(isInvestigation));
-            setSelectedGroup([
-              ...options
-                .filter((e) => !isInvestigation(e))
-                .map((e) => e.external_id),
-              ...options.reduce<string[]>(
-                (acc, option) =>
-                  acc.concat(
-                    isInvestigation(option)
-                      ? option.groups.map((e) => e.external_id)
-                      : []
-                  ),
-                []
-              ),
-            ]);
+            setSelectedGroup(
+              [
+                ...options
+                  .filter((e) => !isInvestigation(e))
+                  .map((e) => e.external_id),
+                ...options.reduce<string[]>(
+                  (acc, option) =>
+                    acc.concat(
+                      isInvestigation(option)
+                        ? option.groups.map((e) => e.external_id)
+                        : []
+                    ),
+                  []
+                ),
+              ].filter((v, i, a) => a.indexOf(v) == i)
+            );
           }}
         />
       </div>
