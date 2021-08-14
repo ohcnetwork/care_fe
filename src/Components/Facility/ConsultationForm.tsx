@@ -174,7 +174,7 @@ export const ConsultationForm = (props: any) => {
               !!res.data.symptoms &&
               !!res.data.symptoms.length &&
               !!res.data.symptoms.filter((i: number) => i === 9).length,
-            admitted: res.data.admitted ? String(res.data.admitted) : "false",
+            admitted: res.data.admitted ? String(res.data.admitted) : "true",
             admitted_to: res.data.admitted_to ? res.data.admitted_to : "",
             category: res.data.category ? res.data.category : "",
             ip_no: res.data.ip_no ? res.data.ip_no : "",
@@ -592,8 +592,9 @@ export const ConsultationForm = (props: any) => {
                     />
                   </div>
                 )}
-                <div className="flex">
-                  <div className="flex-1" id="admitted-div">
+
+                <div className="flex items-center">
+                  <div className="flex-1 hidden" id="admitted-div">
                     <InputLabel id="admitted-label">Admitted</InputLabel>
                     <RadioGroup
                       aria-label="covid"
@@ -619,7 +620,7 @@ export const ConsultationForm = (props: any) => {
                   </div>
 
                   {JSON.parse(state.form.admitted) && (
-                    <div className="flex-1" id="admitted_to-div">
+                    <div className="flex-1 mr-4" id="admitted_to-div">
                       <SelectField
                         optionArray={true}
                         name="admitted_to"
@@ -633,25 +634,25 @@ export const ConsultationForm = (props: any) => {
                       />
                     </div>
                   )}
-                </div>
 
-                {JSON.parse(state.form.admitted) && (
-                  <div className="flex">
-                    <div className="flex-1" id="admission_date-div">
-                      <DateInputField
-                        id="admission_date"
-                        label="Admission Date"
-                        margin="dense"
-                        value={state.form.admission_date}
-                        disableFuture={true}
-                        onChange={(date) =>
-                          handleDateChange(date, "admission_date")
-                        }
-                        errors={state.errors.admission_date}
-                      />
+                  {JSON.parse(state.form.admitted) && (
+                    <div className="flex">
+                      <div className="flex-1" id="admission_date-div">
+                        <DateInputField
+                          id="admission_date"
+                          label="Admission Date*"
+                          margin="dense"
+                          value={state.form.admission_date}
+                          disableFuture={true}
+                          onChange={(date) =>
+                            handleDateChange(date, "admission_date")
+                          }
+                          errors={state.errors.admission_date}
+                        />
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
 
               <div className="mt-4" id="OPconsultation-div">
