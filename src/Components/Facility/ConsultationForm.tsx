@@ -77,6 +77,8 @@ const initForm: any = {
   action: "PENDING",
   assigned_to: "",
   assigned_to_object: null,
+  height: "",
+  weight: "",
 };
 
 const initError = Object.assign(
@@ -341,6 +343,12 @@ export const ConsultationForm = (props: any) => {
         review_time: state.form.review_time,
         assigned_to:
           state.form.is_telemedicine === "true" ? state.form.assigned_to : "",
+        height: Number(state.form.height)
+          ? Number(state.form.height)
+          : undefined,
+        weight: Number(state.form.weight)
+          ? Number(state.form.weight)
+          : undefined,
       };
       const res = await dispatchAction(
         id ? updateConsultation(id, data) : createConsultation(data)
@@ -841,6 +849,33 @@ export const ConsultationForm = (props: any) => {
                   <ErrorHelperText error={state.errors.action} />
                 </div>
               )}
+              <div className="grid grid-cols-2 gap-x-4 mt-2">
+                <div id="height-div">
+                  <InputLabel id="height-label">Height(cm)</InputLabel>
+                  <TextInputField
+                    name="height"
+                    variant="outlined"
+                    margin="dense"
+                    type="number"
+                    value={state.form.height}
+                    onChange={handleChange}
+                    errors={state.errors.height}
+                  />
+                </div>
+                <div id="weight-div">
+                  <InputLabel id="weight-label">Weight(kg)</InputLabel>
+                  <TextInputField
+                    name="weight"
+                    variant="outlined"
+                    margin="dense"
+                    type="number"
+                    value={state.form.weight}
+                    onChange={handleChange}
+                    errors={state.errors.weight}
+                  />
+                </div>
+              </div>
+
               {/* End of Telemedicine fields */}
               <div className="mt-4 flex justify-between">
                 <Button
