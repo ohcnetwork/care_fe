@@ -38,6 +38,10 @@ export interface InvestigationType {
   ideal_value?: string;
   groups: [Group];
 }
+type SearchItem = Group | InvestigationType;
+function isInvestigation(e: SearchItem): e is InvestigationType {
+  return (e as InvestigationType).groups !== undefined;
+}
 
 const testFormReducer = (state = initialState, action: any) => {
   switch (action.type) {
@@ -85,6 +89,8 @@ const Investigation = (props: {
   });
   const [saving, setSaving] = useState(false);
   const [session, setSession] = useState("");
+  const [selectedItems, selectItems] = useState<SearchItem[]>([]);
+  const searchOptions = [...investigationGroups, ...investigations];
 
   const fetchInvestigations = () => {
     setIsLoading({ ...isLoading, investigationLoading: true });
@@ -188,75 +194,70 @@ const Investigation = (props: {
       <PageTitle title={"Create Investigation"} />
       <div className="mt-5">
         <label className="text-sm" id="investigation-group-label">
-          Select Investigation Groups
+          Search Investigations & Groups
         </label>
-        <div className="flex justify-between">
-          <MultiSelectField
-            id="investigation-group-label"
-            options={investigationGroups}
-            value={selectedGroup}
-            optionValue="name"
-            optionKey="external_id"
-            onChange={(e, c) => setSelectedGroup(e.target.value)}
-          />
-          <div className="mx-2 px-2"> </div>
-          <Autocomplete
-            multiple
-            id="search-by-test"
-            fullWidth={true}
-            options={investigations}
-            value={selectedInvestigations}
-            disableCloseOnSelect
-            inputValue={searchInputValue}
-            getOptionLabel={(option) =>
-              option.name + `( ${option.groups.map((e) => e.name).join(", ")})`
+        <Autocomplete
+          multiple
+          id="search-by-test"
+          fullWidth={true}
+          options={searchOptions}
+          value={selectedItems}
+          disableCloseOnSelect
+          inputValue={searchInputValue}
+          getOptionLabel={(option) => option.name}
+          onInputChange={(e, value, reason) => {
+            if (reason === "input" || reason === "clear") {
+              setSearchInputValue(value);
             }
-            onInputChange={(e, value, reason) => {
-              if (reason === "input" || reason === "clear") {
-                setSearchInputValue(value);
-              }
-            }}
-            renderOption={(option, { selected }) => (
-              <React.Fragment>
-                <Checkbox
-                  style={{ marginRight: 8 }}
-                  checked={selected}
-                  color="primary"
-                />
-                {option.name} |{" "}
-                {option.groups.map((e) => {
+          }}
+          renderOption={(option, { selected }) => (
+            <React.Fragment>
+              <Checkbox
+                style={{ marginRight: 8 }}
+                checked={selected}
+                color="primary"
+              />
+              {option.name} |{" "}
+              {isInvestigation(option) &&
+                option.groups.map((e) => {
                   return (
                     <div className="px-2 py-1 text-xs font-bold bg-gray-300 rounded-full">
                       {e.name}
                     </div>
                   );
                 })}
-              </React.Fragment>
-            )}
-            renderInput={(params) => (
-              <>
-                <InputLabel>Search by Test</InputLabel>
-
-                <TextField
-                  margin="dense"
-                  {...params}
-                  placeholder="Select Investigations"
-                />
-              </>
-            )}
-            onChange={(_: any, options: InvestigationType[]) => {
-              setSelectedInvestigations(options);
-              setSelectedGroup(
-                options.reduce<string[]>(
-                  (acc, option) =>
-                    acc.concat(option.groups.map((e) => e.external_id)),
-                  []
-                )
-              );
-            }}
-          />
-        </div>
+            </React.Fragment>
+          )}
+          renderInput={(params) => (
+            <>
+              <TextField
+                margin="dense"
+                {...params}
+                placeholder="Select Investigation"
+              />
+            </>
+          )}
+          onChange={(_: any, options: SearchItem[]) => {
+            selectItems(options);
+            setSelectedInvestigations(options.filter(isInvestigation));
+            setSelectedGroup([
+              ...options
+                .filter((e) => !isInvestigation(e))
+                .map((e) => e.external_id),
+              ...options.reduce<string[]>(
+                (acc, option) =>
+                  acc.concat(
+                    isInvestigation(option)
+                      ? option.groups.map((e) => e.external_id)
+                      : []
+                  ),
+                []
+              ),
+            ]);
+          }}
+        />
       </div>
+
       {selectedGroup.map((group_id) => {
         const filteredInvestigations = selectedInvestigations.length
           ? selectedInvestigations.filter((e) =>
