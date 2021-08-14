@@ -518,3 +518,17 @@ export const MOTOR_RESPONSE_SCALE = [
   { value: 2, text: "Abnormal Extension(decerebrate)" },
   { value: 1, text: "No Response" },
 ];
+export const CONSULTATION_TABS: Array<OptionsType> = [
+  { id: 1, text: "UPDATES", desc: "Updates" },
+  { id: 2, text: "SUMMARY", desc: "Summary" },
+  { id: 3, text: "MEDICINES", desc: "Medicines" },
+  { id: 4, text: "FILES", desc: "Files" },
+  { id: 5, text: "INVESTIGATIONS", desc: "Investigations" },
+  { id: 6, text: "ABG", desc: "ABG" },
+  { id: 7, text: "NURSING", desc: "Nursing" },
+  { id: 8, text: "NEUROLOGICAL_MONITORING", desc: "Neurological Monitoring" },
+  { id: 9, text: "VENTILATOR", desc: "Ventilator" },
+  { id: 10, text: "NUTRITION", desc: "Nutrition" },
+  { id: 11, text: "PRESSURE_SORE", desc: "Pressure Sore" },
+  { id: 12, text: "DIALYSIS", desc: "Dialysis" },
+];
