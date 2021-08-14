@@ -202,7 +202,7 @@ export const ConsultationDetails = (props: any) => {
                 )}
               </div>
               <div className="flex md:flex-row flex-col mt-4 gap-2 justify-between">
-                <div className="flex flex-col text-sm text-gray-700 font-semibold leading-relaxed">
+                <div className="flex flex-col text-sm text-gray-700 font-base leading-relaxed">
                   <div>
                     <span className="text-gray-900">Created: </span>
                     {moment(consultationData.created_date).format("lll")} |
@@ -218,9 +218,10 @@ export const ConsultationDetails = (props: any) => {
                     </div>
                   )}
                 </div>
-                <div className="flex flex-col text-sm md:text-right text-gray-700 font-semibold leading-relaxed">
+                <div className="flex flex-col text-sm md:text-right text-gray-700 font-base leading-relaxed">
                   <div>
-                    <span className="text-gray-900">Last Modified: </span>
+                    {/* <span className="text-gray-900">Last Modified: </span> */}
+                    <i className="fas fa-history text-sm pr-2"></i>
                     {moment(consultationData.modified_date).format("lll")} |
                   </div>
                   {consultationData.last_edited_by && (
