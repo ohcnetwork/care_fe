@@ -261,10 +261,11 @@ const Investigation = (props: {
       </div>
 
       {selectedGroup.map((group_id) => {
-        const filteredInvestigations = selectedInvestigations.length
-          ? selectedInvestigations.filter((e) =>
-              e.groups.map((e) => e.external_id).includes(group_id)
-            )
+        const currentGroupsInvestigations = selectedInvestigations.filter((e) =>
+          e.groups.map((e) => e.external_id).includes(group_id)
+        );
+        const filteredInvestigations = currentGroupsInvestigations.length
+          ? currentGroupsInvestigations
           : listOfInvestigations(group_id, investigations);
         const group = findGroup(group_id, investigationGroups);
         return (
