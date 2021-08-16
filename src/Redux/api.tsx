@@ -130,6 +130,10 @@ const routes: Routes = {
     path: "/api/v1/getallfacilities",
   },
 
+  getAllFacilities: {
+    path: "/api/v1/getallfacilities/{id}/",
+  },
+
   getFacilityUsers: {
     path: "/api/v1/facility/{facility_id}/get_users/",
   },

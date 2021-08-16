@@ -67,6 +67,10 @@ export const getAllFacilities = (params: object) => {
   return fireRequest("getAllFacilitiesList", [], params);
 };
 
+export const getAllFacility = (id: number, key?: string) => {
+  return fireRequest("getAllFacilities", [], {}, { id: id }, key);
+};
+
 export const getFacility = (id: number, key?: string) => {
   return fireRequest("getFacility", [], {}, { id: id }, key);
 };
