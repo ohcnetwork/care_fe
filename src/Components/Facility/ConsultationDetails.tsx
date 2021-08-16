@@ -6,7 +6,12 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getConsultation } from "../../Redux/actions";
 import loadable from "@loadable/component";
 import { ConsultationModel } from "./models";
-import { PATIENT_CATEGORY, SYMPTOM_CHOICES } from "../../Common/constants";
+import {
+  PATIENT_CATEGORY,
+  SYMPTOM_CHOICES,
+  CONSULTATION_TABS,
+  OptionsType,
+} from "../../Common/constants";
 import { FileUpload } from "../Patient/FileUpload";
 import TreatmentSummary from "./TreatmentSummary";
 import { PrimaryParametersPlot } from "./Consultations/PrimaryParametersPlot";
@@ -282,26 +287,13 @@ export const ConsultationDetails = (props: any) => {
             <div className="sm:flex sm:items-baseline overflow-x-auto">
               <div className="mt-4 sm:mt-0">
                 <nav className="pl-2 flex space-x-6 overflow-x-auto pb-2 ">
-                  {[
-                    "UPDATES",
-                    "SUMMARY",
-                    "MEDICINES",
-                    "FILES",
-                    "INVESTIGATIONS",
-                    "ABG",
-                    "NURSING",
-                    "NEUROLOGICAL_MONITORING",
-                    "VENTILATOR",
-                    "NUTRITION",
-                    "PRESSURE_SORE",
-                    "DIALYSIS",
-                  ].map((p: string) => (
+                  {CONSULTATION_TABS.map((p: OptionsType) => (
                     <Link
-                      key={p}
-                      className={tabButtonClasses(tab === p)}
-                      href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/${p.toLocaleLowerCase()}`}
+                      key={p.text}
+                      className={tabButtonClasses(tab === p.text)}
+                      href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/${p.text.toLocaleLowerCase()}`}
                     >
-                      {p.replaceAll("_", " ").toLocaleLowerCase()}
+                      {p.desc}
                     </Link>
                   ))}
                 </nav>
