@@ -639,7 +639,7 @@ export const ConsultationForm = (props: any) => {
                     <div className="flex-1" id="admission_date-div">
                       <DateInputField
                         id="admission_date"
-                        label="Admission Date"
+                        label="Admission Date*"
                         margin="dense"
                         value={state.form.admission_date}
                         disableFuture={true}
