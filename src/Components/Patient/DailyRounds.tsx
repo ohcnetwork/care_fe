@@ -151,6 +151,12 @@ export const DailyRounds = (props: any) => {
             invalidForm = true;
           }
           return;
+        case "admitted_to":
+          if (!state.form.admitted_to) {
+            errors[field] = "Please select admitted to details";
+            invalidForm = true;
+          }
+          return;
         default:
           return;
       }
