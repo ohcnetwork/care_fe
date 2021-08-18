@@ -118,10 +118,10 @@ export default function ShiftDetails(props: { id: string }) {
 
   const showPatientCard = (patientData: any) => {
     const patientGender = GENDER_TYPES.find(
-      (i) => i.id === patientData.gender
+      (i) => i.id === patientData?.gender
     )?.text;
     const testType = TEST_TYPE_CHOICES.find(
-      (i) => i.id === patientData.test_type
+      (i) => i.id === patientData?.test_type
     )?.text;
 
     return (
@@ -129,9 +129,11 @@ export default function ShiftDetails(props: { id: string }) {
         <div className="mt-2">
           <div>
             <span className="font-semibold leading-relaxed">Name: </span>
-            <Link href={`/patient/${patientData.id}`}>{patientData.name}</Link>
+            <Link href={`/patient/${patientData?.id}`}>
+              {patientData?.name}
+            </Link>
           </div>
-          {patientData.is_medical_worker && (
+          {patientData?.is_medical_worker && (
             <div>
               <span className="font-semibold leading-relaxed">
                 Medical Worker:{" "}
@@ -144,42 +146,42 @@ export default function ShiftDetails(props: { id: string }) {
               Disease Status:{" "}
             </span>
             <span className="badge badge-pill badge-warning">
-              {patientData.disease_status}
+              {patientData?.disease_status}
             </span>
           </div>
 
           <div>
             <span className="font-semibold leading-relaxed">SRF ID: </span>
-            {(patientData.srf_id && patientData.srf_id) || "-"}
+            {(patientData?.srf_id && patientData?.srf_id) || "-"}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">Test Type: </span>
-            {(patientData.test_type && testType) || "-"}
+            {(patientData?.test_type && testType) || "-"}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">
               Date of Test:{" "}
             </span>
-            {(patientData.date_of_test &&
-              moment(patientData.date_of_test).format("LL")) ||
+            {(patientData?.date_of_test &&
+              moment(patientData?.date_of_test).format("LL")) ||
               "-"}
           </div>
 
           <div>
             <span className="font-semibold leading-relaxed">Facility: </span>
-            {patientData.facility_object?.name || "-"}
+            {patientData?.facility_object?.name || "-"}
           </div>
-          {patientData.date_of_birth ? (
+          {patientData?.date_of_birth ? (
             <div>
               <span className="font-semibold leading-relaxed">
                 Date of birth:{" "}
               </span>
-              {patientData.date_of_birth}
+              {patientData?.date_of_birth}
             </div>
           ) : (
             <div>
               <span className="font-semibold leading-relaxed">Age: </span>
-              {patientData.age}
+              {patientData?.age}
             </div>
           )}
           <div>
@@ -188,55 +190,55 @@ export default function ShiftDetails(props: { id: string }) {
           </div>
           <div>
             <span className="font-semibold leading-relaxed">Phone: </span>
-            <a href={`tel:${patientData.phone_number}`}>
-              {patientData.phone_number || "-"}
+            <a href={`tel:${patientData?.phone_number}`}>
+              {patientData?.phone_number || "-"}
             </a>
           </div>
           <div>
             <span className="font-semibold leading-relaxed">Nationality: </span>
-            {patientData.nationality || "-"}
+            {patientData?.nationality || "-"}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">Blood Group: </span>
-            {patientData.blood_group || "-"}
+            {patientData?.blood_group || "-"}
           </div>
-          {patientData.nationality !== "India" && (
+          {patientData?.nationality !== "India" && (
             <div>
               <span className="font-semibold leading-relaxed">
                 Passport Number:{" "}
               </span>
-              {patientData.passport_no || "-"}
+              {patientData?.passport_no || "-"}
             </div>
           )}
-          {patientData.nationality === "India" && (
+          {patientData?.nationality === "India" && (
             <>
               <div>
                 <span className="font-semibold leading-relaxed">State: </span>
-                {patientData.state_object?.name}
+                {patientData?.state_object?.name}
               </div>
               <div>
                 <span className="font-semibold leading-relaxed">
                   District:{" "}
                 </span>
-                {patientData.district_object?.name || "-"}
+                {patientData?.district_object?.name || "-"}
               </div>
               <div>
                 <span className="font-semibold leading-relaxed">
                   Local Body:{" "}
                 </span>
-                {patientData.local_body_object?.name || "-"}
+                {patientData?.local_body_object?.name || "-"}
               </div>
             </>
           )}
           <div>
             <span className="font-semibold leading-relaxed">Address: </span>
-            {patientData.address || "-"}
+            {patientData?.address || "-"}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">
               Contact with confirmed carrier:{" "}
             </span>
-            {patientData.contact_with_confirmed_carrier ? (
+            {patientData?.contact_with_confirmed_carrier ? (
               <span className="badge badge-pill badge-warning">Yes</span>
             ) : (
               <span className="badge badge-pill badge-secondary">No</span>
@@ -246,25 +248,25 @@ export default function ShiftDetails(props: { id: string }) {
             <span className="font-semibold leading-relaxed">
               Contact with suspected carrier:{" "}
             </span>
-            {patientData.contact_with_suspected_carrier ? (
+            {patientData?.contact_with_suspected_carrier ? (
               <span className="badge badge-pill badge-warning">Yes</span>
             ) : (
               <span className="badge badge-pill badge-secondary">No</span>
             )}
           </div>
-          {patientData.estimated_contact_date && (
+          {patientData?.estimated_contact_date && (
             <div>
               <span className="font-semibold leading-relaxed">
                 Estimated contact date:{" "}
               </span>
-              {moment(patientData.estimated_contact_date).format("LL")}
+              {moment(patientData?.estimated_contact_date).format("LL")}
             </div>
           )}
           <div className="md:col-span-2">
             <span className="font-semibold leading-relaxed">
               Has SARI (Severe Acute Respiratory illness)?:{" "}
             </span>
-            {patientData.has_SARI ? (
+            {patientData?.has_SARI ? (
               <span className="badge badge-pill badge-warning">Yes</span>
             ) : (
               <span className="badge badge-pill badge-secondary">No</span>
@@ -274,51 +276,51 @@ export default function ShiftDetails(props: { id: string }) {
             <span className="font-semibold leading-relaxed">
               Domestic/international Travel (within last 28 days):{" "}
             </span>
-            {patientData.past_travel ? (
+            {patientData?.past_travel ? (
               <span className="badge badge-pill badge-warning">Yes</span>
             ) : (
               <span className="badge badge-pill badge-secondary">No</span>
             )}
           </div>
-          {patientData.countries_travelled &&
-            !!patientData.countries_travelled.length && (
+          {patientData?.countries_travelled &&
+            !!patientData?.countries_travelled.length && (
               <div className="md:col-span-2">
                 <span className="font-semibold leading-relaxed">
                   Countries travelled:{" "}
                 </span>
-                {Array.isArray(patientData.countries_travelled)
-                  ? patientData.countries_travelled.join(", ")
-                  : patientData.countries_travelled.split(",").join(", ")}
+                {Array.isArray(patientData?.countries_travelled)
+                  ? patientData?.countries_travelled.join(", ")
+                  : patientData?.countries_travelled.split(",").join(", ")}
               </div>
             )}
-          {patientData.ongoing_medication && (
+          {patientData?.ongoing_medication && (
             <div className="md:col-span-2">
               <span className="font-semibold leading-relaxed">
                 Ongoing Medications{" "}
               </span>
-              {patientData.ongoing_medication}
+              {patientData?.ongoing_medication}
             </div>
           )}
-          {patientData.allergies && (
+          {patientData?.allergies && (
             <div className="md:col-span-2">
               <span className="font-semibold leading-relaxed">Allergies: </span>
-              {patientData.allergies}
+              {patientData?.allergies}
             </div>
           )}
-          {!!patientData.number_of_aged_dependents && (
+          {!!patientData?.number_of_aged_dependents && (
             <div>
               <span className="font-semibold leading-relaxed">
                 Number Of Aged Dependents (Above 60):{" "}
               </span>
-              {patientData.number_of_aged_dependents}
+              {patientData?.number_of_aged_dependents}
             </div>
           )}
-          {!!patientData.number_of_chronic_diseased_dependents && (
+          {!!patientData?.number_of_chronic_diseased_dependents && (
             <div>
               <span className="font-semibold leading-relaxed">
                 Number Of Chronic Diseased Dependents:{" "}
               </span>
-              {patientData.number_of_chronic_diseased_dependents}
+              {patientData?.number_of_chronic_diseased_dependents}
             </div>
           )}
         </div>
@@ -361,10 +363,10 @@ export default function ShiftDetails(props: { id: string }) {
     const patientData = data.patient_object;
     const consultation = data.patient.last_consultation;
     const patientGender = GENDER_TYPES.find(
-      (i) => i.id === patientData.gender
+      (i) => i.id === patientData?.gender
     )?.text;
     const testType = TEST_TYPE_CHOICES.find(
-      (i) => i.id === patientData.test_type
+      (i) => i.id === patientData?.test_type
     )?.text;
 
     return (
@@ -405,13 +407,13 @@ export default function ShiftDetails(props: { id: string }) {
           <div className="mt-4">
             <div>
               <span className="font-semibold leading-relaxed">Name: </span>
-              {patientData.name}
+              {patientData?.name}
             </div>
           </div>
           <div className="mt-2 flex justify-between">
             <div>
               <span className="font-semibold leading-relaxed">Age: </span>
-              {patientData.age}
+              {patientData?.age}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">Gender: </span>
@@ -419,21 +421,21 @@ export default function ShiftDetails(props: { id: string }) {
             </div>
             <div>
               <span className="font-semibold leading-relaxed">Phone: </span>
-              <span>{patientData.phone_number || ""}</span>
+              <span>{patientData?.phone_number || ""}</span>
             </div>
           </div>
           <div className="text-left mt-2 flex">
             <span className="font-semibold leading-relaxed"> Address: </span>
             <div className="ml-2">
               <div className="whitespace-pre-wrap">
-                {patientData.address || "-"}
+                {patientData?.address || "-"}
               </div>
-              {patientData.nationality === "India" && (
+              {patientData?.nationality === "India" && (
                 <>
-                  <div>{patientData.ward_object?.name}</div>
-                  <div>{patientData.local_body_object?.name}</div>
-                  <div>{patientData.district_object?.name || "-"}</div>
-                  <div>{patientData.state_object?.name}</div>
+                  <div>{patientData?.ward_object?.name}</div>
+                  <div>{patientData?.local_body_object?.name}</div>
+                  <div>{patientData?.district_object?.name || "-"}</div>
+                  <div>{patientData?.state_object?.name}</div>
                 </>
               )}
             </div>
@@ -457,13 +459,13 @@ export default function ShiftDetails(props: { id: string }) {
               <span className="font-semibold leading-relaxed">
                 Date of Positive Covid 19 Swab:{" "}
               </span>
-              {(patientData.date_of_test &&
-                moment(patientData.date_of_test).format("LL")) ||
+              {(patientData?.date_of_test &&
+                moment(patientData?.date_of_test).format("LL")) ||
                 "-"}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">Test Type: </span>
-              {(patientData.test_type && testType) || "-"}
+              {(patientData?.test_type && testType) || "-"}
             </div>
           </div>
 
