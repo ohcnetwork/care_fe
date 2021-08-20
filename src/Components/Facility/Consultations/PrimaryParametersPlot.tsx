@@ -33,7 +33,7 @@ export const PrimaryParametersPlot = (props: any) => {
               "blood_sugar_level",
               "insulin_intake_frequency",
               "insulin_intake_dose",
-              "spo2",
+              "ventilator_spo2",
               "ventilator_fi02",
               "rhythm",
               "rhythm_detail",
@@ -173,7 +173,7 @@ export const PrimaryParametersPlot = (props: any) => {
             title="SPO2 (%)"
             name="spo2"
             xData={dates}
-            yData={yAxisData("spo2")}
+            yData={yAxisData("ventilator_spo2")}
             low={90}
             high={100}
           />
