@@ -12,6 +12,7 @@ import {
   DISEASE_STATUS,
   PATIENT_FILTER_CATEGORY,
   PATIENT_FILTER_ADMITTED_TO,
+  KASP_STRING,
 } from "../../Common/constants";
 import moment from "moment";
 import { getAllLocalBody, getFacility, getDistrict } from "../../Redux/actions";
@@ -502,7 +503,7 @@ export default function PatientFilterV2(props: any) {
         </div>
 
         <div className="w-64 flex-none">
-          <span className="text-sm font-semibold">KASP</span>
+          <span className="text-sm font-semibold">{KASP_STRING}</span>
           <SelectField
             name="is_kasp"
             variant="outlined"
@@ -510,8 +511,8 @@ export default function PatientFilterV2(props: any) {
             value={filterState.is_kasp}
             options={[
               { id: "", text: "Show All" },
-              { id: "true", text: "Show KASP" },
-              { id: "false", text: "Show Non KASP" },
+              { id: "true", text: `Show ${KASP_STRING}` },
+              { id: "false", text: `Show Non ${KASP_STRING}` },
             ]}
             onChange={handleChange}
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"

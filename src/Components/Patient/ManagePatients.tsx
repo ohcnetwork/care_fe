@@ -27,6 +27,7 @@ import {
   GENDER_TYPES,
   TELEMEDICINE_ACTIONS,
   PATIENT_FILTER_ADMITTED_TO,
+  KASP_STRING,
 } from "../../Common/constants";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import PatientFilterV2 from "./PatientFilterV2";
@@ -738,8 +739,8 @@ export const PatientManager = (props: any) => {
             )}
           {qParams.is_kasp &&
             badge(
-              "KASP",
-              qParams.is_kasp === "true" ? "KASP" : "Non KASP",
+              KASP_STRING,
+              qParams.is_kasp === "true" ? KASP_STRING : `Non ${KASP_STRING}`,
               "is_kasp"
             )}
           {badge("COWIN ID", qParams.covin_id, "covin_id")}

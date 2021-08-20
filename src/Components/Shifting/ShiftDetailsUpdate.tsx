@@ -20,6 +20,7 @@ import {
   FACILITY_TYPES,
   SHIFTING_VEHICLE_CHOICES,
   BREATHLESSNESS_LEVEL,
+  KASP_FULL_STRING,
 } from "../../Common/constants";
 import { UserSelect } from "../Common/UserSelect2";
 import { CircularProgress } from "@material-ui/core";
@@ -338,7 +339,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
               </div>
 
               <div>
-                <InputLabel>Is Karunya Arogya Suraksha Padhathi?</InputLabel>
+                <InputLabel>Is {KASP_FULL_STRING}?</InputLabel>
                 <RadioGroup
                   aria-label="is_kasp"
                   name="is_kasp"

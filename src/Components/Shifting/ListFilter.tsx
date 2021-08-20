@@ -6,7 +6,11 @@ import {
   DateInputField,
   TextInputField,
 } from "../Common/HelperInputFields";
-import { SHIFTING_FILTER_ORDER, DISEASE_STATUS } from "../../Common/constants";
+import {
+  SHIFTING_FILTER_ORDER,
+  DISEASE_STATUS,
+  KASP_STRING,
+} from "../../Common/constants";
 import moment from "moment";
 import { getFacility, getUserList } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
@@ -399,7 +403,7 @@ export default function ListFilter(props: any) {
         </div>
 
         <div className="w-64 flex-none">
-          <span className="text-sm font-semibold">Is KASP</span>
+          <span className="text-sm font-semibold">Is {KASP_STRING}</span>
           <SelectField
             name="is_kasp"
             variant="outlined"

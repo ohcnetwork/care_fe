@@ -19,7 +19,7 @@ import loadable from "@loadable/component";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import React, { useCallback, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
-import { FACILITY_TYPES } from "../../Common/constants";
+import { FACILITY_TYPES, KASP_STRING } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   validateLocationCoordinates,
@@ -781,7 +781,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                   htmlFor="facility-kasp-empanelled"
                   id="kasp_empanelled"
                 >
-                  Is this facility KASP empanelled?
+                  Is this facility {KASP_STRING} empanelled?
                 </InputLabel>
                 <RadioGroup
                   aria-label="kasp_empanelled"
