@@ -1,4 +1,4 @@
-import React, { useReducer, useState, useCallback } from "react";
+import React, { useReducer, useState, useCallback, useEffect } from "react";
 import loadable from "@loadable/component";
 
 import { FacilitySelect } from "../Common/FacilitySelect";
@@ -13,7 +13,7 @@ import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
 import { navigate } from "raviger";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getShiftDetails, updateShift } from "../../Redux/actions";
+import { getShiftDetails, updateShift, getUserList } from "../../Redux/actions";
 import { SelectField } from "../Common/HelperInputFields";
 import {
   SHIFTING_CHOICES,
@@ -21,7 +21,8 @@ import {
   SHIFTING_VEHICLE_CHOICES,
   BREATHLESSNESS_LEVEL,
 } from "../../Common/constants";
-import { UserSelect } from "../Common/UserSelect";
+import { UserSelect } from "../Common/UserSelect2";
+import { CircularProgress } from "@material-ui/core";
 
 import {
   Card,
@@ -86,6 +87,8 @@ const goBack = () => {
 export const ShiftDetailsUpdate = (props: patientShiftProps) => {
   const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState(true);
+  const [assignedUser, SetAssignedUser] = useState(null);
+  const [assignedUserLoading, setAssignedUserLoading] = useState(false);
 
   const shiftFormReducer = (state = initialState, action: any) => {
     switch (action.type) {
@@ -108,6 +111,24 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
 
   const [state, dispatch] = useReducer(shiftFormReducer, initialState);
 
+  useEffect(() => {
+    async function fetchData() {
+      if (state.form.assigned_to) {
+        setAssignedUserLoading(true);
+
+        const res = await dispatchAction(
+          getUserList({ id: state.form.assigned_to })
+        );
+
+        if (res && res.data && res.data.count)
+          SetAssignedUser(res.data.results[0]);
+
+        setAssignedUserLoading(false);
+      }
+    }
+    fetchData();
+  }, [dispatchAction, state.form.assigned_to]);
+
   const validateForm = () => {
     let errors = { ...initError };
     let isInvalidForm = false;
@@ -129,9 +150,10 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     dispatch({ type: "set_form", form });
   };
 
-  const handleOnSelect = (id: string) => {
+  const handleOnSelect = (user: any) => {
     const form = { ...state.form };
-    form["assigned_to"] = id;
+    form["assigned_to"] = user?.id;
+    SetAssignedUser(user);
     dispatch({ type: "set_form", form });
   };
 
@@ -235,7 +257,23 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                   className="bg-white h-14 w-1/3 mt-2 shadow-sm md:text-sm md:leading-5"
                 />
               </div>
-              <div className="md:col-span-1">
+              <div className="w-64 flex-none">
+                <span className="text-sm font-semibold">Assigned To</span>
+                <div className="">
+                  {assignedUserLoading ? (
+                    <CircularProgress size={20} />
+                  ) : (
+                    <UserSelect
+                      multiple={false}
+                      selected={assignedUser}
+                      setSelected={handleOnSelect}
+                      className="shifting-page-filter-dropdown"
+                      errors={""}
+                    />
+                  )}
+                </div>
+              </div>
+              {/* <div className="md:col-span-1">
                 <UserSelect
                   userId={state.form.assigned_to}
                   onSelect={handleOnSelect}
@@ -244,7 +282,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                   }
                   placeholder="Assign a Shifting Staff"
                 />
-              </div>
+              </div> */}
               <div>
                 <InputLabel>Name of shifting approving facility</InputLabel>
                 <FacilitySelect
