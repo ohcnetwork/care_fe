@@ -637,13 +637,12 @@ export const ConsultationForm = (props: any) => {
                     </div>
                   )}
                 </div>
-
                 {JSON.parse(state.form.admitted) && (
                   <div className="flex">
                     <div className="flex-1" id="admission_date-div">
                       <DateInputField
                         id="admission_date"
-                        label="Admission Date"
+                        label="Admission Date*"
                         margin="dense"
                         value={state.form.admission_date}
                         disableFuture={true}
