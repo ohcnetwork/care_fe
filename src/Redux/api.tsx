@@ -107,6 +107,10 @@ const routes: Routes = {
     path: "/api/v1/facility/",
   },
 
+  listFacilityV2: {
+    path: "/api/v1/getallfacilities",
+  },
+
   createFacility: {
     path: "/api/v1/facility/",
     method: "POST",
@@ -114,6 +118,10 @@ const routes: Routes = {
 
   getFacility: {
     path: "/api/v1/facility/{id}/",
+  },
+
+  getFacilityV2: {
+    path: "/api/v1/getallfacilities/{id}/",
   },
 
   updateFacility: {
@@ -124,14 +132,6 @@ const routes: Routes = {
   partialUpdateFacility: {
     path: "/api/v1/facility",
     method: "PATCH",
-  },
-
-  getAllFacilitiesList: {
-    path: "/api/v1/getallfacilities",
-  },
-
-  getAllFacilities: {
-    path: "/api/v1/getallfacilities/{id}/",
   },
 
   getFacilityUsers: {

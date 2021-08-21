@@ -63,16 +63,16 @@ export const deleteUserFacility = (username: string, facility: string) => {
 export const getFacilities = (params: object) => {
   return fireRequest("listFacility", [], params);
 };
-export const getAllFacilities = (params: object) => {
-  return fireRequest("getAllFacilitiesList", [], params);
-};
-
-export const getAllFacility = (id: number, key?: string) => {
-  return fireRequest("getAllFacilities", [], {}, { id: id }, key);
+export const getFacilitiesV2 = (params: object) => {
+  return fireRequest("listFacilityV2", [], params);
 };
 
 export const getFacility = (id: number, key?: string) => {
   return fireRequest("getFacility", [], {}, { id: id }, key);
+};
+
+export const getFacilityV2 = (id: number, key?: string) => {
+  return fireRequest("getFacilityV2", [], {}, { id: id }, key);
 };
 
 export const getFacilityUsers = (id: string) => {
