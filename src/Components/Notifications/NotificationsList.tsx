@@ -16,6 +16,7 @@ import moment from "moment";
 import { useSelector } from "react-redux";
 import { Button, CircularProgress } from "@material-ui/core";
 import { NOTIFICATION_EVENTS } from "../../Common/constants";
+import { Error } from "../../Utils/Notifications.js";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -41,15 +42,21 @@ export default function ResultList() {
   const [isSubscribing, setIsSubscribing] = useState(false);
 
   const intialSubscriptionState = async () => {
-    const res = await dispatch(getUserPnconfig({ username: username }));
-    const reg = await navigator.serviceWorker.ready;
-    const subscription = await reg.pushManager.getSubscription();
-    if (!subscription && !res.data.pf_endpoint) {
-      setIsSubscribed("NotSubscribed");
-    } else if (subscription?.endpoint === res.data.pf_endpoint) {
-      setIsSubscribed("SubscribedOnThisDevice");
-    } else {
-      setIsSubscribed("SubscribedOnAnotherDevice");
+    try {
+      const res = await dispatch(getUserPnconfig({ username: username }));
+      const reg = await navigator.serviceWorker.ready;
+      const subscription = await reg.pushManager.getSubscription();
+      if (!subscription && !res.data.pf_endpoint) {
+        setIsSubscribed("NotSubscribed");
+      } else if (subscription?.endpoint === res.data.pf_endpoint) {
+        setIsSubscribed("SubscribedOnThisDevice");
+      } else {
+        setIsSubscribed("SubscribedOnAnotherDevice");
+      }
+    } catch (error) {
+      Error({
+        msg: `Service Worker Error - ${error}`,
+      });
     }
   };
 
@@ -76,29 +83,44 @@ export default function ResultList() {
   let manageResults: any = null;
 
   const unsubscribe = () => {
-    navigator.serviceWorker.ready.then(function (reg) {
-      setIsSubscribing(true);
-      reg.pushManager.getSubscription().then(function (subscription) {
-        subscription
-          ?.unsubscribe()
-          .then(async function (successful) {
-            const data = {
-              pf_endpoint: "",
-              pf_p256dh: "",
-              pf_auth: "",
-            };
-            const res = await dispatch(
-              updateUserPnconfig(data, { username: username })
-            );
+    navigator.serviceWorker.ready
+      .then(function (reg) {
+        setIsSubscribing(true);
+        reg.pushManager
+          .getSubscription()
+          .then(function (subscription) {
+            subscription
+              ?.unsubscribe()
+              .then(async function (successful) {
+                const data = {
+                  pf_endpoint: "",
+                  pf_p256dh: "",
+                  pf_auth: "",
+                };
+                const res = await dispatch(
+                  updateUserPnconfig(data, { username: username })
+                );
 
-            setIsSubscribed("NotSubscribed");
-            setIsSubscribing(false);
+                setIsSubscribed("NotSubscribed");
+                setIsSubscribing(false);
+              })
+              .catch(function (e) {
+                Error({
+                  msg: "Unsubscribe failed.",
+                });
+              });
           })
           .catch(function (e) {
-            console.log("Unsubscription failed");
+            Error({
+              msg: `Subscription Error`,
+            });
           });
+      })
+      .catch(function (e) {
+        Error({
+          msg: `Service Worker Error`,
+        });
       });
-    });
   };
 
   async function subscribe() {
