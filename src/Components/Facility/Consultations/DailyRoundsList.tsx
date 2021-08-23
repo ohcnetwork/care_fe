@@ -94,6 +94,34 @@ export const DailyRoundsList = (props: any) => {
                       </Typography>
                     </Grid>
                   ) : null}
+
+                  {!telemedicine_doctor_update ? (
+                    <Grid item xs={12}>
+                      <Typography>
+                        <span className="text-gray-700">Updated by:</span>{" "}
+                        {itemData?.last_edited_by &&
+                          itemData.last_edited_by.first_name +
+                            " " +
+                            itemData.last_edited_by.last_name +
+                            " - " +
+                            itemData.last_edited_by.user_type}
+                      </Typography>
+                    </Grid>
+                  ) : null}
+
+                  {!telemedicine_doctor_update && itemData?.created_by ? (
+                    <Grid item xs={12}>
+                      <Typography>
+                        <span className="text-gray-700">Created by:</span>{" "}
+                        {itemData.created_by.first_name +
+                          " " +
+                          itemData.created_by.last_name +
+                          " - " +
+                          itemData.created_by.user_type}
+                      </Typography>
+                    </Grid>
+                  ) : null}
+
                   {itemData.patient_category && (
                     <Grid item xs={12}>
                       <Typography>
