@@ -95,16 +95,15 @@ export const DailyRoundsList = (props: any) => {
                     </Grid>
                   ) : null}
 
-                  {!telemedicine_doctor_update ? (
+                  {!telemedicine_doctor_update && itemData?.last_edited_by ? (
                     <Grid item xs={12}>
                       <Typography>
                         <span className="text-gray-700">Updated by:</span>{" "}
-                        {itemData?.last_edited_by &&
-                          itemData.last_edited_by.first_name +
-                            " " +
-                            itemData.last_edited_by.last_name +
-                            " - " +
-                            itemData.last_edited_by.user_type}
+                        {itemData.last_edited_by.first_name +
+                          " " +
+                          itemData.last_edited_by.last_name +
+                          " - " +
+                          itemData.last_edited_by.user_type}
                       </Typography>
                     </Grid>
                   ) : null}
