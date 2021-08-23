@@ -201,31 +201,34 @@ export const ConsultationDetails = (props: any) => {
                     <span className="font-semibold leading-relaxed">
                       Verified By:{" "}
                     </span>
-                    <span className="badge badge-pill badge-primary">
-                      {consultationData.verified_by}
-                    </span>
+                    {consultationData.verified_by}
+                    <i className="fas fa-check-circle fill-current text-lg text-green-500 ml-2"></i>
                   </div>
                 )}
               </div>
-              <div className="flex flex-col mt-2">
-                <div className="text-sm text-gray-700">
-                  Created on{" "}
-                  {moment(consultationData.created_date).format("lll")}
+              <div className="flex md:flex-row flex-col mt-4 gap-2 justify-between">
+                <div className="flex flex-col text-xs text-gray-700 font-base leading-relaxed">
+                  <div>
+                    <span className="text-gray-900">Created: </span>
+                    {moment(consultationData.created_date).format("lll")} |
+                  </div>
                   {consultationData.created_by && (
-                    <span>
-                      {`by ${consultationData.created_by?.first_name} ${consultationData.created_by?.last_name} @${consultationData.created_by?.username} (${consultationData.created_by?.user_type})`}
-                    </span>
+                    <div>
+                      {` ${consultationData.created_by?.first_name} ${consultationData.created_by?.last_name}  `}
+                      {`@${consultationData.created_by?.username} (${consultationData.created_by?.user_type})`}
+                    </div>
                   )}
                 </div>
-
-                <div className="text-sm text-gray-700">
-                  Last Modified on{" "}
-                  {moment(consultationData.modified_date).format("lll")}{" "}
+                <div className="flex flex-col text-xs md:text-right text-gray-700 font-base leading-relaxed">
+                  <div>
+                    <span className="text-gray-900">Last Modified: </span>
+                    {moment(consultationData.modified_date).format("lll")} |
+                  </div>
                   {consultationData.last_edited_by && (
-                    <span>
-                      by{" "}
-                      {`${consultationData.last_edited_by?.first_name} ${consultationData.last_edited_by?.last_name} @${consultationData.last_edited_by?.username} (${consultationData.last_edited_by?.user_type})`}
-                    </span>
+                    <div>
+                      {` ${consultationData.last_edited_by?.first_name} ${consultationData.last_edited_by?.last_name}  `}
+                      {`@${consultationData.last_edited_by?.username} (${consultationData.last_edited_by?.user_type})`}
+                    </div>
                   )}
                 </div>
               </div>
