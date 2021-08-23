@@ -1,4 +1,5 @@
 import React from "react";
+import { KASP_STRING } from "../../Common/constants";
 
 export default function BadgesList(props: any) {
   const { filterParams, appliedFilters, local, updateFilter } = props;
@@ -59,7 +60,7 @@ export default function BadgesList(props: any) {
         "emergency"
       )}
       {badge(
-        "Is KASP",
+        `Is ${KASP_STRING}`,
         local.is_kasp === "yes" || appliedFilters.is_kasp === "true"
           ? "yes"
           : local.is_kasp === "no" || appliedFilters.is_kasp === "false"

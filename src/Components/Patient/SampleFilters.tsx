@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { SelectField } from "../Common/HelperInputFields";
-import { SAMPLE_TEST_STATUS } from "../../Common/constants";
+import { SAMPLE_TEST_STATUS, SAMPLE_TEST_RESULT } from "../../Common/constants";
 import { navigate } from "raviger";
 
 const useMergeState = (initialState: any) => {
@@ -15,10 +15,12 @@ export default function UserFilter(props: any) {
 
   const [filterState, setFilterState] = useMergeState({
     status: filter.status || "",
+    result: filter.result || "",
   });
 
   const clearFilterState = {
     status: "",
+    result: "",
   };
 
   const handleChange = (event: any) => {
@@ -31,9 +33,10 @@ export default function UserFilter(props: any) {
   };
 
   const applyFilter = () => {
-    const { status } = filterState;
+    const { status, result } = filterState;
     const data = {
       status: status || "",
+      result: result || "",
     };
     onChange(data);
   };
@@ -63,7 +66,7 @@ export default function UserFilter(props: any) {
 
       <div className="font-light text-md mt-2">Filter By:</div>
       <div className="flex flex-wrap gap-2">
-        <div className="">
+        <div className="w-64 flex-none">
           <div className="text-sm font-semibold">Status</div>
           <SelectField
             name="status"
@@ -76,6 +79,19 @@ export default function UserFilter(props: any) {
                 return { id, text: text.replaceAll("_", " ") };
               }),
             ]}
+            onChange={handleChange}
+            errors=""
+          />
+        </div>
+
+        <div className="w-64 flex-none">
+          <div className="text-sm font-semibold">Result</div>
+          <SelectField
+            name="result"
+            variant="outlined"
+            margin="dense"
+            value={filterState.result || 0}
+            options={[{ id: "", text: "SELECT" }, ...SAMPLE_TEST_RESULT]}
             onChange={handleChange}
             errors=""
           />

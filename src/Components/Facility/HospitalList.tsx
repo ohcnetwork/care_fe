@@ -2,7 +2,11 @@ import { navigate, useQueryParams } from "raviger";
 import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { DOWNLOAD_TYPES, FACILITY_TYPES } from "../../Common/constants";
+import {
+  DOWNLOAD_TYPES,
+  FACILITY_TYPES,
+  KASP_STRING,
+} from "../../Common/constants";
 import {
   getFacilities,
   downloadFacility,
@@ -320,7 +324,7 @@ const HospitalListPage = (props: any) => {
               <div className="px-6 py-4">
                 {facility.kasp_empanelled && (
                   <div className="mt-2 inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-yellow-100 text-yellow-800">
-                    KASP
+                    {KASP_STRING}
                   </div>
                 )}
                 <div className="inline-flex float-right items-center px-2.5 py-0.5 mt-2 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800">
@@ -655,8 +659,10 @@ const HospitalListPage = (props: any) => {
         )}
         {qParams.kasp_empanelled &&
           badge(
-            "KASP Empanelled",
-            qParams.kasp_empanelled === "true" ? "KASP" : "Non KASP",
+            `${KASP_STRING} Empanelled`,
+            qParams.kasp_empanelled === "true"
+              ? KASP_STRING
+              : `Non ${KASP_STRING}`,
             "kasp_empanelled"
           )}
       </div>

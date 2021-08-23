@@ -151,6 +151,18 @@ export const DailyRounds = (props: any) => {
             invalidForm = true;
           }
           return;
+        case "clone_last":
+          if (state.form.clone_last === null) {
+            errors[field] = "Please choose a value";
+            invalidForm = true;
+          }
+          return;
+        case "admitted_to":
+          if (!state.form.admitted_to && state.form.clone_last === "false") {
+            errors[field] = "Please select admitted to details";
+            invalidForm = true;
+          }
+          return;
         default:
           return;
       }
@@ -350,6 +362,7 @@ export const DailyRounds = (props: any) => {
                       />
                     </Box>
                   </RadioGroup>
+                  <ErrorHelperText error={state.errors.clone_last} />
                 </div>
               )}
               {(state.form.clone_last === "false" || id) && (

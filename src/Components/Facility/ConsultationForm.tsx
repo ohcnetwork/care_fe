@@ -22,6 +22,7 @@ import {
   SYMPTOM_CHOICES,
   TELEMEDICINE_ACTIONS,
   REVIEW_AT_CHOICES,
+  KASP_STRING,
 } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
@@ -282,7 +283,9 @@ export const ConsultationForm = (props: any) => {
           return;
         case "is_kasp":
           if (!state.form[field]) {
-            errors[field] = "Please select an option, Kasp is mandatory";
+            errors[
+              field
+            ] = `Please select an option, ${KASP_STRING} is mandatory`;
             if (!error_div) error_div = field;
             invalidForm = true;
           }
@@ -634,13 +637,12 @@ export const ConsultationForm = (props: any) => {
                     </div>
                   )}
                 </div>
-
                 {JSON.parse(state.form.admitted) && (
                   <div className="flex">
                     <div className="flex-1" id="admission_date-div">
                       <DateInputField
                         id="admission_date"
-                        label="Admission Date"
+                        label="Admission Date*"
                         margin="dense"
                         value={state.form.admission_date}
                         disableFuture={true}
@@ -742,7 +744,7 @@ export const ConsultationForm = (props: any) => {
               </div>
 
               <div className="flex-1" id="is_kasp-div">
-                <InputLabel id="admitted-label">Kasp*</InputLabel>
+                <InputLabel id="admitted-label">{KASP_STRING}*</InputLabel>
                 <RadioGroup
                   aria-label="covid"
                   name="is_kasp"
