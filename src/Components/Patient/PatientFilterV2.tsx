@@ -9,6 +9,7 @@ import {
 import {
   PATIENT_FILTER_ORDER,
   GENDER_TYPES,
+  FACILITY_TYPES,
   DISEASE_STATUS,
   PATIENT_FILTER_CATEGORY,
   PATIENT_FILTER_ADMITTED_TO,
@@ -51,6 +52,7 @@ export default function PatientFilterV2(props: any) {
   const [filterState, setFilterState] = useMergeState({
     district: filter.district || "",
     facility: filter.facility || "",
+    facility_type: filter.facility_type || "",
     lsgBody: filter.lsgBody || "",
     facility_ref: null,
     lsgBody_ref: null,
@@ -102,6 +104,7 @@ export default function PatientFilterV2(props: any) {
   const clearFilterState = {
     district: "",
     facility: "",
+    facility_type: "",
     lsgBody: "",
     facility_ref: null,
     lsgBody_ref: null,
@@ -248,6 +251,7 @@ export default function PatientFilterV2(props: any) {
     const {
       district,
       facility,
+      facility_type,
       lsgBody,
       date_declared_positive_before,
       date_declared_positive_after,
@@ -284,6 +288,7 @@ export default function PatientFilterV2(props: any) {
       district: district || "",
       lsgBody: lsgBody || "",
       facility: facility || "",
+      facility_type: facility_type || "",
       date_declared_positive_before:
         date_declared_positive_before &&
         moment(date_declared_positive_before).isValid()
@@ -489,6 +494,21 @@ export default function PatientFilterV2(props: any) {
             errors={""}
           />
         </div>
+
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">Facility type</span>
+          <SelectField
+            name="facility_type"
+            variant="outlined"
+            margin="dense"
+            value={filterState.facility_type}
+            options={[{ id: "", text: "Show All" }, ...FACILITY_TYPES]}
+            optionKey="text"
+            onChange={handleChange}
+            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+          />
+        </div>
+
         <div className="w-64 flex-none">
           <span className="text-sm font-semibold">Gender</span>
           <SelectField
