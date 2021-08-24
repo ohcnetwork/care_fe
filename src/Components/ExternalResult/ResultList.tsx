@@ -350,7 +350,6 @@ export default function ResultList() {
     );
   }
 
-  console.log(qParams);
   return (
     <div className="px-6">
       {showDialog && (
