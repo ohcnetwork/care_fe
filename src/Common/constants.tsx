@@ -22,6 +22,7 @@ export const USER_TYPES: Array<String> = [
   "StateLabAdmin",
   "StateAdmin",
   "StateReadOnlyAdmin",
+  "BlockAdmin",
 ];
 
 export const DOWNLOAD_TYPES: Array<String> = [
