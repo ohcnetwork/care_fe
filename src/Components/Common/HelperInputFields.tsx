@@ -115,7 +115,7 @@ interface OptionsProps {
 }
 
 export const TextInputField = (props: TextFieldPropsExtended) => {
-  const { onChange, type, errors, onKeyDown } = props;
+  const { onChange, type, errors, onKeyDown, autoFocus } = props;
   const inputType = type === "number" || type === "float" ? "text" : type;
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (typeof onChange !== "function") {
@@ -138,6 +138,7 @@ export const TextInputField = (props: TextFieldPropsExtended) => {
   return (
     <div>
       <TextField
+        autoFocus={autoFocus}
         {...props}
         fullWidth
         type={inputType}
