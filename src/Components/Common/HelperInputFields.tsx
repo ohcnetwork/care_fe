@@ -138,7 +138,6 @@ export const TextInputField = (props: TextFieldPropsExtended) => {
   return (
     <div>
       <TextField
-        autoFocus={autoFocus}
         {...props}
         fullWidth
         type={inputType}
