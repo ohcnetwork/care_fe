@@ -513,7 +513,7 @@ export const PatientHome = (props: any) => {
       statusName = "SENT_TO_COLLECTON_CENTRE";
     }
 
-    const res = await dispatch(patchSample(sample.id, sampleData));
+    const res = await dispatch(patchSample(sampleData, { id: sample.id }));
     if (res && (res.status === 201 || res.status === 200)) {
       Notification.Success({
         msg: `Request ${statusName}`,

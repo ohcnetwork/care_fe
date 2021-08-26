@@ -416,10 +416,9 @@ const routes: Routes = {
   },
   getTestSample: {
     path: "/api/v1/test_sample",
-    method: "POST",
   },
   patchSample: {
-    path: "/api/v1/test_sample",
+    path: "/api/v1/test_sample/{id}/",
     method: "PATCH",
   },
 
