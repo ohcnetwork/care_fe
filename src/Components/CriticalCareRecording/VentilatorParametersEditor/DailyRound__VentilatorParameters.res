@@ -68,19 +68,11 @@ let make = (
       "High",
     )}
     {renderOptionalInt("Tidal Volume", VentilatorParameters.tidalVolume(ventilatorParameters))}
-    {renderOptionalIntWithIndicators(
-      "Oxygen Modality Oxygen Rate",
-      VentilatorParameters.oxygenModalityOxygenRate(ventilatorParameters),
-      35,
-      60,
-      "Low",
-      "High",
-    )}
     {switch VentilatorParameters.oxygenModality(ventilatorParameters) {
     | NASAL_PRONGS =>
       renderOptionalIntWithIndicators(
-        "Oxygen Modality Flow Rate",
-        VentilatorParameters.oxygenModalityFlowRate(ventilatorParameters),
+        "Oxygen Flow Rate",
+        VentilatorParameters.oxygenModalityOxygenRate(ventilatorParameters),
         1,
         4,
         "Low",
@@ -88,8 +80,8 @@ let make = (
       )
     | SIMPLE_FACE_MASK =>
       renderOptionalIntWithIndicators(
-        "Oxygen Modality Flow Rate",
-        VentilatorParameters.oxygenModalityFlowRate(ventilatorParameters),
+        "Oxygen Flow Rate",
+        VentilatorParameters.oxygenModalityOxygenRate(ventilatorParameters),
         5,
         10,
         "Low",
@@ -97,18 +89,23 @@ let make = (
       )
     | NON_REBREATHING_MASK =>
       renderOptionalIntWithIndicators(
-        "Oxygen Modality Flow Rate",
-        VentilatorParameters.oxygenModalityFlowRate(ventilatorParameters),
+        "Oxygen Flow Rate",
+        VentilatorParameters.oxygenModalityOxygenRate(ventilatorParameters),
         11,
         15,
         "Low",
         "High",
       )
-    | _ =>
-      renderOptionalInt(
-        "Oxygen Modality Flow Rate",
+    | HIGH_FLOW_NASAL_CANNULA =>
+      renderOptionalIntWithIndicators(
+        "Flow Rate",
         VentilatorParameters.oxygenModalityFlowRate(ventilatorParameters),
+        35,
+        60,
+        "Low",
+        "High",
       )
+    | _ => <div />
     }}
     {renderOptionalIntWithIndicators(
       "FIO2",
