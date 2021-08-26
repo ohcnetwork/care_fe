@@ -284,24 +284,12 @@ export default function SampleViewAdmin(props: any) {
                   </div>
                 )}
 
-                <div className="grid gap-2 grid-cols-2 mt-2">
-                  <button
-                    onClick={(e) =>
-                      navigate(
-                        `/facility/${item.facility}/patient/${item.patient}`
-                      )
-                    }
-                    className="w-full text-sm bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow text-center"
-                  >
-                    Patient Details
-                  </button>
-                  <button
-                    onClick={(e) => navigate(`/sample/${item.id}`)}
-                    className="w-full text-sm bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow text-center"
-                  >
-                    Sample Details
-                  </button>
-                </div>
+                <button
+                  onClick={(e) => navigate(`/sample/${item.id}`)}
+                  className="mt-2 w-full text-sm bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow text-center"
+                >
+                  Sample Details
+                </button>
               </div>
             </div>
           </div>
