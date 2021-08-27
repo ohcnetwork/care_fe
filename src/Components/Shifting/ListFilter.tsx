@@ -61,7 +61,6 @@ export default function ListFilter(props: any) {
     ordering: filter.ordering || local.ordering || null,
     is_kasp: filter.is_kasp || local.is_kasp || "--",
     status: filter.status || local.status || null,
-    assigned_user: filter.assigned_user || local.assigned_user || "",
     assigned_user_ref: null,
     assigned_to: filter.assigned_to || local.assigned_to || "",
     disease_status: filter.disease_status || local.disease_status || "",
@@ -121,21 +120,15 @@ export default function ListFilter(props: any) {
 
   useEffect(() => {
     async function fetchData() {
-      if (filter.assigned_user) {
+      if (filter.assigned_to) {
         setAssignedUserLoading(true);
-        const params = {
-          limit: 10,
-          offset: 0,
-          username: filter.assigned_user,
-        };
-        const res = await dispatch(getUserList(params));
+        const res = await dispatch(getUserList({ id: filter.assigned_to }));
 
         if (res && res.data && res.data.count) {
-          const assigned_user = res.data.results.find(
-            (user: any) => user.id == filter.assigned_to
-          );
-
-          setFilterState({ assigned_user_ref: assigned_user });
+          setFilterState({
+            ...filterState,
+            assigned_user_ref: res.data.results[0],
+          });
         }
         setAssignedUserLoading(false);
       }
@@ -152,15 +145,8 @@ export default function ListFilter(props: any) {
   };
 
   const setAssignedUser = (user: any) => {
-    const getPersonName = (user: any) => {
-      let personName = user.first_name + " " + user.last_name;
-
-      return personName.trim().length > 0 ? personName : user.username;
-    };
-
     const filterData: any = { ...filterState };
     filterData.assigned_to = user ? user.id : "";
-    filterData.assigned_user = user ? getPersonName(user) : "";
     filterData.assigned_user_ref = user;
 
     setFilterState(filterData);
@@ -195,7 +181,6 @@ export default function ListFilter(props: any) {
       ordering,
       is_kasp,
       status,
-      assigned_user,
       assigned_to,
       disease_status,
     } = filterState;
@@ -225,7 +210,6 @@ export default function ListFilter(props: any) {
       ordering: ordering || "",
       is_kasp: is_kasp || "",
       status: status || "",
-      assigned_user: assigned_user || "",
       assigned_to: assigned_to || "",
       disease_status: disease_status || "",
     };
