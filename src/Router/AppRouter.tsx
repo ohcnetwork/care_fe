@@ -457,6 +457,9 @@ const AppRouter = (props: any) => {
               <div className="flex-shrink-0 flex items-center px-4">
                 <a href="/">
                   <img className="h-8 w-auto" src={img} alt="care logo" />
+                  <span className="m-1 text-center text-green-200 text-sm font-semibold">
+                    This is Staging Instance
+                  </span>
                 </a>
               </div>
               <div className="mt-5 flex-1 h-0 overflow-y-auto">
@@ -537,6 +540,9 @@ const AppRouter = (props: any) => {
           <div className="flex items-center flex-shrink-0 px-4">
             <a href="/">
               <img className="h-8 w-auto" src={img} alt="care logo" />
+              <span className="m-1 text-center text-green-200 text-sm font-semibold">
+                This is Staging Instance
+              </span>
             </a>
           </div>
           <div className="mt-5 h-0 flex-1 flex flex-col overflow-y-auto">
