@@ -64,6 +64,7 @@ export default function SampleViewAdmin(props: any) {
           district_name: qParams.district_name || undefined,
           status: qParams.status || undefined,
           result: qParams.result || undefined,
+          facility__external_id: qParams.facility__external_id || "",
         })
       );
       if (!status.aborted) {
@@ -81,6 +82,7 @@ export default function SampleViewAdmin(props: any) {
       qParams.patient_name,
       qParams.status,
       qParams.result,
+      qParams.facility__external_id,
     ]
   );
 

@@ -3,6 +3,7 @@ import { SelectField } from "../Common/HelperInputFields";
 import { SAMPLE_TEST_STATUS, SAMPLE_TEST_RESULT } from "../../Common/constants";
 import { navigate } from "raviger";
 import { FacilitySelect } from "../Common/FacilitySelect";
+import { FacilityModel } from "../Facility/models";
 
 const useMergeState = (initialState: any) => {
   const [state, setState] = useState(initialState);
@@ -109,7 +110,10 @@ export default function UserFilter(props: any) {
             showAll={false}
             setSelected={(obj) =>
               handleChange({
-                target: { name: "facility__external_id", value: obj.id },
+                target: {
+                  name: "facility__external_id",
+                  value: obj ? (obj as FacilityModel).id : "",
+                },
               })
             }
             className="shifting-page-filter-dropdown"
