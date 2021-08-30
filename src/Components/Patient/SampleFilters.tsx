@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { SelectField } from "../Common/HelperInputFields";
 import { SAMPLE_TEST_STATUS, SAMPLE_TEST_RESULT } from "../../Common/constants";
 import { navigate } from "raviger";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FacilityModel } from "../Facility/models";
+import { getFacility } from "../../Redux/actions";
+import { useDispatch } from "react-redux";
 
 const useMergeState = (initialState: any) => {
   const [state, setState] = useState(initialState);
@@ -14,16 +16,43 @@ const useMergeState = (initialState: any) => {
 
 export default function UserFilter(props: any) {
   let { filter, onChange, closeFilter } = props;
+  const [isFacilityLoading, setFacilityLoading] = useState(false);
+  const dispatch: any = useDispatch();
 
   const [filterState, setFilterState] = useMergeState({
     status: filter.status || "",
     result: filter.result || "",
-    facility__external_id: filter.facility__external_id || null,
+    facility: filter.facility || "",
+    facility_ref: filter.facility_ref || null,
   });
 
   const clearFilterState = {
     status: "",
     result: "",
+    facility: "",
+    facility_ref: null,
+  };
+
+  useEffect(() => {
+    async function fetchData() {
+      if (filter.facility) {
+        setFacilityLoading(true);
+        const { data: facilityData } = await dispatch(
+          getFacility(filter.facility, "facility")
+        );
+        setFilterState({ facility_ref: facilityData });
+        setFacilityLoading(false);
+      }
+    }
+    fetchData();
+  }, [dispatch]);
+
+  const setFacility = (selected: any, name: string) => {
+    const filterData: any = { ...filterState };
+    filterData[`${name}_ref`] = selected;
+    filterData[name] = (selected || {}).id;
+
+    setFilterState(filterData);
   };
 
   const handleChange = (event: any) => {
@@ -36,11 +65,11 @@ export default function UserFilter(props: any) {
   };
 
   const applyFilter = () => {
-    const { status, result, facility__external_id } = filterState;
+    const { status, result, facility } = filterState;
     const data = {
       status: status || "",
       result: result || "",
-      facility__external_id: facility__external_id || "",
+      facility: facility || "",
     };
     onChange(data);
   };
@@ -108,14 +137,7 @@ export default function UserFilter(props: any) {
             name="facility"
             selected={filterState.facility_ref}
             showAll={false}
-            setSelected={(obj) =>
-              handleChange({
-                target: {
-                  name: "facility__external_id",
-                  value: obj ? (obj as FacilityModel).id : "",
-                },
-              })
-            }
+            setSelected={(obj) => setFacility(obj, "facility")}
             className="shifting-page-filter-dropdown"
             errors={""}
           />
