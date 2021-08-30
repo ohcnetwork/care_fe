@@ -2,6 +2,7 @@ import { useState } from "react";
 import { SelectField } from "../Common/HelperInputFields";
 import { SAMPLE_TEST_STATUS, SAMPLE_TEST_RESULT } from "../../Common/constants";
 import { navigate } from "raviger";
+import { FacilitySelect } from "../Common/FacilitySelect";
 
 const useMergeState = (initialState: any) => {
   const [state, setState] = useState(initialState);
@@ -16,6 +17,7 @@ export default function UserFilter(props: any) {
   const [filterState, setFilterState] = useMergeState({
     status: filter.status || "",
     result: filter.result || "",
+    facility__external_id: filter.facility__external_id || null,
   });
 
   const clearFilterState = {
@@ -33,10 +35,11 @@ export default function UserFilter(props: any) {
   };
 
   const applyFilter = () => {
-    const { status, result } = filterState;
+    const { status, result, facility__external_id } = filterState;
     const data = {
       status: status || "",
       result: result || "",
+      facility__external_id: facility__external_id || "",
     };
     onChange(data);
   };
@@ -94,6 +97,23 @@ export default function UserFilter(props: any) {
             options={[{ id: "", text: "SELECT" }, ...SAMPLE_TEST_RESULT]}
             onChange={handleChange}
             errors=""
+          />
+        </div>
+
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">Facility</span>
+          <FacilitySelect
+            multiple={false}
+            name="facility"
+            selected={filterState.facility_ref}
+            showAll={false}
+            setSelected={(obj) =>
+              handleChange({
+                target: { name: "facility__external_id", value: obj.id },
+              })
+            }
+            className="shifting-page-filter-dropdown"
+            errors={""}
           />
         </div>
       </div>
