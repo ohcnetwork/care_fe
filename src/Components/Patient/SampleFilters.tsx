@@ -136,7 +136,7 @@ export default function UserFilter(props: any) {
             multiple={false}
             name="facility"
             selected={filterState.facility_ref}
-            showAll={false}
+            showAll={true}
             setSelected={(obj) => setFacility(obj, "facility")}
             className="shifting-page-filter-dropdown"
             errors={""}
