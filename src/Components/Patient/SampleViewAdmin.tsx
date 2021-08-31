@@ -6,7 +6,7 @@ import SampleFilter from "./SampleFilters";
 import { navigate, useQueryParams } from "raviger";
 import moment from "moment";
 import loadable from "@loadable/component";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   SAMPLE_TEST_STATUS,
@@ -15,12 +15,7 @@ import {
   SAMPLE_FLOW_RULES,
 } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import {
-  getTestList,
-  patchSample,
-  sampleSearch,
-  getFacility,
-} from "../../Redux/actions";
+import { getTestList, patchSample } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
 import Pagination from "../Common/Pagination";
 import { SampleTestModel } from "./models";
@@ -47,7 +42,6 @@ export default function SampleViewAdmin(props: any) {
   const [offset, setOffset] = useState(0);
   const [fetchFlag, callFetchData] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
-  const [filterFacilityName, setFilterFacilityName] = useState("");
   const [statusDialog, setStatusDialog] = useState<{
     show: boolean;
     sample: SampleTestModel;
@@ -176,22 +170,6 @@ export default function SampleViewAdmin(props: any) {
       sample: {},
     });
   };
-  const fetchFacilityName = useCallback(
-    async (status: statusType) => {
-      const res =
-        qParams.facility && (await dispatch(getFacility(qParams.facility)));
-      if (!status.aborted) {
-        setFilterFacilityName(res?.data?.name);
-      }
-    },
-    [dispatch, qParams.facility]
-  );
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchFacilityName(status);
-    },
-    [fetchFacilityName]
-  );
 
   let sampleList: any[] = [];
   if (sample && sample.length) {
@@ -512,7 +490,10 @@ export default function SampleViewAdmin(props: any) {
               ?.text,
             "result"
           )}
-          {badge("Facility", filterFacilityName, "facility")}
+          {qParams.facility &&
+            sample[0] &&
+            sample[0].facility_object &&
+            badge("Facility", sample[0].facility_object.name, "facility")}
         </div>
       </div>
       <div className="px-3 md:px-8">
