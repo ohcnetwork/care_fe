@@ -107,6 +107,9 @@ const LoginPage = (props: any) => {
               className="h-8 w-auto"
               alt="care logo"
             />{" "}
+            <span className="m-1 text-center text-green-200 text-sm font-semibold">
+              This is Staging Instance
+            </span>
           </a>
         </div>
         <div className="mt-4 md:mt-20 rounded-lg px-1/5 py-4">

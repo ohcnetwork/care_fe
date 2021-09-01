@@ -9,8 +9,8 @@ export interface OptionsType {
   disabled?: boolean;
 }
 
-export const KASP_STRING = "KASP";
-export const KASP_FULL_STRING = "Karunya Arogya Suraksha Padhathi";
+export const KASP_STRING = "ABIS";
+export const KASP_FULL_STRING = "Ayushman Bharat Insurance Scheme";
 
 export const USER_TYPES: Array<String> = [
   "Volunteer",
@@ -26,6 +26,7 @@ export const USER_TYPES: Array<String> = [
   "StateLabAdmin",
   "StateAdmin",
   "StateReadOnlyAdmin",
+  "BlockAdmin",
 ];
 
 export const DOWNLOAD_TYPES: Array<String> = [
