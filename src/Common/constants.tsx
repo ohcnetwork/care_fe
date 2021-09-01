@@ -16,13 +16,13 @@ export const USER_TYPES: Array<String> = [
   "Doctor",
   "WardAdmin",
   "LocalBodyAdmin",
+  "BlockAdmin",
   "DistrictReadOnlyAdmin",
   "DistrictAdmin",
   "DistrictLabAdmin",
   "StateLabAdmin",
   "StateAdmin",
   "StateReadOnlyAdmin",
-  "BlockAdmin",
 ];
 
 export const DOWNLOAD_TYPES: Array<String> = [
