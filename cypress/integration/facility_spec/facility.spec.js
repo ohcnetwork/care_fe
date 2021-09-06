@@ -1,10 +1,16 @@
 /// <reference types="cypress" />
 
+let current_url = "http://localhost:4000";
+
 describe("Facility", () => {
+  beforeEach(() => {
+    cy.restoreLocalStorage();
+    cy.visit(current_url);
+  });
+
   it("creats facility", () => {
     cy.login("karadmin", "passwordR0FL");
 
-    // create facility
     cy.createFacility({
       type: "Private Hospital",
       name: "cypress facility",
@@ -46,9 +52,13 @@ describe("Facility", () => {
 
     cy.url().should("include", "doctor");
     cy.get("[id=doctor-cancel").click();
+    cy.url().then((url) => {
+      current_url = url;
+    });
   });
 
   it("updates facility", () => {
+    cy.visit(current_url);
     cy.updateFacility({
       type: "Educational Inst",
       name: " update",
@@ -69,11 +79,22 @@ describe("Facility", () => {
       expected_type_d_cylinders: "4",
       kasp_empanelled: false,
     });
+    cy.url().then((url) => {
+      current_url = url;
+    });
   });
 
   it("deletes facility", () => {
+    cy.visit(current_url);
     cy.get("[id=facility-delete]").click();
     cy.get("[id=facility-delete-confirm]").click();
     cy.verifyNotification("Facility deleted successfully");
+    cy.url().then((url) => {
+      current_url = url;
+    });
+  });
+
+  afterEach(() => {
+    cy.saveLocalStorage();
   });
 });

@@ -75,7 +75,6 @@ const fillFacilityForm = ({
     .check();
 
   cy.get("[id=facility-location-button]").click();
-  cy.get(".leaflet-crosshair").should("exist").click();
   cy.get("body").click();
 };
 
