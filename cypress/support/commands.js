@@ -24,6 +24,8 @@
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 
+import "./crud/patient_crud";
+
 Cypress.Commands.add("login", (username, password) => {
   cy.log(`Logging in the user: ${username}:${password}`);
 
