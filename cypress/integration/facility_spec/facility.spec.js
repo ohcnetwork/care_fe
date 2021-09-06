@@ -1,7 +1,7 @@
 /// <reference types="cypress" />
 
-describe("Facility creation", () => {
-  it("Facility workflow", () => {
+describe("Facility", () => {
+  it("creats facility", () => {
     cy.login("karadmin", "passwordR0FL");
 
     // create facility
@@ -46,7 +46,9 @@ describe("Facility creation", () => {
 
     cy.url().should("include", "doctor");
     cy.get("[id=doctor-cancel").click();
+  });
 
+  it("updates facility", () => {
     cy.updateFacility({
       type: "Educational Inst",
       name: " update",
@@ -67,8 +69,9 @@ describe("Facility creation", () => {
       expected_type_d_cylinders: "4",
       kasp_empanelled: false,
     });
+  });
 
-    // delete facility
+  it("deletes facility", () => {
     cy.get("[id=facility-delete]").click();
     cy.get("[id=facility-delete-confirm]").click();
     cy.verifyNotification("Facility deleted successfully");
