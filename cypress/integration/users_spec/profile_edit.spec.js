@@ -9,15 +9,13 @@ const base_url = "http://localhost:4000";
 describe("Edit Profile Testing", () => {
   beforeEach(() => {
     cy.login(username, password);
-  });
-
-  it("Empty First-Name field of " + username, () => {
-    // Opening editing form
 
     cy.get("a").contains("Profile").click();
     cy.url().should("include", "/user/profile");
-    cy.get("button").contains("Edit User Profile").click();
+    cy.contains("Edit User Profile").click();
+  });
 
+  it("Empty First-Name field of " + username, () => {
     // Typing into firstname field
     cy.get("input[name=firstName]").clear().trigger("change", { force: true });
 
@@ -31,12 +29,6 @@ describe("Edit Profile Testing", () => {
   });
 
   it("Valid First-Name field of " + username, () => {
-    // Opening editing form
-
-    cy.get("a").contains("Profile").click();
-    cy.url().should("include", "/user/profile");
-    cy.get("button").contains("Edit User Profile").click();
-
     // Typing into firstname field
     cy.get("input[name=firstName]")
       .type(backspace + "User 1")
@@ -54,12 +46,6 @@ describe("Edit Profile Testing", () => {
   });
 
   it("Empty Last-Name field of " + username, () => {
-    // Opening editing form
-
-    cy.get("a").contains("Profile").click();
-    cy.url().should("include", "/user/profile");
-    cy.get("button").contains("Edit User Profile").click();
-
     // Typing into lastname field
     cy.get("input[name=lastName]").clear().trigger("change", { force: true });
 
@@ -73,12 +59,6 @@ describe("Edit Profile Testing", () => {
   });
 
   it("Valid Last-Name field of " + username, () => {
-    // Opening editing form
-
-    cy.get("a").contains("Profile").click();
-    cy.url().should("include", "/user/profile");
-    cy.get("button").contains("Edit User Profile").click();
-
     // Typing into lastname field
     cy.get("input[name=lastName]")
       .type(backspace + "User 1")
@@ -96,13 +76,7 @@ describe("Edit Profile Testing", () => {
   });
 
   it("Invalid Whatsapp Number of " + username, () => {
-    // Opening editing form
-
     const whatsapp_num = "11111-11111";
-
-    cy.get("a").contains("Profile").click();
-    cy.url().should("include", "/user/profile");
-    cy.get("button").contains("Edit User Profile").click();
 
     cy.get(".flag-dropdown").last().find(".arrow").click();
     cy.get('li[data-flag-key="flag_no_84"]').click();
@@ -122,13 +96,7 @@ describe("Edit Profile Testing", () => {
   });
 
   it("Valid Whatsapp Number of " + username, () => {
-    // Opening editing form
-
     const whatsapp_num = "91111-11111";
-
-    cy.get("a").contains("Profile").click();
-    cy.url().should("include", "/user/profile");
-    cy.get("button").contains("Edit User Profile").click();
 
     cy.get(".flag-dropdown").last().find(".arrow").click();
     cy.get('li[data-flag-key="flag_no_84"]').click();
@@ -156,14 +124,7 @@ describe("Edit Profile Testing", () => {
 
   // Phone Testing
   it("Invalid Phone Number of " + username, () => {
-    // Opening editing form
-
     const phone_num = "11111-11111";
-
-    cy.get("a").contains("Profile").click();
-    cy.url().should("include", "/user/profile");
-    cy.get("button").contains("Edit User Profile").click();
-
     cy.get(".flag-dropdown").first().find(".arrow").click();
     cy.get('li[data-flag-key="flag_no_84"]').click();
 
@@ -182,14 +143,7 @@ describe("Edit Profile Testing", () => {
   });
 
   it("Valid Phone Number of " + username, () => {
-    // Opening editing form
-
     const phone_num = "99999-99999";
-
-    cy.get("a").contains("Profile").click();
-    cy.url().should("include", "/user/profile");
-    cy.get("button").contains("Edit User Profile").click();
-
     cy.get(".flag-dropdown").first().find(".arrow").click();
     cy.get('li[data-flag-key="flag_no_84"]').click();
 
