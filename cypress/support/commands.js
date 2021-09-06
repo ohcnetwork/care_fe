@@ -25,7 +25,7 @@
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 
 Cypress.Commands.add("login", (username, password) => {
-  cy.log(`Logging in the user: {username}:{password}`);
+  cy.log(`Logging in the user: ${username}:${password}`);
 
   cy.visit("http://localhost:4000/");
   cy.get('input[name="username"]').type(username);

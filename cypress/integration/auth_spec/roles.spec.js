@@ -1,43 +1,5 @@
 /// <reference types="cypress" />
-
-const users = [
-  {
-    username: "karadmin",
-    rolename: "DistrictAdmin",
-  },
-  {
-    username: "karadminro",
-    rolename: "DistrictReadOnlyAdmin",
-  },
-  {
-    username: "karstaff",
-    rolename: "Staff",
-  },
-  {
-    username: "karstaffro",
-    rolename: "StaffReadOnly",
-  },
-  {
-    username: "karlocal",
-    rolename: "LocalBodyAdmin",
-  },
-  {
-    username: "karward",
-    rolename: "WardAdmin",
-  },
-  {
-    username: "kardoc",
-    rolename: "Doctor",
-  },
-  {
-    username: "karpharma",
-    rolename: "Pharmacist",
-  },
-  {
-    username: "karvol",
-    rolename: "Volunteer",
-  },
-];
+import users from "../../fixtures/users.json";
 
 describe("authentication", () => {
   users.forEach((user) => {
@@ -51,9 +13,8 @@ describe("authentication", () => {
       cy.get("dd").should("contain", user.rolename);
     });
   });
-
   afterEach(() => {
-    cy.log("Logging the user out");
+    cy.log("Logging out");
     cy.get("p").contains("Sign Out").click();
     cy.url().should("include", "/login");
   });
