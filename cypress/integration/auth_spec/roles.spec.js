@@ -40,23 +40,9 @@ const users = [
 ];
 
 describe("authentication", () => {
-  afterEach(() => {
-    cy.log("Logging the user out");
-    cy.get("p").contains("Sign Out").click();
-    cy.url().should("include", "/login");
-  });
-
   users.forEach((user) => {
     it("Login as " + user.username + " - " + user.rolename, () => {
-      cy.visit("http://localhost:4000/");
-
-      // Login
-      cy.get('input[name="username"]').type(user.username);
-      cy.get('input[name="password"]').type("passwordR0FL");
-      cy.get("button").contains("Login").click();
-
-      // Check URL
-      cy.url().should("include", "/facility");
+      cy.login(user.username, "passwordR0FL");
 
       // Assert user
       cy.get("a").contains("Profile").click();
@@ -64,5 +50,11 @@ describe("authentication", () => {
       cy.get("dd").should("contain", user.username);
       cy.get("dd").should("contain", user.rolename);
     });
+  });
+
+  afterEach(() => {
+    cy.log("Logging the user out");
+    cy.get("p").contains("Sign Out").click();
+    cy.url().should("include", "/login");
   });
 });

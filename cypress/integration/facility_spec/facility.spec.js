@@ -85,13 +85,7 @@ const facilityForm = (
 
 describe("Facility creation", () => {
   it("Facility workflow", () => {
-    // login
-    cy.visit("http://localhost:4000/");
-    cy.get('input[name="username"]').type("karadmin");
-    cy.get('input[name="password"]').type("passwordR0FL");
-    cy.get("button").contains("Login").click();
-
-    cy.url().should("include", "/facility");
+    cy.login("karadmin", "passwordR0FL");
 
     // create facility
     cy.visit("http://localhost:4000/facility/create");

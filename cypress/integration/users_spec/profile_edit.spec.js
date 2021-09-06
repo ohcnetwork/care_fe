@@ -8,16 +8,7 @@ const backspace =
 const base_url = "http://localhost:4000";
 describe("Edit Profile Testing", () => {
   beforeEach(() => {
-    cy.log("Logging in the user");
-    cy.visit(base_url);
-
-    // Login
-    cy.get('input[name="username"]').type(username);
-    cy.get("input[name='password']").type(password);
-    cy.get("button").contains("Login").click();
-
-    // Check URL
-    cy.url().should("include", "/facility");
+    cy.login(username, password);
   });
 
   it("Empty First-Name field of " + username, () => {

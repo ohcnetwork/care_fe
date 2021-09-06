@@ -5,13 +5,7 @@ const address = "C-106,\nSector-H,\nAliganj,\nLucknow,\nUttar Pradesh";
 
 describe("Death Report", () => {
   it("Add Data And Submit " + user.username, () => {
-    cy.visit("http://localhost:4000/");
-
-    // Login
-    cy.get('input[name="username"]').type(user.username);
-    cy.get('input[name="password"]').type(user.password);
-    cy.get("button").contains("Login").click();
-    cy.url().should("include", "/facility");
+    cy.login(user.username, user.password);
 
     // Paitents Page
     cy.get("a").contains("Patients").click();

@@ -8,11 +8,7 @@ let patient_url = "";
 
 describe("Patient Creation", () => {
   beforeEach(() => {
-    cy.visit("http://localhost:4000/");
-    cy.get('input[name="username"]').type(username);
-    cy.get('input[name="password"]').type(password);
-    cy.get("button").contains("Login").click();
-    cy.url().should("include", "/facility");
+    cy.login(username, password);
   });
 
   it("Create", () => {
