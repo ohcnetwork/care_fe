@@ -25,6 +25,7 @@
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 
 import "./crud/patient_crud";
+import "./crud/facility_crud";
 
 Cypress.Commands.add("login", (username, password) => {
   cy.log(`Logging in the user: ${username}:${password}`);
