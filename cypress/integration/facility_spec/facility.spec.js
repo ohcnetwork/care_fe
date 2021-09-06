@@ -1,4 +1,4 @@
-import { cy, describe, it } from "local-cypress";
+/// <reference types="cypress" />
 
 // function to create and update facility
 const facilityForm = (

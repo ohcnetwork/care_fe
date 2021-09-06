@@ -1,4 +1,4 @@
-import { cy, it, describe, beforeEach } from "local-cypress";
+/// <reference types="cypress" />
 
 const username = "devdistrictadmin";
 const password = "Coronasafe@123";

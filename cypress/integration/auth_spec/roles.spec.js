@@ -1,4 +1,4 @@
-import { cy, it, describe, afterEach } from "local-cypress";
+/// <reference types="cypress" />
 
 const users = [
   {

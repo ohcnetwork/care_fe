@@ -1,4 +1,4 @@
-import { cy, it, describe } from "local-cypress";
+/// <reference types="cypress" />
 
 const username = "dummy_user_1";
 const password = "Dummyuser1";
