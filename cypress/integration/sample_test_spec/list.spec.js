@@ -1,8 +1,14 @@
 /// <reference types="cypress" />
 
 describe("Sample List", () => {
-  beforeEach(() => {
+  before(() => {
     cy.login("devdistrictadmin", "Coronasafe@123");
+    cy.saveLocalStorage();
+  });
+
+  beforeEach(() => {
+    cy.restoreLocalStorage();
+    cy.visit("http://localhost:4000");
     cy.contains("Sample Test", "a").click();
   });
 
@@ -29,5 +35,9 @@ describe("Sample List", () => {
   it("Next/Previous Page", () => {
     cy.contains("Next").click();
     cy.url().should("contain", "limit=2");
+  });
+
+  afterEach(() => {
+    cy.saveLocalStorage();
   });
 });

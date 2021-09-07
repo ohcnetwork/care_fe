@@ -3,14 +3,16 @@
 let current_url = "http://localhost:4000";
 
 describe("Facility", () => {
+  before(() => {
+    cy.login("karadmin", "passwordR0FL");
+    cy.saveLocalStorage();
+  });
   beforeEach(() => {
     cy.restoreLocalStorage();
     cy.visit(current_url);
   });
 
   it("creats facility", () => {
-    cy.login("karadmin", "passwordR0FL");
-
     cy.createFacility({
       type: "Private Hospital",
       name: "cypress facility",

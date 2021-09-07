@@ -1,9 +1,14 @@
 /// <reference types="cypress" />
 
 describe("Edit Profile Testing", () => {
-  beforeEach(() => {
+  before(() => {
     cy.login(username, password);
+    cy.saveLocalStorage();
+  });
 
+  beforeEach(() => {
+    cy.restoreLocalStorage();
+    cy.visit("http://localhost:4000");
     cy.get("a").contains("Users").click();
     cy.url().should("include", "/user");
   });
@@ -52,5 +57,9 @@ describe("Edit Profile Testing", () => {
     cy.get('[name="search"]').type("cypress_test");
     cy.contains("Delete").click();
     cy.get("button.font-medium.btn.btn-danger").click();
+  });
+
+  afterEach(() => {
+    cy.saveLocalStorage();
   });
 });

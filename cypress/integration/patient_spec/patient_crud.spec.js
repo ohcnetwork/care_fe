@@ -7,8 +7,14 @@ const emergency_phone_number = "9430123487";
 let patient_url = "";
 
 describe("Patient Creation", () => {
-  beforeEach(() => {
+  before(() => {
     cy.login(username, password);
+    cy.saveLocalStorage();
+  });
+
+  beforeEach(() => {
+    cy.restoreLocalStorage();
+    cy.visit("http://localhost:4000");
   });
 
   it("Create", () => {
@@ -67,5 +73,9 @@ describe("Patient Creation", () => {
       "MANAKKAPADY"
     );
     cy.get("[data-testid=pincode] input").should("have.value", "159015");
+  });
+
+  afterEach(() => {
+    cy.saveLocalStorage();
   });
 });

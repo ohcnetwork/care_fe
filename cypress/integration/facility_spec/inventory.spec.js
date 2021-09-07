@@ -1,8 +1,14 @@
 /// <reference types="cypress" />
 
 describe("Inventory Management Section", () => {
-  beforeEach(() => {
+  before(() => {
     cy.login("devdistrictadmin", "Coronasafe@123");
+    cy.saveLocalStorage();
+  });
+
+  beforeEach(() => {
+    cy.restoreLocalStorage();
+    cy.visit("http://localhost:4000");
     cy.contains("View Facility").click();
     cy.contains("Inventory Management").click();
   });
@@ -15,5 +21,9 @@ describe("Inventory Management Section", () => {
     cy.get('[name="unit"').select("Items");
     cy.contains("Add Inventory").click();
     cy.verifyNotification("Inventory created successfully");
+  });
+
+  afterEach(() => {
+    cy.saveLocalStorage();
   });
 });

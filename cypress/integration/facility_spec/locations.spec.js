@@ -1,8 +1,14 @@
 /// <reference types="cypress" />
 
 describe("Location Management Section", () => {
-  beforeEach(() => {
+  before(() => {
     cy.login("devdistrictadmin", "Coronasafe@123");
+    cy.saveLocalStorage();
+  });
+
+  beforeEach(() => {
+    cy.restoreLocalStorage();
+    cy.visit("http://localhost:4000");
     cy.contains("View Facility").click();
     cy.contains("Location Management").click();
   });
@@ -13,5 +19,9 @@ describe("Location Management Section", () => {
     cy.get('[name="description"').type("Test Description");
     cy.contains("Add Location").click();
     cy.verifyNotification("Location created successfully");
+  });
+
+  afterEach(() => {
+    cy.saveLocalStorage();
   });
 });
