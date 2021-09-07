@@ -9,7 +9,7 @@ describe("Sample List", () => {
   beforeEach(() => {
     cy.restoreLocalStorage();
     cy.visit("http://localhost:4000");
-    cy.contains("Sample Test", "a").click();
+    cy.get("a").contains("Sample Test").click();
   });
 
   it("Search by District name", () => {
@@ -21,7 +21,7 @@ describe("Sample List", () => {
   });
 
   it("Update Sample Status", () => {
-    cy.contains("Update Sample Test Status").click();
+    cy.contains("UPDATE SAMPLE TEST STATUS").click();
   });
 
   it("View Patient Details", () => {
@@ -33,8 +33,10 @@ describe("Sample List", () => {
   });
 
   it("Next/Previous Page", () => {
-    cy.contains("Next").click();
-    cy.url().should("contain", "limit=2");
+    cy.wait(1000);
+    cy.contains("Next").not(".hidden").click({ force: true });
+    cy.wait(1000);
+    cy.contains("Previous").not(".hidden").click({ force: true });
   });
 
   afterEach(() => {
