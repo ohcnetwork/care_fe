@@ -507,6 +507,7 @@ export const UserAdd = (props: UserProps) => {
 
               <div>
                 <PhoneNumberField
+                  name="phone_number"
                   label="Phone Number*"
                   value={state.form.phone_number}
                   onChange={(value: any) =>
@@ -519,6 +520,7 @@ export const UserAdd = (props: UserProps) => {
 
               <div>
                 <PhoneNumberField
+                  name="whatsapp_number"
                   label="Whatsapp Number"
                   value={state.form.alt_phone_number}
                   onChange={(value: any) =>

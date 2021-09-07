@@ -5,32 +5,52 @@ describe("Edit Profile Testing", () => {
     cy.login(username, password);
 
     cy.get("a").contains("Users").click();
-    cy.url().should("include", "/user/profile");
+    cy.url().should("include", "/user");
   });
 
   it("create user", () => {
     cy.contains("Add New User").click();
     cy.get('[name="user_type"]').select("Volunteer");
-    // TODO: add name attribute for
-    // Phone Number, Whatsapp Number, Facilities
-    cy.get('[name="username"');
-    cy.get('[name="password"]');
-    cy.get('[name="c_password"]');
-    cy.get('[name="first_name"]');
-    cy.get('[name="last_name"]');
-    cy.get('[name="email"');
-    cy.get('[name="gender"]');
-    cy.get('[name="state"]');
-    cy.get('[name="district"]');
-    cy.get('[name="local_body"]');
+    cy.get('[name="phone_number"]').type("9343234277");
+    cy.get('[name="whatsapp_number"]').type("923342343");
+    cy.get('[name="facilities"]').type("Harsha");
+    cy.get('[name="username"').type("cypress_test");
+    cy.get('[name="password"]').type("cypress_test");
+    cy.get('[name="c_password"]').type("cypress_test");
+    cy.get('[name="first_name"]').type("Cypress Test");
+    cy.get('[name="last_name"]').type("Tester");
+    cy.get('[name="email"').type("cypress@tester.com");
+    cy.get('[name="gender"]').select("Male");
+    cy.get('[name="state"]').select("Kerala");
+    cy.get('[name="district"]').select("Ernakulam");
+    cy.get('[name="local_body"]').select("");
+    cy.contains("Save User").click();
   });
 
   it("view user and verify details", () => {
-    // TODO: Filter by username, lastname, etc
-    // TODO: view first user that comes
+    cy.contains("Advanced Filters").click();
+    cy.get('[name="state"]').select("Kerala");
+    cy.get('[name="district"]').select("Ernakulum");
+    cy.get('[name="local_body"]').select("");
+    cy.get('[name="facility_type"]').select("");
+    cy.get('[name="kasp_empanelled"]').select("");
+    cy.contains("Apply").click();
+
+    // TODO: some verify task
+    cy.get('[name="search"]').type("cypress_test");
   });
 
   it("update user", () => {
-    // TODO: update user
+    cy.get('[name="search"]').type("cypress_test");
+    cy.contains("Click here to show").click();
+    cy.contains("Link new facility").click();
+    cy.get('[name="facility"]').type("test{enter}");
+    cy.contains("Add").click();
+  });
+
+  it("deletes user", () => {
+    cy.get('[name="search"]').type("cypress_test");
+    cy.contains("Delete").click();
+    cy.get("button.font-medium.btn.btn-danger").click();
   });
 });

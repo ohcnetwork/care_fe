@@ -457,6 +457,7 @@ export default function ManageUsers(props: any) {
     <div>
       {linkFacility.show && (
         <LinkFacilityDialog
+          name="facility"
           username={linkFacility.username}
           handleOk={addFacility}
           handleCancel={hideLinkFacilityModal}
