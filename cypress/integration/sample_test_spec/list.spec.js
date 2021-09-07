@@ -34,9 +34,9 @@ describe("Sample List", () => {
 
   it("Next/Previous Page", () => {
     cy.wait(1000);
-    cy.contains("Next").not(".hidden").click({ force: true });
+    cy.contains("Next").should("be.visible").click();
     cy.wait(1000);
-    cy.contains("Previous").not(".hidden").click({ force: true });
+    cy.contains("Previous").should("be.visible").click();
   });
 
   afterEach(() => {

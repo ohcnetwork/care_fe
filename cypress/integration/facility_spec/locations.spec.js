@@ -16,8 +16,8 @@ describe("Location Management Section", () => {
   it("Adds Location", () => {
     cy.contains("Add Location").click();
     cy.get('[name="name"]').type("Test Location");
-    cy.get('[name="description"').type("Test Description");
-    cy.contains("Add Location").click();
+    cy.get('textarea[name="description"]').type("Test Description");
+    cy.get("button").contains("Add Location").click();
     cy.verifyNotification("Location created successfully");
   });
 
