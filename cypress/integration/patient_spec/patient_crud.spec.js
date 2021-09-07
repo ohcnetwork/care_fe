@@ -34,6 +34,7 @@ describe("Patient Creation", () => {
       cy.log(patient_url);
     });
   });
+
   it("Dashboard", () => {
     cy.visit(patient_url);
     cy.url().should("include", "/patient/");
@@ -50,6 +51,7 @@ describe("Patient Creation", () => {
     cy.get("[data-testid=patient-dashboard]").should("contain", "1999");
     cy.get("[data-testid=patient-dashboard]").should("contain", "O+");
   });
+
   it("Edit", () => {
     cy.visit(patient_url + "/update");
     cy.get("[data-testid=state] select").should("contain", "Kerala");
