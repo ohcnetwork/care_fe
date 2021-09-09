@@ -5,6 +5,7 @@ import { AutoCompleteAsyncField } from "../Common/HelperInputFields";
 import { UserModal } from "../Users/models";
 const debounce = require("lodash.debounce");
 interface UserSelectProps {
+  name?: string | "";
   margin?: string;
   errors: string;
   className?: string;
@@ -15,6 +16,7 @@ interface UserSelectProps {
 
 export const UserSelect = (props: UserSelectProps) => {
   const {
+    name,
     multiple,
     selected,
     setSelected,
@@ -73,6 +75,7 @@ export const UserSelect = (props: UserSelectProps) => {
 
   return (
     <AutoCompleteAsyncField
+      name={name}
       multiple={multiple}
       variant="outlined"
       margin={margin}
