@@ -69,7 +69,7 @@ export default function BoardView() {
     const res = await dispatch(
       downloadShiftRequests({ ...formatFilter(qParams), csv: 1 })
     );
-    setDownloadFile(res.data);
+    res && setDownloadFile(res.data);
     document.getElementById(`shiftRequests-ALL`)?.click();
   };
 
