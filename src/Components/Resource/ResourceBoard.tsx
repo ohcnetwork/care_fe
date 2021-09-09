@@ -69,7 +69,7 @@ export default function ResourceBoard({
         csv: 1,
       })
     );
-    setDownloadFile(res.data);
+    res && setDownloadFile(res.data);
     document.getElementById(`resourceRequests-${board}`)?.click();
   };
 
