@@ -65,6 +65,7 @@ export default function ListFilter(props: any) {
     assigned_user_ref: null,
     assigned_to: filter.assigned_to || local.assigned_to || "",
     disease_status: filter.disease_status || local.disease_status || "",
+    is_antenatal: filter.is_antenatal || local.is_antenatal || "--",
   });
   const dispatch: any = useDispatch();
 
@@ -198,6 +199,7 @@ export default function ListFilter(props: any) {
       assigned_user,
       assigned_to,
       disease_status,
+      is_antenatal,
     } = filterState;
     const data = {
       orgin_facility: orgin_facility || "",
@@ -228,6 +230,7 @@ export default function ListFilter(props: any) {
       assigned_user: assigned_user || "",
       assigned_to: assigned_to || "",
       disease_status: disease_status || "",
+      is_antenatal: is_antenatal || "",
     };
     localStorage.setItem(
       "shift-filters",
@@ -439,6 +442,20 @@ export default function ListFilter(props: any) {
             optionArray={true}
             value={filterState.disease_status}
             options={["--", ...DISEASE_STATUS]}
+            onChange={handleChange}
+            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+          />
+        </div>
+
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">Is Antenatal</span>
+          <SelectField
+            name="is_antenatal"
+            variant="outlined"
+            margin="dense"
+            optionArray={true}
+            value={filterState.is_antenatal}
+            options={["--", "yes", "no"]}
             onChange={handleChange}
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
           />
