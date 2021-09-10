@@ -25,6 +25,7 @@ describe("Assets List", () => {
 
   it("Next/Previous Page", () => {
     cy.wait(1000);
+    // only works for desktop mode
     cy.get("button").contains("Next").click();
     cy.wait(1000);
     cy.get("button").contains("Prev").click();
