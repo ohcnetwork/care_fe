@@ -3,8 +3,8 @@
 describe("Assets Filter", () => {
   beforeEach(() => {
     cy.login("devdistrictadmin", "Coronasafe@123");
-    cy.contains("Assets", "a").click();
-    cy.contains("Advaned Filters").click();
+    cy.get("a").contains("Assets").click();
+    cy.contains("Advanced Filters").click();
   });
 
   it("Filter by Facility", () => {
