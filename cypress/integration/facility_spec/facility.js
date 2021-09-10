@@ -1,9 +1,9 @@
 /// <reference types="cypress" />
 
-class facility {
+export default class facility {
   static create(facility) {
     cy.visit("http://localhost:4000/facility/create");
-    fillFacilityForm(facilityDetails);
+    this.fillForm(facility);
     cy.get("[id=facility-save]").should("exist").click();
     cy.verifyNotification("Facility added successfully");
   }
@@ -11,7 +11,7 @@ class facility {
   static update(facility) {
     cy.get("[id=update-facility").click();
     cy.url().should("include", "update");
-    fillFacilityForm(facilityDetails);
+    this.fillForm(facility);
     cy.get("[id=facility-save]").should("exist").click();
     cy.verifyNotification("Facility updated successfully");
   }
