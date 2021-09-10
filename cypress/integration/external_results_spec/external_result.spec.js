@@ -33,7 +33,7 @@ describe("Edit Profile Testing", () => {
 
     it('upload list', () => {
         cy.contains('Upload List').click().wait(100)
-        // attach file and save
+        // TODO: attach file and save
     })
 
     it('export', () => {

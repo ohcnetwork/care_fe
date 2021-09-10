@@ -1,5 +1,17 @@
 /// <reference types="cypress" />
 
+function makeid(length) {
+  var result           = '';
+  var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  var charactersLength = characters.length;
+  for ( var i = 0; i < length; i++ ) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+ return result;
+}
+
+const username = makeid(10)
+
 describe("Edit Profile Testing", () => {
   before(() => {
     cy.login("devdistrictadmin", "Coronasafe@123");
@@ -23,7 +35,7 @@ describe("Edit Profile Testing", () => {
       .wait(2000)
       .type("{downarrow}{enter}");
     cy.wait(2000);
-    cy.get('[name="username"').type("cypress_test1");
+    cy.get('[name="username"').type(username);
     cy.get('[name="dob"]').type("02/03/2001");
     cy.get('[name="password"]').type("#@Cypress_test123");
     cy.get('[name="c_password"]').type("#@Cypress_test123");
@@ -49,7 +61,7 @@ describe("Edit Profile Testing", () => {
     cy.get('[name="alt_phone_number"]').select("9239342343");
     cy.contains("Apply").click();
     cy.wait(2000);
-    cy.get('[name="search"]').type("cypress_test1");
+    cy.get('[name="search"]').type(username);
     cy.wait(1000);
     // TODO: some verify task
   });
@@ -63,7 +75,7 @@ describe("Edit Profile Testing", () => {
     cy.get('[name="alt_phone_number"]').type("9239342343");
     cy.contains("Apply").click();
     cy.wait(2000);
-    cy.get('[name="search"]').type("cypress_test1");
+    cy.get('[name="search"]').type(username);
     cy.wait(1000);
     cy.contains("Click here to show").click();
     cy.contains("Link new facility").click();
@@ -77,7 +89,7 @@ describe("Edit Profile Testing", () => {
   });
 
   it("deletes user", () => {
-    cy.get('[name="search"]').type("cypress_test1");
+    cy.get('[name="search"]').type(username);
     cy.wait(2000);
     cy.contains("Delete").click();
     cy.get("button.font-medium.btn.btn-danger").click();
