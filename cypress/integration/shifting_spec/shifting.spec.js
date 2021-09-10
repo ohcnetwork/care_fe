@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 
-describe("Edit Profile Testing", () => {
+describe("Shifting Page", () => {
   before(() => {
     cy.login("devdistrictadmin", "Coronasafe@123");
     cy.saveLocalStorage();

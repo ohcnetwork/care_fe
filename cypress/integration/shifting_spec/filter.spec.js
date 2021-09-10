@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 
-describe("Edit Profile Testing", () => {
+describe("Shifting section filter", () => {
   before(() => {
     cy.login("devdistrictadmin", "Coronasafe@123");
     cy.saveLocalStorage();
@@ -97,7 +97,7 @@ describe("Edit Profile Testing", () => {
     );
     cy.contains("Cancel").click();
   });
-    
+
   it("filter by patient phone number", () => {
     cy.contains("Cancel").click().wait(100);
     cy.contains(/^((\+91|91|0)[\- ]{0,1})?[123456789]\d{9}$/)
@@ -109,17 +109,17 @@ describe("Edit Profile Testing", () => {
       });
   });
 
-  it('filter by created date', () => {
-    cy.get('[name="created_date_after"]').type('22/05/2020')
-    cy.get('[name="created_date_before"]').type('09/09/2021')
+  it("filter by created date", () => {
+    cy.get('[name="created_date_after"]').type("22/05/2020");
+    cy.get('[name="created_date_before"]').type("09/09/2021");
     cy.contains("Apply").click().wait(1000);
-  })
+  });
 
-  it('filter by modified date', () => {
-      cy.get('[name="modified_date_after"]').type('22/05/2020')
-      cy.get('[name="modified_date_before"]').type('09/09/2021')
-      cy.contains("Apply").click().wait(1000);
-  })
+  it("filter by modified date", () => {
+    cy.get('[name="modified_date_after"]').type("22/05/2020");
+    cy.get('[name="modified_date_before"]').type("09/09/2021");
+    cy.contains("Apply").click().wait(1000);
+  });
 
   afterEach(() => {
     cy.contains("Filters").click();
