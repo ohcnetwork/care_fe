@@ -24,15 +24,18 @@ describe("Edit Profile Testing", () => {
     })
 
     it('filter by created date', () => {
-
+      cy.get('[name="created_date_after"]').type('06/12/2020')
+      cy.get('[name="created_date_before"]').type('31/12/2020')
     })
 
     it('filter by result date', () => {
-
+      cy.get('[name="result_date_after"]').type('02/03/2021')
+      cy.get('[name="result_date_before"]').type('02/04/2021')
     })
 
     it('filter by sample collection date', () => {
-
+      cy.get('[name="sample_collection_date_after"]').type('04/01/2021')
+      cy.get('[name="sample_collection_date_before"]').type('03/03/2021')
     })
 
     it('filter by srf id', () => {

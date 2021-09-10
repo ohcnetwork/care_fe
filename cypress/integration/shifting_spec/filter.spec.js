@@ -83,12 +83,15 @@ describe("Edit Profile Testing", () => {
     })
 
     it('filter by created date', () => {
-
+        cy.get('[name="created_date_after"]').type('22/05/2020')
+        cy.get('[name="created_date_before"]').type('09/09/2021')
     })
 
     it('filter by modified date', () => {
-
+        cy.get('[name="modified_date_after"]').type('22/05/2020')
+        cy.get('[name="modified_date_before"]').type('09/09/2021')
     })
+    
   
     afterEach(() => {
       cy.saveLocalStorage();
