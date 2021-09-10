@@ -1,16 +1,17 @@
 /// <reference types="cypress" />
 
 function makeid(length) {
-  var result           = '';
-  var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  var result = "";
+  var characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   var charactersLength = characters.length;
-  for ( var i = 0; i < length; i++ ) {
+  for (var i = 0; i < length; i++) {
     result += characters.charAt(Math.floor(Math.random() * charactersLength));
   }
- return result;
+  return result;
 }
 
-const username = makeid(10)
+const username = makeid(20);
 
 describe("Edit Profile Testing", () => {
   before(() => {
@@ -20,7 +21,7 @@ describe("Edit Profile Testing", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    cy.visit("http://localhost:4000");
+    cy.visit("http://localhost:4000").wait(1000);
     cy.get("a").contains("Users").click();
     cy.url().should("include", "/user");
   });
@@ -55,10 +56,10 @@ describe("Edit Profile Testing", () => {
     cy.wait(1000);
     cy.contains("Advanced Filters").click();
     cy.wait(2000);
-    cy.get('[name="first_name"]').select("Cypress Test");
-    cy.get('[name="last_name"]').select("Tester");
-    cy.get('[name="phone_number"]').select("9343234277");
-    cy.get('[name="alt_phone_number"]').select("9239342343");
+    cy.get('[name="first_name"]').type("Cypress Test");
+    cy.get('[name="last_name"]').type("Tester");
+    cy.get('[name="phone_number"]').type("9343234277");
+    cy.get('[name="alt_phone_number"]').type("9239342343");
     cy.contains("Apply").click();
     cy.wait(2000);
     cy.get('[name="search"]').type(username);
@@ -67,8 +68,7 @@ describe("Edit Profile Testing", () => {
   });
 
   it("update user", () => {
-    cy.contains("Advanced Filters").click();
-    cy.wait(2000);
+    cy.contains("Advanced Filters").click().wait(2000);
     cy.get('[name="first_name"]').type("Cypress Test");
     cy.get('[name="last_name"]').type("Tester");
     cy.get('[name="phone_number"]').type("9343234277");
@@ -83,9 +83,7 @@ describe("Edit Profile Testing", () => {
       .type("test")
       .wait(2000)
       .type("{downarrow}{enter}");
-    cy.contains("Add").click();
-    cy.wait(2000);
-    cy.verifyNotification("User updated successfully");
+    cy.get("button > span").contains("Add").click().wait(1000);
   });
 
   it("deletes user", () => {
@@ -93,6 +91,14 @@ describe("Edit Profile Testing", () => {
     cy.wait(2000);
     cy.contains("Delete").click();
     cy.get("button.font-medium.btn.btn-danger").click();
+  });
+
+  it("Next/Previous Page", () => {
+    cy.wait(1000);
+    // only works for desktop mode
+    cy.get("button").contains("Next").click();
+    cy.wait(1000);
+    cy.get("button").contains("Prev").click();
   });
 
   afterEach(() => {
