@@ -4,27 +4,24 @@ const user = { username: "devdistrictadmin", password: "Coronasafe@123" };
 const address = "C-106,\nSector-H,\nAliganj,\nLucknow,\nUttar Pradesh";
 
 describe("Death Report", () => {
-  it("Add Data And Submit " + user.username, () => {
-    cy.visit("http://localhost:4000/");
+  before(() => {
+    cy.login(user.username, user.password);
+    cy.saveLocalStorage();
+  });
 
-    // Login
-    cy.get('input[name="username"]').type(user.username);
-    cy.get('input[name="password"]').type(user.password);
-    cy.get("button").contains("Login").click();
-    cy.url().should("include", "/facility");
-
-    // Paitents Page
+  beforeEach(() => {
+    cy.restoreLocalStorage();
+    cy.visit("http://localhost:4000");
     cy.get("a").contains("Patients").click();
     cy.url().should("include", "/patients");
+    cy.contains("Details").click();
+    cy.url().then((url) => {
+      const patient_id = url.split("/")[6];
+      cy.visit(`http://localhost:4000/death_report/${patient_id}`);
+    });
+  });
 
-    // Patient Details
-    cy.get("div").contains("Details").click();
-    cy.url().should("include", "/patient");
-
-    // Open Death Form
-    cy.get('button[name="death_report"]').click();
-    cy.url().should("include", "/death_report");
-
+  it("Add Data And Submit " + user.username, () => {
     // Wait For Form Data To Prepopulate
     cy.wait(1000);
 

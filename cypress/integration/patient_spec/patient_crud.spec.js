@@ -1,4 +1,4 @@
-import { cy, it, describe, beforeEach } from "local-cypress";
+/// <reference types="cypress" />
 
 const username = "devdistrictadmin";
 const password = "Coronasafe@123";
@@ -7,12 +7,14 @@ const emergency_phone_number = "9430123487";
 let patient_url = "";
 
 describe("Patient Creation", () => {
+  before(() => {
+    cy.login(username, password);
+    cy.saveLocalStorage();
+  });
+
   beforeEach(() => {
-    cy.visit("http://localhost:4000/");
-    cy.get('input[name="username"]').type(username);
-    cy.get('input[name="password"]').type(password);
-    cy.get("button").contains("Login").click();
-    cy.url().should("include", "/facility");
+    cy.restoreLocalStorage();
+    cy.visit("http://localhost:4000");
   });
 
   it("Create", () => {
@@ -49,6 +51,7 @@ describe("Patient Creation", () => {
       cy.log(patient_url);
     });
   });
+
   it("Dashboard", () => {
     cy.visit(patient_url);
     cy.url().should("include", "/patient/");
@@ -65,6 +68,7 @@ describe("Patient Creation", () => {
     cy.get("[data-testid=patient-dashboard]").should("contain", "1999");
     cy.get("[data-testid=patient-dashboard]").should("contain", "O+");
   });
+
   it("Edit", () => {
     cy.visit(patient_url + "/update");
     cy.get("[data-testid=state] select").should("contain", "Kerala");
@@ -80,5 +84,9 @@ describe("Patient Creation", () => {
       "MANAKKAPADY"
     );
     cy.get("[data-testid=pincode] input").should("have.value", "159015");
+  });
+
+  afterEach(() => {
+    cy.saveLocalStorage();
   });
 });

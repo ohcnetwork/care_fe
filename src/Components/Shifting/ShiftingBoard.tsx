@@ -72,7 +72,7 @@ export default function ListView({
         csv: 1,
       })
     );
-    setDownloadFile(res.data);
+    res && setDownloadFile(res.data);
     document.getElementById(`shiftRequests-${board}`)?.click();
   };
 

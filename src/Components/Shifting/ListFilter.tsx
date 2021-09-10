@@ -350,6 +350,7 @@ export default function ListFilter(props: any) {
               <CircularProgress size={20} />
             ) : (
               <UserSelect
+                name="assigned_to"
                 multiple={false}
                 selected={filterState.assigned_user_ref}
                 setSelected={(obj) => setAssignedUser(obj)}
