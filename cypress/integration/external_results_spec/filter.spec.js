@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 
-describe("Edit Profile Testing", () => {
+describe("External Results Filters", () => {
   before(() => {
     cy.login("devdistrictadmin", "Coronasafe@123");
     cy.saveLocalStorage();
