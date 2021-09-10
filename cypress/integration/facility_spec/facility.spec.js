@@ -1,5 +1,7 @@
 /// <reference types="cypress" />
 
+import facility from "./facility";
+
 let current_url = "http://localhost:4000";
 
 describe("Facility", () => {
@@ -7,13 +9,14 @@ describe("Facility", () => {
     cy.login("karadmin", "passwordR0FL");
     cy.saveLocalStorage();
   });
+
   beforeEach(() => {
     cy.restoreLocalStorage();
     cy.visit(current_url);
   });
 
   it("creats facility", () => {
-    cy.createFacility({
+    facility.create({
       type: "Private Hospital",
       name: "cypress facility",
       state: "1",
@@ -61,7 +64,7 @@ describe("Facility", () => {
 
   it("updates facility", () => {
     cy.visit(current_url);
-    cy.updateFacility({
+    facility.update({
       type: "Educational Inst",
       name: " update",
       state: "1",
