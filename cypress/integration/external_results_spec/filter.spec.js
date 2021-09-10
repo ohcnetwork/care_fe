@@ -14,13 +14,16 @@ describe("Edit Profile Testing", () => {
       cy.url().should("include", "/external_results");
     });
   
-    // TODO: set identifying attribute for blank tests
-    
     it('filter by lsg', () => {
-        
+      cy.get('[placeholder="Select Local Body"]')
+        .type('ernakulam')
+        .type('{downarrow}{enter}')
     })
 
     it('filter by ward', () => {
+      cy.get('[placeholder="Select wards"]')
+        .type('ernakulam')
+        .type('{downarrow}{enter}')
     })
 
     it('filter by created date', () => {
