@@ -13,11 +13,13 @@ describe("Sample List", () => {
   });
 
   it("Search by District name", () => {
-    cy.get('[placeholder="District Name"]').type("TEst");
+    cy.get('[placeholder="District Name"]').type("TEst").wait(1000);
+    cy.url().should("include", "TEst");
   });
 
   it("Search by Patient Name", () => {
-    cy.get('[placeholder="Search by Patient Name"]').type("TEst");
+    cy.get('[placeholder="Search by Patient Name"]').type("Test").wait(1000);
+    cy.url().should("include", "Test");
   });
 
   it("Update Sample Status", () => {
@@ -34,9 +36,10 @@ describe("Sample List", () => {
 
   it("Next/Previous Page", () => {
     cy.wait(1000);
-    cy.contains("Next").should("be.visible").click();
+    // only works for desktop mode
+    cy.get("button").contains("Next").click();
     cy.wait(1000);
-    cy.contains("Previous").should("be.visible").click();
+    cy.get("button").contains("Prev").click();
   });
 
   afterEach(() => {
