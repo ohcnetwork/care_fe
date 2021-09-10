@@ -7,33 +7,21 @@ describe("Death Report", () => {
   before(() => {
     cy.login(user.username, user.password);
     cy.saveLocalStorage();
-  })
+  });
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    cy.visit('http://localhost:4000');
+    cy.visit("http://localhost:4000");
     cy.get("a").contains("Patients").click();
     cy.url().should("include", "/patients");
-    cy.contains('Details').click();
+    cy.contains("Details").click();
     cy.url().then((url) => {
-      const patient_id = url.split('/')[6]
-      cy.visit(`https://localhost:4000/death_report/${patient_id}`)
-    })
-  })
-  
+      const patient_id = url.split("/")[6];
+      cy.visit(`http://localhost:4000/death_report/${patient_id}`);
+    });
+  });
+
   it("Add Data And Submit " + user.username, () => {
-    // Paitents Page
-    cy.get("a").contains("Patients").click();
-    cy.url().should("include", "/patients");
-
-    // Patient Details
-    cy.get("div").contains("Details").click();
-    cy.url().should("include", "/patient");
-
-    // Open Death Form
-    cy.get('button[name="death_report"]').click();
-    cy.url().should("include", "/death_report");
-
     // Wait For Form Data To Prepopulate
     cy.wait(1000);
 
