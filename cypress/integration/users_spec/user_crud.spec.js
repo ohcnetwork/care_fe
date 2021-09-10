@@ -13,7 +13,7 @@ function makeid(length) {
 
 const username = makeid(20);
 
-describe("Edit Profile Testing", () => {
+describe("User management", () => {
   before(() => {
     cy.login("devdistrictadmin", "Coronasafe@123");
     cy.saveLocalStorage();
