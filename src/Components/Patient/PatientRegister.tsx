@@ -290,11 +290,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   const parseGenderFromExt = (gender: any, defaultValue: any) => {
     switch (gender.toLowerCase()) {
       case "m":
-        return 1;
+        return "1";
       case "f":
-        return 2;
+        return "2";
       case "o":
-        return 3;
+        return "3";
       default:
         return defaultValue;
     }
