@@ -169,6 +169,9 @@ export default function ListFilter(props: any) {
   const handleChange = (event: any) => {
     let { name, value } = event.target;
 
+    if (value === "--") {
+      value = "";
+    }
     const filterData: any = { ...filterState };
     filterData[name] = value;
 
