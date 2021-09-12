@@ -98,6 +98,7 @@ export default function ListView({
     filterProp.assigned_user,
     filterProp.assigned_to,
     filterProp.disease_status,
+    filterProp.breathlessness_level,
   ]);
 
   const handlePagination = (page: number, limit: number) => {
