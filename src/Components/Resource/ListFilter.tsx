@@ -7,7 +7,7 @@ import {
 } from "../Common/HelperInputFields";
 import { RESOURCE_FILTER_ORDER } from "../../Common/constants";
 import moment from "moment";
-import { getFacility } from "../../Redux/actions";
+import { getFacilityV2 as getFacility } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { CircularProgress } from "@material-ui/core";
 import { RESOURCE_CHOICES } from "../../Common/constants";
