@@ -23,6 +23,7 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
+/// <reference types="cypress" />
 
 Cypress.Commands.add("login", (username, password) => {
   cy.log(`Logging in the user: ${username}:${password}`);
@@ -32,12 +33,12 @@ Cypress.Commands.add("login", (username, password) => {
   cy.get('input[name="password"]').type(password);
   cy.get("button").contains("Login").click();
 
-  cy.url().should("include", "/facility");
+  return cy.url().should("include", "/facility");
 });
 
 Cypress.Commands.add("verifyNotification", (text) => {
   cy.get(".pnotify-container").should("exist").contains(text);
-  cy.get(".pnotify-container").click();
+  return cy.get(".pnotify-container").click();
 });
 
 let LOCAL_STORAGE_MEMORY = {};
