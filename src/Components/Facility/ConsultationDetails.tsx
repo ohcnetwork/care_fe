@@ -382,8 +382,13 @@ export const ConsultationDetails = (props: any) => {
               )}
               {consultationData.discharge_advice && (
                 <div className="mt-4">
-                  <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                  <h3 className="flex text-lg font-semibold leading-relaxed text-gray-900">
                     Prescription
+                    <div className="ml-3 text-xs text-gray-600 mt-2">
+                      <i className="fas fa-history text-sm pr-2"></i>
+                      {consultationData.modified_date &&
+                        moment(consultationData.modified_date)}
+                    </div>
                   </h3>
                   <div className="flex flex-col">
                     <div className="-my-2 py-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
