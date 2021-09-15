@@ -135,6 +135,7 @@ export default function ListView() {
     qParams.is_kasp,
     qParams.assigned_to,
     qParams.disease_status,
+    qParams.breathlessness_level,
     offset,
   ]);
 

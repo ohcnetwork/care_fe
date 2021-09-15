@@ -10,6 +10,7 @@ import {
   SHIFTING_FILTER_ORDER,
   DISEASE_STATUS,
   KASP_STRING,
+  BREATHLESSNESS_LEVEL,
 } from "../../Common/constants";
 import moment from "moment";
 import { getFacilityV2, getUserList } from "../../Redux/actions";
@@ -64,6 +65,8 @@ export default function ListFilter(props: any) {
     assigned_user_ref: null,
     assigned_to: filter.assigned_to || local.assigned_to || "",
     disease_status: filter.disease_status || local.disease_status || "",
+    breathlessness_level:
+      filter.breathlessness_level || local.breathlessness_level || "",
   });
   const dispatch: any = useDispatch();
 
@@ -186,6 +189,7 @@ export default function ListFilter(props: any) {
       status,
       assigned_to,
       disease_status,
+      breathlessness_level,
     } = filterState;
     const data = {
       orgin_facility: orgin_facility || "",
@@ -215,6 +219,7 @@ export default function ListFilter(props: any) {
       status: status || "",
       assigned_to: assigned_to || "",
       disease_status: disease_status || "",
+      breathlessness_level: breathlessness_level || "",
     };
     localStorage.setItem(
       "shift-filters",
@@ -426,6 +431,20 @@ export default function ListFilter(props: any) {
             optionArray={true}
             value={filterState.disease_status}
             options={["--", ...DISEASE_STATUS]}
+            onChange={handleChange}
+            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+          />
+        </div>
+
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">Breathlessness Level</span>
+          <SelectField
+            name="breathlessness_level"
+            variant="outlined"
+            margin="dense"
+            optionArray={true}
+            value={filterState.breathlessness_level}
+            options={["--", ...BREATHLESSNESS_LEVEL]}
             onChange={handleChange}
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
           />

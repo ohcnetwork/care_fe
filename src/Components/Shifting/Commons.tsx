@@ -22,6 +22,7 @@ export const initialFilterData = {
   is_kasp: "--",
   assigned_to: "",
   disease_status: "",
+  breathlessness_level: "",
 };
 
 export const formatFilter = (params: any) => {
@@ -56,6 +57,7 @@ export const formatFilter = (params: any) => {
     ordering: filter.ordering || undefined,
     assigned_to: filter.assigned_to || undefined,
     disease_status: filter.disease_status || undefined,
+    breathlessness_level: filter.breathlessness_level || undefined,
     is_kasp:
       (filter.is_kasp && filter.is_kasp) === "--"
         ? ""

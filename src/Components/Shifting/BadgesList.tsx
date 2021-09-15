@@ -133,6 +133,11 @@ export default function BadgesList(props: any) {
         appliedFilters.disease_status || local.disease_status,
         "disease_status"
       )}
+      {badge(
+        "Breathlessness Level",
+        appliedFilters.breathlessness_level || local.breathlessness_level,
+        "breathlessness_level"
+      )}
 
       {badge("Assigned To", assignedUsername, "assigned_to")}
 
