@@ -10,16 +10,6 @@ let ventilatorOxygenModality: array<Options.t> = [
 
 let silderOptionArray = [
   {
-    "title": "Flow Rate",
-    "start": "0",
-    "end": "70",
-    "interval": "5",
-    "step": 1.0,
-    "id": "ventilator_oxygen_modality_flow_rate",
-    "min": 35.0,
-    "max": 60.0,
-  },
-  {
     "title": "FiO2 (%)",
     "start": "21",
     "end": "100",
@@ -65,21 +55,37 @@ let make = (~state: VentilatorParameters.state, ~send: VentilatorParameters.acti
       options={ventilatorOxygenModality}
       ishorizontal={false}
     />
-    <Slider
-      title={"Oxygen Flow Rate"}
-      start={"0"}
-      end={"50"}
-      interval={"5"}
-      step={1.0}
-      value={Belt.Int.toString(
-        switch state.ventilator_oxygen_modality_oxygen_rate {
-        | Some(value) => value
-        | _ => 0
-        },
-      )}
-      setValue={s => send(SetOxygenModalityOxygenRate(Belt.Int.fromString(s)))}
-      getLabel={getOxygenFlowRateLabel}
-    />
+    {state.ventilator_oxygen_modality === HIGH_FLOW_NASAL_CANNULA
+      ? <Slider
+          title={"Flow Rate"}
+          start={"0"}
+          end={"70"}
+          interval={"5"}
+          step={1.0}
+          value={Belt.Int.toString(
+            switch state.ventilator_oxygen_modality_flow_rate {
+            | Some(value) => value
+            | _ => 0
+            },
+          )}
+          setValue={s => send(SetOxygenModalityFlowRate(Belt.Int.fromString(s)))}
+          getLabel={VentilatorParameters.getStatus(35.0, "Low", 60.0, "High")}
+        />
+      : <Slider
+          title={"Oxygen Flow Rate"}
+          start={"0"}
+          end={"50"}
+          interval={"5"}
+          step={1.0}
+          value={Belt.Int.toString(
+            switch state.ventilator_oxygen_modality_oxygen_rate {
+            | Some(value) => value
+            | _ => 0
+            },
+          )}
+          setValue={s => send(SetOxygenModalityOxygenRate(Belt.Int.fromString(s)))}
+          getLabel={getOxygenFlowRateLabel}
+        />}
     {silderOptionArray
     |> Array.map(option => {
       let value: option<int> = switch option["id"] {
@@ -90,7 +96,6 @@ let make = (~state: VentilatorParameters.state, ~send: VentilatorParameters.acti
       }
       let handleChange: option<int> => VentilatorParameters.action = s =>
         switch option["id"] {
-        | "ventilator_oxygen_modality_flow_rate" => SetOxygenModalityFlowRate(s)
         | "ventilator_fi02" => SetFIO2(s)
         | "ventilator_spo2" => SetSPO2(s)
         }
