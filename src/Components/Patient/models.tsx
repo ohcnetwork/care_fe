@@ -257,6 +257,16 @@ export interface DailyRoundsModel {
   rounds_type?: string;
   last_updated_by_telemedicine?: boolean;
   created_by_telemedicine?: boolean;
+  created_by?: {
+    first_name?: string;
+    last_name?: string;
+    user_type?: string;
+  };
+  last_edited_by?: {
+    first_name?: string;
+    last_name?: string;
+    user_type?: string;
+  };
 }
 export interface FacilityNameModel {
   id?: string;
