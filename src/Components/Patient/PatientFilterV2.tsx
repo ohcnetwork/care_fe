@@ -502,8 +502,15 @@ export default function PatientFilterV2(props: any) {
             variant="outlined"
             margin="dense"
             value={filterState.facility_type}
-            options={[{ id: "", text: "Show All" }, ...FACILITY_TYPES]}
-            optionKey="text"
+            options={[
+              { id: "", text: "Show All" },
+              ...FACILITY_TYPES.map(({ id, text }) => {
+                return {
+                  id: text,
+                  text,
+                };
+              }),
+            ]}
             onChange={handleChange}
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
           />
