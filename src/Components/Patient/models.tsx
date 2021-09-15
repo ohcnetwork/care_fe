@@ -109,6 +109,7 @@ export interface PatientModel {
 }
 
 export interface SampleTestModel {
+  patient_object?: PatientModel;
   atypical_presentation?: string;
   diagnosis?: string;
   diff_diagnosis?: string;
