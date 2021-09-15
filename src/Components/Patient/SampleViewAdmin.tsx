@@ -6,7 +6,7 @@ import SampleFilter from "./SampleFilters";
 import { navigate, useQueryParams } from "raviger";
 import moment from "moment";
 import loadable from "@loadable/component";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   SAMPLE_TEST_STATUS,
@@ -15,7 +15,7 @@ import {
   SAMPLE_FLOW_RULES,
 } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getTestList, patchSample, sampleSearch } from "../../Redux/actions";
+import { getTestList, patchSample } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
 import Pagination from "../Common/Pagination";
 import { SampleTestModel } from "./models";
@@ -64,6 +64,7 @@ export default function SampleViewAdmin(props: any) {
           district_name: qParams.district_name || undefined,
           status: qParams.status || undefined,
           result: qParams.result || undefined,
+          facility: qParams.facility || "",
         })
       );
       if (!status.aborted) {
@@ -81,6 +82,7 @@ export default function SampleViewAdmin(props: any) {
       qParams.patient_name,
       qParams.status,
       qParams.result,
+      qParams.facility,
     ]
   );
 
@@ -476,6 +478,10 @@ export default function SampleViewAdmin(props: any) {
               ?.text,
             "result"
           )}
+          {qParams.facility &&
+            sample[0] &&
+            sample[0].facility_object &&
+            badge("Facility", sample[0].facility_object.name, "facility")}
         </div>
       </div>
       <div className="px-3 md:px-8">
