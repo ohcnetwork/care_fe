@@ -387,7 +387,7 @@ export const ConsultationDetails = (props: any) => {
                     <div className="ml-3 text-xs text-gray-600 mt-2">
                       <i className="fas fa-history text-sm pr-2"></i>
                       {consultationData.modified_date &&
-                        moment(consultationData.modified_date)}
+                        moment(consultationData.modified_date).format("lll")}
                     </div>
                   </h3>
                   <div className="flex flex-col">
