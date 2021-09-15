@@ -9,7 +9,12 @@ export default function HelpToolTip(props: any) {
       title={
         <div>
           <span className="text-base">{text}</span>
-          <a href={link} target="_blank" className="text-blue-200 text-base">
+          <a
+            href={link}
+            rel="noreferrer noopener"
+            target="_blank"
+            className="text-blue-200 text-base"
+          >
             here
           </a>
         </div>
