@@ -48,7 +48,7 @@ import {
 import { make as PrescriptionBuilder } from "../Common/PrescriptionBuilder.gen";
 import { FacilityModel } from "./models";
 import { OnlineUsersSelect } from "../Common/OnlineUsersSelect";
-import { UserModal } from "../Users/models";
+import { UserModel } from "../Users/models";
 import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 
 const Loading = loadable(() => import("../Common/Loading"));
@@ -85,8 +85,10 @@ type FormDetails = {
   is_telemedicine: Boolean;
   action: string;
   assigned_to: string;
-  assigned_to_object: UserModal | null;
+  assigned_to_object: UserModel | null;
   review_time: number;
+  weight: string;
+  height: string;
 };
 
 type Action =
@@ -124,6 +126,8 @@ const initForm: FormDetails = {
   assigned_to: "",
   assigned_to_object: null,
   review_time: 0,
+  weight: "",
+  height: "",
 };
 
 const initError = Object.assign(
@@ -230,6 +234,8 @@ export const ConsultationForm = (props: any) => {
             is_telemedicine: `${res.data.is_telemedicine}`,
             is_kasp: `${res.data.is_kasp}`,
             assigned_to: res.data.assigned_to || "",
+            weight: res.data.weight ? res.data.weight : "",
+            height: res.data.height ? res.data.height : "",
           };
           dispatch({ type: "set_form", form: formData });
         } else {
@@ -386,9 +392,10 @@ export const ConsultationForm = (props: any) => {
         is_telemedicine: state.form.is_telemedicine,
         action: state.form.action,
         review_time: state.form.review_time,
-        assigned_to: JSON.parse(state.form.is_telemedicine)
-          ? state.form.assigned_to
-          : "",
+        assigned_to:
+          state.form.is_telemedicine === "true" ? state.form.assigned_to : "",
+        weight: Number(state.form.weight),
+        height: Number(state.form.height),
       };
       const res = await dispatchAction(
         id ? updateConsultation(id, data) : createConsultation(data)
@@ -473,7 +480,7 @@ export const ConsultationForm = (props: any) => {
       dispatch({ type: "set_form", form: { ...state.form, [key]: date } });
   };
 
-  const handleDoctorSelect = (doctor: UserModal) => {
+  const handleDoctorSelect = (doctor: UserModel | null) => {
     doctor &&
       doctor.id &&
       dispatch({
@@ -902,6 +909,41 @@ export const ConsultationForm = (props: any) => {
                   <ErrorHelperText error={state.errors.action} />
                 </div>
               )}
+              <div className="flex flex-col md:flex-row justify-between md:gap-5">
+                <div id="weight-div" className="flex-1">
+                  <InputLabel id="refered-label">Weight (in Kg)</InputLabel>
+                  <TextInputField
+                    name="weight"
+                    variant="outlined"
+                    margin="dense"
+                    type="string"
+                    InputLabelProps={{ shrink: !!state.form.weight }}
+                    value={state.form.weight}
+                    onChange={handleChange}
+                    errors={state.errors.weight}
+                  />
+                </div>
+                <div id="height-div" className="flex-1">
+                  <InputLabel id="refered-label">Height (in cm)</InputLabel>
+                  <TextInputField
+                    name="height"
+                    variant="outlined"
+                    margin="dense"
+                    type="string"
+                    InputLabelProps={{ shrink: !!state.form.height }}
+                    value={state.form.height}
+                    onChange={handleChange}
+                    errors={state.errors.height}
+                  />
+                </div>
+              </div>
+              <div id="body_surface-div" className="flex-1">
+                Body Surface area :{" "}
+                {Math.sqrt(
+                  (Number(state.form.weight) * Number(state.form.height)) / 3600
+                ).toFixed(2)}{" "}
+                m<sup>2</sup>
+              </div>
               {/* End of Telemedicine fields */}
               <div className="mt-4 flex justify-between">
                 <Button

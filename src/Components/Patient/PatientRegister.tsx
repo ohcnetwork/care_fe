@@ -646,6 +646,13 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               if (!error_div) error_div = field;
               invalidForm = true;
             }
+
+            if (!state.form.last_vaccinated_date) {
+              errors["last_vaccinated_date"] =
+                "Please enter last vaccinated date";
+              if (!error_div) error_div = field;
+              invalidForm = true;
+            }
           }
           return;
 

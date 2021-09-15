@@ -126,6 +126,7 @@ const LoginPage = (props: any) => {
                 label={t("username")}
                 variant="outlined"
                 margin="dense"
+                autoFocus={true}
                 InputLabelProps={{ shrink: !!form.username }}
                 value={form.username}
                 onChange={handleChange}

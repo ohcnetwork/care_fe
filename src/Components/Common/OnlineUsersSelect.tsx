@@ -1,29 +1,39 @@
-import loadable from "@loadable/component";
 import { CircularProgress } from "@material-ui/core";
-import React, {
-  useCallback,
-  useReducer,
-  useState,
-  useEffect,
-  useRef,
-} from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import moment from "moment";
 import { getUserList } from "../../Redux/actions";
 import classNames from "classnames";
+import { UserModel } from "../Users/models";
 
-export const OnlineUsersSelect = (props: any) => {
+type UserFetchState = {
+  loading: boolean;
+  users: Array<UserModel>;
+  searchTerm: string;
+  searchFieldRef: React.RefObject<HTMLInputElement>;
+};
+
+type Props = {
+  selectedUser: UserModel | null;
+  userId: string;
+  onSelect: (user: UserModel | null) => void;
+  user_type: string;
+};
+
+const initialState: UserFetchState = {
+  loading: false,
+  users: new Array<UserModel>(),
+  searchTerm: "",
+  searchFieldRef: React.createRef<HTMLInputElement>(),
+};
+
+export const OnlineUsersSelect = (props: Props) => {
   const dispatchAction: any = useDispatch();
   const { selectedUser, userId, onSelect, user_type } = props;
-  const initalState = {
-    loading: false,
-    users: new Array<any>(),
-    searchTerm: "",
-  };
-  const [state, setState] = useState(initalState);
-  const [isExpanded, setIsExpanded] = useState(false);
-  const searchFieldRef = useRef<any>(null);
+  const [state, setState] = useState(initialState);
+  const { loading, users, searchTerm, searchFieldRef } = state;
+  const [isDropdownExpanded, setDropdownExpand] = useState(false);
 
   const fetchUsers = useCallback(
     async (status: statusType) => {
@@ -31,7 +41,7 @@ export const OnlineUsersSelect = (props: any) => {
       const params = {
         user_type: user_type,
         ordering: "-last-login",
-        search_text: state.searchTerm,
+        search_text: searchTerm,
       };
       const res = await dispatchAction(getUserList(params));
       if (!status.aborted) {
@@ -40,7 +50,7 @@ export const OnlineUsersSelect = (props: any) => {
         }
       }
     },
-    [dispatchAction, state.searchTerm]
+    [dispatchAction, searchTerm]
   );
 
   useAbortableEffect(
@@ -50,19 +60,14 @@ export const OnlineUsersSelect = (props: any) => {
       }, 1000);
       return () => clearTimeout(debounce_timer);
     },
-    [state.searchTerm]
+    [searchTerm]
   );
 
   useEffect(() => {
-    if (isExpanded) {
+    if (isDropdownExpanded && searchFieldRef.current) {
       searchFieldRef.current.focus();
     }
-  }, [isExpanded]);
-
-  const handleSearchTermChange = (e: any) => {
-    const { value } = e.target;
-    setState({ ...state, searchTerm: value });
-  };
+  }, [isDropdownExpanded]);
 
   return (
     <div className="pb-2">
@@ -76,7 +81,7 @@ export const OnlineUsersSelect = (props: any) => {
         <div className="relative">
           <span className="inline-block w-full rounded-md shadow-sm">
             <button
-              onClick={(_) => setIsExpanded(true)}
+              onClick={(_) => setDropdownExpand(true)}
               type="button"
               aria-haspopup="listbox"
               aria-expanded="true"
@@ -89,15 +94,17 @@ export const OnlineUsersSelect = (props: any) => {
                 type="text"
                 placeholder="Search by name or username"
                 className={classNames("py-2 pl-3 w-full outline-none", {
-                  hidden: !isExpanded,
+                  hidden: !isDropdownExpanded,
                 })}
-                value={state.searchTerm}
-                onChange={handleSearchTermChange}
+                value={searchTerm}
+                onChange={(e) =>
+                  setState({ ...state, searchTerm: e.target.value })
+                }
                 onKeyUp={(e) => e.preventDefault()}
               />
               <div
                 className={classNames("flex items-center justify-between", {
-                  hidden: isExpanded,
+                  hidden: isDropdownExpanded,
                 })}
               >
                 <div className="space-x-3 flex items-center">
@@ -124,9 +131,7 @@ export const OnlineUsersSelect = (props: any) => {
                 </div>
                 <div
                   className="btn btn-default"
-                  onClick={(_) => {
-                    onSelect("");
-                  }}
+                  onClick={(_) => onSelect(null)}
                 >
                   {" "}
                   Clear
@@ -141,30 +146,33 @@ export const OnlineUsersSelect = (props: any) => {
                 >
                   <path
                     d="M7 7l3-3 3 3m0 6l-3 3-3-3"
-                    stroke-width="1.5"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                   />
                 </svg>
               </span>
             </button>
           </span>
-          {isExpanded && (
+          {isDropdownExpanded && (
             <div
               role="listbox"
               aria-labelledby="listbox-label"
               aria-activedescendant="listbox-item-3"
               className="multiselect-dropdown__search-dropdown w-full border border-gray-400 bg-white mt-1 rounded-lg shadow-lg px-4 py-2 z-50"
             >
-              {!state.loading ? (
-                state.users.map((user: any) => {
+              {!loading ? (
+                users.map((user: UserModel) => {
                   return (
                     <button
                       key={user.id}
                       onClick={(_) => {
-                        setIsExpanded(false);
+                        setDropdownExpand(false);
                         onSelect(user);
-                        setState({ ...state, searchTerm: "" });
+                        setState({
+                          ...state,
+                          searchTerm: "",
+                        });
                       }}
                       id="listbox-item-0"
                       role="option"
@@ -186,7 +194,7 @@ export const OnlineUsersSelect = (props: any) => {
                           {user.first_name} {user.last_name}
                         </span>
                       </div>
-                      {user.id == userId && (
+                      {user.id?.toString() == userId && (
                         <span className="flex items-center">
                           <svg
                             className="h-5 w-5"
@@ -197,7 +205,7 @@ export const OnlineUsersSelect = (props: any) => {
                             <path
                               fillRule="evenodd"
                               d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                              clip-rule="evenodd"
+                              clipRule="evenodd"
                             />
                           </svg>
                         </span>
