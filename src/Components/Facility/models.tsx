@@ -100,6 +100,8 @@ export interface ConsultationModel {
   assigned_to_object?: AssignedToObjectModel;
   created_by?: any;
   last_edited_by?: any;
+  weight?: number | null;
+  height?: number | null;
 }
 export interface PatientStatsModel {
   id?: number;

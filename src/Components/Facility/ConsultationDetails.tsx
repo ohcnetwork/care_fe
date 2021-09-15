@@ -331,7 +331,6 @@ export const ConsultationDetails = (props: any) => {
                     </div>
                   </div>
                 )}
-
                 {consultationData.consultation_notes && (
                   <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
                     <div className="px-4 py-5 sm:p-6">
@@ -344,6 +343,52 @@ export const ConsultationDetails = (props: any) => {
                     </div>
                   </div>
                 )}
+                {consultationData.weight != null &&
+                  consultationData.weight > 0 && (
+                    <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
+                      <div className="px-4 py-5 sm:p-6">
+                        <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                          Weight
+                        </h3>
+                        <div className="mt-2">
+                          {consultationData.weight || "-"} kg
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                {consultationData.height != null &&
+                  consultationData.height > 0 && (
+                    <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
+                      <div className="px-4 py-5 sm:p-6">
+                        <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                          Height
+                        </h3>
+                        <div className="mt-2">
+                          {consultationData.height || "-"} cm
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                {consultationData.weight != null &&
+                  consultationData.height != null &&
+                  consultationData.weight > 0 &&
+                  consultationData.height > 0 && (
+                    <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
+                      <div className="px-4 py-5 sm:p-6">
+                        <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                          Body Surface Area
+                        </h3>
+                        <div className="mt-2">
+                          {Math.sqrt(
+                            (Number(consultationData.weight) *
+                              Number(consultationData.height)) /
+                              3600
+                          ).toFixed(2)}{" "}
+                          m<sup>2</sup>
+                        </div>
+                      </div>
+                    </div>
+                  )}
               </div>
               <div className="md:w-1/3">
                 <PageTitle title="Updates" hideBack={true} />
