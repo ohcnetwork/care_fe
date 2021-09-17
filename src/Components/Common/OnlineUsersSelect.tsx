@@ -15,7 +15,7 @@ type UserFetchState = {
 };
 
 type Props = {
-  selectedUser: UserModel;
+  selectedUser: UserModel | null;
   userId: string;
   onSelect: (user: UserModel | null) => void;
   user_type: string;

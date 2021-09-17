@@ -3,7 +3,6 @@ import loadable from "@loadable/component";
 import {
   Box,
   Button,
-  Card,
   CardContent,
   FormControlLabel,
   InputLabel,
@@ -13,7 +12,12 @@ import {
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { navigate } from "raviger";
 import moment from "moment";
-import React, { useCallback, useReducer, useState } from "react";
+import React, {
+  ChangeEventHandler,
+  useCallback,
+  useReducer,
+  useState,
+} from "react";
 import { useDispatch } from "react-redux";
 import {
   ADMITTED_TO,
@@ -44,29 +48,72 @@ import {
 import { make as PrescriptionBuilder } from "../Common/PrescriptionBuilder.gen";
 import { FacilityModel } from "./models";
 import { OnlineUsersSelect } from "../Common/OnlineUsersSelect";
+import { UserModel } from "../Users/models";
+import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
-const initForm: any = {
+type Boolean = "true" | "false";
+
+type FormDetails = {
+  hasSymptom: boolean;
+  otherSymptom: boolean;
+  symptoms: number[];
+  other_symptoms: string;
+  symptoms_onset_date: string;
+  suggestion: string;
+  patient: string;
+  facility: string;
+  admitted: Boolean;
+  admitted_to: string;
+  category: string;
+  admission_date: string;
+  discharge_date: null;
+  referred_to: string;
+  diagnosis: string;
+  verified_by: string;
+  test_id: string;
+  is_kasp: Boolean;
+  kasp_enabled_date: null;
+  examination_details: string;
+  existing_medication: string;
+  prescribed_medication: string;
+  consultation_notes: string;
+  ip_no: string;
+  discharge_advice: Prescription_t[];
+  is_telemedicine: Boolean;
+  action: string;
+  assigned_to: string;
+  assigned_to_object: UserModel | null;
+  review_time: number;
+  weight: string;
+  height: string;
+};
+
+type Action =
+  | { type: "set_form"; form: FormDetails }
+  | { type: "set_error"; errors: FormDetails };
+
+const initForm: FormDetails = {
   hasSymptom: false,
   otherSymptom: false,
   symptoms: [],
   other_symptoms: "",
-  symptoms_onset_date: null,
+  symptoms_onset_date: "",
   suggestion: "",
   patient: "",
   facility: "",
   admitted: "false",
   admitted_to: "",
   category: "",
-  admission_date: new Date(),
+  admission_date: new Date().toString(),
   discharge_date: null,
   referred_to: "",
   diagnosis: "",
   verified_by: "",
   test_id: "",
-  is_kasp: "",
+  is_kasp: "false",
   kasp_enabled_date: null,
   examination_details: "",
   existing_medication: "",
@@ -78,6 +125,7 @@ const initForm: any = {
   action: "PENDING",
   assigned_to: "",
   assigned_to_object: null,
+  review_time: 0,
   weight: "",
   height: "",
 };
@@ -92,7 +140,7 @@ const initialState = {
   errors: { ...initError },
 };
 
-const consultationFormReducer = (state = initialState, action: any) => {
+const consultationFormReducer = (state = initialState, action: Action) => {
   switch (action.type) {
     case "set_form": {
       return {
@@ -106,8 +154,6 @@ const consultationFormReducer = (state = initialState, action: any) => {
         errors: action.errors,
       };
     }
-    default:
-      return state;
   }
 };
 
@@ -267,7 +313,7 @@ export const ConsultationForm = (props: any) => {
             invalidForm = true;
           }
           return;
-        case "OPconsultation":
+        case "consultation_notes":
           if (state.form.suggestion === "OP" && !state.form[field]) {
             errors[field] = "Please enter OP consultation Details";
             if (!error_div) error_div = field;
@@ -328,7 +374,7 @@ export const ConsultationForm = (props: any) => {
           : undefined,
         category: state.form.category,
         is_kasp: state.form.is_kasp,
-        kasp_enabled_date: state.form.is_kasp === "true" ? new Date() : null,
+        kasp_enabled_date: JSON.parse(state.form.is_kasp) ? new Date() : null,
         examination_details: state.form.examination_details,
         existing_medication: state.form.existing_medication,
         prescribed_medication: state.form.prescribed_medication,
@@ -342,7 +388,7 @@ export const ConsultationForm = (props: any) => {
         test_id: state.form.test_id,
         referred_to:
           state.form.suggestion === "R" ? state.form.referred_to : undefined,
-        consultation_notes: state.form.OPconsultation,
+        consultation_notes: state.form.consultation_notes,
         is_telemedicine: state.form.is_telemedicine,
         action: state.form.action,
         review_time: state.form.review_time,
@@ -376,33 +422,41 @@ export const ConsultationForm = (props: any) => {
     }
   };
 
-  const handleChange = (e: any) => {
-    const form = { ...state.form };
-    const { name, value } = e.target;
-    form[name] = value;
-    dispatch({ type: "set_form", form });
+  const handleChange: ChangeEventHandler<HTMLInputElement> = (e) => {
+    e &&
+      e.target &&
+      dispatch({
+        type: "set_form",
+        form: { ...state.form, [e.target.name]: e.target.value },
+      });
   };
 
-  const handleTelemedicineChange = (e: any) => {
-    const form = { ...state.form };
-    const { name, value } = e.target;
-    form[name] = value;
-    if (value === "false") {
-      form.action = "PENDING";
-    }
-    dispatch({ type: "set_form", form });
+  const handleTelemedicineChange: ChangeEventHandler<HTMLInputElement> = (
+    e
+  ) => {
+    e &&
+      e.target &&
+      dispatch({
+        type: "set_form",
+        form: {
+          ...state.form,
+          [e.target.name]: e.target.value,
+          action: e.target.value === "false" ? "PENDING" : state.form.action,
+        },
+      });
   };
 
   const handleDecisionChange = (e: any) => {
-    const form = { ...state.form };
-    const { name, value } = e.target;
-    form[name] = value;
-    if (value === "A") {
-      form.admitted = "true";
-    } else {
-      form.admitted = "false";
-    }
-    dispatch({ type: "set_form", form });
+    e &&
+      e.target &&
+      dispatch({
+        type: "set_form",
+        form: {
+          ...state.form,
+          [e.target.name]: e.target.value,
+          admitted: e.target.value === "A" ? "true" : "false",
+        },
+      });
   };
 
   const handleSymptomChange = (e: any, child?: any) => {
@@ -421,25 +475,31 @@ export const ConsultationForm = (props: any) => {
     dispatch({ type: "set_form", form });
   };
 
-  const handleDateChange = (date: any, key: string) => {
-    if (moment(date).isValid()) {
-      const form = { ...state.form };
-      form[key] = date;
-      dispatch({ type: "set_form", form });
-    }
+  const handleDateChange = (date: MaterialUiPickersDate, key: string) => {
+    moment(date).isValid() &&
+      dispatch({ type: "set_form", form: { ...state.form, [key]: date } });
   };
 
-  const handleDoctorSelect = (doctor: any) => {
-    const form = { ...state.form };
-    form["assigned_to"] = doctor.id;
-    form["assigned_to_object"] = doctor;
-    dispatch({ type: "set_form", form });
+  const handleDoctorSelect = (doctor: UserModel | null) => {
+    doctor &&
+      doctor.id &&
+      dispatch({
+        type: "set_form",
+        form: {
+          ...state.form,
+          assigned_to: doctor.id.toString(),
+          assigned_to_object: doctor,
+        },
+      });
   };
 
   const setFacility = (selected: FacilityModel | FacilityModel[] | null) => {
-    setSelectedFacility(selected as FacilityModel);
-    const form = { ...state.form };
-    form.referred_to = selected ? (selected as FacilityModel).id : "";
+    const selectedFacility = selected as FacilityModel;
+    setSelectedFacility(selectedFacility);
+    const form: FormDetails = { ...state.form };
+    if (selectedFacility && selectedFacility.id) {
+      form.referred_to = selectedFacility.id.toString() || "";
+    }
     dispatch({ type: "set_form", form });
   };
 
@@ -667,17 +727,17 @@ export const ConsultationForm = (props: any) => {
                 <MultilineInputField
                   rows={5}
                   className="mt-2"
-                  name="OPconsultation"
+                  name="consultation_notes"
                   variant="outlined"
                   margin="dense"
                   type="text"
                   placeholder="Information optional"
                   InputLabelProps={{
-                    shrink: !!state.form.OPconsultation,
+                    shrink: !!state.form.consultation_notes,
                   }}
-                  value={state.form.OPconsultation}
+                  value={state.form.consultation_notes}
                   onChange={handleChange}
-                  errors={state.errors.OPconsultation}
+                  errors={state.errors.consultation_notes}
                 />
               </div>
               <div className="mt-4">
