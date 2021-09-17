@@ -84,6 +84,7 @@ const initForm: any = {
   intubation_end_date: null,
   ett_tt: 3,
   cuff_pressure: 0,
+  special_instruction: "",
 };
 
 const initError = Object.assign(
@@ -199,6 +200,7 @@ export const ConsultationForm = (props: any) => {
             cuff_pressure: res.data.cuff_pressure
               ? Number(res.data.cuff_pressure)
               : 0,
+            special_instruction: res.data.special_instruction || "",
           };
           dispatch({ type: "set_form", form: formData });
         } else {
@@ -380,6 +382,7 @@ export const ConsultationForm = (props: any) => {
         cuff_pressure: isMmhgUnit
           ? state.form.cuff_pressure
           : cmH2oTommHg(state.form.cuff_pressure),
+        special_instruction: state.form.special_instruction,
       };
       const res = await dispatchAction(
         id ? updateConsultation(id, data) : createConsultation(data)
@@ -908,7 +911,7 @@ export const ConsultationForm = (props: any) => {
                   errors={state.errors.cpk_mb}
                 />
               </div>
-              <div id="operation-div">
+              <div id="operation-div" className="mt-2">
                 <InputLabel id="exam-details-label">Operation</InputLabel>
                 <MultilineInputField
                   rows={5}
@@ -923,6 +926,25 @@ export const ConsultationForm = (props: any) => {
                   value={state.form.operation}
                   onChange={handleChange}
                   errors={state.errors.operation}
+                />
+              </div>
+              <div id="special-instruction-div" className="mt-2">
+                <InputLabel id="special-instruction-label">
+                  Special Instructions
+                </InputLabel>
+                <MultilineInputField
+                  rows={5}
+                  name="special_instruction"
+                  variant="outlined"
+                  margin="dense"
+                  type="text"
+                  placeholder="Information optional"
+                  InputLabelProps={{
+                    shrink: !!state.form.special_instruction,
+                  }}
+                  value={state.form.special_instruction}
+                  onChange={handleChange}
+                  errors={state.errors.special_instruction}
                 />
               </div>
               <div className="mt-4">
