@@ -513,7 +513,7 @@ export const PatientHome = (props: any) => {
       statusName = "SENT_TO_COLLECTON_CENTRE";
     }
 
-    const res = await dispatch(patchSample(sample.id, sampleData));
+    const res = await dispatch(patchSample(sampleData, { id: sample.id }));
     if (res && (res.status === 201 || res.status === 200)) {
       Notification.Success({
         msg: `Request ${statusName}`,
@@ -599,7 +599,7 @@ export const PatientHome = (props: any) => {
       )}
 
       <div id="revamp">
-        <PageTitle title={`Covid Suspect Details`} />
+        <PageTitle title={`Covid Suspect Details`} backUrl="/patients" />
         <div className="relative mt-2">
           <div className="max-w-screen-xl mx-auto py-3 px-3 sm:px-6 lg:px-8">
             <div className="md:flex">

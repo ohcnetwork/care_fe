@@ -154,6 +154,7 @@ export default function BoardView() {
         ) : (
           boardFilter.map((board) => (
             <ShiftingBoard
+              key={board}
               filterProp={qParams}
               board={board}
               formatFilter={formatFilter}

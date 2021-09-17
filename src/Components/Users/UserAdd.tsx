@@ -36,6 +36,8 @@ import {
   MultiSelectField,
 } from "../Common/HelperInputFields";
 import { FacilityModel } from "../Facility/models";
+import HelpToolTip from "../Common/utils/HelpToolTip";
+
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -486,7 +488,12 @@ export const UserAdd = (props: UserProps) => {
   return (
     <div className="px-2 pb-2">
       <PageTitle title={headerText} />
+
       <Card className="mt-4">
+        <HelpToolTip
+          text="Need help? Go to the docs "
+          link="https://school.coronasafe.network/targets/12953"
+        />
         <CardContent>
           <form onSubmit={(e) => handleSubmit(e)}>
             <div className="grid gap-4 grid-cols-1 md:grid-cols-2">

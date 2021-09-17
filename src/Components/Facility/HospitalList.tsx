@@ -1,6 +1,6 @@
 import { navigate, useQueryParams } from "raviger";
 import React, { useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   DOWNLOAD_TYPES,
@@ -76,6 +76,9 @@ const HospitalListPage = (props: any) => {
   const [stateName, setStateName] = useState("");
   const [districtName, setDistrictName] = useState("");
   const [localbodyName, setLocalbodyName] = useState("");
+  const rootState: any = useSelector((rootState) => rootState);
+  const { currentUser } = rootState;
+  const userType = currentUser.data.user_type;
   const [notifyMessage, setNotifyMessage] = useState("");
   const [modalFor, setModalFor] = useState(undefined);
   const { t } = props;
@@ -370,12 +373,16 @@ const HospitalListPage = (props: any) => {
                     </a>
                   </div>
                   <span className="inline-flex rounded-md shadow-sm">
-                    <button
-                      className="ml-2 md:ml-0 inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:shadow-outline-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow mr-5"
-                      onClick={(_) => setModalFor(facility.id)}
-                    >
-                      <i className="far fa-comment-dots mr-1"></i> Notify
-                    </button>
+                    {userType !== "Staff" ? (
+                      <button
+                        className="ml-2 md:ml-0 inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:shadow-outline-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow mr-5"
+                        onClick={(_) => setModalFor(facility.id)}
+                      >
+                        <i className="far fa-comment-dots mr-1"></i> Notify
+                      </button>
+                    ) : (
+                      <></>
+                    )}
                     <Modal
                       open={modalFor === facility.id}
                       onClose={(_) => setModalFor(undefined)}
