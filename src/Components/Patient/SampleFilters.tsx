@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { SelectField } from "../Common/HelperInputFields";
 import { SAMPLE_TEST_STATUS, SAMPLE_TEST_RESULT } from "../../Common/constants";
 import { navigate } from "raviger";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FacilityModel } from "../Facility/models";
+import { getFacilityV2 as getFacility } from "../../Redux/actions";
+import { useDispatch } from "react-redux";
 
 const useMergeState = (initialState: any) => {
   const [state, setState] = useState(initialState);
@@ -21,6 +23,8 @@ export default function UserFilter(props: any) {
     facility: filter.facility || "",
     facility_ref: filter.facility_ref || null,
   });
+
+  const dispatch: any = useDispatch();
 
   const clearFilterState = {
     status: "",
@@ -47,6 +51,18 @@ export default function UserFilter(props: any) {
     };
     onChange(data);
   };
+
+  useEffect(() => {
+    async function fetchData() {
+      if (filter.facility) {
+        const { data: facilityData } = await dispatch(
+          getFacility(filter.facility, "facility")
+        );
+        setFilterState({ ...filterState, facility_ref: facilityData });
+      }
+    }
+    fetchData();
+  }, [dispatch]);
 
   return (
     <div>
@@ -113,7 +129,10 @@ export default function UserFilter(props: any) {
             showAll={true}
             setSelected={(obj) =>
               handleChange({
-                target: { name: "facility", value: (obj as FacilityModel)?.id },
+                target: {
+                  name: "facility",
+                  value: (obj as FacilityModel)?.id,
+                },
               })
             }
             className="shifting-page-filter-dropdown"
