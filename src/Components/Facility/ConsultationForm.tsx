@@ -22,6 +22,7 @@ import {
   SYMPTOM_CHOICES,
   TELEMEDICINE_ACTIONS,
   REVIEW_AT_CHOICES,
+  LINES_CATHETER_CHOICES,
 } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
@@ -85,6 +86,10 @@ const initForm: any = {
   ett_tt: 3,
   cuff_pressure: 0,
   special_instruction: "",
+  lines: [],
+  otherLines: false,
+  other_lines: "",
+  hasLines: false,
 };
 
 const initError = Object.assign(
@@ -125,6 +130,8 @@ const suggestionTypes = [
 ];
 
 const symptomChoices = [...SYMPTOM_CHOICES];
+
+const linesCatheterChoices = [...LINES_CATHETER_CHOICES];
 
 const admittedToChoices = ["Select", ...ADMITTED_TO];
 
@@ -201,6 +208,7 @@ export const ConsultationForm = (props: any) => {
               ? Number(res.data.cuff_pressure)
               : 0,
             special_instruction: res.data.special_instruction || "",
+            lines: res.data.lines || [],
           };
           dispatch({ type: "set_form", form: formData });
         } else {
@@ -383,6 +391,7 @@ export const ConsultationForm = (props: any) => {
           ? state.form.cuff_pressure
           : cmH2oTommHg(state.form.cuff_pressure),
         special_instruction: state.form.special_instruction,
+        lines: state.form.lines,
       };
       const res = await dispatchAction(
         id ? updateConsultation(id, data) : createConsultation(data)
@@ -1010,6 +1019,56 @@ export const ConsultationForm = (props: any) => {
                   getLabel={(s) => ["", "#059669"]}
                 />
               </div>
+
+              <div className="mt-4">
+                <InputLabel id="special-instruction-label">
+                  Lines and Catheters
+                </InputLabel>
+                <MultiSelectField
+                  name="lines"
+                  variant="outlined"
+                  value={state.form.lines}
+                  options={linesCatheterChoices}
+                  onChange={handleSymptomChange}
+                />
+                <ErrorHelperText error={state.errors.symptoms} />
+              </div>
+
+              {state.form.otherLines && (
+                <div id="other_lines-div">
+                  <InputLabel id="other-symptoms-label">
+                    Other Lines and Catheter Details
+                  </InputLabel>
+                  <MultilineInputField
+                    rows={5}
+                    name="other_lines"
+                    variant="outlined"
+                    margin="dense"
+                    type="text"
+                    placeholder="Enter the information here"
+                    InputLabelProps={{ shrink: !!state.form.other_lines }}
+                    value={state.form.other_lines}
+                    onChange={handleChange}
+                    errors={state.errors.other_lines}
+                  />
+                </div>
+              )}
+
+              {state.form.hasLines && (
+                <div id="symptoms_onset_date-div">
+                  <DateInputField
+                    label="Date of insertion"
+                    value={state.form.lines_insertion_date}
+                    onChange={(date) =>
+                      handleDateChange(date, "symptoms_onset_date")
+                    }
+                    disableFuture={true}
+                    errors={state.errors.lines_insertion_date}
+                    InputLabelProps={{ shrink: true }}
+                  />
+                </div>
+              )}
+
               {/* End of Telemedicine fields */}
               <div className="mt-4 flex justify-between">
                 <Button

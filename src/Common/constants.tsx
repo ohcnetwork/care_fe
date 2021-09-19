@@ -202,6 +202,16 @@ export const SYMPTOM_CHOICES: Array<OptionsType> = [
   { id: 9, text: "OTHERS" },
 ];
 
+export const LINES_CATHETER_CHOICES: Array<OptionsType> = [
+  { id: 1, text: "CVP catheter " },
+  { id: 2, text: "Arterial Line" },
+  { id: 3, text: "Quinton catheter" },
+  { id: 4, text: "Chest Tubes (ICD)" },
+  { id: 5, text: "NG Tube/GT" },
+  { id: 6, text: "Urine Catheters" },
+  { id: 7, text: "Other" },
+];
+
 export const GENDER_TYPES: Array<OptionsType> = [
   { id: 1, text: "Male" },
   { id: 2, text: "Female" },
