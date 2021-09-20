@@ -201,9 +201,11 @@ export default function SampleViewAdmin(props: any) {
                     {item.patient_name}
                   </div>
                   <div>
-                    <span className="bg-blue-200 text-blue-800 text-sm rounded-md font-bold px-2 py-1 mx-1 text-wrap">
-                      type: {item.sample_type}
-                    </span>
+                    {item.sample_type && (
+                      <span className="bg-blue-200 text-blue-800 text-sm rounded-md font-bold px-2 py-1 mx-1 text-wrap">
+                        type: {item.sample_type}
+                      </span>
+                    )}
                   </div>
                 </div>
                 {item.result !== "AWAITING" && (
