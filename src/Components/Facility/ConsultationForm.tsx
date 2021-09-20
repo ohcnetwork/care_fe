@@ -136,8 +136,36 @@ const symptomChoices = [...SYMPTOM_CHOICES];
 const linesCatheterChoices = [...LINES_CATHETER_CHOICES];
 
 const lineIdToString = (id: any) => {
-  const selectedChoice = linesCatheterChoices.filter((obj) => obj.id === id);
-  return selectedChoice ? selectedChoice[0].text : "";
+  const selectedChoice = linesCatheterChoices.find((obj) => obj.id === id);
+  return selectedChoice ? selectedChoice?.text : "";
+};
+
+const lineStringToId = (line: any) => {
+  const selectedChoice = linesCatheterChoices.find((obj) => obj.text === line);
+  return selectedChoice ? selectedChoice?.id : -1;
+};
+
+const parseLinesData = (linesData: any) => {
+  const lines: any = [];
+  const lines_insertion_date: any = {};
+  const lines_site_level_fixation: any = {};
+
+  linesData.forEach((line: any) => {
+    const lineId = lineStringToId(line.type);
+    if (lineId) {
+      lines.push(lineId);
+      lines_insertion_date[lineId] = line.start_date;
+      lines_site_level_fixation[lineId] = line.site;
+    }
+  });
+
+  console.log(
+    "Parsed Date",
+    lines,
+    lines_insertion_date,
+    lines_site_level_fixation
+  );
+  return [lines, lines_insertion_date, lines_site_level_fixation];
 };
 
 const admittedToChoices = ["Select", ...ADMITTED_TO];
@@ -187,6 +215,9 @@ export const ConsultationForm = (props: any) => {
 
       if (!status.aborted) {
         if (res && res.data) {
+          const [lines, lines_insertion_date, lines_site_level_fixation] =
+            parseLinesData(res.data.lines);
+
           const formData = {
             ...res.data,
             hasSymptom:
@@ -218,8 +249,14 @@ export const ConsultationForm = (props: any) => {
             otherLines:
               !!res.data.lines &&
               !!res.data.lines.length &&
-              res.data.lines.filter((i: number) => i === 7).length,
+              res.data.lines.some((obj: any) => obj.other_type !== ""),
             hasLines: !!res.data.lines && !!res.data.lines.length,
+            other_lines:
+              res.data.lines.filter((obj: any) => obj.other_type !== "")?.[0]
+                ?.other_type || "",
+            lines: lines,
+            lines_insertion_date: lines_insertion_date,
+            lines_site_level_fixation: lines_site_level_fixation,
           };
           dispatch({ type: "set_form", form: formData });
         } else {
@@ -499,13 +536,15 @@ export const ConsultationForm = (props: any) => {
 
   const createLinesPayload = () => {
     const payload = state.form.lines.map((id: any) => {
-      const type = id !== 7 ? lineIdToString(id) : state.form.other_lines;
+      const type = lineIdToString(id);
+      const other_type = id === 7 ? state.form.other_lines : "";
       const start_date = state.form.lines_insertion_date[id];
       const site = state.form.lines_site_level_fixation[id];
       return {
         start_date: start_date,
         type: type,
         site: site,
+        other_type: other_type,
       };
     });
     return payload;
@@ -1124,7 +1163,7 @@ export const ConsultationForm = (props: any) => {
                       <div id="lines_insertion_date-div" className="col-span-1">
                         <DateInputField
                           label="Date of insertion"
-                          value={state.form.lines_insertion_date[id]}
+                          value={state.form.lines_insertion_date?.[id]}
                           onChange={(date) => handleLinesDateChange(id, date)}
                           disableFuture={true}
                           errors={state.errors.lines_insertion_date}
