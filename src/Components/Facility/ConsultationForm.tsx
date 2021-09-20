@@ -90,6 +90,8 @@ const initForm: any = {
   otherLines: false,
   other_lines: "",
   hasLines: false,
+  lines_insertion_date: {},
+  lines_site_level_fixation: {},
 };
 
 const initError = Object.assign(
@@ -132,6 +134,11 @@ const suggestionTypes = [
 const symptomChoices = [...SYMPTOM_CHOICES];
 
 const linesCatheterChoices = [...LINES_CATHETER_CHOICES];
+
+const lineIdToString = (id: any) => {
+  const selectedChoice = linesCatheterChoices.filter((obj) => obj.id === id);
+  return selectedChoice ? selectedChoice[0].text : "";
+};
 
 const admittedToChoices = ["Select", ...ADMITTED_TO];
 
@@ -208,7 +215,11 @@ export const ConsultationForm = (props: any) => {
               ? Number(res.data.cuff_pressure)
               : 0,
             special_instruction: res.data.special_instruction || "",
-            lines: res.data.lines || [],
+            otherLines:
+              !!res.data.lines &&
+              !!res.data.lines.length &&
+              res.data.lines.filter((i: number) => i === 7).length,
+            hasLines: !!res.data.lines && !!res.data.lines.length,
           };
           dispatch({ type: "set_form", form: formData });
         } else {
@@ -391,7 +402,7 @@ export const ConsultationForm = (props: any) => {
           ? state.form.cuff_pressure
           : cmH2oTommHg(state.form.cuff_pressure),
         special_instruction: state.form.special_instruction,
-        lines: state.form.lines,
+        lines: createLinesPayload(),
       };
       const res = await dispatchAction(
         id ? updateConsultation(id, data) : createConsultation(data)
@@ -461,6 +472,43 @@ export const ConsultationForm = (props: any) => {
     form.hasSymptom = !!form.symptoms.filter((i: number) => i !== 1).length;
     form.otherSymptom = !!form.symptoms.filter((i: number) => i === 9).length;
     dispatch({ type: "set_form", form });
+  };
+
+  const handleLinesChange = (e: any) => {
+    const form = { ...state.form };
+    const { value } = e?.target;
+    form.lines = value;
+    form.hasLines = form.lines.length > 0;
+    form.otherLines = !!form.lines.filter((i: number) => i === 7).length;
+    dispatch({ type: "set_form", form });
+  };
+
+  const handleLinesDateChange = (id: any, date: any) => {
+    const form = { ...state.form };
+    if (moment(date).isValid()) {
+      form.lines_insertion_date[id] = date;
+    }
+    dispatch({ type: "set_form", form });
+  };
+
+  const handleLinesSiteChange = (e: any, id: any) => {
+    const form = { ...state.form };
+    form.lines_site_level_fixation[id] = e.target.value;
+    dispatch({ type: "set_form", form });
+  };
+
+  const createLinesPayload = () => {
+    const payload = state.form.lines.map((id: any) => {
+      const type = id !== 7 ? lineIdToString(id) : state.form.other_lines;
+      const start_date = state.form.lines_insertion_date[id];
+      const site = state.form.lines_site_level_fixation[id];
+      return {
+        start_date: start_date,
+        type: type,
+        site: site,
+      };
+    });
+    return payload;
   };
 
   const handleDateChange = (date: any, key: string) => {
@@ -1021,21 +1069,31 @@ export const ConsultationForm = (props: any) => {
               </div>
 
               <div className="mt-4">
-                <InputLabel id="special-instruction-label">
+                <InputLabel
+                  id="action-label"
+                  style={{ fontWeight: "bold", fontSize: "18px" }}
+                  className="mb-2 text-gray-900"
+                >
                   Lines and Catheters
+                </InputLabel>
+                <InputLabel
+                  id="lines-catheters-label"
+                  style={{ fontWeight: "bold", fontSize: "16px" }}
+                >
+                  Types
                 </InputLabel>
                 <MultiSelectField
                   name="lines"
                   variant="outlined"
                   value={state.form.lines}
                   options={linesCatheterChoices}
-                  onChange={handleSymptomChange}
+                  onChange={handleLinesChange}
                 />
-                <ErrorHelperText error={state.errors.symptoms} />
+                {/* <ErrorHelperText error={state.errors.symptoms} /> */}
               </div>
 
               {state.form.otherLines && (
-                <div id="other_lines-div">
+                <div id="other_lines-div" className="mt-4">
                   <InputLabel id="other-symptoms-label">
                     Other Lines and Catheter Details
                   </InputLabel>
@@ -1048,28 +1106,49 @@ export const ConsultationForm = (props: any) => {
                     placeholder="Enter the information here"
                     InputLabelProps={{ shrink: !!state.form.other_lines }}
                     value={state.form.other_lines}
-                    onChange={handleChange}
+                    onChange={(e) => handleChange(e)}
                     errors={state.errors.other_lines}
                   />
                 </div>
               )}
 
-              {state.form.hasLines && (
-                <div id="symptoms_onset_date-div">
-                  <DateInputField
-                    label="Date of insertion"
-                    value={state.form.lines_insertion_date}
-                    onChange={(date) =>
-                      handleDateChange(date, "symptoms_onset_date")
-                    }
-                    disableFuture={true}
-                    errors={state.errors.lines_insertion_date}
-                    InputLabelProps={{ shrink: true }}
-                  />
-                </div>
-              )}
+              {state.form.hasLines &&
+                state.form.lines.map((id: any) => (
+                  <div className="my-5" key={`lines_${id}`}>
+                    <InputLabel
+                      style={{ fontWeight: "bold", fontSize: "16px" }}
+                    >
+                      {lineIdToString(id)}
+                    </InputLabel>
+                    <div className="grid grid-cols-4 mt-1 gap-x-10">
+                      <div id="lines_insertion_date-div" className="col-span-1">
+                        <DateInputField
+                          label="Date of insertion"
+                          value={state.form.lines_insertion_date[id]}
+                          onChange={(date) => handleLinesDateChange(id, date)}
+                          disableFuture={true}
+                          errors={state.errors.lines_insertion_date}
+                          InputLabelProps={{ shrink: true }}
+                        />
+                      </div>
+                      <div id="site-level-fixation-div" className="col-span-3">
+                        <InputLabel id="refered-label">
+                          Site or level of fixation
+                        </InputLabel>
+                        <TextInputField
+                          name="lines_site_level_fixation"
+                          variant="outlined"
+                          margin="dense"
+                          type="string"
+                          value={state.form.lines_site_level_fixation?.[id]}
+                          onChange={(e) => handleLinesSiteChange(e, id)}
+                          errors={state.errors.lines_site_level_fixation}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
 
-              {/* End of Telemedicine fields */}
               <div className="mt-4 flex justify-between">
                 <Button
                   color="default"
