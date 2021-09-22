@@ -179,6 +179,7 @@ export const SampleTest = (props: any) => {
     if (validForm) {
       setIsLoading(true);
       const data: SampleTestModel = {
+        date_of_sample: new Date().toISOString(),
         fast_track: state.form.isFastTrack ? state.form.fast_track : undefined,
         icmr_label: state.form.icmr_label ? state.form.icmr_label : undefined,
         facility: facilityId,
