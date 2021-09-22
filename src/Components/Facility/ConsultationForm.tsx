@@ -45,6 +45,7 @@ import { make as PrescriptionBuilder } from "../Common/PrescriptionBuilder.gen";
 import { make as Slider } from "../CriticalCareRecording/components/Slider.gen";
 import { FacilityModel } from "./models";
 import { OnlineUsersSelect } from "../Common/OnlineUsersSelect";
+import _ from "lodash";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -365,6 +366,48 @@ export const ConsultationForm = (props: any) => {
             (state.form[field] < 0 || state.form[field] > 100)
           ) {
             errors[field] = "Value should be between 0 and 100.";
+            invalidForm = true;
+          }
+          return;
+        case "operation":
+          if (state.form[field] && _.isEmpty(state.form[field])) {
+            errors[field] = "Please enter operation information.";
+            invalidForm = true;
+          }
+          return;
+        case "special_instruction":
+          if (state.form[field] && _.isEmpty(state.form[field])) {
+            errors[field] = "Please enter special instruction information.";
+            invalidForm = true;
+          }
+          return;
+        case "other_lines":
+          if (
+            state.form[field] &&
+            state.form[field] === "" &&
+            !!state.form.lines.find((id: any) => id === 7)
+          ) {
+            errors[field] = "Please enter information for Other option";
+            invalidForm = true;
+          }
+          return;
+        case "lines_insertion_date":
+          if (
+            state.form[field] &&
+            Object.keys(state.form[field]).length !== state.form.lines.length
+          ) {
+            errors[field] =
+              "Please enter insertion date for all selected options";
+            invalidForm = true;
+          }
+          return;
+        case "lines_site_level_fixation":
+          if (
+            state.form[field] &&
+            Object.keys(state.form[field]).length !== state.form.lines.length
+          ) {
+            errors[field] =
+              "Please enter site of insertion for all selected options";
             invalidForm = true;
           }
           return;
@@ -1008,7 +1051,7 @@ export const ConsultationForm = (props: any) => {
                 />
               </div>
               <div id="operation-div" className="mt-2">
-                <InputLabel id="exam-details-label">Operation</InputLabel>
+                <InputLabel id="exam-details-label">Operation*</InputLabel>
                 <MultilineInputField
                   rows={5}
                   name="operation"
@@ -1026,7 +1069,7 @@ export const ConsultationForm = (props: any) => {
               </div>
               <div id="special-instruction-div" className="mt-2">
                 <InputLabel id="special-instruction-label">
-                  Special Instructions
+                  Special Instructions*
                 </InputLabel>
                 <MultilineInputField
                   rows={5}
@@ -1128,7 +1171,6 @@ export const ConsultationForm = (props: any) => {
                   options={linesCatheterChoices}
                   onChange={handleLinesChange}
                 />
-                {/* <ErrorHelperText error={state.errors.symptoms} /> */}
               </div>
 
               {state.form.otherLines && (
