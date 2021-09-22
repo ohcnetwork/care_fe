@@ -98,10 +98,10 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
               {itemData.fast_track}
             </div>
           )}
-          {itemData.date_of_result && (
+          {itemData.date_of_sample && (
             <div>
               <span className="text-gray-700">Tested on :</span>{" "}
-              {moment(itemData.date_of_result).format("lll")}
+              {moment(itemData.date_of_sample).format("lll")}
             </div>
           )}
           {itemData.date_of_result && (

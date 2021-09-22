@@ -231,10 +231,14 @@ export default function SampleViewAdmin(props: any) {
                 )}
                 {item.date_of_sample && (
                   <div>
-                    <span className="font-semibold leading-relaxed">
-                      Date of Sample:{" "}
-                    </span>
+                    <span className="text-gray-700">Tested on :</span>{" "}
                     {moment(item.date_of_sample).format("lll")}
+                  </div>
+                )}
+                {item.date_of_result && (
+                  <div>
+                    <span className="text-gray-700">Result on:</span>{" "}
+                    {moment(item.date_of_result).format("lll")}
                   </div>
                 )}
                 {item.patient_has_confirmed_contact && (
