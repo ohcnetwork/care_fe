@@ -133,9 +133,9 @@ export default function ListView() {
     qParams.patient_phone_number,
     qParams.ordering,
     qParams.is_kasp,
-    qParams.assigned_user,
     qParams.assigned_to,
     qParams.disease_status,
+    qParams.breathlessness_level,
     offset,
   ]);
 

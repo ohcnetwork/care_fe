@@ -2,6 +2,8 @@ import React, { useEffect, useReducer, useState } from "react";
 import { MultiSelectField } from "../../Common/HelperInputFields";
 import { TestTable } from "./Table";
 import { useDispatch } from "react-redux";
+import Autocomplete from "@material-ui/lab/Autocomplete";
+import { Checkbox, TextField, InputLabel } from "@material-ui/core";
 import {
   createInvestigation,
   listInvestigationGroups,
@@ -36,6 +38,10 @@ export interface InvestigationType {
   ideal_value?: string;
   groups: [Group];
 }
+type SearchItem = Group | InvestigationType;
+function isInvestigation(e: SearchItem): e is InvestigationType {
+  return (e as InvestigationType).groups !== undefined;
+}
 
 const testFormReducer = (state = initialState, action: any) => {
   switch (action.type) {
@@ -69,16 +75,22 @@ const Investigation = (props: {
   facilityId: string;
 }) => {
   const dispatch: any = useDispatch();
-  const [selectedGroup, setSelectedGroup] = useState([]);
+  const [selectedGroup, setSelectedGroup] = useState<string[]>([]);
   const [state, setState] = useReducer(testFormReducer, initialState);
   const [investigations, setInvestigations] = useState<InvestigationType[]>([]);
   const [investigationGroups, setInvestigationGroups] = useState<Group[]>([]);
+  const [selectedInvestigations, setSelectedInvestigations] = useState<
+    InvestigationType[]
+  >([]);
+  const [searchInputValue, setSearchInputValue] = useState<string>("");
   const [isLoading, setIsLoading] = useState({
     investigationLoading: false,
     investigationGroupLoading: false,
   });
   const [saving, setSaving] = useState(false);
   const [session, setSession] = useState("");
+  const [selectedItems, selectItems] = useState<SearchItem[]>([]);
+  const searchOptions = [...investigationGroups, ...investigations];
 
   const fetchInvestigations = () => {
     setIsLoading({ ...isLoading, investigationLoading: true });
@@ -106,10 +118,8 @@ const Investigation = (props: {
     setSession(new Date().toString());
   }, [props.consultationId]);
 
-  const handleGroupSelect = (e: any, child?: any) => {
-    const { value } = e?.target;
-
-    let investigationsArray = value.map((group_id: string) => {
+  const initialiseForm = () => {
+    let investigationsArray = selectedGroup.map((group_id: string) => {
       return listOfInvestigations(group_id, investigations);
     });
 
@@ -129,12 +139,11 @@ const Investigation = (props: {
                 investigation_type: i.investigation_type,
               })
     );
-
-    setSelectedGroup(value);
     setState({ type: "set_form", form });
   };
 
   const handleSubmit = async (e: any) => {
+    initialiseForm();
     if (!saving) {
       setSaving(true);
 
@@ -185,22 +194,79 @@ const Investigation = (props: {
       <PageTitle title={"Create Investigation"} />
       <div className="mt-5">
         <label className="text-sm" id="investigation-group-label">
-          Select Investigation Groups
+          Search Investigations & Groups
         </label>
-        <MultiSelectField
-          id="investigation-group-label"
-          options={investigationGroups}
-          value={selectedGroup}
-          optionValue="name"
-          optionKey="external_id"
-          onChange={handleGroupSelect}
+        <Autocomplete
+          multiple
+          id="search-by-test"
+          fullWidth={true}
+          options={searchOptions}
+          value={selectedItems}
+          disableCloseOnSelect
+          inputValue={searchInputValue}
+          getOptionLabel={(option) => option.name}
+          onInputChange={(e, value, reason) => {
+            if (reason === "input" || reason === "clear") {
+              setSearchInputValue(value);
+            }
+          }}
+          renderOption={(option, { selected }) => (
+            <React.Fragment>
+              <Checkbox
+                style={{ marginRight: 8 }}
+                checked={selected}
+                color="primary"
+              />
+              {option.name} |{" "}
+              {isInvestigation(option) &&
+                option.groups.map((e) => {
+                  return (
+                    <div className="px-2 py-1 text-xs font-bold bg-gray-300 rounded-full">
+                      {e.name}
+                    </div>
+                  );
+                })}
+            </React.Fragment>
+          )}
+          renderInput={(params) => (
+            <>
+              <TextField
+                margin="dense"
+                {...params}
+                placeholder="Select Investigation"
+              />
+            </>
+          )}
+          onChange={(_: any, options: SearchItem[]) => {
+            selectItems(options);
+            setSelectedInvestigations(options.filter(isInvestigation));
+            setSelectedGroup(
+              [
+                ...options
+                  .filter((e) => !isInvestigation(e))
+                  .map((e) => e.external_id),
+                ...options.reduce<string[]>(
+                  (acc, option) =>
+                    acc.concat(
+                      isInvestigation(option)
+                        ? option.groups.map((e) => e.external_id)
+                        : []
+                    ),
+                  []
+                ),
+              ].filter((v, i, a) => a.indexOf(v) == i)
+            );
+          }}
         />
       </div>
-      {selectedGroup.map((group_id: string) => {
-        const filteredInvestigations = listOfInvestigations(
-          group_id,
-          investigations
+
+      {selectedGroup.map((group_id) => {
+        const currentGroupsInvestigations = selectedInvestigations.filter((e) =>
+          e.groups.map((e) => e.external_id).includes(group_id)
         );
+        const filteredInvestigations = currentGroupsInvestigations.length
+          ? currentGroupsInvestigations
+          : listOfInvestigations(group_id, investigations);
         const group = findGroup(group_id, investigationGroups);
         return (
           <TestTable

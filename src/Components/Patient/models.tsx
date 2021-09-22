@@ -56,6 +56,7 @@ export interface PatientModel {
     facility: string;
     assigned_to_object?: AssignedToObjectModel;
     is_telemedicine?: boolean;
+    consultation_notes: string;
   };
   address?: string;
   village?: string;
@@ -108,6 +109,7 @@ export interface PatientModel {
 }
 
 export interface SampleTestModel {
+  patient_object?: PatientModel;
   atypical_presentation?: string;
   diagnosis?: string;
   diff_diagnosis?: string;
@@ -255,6 +257,16 @@ export interface DailyRoundsModel {
   rounds_type?: string;
   last_updated_by_telemedicine?: boolean;
   created_by_telemedicine?: boolean;
+  created_by?: {
+    first_name?: string;
+    last_name?: string;
+    user_type?: string;
+  };
+  last_edited_by?: {
+    first_name?: string;
+    last_name?: string;
+    user_type?: string;
+  };
 }
 export interface FacilityNameModel {
   id?: string;

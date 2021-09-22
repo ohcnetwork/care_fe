@@ -3,7 +3,6 @@ import loadable from "@loadable/component";
 import {
   Box,
   Button,
-  Card,
   CardContent,
   FormControlLabel,
   InputLabel,
@@ -13,7 +12,12 @@ import {
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { navigate } from "raviger";
 import moment from "moment";
-import React, { useCallback, useReducer, useState } from "react";
+import React, {
+  ChangeEventHandler,
+  useCallback,
+  useReducer,
+  useState,
+} from "react";
 import { useDispatch } from "react-redux";
 import {
   ADMITTED_TO,
@@ -23,6 +27,7 @@ import {
   TELEMEDICINE_ACTIONS,
   REVIEW_AT_CHOICES,
   LINES_CATHETER_CHOICES,
+  KASP_STRING,
 } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
@@ -46,29 +51,85 @@ import { make as Slider } from "../CriticalCareRecording/components/Slider.gen";
 import { FacilityModel } from "./models";
 import { OnlineUsersSelect } from "../Common/OnlineUsersSelect";
 import _ from "lodash";
+import { UserModel } from "../Users/models";
+import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
-const initForm: any = {
+type Boolean = "true" | "false";
+
+type FormDetails = {
+  hasSymptom: boolean;
+  otherSymptom: boolean;
+  symptoms: number[];
+  other_symptoms: string;
+  symptoms_onset_date: string;
+  suggestion: string;
+  patient: string;
+  facility: string;
+  admitted: Boolean;
+  admitted_to: string;
+  category: string;
+  admission_date: string;
+  discharge_date: null;
+  referred_to: string;
+  diagnosis: string;
+  verified_by: string;
+  test_id: string;
+  is_kasp: Boolean;
+  kasp_enabled_date: null;
+  examination_details: string;
+  existing_medication: string;
+  prescribed_medication: string;
+  consultation_notes: string;
+  ip_no: string;
+  discharge_advice: Prescription_t[];
+  is_telemedicine: Boolean;
+  action: string;
+  assigned_to: string;
+  assigned_to_object: UserModel | null;
+  cpk_mb: number;
+  operation: string;
+  intubation_start_date: string | null;
+  intubation_end_date: string | null;
+  ett_tt: number;
+  cuff_pressure: number;
+  special_instruction: string;
+  lines: number[];
+  otherLines: boolean;
+  other_lines: string;
+  hasLines: boolean;
+  lines_insertion_date: any;
+  lines_site_level_fixation: any;
+  review_time: number;
+  weight: string;
+  height: string;
+};
+
+type Action =
+  | { type: "set_form"; form: FormDetails }
+  | { type: "set_error"; errors: FormDetails };
+
+const initForm: FormDetails = {
   hasSymptom: false,
   otherSymptom: false,
   symptoms: [],
   other_symptoms: "",
-  symptoms_onset_date: null,
+  symptoms_onset_date: "",
   suggestion: "",
   patient: "",
   facility: "",
   admitted: "false",
   admitted_to: "",
   category: "",
-  admission_date: new Date(),
+  admission_date: new Date().toString(),
   discharge_date: null,
   referred_to: "",
   diagnosis: "",
   verified_by: "",
   test_id: "",
-  is_kasp: "",
+  is_kasp: "false",
   kasp_enabled_date: null,
   examination_details: "",
   existing_medication: "",
@@ -93,6 +154,9 @@ const initForm: any = {
   hasLines: false,
   lines_insertion_date: {},
   lines_site_level_fixation: {},
+  review_time: 0,
+  weight: "",
+  height: "",
 };
 
 const initError = Object.assign(
@@ -105,7 +169,7 @@ const initialState = {
   errors: { ...initError },
 };
 
-const consultationFormReducer = (state = initialState, action: any) => {
+const consultationFormReducer = (state = initialState, action: Action) => {
   switch (action.type) {
     case "set_form": {
       return {
@@ -119,8 +183,6 @@ const consultationFormReducer = (state = initialState, action: any) => {
         errors: action.errors,
       };
     }
-    default:
-      return state;
   }
 };
 
@@ -258,6 +320,8 @@ export const ConsultationForm = (props: any) => {
             lines: lines,
             lines_insertion_date: lines_insertion_date,
             lines_site_level_fixation: lines_site_level_fixation,
+            weight: res.data.weight ? res.data.weight : "",
+            height: res.data.height ? res.data.height : "",
           };
           dispatch({ type: "set_form", form: formData });
         } else {
@@ -335,7 +399,7 @@ export const ConsultationForm = (props: any) => {
             invalidForm = true;
           }
           return;
-        case "OPconsultation":
+        case "consultation_notes":
           if (state.form.suggestion === "OP" && !state.form[field]) {
             errors[field] = "Please enter OP consultation Details";
             if (!error_div) error_div = field;
@@ -355,7 +419,9 @@ export const ConsultationForm = (props: any) => {
           return;
         case "is_kasp":
           if (!state.form[field]) {
-            errors[field] = "Please select an option, Kasp is mandatory";
+            errors[
+              field
+            ] = `Please select an option, ${KASP_STRING} is mandatory`;
             if (!error_div) error_div = field;
             invalidForm = true;
           }
@@ -419,12 +485,12 @@ export const ConsultationForm = (props: any) => {
     return [!invalidForm, error_div];
   };
 
-  const mmHgTocmH2o = (val: any) => {
-    return (val * 1.35951).toFixed();
+  const mmHgTocmH2o = (val: number) => {
+    return val * 1.35951;
   };
 
-  const cmH2oTommHg = (val: any) => {
-    return (val * 0.73556).toFixed();
+  const cmH2oTommHg = (val: number) => {
+    return val * 0.73556;
   };
 
   const handleSubmit = async (e: any) => {
@@ -453,7 +519,7 @@ export const ConsultationForm = (props: any) => {
           : undefined,
         category: state.form.category,
         is_kasp: state.form.is_kasp,
-        kasp_enabled_date: state.form.is_kasp === "true" ? new Date() : null,
+        kasp_enabled_date: JSON.parse(state.form.is_kasp) ? new Date() : null,
         examination_details: state.form.examination_details,
         existing_medication: state.form.existing_medication,
         prescribed_medication: state.form.prescribed_medication,
@@ -467,7 +533,7 @@ export const ConsultationForm = (props: any) => {
         test_id: state.form.test_id,
         referred_to:
           state.form.suggestion === "R" ? state.form.referred_to : undefined,
-        consultation_notes: state.form.OPconsultation,
+        consultation_notes: state.form.consultation_notes,
         is_telemedicine: state.form.is_telemedicine,
         action: state.form.action,
         review_time: state.form.review_time,
@@ -483,6 +549,8 @@ export const ConsultationForm = (props: any) => {
           : cmH2oTommHg(state.form.cuff_pressure),
         special_instruction: state.form.special_instruction,
         lines: createLinesPayload(),
+        weight: Number(state.form.weight),
+        height: Number(state.form.height),
       };
       const res = await dispatchAction(
         id ? updateConsultation(id, data) : createConsultation(data)
@@ -509,33 +577,43 @@ export const ConsultationForm = (props: any) => {
     }
   };
 
-  const handleChange = (e: any) => {
-    const form = { ...state.form };
-    const { name, value } = e.target;
-    form[name] = value;
-    dispatch({ type: "set_form", form });
+  const handleChange:
+    | ChangeEventHandler<HTMLInputElement>
+    | ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement> = (e: any) => {
+    e &&
+      e.target &&
+      dispatch({
+        type: "set_form",
+        form: { ...state.form, [e.target.name]: e.target.value },
+      });
   };
 
-  const handleTelemedicineChange = (e: any) => {
-    const form = { ...state.form };
-    const { name, value } = e.target;
-    form[name] = value;
-    if (value === "false") {
-      form.action = "PENDING";
-    }
-    dispatch({ type: "set_form", form });
+  const handleTelemedicineChange: ChangeEventHandler<HTMLInputElement> = (
+    e
+  ) => {
+    e &&
+      e.target &&
+      dispatch({
+        type: "set_form",
+        form: {
+          ...state.form,
+          [e.target.name]: e.target.value,
+          action: e.target.value === "false" ? "PENDING" : state.form.action,
+        },
+      });
   };
 
   const handleDecisionChange = (e: any) => {
-    const form = { ...state.form };
-    const { name, value } = e.target;
-    form[name] = value;
-    if (value === "A") {
-      form.admitted = "true";
-    } else {
-      form.admitted = "false";
-    }
-    dispatch({ type: "set_form", form });
+    e &&
+      e.target &&
+      dispatch({
+        type: "set_form",
+        form: {
+          ...state.form,
+          [e.target.name]: e.target.value,
+          admitted: e.target.value === "A" ? "true" : "false",
+        },
+      });
   };
 
   const handleSymptomChange = (e: any, child?: any) => {
@@ -593,32 +671,44 @@ export const ConsultationForm = (props: any) => {
     return payload;
   };
 
-  const handleDateChange = (date: any, key: string) => {
-    if (moment(date).isValid()) {
-      const form = { ...state.form };
-      form[key] = date;
-      dispatch({ type: "set_form", form });
-    }
+  // ------------- DEPRECATED -------------
+  // const handleDateChange = (date: any, key: string) => {
+  //   if (moment(date).isValid()) {
+  //     const form = { ...state.form };
+  //     form[key] = date;
+  //     dispatch({ type: "set_form", form });
+  //   }
+
+  const handleDateChange = (date: MaterialUiPickersDate, key: string) => {
+    moment(date).isValid() &&
+      dispatch({ type: "set_form", form: { ...state.form, [key]: date } });
   };
 
-  const handleDoctorSelect = (doctor: any) => {
-    const form = { ...state.form };
-    form["assigned_to"] = doctor.id;
-    form["assigned_to_object"] = doctor;
-    dispatch({ type: "set_form", form });
+  const handleDoctorSelect = (doctor: UserModel | null) => {
+    doctor &&
+      doctor.id &&
+      dispatch({
+        type: "set_form",
+        form: {
+          ...state.form,
+          assigned_to: doctor.id.toString(),
+          assigned_to_object: doctor,
+        },
+      });
   };
 
   const setFacility = (selected: FacilityModel | FacilityModel[] | null) => {
-    setSelectedFacility(selected as FacilityModel);
-    const form = { ...state.form };
-    form.referred_to = selected ? (selected as FacilityModel).id : "";
+    const selectedFacility = selected as FacilityModel;
+    setSelectedFacility(selectedFacility);
+    const form: FormDetails = { ...state.form };
+    if (selectedFacility && selectedFacility.id) {
+      form.referred_to = selectedFacility.id.toString() || "";
+    }
     dispatch({ type: "set_form", form });
   };
 
   const handleSliderChange = (value: any, key: string) => {
-    const form = { ...state.form };
-    form[key] = value;
-    dispatch({ type: "set_form", form });
+    dispatch({ type: "set_form", form: { ...state.form, [key]: value } });
   };
 
   const toggleCuffUnit = () => {
@@ -830,13 +920,12 @@ export const ConsultationForm = (props: any) => {
                     </div>
                   )}
                 </div>
-
                 {JSON.parse(state.form.admitted) && (
                   <div className="flex">
                     <div className="flex-1" id="admission_date-div">
                       <DateInputField
                         id="admission_date"
-                        label="Admission Date"
+                        label="Admission Date*"
                         margin="dense"
                         value={state.form.admission_date}
                         disableFuture={true}
@@ -855,17 +944,17 @@ export const ConsultationForm = (props: any) => {
                 <MultilineInputField
                   rows={5}
                   className="mt-2"
-                  name="OPconsultation"
+                  name="consultation_notes"
                   variant="outlined"
                   margin="dense"
                   type="text"
                   placeholder="Information optional"
                   InputLabelProps={{
-                    shrink: !!state.form.OPconsultation,
+                    shrink: !!state.form.consultation_notes,
                   }}
-                  value={state.form.OPconsultation}
+                  value={state.form.consultation_notes}
                   onChange={handleChange}
-                  errors={state.errors.OPconsultation}
+                  errors={state.errors.consultation_notes}
                 />
               </div>
               <div className="mt-4">
@@ -938,7 +1027,7 @@ export const ConsultationForm = (props: any) => {
               </div>
 
               <div className="flex-1" id="is_kasp-div">
-                <InputLabel id="admitted-label">Kasp*</InputLabel>
+                <InputLabel id="admitted-label">{KASP_STRING}*</InputLabel>
                 <RadioGroup
                   aria-label="covid"
                   name="is_kasp"
@@ -1096,7 +1185,7 @@ export const ConsultationForm = (props: any) => {
                       id="intubation_start_date"
                       label="Intubated On"
                       margin="dense"
-                      value={state.form.intubation_start_date}
+                      value={state.form.intubation_start_date || ""}
                       disableFuture={true}
                       onChange={(date) =>
                         handleDateChange(date, "intubation_start_date")
@@ -1109,7 +1198,7 @@ export const ConsultationForm = (props: any) => {
                       id="intubation_end_date"
                       label="Exhubated On"
                       margin="dense"
-                      value={state.form.intubation_end_date}
+                      value={state.form.intubation_end_date || ""}
                       disableFuture={true}
                       onChange={(date) =>
                         handleDateChange(date, "intubation_end_date")
@@ -1124,7 +1213,7 @@ export const ConsultationForm = (props: any) => {
                   end={"10"}
                   interval={"1"}
                   step={0.1}
-                  value={state.form.ett_tt}
+                  value={state.form.ett_tt.toString()}
                   setValue={(val) => handleSliderChange(val, "ett_tt")}
                   getLabel={(s) => ["", "#059669"]}
                 />
@@ -1144,7 +1233,7 @@ export const ConsultationForm = (props: any) => {
                   end={"60"}
                   interval={"1"}
                   step={1.0}
-                  value={state.form.cuff_pressure}
+                  value={state.form.cuff_pressure.toString()}
                   setValue={(val) => handleSliderChange(val, "cuff_pressure")}
                   getLabel={(s) => ["", "#059669"]}
                 />
@@ -1187,7 +1276,7 @@ export const ConsultationForm = (props: any) => {
                     placeholder="Enter the information here"
                     InputLabelProps={{ shrink: !!state.form.other_lines }}
                     value={state.form.other_lines}
-                    onChange={(e) => handleChange(e)}
+                    onChange={handleChange}
                     errors={state.errors.other_lines}
                   />
                 </div>
@@ -1230,6 +1319,42 @@ export const ConsultationForm = (props: any) => {
                   </div>
                 ))}
 
+              <div className="flex flex-col md:flex-row justify-between md:gap-5">
+                <div id="weight-div" className="flex-1">
+                  <InputLabel id="refered-label">Weight (in Kg)</InputLabel>
+                  <TextInputField
+                    name="weight"
+                    variant="outlined"
+                    margin="dense"
+                    type="string"
+                    InputLabelProps={{ shrink: !!state.form.weight }}
+                    value={state.form.weight}
+                    onChange={handleChange}
+                    errors={state.errors.weight}
+                  />
+                </div>
+                <div id="height-div" className="flex-1">
+                  <InputLabel id="refered-label">Height (in cm)</InputLabel>
+                  <TextInputField
+                    name="height"
+                    variant="outlined"
+                    margin="dense"
+                    type="string"
+                    InputLabelProps={{ shrink: !!state.form.height }}
+                    value={state.form.height}
+                    onChange={handleChange}
+                    errors={state.errors.height}
+                  />
+                </div>
+              </div>
+              <div id="body_surface-div" className="flex-1">
+                Body Surface area :{" "}
+                {Math.sqrt(
+                  (Number(state.form.weight) * Number(state.form.height)) / 3600
+                ).toFixed(2)}{" "}
+                m<sup>2</sup>
+              </div>
+              {/* End of Telemedicine fields */}
               <div className="mt-4 flex justify-between">
                 <Button
                   color="default"

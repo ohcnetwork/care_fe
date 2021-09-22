@@ -29,9 +29,9 @@ export const NoticeBoard: any = () => {
   let notices: any[] = [];
   if (data && data.length) {
     notices = data.map((item) => (
-      <Card className="my-4 mx-8 rounded-lg">
+      <Card key={`usr_${item.id}`} className="my-4 mx-8 rounded-lg">
         <CardContent>
-          <div key={`usr_${item.id}`} className="">
+          <div className="">
             <div className="text-lg font-bold">{`Message From: ${item.caused_by.first_name} ${item.caused_by.last_name} - ${item.caused_by.user_type}`}</div>
             <div className="text-xs">
               On: {moment(item.created_date).format("lll")}
@@ -43,7 +43,7 @@ export const NoticeBoard: any = () => {
     ));
   } else {
     notices.push(
-      <Card className="my-4 mx-8 rounded-lg">
+      <Card key="no-notice" className="my-4 mx-8 rounded-lg">
         <CardContent>
           <div className="text-xl text-center semibold">
             No notices for you.

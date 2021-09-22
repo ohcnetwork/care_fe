@@ -9,6 +9,9 @@ export interface OptionsType {
   disabled?: boolean;
 }
 
+export const KASP_STRING = "KASP";
+export const KASP_FULL_STRING = "Karunya Arogya Suraksha Padhathi";
+
 export const USER_TYPES: Array<String> = [
   "Volunteer",
   "Pharmacist",
@@ -142,10 +145,10 @@ export const BED_TYPES: Array<OptionsType> = [
   { id: 120, text: "Covid Oxygen beds" },
   { id: 110, text: "Covid ICU (ICU without ventilator)" },
   { id: 100, text: "Covid Ventilators (ICU with ventilator)" },
-  { id: 40, text: "KASP Ordinary Beds" },
-  { id: 60, text: "KASP Oxygen beds" },
-  { id: 50, text: "KASP ICU (ICU without ventilator)" },
-  { id: 70, text: "KASP ICU (ICU with ventilator)" },
+  { id: 40, text: KASP_STRING + " Ordinary Beds" },
+  { id: 60, text: KASP_STRING + " Oxygen beds" },
+  { id: 50, text: KASP_STRING + " ICU (ICU without ventilator)" },
+  { id: 70, text: KASP_STRING + " ICU (ICU with ventilator)" },
   { id: 2, text: "Hostel" },
   { id: 3, text: "Single Room with Attached Bathroom" },
 ];
@@ -340,7 +343,15 @@ export const DISEASE_STATUS = [
 
 export const TEST_TYPE = ["UNK", "ANTIGEN", "RTPCR", "CBNAAT", "TRUENAT"];
 
-export const VACCINES = ["CoviShield", "Covaxin"];
+export const VACCINES = [
+  "CoviShield",
+  "Covaxin",
+  "Sputnik",
+  "Moderna",
+  "Pfizer",
+  "Janssen",
+  "Sinovac",
+];
 
 export const BLOOD_GROUPS = [
   "UNK",
@@ -527,4 +538,18 @@ export const MOTOR_RESPONSE_SCALE = [
   { value: 3, text: "Abnormal Flexion(decorticate)" },
   { value: 2, text: "Abnormal Extension(decerebrate)" },
   { value: 1, text: "No Response" },
+];
+export const CONSULTATION_TABS: Array<OptionsType> = [
+  { id: 1, text: "UPDATES", desc: "Updates" },
+  { id: 2, text: "SUMMARY", desc: "Summary" },
+  { id: 3, text: "MEDICINES", desc: "Medicines" },
+  { id: 4, text: "FILES", desc: "Files" },
+  { id: 5, text: "INVESTIGATIONS", desc: "Investigations" },
+  { id: 6, text: "ABG", desc: "ABG" },
+  { id: 7, text: "NURSING", desc: "Nursing" },
+  { id: 8, text: "NEUROLOGICAL_MONITORING", desc: "Neurological Monitoring" },
+  { id: 9, text: "VENTILATOR", desc: "Ventilator" },
+  { id: 10, text: "NUTRITION", desc: "Nutrition" },
+  { id: 11, text: "PRESSURE_SORE", desc: "Pressure Sore" },
+  { id: 12, text: "DIALYSIS", desc: "Dialysis" },
 ];

@@ -2,7 +2,7 @@ import React, { useCallback, useState } from "react";
 import { navigate } from "raviger";
 import { SelectField } from "../../Common/HelperInputFields";
 import { CircularProgress } from "@material-ui/core";
-import { FACILITY_TYPES } from "../../../Common/constants";
+import { FACILITY_TYPES, KASP_STRING } from "../../../Common/constants";
 import {
   getStates,
   getDistrictByState,
@@ -131,11 +131,11 @@ function FacillityFilter(props: any) {
   const handleChange = (event: any) => {
     const { name, value } = event.target;
     const filterData: any = { ...filterState };
-    if (name === "state" && value == 0) {
+    if (name === "state") {
       filterData["district"] = 0;
       filterData["local_body"] = 0;
     }
-    if (name === "district" && value == 0) {
+    if (name === "district") {
       filterData["local_body"] = 0;
     }
     filterData[name] = value;
@@ -239,7 +239,9 @@ function FacillityFilter(props: any) {
         </div>
 
         <div className="w-64 flex-none">
-          <span className="text-sm font-semibold">KASP Empanelled</span>
+          <span className="text-sm font-semibold">
+            {KASP_STRING} Empanelled
+          </span>
           <SelectField
             name="kasp_empanelled"
             variant="outlined"

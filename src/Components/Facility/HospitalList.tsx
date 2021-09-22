@@ -1,8 +1,12 @@
 import { navigate, useQueryParams } from "raviger";
 import React, { useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { DOWNLOAD_TYPES, FACILITY_TYPES } from "../../Common/constants";
+import {
+  DOWNLOAD_TYPES,
+  FACILITY_TYPES,
+  KASP_STRING,
+} from "../../Common/constants";
 import {
   getFacilities,
   downloadFacility,
@@ -72,6 +76,9 @@ const HospitalListPage = (props: any) => {
   const [stateName, setStateName] = useState("");
   const [districtName, setDistrictName] = useState("");
   const [localbodyName, setLocalbodyName] = useState("");
+  const rootState: any = useSelector((rootState) => rootState);
+  const { currentUser } = rootState;
+  const userType = currentUser.data.user_type;
   const [notifyMessage, setNotifyMessage] = useState("");
   const [modalFor, setModalFor] = useState(undefined);
   const { t } = props;
@@ -320,7 +327,7 @@ const HospitalListPage = (props: any) => {
               <div className="px-6 py-4">
                 {facility.kasp_empanelled && (
                   <div className="mt-2 inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-yellow-100 text-yellow-800">
-                    KASP
+                    {KASP_STRING}
                   </div>
                 )}
                 <div className="inline-flex float-right items-center px-2.5 py-0.5 mt-2 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800">
@@ -366,12 +373,16 @@ const HospitalListPage = (props: any) => {
                     </a>
                   </div>
                   <span className="inline-flex rounded-md shadow-sm">
-                    <button
-                      className="ml-2 md:ml-0 inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:shadow-outline-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow mr-5"
-                      onClick={(_) => setModalFor(facility.id)}
-                    >
-                      <i className="far fa-comment-dots mr-1"></i> Notify
-                    </button>
+                    {userType !== "Staff" ? (
+                      <button
+                        className="ml-2 md:ml-0 inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:shadow-outline-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow mr-5"
+                        onClick={(_) => setModalFor(facility.id)}
+                      >
+                        <i className="far fa-comment-dots mr-1"></i> Notify
+                      </button>
+                    ) : (
+                      <></>
+                    )}
                     <Modal
                       open={modalFor === facility.id}
                       onClose={(_) => setModalFor(undefined)}
@@ -655,8 +666,10 @@ const HospitalListPage = (props: any) => {
         )}
         {qParams.kasp_empanelled &&
           badge(
-            "KASP Empanelled",
-            qParams.kasp_empanelled === "true" ? "KASP" : "Non KASP",
+            `${KASP_STRING} Empanelled`,
+            qParams.kasp_empanelled === "true"
+              ? KASP_STRING
+              : `Non ${KASP_STRING}`,
             "kasp_empanelled"
           )}
       </div>

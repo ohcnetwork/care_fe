@@ -194,6 +194,7 @@ export default function BoardView() {
         ) : (
           boardFilter.map((board) => (
             <ResourceBoard
+              key={board}
               filterProp={qParams}
               board={board}
               formatFilter={formatFilter}

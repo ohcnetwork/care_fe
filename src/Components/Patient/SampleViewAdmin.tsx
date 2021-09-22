@@ -6,15 +6,16 @@ import SampleFilter from "./SampleFilters";
 import { navigate, useQueryParams } from "raviger";
 import moment from "moment";
 import loadable from "@loadable/component";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   SAMPLE_TEST_STATUS,
+  SAMPLE_TEST_RESULT,
   ROLE_STATUS_MAP,
   SAMPLE_FLOW_RULES,
 } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getTestList, patchSample, sampleSearch } from "../../Redux/actions";
+import { getTestList, patchSample } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
 import Pagination from "../Common/Pagination";
 import { SampleTestModel } from "./models";
@@ -62,6 +63,8 @@ export default function SampleViewAdmin(props: any) {
           patient_name: qParams.patient_name || undefined,
           district_name: qParams.district_name || undefined,
           status: qParams.status || undefined,
+          result: qParams.result || undefined,
+          facility: qParams.facility || "",
         })
       );
       if (!status.aborted) {
@@ -78,6 +81,8 @@ export default function SampleViewAdmin(props: any) {
       qParams.district_name,
       qParams.patient_name,
       qParams.status,
+      qParams.result,
+      qParams.facility,
     ]
   );
 
@@ -142,7 +147,7 @@ export default function SampleViewAdmin(props: any) {
       sampleData.result = result;
     }
     const statusName = SAMPLE_TEST_STATUS.find((i) => i.id === status)?.desc;
-    const res = await dispatch(patchSample(sample.id, sampleData));
+    const res = await dispatch(patchSample(sampleData, { id: sample.id }));
     if (res && (res.status === 201 || res.status === 200)) {
       Notification.Success({
         msg: `Success - ${statusName}`,
@@ -281,24 +286,12 @@ export default function SampleViewAdmin(props: any) {
                   </div>
                 )}
 
-                <div className="grid gap-2 grid-cols-2 mt-2">
-                  <button
-                    onClick={(e) =>
-                      navigate(
-                        `/facility/${item.facility}/patient/${item.patient}`
-                      )
-                    }
-                    className="w-full text-sm bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow text-center"
-                  >
-                    Patient Details
-                  </button>
-                  <button
-                    onClick={(e) => navigate(`/sample/${item.id}`)}
-                    className="w-full text-sm bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow text-center"
-                  >
-                    Sample Details
-                  </button>
-                </div>
+                <button
+                  onClick={(e) => navigate(`/sample/${item.id}`)}
+                  className="mt-2 w-full text-sm bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow text-center"
+                >
+                  Sample Details
+                </button>
               </div>
             </div>
           </div>
@@ -479,6 +472,16 @@ export default function SampleViewAdmin(props: any) {
             )?.text.replaceAll("_", " "),
             "status"
           )}
+          {badge(
+            "Result",
+            SAMPLE_TEST_RESULT.find((result) => result.id == qParams.result)
+              ?.text,
+            "result"
+          )}
+          {qParams.facility &&
+            sample[0] &&
+            sample[0].facility_object &&
+            badge("Facility", sample[0].facility_object.name, "facility")}
         </div>
       </div>
       <div className="px-3 md:px-8">

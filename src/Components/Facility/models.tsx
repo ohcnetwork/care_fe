@@ -1,5 +1,26 @@
 import { AssignedToObjectModel } from "../Patient/models";
 
+export interface LocalBodyModel {
+  name: string;
+  body_type: number;
+  localbody_code: string;
+  district: number;
+}
+export interface DistrictModel {
+  id: number;
+  name: string;
+  state: number;
+}
+export interface StateModel {
+  id: number;
+  name: string;
+}
+export interface WardModel {
+  id: number;
+  name: string;
+  number: number;
+  local_body: number;
+}
 export interface FacilityModel {
   id?: number;
   name?: string;
@@ -19,20 +40,10 @@ export interface FacilityModel {
   expected_type_c_cylinders?: number;
   expected_type_d_cylinders?: number;
   expected_oxygen_requirement?: number;
-  local_body_object?: {
-    name: string;
-    body_type: number;
-    localbody_code: string;
-    district: number;
-  };
-  district_object?: { id: number; name: string; state: number };
-  state_object?: { id: number; name: string };
-  ward_object?: {
-    id: number;
-    name: string;
-    number: number;
-    local_body: number;
-  };
+  local_body_object?: LocalBodyModel;
+  district_object?: DistrictModel;
+  state_object?: StateModel;
+  ward_object?: WardModel;
 }
 
 export interface CapacityModal {
@@ -89,6 +100,8 @@ export interface ConsultationModel {
   assigned_to_object?: AssignedToObjectModel;
   created_by?: any;
   last_edited_by?: any;
+  weight?: number | null;
+  height?: number | null;
 }
 export interface PatientStatsModel {
   id?: number;

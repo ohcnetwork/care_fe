@@ -40,6 +40,7 @@ export make = (
   ~getLabel: float => (string, string),
   ~interval: string,
   ~hasError=None,
+  ~className="",
 ) => {
   let (textColor, setColor) = React.useState(() => "#2856ff")
   let (text, setText) = React.useState(() => "Normal")
@@ -58,7 +59,7 @@ export make = (
   }, [value])
 
   <>
-    <section className="slider-box">
+    <section className={"slider-box " ++ className}>
       <div className="slider-head">
         <div className="flex items-center">
           <h1 className="m-2"> {title->str} </h1> titleNeighbour

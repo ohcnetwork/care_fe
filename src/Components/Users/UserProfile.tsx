@@ -1,3 +1,4 @@
+import loadable from "@loadable/component";
 import React, { useState, useCallback, useReducer } from "react";
 import { InputLabel, Button } from "@material-ui/core";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
@@ -15,8 +16,34 @@ import { validateEmailAddress, phonePreg } from "../../Common/validation";
 import * as Notification from "../../Utils/Notifications.js";
 import { checkIfLatestBundle } from "../../Utils/build-meta-info";
 import LanguageSelector from "../../Components/Common/LanguageSelector";
+const Loading = loadable(() => import("../Common/Loading"));
 
-const initForm: any = {
+type EditForm = {
+  firstName: string;
+  lastName: string;
+  age: string;
+  gender: string;
+  email: string;
+  phoneNumber: string;
+  altPhoneNumber: string;
+};
+type State = {
+  form: EditForm;
+  errors: EditForm;
+};
+type Action =
+  | { type: "set_form"; form: EditForm }
+  | { type: "set_error"; errors: EditForm };
+
+const genderTypes = [
+  {
+    id: 0,
+    text: "Select",
+  },
+  ...GENDER_TYPES,
+];
+
+const initForm: EditForm = {
   firstName: "",
   lastName: "",
   age: "",
@@ -26,32 +53,30 @@ const initForm: any = {
   altPhoneNumber: "",
 };
 
-const initError = Object.assign(
+const initError: EditForm = Object.assign(
   {},
   ...Object.keys(initForm).map((k) => ({ [k]: "" }))
 );
 
-const initialState = {
+const initialState: State = {
   form: { ...initForm },
   errors: { ...initError },
 };
 
-const editFormReducer = (states = initialState, action: any) => {
+const editFormReducer = (state: State, action: Action) => {
   switch (action.type) {
     case "set_form": {
       return {
-        ...states,
+        ...state,
         form: action.form,
       };
     }
     case "set_error": {
       return {
-        ...states,
+        ...state,
         errors: action.errors,
       };
     }
-    default:
-      return states;
   }
 };
 export default function UserProfile() {
@@ -70,14 +95,6 @@ export default function UserProfile() {
   const initialDetails: any = [{}];
   const [details, setDetails] = useState(initialDetails);
 
-  const genderTypes = [
-    {
-      id: 0,
-      text: "Select",
-    },
-    ...GENDER_TYPES,
-  ];
-
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
@@ -85,13 +102,15 @@ export default function UserProfile() {
       if (!status.aborted) {
         if (res && res.data) {
           setDetails(res.data);
-          const formData: any = {
+          const formData: EditForm = {
             firstName: res.data.first_name,
             lastName: res.data.last_name,
             age: res.data.age,
-            gender: genderTypes.filter((el) => {
-              return el.text === res.data.gender;
-            })[0].id,
+            gender: genderTypes
+              .filter((el) => {
+                return el.text === res.data.gender;
+              })[0]
+              .id.toString(),
             email: res.data.email,
             phoneNumber: res.data.phone_number,
             altPhoneNumber: res.data.alt_phone_number,
@@ -113,18 +132,6 @@ export default function UserProfile() {
     [fetchData]
   );
 
-  const handleChangeInput = (e: any) => {
-    let form = { ...states.form };
-    form[e.target.name] = e.target.value;
-    dispatch({ type: "set_form", form });
-  };
-
-  const handleWhatsappNumberChange = (value: any) => {
-    let form = { ...states.form };
-    form["altPhoneNumber"] = value;
-    dispatch({ type: "set_form", form });
-  };
-
   const validateForm = () => {
     let errors = { ...initError };
     let invalidForm = false;
@@ -143,7 +150,7 @@ export default function UserProfile() {
             errors[field] = "This field is required";
             invalidForm = true;
           } else if (
-            states.form[field] <= 0 ||
+            Number(states.form[field]) <= 0 ||
             !/^\d+$/.test(states.form[field])
           ) {
             errors[field] = "Age must be a number greater than 0";
@@ -193,29 +200,30 @@ export default function UserProfile() {
             invalidForm = true;
           }
           return;
-        default:
-          return;
       }
     });
     dispatch({ type: "set_error", errors });
     return !invalidForm;
   };
 
-  const handleValueChange = (phoneNo: any, name: string) => {
+  const handleChangeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let form: EditForm = { ...states.form, [e.target.name]: e.target.value };
+    dispatch({ type: "set_form", form });
+  };
+
+  const handleValueChange = (phoneNo: string, name: string) => {
     if (phoneNo && parsePhoneNumberFromString(phoneNo)?.isPossible()) {
-      const form = { ...states.form };
-      form[name] = phoneNo;
+      const form: EditForm = { ...states.form, [name]: phoneNo };
       dispatch({ type: "set_form", form });
     }
   };
 
-  const handleWhatsappNumChange = (phoneNo: any, name: string) => {
-    const form = { ...states.form };
-    form[name] = phoneNo;
+  const handleWhatsappNumChange = (phoneNo: string, name: string) => {
+    const form: EditForm = { ...states.form, [name]: phoneNo };
     dispatch({ type: "set_form", form });
   };
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const validForm = validateForm();
     if (validForm) {
@@ -281,7 +289,9 @@ export default function UserProfile() {
       setTimeout(() => setUpdateBtnText("Update"), 1000);
     }
   };
-
+  if (isLoading) {
+    return <Loading />;
+  }
   return (
     <div>
       <div className="md:p-20 p-10">
@@ -506,9 +516,9 @@ export default function UserProfile() {
                         <PhoneNumberField
                           label="Phone Number*"
                           value={states.form.phoneNumber}
-                          onChange={(value: any) => {
-                            handleValueChange(value, "phoneNumber");
-                          }}
+                          onChange={(value: string) =>
+                            handleValueChange(value, "phoneNumber")
+                          }
                           errors={states.errors.phoneNumber}
                         />
                       </div>
@@ -518,9 +528,9 @@ export default function UserProfile() {
                           name="altPhoneNumber"
                           label="Whatsapp Number"
                           value={states.form.altPhoneNumber}
-                          onChange={(value: any) => {
-                            handleWhatsappNumChange(value, "altPhoneNumber");
-                          }}
+                          onChange={(value: string) =>
+                            handleWhatsappNumChange(value, "altPhoneNumber")
+                          }
                           errors={states.errors.altPhoneNumber}
                         />
                       </div>

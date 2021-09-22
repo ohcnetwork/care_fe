@@ -289,7 +289,7 @@ export const FileUpload = (props: FileUploadProps) => {
 
   // Store all audio urls for each audio file
   const audio_urls = (files: any) => {
-    let audio_files = files;
+    let audio_files = files || [];
     audio_files = audio_files.filter(
       (x: FileUploadModel) => x.file_category === "AUDIO"
     );
@@ -715,7 +715,8 @@ export const FileUpload = (props: FileUploadProps) => {
       </div>
 
       <PageTitle title={`${VIEW_HEADING[type]}`} hideBack={true} />
-      {uploadedFiles.length > 0 &&
+      {uploadedFiles &&
+        uploadedFiles.length > 0 &&
         uploadedFiles.map((item: FileUploadModel) => renderFileUpload(item))}
       {totalCount > limit && (
         <div className="mt-4 flex w-full justify-center">

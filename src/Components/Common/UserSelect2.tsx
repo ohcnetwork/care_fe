@@ -2,15 +2,15 @@ import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { getUserList } from "../../Redux/actions";
 import { AutoCompleteAsyncField } from "../Common/HelperInputFields";
-import { UserModal } from "../Users/models";
+import { UserModel } from "../Users/models";
 const debounce = require("lodash.debounce");
 interface UserSelectProps {
   margin?: string;
   errors: string;
   className?: string;
   multiple?: boolean;
-  selected: UserModal | UserModal[] | null;
-  setSelected: (selected: UserModal | UserModal[] | null) => void;
+  selected: UserModel | UserModel[] | null;
+  setSelected: (selected: UserModel | UserModel[] | null) => void;
 }
 
 export const UserSelect = (props: UserSelectProps) => {
@@ -25,7 +25,7 @@ export const UserSelect = (props: UserSelectProps) => {
   const dispatchAction: any = useDispatch();
   const [userLoading, isUserLoading] = useState(false);
   const [hasSearchText, setHasSearchText] = useState(false);
-  const [UserList, setUserList] = useState<Array<UserModal>>([]);
+  const [UserList, setUserList] = useState<Array<UserModel>>([]);
 
   const getPersonName = (user: any) => {
     let personName = user.first_name + " " + user.last_name;
@@ -33,7 +33,7 @@ export const UserSelect = (props: UserSelectProps) => {
     return personName.trim().length > 0 ? personName : user.username;
   };
 
-  const handleValueChange = (current: UserModal | UserModal[] | null) => {
+  const handleValueChange = (current: UserModel | UserModel[] | null) => {
     if (!current) {
       setUserList([]);
       isUserLoading(false);
@@ -98,7 +98,7 @@ export const UserSelect = (props: UserSelectProps) => {
       getOptionLabel={(option: any) =>
         `${getPersonName(option)} - (${option.user_type})`
       }
-      filterOptions={(options: UserModal[]) => options}
+      filterOptions={(options: UserModel[]) => options}
       errors={errors}
       className={className}
     />

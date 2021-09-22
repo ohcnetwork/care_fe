@@ -33,7 +33,7 @@ export const PrimaryParametersPlot = (props: any) => {
               "blood_sugar_level",
               "insulin_intake_frequency",
               "insulin_intake_dose",
-              "spo2",
+              "ventilator_spo2",
               "ventilator_fi02",
               "rhythm",
               "rhythm_detail",
@@ -173,7 +173,7 @@ export const PrimaryParametersPlot = (props: any) => {
             title="SPO2 (%)"
             name="spo2"
             xData={dates}
-            yData={yAxisData("spo2")}
+            yData={yAxisData("ventilator_spo2")}
             low={90}
             high={100}
           />
@@ -194,21 +194,24 @@ export const PrimaryParametersPlot = (props: any) => {
         {Object.entries(rhythmValues).map((obj: any) => {
           if (obj[1].length > 0) {
             return (
-              <div className="px-3 text-sm">
+              <div>
                 <h4 className="text-base my-3">{obj[0]}</h4>
-                <div className="flex bg-white border shadow rounded-lg overflow-x-auto">
-                  {obj[1].map((item: any) => {
-                    return (
-                      <div className="border border-gray-300 text-center">
-                        <div className="py-3 px-2 border-b border-gray-300">
-                          <div className="text-xs">{item["time"]}</div>
+                <div className="flex flex-row shadow overflow-hidden sm:rounded-lg divide-y divide-cool-gray-200 my-4 w-max-content max-w-full">
+                  <div className="flex flex-row overflow-x-auto">
+                    {obj[1].map((x: any, i: any) => (
+                      <div
+                        key={`rhythm_${i}`}
+                        className="flex flex-col  min-w-max-content divide-x divide-cool-gray-200"
+                      >
+                        <div className="px-2 border-r py-3 bg-cool-gray-50 text-center text-xs leading-4 font-medium text-cool-gray-500">
+                          {x.time}
                         </div>
-                        <div className="py-3 px-2">
-                          {item["rhythm"] === 5 ? "Regular" : "Ir regular"}
+                        <div className="px-6 py-4 bg-white text-center whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
+                          {x.rhythm === 5 ? "Regular" : "Irregular"}
                         </div>
                       </div>
-                    );
-                  })}
+                    ))}
+                  </div>
                 </div>
               </div>
             );
@@ -218,7 +221,7 @@ export const PrimaryParametersPlot = (props: any) => {
 
       <div className="py-2 px-3">
         <h3 className="text-lg">Rhythm description</h3>
-        <div className="mt-4 bg-white rounded-lg p-2">
+        <div className="mt-4 bg-white rounded-lg p-2 shadow">
           {Object.entries(results).map((obj: any) => {
             if (obj[1].rhythm_detail) {
               return (

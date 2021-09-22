@@ -63,12 +63,16 @@ export const deleteUserFacility = (username: string, facility: string) => {
 export const getFacilities = (params: object) => {
   return fireRequest("listFacility", [], params);
 };
-export const getAllFacilities = (params: object) => {
-  return fireRequest("getAllFacilitiesList", [], params);
+export const getFacilitiesV2 = (params: object) => {
+  return fireRequest("listFacilityV2", [], params);
 };
 
 export const getFacility = (id: number, key?: string) => {
   return fireRequest("getFacility", [], {}, { id: id }, key);
+};
+
+export const getFacilityV2 = (id: number, key?: string) => {
+  return fireRequest("getFacilityV2", [], {}, { id: id }, key);
 };
 
 export const getFacilityUsers = (id: string) => {
@@ -285,8 +289,8 @@ export const getTestList = (params: object) => {
 export const getTestSample = (id: number) => {
   return fireRequest("getTestSample", [id], {});
 };
-export const patchSample = (id: any, params: object) => {
-  return fireRequest("patchSample", [id], params);
+export const patchSample = (params: object, pathParam: object) => {
+  return fireRequest("patchSample", [], params, pathParam);
 };
 
 // Daily Rounds

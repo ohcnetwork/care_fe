@@ -6,7 +6,12 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getConsultation } from "../../Redux/actions";
 import loadable from "@loadable/component";
 import { ConsultationModel } from "./models";
-import { PATIENT_CATEGORY, SYMPTOM_CHOICES } from "../../Common/constants";
+import {
+  PATIENT_CATEGORY,
+  SYMPTOM_CHOICES,
+  CONSULTATION_TABS,
+  OptionsType,
+} from "../../Common/constants";
 import { FileUpload } from "../Patient/FileUpload";
 import TreatmentSummary from "./TreatmentSummary";
 import { PrimaryParametersPlot } from "./Consultations/PrimaryParametersPlot";
@@ -196,31 +201,34 @@ export const ConsultationDetails = (props: any) => {
                     <span className="font-semibold leading-relaxed">
                       Verified By:{" "}
                     </span>
-                    <span className="badge badge-pill badge-primary">
-                      {consultationData.verified_by}
-                    </span>
+                    {consultationData.verified_by}
+                    <i className="fas fa-check-circle fill-current text-lg text-green-500 ml-2"></i>
                   </div>
                 )}
               </div>
-              <div className="flex flex-col mt-2">
-                <div className="text-sm text-gray-700">
-                  Created on{" "}
-                  {moment(consultationData.created_date).format("lll")}
+              <div className="flex md:flex-row flex-col mt-4 gap-2 justify-between">
+                <div className="flex flex-col text-xs text-gray-700 font-base leading-relaxed">
+                  <div>
+                    <span className="text-gray-900">Created: </span>
+                    {moment(consultationData.created_date).format("lll")} |
+                  </div>
                   {consultationData.created_by && (
-                    <span>
-                      {`by ${consultationData.created_by?.first_name} ${consultationData.created_by?.last_name} @${consultationData.created_by?.username} (${consultationData.created_by?.user_type})`}
-                    </span>
+                    <div>
+                      {` ${consultationData.created_by?.first_name} ${consultationData.created_by?.last_name}  `}
+                      {`@${consultationData.created_by?.username} (${consultationData.created_by?.user_type})`}
+                    </div>
                   )}
                 </div>
-
-                <div className="text-sm text-gray-700">
-                  Last Modified on{" "}
-                  {moment(consultationData.modified_date).format("lll")}{" "}
+                <div className="flex flex-col text-xs md:text-right text-gray-700 font-base leading-relaxed">
+                  <div>
+                    <span className="text-gray-900">Last Modified: </span>
+                    {moment(consultationData.modified_date).format("lll")} |
+                  </div>
                   {consultationData.last_edited_by && (
-                    <span>
-                      by{" "}
-                      {`${consultationData.last_edited_by?.first_name} ${consultationData.last_edited_by?.last_name} @${consultationData.last_edited_by?.username} (${consultationData.last_edited_by?.user_type})`}
-                    </span>
+                    <div>
+                      {` ${consultationData.last_edited_by?.first_name} ${consultationData.last_edited_by?.last_name}  `}
+                      {`@${consultationData.last_edited_by?.username} (${consultationData.last_edited_by?.user_type})`}
+                    </div>
                   )}
                 </div>
               </div>
@@ -282,26 +290,13 @@ export const ConsultationDetails = (props: any) => {
             <div className="sm:flex sm:items-baseline overflow-x-auto">
               <div className="mt-4 sm:mt-0">
                 <nav className="pl-2 flex space-x-6 overflow-x-auto pb-2 ">
-                  {[
-                    "UPDATES",
-                    "SUMMARY",
-                    "MEDICINES",
-                    "FILES",
-                    "INVESTIGATIONS",
-                    "ABG",
-                    "NURSING",
-                    "NEUROLOGICAL_MONITORING",
-                    "VENTILATOR",
-                    "NUTRITION",
-                    "PRESSURE_SORE",
-                    "DIALYSIS",
-                  ].map((p: string) => (
+                  {CONSULTATION_TABS.map((p: OptionsType) => (
                     <Link
-                      key={p}
-                      className={tabButtonClasses(tab === p)}
-                      href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/${p.toLocaleLowerCase()}`}
+                      key={p.text}
+                      className={tabButtonClasses(tab === p.text)}
+                      href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/${p.text.toLocaleLowerCase()}`}
                     >
-                      {p.replaceAll("_", " ").toLocaleLowerCase()}
+                      {p.desc}
                     </Link>
                   ))}
                 </nav>
@@ -336,7 +331,6 @@ export const ConsultationDetails = (props: any) => {
                     </div>
                   </div>
                 )}
-
                 {consultationData.consultation_notes && (
                   <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
                     <div className="px-4 py-5 sm:p-6">
@@ -349,6 +343,52 @@ export const ConsultationDetails = (props: any) => {
                     </div>
                   </div>
                 )}
+                {consultationData.weight != null &&
+                  consultationData.weight > 0 && (
+                    <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
+                      <div className="px-4 py-5 sm:p-6">
+                        <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                          Weight
+                        </h3>
+                        <div className="mt-2">
+                          {consultationData.weight || "-"} kg
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                {consultationData.height != null &&
+                  consultationData.height > 0 && (
+                    <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
+                      <div className="px-4 py-5 sm:p-6">
+                        <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                          Height
+                        </h3>
+                        <div className="mt-2">
+                          {consultationData.height || "-"} cm
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                {consultationData.weight != null &&
+                  consultationData.height != null &&
+                  consultationData.weight > 0 &&
+                  consultationData.height > 0 && (
+                    <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
+                      <div className="px-4 py-5 sm:p-6">
+                        <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                          Body Surface Area
+                        </h3>
+                        <div className="mt-2">
+                          {Math.sqrt(
+                            (Number(consultationData.weight) *
+                              Number(consultationData.height)) /
+                              3600
+                          ).toFixed(2)}{" "}
+                          m<sup>2</sup>
+                        </div>
+                      </div>
+                    </div>
+                  )}
               </div>
               <div className="md:w-1/3">
                 <PageTitle title="Updates" hideBack={true} />
@@ -387,8 +427,13 @@ export const ConsultationDetails = (props: any) => {
               )}
               {consultationData.discharge_advice && (
                 <div className="mt-4">
-                  <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                  <h3 className="flex text-lg font-semibold leading-relaxed text-gray-900">
                     Prescription
+                    <div className="ml-3 text-xs text-gray-600 mt-2">
+                      <i className="fas fa-history text-sm pr-2"></i>
+                      {consultationData.modified_date &&
+                        moment(consultationData.modified_date).format("lll")}
+                    </div>
                   </h3>
                   <div className="flex flex-col">
                     <div className="-my-2 py-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
