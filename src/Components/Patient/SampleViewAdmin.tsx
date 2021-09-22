@@ -145,6 +145,7 @@ export default function SampleViewAdmin(props: any) {
     };
     if (status === 7) {
       sampleData.result = result;
+      sampleData.date_of_result = new Date().toISOString();
     }
     const statusName = SAMPLE_TEST_STATUS.find((i) => i.id === status)?.desc;
     const res = await dispatch(patchSample(sampleData, { id: sample.id }));

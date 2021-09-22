@@ -41,6 +41,7 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
     };
     if (status === 7) {
       sampleData.result = result;
+      sampleData.date_of_result = new Date().toISOString();
     }
     const statusName = SAMPLE_TEST_STATUS.find((i) => i.id === status)?.desc;
 
