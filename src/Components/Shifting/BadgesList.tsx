@@ -99,6 +99,16 @@ export default function BadgesList(props: any) {
         "is_up_shift"
       )}
       {badge(
+        "Is Antenatal",
+        local.is_antenatal === "yes" || appliedFilters.is_antenatal === "true"
+          ? "yes"
+          : local.is_antenatal === "no" ||
+            appliedFilters.is_antenatal === "false"
+          ? "no"
+          : undefined,
+        "is_antenatal"
+      )}
+      {badge(
         "Phone Number",
         appliedFilters.patient_phone_number || local.patient_phone_number,
         "patient_phone_number"
