@@ -3,14 +3,16 @@ import moment from "moment";
 import { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getConsultation } from "../../Redux/actions";
+import { getConsultation, getPatient } from "../../Redux/actions";
 import loadable from "@loadable/component";
 import { ConsultationModel } from "./models";
+import { PatientModel } from "../Patient/models";
 import {
   PATIENT_CATEGORY,
   SYMPTOM_CHOICES,
   CONSULTATION_TABS,
   OptionsType,
+  GENDER_TYPES,
 } from "../../Common/constants";
 import { FileUpload } from "../Patient/FileUpload";
 import TreatmentSummary from "./TreatmentSummary";
@@ -41,6 +43,26 @@ export const ConsultationDetails = (props: any) => {
   const [consultationData, setConsultationData] = useState<ConsultationModel>(
     {}
   );
+  const [patientData, setPatientData] = useState<PatientModel>({});
+
+  const getPatientGender = (patientData: any) =>
+    GENDER_TYPES.find((i) => i.id === patientData.gender)?.text;
+
+  const getPatientAddress = (patientData: any) =>
+    `${patientData.address},\n${patientData.ward_object?.name},\n${patientData.local_body_object?.name},\n${patientData.district_object?.name},\n${patientData.state_object?.name}`;
+
+  const getPatientComorbidities = (patientData: any) => {
+    if (
+      patientData &&
+      patientData.medical_history &&
+      patientData.medical_history.length
+    ) {
+      const medHis = patientData.medical_history;
+      return medHis.map((item: any) => item.disease).join(", ");
+    } else {
+      return "None";
+    }
+  };
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -69,6 +91,26 @@ export const ConsultationDetails = (props: any) => {
                 : res.data.discharge_advice;
           }
           setConsultationData(data);
+          const id = res.data.patient;
+          const patientRes = await dispatch(getPatient({ id }));
+          if (patientRes && patientRes.data) {
+            const patientGender = getPatientGender(patientRes.data);
+            const patientAddress = getPatientAddress(patientRes.data);
+            const patientComorbidities = getPatientComorbidities(
+              patientRes.data
+            );
+            const data = {
+              ...patientRes.data,
+              gender: patientGender,
+              address: patientAddress,
+              comorbidities: patientComorbidities,
+              is_declared_positive: patientRes.data.is_declared_positive
+                ? "Yes"
+                : "No",
+              is_vaccinated: patientData.is_vaccinated ? "Yes" : "No",
+            };
+            setPatientData(data);
+          }
         }
         setIsLoading(false);
       }
@@ -343,54 +385,174 @@ export const ConsultationDetails = (props: any) => {
                     </div>
                   </div>
                 )}
-                {consultationData.weight != null &&
-                  consultationData.weight > 0 && (
-                    <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
-                      <div className="px-4 py-5 sm:p-6">
-                        <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-                          Weight
-                        </h3>
-                        <div className="mt-2">
-                          {consultationData.weight || "-"} kg
+
+                <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
+                  <div className="px-4 py-5 sm:p-6">
+                    <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                      Notes
+                    </h3>
+                    <div className="mt-2">
+                      {consultationData.diagnosis && (
+                        <div>
+                          <h5>Diagnosis</h5>
+                          <p className="text-justify break-words">
+                            {consultationData.diagnosis}
+                          </p>
                         </div>
-                      </div>
-                    </div>
-                  )}
-                {consultationData.height != null &&
-                  consultationData.height > 0 && (
-                    <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
-                      <div className="px-4 py-5 sm:p-6">
-                        <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-                          Height
-                        </h3>
-                        <div className="mt-2">
-                          {consultationData.height || "-"} cm
+                      )}
+                      {consultationData.operation && (
+                        <div className="mt-4">
+                          <h5>Operation</h5>
+                          <p className="text-justify break-words">
+                            {consultationData.operation}
+                          </p>
                         </div>
-                      </div>
-                    </div>
-                  )}
-                {consultationData.weight != null &&
-                  consultationData.height != null &&
-                  consultationData.weight > 0 &&
-                  consultationData.height > 0 && (
-                    <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
-                      <div className="px-4 py-5 sm:p-6">
-                        <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-                          Body Surface Area
-                        </h3>
-                        <div className="mt-2">
-                          {Math.sqrt(
-                            (Number(consultationData.weight) *
-                              Number(consultationData.height)) /
-                              3600
-                          ).toFixed(2)}{" "}
-                          m<sup>2</sup>
+                      )}
+                      {consultationData.special_instruction && (
+                        <div className="mt-4">
+                          <h5>Special Instruction</h5>
+                          <p className="text-justify break-words">
+                            {consultationData.special_instruction}
+                          </p>
                         </div>
-                      </div>
+                      )}
                     </div>
-                  )}
+                  </div>
+                </div>
+
+                <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
+                  <div className="px-4 py-5 sm:p-6">
+                    <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                      Date/Size/LL:{" "}
+                    </h3>
+                    <div className="mt-2">
+                      <table>
+                        <tbody>
+                          <tr className="">
+                            <td className="pr-15">Intubation Date</td>
+                            <td className="font-semibold">
+                              {moment(
+                                consultationData.intubation_start_date
+                              ).format("lll")}
+                            </td>
+                          </tr>
+                          <tr className="">
+                            <td className="pr-15">Extubation Date</td>
+                            <td className="font-semibold">
+                              {moment(
+                                consultationData.intubation_end_date
+                              ).format("lll")}
+                            </td>
+                          </tr>
+                          <tr className="">
+                            <td className="pr-15">ETT/TT (mmid)</td>
+                            <td className="font-semibold">
+                              {consultationData.ett_tt}
+                            </td>
+                          </tr>
+                          <tr className="">
+                            <td className="pr-15">Cuff Pressure (mmhg)</td>
+                            <td className="font-semibold">
+                              {consultationData.cuff_pressure}
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
+                  <div className="px-4 py-5 sm:p-6">
+                    <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                      Lines and Catheters
+                    </h3>
+                    <div className="mt-2">
+                      {console.log(consultationData.lines)}
+                      {consultationData.lines.map((line: any) => (
+                        <div className="mt-4">
+                          <h5>{line.type}</h5>
+                          <p>
+                            Details:
+                            <br />
+                            <span className="text-justify break-word">
+                              {line.other_type}
+                            </span>
+                          </p>
+                          <p>
+                            Insertion Date:{" "}
+                            <span className="font-semibold">
+                              {moment(line.start_date).format("lll")}
+                            </span>
+                          </p>
+                          <p>
+                            Site/Level of Fixation: <br />
+                            <span className="text-justify break-word">
+                              {line.site}
+                            </span>
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
+                  <div className="px-4 py-5 sm:p-6">
+                    <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                      Body Details
+                    </h3>
+                    <div className="mt-2">
+                      <table>
+                        <tbody>
+                          <tr className="">
+                            <td className="pr-15">Gender</td>
+                            <td className="font-semibold">
+                              {patientData.gender || "-"}
+                            </td>
+                          </tr>
+                          <tr>
+                            <td className="pr-15">Age</td>
+                            <td className="font-semibold">
+                              {patientData.age || "-"}
+                            </td>
+                          </tr>
+                          <tr>
+                            <td className="pr-15">Weight</td>
+                            <td className="font-semibold">
+                              {consultationData.weight || "-"} Kg
+                            </td>
+                          </tr>
+                          <tr>
+                            <td className="pr-15">Height</td>
+                            <td className="font-semibold">
+                              {consultationData.height || "-"} cm
+                            </td>
+                          </tr>
+                          <tr>
+                            <td className="pr-15">Body Surface Area</td>
+                            <td className="font-semibold">
+                              {Math.sqrt(
+                                (Number(consultationData.weight) *
+                                  Number(consultationData.height)) /
+                                  3600
+                              ).toFixed(2)}{" "}
+                              m<sup>2</sup>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td className="pr-15">Blood Group</td>
+                            <td className="font-semibold">
+                              {patientData.blood_group || "-"}
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="md:w-1/3">
+              <div className="md:w-1/3 pl-4">
                 <PageTitle title="Updates" hideBack={true} />
                 <DailyRoundsList
                   facilityId={facilityId}

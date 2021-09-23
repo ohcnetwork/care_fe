@@ -102,6 +102,13 @@ export interface ConsultationModel {
   last_edited_by?: any;
   weight?: number | null;
   height?: number | null;
+  operation?: string;
+  special_instruction?: string;
+  intubation_start_date?: string;
+  intubation_end_date?: string;
+  ett_tt?: number;
+  cuff_pressure?: number;
+  lines?: any;
 }
 export interface PatientStatsModel {
   id?: number;
