@@ -177,6 +177,7 @@ export const PatientManager = (props: any) => {
     last_vaccinated_date_after: qParams.last_vaccinated_date_after || undefined,
     last_consultation_is_telemedicine:
       qParams.last_consultation_is_telemedicine || undefined,
+    is_antenatal: qParams.is_antenatal || undefined,
   };
 
   let managePatients: any = null;
@@ -257,6 +258,7 @@ export const PatientManager = (props: any) => {
     qParams.last_vaccinated_date_before,
     qParams.last_vaccinated_date_after,
     qParams.last_consultation_is_telemedicine,
+    qParams.is_antenatal,
   ]);
 
   const fetchDistrictName = useCallback(
@@ -746,7 +748,7 @@ export const PatientManager = (props: any) => {
               "is_kasp"
             )}
           {badge("COWIN ID", qParams.covin_id, "covin_id")}
-
+          {badge("Is Antenatal", qParams.is_antenatal, "is_antenatal")}
           {badge("Facility", facilityName, "facility")}
           {badge("Facility Type", qParams.facility_type, "facility_type")}
           {badge("District", districtName, "district")}
