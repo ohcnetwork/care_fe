@@ -1,8 +1,27 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { KASP_STRING } from "../../Common/constants";
+import { getUserList } from "../../Redux/actions";
+import { useDispatch } from "react-redux";
 
 export default function BadgesList(props: any) {
   const { filterParams, appliedFilters, local, updateFilter } = props;
+
+  const [assignedUsername, setAssignedUsername] = useState("");
+  const dispatch: any = useDispatch();
+
+  useEffect(() => {
+    async function fetchData() {
+      if (appliedFilters.assigned_to || local.assigned_to) {
+        const res = await dispatch(
+          getUserList({ id: appliedFilters.assigned_to || local.assigned_to })
+        );
+
+        const { first_name, last_name } = res?.data?.results[0];
+        setAssignedUsername(`${first_name} ${last_name}`);
+      } else setAssignedUsername("");
+    }
+    fetchData();
+  }, [dispatch, appliedFilters.assigned_to]);
 
   const removeFilter = (paramKey: any) => {
     const localData: any = { ...local };
@@ -78,6 +97,16 @@ export default function BadgesList(props: any) {
         "is_up_shift"
       )}
       {badge(
+        "Is Antenatal",
+        local.is_antenatal === "yes" || appliedFilters.is_antenatal === "true"
+          ? "yes"
+          : local.is_antenatal === "no" ||
+            appliedFilters.is_antenatal === "false"
+          ? "no"
+          : undefined,
+        "is_antenatal"
+      )}
+      {badge(
         "Phone Number",
         appliedFilters.patient_phone_number || local.patient_phone_number,
         "patient_phone_number"
@@ -112,15 +141,13 @@ export default function BadgesList(props: any) {
         appliedFilters.disease_status || local.disease_status,
         "disease_status"
       )}
-
       {badge(
-        "Assigned To",
-        appliedFilters.assigned_user ||
-          appliedFilters.assigned_to ||
-          local.assigned_user ||
-          local.assigned_to,
-        "assigned_to"
+        "Breathlessness Level",
+        appliedFilters.breathlessness_level || local.breathlessness_level,
+        "breathlessness_level"
       )}
+
+      {badge("Assigned To", assignedUsername, "assigned_to")}
 
       {badge(
         "Filtered By",

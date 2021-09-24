@@ -290,11 +290,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   const parseGenderFromExt = (gender: any, defaultValue: any) => {
     switch (gender.toLowerCase()) {
       case "m":
-        return 1;
+        return "1";
       case "f":
-        return 2;
+        return "2";
       case "o":
-        return 3;
+        return "3";
       default:
         return defaultValue;
     }
@@ -643,6 +643,13 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               state.form.vaccine_name === "Select"
             ) {
               errors["vaccine_name"] = "Please select vaccine name";
+              if (!error_div) error_div = field;
+              invalidForm = true;
+            }
+
+            if (!state.form.last_vaccinated_date) {
+              errors["last_vaccinated_date"] =
+                "Please enter last vaccinated date";
               if (!error_div) error_div = field;
               invalidForm = true;
             }

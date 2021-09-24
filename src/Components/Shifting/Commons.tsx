@@ -20,9 +20,10 @@ export const initialFilterData = {
   offset: 0,
   ordering: null,
   is_kasp: "--",
-  assigned_user: "",
   assigned_to: "",
   disease_status: "",
+  is_antenatal: "--",
+  breathlessness_level: "",
 };
 
 export const formatFilter = (params: any) => {
@@ -55,13 +56,19 @@ export const formatFilter = (params: any) => {
     modified_date_after: filter.modified_date_after || undefined,
     patient_phone_number: filter.patient_phone_number || undefined,
     ordering: filter.ordering || undefined,
-    assigned_user: filter.assigned_user || undefined,
     assigned_to: filter.assigned_to || undefined,
     disease_status: filter.disease_status || undefined,
+    breathlessness_level: filter.breathlessness_level || undefined,
     is_kasp:
       (filter.is_kasp && filter.is_kasp) === "--"
         ? ""
         : filter.is_kasp === "yes"
+        ? "true"
+        : "false",
+    is_antenatal:
+      (filter.is_antenatal && filter.is_antenatal) === "--"
+        ? ""
+        : filter.is_antenatal === "yes"
         ? "true"
         : "false",
   };

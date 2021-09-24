@@ -98,6 +98,7 @@ export default function PatientFilterV2(props: any) {
     last_vaccinated_date_after: filter.last_vaccinated_date_after || null,
     last_consultation_is_telemedicine:
       filter.last_consultation_is_telemedicine || null,
+    is_antenatal: filter.is_antenatal || null,
   });
   const dispatch: any = useDispatch();
 
@@ -140,6 +141,7 @@ export default function PatientFilterV2(props: any) {
     last_vaccinated_date_before: null,
     last_vaccinated_date_after: null,
     last_consultation_is_telemedicine: null,
+    is_antenatal: null,
   };
 
   useEffect(() => {
@@ -283,6 +285,7 @@ export default function PatientFilterV2(props: any) {
       last_vaccinated_date_before,
       last_vaccinated_date_after,
       last_consultation_is_telemedicine,
+      is_antenatal,
     } = filterState;
     const data = {
       district: district || "",
@@ -387,6 +390,7 @@ export default function PatientFilterV2(props: any) {
           : "",
       last_consultation_is_telemedicine:
         last_consultation_is_telemedicine || "",
+      is_antenatal: is_antenatal || "",
     };
     onChange(data);
   };
@@ -502,8 +506,15 @@ export default function PatientFilterV2(props: any) {
             variant="outlined"
             margin="dense"
             value={filterState.facility_type}
-            options={[{ id: "", text: "Show All" }, ...FACILITY_TYPES]}
-            optionKey="text"
+            options={[
+              { id: "", text: "Show All" },
+              ...FACILITY_TYPES.map(({ id, text }) => {
+                return {
+                  id: text,
+                  text,
+                };
+              }),
+            ]}
             onChange={handleChange}
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
           />
@@ -517,6 +528,23 @@ export default function PatientFilterV2(props: any) {
             margin="dense"
             value={filterState.gender}
             options={[{ id: "", text: "Show All" }, ...GENDER_TYPES]}
+            onChange={handleChange}
+            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+          />
+        </div>
+
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">Is Antenatal</span>
+          <SelectField
+            name="is_antenatal"
+            variant="outlined"
+            margin="dense"
+            value={filterState.is_antenatal}
+            options={[
+              { id: "", text: "Show All" },
+              { id: "true", text: `antenatal` },
+              { id: "false", text: `non antenatal` },
+            ]}
             onChange={handleChange}
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
           />

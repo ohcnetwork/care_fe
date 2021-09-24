@@ -95,9 +95,10 @@ export default function ListView({
     filterProp.patient_phone_number,
     filterProp.ordering,
     filterProp.is_kasp,
-    filterProp.assigned_user,
     filterProp.assigned_to,
     filterProp.disease_status,
+    filterProp.is_antenatal,
+    filterProp.breathlessness_level,
   ]);
 
   const handlePagination = (page: number, limit: number) => {

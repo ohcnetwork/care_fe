@@ -10,6 +10,7 @@ import {
   SHIFTING_FILTER_ORDER,
   DISEASE_STATUS,
   KASP_STRING,
+  BREATHLESSNESS_LEVEL,
 } from "../../Common/constants";
 import moment from "moment";
 import { getFacilityV2, getUserList } from "../../Redux/actions";
@@ -61,10 +62,12 @@ export default function ListFilter(props: any) {
     ordering: filter.ordering || local.ordering || null,
     is_kasp: filter.is_kasp || local.is_kasp || "--",
     status: filter.status || local.status || null,
-    assigned_user: filter.assigned_user || local.assigned_user || "",
     assigned_user_ref: null,
     assigned_to: filter.assigned_to || local.assigned_to || "",
     disease_status: filter.disease_status || local.disease_status || "",
+    is_antenatal: filter.is_antenatal || local.is_antenatal || "--",
+    breathlessness_level:
+      filter.breathlessness_level || local.breathlessness_level || "",
   });
   const dispatch: any = useDispatch();
 
@@ -121,21 +124,15 @@ export default function ListFilter(props: any) {
 
   useEffect(() => {
     async function fetchData() {
-      if (filter.assigned_user) {
+      if (filter.assigned_to) {
         setAssignedUserLoading(true);
-        const params = {
-          limit: 10,
-          offset: 0,
-          username: filter.assigned_user,
-        };
-        const res = await dispatch(getUserList(params));
+        const res = await dispatch(getUserList({ id: filter.assigned_to }));
 
         if (res && res.data && res.data.count) {
-          const assigned_user = res.data.results.find(
-            (user: any) => user.id == filter.assigned_to
-          );
-
-          setFilterState({ assigned_user_ref: assigned_user });
+          setFilterState({
+            ...filterState,
+            assigned_user_ref: res.data.results[0],
+          });
         }
         setAssignedUserLoading(false);
       }
@@ -152,15 +149,8 @@ export default function ListFilter(props: any) {
   };
 
   const setAssignedUser = (user: any) => {
-    const getPersonName = (user: any) => {
-      let personName = user.first_name + " " + user.last_name;
-
-      return personName.trim().length > 0 ? personName : user.username;
-    };
-
     const filterData: any = { ...filterState };
     filterData.assigned_to = user ? user.id : "";
-    filterData.assigned_user = user ? getPersonName(user) : "";
     filterData.assigned_user_ref = user;
 
     setFilterState(filterData);
@@ -169,6 +159,9 @@ export default function ListFilter(props: any) {
   const handleChange = (event: any) => {
     let { name, value } = event.target;
 
+    if (value === "--") {
+      value = "";
+    }
     const filterData: any = { ...filterState };
     filterData[name] = value;
 
@@ -195,9 +188,10 @@ export default function ListFilter(props: any) {
       ordering,
       is_kasp,
       status,
-      assigned_user,
       assigned_to,
       disease_status,
+      is_antenatal,
+      breathlessness_level,
     } = filterState;
     const data = {
       orgin_facility: orgin_facility || "",
@@ -225,9 +219,10 @@ export default function ListFilter(props: any) {
       ordering: ordering || "",
       is_kasp: is_kasp || "",
       status: status || "",
-      assigned_user: assigned_user || "",
       assigned_to: assigned_to || "",
       disease_status: disease_status || "",
+      is_antenatal: is_antenatal || "",
+      breathlessness_level: breathlessness_level || "",
     };
     localStorage.setItem(
       "shift-filters",
@@ -439,6 +434,34 @@ export default function ListFilter(props: any) {
             optionArray={true}
             value={filterState.disease_status}
             options={["--", ...DISEASE_STATUS]}
+            onChange={handleChange}
+            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+          />
+        </div>
+
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">Is Antenatal</span>
+          <SelectField
+            name="is_antenatal"
+            variant="outlined"
+            margin="dense"
+            optionArray={true}
+            value={filterState.is_antenatal}
+            options={["--", "yes", "no"]}
+            onChange={handleChange}
+            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+          />
+        </div>
+        
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">Breathlessness Level</span>
+          <SelectField
+            name="breathlessness_level"
+            variant="outlined"
+            margin="dense"
+            optionArray={true}
+            value={filterState.breathlessness_level}
+            options={["--", ...BREATHLESSNESS_LEVEL]}
             onChange={handleChange}
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
           />

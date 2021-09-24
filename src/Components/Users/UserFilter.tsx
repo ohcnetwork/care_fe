@@ -21,8 +21,6 @@ export default function UserFilter(props: any) {
     user_type: filter.user_type || "",
   });
 
-  console.log(filterState);
-
   const clearFilterState = {
     first_name: "",
     last_name: "",
@@ -31,11 +29,15 @@ export default function UserFilter(props: any) {
     user_type: "",
   };
 
-  const USER_TYPE_OPTIONS = ["Select", ...USER_TYPES].map((user) => {
-    return {
-      text: user,
-    };
-  });
+  const USER_TYPE_OPTIONS = [
+    { id: "", text: "Select" },
+    ...USER_TYPES.map((user) => {
+      return {
+        id: user,
+        text: user,
+      };
+    }),
+  ];
 
   const handleChange = (event: any) => {
     const { name, value } = event.target;

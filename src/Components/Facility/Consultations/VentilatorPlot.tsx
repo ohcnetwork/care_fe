@@ -182,16 +182,16 @@ export const VentilatorPlot = (props: any) => {
         </div>
         <div className="pt-4 px-4 bg-white border rounded-lg shadow">
           <LinePlot
-            title="Oxygen Rate"
-            name="Oxygen Rate"
+            title="Oxygen Flow Rate"
+            name="Oxygen Flow Rate"
             xData={dates}
             yData={yAxisData("ventilator_oxygen_modality_oxygen_rate")}
           />
         </div>
         <div className="pt-4 px-4 bg-white border rounded-lg shadow">
           <LinePlot
-            title="Oxygen Flow Rate"
-            name="Oxygen Flow Rate"
+            title="Flow Rate"
+            name="Flow Rate"
             xData={dates}
             yData={yAxisData("ventilator_oxygen_modality_flow_rate")}
           />

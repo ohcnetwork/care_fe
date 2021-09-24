@@ -2,6 +2,8 @@ import { useState } from "react";
 import { SelectField } from "../Common/HelperInputFields";
 import { SAMPLE_TEST_STATUS, SAMPLE_TEST_RESULT } from "../../Common/constants";
 import { navigate } from "raviger";
+import { FacilitySelect } from "../Common/FacilitySelect";
+import { FacilityModel } from "../Facility/models";
 
 const useMergeState = (initialState: any) => {
   const [state, setState] = useState(initialState);
@@ -16,11 +18,15 @@ export default function UserFilter(props: any) {
   const [filterState, setFilterState] = useMergeState({
     status: filter.status || "",
     result: filter.result || "",
+    facility: filter.facility || "",
+    facility_ref: filter.facility_ref || null,
   });
 
   const clearFilterState = {
     status: "",
     result: "",
+    facility: "",
+    facility_ref: null,
   };
 
   const handleChange = (event: any) => {
@@ -33,10 +39,11 @@ export default function UserFilter(props: any) {
   };
 
   const applyFilter = () => {
-    const { status, result } = filterState;
+    const { status, result, facility } = filterState;
     const data = {
       status: status || "",
       result: result || "",
+      facility: facility || "",
     };
     onChange(data);
   };
@@ -94,6 +101,23 @@ export default function UserFilter(props: any) {
             options={[{ id: "", text: "SELECT" }, ...SAMPLE_TEST_RESULT]}
             onChange={handleChange}
             errors=""
+          />
+        </div>
+
+        <div className="w-64 flex-none">
+          <span className="text-sm font-semibold">Facility</span>
+          <FacilitySelect
+            multiple={false}
+            name="facility"
+            selected={filterState.facility_ref}
+            showAll={true}
+            setSelected={(obj) =>
+              handleChange({
+                target: { name: "facility", value: (obj as FacilityModel)?.id },
+              })
+            }
+            className="shifting-page-filter-dropdown"
+            errors={""}
           />
         </div>
       </div>
