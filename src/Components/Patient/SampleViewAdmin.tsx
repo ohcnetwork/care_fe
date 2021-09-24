@@ -15,12 +15,17 @@ import {
   SAMPLE_FLOW_RULES,
 } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getTestList, patchSample } from "../../Redux/actions";
+import {
+  getTestList,
+  patchSample,
+  downloadSampleTests,
+} from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
 import Pagination from "../Common/Pagination";
 import { SampleTestModel } from "./models";
 import { InputSearchBox } from "../Common/SearchBox";
 import UpdateStatusDialog from "./UpdateStatusDialog";
+import { CSVLink } from "react-csv";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -29,6 +34,8 @@ const statusChoices = [...SAMPLE_TEST_STATUS];
 const statusFlow = { ...SAMPLE_FLOW_RULES };
 
 const roleStatusMap = { ...ROLE_STATUS_MAP };
+
+const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
 export default function SampleViewAdmin(props: any) {
   const [qParams, setQueryParams] = useQueryParams();
@@ -40,6 +47,7 @@ export default function SampleViewAdmin(props: any) {
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [offset, setOffset] = useState(0);
+  const [downloadFile, setDownloadFile] = useState("");
   const [fetchFlag, callFetchData] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [statusDialog, setStatusDialog] = useState<{
@@ -85,6 +93,12 @@ export default function SampleViewAdmin(props: any) {
       qParams.facility,
     ]
   );
+
+  const triggerDownload = async () => {
+    const res = await dispatch(downloadSampleTests({ ...qParams }));
+    setDownloadFile(res.data);
+    document.getElementById("download-sample-tests")?.click();
+  };
 
   const applyFilter = (data: any) => {
     const filter = { ...qParams, ...data };
@@ -487,6 +501,14 @@ export default function SampleViewAdmin(props: any) {
       <div className="px-3 md:px-8">
         <div className="flex flex-wrap md:-mx-4">{manageSamples}</div>
       </div>
+
+      <CSVLink
+        data={downloadFile}
+        filename={`shift-requests--${now}.csv`}
+        target="_blank"
+        className="hidden"
+        id={`download-sample-tests`}
+      />
     </div>
   );
 }
