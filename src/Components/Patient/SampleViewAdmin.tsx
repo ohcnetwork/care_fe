@@ -26,6 +26,7 @@ import { SampleTestModel } from "./models";
 import { InputSearchBox } from "../Common/SearchBox";
 import UpdateStatusDialog from "./UpdateStatusDialog";
 import { CSVLink } from "react-csv";
+import GetAppIcon from "@material-ui/icons/GetApp";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -376,11 +377,14 @@ export default function SampleViewAdmin(props: any) {
           userType={userType}
         />
       )}
-      <PageTitle
-        title="Sample Management System"
-        hideBack={true}
-        className="mx-3 md:mx-8"
-      />
+      <div className="flex items-center">
+        <PageTitle
+          title="Sample Management System"
+          hideBack={true}
+          className="ml-3 md:ml-8"
+        />
+        <GetAppIcon className="cursor-pointer mt-5" onClick={triggerDownload} />
+      </div>
       <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3 m-4 md:px-4">
         <div className="bg-white overflow-hidden shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">
