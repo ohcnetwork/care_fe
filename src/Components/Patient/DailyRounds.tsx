@@ -108,9 +108,13 @@ export const DailyRounds = (props: any) => {
   const { facilityId, patientId, consultationId, id } = props;
   const [state, dispatch] = useReducer(DailyRoundsFormReducer, initialState);
   const [isLoading, setIsLoading] = useState(false);
+  const [showVitals, setShowVitals] = useState(false);
 
   const headerText = !id ? "Add Consultation Update" : "Info";
   const buttonText = !id ? "Save" : "Continue";
+  const vitalsText = !id
+    ? "Do you want to enter vitals?"
+    : "Do you want to update vitals?";
 
   const fetchpatient = useCallback(
     async (status: statusType) => {
@@ -230,9 +234,13 @@ export const DailyRounds = (props: any) => {
           Notification.Success({
             msg: "Consultation Updates details updated successfully",
           });
-          navigate(
-            `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${res.data.external_id}/update`
-          );
+          showVitals
+            ? navigate(
+                `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${res.data.external_id}/update`
+              )
+            : navigate(
+                `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`
+              );
         } else {
           Notification.Success({
             msg: "Consultation Updates details created successfully",
@@ -242,9 +250,13 @@ export const DailyRounds = (props: any) => {
               `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${res.data.external_id}/update`
             );
           } else {
-            navigate(
-              `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${res.data.external_id}/update`
-            );
+            showVitals
+              ? navigate(
+                  `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${res.data.external_id}/update`
+                )
+              : navigate(
+                  `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`
+                );
           }
         }
       } else {
@@ -520,6 +532,14 @@ export const DailyRounds = (props: any) => {
                         onChange={handleCheckboxFieldChange}
                         name="recommend_discharge"
                         label="Recommend Discharge"
+                      />
+                    </div>
+                    <div>
+                      <CheckboxField
+                        checked={showVitals}
+                        onChange={() => setShowVitals(!showVitals)}
+                        name="show_vitals"
+                        label={vitalsText}
                       />
                     </div>
                   </div>
