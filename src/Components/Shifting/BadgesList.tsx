@@ -9,8 +9,6 @@ export default function BadgesList(props: any) {
   const [assignedUsername, setAssignedUsername] = useState("");
   const dispatch: any = useDispatch();
 
-  console.log(assignedUsername);
-
   useEffect(() => {
     async function fetchData() {
       if (appliedFilters.assigned_to || local.assigned_to) {
@@ -20,6 +18,8 @@ export default function BadgesList(props: any) {
 
         const { first_name, last_name } = res?.data?.results[0];
         setAssignedUsername(`${first_name} ${last_name}`);
+      } else {
+        setAssignedUsername("");
       }
     }
     fetchData();
