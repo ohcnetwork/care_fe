@@ -22,6 +22,7 @@ export const initialFilterData = {
   is_kasp: "--",
   assigned_to: "",
   disease_status: "",
+  is_antenatal: "--",
   breathlessness_level: "",
 };
 
@@ -62,6 +63,12 @@ export const formatFilter = (params: any) => {
       (filter.is_kasp && filter.is_kasp) === "--"
         ? ""
         : filter.is_kasp === "yes"
+        ? "true"
+        : "false",
+    is_antenatal:
+      (filter.is_antenatal && filter.is_antenatal) === "--"
+        ? ""
+        : filter.is_antenatal === "yes"
         ? "true"
         : "false",
   };

@@ -951,9 +951,7 @@ export const ConsultationForm = (props: any) => {
                   variant="contained"
                   type="button"
                   onClick={(_) =>
-                    navigate(
-                      `/facility/${facilityId}/patient/${patientId}/consultation/${id}`
-                    )
+                    navigate(`/facility/${facilityId}/patient/${patientId}`)
                   }
                 >
                   Cancel{" "}
