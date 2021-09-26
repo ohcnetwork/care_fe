@@ -9,6 +9,7 @@ export default function BadgesList(props: any) {
   const [assignedUsername, setAssignedUsername] = useState("");
   const [assignedFacilityName, setAssignedFacilityName] = useState("");
   const [orginFacilityName, setOrginFacilityName] = useState("");
+  const [approvingFacilityName, setApprovingFacilityName] = useState("");
   const dispatch: any = useDispatch();
 
   useEffect(() => {
@@ -42,6 +43,28 @@ export default function BadgesList(props: any) {
     }
     fetchData();
   }, [dispatch, appliedFilters.orgin_facility]);
+
+  useEffect(() => {
+    async function fetchData() {
+      if (
+        appliedFilters.shifting_approving_facility ||
+        local.shifting_approving_facility
+      ) {
+        const res = await dispatch(
+          getFacility(
+            appliedFilters.shifting_approving_facility ||
+              local.shifting_approving_facility,
+            "shifting_approving_facility"
+          )
+        );
+
+        setApprovingFacilityName(res?.data?.name);
+      } else {
+        setApprovingFacilityName("");
+      }
+    }
+    fetchData();
+  }, [dispatch, appliedFilters.shifting_approving_facility]);
 
   useEffect(() => {
     async function fetchData() {
@@ -190,10 +213,8 @@ export default function BadgesList(props: any) {
       {badge("Assigned Facility", assignedFacilityName, "assigned_facility")}
       {badge("Origin Facility", orginFacilityName, "orgin_facility")}
       {badge(
-        "Filtered By",
-        (appliedFilters.shifting_approving_facility ||
-          local.shifting_approving_facility) &&
-          "Shifting Approving Facility",
+        "Shifting Approving Facility",
+        approvingFacilityName,
         "shifting_approving_facility"
       )}
     </div>
