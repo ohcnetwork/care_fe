@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { KASP_STRING } from "../../Common/constants";
-import { getUserList } from "../../Redux/actions";
+import { getUserList, getFacility } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 
 export default function BadgesList(props: any) {
   const { filterParams, appliedFilters, local, updateFilter } = props;
 
   const [assignedUsername, setAssignedUsername] = useState("");
+  const [orginFacilityName, setOrginFacilityName] = useState("");
   const dispatch: any = useDispatch();
 
   useEffect(() => {
@@ -22,6 +23,24 @@ export default function BadgesList(props: any) {
     }
     fetchData();
   }, [dispatch, appliedFilters.assigned_to]);
+
+  useEffect(() => {
+    async function fetchData() {
+      if (appliedFilters.orgin_facility || local.orgin_facility) {
+        const res = await dispatch(
+          getFacility(
+            appliedFilters.orgin_facility || local.orgin_facility,
+            "orgin_facility"
+          )
+        );
+
+        setOrginFacilityName(res?.data?.name);
+      } else {
+        setOrginFacilityName("");
+      }
+    }
+    fetchData();
+  }, [dispatch, appliedFilters.orgin_facility]);
 
   const removeFilter = (paramKey: any) => {
     const localData: any = { ...local };
@@ -149,17 +168,12 @@ export default function BadgesList(props: any) {
 
       {badge("Assigned To", assignedUsername, "assigned_to")}
 
+      {badge("Origin Facility", orginFacilityName, "orgin_facility")}
       {badge(
         "Filtered By",
         (appliedFilters.assigned_facility || local.assigned_facility) &&
           "Assigned Facility",
         "assigned_facility"
-      )}
-      {badge(
-        "Filtered By",
-        (appliedFilters.orgin_facility || local.orgin_facility) &&
-          "Origin Facility",
-        "orgin_facility"
       )}
       {badge(
         "Filtered By",
