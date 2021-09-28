@@ -101,13 +101,13 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
           )}
           {itemData.date_of_sample && (
             <div>
-              <span className="text-gray-700">Tested on :</span>{" "}
+              <span className="text-gray-700">Date of Sample :</span>{" "}
               {moment(itemData.date_of_sample).format("lll")}
             </div>
           )}
           {itemData.date_of_result && (
             <div>
-              <span className="text-gray-700">Result on:</span>{" "}
+              <span className="text-gray-700">Date of Result :</span>{" "}
               {moment(itemData.date_of_result).format("lll")}
             </div>
           )}
