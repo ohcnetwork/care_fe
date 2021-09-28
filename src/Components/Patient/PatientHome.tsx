@@ -599,7 +599,7 @@ export const PatientHome = (props: any) => {
       )}
 
       <div id="revamp">
-        <PageTitle title={`Covid Suspect Details`} backUrl="/patients" />
+        <PageTitle title={`Covid Suspect Details`} />
         <div className="relative mt-2">
           <div className="max-w-screen-xl mx-auto py-3 px-3 sm:px-6 lg:px-8">
             <div className="md:flex">
