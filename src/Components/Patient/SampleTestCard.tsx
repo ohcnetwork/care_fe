@@ -99,19 +99,24 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
               {itemData.fast_track}
             </div>
           )}
-          {itemData.date_of_sample && (
-            <div>
-              <span className="text-gray-700">Date of Sample :</span>{" "}
-              {moment(itemData.date_of_sample).format("lll")}
-            </div>
-          )}
-          {itemData.date_of_result && (
-            <div>
-              <span className="text-gray-700">Date of Result :</span>{" "}
-              {moment(itemData.date_of_result).format("lll")}
-            </div>
-          )}
         </div>
+
+        <div className="mt-4">
+          <div className="text-gray-600 text-sm font-bold">
+            <span className="text-gray-800">Date of Sample:</span>{" "}
+            {itemData.date_of_sample
+              ? moment(itemData.date_of_sample).format("lll")
+              : "Not Available"}
+          </div>
+
+          <div className="text-gray-600 text-sm font-bold">
+            <span className="text-gray-800">Date of Result:</span>{" "}
+            {itemData.date_of_result
+              ? moment(itemData.date_of_result).format("lll")
+              : "Not Available"}
+          </div>
+        </div>
+
         {itemData.status === "APPROVED" && (
           <div className="mt-4">
             <Button

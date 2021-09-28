@@ -230,18 +230,6 @@ export default function SampleViewAdmin(props: any) {
                     {item.fast_track}
                   </div>
                 )}
-                {item.date_of_sample && (
-                  <div>
-                    <span className="text-gray-700">Date of Sample :</span>{" "}
-                    {moment(item.date_of_sample).format("lll")}
-                  </div>
-                )}
-                {item.date_of_result && (
-                  <div>
-                    <span className="text-gray-700">Date of Result :</span>{" "}
-                    {moment(item.date_of_result).format("lll")}
-                  </div>
-                )}
                 {item.patient_has_confirmed_contact && (
                   <div>
                     <span className="font-semibold leading-relaxed">
@@ -277,6 +265,22 @@ export default function SampleViewAdmin(props: any) {
                     <WarningRoundedIcon className="text-yellow-500"></WarningRoundedIcon>
                   </div>
                 )}
+              </div>
+
+              <div className="mt-4">
+                <div className="text-gray-600 text-sm font-bold">
+                  <span className="text-gray-800">Date of Sample:</span>{" "}
+                  {item.date_of_sample
+                    ? moment(item.date_of_sample).format("lll")
+                    : "Not Available"}
+                </div>
+
+                <div className="text-gray-600 text-sm font-bold">
+                  <span className="text-gray-800">Date of Result:</span>{" "}
+                  {item.date_of_result
+                    ? moment(item.date_of_result).format("lll")
+                    : "Not Available"}
+                </div>
               </div>
 
               <div className="mt-2">
