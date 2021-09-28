@@ -100,13 +100,15 @@ export const ConsultationDetails = (props: any) => {
         />
       ) : (
         <div className="px-2 pb-2">
-          <Link
+          <div
             className="btn btn-default bg-white mt-2"
-            href={`/facility/${facilityId}/patient/${patientId}`}
+            onClick={() => {
+              window.history.go(-1);
+            }}
           >
             <i className="fas fa-chevron-left  rounded-md p-2 hover:bg-gray-200 mr-1"></i>
             {"Go back to Patient Page"}
-          </Link>
+          </div>
           <div className="flex md:flex-row flex-col w-full mt-2">
             <div className="border rounded-lg bg-white shadow h-full text-black p-4 w-full">
               <div className="flex md:flex-row flex-col justify-between">
