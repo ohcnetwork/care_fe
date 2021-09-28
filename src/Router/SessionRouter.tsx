@@ -45,7 +45,7 @@ const SessionRouter = (props: any) => {
             </a>
             <div className="mx-auto">
               <a
-                href="https://github.com/coronasafe"
+                href={process.env.REACT_APP_GITHUB_URL}
                 className="care-secondary-color"
               >
                 {t("contribute_github")}
