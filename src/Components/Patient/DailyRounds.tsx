@@ -21,6 +21,7 @@ import {
   ADMITTED_TO,
 } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
+import { make as Slider } from "../CriticalCareRecording/components/Slider.gen";
 import {
   NativeSelectField,
   CheckboxField,
@@ -56,6 +57,15 @@ const initForm: any = {
   taken_at: null,
   rounds_type: "NORMAL",
   clone_last: null,
+  systolic: undefined,
+  diastolic: undefined,
+  pulse: undefined,
+  resp: undefined,
+  tempInCelcius: false,
+  temperature: undefined,
+  rhythm: "0",
+  rhythm_detail: "",
+  ventilator_spo2: undefined,
 };
 
 const initError = Object.assign(
@@ -214,6 +224,24 @@ export const DailyRounds = (props: any) => {
         data = baseData;
       }
 
+      if (state.form.rounds_type === "NORMAL") {
+        data = {
+          ...data,
+          bp:
+            state.form.systolic && state.form.diastolic
+              ? {
+                  systolic: Number(state.form.systolic),
+                  diastolic: Number(state.form.diastolic),
+                }
+              : undefined,
+          pulse: Number(state.form.pulse),
+          resp: Number(state.form.resp),
+          rhythm: Number(state.form.rhythm),
+          rhythm_detail: state.form.rhythm_detail,
+          ventilator_spo2: Number(state.form.ventilator_spo2),
+        };
+      }
+
       let res;
       if (id) {
         res = await dispatchAction(
@@ -287,6 +315,59 @@ export const DailyRounds = (props: any) => {
     form.otherSymptom = !!form.additional_symptoms.filter(
       (i: number) => i === 9
     ).length;
+    dispatch({ type: "set_form", form });
+  };
+
+  const handleSliderChange = (value: any, key: string) => {
+    console.log(value);
+    const form = { ...state.form };
+    form[key] = value;
+    dispatch({ type: "set_form", form });
+  };
+
+  const getStatus = (
+    min: any,
+    minText: string,
+    max: any,
+    maxText: string,
+    val: any
+  ): [string, string] => {
+    if (val >= min && val <= max) {
+      return ["Normal", "#059669"];
+    } else if (val < min) {
+      return [minText, "#DC2626"];
+    } else {
+      return [maxText, "#DC2626"];
+    }
+  };
+
+  const calculateMAP = (systolic: any, diastolic: any) => {
+    let map = 0;
+    if (systolic && diastolic) {
+      map = (Number(systolic) + 2 * Number(diastolic)) / 3.0;
+    }
+    return map.toFixed(2);
+  };
+
+  const farenheitToCelcius = (x: number) => {
+    const t = (x - 32.0) * (5.0 / 9.0);
+    return String(t.toFixed(2));
+  };
+
+  const CelciusToFarenheit = (x: number) => {
+    const t = (x * 9.0) / 5.0 + 32.0;
+    return String(t.toFixed(2));
+  };
+
+  const toggleTemperature = () => {
+    const isCelcius = state.form.tempInCelcius;
+    const temp = Number(state.form.temperature);
+
+    const form = { ...state.form };
+    form.temperature = isCelcius
+      ? CelciusToFarenheit(temp)
+      : farenheitToCelcius(temp);
+    form.tempInCelcius = !isCelcius;
     dispatch({ type: "set_form", form });
   };
 
@@ -523,6 +604,160 @@ export const DailyRounds = (props: any) => {
                       />
                     </div>
                   </div>
+                  {state.form.rounds_type === "NORMAL" && (
+                    <div className="mt-4">
+                      <h3>Vitals</h3>
+                      <div className="mx-2 md:flex justify-between">
+                        <h4>{"BP (mm hg)"}</h4>
+                        <p>{`Mean Arterial Pressure: ${calculateMAP(
+                          state.form.systolic,
+                          state.form.diastolic
+                        )}`}</p>
+                      </div>
+
+                      <Slider
+                        title={"Systolic"}
+                        start={"0"}
+                        end={"250"}
+                        interval={"10"}
+                        step={1.0}
+                        value={state.form.systolic}
+                        setValue={(val: any) =>
+                          handleSliderChange(val, "systolic")
+                        }
+                        getLabel={(val: any) =>
+                          getStatus(100.0, "Low", 140.0, "High", val)
+                        }
+                      />
+                      <Slider
+                        title={"Diastolic"}
+                        start={"30"}
+                        end={"180"}
+                        interval={"10"}
+                        step={1.0}
+                        value={state.form.diastolic}
+                        setValue={(val: any) =>
+                          handleSliderChange(val, "diastolic")
+                        }
+                        getLabel={(val: any) =>
+                          getStatus(50.0, "Low", 90.0, "High", val)
+                        }
+                      />
+                      <Slider
+                        title={"Pulse (bpm)"}
+                        start={"0"}
+                        end={"200"}
+                        interval={"10"}
+                        step={1.0}
+                        value={state.form.pulse}
+                        setValue={(val: any) =>
+                          handleSliderChange(val, "pulse")
+                        }
+                        getLabel={(val: any) =>
+                          getStatus(
+                            40.0,
+                            "Bradycardia",
+                            100.0,
+                            "Tachycardia",
+                            val
+                          )
+                        }
+                      />
+                      <Slider
+                        title={"Temperature"}
+                        titleNeighbour={
+                          <div
+                            className="flex items-center ml-1 border border-gray-400 rounded px-4 h-10 cursor-pointer hover:bg-gray-200"
+                            onClick={toggleTemperature}
+                          >
+                            <span className="text-blue-700">
+                              {" "}
+                              {state.form.tempInCelcius ? "C" : "F"}{" "}
+                            </span>
+                          </div>
+                        }
+                        start={state.form.tempInCelcius ? "35" : "95"}
+                        end={state.form.tempInCelcius ? "41" : "106"}
+                        interval={"10"}
+                        step={0.1}
+                        value={state.form.temperature}
+                        setValue={(val: any) =>
+                          handleSliderChange(val, "temperature")
+                        }
+                        getLabel={(val: any) =>
+                          state.form.tempInCelcius
+                            ? getStatus(36.4, "Low", 37.5, "High", val)
+                            : getStatus(97.6, "Low", 99.6, "High", val)
+                        }
+                      />
+                      <Slider
+                        title={"Respiratory Rate (bpm)"}
+                        start={"10"}
+                        end={"50"}
+                        interval={"5"}
+                        step={1.0}
+                        value={state.form.resp}
+                        setValue={(val: any) => handleSliderChange(val, "resp")}
+                        getLabel={(val: any) =>
+                          getStatus(12.0, "Low", 16.0, "High", val)
+                        }
+                      />
+                      <div className="mx-2">
+                        <p className="mb-2 font-bold">Rhythm</p>
+                        <RadioGroup
+                          aria-label="rhythm"
+                          name="rhythm"
+                          value={state.form.rhythm}
+                          onChange={handleChange}
+                          style={{ padding: "0px 5px" }}
+                        >
+                          <Box display="flex" flexDirection="row">
+                            <FormControlLabel
+                              value="5"
+                              control={<Radio />}
+                              label="Regular"
+                            />
+                            <FormControlLabel
+                              value="10"
+                              control={<Radio />}
+                              label="Irregular"
+                            />
+                            <FormControlLabel
+                              value="0"
+                              control={<Radio />}
+                              label="Unknown"
+                            />
+                          </Box>
+                        </RadioGroup>
+                      </div>
+                      <div className="mx-2 w-full">
+                        <p className="mb-2 font-bold">Description</p>
+                        <textarea
+                          name="rhythm_detail"
+                          className="block w-full border-gray-500 border-2 rounded px-2 py-1"
+                          rows={3}
+                          value={state.form.rhythm_detail}
+                          onChange={handleChange}
+                        />
+                      </div>
+                      <div className="mt-4">
+                        <Slider
+                          title={"SPO2 (%)"}
+                          start={"0"}
+                          end={"100"}
+                          interval={"10"}
+                          step={1.0}
+                          value={state.form.ventilator_spo2}
+                          setValue={(val: any) =>
+                            handleSliderChange(val, "ventilator_spo2")
+                          }
+                          getLabel={(val: any) =>
+                            getStatus(90.0, "Low", 100.0, "High", val)
+                          }
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
