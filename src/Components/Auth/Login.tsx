@@ -103,7 +103,7 @@ const LoginPage = (props: any) => {
         <div className="pl-1/5">
           <a href={"/"}>
             <img
-              src="https://cdn.coronasafe.network/light-logo.svg"
+              src={process.env.REACT_APP_LIGHT_LOGO}
               className="h-8 w-auto"
               alt="care logo"
             />{" "}
