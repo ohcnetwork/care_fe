@@ -35,7 +35,7 @@ const SessionRouter = (props: any) => {
           <div className="mx-auto p-2">
             <img
               className="h-20"
-              src="https://cdn.coronasafe.network/ksdma_logo.webp"
+              src={process.env.REACT_APP_COVER_IMAGE_ALT}
               alt="Care Logo"
             />
           </div>

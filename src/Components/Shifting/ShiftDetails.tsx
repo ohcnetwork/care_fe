@@ -385,10 +385,7 @@ export default function ShiftDetails(props: { id: string }) {
       <div id="section-to-print" className="print bg-white ">
         <div>
           {data.is_kasp && (
-            <img
-              alt="logo"
-              src="https://cdn.coronasafe.network/header_logo.png"
-            />
+            <img alt="logo" src={process.env.REACT_APP_HEADER_LOGO} />
           )}
         </div>
         <div className="mx-20 p-4">
@@ -535,9 +532,7 @@ export default function ShiftDetails(props: { id: string }) {
               <div>
                 <div className="">
                   <QRCode
-                    value={
-                      "https://care.coronasafe.network/shifting/" + data.id
-                    }
+                    value={`https://${process.env.REACT_APP_DEPLOYED_URL}/shifting/ data.id`}
                   />
                 </div>
               </div>
@@ -552,7 +547,7 @@ export default function ShiftDetails(props: { id: string }) {
             Auto Generated for Care
           </div>
           <div className="font-xs font-gray-600 text-center font-mono">
-            care.coronasafe.network/shifting/{data.id}
+            {process.env.REACT_APP_DEPLOYED_URL}/shifting/{data.id}
           </div>
         </div>
       </div>
