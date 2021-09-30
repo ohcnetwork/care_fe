@@ -153,6 +153,7 @@ export const DailyRounds = (props: any) => {
   const validateForm = () => {
     let errors = { ...initError };
     let invalidForm = false;
+    let error_div = "";
     Object.keys(state.form).forEach((field, i) => {
       switch (field) {
         case "other_symptoms":
@@ -170,6 +171,7 @@ export const DailyRounds = (props: any) => {
         case "admitted_to":
           if (!state.form.admitted_to && state.form.clone_last === "false") {
             errors[field] = "Please select admitted to details";
+            if (!error_div) error_div = field;
             invalidForm = true;
           }
           return;
@@ -177,12 +179,13 @@ export const DailyRounds = (props: any) => {
           return;
       }
     });
-    if (invalidForm) {
-      dispatch({ type: "set_error", errors });
-      return false;
-    }
     dispatch({ type: "set_error", errors });
-    return true;
+    return [!invalidForm, error_div];
+  };
+
+  const scrollTo = (id: any) => {
+    const element = document.querySelector(`#${id}-div`);
+    element?.scrollIntoView({ behavior: "smooth", block: "center" });
   };
 
   const fahrenheitToCelcius = (x: any) => {
@@ -197,8 +200,10 @@ export const DailyRounds = (props: any) => {
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
-    const validForm = validateForm();
-    if (validForm) {
+    const [validForm, error_div] = validateForm();
+    if (!validForm) {
+      scrollTo(error_div);
+    } else {
       setIsLoading(true);
       let baseData = {
         clone_last: state.form.clone_last === "true" ? true : false,
@@ -552,7 +557,7 @@ export const DailyRounds = (props: any) => {
                       />
                     </div>
 
-                    <div className="flex-1">
+                    <div className="flex-1" id="admitted_to-div">
                       <InputLabel id="admitted-to-label">
                         Admitted To *{" "}
                       </InputLabel>
