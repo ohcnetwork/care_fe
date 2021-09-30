@@ -198,6 +198,14 @@ export const DailyRounds = (props: any) => {
     return String(t.toFixed(2));
   };
 
+  const calculateMAP = (systolic: any, diastolic: any) => {
+    let map = 0;
+    if (systolic && diastolic) {
+      map = (Number(systolic) + 2 * Number(diastolic)) / 3.0;
+    }
+    return map.toFixed(2);
+  };
+
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     const [validForm, error_div] = validateForm();
@@ -247,6 +255,9 @@ export const DailyRounds = (props: any) => {
               ? {
                   systolic: Number(state.form.systolic),
                   diastolic: Number(state.form.diastolic),
+                  mean: Number(
+                    calculateMAP(state.form.systolic, state.form.diastolic)
+                  ),
                 }
               : undefined,
           pulse: Number(state.form.pulse),
@@ -357,14 +368,6 @@ export const DailyRounds = (props: any) => {
     } else {
       return [maxText, "#DC2626"];
     }
-  };
-
-  const calculateMAP = (systolic: any, diastolic: any) => {
-    let map = 0;
-    if (systolic && diastolic) {
-      map = (Number(systolic) + 2 * Number(diastolic)) / 3.0;
-    }
-    return map.toFixed(2);
   };
 
   const toggleTemperature = () => {
