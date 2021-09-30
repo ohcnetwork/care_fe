@@ -185,6 +185,16 @@ export const DailyRounds = (props: any) => {
     return true;
   };
 
+  const fahrenheitToCelcius = (x: any) => {
+    const t = (Number(x) - 32.0) * (5.0 / 9.0);
+    return String(t.toFixed(2));
+  };
+
+  const celciusToFahrenheit = (x: any) => {
+    const t = (Number(x) * 9.0) / 5.0 + 32.0;
+    return String(t.toFixed(2));
+  };
+
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     const validForm = validateForm();
@@ -236,6 +246,9 @@ export const DailyRounds = (props: any) => {
               : undefined,
           pulse: Number(state.form.pulse),
           resp: Number(state.form.resp),
+          temperature: state.form.tempInCelcius
+            ? celciusToFahrenheit(state.form.temperature)
+            : state.form.temperature,
           rhythm: Number(state.form.rhythm),
           rhythm_detail: state.form.rhythm_detail,
           ventilator_spo2: Number(state.form.ventilator_spo2),
@@ -349,24 +362,14 @@ export const DailyRounds = (props: any) => {
     return map.toFixed(2);
   };
 
-  const farenheitToCelcius = (x: number) => {
-    const t = (x - 32.0) * (5.0 / 9.0);
-    return String(t.toFixed(2));
-  };
-
-  const CelciusToFarenheit = (x: number) => {
-    const t = (x * 9.0) / 5.0 + 32.0;
-    return String(t.toFixed(2));
-  };
-
   const toggleTemperature = () => {
     const isCelcius = state.form.tempInCelcius;
-    const temp = Number(state.form.temperature);
+    const temp = state.form.temperature;
 
     const form = { ...state.form };
     form.temperature = isCelcius
-      ? CelciusToFarenheit(temp)
-      : farenheitToCelcius(temp);
+      ? celciusToFahrenheit(temp)
+      : fahrenheitToCelcius(temp);
     form.tempInCelcius = !isCelcius;
     dispatch({ type: "set_form", form });
   };
