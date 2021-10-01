@@ -1,9 +1,27 @@
 import React, { useState, useEffect } from "react";
-import { getUserList } from "../../Redux/actions";
+import { getFacility } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 
 export default function BadgesList(props: any) {
   const { appliedFilters, updateFilter } = props;
+
+  const [orginFacilityName, setOrginFacilityName] = useState("");
+  const dispatch: any = useDispatch();
+
+  useEffect(() => {
+    async function fetchData() {
+      if (appliedFilters.orgin_facility) {
+        const res = await dispatch(
+          getFacility(appliedFilters.orgin_facility, "orgin_facility")
+        );
+
+        setOrginFacilityName(res?.data?.name);
+      } else {
+        setOrginFacilityName("");
+      }
+    }
+    fetchData();
+  }, [dispatch, appliedFilters.orgin_facility]);
 
   const removeFilter = (paramKey: any) => {
     const params = { ...appliedFilters };
@@ -69,11 +87,7 @@ export default function BadgesList(props: any) {
         appliedFilters.assigned_facility && "Assigned Facility",
         "assigned_facility"
       )}
-      {badge(
-        "Filtered By",
-        appliedFilters.orgin_facility && "Origin Facility",
-        "orgin_facility"
-      )}
+      {badge("Origin Facility", orginFacilityName, "orgin_facility")}
       {badge(
         "Filtered By",
         appliedFilters.approving_facility && "Resource Approving Facility",
