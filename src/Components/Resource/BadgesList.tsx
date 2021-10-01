@@ -6,6 +6,7 @@ export default function BadgesList(props: any) {
   const { appliedFilters, updateFilter } = props;
 
   const [orginFacilityName, setOrginFacilityName] = useState("");
+  const [approvingFacilityName, setApprovingFacilityName] = useState("");
   const dispatch: any = useDispatch();
 
   useEffect(() => {
@@ -22,6 +23,21 @@ export default function BadgesList(props: any) {
     }
     fetchData();
   }, [dispatch, appliedFilters.orgin_facility]);
+
+  useEffect(() => {
+    async function fetchData() {
+      if (appliedFilters.approving_facility) {
+        const res = await dispatch(
+          getFacility(appliedFilters.approving_facility, "approving_facility")
+        );
+
+        setApprovingFacilityName(res?.data?.name);
+      } else {
+        setApprovingFacilityName("");
+      }
+    }
+    fetchData();
+  }, [dispatch, appliedFilters.approving_facility]);
 
   const removeFilter = (paramKey: any) => {
     const params = { ...appliedFilters };
@@ -88,11 +104,7 @@ export default function BadgesList(props: any) {
         "assigned_facility"
       )}
       {badge("Origin Facility", orginFacilityName, "orgin_facility")}
-      {badge(
-        "Filtered By",
-        appliedFilters.approving_facility && "Resource Approving Facility",
-        "approving_facility"
-      )}
+      {badge("Approving Facility", approvingFacilityName, "approving_facility")}
     </div>
   );
 }
