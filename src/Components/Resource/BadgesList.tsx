@@ -7,6 +7,7 @@ export default function BadgesList(props: any) {
 
   const [orginFacilityName, setOrginFacilityName] = useState("");
   const [approvingFacilityName, setApprovingFacilityName] = useState("");
+  const [assignedFacilityName, setAssignedFacilityName] = useState("");
   const dispatch: any = useDispatch();
 
   useEffect(() => {
@@ -38,6 +39,21 @@ export default function BadgesList(props: any) {
     }
     fetchData();
   }, [dispatch, appliedFilters.approving_facility]);
+
+  useEffect(() => {
+    async function fetchData() {
+      if (appliedFilters.assigned_facility) {
+        const res = await dispatch(
+          getFacility(appliedFilters.assigned_facility, "assigned_facility")
+        );
+
+        setAssignedFacilityName(res?.data?.name);
+      } else {
+        setAssignedFacilityName("");
+      }
+    }
+    fetchData();
+  }, [dispatch, appliedFilters.assigned_facility]);
 
   const removeFilter = (paramKey: any) => {
     const params = { ...appliedFilters };
@@ -98,13 +114,9 @@ export default function BadgesList(props: any) {
         appliedFilters.created_date_after,
         "created_date_after"
       )}
-      {badge(
-        "Filtered By",
-        appliedFilters.assigned_facility && "Assigned Facility",
-        "assigned_facility"
-      )}
       {badge("Origin Facility", orginFacilityName, "orgin_facility")}
       {badge("Approving Facility", approvingFacilityName, "approving_facility")}
+      {badge("Assigned Facility", assignedFacilityName, "assigned_facility")}
     </div>
   );
 }
