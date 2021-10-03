@@ -3,13 +3,10 @@ import { navigate } from "raviger";
 import { SelectField } from "../../Common/HelperInputFields";
 import { CircularProgress } from "@material-ui/core";
 import { FACILITY_TYPES, KASP_STRING } from "../../../Common/constants";
-import {
-  getStates,
-  getDistrictByState,
-  getLocalbodyByDistrict,
-} from "../../../Redux/actions";
+import { getStates, getDistrictByState } from "../../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { useAbortableEffect, statusType } from "../../../Common/utils";
+import LocalBodySelect from "./LocalBodySelect";
 
 function useMergeState(initialState: any) {
   const [state, setState] = useState(initialState);
@@ -22,7 +19,6 @@ function useMergeState(initialState: any) {
 const initialStates = [{ id: 0, name: "Choose State *" }];
 const initialDistricts = [{ id: 0, name: "Choose District" }];
 const selectStates = [{ id: 0, name: "Please select your state" }];
-const initialLocalbodies = [{ id: 0, name: "Choose Localbody" }];
 const selectDistrict = [{ id: 0, name: "Please select your district" }];
 
 function FacillityFilter(props: any) {
@@ -31,10 +27,8 @@ function FacillityFilter(props: any) {
 
   const [isStateLoading, setIsStateLoading] = useState(false);
   const [isDistrictLoading, setIsDistrictLoading] = useState(false);
-  const [isLocalbodyLoading, setIsLocalbodyLoading] = useState(false);
   const [states, setStates] = useState(initialStates);
   const [districts, setDistricts] = useState(selectStates);
-  const [localBody, setLocalBody] = useState(selectDistrict);
   const [filterState, setFilterState] = useMergeState({
     state: filter.state || "",
     district: filter.district || "",
@@ -86,37 +80,6 @@ function FacillityFilter(props: any) {
     [filterState.state]
   );
 
-  const fetchLocalbodies = useCallback(
-    async (status) => {
-      setIsLocalbodyLoading(true);
-      const res =
-        Number(filterState.district) &&
-        (await dispatchAction(
-          getLocalbodyByDistrict({ id: filterState.district })
-        ));
-      if (!status.aborted) {
-        if (res && res.data) {
-          if (res.data.length) {
-            setLocalBody([...initialLocalbodies, ...res.data]);
-          } else {
-            setLocalBody([{ id: 0, name: "No local bodies found!" }]);
-          }
-        } else {
-          setLocalBody(selectDistrict);
-        }
-        setIsLocalbodyLoading(false);
-      }
-    },
-    [dispatchAction, filterState.district]
-  );
-
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchLocalbodies(status);
-    },
-    [filterState.district]
-  );
-
   const applyFilter = () => {
     const data = {
       state: Number(filterState.state) || "",
@@ -141,6 +104,10 @@ function FacillityFilter(props: any) {
     filterData[name] = value;
 
     setFilterState(filterData);
+  };
+
+  const handleLocalBodyChange = (local_body_id: string) => {
+    handleChange({ target: { name: "local_body", value: local_body_id } });
   };
 
   return (
@@ -209,19 +176,13 @@ function FacillityFilter(props: any) {
         <div className="w-64 flex-none">
           <span className="text-sm font-semibold">Local Body</span>
           <div>
-            {isLocalbodyLoading ? (
-              <CircularProgress size={20} />
-            ) : (
-              <SelectField
-                name="local_body"
-                variant="outlined"
-                margin="dense"
-                value={filterState.local_body}
-                options={localBody}
-                optionValue="name"
-                onChange={handleChange}
-              />
-            )}
+            <LocalBodySelect
+              name="local_body"
+              district={filterState.district}
+              selected={filterState.local_body}
+              setSelected={handleLocalBodyChange}
+              margin="dense"
+            />
           </div>
         </div>
 
