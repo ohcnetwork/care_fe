@@ -13,6 +13,7 @@ import {
   SAMPLE_TEST_RESULT,
   ROLE_STATUS_MAP,
   SAMPLE_FLOW_RULES,
+  SAMPLE_TYPE_CHOICES,
 } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getTestList, patchSample } from "../../Redux/actions";
@@ -65,6 +66,7 @@ export default function SampleViewAdmin(props: any) {
           status: qParams.status || undefined,
           result: qParams.result || undefined,
           facility: qParams.facility || "",
+          sample_type: qParams.sample_type || undefined,
         })
       );
       if (!status.aborted) {
@@ -83,6 +85,7 @@ export default function SampleViewAdmin(props: any) {
       qParams.status,
       qParams.result,
       qParams.facility,
+      qParams.sample_type,
     ]
   );
 
@@ -477,6 +480,13 @@ export default function SampleViewAdmin(props: any) {
             SAMPLE_TEST_RESULT.find((result) => result.id == qParams.result)
               ?.text,
             "result"
+          )}
+          {badge(
+            "Sample Test Type",
+            SAMPLE_TYPE_CHOICES.find(
+              (type) => type.id.toString() === qParams.sample_type
+            )?.text,
+            "sample_type"
           )}
           {qParams.facility &&
             sample[0] &&

@@ -356,16 +356,16 @@ export const BLOOD_GROUPS = [
 ];
 
 export const SAMPLE_TYPE_CHOICES = [
-  "UNKNOWN",
-  "BA/ETA",
-  "TS/NPS/NS",
-  "Blood in EDTA",
-  "Acute Sera",
-  "Covalescent sera",
-  "Biopsy",
-  "AMR",
-  "Communicable Diseases",
-  "OTHER TYPE",
+  { id: 0, text: "UNKNOWN" },
+  { id: 1, text: "BA/ETA" },
+  { id: 2, text: "TS/NPS/NS" },
+  { id: 3, text: "Blood in EDTA" },
+  { id: 4, text: "Acute Sera" },
+  { id: 5, text: "Covalescent sera" },
+  { id: 6, text: "Biopsy" },
+  { id: 7, text: "AMR" },
+  { id: 8, text: "Communicable Diseases" },
+  { id: 9, text: "OTHER TYPE" },
 ];
 
 export const ICMR_CATEGORY = [

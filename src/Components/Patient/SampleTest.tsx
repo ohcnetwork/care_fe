@@ -20,7 +20,6 @@ import Container from "@material-ui/core/Container";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
-const sampleTestTypes = [...SAMPLE_TYPE_CHOICES];
 const icmrCategories = [...ICMR_CATEGORY];
 
 const initForm: SampleTestModel = {
@@ -37,7 +36,7 @@ const initForm: SampleTestModel = {
   has_sari: false,
   is_atypical_presentation: false,
   is_unusual_course: false,
-  sample_type: "UNKNOWN",
+  sample_type: "0",
   icmr_category: "Cat 0",
   sample_type_other: "",
 };
@@ -144,7 +143,7 @@ export const SampleTest = (props: any) => {
           }
           break;
         case "sample_type_other":
-          if (state.form.sample_type === "OTHER TYPE" && !state.form[field]) {
+          if (state.form.sample_type === "9" && !state.form[field]) {
             errors[field] = "Please provide details of the sample type";
             invalidForm = true;
           }
@@ -204,7 +203,7 @@ export const SampleTest = (props: any) => {
         sample_type: state.form.sample_type,
         icmr_category: state.form.icmr_category,
         sample_type_other:
-          state.form.sample_type === "OTHER TYPE"
+          state.form.sample_type === "9"
             ? state.form.sample_type_other
             : undefined,
       };
@@ -254,9 +253,8 @@ export const SampleTest = (props: any) => {
                     name="sample_type"
                     variant="outlined"
                     margin="dense"
-                    optionArray={true}
                     value={state.form.sample_type}
-                    options={sampleTestTypes}
+                    options={[...SAMPLE_TYPE_CHOICES]}
                     onChange={handleChange}
                     errors={state.errors.sample_type}
                   />
@@ -323,7 +321,7 @@ export const SampleTest = (props: any) => {
                     label="Is fast-track testing required?"
                   />
                 </div>
-                {state.form.sample_type === "OTHER TYPE" && (
+                {state.form.sample_type === "9" && (
                   <div>
                     <InputLabel>Sample Test Type Details*</InputLabel>
                     <MultilineInputField
