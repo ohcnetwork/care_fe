@@ -100,7 +100,7 @@ const initForm: FormDetails = {
   otherSymptom: false,
   symptoms: [],
   other_symptoms: "",
-  symptoms_onset_date: "",
+  symptoms_onset_date: new Date().toString(),
   suggestion: "",
   patient: "",
   facility: "",
