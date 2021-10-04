@@ -128,13 +128,13 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
         <div className="mt-4 flex flex-wrap justify-between w-full">
           <button
             onClick={(e) => navigate(`/sample/${itemData.id}`)}
-            className="px-4 py-2 shadow border bg-white rounded-md border border-grey-500 whitespace-no-wrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300 text-center"
+            className="px-4 py-2 shadow border bg-white rounded-md border-grey-500 whitespace-no-wrap text-sm font-semibold cursor-pointer hover:bg-gray-300 text-center"
           >
             Sample Report
           </button>
           <button
             onClick={(e) => showUpdateStatus(itemData)}
-            className="px-4 py-2 shadow border bg-white rounded-md border border-grey-500 whitespace-no-wrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300 text-center"
+            className="px-4 py-2 shadow border bg-white rounded-md border-grey-500 whitespace-no-wrap text-sm font-semibold cursor-pointer hover:bg-gray-300 text-center"
           >
             UPDATE SAMPLE TEST STATUS
           </button>

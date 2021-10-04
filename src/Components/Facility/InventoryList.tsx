@@ -73,9 +73,7 @@ export default function InventoryList(props: any) {
               <p className="text-gray-900 whitespace-no-wrap">
                 {inventoryItem.item_object?.name}
                 {inventoryItem.is_low && (
-                  <span className="ml-2 badge badge badge-danger">
-                    Low Stock
-                  </span>
+                  <span className="ml-2 badge badge-danger">Low Stock</span>
                 )}
               </p>
             </div>

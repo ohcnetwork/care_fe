@@ -109,7 +109,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
               View Consultation / Consultation Updates
             </button>
             <button
-              className="px-4 py-2 shadow border bg-white rounded-md border border-grey-500 whitespace-no-wrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300 text-center"
+              className="px-4 py-2 shadow border bg-white rounded-md border-grey-500 whitespace-no-wrap text-sm font-semibold cursor-pointer hover:bg-gray-300 text-center"
               onClick={() =>
                 navigate(
                   `/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/files/`
@@ -120,7 +120,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
             </button>
             {isLastConsultation && (
               <button
-                className="mr-4 px-4 py-2 shadow border bg-white rounded-md border border-grey-500 whitespace-no-wrap text-sm font-semibold rounded cursor-pointer hover:bg-gray-300 text-center"
+                className="mr-4 px-4 py-2 shadow border bg-white rounded-md border-grey-500 whitespace-no-wrap text-sm font-semibold cursor-pointer hover:bg-gray-300 text-center"
                 onClick={() =>
                   navigate(
                     `/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/daily-rounds`
