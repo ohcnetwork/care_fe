@@ -327,6 +327,7 @@ export const ConsultationForm = (props: any) => {
             weight: res.data.weight ? res.data.weight : "",
             height: res.data.height ? res.data.height : "",
           };
+          setLineRequired(lines.length ? true : false);
           dispatch({ type: "set_form", form: formData });
         } else {
           goBack();
@@ -678,7 +679,7 @@ export const ConsultationForm = (props: any) => {
         start_date: lineRequired ? start_date : undefined,
         type: lineRequired ? type : undefined,
         site: lineRequired ? site : undefined,
-        other_type: lineRequired ? other_type : undefined,
+        //other_type: lineRequired ? other_type : undefined,
       };
     });
     return payload;
@@ -1331,7 +1332,7 @@ export const ConsultationForm = (props: any) => {
                       <div id="lines_insertion_date-div" className="col-span-1">
                         <DateInputField
                           label="Date of insertion"
-                          value={state.form.lines_insertion_date?.[id]}
+                          value={state.form.lines_insertion_date?.[id] || ""}
                           onChange={(date) => handleLinesDateChange(id, date)}
                           disableFuture={true}
                           errors={state.errors.lines_insertion_date}
