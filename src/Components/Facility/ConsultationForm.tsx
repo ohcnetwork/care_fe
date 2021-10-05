@@ -453,6 +453,7 @@ export const ConsultationForm = (props: any) => {
           return;
         case "other_lines":
           if (
+            lineRequired &&
             state.form[field] &&
             state.form[field] === "" &&
             !!state.form.lines.find((id: any) => id === 7)
@@ -463,6 +464,7 @@ export const ConsultationForm = (props: any) => {
           return;
         case "lines_insertion_date":
           if (
+            lineRequired &&
             state.form[field] &&
             Object.keys(state.form[field]).length !== state.form.lines.length
           ) {
@@ -473,6 +475,7 @@ export const ConsultationForm = (props: any) => {
           return;
         case "lines_site_level_fixation":
           if (
+            lineRequired &&
             state.form[field] &&
             Object.keys(state.form[field]).length !== state.form.lines.length
           ) {
