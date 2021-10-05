@@ -8,7 +8,9 @@ import {
   InputLabel,
   Radio,
   RadioGroup,
+  Switch,
 } from "@material-ui/core";
+
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { navigate } from "raviger";
 import moment from "moment";
@@ -259,6 +261,8 @@ export const ConsultationForm = (props: any) => {
     useState<FacilityModel | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isMmhgUnit, setIsMmhgUnit] = useState(true);
+  const [lineRequired, setLineRequired] = useState(false);
+  const [dateRequired, setDateRequired] = useState(false);
 
   const headerText = !id ? "Consultation" : "Edit Consultation";
   const buttonText = !id ? "Add Consultation" : "Update Consultation";
@@ -1176,37 +1180,46 @@ export const ConsultationForm = (props: any) => {
                 />
               </div>
               <div className="mt-4">
-                <h3 className="text-lg leading-relaxed font-semibold text-gray-900">
-                  Date/Size/LL
-                </h3>
-                <div className="flex flex-row justify-between px-4">
-                  <div id="intubation_start_date-div">
-                    <DateInputField
-                      id="intubation_start_date"
-                      label="Intubated On"
-                      margin="dense"
-                      value={state.form.intubation_start_date || ""}
-                      disableFuture={true}
-                      onChange={(date) =>
-                        handleDateChange(date, "intubation_start_date")
-                      }
-                      errors={state.errors.intubation_start_date}
-                    />
-                  </div>
-                  <div id="intubation_end_date-div">
-                    <DateInputField
-                      id="intubation_end_date"
-                      label="Exhubated On"
-                      margin="dense"
-                      value={state.form.intubation_end_date || ""}
-                      disableFuture={true}
-                      onChange={(date) =>
-                        handleDateChange(date, "intubation_end_date")
-                      }
-                      errors={state.errors.intubation_start_date}
-                    />
-                  </div>
+                <div className="flex">
+                  <h3 className="text-lg leading-relaxed font-semibold text-gray-900">
+                    Date/Size/LL
+                  </h3>
+                  <Switch
+                    checked={dateRequired}
+                    onChange={(e) => setDateRequired(e.target.checked)}
+                    value="date-size-ll"
+                  />
                 </div>
+                {dateRequired && (
+                  <div className="flex flex-row justify-between px-4">
+                    <div id="intubation_start_date-div">
+                      <DateInputField
+                        id="intubation_start_date"
+                        label="Intubated On"
+                        margin="dense"
+                        value={state.form.intubation_start_date || ""}
+                        disableFuture={true}
+                        onChange={(date) =>
+                          handleDateChange(date, "intubation_start_date")
+                        }
+                        errors={state.errors.intubation_start_date}
+                      />
+                    </div>
+                    <div id="intubation_end_date-div">
+                      <DateInputField
+                        id="intubation_end_date"
+                        label="Exhubated On"
+                        margin="dense"
+                        value={state.form.intubation_end_date || ""}
+                        disableFuture={true}
+                        onChange={(date) =>
+                          handleDateChange(date, "intubation_end_date")
+                        }
+                        errors={state.errors.intubation_start_date}
+                      />
+                    </div>
+                  </div>
+                )}
                 <Slider
                   title={"ETT/TT (mmid)"}
                   start={"3"}
@@ -1240,26 +1253,37 @@ export const ConsultationForm = (props: any) => {
               </div>
 
               <div className="mt-4">
-                <InputLabel
-                  id="action-label"
-                  style={{ fontWeight: "bold", fontSize: "18px" }}
-                  className="mb-2 text-gray-900"
-                >
-                  Lines and Catheters
-                </InputLabel>
-                <InputLabel
-                  id="lines-catheters-label"
-                  style={{ fontWeight: "bold", fontSize: "16px" }}
-                >
-                  Types
-                </InputLabel>
-                <MultiSelectField
-                  name="lines"
-                  variant="outlined"
-                  value={state.form.lines}
-                  options={linesCatheterChoices}
-                  onChange={handleLinesChange}
-                />
+                <div className="flex">
+                  <InputLabel
+                    id="action-label"
+                    style={{ fontWeight: "bold", fontSize: "18px" }}
+                    className="mb-2 text-gray-900"
+                  >
+                    Lines and Catheters
+                  </InputLabel>
+                  <Switch
+                    checked={lineRequired}
+                    onChange={(e) => setLineRequired(e.target.checked)}
+                    value="otherLines"
+                  />
+                </div>
+                {lineRequired && (
+                  <>
+                    <InputLabel
+                      id="lines-catheters-label"
+                      style={{ fontWeight: "bold", fontSize: "16px" }}
+                    >
+                      Types
+                    </InputLabel>
+                    <MultiSelectField
+                      name="lines"
+                      variant="outlined"
+                      value={state.form.lines}
+                      options={linesCatheterChoices}
+                      onChange={handleLinesChange}
+                    />
+                  </>
+                )}
               </div>
 
               {state.form.otherLines && (
