@@ -1194,65 +1194,69 @@ export const ConsultationForm = (props: any) => {
                   />
                 </div>
                 {dateRequired && (
-                  <div className="flex flex-row justify-between px-4">
-                    <div id="intubation_start_date-div">
-                      <DateInputField
-                        id="intubation_start_date"
-                        label="Intubated On"
-                        margin="dense"
-                        value={state.form.intubation_start_date || ""}
-                        disableFuture={true}
-                        onChange={(date) =>
-                          handleDateChange(date, "intubation_start_date")
-                        }
-                        errors={state.errors.intubation_start_date}
-                      />
+                  <>
+                    <div className="flex flex-row justify-between px-4">
+                      <div id="intubation_start_date-div">
+                        <DateInputField
+                          id="intubation_start_date"
+                          label="Intubated On"
+                          margin="dense"
+                          value={state.form.intubation_start_date || ""}
+                          disableFuture={true}
+                          onChange={(date) =>
+                            handleDateChange(date, "intubation_start_date")
+                          }
+                          errors={state.errors.intubation_start_date}
+                        />
+                      </div>
+                      <div id="intubation_end_date-div">
+                        <DateInputField
+                          id="intubation_end_date"
+                          label="Exhubated On"
+                          margin="dense"
+                          value={state.form.intubation_end_date || ""}
+                          disableFuture={true}
+                          onChange={(date) =>
+                            handleDateChange(date, "intubation_end_date")
+                          }
+                          errors={state.errors.intubation_start_date}
+                        />
+                      </div>
                     </div>
-                    <div id="intubation_end_date-div">
-                      <DateInputField
-                        id="intubation_end_date"
-                        label="Exhubated On"
-                        margin="dense"
-                        value={state.form.intubation_end_date || ""}
-                        disableFuture={true}
-                        onChange={(date) =>
-                          handleDateChange(date, "intubation_end_date")
-                        }
-                        errors={state.errors.intubation_start_date}
-                      />
-                    </div>
-                  </div>
+                    <Slider
+                      title={"ETT/TT (mmid)"}
+                      start={"3"}
+                      end={"10"}
+                      interval={"1"}
+                      step={0.1}
+                      value={state.form.ett_tt.toString()}
+                      setValue={(val) => handleSliderChange(val, "ett_tt")}
+                      getLabel={(s) => ["", "#059669"]}
+                    />
+                    <Slider
+                      title={"Cuff Pressure"}
+                      titleNeighbour={
+                        <div
+                          className="flex items-center ml-1 border border-gray-400 rounded px-4 h-10 cursor-pointer hover:bg-gray-200"
+                          onClick={(_) => toggleCuffUnit()}
+                        >
+                          <span className="text-primary-600">
+                            {isMmhgUnit ? "mmHg" : "cmH2O"}
+                          </span>
+                        </div>
+                      }
+                      start={"0"}
+                      end={"60"}
+                      interval={"1"}
+                      step={1.0}
+                      value={state.form.cuff_pressure.toString()}
+                      setValue={(val) =>
+                        handleSliderChange(val, "cuff_pressure")
+                      }
+                      getLabel={(s) => ["", "#059669"]}
+                    />
+                  </>
                 )}
-                <Slider
-                  title={"ETT/TT (mmid)"}
-                  start={"3"}
-                  end={"10"}
-                  interval={"1"}
-                  step={0.1}
-                  value={state.form.ett_tt.toString()}
-                  setValue={(val) => handleSliderChange(val, "ett_tt")}
-                  getLabel={(s) => ["", "#059669"]}
-                />
-                <Slider
-                  title={"Cuff Pressure"}
-                  titleNeighbour={
-                    <div
-                      className="flex items-center ml-1 border border-gray-400 rounded px-4 h-10 cursor-pointer hover:bg-gray-200"
-                      onClick={(_) => toggleCuffUnit()}
-                    >
-                      <span className="text-primary-600">
-                        {isMmhgUnit ? "mmHg" : "cmH2O"}
-                      </span>
-                    </div>
-                  }
-                  start={"0"}
-                  end={"60"}
-                  interval={"1"}
-                  step={1.0}
-                  value={state.form.cuff_pressure.toString()}
-                  setValue={(val) => handleSliderChange(val, "cuff_pressure")}
-                  getLabel={(s) => ["", "#059669"]}
-                />
               </div>
 
               <div className="mt-4">
@@ -1289,7 +1293,7 @@ export const ConsultationForm = (props: any) => {
                 )}
               </div>
 
-              {state.form.otherLines && (
+              {lineRequired && state.form.otherLines && (
                 <div id="other_lines-div" className="mt-4">
                   <InputLabel id="other-symptoms-label">
                     Other Lines and Catheter Details
