@@ -263,6 +263,7 @@ export const ConsultationForm = (props: any) => {
   const [isMmhgUnit, setIsMmhgUnit] = useState(true);
   const [lineRequired, setLineRequired] = useState(false);
   const [dateRequired, setDateRequired] = useState(false);
+  const [opsInsRequired, setOpsInsRequired] = useState(false);
 
   const headerText = !id ? "Consultation" : "Edit Consultation";
   const buttonText = !id ? "Add Consultation" : "Update Consultation";
@@ -440,13 +441,21 @@ export const ConsultationForm = (props: any) => {
           }
           return;
         case "operation":
-          if (state.form[field] && _.isEmpty(state.form[field])) {
+          if (
+            opsInsRequired &&
+            state.form[field] &&
+            _.isEmpty(state.form[field])
+          ) {
             errors[field] = "Please enter operation information.";
             invalidForm = true;
           }
           return;
         case "special_instruction":
-          if (state.form[field] && _.isEmpty(state.form[field])) {
+          if (
+            opsInsRequired &&
+            state.form[field] &&
+            _.isEmpty(state.form[field])
+          ) {
             errors[field] = "Please enter special instruction information.";
             invalidForm = true;
           }
@@ -1146,41 +1155,59 @@ export const ConsultationForm = (props: any) => {
                   errors={state.errors.cpk_mb}
                 />
               </div>
-              <div id="operation-div" className="mt-2">
-                <InputLabel id="exam-details-label">Operation*</InputLabel>
-                <MultilineInputField
-                  rows={5}
-                  name="operation"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  placeholder="Information optional"
-                  InputLabelProps={{
-                    shrink: !!state.form.operation,
-                  }}
-                  value={state.form.operation}
-                  onChange={handleChange}
-                  errors={state.errors.operation}
-                />
-              </div>
-              <div id="special-instruction-div" className="mt-2">
-                <InputLabel id="special-instruction-label">
-                  Special Instructions*
-                </InputLabel>
-                <MultilineInputField
-                  rows={5}
-                  name="special_instruction"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  placeholder="Information optional"
-                  InputLabelProps={{
-                    shrink: !!state.form.special_instruction,
-                  }}
-                  value={state.form.special_instruction}
-                  onChange={handleChange}
-                  errors={state.errors.special_instruction}
-                />
+              <div className="mt-4">
+                <div className="flex">
+                  <h3 className="text-lg leading-relaxed font-semibold text-gray-900">
+                    Operation &amp; Special Instructions
+                  </h3>
+                  <Switch
+                    checked={opsInsRequired}
+                    onChange={(e) => setOpsInsRequired(e.target.checked)}
+                    value="operation-special-instruction"
+                  />
+                </div>
+                {opsInsRequired && (
+                  <>
+                    <div id="operation-div" className="mt-2">
+                      <InputLabel id="exam-details-label">
+                        Operation*
+                      </InputLabel>
+                      <MultilineInputField
+                        rows={5}
+                        name="operation"
+                        variant="outlined"
+                        margin="dense"
+                        type="text"
+                        placeholder="Information optional"
+                        InputLabelProps={{
+                          shrink: !!state.form.operation,
+                        }}
+                        value={state.form.operation}
+                        onChange={handleChange}
+                        errors={state.errors.operation}
+                      />
+                    </div>
+                    <div id="special-instruction-div" className="mt-2">
+                      <InputLabel id="special-instruction-label">
+                        Special Instructions*
+                      </InputLabel>
+                      <MultilineInputField
+                        rows={5}
+                        name="special_instruction"
+                        variant="outlined"
+                        margin="dense"
+                        type="text"
+                        placeholder="Information optional"
+                        InputLabelProps={{
+                          shrink: !!state.form.special_instruction,
+                        }}
+                        value={state.form.special_instruction}
+                        onChange={handleChange}
+                        errors={state.errors.special_instruction}
+                      />
+                    </div>
+                  </>
+                )}
               </div>
               <div className="mt-4">
                 <div className="flex">
@@ -1194,67 +1221,70 @@ export const ConsultationForm = (props: any) => {
                   />
                 </div>
                 {dateRequired && (
-                  <div className="flex flex-row justify-between px-4">
-                    <div id="intubation_start_date-div">
-                      <DateInputField
-                        id="intubation_start_date"
-                        label="Intubated On"
-                        margin="dense"
-                        value={state.form.intubation_start_date || ""}
-                        disableFuture={true}
-                        onChange={(date) =>
-                          handleDateChange(date, "intubation_start_date")
-                        }
-                        errors={state.errors.intubation_start_date}
-                      />
+                  <>
+                    <div className="flex flex-row justify-between px-4">
+                      <div id="intubation_start_date-div">
+                        <DateInputField
+                          id="intubation_start_date"
+                          label="Intubated On"
+                          margin="dense"
+                          value={state.form.intubation_start_date || ""}
+                          disableFuture={true}
+                          onChange={(date) =>
+                            handleDateChange(date, "intubation_start_date")
+                          }
+                          errors={state.errors.intubation_start_date}
+                        />
+                      </div>
+                      <div id="intubation_end_date-div">
+                        <DateInputField
+                          id="intubation_end_date"
+                          label="Exhubated On"
+                          margin="dense"
+                          value={state.form.intubation_end_date || ""}
+                          disableFuture={true}
+                          onChange={(date) =>
+                            handleDateChange(date, "intubation_end_date")
+                          }
+                          errors={state.errors.intubation_start_date}
+                        />
+                      </div>
                     </div>
-                    <div id="intubation_end_date-div">
-                      <DateInputField
-                        id="intubation_end_date"
-                        label="Exhubated On"
-                        margin="dense"
-                        value={state.form.intubation_end_date || ""}
-                        disableFuture={true}
-                        onChange={(date) =>
-                          handleDateChange(date, "intubation_end_date")
-                        }
-                        errors={state.errors.intubation_start_date}
-                      />
-                    </div>
-                  </div>
+                    <Slider
+                      title={"ETT/TT (mmid)"}
+                      start={"3"}
+                      end={"10"}
+                      interval={"1"}
+                      step={0.1}
+                      value={state.form.ett_tt.toString()}
+                      setValue={(val) => handleSliderChange(val, "ett_tt")}
+                      getLabel={(s) => ["", "#059669"]}
+                    />
+                    <Slider
+                      title={"Cuff Pressure"}
+                      titleNeighbour={
+                        <div
+                          className="flex items-center ml-1 border border-gray-400 rounded px-4 h-10 cursor-pointer hover:bg-gray-200"
+                          onClick={(_) => toggleCuffUnit()}
+                        >
+                          <span className="text-primary-600">
+                            {isMmhgUnit ? "mmHg" : "cmH2O"}
+                          </span>
+                        </div>
+                      }
+                      start={"0"}
+                      end={"60"}
+                      interval={"1"}
+                      step={1.0}
+                      value={state.form.cuff_pressure.toString()}
+                      setValue={(val) =>
+                        handleSliderChange(val, "cuff_pressure")
+                      }
+                      getLabel={(s) => ["", "#059669"]}
+                    />
+                  </>
                 )}
-                <Slider
-                  title={"ETT/TT (mmid)"}
-                  start={"3"}
-                  end={"10"}
-                  interval={"1"}
-                  step={0.1}
-                  value={state.form.ett_tt.toString()}
-                  setValue={(val) => handleSliderChange(val, "ett_tt")}
-                  getLabel={(s) => ["", "#059669"]}
-                />
-                <Slider
-                  title={"Cuff Pressure"}
-                  titleNeighbour={
-                    <div
-                      className="flex items-center ml-1 border border-gray-400 rounded px-4 h-10 cursor-pointer hover:bg-gray-200"
-                      onClick={(_) => toggleCuffUnit()}
-                    >
-                      <span className="text-primary-600">
-                        {isMmhgUnit ? "mmHg" : "cmH2O"}
-                      </span>
-                    </div>
-                  }
-                  start={"0"}
-                  end={"60"}
-                  interval={"1"}
-                  step={1.0}
-                  value={state.form.cuff_pressure.toString()}
-                  setValue={(val) => handleSliderChange(val, "cuff_pressure")}
-                  getLabel={(s) => ["", "#059669"]}
-                />
               </div>
-
               <div className="mt-4">
                 <div className="flex">
                   <InputLabel
@@ -1289,7 +1319,7 @@ export const ConsultationForm = (props: any) => {
                 )}
               </div>
 
-              {state.form.otherLines && (
+              {lineRequired && state.form.otherLines && (
                 <div id="other_lines-div" className="mt-4">
                   <InputLabel id="other-symptoms-label">
                     Other Lines and Catheter Details
