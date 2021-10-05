@@ -469,7 +469,7 @@ export const ConsultationDetails = (props: any) => {
                     </h3>
                     <div className="mt-2">
                       {console.log(consultationData.lines)}
-                      {consultationData.lines.map((line: any) => (
+                      {consultationData.lines?.map((line: any) => (
                         <div className="mt-4">
                           <h5>{line.type}</h5>
                           <p>
