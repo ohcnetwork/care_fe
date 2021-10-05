@@ -548,12 +548,18 @@ export const ConsultationForm = (props: any) => {
           state.form.is_telemedicine === "true" ? state.form.assigned_to : "",
         cpk_mb: state.form.cpk_mb ? Number(state.form.cpk_mb) : 0,
         operation: state.form.operation,
-        intubation_start_date: state.form.intubation_start_date,
-        intubation_end_date: state.form.intubation_end_date,
-        ett_tt: state.form.ett_tt,
-        cuff_pressure: isMmhgUnit
-          ? state.form.cuff_pressure
-          : cmH2oTommHg(state.form.cuff_pressure),
+        intubation_start_date: dateRequired
+          ? state.form.intubation_start_date
+          : undefined,
+        intubation_end_date: dateRequired
+          ? state.form.intubation_end_date
+          : undefined,
+        ett_tt: dateRequired ? state.form.ett_tt : undefined,
+        cuff_pressure: dateRequired
+          ? isMmhgUnit
+            ? state.form.cuff_pressure
+            : cmH2oTommHg(state.form.cuff_pressure)
+          : undefined,
         special_instruction: state.form.special_instruction,
         lines: createLinesPayload(),
         weight: Number(state.form.weight),
@@ -669,10 +675,10 @@ export const ConsultationForm = (props: any) => {
       const start_date = state.form.lines_insertion_date[id];
       const site = state.form.lines_site_level_fixation[id];
       return {
-        start_date: start_date,
-        type: type,
-        site: site,
-        other_type: other_type,
+        start_date: lineRequired ? start_date : undefined,
+        type: lineRequired ? type : undefined,
+        site: lineRequired ? site : undefined,
+        other_type: lineRequired ? other_type : undefined,
       };
     });
     return payload;
