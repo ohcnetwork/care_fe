@@ -44,10 +44,26 @@ const CommentSection = (props: CommentSectionProps) => {
       Notification.Success({ msg: "Comment added successfully" });
       fetchData();
     });
+    setCommentBox("");
   };
 
   return (
     <div className="w-full flex flex-col">
+      <textarea
+        rows={3}
+        placeholder="Type your comment"
+        className="mt-4 border border-gray-500 rounded-lg p-4"
+        value={commentBox}
+        onChange={(e) => setCommentBox(e.target.value)}
+      />
+      <div className="flex w-full justify-end">
+        <Button
+          onClick={onSubmitComment}
+          className="border border-solid border-primary-600 hover:border-primary-700 text-primary-600 hover:bg-white capitalize my-2 text-sm"
+        >
+          Post Your Comment
+        </Button>
+      </div>
       <div className=" w-full">
         {comments.map((comment: any) => (
           <div className="flex p-4 bg-white rounded-lg text-gray-800 mt-4 flex-col w-full border border-gray-300">
@@ -70,20 +86,6 @@ const CommentSection = (props: CommentSectionProps) => {
             </div>
           </div>
         ))}
-      </div>
-      <textarea
-        rows={3}
-        placeholder="Type your comment"
-        className="mt-4 border border-gray-500 rounded-lg p-4"
-        onChange={(e) => setCommentBox(e.target.value)}
-      />
-      <div className="flex w-full justify-end">
-        <Button
-          onClick={onSubmitComment}
-          className="border border-solid border-primary-600 hover:border-primary-700 text-primary-600 hover:bg-white capitalize my-2 text-sm"
-        >
-          Post Your Comment
-        </Button>
       </div>
     </div>
   );
