@@ -33,6 +33,10 @@ const initError: any = {
   serial_number: "",
   warranty_details: "",
   location: "",
+  vendor_name: "",
+  support_name: "",
+  support_phone: "",
+  support_email: "",
 };
 
 const initialState = {
@@ -69,6 +73,10 @@ const AssetCreate = (props: AssetProps) => {
   const [is_working, setIsWorking] = useState<string>();
   const [serial_number, setSerialNumber] = useState<string>("");
   const [warranty_details, setWarrantyDetails] = useState<string>("");
+  const [vendor_name, setVendorName] = useState<string>("");
+  const [support_name, setSupportName] = useState<string>("");
+  const [support_phone, setSupportPhone] = useState<string>("");
+  const [support_email, setSupportEmail] = useState<string>("");
   const [location, setLocation] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const dispatchAction: any = useDispatch();
@@ -103,6 +111,10 @@ const AssetCreate = (props: AssetProps) => {
       setIsWorking(String(asset.is_working));
       setSerialNumber(asset.serial_number);
       setWarrantyDetails(asset.warranty_details);
+      setVendorName(asset.vendor_name);
+      setSupportName(asset.support_name);
+      setSupportEmail(asset.support_email);
+      setSupportPhone(asset.support_phone);
     }
   }, [asset]);
 
@@ -160,6 +172,10 @@ const AssetCreate = (props: AssetProps) => {
         serial_number: serial_number,
         warranty_details: warranty_details,
         location: location,
+        vendor_name: vendor_name,
+        support_name: support_name,
+        support_email: support_email,
+        support_phone: support_phone,
       };
       if (!assetId) {
         const res = await dispatchAction(createAsset(data));
@@ -352,6 +368,78 @@ const AssetCreate = (props: AssetProps) => {
                   setWarrantyDetails(e.target.value)
                 }
                 errors={state.errors.warranty_details}
+              />
+            </div>
+            <div>
+              <InputLabel htmlFor="vendor_name" id="name=label">
+                Vendor Name
+              </InputLabel>
+              <TextInputField
+                id="vendor_name"
+                fullWidth
+                name="vendor_name"
+                placeholder=""
+                variant="outlined"
+                margin="dense"
+                value={vendor_name}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setVendorName(e.target.value)
+                }
+                errors={state.errors.vendor_name}
+              />
+            </div>
+            <div>
+              <InputLabel htmlFor="support_name" id="name=label">
+                Customer Support Name
+              </InputLabel>
+              <TextInputField
+                id="support_name"
+                fullWidth
+                name="support_name"
+                placeholder=""
+                variant="outlined"
+                margin="dense"
+                value={support_name}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setSupportName(e.target.value)
+                }
+                errors={state.errors.support_name}
+              />
+            </div>
+            <div>
+              <InputLabel htmlFor="support_phone" id="name=label">
+                Contact Phone Number
+              </InputLabel>
+              <TextInputField
+                id="support_phone"
+                fullWidth
+                name="support_phone"
+                placeholder=""
+                variant="outlined"
+                margin="dense"
+                value={support_phone}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setSupportPhone(e.target.value)
+                }
+                errors={state.errors.support_phone}
+              />
+            </div>
+            <div>
+              <InputLabel htmlFor="support_email" id="name=label">
+                Contact Email
+              </InputLabel>
+              <TextInputField
+                id="support_email"
+                fullWidth
+                name="support_email"
+                placeholder=""
+                variant="outlined"
+                margin="dense"
+                value={support_email}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setSupportEmail(e.target.value)
+                }
+                errors={state.errors.support_email}
               />
             </div>
             <Button
