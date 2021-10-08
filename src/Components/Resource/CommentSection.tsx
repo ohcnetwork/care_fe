@@ -5,6 +5,8 @@ import { getResourceComments, addResourceComments } from "../../Redux/actions";
 import { Button } from "@material-ui/core";
 import * as Notification from "../../Utils/Notifications.js";
 import moment from "moment";
+import Pagination from "../Common/Pagination";
+import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 
 interface CommentSectionProps {
   id: string;
@@ -15,18 +17,33 @@ const CommentSection = (props: CommentSectionProps) => {
   const [comments, setComments] = useState(initialData);
   const [commentBox, setCommentBox] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [offset, setOffset] = useState(0);
+  const limit = RESULTS_PER_PAGE_LIMIT;
+
+  const handlePagination = (page: number, limit: number) => {
+    const offset = (page - 1) * limit;
+    setCurrentPage(page);
+    setOffset(offset);
+  };
+
   const fetchData = useCallback(
     async (status: statusType = { aborted: false }) => {
       setIsLoading(true);
-      const res = await dispatch(getResourceComments(props.id));
+      const res = await dispatch(
+        getResourceComments(props.id, { limit, offset })
+      );
       if (!status.aborted) {
         if (res && res.data) {
           setComments(res.data?.results);
+          setTotalCount(res.data.count);
         }
         setIsLoading(false);
       }
     },
-    [props.id, dispatch]
+    [props.id, dispatch, offset]
   );
 
   useAbortableEffect(
@@ -87,6 +104,16 @@ const CommentSection = (props: CommentSectionProps) => {
           </div>
         ))}
       </div>
+      {totalCount > limit && (
+        <div className="mt-4 flex w-full justify-center">
+          <Pagination
+            cPage={currentPage}
+            defaultPerPage={limit}
+            data={{ totalCount }}
+            onChange={handlePagination}
+          />
+        </div>
+      )}
     </div>
   );
 };
