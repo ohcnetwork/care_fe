@@ -143,6 +143,10 @@ export const UserAdd = (props: UserProps) => {
     ? [...USER_TYPES]
     : userType === "StaffReadOnly"
     ? ["StaffReadOnly"]
+    : userType === "DistrictReadOnlyAdmin"
+    ? ["StaffReadOnly", "DistrictReadOnlyAdmin"]
+    : userType === "StateReadOnlyAdmin"
+    ? ["StaffReadOnly", "DistrictReadOnlyAdmin", "StateReadOnlyAdmin"]
     : userType === "Pharmacist"
     ? ["Pharmacist"]
     : USER_TYPES.slice(0, userIndex + 1);
