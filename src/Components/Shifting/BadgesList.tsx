@@ -18,7 +18,9 @@ export default function BadgesList(props: any) {
 
         const { first_name, last_name } = res?.data?.results[0];
         setAssignedUsername(`${first_name} ${last_name}`);
-      } else setAssignedUsername("");
+      } else {
+        setAssignedUsername("");
+      }
     }
     fetchData();
   }, [dispatch, appliedFilters.assigned_to]);
