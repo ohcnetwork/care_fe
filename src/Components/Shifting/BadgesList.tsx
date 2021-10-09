@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { KASP_STRING } from "../../Common/constants";
-import { getUserList } from "../../Redux/actions";
+import { getUserList, getFacility } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 
 export default function BadgesList(props: any) {
   const { filterParams, appliedFilters, local, updateFilter } = props;
 
   const [assignedUsername, setAssignedUsername] = useState("");
+  const [assignedFacilityName, setAssignedFacilityName] = useState("");
+  const [orginFacilityName, setOrginFacilityName] = useState("");
+  const [approvingFacilityName, setApprovingFacilityName] = useState("");
   const dispatch: any = useDispatch();
 
   useEffect(() => {
@@ -24,6 +27,64 @@ export default function BadgesList(props: any) {
     }
     fetchData();
   }, [dispatch, appliedFilters.assigned_to]);
+
+  useEffect(() => {
+    async function fetchData() {
+      if (appliedFilters.orgin_facility || local.orgin_facility) {
+        const res = await dispatch(
+          getFacility(
+            appliedFilters.orgin_facility || local.orgin_facility,
+            "orgin_facility"
+          )
+        );
+
+        setOrginFacilityName(res?.data?.name);
+      } else {
+        setOrginFacilityName("");
+      }
+    }
+    fetchData();
+  }, [dispatch, appliedFilters.orgin_facility]);
+
+  useEffect(() => {
+    async function fetchData() {
+      if (
+        appliedFilters.shifting_approving_facility ||
+        local.shifting_approving_facility
+      ) {
+        const res = await dispatch(
+          getFacility(
+            appliedFilters.shifting_approving_facility ||
+              local.shifting_approving_facility,
+            "shifting_approving_facility"
+          )
+        );
+
+        setApprovingFacilityName(res?.data?.name);
+      } else {
+        setApprovingFacilityName("");
+      }
+    }
+    fetchData();
+  }, [dispatch, appliedFilters.shifting_approving_facility]);
+
+  useEffect(() => {
+    async function fetchData() {
+      if (appliedFilters.assigned_facility || local.assigned_facility) {
+        const res = await dispatch(
+          getFacility(
+            appliedFilters.assigned_facility || local.assigned_facility,
+            "assigned_facility"
+          )
+        );
+
+        setAssignedFacilityName(res?.data?.name);
+      } else {
+        setAssignedFacilityName("");
+      }
+    }
+    fetchData();
+  }, [dispatch, appliedFilters.assigned_facility]);
 
   const removeFilter = (paramKey: any) => {
     const localData: any = { ...local };
@@ -151,23 +212,11 @@ export default function BadgesList(props: any) {
 
       {badge("Assigned To", assignedUsername, "assigned_to")}
 
+      {badge("Assigned Facility", assignedFacilityName, "assigned_facility")}
+      {badge("Origin Facility", orginFacilityName, "orgin_facility")}
       {badge(
-        "Filtered By",
-        (appliedFilters.assigned_facility || local.assigned_facility) &&
-          "Assigned Facility",
-        "assigned_facility"
-      )}
-      {badge(
-        "Filtered By",
-        (appliedFilters.orgin_facility || local.orgin_facility) &&
-          "Origin Facility",
-        "orgin_facility"
-      )}
-      {badge(
-        "Filtered By",
-        (appliedFilters.shifting_approving_facility ||
-          local.shifting_approving_facility) &&
-          "Shifting Approving Facility",
+        "Shifting Approving Facility",
+        approvingFacilityName,
         "shifting_approving_facility"
       )}
     </div>
