@@ -49,7 +49,7 @@ export default function BadgesList(props: any) {
   const badge = (key: string, value: any, paramKey: any) => {
     return (
       value && (
-        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
+        <span className="inline-flex items-center px-3 py-1 mt-2 ml-2 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
           {key}
           {": "}
           {value}
@@ -62,7 +62,7 @@ export default function BadgesList(props: any) {
     );
   };
   return (
-    <div className="flex flex-wrap space-x-2 mt-2 ml-2">
+    <div className="flex flex-wrap mt-4 ml-2">
       {badge(
         "status",
         (appliedFilters.status != "--" && appliedFilters.status) ||
