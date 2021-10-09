@@ -145,6 +145,7 @@ export default function SampleViewAdmin(props: any) {
     };
     if (status === 7) {
       sampleData.result = result;
+      sampleData.date_of_result = new Date().toISOString();
     }
     const statusName = SAMPLE_TEST_STATUS.find((i) => i.id === status)?.desc;
     const res = await dispatch(patchSample(sampleData, { id: sample.id }));
@@ -238,14 +239,6 @@ export default function SampleViewAdmin(props: any) {
                     {item.fast_track}
                   </div>
                 )}
-                {item.date_of_sample && (
-                  <div>
-                    <span className="font-semibold leading-relaxed">
-                      Date of Sample:{" "}
-                    </span>
-                    {moment(item.date_of_sample).format("lll")}
-                  </div>
-                )}
                 {item.patient_has_confirmed_contact && (
                   <div>
                     <span className="font-semibold leading-relaxed">
@@ -281,6 +274,22 @@ export default function SampleViewAdmin(props: any) {
                     <WarningRoundedIcon className="text-yellow-500"></WarningRoundedIcon>
                   </div>
                 )}
+              </div>
+
+              <div className="mt-4">
+                <div className="text-gray-600 text-sm font-bold">
+                  <span className="text-gray-800">Date of Sample:</span>{" "}
+                  {item.date_of_sample
+                    ? moment(item.date_of_sample).format("lll")
+                    : "Not Available"}
+                </div>
+
+                <div className="text-gray-600 text-sm font-bold">
+                  <span className="text-gray-800">Date of Result:</span>{" "}
+                  {item.date_of_result
+                    ? moment(item.date_of_result).format("lll")
+                    : "Not Available"}
+                </div>
               </div>
 
               <div className="mt-2">
