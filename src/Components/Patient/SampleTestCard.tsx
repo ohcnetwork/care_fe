@@ -131,6 +131,28 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
             </Button>
           </div>
         )}
+        <div className="flex flex-col mt-6">
+          {
+            <div className="text-sm text-gray-700">
+              Created on {moment(itemData.created_date).format("lll")}{" "}
+              {itemData.created_by && (
+                <span>
+                  by{" "}
+                  {`${itemData.created_by?.first_name} ${itemData.created_by?.last_name} @${itemData.created_by?.username} (${itemData.created_by?.user_type})`}
+                </span>
+              )}
+            </div>
+          }
+          <div className="text-sm text-gray-700">
+            Last Modified on {moment(itemData.modified_date).format("lll")}{" "}
+            {itemData.last_edited_by && (
+              <span>
+                by{" "}
+                {`${itemData.last_edited_by?.first_name} ${itemData.last_edited_by?.last_name} @${itemData.last_edited_by?.username} (${itemData.last_edited_by?.user_type})`}
+              </span>
+            )}
+          </div>
+        </div>
         <div className="mt-4 flex flex-wrap justify-between w-full">
           <button
             onClick={(e) => navigate(`/sample/${itemData.id}`)}
