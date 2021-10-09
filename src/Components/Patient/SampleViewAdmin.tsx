@@ -196,8 +196,17 @@ export default function SampleViewAdmin(props: any) {
           >
             <div className="px-6 py-4 h-full flex flex-col justify-between">
               <div>
-                <div className="font-bold text-xl capitalize mb-2">
-                  {item.patient_name}
+                <div className="flex justify-between">
+                  <div className="font-bold text-xl capitalize mb-2">
+                    {item.patient_name}
+                  </div>
+                  <div>
+                    {item.sample_type && (
+                      <span className="bg-blue-200 text-blue-800 text-sm rounded-md font-bold px-2 py-1 mx-1 text-wrap">
+                        type: {item.sample_type}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 {item.result !== "AWAITING" && (
                   <div className="capitalize">
