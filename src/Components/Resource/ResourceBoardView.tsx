@@ -12,6 +12,7 @@ import { useDispatch } from "react-redux";
 import moment from "moment";
 import GetAppIcon from "@material-ui/icons/GetApp";
 
+import BadgesList from "./BadgesList";
 import { formatFilter } from "./Commons";
 
 const Loading = loadable(() => import("../Common/Loading"));
@@ -53,6 +54,9 @@ export default function BoardView() {
   };
 
   const appliedFilters = formatFilter(qParams);
+  const updateFilter = (params: any) => {
+    updateQuery(params);
+  };
 
   const triggerDownload = async () => {
     const res = await dispatch(
@@ -65,29 +69,6 @@ export default function BoardView() {
   const onListViewBtnClick = () => {
     navigate("/resource/list-view", qParams);
     localStorage.setItem("defaultResourceView", "list");
-  };
-
-  const removeFilter = (paramKey: any) => {
-    const params = { ...qParams };
-    console.log(params);
-    params[paramKey] = "";
-    updateQuery(params);
-  };
-
-  const badge = (key: string, value: any, paramKey: any = "") => {
-    return (
-      value && (
-        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
-          {key}
-          {": "}
-          {value}
-          <i
-            className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
-            onClick={(e) => removeFilter(paramKey)}
-          ></i>
-        </span>
-      )
-    );
   };
 
   return (
@@ -141,53 +122,9 @@ export default function BoardView() {
           </button>
         </div>
       </div>
-      <div className="flex flex-wrap space-x-2 mt-2 ml-2 space-y-1">
-        {badge("Ordering", appliedFilters.ordering, "ordering")}
-        {badge(
-          "Emergency",
-          appliedFilters.emergency === "true"
-            ? "yes"
-            : appliedFilters.emergency === "false"
-            ? "no"
-            : undefined,
-          "emergency"
-        )}
-        {badge(
-          "Modified After",
-          appliedFilters.modified_date_after,
-          "modified_date_after"
-        )}
-        {badge(
-          "Modified Before",
-          appliedFilters.modified_date_before,
-          "modified_date_before"
-        )}
-        {badge(
-          "Created Before",
-          appliedFilters.created_date_before,
-          "created_date_before"
-        )}
-        {badge(
-          "Created After",
-          appliedFilters.created_date_after,
-          "created_date_after"
-        )}
-        {badge(
-          "Filtered By",
-          appliedFilters.assigned_facility && "Assigned Facility",
-          "assigned_facility"
-        )}
-        {badge(
-          "Filtered By",
-          appliedFilters.orgin_facility && "Origin Facility",
-          "orgin_facility"
-        )}
-        {badge(
-          "Filtered By",
-          appliedFilters.approving_facility && "Resource Approving Facility",
-          "approving_facility"
-        )}
-      </div>
+
+      <BadgesList appliedFilters={appliedFilters} updateFilter={updateFilter} />
+
       <div className="flex mt-4 pb-2 flex-1 items-start overflow-x-scroll">
         {isLoading ? (
           <Loading />
