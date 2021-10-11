@@ -189,6 +189,14 @@ const AssetManage = (props: AssetManageProps) => {
             <Typography>
               Working status : {working_status(asset?.is_working)}
             </Typography>
+            <Typography>Vendor Name : {asset?.vendor_name}</Typography>
+            <Typography>
+              Customer Support Name : {asset?.support_name}
+            </Typography>
+            <Typography>
+              Contact Phone Number : {asset?.support_phone}
+            </Typography>
+            <Typography>Contact Email : {asset?.support_email}</Typography>
           </div>
           <div className="flex flex-col">
             <div className="mb-1">

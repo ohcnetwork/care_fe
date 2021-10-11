@@ -23,6 +23,10 @@ export interface AssetData {
   asset_type: "INTERNAL" | "EXTERNAL";
   location_object: AssetLocationObject;
   status: "ACTIVE" | "TRANSFER_IN_PROGRESS";
+  vendor_name: string;
+  support_name: string;
+  support_email: string;
+  support_phone: string;
 }
 
 export interface AssetsResponse {

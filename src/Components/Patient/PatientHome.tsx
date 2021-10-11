@@ -8,7 +8,7 @@ import {
 import { makeStyles } from "@material-ui/core/styles";
 import { navigate } from "raviger";
 import moment from "moment";
-import React, { Fragment, useCallback, useState } from "react";
+import React, { Fragment, useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { GENDER_TYPES, DISEASE_STATUS } from "../../Common/constants";
 import loadable from "@loadable/component";
@@ -149,6 +149,10 @@ export const PatientHome = (props: any) => {
   const [dischargeSummaryState, setDischargeSummaryForm] = useState(
     initDischargeSummaryForm
   );
+
+  useEffect(() => {
+    setAssignedVolunteerObject(patientData.assigned_to_object);
+  }, [patientData.assigned_to_object]);
 
   const handleDischargeSummaryFormChange = (e: any) => {
     const { value } = e.target;

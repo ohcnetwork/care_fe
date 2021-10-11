@@ -235,7 +235,7 @@ let make = (~hemodynamicParameter, ~updateCB, ~id, ~consultationId) => {
       <Slider
         title={"Respiratory Rate (bpm)"}
         start={"10"}
-        end={"50"}
+        end={"70"}
         interval={"5"}
         step={1.0}
         value={Belt.Option.mapWithDefault(state.resp, "", string_of_int)}

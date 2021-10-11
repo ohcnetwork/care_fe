@@ -1597,7 +1597,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                 </div>
 
                 <div className="grid gap-4 grid-cols-1 md:grid-cols-2 mt-4">
-                  {state.form.gender === "2" && (
+                  {state.form.gender == "2" && (
                     <div id="is_antenatal-div">
                       <InputLabel id="is_antenatal">Is antenatal ? </InputLabel>
                       <RadioGroup
