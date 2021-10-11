@@ -41,6 +41,8 @@ export default function ResultList() {
   const [isSubscribed, setIsSubscribed] = useState("");
   const [isSubscribing, setIsSubscribing] = useState(false);
 
+  const isIOSDevice = /(iPad|iPhone|iPod)/g.test(navigator.userAgent);
+
   const intialSubscriptionState = async () => {
     try {
       const res = await dispatch(getUserPnconfig({ username: username }));
@@ -181,7 +183,8 @@ export default function ResultList() {
           setOffset((prev) => prev - RESULT_LIMIT);
         });
     }
-    intialSubscriptionState();
+
+    if (!isIOSDevice) intialSubscriptionState();
   }, [dispatch, reload, showNotifications, offset, eventFilter, isSubscribed]);
 
   // const handlePagination = (page: number, limit: number) => {
@@ -321,36 +324,38 @@ export default function ResultList() {
                     Close
                   </button>
                 </div>
-                <div>
-                  <button
-                    onClick={handleSubscribeClick}
-                    className="inline-flex items-center font-semibold p-2 md:py-1 bg-white active:bg-gray-300 border rounded text-xs flex-shrink-0"
-                    disabled={isSubscribing}
-                  >
-                    {isSubscribing && (
-                      <svg
-                        className="animate-spin h-5 w-5 mr-3"
-                        viewBox="0 0 24 24"
-                      >
-                        <circle
-                          className="opacity-75"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="#f1edf7"
-                          fill="white"
-                          stroke-width="4"
-                        />
-                        <path
-                          className=""
-                          fill="white"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
-                      </svg>
-                    )}
-                    {getButtonText()}
-                  </button>
-                </div>
+                {!isIOSDevice && (
+                  <div>
+                    <button
+                      onClick={handleSubscribeClick}
+                      className="inline-flex items-center font-semibold p-2 md:py-1 bg-white active:bg-gray-300 border rounded text-xs flex-shrink-0"
+                      disabled={isSubscribing}
+                    >
+                      {isSubscribing && (
+                        <svg
+                          className="animate-spin h-5 w-5 mr-3"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-75"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="#f1edf7"
+                            fill="white"
+                            stroke-width="4"
+                          />
+                          <path
+                            className=""
+                            fill="white"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
+                        </svg>
+                      )}
+                      {getButtonText()}
+                    </button>
+                  </div>
+                )}
               </div>
               <div className="font-bold text-xl mt-4">Notifications</div>
             </div>
