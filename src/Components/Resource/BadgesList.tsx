@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getFacility } from "../../Redux/actions";
+import { getFacilityV2 } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 
 export default function BadgesList(props: any) {
@@ -14,7 +14,7 @@ export default function BadgesList(props: any) {
     async function fetchData() {
       if (appliedFilters.orgin_facility) {
         const res = await dispatch(
-          getFacility(appliedFilters.orgin_facility, "orgin_facility")
+          getFacilityV2(appliedFilters.orgin_facility, "orgin_facility")
         );
 
         setOrginFacilityName(res?.data?.name);
@@ -29,7 +29,7 @@ export default function BadgesList(props: any) {
     async function fetchData() {
       if (appliedFilters.approving_facility) {
         const res = await dispatch(
-          getFacility(appliedFilters.approving_facility, "approving_facility")
+          getFacilityV2(appliedFilters.approving_facility, "approving_facility")
         );
 
         setApprovingFacilityName(res?.data?.name);
@@ -44,7 +44,7 @@ export default function BadgesList(props: any) {
     async function fetchData() {
       if (appliedFilters.assigned_facility) {
         const res = await dispatch(
-          getFacility(appliedFilters.assigned_facility, "assigned_facility")
+          getFacilityV2(appliedFilters.assigned_facility, "assigned_facility")
         );
 
         setAssignedFacilityName(res?.data?.name);
