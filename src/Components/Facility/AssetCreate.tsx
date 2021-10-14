@@ -147,6 +147,12 @@ const AssetCreate = (props: AssetProps) => {
             invalidForm = true;
           }
           return;
+        case "support_phone":
+          if (!support_phone) {
+            errors[field] = "Field is required";
+            invalidForm = true;
+          }
+          return;
         default:
           return;
       }
@@ -408,7 +414,7 @@ const AssetCreate = (props: AssetProps) => {
             </div>
             <div>
               <InputLabel htmlFor="support_phone" id="name=label">
-                Contact Phone Number
+                Contact Phone Number*
               </InputLabel>
               <TextInputField
                 id="support_phone"
