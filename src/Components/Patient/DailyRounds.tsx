@@ -19,9 +19,9 @@ import {
   TELEMEDICINE_ACTIONS,
   REVIEW_AT_CHOICES,
   ADMITTED_TO,
+  RHYTHM_CHOICES,
 } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { make as Slider } from "../CriticalCareRecording/components/Slider.gen";
 import {
   NativeSelectField,
   CheckboxField,
@@ -30,6 +30,7 @@ import {
   ErrorHelperText,
   DateTimeFiled,
   MultiSelectField,
+  AutoCompleteAsyncField,
 } from "../Common/HelperInputFields";
 import {
   createDailyReport,
@@ -57,15 +58,15 @@ const initForm: any = {
   taken_at: null,
   rounds_type: "NORMAL",
   clone_last: null,
-  systolic: undefined,
-  diastolic: undefined,
-  pulse: undefined,
-  resp: undefined,
+  systolic: null,
+  diastolic: null,
+  pulse: null,
+  resp: null,
   tempInCelcius: false,
-  temperature: undefined,
+  temperature: null,
   rhythm: "0",
   rhythm_detail: "",
-  ventilator_spo2: undefined,
+  ventilator_spo2: null,
 };
 
 const initError = Object.assign(
@@ -317,6 +318,12 @@ export const DailyRounds = (props: any) => {
     dispatch({ type: "set_form", form });
   };
 
+  const handleAutoComplete = (name: any, value: any) => {
+    const form = { ...state.form };
+    form[name] = value;
+    dispatch({ type: "set_form", form });
+  };
+
   const handleDateChange = (date: any, key: string) => {
     let form = { ...state.form };
     form[key] = date;
@@ -328,6 +335,13 @@ export const DailyRounds = (props: any) => {
     const { checked, name } = e.target;
     form[name] = checked;
     dispatch({ type: "set_form", form });
+  };
+
+  const generateOptions = (start: any, end: any, step: any) => {
+    const len = Math.floor((end - start) / step) + 1;
+    return Array(len)
+      .fill(0)
+      .map((_, idx) => (start + idx * step).toFixed(2).toString());
   };
 
   const handleSymptomChange = (e: any, child?: any) => {
@@ -347,26 +361,34 @@ export const DailyRounds = (props: any) => {
     dispatch({ type: "set_form", form });
   };
 
-  const handleSliderChange = (value: any, key: string) => {
-    console.log(value);
-    const form = { ...state.form };
-    form[key] = value;
-    dispatch({ type: "set_form", form });
-  };
-
   const getStatus = (
     min: any,
     minText: string,
     max: any,
     maxText: string,
-    val: any
-  ): [string, string] => {
-    if (val >= min && val <= max) {
-      return ["Normal", "#059669"];
-    } else if (val < min) {
-      return [minText, "#DC2626"];
-    } else {
-      return [maxText, "#DC2626"];
+    name: any
+  ) => {
+    if (state.form[name]) {
+      const val = Number(state.form[name]);
+      if (val >= min && val <= max) {
+        return (
+          <p className="text-xs" style={{ color: "#059669" }}>
+            Normal
+          </p>
+        );
+      } else if (val < min) {
+        return (
+          <p className="text-xs" style={{ color: "#DC2626" }}>
+            {minText}
+          </p>
+        );
+      } else {
+        return (
+          <p className="text-xs" style={{ color: "#DC2626" }}>
+            {maxText}
+          </p>
+        );
+      }
     }
   };
 
@@ -618,154 +640,248 @@ export const DailyRounds = (props: any) => {
                   {state.form.rounds_type === "NORMAL" && (
                     <div className="mt-4">
                       <h3>Vitals</h3>
-                      <div className="mx-2 md:flex justify-between">
-                        <h4>{"BP (mm hg)"}</h4>
-                        <p>{`Mean Arterial Pressure: ${calculateMAP(
-                          state.form.systolic,
-                          state.form.diastolic
-                        )}`}</p>
-                      </div>
 
-                      <Slider
-                        title={"Systolic"}
-                        start={"0"}
-                        end={"250"}
-                        interval={"10"}
-                        step={1.0}
-                        value={state.form.systolic}
-                        setValue={(val: any) =>
-                          handleSliderChange(val, "systolic")
-                        }
-                        getLabel={(val: any) =>
-                          getStatus(100.0, "Low", 140.0, "High", val)
-                        }
-                      />
-                      <Slider
-                        title={"Diastolic"}
-                        start={"30"}
-                        end={"180"}
-                        interval={"10"}
-                        step={1.0}
-                        value={state.form.diastolic}
-                        setValue={(val: any) =>
-                          handleSliderChange(val, "diastolic")
-                        }
-                        getLabel={(val: any) =>
-                          getStatus(50.0, "Low", 90.0, "High", val)
-                        }
-                      />
-                      <Slider
-                        title={"Pulse (bpm)"}
-                        start={"0"}
-                        end={"200"}
-                        interval={"10"}
-                        step={1.0}
-                        value={state.form.pulse}
-                        setValue={(val: any) =>
-                          handleSliderChange(val, "pulse")
-                        }
-                        getLabel={(val: any) =>
-                          getStatus(
-                            40.0,
-                            "Bradycardia",
-                            100.0,
-                            "Tachycardia",
-                            val
-                          )
-                        }
-                      />
-                      <Slider
-                        title={"Temperature"}
-                        titleNeighbour={
-                          <div
-                            className="flex items-center ml-1 border border-gray-400 rounded px-4 h-10 cursor-pointer hover:bg-gray-200"
-                            onClick={toggleTemperature}
-                          >
-                            <span className="text-blue-700">
-                              {" "}
-                              {state.form.tempInCelcius ? "C" : "F"}{" "}
-                            </span>
+                      <div className="md:grid gap-x-4 grid-cols-1 md:grid-cols-2 gap-y-2 items-end">
+                        <div>
+                          <div className="flex flex-row justify-between">
+                            <h4>BP</h4>
+                            <p className="text-sm font-semibold">{`MAP: ${calculateMAP(
+                              state.form.systolic,
+                              state.form.diastolic
+                            )}`}</p>
                           </div>
-                        }
-                        start={state.form.tempInCelcius ? "35" : "95"}
-                        end={state.form.tempInCelcius ? "41" : "106"}
-                        interval={"10"}
-                        step={0.1}
-                        value={state.form.temperature}
-                        setValue={(val: any) =>
-                          handleSliderChange(val, "temperature")
-                        }
-                        getLabel={(val: any) =>
-                          state.form.tempInCelcius
-                            ? getStatus(36.4, "Low", 37.5, "High", val)
-                            : getStatus(97.6, "Low", 99.6, "High", val)
-                        }
-                      />
-                      <Slider
-                        title={"Respiratory Rate (bpm)"}
-                        start={"10"}
-                        end={"50"}
-                        interval={"5"}
-                        step={1.0}
-                        value={state.form.resp}
-                        setValue={(val: any) => handleSliderChange(val, "resp")}
-                        getLabel={(val: any) =>
-                          getStatus(12.0, "Low", 16.0, "High", val)
-                        }
-                      />
-                      <div className="mx-2">
-                        <p className="mb-2 font-bold">Rhythm</p>
-                        <RadioGroup
-                          aria-label="rhythm"
-                          name="rhythm"
-                          value={state.form.rhythm}
-                          onChange={handleChange}
-                          style={{ padding: "0px 5px" }}
-                        >
-                          <Box display="flex" flexDirection="row">
-                            <FormControlLabel
-                              value="5"
-                              control={<Radio />}
-                              label="Regular"
-                            />
-                            <FormControlLabel
-                              value="10"
-                              control={<Radio />}
-                              label="Irregular"
-                            />
-                            <FormControlLabel
-                              value="0"
-                              control={<Radio />}
-                              label="Unknown"
-                            />
-                          </Box>
-                        </RadioGroup>
-                      </div>
-                      <div className="mx-2 w-full">
-                        <p className="mb-2 font-bold">Description</p>
-                        <textarea
-                          name="rhythm_detail"
-                          className="block w-full border-gray-500 border-2 rounded px-2 py-1"
-                          rows={3}
-                          value={state.form.rhythm_detail}
-                          onChange={handleChange}
-                        />
-                      </div>
-                      <div className="mt-4">
-                        <Slider
-                          title={"SPO2 (%)"}
-                          start={"0"}
-                          end={"100"}
-                          interval={"10"}
-                          step={1.0}
-                          value={state.form.ventilator_spo2}
-                          setValue={(val: any) =>
-                            handleSliderChange(val, "ventilator_spo2")
-                          }
-                          getLabel={(val: any) =>
-                            getStatus(90.0, "Low", 100.0, "High", val)
-                          }
-                        />
+                          <div className="md:grid gap-2 grid-cols-1 md:grid-cols-2">
+                            <div>
+                              <InputLabel className="flex flex-row justify-between">
+                                Systolic
+                                {getStatus(100, "Low", 140, "High", "systolic")}
+                              </InputLabel>
+                              <AutoCompleteAsyncField
+                                name="systolic"
+                                multiple={false}
+                                variant="standard"
+                                value={state.form.systolic}
+                                options={generateOptions(0, 250, 1)}
+                                onChange={(e: any, value: any) =>
+                                  handleAutoComplete("systolic", value)
+                                }
+                                placeholder="Enter value"
+                                noOptionsText={"Invalid value"}
+                                renderOption={(option: any) => (
+                                  <div>{option} </div>
+                                )}
+                                freeSolo={false}
+                                getOptionSelected={(option: any, value: any) =>
+                                  option === value
+                                }
+                                getOptionLabel={(option: any) => option}
+                                className="-mt-3"
+                              />
+                            </div>
+                            <div>
+                              <InputLabel className="flex flex-row justify-between">
+                                Diastolic{" "}
+                                {getStatus(50, "Low", 90, "High", "diastolic")}
+                              </InputLabel>
+                              <AutoCompleteAsyncField
+                                name="diastolic"
+                                multiple={false}
+                                variant="standard"
+                                value={state.form.diastolic}
+                                options={generateOptions(30, 180, 1)}
+                                onChange={(e: any, value: any) =>
+                                  handleAutoComplete("diastolic", value)
+                                }
+                                placeholder="Enter value"
+                                noOptionsText={"Invalid value"}
+                                renderOption={(option: any) => (
+                                  <div>{option}</div>
+                                )}
+                                freeSolo={false}
+                                getOptionSelected={(option: any, value: any) =>
+                                  option === value
+                                }
+                                getOptionLabel={(option: any) => option}
+                                className="-mt-3"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                        <div>
+                          <InputLabel className="flex flex-row justify-between">
+                            {"Pulse (bpm)"}
+                            {getStatus(
+                              40,
+                              "Bradycardia",
+                              100,
+                              "Tachycardia",
+                              "pulse"
+                            )}
+                          </InputLabel>
+                          <AutoCompleteAsyncField
+                            name="pulse"
+                            multiple={false}
+                            variant="standard"
+                            value={state.form.pulse}
+                            options={generateOptions(0, 200, 1)}
+                            onChange={(e: any, value: any) =>
+                              handleAutoComplete("pulse", value)
+                            }
+                            placeholder="Enter value"
+                            noOptionsText={"Invalid value"}
+                            renderOption={(option: any) => <div>{option}</div>}
+                            freeSolo={false}
+                            getOptionSelected={(option: any, value: any) =>
+                              option === value
+                            }
+                            getOptionLabel={(option: any) => option}
+                            className="-mt-3"
+                          />
+                        </div>
+                        <div>
+                          <InputLabel className="flex flex-row justify-between">
+                            Temperature{" "}
+                            {state.form.tempInCelcius
+                              ? getStatus(
+                                  36.4,
+                                  "Low",
+                                  37.5,
+                                  "High",
+                                  "temperature"
+                                )
+                              : getStatus(
+                                  97.6,
+                                  "Low",
+                                  99.6,
+                                  "High",
+                                  "temperature"
+                                )}
+                          </InputLabel>
+                          <div className="flex flex-row">
+                            <div className="flex-grow mr-2">
+                              <AutoCompleteAsyncField
+                                name="temperature"
+                                multiple={false}
+                                variant="standard"
+                                value={state.form.temperature}
+                                options={
+                                  state.form.tempInCelcius
+                                    ? generateOptions(35, 41, 0.1)
+                                    : generateOptions(95, 106, 0.1)
+                                }
+                                onChange={(e: any, value: any) =>
+                                  handleAutoComplete("temperature", value)
+                                }
+                                placeholder="Enter value"
+                                noOptionsText={"Invalid value"}
+                                renderOption={(option: any) => (
+                                  <div>{option}</div>
+                                )}
+                                freeSolo={false}
+                                getOptionSelected={(option: any, value: any) =>
+                                  option === value
+                                }
+                                getOptionLabel={(option: any) => option}
+                                className="-mt-3"
+                              />
+                            </div>
+                            <div
+                              className="flex items-center ml-1 border border-gray-400 rounded px-4 h-10 cursor-pointer hover:bg-gray-200 max-w-min-content"
+                              onClick={toggleTemperature}
+                            >
+                              <span className="text-blue-700">
+                                {" "}
+                                {state.form.tempInCelcius ? "C" : "F"}{" "}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div>
+                          <InputLabel className="flex flex-row justify-between">
+                            {"Respiratory Rate (bpm)"}
+                            {getStatus(12, "Low", 16, "High", "resp")}
+                          </InputLabel>
+                          <AutoCompleteAsyncField
+                            name="resp"
+                            multiple={false}
+                            variant="standard"
+                            value={state.form.resp}
+                            options={generateOptions(10, 50, 1)}
+                            onChange={(e: any, value: any) =>
+                              handleAutoComplete("resp", value)
+                            }
+                            placeholder="Enter value"
+                            noOptionsText={"Invalid value"}
+                            renderOption={(option: any) => <div>{option}</div>}
+                            freeSolo={false}
+                            getOptionSelected={(option: any, value: any) =>
+                              option === value
+                            }
+                            getOptionLabel={(option: any) => option}
+                            className="-mt-3"
+                          />
+                        </div>
+                        <div>
+                          <InputLabel className="flex flex-row justify-between">
+                            {"SPO2 (%)"}
+                            {getStatus(
+                              90,
+                              "Low",
+                              100,
+                              "High",
+                              "ventilator_spo2"
+                            )}
+                          </InputLabel>
+                          <AutoCompleteAsyncField
+                            name="ventilator_spo2"
+                            multiple={false}
+                            variant="standard"
+                            value={state.form.ventilator_spo2}
+                            options={generateOptions(0, 100, 1)}
+                            onChange={(e: any, value: any) =>
+                              handleAutoComplete("ventilator_spo2", value)
+                            }
+                            placeholder="Enter value"
+                            noOptionsText={"Invalid value"}
+                            renderOption={(option: any) => <div>{option}</div>}
+                            freeSolo={false}
+                            getOptionSelected={(option: any, value: any) =>
+                              option === value
+                            }
+                            getOptionLabel={(option: any) => option}
+                            className="-mt-3"
+                          />
+                        </div>
+                        <div className="">
+                          <InputLabel className="flex flex-row justify-between">
+                            Rhythm
+                          </InputLabel>
+                          <SelectField
+                            name="rhythm"
+                            variant="standard"
+                            value={state.form.rhythm}
+                            options={RHYTHM_CHOICES}
+                            onChange={handleChange}
+                            errors={state.errors.rhythm}
+                            className="mb-2 mt-1"
+                          />
+                        </div>
+                        <div className="md:col-span-2 mt-2">
+                          <InputLabel>Rhythm Description</InputLabel>
+                          <MultilineInputField
+                            rows={5}
+                            name="rhythm_detail"
+                            variant="outlined"
+                            margin="dense"
+                            type="text"
+                            InputLabelProps={{
+                              shrink: !!state.form.rhythm_detail,
+                            }}
+                            value={state.form.rhythm_detail}
+                            onChange={handleChange}
+                            errors={state.errors.rhythm_detail}
+                          />
+                        </div>
                       </div>
                     </div>
                   )}
