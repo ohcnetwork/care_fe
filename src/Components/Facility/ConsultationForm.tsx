@@ -15,6 +15,7 @@ import moment from "moment";
 import React, {
   ChangeEventHandler,
   useCallback,
+  useEffect,
   useReducer,
   useState,
 } from "react";
@@ -33,6 +34,7 @@ import {
   createConsultation,
   getConsultation,
   updateConsultation,
+  getPatient,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { FacilitySelect } from "../Common/FacilitySelect";
@@ -194,9 +196,27 @@ export const ConsultationForm = (props: any) => {
   const [selectedFacility, setSelectedFacility] =
     useState<FacilityModel | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [patientName, setPatientName] = useState("");
+  const [facilityName, setFacilityName] = useState("");
 
   const headerText = !id ? "Consultation" : "Edit Consultation";
   const buttonText = !id ? "Add Consultation" : "Update Consultation";
+
+  useEffect(() => {
+    async function fetchPatientName() {
+      if (patientId) {
+        const res = await dispatchAction(getPatient({ id: patientId }));
+        if (res.data) {
+          setPatientName(res.data.name);
+          setFacilityName(res.data.facility_object.name);
+        }
+      } else {
+        setPatientName("");
+        setFacilityName("");
+      }
+    }
+    fetchPatientName();
+  }, [dispatchAction, patientId]);
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -351,7 +371,7 @@ export const ConsultationForm = (props: any) => {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     const [validForm, error_div] = validateForm();
-    console.log(error_div);
+
     if (!validForm) {
       scrollTo(error_div);
     } else {
@@ -509,7 +529,13 @@ export const ConsultationForm = (props: any) => {
 
   return (
     <div className="px-2 pb-2 max-w-3xl mx-auto">
-      <PageTitle title={headerText} />
+      <PageTitle
+        title={headerText}
+        crumbsReplaces={{
+          [facilityId]: facilityName,
+          [patientId]: patientName,
+        }}
+      />
       <div className="mt-4">
         <div className="bg-white rounded shadow">
           <form onSubmit={(e) => handleSubmit(e)}>
