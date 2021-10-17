@@ -8,7 +8,7 @@ interface PageTitleProps {
   backUrl?: string;
   className?: string;
   breadcrumbs?: boolean;
-  crumbs?: Array<{ name: string; uri: string }>;
+  crumbsReplaces?: { [key: string]: string };
 }
 
 const PageTitle = (props: PageTitleProps) => {
@@ -17,8 +17,8 @@ const PageTitle = (props: PageTitleProps) => {
     hideBack,
     backUrl,
     className = "",
-    breadcrumbs = false,
-    crumbs = [],
+    breadcrumbs = true,
+    crumbsReplaces = {},
   } = props;
   const goBack = () => {
     if (backUrl) {
@@ -42,7 +42,7 @@ const PageTitle = (props: PageTitleProps) => {
         <h2 className="font-semibold text-2xl leading-tight ml-0">{title}</h2>
       </div>
       <div className={hideBack ? "my-2" : "ml-8 my-2"}>
-        {breadcrumbs && <Breadcrumbs crumbs={crumbs} />}
+        {breadcrumbs && <Breadcrumbs replaces={crumbsReplaces} />}
       </div>
     </div>
   );

@@ -1,11 +1,25 @@
+import { usePath } from "raviger";
 import { useState } from "react";
 
 export default function Breadcrumbs(props: any) {
-  const { crumbs } = props;
+  const path = usePath();
+  const crumbs = path
+    .slice(1)
+    .split("/")
+    .map((field, i) => {
+      return {
+        name: field in props.replaces ? props.replaces[field] : field,
+        uri: path
+          .split("/")
+          .slice(0, i + 2)
+          .join("/"),
+      };
+    });
+
   const [showFullPath, setShowFullPath] = useState(false);
 
   return (
-    <div className="max-w-lg">
+    <div className="w-full">
       <nav className="flex" aria-label="Breadcrumb">
         <ol className="flex items-center space-x-1">
           <li>
@@ -69,7 +83,7 @@ export default function Breadcrumbs(props: any) {
           {crumbs.slice(showFullPath ? 0 : -2).map((crumb: any) => {
             return (
               crumb && (
-                <li>
+                <li key={crumb.name}>
                   <div className="flex items-center">
                     <svg
                       className="flex-shrink-0 h-5 w-5 text-gray-300"
@@ -84,7 +98,8 @@ export default function Breadcrumbs(props: any) {
                       href={crumb.uri}
                       className="ml-1 text-sm font-medium text-gray-500 hover:text-gray-700"
                     >
-                      {crumb.name}
+                      {crumb.name.slice(0, 13) +
+                        (crumb.name.length > 13 ? "..." : "")}
                     </a>
                   </div>
                 </li>
