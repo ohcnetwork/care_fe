@@ -1,18 +1,22 @@
-import { usePath } from "raviger";
+import { navigate, usePath } from "raviger";
 import { useState } from "react";
 
 export default function Breadcrumbs(props: any) {
+  const { replacements } = props;
   const path = usePath();
   const crumbs = path
     .slice(1)
     .split("/")
     .map((field, i) => {
       return {
-        name: field in props.replaces ? props.replaces[field] : field,
-        uri: path
-          .split("/")
-          .slice(0, i + 2)
-          .join("/"),
+        name: replacements[field]?.name || field,
+        uri:
+          replacements[field]?.uri ||
+          path
+            .split("/")
+            .slice(0, i + 2)
+            .join("/"),
+        style: replacements[field]?.style || "",
       };
     });
 
@@ -41,7 +45,7 @@ export default function Breadcrumbs(props: any) {
           </li>
           {!showFullPath && crumbs.length > 2 && (
             <li>
-              <div className="flex items-center">
+              <div className="flex items-center cursor-pointer">
                 <svg
                   className="flex-shrink-0 h-5 w-5 text-gray-300"
                   xmlns="http://www.w3.org/2000/svg"
@@ -82,8 +86,14 @@ export default function Breadcrumbs(props: any) {
           )}
           {crumbs.slice(showFullPath ? 0 : -2).map((crumb: any) => {
             return (
-              crumb && (
-                <li key={crumb.name}>
+              crumb.name && (
+                <li
+                  key={crumb.name}
+                  className={
+                    "text-sm font-medium text-gray-500 hover:text-gray-700 cursor-pointer " +
+                    crumb.style
+                  }
+                >
                   <div className="flex items-center">
                     <svg
                       className="flex-shrink-0 h-5 w-5 text-gray-300"
@@ -94,13 +104,10 @@ export default function Breadcrumbs(props: any) {
                     >
                       <path d="M5.555 17.776l8-16 .894.448-8 16-.894-.448z"></path>
                     </svg>
-                    <a
-                      href={crumb.uri}
-                      className="ml-1 text-sm font-medium text-gray-500 hover:text-gray-700"
-                    >
+                    <div onClick={() => navigate(crumb.uri)} className="ml-1">
                       {crumb.name.slice(0, 13) +
                         (crumb.name.length > 13 ? "..." : "")}
-                    </a>
+                    </div>
                   </div>
                 </li>
               )
