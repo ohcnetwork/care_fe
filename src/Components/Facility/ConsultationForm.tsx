@@ -531,9 +531,9 @@ export const ConsultationForm = (props: any) => {
     <div className="px-2 pb-2 max-w-3xl mx-auto">
       <PageTitle
         title={headerText}
-        crumbsReplaces={{
-          [facilityId]: facilityName,
-          [patientId]: patientName,
+        crumbsReplacements={{
+          [facilityId]: { name: facilityName },
+          [patientId]: { name: patientName },
         }}
       />
       <div className="mt-4">
