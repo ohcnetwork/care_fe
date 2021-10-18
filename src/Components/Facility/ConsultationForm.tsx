@@ -66,7 +66,7 @@ type FormDetails = {
   otherSymptom: boolean;
   symptoms: number[];
   other_symptoms: string;
-  symptoms_onset_date: string;
+  symptoms_onset_date: any;
   suggestion: string;
   patient: string;
   facility: string;
@@ -93,8 +93,8 @@ type FormDetails = {
   assigned_to_object: UserModel | null;
   cpk_mb: number;
   operation: string;
-  intubation_start_date: string | null;
-  intubation_end_date: string | null;
+  intubation_start_date: any;
+  intubation_end_date: any;
   ett_tt: number;
   cuff_pressure: number;
   special_instruction: string;
@@ -118,7 +118,7 @@ const initForm: FormDetails = {
   otherSymptom: false,
   symptoms: [],
   other_symptoms: "",
-  symptoms_onset_date: "",
+  symptoms_onset_date: null,
   suggestion: "",
   patient: "",
   facility: "",
@@ -679,7 +679,7 @@ export const ConsultationForm = (props: any) => {
         start_date: lineRequired ? start_date : undefined,
         type: lineRequired ? type : undefined,
         site: lineRequired ? site : undefined,
-        //other_type: lineRequired ? other_type : undefined,
+        other_type: lineRequired ? other_type : undefined,
       };
     });
     return payload;
@@ -782,7 +782,7 @@ export const ConsultationForm = (props: any) => {
                   <div id="symptoms_onset_date-div">
                     <DateInputField
                       label="Date of onset of the symptoms*"
-                      value={state.form.symptoms_onset_date}
+                      value={state.form?.symptoms_onset_date}
                       onChange={(date) =>
                         handleDateChange(date, "symptoms_onset_date")
                       }
@@ -1208,7 +1208,7 @@ export const ConsultationForm = (props: any) => {
                           id="intubation_start_date"
                           label="Intubated On"
                           margin="dense"
-                          value={state.form.intubation_start_date || ""}
+                          value={state.form?.intubation_start_date}
                           disableFuture={true}
                           onChange={(date) =>
                             handleDateChange(date, "intubation_start_date")
@@ -1221,7 +1221,7 @@ export const ConsultationForm = (props: any) => {
                           id="intubation_end_date"
                           label="Exhubated On"
                           margin="dense"
-                          value={state.form.intubation_end_date || ""}
+                          value={state.form?.intubation_end_date}
                           disableFuture={true}
                           onChange={(date) =>
                             handleDateChange(date, "intubation_end_date")
@@ -1332,7 +1332,7 @@ export const ConsultationForm = (props: any) => {
                       <div id="lines_insertion_date-div" className="col-span-1">
                         <DateInputField
                           label="Date of insertion"
-                          value={state.form.lines_insertion_date?.[id] || ""}
+                          value={state.form.lines_insertion_date?.[id]}
                           onChange={(date) => handleLinesDateChange(id, date)}
                           disableFuture={true}
                           errors={state.errors.lines_insertion_date}
