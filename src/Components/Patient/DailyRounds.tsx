@@ -191,12 +191,12 @@ export const DailyRounds = (props: any) => {
 
   const fahrenheitToCelcius = (x: any) => {
     const t = (Number(x) - 32.0) * (5.0 / 9.0);
-    return String(t.toFixed(2));
+    return String(t.toFixed(1));
   };
 
   const celciusToFahrenheit = (x: any) => {
     const t = (Number(x) * 9.0) / 5.0 + 32.0;
-    return String(t.toFixed(2));
+    return String(t.toFixed(1));
   };
 
   const calculateMAP = (systolic: any, diastolic: any) => {
@@ -337,11 +337,11 @@ export const DailyRounds = (props: any) => {
     dispatch({ type: "set_form", form });
   };
 
-  const generateOptions = (start: any, end: any, step: any) => {
+  const generateOptions = (start: any, end: any, step: any, decimals: any) => {
     const len = Math.floor((end - start) / step) + 1;
     return Array(len)
       .fill(0)
-      .map((_, idx) => (start + idx * step).toFixed(2).toString());
+      .map((_, idx) => (start + idx * step).toFixed(decimals).toString());
   };
 
   const handleSymptomChange = (e: any, child?: any) => {
@@ -661,7 +661,7 @@ export const DailyRounds = (props: any) => {
                                 multiple={false}
                                 variant="standard"
                                 value={state.form.systolic}
-                                options={generateOptions(0, 250, 1)}
+                                options={generateOptions(0, 250, 1, 0)}
                                 onChange={(e: any, value: any) =>
                                   handleAutoComplete("systolic", value)
                                 }
@@ -688,7 +688,7 @@ export const DailyRounds = (props: any) => {
                                 multiple={false}
                                 variant="standard"
                                 value={state.form.diastolic}
-                                options={generateOptions(30, 180, 1)}
+                                options={generateOptions(30, 180, 1, 0)}
                                 onChange={(e: any, value: any) =>
                                   handleAutoComplete("diastolic", value)
                                 }
@@ -723,7 +723,7 @@ export const DailyRounds = (props: any) => {
                             multiple={false}
                             variant="standard"
                             value={state.form.pulse}
-                            options={generateOptions(0, 200, 1)}
+                            options={generateOptions(0, 200, 1, 0)}
                             onChange={(e: any, value: any) =>
                               handleAutoComplete("pulse", value)
                             }
@@ -766,8 +766,8 @@ export const DailyRounds = (props: any) => {
                                 value={state.form.temperature}
                                 options={
                                   state.form.tempInCelcius
-                                    ? generateOptions(35, 41, 0.1)
-                                    : generateOptions(95, 106, 0.1)
+                                    ? generateOptions(35, 41, 0.1, 1)
+                                    : generateOptions(95, 106, 0.1, 1)
                                 }
                                 onChange={(e: any, value: any) =>
                                   handleAutoComplete("temperature", value)
@@ -806,7 +806,7 @@ export const DailyRounds = (props: any) => {
                             multiple={false}
                             variant="standard"
                             value={state.form.resp}
-                            options={generateOptions(10, 50, 1)}
+                            options={generateOptions(10, 50, 1, 0)}
                             onChange={(e: any, value: any) =>
                               handleAutoComplete("resp", value)
                             }
@@ -837,7 +837,7 @@ export const DailyRounds = (props: any) => {
                             multiple={false}
                             variant="standard"
                             value={state.form.ventilator_spo2}
-                            options={generateOptions(0, 100, 1)}
+                            options={generateOptions(0, 100, 1, 0)}
                             onChange={(e: any, value: any) =>
                               handleAutoComplete("ventilator_spo2", value)
                             }
