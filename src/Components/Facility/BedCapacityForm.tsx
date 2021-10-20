@@ -17,6 +17,7 @@ import {
   getCapacity,
   listCapacity,
   getCapacityBed,
+  getFacilityV2,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import {
@@ -77,6 +78,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
   const [isLastOptionType, setIsLastOptionType] = useState(false);
   const [bedTypes, setBedTypes] = useState<Array<OptionsType>>(initBedTypes);
   const [isLoading, setIsLoading] = useState(false);
+  const [facilityName, setFacilityName] = useState("");
 
   const headerText = !id ? "Add Bed Capacity" : "Edit Bed Capacity";
   const buttonText = !id
@@ -147,6 +149,19 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
     },
     [dispatch, fetchData, id]
   );
+
+  useEffect(() => {
+    async function fetchFacilityName() {
+      if (facilityId) {
+        const res = await dispatchAction(getFacilityV2(facilityId));
+
+        setFacilityName(res?.data?.name || "");
+      } else {
+        setFacilityName("");
+      }
+    }
+    fetchFacilityName();
+  }, [dispatchAction, facilityId]);
 
   useEffect(() => {
     const lastBedType =
@@ -232,7 +247,15 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
   }
   return (
     <div className="px-2">
-      <PageTitle title={headerText} />
+      <PageTitle
+        title={headerText}
+        crumbsReplacements={{
+          [facilityId]: { name: facilityName },
+          [id || "????"]: {
+            name: bedTypes.find((type) => type.id == id)?.text,
+          },
+        }}
+      />
       <div>
         <Card className="mt-4">
           <form

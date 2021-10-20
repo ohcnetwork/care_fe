@@ -66,6 +66,8 @@ const goBack = () => {
 };
 
 const AssetCreate = (props: AssetProps) => {
+  const { facilityId, assetId } = props;
+
   const [state, dispatch] = useReducer(asset_create_reducer, initialState);
   const [name, setName] = useState<string>("");
   const [asset_type, setAssetType] = useState<string>("");
@@ -82,13 +84,14 @@ const AssetCreate = (props: AssetProps) => {
   const dispatchAction: any = useDispatch();
   const [locations, setLocations] = useState([{ id: "0", name: "Select" }]);
   const [asset, setAsset] = useState<AssetData>();
+  const [facilityName, setFacilityName] = useState("");
 
-  const { facilityId, assetId } = props;
   useEffect(() => {
     setIsLoading(true);
     dispatchAction(
       listFacilityAssetLocation({}, { facility_external_id: facilityId })
     ).then(({ data }: any) => {
+      setFacilityName(data.results[0].facility.name);
       setLocations([...locations, ...data.results]);
       setIsLoading(false);
     });
@@ -203,7 +206,14 @@ const AssetCreate = (props: AssetProps) => {
 
   return (
     <div className="px-6 pb-2">
-      <PageTitle title={assetId ? "Update Asset" : "Create New Asset"} />
+      <PageTitle
+        title={assetId ? "Update Asset" : "Create New Asset"}
+        crumbsReplacements={{
+          [facilityId]: { name: facilityName },
+          assets: { style: "text-gray-200 pointer-events-none" },
+          [assetId || "????"]: { name },
+        }}
+      />
       <Card className="mt-4 max-w-lg m-auto">
         <CardContent>
           <form
