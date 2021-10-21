@@ -305,7 +305,7 @@ export const SampleDetails = (props: SampleDetailsProps) => {
 
   return (
     <div className="px-2 pb-2">
-      <PageTitle title={`Sample Test Details`} />
+      <PageTitle title="Sample Test Details" />
       {sampleDetails.patient && (
         <div className="flex justify-end">
           <Button
@@ -490,7 +490,11 @@ export const SampleDetails = (props: SampleDetailsProps) => {
         {showPatientCard(sampleDetails.patient_object)}
       </div>
 
-      <PageTitle title="Sample Test History" hideBack={true} />
+      <PageTitle
+        title="Sample Test History"
+        hideBack={true}
+        breadcrumbs={false}
+      />
       {sampleDetails.flow &&
         sampleDetails.flow.map((flow: FlowModel) => renderFlow(flow))}
 

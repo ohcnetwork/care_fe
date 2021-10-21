@@ -603,7 +603,14 @@ export const PatientHome = (props: any) => {
       )}
 
       <div id="revamp">
-        <PageTitle title={`Covid Suspect Details`} backUrl="/patients" />
+        <PageTitle
+          title={`Covid Suspect Details`}
+          backUrl="/patients"
+          crumbsReplacements={{
+            [facilityId]: { name: patientData?.facility_object?.name },
+            [id]: { name: patientData?.name },
+          }}
+        />
         <div className="relative mt-2">
           <div className="max-w-screen-xl mx-auto py-3 px-3 sm:px-6 lg:px-8">
             <div className="md:flex">
@@ -1749,7 +1756,11 @@ export const PatientHome = (props: any) => {
       </Dialog>
 
       <div>
-        <PageTitle title="Consultation History" hideBack={true} />
+        <PageTitle
+          title="Consultation History"
+          hideBack={true}
+          breadcrumbs={false}
+        />
         {consultationList}
         {!isConsultationLoading && totalConsultationCount > limit && (
           <div className="mt-4 flex w-full justify-center">
@@ -1764,7 +1775,11 @@ export const PatientHome = (props: any) => {
       </div>
 
       <div>
-        <PageTitle title="Sample Test History" hideBack={true} />
+        <PageTitle
+          title="Sample Test History"
+          hideBack={true}
+          breadcrumbs={false}
+        />
         {sampleList}
         {!isSampleLoading && totalSampleListCount > limit && (
           <div className="mt-4 flex w-full justify-center">

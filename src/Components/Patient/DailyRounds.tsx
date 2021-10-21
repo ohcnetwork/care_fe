@@ -10,7 +10,7 @@ import {
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { navigate } from "raviger";
 import loadable from "@loadable/component";
-import { useCallback, useReducer, useState } from "react";
+import { useCallback, useReducer, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import {
   CURRENT_HEALTH_CHANGE,
@@ -34,6 +34,7 @@ import {
   createDailyReport,
   getConsultationDailyRoundsDetails,
   updateDailyReport,
+  getPatient,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
 import { make as Link } from "../Common/components/Link.gen";
@@ -108,6 +109,8 @@ export const DailyRounds = (props: any) => {
   const { facilityId, patientId, consultationId, id } = props;
   const [state, dispatch] = useReducer(DailyRoundsFormReducer, initialState);
   const [isLoading, setIsLoading] = useState(false);
+  const [facilityName, setFacilityName] = useState("");
+  const [patientName, setPatientName] = useState("");
 
   const headerText = !id ? "Add Consultation Update" : "Info";
   const buttonText = !id ? "Save" : "Continue";
@@ -140,6 +143,23 @@ export const DailyRounds = (props: any) => {
     },
     [dispatchAction, fetchpatient]
   );
+
+  useEffect(() => {
+    async function fetchPatientName() {
+      if (patientId) {
+        const res = await dispatchAction(getPatient({ id: patientId }));
+        if (res.data) {
+          setPatientName(res.data.name);
+          setFacilityName(res.data.facility_object.name);
+        }
+      } else {
+        setPatientName("");
+        setFacilityName("");
+      }
+    }
+    fetchPatientName();
+  }, [dispatchAction, patientId]);
+
   const validateForm = () => {
     let errors = { ...initError };
     let invalidForm = false;
@@ -296,7 +316,13 @@ export const DailyRounds = (props: any) => {
 
   return (
     <div className="px-2 pb-2 max-w-3xl mx-auto">
-      <PageTitle title={headerText} />
+      <PageTitle
+        title={headerText}
+        crumbsReplacements={{
+          [facilityId]: { name: facilityName },
+          [patientId]: { name: patientName },
+        }}
+      />
       <div className="mt-4">
         <div className="bg-white rounded shadow">
           <form onSubmit={(e) => handleSubmit(e)}>

@@ -17,6 +17,7 @@ import {
   getDistrict,
   getLocalBody,
   getFacility,
+  getFacilityV2,
 } from "../../Redux/actions";
 import { PhoneNumberField } from "../Common/HelperInputFields";
 import NavTabs from "../Common/NavTabs";
@@ -116,7 +117,8 @@ export const PatientManager = (props: any) => {
 
   const [districtName, setDistrictName] = useState("");
   const [localbodyName, setLocalbodyName] = useState("");
-  const [facilityName, setFacilityName] = useState("");
+  const [facilityBadgeName, setFacilityBadgeName] = useState("");
+  const [facilityCrumbName, setFacilityCrumbName] = useState("");
 
   const tabValue = qParams.is_active === "False" ? 1 : 0;
 
@@ -203,6 +205,19 @@ export const PatientManager = (props: any) => {
   const handleDownloadFiltered = async () => {
     await handleDownload(true);
   };
+
+  useEffect(() => {
+    async function fetchFacilityName() {
+      if (facilityId) {
+        const res = await dispatch(getFacilityV2(facilityId));
+
+        setFacilityCrumbName(res?.data?.name || "");
+      } else {
+        setFacilityCrumbName("");
+      }
+    }
+    fetchFacilityName();
+  }, [dispatch, facilityId]);
 
   useEffect(() => {
     setIsLoading(true);
@@ -299,12 +314,12 @@ export const PatientManager = (props: any) => {
     [fetchLocalbodyName]
   );
 
-  const fetchFacilityName = useCallback(
+  const fetchFacilityBadgeName = useCallback(
     async (status: statusType) => {
       const res =
         qParams.facility && (await dispatch(getFacility(qParams.facility)));
       if (!status.aborted) {
-        setFacilityName(res?.data?.name);
+        setFacilityBadgeName(res?.data?.name);
       }
     },
     [dispatch, qParams.facility]
@@ -312,9 +327,9 @@ export const PatientManager = (props: any) => {
 
   useAbortableEffect(
     (status: statusType) => {
-      fetchFacilityName(status);
+      fetchFacilityBadgeName(status);
     },
-    [fetchFacilityName]
+    [fetchFacilityBadgeName]
   );
 
   const updateQuery = (params: any) => {
@@ -564,7 +579,12 @@ export const PatientManager = (props: any) => {
 
   return (
     <div className="px-6">
-      <PageTitle title="Patients" hideBack={!facilityId} className="mt-4" />
+      <PageTitle
+        title="Patients"
+        hideBack={!facilityId}
+        className="mt-4"
+        crumbsReplacements={{ [facilityId]: { name: facilityCrumbName } }}
+      />
       <div className="mt-5 md:grid grid-cols-1 gap-5 sm:grid-cols-3 my-4 px-2 md:px-0 relative">
         <div className="title-text flex align-center">
           <div>
@@ -749,7 +769,7 @@ export const PatientManager = (props: any) => {
             )}
           {badge("COWIN ID", qParams.covin_id, "covin_id")}
           {badge("Is Antenatal", qParams.is_antenatal, "is_antenatal")}
-          {badge("Facility", facilityName, "facility")}
+          {badge("Facility", facilityBadgeName, "facility")}
           {badge("Facility Type", qParams.facility_type, "facility_type")}
           {badge("District", districtName, "district")}
           {badge("Ordering", qParams.ordering, "ordering")}

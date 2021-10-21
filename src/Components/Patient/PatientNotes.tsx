@@ -1,7 +1,11 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getPatientNotes, addPatientNote } from "../../Redux/actions";
+import {
+  getPatientNotes,
+  addPatientNote,
+  getPatient,
+} from "../../Redux/actions";
 import { Button } from "@material-ui/core";
 import * as Notification from "../../Utils/Notifications.js";
 import moment from "moment";
@@ -17,11 +21,16 @@ interface PatientNotesProps {
 const pageSize = 14;
 
 const PatientNotes = (props: PatientNotesProps) => {
+  const { patientId, facilityId } = props;
+
   const dispatch: any = useDispatch();
   let initialData: any = { notes: [], cPage: 1, count: 1 };
   const [state, setState] = useState(initialData);
   const [noteField, setNoteField] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [facilityName, setFacilityName] = useState("");
+  const [patientName, setPatientName] = useState("");
+
   const fetchData = useCallback(
     async (page: number = 1, status: statusType = { aborted: false }) => {
       setIsLoading(true);
@@ -50,6 +59,22 @@ const PatientNotes = (props: PatientNotesProps) => {
     [fetchData]
   );
 
+  useEffect(() => {
+    async function fetchPatientName() {
+      if (patientId) {
+        const res = await dispatch(getPatient({ id: patientId }));
+        if (res.data) {
+          setPatientName(res.data.name);
+          setFacilityName(res.data.facility_object.name);
+        }
+      } else {
+        setPatientName("");
+        setFacilityName("");
+      }
+    }
+    fetchPatientName();
+  }, [dispatch, patientId]);
+
   function handlePagination(page: number) {
     fetchData(page);
   }
@@ -70,7 +95,13 @@ const PatientNotes = (props: PatientNotesProps) => {
 
   return (
     <div className="w-full flex flex-col">
-      <PageTitle title="Patient Notes" />
+      <PageTitle
+        title="Patient Notes"
+        crumbsReplacements={{
+          [facilityId]: { name: facilityName },
+          [patientId]: { name: patientName },
+        }}
+      />
       <div className=" w-full">
         {state.notes.map((note: any) => (
           <div className="flex p-4 bg-white rounded-lg text-gray-800 mt-4 flex-col w-full border border-gray-300">
