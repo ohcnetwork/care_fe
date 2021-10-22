@@ -6,7 +6,7 @@ import SampleFilter from "./SampleFilters";
 import { navigate, useQueryParams } from "raviger";
 import moment from "moment";
 import loadable from "@loadable/component";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   SAMPLE_TEST_STATUS,
@@ -15,7 +15,7 @@ import {
   SAMPLE_FLOW_RULES,
 } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getTestList, patchSample } from "../../Redux/actions";
+import { getTestList, patchSample, getFacilityV2 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
 import Pagination from "../Common/Pagination";
 import { SampleTestModel } from "./models";
@@ -42,6 +42,7 @@ export default function SampleViewAdmin(props: any) {
   const [offset, setOffset] = useState(0);
   const [fetchFlag, callFetchData] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [facilityName, setFacilityName] = useState("");
   const [statusDialog, setStatusDialog] = useState<{
     show: boolean;
     sample: SampleTestModel;
@@ -52,6 +53,19 @@ export default function SampleViewAdmin(props: any) {
     currentUser.data.user_type;
 
   const limit = 10;
+
+  useEffect(() => {
+    async function fetchData() {
+      if (qParams.facility) {
+        const res = await dispatch(getFacilityV2(qParams.facility));
+
+        setFacilityName(res?.data?.name);
+      } else {
+        setFacilityName("");
+      }
+    }
+    fetchData();
+  }, [dispatch, qParams.facility]);
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -496,10 +510,7 @@ export default function SampleViewAdmin(props: any) {
               ?.text,
             "result"
           )}
-          {qParams.facility &&
-            sample[0] &&
-            sample[0].facility_object &&
-            badge("Facility", sample[0].facility_object.name, "facility")}
+          {badge("Facility", facilityName, "facility")}
         </div>
       </div>
       <div className="px-3 md:px-8">
