@@ -177,6 +177,7 @@ export const PatientManager = (props: any) => {
     last_vaccinated_date_after: qParams.last_vaccinated_date_after || undefined,
     last_consultation_is_telemedicine:
       qParams.last_consultation_is_telemedicine || undefined,
+    is_antenatal: qParams.is_antenatal || undefined,
   };
 
   let managePatients: any = null;
@@ -257,6 +258,7 @@ export const PatientManager = (props: any) => {
     qParams.last_vaccinated_date_before,
     qParams.last_vaccinated_date_after,
     qParams.last_consultation_is_telemedicine,
+    qParams.is_antenatal,
   ]);
 
   const fetchDistrictName = useCallback(
@@ -359,7 +361,7 @@ export const PatientManager = (props: any) => {
   const badge = (key: string, value: any, paramKey: string) => {
     return (
       value && (
-        <span className="inline-flex items-center px-3 py-1 mt-2 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
+        <span className="inline-flex items-center px-3 py-1 mt-2 ml-2 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
           {key}
           {": "}
           {value}
@@ -376,7 +378,7 @@ export const PatientManager = (props: any) => {
     const badge = (key: string, value: any, id: string) => {
       return (
         value && (
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
+          <span className="inline-flex items-center px-3 py-1 mt-2 ml-2 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
             {key}
             {": "}
             {value}
@@ -679,7 +681,7 @@ export const PatientManager = (props: any) => {
             />
           </div>
         </div>
-        <div className="flex space-x-2 flex-wrap w-full col-span-3">
+        <div className="flex flex-wrap w-full col-span-3">
           {qParams.phone_number?.trim().split(" ").length - 1
             ? badge("Primary Number", qParams.phone_number, "phone_number")
             : null}
@@ -746,7 +748,7 @@ export const PatientManager = (props: any) => {
               "is_kasp"
             )}
           {badge("COWIN ID", qParams.covin_id, "covin_id")}
-
+          {badge("Is Antenatal", qParams.is_antenatal, "is_antenatal")}
           {badge("Facility", facilityName, "facility")}
           {badge("Facility Type", qParams.facility_type, "facility_type")}
           {badge("District", districtName, "district")}

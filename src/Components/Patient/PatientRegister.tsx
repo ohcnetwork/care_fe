@@ -290,11 +290,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   const parseGenderFromExt = (gender: any, defaultValue: any) => {
     switch (gender.toLowerCase()) {
       case "m":
-        return 1;
+        return "1";
       case "f":
-        return 2;
+        return "2";
       case "o":
-        return 3;
+        return "3";
       default:
         return defaultValue;
     }
@@ -1597,7 +1597,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                 </div>
 
                 <div className="grid gap-4 grid-cols-1 md:grid-cols-2 mt-4">
-                  {state.form.gender === "2" && (
+                  {state.form.gender == "2" && (
                     <div id="is_antenatal-div">
                       <InputLabel id="is_antenatal">Is antenatal ? </InputLabel>
                       <RadioGroup

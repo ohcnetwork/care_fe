@@ -125,7 +125,7 @@ const initForm: FormDetails = {
   admitted: "false",
   admitted_to: "",
   category: "",
-  admission_date: new Date().toString(),
+  admission_date: new Date().toISOString(),
   discharge_date: null,
   referred_to: "",
   diagnosis: "",
@@ -852,7 +852,7 @@ export const ConsultationForm = (props: any) => {
                   />
                 </div>
                 <div className="flex-1" id="category-div">
-                  <InputLabel id="category-label">Category *</InputLabel>
+                  <InputLabel id="category-label">Category*</InputLabel>
                   <SelectField
                     name="category"
                     variant="standard"
@@ -962,7 +962,7 @@ export const ConsultationForm = (props: any) => {
                   variant="outlined"
                   margin="dense"
                   type="text"
-                  placeholder="Information optional"
+                  placeholder="Consultation Notes..."
                   InputLabelProps={{
                     shrink: !!state.form.consultation_notes,
                   }}
@@ -1399,9 +1399,7 @@ export const ConsultationForm = (props: any) => {
                   variant="contained"
                   type="button"
                   onClick={(_) =>
-                    navigate(
-                      `/facility/${facilityId}/patient/${patientId}/consultation/${id}`
-                    )
+                    navigate(`/facility/${facilityId}/patient/${patientId}`)
                   }
                 >
                   Cancel{" "}

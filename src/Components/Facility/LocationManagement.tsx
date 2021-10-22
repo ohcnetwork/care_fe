@@ -1,19 +1,160 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import loadable from "@loadable/component";
 import { useDispatch } from "react-redux";
-import { Button } from "@material-ui/core";
+import { Button, CircularProgress } from "@material-ui/core";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { listFacilityAssetLocation } from "../../Redux/actions";
+import {
+  listFacilityAssetLocation,
+  updateFacilityAssetLocation,
+} from "../../Redux/actions";
 import { navigate } from "raviger";
 import Pagination from "../Common/Pagination";
 import { LocationModel } from "./models";
 import { ReactElement } from "react";
+import {
+  MultilineInputField,
+  TextInputField,
+} from "../Common/HelperInputFields";
+import * as Notification from "../../Utils/Notifications.js";
+import classNames from "classnames";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
 interface LocationManagementProps {
   facilityId: string;
 }
+
+interface LocationRowProps {
+  id: string;
+  facility_id: string;
+  name: string;
+  description: string;
+  triggerRerender: () => void;
+}
+
+const LocationRow = (props: LocationRowProps) => {
+  let { id, facility_id, name, description, triggerRerender } = props;
+
+  const dispatchAction: any = useDispatch();
+  const [isEditable, setIsEditable] = useState(false);
+  const [nameField, setNameField] = useState(name);
+  const [descField, setDescField] = useState(description);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSave = async () => {
+    setIsLoading(true);
+    const res = await dispatchAction(
+      updateFacilityAssetLocation(
+        { name: nameField, description: descField },
+        facility_id,
+        id
+      )
+    );
+    setIsLoading(false);
+
+    if (res && res.status === 200) {
+      Notification.Success({
+        msg: "Location updated successfully",
+      });
+    } else {
+      Notification.Error({
+        msg: "Location update failed",
+      });
+    }
+    setIsEditable(false);
+    triggerRerender();
+    // window.location.reload();
+  };
+
+  const handleCancel = () => {
+    setNameField(name);
+    setDescField(description);
+    setIsEditable(false);
+  };
+
+  return (
+    <tr key={id}>
+      <td className="px-5 py-5 border-b border-gray-200 text-sm">
+        {isEditable ? (
+          <TextInputField
+            name="name"
+            variant="outlined"
+            margin="dense"
+            type="text"
+            value={nameField}
+            onChange={(e) => setNameField(e.target.value)}
+            errors=""
+          />
+        ) : (
+          <p className="text-gray-900">
+            {name.slice(0, 25) + (name.length > 25 ? "..." : "")}
+          </p>
+        )}
+      </td>
+      <td className="px-5 py-5 border-b border-gray-200 text-sm">
+        {isEditable ? (
+          <MultilineInputField
+            rows={2}
+            name="description"
+            variant="outlined"
+            margin="dense"
+            type="float"
+            value={descField}
+            onChange={(e) => setDescField(e.target.value)}
+            errors=""
+          />
+        ) : (
+          <p className="text-gray-900 lowercase">{description}</p>
+        )}
+      </td>
+      <td className="px-5 py-5 border-b border-gray-200 text-sm">
+        {isEditable ? (
+          <div className="flex space-x-2">
+            <Button
+              color={isLoading ? "default" : "primary"}
+              variant="contained"
+              type="submit"
+              size="small"
+              style={{ marginLeft: "auto" }}
+              onClick={handleSave}
+            >
+              <CircularProgress
+                size={20}
+                className={classNames("absolute z-10", { hidden: !isLoading })}
+              />
+              <p> SAVE </p>
+            </Button>
+            <Button
+              color="secondary"
+              variant="contained"
+              type="submit"
+              size="small"
+              style={{ marginLeft: "auto" }}
+              onClick={handleCancel}
+            >
+              CANCEL
+            </Button>
+          </div>
+        ) : (
+          <Button
+            color="inherit"
+            variant="contained"
+            type="submit"
+            size="small"
+            style={{
+              marginLeft: "auto",
+              backgroundColor: "#24a0ed",
+              color: "white",
+            }}
+            onClick={() => setIsEditable(true)}
+          >
+            EDIT
+          </Button>
+        )}
+      </td>
+    </tr>
+  );
+};
 
 export const LocationManagement = (props: LocationManagementProps) => {
   const { facilityId } = props;
@@ -25,7 +166,12 @@ export const LocationManagement = (props: LocationManagementProps) => {
   const [offset, setOffset] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+  const [rerender, setRerender] = useState(false);
   const limit = 14;
+
+  const triggerRerender = () => {
+    setRerender(!rerender);
+  };
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -44,7 +190,7 @@ export const LocationManagement = (props: LocationManagementProps) => {
         setIsLoading(false);
       }
     },
-    [dispatchAction, offset]
+    [dispatchAction, offset, rerender]
   );
 
   useAbortableEffect(
@@ -62,14 +208,13 @@ export const LocationManagement = (props: LocationManagementProps) => {
 
   if (locations && locations.length) {
     locationsList = locations.map((locationItem: LocationModel) => (
-      <tr key={locationItem.id} className="">
-        <td className="px-5 py-5 border-b border-gray-200 text-sm ">
-          <p className="text-gray-900">{locationItem.name}</p>
-        </td>
-        <td className="px-5 py-5 border-b border-gray-200 text-sm ">
-          <p className="text-gray-900 lowercase">{locationItem.description}</p>
-        </td>
-      </tr>
+      <LocationRow
+        id={locationItem.id || ""}
+        facility_id={facilityId || ""}
+        name={locationItem.name || ""}
+        description={locationItem.description || ""}
+        triggerRerender={triggerRerender}
+      />
     ));
   } else if (locations && locations.length === 0) {
     locationsList = (
@@ -100,6 +245,9 @@ export const LocationManagement = (props: LocationManagementProps) => {
                 </th>
                 <th className="px-5 py-3 border-b-2 border-gray-200 bg-primary-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
                   Description
+                </th>
+                <th className="px-5 py-3 border-b-2 border-gray-200 bg-primary-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                  Manage
                 </th>
               </tr>
             </thead>

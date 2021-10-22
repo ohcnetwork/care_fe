@@ -82,7 +82,11 @@ export default function ExternalResultUpload() {
 
   return (
     <div className="px-6">
-      <PageTitle title="Upload External Results" hideBack className="mt-4" />
+      <PageTitle
+        title="Upload External Results"
+        backUrl="/external_results"
+        className="mt-4"
+      />
       <div className="max-w-3xl mx-auto mt-6">
         <div className="p-4 ">
           <div className="block text-sm leading-5 font-medium text-gray-700 sm:mt-px sm:pt-2">

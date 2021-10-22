@@ -21,8 +21,8 @@ export const USER_TYPES: Array<String> = [
   "WardAdmin",
   "LocalBodyAdmin",
   "DistrictReadOnlyAdmin",
-  "DistrictAdmin",
   "DistrictLabAdmin",
+  "DistrictAdmin",
   "StateLabAdmin",
   "StateAdmin",
   "StateReadOnlyAdmin",
@@ -41,6 +41,8 @@ export const TEST_TYPE_CHOICES: Array<OptionsType> = [
   { id: 30, text: "RTPCR" },
   { id: 40, text: "CBNAAT" },
   { id: 50, text: "TRUENAT" },
+  { id: 60, text: "RTLAMP" },
+  { id: 70, text: "POCPCR" },
 ];
 
 export const DISTRICT_CHOICES: Array<OptionsType> = [
@@ -341,7 +343,15 @@ export const DISEASE_STATUS = [
   "EXPIRED",
 ];
 
-export const TEST_TYPE = ["UNK", "ANTIGEN", "RTPCR", "CBNAAT", "TRUENAT"];
+export const TEST_TYPE = [
+  "UNK",
+  "ANTIGEN",
+  "RTPCR",
+  "CBNAAT",
+  "TRUENAT",
+  "RTLAMP",
+  "POCPCR",
+];
 
 export const VACCINES = [
   "CoviShield",

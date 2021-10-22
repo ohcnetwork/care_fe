@@ -97,6 +97,7 @@ export default function ListView({
     filterProp.is_kasp,
     filterProp.assigned_to,
     filterProp.disease_status,
+    filterProp.is_antenatal,
     filterProp.breathlessness_level,
   ]);
 

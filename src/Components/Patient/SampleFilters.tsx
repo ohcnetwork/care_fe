@@ -1,9 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { SelectField } from "../Common/HelperInputFields";
 import { SAMPLE_TEST_STATUS, SAMPLE_TEST_RESULT } from "../../Common/constants";
 import { navigate } from "raviger";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FacilityModel } from "../Facility/models";
+import { getFacilityV2 as getFacility } from "../../Redux/actions";
+import { useDispatch } from "react-redux";
+import { CircularProgress } from "@material-ui/core";
 
 const useMergeState = (initialState: any) => {
   const [state, setState] = useState(initialState);
@@ -21,6 +24,9 @@ export default function UserFilter(props: any) {
     facility: filter.facility || "",
     facility_ref: filter.facility_ref || null,
   });
+
+  const [isFacilityLoading, setFacilityLoading] = useState(false);
+  const dispatch: any = useDispatch();
 
   const clearFilterState = {
     status: "",
@@ -47,6 +53,20 @@ export default function UserFilter(props: any) {
     };
     onChange(data);
   };
+
+  useEffect(() => {
+    async function fetchData() {
+      if (filter.facility) {
+        setFacilityLoading(true);
+        const { data: facilityData } = await dispatch(
+          getFacility(filter.facility, "facility")
+        );
+        setFilterState({ ...filterState, facility_ref: facilityData });
+        setFacilityLoading(false);
+      }
+    }
+    fetchData();
+  }, [dispatch]);
 
   return (
     <div>
@@ -106,19 +126,28 @@ export default function UserFilter(props: any) {
 
         <div className="w-64 flex-none">
           <span className="text-sm font-semibold">Facility</span>
-          <FacilitySelect
-            multiple={false}
-            name="facility"
-            selected={filterState.facility_ref}
-            showAll={true}
-            setSelected={(obj) =>
-              handleChange({
-                target: { name: "facility", value: (obj as FacilityModel)?.id },
-              })
-            }
-            className="shifting-page-filter-dropdown"
-            errors={""}
-          />
+          <div className="">
+            {isFacilityLoading ? (
+              <CircularProgress size={20} />
+            ) : (
+              <FacilitySelect
+                multiple={false}
+                name="facility"
+                selected={filterState.facility_ref}
+                showAll={true}
+                setSelected={(obj) =>
+                  handleChange({
+                    target: {
+                      name: "facility",
+                      value: (obj as FacilityModel)?.id,
+                    },
+                  })
+                }
+                className="shifting-page-filter-dropdown"
+                errors={""}
+              />
+            )}
+          </div>
         </div>
       </div>
     </div>
