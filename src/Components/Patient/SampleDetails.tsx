@@ -473,6 +473,14 @@ export const SampleDetails = (props: SampleDetailsProps) => {
                 {sampleDetails.patient_travel_history}
               </div>
             )}
+            {sampleDetails.sample_type && (
+              <div className="md:col-span-2">
+                <span className="font-semibold leading-relaxed">
+                  Sample Type:{" "}
+                </span>
+                {sampleDetails.sample_type}
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

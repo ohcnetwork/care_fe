@@ -21,6 +21,7 @@ const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 const icmrCategories = [...ICMR_CATEGORY];
+const sampleTestTypes = [...SAMPLE_TYPE_CHOICES];
 
 const initForm: SampleTestModel = {
   isFastTrack: false,
@@ -178,6 +179,7 @@ export const SampleTest = (props: any) => {
     if (validForm) {
       setIsLoading(true);
       const data: SampleTestModel = {
+        date_of_sample: new Date().toISOString(),
         fast_track: state.form.isFastTrack ? state.form.fast_track : undefined,
         icmr_label: state.form.icmr_label ? state.form.icmr_label : undefined,
         facility: facilityId,
@@ -247,43 +249,50 @@ export const SampleTest = (props: any) => {
           <CardContent>
             <form onSubmit={(e) => handleSubmit(e)}>
               <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
-                <div>
-                  <InputLabel>Sample Test Type*</InputLabel>
-                  <SelectField
-                    name="sample_type"
-                    variant="outlined"
-                    margin="dense"
-                    value={state.form.sample_type}
-                    options={[...SAMPLE_TYPE_CHOICES]}
-                    onChange={handleChange}
-                    errors={state.errors.sample_type}
-                  />
+                <div className="space-y-4">
+                  <div>
+                    <InputLabel>Sample Test Type*</InputLabel>
+                    <SelectField
+                      name="sample_type"
+                      variant="outlined"
+                      margin="dense"
+                      optionArray={true}
+                      value={state.form.sample_type}
+                      options={sampleTestTypes}
+                      onChange={handleChange}
+                      errors={state.errors.sample_type}
+                    />
+                  </div>
+                  {state.form.sample_type === "OTHER TYPE" && (
+                    <div>
+                      <InputLabel>Sample Test Type Details*</InputLabel>
+                      <MultilineInputField
+                        rows={4}
+                        name="sample_type_other"
+                        variant="outlined"
+                        margin="dense"
+                        type="text"
+                        value={state.form.sample_type_other}
+                        onChange={handleChange}
+                        errors={state.errors.sample_type_other}
+                      />
+                    </div>
+                  )}
                 </div>
-                <div>
-                  <InputLabel>ICMR Category (for COVID Test)</InputLabel>
-                  <SelectField
-                    name="icmr_category"
-                    variant="outlined"
-                    margin="dense"
-                    optionArray={true}
-                    value={state.form.icmr_category}
-                    options={icmrCategories}
-                    onChange={handleChange}
-                    errors={state.errors.icmr_category}
-                  />
-                </div>
-                <div>
-                  <InputLabel>Label*</InputLabel>
-                  <TextInputField
-                    name="icmr_label"
-                    variant="outlined"
-                    margin="dense"
-                    value={state.form.icmr_label}
-                    onChange={handleChange}
-                    errors={state.errors.icmr_label}
-                  />
-                </div>
-                <div>
+                <div className="row-span-3 space-y-4">
+                  <div>
+                    <InputLabel>ICMR Category (for COVID Test)</InputLabel>
+                    <SelectField
+                      name="icmr_category"
+                      variant="outlined"
+                      margin="dense"
+                      optionArray={true}
+                      value={state.form.icmr_category}
+                      options={icmrCategories}
+                      onChange={handleChange}
+                      errors={state.errors.icmr_category}
+                    />
+                  </div>
                   <Container>
                     <InputLabel>
                       Reference below to know more about ICMR Categories
@@ -313,64 +322,61 @@ export const SampleTest = (props: any) => {
                     </Typography>
                   </Container>
                 </div>
-                <div className="flex items-center">
-                  <CheckboxField
-                    checked={state.form.isFastTrack}
-                    onChange={handleCheckboxFieldChange}
-                    name="isFastTrack"
-                    label="Is fast-track testing required?"
-                  />
+                <div className="space-y-4">
+                  <div>
+                    <InputLabel>Label*</InputLabel>
+                    <TextInputField
+                      name="icmr_label"
+                      variant="outlined"
+                      margin="dense"
+                      value={state.form.icmr_label}
+                      onChange={handleChange}
+                      errors={state.errors.icmr_label}
+                    />
+                  </div>
+                  <div className="mt-4 w-full">
+                    <InputLabel>Testing Facility Name</InputLabel>
+                    <SelectField
+                      name="testing_facility"
+                      variant="outlined"
+                      margin="dense"
+                      value={state.form.testing_facility || ""}
+                      options={facilityName.map((e) => {
+                        return { id: e.id, name: e.name };
+                      })}
+                      optionValue="name"
+                      optionKey="id"
+                      onChange={handleChange}
+                      errors={state.errors.testing_facility}
+                    />
+                  </div>
+                  <div className="flex items-center">
+                    <CheckboxField
+                      checked={state.form.isFastTrack}
+                      onChange={handleCheckboxFieldChange}
+                      name="isFastTrack"
+                      label="Is fast-track testing required?"
+                    />
+                  </div>
+                  {state.form.isFastTrack && (
+                    <div>
+                      <InputLabel>
+                        Provide reasons for fast-track testing
+                      </InputLabel>
+                      <MultilineInputField
+                        rows={4}
+                        name="fast_track"
+                        variant="outlined"
+                        margin="dense"
+                        type="text"
+                        InputLabelProps={{ shrink: !!state.form.fast_track }}
+                        value={state.form.fast_track}
+                        onChange={handleChange}
+                        errors={state.errors.fast_track}
+                      />
+                    </div>
+                  )}
                 </div>
-                {state.form.sample_type === "9" && (
-                  <div>
-                    <InputLabel>Sample Test Type Details*</InputLabel>
-                    <MultilineInputField
-                      rows={4}
-                      name="sample_type_other"
-                      variant="outlined"
-                      margin="dense"
-                      type="text"
-                      value={state.form.sample_type_other}
-                      onChange={handleChange}
-                      errors={state.errors.sample_type_other}
-                    />
-                  </div>
-                )}
-                {state.form.isFastTrack && (
-                  <div>
-                    <InputLabel>
-                      Provide reasons for fast-track testing
-                    </InputLabel>
-                    <MultilineInputField
-                      rows={4}
-                      name="fast_track"
-                      variant="outlined"
-                      margin="dense"
-                      type="text"
-                      InputLabelProps={{ shrink: !!state.form.fast_track }}
-                      value={state.form.fast_track}
-                      onChange={handleChange}
-                      errors={state.errors.fast_track}
-                    />
-                  </div>
-                )}
-              </div>
-              <InputLabel>Testing Facility Name</InputLabel>
-
-              <div className="mt-2 w-1/3 ">
-                <SelectField
-                  name="testing_facility"
-                  variant="outlined"
-                  margin="dense"
-                  value={state.form.testing_facility || ""}
-                  options={facilityName.map((e) => {
-                    return { id: e.id, name: e.name };
-                  })}
-                  optionValue="name"
-                  optionKey="id"
-                  onChange={handleChange}
-                  errors={state.errors.testing_facility}
-                />
               </div>
               <div className="mt-4 grid gap-4 grid-cols-1 md:grid-cols-2">
                 <div>
@@ -392,6 +398,21 @@ export const SampleTest = (props: any) => {
                     label="Is atypical presentation?"
                   />
                 </div>
+                {state.form.is_atypical_presentation && (
+                  <div>
+                    <InputLabel>Atypical presentation details*</InputLabel>
+                    <MultilineInputField
+                      rows={4}
+                      name="atypical_presentation"
+                      variant="outlined"
+                      margin="dense"
+                      type="text"
+                      value={state.form.atypical_presentation}
+                      onChange={handleChange}
+                      errors={state.errors.atypical_presentation}
+                    />
+                  </div>
+                )}
                 <div>
                   <InputLabel>Diagnosis</InputLabel>
                   <MultilineInputField
@@ -431,21 +452,6 @@ export const SampleTest = (props: any) => {
                     errors={state.errors.diff_diagnosis}
                   />
                 </div>
-                {state.form.is_atypical_presentation && (
-                  <div>
-                    <InputLabel>Atypical presentation details*</InputLabel>
-                    <MultilineInputField
-                      rows={4}
-                      name="atypical_presentation"
-                      variant="outlined"
-                      margin="dense"
-                      type="text"
-                      value={state.form.atypical_presentation}
-                      onChange={handleChange}
-                      errors={state.errors.atypical_presentation}
-                    />
-                  </div>
-                )}
               </div>
               <div className="mt-4 grid gap-4 grid-cols-1 md:grid-cols-2">
                 <div className="flex items-center">

@@ -5,6 +5,8 @@ import { getResourceComments, addResourceComments } from "../../Redux/actions";
 import { Button } from "@material-ui/core";
 import * as Notification from "../../Utils/Notifications.js";
 import moment from "moment";
+import Pagination from "../Common/Pagination";
+import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 
 interface CommentSectionProps {
   id: string;
@@ -15,18 +17,33 @@ const CommentSection = (props: CommentSectionProps) => {
   const [comments, setComments] = useState(initialData);
   const [commentBox, setCommentBox] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [offset, setOffset] = useState(0);
+  const limit = RESULTS_PER_PAGE_LIMIT;
+
+  const handlePagination = (page: number, limit: number) => {
+    const offset = (page - 1) * limit;
+    setCurrentPage(page);
+    setOffset(offset);
+  };
+
   const fetchData = useCallback(
     async (status: statusType = { aborted: false }) => {
       setIsLoading(true);
-      const res = await dispatch(getResourceComments(props.id));
+      const res = await dispatch(
+        getResourceComments(props.id, { limit, offset })
+      );
       if (!status.aborted) {
         if (res && res.data) {
           setComments(res.data?.results);
+          setTotalCount(res.data.count);
         }
         setIsLoading(false);
       }
     },
-    [props.id, dispatch]
+    [props.id, dispatch, offset]
   );
 
   useAbortableEffect(
@@ -44,10 +61,26 @@ const CommentSection = (props: CommentSectionProps) => {
       Notification.Success({ msg: "Comment added successfully" });
       fetchData();
     });
+    setCommentBox("");
   };
 
   return (
     <div className="w-full flex flex-col">
+      <textarea
+        rows={3}
+        placeholder="Type your comment"
+        className="mt-4 border border-gray-500 rounded-lg p-4"
+        value={commentBox}
+        onChange={(e) => setCommentBox(e.target.value)}
+      />
+      <div className="flex w-full justify-end">
+        <Button
+          onClick={onSubmitComment}
+          className="border border-solid border-primary-600 hover:border-primary-700 text-primary-600 hover:bg-white capitalize my-2 text-sm"
+        >
+          Post Your Comment
+        </Button>
+      </div>
       <div className=" w-full">
         {comments.map((comment: any) => (
           <div className="flex p-4 bg-white rounded-lg text-gray-800 mt-4 flex-col w-full border border-gray-300">
@@ -71,20 +104,16 @@ const CommentSection = (props: CommentSectionProps) => {
           </div>
         ))}
       </div>
-      <textarea
-        rows={3}
-        placeholder="Type your comment"
-        className="mt-4 border border-gray-500 rounded-lg p-4"
-        onChange={(e) => setCommentBox(e.target.value)}
-      />
-      <div className="flex w-full justify-end">
-        <Button
-          onClick={onSubmitComment}
-          className="border border-solid border-primary-600 hover:border-primary-700 text-primary-600 hover:bg-white capitalize my-2 text-sm"
-        >
-          Post Your Comment
-        </Button>
-      </div>
+      {totalCount > limit && (
+        <div className="mt-4 flex w-full justify-center">
+          <Pagination
+            cPage={currentPage}
+            defaultPerPage={limit}
+            data={{ totalCount }}
+            onChange={handlePagination}
+          />
+        </div>
+      )}
     </div>
   );
 };

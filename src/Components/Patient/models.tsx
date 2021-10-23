@@ -145,6 +145,10 @@ export interface SampleTestModel {
   fast_track?: string;
   isFastTrack?: boolean;
   flow?: Array<FlowModel>;
+  created_by?: any;
+  last_edited_by?: any;
+  created_date?: string;
+  modified_date?: string;
 }
 
 export interface SampleReportModel {

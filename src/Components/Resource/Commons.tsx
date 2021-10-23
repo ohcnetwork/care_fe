@@ -41,15 +41,3 @@ export const formatFilter = (params: any) => {
     ordering: filter.ordering || undefined,
   };
 };
-
-// export const badge = (key: string, value: any) => {
-//   return (
-//     value && (
-//       <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
-//         {key}
-//         {": "}
-//         {value}
-//       </span>
-//     )
-//   );
-// };

@@ -41,6 +41,7 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
     };
     if (status === 7) {
       sampleData.result = result;
+      sampleData.date_of_result = new Date().toISOString();
     }
     const statusName = SAMPLE_TEST_STATUS.find((i) => i.id === status)?.desc;
 
@@ -98,19 +99,24 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
               {itemData.fast_track}
             </div>
           )}
-          {itemData.date_of_result && (
-            <div>
-              <span className="text-gray-700">Tested on :</span>{" "}
-              {moment(itemData.date_of_result).format("lll")}
-            </div>
-          )}
-          {itemData.date_of_result && (
-            <div>
-              <span className="text-gray-700">Result on:</span>{" "}
-              {moment(itemData.date_of_result).format("lll")}
-            </div>
-          )}
         </div>
+
+        <div className="mt-4">
+          <div className="text-gray-600 text-sm font-bold">
+            <span className="text-gray-800">Date of Sample:</span>{" "}
+            {itemData.date_of_sample
+              ? moment(itemData.date_of_sample).format("lll")
+              : "Not Available"}
+          </div>
+
+          <div className="text-gray-600 text-sm font-bold">
+            <span className="text-gray-800">Date of Result:</span>{" "}
+            {itemData.date_of_result
+              ? moment(itemData.date_of_result).format("lll")
+              : "Not Available"}
+          </div>
+        </div>
+
         {itemData.status === "APPROVED" && (
           <div className="mt-4">
             <Button
@@ -125,6 +131,28 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
             </Button>
           </div>
         )}
+        <div className="flex flex-col mt-6">
+          {
+            <div className="text-sm text-gray-700">
+              Created on {moment(itemData.created_date).format("lll")}{" "}
+              {itemData.created_by && (
+                <span>
+                  by{" "}
+                  {`${itemData.created_by?.first_name} ${itemData.created_by?.last_name} @${itemData.created_by?.username} (${itemData.created_by?.user_type})`}
+                </span>
+              )}
+            </div>
+          }
+          <div className="text-sm text-gray-700">
+            Last Modified on {moment(itemData.modified_date).format("lll")}{" "}
+            {itemData.last_edited_by && (
+              <span>
+                by{" "}
+                {`${itemData.last_edited_by?.first_name} ${itemData.last_edited_by?.last_name} @${itemData.last_edited_by?.username} (${itemData.last_edited_by?.user_type})`}
+              </span>
+            )}
+          </div>
+        </div>
         <div className="mt-4 flex flex-wrap justify-between w-full">
           <button
             onClick={(e) => navigate(`/sample/${itemData.id}`)}

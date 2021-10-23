@@ -8,7 +8,7 @@ import {
 import { makeStyles } from "@material-ui/core/styles";
 import { navigate } from "raviger";
 import moment from "moment";
-import React, { Fragment, useCallback, useState } from "react";
+import React, { Fragment, useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { GENDER_TYPES, DISEASE_STATUS } from "../../Common/constants";
 import loadable from "@loadable/component";
@@ -149,6 +149,10 @@ export const PatientHome = (props: any) => {
   const [dischargeSummaryState, setDischargeSummaryForm] = useState(
     initDischargeSummaryForm
   );
+
+  useEffect(() => {
+    setAssignedVolunteerObject(patientData.assigned_to_object);
+  }, [patientData.assigned_to_object]);
 
   const handleDischargeSummaryFormChange = (e: any) => {
     const { value } = e.target;
@@ -855,7 +859,7 @@ export const PatientHome = (props: any) => {
                   <div className="flex justify-between">
                     <div className="w-1/2 border-r-2 truncate">
                       <div className="text-sm leading-5 font-medium text-gray-500">
-                        Disease Status
+                        COVID <br /> Disease Status
                       </div>
                       <div className="mt-1 text-xl font-semibold leading-5 text-gray-900">
                         {patientData.disease_status}
