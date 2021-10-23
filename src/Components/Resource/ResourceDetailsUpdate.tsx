@@ -76,6 +76,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
   const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState(true);
   const [assignedQuantity, setAssignedQuantity] = useState(0);
+  const [requestTitle, setRequestTitle] = useState("");
 
   const resourceFormReducer = (state = initialState, action: any) => {
     switch (action.type) {
@@ -176,6 +177,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
       const res = await dispatchAction(getResourceDetails({ id: props.id }));
       if (!status.aborted) {
         if (res && res.data) {
+          setRequestTitle(res.data.title);
           setAssignedQuantity(res.data.assigned_quantity);
           dispatch({ type: "set_form", form: res.data });
         }
@@ -198,7 +200,10 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
 
   return (
     <div className="px-2 pb-2">
-      <PageTitle title={"Update Resource Request"} />
+      <PageTitle
+        title={"Update Resource Request"}
+        crumbsReplacements={{ [props.id]: { name: requestTitle } }}
+      />
       <div className="mt-4">
         <Card>
           <CardContent>

@@ -7,6 +7,7 @@ interface PageTitleProps {
   hideBack?: boolean;
   backUrl?: string;
   className?: string;
+  componentRight?: React.ReactChild;
   breadcrumbs?: boolean;
   crumbsReplacements?: {
     [key: string]: { name?: string; uri?: string; style?: string };
@@ -19,6 +20,7 @@ const PageTitle = (props: PageTitleProps) => {
     hideBack,
     backUrl,
     className = "",
+    componentRight = () => <></>,
     breadcrumbs = true,
     crumbsReplacements = {},
   } = props;
@@ -40,8 +42,8 @@ const PageTitle = (props: PageTitleProps) => {
             </i>
           </button>
         )}
-
         <h2 className="font-semibold text-2xl leading-tight ml-0">{title}</h2>
+        {componentRight}
       </div>
       <div className={hideBack ? "my-2" : "ml-8 my-2"}>
         {breadcrumbs && <Breadcrumbs replacements={crumbsReplacements} />}
