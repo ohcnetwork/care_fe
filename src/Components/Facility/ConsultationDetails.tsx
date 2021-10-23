@@ -391,7 +391,7 @@ export const ConsultationDetails = (props: any) => {
                     <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
                       Notes
                     </h3>
-                    <div className="mt-2">
+                    <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
                       {consultationData.diagnosis && (
                         <div>
                           <h5>Diagnosis</h5>
@@ -425,39 +425,35 @@ export const ConsultationDetails = (props: any) => {
                     <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
                       Date/Size/LL:{" "}
                     </h3>
-                    <div className="mt-2">
-                      <table>
-                        <tbody>
-                          <tr className="">
-                            <td className="pr-15">Intubation Date</td>
-                            <td className="font-semibold">
-                              {moment(
-                                consultationData.intubation_start_date
-                              ).format("lll")}
-                            </td>
-                          </tr>
-                          <tr className="">
-                            <td className="pr-15">Extubation Date</td>
-                            <td className="font-semibold">
-                              {moment(
-                                consultationData.intubation_end_date
-                              ).format("lll")}
-                            </td>
-                          </tr>
-                          <tr className="">
-                            <td className="pr-15">ETT/TT (mmid)</td>
-                            <td className="font-semibold">
-                              {consultationData.ett_tt}
-                            </td>
-                          </tr>
-                          <tr className="">
-                            <td className="pr-15">Cuff Pressure (mmhg)</td>
-                            <td className="font-semibold">
-                              {consultationData.cuff_pressure}
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
+                    <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
+                      <div className="">
+                        Intubation Date{" - "}
+                        <span className="font-semibold">
+                          {moment(
+                            consultationData.intubation_start_date
+                          ).format("lll")}
+                        </span>
+                      </div>
+                      <div className="">
+                        Extubation Date{" - "}
+                        <span className="font-semibold">
+                          {moment(consultationData.intubation_end_date).format(
+                            "lll"
+                          )}
+                        </span>
+                      </div>
+                      <div className="">
+                        ETT/TT (mmid){" - "}
+                        <span className="font-semibold">
+                          {consultationData.ett_tt}
+                        </span>
+                      </div>
+                      <div className="">
+                        Cuff Pressure (mmhg){" - "}
+                        <span className="font-semibold">
+                          {consultationData.cuff_pressure}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -467,16 +463,14 @@ export const ConsultationDetails = (props: any) => {
                     <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
                       Lines and Catheters
                     </h3>
-                    <div className="mt-2">
+                    <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
                       {consultationData.lines?.map((line: any) => (
                         <div className="mt-4">
                           <h5>{line.type}</h5>
-                          <p>
+                          <p className="text-justify break-word">
                             Details:
                             <br />
-                            <span className="text-justify break-word">
-                              {line.other_type}
-                            </span>
+                            <span>{line.other_type}</span>
                           </p>
                           <p>
                             Insertion Date:{" "}
@@ -501,52 +495,48 @@ export const ConsultationDetails = (props: any) => {
                     <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
                       Body Details
                     </h3>
-                    <div className="mt-2">
-                      <table>
-                        <tbody>
-                          <tr className="">
-                            <td className="pr-15">Gender</td>
-                            <td className="font-semibold">
-                              {patientData.gender || "-"}
-                            </td>
-                          </tr>
-                          <tr>
-                            <td className="pr-15">Age</td>
-                            <td className="font-semibold">
-                              {patientData.age || "-"}
-                            </td>
-                          </tr>
-                          <tr>
-                            <td className="pr-15">Weight</td>
-                            <td className="font-semibold">
-                              {consultationData.weight || "-"} Kg
-                            </td>
-                          </tr>
-                          <tr>
-                            <td className="pr-15">Height</td>
-                            <td className="font-semibold">
-                              {consultationData.height || "-"} cm
-                            </td>
-                          </tr>
-                          <tr>
-                            <td className="pr-15">Body Surface Area</td>
-                            <td className="font-semibold">
-                              {Math.sqrt(
-                                (Number(consultationData.weight) *
-                                  Number(consultationData.height)) /
-                                  3600
-                              ).toFixed(2)}{" "}
-                              m<sup>2</sup>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td className="pr-15">Blood Group</td>
-                            <td className="font-semibold">
-                              {patientData.blood_group || "-"}
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
+                    <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+                      <div>
+                        Gender {" - "}
+                        <span className="font-semibold">
+                          {patientData.gender || "-"}
+                        </span>
+                      </div>
+                      <div>
+                        Age {" - "}
+                        <span className="font-semibold">
+                          {patientData.age || "-"}
+                        </span>
+                      </div>
+                      <div>
+                        Weight {" - "}
+                        <span className="font-semibold">
+                          {consultationData.weight || "-"} Kg
+                        </span>
+                      </div>
+                      <div>
+                        Height {" - "}
+                        <span className="font-semibold">
+                          {consultationData.height || "-"} cm
+                        </span>
+                      </div>
+                      <div>
+                        Body Surface Area {" - "}
+                        <span className="font-semibold">
+                          {Math.sqrt(
+                            (Number(consultationData.weight) *
+                              Number(consultationData.height)) /
+                              3600
+                          ).toFixed(2)}{" "}
+                          m<sup>2</sup>
+                        </span>
+                      </div>
+                      <div>
+                        Blood Group {" - "}
+                        <span className="font-semibold">
+                          {patientData.blood_group || "-"}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
