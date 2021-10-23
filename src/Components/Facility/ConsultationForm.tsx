@@ -670,19 +670,15 @@ export const ConsultationForm = (props: any) => {
   };
 
   const createLinesPayload = () => {
-    const payload = state.form.lines.map((id: any) => {
-      const type = lineIdToString(id);
-      const other_type = id === 7 ? state.form.other_lines : "";
-      const start_date = state.form.lines_insertion_date[id];
-      const site = state.form.lines_site_level_fixation[id];
+    if (!lineRequired) return [];
+    return state.form.lines.map((id: any) => {
       return {
-        start_date: lineRequired ? start_date : undefined,
-        type: lineRequired ? type : undefined,
-        site: lineRequired ? site : undefined,
-        other_type: lineRequired ? other_type : undefined,
+        start_date: state.form.lines_insertion_date[id],
+        type: lineIdToString(id),
+        site: state.form.lines_site_level_fixation[id],
+        other_type: id === 7 ? state.form.other_lines : "",
       };
     });
-    return payload;
   };
 
   // ------------- DEPRECATED -------------
