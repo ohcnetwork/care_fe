@@ -1320,7 +1320,8 @@ export const ConsultationForm = (props: any) => {
                 </div>
               )}
 
-              {state.form.hasLines &&
+              {lineRequired &&
+                state.form.hasLines &&
                 state.form.lines.map((id: any) => (
                   <div className="my-5" key={`lines_${id}`}>
                     <InputLabel
