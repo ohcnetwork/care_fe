@@ -1,20 +1,18 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
-import {
-  getLocalbodyByDistrict,
-  getLocalbodyByName,
-} from "../../../Redux/actions";
+import { getLocalbodyByDistrict } from "../../../Redux/actions";
 import { AutoCompleteAsyncField } from "../../Common/HelperInputFields";
-const debounce = require("lodash.debounce");
 
 interface LocalBodySelectProps {
   name: string;
-  errors: string;
+  errors?: string;
   className?: string;
   multiple?: boolean;
   searchAll?: boolean;
   selected: string;
   margin?: string;
+  district?: string;
+  isLoading?: (loading: boolean) => void;
   setSelected: (selected: string) => void;
 }
 
@@ -28,43 +26,60 @@ function LocalBodySelect(props: LocalBodySelectProps) {
     searchAll,
     setSelected,
     margin,
+    district,
   } = props;
   const [loadBodyLoading, isLocalBodyLoading] = useState(false);
+  const [selectedObject, setSelectedObject] = useState(null);
   const [hasSearchText, setHasSearchText] = useState(false);
+  const [districtLocalBodies, setDistrictLocalBodies] = useState([]);
   const [localBodyList, setLocalBodyList] = useState([]);
   const dispatchAction: any = useDispatch();
 
-  const handleValueChange = (current: string) => {
-    if (!current) {
-      setLocalBodyList([]);
-      isLocalBodyLoading(false);
-      setHasSearchText(false);
-    }
-    setSelected(current);
+  const handleValueChange = (local_body: any) => {
+    setSelectedObject(local_body);
+    setSelected(local_body?.id);
   };
 
   const handleSearch = (e: any) => {
+    const searchTerm = e.target.value;
     isLocalBodyLoading(true);
-    setHasSearchText(!!e.target.value);
-    onLocalBodySearch(e.target.value);
+    setHasSearchText(!!searchTerm);
+
+    setLocalBodyList(
+      districtLocalBodies.filter((local_body: any) =>
+        local_body.name.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    );
+    isLocalBodyLoading(false);
   };
 
-  const onLocalBodySearch = useCallback(
-    debounce(async (text: string) => {
-      if (text) {
-        const params = { limit: 50, offset: 0, local_body_name: text };
-        const res = await dispatchAction(getLocalbodyByName(params));
+  useEffect(() => {
+    const fetchLocalbodies = async () => {
+      if (Number(district)) {
+        const res = await dispatchAction(
+          getLocalbodyByDistrict({ id: district })
+        );
         if (res && res.data) {
-          setLocalBodyList(res.data.results);
+          setDistrictLocalBodies(res.data);
+          setLocalBodyList(res.data);
+
+          if (selected) {
+            setSelectedObject(
+              res.data.find((local_body: any) => local_body.id == selected) ||
+                null
+            );
+          }
         }
-        isLocalBodyLoading(false);
       } else {
+        setDistrictLocalBodies([]);
         setLocalBodyList([]);
-        isLocalBodyLoading(false);
       }
-    }, 300),
-    []
-  );
+    };
+
+    isLocalBodyLoading(true);
+    fetchLocalbodies();
+    isLocalBodyLoading(false);
+  }, [dispatchAction, district]);
 
   return (
     <AutoCompleteAsyncField
@@ -72,7 +87,7 @@ function LocalBodySelect(props: LocalBodySelectProps) {
       multiple={multiple}
       variant="outlined"
       margin={margin}
-      value={selected}
+      value={selectedObject}
       options={localBodyList}
       onSearch={handleSearch}
       onChange={(e: any, selected: any) => handleValueChange(selected)}

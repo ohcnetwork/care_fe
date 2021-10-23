@@ -33,6 +33,10 @@ const initError: any = {
   serial_number: "",
   warranty_details: "",
   location: "",
+  vendor_name: "",
+  support_name: "",
+  support_phone: "",
+  support_email: "",
 };
 
 const initialState = {
@@ -65,10 +69,15 @@ const AssetCreate = (props: AssetProps) => {
   const [state, dispatch] = useReducer(asset_create_reducer, initialState);
   const [name, setName] = useState<string>("");
   const [asset_type, setAssetType] = useState<string>("");
+  const [not_working_reason, setNotWorkingReason] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [is_working, setIsWorking] = useState<string>();
   const [serial_number, setSerialNumber] = useState<string>("");
   const [warranty_details, setWarrantyDetails] = useState<string>("");
+  const [vendor_name, setVendorName] = useState<string>("");
+  const [support_name, setSupportName] = useState<string>("");
+  const [support_phone, setSupportPhone] = useState<string>("");
+  const [support_email, setSupportEmail] = useState<string>("");
   const [location, setLocation] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const dispatchAction: any = useDispatch();
@@ -101,8 +110,13 @@ const AssetCreate = (props: AssetProps) => {
       setLocation(asset.location_object.id);
       setAssetType(asset.asset_type);
       setIsWorking(String(asset.is_working));
+      setNotWorkingReason(asset.not_working_reason);
       setSerialNumber(asset.serial_number);
       setWarrantyDetails(asset.warranty_details);
+      setVendorName(asset.vendor_name);
+      setSupportName(asset.support_name);
+      setSupportEmail(asset.support_email);
+      setSupportPhone(asset.support_phone);
     }
   }, [asset]);
 
@@ -157,9 +171,14 @@ const AssetCreate = (props: AssetProps) => {
         asset_type: asset_type,
         description: description,
         is_working: is_working,
+        not_working_reason: is_working === "true" ? "" : not_working_reason,
         serial_number: serial_number,
         warranty_details: warranty_details,
         location: location,
+        vendor_name: vendor_name,
+        support_name: support_name,
+        support_email: support_email,
+        support_phone: support_phone,
       };
       if (!assetId) {
         const res = await dispatchAction(createAsset(data));
@@ -299,6 +318,27 @@ const AssetCreate = (props: AssetProps) => {
                 errors={state.errors.is_working}
               />
             </div>
+            {is_working === "false" && (
+              <div>
+                <InputLabel htmlFor="description" id="name=label">
+                  Reason
+                </InputLabel>
+                <MultilineInputField
+                  id="not_working_reason"
+                  rows={3}
+                  fullWidth
+                  name="description"
+                  placeholder=""
+                  variant="outlined"
+                  margin="dense"
+                  value={not_working_reason}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setNotWorkingReason(e.target.value)
+                  }
+                  errors={state.errors.not_working_reason}
+                />
+              </div>
+            )}
             <div>
               <InputLabel htmlFor="description" id="name=label">
                 Description
@@ -352,6 +392,78 @@ const AssetCreate = (props: AssetProps) => {
                   setWarrantyDetails(e.target.value)
                 }
                 errors={state.errors.warranty_details}
+              />
+            </div>
+            <div>
+              <InputLabel htmlFor="vendor_name" id="name=label">
+                Vendor Name
+              </InputLabel>
+              <TextInputField
+                id="vendor_name"
+                fullWidth
+                name="vendor_name"
+                placeholder=""
+                variant="outlined"
+                margin="dense"
+                value={vendor_name}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setVendorName(e.target.value)
+                }
+                errors={state.errors.vendor_name}
+              />
+            </div>
+            <div>
+              <InputLabel htmlFor="support_name" id="name=label">
+                Customer Support Name
+              </InputLabel>
+              <TextInputField
+                id="support_name"
+                fullWidth
+                name="support_name"
+                placeholder=""
+                variant="outlined"
+                margin="dense"
+                value={support_name}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setSupportName(e.target.value)
+                }
+                errors={state.errors.support_name}
+              />
+            </div>
+            <div>
+              <InputLabel htmlFor="support_phone" id="name=label">
+                Contact Phone Number
+              </InputLabel>
+              <TextInputField
+                id="support_phone"
+                fullWidth
+                name="support_phone"
+                placeholder=""
+                variant="outlined"
+                margin="dense"
+                value={support_phone}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setSupportPhone(e.target.value)
+                }
+                errors={state.errors.support_phone}
+              />
+            </div>
+            <div>
+              <InputLabel htmlFor="support_email" id="name=label">
+                Contact Email
+              </InputLabel>
+              <TextInputField
+                id="support_email"
+                fullWidth
+                name="support_email"
+                placeholder=""
+                variant="outlined"
+                margin="dense"
+                value={support_email}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setSupportEmail(e.target.value)
+                }
+                errors={state.errors.support_email}
               />
             </div>
             <Button

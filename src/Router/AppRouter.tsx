@@ -60,8 +60,8 @@ import AssetManage from "../Components/Assets/AssetManage";
 import { DailyRoundListDetails } from "../Components/Patient/DailyRoundListDetails";
 
 const get = require("lodash.get");
-const img = "https://cdn.coronasafe.network/light-logo.svg";
-const logoBlack = "https://cdn.coronasafe.network/black-logo.svg";
+const img = process.env.REACT_APP_LIGHT_LOGO;
+const logoBlack = process.env.REACT_APP_BLACK_LOGO;
 
 const routes = {
   "/critical_care_ventilator": () => (
@@ -488,7 +488,7 @@ const AppRouter = (props: any) => {
                   <NotificationsList />
                   <a
                     key="dashboard"
-                    href="http://dashboard.coronasafe.network/"
+                    href={process.env.REACT_APP_DASHBOARD_URL}
                     className="mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-primary-300 rounded-md hover:text-white hover:bg-primary-700 focus:outline-none focus:bg-primary-900 transition ease-in-out duration-150"
                   >
                     <i className="fas fa-tachometer-alt text-primary-400 mr-3 text-md group-hover:text-primary-300 group-focus:text-primary-300 transition ease-in-out duration-150"></i>
@@ -569,7 +569,7 @@ const AppRouter = (props: any) => {
               <NotificationsList />
               <a
                 key="dashboard"
-                href="http://dashboard.coronasafe.network/"
+                href={process.env.REACT_APP_DASHBOARD_URL}
                 target="_blank"
                 rel="noreferrer"
                 className="mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-primary-300 rounded-md hover:text-white hover:bg-primary-700 focus:outline-none focus:bg-primary-900 transition ease-in-out duration-150"

@@ -6,7 +6,7 @@ import SampleFilter from "./SampleFilters";
 import { navigate, useQueryParams } from "raviger";
 import moment from "moment";
 import loadable from "@loadable/component";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   SAMPLE_TEST_STATUS,
@@ -19,6 +19,7 @@ import {
   getTestList,
   patchSample,
   downloadSampleTests,
+  getFacilityV2,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
 import Pagination from "../Common/Pagination";
@@ -51,6 +52,7 @@ export default function SampleViewAdmin(props: any) {
   const [downloadFile, setDownloadFile] = useState("");
   const [fetchFlag, callFetchData] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [facilityName, setFacilityName] = useState("");
   const [statusDialog, setStatusDialog] = useState<{
     show: boolean;
     sample: SampleTestModel;
@@ -61,6 +63,19 @@ export default function SampleViewAdmin(props: any) {
     currentUser.data.user_type;
 
   const limit = 10;
+
+  useEffect(() => {
+    async function fetchData() {
+      if (qParams.facility) {
+        const res = await dispatch(getFacilityV2(qParams.facility));
+
+        setFacilityName(res?.data?.name);
+      } else {
+        setFacilityName("");
+      }
+    }
+    fetchData();
+  }, [dispatch, qParams.facility]);
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -160,6 +175,7 @@ export default function SampleViewAdmin(props: any) {
     };
     if (status === 7) {
       sampleData.result = result;
+      sampleData.date_of_result = new Date().toISOString();
     }
     const statusName = SAMPLE_TEST_STATUS.find((i) => i.id === status)?.desc;
     const res = await dispatch(patchSample(sampleData, { id: sample.id }));
@@ -211,8 +227,17 @@ export default function SampleViewAdmin(props: any) {
           >
             <div className="px-6 py-4 h-full flex flex-col justify-between">
               <div>
-                <div className="font-bold text-xl capitalize mb-2">
-                  {item.patient_name}
+                <div className="flex justify-between">
+                  <div className="font-bold text-xl capitalize mb-2">
+                    {item.patient_name}
+                  </div>
+                  <div>
+                    {item.sample_type && (
+                      <span className="bg-blue-200 text-blue-800 text-sm rounded-md font-bold px-2 py-1 mx-1 text-wrap">
+                        type: {item.sample_type}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 {item.result !== "AWAITING" && (
                   <div className="capitalize">
@@ -242,14 +267,6 @@ export default function SampleViewAdmin(props: any) {
                       Fast track:{" "}
                     </span>
                     {item.fast_track}
-                  </div>
-                )}
-                {item.date_of_sample && (
-                  <div>
-                    <span className="font-semibold leading-relaxed">
-                      Date of Sample:{" "}
-                    </span>
-                    {moment(item.date_of_sample).format("lll")}
                   </div>
                 )}
                 {item.patient_has_confirmed_contact && (
@@ -287,6 +304,22 @@ export default function SampleViewAdmin(props: any) {
                     <WarningRoundedIcon className="text-yellow-500"></WarningRoundedIcon>
                   </div>
                 )}
+              </div>
+
+              <div className="mt-4">
+                <div className="text-gray-600 text-sm font-bold">
+                  <span className="text-gray-800">Date of Sample:</span>{" "}
+                  {item.date_of_sample
+                    ? moment(item.date_of_sample).format("lll")
+                    : "Not Available"}
+                </div>
+
+                <div className="text-gray-600 text-sm font-bold">
+                  <span className="text-gray-800">Date of Result:</span>{" "}
+                  {item.date_of_result
+                    ? moment(item.date_of_result).format("lll")
+                    : "Not Available"}
+                </div>
               </div>
 
               <div className="mt-2">
@@ -496,10 +529,7 @@ export default function SampleViewAdmin(props: any) {
               ?.text,
             "result"
           )}
-          {qParams.facility &&
-            sample[0] &&
-            sample[0].facility_object &&
-            badge("Facility", sample[0].facility_object.name, "facility")}
+          {badge("Facility", facilityName, "facility")}
         </div>
       </div>
       <div className="px-3 md:px-8">
