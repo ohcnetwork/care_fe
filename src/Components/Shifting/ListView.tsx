@@ -347,13 +347,17 @@ export default function ListView() {
   return (
     <div className="flex flex-col h-screen px-2 pb-2">
       <div className="flex items-end justify-between px-4">
-        <div className="flex items-center">
-          <PageTitle title={"Shifting"} hideBack={true} />
-          <GetAppIcon
-            className="cursor-pointer mt-4"
-            onClick={triggerDownload}
-          />
-        </div>
+        <PageTitle
+          title={"Shifting"}
+          hideBack={true}
+          componentRight={
+            <GetAppIcon
+              className="cursor-pointer mt-2 ml-2"
+              onClick={triggerDownload}
+            />
+          }
+        />
+
         <div className="md:px-4">
           <InputSearchBox
             value={qParams.patient_name || ""}
