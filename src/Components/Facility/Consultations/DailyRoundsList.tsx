@@ -76,7 +76,7 @@ export const DailyRoundsList = (props: any) => {
           <div
             className={`block border rounded-lg ${
               telemedicine_doctor_update ? "bg-purple-200" : "bg-white"
-            }  shadow h-full cursor-pointer`}
+            } shadow cursor-pointer`}
           >
             <div className="p-2">
               <Grid container justify="space-between" alignItems="center">

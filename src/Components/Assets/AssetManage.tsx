@@ -192,6 +192,11 @@ const AssetManage = (props: AssetManageProps) => {
             <Typography>
               Working status : {working_status(asset?.is_working)}
             </Typography>
+            {!asset?.is_working && (
+              <Typography>
+                Not working reason : {asset?.not_working_reason}
+              </Typography>
+            )}
             <Typography>Vendor Name : {asset?.vendor_name}</Typography>
             <Typography>
               Customer Support Name : {asset?.support_name}
