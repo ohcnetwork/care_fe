@@ -47,7 +47,7 @@ export default function Breadcrumbs(props: any) {
             <li>
               <div className="flex items-center cursor-pointer">
                 <svg
-                  className="flex-shrink-0 h-5 w-5 text-gray-300"
+                  className="flex-shrink-0 h-5 w-5 text-gray-400"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="currentColor"
                   viewBox="0 0 20 20"
@@ -96,7 +96,7 @@ export default function Breadcrumbs(props: any) {
                 >
                   <div className="flex items-center">
                     <svg
-                      className="flex-shrink-0 h-5 w-5 text-gray-300"
+                      className="flex-shrink-0 h-5 w-5 text-gray-400"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="currentColor"
                       viewBox="0 0 20 20"
