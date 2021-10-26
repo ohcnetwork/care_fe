@@ -95,6 +95,7 @@ export default function BoardView() {
               onClick={triggerDownload}
             />
           }
+          breadcrumbs={false}
         />
 
         <div className="md:px-4">

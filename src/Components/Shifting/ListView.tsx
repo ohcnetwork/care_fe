@@ -356,6 +356,7 @@ export default function ListView() {
               onClick={triggerDownload}
             />
           }
+          breadcrumbs={false}
         />
 
         <div className="md:px-4">

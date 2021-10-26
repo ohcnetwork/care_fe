@@ -401,6 +401,7 @@ export default function SampleViewAdmin(props: any) {
         title="Sample Management System"
         hideBack={true}
         className="mx-3 md:mx-8"
+        breadcrumbs={false}
       />
       <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3 m-4 md:px-4">
         <div className="bg-white overflow-hidden shadow rounded-lg">
