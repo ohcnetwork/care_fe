@@ -292,6 +292,9 @@ export const getTestSample = (id: number) => {
 export const patchSample = (params: object, pathParam: object) => {
   return fireRequest("patchSample", [], params, pathParam);
 };
+export const downloadSampleTests = (params: object) => {
+  return fireRequest("getTestSampleList", [], { ...params, csv: 1 });
+};
 
 // Daily Rounds
 
