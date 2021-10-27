@@ -9,6 +9,7 @@ describe("Forgot Password", () => {
   it("Send Password Reset Link", () => {
     cy.get('[name="username"]').type("dummy_user_1");
     cy.contains("Send Reset Link").click().wait(1000);
+    cy.contains("Password Reset Email Sent").should("exist");
   });
 
   it("Go to Login page", () => {
