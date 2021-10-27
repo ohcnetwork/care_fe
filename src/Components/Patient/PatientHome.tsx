@@ -859,7 +859,7 @@ export const PatientHome = (props: any) => {
                   <div className="flex justify-between">
                     <div className="w-1/2 border-r-2 truncate">
                       <div className="text-sm leading-5 font-medium text-gray-500">
-                        COVID <br /> Disease Status
+                        COVID Status
                       </div>
                       <div className="mt-1 text-xl font-semibold leading-5 text-gray-900">
                         {patientData.disease_status}
