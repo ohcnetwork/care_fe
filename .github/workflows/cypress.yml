@@ -14,7 +14,8 @@ jobs:
       - name: Cypress run
         uses: cypress-io/github-action@v2
         with:
-          start: npm start
+          build: npm run build
+          start: npm run start:Dev
           spec: cypress/integration/assets_spec/*.js
   auth-test:
     name: "Auth Module"
@@ -27,7 +28,8 @@ jobs:
       - name: Cypress run
         uses: cypress-io/github-action@v2
         with:
-          start: npm start
+          build: npm run build
+          start: npm run start:Dev
           spec: cypress/integration/auth_spec/*.js
   external-result-test:
     name: "External Result Module"
@@ -40,7 +42,8 @@ jobs:
       - name: Cypress run
         uses: cypress-io/github-action@v2
         with:
-          start: npm start
+          build: npm run build
+          start: npm run start:Dev
           spec: cypress/integration/external_results_spec/*.js
   facility-test:
     name: "Facility Module"
@@ -53,7 +56,8 @@ jobs:
       - name: Cypress run
         uses: cypress-io/github-action@v2
         with:
-          start: npm start
+          build: npm run build
+          start: npm run start:Dev
           spec: cypress/integration/facility_spec/*.js
   patient-test:
     name: "Patient Module"
@@ -66,7 +70,8 @@ jobs:
       - name: Cypress run
         uses: cypress-io/github-action@v2
         with:
-          start: npm start
+          build: npm run build
+          start: npm run start:Dev
           spec: cypress/integration/patient_spec/*.js
   resource-test:
     name: "Resource Module"
@@ -79,7 +84,8 @@ jobs:
       - name: Cypress run
         uses: cypress-io/github-action@v2
         with:
-          start: npm start
+          build: npm run build
+          start: npm run start:Dev
           spec: cypress/integration/resource_spec/*.js
   sample-test:
     name: "Sample Test Module"
@@ -92,7 +98,8 @@ jobs:
       - name: Cypress run
         uses: cypress-io/github-action@v2
         with:
-          start: npm start
+          build: npm run build
+          start: npm run start:Dev
           spec: cypress/integration/sample_test_spec/*.js
   shifting-test:
     name: "Shifting Module"
@@ -105,7 +112,8 @@ jobs:
       - name: Cypress run
         uses: cypress-io/github-action@v2
         with:
-          start: npm start
+          build: npm run build
+          start: npm run start:Dev
           spec: cypress/integration/shifting_spec/*.js
   users-test:
     name: "Users Module"
@@ -118,7 +126,8 @@ jobs:
       - name: Cypress run
         uses: cypress-io/github-action@v2
         with:
-          start: npm start
+          build: npm run build
+          start: npm run start:Dev
           spec: cypress/integration/users_spec/*.js
   death-report-test:
     name: "Death Report Module"
@@ -131,5 +140,6 @@ jobs:
       - name: Cypress run
         uses: cypress-io/github-action@v2
         with:
-          start: npm start
+          build: npm run build
+          start: npm run start:Dev
           spec: cypress/integration/death_report_spec/*.js
