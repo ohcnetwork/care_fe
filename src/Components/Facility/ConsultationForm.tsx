@@ -551,16 +551,16 @@ export const ConsultationForm = (props: any) => {
         operation: state.form.operation,
         intubation_start_date: dateRequired
           ? state.form.intubation_start_date
-          : undefined,
+          : null,
         intubation_end_date: dateRequired
           ? state.form.intubation_end_date
-          : undefined,
-        ett_tt: dateRequired ? state.form.ett_tt : undefined,
+          : null,
+        ett_tt: dateRequired ? state.form.ett_tt : null,
         cuff_pressure: dateRequired
           ? isMmhgUnit
             ? state.form.cuff_pressure
             : cmH2oTommHg(state.form.cuff_pressure)
-          : undefined,
+          : null,
         special_instruction: state.form.special_instruction,
         lines: createLinesPayload(),
         weight: Number(state.form.weight),
