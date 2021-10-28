@@ -4,7 +4,7 @@ import ReactPlayer from "react-player";
 
 export default function LiveFeed() {
   const [sourceUrl, setSourceUrl] = useState<string>();
-  const requestStream = async () => {
+  const requestStream = () => {
     axios
       .post(`https://testcamera0001.in.ngrok.io/start`, {
         uri: "rtsp://remote:qwerty123@192.168.1.64:554/",
