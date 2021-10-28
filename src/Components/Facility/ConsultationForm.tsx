@@ -1231,7 +1231,7 @@ export const ConsultationForm = (props: any) => {
                       start={"3"}
                       end={"10"}
                       interval={"1"}
-                      step={0.1}
+                      step={1}
                       value={state.form.ett_tt.toString()}
                       setValue={(val) => handleSliderChange(val, "ett_tt")}
                       getLabel={(s) => ["", "#059669"]}
