@@ -256,7 +256,7 @@ export const SampleTest = (props: any) => {
                       name="sample_type"
                       variant="outlined"
                       margin="dense"
-                      optionArray={true}
+                      optionArray={false}
                       value={state.form.sample_type}
                       options={sampleTestTypes}
                       onChange={handleChange}
