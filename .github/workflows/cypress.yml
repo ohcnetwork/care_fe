@@ -3,7 +3,8 @@ name: Cypress Tests
 on: [push]
 
 jobs:
-  cypress-run:
+  assets-test:
+    name: "Assets Module"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -14,3 +15,121 @@ jobs:
         uses: cypress-io/github-action@v2
         with:
           start: npm start
+          spec: cypress/integration/assets_spec/*.js
+  auth-test:
+    name: "Auth Module"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: NPM Install
+        run: npm install
+      - name: Cypress run
+        uses: cypress-io/github-action@v2
+        with:
+          start: npm start
+          spec: cypress/integration/auth_spec/*.js
+  external-result-test:
+    name: "External Result Module"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: NPM Install
+        run: npm install
+      - name: Cypress run
+        uses: cypress-io/github-action@v2
+        with:
+          start: npm start
+          spec: cypress/integration/external_results_spec/*.js
+  facility-test:
+    name: "Facility Module"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: NPM Install
+        run: npm install
+      - name: Cypress run
+        uses: cypress-io/github-action@v2
+        with:
+          start: npm start
+          spec: cypress/integration/facility_spec/*.js
+  patient-test:
+    name: "Patient Module"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: NPM Install
+        run: npm install
+      - name: Cypress run
+        uses: cypress-io/github-action@v2
+        with:
+          start: npm start
+          spec: cypress/integration/patient_spec/*.js
+  resource-test:
+    name: "Resource Module"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: NPM Install
+        run: npm install
+      - name: Cypress run
+        uses: cypress-io/github-action@v2
+        with:
+          start: npm start
+          spec: cypress/integration/resource_spec/*.js
+  sample-test:
+    name: "Sample Test Module"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: NPM Install
+        run: npm install
+      - name: Cypress run
+        uses: cypress-io/github-action@v2
+        with:
+          start: npm start
+          spec: cypress/integration/sample_test_spec/*.js
+  shifting-test:
+    name: "Shifting Module"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: NPM Install
+        run: npm install
+      - name: Cypress run
+        uses: cypress-io/github-action@v2
+        with:
+          start: npm start
+          spec: cypress/integration/shifting_spec/*.js
+  users-test:
+    name: "Users Module"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: NPM Install
+        run: npm install
+      - name: Cypress run
+        uses: cypress-io/github-action@v2
+        with:
+          start: npm start
+          spec: cypress/integration/users_spec/*.js
+  death-report-test:
+    name: "Death Report Module"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: NPM Install
+        run: npm install
+      - name: Cypress run
+        uses: cypress-io/github-action@v2
+        with:
+          start: npm start
+          spec: cypress/integration/death_report_spec/*.js
