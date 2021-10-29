@@ -186,6 +186,12 @@ const AssetManage = (props: AssetManageProps) => {
               Warranty Details : {asset?.warranty_details}
             </Typography>
             <Typography>Type : {asset?.asset_type}</Typography>
+            {asset?.camera && (
+              <Typography>Camera URL: {asset?.camera.url}</Typography>
+            )}
+            {asset?.camera && (
+              <Typography>Camera Preset: {asset?.camera.preset}</Typography>
+            )}
             <Typography>
               Working status : {working_status(asset?.is_working)}
             </Typography>

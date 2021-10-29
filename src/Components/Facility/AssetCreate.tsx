@@ -24,7 +24,7 @@ import {
   TextInputField,
   MultilineInputField,
 } from "../Common/HelperInputFields";
-import { AssetData } from "../Assets/AssetTypes";
+import { AssetData, CameraData } from "../Assets/AssetTypes";
 import loadable from "@loadable/component";
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -40,6 +40,8 @@ const initError: any = {
   support_name: "",
   support_phone: "",
   support_email: "",
+  camera_url: "",
+  camera_preset: "",
 };
 
 const initialState = {
@@ -82,6 +84,10 @@ const AssetCreate = (props: AssetProps) => {
   const [support_phone, setSupportPhone] = useState<string>("");
   const [support_email, setSupportEmail] = useState<string>("");
   const [location, setLocation] = useState<string>("");
+  const [camera, setCamera] = useState<CameraData>({
+    url: "",
+    preset: 0,
+  });
   const [isLoading, setIsLoading] = useState(false);
   const dispatchAction: any = useDispatch();
   const [locations, setLocations] = useState([{ id: "0", name: "Select" }]);
@@ -120,6 +126,7 @@ const AssetCreate = (props: AssetProps) => {
       setSupportName(asset.support_name);
       setSupportEmail(asset.support_email);
       setSupportPhone(asset.support_phone);
+      setCamera(asset.camera);
     }
   }, [asset]);
 
@@ -147,13 +154,29 @@ const AssetCreate = (props: AssetProps) => {
           }
           return;
         case "asset_type":
-          if (asset_type !== "INTERNAL" && asset_type !== "EXTERNAL") {
+          if (
+            asset_type !== "INTERNAL" &&
+            asset_type !== "EXTERNAL" &&
+            asset_type !== "CAMERA"
+          ) {
             errors[field] = "Field is required";
             invalidForm = true;
           }
           return;
         case "support_phone":
           if (!support_phone) {
+            errors[field] = "Field is required";
+            invalidForm = true;
+          }
+          return;
+        case "camera_url":
+          if (asset_type === "CAMERA" && !camera.url) {
+            errors[field] = "Field is required";
+            invalidForm = true;
+          }
+          return;
+        case "camera_preset":
+          if (asset_type === "CAMERA" && !camera.preset) {
             errors[field] = "Field is required";
             invalidForm = true;
           }
@@ -188,6 +211,7 @@ const AssetCreate = (props: AssetProps) => {
         support_name: support_name,
         support_email: support_email,
         support_phone: support_phone,
+        camera: camera,
       };
       if (!assetId) {
         const res = await dispatchAction(createAsset(data));
@@ -262,6 +286,10 @@ const AssetCreate = (props: AssetProps) => {
                       id: "INTERNAL",
                       name: "INTERNAL",
                     },
+                    {
+                      id: "CAMERA",
+                      name: "CAMERA",
+                    },
                   ]}
                   optionValue="name"
                   value={asset_type}
@@ -271,6 +299,51 @@ const AssetCreate = (props: AssetProps) => {
                   errors={state.errors.asset_type}
                 />
               </div>
+              {asset_type === "CAMERA" && (
+                <div>
+                  <div>
+                    <InputLabel htmlFor="camera-url" id="name=label" required>
+                      Camera URL
+                    </InputLabel>
+                    <TextInputField
+                      id="camera-url"
+                      fullWidth
+                      name="camera-url"
+                      placeholder=""
+                      variant="outlined"
+                      margin="dense"
+                      value={camera.url}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        setCamera({ ...camera, url: e.target.value })
+                      }
+                      errors={state.errors.camera_url}
+                    />
+                  </div>
+                  <div>
+                    <InputLabel
+                      htmlFor="camera-preset"
+                      id="name=label"
+                      required
+                    >
+                      Camera Preset
+                    </InputLabel>
+                    <TextInputField
+                      id="camera-preset"
+                      fullWidth
+                      type="number"
+                      name="camera-preset"
+                      placeholder=""
+                      variant="outlined"
+                      margin="dense"
+                      value={camera.preset}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        setCamera({ ...camera, preset: Number(e.target.value) })
+                      }
+                      errors={state.errors.camera_preset}
+                    />
+                  </div>
+                </div>
+              )}
               <div>
                 <InputLabel htmlFor="location" id="name=label" required>
                   Location

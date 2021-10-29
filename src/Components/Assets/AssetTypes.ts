@@ -10,6 +10,11 @@ export interface AssetLocationObject {
   };
 }
 
+export interface CameraData {
+  url: string;
+  preset: number;
+}
+
 export interface AssetData {
   id: string;
   name: string;
@@ -28,6 +33,7 @@ export interface AssetData {
   support_name: string;
   support_email: string;
   support_phone: string;
+  camera: CameraData;
 }
 
 export interface AssetsResponse {
