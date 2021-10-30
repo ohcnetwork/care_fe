@@ -105,8 +105,16 @@ export default function Breadcrumbs(props: any) {
                       <path d="M5.555 17.776l8-16 .894.448-8 16-.894-.448z"></path>
                     </svg>
                     <div onClick={() => navigate(crumb.uri)} className="ml-1">
-                      {crumb.name.slice(0, 13) +
-                        (crumb.name.length > 13 ? "..." : "")}
+                      {crumb.name.match(/^\w{8}-(\w{4}-){3}\w{12}$/) ? (
+                        <div>
+                          <i className="fas fa-hashtag fa-lg mr-1" />
+                          <span>{crumb.name.slice(0, 13) + "..."}</span>
+                        </div>
+                      ) : (
+                        <div>
+                          <span>{crumb.name}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </li>
