@@ -1,6 +1,18 @@
 import { navigate, usePath } from "raviger";
 import { useState } from "react";
 
+const MENU_TAGS: { [key: string]: string } = {
+  facility: "Facilities",
+  patients: "Patients",
+  assets: "Assets",
+  sample: "Sample Tests",
+  shifting: "Shiftings",
+  resource: "Resources",
+  external_results: "External Results",
+  users: "Users",
+  notice_board: "Notice Board",
+};
+
 export default function Breadcrumbs(props: any) {
   const { replacements } = props;
   const path = usePath();
@@ -9,7 +21,7 @@ export default function Breadcrumbs(props: any) {
     .split("/")
     .map((field, i) => {
       return {
-        name: replacements[field]?.name || field,
+        name: replacements[field]?.name || MENU_TAGS[field] || field,
         uri:
           replacements[field]?.uri ||
           path
