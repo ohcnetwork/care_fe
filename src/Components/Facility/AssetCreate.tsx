@@ -10,11 +10,14 @@ import * as Notification from "../../Utils/Notifications.js";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import PageTitle from "../Common/PageTitle";
 import {
+  Box,
   Button,
   Card,
   CardContent,
-  CircularProgress,
+  FormControlLabel,
   InputLabel,
+  Radio,
+  RadioGroup,
 } from "@material-ui/core";
 import {
   SelectField,
@@ -73,7 +76,7 @@ const AssetCreate = (props: AssetProps) => {
   const [asset_type, setAssetType] = useState<string>("");
   const [not_working_reason, setNotWorkingReason] = useState<string>("");
   const [description, setDescription] = useState<string>("");
-  const [is_working, setIsWorking] = useState<string>();
+  const [is_working, setIsWorking] = useState<string>("0");
   const [serial_number, setSerialNumber] = useState<string>("");
   const [warranty_details, setWarrantyDetails] = useState<string>("");
   const [vendor_name, setVendorName] = useState<string>("");
@@ -223,264 +226,255 @@ const AssetCreate = (props: AssetProps) => {
           [assetId || "????"]: { name },
         }}
       />
-      <Card className="mt-4 max-w-lg m-auto">
+      <Card className="mt-4 max-w-screen-lg mx-auto">
         <CardContent>
-          <form
-            onSubmit={(e) => handleSubmit(e)}
-            className="flex flex-col gap-3"
-          >
-            <div>
-              <InputLabel htmlFor="asset-name" id="name=label">
-                Asset Name*
-              </InputLabel>
-              <TextInputField
-                id="asset-name"
-                fullWidth
-                name="name"
-                placeholder=""
-                variant="outlined"
-                margin="dense"
-                value={name}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setName(e.target.value)
-                }
-                errors={state.errors.name}
-              />
-            </div>
-            <div>
-              <InputLabel htmlFor="asset-type" id="name=label">
-                Asset Type*
-              </InputLabel>
-              <SelectField
-                id="asset-type"
-                fullWidth
-                name="asset_type"
-                placeholder=""
-                variant="outlined"
-                margin="dense"
-                options={[
-                  {
-                    id: "",
-                    name: "Select",
-                  },
-                  {
-                    id: "EXTERNAL",
-                    name: "EXTERNAL",
-                  },
-                  {
-                    id: "INTERNAL",
-                    name: "INTERNAL",
-                  },
-                ]}
-                optionValue="name"
-                value={asset_type}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setAssetType(e.target.value)
-                }
-                errors={state.errors.asset_type}
-              />
-            </div>
-            <div>
-              <InputLabel htmlFor="location" id="name=label">
-                Location*
-              </InputLabel>
+          <form onSubmit={(e) => handleSubmit(e)}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+              <div>
+                <InputLabel htmlFor="asset-name" id="name=label" required>
+                  Asset Name
+                </InputLabel>
+                <TextInputField
+                  id="asset-name"
+                  fullWidth
+                  name="name"
+                  placeholder=""
+                  variant="outlined"
+                  margin="dense"
+                  value={name}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setName(e.target.value)
+                  }
+                  errors={state.errors.name}
+                />
+              </div>
+              <div>
+                <InputLabel htmlFor="asset-type" id="name=label" required>
+                  Asset Type
+                </InputLabel>
+                <SelectField
+                  id="asset-type"
+                  fullWidth
+                  name="asset_type"
+                  placeholder=""
+                  variant="outlined"
+                  margin="dense"
+                  options={[
+                    {
+                      id: "",
+                      name: "Select",
+                    },
+                    {
+                      id: "EXTERNAL",
+                      name: "EXTERNAL",
+                    },
+                    {
+                      id: "INTERNAL",
+                      name: "INTERNAL",
+                    },
+                  ]}
+                  optionValue="name"
+                  value={asset_type}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setAssetType(e.target.value)
+                  }
+                  errors={state.errors.asset_type}
+                />
+              </div>
+              <div>
+                <InputLabel htmlFor="location" id="name=label" required>
+                  Location
+                </InputLabel>
 
-              <SelectField
-                id="location"
-                fullWidth
-                name="location"
-                placeholder=""
-                variant="outlined"
-                margin="dense"
-                options={locations}
-                optionValue="name"
-                value={location}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setLocation(e.target.value)
-                }
-                errors={state.errors.location}
-              />
-            </div>
-            <div>
-              <InputLabel htmlFor="is_working" id="name=label">
-                Is Working*
-              </InputLabel>
-              <SelectField
-                id="is_working"
-                fullWidth
-                name="is_working"
-                placeholder=""
-                variant="outlined"
-                margin="dense"
-                options={[
-                  {
-                    id: "0",
-                    name: "Select",
-                  },
-                  {
-                    id: "true",
-                    name: "Yes",
-                  },
-                  {
-                    id: "false",
-                    name: "No",
-                  },
-                ]}
-                optionValue="name"
-                value={is_working}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setIsWorking(e.target.value)
-                }
-                errors={state.errors.is_working}
-              />
-            </div>
-            {is_working === "false" && (
+                <SelectField
+                  id="location"
+                  fullWidth
+                  name="location"
+                  placeholder=""
+                  variant="outlined"
+                  margin="dense"
+                  options={locations}
+                  optionValue="name"
+                  value={location}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setLocation(e.target.value)
+                  }
+                  errors={state.errors.location}
+                />
+              </div>
+              <div>
+                <InputLabel htmlFor="is_working" id="name=label" required>
+                  Is Working
+                </InputLabel>
+                <RadioGroup
+                  aria-label="is_working"
+                  name="is_working"
+                  value={is_working}
+                  onChange={(e) => setIsWorking(e.target.value)}
+                  className="flex flex-col justify-center mt-2"
+                >
+                  <Box display="flex" flexDirection="row">
+                    <FormControlLabel
+                      value={"true"}
+                      control={<Radio />}
+                      label="Yes"
+                    />
+                    <FormControlLabel
+                      value={"false"}
+                      control={<Radio />}
+                      label="No"
+                    />
+                  </Box>
+                </RadioGroup>
+              </div>
+              {is_working === "false" && (
+                <div>
+                  <InputLabel htmlFor="description" id="name=label">
+                    Reason
+                  </InputLabel>
+                  <MultilineInputField
+                    id="not_working_reason"
+                    rows={3}
+                    fullWidth
+                    name="description"
+                    placeholder=""
+                    variant="outlined"
+                    margin="dense"
+                    value={not_working_reason}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setNotWorkingReason(e.target.value)
+                    }
+                    errors={state.errors.not_working_reason}
+                  />
+                </div>
+              )}
               <div>
                 <InputLabel htmlFor="description" id="name=label">
-                  Reason
+                  Description
                 </InputLabel>
                 <MultilineInputField
-                  id="not_working_reason"
+                  id="description"
                   rows={3}
                   fullWidth
                   name="description"
                   placeholder=""
                   variant="outlined"
                   margin="dense"
-                  value={not_working_reason}
+                  value={description}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setNotWorkingReason(e.target.value)
+                    setDescription(e.target.value)
                   }
-                  errors={state.errors.not_working_reason}
+                  errors={state.errors.description}
                 />
               </div>
-            )}
-            <div>
-              <InputLabel htmlFor="description" id="name=label">
-                Description
-              </InputLabel>
-              <MultilineInputField
-                id="description"
-                rows={3}
-                fullWidth
-                name="description"
-                placeholder=""
-                variant="outlined"
-                margin="dense"
-                value={description}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setDescription(e.target.value)
-                }
-                errors={state.errors.description}
-              />
-            </div>
-            <div>
-              <InputLabel htmlFor="serial_number" id="name=label">
-                Serial Number
-              </InputLabel>
-              <TextInputField
-                id="serial_number"
-                fullWidth
-                name="serial_number"
-                placeholder=""
-                variant="outlined"
-                margin="dense"
-                value={serial_number}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setSerialNumber(e.target.value)
-                }
-                errors={state.errors.serial_number}
-              />
-            </div>
-            <div>
-              <InputLabel htmlFor="warranty_details" id="name=label">
-                Warranty Details
-              </InputLabel>
-              <TextInputField
-                id="warranty_details"
-                fullWidth
-                name="warranty_details"
-                placeholder=""
-                variant="outlined"
-                margin="dense"
-                value={warranty_details}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setWarrantyDetails(e.target.value)
-                }
-                errors={state.errors.warranty_details}
-              />
-            </div>
-            <div>
-              <InputLabel htmlFor="vendor_name" id="name=label">
-                Vendor Name
-              </InputLabel>
-              <TextInputField
-                id="vendor_name"
-                fullWidth
-                name="vendor_name"
-                placeholder=""
-                variant="outlined"
-                margin="dense"
-                value={vendor_name}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setVendorName(e.target.value)
-                }
-                errors={state.errors.vendor_name}
-              />
-            </div>
-            <div>
-              <InputLabel htmlFor="support_name" id="name=label">
-                Customer Support Name
-              </InputLabel>
-              <TextInputField
-                id="support_name"
-                fullWidth
-                name="support_name"
-                placeholder=""
-                variant="outlined"
-                margin="dense"
-                value={support_name}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setSupportName(e.target.value)
-                }
-                errors={state.errors.support_name}
-              />
-            </div>
-            <div>
-              <InputLabel htmlFor="support_phone" id="name=label">
-                Contact Phone Number*
-              </InputLabel>
-              <TextInputField
-                id="support_phone"
-                fullWidth
-                name="support_phone"
-                placeholder=""
-                variant="outlined"
-                margin="dense"
-                value={support_phone}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setSupportPhone(e.target.value)
-                }
-                errors={state.errors.support_phone}
-              />
-            </div>
-            <div>
-              <InputLabel htmlFor="support_email" id="name=label">
-                Contact Email
-              </InputLabel>
-              <TextInputField
-                id="support_email"
-                fullWidth
-                name="support_email"
-                placeholder=""
-                variant="outlined"
-                margin="dense"
-                value={support_email}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setSupportEmail(e.target.value)
-                }
-                errors={state.errors.support_email}
-              />
+              <div>
+                <InputLabel htmlFor="serial_number" id="name=label">
+                  Serial Number
+                </InputLabel>
+                <TextInputField
+                  id="serial_number"
+                  fullWidth
+                  name="serial_number"
+                  placeholder=""
+                  variant="outlined"
+                  margin="dense"
+                  value={serial_number}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setSerialNumber(e.target.value)
+                  }
+                  errors={state.errors.serial_number}
+                />
+              </div>
+              <div>
+                <InputLabel htmlFor="warranty_details" id="name=label">
+                  Warranty Details
+                </InputLabel>
+                <TextInputField
+                  id="warranty_details"
+                  fullWidth
+                  name="warranty_details"
+                  placeholder=""
+                  variant="outlined"
+                  margin="dense"
+                  value={warranty_details}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setWarrantyDetails(e.target.value)
+                  }
+                  errors={state.errors.warranty_details}
+                />
+              </div>
+              <div>
+                <InputLabel htmlFor="vendor_name" id="name=label">
+                  Vendor Name
+                </InputLabel>
+                <TextInputField
+                  id="vendor_name"
+                  fullWidth
+                  name="vendor_name"
+                  placeholder=""
+                  variant="outlined"
+                  margin="dense"
+                  value={vendor_name}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setVendorName(e.target.value)
+                  }
+                  errors={state.errors.vendor_name}
+                />
+              </div>
+              <div>
+                <InputLabel htmlFor="support_name" id="name=label">
+                  Customer Support Name
+                </InputLabel>
+                <TextInputField
+                  id="support_name"
+                  fullWidth
+                  name="support_name"
+                  placeholder=""
+                  variant="outlined"
+                  margin="dense"
+                  value={support_name}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setSupportName(e.target.value)
+                  }
+                  errors={state.errors.support_name}
+                />
+              </div>
+              <div>
+                <InputLabel htmlFor="support_phone" id="name=label" required>
+                  Contact Phone Number
+                </InputLabel>
+                <TextInputField
+                  id="support_phone"
+                  fullWidth
+                  name="support_phone"
+                  placeholder=""
+                  variant="outlined"
+                  margin="dense"
+                  value={support_phone}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setSupportPhone(e.target.value)
+                  }
+                  errors={state.errors.support_phone}
+                />
+              </div>
+              <div>
+                <InputLabel htmlFor="support_email" id="name=label">
+                  Contact Email
+                </InputLabel>
+                <TextInputField
+                  id="support_email"
+                  fullWidth
+                  name="support_email"
+                  placeholder=""
+                  variant="outlined"
+                  margin="dense"
+                  value={support_email}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setSupportEmail(e.target.value)
+                  }
+                  errors={state.errors.support_email}
+                />
+              </div>
             </div>
             <Button
               id="asset-create"
