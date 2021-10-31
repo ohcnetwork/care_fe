@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { KASP_STRING } from "../../Common/constants";
-import { getUserList, getFacility } from "../../Redux/actions";
+import { getUserList, getFacilityV2 } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 
 export default function BadgesList(props: any) {
@@ -32,7 +32,7 @@ export default function BadgesList(props: any) {
     async function fetchData() {
       if (appliedFilters.orgin_facility || local.orgin_facility) {
         const res = await dispatch(
-          getFacility(
+          getFacilityV2(
             appliedFilters.orgin_facility || local.orgin_facility,
             "orgin_facility"
           )
@@ -53,7 +53,7 @@ export default function BadgesList(props: any) {
         local.shifting_approving_facility
       ) {
         const res = await dispatch(
-          getFacility(
+          getFacilityV2(
             appliedFilters.shifting_approving_facility ||
               local.shifting_approving_facility,
             "shifting_approving_facility"
@@ -72,7 +72,7 @@ export default function BadgesList(props: any) {
     async function fetchData() {
       if (appliedFilters.assigned_facility || local.assigned_facility) {
         const res = await dispatch(
-          getFacility(
+          getFacilityV2(
             appliedFilters.assigned_facility || local.assigned_facility,
             "assigned_facility"
           )

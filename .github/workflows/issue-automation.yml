@@ -1,0 +1,34 @@
+name: Automate Issues to Project
+on:
+  issues:
+    types:
+      - opened
+      - reopened
+      - closed
+jobs:
+  issue_opened_and_reopened:
+    name: issue_opened_and_reopened
+    runs-on: ubuntu-latest
+    if: github.event_name == 'issues' && github.event.action == 'opened' || github.event.action == 'reopened'
+    steps:
+      - name: 'Move issue to "Triage"'
+        uses: leonsteinhaeuser/project-beta-automations@v1.0.1
+        with:
+          gh_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          organization: coronasafe
+          project_id: 4
+          resource_node_id: ${{ github.event.issue.node_id }}
+          status_value: "Triage"
+  issue_closed:
+    name: issue_closed
+    runs-on: ubuntu-latest
+    if: github.event_name == 'issues' && github.event.action == 'closed'
+    steps:
+      - name: 'Moved issue to "Done"'
+        uses: leonsteinhaeuser/project-beta-automations@v1.0.1
+        with:
+          gh_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          organization: coronasafe
+          project_id: 4
+          resource_node_id: ${{ github.event.issue.node_id }}
+          status_value: "Done"

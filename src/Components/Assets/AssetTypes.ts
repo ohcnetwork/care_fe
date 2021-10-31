@@ -16,6 +16,7 @@ export interface AssetData {
   location: string;
   description: string;
   is_working: boolean;
+  not_working_reason: string;
   created_date: string;
   modified_date: string;
   serial_number: string;

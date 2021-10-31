@@ -209,7 +209,7 @@ function AssetFilter(props: any) {
               },
               {
                 id: "TRANSFER_IN_PROGRESS",
-                name: "TRANSFER_IN_PROGRESS",
+                name: "TRANSFER IN PROGRESS",
               },
             ]}
             optionValue="name"
