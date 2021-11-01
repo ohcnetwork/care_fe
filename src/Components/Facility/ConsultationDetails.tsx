@@ -420,75 +420,86 @@ export const ConsultationDetails = (props: any) => {
                   </div>
                 </div>
 
-                <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
-                  <div className="px-4 py-5 sm:p-6">
-                    <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-                      Date/Size/LL:{" "}
-                    </h3>
-                    <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
-                      <div className="">
-                        Intubation Date{" - "}
-                        <span className="font-semibold">
-                          {moment(
-                            consultationData.intubation_start_date
-                          ).format("lll")}
-                        </span>
-                      </div>
-                      <div className="">
-                        Extubation Date{" - "}
-                        <span className="font-semibold">
-                          {moment(consultationData.intubation_end_date).format(
-                            "lll"
-                          )}
-                        </span>
-                      </div>
-                      <div className="">
-                        ETT/TT (mmid){" - "}
-                        <span className="font-semibold">
-                          {consultationData.ett_tt}
-                        </span>
-                      </div>
-                      <div className="">
-                        Cuff Pressure (mmhg){" - "}
-                        <span className="font-semibold">
-                          {consultationData.cuff_pressure}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
-                  <div className="px-4 py-5 sm:p-6">
-                    <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-                      Lines and Catheters
-                    </h3>
-                    <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
-                      {consultationData.lines?.map((line: any) => (
-                        <div className="mt-4">
-                          <h5>{line.type}</h5>
-                          <p className="text-justify break-word">
-                            Details:
-                            <br />
-                            <span>{line.other_type}</span>
-                          </p>
-                          <p>
-                            Insertion Date:{" "}
-                            <span className="font-semibold">
-                              {moment(line.start_date).format("lll")}
-                            </span>
-                          </p>
-                          <p>
-                            Site/Level of Fixation: <br />
-                            <span className="text-justify break-word">
-                              {line.site}
-                            </span>
-                          </p>
+                {[
+                  "intubation_start_date",
+                  "intubation_end_date",
+                  "ett_tt",
+                  "cuff_pressure",
+                ].every((key) =>
+                  Object.keys(consultationData).includes(key)
+                ) && (
+                  <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
+                    <div className="px-4 py-5 sm:p-6">
+                      <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                        Date/Size/LL:{" "}
+                      </h3>
+                      <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
+                        <div className="">
+                          Intubation Date{" - "}
+                          <span className="font-semibold">
+                            {moment(
+                              consultationData.intubation_start_date
+                            ).format("lll")}
+                          </span>
                         </div>
-                      ))}
+                        <div className="">
+                          Extubation Date{" - "}
+                          <span className="font-semibold">
+                            {moment(
+                              consultationData.intubation_end_date
+                            ).format("lll")}
+                          </span>
+                        </div>
+                        <div className="">
+                          ETT/TT (mmid){" - "}
+                          <span className="font-semibold">
+                            {consultationData.ett_tt}
+                          </span>
+                        </div>
+                        <div className="">
+                          Cuff Pressure (mmhg){" - "}
+                          <span className="font-semibold">
+                            {consultationData.cuff_pressure}
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
+
+                {consultationData.lines.length && (
+                  <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
+                    <div className="px-4 py-5 sm:p-6">
+                      <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                        Lines and Catheters
+                      </h3>
+                      <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
+                        {consultationData.lines?.map((line: any) => (
+                          <div className="mt-4">
+                            <h5>{line.type}</h5>
+                            <p className="text-justify break-word">
+                              Details:
+                              <br />
+                              <span>{line.other_type}</span>
+                            </p>
+                            <p>
+                              Insertion Date:{" "}
+                              <span className="font-semibold">
+                                {moment(line.start_date).format("lll")}
+                              </span>
+                            </p>
+                            <p>
+                              Site/Level of Fixation: <br />
+                              <span className="text-justify break-word">
+                                {line.site}
+                              </span>
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
                   <div className="px-4 py-5 sm:p-6">
