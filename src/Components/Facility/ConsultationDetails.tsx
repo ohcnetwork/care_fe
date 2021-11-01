@@ -425,9 +425,7 @@ export const ConsultationDetails = (props: any) => {
                   "intubation_end_date",
                   "ett_tt",
                   "cuff_pressure",
-                ].every((key) =>
-                  Object.keys(consultationData).includes(key)
-                ) && (
+                ].every((key) => consultationData[key]) && (
                   <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
                     <div className="px-4 py-5 sm:p-6">
                       <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
@@ -467,7 +465,7 @@ export const ConsultationDetails = (props: any) => {
                   </div>
                 )}
 
-                {consultationData.lines?.length && (
+                {consultationData.lines?.length > 0 && (
                   <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
                     <div className="px-4 py-5 sm:p-6">
                       <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
