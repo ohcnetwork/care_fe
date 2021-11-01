@@ -126,7 +126,7 @@ const AssetCreate = (props: AssetProps) => {
       setSupportName(asset.support_name);
       setSupportEmail(asset.support_email);
       setSupportPhone(asset.support_phone);
-      setCamera(asset.camera);
+      setCamera(asset.meta.camera);
     }
   }, [asset]);
 
@@ -211,7 +211,7 @@ const AssetCreate = (props: AssetProps) => {
         support_name: support_name,
         support_email: support_email,
         support_phone: support_phone,
-        camera: camera,
+        meta: { camera },
       };
       if (!assetId) {
         const res = await dispatchAction(createAsset(data));

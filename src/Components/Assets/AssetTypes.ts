@@ -33,7 +33,9 @@ export interface AssetData {
   support_name: string;
   support_email: string;
   support_phone: string;
-  camera: CameraData;
+  meta: {
+    camera: CameraData;
+  };
 }
 
 export interface AssetsResponse {
