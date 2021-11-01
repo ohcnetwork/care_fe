@@ -420,48 +420,46 @@ export const ConsultationDetails = (props: any) => {
                   </div>
                 </div>
 
-                {consultationData.intubation_start_date &&
-                  consultationData.intubation_end_date &&
-                  consultationData.ett_tt &&
-                  consultationData.cuff_pressure && (
-                    <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
-                      <div className="px-4 py-5 sm:p-6">
-                        <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-                          Date/Size/LL:{" "}
-                        </h3>
-                        <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
-                          <div className="">
-                            Intubation Date{" - "}
-                            <span className="font-semibold">
-                              {moment(
-                                consultationData.intubation_start_date
-                              ).format("lll")}
-                            </span>
-                          </div>
-                          <div className="">
-                            Extubation Date{" - "}
-                            <span className="font-semibold">
-                              {moment(
+                {consultationData.intubation_start_date && (
+                  <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
+                    <div className="px-4 py-5 sm:p-6">
+                      <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                        Date/Size/LL:{" "}
+                      </h3>
+                      <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
+                        <div className="">
+                          Intubation Date{" - "}
+                          <span className="font-semibold">
+                            {moment(
+                              consultationData.intubation_start_date
+                            ).format("lll")}
+                          </span>
+                        </div>
+                        <div className="">
+                          Extubation Date{" - "}
+                          <span className="font-semibold">
+                            {consultationData.intubation_end_date &&
+                              moment(
                                 consultationData.intubation_end_date
                               ).format("lll")}
-                            </span>
-                          </div>
-                          <div className="">
-                            ETT/TT (mmid){" - "}
-                            <span className="font-semibold">
-                              {consultationData.ett_tt}
-                            </span>
-                          </div>
-                          <div className="">
-                            Cuff Pressure (mmhg){" - "}
-                            <span className="font-semibold">
-                              {consultationData.cuff_pressure}
-                            </span>
-                          </div>
+                          </span>
+                        </div>
+                        <div className="">
+                          ETT/TT (mmid){" - "}
+                          <span className="font-semibold">
+                            {consultationData.ett_tt}
+                          </span>
+                        </div>
+                        <div className="">
+                          Cuff Pressure (mmhg){" - "}
+                          <span className="font-semibold">
+                            {consultationData.cuff_pressure}
+                          </span>
                         </div>
                       </div>
                     </div>
-                  )}
+                  </div>
+                )}
 
                 {consultationData.lines?.length > 0 && (
                   <div className="bg-white overflow-hidden shadow rounded-lg mt-4">

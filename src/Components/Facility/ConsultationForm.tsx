@@ -328,6 +328,7 @@ export const ConsultationForm = (props: any) => {
             height: res.data.height ? res.data.height : "",
           };
           setLineRequired(lines.length ? true : false);
+          setDateRequired(formData.intubation_start_date ? true : false);
           dispatch({ type: "set_form", form: formData });
         } else {
           goBack();
