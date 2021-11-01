@@ -419,9 +419,9 @@ export default function SampleViewAdmin(props: any) {
         className="mx-3 md:mx-8"
         breadcrumbs={false}
         componentRight={
-          <GetAppIcon 
-            className="cursor-pointer mt-5" 
-            onClick={triggerDownload} 
+          <GetAppIcon
+            className="cursor-pointer mt-2 ml-2"
+            onClick={triggerDownload}
           />
         }
       />
