@@ -965,7 +965,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       )}
       <PageTitle title={headerText} className="mb-11" />
       <div className="mt-4">
-        <div className="bg-purple-100 text-purple-800 p-4 font-semibold text-xs my-8 rounded">
+        <div className="bg-purple-100 text-purple-800 p-4 font-semibold text-xs my-8 rounded mx-4">
           <div className="text-lg font-bold flex items-center mb-1">
             <InfoOutlined className="mr-2" /> Please enter the correct date of
             birth for the patient
@@ -986,14 +986,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           )}
           {showImport ? (
             <div className="p-4">
-              <button
-                className="btn border"
-                onClick={(_) => setShowImport(false)}
-              >
-                Cancel Import
-              </button>
               <div>
-                <div className="mt-4">
+                <div className="my-4">
                   <InputLabel htmlFor="care-external-results-id" required>
                     {" "}
                     Enter Care External Results Id
@@ -1004,16 +998,24 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     variant="outlined"
                     margin="dense"
                     type="text"
+                    required
                     value={careExtId}
                     onChange={(e) => setCareExtId(e.target.value)}
                     errors={state.errors.name}
                   />
                 </div>
                 <button
-                  className="btn btn-primary"
+                  className="btn btn-primary mr-4"
                   onClick={fetchExtResultData}
+                  disabled={!careExtId}
                 >
-                  Import Patient Data from External Resuts
+                  Import Patient Data from External Results
+                </button>{" "}
+                <button
+                  className="btn border"
+                  onClick={(_) => setShowImport(false)}
+                >
+                  Cancel Import
                 </button>
               </div>
             </div>
@@ -1022,7 +1024,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               <>
                 <form onSubmit={(e) => handleSubmit(e)}>
                   <button
-                    className="btn btn-primary mb-8"
+                    className="btn btn-primary mb-8 mx-4"
                     onClick={(_) => {
                       setShowImport(true);
                       setQuery({ extId: "" }, true);
