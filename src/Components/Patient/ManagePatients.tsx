@@ -192,7 +192,7 @@ export const PatientManager = (props: any) => {
         "downloadPatients"
       )
     );
-    if (res && res.data) {
+    if (res && res.data && res.data.status === 200) {
       setDownloadFile(res.data);
       document.getElementById("downloadlink")?.click();
     }
