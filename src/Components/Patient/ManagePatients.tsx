@@ -186,6 +186,12 @@ export const PatientManager = (props: any) => {
       getAllPatient(
         {
           ...params,
+          created_date_after: params.created_date_after
+            ? params.created_date_after
+            : moment().subtract(7, "d").format("YYYY-MM-DD"),
+          created_date_before: params.created_date_before
+            ? params.created_date_before
+            : moment().format("YYYY-MM-DD"),
           csv: true,
           facility: facilityId,
         },
