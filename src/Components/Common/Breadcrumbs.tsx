@@ -13,6 +13,17 @@ const MENU_TAGS: { [key: string]: string } = {
   notice_board: "Notice Board",
 };
 
+const capitalize = (string: string) => {
+  return string
+    .replace(/[_-]/g, " ")
+    .split(" ")
+    .reduce(
+      (acc, word) => acc + (word[0]?.toUpperCase() || "") + word.slice(1) + " ",
+      ""
+    )
+    .trim();
+};
+
 export default function Breadcrumbs(props: any) {
   const { replacements } = props;
   const path = usePath();
@@ -21,7 +32,8 @@ export default function Breadcrumbs(props: any) {
     .split("/")
     .map((field, i) => {
       return {
-        name: replacements[field]?.name || MENU_TAGS[field] || field,
+        name:
+          replacements[field]?.name || MENU_TAGS[field] || capitalize(field),
         uri:
           replacements[field]?.uri ||
           path
