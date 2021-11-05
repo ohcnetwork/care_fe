@@ -2210,7 +2210,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       </div>
                     </CardContent>
                   </Card>
-                  <div className="flex items-center my-4">
+                  <div className="flex items-center my-4 mx-4">
                     <button
                       className="btn btn-large btn-primary mr-4"
                       type="submit"
