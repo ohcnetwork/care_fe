@@ -284,25 +284,34 @@ export const DailyRounds = (props: any) => {
       setIsLoading(false);
       if (res && res.data && (res.status === 201 || res.status === 200)) {
         dispatch({ type: "set_form", form: initForm });
-        if (id) {
-          Notification.Success({
-            msg: "Consultation Updates details updated successfully",
-          });
-          navigate(
-            `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${res.data.external_id}/update`
-          );
-        } else {
+        if (state.form.rounds_type === "NORMAL") {
           Notification.Success({
             msg: "Consultation Updates details created successfully",
           });
-          if (data.clone_last) {
-            navigate(
-              `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${res.data.external_id}/update`
-            );
-          } else {
+          navigate(
+            `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${res.data.external_id}`
+          );
+        } else {
+          if (id) {
+            Notification.Success({
+              msg: "Consultation Updates details updated successfully",
+            });
             navigate(
               `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${res.data.external_id}/update`
             );
+          } else {
+            Notification.Success({
+              msg: "Consultation Updates details created successfully",
+            });
+            if (data.clone_last) {
+              navigate(
+                `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${res.data.external_id}/update`
+              );
+            } else {
+              navigate(
+                `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${res.data.external_id}/update`
+              );
+            }
           }
         }
       } else {
