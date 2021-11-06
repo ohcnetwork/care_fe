@@ -176,6 +176,13 @@ export const DailyRounds = (props: any) => {
             invalidForm = true;
           }
           return;
+        case "resp":
+          if (state.form.resp === null) {
+            errors[field] = "Please enter a respiratory rate";
+            if (!error_div) error_div = field;
+            invalidForm = true;
+          }
+          return;
         default:
           return;
       }
@@ -284,20 +291,21 @@ export const DailyRounds = (props: any) => {
       setIsLoading(false);
       if (res && res.data && (res.status === 201 || res.status === 200)) {
         dispatch({ type: "set_form", form: initForm });
-        if (state.form.rounds_type === "NORMAL") {
+
+        if (id) {
+          Notification.Success({
+            msg: "Consultation Updates details updated successfully",
+          });
+          navigate(
+            `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${res.data.external_id}/update`
+          );
+        } else {
           Notification.Success({
             msg: "Consultation Updates details created successfully",
           });
-          navigate(
-            `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${res.data.external_id}`
-          );
-        } else {
-          if (id) {
-            Notification.Success({
-              msg: "Consultation Updates details updated successfully",
-            });
+          if (state.form.rounds_type === "NORMAL") {
             navigate(
-              `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${res.data.external_id}/update`
+              `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${res.data.external_id}`
             );
           } else {
             Notification.Success({
@@ -828,6 +836,7 @@ export const DailyRounds = (props: any) => {
                             }
                             getOptionLabel={(option: any) => option}
                             className="-mt-3"
+                            errors={state.errors.resp}
                           />
                         </div>
                         <div>
