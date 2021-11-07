@@ -136,6 +136,7 @@ export const DailyRounds = (props: any) => {
             ...res.data,
             admitted_to: res.data.admitted_to ? res.data.admitted_to : "Select",
           };
+          console.log(data);
           dispatch({ type: "set_form", form: data });
         }
         setIsLoading(false);
@@ -176,13 +177,13 @@ export const DailyRounds = (props: any) => {
             invalidForm = true;
           }
           return;
-        case "resp":
-          if (state.form.resp === null) {
-            errors[field] = "Please enter a respiratory rate";
-            if (!error_div) error_div = field;
-            invalidForm = true;
-          }
-          return;
+        // case "resp":
+        //   if (state.form.resp === null) {
+        //     errors[field] = "Please enter a respiratory rate";
+        //     if (!error_div) error_div = field;
+        //     invalidForm = true;
+        //   }
+        //   return;
         default:
           return;
       }
@@ -251,32 +252,31 @@ export const DailyRounds = (props: any) => {
           action: state.form.action,
           review_time: state.form.review_time,
         };
+        if (state.form.rounds_type === "NORMAL") {
+          data = {
+            ...data,
+            bp:
+              state.form.systolic && state.form.diastolic
+                ? {
+                    systolic: Number(state.form.systolic),
+                    diastolic: Number(state.form.diastolic),
+                    mean: Number(
+                      calculateMAP(state.form.systolic, state.form.diastolic)
+                    ),
+                  }
+                : undefined,
+            pulse: Number(state.form.pulse),
+            resp: Number(state.form.resp),
+            temperature: state.form.tempInCelcius
+              ? celciusToFahrenheit(state.form.temperature)
+              : state.form.temperature,
+            rhythm: Number(state.form.rhythm),
+            rhythm_detail: state.form.rhythm_detail,
+            ventilator_spo2: Number(state.form.ventilator_spo2),
+          };
+        }
       } else {
         data = baseData;
-      }
-
-      if (state.form.rounds_type === "NORMAL") {
-        data = {
-          ...data,
-          bp:
-            state.form.systolic && state.form.diastolic
-              ? {
-                  systolic: Number(state.form.systolic),
-                  diastolic: Number(state.form.diastolic),
-                  mean: Number(
-                    calculateMAP(state.form.systolic, state.form.diastolic)
-                  ),
-                }
-              : undefined,
-          pulse: Number(state.form.pulse),
-          resp: Number(state.form.resp),
-          temperature: state.form.tempInCelcius
-            ? celciusToFahrenheit(state.form.temperature)
-            : state.form.temperature,
-          rhythm: Number(state.form.rhythm),
-          rhythm_detail: state.form.rhythm_detail,
-          ventilator_spo2: Number(state.form.ventilator_spo2),
-        };
       }
 
       let res;
@@ -304,13 +304,16 @@ export const DailyRounds = (props: any) => {
             msg: "Consultation Updates details created successfully",
           });
           if (state.form.rounds_type === "NORMAL") {
-            navigate(
-              `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${res.data.external_id}`
-            );
+            if (data.clone_last) {
+              navigate(
+                `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${res.data.external_id}/update`
+              );
+            } else {
+              navigate(
+                `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${res.data.external_id}`
+              );
+            }
           } else {
-            Notification.Success({
-              msg: "Consultation Updates details created successfully",
-            });
             if (data.clone_last) {
               navigate(
                 `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${res.data.external_id}/update`
