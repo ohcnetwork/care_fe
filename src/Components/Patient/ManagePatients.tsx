@@ -180,18 +180,29 @@ export const PatientManager = (props: any) => {
     is_antenatal: qParams.is_antenatal || undefined,
   };
 
+  const csvCreatedDateAfter: moment.Moment = !!params.created_date_after
+    ? moment(params.created_date_after)
+    : !!params.created_date_before
+    ? moment(params.created_date_before).subtract(7, "days")
+    : moment().subtract(7, "d");
+
+  const csvCreatedDateBefore: moment.Moment = !!params.created_date_before
+    ? moment(params.created_date_before)
+    : !!params.created_date_after
+    ? moment(params.created_date_after).add(7, "days")
+    : moment();
+
+  const isDownloadAllowed: boolean =
+    csvCreatedDateBefore.diff(csvCreatedDateAfter, "days") <= 7;
+
   let managePatients: any = null;
   const handleDownload = async (isFiltered: boolean) => {
     const res = await dispatch(
       getAllPatient(
         {
           ...params,
-          created_date_after: params.created_date_after
-            ? params.created_date_after
-            : moment().subtract(7, "d").format("YYYY-MM-DD"),
-          created_date_before: params.created_date_before
-            ? params.created_date_before
-            : moment().format("YYYY-MM-DD"),
+          created_date_after: csvCreatedDateAfter.format("YYYY-MM-DD"),
+          created_date_before: csvCreatedDateBefore.format("YYYY-MM-DD"),
           csv: true,
           facility: facilityId,
         },
@@ -590,14 +601,22 @@ export const PatientManager = (props: any) => {
               target="_blank"
             ></CSVLink>
           </div>
-          <Button
-            color="primary"
-            onClick={handleDownloadAll}
-            size="small"
-            startIcon={<ArrowDownwardIcon>download</ArrowDownwardIcon>}
-          >
-            Download All Patients
-          </Button>
+          <div className="flex flex-col gap-2">
+            <Button
+              color="primary"
+              onClick={handleDownloadAll}
+              size="small"
+              startIcon={<ArrowDownwardIcon>download</ArrowDownwardIcon>}
+              disabled={!isDownloadAllowed}
+            >
+              Download All Patients
+            </Button>
+            {!isDownloadAllowed && (
+              <p className="self-end text-sm italic text-red-400">
+                * Select a 7 day period
+              </p>
+            )}
+          </div>
         </div>
         <div className="bg-white overflow-hidden shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">
