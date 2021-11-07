@@ -136,7 +136,6 @@ export const DailyRounds = (props: any) => {
             ...res.data,
             admitted_to: res.data.admitted_to ? res.data.admitted_to : "Select",
           };
-          console.log(data);
           dispatch({ type: "set_form", form: data });
         }
         setIsLoading(false);
@@ -692,9 +691,11 @@ export const DailyRounds = (props: any) => {
                                 )}
                                 freeSolo={false}
                                 getOptionSelected={(option: any, value: any) =>
-                                  option === value
+                                  option == value
                                 }
-                                getOptionLabel={(option: any) => option}
+                                getOptionLabel={(option: any) =>
+                                  option.toString()
+                                }
                                 className="-mt-3"
                               />
                             </div>
@@ -719,9 +720,11 @@ export const DailyRounds = (props: any) => {
                                 )}
                                 freeSolo={false}
                                 getOptionSelected={(option: any, value: any) =>
-                                  option === value
+                                  option == value
                                 }
-                                getOptionLabel={(option: any) => option}
+                                getOptionLabel={(option: any) =>
+                                  option.toString()
+                                }
                                 className="-mt-3"
                               />
                             </div>
@@ -752,9 +755,9 @@ export const DailyRounds = (props: any) => {
                             renderOption={(option: any) => <div>{option}</div>}
                             freeSolo={false}
                             getOptionSelected={(option: any, value: any) =>
-                              option === value
+                              option == value
                             }
-                            getOptionLabel={(option: any) => option}
+                            getOptionLabel={(option: any) => option.toString()}
                             className="-mt-3"
                           />
                         </div>
@@ -799,9 +802,11 @@ export const DailyRounds = (props: any) => {
                                 )}
                                 freeSolo={false}
                                 getOptionSelected={(option: any, value: any) =>
-                                  option === value
+                                  option == value
                                 }
-                                getOptionLabel={(option: any) => option}
+                                getOptionLabel={(option: any) =>
+                                  option.toString()
+                                }
                                 className="-mt-3"
                               />
                             </div>
@@ -835,9 +840,9 @@ export const DailyRounds = (props: any) => {
                             renderOption={(option: any) => <div>{option}</div>}
                             freeSolo={false}
                             getOptionSelected={(option: any, value: any) =>
-                              option === value
+                              option == value
                             }
-                            getOptionLabel={(option: any) => option}
+                            getOptionLabel={(option: any) => option.toString()}
                             className="-mt-3"
                             errors={state.errors.resp}
                           />
@@ -867,9 +872,9 @@ export const DailyRounds = (props: any) => {
                             renderOption={(option: any) => <div>{option}</div>}
                             freeSolo={false}
                             getOptionSelected={(option: any, value: any) =>
-                              option === value
+                              option == value
                             }
-                            getOptionLabel={(option: any) => option}
+                            getOptionLabel={(option: any) => option.toString()}
                             className="-mt-3"
                           />
                         </div>
