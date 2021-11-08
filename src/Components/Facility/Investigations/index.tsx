@@ -279,7 +279,7 @@ const Investigation = (props: {
         );
       })}
       <button
-        className="btn btn-primary mt-4"
+        className="btn btn-primary mt-4 ml-4"
         onClick={handleSubmit}
         disabled={saving || !selectedGroup.length}
       >
