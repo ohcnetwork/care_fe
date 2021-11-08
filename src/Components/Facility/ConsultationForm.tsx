@@ -406,7 +406,7 @@ export const ConsultationForm = (props: any) => {
           }
           return;
         case "consultation_notes":
-          if (state.form.suggestion === "OP" && !state.form[field]) {
+          if (state.form.suggestion === "OP" || !state.form[field]) {
             errors[field] = "Please enter OP consultation Details";
             if (!error_div) error_div = field;
             invalidForm = true;
@@ -434,21 +434,25 @@ export const ConsultationForm = (props: any) => {
           return;
         case "cpk_mb":
           if (
-            state.form[field] &&
-            (state.form[field] < 0 || state.form[field] > 100)
+            !state.form[field] ||
+            state.form[field] < 0 ||
+            state.form[field] > 100
           ) {
+            if (!error_div) error_div = field;
             errors[field] = "Value should be between 0 and 100.";
             invalidForm = true;
           }
           return;
         case "operation":
-          if (state.form[field] && _.isEmpty(state.form[field])) {
+          if (!state.form[field] || _.isEmpty(state.form[field])) {
+            if (!error_div) error_div = field;
             errors[field] = "Please enter operation information.";
             invalidForm = true;
           }
           return;
         case "special_instruction":
-          if (state.form[field] && _.isEmpty(state.form[field])) {
+          if (!state.form[field] || _.isEmpty(state.form[field])) {
+            if (!error_div) error_div = field;
             errors[field] = "Please enter special instruction information.";
             invalidForm = true;
           }
@@ -456,10 +460,11 @@ export const ConsultationForm = (props: any) => {
         case "other_lines":
           if (
             lineRequired &&
-            state.form[field] &&
-            state.form[field] === "" &&
-            !!state.form.lines.find((id: any) => id === 7)
+            (!state.form[field] ||
+              (state.form[field] === "" &&
+                !!state.form.lines.find((id: any) => id === 7)))
           ) {
+            if (!error_div) error_div = field;
             errors[field] = "Please enter information for Other option";
             invalidForm = true;
           }
@@ -467,9 +472,10 @@ export const ConsultationForm = (props: any) => {
         case "lines_insertion_date":
           if (
             lineRequired &&
-            state.form[field] &&
-            Object.keys(state.form[field]).length !== state.form.lines.length
+            (!state.form[field] ||
+              Object.keys(state.form[field]).length !== state.form.lines.length)
           ) {
+            if (!error_div) error_div = field;
             errors[field] =
               "Please enter insertion date for all selected options";
             invalidForm = true;
@@ -478,9 +484,10 @@ export const ConsultationForm = (props: any) => {
         case "lines_site_level_fixation":
           if (
             lineRequired &&
-            state.form[field] &&
-            Object.keys(state.form[field]).length !== state.form.lines.length
+            (!state.form[field] ||
+              Object.keys(state.form[field]).length !== state.form.lines.length)
           ) {
+            if (!error_div) error_div = field;
             errors[field] =
               "Please enter site of insertion for all selected options";
             invalidForm = true;
@@ -950,7 +957,7 @@ export const ConsultationForm = (props: any) => {
                 )}
               </div>
 
-              <div className="mt-4" id="OPconsultation-div">
+              <div className="mt-4" id="consultation_notes-div">
                 <InputLabel>Advice*</InputLabel>
                 <MultilineInputField
                   rows={5}
@@ -1167,7 +1174,7 @@ export const ConsultationForm = (props: any) => {
                   errors={state.errors.operation}
                 />
               </div>
-              <div id="special-instruction-div" className="mt-2">
+              <div id="special_instruction-div" className="mt-2">
                 <InputLabel id="special-instruction-label">
                   Special Instructions*
                 </InputLabel>
@@ -1330,10 +1337,10 @@ export const ConsultationForm = (props: any) => {
                       <div id="lines_insertion_date-div" className="col-span-1">
                         <DateInputField
                           label="Date of insertion"
-                          value={state.form.lines_insertion_date?.[id]}
+                          value={state.form.lines_insertion_date?.[id] || ""}
                           onChange={(date) => handleLinesDateChange(id, date)}
                           disableFuture={true}
-                          errors={state.errors.lines_insertion_date}
+                          errors={state.errors.lines_insertion_date?.[id]}
                           InputLabelProps={{ shrink: true }}
                         />
                       </div>
