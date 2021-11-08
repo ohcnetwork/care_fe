@@ -8,7 +8,7 @@ import {
 import { navigate } from "raviger";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FacilityModel } from "../Facility/models";
-import { getFacilityV2 as getFacility } from "../../Redux/actions";
+import { getAnyFacility as getFacility } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { CircularProgress } from "@material-ui/core";
 

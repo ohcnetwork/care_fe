@@ -20,7 +20,7 @@ import {
   getTestList,
   patchSample,
   downloadSampleTests,
-  getFacilityV2,
+  getAnyFacility,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
 import Pagination from "../Common/Pagination";
@@ -68,7 +68,7 @@ export default function SampleViewAdmin(props: any) {
   useEffect(() => {
     async function fetchData() {
       if (qParams.facility) {
-        const res = await dispatch(getFacilityV2(qParams.facility));
+        const res = await dispatch(getAnyFacility(qParams.facility));
 
         setFacilityName(res?.data?.name);
       } else {

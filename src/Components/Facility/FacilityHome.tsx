@@ -11,7 +11,7 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 import { BED_TYPES, DOCTOR_SPECIALIZATION } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
-  getFacility,
+  getPermittedFacility,
   deleteFacility,
   getTriageInfo,
   listCapacity,
@@ -48,7 +48,7 @@ export const FacilityHome = (props: any) => {
       setIsLoading(true);
       const [facilityRes, capacityRes, doctorRes, triageRes] =
         await Promise.all([
-          dispatch(getFacility(facilityId)),
+          dispatch(getPermittedFacility(facilityId)),
           dispatch(listCapacity({}, { facilityId })),
           dispatch(listDoctor({}, { facilityId })),
           dispatch(getTriageInfo({ facilityId })),

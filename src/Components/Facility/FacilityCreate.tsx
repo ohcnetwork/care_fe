@@ -29,7 +29,7 @@ import {
 import {
   createFacility,
   getDistrictByState,
-  getFacility,
+  getPermittedFacility,
   getLocalbodyByDistrict,
   getStates,
   updateFacility,
@@ -196,7 +196,7 @@ export const FacilityCreate = (props: FacilityProps) => {
     async (status: statusType) => {
       if (facilityId) {
         setIsLoading(true);
-        const res = await dispatchAction(getFacility(facilityId));
+        const res = await dispatchAction(getPermittedFacility(facilityId));
         if (!status.aborted && res.data) {
           const formData = {
             facility_type: res.data.facility_type,
