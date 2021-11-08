@@ -260,7 +260,10 @@ export default function ResourceDetails(props: { id: string }) {
       ) : (
         <div className="mx-3 md:mx-8 mb-10">
           <div className="my-4 flex justify-between items-center">
-            <PageTitle title={"Resource details"} />
+            <PageTitle
+              title={"Resource details"}
+              crumbsReplacements={{ [props.id]: { name: data.title } }}
+            />
             <div>
               <button
                 onClick={(_) => setIsPrintMode(true)}
