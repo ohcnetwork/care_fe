@@ -460,9 +460,9 @@ export const ConsultationForm = (props: any) => {
         case "other_lines":
           if (
             lineRequired &&
-            (!state.form[field] ||
-              (state.form[field] === "" &&
-                !!state.form.lines.find((id: any) => id === 7)))
+            state.form[field] &&
+            state.form[field] === "" &&
+            !!state.form.lines.find((id: any) => id === 7)
           ) {
             if (!error_div) error_div = field;
             errors[field] = "Please enter information for Other option";
@@ -1337,7 +1337,7 @@ export const ConsultationForm = (props: any) => {
                       <div id="lines_insertion_date-div" className="col-span-1">
                         <DateInputField
                           label="Date of insertion"
-                          value={state.form.lines_insertion_date?.[id] || ""}
+                          value={state.form.lines_insertion_date?.[id] || null}
                           onChange={(date) => handleLinesDateChange(id, date)}
                           disableFuture={true}
                           errors={state.errors.lines_insertion_date?.[id]}
