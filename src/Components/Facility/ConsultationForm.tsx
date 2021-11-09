@@ -452,17 +452,6 @@ export const ConsultationForm = (props: any) => {
             invalidForm = true;
           }
           return;
-        case "cpk_mb":
-          if (
-            !state.form[field] ||
-            state.form[field] < 0 ||
-            state.form[field] > 100
-          ) {
-            if (!error_div) error_div = field;
-            errors[field] = "Value should be between 0 and 100.";
-            invalidForm = true;
-          }
-          return;
         case "operation":
           if (!state.form[field] || _.isEmpty(state.form[field])) {
             if (!error_div) error_div = field;
