@@ -513,6 +513,16 @@ export const ConsultationForm = (props: any) => {
             invalidForm = true;
           }
           return;
+        case "intubation_start_date":
+          if (
+            dateRequired &&
+            (!state.form[field] || !moment(state.form[field]).isValid())
+          ) {
+            if (!error_div) error_div = field;
+            errors[field] = "Please enter intubation start date";
+            invalidForm = true;
+          }
+          return;
         default:
           return;
       }
@@ -1256,7 +1266,7 @@ export const ConsultationForm = (props: any) => {
                           onChange={(date) =>
                             handleDateChange(date, "intubation_end_date")
                           }
-                          errors={state.errors.intubation_start_date}
+                          errors={state.errors.intubation_end_date}
                         />
                       </div>
                     </div>
