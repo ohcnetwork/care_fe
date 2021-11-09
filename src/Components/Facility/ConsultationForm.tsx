@@ -1366,7 +1366,7 @@ export const ConsultationForm = (props: any) => {
                           value={state.form.lines_insertion_date?.[id] || null}
                           onChange={(date) => handleLinesDateChange(id, date)}
                           disableFuture={true}
-                          errors={state.errors.lines_insertion_date?.[id]}
+                          errors={state.errors.lines_insertion_date}
                           InputLabelProps={{ shrink: true }}
                         />
                       </div>
