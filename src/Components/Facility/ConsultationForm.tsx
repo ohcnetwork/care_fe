@@ -427,7 +427,7 @@ export const ConsultationForm = (props: any) => {
           return;
         case "consultation_notes":
           if (state.form.suggestion === "OP" || !state.form[field]) {
-            errors[field] = "Please enter OP consultation Details";
+            errors[field] = "Required *";
             if (!error_div) error_div = field;
             invalidForm = true;
           }
@@ -466,14 +466,14 @@ export const ConsultationForm = (props: any) => {
         case "operation":
           if (!state.form[field] || _.isEmpty(state.form[field])) {
             if (!error_div) error_div = field;
-            errors[field] = "Please enter operation information.";
+            errors[field] = "Required *";
             invalidForm = true;
           }
           return;
         case "special_instruction":
           if (!state.form[field] || _.isEmpty(state.form[field])) {
             if (!error_div) error_div = field;
-            errors[field] = "Please enter special instruction information.";
+            errors[field] = "Required *";
             invalidForm = true;
           }
           return;
