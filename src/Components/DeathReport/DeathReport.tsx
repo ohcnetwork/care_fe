@@ -41,6 +41,7 @@ export default function PrintDeathReport(props: { id: string }) {
   };
 
   const [patientData, setPatientData] = useState(initialState);
+  const [patientName, setPatientName] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isPrintMode, setIsPrintMode] = useState(false);
   const { id } = props;
@@ -71,6 +72,7 @@ export default function PrintDeathReport(props: { id: string }) {
       const patientRes = await dispatch(getPatient({ id }));
       if (!status.aborted) {
         if (patientRes && patientRes.data) {
+          setPatientName(patientRes.data.name);
           const patientGender = getPatientGender(patientRes.data);
           const patientAddress = getPatientAddress(patientRes.data);
           const patientComorbidities = getPatientComorbidities(patientRes.data);
@@ -282,7 +284,13 @@ export default function PrintDeathReport(props: { id: string }) {
         previewData()
       ) : (
         <div className="m-5 p-5 bg-gray-100 border rounded-xl shadow">
-          <PageTitle title={`Covid-19 Death Reporting : Form 1`} />
+          <PageTitle
+            title={`Covid-19 Death Reporting : Form 1`}
+            crumbsReplacements={{
+              [props.id]: { name: patientName },
+              death_report: { style: "pointer-events-none" },
+            }}
+          />
           <div className="grid grid-rows-11">
             <div className="grid grid-cols-1 mt-4 gap-10">
               <div>

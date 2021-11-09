@@ -71,7 +71,7 @@ export const getFacility = (id: number, key?: string) => {
   return fireRequest("getFacility", [], {}, { id: id }, key);
 };
 
-export const getFacilityV2 = (id: number, key?: string) => {
+export const getFacilityV2 = (id: number | string, key?: string) => {
   return fireRequest("getFacilityV2", [], {}, { id: id }, key);
 };
 
@@ -291,6 +291,9 @@ export const getTestSample = (id: number) => {
 };
 export const patchSample = (params: object, pathParam: object) => {
   return fireRequest("patchSample", [], params, pathParam);
+};
+export const downloadSampleTests = (params: object) => {
+  return fireRequest("getTestSampleList", [], { ...params, csv: 1 });
 };
 
 // Daily Rounds

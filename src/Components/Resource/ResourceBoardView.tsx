@@ -74,13 +74,18 @@ export default function BoardView() {
   return (
     <div className="flex flex-col h-screen px-2 pb-2">
       <div className="flex items-end justify-between px-4">
-        <div className="flex items-center">
-          <PageTitle title={"Resource"} hideBack={true} />
-          <GetAppIcon
-            className="cursor-pointer mt-4"
-            onClick={triggerDownload}
-          />
-        </div>
+        <PageTitle
+          title={"Resource"}
+          hideBack={true}
+          componentRight={
+            <GetAppIcon
+              className="cursor-pointer mt-2 ml-2"
+              onClick={triggerDownload}
+            />
+          }
+          breadcrumbs={false}
+        />
+
         <div className="bg-gray-200 text-sm text-gray-500 leading-none border-2 border-gray-200 rounded-full inline-flex w-32">
           <button
             className={
@@ -125,7 +130,7 @@ export default function BoardView() {
 
       <BadgesList appliedFilters={appliedFilters} updateFilter={updateFilter} />
 
-      <div className="flex mt-4 pb-2 flex-1 items-start overflow-x-scroll">
+      <div className="flex mt-4 pb-2 flex-1 items-start overflow-x-scroll px-4">
         {isLoading ? (
           <Loading />
         ) : (

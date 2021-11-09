@@ -6,6 +6,7 @@ import {
   getPatientInvestigation,
   listInvestigationGroups,
   listInvestigations,
+  getPatient,
 } from "../../../../Redux/actions";
 import { MultiSelectField } from "../../../Common/HelperInputFields";
 import PageTitle from "../../../Common/PageTitle";
@@ -102,6 +103,7 @@ const InvestigationReports = ({ id }: any) => {
   const [sessionPage, setSessionPage] = useState(1);
   const [isNextSessionDisabled, setIsNextSessionDisabled] = useState(false);
   const [isLoadMoreDisabled, setIsLoadMoreDisabled] = useState(false);
+  const [patientName, setPatientName] = useState("");
   const [state, dispatch] = useReducer(
     investigationReportsReducer,
     initialState
@@ -206,6 +208,20 @@ const InvestigationReports = ({ id }: any) => {
     });
   });
 
+  useEffect(() => {
+    async function fetchPatientName() {
+      if (id) {
+        const res = await dispatchAction(getPatient({ id: id }));
+        if (res.data) {
+          setPatientName(res.data.name);
+        }
+      } else {
+        setPatientName("");
+      }
+    }
+    fetchPatientName();
+  }, [dispatchAction, id]);
+
   const handleGroupSelect = (e: any) => {
     dispatch({ type: "set_investigations", payload: [] });
     dispatch({ type: "set_investigation_table_data", payload: [] });
@@ -293,7 +309,13 @@ const InvestigationReports = ({ id }: any) => {
 
   return (
     <div className="max-w-7xl mx-auto px-4">
-      <PageTitle title={"Investigation Reports"} />
+      <PageTitle
+        title={"Investigation Reports"}
+        crumbsReplacements={{
+          patient: { style: "pointer-events-none" },
+          [id]: { name: patientName },
+        }}
+      />
       {!isLoading.investigationGroupLoading ? (
         <>
           <div className="mt-5">
