@@ -19,10 +19,14 @@ import {
   Radio,
   RadioGroup,
 } from "@material-ui/core";
+import { parsePhoneNumberFromString } from "libphonenumber-js";
+import { validateEmailAddress } from "../../Common/validation";
 import {
   SelectField,
   TextInputField,
   MultilineInputField,
+  PhoneNumberField,
+  ErrorHelperText,
 } from "../Common/HelperInputFields";
 import { AssetData } from "../Assets/AssetTypes";
 import loadable from "@loadable/component";
@@ -138,7 +142,7 @@ const AssetCreate = (props: AssetProps) => {
           }
           return;
         case "is_working":
-          if (is_working === "0") {
+          if (is_working == "0") {
             errors[field] = "Field is required";
             invalidForm = true;
           }
@@ -158,6 +162,17 @@ const AssetCreate = (props: AssetProps) => {
         case "support_phone":
           if (!support_phone) {
             errors[field] = "Field is required";
+            invalidForm = true;
+          }
+          const phoneNumber = parsePhoneNumberFromString(support_phone);
+          if (!phoneNumber?.isPossible()) {
+            errors[field] = "Please enter valid phone number";
+            invalidForm = true;
+          }
+          return;
+        case "support_email":
+          if (support_email && !validateEmailAddress(support_email)) {
+            errors[field] = "Please enter valid email id";
             invalidForm = true;
           }
           return;
@@ -190,7 +205,8 @@ const AssetCreate = (props: AssetProps) => {
         vendor_name: vendor_name,
         support_name: support_name,
         support_email: support_email,
-        support_phone: support_phone,
+        support_phone:
+          parsePhoneNumberFromString(support_phone)?.format("E.164"),
       };
       if (!assetId) {
         const res = await dispatchAction(createAsset(data));
@@ -326,6 +342,7 @@ const AssetCreate = (props: AssetProps) => {
                     />
                   </Box>
                 </RadioGroup>
+                <ErrorHelperText error={state.errors.is_working} />
               </div>
               {is_working === "false" && (
                 <div>
@@ -440,20 +457,10 @@ const AssetCreate = (props: AssetProps) => {
                 />
               </div>
               <div>
-                <InputLabel htmlFor="support_phone" id="name=label" required>
-                  Contact Phone Number
-                </InputLabel>
-                <TextInputField
-                  id="support_phone"
-                  fullWidth
-                  name="support_phone"
-                  placeholder=""
-                  variant="outlined"
-                  margin="dense"
+                <PhoneNumberField
+                  label="Phone Number*"
                   value={support_phone}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setSupportPhone(e.target.value)
-                  }
+                  onChange={(value: any) => setSupportPhone(value)}
                   errors={state.errors.support_phone}
                 />
               </div>
