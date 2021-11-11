@@ -93,12 +93,15 @@ export const SampleTest = (props: any) => {
     async (status: statusType) => {
       const coronaLabType = 950;
       const labType = 9;
+      setIsLoading(true);
       const LabList = await dispatchAction(
         getFacilitiesV2({ facility_type: labType })
       );
+
       const CoronaLabList = await dispatchAction(
         getFacilitiesV2({ facility_type: coronaLabType })
       );
+
       if (
         !status.aborted &&
         LabList.data.results &&
@@ -116,6 +119,7 @@ export const SampleTest = (props: any) => {
           },
         });
       }
+      setIsLoading(false);
     },
     [dispatchAction]
   );
