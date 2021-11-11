@@ -224,10 +224,7 @@ export default function ListFilter(props: any) {
       is_antenatal: is_antenatal || "",
       breathlessness_level: breathlessness_level || "",
     };
-    localStorage.setItem(
-      "shift-filters",
-      JSON.stringify({ ...filterState, ...data })
-    );
+    localStorage.setItem("shift-filters", JSON.stringify({ ...data }));
     onChange(data);
   };
 
@@ -452,7 +449,7 @@ export default function ListFilter(props: any) {
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
           />
         </div>
-        
+
         <div className="w-64 flex-none">
           <span className="text-sm font-semibold">Breathlessness Level</span>
           <SelectField
