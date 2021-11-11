@@ -18,7 +18,6 @@ import Pagination from "../Common/Pagination";
 import { InputSearchBox } from "../Common/SearchBox";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import AssetFilter from "./AssetFilter";
-import { FacilityModel } from "../Facility/models";
 import AdvancedFilterButton from "../Common/AdvancedFilterButton";
 
 const Loading = loadable(() => import("../Common/Loading"));
@@ -67,17 +66,22 @@ const AssetsList = (props: any) => {
             location: qParams.location,
             status: qParams.status,
           };
-      const { data }: any = await dispatch(listAssets(params));
-      if (!status.aborted) {
-        setIsLoading(false);
-        if (!data)
-          Notification.Error({
-            msg: "Something went wrong..!",
-          });
-        else {
-          setAssets(data.results);
-          setTotalCount(data.count);
+
+      try {
+        const { data }: any = await dispatch(listAssets(params));
+        if (!status.aborted) {
+          setIsLoading(false);
+          if (!data)
+            Notification.Error({
+              msg: "Something went wrong..!",
+            });
+          else {
+            setAssets(data.results);
+            setTotalCount(data.count);
+          }
         }
+      } catch (err) {
+        console.log(err);
       }
     },
     [
@@ -132,7 +136,7 @@ const AssetsList = (props: any) => {
         setLocationName("");
       }
     },
-    [dispatch, qParams.location]
+    [dispatch, qParams.location, qParams.facility]
   );
 
   useAbortableEffect(
