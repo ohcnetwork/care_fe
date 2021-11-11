@@ -309,7 +309,7 @@ export const DailyRounds = (props: any) => {
               );
             } else {
               navigate(
-                `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${res.data.external_id}`
+                `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`
               );
             }
           } else {
@@ -823,7 +823,7 @@ export const DailyRounds = (props: any) => {
                         </div>
                         <div>
                           <InputLabel className="flex flex-row justify-between">
-                            {"Respiratory Rate (bpm)"}
+                            {"Respiratory Rate (bpm) *"}
                             {getStatus(12, "Low", 16, "High", "resp")}
                           </InputLabel>
                           <AutoCompleteAsyncField
