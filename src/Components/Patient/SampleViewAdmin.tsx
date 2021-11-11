@@ -413,14 +413,18 @@ export default function SampleViewAdmin(props: any) {
           userType={userType}
         />
       )}
-      <div className="flex items-center">
-        <PageTitle
-          title="Sample Management System"
-          hideBack={true}
-          className="ml-3 md:ml-8"
-        />
-        <GetAppIcon className="cursor-pointer mt-5" onClick={triggerDownload} />
-      </div>
+      <PageTitle
+        title="Sample Management System"
+        hideBack={true}
+        className="mx-3 md:mx-8"
+        breadcrumbs={false}
+        componentRight={
+          <GetAppIcon
+            className="cursor-pointer mt-2 ml-2"
+            onClick={triggerDownload}
+          />
+        }
+      />
       <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3 m-4 md:px-4">
         <div className="bg-white overflow-hidden shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">

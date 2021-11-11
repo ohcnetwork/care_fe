@@ -1,9 +1,12 @@
 import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
 import loadable from "@loadable/component";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { createFacilityAssetLocation } from "../../Redux/actions";
+import {
+  createFacilityAssetLocation,
+  getAnyFacility,
+} from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import {
   MultilineInputField,
@@ -26,6 +29,20 @@ export const AddLocationForm = (props: LocationFormProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [name, setName] = useState<string>("");
   const [description, setDescription] = useState<string>("");
+  const [facilityName, setFacilityName] = useState("");
+
+  useEffect(() => {
+    async function fetchFacilityName() {
+      if (facilityId) {
+        const res = await dispatchAction(getAnyFacility(facilityId));
+
+        setFacilityName(res?.data?.name || "");
+      } else {
+        setFacilityName("");
+      }
+    }
+    fetchFacilityName();
+  }, [dispatchAction, facilityId]);
 
   const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
@@ -53,7 +70,10 @@ export const AddLocationForm = (props: LocationFormProps) => {
 
   return (
     <div className="px-2">
-      <PageTitle title="Add Location" />
+      <PageTitle
+        title="Add Location"
+        crumbsReplacements={{ [facilityId]: { name: facilityName } }}
+      />
       <div className="mt-4">
         <Card>
           <form onSubmit={(e) => handleSubmit(e)}>

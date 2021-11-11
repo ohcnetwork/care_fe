@@ -6,7 +6,12 @@ import React, { useCallback, useEffect, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
 import { DOCTOR_SPECIALIZATION } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { createDoctor, getDoctor, listDoctor } from "../../Redux/actions";
+import {
+  createDoctor,
+  getDoctor,
+  listDoctor,
+  getAnyFacility,
+} from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import {
   ErrorHelperText,
@@ -66,6 +71,7 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
   const [isLastOptionType, setIsLastOptionType] = useState(false);
   const [doctorTypes, setDoctorTypes] =
     useState<Array<OptionsType>>(initDoctorTypes);
+  const [facilityName, setFacilityName] = useState("");
 
   const headerText = !id ? "Add Doctor Capacity" : "Edit Doctor Capacity";
   const buttonText = !id
@@ -134,6 +140,19 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
     },
     [dispatch, fetchData, id]
   );
+
+  useEffect(() => {
+    async function fetchFacilityName() {
+      if (facilityId) {
+        const res = await dispatchAction(getAnyFacility(facilityId));
+
+        setFacilityName(res?.data?.name || "");
+      } else {
+        setFacilityName("");
+      }
+    }
+    fetchFacilityName();
+  }, [dispatchAction, facilityId]);
 
   useEffect(() => {
     const lastDoctorType =
@@ -210,7 +229,15 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
   }
   return (
     <div className="px-2 pb-2">
-      <PageTitle title={headerText} />
+      <PageTitle
+        title={headerText}
+        crumbsReplacements={{
+          [facilityId]: { name: facilityName },
+          [id || "????"]: {
+            name: DOCTOR_SPECIALIZATION.find((type) => type.id == id)?.text,
+          },
+        }}
+      />
       <div>
         <Card style={{ marginTop: "20px" }}>
           <form

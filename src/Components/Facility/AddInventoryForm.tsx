@@ -4,7 +4,7 @@ import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { useCallback, useReducer, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getItems, postInventory } from "../../Redux/actions";
+import { getItems, postInventory, getAnyFacility } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { SelectField, TextInputField } from "../Common/HelperInputFields";
 import { InventoryItemsModel } from "./models";
@@ -52,6 +52,7 @@ export const AddInventoryForm = (props: any) => {
   const [offset, setOffset] = useState(0);
   const [data, setData] = useState<Array<InventoryItemsModel>>([]);
   const [currentUnit, setCurrentUnit] = useState<any>();
+  const [facilityName, setFacilityName] = useState("");
 
   const limit = 14;
 
@@ -78,6 +79,19 @@ export const AddInventoryForm = (props: any) => {
     },
     [fetchData]
   );
+
+  useEffect(() => {
+    async function fetchFacilityName() {
+      if (facilityId) {
+        const res = await dispatchAction(getAnyFacility(facilityId));
+
+        setFacilityName(res?.data?.name || "");
+      } else {
+        setFacilityName("");
+      }
+    }
+    fetchFacilityName();
+  }, [dispatchAction, facilityId]);
 
   useEffect(() => {
     // set the default units according to the item
@@ -124,7 +138,10 @@ export const AddInventoryForm = (props: any) => {
 
   return (
     <div className="px-2">
-      <PageTitle title="Add Inventory" />
+      <PageTitle
+        title="Add Inventory"
+        crumbsReplacements={{ [facilityId]: { name: facilityName } }}
+      />
       <div className="mt-4">
         <Card>
           <form onSubmit={(e) => handleSubmit(e)}>

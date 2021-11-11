@@ -1,4 +1,4 @@
-import React, { useReducer, useState } from "react";
+import React, { useReducer, useState, useEffect } from "react";
 import loadable from "@loadable/component";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import {
@@ -30,7 +30,7 @@ import {
 } from "@material-ui/core";
 import { phonePreg } from "../../Common/validation";
 
-import { createShift } from "../../Redux/actions";
+import { createShift, getPatient } from "../../Redux/actions";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -95,8 +95,27 @@ const goBack = () => {
 };
 
 export const ShiftCreate = (props: patientShiftProps) => {
+  const { facilityId, patientId } = props;
   const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
+  const [facilityName, setFacilityName] = useState("");
+  const [patientName, setPatientName] = useState("");
+
+  useEffect(() => {
+    async function fetchPatientName() {
+      if (patientId) {
+        const res = await dispatchAction(getPatient({ id: patientId }));
+        if (res.data) {
+          setPatientName(res.data.name);
+          setFacilityName(res.data.facility_object.name);
+        }
+      } else {
+        setPatientName("");
+        setFacilityName("");
+      }
+    }
+    fetchPatientName();
+  }, [dispatchAction, patientId]);
 
   const shiftFormReducer = (state = initialState, action: any) => {
     switch (action.type) {
@@ -213,7 +232,13 @@ export const ShiftCreate = (props: patientShiftProps) => {
 
   return (
     <div className="px-2 pb-2">
-      <PageTitle title={"Create Shift Request"} />
+      <PageTitle
+        title={"Create Shift Request"}
+        crumbsReplacements={{
+          [facilityId]: { name: facilityName },
+          [patientId]: { name: patientName },
+        }}
+      />
       <div className="mt-4">
         <Card>
           <CardContent>

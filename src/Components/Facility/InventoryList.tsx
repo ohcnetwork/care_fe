@@ -1,10 +1,10 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import loadable from "@loadable/component";
 import { Button } from "@material-ui/core";
 import { navigate } from "raviger";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getInventorySummary } from "../../Redux/actions";
+import { getInventorySummary, getAnyFacility } from "../../Redux/actions";
 import Pagination from "../Common/Pagination";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
@@ -19,6 +19,7 @@ export default function InventoryList(props: any) {
   const [offset, setOffset] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+  const [facilityName, setFacilityName] = useState("");
   const limit = 14;
 
   const fetchData = useCallback(
@@ -44,6 +45,19 @@ export default function InventoryList(props: any) {
     },
     [fetchData]
   );
+
+  useEffect(() => {
+    async function fetchFacilityName() {
+      if (facilityId) {
+        const res = await dispatchAction(getAnyFacility(facilityId));
+
+        setFacilityName(res?.data?.name || "");
+      } else {
+        setFacilityName("");
+      }
+    }
+    fetchFacilityName();
+  }, [dispatchAction, facilityId]);
 
   const handlePagination = (page: number, limit: number) => {
     const offset = (page - 1) * limit;
@@ -146,6 +160,7 @@ export default function InventoryList(props: any) {
         title="Inventory Summary"
         hideBack={false}
         className="mx-3 md:mx-8"
+        crumbsReplacements={{ [facilityId]: { name: facilityName } }}
       />
       <div className="container mx-auto px-4 sm:px-8">
         <div className="py-4 md:py-8">

@@ -71,7 +71,7 @@ export const getPermittedFacility = (id: number, key?: string) => {
   return fireRequest("getPermittedFacility", [], {}, { id: id }, key);
 };
 
-export const getAnyFacility = (id: number, key?: string) => {
+export const getAnyFacility = (id: number | string, key?: string) => {
   return fireRequest("getAnyFacility", [], {}, { id: id }, key);
 };
 

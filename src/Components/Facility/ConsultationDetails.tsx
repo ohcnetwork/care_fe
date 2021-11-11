@@ -306,7 +306,7 @@ export const ConsultationDetails = (props: any) => {
           {tab === "UPDATES" && (
             <div className="flex md:flex-row flex-col">
               <div className="md:w-2/3">
-                <PageTitle title="Info" hideBack={true} />
+                <PageTitle title="Info" hideBack={true} breadcrumbs={false} />
                 {consultationData.examination_details && (
                   <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
                     <div className="px-4 py-5 sm:p-6">
@@ -391,7 +391,11 @@ export const ConsultationDetails = (props: any) => {
                   )}
               </div>
               <div className="md:w-1/3">
-                <PageTitle title="Updates" hideBack={true} />
+                <PageTitle
+                  title="Updates"
+                  hideBack={true}
+                  breadcrumbs={false}
+                />
                 <DailyRoundsList
                   facilityId={facilityId}
                   patientId={patientId}
@@ -403,7 +407,11 @@ export const ConsultationDetails = (props: any) => {
           )}
           {tab === "SUMMARY" && (
             <div className="mt-4">
-              <PageTitle title="Primary Parameters Plot" hideBack={true} />
+              <PageTitle
+                title="Primary Parameters Plot"
+                hideBack={true}
+                breadcrumbs={false}
+              />
               <PrimaryParametersPlot
                 facilityId={facilityId}
                 patientId={patientId}
@@ -499,7 +507,11 @@ export const ConsultationDetails = (props: any) => {
 
           {tab === "ABG" && (
             <div>
-              <PageTitle title="ABG Analysis Plot" hideBack={true} />
+              <PageTitle
+                title="ABG Analysis Plot"
+                hideBack={true}
+                breadcrumbs={false}
+              />
               <ABGPlots
                 facilityId={facilityId}
                 patientId={patientId}
@@ -509,7 +521,11 @@ export const ConsultationDetails = (props: any) => {
           )}
           {tab === "NURSING" && (
             <div>
-              <PageTitle title="Nursing Analysis" hideBack={true} />
+              <PageTitle
+                title="Nursing Analysis"
+                hideBack={true}
+                breadcrumbs={false}
+              />
               <NursingPlot
                 facilityId={facilityId}
                 patientId={patientId}
@@ -519,7 +535,11 @@ export const ConsultationDetails = (props: any) => {
           )}
           {tab === "NEUROLOGICAL_MONITORING" && (
             <div>
-              <PageTitle title="Neurological Monitoring" hideBack={true} />
+              <PageTitle
+                title="Neurological Monitoring"
+                hideBack={true}
+                breadcrumbs={false}
+              />
               <NeurologicalTable
                 facilityId={facilityId}
                 patientId={patientId}
@@ -529,7 +549,11 @@ export const ConsultationDetails = (props: any) => {
           )}
           {tab === "VENTILATOR" && (
             <div>
-              <PageTitle title="Ventilator Parameters" hideBack={true} />
+              <PageTitle
+                title="Ventilator Parameters"
+                hideBack={true}
+                breadcrumbs={false}
+              />
               <VentilatorPlot
                 facilityId={facilityId}
                 patientId={patientId}
@@ -539,7 +563,11 @@ export const ConsultationDetails = (props: any) => {
           )}
           {tab === "NUTRITION" && (
             <div>
-              <PageTitle title="Nutrition" hideBack={true} />
+              <PageTitle
+                title="Nutrition"
+                hideBack={true}
+                breadcrumbs={false}
+              />
               <NutritionPlots
                 facilityId={facilityId}
                 patientId={patientId}
@@ -549,7 +577,11 @@ export const ConsultationDetails = (props: any) => {
           )}
           {tab === "PRESSURE_SORE" && (
             <div className="mt-4">
-              <PageTitle title="Pressure Sore" hideBack={true} />
+              <PageTitle
+                title="Pressure Sore"
+                hideBack={true}
+                breadcrumbs={false}
+              />
               <PressureSoreDiagrams
                 consultationId={consultationId}
               ></PressureSoreDiagrams>
@@ -557,14 +589,22 @@ export const ConsultationDetails = (props: any) => {
           )}
           {tab === "DIALYSIS" && (
             <div>
-              <PageTitle title="Dialysis Plots" hideBack={true} />
+              <PageTitle
+                title="Dialysis Plots"
+                hideBack={true}
+                breadcrumbs={false}
+              />
               <DialysisPlots consultationId={consultationId}></DialysisPlots>
             </div>
           )}
           {tab === "INVESTIGATIONS" && (
             <div>
               <div className="flex justify-between">
-                <PageTitle title="Investigations" hideBack={true} />
+                <PageTitle
+                  title="Investigations"
+                  hideBack={true}
+                  breadcrumbs={false}
+                />
                 <div className="pt-6">
                   <button
                     className="btn btn-primary w-full"

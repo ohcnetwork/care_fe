@@ -452,7 +452,12 @@ export const FacilityCreate = (props: FacilityProps) => {
   const id = open ? "map-popover" : undefined;
   return (
     <div className="px-2 pb-2">
-      <PageTitle title={headerText} />
+      <PageTitle
+        title={headerText}
+        crumbsReplacements={{
+          [facilityId || "????"]: { name: state.form.name },
+        }}
+      />
       <Card className="mt-4">
         <CardContent>
           <form onSubmit={(e) => handleSubmit(e)}>
