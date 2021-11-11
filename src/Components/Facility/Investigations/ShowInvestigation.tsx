@@ -165,7 +165,7 @@ export default function ShowInvestigation(props: any) {
       <PageTitle
         title="Investigation"
         hideBack={false}
-        className="mx-3 md:mx-8"
+        className="mx-3 md:mx-4"
         crumbsReplacements={{
           [facilityId]: { name: facilityName },
           [patientId]: { name: patientName },
