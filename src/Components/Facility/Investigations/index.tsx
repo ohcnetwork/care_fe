@@ -8,6 +8,7 @@ import {
   createInvestigation,
   listInvestigationGroups,
   listInvestigations,
+  getPatient,
 } from "../../../Redux/actions";
 import * as Notification from "../../../Utils/Notifications.js";
 import { navigate } from "raviger";
@@ -74,6 +75,8 @@ const Investigation = (props: {
   patientId: string;
   facilityId: string;
 }) => {
+  const { consultationId, patientId, facilityId } = props;
+
   const dispatch: any = useDispatch();
   const [selectedGroup, setSelectedGroup] = useState<string[]>([]);
   const [state, setState] = useReducer(testFormReducer, initialState);
@@ -90,6 +93,8 @@ const Investigation = (props: {
   const [saving, setSaving] = useState(false);
   const [session, setSession] = useState("");
   const [selectedItems, selectItems] = useState<SearchItem[]>([]);
+  const [facilityName, setFacilityName] = useState("");
+  const [patientName, setPatientName] = useState("");
   const searchOptions = [...investigationGroups, ...investigations];
 
   const fetchInvestigations = () => {
@@ -111,6 +116,22 @@ const Investigation = (props: {
       setIsLoading({ ...isLoading, investigationGroupLoading: false });
     });
   };
+
+  useEffect(() => {
+    async function fetchPatientName() {
+      if (patientId) {
+        const res = await dispatch(getPatient({ id: patientId }));
+        if (res.data) {
+          setPatientName(res.data.name);
+          setFacilityName(res.data.facility_object.name);
+        }
+      } else {
+        setPatientName("");
+        setFacilityName("");
+      }
+    }
+    fetchPatientName();
+  }, [dispatch, patientId]);
 
   useEffect(() => {
     fetchInvestigationGroups();
@@ -191,7 +212,13 @@ const Investigation = (props: {
 
   return (
     <div className="max-w-7xl mx-auto px-4">
-      <PageTitle title={"Create Investigation"} />
+      <PageTitle
+        title={"Create Investigation"}
+        crumbsReplacements={{
+          [facilityId]: { name: facilityName },
+          [patientId]: { name: patientName },
+        }}
+      />
       <div className="mt-5">
         <label className="text-sm" id="investigation-group-label">
           Search Investigations & Groups

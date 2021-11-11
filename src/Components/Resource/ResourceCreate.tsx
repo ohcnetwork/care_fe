@@ -1,4 +1,4 @@
-import React, { useReducer, useState } from "react";
+import React, { useReducer, useState, useEffect } from "react";
 import loadable from "@loadable/component";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import {
@@ -30,7 +30,7 @@ import {
 } from "@material-ui/core";
 import { phonePreg } from "../../Common/validation";
 
-import { createResource } from "../../Redux/actions";
+import { createResource, getFacilityV2 } from "../../Redux/actions";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -93,8 +93,11 @@ const goBack = () => {
 };
 
 export default function ResourceCreate(props: resourceProps) {
+  const { facilityId } = props;
+
   const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
+  const [facilityName, setFacilityName] = useState("");
 
   const resourceFormReducer = (state = initialState, action: any) => {
     switch (action.type) {
@@ -116,6 +119,19 @@ export default function ResourceCreate(props: resourceProps) {
   };
 
   const [state, dispatch] = useReducer(resourceFormReducer, initialState);
+
+  useEffect(() => {
+    async function fetchFacilityName() {
+      if (facilityId) {
+        const res = await dispatchAction(getFacilityV2(facilityId));
+
+        setFacilityName(res?.data?.name || "");
+      } else {
+        setFacilityName("");
+      }
+    }
+    fetchFacilityName();
+  }, [dispatchAction, facilityId]);
 
   const validateForm = () => {
     let errors = { ...initError };
@@ -204,7 +220,13 @@ export default function ResourceCreate(props: resourceProps) {
 
   return (
     <div className="px-2 pb-2">
-      <PageTitle title={"Create Resource Request"} />
+      <PageTitle
+        title={"Create Resource Request"}
+        crumbsReplacements={{
+          [facilityId]: { name: facilityName },
+          resource: { style: "pointer-events-none" },
+        }}
+      />
       <div className="mt-4">
         <Card>
           <CardContent>

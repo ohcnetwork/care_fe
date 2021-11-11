@@ -1,8 +1,8 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import loadable from "@loadable/component";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getMinQuantity } from "../../Redux/actions";
+import { getMinQuantity, getFacilityV2 } from "../../Redux/actions";
 import Pagination from "../Common/Pagination";
 import { Button, ButtonBase } from "@material-ui/core";
 import { navigate } from "raviger";
@@ -19,6 +19,7 @@ export default function MinQuantityList(props: any) {
   const [offset, setOffset] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+  const [facilityName, setFacilityName] = useState("");
   const limit = 14;
 
   const fetchData = useCallback(
@@ -44,6 +45,19 @@ export default function MinQuantityList(props: any) {
     },
     [fetchData]
   );
+
+  useEffect(() => {
+    async function fetchFacilityName() {
+      if (facilityId) {
+        const res = await dispatchAction(getFacilityV2(facilityId));
+
+        setFacilityName(res?.data?.name || "");
+      } else {
+        setFacilityName("");
+      }
+    }
+    fetchFacilityName();
+  }, [dispatchAction, facilityId]);
 
   const handlePagination = (page: number, limit: number) => {
     const offset = (page - 1) * limit;
@@ -142,6 +156,11 @@ export default function MinQuantityList(props: any) {
         title="Minimum Quantity Required"
         hideBack={false}
         className="mx-3 md:mx-8"
+        crumbsReplacements={{
+          [facilityId]: { name: facilityName },
+          min_quantity: { name: "" },
+          list: { name: "min quantity" },
+        }}
       />
       <div className="container mx-auto px-4 sm:px-8">
         <div className="py-8">

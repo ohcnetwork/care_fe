@@ -55,7 +55,7 @@ export const NoticeBoard: any = () => {
 
   return (
     <div className="flex flex-col">
-      <PageTitle title="Notice Board" />
+      <PageTitle title="Notice Board" breadcrumbs={false} />
       {notices}
     </div>
   );

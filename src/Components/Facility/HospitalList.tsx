@@ -484,7 +484,12 @@ const HospitalListPage = (props: any) => {
   return (
     <div className="px-6">
       <div className="grid grid-cols-2">
-        <PageTitle title={t("Facilities")} hideBack={true} className="mx-3" />
+        <PageTitle
+          title={t("Facilities")}
+          hideBack={true}
+          className="mx-3"
+          breadcrumbs={false}
+        />
 
         <div className="flex justify-end w-full mt-4">
           <div>
