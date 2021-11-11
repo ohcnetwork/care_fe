@@ -171,7 +171,10 @@ const AssetManage = (props: AssetManageProps) => {
   if (isPrintMode) return <PrintPreview />;
   return (
     <div className="px-2 pb-2">
-      <PageTitle title={asset?.name || "Asset"} />
+      <PageTitle
+        title={asset?.name || "Asset"}
+        crumbsReplacements={{ [assetId]: { name: asset?.name } }}
+      />
       <div className="bg-white rounded-lg md:p-6 p-3 shadow">
         <div className="md:flex justify-between">
           <div className="mb-2">

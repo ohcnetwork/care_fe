@@ -218,7 +218,7 @@ const AssetsList = (props: any) => {
 
   return (
     <div className="px-4 pb-2">
-      <PageTitle title="Assets" hideBack={true} />
+      <PageTitle title="Assets" hideBack={true} breadcrumbs={false} />
       <div className="md:flex mt-5 space-y-2">
         <div className="bg-white overflow-hidden shadow rounded-lg flex-1 md:mr-2">
           <div className="px-4 py-5 sm:p-6">

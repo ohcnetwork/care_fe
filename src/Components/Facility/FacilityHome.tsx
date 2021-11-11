@@ -177,7 +177,10 @@ export const FacilityHome = (props: any) => {
 
   return (
     <div className="px-2 pb-2">
-      <PageTitle title={facilityData.name || "Facility"} />
+      <PageTitle
+        title={facilityData.name || "Facility"}
+        crumbsReplacements={{ [facilityId]: { name: facilityData.name } }}
+      />
       <Dialog
         maxWidth={"md"}
         open={openDeleteDialog}

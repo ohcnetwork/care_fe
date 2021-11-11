@@ -19,10 +19,14 @@ import {
   Radio,
   RadioGroup,
 } from "@material-ui/core";
+import { parsePhoneNumberFromString } from "libphonenumber-js";
+import { validateEmailAddress } from "../../Common/validation";
 import {
   SelectField,
   TextInputField,
   MultilineInputField,
+  PhoneNumberField,
+  ErrorHelperText,
 } from "../Common/HelperInputFields";
 import { AssetData } from "../Assets/AssetTypes";
 import loadable from "@loadable/component";
@@ -69,6 +73,8 @@ const goBack = () => {
 };
 
 const AssetCreate = (props: AssetProps) => {
+  const { facilityId, assetId } = props;
+
   const [state, dispatch] = useReducer(asset_create_reducer, initialState);
   const [name, setName] = useState<string>("");
   const [asset_type, setAssetType] = useState<string>("");
@@ -86,13 +92,14 @@ const AssetCreate = (props: AssetProps) => {
   const dispatchAction: any = useDispatch();
   const [locations, setLocations] = useState([{ id: "0", name: "Select" }]);
   const [asset, setAsset] = useState<AssetData>();
+  const [facilityName, setFacilityName] = useState("");
 
-  const { facilityId, assetId } = props;
   useEffect(() => {
     setIsLoading(true);
     dispatchAction(
       listFacilityAssetLocation({}, { facility_external_id: facilityId })
     ).then(({ data }: any) => {
+      setFacilityName(data.results[0].facility.name);
       setLocations([...locations, ...data.results]);
       setIsLoading(false);
     });
@@ -135,7 +142,7 @@ const AssetCreate = (props: AssetProps) => {
           }
           return;
         case "is_working":
-          if (is_working === "0") {
+          if (is_working == "0") {
             errors[field] = "Field is required";
             invalidForm = true;
           }
@@ -155,6 +162,17 @@ const AssetCreate = (props: AssetProps) => {
         case "support_phone":
           if (!support_phone) {
             errors[field] = "Field is required";
+            invalidForm = true;
+          }
+          const phoneNumber = parsePhoneNumberFromString(support_phone);
+          if (!phoneNumber?.isPossible()) {
+            errors[field] = "Please enter valid phone number";
+            invalidForm = true;
+          }
+          return;
+        case "support_email":
+          if (support_email && !validateEmailAddress(support_email)) {
+            errors[field] = "Please enter valid email id";
             invalidForm = true;
           }
           return;
@@ -187,7 +205,8 @@ const AssetCreate = (props: AssetProps) => {
         vendor_name: vendor_name,
         support_name: support_name,
         support_email: support_email,
-        support_phone: support_phone,
+        support_phone:
+          parsePhoneNumberFromString(support_phone)?.format("E.164"),
       };
       if (!assetId) {
         const res = await dispatchAction(createAsset(data));
@@ -215,7 +234,14 @@ const AssetCreate = (props: AssetProps) => {
 
   return (
     <div className="px-6 pb-2">
-      <PageTitle title={assetId ? "Update Asset" : "Create New Asset"} />
+      <PageTitle
+        title={assetId ? "Update Asset" : "Create New Asset"}
+        crumbsReplacements={{
+          [facilityId]: { name: facilityName },
+          assets: { style: "text-gray-200 pointer-events-none" },
+          [assetId || "????"]: { name },
+        }}
+      />
       <Card className="mt-4 max-w-screen-lg mx-auto">
         <CardContent>
           <form onSubmit={(e) => handleSubmit(e)}>
@@ -316,6 +342,7 @@ const AssetCreate = (props: AssetProps) => {
                     />
                   </Box>
                 </RadioGroup>
+                <ErrorHelperText error={state.errors.is_working} />
               </div>
               {is_working === "false" && (
                 <div>
@@ -430,20 +457,10 @@ const AssetCreate = (props: AssetProps) => {
                 />
               </div>
               <div>
-                <InputLabel htmlFor="support_phone" id="name=label" required>
-                  Contact Phone Number
-                </InputLabel>
-                <TextInputField
-                  id="support_phone"
-                  fullWidth
-                  name="support_phone"
-                  placeholder=""
-                  variant="outlined"
-                  margin="dense"
+                <PhoneNumberField
+                  label="Phone Number*"
                   value={support_phone}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setSupportPhone(e.target.value)
-                  }
+                  onChange={(value: any) => setSupportPhone(value)}
                   errors={state.errors.support_phone}
                 />
               </div>

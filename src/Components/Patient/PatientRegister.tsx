@@ -40,6 +40,7 @@ import {
   updatePatient,
   getWardByLocalBody,
   externalResult,
+  getFacilityV2,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import AlertDialog from "../Common/AlertDialog";
@@ -231,6 +232,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     patientList: Array<DupPatientModel>;
   }>({ patientList: [] });
   const [sameAddress, setSameAddress] = useState(true);
+  const [facilityName, setFacilityName] = useState("");
+  const [patientName, setPatientName] = useState("");
   const [{ extId }, setQuery] = useQueryParams();
 
   useEffect(() => {
@@ -370,6 +373,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       const res = await dispatchAction(getPatient({ id }));
       if (!status.aborted) {
         if (res && res.data) {
+          setFacilityName(res.data.facility_object.name);
+          setPatientName(res.data.name);
           const formData = {
             ...res.data,
             nationality: res.data.nationality ? res.data.nationality : "India",
@@ -496,6 +501,19 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     },
     [dispatch, fetchData]
   );
+
+  useEffect(() => {
+    async function fetchFacilityName() {
+      if (facilityId && !id) {
+        const res = await dispatchAction(getFacilityV2(facilityId));
+
+        setFacilityName(res?.data?.name || "");
+      } else {
+        setFacilityName("");
+      }
+    }
+    fetchFacilityName();
+  }, [dispatchAction, facilityId]);
 
   const validateForm = () => {
     let errors = { ...initError };
@@ -963,7 +981,14 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           facilityId={facilityId}
         />
       )}
-      <PageTitle title={headerText} className="mb-11" />
+      <PageTitle
+        title={headerText}
+        className="mb-11" 
+        crumbsReplacements={{
+          [facilityId]: { name: facilityName },
+          [id || "????"]: { name: patientName },
+        }}
+      />
       <div className="mt-4">
         <div className="bg-purple-100 text-purple-800 p-4 font-semibold text-xs my-8 rounded mx-4">
           <div className="text-lg font-bold flex items-center mb-1">
