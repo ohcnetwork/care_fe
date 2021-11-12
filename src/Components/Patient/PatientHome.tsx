@@ -348,6 +348,10 @@ export const PatientHome = (props: any) => {
   }
 
   const dischargeSummaryFormSetUserEmail = () => {
+    if (!currentUser.data.email.trim())
+      return Notification.Error({
+        msg: "Email not provided! Please update profile",
+      });
     setDischargeSummaryForm({ email: currentUser.data.email });
   };
 
