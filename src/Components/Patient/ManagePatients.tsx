@@ -33,6 +33,7 @@ import { make as SlideOver } from "../Common/SlideOver.gen";
 import PatientFilterV2 from "./PatientFilterV2";
 import { parseOptionId } from "../../Common/utils";
 import { statusType, useAbortableEffect } from "../../Common/utils";
+import { every } from "lodash";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -180,20 +181,38 @@ export const PatientManager = (props: any) => {
     is_antenatal: qParams.is_antenatal || undefined,
   };
 
-  const csvCreatedDateAfter: moment.Moment = !!params.created_date_after
-    ? moment(params.created_date_after)
-    : !!params.created_date_before
-    ? moment(params.created_date_before).subtract(7, "days")
-    : moment().subtract(7, "d");
+  const date_range_fields = [
+    [params.created_date_before, params.created_date_after],
+    [params.modified_date_before, params.modified_date_after],
+    [params.date_declared_positive_before, params.date_declared_positive_after],
+    [params.date_of_result_before, params.date_of_result_after],
+    [params.last_vaccinated_date_before, params.last_vaccinated_date_after],
+    [
+      params.last_consultation_admission_date_before,
+      params.last_consultation_admission_date_after,
+    ],
+    [
+      params.last_consultation_discharge_date_before,
+      params.last_consultation_discharge_date_after,
+    ],
+    [
+      params.last_consultation_symptoms_onset_date_before,
+      params.last_consultation_symptoms_onset_date_after,
+    ],
+  ];
 
-  const csvCreatedDateBefore: moment.Moment = !!params.created_date_before
-    ? moment(params.created_date_before)
-    : !!params.created_date_after
-    ? moment(params.created_date_after).add(7, "days")
-    : moment();
-
-  const isDownloadAllowed: boolean =
-    csvCreatedDateBefore.diff(csvCreatedDateAfter, "days") <= 7;
+  const isDownloadAllowed = date_range_fields
+    .map((field: string[]) => {
+      if (field[0] || field[1]) {
+        if (field[0] && field[1]) {
+          return moment(field[0]).diff(moment(field[1]), "days") <= 7;
+        } else {
+          return false;
+        }
+      }
+      return true;
+    })
+    .every((x) => x);
 
   let managePatients: any = null;
   const handleDownload = async (isFiltered: boolean) => {
@@ -201,8 +220,6 @@ export const PatientManager = (props: any) => {
       getAllPatient(
         {
           ...params,
-          created_date_after: csvCreatedDateAfter.format("YYYY-MM-DD"),
-          created_date_before: csvCreatedDateBefore.format("YYYY-MM-DD"),
           csv: true,
           facility: facilityId,
         },
