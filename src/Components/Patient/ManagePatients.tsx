@@ -201,18 +201,20 @@ export const PatientManager = (props: any) => {
     ],
   ];
 
-  const isDownloadAllowed = date_range_fields
-    .map((field: string[]) => {
-      if (field[0] || field[1]) {
-        if (field[0] && field[1]) {
-          return moment(field[0]).diff(moment(field[1]), "days") <= 7;
-        } else {
-          return false;
-        }
-      }
-      return true;
-    })
-    .every((x) => x);
+  const durations = date_range_fields.map((field: string[]) => {
+    // XOR (checks if only one of the dates is set)
+    if (!field[0] !== !field[1]) {
+      return -1;
+    }
+    if (field[0] && field[1]) {
+      return moment(field[0]).diff(moment(field[1]), "days");
+    }
+    return 0;
+  });
+
+  const isDownloadAllowed =
+    durations.every((x) => x >= 0 && x <= 7) &&
+    !durations.every((x) => x === 0);
 
   let managePatients: any = null;
   const handleDownload = async (isFiltered: boolean) => {
