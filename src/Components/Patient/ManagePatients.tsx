@@ -16,7 +16,6 @@ import {
   getAllPatient,
   getDistrict,
   getLocalBody,
-  getFacility,
   getFacilityV2,
 } from "../../Redux/actions";
 import { PhoneNumberField } from "../Common/HelperInputFields";
@@ -317,7 +316,7 @@ export const PatientManager = (props: any) => {
   const fetchFacilityBadgeName = useCallback(
     async (status: statusType) => {
       const res =
-        qParams.facility && (await dispatch(getFacility(qParams.facility)));
+        qParams.facility && (await dispatch(getFacilityV2(qParams.facility)));
       if (!status.aborted) {
         setFacilityBadgeName(res?.data?.name);
       }
