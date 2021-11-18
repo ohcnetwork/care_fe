@@ -38,11 +38,17 @@ export default function ListView() {
     loading: false,
   });
 
+  const local = JSON.parse(localStorage.getItem("resource-filters") || "{}");
+
   const applyFilter = (data: any) => {
     const filter = { ...qParams, ...data };
     updateQuery(filter);
     setShowFilters(false);
   };
+
+  useEffect(() => {
+    applyFilter(local);
+  }, []);
 
   const triggerDownload = async () => {
     const res = await dispatch(
@@ -76,8 +82,9 @@ export default function ListView() {
   };
 
   const appliedFilters = formatFilter(qParams);
-  const updateFilter = (params: any) => {
+  const updateFilter = (params: any, local: any) => {
     updateQuery(params);
+    localStorage.setItem("resource-filters", JSON.stringify(local));
   };
 
   const refreshList = () => {
@@ -267,7 +274,11 @@ export default function ListView() {
         </div>
       </div>
 
-      <BadgesList appliedFilters={appliedFilters} updateFilter={updateFilter} />
+      <BadgesList
+        appliedFilters={appliedFilters}
+        local={local}
+        updateFilter={updateFilter}
+      />
 
       <div className="px-4">
         {isLoading ? (
@@ -314,6 +325,7 @@ export default function ListView() {
         <div className="bg-white min-h-screen p-4">
           <ListFilter
             filter={qParams}
+            local={local}
             showResourceStatus={true}
             onChange={applyFilter}
             closeFilter={() => setShowFilters(false)}
