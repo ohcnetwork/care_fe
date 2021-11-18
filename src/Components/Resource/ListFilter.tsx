@@ -24,24 +24,30 @@ function useMergeState(initialState: any) {
 const resourceStatusOptions = RESOURCE_CHOICES.map((obj) => obj.text);
 
 export default function ListFilter(props: any) {
-  let { filter, onChange, closeFilter } = props;
+  let { filter, onChange, closeFilter, local } = props;
   const [isOriginLoading, setOriginLoading] = useState(false);
   const [isResourceLoading, setResourceLoading] = useState(false);
   const [isAssignedLoading, setAssignedLoading] = useState(false);
   const [filterState, setFilterState] = useMergeState({
-    orgin_facility: filter.orgin_facility || "",
+    orgin_facility: filter.orgin_facility || local.origin_facility || "",
     orgin_facility_ref: null,
-    approving_facility: filter.approving_facility || "",
+    approving_facility:
+      filter.approving_facility || local.approving_facility || "",
     approving_facility_ref: null,
-    assigned_facility: filter.assigned_facility || "",
+    assigned_facility:
+      filter.assigned_facility || local.assigned_facility || "",
     assigned_facility_ref: null,
-    emergency: filter.emergency || "--",
-    created_date_before: filter.created_date_before || null,
-    created_date_after: filter.created_date_after || null,
-    modified_date_before: filter.modified_date_before || null,
-    modified_date_after: filter.modified_date_after || null,
-    ordering: filter.ordering || null,
-    status: filter.status || null,
+    emergency: filter.emergency || local.emergency || "--",
+    created_date_before:
+      filter.created_date_before || local.created_date_before || null,
+    created_date_after:
+      filter.created_date_after || local.created_date_after || null,
+    modified_date_before:
+      filter.modified_date_before || local.modified_date_before || null,
+    modified_date_after:
+      filter.modified_date_after || local.modified_date_after || null,
+    ordering: filter.ordering || local.ordering || null,
+    status: filter.status || local.status || null,
   });
   const dispatch: any = useDispatch();
 
@@ -147,8 +153,15 @@ export default function ListFilter(props: any) {
       ordering: ordering || "",
       status: status || "",
     };
+    localStorage.setItem("resource-filters", JSON.stringify({ ...data }));
     onChange(data);
   };
+
+  const clearFilters = () => {
+    localStorage.removeItem("resource-filters");
+    closeFilter();
+  };
+
   const handleDateRangeChange = (
     startDateId: string,
     endDateId: string,
@@ -167,7 +180,11 @@ export default function ListFilter(props: any) {
           <i className="fas fa-times mr-2" />
           Cancel
         </button>
-        <Link href="/resource" className="btn btn-default hover:text-gray-900">
+        <Link
+          href="/resource"
+          className="btn btn-default hover:text-gray-900"
+          onClick={clearFilters}
+        >
           <i className="fas fa-times mr-2" />
           Clear Filters
         </Link>
