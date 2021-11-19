@@ -7,7 +7,7 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   getItemName,
   updateMinQuantity,
-  getFacilityV2,
+  getAnyFacility,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { TextInputField } from "../Common/HelperInputFields";
@@ -81,7 +81,7 @@ export const UpdateMinQuantity = (props: any) => {
   useEffect(() => {
     async function fetchFacilityName() {
       if (facilityId) {
-        const res = await dispatchAction(getFacilityV2(facilityId));
+        const res = await dispatchAction(getAnyFacility(facilityId));
 
         setFacilityName(res?.data?.name || "");
       } else {

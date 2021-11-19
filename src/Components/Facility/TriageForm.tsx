@@ -8,7 +8,7 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   createTriageForm,
   getTriageDetails,
-  getFacilityV2,
+  getAnyFacility,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { DateInputField, TextInputField } from "../Common/HelperInputFields";
@@ -109,7 +109,7 @@ export const TriageForm = (props: triageFormProps) => {
   useEffect(() => {
     async function fetchFacilityName() {
       if (facilityId) {
-        const res = await dispatchAction(getFacilityV2(facilityId));
+        const res = await dispatchAction(getAnyFacility(facilityId));
 
         setFacilityName(res?.data?.name || "");
       } else {

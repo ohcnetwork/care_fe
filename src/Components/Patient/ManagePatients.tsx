@@ -16,8 +16,8 @@ import {
   getAllPatient,
   getDistrict,
   getLocalBody,
-  getFacility,
-  getFacilityV2,
+  getPermittedFacility,
+  getAnyFacility,
 } from "../../Redux/actions";
 import { PhoneNumberField } from "../Common/HelperInputFields";
 import NavTabs from "../Common/NavTabs";
@@ -209,7 +209,7 @@ export const PatientManager = (props: any) => {
   useEffect(() => {
     async function fetchFacilityName() {
       if (facilityId) {
-        const res = await dispatch(getFacilityV2(facilityId));
+        const res = await dispatch(getAnyFacility(facilityId));
 
         setFacilityCrumbName(res?.data?.name || "");
       } else {
@@ -317,7 +317,8 @@ export const PatientManager = (props: any) => {
   const fetchFacilityBadgeName = useCallback(
     async (status: statusType) => {
       const res =
-        qParams.facility && (await dispatch(getFacility(qParams.facility)));
+        qParams.facility &&
+        (await dispatch(getPermittedFacility(qParams.facility)));
       if (!status.aborted) {
         setFacilityBadgeName(res?.data?.name);
       }

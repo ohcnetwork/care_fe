@@ -4,7 +4,7 @@ import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { useCallback, useReducer, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getItems, postInventory, getFacilityV2 } from "../../Redux/actions";
+import { getItems, postInventory, getAnyFacility } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { SelectField, TextInputField } from "../Common/HelperInputFields";
 import { InventoryItemsModel } from "./models";
@@ -83,7 +83,7 @@ export const AddInventoryForm = (props: any) => {
   useEffect(() => {
     async function fetchFacilityName() {
       if (facilityId) {
-        const res = await dispatchAction(getFacilityV2(facilityId));
+        const res = await dispatchAction(getAnyFacility(facilityId));
 
         setFacilityName(res?.data?.name || "");
       } else {

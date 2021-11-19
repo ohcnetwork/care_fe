@@ -103,11 +103,11 @@ const routes: Routes = {
 
   // Facility Endpoints
 
-  listFacility: {
+  getPermittedFacilities: {
     path: "/api/v1/facility/",
   },
 
-  listFacilityV2: {
+  getAllFacilities: {
     path: "/api/v1/getallfacilities",
   },
 
@@ -116,11 +116,11 @@ const routes: Routes = {
     method: "POST",
   },
 
-  getFacility: {
+  getPermittedFacility: {
     path: "/api/v1/facility/{id}/",
   },
 
-  getFacilityV2: {
+  getAnyFacility: {
     path: "/api/v1/getallfacilities/{id}/",
   },
 
