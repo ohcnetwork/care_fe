@@ -7,7 +7,7 @@ import { useDispatch } from "react-redux";
 import { SAMPLE_TYPE_CHOICES, ICMR_CATEGORY } from "../../Common/constants";
 import {
   createSampleTest,
-  getFacilitiesV2,
+  getAllFacilities,
   getPatient,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
@@ -95,11 +95,11 @@ export const SampleTest = (props: any) => {
       const labType = 9;
       setIsLoading(true);
       const LabList = await dispatchAction(
-        getFacilitiesV2({ facility_type: labType })
+        getAllFacilities({ facility_type: labType })
       );
 
       const CoronaLabList = await dispatchAction(
-        getFacilitiesV2({ facility_type: coronaLabType })
+        getAllFacilities({ facility_type: coronaLabType })
       );
 
       if (

@@ -18,7 +18,7 @@ import {
 import moment from "moment";
 import {
   getAllLocalBody,
-  getFacilityV2,
+  getAnyFacility,
   getDistrict,
 } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
@@ -153,7 +153,7 @@ export default function PatientFilterV2(props: any) {
       if (filter.facility) {
         setFacilityLoading(true);
         const { data: facilityData } = await dispatch(
-          getFacilityV2(filter.facility, "facility")
+          getAnyFacility(filter.facility, "facility")
         );
         setFilterState({ facility_ref: facilityData });
         setFacilityLoading(false);

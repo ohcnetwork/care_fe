@@ -16,7 +16,8 @@ import {
   getAllPatient,
   getDistrict,
   getLocalBody,
-  getFacilityV2,
+  getAnyFacility,
+
 } from "../../Redux/actions";
 import { PhoneNumberField } from "../Common/HelperInputFields";
 import NavTabs from "../Common/NavTabs";
@@ -33,6 +34,7 @@ import { make as SlideOver } from "../Common/SlideOver.gen";
 import PatientFilterV2 from "./PatientFilterV2";
 import { parseOptionId } from "../../Common/utils";
 import { statusType, useAbortableEffect } from "../../Common/utils";
+import { every } from "lodash";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -181,6 +183,41 @@ export const PatientManager = (props: any) => {
     is_antenatal: qParams.is_antenatal || undefined,
   };
 
+  const date_range_fields = [
+    [params.created_date_before, params.created_date_after],
+    [params.modified_date_before, params.modified_date_after],
+    [params.date_declared_positive_before, params.date_declared_positive_after],
+    [params.date_of_result_before, params.date_of_result_after],
+    [params.last_vaccinated_date_before, params.last_vaccinated_date_after],
+    [
+      params.last_consultation_admission_date_before,
+      params.last_consultation_admission_date_after,
+    ],
+    [
+      params.last_consultation_discharge_date_before,
+      params.last_consultation_discharge_date_after,
+    ],
+    [
+      params.last_consultation_symptoms_onset_date_before,
+      params.last_consultation_symptoms_onset_date_after,
+    ],
+  ];
+
+  const durations = date_range_fields.map((field: string[]) => {
+    // XOR (checks if only one of the dates is set)
+    if (!field[0] !== !field[1]) {
+      return -1;
+    }
+    if (field[0] && field[1]) {
+      return moment(field[0]).diff(moment(field[1]), "days");
+    }
+    return 0;
+  });
+
+  const isDownloadAllowed =
+    durations.every((x) => x >= 0 && x <= 7) &&
+    !durations.every((x) => x === 0);
+
   let managePatients: any = null;
   const handleDownload = async (isFiltered: boolean) => {
     const res = await dispatch(
@@ -193,7 +230,7 @@ export const PatientManager = (props: any) => {
         "downloadPatients"
       )
     );
-    if (res && res.data) {
+    if (res && res.data && res.status === 200) {
       setDownloadFile(res.data);
       document.getElementById("downloadlink")?.click();
     }
@@ -208,7 +245,7 @@ export const PatientManager = (props: any) => {
   useEffect(() => {
     async function fetchFacilityName() {
       if (facilityId) {
-        const res = await dispatch(getFacilityV2(facilityId));
+        const res = await dispatch(getAnyFacility(facilityId));
 
         setFacilityCrumbName(res?.data?.name || "");
       } else {
@@ -315,8 +352,9 @@ export const PatientManager = (props: any) => {
 
   const fetchFacilityBadgeName = useCallback(
     async (status: statusType) => {
-      const res =
-        qParams.facility && (await dispatch(getFacilityV2(qParams.facility)));
+      const res = qParams.facility &&
+        (await dispatch(getAnyFacility(qParams.facility)));
+      
       if (!status.aborted) {
         setFacilityBadgeName(res?.data?.name);
       }
@@ -604,14 +642,22 @@ export const PatientManager = (props: any) => {
               target="_blank"
             ></CSVLink>
           </div>
-          <Button
-            color="primary"
-            onClick={handleDownloadAll}
-            size="small"
-            startIcon={<ArrowDownwardIcon>download</ArrowDownwardIcon>}
-          >
-            Download All Patients
-          </Button>
+          <div className="flex flex-col gap-2">
+            <Button
+              color="primary"
+              onClick={handleDownloadAll}
+              size="small"
+              startIcon={<ArrowDownwardIcon>download</ArrowDownwardIcon>}
+              disabled={!isDownloadAllowed}
+            >
+              Download All Patients
+            </Button>
+            {!isDownloadAllowed && (
+              <p className="self-end text-sm italic text-red-400">
+                * Select a 7 day period
+              </p>
+            )}
+          </div>
         </div>
         <div className="bg-white overflow-hidden shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">

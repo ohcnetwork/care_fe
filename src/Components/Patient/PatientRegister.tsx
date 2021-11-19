@@ -40,7 +40,7 @@ import {
   updatePatient,
   getWardByLocalBody,
   externalResult,
-  getFacilityV2,
+  getAnyFacility,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import AlertDialog from "../Common/AlertDialog";
@@ -452,6 +452,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               ? res.data.last_vaccinated_date
               : null,
           };
+          if (res.data.address !== res.data.permanent_address) {
+            setSameAddress(false);
+          }
           res.data.medical_history.forEach((i: any) => {
             const medicalHistory = medicalHistoryTypes.find(
               (j: any) =>
@@ -505,7 +508,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   useEffect(() => {
     async function fetchFacilityName() {
       if (facilityId && !id) {
-        const res = await dispatchAction(getFacilityV2(facilityId));
+        const res = await dispatchAction(getAnyFacility(facilityId));
 
         setFacilityName(res?.data?.name || "");
       } else {
