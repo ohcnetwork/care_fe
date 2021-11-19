@@ -452,6 +452,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               ? res.data.last_vaccinated_date
               : null,
           };
+          if (res.data.address !== res.data.permanent_address) {
+            setSameAddress(false);
+          }
           res.data.medical_history.forEach((i: any) => {
             const medicalHistory = medicalHistoryTypes.find(
               (j: any) =>
