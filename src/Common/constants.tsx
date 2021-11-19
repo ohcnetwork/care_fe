@@ -563,3 +563,9 @@ export const CONSULTATION_TABS: Array<OptionsType> = [
   { id: 11, text: "PRESSURE_SORE", desc: "Pressure Sore" },
   { id: 12, text: "DIALYSIS", desc: "Dialysis" },
 ];
+
+export const RHYTHM_CHOICES: Array<OptionsType> = [
+  { id: 0, text: "Unknown" },
+  { id: 5, text: "Regular" },
+  { id: 10, text: "Irregular" },
+];

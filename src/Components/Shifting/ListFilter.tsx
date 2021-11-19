@@ -13,7 +13,7 @@ import {
   BREATHLESSNESS_LEVEL,
 } from "../../Common/constants";
 import moment from "moment";
-import { getFacilityV2, getUserList } from "../../Redux/actions";
+import { getAnyFacility, getUserList } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { CircularProgress } from "@material-ui/core";
 import { SHIFTING_CHOICES } from "../../Common/constants";
@@ -76,7 +76,7 @@ export default function ListFilter(props: any) {
       if (filter.orgin_facility) {
         setOriginLoading(true);
         const res = await dispatch(
-          getFacilityV2(filter.orgin_facility, "orgin_facility")
+          getAnyFacility(filter.orgin_facility, "orgin_facility")
         );
         if (res && res.data) {
           setFilterState({ orgin_facility_ref: res.data });
@@ -92,7 +92,7 @@ export default function ListFilter(props: any) {
       if (filter.shifting_approving_facility) {
         setShiftingLoading(true);
         const res = await dispatch(
-          getFacilityV2(
+          getAnyFacility(
             filter.shifting_approving_facility,
             "shifting_approving_facility"
           )
@@ -111,7 +111,7 @@ export default function ListFilter(props: any) {
       if (filter.assigned_facility) {
         setAssignedLoading(true);
         const res = await dispatch(
-          getFacilityV2(filter.assigned_facility, "assigned_facility")
+          getAnyFacility(filter.assigned_facility, "assigned_facility")
         );
         if (res && res.data) {
           setFilterState({ assigned_facility_ref: res.data });

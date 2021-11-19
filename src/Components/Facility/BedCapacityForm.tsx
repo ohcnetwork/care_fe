@@ -17,7 +17,7 @@ import {
   getCapacity,
   listCapacity,
   getCapacityBed,
-  getFacilityV2,
+  getAnyFacility,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import {
@@ -153,7 +153,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
   useEffect(() => {
     async function fetchFacilityName() {
       if (facilityId) {
-        const res = await dispatchAction(getFacilityV2(facilityId));
+        const res = await dispatchAction(getAnyFacility(facilityId));
 
         setFacilityName(res?.data?.name || "");
       } else {

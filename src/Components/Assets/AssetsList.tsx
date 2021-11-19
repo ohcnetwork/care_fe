@@ -5,7 +5,7 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 import * as Notification from "../../Utils/Notifications.js";
 import PageTitle from "../Common/PageTitle";
 import {
-  getFacilityV2,
+  getAnyFacility,
   listAssets,
   getFacilityAssetLocation,
 } from "../../Redux/actions";
@@ -106,7 +106,9 @@ const AssetsList = (props: any) => {
     async (status: statusType) => {
       if (qParams.facility) {
         setIsLoading(true);
-        const res = await dispatch(getFacilityV2(qParams.facility));
+        
+        const res = await dispatch(getAnyFacility(qParams.facility));
+
         if (!status.aborted) {
           setFacilityName(res?.data?.name);
           setIsLoading(false);

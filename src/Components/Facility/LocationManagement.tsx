@@ -6,7 +6,7 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   listFacilityAssetLocation,
   updateFacilityAssetLocation,
-  getFacilityV2,
+  getAnyFacility,
 } from "../../Redux/actions";
 import { navigate } from "raviger";
 import Pagination from "../Common/Pagination";
@@ -205,7 +205,7 @@ export const LocationManagement = (props: LocationManagementProps) => {
   useEffect(() => {
     async function fetchFacilityName() {
       if (facilityId) {
-        const res = await dispatchAction(getFacilityV2(facilityId));
+        const res = await dispatchAction(getAnyFacility(facilityId));
 
         setFacilityName(res?.data?.name || "");
       } else {
