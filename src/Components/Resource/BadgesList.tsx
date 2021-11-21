@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getFacilityV2 } from "../../Redux/actions";
+import { getAnyFacility } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 
 export default function BadgesList(props: any) {
@@ -14,7 +14,7 @@ export default function BadgesList(props: any) {
     async function fetchData() {
       if (appliedFilters.orgin_facility || local.origin_facility) {
         const res = await dispatch(
-          getFacilityV2(
+          getAnyFacility(
             appliedFilters.orgin_facility || local.origin_facility,
             "orgin_facility"
           )
@@ -32,7 +32,7 @@ export default function BadgesList(props: any) {
     async function fetchData() {
       if (appliedFilters.approving_facility || local.approving_facility) {
         const res = await dispatch(
-          getFacilityV2(
+          getAnyFacility(
             appliedFilters.approving_facility || local.approving_facility,
             "approving_facility"
           )
@@ -50,7 +50,7 @@ export default function BadgesList(props: any) {
     async function fetchData() {
       if (appliedFilters.assigned_facility || local.assigned_facility) {
         const res = await dispatch(
-          getFacilityV2(
+          getAnyFacility(
             appliedFilters.assigned_facility || local.assigned_facility,
             "assigned_facility"
           )

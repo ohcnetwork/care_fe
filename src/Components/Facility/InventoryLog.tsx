@@ -6,7 +6,7 @@ import {
   getInventoryLog,
   flagInventoryItem,
   deleteLastInventoryLog,
-  getFacilityV2,
+  getAnyFacility,
 } from "../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import Pagination from "../Common/Pagination";
@@ -54,7 +54,7 @@ export default function InventoryLog(props: any) {
   useEffect(() => {
     async function fetchFacilityName() {
       if (facilityId) {
-        const res = await dispatchAction(getFacilityV2(facilityId));
+        const res = await dispatchAction(getAnyFacility(facilityId));
 
         setFacilityName(res?.data?.name || "");
       } else {

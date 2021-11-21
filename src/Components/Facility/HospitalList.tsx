@@ -8,7 +8,7 @@ import {
   KASP_STRING,
 } from "../../Common/constants";
 import {
-  getFacilities,
+  getPermittedFacilities,
   downloadFacility,
   downloadFacilityCapacity,
   downloadFacilityDoctors,
@@ -108,7 +108,7 @@ const HospitalListPage = (props: any) => {
             kasp_empanelled: qParams.kasp_empanelled,
           };
 
-      const res = await dispatchAction(getFacilities(params));
+      const res = await dispatchAction(getPermittedFacilities(params));
       if (!status.aborted) {
         if (res && res.data) {
           setData(res.data.results);

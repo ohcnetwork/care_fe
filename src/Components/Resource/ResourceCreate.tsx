@@ -30,7 +30,7 @@ import {
 } from "@material-ui/core";
 import { phonePreg } from "../../Common/validation";
 
-import { createResource, getFacilityV2 } from "../../Redux/actions";
+import { createResource, getAnyFacility } from "../../Redux/actions";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -123,7 +123,7 @@ export default function ResourceCreate(props: resourceProps) {
   useEffect(() => {
     async function fetchFacilityName() {
       if (facilityId) {
-        const res = await dispatchAction(getFacilityV2(facilityId));
+        const res = await dispatchAction(getAnyFacility(facilityId));
 
         setFacilityName(res?.data?.name || "");
       } else {
