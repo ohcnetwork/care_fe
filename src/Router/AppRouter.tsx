@@ -325,31 +325,27 @@ const routes = {
   "/death_report/:id": ({ id }: any) => <DeathReport id={id} />,
   "/notifications/:id": (id: any) => <ShowPushNotification external_id={id} />,
   "/notice_board/": () => <NoticeBoard />,
-  "/facility/:facilityId/patient/:patientId/consultation/:id": ({
+  "/facility/:facilityId/patient/:patientId/consultation/:consultationId": ({
     facilityId,
     patientId,
-    id,
+    consultationId,
   }: any) => (
     <ConsultationDetails
       facilityId={facilityId}
       patientId={patientId}
-      consultationId={id}
+      consultationId={consultationId}
       tab={"updates"}
     />
   ),
-  "/facility/:facilityId/patient/:patientId/consultation/:id/:tab": ({
-    facilityId,
-    patientId,
-    id,
-    tab,
-  }: any) => (
-    <ConsultationDetails
-      facilityId={facilityId}
-      patientId={patientId}
-      consultationId={id}
-      tab={tab}
-    />
-  ),
+  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/:tab":
+    ({ facilityId, patientId, consultationId, tab }: any) => (
+      <ConsultationDetails
+        facilityId={facilityId}
+        patientId={patientId}
+        consultationId={consultationId}
+        tab={tab}
+      />
+    ),
 };
 
 let menus = [

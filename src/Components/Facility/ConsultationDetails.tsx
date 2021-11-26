@@ -28,6 +28,7 @@ import { NutritionPlots } from "./Consultations/NutritionPlots";
 import { PressureSoreDiagrams } from "./Consultations/PressureSoreDiagrams";
 import { DialysisPlots } from "./Consultations/DialysisPlots";
 import ViewInvestigations from "./Investigations/ViewInvestigations";
+import LiveFeed from "./Consultations/LiveFeed";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -561,6 +562,7 @@ export const ConsultationDetails = (props: any) => {
               </div>
             </div>
           )}
+          {tab === "FEED" && <LiveFeed />}
           {tab === "SUMMARY" && (
             <div className="mt-4">
               <PageTitle
