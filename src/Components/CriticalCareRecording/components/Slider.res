@@ -29,9 +29,9 @@ let str = React.string
 %%raw(`import ('@yaireo/ui-range')`)
 
 @react.component
-let make = (
+export make = (
   ~title: string,
-  ~titleNeighbour: React.element = <div className="hidden"></div>,
+  ~titleNeighbour: React.element=<div className="hidden" />,
   ~start: string,
   ~end: string,
   ~step: float,
@@ -62,8 +62,7 @@ let make = (
     <section className={"slider-box " ++ className}>
       <div className="slider-head">
         <div className="flex items-center">
-          <h1 className="m-2"> {title->str} </h1>
-          titleNeighbour
+          <h1 className="m-2"> {title->str} </h1> titleNeighbour
         </div>
         <div className="flex flex-col">
           <label htmlFor="measure" style={ReactDOM.Style.make(~color=textColor, ())}>

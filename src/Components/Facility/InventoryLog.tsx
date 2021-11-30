@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import loadable from "@loadable/component";
 import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
@@ -6,6 +6,7 @@ import {
   getInventoryLog,
   flagInventoryItem,
   deleteLastInventoryLog,
+  getAnyFacility,
 } from "../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import Pagination from "../Common/Pagination";
@@ -29,6 +30,7 @@ export default function InventoryLog(props: any) {
   const limit = 14;
   const item = inventoryId;
   const [itemName, setItemName] = useState(" ");
+  const [facilityName, setFacilityName] = useState("");
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -48,6 +50,19 @@ export default function InventoryLog(props: any) {
     },
     [dispatchAction, offset, facilityId]
   );
+
+  useEffect(() => {
+    async function fetchFacilityName() {
+      if (facilityId) {
+        const res = await dispatchAction(getAnyFacility(facilityId));
+
+        setFacilityName(res?.data?.name || "");
+      } else {
+        setFacilityName("");
+      }
+    }
+    fetchFacilityName();
+  }, [dispatchAction, facilityId]);
 
   const flagFacility = async (id: string) => {
     setSaving(true);
@@ -208,6 +223,10 @@ export default function InventoryLog(props: any) {
         title="Inventory Log"
         hideBack={false}
         className="mx-3 md:mx-8"
+        crumbsReplacements={{
+          [facilityId]: { name: facilityName },
+          [inventoryId]: { name: itemName },
+        }}
       />
       <div className="container mx-auto px-4 sm:px-8">
         <div className="py-8 ">

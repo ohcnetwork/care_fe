@@ -8,7 +8,7 @@ import {
 import { navigate } from "raviger";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FacilityModel } from "../Facility/models";
-import { getFacilityV2 as getFacility } from "../../Redux/actions";
+import { getAnyFacility } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { CircularProgress } from "@material-ui/core";
 
@@ -66,7 +66,7 @@ export default function UserFilter(props: any) {
       if (filter.facility) {
         setFacilityLoading(true);
         const { data: facilityData } = await dispatch(
-          getFacility(filter.facility, "facility")
+          getAnyFacility(filter.facility, "facility")
         );
         setFilterState({ ...filterState, facility_ref: facilityData });
         setFacilityLoading(false);

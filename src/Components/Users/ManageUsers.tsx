@@ -466,6 +466,7 @@ export default function ManageUsers(props: any) {
         title="User Management"
         hideBack={true}
         className="mx-3 md:mx-8"
+        breadcrumbs={false}
       />
 
       <div className="mt-5 grid grid-cols-1 md:gap-5 sm:grid-cols-3 m-4 md:px-4">

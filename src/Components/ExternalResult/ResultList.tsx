@@ -364,7 +364,12 @@ export default function ResultList() {
           handleCancel={() => setShowDialog(false)}
         />
       )}
-      <PageTitle title="Results" hideBack={true} className="mt-4" />
+      <PageTitle
+        title="Results"
+        hideBack={true}
+        className="mt-4"
+        breadcrumbs={false}
+      />
       <div className="mt-5 md:grid grid-cols-1 gap-5 sm:grid-cols-3 my-4 px-2 md:px-0 relative">
         <div className="bg-white overflow-hidden shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">

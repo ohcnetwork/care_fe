@@ -207,6 +207,16 @@ export const SYMPTOM_CHOICES: Array<OptionsType> = [
   { id: 9, text: "OTHERS" },
 ];
 
+export const LINES_CATHETER_CHOICES: Array<OptionsType> = [
+  { id: 1, text: "CVP catheter " },
+  { id: 2, text: "Arterial Line" },
+  { id: 3, text: "Quinton catheter" },
+  { id: 4, text: "Chest Tubes (ICD)" },
+  { id: 5, text: "NG Tube/GT" },
+  { id: 6, text: "Urine Catheters" },
+  { id: 7, text: "Other" },
+];
+
 export const GENDER_TYPES: Array<OptionsType> = [
   { id: 1, text: "Male" },
   { id: 2, text: "Female" },
@@ -553,4 +563,10 @@ export const CONSULTATION_TABS: Array<OptionsType> = [
   { id: 10, text: "NUTRITION", desc: "Nutrition" },
   { id: 11, text: "PRESSURE_SORE", desc: "Pressure Sore" },
   { id: 12, text: "DIALYSIS", desc: "Dialysis" },
+];
+
+export const RHYTHM_CHOICES: Array<OptionsType> = [
+  { id: 0, text: "Unknown" },
+  { id: 5, text: "Regular" },
+  { id: 10, text: "Irregular" },
 ];
