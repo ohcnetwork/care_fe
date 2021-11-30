@@ -159,6 +159,24 @@ const routes: Routes = {
     method: "PATCH",
   },
 
+  // Facility Beds
+  listFacilityBeds: {
+    path: "/api/v1/bed/",
+    method: "GET",
+  },
+  createFacilityBed: {
+    path: "/api/v1/bed/",
+    method: "POST",
+  },
+  getFacilityBed: {
+    path: "/api/v1/bed/{external_id}/",
+    method: "GET",
+  },
+  updateFacilityBed: {
+    path: "/api/v1/bed/{external_id}/",
+    method: "PUT",
+  },
+
   // Download Api
   deleteFacility: {
     path: "/api/v1/facility",
