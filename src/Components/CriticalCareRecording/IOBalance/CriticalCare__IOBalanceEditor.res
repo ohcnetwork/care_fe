@@ -16,7 +16,7 @@ type state = {
 
 let infusionCollection = ["Adrenalin", "Nor-adrenalin", "Vasopressin", "Dopamine", "Dobutamine"]
 let ivfluidsCollection = ["RL", "NS", "DNS"]
-let feedsCollection = ["Ryles Tube", "Normal Feed"]
+let feedsCollection = ["Ryles Tube", "Normal Feed", "Calories"]
 let outputsCollection = ["Urine", "Rules Tube Aspiration", "ICD"]
 
 type action =
