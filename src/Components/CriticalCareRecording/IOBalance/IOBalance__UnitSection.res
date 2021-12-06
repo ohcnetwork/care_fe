@@ -70,7 +70,7 @@ let make = (~name, ~items, ~collection, ~updateCB) => {
       </div>
       <div className="m-1 rounded-md shadow-sm w-3/12">
         <label htmlFor="Value" className="block text-sm font-medium leading-5 text-gray-700">
-          {"Value (ml)"->str}
+          {"Value"->str}
         </label>
       </div>
     </div>
