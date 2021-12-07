@@ -9,11 +9,11 @@ const LiveFeed = () => {
   const [sourceUrl, setSourceUrl] = useState<string>();
   const requestStream = () => {
     axios
-      .post(`https://testcamera0001.in.ngrok.io/start`, {
+      .post(`https://dev_middleware.coronasafe.live/start`, {
         uri: "rtsp://remote:qwerty123@192.168.1.64:554/",
       })
       .then((resp: any) => {
-        setSourceUrl(`https://testcamera0001.in.ngrok.io${resp.data.uri}`);
+        setSourceUrl(`https://dev_middleware.coronasafe.live${resp.data.uri}`);
       })
       .catch((ex: any) => {
         // console.error('Error while refreshing',ex);

@@ -570,3 +570,9 @@ export const RHYTHM_CHOICES: Array<OptionsType> = [
   { id: 5, text: "Regular" },
   { id: 10, text: "Irregular" },
 ];
+
+export const ASSET_META_TYPE = [{ id: "CAMERA", text: "Camera" }];
+
+export const CAMERA_TYPE = [
+  { id: "HIKVISION", text: "ONVIF Camera (HIKVISION)" },
+];
