@@ -15,6 +15,15 @@ import LiveFeed from "../Facility/Consultations/LiveFeed";
 interface AssetConfigureProps {
   assetId: string;
 }
+const getCameraConfig = (asset: AssetData) => {
+  const { meta }: any = asset;
+  return {
+    hostname: meta.camera_address,
+    username: meta.camera_access_key.split(":")[0],
+    password: meta.camera_access_key.split(":")[1],
+    port: 80,
+  };
+};
 
 const AssetConfigure = (props: AssetConfigureProps) => {
   const { assetId } = props;
@@ -201,7 +210,9 @@ const AssetConfigure = (props: AssetConfigureProps) => {
       </Card>
       <Card>
         <CardContent>
-          {asset?.meta?.asset_type === "CAMERA" && <LiveFeed />}
+          {asset?.meta?.asset_type === "CAMERA" && (
+            <LiveFeed asset={getCameraConfig(asset)} />
+          )}
         </CardContent>
       </Card>
     </div>
