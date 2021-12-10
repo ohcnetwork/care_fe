@@ -28,18 +28,22 @@ const LiveFeed = (props: any) => {
       });
   };
   const stopStream = (url: string | undefined) => {
-    const id = url?.split("/").pop();
-    axios
-      .post(`https://dev_middleware.coronasafe.live/STOP`, {
-        id,
-      })
-      .then((resp: any) => {
-        console.log(resp);
-        // setSourceUrl(`https://dev_middleware.coronasafe.live${resp.data.uri}`);
-      })
-      .catch((ex: any) => {
-        // console.error('Error while refreshing',ex);
-      });
+    if (url) {
+      let urlSegments = url.split("/");
+      const x = urlSegments.pop();
+      const id = urlSegments?.pop();
+      axios
+        .post(`https://dev_middleware.coronasafe.live/stop`, {
+          id,
+        })
+        .then((resp: any) => {
+          console.log(resp);
+          // setSourceUrl(`https://dev_middleware.coronasafe.live${resp.data.uri}`);
+        })
+        .catch((ex: any) => {
+          // console.error('Error while refreshing',ex);
+        });
+    }
   };
   const getCameraStatus = (asset: any) => {
     axios
@@ -181,7 +185,7 @@ const LiveFeed = (props: any) => {
               playing={true}
               muted={true}
               onError={(_) => {
-                requestStream();
+                // requestStream();
                 console.log("Video Player Error");
               }}
             />
