@@ -583,3 +583,9 @@ export const LOCATION_BED_TYPES: Array<any> = [
   { id: "BED_WITH_OXYGEN_SUPPORT", name: "Bed with oxygen support" },
   { id: "REGULAR", name: "Regular" },
 ];
+
+export const ASSET_META_TYPE = [{ id: "CAMERA", text: "Camera" }];
+
+export const CAMERA_TYPE = [
+  { id: "HIKVISION", text: "ONVIF Camera (HIKVISION)" },
+];

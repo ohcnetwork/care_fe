@@ -986,7 +986,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       )}
       <PageTitle
         title={headerText}
-        className="mb-11" 
+        className="mb-11"
         crumbsReplacements={{
           [facilityId]: { name: facilityName },
           [id || "????"]: { name: patientName },
