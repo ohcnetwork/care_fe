@@ -8,7 +8,6 @@ import {
   InputLabel,
   Radio,
   RadioGroup,
-  Switch,
 } from "@material-ui/core";
 
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
@@ -51,7 +50,6 @@ import {
   TextInputField,
 } from "../Common/HelperInputFields";
 import { make as PrescriptionBuilder } from "../Common/PrescriptionBuilder.gen";
-import { make as Slider } from "../CriticalCareRecording/components/Slider.gen";
 import { FacilityModel } from "./models";
 import { OnlineUsersSelect } from "../Common/OnlineUsersSelect";
 import _ from "lodash";
@@ -95,17 +93,7 @@ type FormDetails = {
   assigned_to_object: UserModel | null;
   cpk_mb: number;
   operation: string;
-  intubation_start_date: any;
-  intubation_end_date: any;
-  ett_tt: number;
-  cuff_pressure: number;
   special_instruction: string;
-  lines: number[];
-  otherLines: boolean;
-  other_lines: string;
-  hasLines: boolean;
-  lines_insertion_date: any;
-  lines_site_level_fixation: any;
   review_time: number;
   weight: string;
   height: string;
@@ -147,17 +135,7 @@ const initForm: FormDetails = {
   assigned_to_object: null,
   cpk_mb: 0,
   operation: "",
-  intubation_start_date: null,
-  intubation_end_date: null,
-  ett_tt: 3,
-  cuff_pressure: 0,
   special_instruction: "",
-  lines: [],
-  otherLines: false,
-  other_lines: "",
-  hasLines: false,
-  lines_insertion_date: {},
-  lines_site_level_fixation: {},
   review_time: 0,
   weight: "",
   height: "",
@@ -201,11 +179,6 @@ const suggestionTypes = [
 const symptomChoices = [...SYMPTOM_CHOICES];
 
 const linesCatheterChoices = [...LINES_CATHETER_CHOICES];
-
-const lineIdToString = (id: any) => {
-  const selectedChoice = linesCatheterChoices.find((obj) => obj.id === id);
-  return selectedChoice ? selectedChoice?.text : "";
-};
 
 const lineStringToId = (line: any) => {
   const selectedChoice = linesCatheterChoices.find((obj) => obj.text === line);
@@ -262,9 +235,6 @@ export const ConsultationForm = (props: any) => {
   const [selectedFacility, setSelectedFacility] =
     useState<FacilityModel | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [isMmhgUnit, setIsMmhgUnit] = useState(true);
-  const [lineRequired, setLineRequired] = useState(false);
-  const [dateRequired, setDateRequired] = useState(false);
   const [patientName, setPatientName] = useState("");
   const [facilityName, setFacilityName] = useState("");
 
@@ -302,9 +272,6 @@ export const ConsultationForm = (props: any) => {
 
       if (!status.aborted) {
         if (res && res.data) {
-          const [lines, lines_insertion_date, lines_site_level_fixation] =
-            parseLinesData(res.data.lines);
-
           const formData = {
             ...res.data,
             hasSymptom:
@@ -329,26 +296,10 @@ export const ConsultationForm = (props: any) => {
             cpk_mb: res.data.cpk_mb || "",
             operation: res.data.operation || "",
             ett_tt: res.data.ett_tt ? Number(res.data.ett_tt) : 3,
-            cuff_pressure: res.data.cuff_pressure
-              ? Number(res.data.cuff_pressure)
-              : 0,
             special_instruction: res.data.special_instruction || "",
-            otherLines:
-              !!res.data.lines &&
-              !!res.data.lines.length &&
-              res.data.lines.some((obj: any) => obj.other_type !== ""),
-            hasLines: !!res.data.lines && !!res.data.lines.length,
-            other_lines:
-              res.data.lines.filter((obj: any) => obj.other_type !== "")?.[0]
-                ?.other_type || "",
-            lines: lines,
-            lines_insertion_date: lines_insertion_date,
-            lines_site_level_fixation: lines_site_level_fixation,
             weight: res.data.weight ? res.data.weight : "",
             height: res.data.height ? res.data.height : "",
           };
-          setLineRequired(lines.length ? true : false);
-          setDateRequired(formData.intubation_start_date ? true : false);
           dispatch({ type: "set_form", form: formData });
         } else {
           goBack();
@@ -466,52 +417,6 @@ export const ConsultationForm = (props: any) => {
             invalidForm = true;
           }
           return;
-        case "other_lines":
-          if (
-            lineRequired &&
-            state.form[field] &&
-            state.form[field] === "" &&
-            !!state.form.lines.find((id: any) => id === 7)
-          ) {
-            if (!error_div) error_div = field;
-            errors[field] = "Please enter information for Other option";
-            invalidForm = true;
-          }
-          return;
-        case "lines_insertion_date":
-          if (
-            lineRequired &&
-            (!state.form[field] ||
-              Object.keys(state.form[field]).length !== state.form.lines.length)
-          ) {
-            if (!error_div) error_div = field;
-            errors[field] =
-              "Please enter insertion date for all selected options";
-            invalidForm = true;
-          }
-          return;
-        case "lines_site_level_fixation":
-          if (
-            lineRequired &&
-            (!state.form[field] ||
-              Object.keys(state.form[field]).length !== state.form.lines.length)
-          ) {
-            if (!error_div) error_div = field;
-            errors[field] =
-              "Please enter site of insertion for all selected options";
-            invalidForm = true;
-          }
-          return;
-        case "intubation_start_date":
-          if (
-            dateRequired &&
-            (!state.form[field] || !moment(state.form[field]).isValid())
-          ) {
-            if (!error_div) error_div = field;
-            errors[field] = "Please enter intubation start date";
-            invalidForm = true;
-          }
-          return;
         default:
           return;
       }
@@ -520,13 +425,9 @@ export const ConsultationForm = (props: any) => {
     return [!invalidForm, error_div];
   };
 
-  const mmHgTocmH2o = (val: number) => {
-    return val * 1.35951;
-  };
-
-  const cmH2oTommHg = (val: number) => {
-    return val * 0.73556;
-  };
+  // const cmH2oTommHg = (val: number) => {
+  //   return val * 0.73556;
+  // };
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
@@ -576,20 +477,7 @@ export const ConsultationForm = (props: any) => {
           state.form.is_telemedicine === "true" ? state.form.assigned_to : "",
         cpk_mb: state.form.cpk_mb ? Number(state.form.cpk_mb) : 0,
         operation: state.form.operation,
-        intubation_start_date: dateRequired
-          ? state.form.intubation_start_date
-          : null,
-        intubation_end_date: dateRequired
-          ? state.form.intubation_end_date
-          : null,
-        ett_tt: dateRequired ? state.form.ett_tt : null,
-        cuff_pressure: dateRequired
-          ? isMmhgUnit
-            ? state.form.cuff_pressure
-            : cmH2oTommHg(state.form.cuff_pressure)
-          : null,
         special_instruction: state.form.special_instruction,
-        lines: createLinesPayload(),
         weight: Number(state.form.weight),
         height: Number(state.form.height),
       };
@@ -673,41 +561,6 @@ export const ConsultationForm = (props: any) => {
     dispatch({ type: "set_form", form });
   };
 
-  const handleLinesChange = (e: any) => {
-    const form = { ...state.form };
-    const { value } = e?.target;
-    form.lines = value;
-    form.hasLines = form.lines.length > 0;
-    form.otherLines = !!form.lines.filter((i: number) => i === 7).length;
-    dispatch({ type: "set_form", form });
-  };
-
-  const handleLinesDateChange = (id: any, date: any) => {
-    const form = { ...state.form };
-    if (moment(date).isValid()) {
-      form.lines_insertion_date[id] = date;
-    }
-    dispatch({ type: "set_form", form });
-  };
-
-  const handleLinesSiteChange = (e: any, id: any) => {
-    const form = { ...state.form };
-    form.lines_site_level_fixation[id] = e.target.value;
-    dispatch({ type: "set_form", form });
-  };
-
-  const createLinesPayload = () => {
-    if (!lineRequired) return [];
-    return state.form.lines.map((id: any) => {
-      return {
-        start_date: state.form.lines_insertion_date[id],
-        type: lineIdToString(id),
-        site: state.form.lines_site_level_fixation[id],
-        other_type: id === 7 ? state.form.other_lines : "",
-      };
-    });
-  };
-
   // ------------- DEPRECATED -------------
   // const handleDateChange = (date: any, key: string) => {
   //   if (moment(date).isValid()) {
@@ -742,19 +595,6 @@ export const ConsultationForm = (props: any) => {
       form.referred_to = selectedFacility.id.toString() || "";
     }
     dispatch({ type: "set_form", form });
-  };
-
-  const handleSliderChange = (value: any, key: string) => {
-    dispatch({ type: "set_form", form: { ...state.form, [key]: value } });
-  };
-
-  const toggleCuffUnit = () => {
-    const form = { ...state.form };
-    form.cuff_pressure = isMmhgUnit
-      ? mmHgTocmH2o(form.cuff_pressure)
-      : cmH2oTommHg(form.cuff_pressure);
-    dispatch({ type: "set_form", form });
-    setIsMmhgUnit(!isMmhgUnit);
   };
 
   if (isLoading) {
@@ -1218,174 +1058,6 @@ export const ConsultationForm = (props: any) => {
                   errors={state.errors.special_instruction}
                 />
               </div>
-              <div className="mt-4">
-                <div className="flex">
-                  <h3 className="text-lg leading-relaxed font-semibold text-gray-900">
-                    Date/Size/LL
-                  </h3>
-                  <Switch
-                    checked={dateRequired}
-                    onChange={(e) => setDateRequired(e.target.checked)}
-                    value="date-size-ll"
-                  />
-                </div>
-                {dateRequired && (
-                  <>
-                    <div className="flex flex-row justify-between px-4">
-                      <div id="intubation_start_date-div">
-                        <DateInputField
-                          id="intubation_start_date"
-                          label="Intubated On"
-                          margin="dense"
-                          value={state.form?.intubation_start_date}
-                          disableFuture={true}
-                          onChange={(date) =>
-                            handleDateChange(date, "intubation_start_date")
-                          }
-                          errors={state.errors.intubation_start_date}
-                        />
-                      </div>
-                      <div id="intubation_end_date-div">
-                        <DateInputField
-                          id="intubation_end_date"
-                          label="Exhubated On"
-                          margin="dense"
-                          value={state.form?.intubation_end_date}
-                          disableFuture={true}
-                          onChange={(date) =>
-                            handleDateChange(date, "intubation_end_date")
-                          }
-                          errors={state.errors.intubation_end_date}
-                        />
-                      </div>
-                    </div>
-                    <Slider
-                      title={"ETT/TT (mmid)"}
-                      start={"3"}
-                      end={"10"}
-                      interval={"1"}
-                      step={1}
-                      value={state.form.ett_tt.toString()}
-                      setValue={(val) => handleSliderChange(val, "ett_tt")}
-                      getLabel={(s) => ["", "#059669"]}
-                    />
-                    <Slider
-                      title={"Cuff Pressure"}
-                      titleNeighbour={
-                        <div
-                          className="flex items-center ml-1 border border-gray-400 rounded px-4 h-10 cursor-pointer hover:bg-gray-200"
-                          onClick={(_) => toggleCuffUnit()}
-                        >
-                          <span className="text-primary-600">
-                            {isMmhgUnit ? "mmHg" : "cmH2O"}
-                          </span>
-                        </div>
-                      }
-                      start={"0"}
-                      end={"60"}
-                      interval={"1"}
-                      step={1.0}
-                      value={state.form.cuff_pressure.toString()}
-                      setValue={(val) =>
-                        handleSliderChange(val, "cuff_pressure")
-                      }
-                      getLabel={(s) => ["", "#059669"]}
-                    />
-                  </>
-                )}
-              </div>
-
-              <div className="mt-4">
-                <div className="flex">
-                  <InputLabel
-                    id="action-label"
-                    style={{ fontWeight: "bold", fontSize: "18px" }}
-                    className="mb-2 text-gray-900"
-                  >
-                    Lines and Catheters
-                  </InputLabel>
-                  <Switch
-                    checked={lineRequired}
-                    onChange={(e) => setLineRequired(e.target.checked)}
-                    value="otherLines"
-                  />
-                </div>
-                {lineRequired && (
-                  <>
-                    <InputLabel
-                      id="lines-catheters-label"
-                      style={{ fontWeight: "bold", fontSize: "16px" }}
-                    >
-                      Types
-                    </InputLabel>
-                    <MultiSelectField
-                      name="lines"
-                      variant="outlined"
-                      value={state.form.lines}
-                      options={linesCatheterChoices}
-                      onChange={handleLinesChange}
-                    />
-                  </>
-                )}
-              </div>
-
-              {lineRequired && state.form.otherLines && (
-                <div id="other_lines-div" className="mt-4">
-                  <InputLabel id="other-symptoms-label">
-                    Other Lines and Catheter Details
-                  </InputLabel>
-                  <MultilineInputField
-                    rows={5}
-                    name="other_lines"
-                    variant="outlined"
-                    margin="dense"
-                    type="text"
-                    placeholder="Enter the information here"
-                    InputLabelProps={{ shrink: !!state.form.other_lines }}
-                    value={state.form.other_lines}
-                    onChange={handleChange}
-                    errors={state.errors.other_lines}
-                  />
-                </div>
-              )}
-
-              {lineRequired &&
-                state.form.hasLines &&
-                state.form.lines.map((id: any) => (
-                  <div className="my-5" key={`lines_${id}`}>
-                    <InputLabel
-                      style={{ fontWeight: "bold", fontSize: "16px" }}
-                    >
-                      {lineIdToString(id)}
-                    </InputLabel>
-                    <div className="grid grid-cols-4 mt-1 gap-x-10">
-                      <div id="lines_insertion_date-div" className="col-span-1">
-                        <DateInputField
-                          label="Date of insertion"
-                          value={state.form.lines_insertion_date?.[id] || null}
-                          onChange={(date) => handleLinesDateChange(id, date)}
-                          disableFuture={true}
-                          errors={state.errors.lines_insertion_date}
-                          InputLabelProps={{ shrink: true }}
-                        />
-                      </div>
-                      <div id="site-level-fixation-div" className="col-span-3">
-                        <InputLabel id="refered-label">
-                          Site or level of fixation
-                        </InputLabel>
-                        <TextInputField
-                          name="lines_site_level_fixation"
-                          variant="outlined"
-                          margin="dense"
-                          type="string"
-                          value={state.form.lines_site_level_fixation?.[id]}
-                          onChange={(e) => handleLinesSiteChange(e, id)}
-                          errors={state.errors.lines_site_level_fixation}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                ))}
 
               <div className="flex flex-col md:flex-row justify-between md:gap-5">
                 <div id="weight-div" className="flex-1">
