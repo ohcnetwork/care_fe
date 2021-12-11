@@ -156,3 +156,15 @@ export interface LocationModel {
     name: string;
   };
 }
+
+export interface BedModel {
+  id?: string;
+  bed_type?: string;
+  description?: string;
+  name?: string;
+  facility?: string;
+  location_object?: {
+    name: string;
+  };
+  location?: string;
+}

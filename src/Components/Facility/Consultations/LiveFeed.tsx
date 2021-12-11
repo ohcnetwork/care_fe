@@ -6,15 +6,28 @@ import loadable from "@loadable/component";
 const PageTitle = loadable(() => import("../../Common/PageTitle"));
 
 const LiveFeed = (props: any) => {
-  const asset = props.asset ?? {
-    hostname: "192.168.1.64",
-    port: "80",
-    username: "onvif_user",
-    password: "qwerty123",
-  };
+  const [asset, setAsset] = useState<any>(
+    props.asset ?? {
+      hostname: "192.168.1.64",
+      port: "80",
+      username: "onvif_user",
+      password: "qwerty123",
+    }
+  );
   const [sourceUrl, setSourceUrl] = useState<string>();
   const [position, setPosition] = useState<any>();
   const [presets, setPresets] = useState<any>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  useEffect(() => {
+    let loadingTimeout: any;
+    if (loading === true)
+      loadingTimeout = setTimeout(() => {
+        setLoading(false);
+      }, 5000);
+    return () => {
+      if (loadingTimeout) clearTimeout(loadingTimeout);
+    };
+  }, [loading]);
   const requestStream = () => {
     axios
       .post(`https://dev_middleware.coronasafe.live/start`, {
@@ -28,6 +41,7 @@ const LiveFeed = (props: any) => {
       });
   };
   const stopStream = (url: string | undefined) => {
+    console.log("stop", url);
     if (url) {
       let urlSegments = url.split("/");
       const x = urlSegments.pop();
@@ -83,6 +97,7 @@ const LiveFeed = (props: any) => {
       });
   };
   const requestPTZ = (action: string) => {
+    setLoading(true);
     if (!position) {
       getCameraStatus(asset);
     } else {
@@ -91,6 +106,7 @@ const LiveFeed = (props: any) => {
         y: 0,
         zoom: 0,
       } as any;
+      console.log(action);
       // Relative X Y Coordinates
       switch (action) {
         case "up":
@@ -179,16 +195,42 @@ const LiveFeed = (props: any) => {
       <div className="mt-4 flex flex-col">
         <div className="mt-4 flex flex-col md:flex-row">
           {sourceUrl ? (
-            <ReactPlayer
-              url={sourceUrl}
-              ref={liveFeedPlayerRef}
-              playing={true}
-              muted={true}
-              onError={(_) => {
-                // requestStream();
-                console.log("Video Player Error");
-              }}
-            />
+            <>
+              <ReactPlayer
+                url={sourceUrl}
+                ref={liveFeedPlayerRef}
+                playing={true}
+                muted={true}
+                onError={(
+                  e: any,
+                  data: any,
+                  hlsInstance: any,
+                  hlsGlobal: any
+                ) => {
+                  // requestStream();
+                  console.log("Error", e);
+                  console.log("Data", data);
+                  console.log("HLS Instance", hlsInstance);
+                  console.log("HLS Global", hlsGlobal);
+                  if (e === "hlsError") {
+                    const recovered = hlsInstance.recoverMediaError();
+                    console.log(recovered);
+                  }
+                }}
+              />
+              {loading && (
+                <div
+                  className="absolute bg-gray-500 bg-opacity-75 z-5 transition-opacity"
+                  style={{ height: "360px", width: "640px" }}
+                >
+                  {/* div with "Loading" at the center */}
+                  <div className="flex justify-center items-center h-full">
+                    <div className="text-white text-2xl">Moving Camera</div>
+                    <div className="text-white text-3xl">...</div>
+                  </div>
+                </div>
+              )}
+            </>
           ) : (
             <div className="w-full max-w-xl bg-gray-500 flex flex-col justify-center items-center">
               <p className="font-bold text-black">
@@ -199,9 +241,15 @@ const LiveFeed = (props: any) => {
               </p>
             </div>
           )}
+
           <div className="grid grid-cols-2 md:ml-12 my-auto gap-4 mt-4 md:mt-0">
             {viewOptions.map((option: any) => (
-              <div onClick={() => gotoPreset(option.value)}>
+              <div
+                onClick={() => {
+                  setLoading(true);
+                  gotoPreset(option.value);
+                }}
+              >
                 <button className="bg-green-100 border border-white rounded-md px-3 py-2 text-black font-semibold hover:bg-green-200 w-full">
                   {option.label}
                 </button>
@@ -216,7 +264,7 @@ const LiveFeed = (props: any) => {
               <div
                 key={option.action}
                 onClick={(_) => {
-                  console.log(option.action);
+                  // console.log(option.action);
                   requestPTZ(option.action);
                 }}
               >
