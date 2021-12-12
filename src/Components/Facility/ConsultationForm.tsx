@@ -91,7 +91,6 @@ type FormDetails = {
   action: string;
   assigned_to: string;
   assigned_to_object: UserModel | null;
-  cpk_mb: number;
   operation: string;
   special_instruction: string;
   review_time: number;
@@ -133,7 +132,6 @@ const initForm: FormDetails = {
   action: "PENDING",
   assigned_to: "",
   assigned_to_object: null,
-  cpk_mb: 0,
   operation: "",
   special_instruction: "",
   review_time: 0,
@@ -177,36 +175,6 @@ const suggestionTypes = [
 ];
 
 const symptomChoices = [...SYMPTOM_CHOICES];
-
-const linesCatheterChoices = [...LINES_CATHETER_CHOICES];
-
-const lineStringToId = (line: any) => {
-  const selectedChoice = linesCatheterChoices.find((obj) => obj.text === line);
-  return selectedChoice ? selectedChoice?.id : -1;
-};
-
-const parseLinesData = (linesData: any) => {
-  const lines: any = [];
-  const lines_insertion_date: any = {};
-  const lines_site_level_fixation: any = {};
-
-  linesData.forEach((line: any) => {
-    const lineId = lineStringToId(line.type);
-    if (lineId) {
-      lines.push(lineId);
-      lines_insertion_date[lineId] = line.start_date;
-      lines_site_level_fixation[lineId] = line.site;
-    }
-  });
-
-  console.log(
-    "Parsed Date",
-    lines,
-    lines_insertion_date,
-    lines_site_level_fixation
-  );
-  return [lines, lines_insertion_date, lines_site_level_fixation];
-};
 
 const admittedToChoices = ["Select", ...ADMITTED_TO];
 
@@ -293,7 +261,6 @@ export const ConsultationForm = (props: any) => {
             is_telemedicine: `${res.data.is_telemedicine}`,
             is_kasp: `${res.data.is_kasp}`,
             assigned_to: res.data.assigned_to || "",
-            cpk_mb: res.data.cpk_mb || "",
             operation: res.data.operation || "",
             ett_tt: res.data.ett_tt ? Number(res.data.ett_tt) : 3,
             special_instruction: res.data.special_instruction || "",
@@ -403,20 +370,6 @@ export const ConsultationForm = (props: any) => {
             invalidForm = true;
           }
           return;
-        case "operation":
-          if (!state.form[field] || _.isEmpty(state.form[field])) {
-            if (!error_div) error_div = field;
-            errors[field] = "Required *";
-            invalidForm = true;
-          }
-          return;
-        case "special_instruction":
-          if (!state.form[field] || _.isEmpty(state.form[field])) {
-            if (!error_div) error_div = field;
-            errors[field] = "Required *";
-            invalidForm = true;
-          }
-          return;
         default:
           return;
       }
@@ -424,10 +377,6 @@ export const ConsultationForm = (props: any) => {
     dispatch({ type: "set_error", errors });
     return [!invalidForm, error_div];
   };
-
-  // const cmH2oTommHg = (val: number) => {
-  //   return val * 0.73556;
-  // };
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
@@ -475,7 +424,6 @@ export const ConsultationForm = (props: any) => {
         review_time: state.form.review_time,
         assigned_to:
           state.form.is_telemedicine === "true" ? state.form.assigned_to : "",
-        cpk_mb: state.form.cpk_mb ? Number(state.form.cpk_mb) : 0,
         operation: state.form.operation,
         special_instruction: state.form.special_instruction,
         weight: Number(state.form.weight),
@@ -1009,21 +957,8 @@ export const ConsultationForm = (props: any) => {
                   <ErrorHelperText error={state.errors.action} />
                 </div>
               )}
-              <div id="cpk_mb-div">
-                <InputLabel id="cpk_mb-label">CPK/MB</InputLabel>
-                <TextInputField
-                  id="cpk_mb"
-                  name="cpk_mb"
-                  type="number"
-                  variant="outlined"
-                  margin="dense"
-                  onChange={handleChange}
-                  value={state.form.cpk_mb}
-                  errors={state.errors.cpk_mb}
-                />
-              </div>
               <div id="operation-div" className="mt-2">
-                <InputLabel id="exam-details-label">Operation*</InputLabel>
+                <InputLabel id="exam-details-label">Operation</InputLabel>
                 <MultilineInputField
                   rows={5}
                   name="operation"
@@ -1041,7 +976,7 @@ export const ConsultationForm = (props: any) => {
               </div>
               <div id="special_instruction-div" className="mt-2">
                 <InputLabel id="special-instruction-label">
-                  Special Instructions*
+                  Special Instructions
                 </InputLabel>
                 <MultilineInputField
                   rows={5}
