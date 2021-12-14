@@ -14,16 +14,10 @@ type state = {
   saving: bool,
 }
 
-let infusionCollection = [
-  "Adrenalin (ml)",
-  "Nor-adrenalin (ml)",
-  "Vasopressin (ml)",
-  "Dopamine (ml)",
-  "Dobutamine (ml)",
-]
-let ivfluidsCollection = ["RL (ml)", "NS (ml)", "DNS (ml)"]
-let feedsCollection = ["Ryles Tube (ml)", "Normal Feed (ml)", "Calories (kcals)"]
-let outputsCollection = ["Urine (ml)", "Rules Tube Aspiration (ml)", "ICD (ml)"]
+let infusionCollection = ["Adrenalin", "Nor-adrenalin", "Vasopressin", "Dopamine", "Dobutamine"]
+let ivfluidsCollection = ["RL", "NS", "DNS"]
+let feedsCollection = ["Ryles Tube", "Normal Feed", "Calories"]
+let outputsCollection = ["Urine", "Rules Tube Aspiration", "ICD"]
 
 type action =
   | SetInfusions(array<IOBalance.item>)

@@ -8,13 +8,26 @@ let findAndReplace = (index, f, array) =>
 type action =
   | UpdateField(string, int)
   | UpdateValue(float, int)
+  | UpdateValueWithConcentration(float, string, int)
   | DeleteUnit(int)
   | AddUnit
 
+let concentrations = ["mcg", "ng"]
+
+let computeConversion = (concentration, value) => {
+  switch concentration {
+  | "mcg" => value *. 0.001
+  | "ng" => value *. 0.001 *. 0.001
+  | _ => value
+  }
+}
 let reducer = (state, action) => {
   switch action {
   | UpdateField(field, index) => findAndReplace(index, IOBalance.updateName(field), state)
   | UpdateValue(value, index) => findAndReplace(index, IOBalance.updateQuantity(value), state)
+  | UpdateValueWithConcentration(value, concentration, index) =>
+    let newValue = computeConversion(concentration, value)
+    findAndReplace(index, IOBalance.updateQuantity(newValue), state)
   | AddUnit => Js.Array.concat([IOBalance.makeDefaultItem()], state)
   | DeleteUnit(index) => Js.Array.filteri((_, i) => i != index, state)
   }
@@ -22,6 +35,11 @@ let reducer = (state, action) => {
 
 let showUnit = (name, item, params, index, send) => {
   <div className="flex justify-between items-center" key={index->string_of_int}>
+    <div
+      onClick={_ => index->DeleteUnit->send}
+      className="appearance-none block border border-gray-400 rounded p-2 text-xs bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white focus:border-gray-600 text-gray-600 font-bold">
+      {"x"->str}
+    </div>
     <div className="m-1 rounded-md shadow-sm w-4/6">
       <IOBalance__UnitPicker
         id={"field" ++ index->string_of_int}
@@ -31,7 +49,7 @@ let showUnit = (name, item, params, index, send) => {
         selectables=params
       />
     </div>
-    <div className="m-1 rounded-md shadow-sm w-1/6">
+    <div className="m-1 rounded-md shadow-sm w-2/6">
       <input
         id={"value" ++ index->string_of_int}
         className="appearance-none h-10 mt-1 block w-full border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white focus:border-gray-600"
@@ -43,11 +61,23 @@ let showUnit = (name, item, params, index, send) => {
         required=true
       />
     </div>
-    <div
-      onClick={_ => index->DeleteUnit->send}
-      className="appearance-none h-10 mt-1 block border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white focus:border-gray-600 text-gray-600 font-bold">
-      {"x"->str}
-    </div>
+    {if name === "Infusions" {
+      <div className="rounded-md shadow-sm w-1/6">
+        <IOBalance__UnitPicker
+          id={"concentration" ++ index->string_of_int}
+          value={""}
+          updateCB={concentration =>
+            UpdateValueWithConcentration(IOBalance.quantity(item), concentration, index)->send}
+          placeholder={"Select Unit"}
+          selectables=concentrations
+        />
+        <div className="text-xl font-bold text-gray-800">
+          {str(IOBalance.quantity(item)->Belt.Float.toString ++ " mg")}
+        </div>
+      </div>
+    } else {
+      <div />
+    }}
   </div>
 }
 
@@ -63,16 +93,26 @@ let make = (~name, ~items, ~collection, ~updateCB) => {
       {name->str}
     </h3>
     <div className="flex justify-between mt-4">
-      <div className="m-1 rounded-md shadow-sm w-8/12">
+      <div className="m-1 rounded-md shadow-sm w-7/12">
         <label htmlFor="Field" className="block text-sm font-medium leading-5 text-gray-700">
           {"Field"->str}
         </label>
       </div>
-      <div className="m-1 rounded-md shadow-sm w-3/12">
+      <div className="m-1 rounded-md shadow-sm w-2/12">
         <label htmlFor="Value" className="block text-sm font-medium leading-5 text-gray-700">
           {"Value"->str}
         </label>
       </div>
+      {if name === "Infusions" {
+        <div className="m-1 rounded-md shadow-sm w-1/12">
+          <label
+            htmlFor="Concentration" className="block text-sm font-medium leading-5 text-gray-700">
+            {"Concentration"->str}
+          </label>
+        </div>
+      } else {
+        <div />
+      }}
     </div>
     {Js.Array.mapi(
       (item, index) => showUnit(name, item, selectables, index, send),
