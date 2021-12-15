@@ -54,7 +54,9 @@ import { make as VentilatorParametersEditor } from "../Components/CriticalCareRe
 import ShowPushNotification from "../Components/Notifications/ShowPushNotification";
 import { NoticeBoard } from "../Components/Notifications/NoticeBoard";
 import { AddLocationForm } from "../Components/Facility/AddLocationForm";
+import { AddBedForm } from "../Components/Facility/AddBedForm";
 import { LocationManagement } from "../Components/Facility/LocationManagement";
+import { BedManagement } from "../Components/Facility/BedManagement";
 import AssetsList from "../Components/Assets/AssetsList";
 import AssetManage from "../Components/Assets/AssetManage";
 import AssetConfigure from "../Components/Assets/AssetConfigure";
@@ -258,12 +260,20 @@ const routes = {
   "/facility/:facilityId/location": ({ facilityId }: any) => (
     <LocationManagement facilityId={facilityId} />
   ),
+  "/facility/:facilityId/location/:locationId/beds": ({
+    facilityId,
+    locationId,
+  }: any) => <BedManagement facilityId={facilityId} locationId={locationId} />,
   "/facility/:facilityId/inventory/add": ({ facilityId }: any) => (
     <AddInventoryForm facilityId={facilityId} />
   ),
   "/facility/:facilityId/location/add": ({ facilityId }: any) => (
     <AddLocationForm facilityId={facilityId} />
   ),
+  "/facility/:facilityId/location/:locationId/beds/add": ({
+    facilityId,
+    locationId,
+  }: any) => <AddBedForm facilityId={facilityId} locationId={locationId} />,
   "/facility/:facilityId/inventory/min_quantity/set": ({ facilityId }: any) => (
     <SetInventoryForm facilityId={facilityId} />
   ),
