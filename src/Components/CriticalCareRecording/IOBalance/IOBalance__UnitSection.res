@@ -37,10 +37,10 @@ let showUnit = (name, item, params, index, send) => {
   <div className="flex justify-between items-center" key={index->string_of_int}>
     <div
       onClick={_ => index->DeleteUnit->send}
-      className="appearance-none block border border-gray-400 rounded p-2 text-xs bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white focus:border-gray-600 text-gray-600 font-bold">
+      className="appearance-none h-10 mt-1 block border border-gray-400 rounded p-2 text-xs bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white focus:border-gray-600 text-gray-600 font-bold">
       {"x"->str}
     </div>
-    <div className="m-1 rounded-md shadow-sm w-4/6">
+    <div className="m-1 rounded-md shadow-sm w-5/6">
       <IOBalance__UnitPicker
         id={"field" ++ index->string_of_int}
         value={IOBalance.name(item)}
@@ -49,7 +49,7 @@ let showUnit = (name, item, params, index, send) => {
         selectables=params
       />
     </div>
-    <div className="m-1 rounded-md shadow-sm w-2/6">
+    <div className="m-1 rounded-md shadow-sm w-1/6">
       <input
         id={"value" ++ index->string_of_int}
         className="appearance-none h-10 mt-1 block w-full border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white focus:border-gray-600"
@@ -62,18 +62,15 @@ let showUnit = (name, item, params, index, send) => {
       />
     </div>
     {if name === "Infusions" {
-      <div className="rounded-md shadow-sm w-1/6">
+      <div className="rounded-md shadow-sm w-2/12">
         <IOBalance__UnitPicker
           id={"concentration" ++ index->string_of_int}
           value={""}
           updateCB={concentration =>
             UpdateValueWithConcentration(IOBalance.quantity(item), concentration, index)->send}
-          placeholder={"Select Unit"}
+          placeholder={"Convert to"}
           selectables=concentrations
         />
-        <div className="text-xl font-bold text-gray-800">
-          {str(IOBalance.quantity(item)->Belt.Float.toString ++ " mg")}
-        </div>
       </div>
     } else {
       <div />
@@ -93,26 +90,18 @@ let make = (~name, ~items, ~collection, ~updateCB) => {
       {name->str}
     </h3>
     <div className="flex justify-between mt-4">
-      <div className="m-1 rounded-md shadow-sm w-7/12">
-        <label htmlFor="Field" className="block text-sm font-medium leading-5 text-gray-700">
+      <div className="m-1 rounded-md shadow-sm w-10/12">
+        <label
+          htmlFor="Field" className="block text-sm font-medium leading-5 text-gray-700 text-center">
           {"Field"->str}
         </label>
       </div>
       <div className="m-1 rounded-md shadow-sm w-2/12">
-        <label htmlFor="Value" className="block text-sm font-medium leading-5 text-gray-700">
+        <label
+          htmlFor="Value" className="block text-sm font-medium leading-5 text-gray-700 text-center">
           {"Value"->str}
         </label>
       </div>
-      {if name === "Infusions" {
-        <div className="m-1 rounded-md shadow-sm w-1/12">
-          <label
-            htmlFor="Concentration" className="block text-sm font-medium leading-5 text-gray-700">
-            {"Concentration"->str}
-          </label>
-        </div>
-      } else {
-        <div />
-      }}
     </div>
     {Js.Array.mapi(
       (item, index) => showUnit(name, item, selectables, index, send),
