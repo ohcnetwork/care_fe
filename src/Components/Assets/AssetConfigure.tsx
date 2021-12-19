@@ -5,12 +5,19 @@ import { AssetData } from "./AssetTypes";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { useDispatch } from "react-redux";
-import { getAsset, partialUpdateAsset } from "../../Redux/actions";
+import {
+  getAsset,
+  partialUpdateAsset,
+  createAssetBed,
+} from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { Card, CardContent, InputLabel, Button } from "@material-ui/core";
 import { SelectField, TextInputField } from "../Common/HelperInputFields";
 import { ASSET_META_TYPE, CAMERA_TYPE } from "../../Common/constants";
 import LiveFeed from "../Facility/Consultations/LiveFeed";
+import { BedSelect } from "../Common/BedSelect";
+import { BedModel } from "../Facility/models";
+import axios from "axios";
 
 interface AssetConfigureProps {
   assetId: string;
@@ -35,6 +42,8 @@ const AssetConfigure = (props: AssetConfigureProps) => {
   const [cameraType, setCameraType] = React.useState("");
   const [cameraAddress, setCameraAddress] = React.useState("");
   const [cameraAccessKey, setCameraAccessKey] = React.useState("");
+  const [bed, setBed] = React.useState<BedModel>({});
+  const [newPreset, setNewPreset] = React.useState("");
   const dispatch = useDispatch();
 
   const fetchData = useCallback(
@@ -94,6 +103,31 @@ const AssetConfigure = (props: AssetConfigureProps) => {
     }
   };
 
+  const addPreset = async (e: React.SyntheticEvent) => {
+    e.preventDefault();
+    const data = {
+      bed: bed.id,
+      preset: newPreset,
+    };
+    let presetData = await axios.post(
+      `https://${asset?.meta?.middleware_hostname}/getStatus`,
+      data
+    );
+    console.log(presetData);
+    // let res: any = await Promise.resolve(
+    //   dispatch(createAssetBed({ meta: presetData }, assetId, bed?.id as string))
+    // );
+    // if (res?.status === 200) {
+    //   Notification.Success({
+    //     msg: "Preset Added Successfully",
+    //   });
+    // } else {
+    //   Notification.Error({
+    //     msg: "Something went wrong..!",
+    //   });
+    // }
+  };
+
   if (isLoading) return <Loading />;
   return (
     <div>
@@ -102,116 +136,169 @@ const AssetConfigure = (props: AssetConfigureProps) => {
         crumbsReplacements={{ [assetId]: { name: asset?.name } }}
       />
       <Card>
-        <form onSubmit={handleSubmit}>
-          <CardContent>
-            <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
-              <div>
-                <InputLabel id="asset-type">Asset Type</InputLabel>
-                <SelectField
-                  name="asset_type"
-                  id="asset-type"
-                  variant="outlined"
-                  margin="dense"
-                  options={[
-                    { id: "", text: "Select Asset Type" },
-                    ...ASSET_META_TYPE,
-                  ]}
-                  value={assetType}
-                  onChange={(e) => setAssetType(e.target.value)}
-                  optionValue="text"
-                />
+        <CardContent>
+          <form onSubmit={handleSubmit}>
+            <CardContent>
+              <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
+                <div>
+                  <InputLabel id="asset-type">Asset Type</InputLabel>
+                  <SelectField
+                    name="asset_type"
+                    id="asset-type"
+                    variant="outlined"
+                    margin="dense"
+                    options={[
+                      { id: "", text: "Select Asset Type" },
+                      ...ASSET_META_TYPE,
+                    ]}
+                    value={assetType}
+                    onChange={(e) => setAssetType(e.target.value)}
+                    optionValue="text"
+                  />
+                </div>
+                <div>
+                  <InputLabel id="location">Location</InputLabel>
+                  <TextInputField
+                    name="name"
+                    id="location"
+                    variant="outlined"
+                    margin="dense"
+                    type="text"
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    errors=""
+                  />
+                </div>
+                <div>
+                  <InputLabel id="middleware-hostname">
+                    Hospital Middleware Hostname
+                  </InputLabel>
+                  <TextInputField
+                    name="name"
+                    id="middleware-hostname"
+                    variant="outlined"
+                    margin="dense"
+                    type="text"
+                    value={middlewareHostname}
+                    onChange={(e) => setMiddlewareHostname(e.target.value)}
+                    errors=""
+                  />
+                </div>
+                <div>
+                  <InputLabel id="camera-type">Camera Type</InputLabel>
+                  <SelectField
+                    name="camera_type"
+                    id="camera-type"
+                    variant="outlined"
+                    margin="dense"
+                    options={[
+                      { id: "", text: "Select Camera Type" },
+                      ...CAMERA_TYPE,
+                    ]}
+                    value={cameraType}
+                    onChange={(e) => setCameraType(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <InputLabel id="camera-addess">Camera Address</InputLabel>
+                  <TextInputField
+                    name="name"
+                    id="camera-addess"
+                    variant="outlined"
+                    margin="dense"
+                    type="text"
+                    value={cameraAddress}
+                    onChange={(e) => setCameraAddress(e.target.value)}
+                    errors=""
+                  />
+                </div>
+                <div>
+                  <InputLabel id="camera-access-key">
+                    Camera Access Key
+                  </InputLabel>
+                  <TextInputField
+                    name="name"
+                    id="camera-access-key"
+                    variant="outlined"
+                    margin="dense"
+                    type="password"
+                    value={cameraAccessKey}
+                    onChange={(e) => setCameraAccessKey(e.target.value)}
+                    errors=""
+                  />
+                </div>
               </div>
-              <div>
-                <InputLabel id="location">Location</InputLabel>
-                <TextInputField
-                  name="name"
-                  id="location"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  errors=""
-                />
+              <div className="flex justify-between mt-4">
+                <Button
+                  color="primary"
+                  variant="contained"
+                  type="submit"
+                  style={{ marginLeft: "auto" }}
+                  startIcon={<CheckCircleOutlineIcon></CheckCircleOutlineIcon>}
+                  onClick={handleSubmit}
+                >
+                  Set Configuration
+                </Button>
               </div>
-              <div>
-                <InputLabel id="middleware-hostname">
-                  Hospital Middleware Hostname
-                </InputLabel>
-                <TextInputField
-                  name="name"
-                  id="middleware-hostname"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  value={middlewareHostname}
-                  onChange={(e) => setMiddlewareHostname(e.target.value)}
-                  errors=""
-                />
-              </div>
-              <div>
-                <InputLabel id="camera-type">Camera Type</InputLabel>
-                <SelectField
-                  name="camera_type"
-                  id="camera-type"
-                  variant="outlined"
-                  margin="dense"
-                  options={[
-                    { id: "", text: "Select Camera Type" },
-                    ...CAMERA_TYPE,
-                  ]}
-                  value={cameraType}
-                  onChange={(e) => setCameraType(e.target.value)}
-                />
-              </div>
-              <div>
-                <InputLabel id="camera-addess">Camera Address</InputLabel>
-                <TextInputField
-                  name="name"
-                  id="camera-addess"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  value={cameraAddress}
-                  onChange={(e) => setCameraAddress(e.target.value)}
-                  errors=""
-                />
-              </div>
-              <div>
-                <InputLabel id="camera-access-key">
-                  Camera Access Key
-                </InputLabel>
-                <TextInputField
-                  name="name"
-                  id="camera-access-key"
-                  variant="outlined"
-                  margin="dense"
-                  type="password"
-                  value={cameraAccessKey}
-                  onChange={(e) => setCameraAccessKey(e.target.value)}
-                  errors=""
-                />
-              </div>
-            </div>
-            <div className="flex justify-between mt-4">
-              <Button
-                color="primary"
-                variant="contained"
-                type="submit"
-                style={{ marginLeft: "auto" }}
-                startIcon={<CheckCircleOutlineIcon></CheckCircleOutlineIcon>}
-                onClick={handleSubmit}
-              >
-                Set Configuration
-              </Button>
-            </div>
-          </CardContent>
-        </form>
+            </CardContent>
+          </form>
+        </CardContent>
       </Card>
+      {asset?.meta?.asset_type === "CAMERA" && (
+        <Card>
+          <form onSubmit={addPreset}>
+            <CardContent>
+              <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
+                <div>
+                  <InputLabel id="asset-type">Bed</InputLabel>
+                  <BedSelect
+                    name="bed"
+                    setSelected={(selected) => setBed(selected as BedModel)}
+                    selected={bed}
+                    errors=""
+                    multiple={false}
+                    margin="dense"
+                    location={asset?.location_object?.id}
+                    facility={asset?.location_object?.facility?.id}
+                  />
+                </div>
+                <div>
+                  <InputLabel id="location">Preset Name</InputLabel>
+                  <TextInputField
+                    name="name"
+                    id="location"
+                    variant="outlined"
+                    margin="dense"
+                    type="text"
+                    value={newPreset}
+                    onChange={(e) => setNewPreset(e.target.value)}
+                    errors=""
+                  />
+                </div>
+              </div>
+              <div className="flex justify-between mt-4">
+                <Button
+                  color="primary"
+                  variant="contained"
+                  type="submit"
+                  style={{ marginLeft: "auto" }}
+                  startIcon={<CheckCircleOutlineIcon></CheckCircleOutlineIcon>}
+                  onClick={() => {}}
+                >
+                  Add Preset
+                </Button>
+              </div>
+            </CardContent>
+          </form>
+        </Card>
+      )}
       <Card>
         <CardContent>
           {asset?.meta?.asset_type === "CAMERA" && (
-            <LiveFeed asset={getCameraConfig(asset)} />
+            <LiveFeed
+              middleWareHost={asset?.meta?.middleware_hostname}
+              asset={getCameraConfig(asset)}
+            />
           )}
         </CardContent>
       </Card>

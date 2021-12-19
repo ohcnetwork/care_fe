@@ -159,6 +159,24 @@ const routes: Routes = {
     method: "PATCH",
   },
 
+  // Asset bed
+  listAssetBeds: {
+    path: "/api/v1/assetbed/",
+    method: "GET",
+  },
+  createAssetBed: {
+    path: "/api/v1/assetbed/",
+    method: "POST",
+  },
+  getAssetBed: {
+    path: "/api/v1/assetbed/{external_id}/",
+    method: "GET",
+  },
+  updateAssetBed: {
+    path: "/api/v1/assetbed/{external_id}/",
+    method: "PUT",
+  },
+
   // Facility Beds
   listFacilityBeds: {
     path: "/api/v1/bed/",
