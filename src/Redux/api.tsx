@@ -159,6 +159,12 @@ const routes: Routes = {
     method: "PATCH",
   },
 
+  // Beds
+  listBeds: {
+    path: "/api/v1/bed/",
+    method: "GET",
+  },
+
   // Download Api
   deleteFacility: {
     path: "/api/v1/facility",

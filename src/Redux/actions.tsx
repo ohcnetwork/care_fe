@@ -570,3 +570,5 @@ export const listAssetTransaction = (params: object) =>
   fireRequest("listAssetTransaction", [], params);
 export const getAssetTransaction = (id: string) =>
   fireRequest("getAssetTransaction", [], {}, { id });
+
+export const listBeds = (params: object) => fireRequest("listBeds", [], params);
