@@ -37,6 +37,7 @@ import {
   getConsultationDailyRoundsDetails,
   updateDailyReport,
   getPatient,
+  listFacilityBeds,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
 import { make as Link } from "../Common/components/Link.gen";
@@ -68,6 +69,7 @@ const initForm: any = {
   rhythm: "0",
   rhythm_detail: "",
   ventilator_spo2: null,
+  bed: null,
 };
 
 const initError = Object.assign(
@@ -122,6 +124,7 @@ export const DailyRounds = (props: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
+  const [beds, setBeds] = useState<any>([]);
 
   const headerText = !id ? "Add Consultation Update" : "Info";
   const buttonText = !id ? "Save" : "Continue";
@@ -153,6 +156,28 @@ export const DailyRounds = (props: any) => {
       }
     },
     [dispatchAction, fetchpatient]
+  );
+
+  const fetchBeds = useCallback(
+    async (status: statusType) => {
+      const res = await dispatchAction(
+        listFacilityBeds({ facility: facilityId })
+      );
+
+      if (!status.aborted) {
+        if (res && res.data) {
+          setBeds(res.data.results ?? []);
+        }
+      }
+    },
+    [consultationId, facilityId, dispatchAction]
+  );
+
+  useAbortableEffect(
+    (status: statusType) => {
+      if (facilityId) fetchBeds(status);
+    },
+    [dispatchAction, fetchBeds]
   );
 
   useEffect(() => {
@@ -270,6 +295,7 @@ export const DailyRounds = (props: any) => {
           recommend_discharge: JSON.parse(state.form.recommend_discharge),
           action: state.form.action,
           review_time: state.form.review_time,
+          bed: state.form.bed,
         };
         if (state.form.rounds_type === "NORMAL") {
           data = {
@@ -493,6 +519,28 @@ export const DailyRounds = (props: any) => {
                     value={state.form.rounds_type}
                     onChange={handleChange}
                     errors={state.errors.rounds_type}
+                  />
+                </div>
+                <div className="mt-4">
+                  <InputLabel id="bed">Bed</InputLabel>
+                  <SelectField
+                    className="md:w-1/2"
+                    name="bed"
+                    variant="standard"
+                    margin="dense"
+                    options={[
+                      { id: "", name: "Select Bed" },
+                      ...beds.map((bed: any) => {
+                        return {
+                          id: bed.id,
+                          name: `${bed.name} - ${bed.bed_type}`,
+                        };
+                      }),
+                    ]}
+                    optionValue="name"
+                    value={state.form.bed}
+                    onChange={handleChange}
+                    errors={state.errors.bed}
                   />
                 </div>
               </div>
