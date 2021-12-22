@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { getAnyFacility } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
+import { Link } from "raviger";
 
 export default function BadgesList(props: any) {
   const { appliedFilters, updateFilter } = props;
@@ -57,6 +58,12 @@ export default function BadgesList(props: any) {
     }
     fetchData();
   }, [dispatch, appliedFilters.assigned_facility]);
+
+  const filtersExists = () => {
+    let { limit, offset, ...rest } = appliedFilters;
+
+    return Object.values(rest).some((value) => value);
+  };
 
   const removeFilter = (paramKey: any) => {
     const params = { ...appliedFilters };
@@ -120,6 +127,16 @@ export default function BadgesList(props: any) {
       {badge("Origin Facility", orginFacilityName, "orgin_facility")}
       {badge("Approving Facility", approvingFacilityName, "approving_facility")}
       {badge("Assigned Facility", assignedFacilityName, "assigned_facility")}
+
+      {filtersExists() && (
+        <Link
+          href="/resource"
+          className="inline-flex items-center px-3 py-1 mt-2 ml-2 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border cursor-pointer hover:border-gray-700 hover:text-gray-900"
+        >
+          <i className="fas fa-minus-circle fa-lg mr-1.5"></i>
+          <span>Clear All Filters</span>
+        </Link>
+      )}
     </div>
   );
 }
