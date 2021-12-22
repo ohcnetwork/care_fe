@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import loadable from "@loadable/component";
 import { InputSearchBox } from "../Common/SearchBox";
 import { navigate, useQueryParams } from "raviger";
@@ -38,7 +38,10 @@ export default function ListView() {
     loading: false,
   });
 
-  const local = JSON.parse(localStorage.getItem("resource-filters") || "{}");
+  const local = useMemo(
+    () => JSON.parse(localStorage.getItem("resource-filters") || "{}"),
+    []
+  );
 
   const applyFilter = (data: any) => {
     const filter = { ...qParams, ...data };
