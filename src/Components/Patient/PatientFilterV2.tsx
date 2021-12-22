@@ -16,7 +16,11 @@ import {
   KASP_STRING,
 } from "../../Common/constants";
 import moment from "moment";
-import { getAllLocalBody, getFacility, getDistrict } from "../../Redux/actions";
+import {
+  getAllLocalBody,
+  getPermittedFacility,
+  getDistrict,
+} from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { navigate } from "raviger";
 import { DateRangePicker, getDate } from "../Common/DateRangePicker";
@@ -149,7 +153,7 @@ export default function PatientFilterV2(props: any) {
       if (filter.facility) {
         setFacilityLoading(true);
         const { data: facilityData } = await dispatch(
-          getFacility(filter.facility, "facility")
+          getPermittedFacility(filter.facility, "facility")
         );
         setFilterState({ facility_ref: facilityData });
         setFacilityLoading(false);

@@ -7,7 +7,7 @@ import {
 } from "../Common/HelperInputFields";
 import { RESOURCE_FILTER_ORDER } from "../../Common/constants";
 import moment from "moment";
-import { getFacilityV2 as getFacility } from "../../Redux/actions";
+import { getAnyFacility } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { CircularProgress } from "@material-ui/core";
 import { RESOURCE_CHOICES } from "../../Common/constants";
@@ -56,7 +56,7 @@ export default function ListFilter(props: any) {
       if (filter.orgin_facility) {
         setOriginLoading(true);
         const res = await dispatch(
-          getFacility(filter.orgin_facility, "orgin_facility")
+          getAnyFacility(filter.orgin_facility, "orgin_facility")
         );
         if (res && res.data) {
           setFilterState({ orgin_facility_ref: res.data });
@@ -72,7 +72,7 @@ export default function ListFilter(props: any) {
       if (filter.approving_facility) {
         setResourceLoading(true);
         const res = await dispatch(
-          getFacility(filter.approving_facility, "approving_facility")
+          getAnyFacility(filter.approving_facility, "approving_facility")
         );
         if (res && res.data) {
           setFilterState({ approving_facility_ref: res.data });
@@ -88,7 +88,7 @@ export default function ListFilter(props: any) {
       if (filter.assigned_facility) {
         setAssignedLoading(true);
         const res = await dispatch(
-          getFacility(filter.assigned_facility, "assigned_facility")
+          getAnyFacility(filter.assigned_facility, "assigned_facility")
         );
         if (res && res.data) {
           setFilterState({ assigned_facility_ref: res.data });
