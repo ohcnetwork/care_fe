@@ -18,7 +18,7 @@ import {
 import moment from "moment";
 import {
   getAllLocalBody,
-  getPermittedFacility,
+  getAnyFacility,
   getDistrict,
 } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
@@ -153,7 +153,7 @@ export default function PatientFilterV2(props: any) {
       if (filter.facility) {
         setFacilityLoading(true);
         const { data: facilityData } = await dispatch(
-          getPermittedFacility(filter.facility, "facility")
+          getAnyFacility(filter.facility, "facility")
         );
         setFilterState({ facility_ref: facilityData });
         setFacilityLoading(false);
@@ -496,7 +496,7 @@ export default function PatientFilterV2(props: any) {
             multiple={false}
             name="facility"
             selected={filterState.facility_ref}
-            showAll={false}
+            showAll
             setSelected={(obj) => setFacility(obj, "facility")}
             className="shifting-page-filter-dropdown"
             errors={""}
