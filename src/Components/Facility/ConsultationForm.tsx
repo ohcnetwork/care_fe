@@ -91,6 +91,8 @@ type FormDetails = {
   action: string;
   assigned_to: string;
   assigned_to_object: UserModel | null;
+  operation: string;
+  special_instruction: string;
   review_time: number;
   weight: string;
   height: string;
@@ -130,6 +132,8 @@ const initForm: FormDetails = {
   action: "PENDING",
   assigned_to: "",
   assigned_to_object: null,
+  operation: "",
+  special_instruction: "",
   review_time: 0,
   weight: "",
   height: "",
@@ -257,7 +261,9 @@ export const ConsultationForm = (props: any) => {
             is_telemedicine: `${res.data.is_telemedicine}`,
             is_kasp: `${res.data.is_kasp}`,
             assigned_to: res.data.assigned_to || "",
+            operation: res.data.operation || "",
             ett_tt: res.data.ett_tt ? Number(res.data.ett_tt) : 3,
+            special_instruction: res.data.special_instruction || "",
             weight: res.data.weight ? res.data.weight : "",
             height: res.data.height ? res.data.height : "",
           };
@@ -418,6 +424,8 @@ export const ConsultationForm = (props: any) => {
         review_time: state.form.review_time,
         assigned_to:
           state.form.is_telemedicine === "true" ? state.form.assigned_to : "",
+        operation: state.form.operation,
+        special_instruction: state.form.special_instruction,
         weight: Number(state.form.weight),
         height: Number(state.form.height),
       };
@@ -930,7 +938,7 @@ export const ConsultationForm = (props: any) => {
                 </div>
               )}
               {JSON.parse(state.form.is_telemedicine) && (
-                <div id="action-div" className="mt-2">
+                <div id="action-div">
                   <InputLabel
                     id="action-label"
                     style={{ fontWeight: "bold", fontSize: "18px" }}
@@ -949,7 +957,44 @@ export const ConsultationForm = (props: any) => {
                   <ErrorHelperText error={state.errors.action} />
                 </div>
               )}
-              <div className="flex flex-col md:flex-row justify-between md:gap-5 mt-4">
+              <div id="operation-div" className="mt-2">
+                <InputLabel id="exam-details-label">Operation</InputLabel>
+                <MultilineInputField
+                  rows={5}
+                  name="operation"
+                  variant="outlined"
+                  margin="dense"
+                  type="text"
+                  placeholder="Information optional"
+                  InputLabelProps={{
+                    shrink: !!state.form.operation,
+                  }}
+                  value={state.form.operation}
+                  onChange={handleChange}
+                  errors={state.errors.operation}
+                />
+              </div>
+              <div id="special_instruction-div" className="mt-2">
+                <InputLabel id="special-instruction-label">
+                  Special Instructions
+                </InputLabel>
+                <MultilineInputField
+                  rows={5}
+                  name="special_instruction"
+                  variant="outlined"
+                  margin="dense"
+                  type="text"
+                  placeholder="Information optional"
+                  InputLabelProps={{
+                    shrink: !!state.form.special_instruction,
+                  }}
+                  value={state.form.special_instruction}
+                  onChange={handleChange}
+                  errors={state.errors.special_instruction}
+                />
+              </div>
+
+              <div className="flex flex-col md:flex-row justify-between md:gap-5">
                 <div id="weight-div" className="flex-1">
                   <InputLabel id="refered-label">Weight (in Kg)</InputLabel>
                   <TextInputField
