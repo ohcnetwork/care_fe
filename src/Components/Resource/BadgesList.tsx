@@ -4,7 +4,7 @@ import { useDispatch } from "react-redux";
 import { Link } from "raviger";
 
 export default function BadgesList(props: any) {
-  const { appliedFilters, updateFilter } = props;
+  const { appliedFilters, updateFilter, local } = props;
 
   const [orginFacilityName, setOrginFacilityName] = useState("");
   const [approvingFacilityName, setApprovingFacilityName] = useState("");
@@ -13,9 +13,12 @@ export default function BadgesList(props: any) {
 
   useEffect(() => {
     async function fetchData() {
-      if (appliedFilters.orgin_facility) {
+      if (appliedFilters.orgin_facility || local.origin_facility) {
         const res = await dispatch(
-          getAnyFacility(appliedFilters.orgin_facility, "orgin_facility")
+          getAnyFacility(
+            appliedFilters.orgin_facility || local.origin_facility,
+            "orgin_facility"
+          )
         );
 
         setOrginFacilityName(res?.data?.name);
@@ -28,10 +31,10 @@ export default function BadgesList(props: any) {
 
   useEffect(() => {
     async function fetchData() {
-      if (appliedFilters.approving_facility) {
+      if (appliedFilters.approving_facility || local.approving_facility) {
         const res = await dispatch(
           getAnyFacility(
-            appliedFilters.approving_facility,
+            appliedFilters.approving_facility || local.approving_facility,
             "approving_facility"
           )
         );
@@ -46,9 +49,12 @@ export default function BadgesList(props: any) {
 
   useEffect(() => {
     async function fetchData() {
-      if (appliedFilters.assigned_facility) {
+      if (appliedFilters.assigned_facility || local.assigned_facility) {
         const res = await dispatch(
-          getAnyFacility(appliedFilters.assigned_facility, "assigned_facility")
+          getAnyFacility(
+            appliedFilters.assigned_facility || local.assigned_facility,
+            "assigned_facility"
+          )
         );
 
         setAssignedFacilityName(res?.data?.name);
@@ -66,9 +72,12 @@ export default function BadgesList(props: any) {
   };
 
   const removeFilter = (paramKey: any) => {
+    const localData: any = { ...local };
     const params = { ...appliedFilters };
+
+    localData[paramKey] = "";
     params[paramKey] = "";
-    updateFilter(params);
+    updateFilter(params, localData);
   };
 
   const badge = (key: string, value: any, paramKey: string) => {
@@ -89,39 +98,40 @@ export default function BadgesList(props: any) {
 
   return (
     <div className="flex flex-wrap mt-4 ml-2">
-      {badge("Ordering", appliedFilters.ordering, "ordering")}
+      {badge("Ordering", appliedFilters.ordering || local.ordering, "ordering")}
       {badge(
         "status",
-        appliedFilters.status != "--" && appliedFilters.status,
+        (appliedFilters.status != "--" && appliedFilters.status) ||
+          (local.status !== "--" && local.status),
         "status"
       )}
       {badge(
         "Emergency",
-        appliedFilters.emergency === "true"
+        local.emergency === "yes" || appliedFilters.emergency === "true"
           ? "yes"
-          : appliedFilters.emergency === "false"
+          : local.emergency === "no" || appliedFilters.emergency === "false"
           ? "no"
           : undefined,
         "emergency"
       )}
       {badge(
         "Modified After",
-        appliedFilters.modified_date_after,
+        appliedFilters.modified_date_after || local.modified_date_after,
         "modified_date_after"
       )}
       {badge(
         "Modified Before",
-        appliedFilters.modified_date_before,
+        appliedFilters.modified_date_before || local.modified_date_before,
         "modified_date_before"
       )}
       {badge(
         "Created Before",
-        appliedFilters.created_date_before,
+        appliedFilters.created_date_before || local.created_date_before,
         "created_date_before"
       )}
       {badge(
         "Created After",
-        appliedFilters.created_date_after,
+        appliedFilters.created_date_after || local.created_date_after,
         "created_date_after"
       )}
       {badge("Origin Facility", orginFacilityName, "orgin_facility")}

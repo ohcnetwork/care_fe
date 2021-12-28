@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useQueryParams, navigate } from "raviger";
 import ListFilter from "./ListFilter";
 import ResourceBoard from "./ResourceBoard";
@@ -35,6 +35,11 @@ export default function BoardView() {
   const [isLoading, setIsLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
+  const local = useMemo(
+    () => JSON.parse(localStorage.getItem("resource-filters") || "{}"),
+    []
+  );
+
   const updateQuery = (filter: any) => {
     // prevent empty filters from cluttering the url
     const nParams = Object.keys(filter).reduce(
@@ -53,9 +58,15 @@ export default function BoardView() {
     setShowFilters(false);
   };
 
+  useEffect(() => {
+    applyFilter(local);
+  }, []);
+
   const appliedFilters = formatFilter(qParams);
-  const updateFilter = (params: any) => {
+
+  const updateFilter = (params: any, local: any) => {
     updateQuery(params);
+    localStorage.setItem("resource-filters", JSON.stringify(local));
   };
 
   const triggerDownload = async () => {
@@ -128,7 +139,11 @@ export default function BoardView() {
         </div>
       </div>
 
-      <BadgesList appliedFilters={appliedFilters} updateFilter={updateFilter} />
+      <BadgesList
+        appliedFilters={appliedFilters}
+        local={local}
+        updateFilter={updateFilter}
+      />
 
       <div className="flex mt-4 pb-2 flex-1 items-start overflow-x-scroll px-4">
         {isLoading ? (
@@ -155,6 +170,7 @@ export default function BoardView() {
         <div className="bg-white min-h-screen p-4">
           <ListFilter
             filter={qParams}
+            local={local}
             onChange={applyFilter}
             closeFilter={() => setShowFilters(false)}
           />
