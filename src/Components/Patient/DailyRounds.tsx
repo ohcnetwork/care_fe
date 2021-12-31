@@ -125,6 +125,7 @@ export const DailyRounds = (props: any) => {
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
   const [beds, setBeds] = useState<any>([]);
+  const [isTeleicu, setIsTeleicu] = useState<string>("false");
 
   const headerText = !id ? "Add Consultation Update" : "Info";
   const buttonText = !id ? "Save" : "Continue";
@@ -293,7 +294,7 @@ export const DailyRounds = (props: any) => {
           recommend_discharge: JSON.parse(state.form.recommend_discharge),
           action: state.form.action,
           review_time: state.form.review_time,
-          bed: state.form.bed,
+          bed: isTeleicu === "true" ? state.form.bed : undefined,
         };
         if (state.form.rounds_type === "NORMAL") {
           data = {
@@ -550,7 +551,7 @@ export const DailyRounds = (props: any) => {
               )}
               {(state.form.clone_last === "false" || id) && (
                 <div>
-                  <div className="md:grid gap-4 grid-cols-1 md:grid-cols-2 mt-4">
+                  <div className="md:grid gap-4 grid-cols-1 md:grid-cols-2 my-4">
                     <div>
                       <InputLabel id="physical-examination-info-label">
                         Physical Examination Info
@@ -665,6 +666,32 @@ export const DailyRounds = (props: any) => {
                         errors={state.errors.admitted_to}
                       />
                     </div>
+                    <div className="flex-1" id="is_telemedicine-div">
+                      <InputLabel id="admitted-label">TeleICU</InputLabel>
+                      <RadioGroup
+                        aria-label="covid"
+                        name="is_teleicu"
+                        value={isTeleicu}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                          setIsTeleicu(e.target.value);
+                        }}
+                        style={{ padding: "0px 5px" }}
+                      >
+                        <Box display="flex" flexDirection="row">
+                          <FormControlLabel
+                            value="true"
+                            control={<Radio />}
+                            label="Yes"
+                          />
+                          <FormControlLabel
+                            value="false"
+                            control={<Radio />}
+                            label="No"
+                          />
+                        </Box>
+                      </RadioGroup>
+                      <ErrorHelperText error={state.errors.is_telemedicine} />
+                    </div>
 
                     <div className="flex-1">
                       <InputLabel id="action-label">Action </InputLabel>
@@ -679,28 +706,30 @@ export const DailyRounds = (props: any) => {
                       />
                       <ErrorHelperText error={state.errors.action} />
                     </div>
-                    <div className="">
-                      <InputLabel id="bed">Bed</InputLabel>
-                      <SelectField
-                        className="md:w-1/2"
-                        name="bed"
-                        variant="standard"
-                        margin="dense"
-                        options={[
-                          { id: "", name: "Select Bed" },
-                          ...beds.map((bed: any) => {
-                            return {
-                              id: bed.id,
-                              name: `${bed.name} - ${bed.bed_type}`,
-                            };
-                          }),
-                        ]}
-                        optionValue="name"
-                        value={state.form.bed}
-                        onChange={handleChange}
-                        errors={state.errors.bed}
-                      />
-                    </div>
+                    {isTeleicu === "true" && (
+                      <div className="">
+                        <InputLabel id="bed">Bed</InputLabel>
+                        <SelectField
+                          className="md:w-1/2"
+                          name="bed"
+                          variant="standard"
+                          margin="dense"
+                          options={[
+                            { id: "", name: "Select Bed" },
+                            ...beds.map((bed: any) => {
+                              return {
+                                id: bed.id,
+                                name: `${bed.name} - ${bed.bed_type}`,
+                              };
+                            }),
+                          ]}
+                          optionValue="name"
+                          value={state.form.bed}
+                          onChange={handleChange}
+                          errors={state.errors.bed}
+                        />
+                      </div>
+                    )}
                   </div>
                   <div className="md:grid gap-4 grid-cols-1 md:grid-cols-2">
                     <div className="flex-1">
