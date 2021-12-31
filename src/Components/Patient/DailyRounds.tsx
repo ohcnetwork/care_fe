@@ -712,7 +712,7 @@ export const DailyRounds = (props: any) => {
                       <div className="">
                         <InputLabel id="bed">Bed</InputLabel>
                         <SelectField
-                          className="md:w-1/2"
+                          className=""
                           name="bed"
                           variant="standard"
                           margin="dense"
