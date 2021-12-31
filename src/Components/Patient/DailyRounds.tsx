@@ -521,28 +521,6 @@ export const DailyRounds = (props: any) => {
                     errors={state.errors.rounds_type}
                   />
                 </div>
-                <div className="mt-4">
-                  <InputLabel id="bed">Bed</InputLabel>
-                  <SelectField
-                    className="md:w-1/2"
-                    name="bed"
-                    variant="standard"
-                    margin="dense"
-                    options={[
-                      { id: "", name: "Select Bed" },
-                      ...beds.map((bed: any) => {
-                        return {
-                          id: bed.id,
-                          name: `${bed.name} - ${bed.bed_type}`,
-                        };
-                      }),
-                    ]}
-                    optionValue="name"
-                    value={state.form.bed}
-                    onChange={handleChange}
-                    errors={state.errors.bed}
-                  />
-                </div>
               </div>
               {!id && (
                 <div id="clone_last-div" className="mt-4">
@@ -702,6 +680,28 @@ export const DailyRounds = (props: any) => {
                         onChange={handleChange}
                       />
                       <ErrorHelperText error={state.errors.action} />
+                    </div>
+                    <div className="">
+                      <InputLabel id="bed">Bed</InputLabel>
+                      <SelectField
+                        className="md:w-1/2"
+                        name="bed"
+                        variant="standard"
+                        margin="dense"
+                        options={[
+                          { id: "", name: "Select Bed" },
+                          ...beds.map((bed: any) => {
+                            return {
+                              id: bed.id,
+                              name: `${bed.name} - ${bed.bed_type}`,
+                            };
+                          }),
+                        ]}
+                        optionValue="name"
+                        value={state.form.bed}
+                        onChange={handleChange}
+                        errors={state.errors.bed}
+                      />
                     </div>
                   </div>
                   <div className="md:grid gap-4 grid-cols-1 md:grid-cols-2">
