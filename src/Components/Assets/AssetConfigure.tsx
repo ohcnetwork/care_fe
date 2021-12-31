@@ -105,27 +105,39 @@ const AssetConfigure = (props: AssetConfigureProps) => {
 
   const addPreset = async (e: React.SyntheticEvent) => {
     e.preventDefault();
+    const config = getCameraConfig(asset as AssetData);
     const data = {
-      bed: bed.id,
-      preset: newPreset,
+      bed_id: bed.id,
+      preset_name: newPreset,
     };
-    let presetData = await axios.post(
-      `https://${asset?.meta?.middleware_hostname}/getStatus`,
-      data
-    );
-    console.log(presetData);
-    // let res: any = await Promise.resolve(
-    //   dispatch(createAssetBed({ meta: presetData }, assetId, bed?.id as string))
-    // );
-    // if (res?.status === 200) {
-    //   Notification.Success({
-    //     msg: "Preset Added Successfully",
-    //   });
-    // } else {
-    //   Notification.Error({
-    //     msg: "Something went wrong..!",
-    //   });
-    // }
+    try {
+      let presetData = await axios.get(
+        `https://${asset?.meta?.middleware_hostname}/status?hostname=${config.hostname}&port=${config.port}&username=${config.username}&password=${config.password}`
+      );
+      console.log(presetData);
+      let res: any = await Promise.resolve(
+        dispatch(
+          createAssetBed(
+            { meta: { ...data, ...presetData } },
+            assetId,
+            bed?.id as string
+          )
+        )
+      );
+      if (res?.status === 201) {
+        Notification.Success({
+          msg: "Preset Added Successfully",
+        });
+      } else {
+        Notification.Error({
+          msg: "Something went wrong..!",
+        });
+      }
+    } catch (e) {
+      Notification.Error({
+        msg: "Something went wrong..!",
+      });
+    }
   };
 
   if (isLoading) return <Loading />;
