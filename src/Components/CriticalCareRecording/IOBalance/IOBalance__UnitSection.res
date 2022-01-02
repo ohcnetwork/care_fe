@@ -49,6 +49,20 @@ let showUnit = (name, item, params, index, send) => {
         selectables=params
       />
     </div>
+    {if name === "Infusions" {
+      <div className="rounded-md shadow-sm w-2/12">
+        <IOBalance__UnitPicker
+          id={"concentration" ++ index->string_of_int}
+          value={""}
+          updateCB={concentration =>
+            UpdateValueWithConcentration(IOBalance.quantity(item), concentration, index)->send}
+          placeholder={"Convert from"}
+          selectables=concentrations
+        />
+      </div>
+    } else {
+      <div />
+    }}
     <div className="m-1 rounded-md shadow-sm w-1/6">
       <input
         id={"value" ++ index->string_of_int}
@@ -61,20 +75,6 @@ let showUnit = (name, item, params, index, send) => {
         required=true
       />
     </div>
-    {if name === "Infusions" {
-      <div className="rounded-md shadow-sm w-2/12">
-        <IOBalance__UnitPicker
-          id={"concentration" ++ index->string_of_int}
-          value={""}
-          updateCB={concentration =>
-            UpdateValueWithConcentration(IOBalance.quantity(item), concentration, index)->send}
-          placeholder={"Convert to"}
-          selectables=concentrations
-        />
-      </div>
-    } else {
-      <div />
-    }}
   </div>
 }
 
@@ -97,10 +97,19 @@ let make = (~name, ~items, ~collection, ~updateCB) => {
         </label>
       </div>
       <div className="m-1 rounded-md shadow-sm w-2/12">
-        <label
-          htmlFor="Value" className="block text-sm font-medium leading-5 text-gray-700 text-center">
-          {"Value"->str}
-        </label>
+        {if name === "Infusions" {
+          <label
+            htmlFor="Value"
+            className="block text-sm font-medium leading-5 text-gray-700 text-center">
+            {"Value in mg"->str}
+          </label>
+        } else {
+          <label
+            htmlFor="Value"
+            className="block text-sm font-medium leading-5 text-gray-700 text-center">
+            {"Value"->str}
+          </label>
+        }}
       </div>
     </div>
     {Js.Array.mapi(
