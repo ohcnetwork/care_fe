@@ -120,6 +120,47 @@ export const partialUpdateFacilityAssetLocation = (
     external_id,
   });
 
+// asset bed
+export const listAssetBeds = (params: object) =>
+  fireRequest("listFacilityBeds", [], params, {});
+export const createAssetBed = (
+  params: object,
+  asset_id: string,
+  bed_id: string
+) =>
+  fireRequest(
+    "createAssetBed",
+    [],
+    { ...params, asset: asset_id, bed: bed_id },
+    {}
+  );
+
+export const getAssetBed = (
+  asset_external_id: string,
+  bed_id: string,
+  external_id: string
+) =>
+  fireRequest(
+    "getAssetBed",
+    [],
+    { asset: asset_external_id, bed: bed_id },
+    { external_id }
+  );
+export const updateAssetBed = (
+  params: object,
+  asset_external_id: string,
+  external_id: string,
+  bed_id: string
+) =>
+  fireRequest(
+    "updateAssetBed",
+    [],
+    { ...params, asset: asset_external_id, bed: bed_id },
+    {
+      external_id,
+    }
+  );
+
 // Facility Beds
 export const listFacilityBeds = (params: object) =>
   fireRequest("listFacilityBeds", [], params, {});

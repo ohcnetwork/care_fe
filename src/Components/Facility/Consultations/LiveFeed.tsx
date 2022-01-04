@@ -6,6 +6,8 @@ import loadable from "@loadable/component";
 const PageTitle = loadable(() => import("../../Common/PageTitle"));
 
 const LiveFeed = (props: any) => {
+  const middleWareHost =
+    props.middleWareHost || "dev_middleware.coronasafe.live";
   const [asset, setAsset] = useState<any>(
     props.asset ?? {
       hostname: "192.168.1.64",
@@ -30,11 +32,11 @@ const LiveFeed = (props: any) => {
   }, [loading]);
   const requestStream = () => {
     axios
-      .post(`https://dev_middleware.coronasafe.live/start`, {
+      .post(`https://${middleWareHost}/start`, {
         uri: "rtsp://remote:qwerty123@192.168.1.64:554/",
       })
       .then((resp: any) => {
-        setSourceUrl(`https://dev_middleware.coronasafe.live${resp.data.uri}`);
+        setSourceUrl(`https://${middleWareHost}${resp.data.uri}`);
       })
       .catch((ex: any) => {
         // console.error('Error while refreshing',ex);
@@ -47,12 +49,12 @@ const LiveFeed = (props: any) => {
       const x = urlSegments.pop();
       const id = urlSegments?.pop();
       axios
-        .post(`https://dev_middleware.coronasafe.live/stop`, {
+        .post(`https://${middleWareHost}/stop`, {
           id,
         })
         .then((resp: any) => {
           console.log(resp);
-          // setSourceUrl(`https://dev_middleware.coronasafe.live${resp.data.uri}`);
+          // setSourceUrl(`https://${middleWareHost}${resp.data.uri}`);
         })
         .catch((ex: any) => {
           // console.error('Error while refreshing',ex);
@@ -62,7 +64,7 @@ const LiveFeed = (props: any) => {
   const getCameraStatus = (asset: any) => {
     axios
       .get(
-        `https://dev_middleware.coronasafe.live/status?hostname=${asset.hostname}&port=${asset.port}&username=${asset.username}&password=${asset.password}`
+        `https://${middleWareHost}/status?hostname=${asset.hostname}&port=${asset.port}&username=${asset.username}&password=${asset.password}`
       )
       .then((resp: any) => {
         setPosition(resp.data.position);
@@ -74,10 +76,11 @@ const LiveFeed = (props: any) => {
   const getPresets = (asset: any) => {
     axios
       .get(
-        `https://dev_middleware.coronasafe.live/presets?hostname=${asset.hostname}&port=${asset.port}&username=${asset.username}&password=${asset.password}`
+        `https://${middleWareHost}/presets?hostname=${asset.hostname}&port=${asset.port}&username=${asset.username}&password=${asset.password}`
       )
       .then((resp: any) => {
         setPresets(resp.data);
+        console.log(resp.data);
       })
       .catch((ex: any) => {
         // console.error('Error while refreshing',ex);
@@ -85,7 +88,7 @@ const LiveFeed = (props: any) => {
   };
   const gotoPreset = (preset: number) => {
     axios
-      .post(`https://dev_middleware.coronasafe.live/gotoPreset`, {
+      .post(`https://${middleWareHost}/gotoPreset`, {
         ...asset,
         preset,
       })
@@ -139,7 +142,7 @@ const LiveFeed = (props: any) => {
           break;
       }
       axios
-        .post(`https://dev_middleware.coronasafe.live/relativeMove`, {
+        .post(`https://${middleWareHost}/relativeMove`, {
           ...data,
           ...asset,
         })
