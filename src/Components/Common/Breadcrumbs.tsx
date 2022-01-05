@@ -1,4 +1,4 @@
-import { navigate, usePath } from "raviger";
+import { usePath, Link } from "raviger";
 import { useState } from "react";
 
 const MENU_TAGS: { [key: string]: string } = {
@@ -52,7 +52,7 @@ export default function Breadcrumbs(props: any) {
         <ol className="flex items-center space-x-1">
           <li>
             <div>
-              <a href="/" className="text-gray-500 hover:text-gray-700">
+              <Link href="/" className="text-gray-500 hover:text-gray-700">
                 <svg
                   className="flex-shrink-0 h-5 w-5"
                   x-description="Heroicon name: solid/home"
@@ -64,7 +64,7 @@ export default function Breadcrumbs(props: any) {
                   <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path>
                 </svg>
                 <span className="sr-only">Home</span>
-              </a>
+              </Link>
             </div>
           </li>
           {!showFullPath && crumbs.length > 2 && (
@@ -128,7 +128,10 @@ export default function Breadcrumbs(props: any) {
                     >
                       <path d="M5.555 17.776l8-16 .894.448-8 16-.894-.448z"></path>
                     </svg>
-                    <div onClick={() => navigate(crumb.uri)} className="ml-1">
+                    <Link
+                      href={crumb.uri}
+                      className="ml-1 block text-gray-500 hover:text-gray-700"
+                    >
                       {crumb.name.match(/^\w{8}-(\w{4}-){3}\w{12}$/) ? (
                         <div>
                           <i className="fas fa-hashtag fa-lg mr-1" />
@@ -139,7 +142,7 @@ export default function Breadcrumbs(props: any) {
                           <span>{crumb.name}</span>
                         </div>
                       )}
-                    </div>
+                    </Link>
                   </div>
                 </li>
               )
