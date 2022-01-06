@@ -1268,7 +1268,7 @@ export const PatientHome = (props: any) => {
                 <div className="mt-1 text-sm leading-5 text-gray-900">
                   {patientData.estimated_contact_date
                     ? moment(patientData.estimated_contact_date).format("LL")
-                    : ""}
+                    : "-"}
                 </div>
               </div>
               <div className="sm:col-span-1">
@@ -1276,7 +1276,7 @@ export const PatientHome = (props: any) => {
                   Contact Name / Cluster
                 </div>
                 <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {patientData.cluster_name}
+                  {patientData.cluster_name || "-"}
                 </div>
               </div>
               <div className="sm:col-span-1">
