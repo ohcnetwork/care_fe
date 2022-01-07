@@ -125,7 +125,6 @@ export const ConsultationDetails = (props: any) => {
           }
         }
         if (dailyRounds?.data?.results?.length) {
-          console.log("vbefore fetch");
           const bedAssets = await dispatch(
             listAssetBeds({ bed: dailyRounds.data.results[0].bed })
           );
