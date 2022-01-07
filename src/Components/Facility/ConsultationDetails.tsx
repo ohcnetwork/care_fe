@@ -52,6 +52,7 @@ export const ConsultationDetails = (props: any) => {
   const [patientData, setPatientData] = useState<PatientModel>({});
   const [cameraAsset, setCameraAsset] = useState({});
   const [cameraMiddlewareHostname, setCameraMiddlewareHostname] = useState({});
+  const [cameraConfig, setCameraConfig] = useState({});
 
   const getPatientGender = (patientData: any) =>
     GENDER_TYPES.find((i) => i.id === patientData.gender)?.text;
@@ -138,6 +139,7 @@ export const ConsultationDetails = (props: any) => {
               port: 80,
             });
             setCameraMiddlewareHostname(middleware_hostname);
+            setCameraConfig(bedAssets.data.results[0].meta);
           }
         }
 
@@ -594,6 +596,7 @@ export const ConsultationDetails = (props: any) => {
             <LiveFeed
               asset={cameraAsset}
               middleWareHost={cameraMiddlewareHostname}
+              config={cameraConfig}
             />
           )}
           {tab === "SUMMARY" && (
