@@ -3,7 +3,12 @@ import moment from "moment";
 import { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getConsultation, getPatient } from "../../Redux/actions";
+import {
+  getConsultation,
+  getDailyReport,
+  getPatient,
+  listAssetBeds,
+} from "../../Redux/actions";
 import loadable from "@loadable/component";
 import { ConsultationModel } from "./models";
 import { PatientModel } from "../Patient/models";
@@ -45,6 +50,8 @@ export const ConsultationDetails = (props: any) => {
     {}
   );
   const [patientData, setPatientData] = useState<PatientModel>({});
+  const [cameraAsset, setCameraAsset] = useState({});
+  const [cameraMiddlewareHostname, setCameraMiddlewareHostname] = useState({});
 
   const getPatientGender = (patientData: any) =>
     GENDER_TYPES.find((i) => i.id === patientData.gender)?.text;
@@ -68,7 +75,10 @@ export const ConsultationDetails = (props: any) => {
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const res = await dispatch(getConsultation(consultationId));
+      const [res, dailyRounds] = await Promise.all([
+        dispatch(getConsultation(consultationId)),
+        dispatch(getDailyReport({ limit: 1, offset: 0 }, { consultationId })),
+      ]);
       if (!status.aborted) {
         if (res && res.data) {
           const data: ConsultationModel = {
@@ -113,6 +123,24 @@ export const ConsultationDetails = (props: any) => {
             setPatientData(data);
           }
         }
+        if (dailyRounds?.data?.results?.length) {
+          console.log("vbefore fetch");
+          const bedAssets = await dispatch(
+            listAssetBeds({ bed: dailyRounds.data.results[0].bed })
+          );
+          if (bedAssets?.data?.results?.length) {
+            const { camera_address, camera_access_key, middleware_hostname } =
+              bedAssets.data.results[0].asset_object.meta;
+            setCameraAsset({
+              hostname: camera_address,
+              username: camera_access_key.split(":")[0],
+              password: camera_access_key.split(":")[1],
+              port: 80,
+            });
+            setCameraMiddlewareHostname(middleware_hostname);
+          }
+        }
+
         setIsLoading(false);
       }
     },
@@ -562,7 +590,12 @@ export const ConsultationDetails = (props: any) => {
               </div>
             </div>
           )}
-          {tab === "FEED" && <LiveFeed />}
+          {tab === "FEED" && (
+            <LiveFeed
+              asset={cameraAsset}
+              middleWareHost={cameraMiddlewareHostname}
+            />
+          )}
           {tab === "SUMMARY" && (
             <div className="mt-4">
               <PageTitle
