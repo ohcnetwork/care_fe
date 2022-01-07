@@ -122,7 +122,7 @@ export const partialUpdateFacilityAssetLocation = (
 
 // asset bed
 export const listAssetBeds = (params: object) =>
-  fireRequest("listFacilityBeds", [], params, {});
+  fireRequest("listAssetBeds", [], params, {});
 export const createAssetBed = (
   params: object,
   asset_id: string,
