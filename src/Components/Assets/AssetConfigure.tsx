@@ -118,7 +118,7 @@ const AssetConfigure = (props: AssetConfigureProps) => {
       let res: any = await Promise.resolve(
         dispatch(
           createAssetBed(
-            { meta: { ...data, ...presetData } },
+            { meta: { ...data, ...presetData.data } },
             assetId,
             bed?.id as string
           )
