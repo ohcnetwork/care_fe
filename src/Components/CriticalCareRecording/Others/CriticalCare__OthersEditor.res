@@ -94,6 +94,18 @@ let getStatus = (min, minText, max, maxText, val) => {
   }
 }
 
+let getPainStatus = val => {
+  if val == 0.0 {
+    ("No Pain", "#059669")
+  } else if val < 4.0 {
+    ("Minute", "#ff3f00")
+  } else if val < 8.0 {
+    ("Moderate", "#ff002c")
+  } else {
+    ("Severe", "#de000c")
+  }
+}
+
 @react.component
 let make = (~others, ~updateCB, ~id, ~consultationId) => {
   let (state, send) = React.useReducer(reducer, initialState(others))
@@ -144,7 +156,7 @@ let make = (~others, ~updateCB, ~id, ~consultationId) => {
         step={1.0}
         value={string_of_int(state.etco2)}
         setValue={s => send(SetETCO2(int_of_string(s)))}
-        getLabel={getStatus(35.0, "Low", 45.0, "High")}
+        getLabel={val => getPainStatus(val)}
         hasError={isInvalidInputInt(0, 200, state.etco2)}
       />
     </div>
