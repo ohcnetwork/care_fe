@@ -1021,13 +1021,27 @@ export const ConsultationForm = (props: any) => {
                     errors={state.errors.height}
                   />
                 </div>
+                <div id="body_surface-div" className="flex-1 align-center p-5">
+                  Body Surface area :{" "}
+                  {Math.sqrt(
+                    (Number(state.form.weight) * Number(state.form.height)) /
+                      3600
+                  ).toFixed(2)}{" "}
+                  m<sup>2</sup>
+                </div>
               </div>
-              <div id="body_surface-div" className="flex-1">
-                Body Surface area :{" "}
-                {Math.sqrt(
-                  (Number(state.form.weight) * Number(state.form.height)) / 3600
-                ).toFixed(2)}{" "}
-                m<sup>2</sup>
+
+              <div id="hba1c-div" className="flex-1 w-1/2">
+                <InputLabel id="refered-label">HBA1C parameter</InputLabel>
+                <TextInputField
+                  name="hba1c"
+                  variant="outlined"
+                  margin="dense"
+                  type="number"
+                  value={state.form.weight}
+                  onChange={handleChange}
+                  errors={state.errors.weight}
+                />
               </div>
               {/* End of Telemedicine fields */}
               <div className="mt-4 flex justify-between">
