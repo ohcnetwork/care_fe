@@ -1001,7 +1001,7 @@ export const ConsultationForm = (props: any) => {
                     name="weight"
                     variant="outlined"
                     margin="dense"
-                    type="string"
+                    type="number"
                     InputLabelProps={{ shrink: !!state.form.weight }}
                     value={state.form.weight}
                     onChange={handleChange}
@@ -1014,7 +1014,7 @@ export const ConsultationForm = (props: any) => {
                     name="height"
                     variant="outlined"
                     margin="dense"
-                    type="string"
+                    type="number"
                     InputLabelProps={{ shrink: !!state.form.height }}
                     value={state.form.height}
                     onChange={handleChange}
