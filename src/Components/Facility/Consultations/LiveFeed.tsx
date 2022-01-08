@@ -156,12 +156,30 @@ const LiveFeed = (props: any) => {
     }
   };
 
+  const absoluteMove = (data: any) => {
+    setLoading(true);
+    axios
+      .post(`https://${middleWareHost}/absoluteMove`, {
+        ...data,
+        ...asset,
+      })
+      .then((resp: any) => {
+        getCameraStatus(asset);
+      })
+      .catch((ex: any) => {
+        console.error("Error while absolute move", ex);
+      });
+  };
+
   useEffect(() => {
     requestStream();
   }, []);
 
   useEffect(() => {
     getPresets(asset);
+    if (props.config?.position) {
+      absoluteMove(props.config.position);
+    }
   }, [asset]);
   const liveFeedPlayerRef = useRef<any>(null);
   const handleClickFullscreen = () => {
