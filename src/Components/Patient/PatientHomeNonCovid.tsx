@@ -93,7 +93,7 @@ interface preDischargeFormInterface {
   date_of_test: any;
 }
 
-export const PatientHome = (props: any) => {
+export const PatientHomeNonCovid = (props: any) => {
   const { facilityId, id } = props;
   const classes = useStyles();
   const dispatch: any = useDispatch();
@@ -813,6 +813,9 @@ export const PatientHome = (props: any) => {
                   <Badge color="yellow" icon="unlock" text="Transfer Allowed" />
                 ) : (
                   <Badge color="primary" icon="lock" text="Transfer Blocked" />
+                )}
+                {patientData.allergies && (
+                  <Badge color="red" icon="allergies" text="Has Allergies" />
                 )}
                 {patientData.is_antenatal && patientData.is_active && (
                   <Badge color="blue" icon="baby-carriage" text="Antenatal" />
