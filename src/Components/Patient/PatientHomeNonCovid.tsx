@@ -684,13 +684,17 @@ export const PatientHomeNonCovid = (props: any) => {
                 <i className="fas fa-hospital mr-2"></i>
                 {patientData.facility_object?.name || "-"}
               </h3>
-              <div className="grid grid-cols-1 gap-x-4 gap-y-2 md:gap-y-8 sm:grid-cols-3 mt-2">
+              <div className="grid grid-cols-1 gap-x-4 gap-y-2 md:gap-y-4 sm:grid-cols-3 mt-2">
                 <div className="sm:col-span-1">
                   <div className="text-sm leading-5 font-medium text-gray-500">
-                    Gender, Date of Birth
+                    Address
                   </div>
                   <div className="mt-1 text-sm leading-5 text-gray-900">
-                    {patientData?.date_of_birth}, {patientGender}
+                    {patientData.address}, {patientData.village}
+                  </div>
+                  <div className="mt-1 text-sm leading-5 text-gray-900">
+                    {patientData?.district_object?.name},{" "}
+                    {patientData?.state_object?.name} - {patientData.pincode}
                   </div>
                 </div>
                 <div className="sm:col-span-1">
@@ -733,6 +737,14 @@ export const PatientHomeNonCovid = (props: any) => {
                         <i className="fab fa-whatsapp"></i> Chat on WhatsApp
                       </a>
                     </div>
+                  </div>
+                </div>
+                <div className="sm:col-span-1">
+                  <div className="text-sm leading-5 font-medium text-gray-500">
+                    Gender, Date of Birth
+                  </div>
+                  <div className="mt-1 text-sm leading-5 text-gray-900">
+                    {patientData?.date_of_birth}, {patientGender}
                   </div>
                 </div>
                 <div className="sm:col-span-1">
