@@ -51,6 +51,7 @@ import Modal from "@material-ui/core/Modal";
 import FormControl from "@material-ui/core/FormControl";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
+import { PatientHome } from "./PatientHome";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -635,7 +636,9 @@ export const PatientHomeNonCovid = (props: any) => {
     ));
   }
 
-  return (
+  return patientData?.disease_status === "POSITIVE" ? (
+    <PatientHome facilityId={facilityId} id={id} />
+  ) : (
     <div className="px-2 pb-2">
       {showAlertMessage.show && (
         <AlertDialog

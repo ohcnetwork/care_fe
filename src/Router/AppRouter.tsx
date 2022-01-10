@@ -12,7 +12,6 @@ import { TriageForm } from "../Components/Facility/TriageForm";
 import { DailyRounds } from "../Components/Patient/DailyRounds";
 import { PatientManager } from "../Components/Patient/ManagePatients";
 import PatientNotes from "../Components/Patient/PatientNotes";
-import { PatientHome } from "../Components/Patient/PatientHome";
 import { PatientHomeNonCovid } from "../Components/Patient/PatientHomeNonCovid";
 import { PatientRegister } from "../Components/Patient/PatientRegister";
 import { SampleDetails } from "../Components/Patient/SampleDetails";
