@@ -215,8 +215,8 @@ export const DailyRoundsList = (props: any) => {
             breadcrumbs={false}
           />
         </div>
-        <div className="flex flex-wrap overflow-y-auto min:h-screen">
-          {roundsList}
+        <div className="flex flex-wrap">
+          <div className="overflow-y-auto max-h-96">{roundsList}</div>
           {!isDailyRoundLoading && totalCount > limit && (
             <div className="mt-4 flex w-full justify-center">
               <Pagination
