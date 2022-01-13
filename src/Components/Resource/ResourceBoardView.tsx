@@ -85,57 +85,60 @@ export default function BoardView() {
   return (
     <div className="flex flex-col h-screen px-2 pb-2">
       <div className="flex items-end justify-between px-4">
-        <PageTitle
-          title={"Resource"}
-          hideBack={true}
-          componentRight={
-            <GetAppIcon
-              className="cursor-pointer mt-2 ml-2"
-              onClick={triggerDownload}
-            />
-          }
-          breadcrumbs={false}
-        />
-
-        <div className="bg-gray-200 text-sm text-gray-500 leading-none border-2 border-gray-200 rounded-full inline-flex w-32">
-          <button
-            className={
-              "flex leading-none border-2 border-gray-200 rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-blue-400 focus:text-blue-400 rounded-r-full px-4 py-2" +
-              (boardFilter === ACTIVE
-                ? " bg-white text-gray-800"
-                : " bg-gray-200 text-sm text-gray-500")
+        <div className="md:w-1/3">
+          <PageTitle
+            title={"Resource"}
+            hideBack={true}
+            componentRight={
+              <GetAppIcon
+                className="cursor-pointer mt-2 ml-2"
+                onClick={triggerDownload}
+              />
             }
-            onClick={(_) => setBoardFilter(ACTIVE)}
-          >
-            <span>Active</span>
-          </button>
-          <button
-            className={
-              "flex leading-none border-2 border-gray-200 rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-blue-400 focus:text-blue-400 rounded-r-full px-4 py-2" +
-              (boardFilter === COMPLETED
-                ? " bg-white text-gray-800"
-                : " bg-gray-200 text-sm text-gray-500")
-            }
-            onClick={(_) => setBoardFilter(COMPLETED)}
-          >
-            <span>Completed</span>
-          </button>
+            breadcrumbs={false}
+          />
         </div>
-        <button
-          className="px-4 py-2 rounded-full border-2 border-gray-200 text-sm bg-white text-gray-800 w-32 leading-none transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 hover:border-gray-400 focus:text-primary-600 focus:border-gray-400"
-          onClick={onListViewBtnClick}
-        >
-          <i className="fa fa-list-ul mr-1" aria-hidden="true"></i>
-          List View
-        </button>
-        <div className="flex items-start gap-2">
+        <div className="flex items-end  md:items-center justify-between md:w-2/3 flex-col md:flex-row">
+          <div className="bg-gray-200 text-sm text-gray-500 leading-none border-2 border-gray-200 rounded-full inline-flex">
+            <button
+              className={
+                "flex leading-none border-2 border-gray-200 rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-blue-400 focus:text-blue-400 rounded-r-full px-4 py-2" +
+                (boardFilter === ACTIVE
+                  ? " bg-white text-gray-800"
+                  : " bg-gray-200 text-sm text-gray-500")
+              }
+              onClick={(_) => setBoardFilter(ACTIVE)}
+            >
+              <span>Active</span>
+            </button>
+            <button
+              className={
+                "flex leading-none border-2 border-gray-200 rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-blue-400 focus:text-blue-400 rounded-r-full px-4 py-2" +
+                (boardFilter === COMPLETED
+                  ? " bg-white text-gray-800"
+                  : " bg-gray-200 text-sm text-gray-500")
+              }
+              onClick={(_) => setBoardFilter(COMPLETED)}
+            >
+              <span>Completed</span>
+            </button>
+          </div>
           <button
-            className="flex leading-none border-2 border-gray-200 bg-white rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 focus:text-primary-600 focus:border-gray-400 hover:border-gray-400 rounded-r-full px-4 py-2 text-sm"
-            onClick={(_) => setShowFilters((show) => !show)}
+            className="px-4 py-2 rounded-full border-2 border-gray-200 text-sm bg-white text-gray-800 w-32 leading-none transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 hover:border-gray-400 focus:text-primary-600 focus:border-gray-400"
+            onClick={onListViewBtnClick}
           >
-            <i className="fa fa-filter mr-1" aria-hidden="true"></i>
-            <span>Filters</span>
+            <i className="fa fa-list-ul mr-1" aria-hidden="true"></i>
+            List View
           </button>
+          <div className="flex items-start gap-2">
+            <button
+              className="flex leading-none border-2 border-gray-200 bg-white rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 focus:text-primary-600 focus:border-gray-400 hover:border-gray-400 rounded-r-full px-4 py-2 text-sm"
+              onClick={(_) => setShowFilters((show) => !show)}
+            >
+              <i className="fa fa-filter mr-1" aria-hidden="true"></i>
+              <span>Filters</span>
+            </button>
+          </div>
         </div>
       </div>
 
