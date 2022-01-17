@@ -1,8 +1,11 @@
 import axios from "axios";
 import React, { useEffect, useState, useRef } from "react";
+import { useDispatch } from "react-redux";
 import ReactPlayer from "react-player";
 import screenfull from "screenfull";
 import loadable from "@loadable/component";
+import { listAssetBeds } from "../../../Redux/actions";
+import RefreshIcon from "@material-ui/icons/Refresh";
 const PageTitle = loadable(() => import("../../Common/PageTitle"));
 
 const LiveFeed = (props: any) => {
@@ -10,6 +13,7 @@ const LiveFeed = (props: any) => {
     props.middleWareHost || "dev_middleware.coronasafe.live";
   const [asset, setAsset] = useState<any>(
     props.asset ?? {
+      id: "",
       hostname: "192.168.1.64",
       port: "80",
       username: "onvif_user",
@@ -19,7 +23,10 @@ const LiveFeed = (props: any) => {
   const [sourceUrl, setSourceUrl] = useState<string>();
   const [position, setPosition] = useState<any>();
   const [presets, setPresets] = useState<any>([]);
+  const [bedPresets, setBedPresets] = useState<any>([]);
+
   const [loading, setLoading] = useState<boolean>(false);
+  const dispatch: any = useDispatch();
   useEffect(() => {
     let loadingTimeout: any;
     if (loading === true)
@@ -80,11 +87,18 @@ const LiveFeed = (props: any) => {
       )
       .then((resp: any) => {
         setPresets(resp.data);
-        console.log(resp.data);
+        console.log("PRESETS", resp.data);
       })
       .catch((ex: any) => {
         // console.error('Error while refreshing',ex);
       });
+  };
+  const getBedPresets = async (asset: any) => {
+    const bedAssets = await dispatch(listAssetBeds({ asset: asset.id }));
+    setBedPresets(bedAssets.data.results);
+  };
+  const gotoBedPreset = (preset: any) => {
+    absoluteMove(preset.meta.position);
   };
   const gotoPreset = (preset: number) => {
     axios
@@ -181,6 +195,11 @@ const LiveFeed = (props: any) => {
       absoluteMove(props.config.position);
     }
   }, [asset]);
+
+  // useEffect(() => {
+  //   getBedPresets(asset);
+  // }, []);
+
   const liveFeedPlayerRef = useRef<any>(null);
   const handleClickFullscreen = () => {
     if (screenfull.isEnabled) {
@@ -315,7 +334,7 @@ const LiveFeed = (props: any) => {
           )}
 
           <div className="grid grid-cols-2 md:ml-12 md:w-1/3 my-auto gap-4 mt-4 md:mt-0">
-            {viewOptions.map((option: any) => (
+            {/* {viewOptions.map((option: any) => (
               <div
                 onClick={() => {
                   setLoading(true);
@@ -326,7 +345,29 @@ const LiveFeed = (props: any) => {
                   {option.label}
                 </button>
               </div>
+            ))} */}
+            {bedPresets.map((preset: any, index: number) => (
+              <div
+                onClick={() => {
+                  setLoading(true);
+                  gotoBedPreset(preset);
+                }}
+              >
+                <button className="bg-green-100 border border-white rounded-md px-3 py-2 text-black font-semibold hover:bg-green-200 w-full">
+                  {preset.name ? preset.name : `Unnamed Preset ${index + 1}`}
+                </button>
+              </div>
             ))}
+            <div
+              onClick={() => {
+                setLoading(true);
+                getBedPresets(asset);
+              }}
+            >
+              <button className="bg-green-100 border border-white rounded-md px-3 py-2 text-black font-semibold hover:bg-green-200 w-full">
+                <RefreshIcon /> Refresh
+              </button>
+            </div>
           </div>
         </div>
       </div>
