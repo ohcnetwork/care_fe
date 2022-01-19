@@ -9,6 +9,10 @@ on:
   workflow_dispatch:
 env:
   IMAGE_NAME: care_fe
+  AWS_DEFAULT_REGION: ap-south-1
+  AWS_DEFAULT_OUTPUT: json
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID}}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -112,15 +116,18 @@ jobs:
           token: ${{ secrets.CORONASAFE_GITHUB_PAT }}
           path: kube
           ref: main
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1
+
       - name: Deploy Care Staging
         run: |
           mkdir -p $HOME/.kube/
           echo "${{ secrets.CARE_STAGING_KUBECONFIG }}" | base64 -d > $HOME/.kube/config
           cd kube/staging/care_fe
-          aws configure set aws_access_key_id ${AWS_ACCESS_KEY_ID}
-          aws configure set aws_secret_access_key ${AWS_SECRET_ACCESS_KEY}
-          aws configure set region ${AWS_DEFAULT_REGION}
-          aws configure set output json
           sed -i -e "s/_BUILD_NUMBER_/${GITHUB_RUN_NUMBER}/g" deployment.yaml
           kubectl apply -f deployment.yaml
 
@@ -211,6 +218,12 @@ jobs:
           token: ${{ secrets.CORONASAFE_GITHUB_PAT }}
           path: kube
           ref: main
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1
       - name: Deploy Care Production
         run: |
           mkdir -p $HOME/.kube/
