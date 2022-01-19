@@ -128,8 +128,8 @@ jobs:
           mkdir -p $HOME/.kube/
           echo "${{ secrets.CARE_STAGING_KUBECONFIG }}" | base64 -d > $HOME/.kube/config
           cd kube/staging/care_fe
-          sed -i -e "s/_BUILD_NUMBER_/${GITHUB_RUN_NUMBER}/g" deployment.yaml
-          kubectl apply -f deployment.yaml
+          sed -i -e "s/_BUILD_NUMBER_/${GITHUB_RUN_NUMBER}/g" deployment.yml
+          kubectl apply -f deployment.yml
 
   build-dockerhub-production:
     needs: test
@@ -233,5 +233,5 @@ jobs:
           aws configure set aws_secret_access_key ${AWS_SECRET_ACCESS_KEY}
           aws configure set region ${AWS_DEFAULT_REGION}
           aws configure set output json
-          sed -i -e "s/_BUILD_NUMBER_/${GITHUB_RUN_NUMBER}/g" deployment.yaml
-          kubectl apply -f deployment.yaml
+          sed -i -e "s/_BUILD_NUMBER_/${GITHUB_RUN_NUMBER}/g" deployment.yml
+          kubectl apply -f deployment.yml
