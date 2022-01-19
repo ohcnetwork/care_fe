@@ -50,18 +50,18 @@ jobs:
       - name: Build and Push
         uses: docker/build-push-action@v2
         env:
-          IMAGE_NAME: ${{ env.IMAGE_NAME }}
+          IMAGE_NAME: care_fe
         with:
           context: ./
           file: ./Dockerfile
           builder: ${{ steps.buildx.outputs.name }}
           push: true
           tags: | 
-              ${{ secrets.DOCKER_HUB_USERNAME }}/$IMAGE_NAME:latest
-              ${{ secrets.DOCKER_HUB_USERNAME }}/$IMAGE_NAME:$GITHUB_RUN_NUMBER$NOW$SHORT_SHA
-              ${{ secrets.DOCKER_HUB_USERNAME }}/$IMAGE_NAME:$GITHUB_RUN_NUMBER
-          cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/$IMAGE_NAME:buildcache
-          cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/$IMAGE_NAME:buildcache,mode=max
+              ${{ secrets.DOCKER_HUB_USERNAME }}/care_fe:latest
+              ${{ secrets.DOCKER_HUB_USERNAME }}/care_fe:$GITHUB_RUN_NUMBER$NOW$SHORT_SHA
+              ${{ secrets.DOCKER_HUB_USERNAME }}/care_fe:$GITHUB_RUN_NUMBER
+          cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/care_fe:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/care_fe:buildcache,mode=max
 
   build-github-staging:
     needs: test
@@ -151,11 +151,11 @@ jobs:
           builder: ${{ steps.buildx.outputs.name }}
           push: true
           tags: | 
-              ${{ secrets.DOCKER_HUB_USERNAME }}/${IMAGE_NAME}:production-latest
-              ${{ secrets.DOCKER_HUB_USERNAME }}/${IMAGE_NAME}:$GITHUB_RUN_NUMBER$NOW$SHORT_SHA
-              ${{ secrets.DOCKER_HUB_USERNAME }}/${IMAGE_NAME}:$GITHUB_RUN_NUMBER
-          cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/$IMAGE_NAME:buildcache
-          cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/$IMAGE_NAME:buildcache,mode=max
+              ${{ secrets.DOCKER_HUB_USERNAME }}/care_fe:production-latest
+              ${{ secrets.DOCKER_HUB_USERNAME }}/care_fe:$GITHUB_RUN_NUMBER$NOW$SHORT_SHA
+              ${{ secrets.DOCKER_HUB_USERNAME }}/care_fe:$GITHUB_RUN_NUMBER
+          cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/care_febuildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/care_fe:buildcache,mode=max
 
   build-github-production:
     needs: test
