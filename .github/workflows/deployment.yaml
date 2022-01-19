@@ -26,7 +26,7 @@ jobs:
           fi
 
   build-dockerhub-staging:
-#    needs: test
+    needs: test
     environment: Staging
     name: Build & Push to Dockerhub
     if: github.ref == 'refs/heads/develop'
@@ -59,7 +59,7 @@ jobs:
           echo IMAGE_ID=$IMAGE_ID
           echo VERSION=$VERSION
           docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
-          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION$NOW$SHORT_SHA
+          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION-$GITHUB_RUN_NUMBER-$NOW-$SHORT_SHA
           docker tag $IMAGE_NAME $IMAGE_ID:latest
           docker push $IMAGE_ID --all-tags
 
@@ -93,7 +93,7 @@ jobs:
           echo IMAGE_ID=$IMAGE_ID
           echo VERSION=$VERSION
           docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
-          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION$NOW$SHORT_SHA
+          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION-$GITHUB_RUN_NUMBER-$NOW-$SHORT_SHA
           docker tag $IMAGE_NAME $IMAGE_ID:latest
           docker push $IMAGE_ID --all-tags
 
@@ -141,21 +141,22 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
-      - name: Set up Docker Build
-        uses: docker/setup-buildx-action@v1
-      - name: Build and Push
-        uses: docker/build-push-action@v2
-        with:
-          context: ./
-          file: ./Dockerfile
-          builder: ${{ steps.buildx.outputs.name }}
-          push: true
-          tags: | 
-              ${{ secrets.DOCKER_HUB_USERNAME }}/care_fe:production-latest
-              ${{ secrets.DOCKER_HUB_USERNAME }}/care_fe:$GITHUB_RUN_NUMBER$NOW$SHORT_SHA
-              ${{ secrets.DOCKER_HUB_USERNAME }}/care_fe:$GITHUB_RUN_NUMBER
-          cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/care_febuildcache
-          cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/care_fe:buildcache,mode=max
+      - name: Build image
+        run: docker build . --file Dockerfile --tag $IMAGE_NAME
+
+      - name: Push image
+        run: |
+          IMAGE_ID=${{ secrets.DOCKER_HUB_USERNAME }}/$IMAGE_NAME
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+          [ "$VERSION" == "master" ] && VERSION=production-latest
+          echo IMAGE_ID=$IMAGE_ID
+          echo VERSION=$VERSION
+          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
+          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION-$GITHUB_RUN_NUMBER-$NOW-$SHORT_SHA
+          docker tag $IMAGE_NAME $IMAGE_ID:production-latest
+          docker push $IMAGE_ID --all-tags
 
   build-github-production:
     needs: test
@@ -187,7 +188,7 @@ jobs:
           echo IMAGE_ID=$IMAGE_ID
           echo VERSION=$VERSION
           docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
-          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION$NOW$SHORT_SHA
+          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION-$GITHUB_RUN_NUMBER-$NOW-$SHORT_SHA
           docker tag $IMAGE_NAME $IMAGE_ID:latest
           docker push $IMAGE_ID --all-tags
 
