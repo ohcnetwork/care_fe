@@ -96,7 +96,7 @@ jobs:
           docker push $IMAGE_ID --all-tags
 
   deploy-staging:
-    needs: build-dockerhub
+    needs: build-dockerhub-staging
     name: Deploy to EKS
     runs-on: ubuntu-latest
     environment:
@@ -190,7 +190,7 @@ jobs:
           docker push $IMAGE_ID --all-tags
 
   deploy-production:
-    needs: build-dockerhub
+    needs: build-dockerhub-production
     name: Deploy to EKS
     runs-on: ubuntu-latest
     environment:
