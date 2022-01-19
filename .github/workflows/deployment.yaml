@@ -26,7 +26,7 @@ jobs:
           fi
 
   build-dockerhub-staging:
-    needs: test
+#    needs: test
     environment: Staging
     name: Build & Push to Dockerhub
     if: github.ref == 'refs/heads/develop'
@@ -58,7 +58,7 @@ jobs:
           push: true
           tags: | 
               ${{ secrets.DOCKER_HUB_USERNAME }}/care_fe:latest
-              ${{ secrets.DOCKER_HUB_USERNAME }}/care_fe:$GITHUB_RUN_NUMBER$NOW$SHORT_SHA
+              ${{ secrets.DOCKER_HUB_USERNAME }}/care_fe:$GITHUB_RUN_NUMBER:$NOW:$SHORT_SHA
               ${{ secrets.DOCKER_HUB_USERNAME }}/care_fe:$GITHUB_RUN_NUMBER
           cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/care_fe:buildcache
           cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/care_fe:buildcache,mode=max
