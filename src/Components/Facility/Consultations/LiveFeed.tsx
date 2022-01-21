@@ -369,12 +369,12 @@ const LiveFeed = (props: any) => {
                 getBedPresets(asset);
               }}
             >
-              <button className="bg-green-200 border border-white rounded-md px-3 py-2 text-black font-semibold hover:bg-green-200 w-full">
+              <button className="bg-green-200 border border-white rounded-md px-3 py-2 text-black font-semibold hover:bg-green-300 w-full">
                 <RefreshIcon /> Refresh
               </button>
             </div>
             <button
-              className="bg-green-200 border border-white rounded-md px-3 py-2 text-black font-semibold hover:bg-green-200 w-full"
+              className="bg-green-200 border border-white rounded-md px-3 py-2 text-black font-semibold hover:bg-green-300 w-full"
               onClick={() => {
                 setShowDefaultPresets(!showDefaultPresets);
               }}
