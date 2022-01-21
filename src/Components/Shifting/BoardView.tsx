@@ -130,21 +130,23 @@ export default function BoardView() {
               <span>Completed</span>
             </button>
           </div>
-          <button
-            className="px-4 py-2 rounded-full border-2 border-gray-200 text-sm bg-white text-gray-800 w-32 leading-none transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 hover:border-gray-400 focus:text-primary-600 focus:border-gray-400 mt-1"
-            onClick={onListViewBtnClick}
-          >
-            <i className="fa fa-list-ul mr-1" aria-hidden="true"></i>
-            List View
-          </button>
-          <div className="flex items-start">
+          <div className="mt-1 w-full md:w-2/5 flex justify-evenly">
             <button
-              className="flex leading-none border-2 border-gray-200 bg-white rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 focus:text-primary-600 focus:border-gray-400 hover:border-gray-400 rounded-r-full px-4 py-2 mt-1 text-sm"
-              onClick={(_) => setShowFilters((show) => !show)}
+              className="px-4 py-2 rounded-full border-2 border-gray-200 text-sm bg-white text-gray-800 w-32 leading-none transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 hover:border-gray-400 focus:text-primary-600 focus:border-gray-400"
+              onClick={onListViewBtnClick}
             >
-              <i className="fa fa-filter mr-1" aria-hidden="true"></i>
-              <span>Filters</span>
+              <i className="fa fa-list-ul mr-1" aria-hidden="true"></i>
+              List View
             </button>
+            <div className="flex items-start">
+              <button
+                className="flex leading-none border-2 border-gray-200 bg-white rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 focus:text-primary-600 focus:border-gray-400 hover:border-gray-400 rounded-r-full px-4 py-2 text-sm"
+                onClick={(_) => setShowFilters((show) => !show)}
+              >
+                <i className="fa fa-filter mr-1" aria-hidden="true"></i>
+                <span>Filters</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
