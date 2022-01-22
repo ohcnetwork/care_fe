@@ -311,6 +311,7 @@ const AssetConfigure = (props: AssetConfigureProps) => {
             <LiveFeed
               middleWareHost={asset?.meta?.middleware_hostname}
               asset={getCameraConfig(asset)}
+              showRefreshButton={true}
             />
           )}
         </CardContent>

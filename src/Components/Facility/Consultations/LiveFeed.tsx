@@ -192,14 +192,11 @@ const LiveFeed = (props: any) => {
 
   useEffect(() => {
     getPresets(asset);
+    getBedPresets(asset);
     if (props.config?.position) {
       absoluteMove(props.config.position);
     }
   }, [asset]);
-
-  // useEffect(() => {
-  //   getBedPresets(asset);
-  // }, []);
 
   const liveFeedPlayerRef = useRef<any>(null);
   const handleClickFullscreen = () => {
@@ -363,16 +360,19 @@ const LiveFeed = (props: any) => {
                     </button>
                   </div>
                 ))}
-            <div
-              onClick={() => {
-                setLoading(true);
-                getBedPresets(asset);
-              }}
-            >
-              <button className="bg-green-200 border border-white rounded-md px-3 py-2 text-black font-semibold hover:bg-green-300 w-full">
-                <RefreshIcon /> Refresh
-              </button>
-            </div>
+            {props.showRefreshButton && (
+              <div
+                onClick={() => {
+                  setLoading(true);
+                  getBedPresets(asset);
+                  getPresets(asset);
+                }}
+              >
+                <button className="bg-green-200 border border-white rounded-md px-3 py-2 text-black font-semibold hover:bg-green-300 w-full">
+                  <RefreshIcon /> Refresh
+                </button>
+              </div>
+            )}
             <button
               className="bg-green-200 border border-white rounded-md px-3 py-2 text-black font-semibold hover:bg-green-300 w-full"
               onClick={() => {
