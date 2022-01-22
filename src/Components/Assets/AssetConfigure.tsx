@@ -25,6 +25,7 @@ interface AssetConfigureProps {
 const getCameraConfig = (asset: AssetData) => {
   const { meta }: any = asset;
   return {
+    id: asset.id,
     hostname: meta.camera_address,
     username: meta.camera_access_key.split(":")[0],
     password: meta.camera_access_key.split(":")[1],
@@ -310,6 +311,7 @@ const AssetConfigure = (props: AssetConfigureProps) => {
             <LiveFeed
               middleWareHost={asset?.meta?.middleware_hostname}
               asset={getCameraConfig(asset)}
+              showRefreshButton={true}
             />
           )}
         </CardContent>

@@ -132,6 +132,7 @@ export const ConsultationDetails = (props: any) => {
             const { camera_address, camera_access_key, middleware_hostname } =
               bedAssets.data.results[0].asset_object.meta;
             setCameraAsset({
+              id: bedAssets.data.results[0].asset_object.id,
               hostname: camera_address,
               username: camera_access_key.split(":")[0],
               password: camera_access_key.split(":")[1],
