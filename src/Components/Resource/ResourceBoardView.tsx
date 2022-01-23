@@ -98,7 +98,7 @@ export default function BoardView() {
             breadcrumbs={false}
           />
         </div>
-        <div className="flex items-end  md:items-center justify-between md:w-2/3 flex-col md:flex-row">
+        <div className="flex items-end pt-2 space-y-2 md:items-center justify-between md:w-2/3 flex-col md:flex-row">
           <div className="bg-gray-200 text-sm text-gray-500 leading-none border-2 border-gray-200 rounded-full inline-flex mt-2">
             <button
               className={
