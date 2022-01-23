@@ -166,8 +166,9 @@ export const PatientHomeNonCovid = (props: any) => {
         ));
       if (!status.aborted) {
         if (res && res.data) {
+          console.log(res.data.results[0]);
           const { bp, pulse, resp, tempurature, spo2, rhythm, rhythm_detail } =
-            res.data.results[0];
+            res.data.results[0] || {};
           setVitals({
             bp,
             pulse,
