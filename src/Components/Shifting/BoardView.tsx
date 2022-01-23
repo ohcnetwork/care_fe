@@ -99,7 +99,7 @@ export default function BoardView() {
             breadcrumbs={false}
           />
         </div>
-        <div className="flex items-end  md:items-center justify-between md:w-2/3 flex-col md:flex-row">
+        <div className="flex items-end pt-2 space-y-2 md:items-center justify-between md:w-2/3 flex-col md:flex-row">
           <InputSearchBox
             value={qParams.patient_name || ""}
             search={searchByName}
