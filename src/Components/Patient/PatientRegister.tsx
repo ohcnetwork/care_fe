@@ -786,8 +786,18 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         contact_with_suspected_carrier: JSON.parse(
           state.form.contact_with_suspected_carrier
         ),
-        estimated_contact_date: state.form.estimated_contact_date,
-        cluster_name: state.form.cluster_name,
+        estimated_contact_date:
+          (JSON.parse(state.form.contact_with_confirmed_carrier) ||
+            JSON.parse(state.form.contact_with_suspected_carrier)) &&
+          state.form.estimated_contact_date
+            ? state.form.estimated_contact_date
+            : null,
+        cluster_name:
+          (JSON.parse(state.form.contact_with_confirmed_carrier) ||
+            JSON.parse(state.form.contact_with_suspected_carrier)) &&
+          state.form.cluster_name
+            ? state.form.cluster_name
+            : null,
         past_travel: state.form.past_travel,
         transit_details: state.form.transit_details,
         countries_travelled: state.form.past_travel
