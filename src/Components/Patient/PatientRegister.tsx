@@ -725,9 +725,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         date_of_result: state.form.date_of_result
           ? state.form.date_of_result
           : undefined,
-        date_declared_positive: state.form.date_declared_positive
-          ? state.form.date_declared_positive
-          : undefined,
+        date_declared_positive:
+          JSON.parse(state.form.is_declared_positive) &&
+          state.form.date_declared_positive
+            ? state.form.date_declared_positive
+            : null,
         srf_id: state.form.srf_id,
         covin_id:
           state.form.is_vaccinated === "true" ? state.form.covin_id : undefined,
