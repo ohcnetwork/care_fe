@@ -13,6 +13,7 @@ let float_of_string = data => data->Belt.Float.fromString
 type state = {
   bilateral_air_entry: option<bool>,
   etco2: option<int>,
+  pain: option<int>,
   saving: bool,
   dirty: bool,
 }
@@ -20,6 +21,7 @@ type state = {
 type action =
   | SetBilateralAirEntry(option<bool>)
   | SetETCO2(option<int>)
+  | SetPain(option<int>)
   | SetSaving
   | ClearSaving
 
@@ -35,6 +37,11 @@ let reducer = (state, action) => {
       etco2: etco2,
       dirty: true,
     }
+  | SetPain(pain) => {
+      ...state,
+      pain: pain,
+      dirty: true,
+    }
   | SetSaving => {...state, saving: true}
   | ClearSaving => {...state, saving: false}
   }
@@ -44,6 +51,7 @@ let initialState = others => {
   {
     bilateral_air_entry: Others.bilateral_air_entry(others),
     etco2: Others.etco2(others),
+    pain: Others.pain(others),
     saving: false,
     dirty: false,
   }
@@ -53,6 +61,7 @@ let makePayload = state => {
   let payload = Js.Dict.empty()
   DictUtils.setOptionalBool("bilateral_air_entry", state.bilateral_air_entry, payload)
   DictUtils.setOptionalNumber("etco2", state.etco2, payload)
+  DictUtils.setOptionalNumber("pain", state.pain, payload)
   payload
 }
 let successCB = (send, updateCB, data) => {
@@ -154,10 +163,10 @@ let make = (~others, ~updateCB, ~id, ~consultationId) => {
         end={"10"}
         interval={"1"}
         step={1.0}
-        value={string_of_int(state.etco2)}
-        setValue={s => send(SetETCO2(int_of_string(s)))}
+        value={string_of_int(state.pain)}
+        setValue={s => send(SetPain(int_of_string(s)))}
         getLabel={val => getPainStatus(val)}
-        hasError={isInvalidInputInt(0, 200, state.etco2)}
+        hasError={isInvalidInputInt(0, 10, state.pain)}
       />
     </div>
     <button
