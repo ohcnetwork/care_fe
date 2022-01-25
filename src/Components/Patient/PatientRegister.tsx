@@ -986,7 +986,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       )}
       <PageTitle
         title={headerText}
-        className="mb-11" 
+        className="mb-11"
         crumbsReplacements={{
           [facilityId]: { name: facilityName },
           [id || "????"]: { name: patientName },
@@ -1577,7 +1577,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             checked={state.form.past_travel}
                             onChange={handleCheckboxFieldChange}
                             name="past_travel"
-                            label="Domestic/international Travel History (within last 28 days)"
+                            label="Domestic/international Travel History (within last 14 days)"
                           />
                         </div>
                         <Collapse
