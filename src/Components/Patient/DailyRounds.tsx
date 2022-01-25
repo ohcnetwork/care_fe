@@ -315,9 +315,15 @@ export const DailyRounds = (props: any) => {
           Notification.Success({
             msg: "Consultation Updates details updated successfully",
           });
-          navigate(
-            `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${res.data.external_id}/update`
-          );
+          if (state.form.rounds_type === "NORMAL") {
+            navigate(
+              `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`
+            );
+          } else {
+            navigate(
+              `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${res.data.external_id}/update`
+            );
+          }
         } else {
           Notification.Success({
             msg: "Consultation Updates details created successfully",
