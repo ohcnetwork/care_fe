@@ -55,6 +55,8 @@ let makeUnitsPayload = items => {
     Js.Dict.set(p, "name", Js.Json.string(IOBalance.name(item)))
     Js.Dict.set(p, "quantity", Js.Json.number(IOBalance.quantity(item)))
     Js.Dict.set(p, "calories", Js.Json.number(IOBalance.calories(item)))
+    Js.Dict.set(p, "concentration", Js.Json.number(IOBalance.concentration(item)))
+    Js.Dict.set(p, "conc_unit", Js.Json.string(IOBalance.conc_unit(item)))
     p
   }, items)
 }
@@ -104,7 +106,7 @@ let make = (~ioBalance, ~updateCB, ~id, ~consultationId) => {
     <CriticalCare__PageTitle title="I/O Balance Editor" />
     <div id="intake" className="pb-3">
       <h3> {str("Intake")} </h3>
-      <IOBalance__UnitSection
+      <IOBalance__InfusionUnitSection
         name="Infusions"
         items={state.infusions}
         collection={infusionCollection}
