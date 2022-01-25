@@ -76,7 +76,7 @@ let showUnit = (name, item, params, index, send) => {
       <div className="rounded-md shadow-sm w-1/6">
         <IOBalance__UnitPicker
           id={"conc_unit" ++ index->string_of_int}
-          value={""}
+          value={IOBalance.conc_unit(item)}
           updateCB={conc_unit => UpdateConcUnit(conc_unit, index)->send}
           placeholder={"Unit"}
           selectables=conc_units
