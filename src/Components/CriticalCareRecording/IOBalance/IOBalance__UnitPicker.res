@@ -33,16 +33,20 @@ let renderSelectables = (selections, updateCB) =>
   )
 
 let searchResult = (searchInput, updateCB, selectables) => {
-  // Remove all excess space characters from the user input.
-  let normalizedString =
-    searchInput
-    |> Js.String.trim
-    |> Js.String.replaceByRe(Js.Re.fromStringWithFlags("\\s+", ~flags="g"), " ")
-  switch normalizedString {
-  | "" => []
-  | searchString =>
-    let matchingSelections = search(searchString, selectables)
-    renderSelectables(matchingSelections, updateCB)
+  if Js.testAny(searchInput) {
+    renderSelectables(selectables, updateCB)
+  } else {
+    // Remove all excess space characters from the user input.
+    let normalizedString =
+      searchInput
+      |> Js.String.trim
+      |> Js.String.replaceByRe(Js.Re.fromStringWithFlags("\\s+", ~flags="g"), " ")
+    switch normalizedString {
+    | "" => []
+    | searchString =>
+      let matchingSelections = search(searchString, selectables)
+      renderSelectables(matchingSelections, updateCB)
+    }
   }
 }
 
