@@ -27,56 +27,72 @@ let reducer = (state, action) => {
 }
 
 let conc_units = ["mg", "mcg", "ng"]
+let presets = ["100", "200", "300", "400", "500"]
 
 let showUnit = (name, item, params, index, send) => {
-  <div className="flex justify-between items-center" key={index->string_of_int}>
-    <div
-      onClick={_ => index->DeleteUnit->send}
-      className="appearance-none h-10 mt-1 block border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white focus:border-gray-600 text-gray-600 font-bold">
-      {"x"->str}
+  <div>
+    <div className="flex justify-between items-center" key={index->string_of_int}>
+      <div
+        onClick={_ => index->DeleteUnit->send}
+        className="appearance-none h-10 mt-1 block border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white focus:border-gray-600 text-gray-600 font-bold">
+        {"x"->str}
+      </div>
+      <div className="m-1 rounded-md shadow-sm w-4/6">
+        <IOBalance__UnitPicker
+          id={"field" ++ index->string_of_int}
+          value={IOBalance.name(item)}
+          updateCB={field => UpdateField(field, index)->send}
+          placeholder={"Add" ++ name}
+          selectables=params
+        />
+      </div>
+      <div className="m-1 rounded-md shadow-sm w-1/6">
+        <input
+          id={"value" ++ index->string_of_int}
+          className="appearance-none h-10 mt-1 block w-full border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white focus:border-gray-600"
+          placeholder="Value"
+          onChange={e =>
+            UpdateValue(ReactEvent.Form.target(e)["value"]->Js.Float.fromString, index)->send}
+          value={IOBalance.quantity(item)->Belt.Float.toString}
+          type_="number"
+          required=true
+        />
+      </div>
+      <div className="m-1 rounded-md shadow-sm w-1/6">
+        <input
+          id={"concentration" ++ index->string_of_int}
+          className="appearance-none h-10 mt-1 block w-full border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white focus:border-gray-600"
+          placeholder="Concentration"
+          onChange={e =>
+            UpdateConcentration(
+              ReactEvent.Form.target(e)["value"]->Js.Float.fromString,
+              index,
+            )->send}
+          value={IOBalance.concentration(item)->Belt.Float.toString}
+          type_="number"
+          required=true
+        />
+      </div>
+      <div className="rounded-md shadow-sm w-1/6">
+        <IOBalance__UnitPicker
+          id={"conc_unit" ++ index->string_of_int}
+          value={""}
+          updateCB={conc_unit => UpdateConcUnit(conc_unit, index)->send}
+          placeholder={"Unit"}
+          selectables=conc_units
+        />
+      </div>
     </div>
-    <div className="m-1 rounded-md shadow-sm w-4/6">
-      <IOBalance__UnitPicker
-        id={"field" ++ index->string_of_int}
-        value={IOBalance.name(item)}
-        updateCB={field => UpdateField(field, index)->send}
-        placeholder={"Add" ++ name}
-        selectables=params
-      />
-    </div>
-    <div className="m-1 rounded-md shadow-sm w-1/6">
-      <input
-        id={"value" ++ index->string_of_int}
-        className="appearance-none h-10 mt-1 block w-full border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white focus:border-gray-600"
-        placeholder="Value"
-        onChange={e =>
-          UpdateValue(ReactEvent.Form.target(e)["value"]->Js.Float.fromString, index)->send}
-        value={IOBalance.quantity(item)->Belt.Float.toString}
-        type_="number"
-        required=true
-      />
-    </div>
-    <div className="m-1 rounded-md shadow-sm w-1/6">
-      <input
-        id={"concentration" ++ index->string_of_int}
-        className="appearance-none h-10 mt-1 block w-full border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white focus:border-gray-600"
-        placeholder="Concentration"
-        onChange={e =>
-          UpdateConcentration(ReactEvent.Form.target(e)["value"]->Js.Float.fromString, index)->send}
-        value={IOBalance.concentration(item)->Belt.Float.toString}
-        type_="number"
-        required=true
-      />
-    </div>
-    <div className="rounded-md shadow-sm w-1/6">
-      <IOBalance__UnitPicker
-        id={"conc_unit" ++ index->string_of_int}
-        value={""}
-        updateCB={conc_unit => UpdateConcUnit(conc_unit, index)->send}
-        placeholder={"Unit"}
-        selectables=conc_units
-      />
-    </div>
+    <div className="flex flex-row"> {Js.Array.map(preset => {
+        <div>
+          <input
+            type_="button"
+            value={preset}
+            onClick={_ => UpdateValue(preset->Js.Float.fromString, index)->send}
+            className="appearance-none h-8 m-1 block border border-gray-400 rounded-full py-2 px-4 text-xs bg-gray-400 hover:bg-gray-600 focus:outline-none focus:bg-white focus:border-gray-600 text-gray-600 font-bold"
+          />
+        </div>
+      }, presets)->React.array} </div>
   </div>
 }
 
