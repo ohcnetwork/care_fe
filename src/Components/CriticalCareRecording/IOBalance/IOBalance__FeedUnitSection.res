@@ -43,15 +43,12 @@ let showUnit = (name, item, params, index, send) => {
         />
       </div>
       <div className="m-1 rounded-md shadow-sm w-1/6">
-        <input
+        <IOBalance__UnitPicker
           id={"value" ++ index->string_of_int}
-          className="appearance-none h-10 mt-1 block w-full border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white focus:border-gray-600"
-          placeholder="Value"
-          onChange={e =>
-            UpdateValue(ReactEvent.Form.target(e)["value"]->Js.Float.fromString, index)->send}
           value={IOBalance.quantity(item)->Belt.Float.toString}
-          type_="number"
-          required=true
+          updateCB={value => UpdateValue(value->Js.Float.fromString, index)->send}
+          placeholder={""}
+          selectables=presets
         />
       </div>
       <div className="m-1 rounded-md shadow-sm w-1/6">
@@ -67,16 +64,6 @@ let showUnit = (name, item, params, index, send) => {
         />
       </div>
     </div>
-    <div className="flex flex-row"> {Js.Array.map(preset => {
-        <div>
-          <input
-            type_="button"
-            value={preset}
-            onClick={_ => UpdateValue(preset->Js.Float.fromString, index)->send}
-            className="appearance-none h-8 m-1 block border border-gray-400 rounded-full py-2 px-4 text-xs bg-gray-400 hover:bg-gray-600 focus:outline-none focus:bg-white focus:border-gray-600 text-gray-600 font-bold"
-          />
-        </div>
-      }, presets)->React.array} </div>
   </div>
 }
 
