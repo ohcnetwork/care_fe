@@ -655,7 +655,7 @@ export const FileUpload = (props: FileUploadProps) => {
       <PageTitle
         title={`${UPLOAD_HEADING[type]}`}
         hideBack={hideBack}
-        breadcrumbs={UPLOAD_HEADING[type] !== "Upload Sample Report"}
+        breadcrumbs={false}
         crumbsReplacements={{
           [facilityId]: { name: facilityName },
           [patientId]: { name: patientName },
