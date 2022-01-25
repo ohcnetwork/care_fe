@@ -54,6 +54,7 @@ let makeUnitsPayload = items => {
     let p = Js.Dict.empty()
     Js.Dict.set(p, "name", Js.Json.string(IOBalance.name(item)))
     Js.Dict.set(p, "quantity", Js.Json.number(IOBalance.quantity(item)))
+    Js.Dict.set(p, "calories", Js.Json.number(IOBalance.calories(item)))
     p
   }, items)
 }
@@ -115,7 +116,7 @@ let make = (~ioBalance, ~updateCB, ~id, ~consultationId) => {
         collection={ivfluidsCollection}
         updateCB={ivfluid => send(SetIVFluid(ivfluid))}
       />
-      <IOBalance__UnitSection
+      <IOBalance__FeedUnitSection
         name="Feed"
         items={state.feeds}
         collection={feedsCollection}

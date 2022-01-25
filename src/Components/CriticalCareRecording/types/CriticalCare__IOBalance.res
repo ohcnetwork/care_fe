@@ -1,6 +1,7 @@
 type item = {
   name: string,
   quantity: float,
+  calories: float,
 }
 
 export type t = {
@@ -28,13 +29,17 @@ let make = (
   total_output_calculated: total_output_calculated,
 }
 
-let makeItem = (~name, ~quantity) => {
+let makeItem = (~name, ~quantity, ~calories) => {
   name: name,
   quantity: quantity,
+  calories: calories,
 }
 
 let makeItems = items => {
-  Js.Array.map(i => makeItem(~name=i["name"], ~quantity=i["quantity"]), items)
+  Js.Array.map(
+    i => makeItem(~name=i["name"], ~quantity=i["quantity"], ~calories=i["calories"]),
+    items,
+  )
 }
 
 let makeFromJs = dailyRound => {
@@ -50,6 +55,7 @@ let makeFromJs = dailyRound => {
 
 let name = item => item.name
 let quantity = item => item.quantity
+let calories = item => item.calories
 let infusions = t => t.infusions
 let ivFluid = t => t.ivFluid
 let feed = t => t.feed
@@ -67,6 +73,11 @@ let updateQuantity = (quantity, item) => {
   quantity: quantity,
 }
 
+let updateCalories = (calories, item) => {
+  ...item,
+  calories: calories,
+}
+
 let makeDefaultItem = () => {
-  makeItem(~name="", ~quantity=0.0)
+  makeItem(~name="", ~quantity=0.0, ~calories=0.0)
 }
