@@ -35,7 +35,7 @@ let showUnit = (name, item, params, index, send) => {
       className="appearance-none h-10 mt-1 block border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white focus:border-gray-600 text-gray-600 font-bold">
       {"x"->str}
     </div>
-    <div className="m-1 rounded-md shadow-sm w-5/6">
+    <div className="m-1 rounded-md shadow-sm w-4/6">
       <IOBalance__UnitPicker
         id={"field" ++ index->string_of_int}
         value={IOBalance.name(item)}
@@ -68,7 +68,7 @@ let showUnit = (name, item, params, index, send) => {
         required=true
       />
     </div>
-    <div className="rounded-md shadow-sm w-2/12">
+    <div className="rounded-md shadow-sm w-1/6">
       <IOBalance__UnitPicker
         id={"conc_unit" ++ index->string_of_int}
         value={""}
@@ -92,7 +92,7 @@ let make = (~name, ~items, ~collection, ~updateCB) => {
       {name->str}
     </h3>
     <div className="flex justify-between mt-4">
-      <div className="m-1 rounded-md shadow-sm w-5/6">
+      <div className="m-1 rounded-md shadow-sm w-4/6">
         <label
           htmlFor="Field" className="block text-sm font-medium leading-5 text-gray-700 text-center">
           {"Field"->str}
@@ -102,6 +102,13 @@ let make = (~name, ~items, ~collection, ~updateCB) => {
         <label
           htmlFor="Value" className="block text-sm font-medium leading-5 text-gray-700 text-center">
           {"Value (ml)"->str}
+        </label>
+      </div>
+      <div className="m-1 rounded-md shadow-sm w-2/6">
+        <label
+          htmlFor="Concentration"
+          className="block text-sm font-medium leading-5 text-gray-700 text-center">
+          {"Concentration"->str}
         </label>
       </div>
     </div>
