@@ -200,7 +200,7 @@ export const ConsultationDetails = (props: any) => {
                     </div>
                     {(consultationData.admission_date ||
                       consultationData.discharge_date) && (
-                      <div className="text-3xl font-bold">
+                      <div className="text-3xl font-bold mt-2">
                         {moment(
                           consultationData.discharge_date
                             ? consultationData.discharge_date
@@ -208,7 +208,7 @@ export const ConsultationDetails = (props: any) => {
                         ).fromNow()}
                       </div>
                     )}
-                    <div className="text-xs -mt-2">
+                    <div className="text-xs">
                       {consultationData.admission_date &&
                         moment(consultationData.admission_date).format("lll")}
                       {consultationData.discharge_date &&
@@ -276,7 +276,7 @@ export const ConsultationDetails = (props: any) => {
               </div>
             </div>
             <div className="md:px-2 px-0 md:py-0 py-2">
-              <div className="border rounded-lg bg-white shadow h-full p-4 w-full">
+              <div className="border rounded-lg bg-white shadow p-4 w-full">
                 <div>
                   <button
                     className="btn btn-primary w-full"
