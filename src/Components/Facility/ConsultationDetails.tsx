@@ -220,39 +220,40 @@ export const ConsultationDetails = (props: any) => {
                 )}
               </div>
 
-              <div className="mt-2">
-                {consultationData.other_symptoms && (
-                  <div className="capitalize">
-                    <span className="font-semibold leading-relaxed">
-                      Other Symptoms:{" "}
-                    </span>
-                    {consultationData.other_symptoms}
-                  </div>
-                )}
-
-                {consultationData.diagnosis && (
-                  <div className="text-sm w-full">
-                    <span className="font-semibold leading-relaxed">
-                      Diagnosis:{" "}
-                    </span>
-                    {consultationData.diagnosis}
-                  </div>
-                )}
-                {consultationData.verified_by && (
-                  <div className="text-sm mt-2">
-                    <span className="font-semibold leading-relaxed">
-                      Verified By:{" "}
-                    </span>
-                    {consultationData.verified_by}
-                    <i className="fas fa-check-circle fill-current text-lg text-green-500 ml-2"></i>
-                  </div>
-                )}
-              </div>
               <div className="flex md:flex-row flex-col mt-4 gap-2 justify-between">
+                <div>
+                  {consultationData.other_symptoms && (
+                    <div className="capitalize">
+                      <span className="font-semibold leading-relaxed">
+                        Other Symptoms:{" "}
+                      </span>
+                      {consultationData.other_symptoms}
+                    </div>
+                  )}
+
+                  {consultationData.diagnosis && (
+                    <div className="text-sm w-full">
+                      <span className="font-semibold leading-relaxed">
+                        Diagnosis:{" "}
+                      </span>
+                      {consultationData.diagnosis}
+                    </div>
+                  )}
+                  {consultationData.verified_by && (
+                    <div className="text-sm mt-2">
+                      <span className="font-semibold leading-relaxed">
+                        Verified By:{" "}
+                      </span>
+                      {consultationData.verified_by}
+                      <i className="fas fa-check-circle fill-current text-lg text-green-500 ml-2"></i>
+                    </div>
+                  )}
+                </div>
+
                 <div className="flex flex-col text-xs text-gray-700 font-base leading-relaxed">
                   <div>
                     <span className="text-gray-900">Created: </span>
-                    {moment(consultationData.created_date).format("lll")} |
+                    {moment(consultationData.created_date).format("lll")}
                   </div>
                   {consultationData.created_by && (
                     <div>
@@ -260,11 +261,10 @@ export const ConsultationDetails = (props: any) => {
                       {`@${consultationData.created_by?.username} (${consultationData.created_by?.user_type})`}
                     </div>
                   )}
-                </div>
-                <div className="flex flex-col text-xs md:text-right text-gray-700 font-base leading-relaxed">
+
                   <div>
                     <span className="text-gray-900">Last Modified: </span>
-                    {moment(consultationData.modified_date).format("lll")} |
+                    {moment(consultationData.modified_date).format("lll")}
                   </div>
                   {consultationData.last_edited_by && (
                     <div>
@@ -276,7 +276,7 @@ export const ConsultationDetails = (props: any) => {
               </div>
             </div>
             <div className="md:px-2 px-0 md:py-0 py-2">
-              <div className="border rounded-lg bg-white shadow p-4 w-full">
+              <div className="border rounded-lg bg-white shadow p-4 h-full w-full">
                 <div>
                   <button
                     className="btn btn-primary w-full"
