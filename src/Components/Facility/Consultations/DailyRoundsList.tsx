@@ -72,7 +72,7 @@ export const DailyRoundsList = (props: any) => {
         itemData.last_updated_by_telemedicine;
 
       return (
-        <div key={`daily_round_${idx}`} className="w-full mt-4 px-2">
+        <div key={`daily_round_${idx}`} className="w-full">
           <div
             className={`block border rounded-lg ${
               telemedicine_doctor_update ? "bg-purple-200" : "bg-white"
@@ -209,10 +209,14 @@ export const DailyRoundsList = (props: any) => {
     <div>
       <div>
         <div className="md:hidden">
-          <PageTitle title="Consultation Update" hideBack={true} />
+          <PageTitle
+            title="Consultation Update"
+            hideBack={true}
+            breadcrumbs={false}
+          />
         </div>
-        <div className="flex flex-wrap overflow-y-auto md:h-screen">
-          {roundsList}
+        <div className="flex flex-wrap">
+          <div className="overflow-y-auto h-screen space-y-4">{roundsList}</div>
           {!isDailyRoundLoading && totalCount > limit && (
             <div className="mt-4 flex w-full justify-center">
               <Pagination

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import loadable from "@loadable/component";
 import { InputSearchBox } from "../Common/SearchBox";
 import { navigate, useQueryParams } from "raviger";
@@ -38,11 +38,20 @@ export default function ListView() {
     loading: false,
   });
 
+  const local = useMemo(
+    () => JSON.parse(localStorage.getItem("resource-filters") || "{}"),
+    []
+  );
+
   const applyFilter = (data: any) => {
     const filter = { ...qParams, ...data };
     updateQuery(filter);
     setShowFilters(false);
   };
+
+  useEffect(() => {
+    applyFilter(local);
+  }, []);
 
   const triggerDownload = async () => {
     const res = await dispatch(
@@ -76,8 +85,9 @@ export default function ListView() {
   };
 
   const appliedFilters = formatFilter(qParams);
-  const updateFilter = (params: any) => {
+  const updateFilter = (params: any, local: any) => {
     updateQuery(params);
+    localStorage.setItem("resource-filters", JSON.stringify(local));
   };
 
   const refreshList = () => {
@@ -229,13 +239,18 @@ export default function ListView() {
   return (
     <div className="flex flex-col h-screen px-2 pb-2">
       <div className="flex items-end justify-between px-4">
-        <div className="flex items-center">
-          <PageTitle title={"Resource"} hideBack={true} />
-          <GetAppIcon
-            className="cursor-pointer mt-4"
-            onClick={triggerDownload}
-          />
-        </div>
+        <PageTitle
+          title={"Resource"}
+          hideBack={true}
+          componentRight={
+            <GetAppIcon
+              className="cursor-pointer ml-2 mt-2"
+              onClick={triggerDownload}
+            />
+          }
+          breadcrumbs={false}
+        />
+
         <div className="w-32">
           {/* dummy div to align space as per board view */}
         </div>
@@ -262,7 +277,11 @@ export default function ListView() {
         </div>
       </div>
 
-      <BadgesList appliedFilters={appliedFilters} updateFilter={updateFilter} />
+      <BadgesList
+        appliedFilters={appliedFilters}
+        local={local}
+        updateFilter={updateFilter}
+      />
 
       <div className="px-4">
         {isLoading ? (
@@ -309,6 +328,7 @@ export default function ListView() {
         <div className="bg-white min-h-screen p-4">
           <ListFilter
             filter={qParams}
+            local={local}
             showResourceStatus={true}
             onChange={applyFilter}
             closeFilter={() => setShowFilters(false)}

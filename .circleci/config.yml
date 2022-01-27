@@ -2,28 +2,9 @@ version: 2.1
 
 orbs:
   aws-ecr: circleci/aws-ecr@6.15.3
-  aws-eks: circleci/aws-eks@0.2.6
+  aws-eks: circleci/aws-eks@1.2.0
 
 workflows:
-  deploy-to-staging:
-    jobs:
-      - aws-ecr/build-and-push-image:
-          account-url: AWS_ECR_ACCOUNT_URL
-          aws-access-key-id: AWS_ACCESS_KEY_ID
-          aws-secret-access-key: AWS_SECRET_ACCESS_KEY
-          region: AWS_DEFAULT_REGION
-          repo: "${ECR_REPO_NAME}"
-          tag: "${CIRCLE_SHA1},latest"
-          filters:
-            branches:
-              only: develop
-      - aws-eks/update-container-image:
-          cluster-name: "${EKS_CLUSTER_NAME}"
-          aws-region: "${AWS_DEFAULT_REGION}"
-          container-image-updates: "${EKS_CONTAINER_NAME}=${AWS_ECR_ACCOUNT_URL}/${ECR_REPO_NAME}:${CIRCLE_SHA1}"
-          resource-name: "deployment/care-fe-staging-deployment"
-          requires:
-            - aws-ecr/build-and-push-image
   deploy-to-production:
     jobs:
       - aws-ecr/build-and-push-image:

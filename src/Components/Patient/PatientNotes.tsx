@@ -1,7 +1,11 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getPatientNotes, addPatientNote } from "../../Redux/actions";
+import {
+  getPatientNotes,
+  addPatientNote,
+  getPatient,
+} from "../../Redux/actions";
 import { Button } from "@material-ui/core";
 import * as Notification from "../../Utils/Notifications.js";
 import moment from "moment";
@@ -18,11 +22,16 @@ interface PatientNotesProps {
 const pageSize = RESULTS_PER_PAGE_LIMIT;
 
 const PatientNotes = (props: PatientNotesProps) => {
+  const { patientId, facilityId } = props;
+
   const dispatch: any = useDispatch();
   let initialData: any = { notes: [], cPage: 1, count: 1 };
   const [state, setState] = useState(initialData);
   const [noteField, setNoteField] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [facilityName, setFacilityName] = useState("");
+  const [patientName, setPatientName] = useState("");
+
   const fetchData = useCallback(
     async (page: number = 1, status: statusType = { aborted: false }) => {
       setIsLoading(true);
@@ -51,6 +60,22 @@ const PatientNotes = (props: PatientNotesProps) => {
     [fetchData]
   );
 
+  useEffect(() => {
+    async function fetchPatientName() {
+      if (patientId) {
+        const res = await dispatch(getPatient({ id: patientId }));
+        if (res.data) {
+          setPatientName(res.data.name);
+          setFacilityName(res.data.facility_object.name);
+        }
+      } else {
+        setPatientName("");
+        setFacilityName("");
+      }
+    }
+    fetchPatientName();
+  }, [dispatch, patientId]);
+
   function handlePagination(page: number) {
     fetchData(page);
   }
@@ -71,7 +96,14 @@ const PatientNotes = (props: PatientNotesProps) => {
 
   return (
     <div className="w-full flex flex-col">
-      <PageTitle title="Patient Notes" className="mb-5" />
+      <PageTitle
+        title="Patient Notes"
+        className="mb-5"
+        crumbsReplacements={{
+          [facilityId]: { name: facilityName },
+          [patientId]: { name: patientName },
+        }}
+      />
       <h3 className="text-lg pl-10">Add new notes</h3>
       <textarea
         rows={3}

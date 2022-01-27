@@ -4,7 +4,10 @@ import { navigate, useQueryParams } from "raviger";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FacilityModel } from "../Facility/models";
 import { useDispatch } from "react-redux";
-import { getFacility, getFacilityAssetLocation } from "../../Redux/actions";
+import {
+  getAnyFacility,
+  getFacilityAssetLocation,
+} from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { SelectField } from "../Common/HelperInputFields";
 import { LocationSelect } from "../Common/LocationSelect";
@@ -51,7 +54,7 @@ function AssetFilter(props: any) {
     async (status: statusType) => {
       if (facilityId) {
         const [facilityData]: any = await Promise.all([
-          dispatch(getFacility(facilityId)),
+          dispatch(getAnyFacility(facilityId)),
         ]);
         if (!status.aborted) {
           if (!facilityData?.data)
@@ -138,7 +141,7 @@ function AssetFilter(props: any) {
             }
             selected={facility}
             errors=""
-            showAll={false}
+            showAll
             multiple={false}
           />
         </div>

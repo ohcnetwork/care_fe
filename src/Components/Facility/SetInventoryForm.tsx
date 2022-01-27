@@ -4,7 +4,7 @@ import React, { useCallback, useReducer, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import loadable from "@loadable/component";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getItems, setMinQuantity } from "../../Redux/actions";
+import { getItems, setMinQuantity, getAnyFacility } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { SelectField, TextInputField } from "../Common/HelperInputFields";
 import { InventoryItemsModel } from "./models";
@@ -50,6 +50,7 @@ export const SetInventoryForm = (props: any) => {
   const [offset, setOffset] = useState(0);
   const [data, setData] = useState<Array<InventoryItemsModel>>([]);
   const [currentUnit, setCurrentUnit] = useState<any>();
+  const [facilityName, setFacilityName] = useState("");
 
   const limit = 14;
 
@@ -76,6 +77,19 @@ export const SetInventoryForm = (props: any) => {
     },
     [fetchData]
   );
+
+  useEffect(() => {
+    async function fetchFacilityName() {
+      if (facilityId) {
+        const res = await dispatchAction(getAnyFacility(facilityId));
+
+        setFacilityName(res?.data?.name || "");
+      } else {
+        setFacilityName("");
+      }
+    }
+    fetchFacilityName();
+  }, [dispatchAction, facilityId]);
 
   useEffect(() => {
     // set the default units according to the item
@@ -119,7 +133,10 @@ export const SetInventoryForm = (props: any) => {
 
   return (
     <div className="px-2 pb-2">
-      <PageTitle title="Set Minimum Quantity " />
+      <PageTitle
+        title="Set Minimum Quantity"
+        crumbsReplacements={{ [facilityId]: { name: facilityName } }}
+      />
       <div className="mt-4">
         <Card>
           <form onSubmit={(e) => handleSubmit(e)}>

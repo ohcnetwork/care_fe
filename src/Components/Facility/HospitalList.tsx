@@ -8,7 +8,7 @@ import {
   KASP_STRING,
 } from "../../Common/constants";
 import {
-  getFacilities,
+  getPermittedFacilities,
   downloadFacility,
   downloadFacilityCapacity,
   downloadFacilityDoctors,
@@ -108,7 +108,7 @@ const HospitalListPage = (props: any) => {
             kasp_empanelled: qParams.kasp_empanelled,
           };
 
-      const res = await dispatchAction(getFacilities(params));
+      const res = await dispatchAction(getPermittedFacilities(params));
       if (!status.aborted) {
         if (res && res.data) {
           setData(res.data.results);
@@ -484,7 +484,12 @@ const HospitalListPage = (props: any) => {
   return (
     <div className="px-6">
       <div className="grid grid-cols-2">
-        <PageTitle title={t("Facilities")} hideBack={true} className="mx-3" />
+        <PageTitle
+          title={t("Facilities")}
+          hideBack={true}
+          className="mx-3"
+          breadcrumbs={false}
+        />
 
         <div className="flex justify-end w-full mt-4">
           <div>

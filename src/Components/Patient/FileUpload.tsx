@@ -24,6 +24,7 @@ import {
   retrieveUploadFilesURL,
   createUpload,
   getUserList,
+  getPatient,
 } from "../../Redux/actions";
 import { FlowModel, FileUploadModel } from "./models";
 import { TextInputField } from "../Common/HelperInputFields";
@@ -176,7 +177,25 @@ export const FileUpload = (props: FileUploadProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const [offset, setOffset] = useState(0);
+  const [facilityName, setFacilityName] = useState("");
+  const [patientName, setPatientName] = useState("");
   const limit = RESULTS_PER_PAGE_LIMIT;
+
+  useEffect(() => {
+    async function fetchPatientName() {
+      if (patientId) {
+        const res = await dispatch(getPatient({ id: patientId }));
+        if (res.data) {
+          setPatientName(res.data.name);
+          setFacilityName(res.data.facility_object.name);
+        }
+      } else {
+        setPatientName("");
+        setFacilityName("");
+      }
+    }
+    fetchPatientName();
+  }, [dispatch, patientId]);
 
   const handlePagination = (page: number, limit: number) => {
     const offset = (page - 1) * limit;
@@ -633,7 +652,15 @@ export const FileUpload = (props: FileUploadProps) => {
         )}
       </Modal>
 
-      <PageTitle title={`${UPLOAD_HEADING[type]}`} hideBack={hideBack} />
+      <PageTitle
+        title={`${UPLOAD_HEADING[type]}`}
+        hideBack={hideBack}
+        breadcrumbs={false}
+        crumbsReplacements={{
+          [facilityId]: { name: facilityName },
+          [patientId]: { name: patientName },
+        }}
+      />
       <div className="mt-4">
         <div className="md:grid grid-cols-2 gap-4">
           {audio ? (
@@ -714,7 +741,11 @@ export const FileUpload = (props: FileUploadProps) => {
         </div>
       </div>
 
-      <PageTitle title={`${VIEW_HEADING[type]}`} hideBack={true} />
+      <PageTitle
+        title={`${VIEW_HEADING[type]}`}
+        hideBack={true}
+        breadcrumbs={false}
+      />
       {uploadedFiles &&
         uploadedFiles.length > 0 &&
         uploadedFiles.map((item: FileUploadModel) => renderFileUpload(item))}

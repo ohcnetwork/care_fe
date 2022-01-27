@@ -3,14 +3,16 @@ import moment from "moment";
 import { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getConsultation } from "../../Redux/actions";
+import { getConsultation, getPatient } from "../../Redux/actions";
 import loadable from "@loadable/component";
 import { ConsultationModel } from "./models";
+import { PatientModel } from "../Patient/models";
 import {
   PATIENT_CATEGORY,
   SYMPTOM_CHOICES,
   CONSULTATION_TABS,
   OptionsType,
+  GENDER_TYPES,
 } from "../../Common/constants";
 import { FileUpload } from "../Patient/FileUpload";
 import TreatmentSummary from "./TreatmentSummary";
@@ -41,6 +43,26 @@ export const ConsultationDetails = (props: any) => {
   const [consultationData, setConsultationData] = useState<ConsultationModel>(
     {}
   );
+  const [patientData, setPatientData] = useState<PatientModel>({});
+
+  const getPatientGender = (patientData: any) =>
+    GENDER_TYPES.find((i) => i.id === patientData.gender)?.text;
+
+  const getPatientAddress = (patientData: any) =>
+    `${patientData.address},\n${patientData.ward_object?.name},\n${patientData.local_body_object?.name},\n${patientData.district_object?.name},\n${patientData.state_object?.name}`;
+
+  const getPatientComorbidities = (patientData: any) => {
+    if (
+      patientData &&
+      patientData.medical_history &&
+      patientData.medical_history.length
+    ) {
+      const medHis = patientData.medical_history;
+      return medHis.map((item: any) => item.disease).join(", ");
+    } else {
+      return "None";
+    }
+  };
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -69,6 +91,26 @@ export const ConsultationDetails = (props: any) => {
                 : res.data.discharge_advice;
           }
           setConsultationData(data);
+          const id = res.data.patient;
+          const patientRes = await dispatch(getPatient({ id }));
+          if (patientRes && patientRes.data) {
+            const patientGender = getPatientGender(patientRes.data);
+            const patientAddress = getPatientAddress(patientRes.data);
+            const patientComorbidities = getPatientComorbidities(
+              patientRes.data
+            );
+            const data = {
+              ...patientRes.data,
+              gender: patientGender,
+              address: patientAddress,
+              comorbidities: patientComorbidities,
+              is_declared_positive: patientRes.data.is_declared_positive
+                ? "Yes"
+                : "No",
+              is_vaccinated: patientData.is_vaccinated ? "Yes" : "No",
+            };
+            setPatientData(data);
+          }
         }
         setIsLoading(false);
       }
@@ -306,7 +348,7 @@ export const ConsultationDetails = (props: any) => {
           {tab === "UPDATES" && (
             <div className="flex md:flex-row flex-col">
               <div className="md:w-2/3">
-                <PageTitle title="Info" hideBack={true} />
+                <PageTitle title="Info" hideBack={true} breadcrumbs={false} />
                 {consultationData.examination_details && (
                   <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
                     <div className="px-4 py-5 sm:p-6">
@@ -343,55 +385,173 @@ export const ConsultationDetails = (props: any) => {
                     </div>
                   </div>
                 )}
-                {consultationData.weight != null &&
-                  consultationData.weight > 0 && (
-                    <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
-                      <div className="px-4 py-5 sm:p-6">
-                        <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-                          Weight
-                        </h3>
-                        <div className="mt-2">
-                          {consultationData.weight || "-"} kg
+
+                <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
+                  <div className="px-4 py-5 sm:p-6">
+                    <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                      Notes
+                    </h3>
+                    <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+                      {consultationData.diagnosis && (
+                        <div>
+                          <h5>Diagnosis</h5>
+                          <p className="text-justify break-words">
+                            {consultationData.diagnosis}
+                          </p>
+                        </div>
+                      )}
+                      {consultationData.operation && (
+                        <div className="mt-4">
+                          <h5>Operation</h5>
+                          <p className="text-justify break-words">
+                            {consultationData.operation}
+                          </p>
+                        </div>
+                      )}
+                      {consultationData.special_instruction && (
+                        <div className="mt-4">
+                          <h5>Special Instruction</h5>
+                          <p className="text-justify break-words">
+                            {consultationData.special_instruction}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {consultationData.intubation_start_date && (
+                  <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
+                    <div className="px-4 py-5 sm:p-6">
+                      <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                        Date/Size/LL:{" "}
+                      </h3>
+                      <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
+                        <div className="">
+                          Intubation Date{" - "}
+                          <span className="font-semibold">
+                            {moment(
+                              consultationData.intubation_start_date
+                            ).format("lll")}
+                          </span>
+                        </div>
+                        <div className="">
+                          Extubation Date{" - "}
+                          <span className="font-semibold">
+                            {consultationData.intubation_end_date &&
+                              moment(
+                                consultationData.intubation_end_date
+                              ).format("lll")}
+                          </span>
+                        </div>
+                        <div className="">
+                          ETT/TT (mmid){" - "}
+                          <span className="font-semibold">
+                            {consultationData.ett_tt}
+                          </span>
+                        </div>
+                        <div className="">
+                          Cuff Pressure (mmhg){" - "}
+                          <span className="font-semibold">
+                            {consultationData.cuff_pressure}
+                          </span>
                         </div>
                       </div>
                     </div>
-                  )}
-                {consultationData.height != null &&
-                  consultationData.height > 0 && (
-                    <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
-                      <div className="px-4 py-5 sm:p-6">
-                        <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-                          Height
-                        </h3>
-                        <div className="mt-2">
+                  </div>
+                )}
+
+                {consultationData.lines?.length > 0 && (
+                  <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
+                    <div className="px-4 py-5 sm:p-6">
+                      <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                        Lines and Catheters
+                      </h3>
+                      <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
+                        {consultationData.lines?.map((line: any) => (
+                          <div className="mt-4">
+                            <h5>{line.type}</h5>
+                            <p className="text-justify break-word">
+                              Details:
+                              <br />
+                              <span>{line.other_type}</span>
+                            </p>
+                            <p>
+                              Insertion Date:{" "}
+                              <span className="font-semibold">
+                                {moment(line.start_date).format("lll")}
+                              </span>
+                            </p>
+                            <p>
+                              Site/Level of Fixation: <br />
+                              <span className="text-justify break-word">
+                                {line.site}
+                              </span>
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
+                  <div className="px-4 py-5 sm:p-6">
+                    <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                      Body Details
+                    </h3>
+                    <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+                      <div>
+                        Gender {" - "}
+                        <span className="font-semibold">
+                          {patientData.gender || "-"}
+                        </span>
+                      </div>
+                      <div>
+                        Age {" - "}
+                        <span className="font-semibold">
+                          {patientData.age || "-"}
+                        </span>
+                      </div>
+                      <div>
+                        Weight {" - "}
+                        <span className="font-semibold">
+                          {consultationData.weight || "-"} Kg
+                        </span>
+                      </div>
+                      <div>
+                        Height {" - "}
+                        <span className="font-semibold">
                           {consultationData.height || "-"} cm
-                        </div>
+                        </span>
                       </div>
-                    </div>
-                  )}
-                {consultationData.weight != null &&
-                  consultationData.height != null &&
-                  consultationData.weight > 0 &&
-                  consultationData.height > 0 && (
-                    <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
-                      <div className="px-4 py-5 sm:p-6">
-                        <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-                          Body Surface Area
-                        </h3>
-                        <div className="mt-2">
+                      <div>
+                        Body Surface Area {" - "}
+                        <span className="font-semibold">
                           {Math.sqrt(
                             (Number(consultationData.weight) *
                               Number(consultationData.height)) /
                               3600
                           ).toFixed(2)}{" "}
                           m<sup>2</sup>
-                        </div>
+                        </span>
+                      </div>
+                      <div>
+                        Blood Group {" - "}
+                        <span className="font-semibold">
+                          {patientData.blood_group || "-"}
+                        </span>
                       </div>
                     </div>
-                  )}
+                  </div>
+                </div>
               </div>
-              <div className="md:w-1/3">
-                <PageTitle title="Updates" hideBack={true} />
+              <div className="md:w-1/3 pl-4">
+                <PageTitle
+                  title="Updates"
+                  hideBack={true}
+                  breadcrumbs={false}
+                />
                 <DailyRoundsList
                   facilityId={facilityId}
                   patientId={patientId}
@@ -403,7 +563,11 @@ export const ConsultationDetails = (props: any) => {
           )}
           {tab === "SUMMARY" && (
             <div className="mt-4">
-              <PageTitle title="Primary Parameters Plot" hideBack={true} />
+              <PageTitle
+                title="Primary Parameters Plot"
+                hideBack={true}
+                breadcrumbs={false}
+              />
               <PrimaryParametersPlot
                 facilityId={facilityId}
                 patientId={patientId}
@@ -499,7 +663,11 @@ export const ConsultationDetails = (props: any) => {
 
           {tab === "ABG" && (
             <div>
-              <PageTitle title="ABG Analysis Plot" hideBack={true} />
+              <PageTitle
+                title="ABG Analysis Plot"
+                hideBack={true}
+                breadcrumbs={false}
+              />
               <ABGPlots
                 facilityId={facilityId}
                 patientId={patientId}
@@ -509,7 +677,11 @@ export const ConsultationDetails = (props: any) => {
           )}
           {tab === "NURSING" && (
             <div>
-              <PageTitle title="Nursing Analysis" hideBack={true} />
+              <PageTitle
+                title="Nursing Analysis"
+                hideBack={true}
+                breadcrumbs={false}
+              />
               <NursingPlot
                 facilityId={facilityId}
                 patientId={patientId}
@@ -519,7 +691,11 @@ export const ConsultationDetails = (props: any) => {
           )}
           {tab === "NEUROLOGICAL_MONITORING" && (
             <div>
-              <PageTitle title="Neurological Monitoring" hideBack={true} />
+              <PageTitle
+                title="Neurological Monitoring"
+                hideBack={true}
+                breadcrumbs={false}
+              />
               <NeurologicalTable
                 facilityId={facilityId}
                 patientId={patientId}
@@ -529,7 +705,11 @@ export const ConsultationDetails = (props: any) => {
           )}
           {tab === "VENTILATOR" && (
             <div>
-              <PageTitle title="Ventilator Parameters" hideBack={true} />
+              <PageTitle
+                title="Ventilator Parameters"
+                hideBack={true}
+                breadcrumbs={false}
+              />
               <VentilatorPlot
                 facilityId={facilityId}
                 patientId={patientId}
@@ -539,7 +719,11 @@ export const ConsultationDetails = (props: any) => {
           )}
           {tab === "NUTRITION" && (
             <div>
-              <PageTitle title="Nutrition" hideBack={true} />
+              <PageTitle
+                title="Nutrition"
+                hideBack={true}
+                breadcrumbs={false}
+              />
               <NutritionPlots
                 facilityId={facilityId}
                 patientId={patientId}
@@ -549,7 +733,11 @@ export const ConsultationDetails = (props: any) => {
           )}
           {tab === "PRESSURE_SORE" && (
             <div className="mt-4">
-              <PageTitle title="Pressure Sore" hideBack={true} />
+              <PageTitle
+                title="Pressure Sore"
+                hideBack={true}
+                breadcrumbs={false}
+              />
               <PressureSoreDiagrams
                 consultationId={consultationId}
               ></PressureSoreDiagrams>
@@ -557,14 +745,22 @@ export const ConsultationDetails = (props: any) => {
           )}
           {tab === "DIALYSIS" && (
             <div>
-              <PageTitle title="Dialysis Plots" hideBack={true} />
+              <PageTitle
+                title="Dialysis Plots"
+                hideBack={true}
+                breadcrumbs={false}
+              />
               <DialysisPlots consultationId={consultationId}></DialysisPlots>
             </div>
           )}
           {tab === "INVESTIGATIONS" && (
             <div>
               <div className="flex justify-between">
-                <PageTitle title="Investigations" hideBack={true} />
+                <PageTitle
+                  title="Investigations"
+                  hideBack={true}
+                  breadcrumbs={false}
+                />
                 <div className="pt-6">
                   <button
                     className="btn btn-primary w-full"

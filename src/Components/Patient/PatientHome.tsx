@@ -348,6 +348,10 @@ export const PatientHome = (props: any) => {
   }
 
   const dischargeSummaryFormSetUserEmail = () => {
+    if (!currentUser.data.email.trim())
+      return Notification.Error({
+        msg: "Email not provided! Please update profile",
+      });
     setDischargeSummaryForm({ email: currentUser.data.email });
   };
 
@@ -603,7 +607,14 @@ export const PatientHome = (props: any) => {
       )}
 
       <div id="revamp">
-        <PageTitle title={`Covid Suspect Details`} backUrl="/patients" />
+        <PageTitle
+          title={`Covid Suspect Details`}
+          backUrl="/patients"
+          crumbsReplacements={{
+            [facilityId]: { name: patientData?.facility_object?.name },
+            [id]: { name: patientData?.name },
+          }}
+        />
         <div className="relative mt-2">
           <div className="max-w-screen-xl mx-auto py-3 px-3 sm:px-6 lg:px-8">
             <div className="md:flex">
@@ -1257,7 +1268,7 @@ export const PatientHome = (props: any) => {
                 <div className="mt-1 text-sm leading-5 text-gray-900">
                   {patientData.estimated_contact_date
                     ? moment(patientData.estimated_contact_date).format("LL")
-                    : ""}
+                    : "-"}
                 </div>
               </div>
               <div className="sm:col-span-1">
@@ -1265,7 +1276,7 @@ export const PatientHome = (props: any) => {
                   Contact Name / Cluster
                 </div>
                 <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {patientData.cluster_name}
+                  {patientData.cluster_name || "-"}
                 </div>
               </div>
               <div className="sm:col-span-1">
@@ -1749,7 +1760,11 @@ export const PatientHome = (props: any) => {
       </Dialog>
 
       <div>
-        <PageTitle title="Consultation History" hideBack={true} />
+        <PageTitle
+          title="Consultation History"
+          hideBack={true}
+          breadcrumbs={false}
+        />
         {consultationList}
         {!isConsultationLoading && totalConsultationCount > limit && (
           <div className="mt-4 flex w-full justify-center">
@@ -1764,7 +1779,11 @@ export const PatientHome = (props: any) => {
       </div>
 
       <div>
-        <PageTitle title="Sample Test History" hideBack={true} />
+        <PageTitle
+          title="Sample Test History"
+          hideBack={true}
+          breadcrumbs={false}
+        />
         {sampleList}
         {!isSampleLoading && totalSampleListCount > limit && (
           <div className="mt-4 flex w-full justify-center">

@@ -1,10 +1,14 @@
 import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
 import loadable from "@loadable/component";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
-import React, { useCallback, useReducer, useState } from "react";
+import React, { useCallback, useReducer, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getItemName, updateMinQuantity } from "../../Redux/actions";
+import {
+  getItemName,
+  updateMinQuantity,
+  getAnyFacility,
+} from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { TextInputField } from "../Common/HelperInputFields";
 const Loading = loadable(() => import("../Common/Loading"));
@@ -49,6 +53,7 @@ export const UpdateMinQuantity = (props: any) => {
   const [offset, setOffset] = useState(0);
   const [data, setData] = useState(" ");
   const [currentUnit, setCurrentUnit] = useState<any>();
+  const [facilityName, setFacilityName] = useState("");
 
   const limit = 14;
 
@@ -72,6 +77,20 @@ export const UpdateMinQuantity = (props: any) => {
     },
     [fetchData]
   );
+
+  useEffect(() => {
+    async function fetchFacilityName() {
+      if (facilityId) {
+        const res = await dispatchAction(getAnyFacility(facilityId));
+
+        setFacilityName(res?.data?.name || "");
+      } else {
+        setFacilityName("");
+      }
+    }
+    fetchFacilityName();
+  }, [dispatchAction, facilityId]);
+
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     setIsLoading(true);
@@ -101,10 +120,22 @@ export const UpdateMinQuantity = (props: any) => {
   if (isLoading) {
     return <Loading />;
   }
-
+  console.log(facilityId, inventoryId, state, data);
   return (
     <div className="px-2 pb-2">
-      <PageTitle title="Update Minimum Quantity " hideBack={false} />
+      <PageTitle
+        title="Update Minimum Quantity"
+        hideBack={false}
+        crumbsReplacements={{
+          [facilityId]: { name: facilityName },
+          [itemId]: { name: data },
+          [inventoryId]: {
+            name: "min quantity",
+            uri: `/facility/${facilityId}/inventory/min_quantity/list`,
+          },
+          update: { style: "text-gray-100 pointer-events-none" },
+        }}
+      />
       <div className="mt-4">
         <Card>
           <form onSubmit={(e) => handleSubmit(e)}>
