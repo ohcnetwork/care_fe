@@ -55,6 +55,23 @@ const CommentSection = (props: CommentSectionProps) => {
 
   return (
     <div className="w-full flex flex-col">
+      <textarea
+        rows={3}
+        value={commentBox}
+        minLength={3}
+        placeholder="Type your comment"
+        className="mt-4 border border-gray-500 rounded-lg p-4"
+        onChange={(e) => setCommentBox(e.target.value)}
+      />
+      <div className="flex w-full justify-end">
+        <Button
+          onClick={onSubmitComment}
+          className="border border-solid border-primary-600 hover:border-primary-700 text-primary-600 hover:bg-white capitalize my-2 text-sm"
+        >
+          Post Your Comment
+        </Button>
+      </div>
+
       <div className=" w-full">
         {isLoading ? (
           <CircularProgress />
@@ -81,22 +98,6 @@ const CommentSection = (props: CommentSectionProps) => {
             </div>
           ))
         )}
-      </div>
-      <textarea
-        rows={3}
-        value={commentBox}
-        minLength={3}
-        placeholder="Type your comment"
-        className="mt-4 border border-gray-500 rounded-lg p-4"
-        onChange={(e) => setCommentBox(e.target.value)}
-      />
-      <div className="flex w-full justify-end">
-        <Button
-          onClick={onSubmitComment}
-          className="border border-solid border-primary-600 hover:border-primary-700 text-primary-600 hover:bg-white capitalize my-2 text-sm"
-        >
-          Post Your Comment
-        </Button>
       </div>
     </div>
   );
