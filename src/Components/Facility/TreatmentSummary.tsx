@@ -370,7 +370,7 @@ const TreatmentSummary = (props: any) => {
                                 )}
                               </td>
                               <td className="border border-gray-800 text-center">
-                                {rounds.spo2 || "-"}
+                                {rounds.ventilator_spo2 || "-"}
                               </td>
                               <td className="border border-gray-800 text-center">
                                 {rounds.temperature || "-"}
