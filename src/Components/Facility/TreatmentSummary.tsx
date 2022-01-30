@@ -365,8 +365,8 @@ const TreatmentSummary = (props: any) => {
                           (rounds: DailyRoundsModel, index: number) => (
                             <tr key={index}>
                               <td className="border border-gray-800 text-center">
-                                {moment(rounds.created_date).format(
-                                  "DD/MM/YYYY"
+                                {moment(rounds.modified_date).format(
+                                  "DD/MM/YYYY (h:mm A)"
                                 )}
                               </td>
                               <td className="border border-gray-800 text-center">
