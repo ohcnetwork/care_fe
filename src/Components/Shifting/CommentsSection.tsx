@@ -54,30 +54,13 @@ const CommentSection = (props: CommentSectionProps) => {
   };
 
   return (
-    <div className="w-full flex flex-col">
-      <textarea
-        rows={3}
-        value={commentBox}
-        minLength={3}
-        placeholder="Type your comment"
-        className="mt-4 border border-gray-500 rounded-lg p-4"
-        onChange={(e) => setCommentBox(e.target.value)}
-      />
-      <div className="flex w-full justify-end">
-        <Button
-          onClick={onSubmitComment}
-          className="border border-solid border-primary-600 hover:border-primary-700 text-primary-600 hover:bg-white capitalize my-2 text-sm"
-        >
-          Post Your Comment
-        </Button>
-      </div>
-
-      <div className=" w-full">
+    <div className="w-full flex flex-col overflow-y-auto max-h-96">
+      <div className=" w-full mt-2">
         {isLoading ? (
           <CircularProgress />
         ) : (
           comments.map((comment: any) => (
-            <div className="flex p-4 bg-white rounded-lg text-gray-800 mt-4 flex-col w-full border border-gray-300">
+            <div className="flex p-4 bg-white rounded-lg text-gray-800 mt-2 flex-col w-full border border-gray-300">
               <div className="flex  w-full ">
                 <p className="text-justify">{comment.comment}</p>
               </div>
@@ -98,6 +81,25 @@ const CommentSection = (props: CommentSectionProps) => {
             </div>
           ))
         )}
+      </div>
+
+      <div className="sticky bottom-0 w-full bg-gray-100">
+        <textarea
+          rows={3}
+          value={commentBox}
+          minLength={3}
+          placeholder="Type your comment"
+          className="mt-2 border border-gray-500 rounded-lg p-4 w-full"
+          onChange={(e) => setCommentBox(e.target.value)}
+        />
+        <div className="flex w-full justify-end">
+          <Button
+            onClick={onSubmitComment}
+            className="border border-solid border-primary-600 hover:border-primary-700 text-primary-600 hover:bg-white capitalize my-2 text-sm"
+          >
+            Post Your Comment
+          </Button>
+        </div>
       </div>
     </div>
   );
