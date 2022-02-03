@@ -34,10 +34,15 @@ export const PressureSoreDiagrams = (props: any) => {
       );
       if (!status.aborted) {
         if (res && res.data) {
-          setResults(res.data);
-          let keys = Object.keys(res.data);
+          const keys = Object.keys(res.data.results || {}).filter(
+            (key) => res.data.results[key].pressure_sore.length
+          );
+          const data: any = {};
+          keys.forEach((key) => (data[key] = res.data.results[key]));
+
+          setResults(data);
           if (keys.length > 0) {
-            setSelectedDateData(res.data, keys[0]);
+            setSelectedDateData(data, keys[0]);
           }
         }
         setIsLoading(false);
@@ -48,7 +53,7 @@ export const PressureSoreDiagrams = (props: any) => {
 
   useEffect(() => {
     if (Object.keys(results).length > 0)
-      setSelectedDateData(results, Object.keys(results?.["results"])[0]);
+      setSelectedDateData(results, Object.keys(results)[0]);
   }, [results]);
 
   useAbortableEffect(
@@ -64,19 +69,19 @@ export const PressureSoreDiagrams = (props: any) => {
 
   useEffect(() => {
     if (Object.keys(results).length > 0)
-      setSelectedDateData(results, Object.keys(results?.["results"])[0]);
+      setSelectedDateData(results, Object.keys(results)[0]);
   }, [results]);
 
   const setSelectedDateData = (results: any, key: any) => {
     setData({
-      data: results["results"][key]?.["pressure_sore"],
-      id: results["results"][key]?.["id"],
+      data: results[key]?.["pressure_sore"],
+      id: results[key]?.["id"],
     });
   };
 
   let dates: any = [];
   if (Object.keys(results).length > 0) {
-    dates = Object.keys(results?.["results"]);
+    dates = Object.keys(results);
   }
 
   const dropdown = (dates: Array<any>) => {
