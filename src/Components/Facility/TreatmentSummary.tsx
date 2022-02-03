@@ -1,6 +1,10 @@
 import React, { useCallback, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { getPatient, getInvestigation } from "../../Redux/actions";
+import {
+  getPatient,
+  getInvestigation,
+  getDailyReport,
+} from "../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { PatientModel, DailyRoundsModel } from "../Patient/models";
 import { GENDER_TYPES } from "../../Common/constants";
@@ -9,26 +13,18 @@ import moment from "moment";
 const Loading = loadable(() => import("../Common/Loading"));
 
 const TreatmentSummary = (props: any) => {
+  const { setIsPrintMode, consultationData, dailyRoundsListData, patientId } =
+    props;
   const date = new Date();
   const dispatch: any = useDispatch();
   const [patientData, setPatientData] = useState<PatientModel>({});
   const [isLoading, setIsLoading] = useState(false);
   const [investigations, setInvestigations] = useState<Array<any>>([]);
-  const dailyRounds = props.dailyRoundsListData.filter(function (
-    round: DailyRoundsModel
-  ) {
-    if (
-      round["spo2"] ||
-      (round["temperature"] && round["temperature"] != "0.00")
-    )
-      return true;
-    return false;
-  });
+  const [dailyRounds, setDailyRounds] = useState<any>({});
 
   const fetchPatientData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const patientId = props.patientId;
       const res = await dispatch(getPatient({ id: patientId }));
       if (!status.aborted) {
         if (res && res.data) {
@@ -37,15 +33,14 @@ const TreatmentSummary = (props: any) => {
       }
       setIsLoading(false);
     },
-    [props.patientId, dispatch]
+    [patientId, dispatch]
   );
 
+  let consultationId = consultationData.id;
   const fetchInvestigationData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const res = await dispatch(
-        getInvestigation({}, props.consultationData.id)
-      );
+      const res = await dispatch(getInvestigation({}, consultationId));
 
       if (!status.aborted) {
         if (res && res?.data?.results) {
@@ -58,12 +53,29 @@ const TreatmentSummary = (props: any) => {
       }
       setIsLoading(false);
     },
-    [dispatch]
+    [consultationId, dispatch]
+  );
+
+  let limit = 1;
+
+  const fetchDailyRounds = useCallback(
+    async (status: statusType) => {
+      setIsLoading(true);
+      const res = await dispatch(getDailyReport({ limit }, { consultationId }));
+      if (!status.aborted) {
+        if (res && res.data) {
+          setDailyRounds(res.data.results);
+        }
+        setIsLoading(false);
+      }
+    },
+    [consultationId, limit, dispatch]
   );
 
   useAbortableEffect((status: statusType) => {
     fetchPatientData(status);
     fetchInvestigationData(status);
+    fetchDailyRounds(status);
   }, []);
 
   return (
@@ -80,7 +92,7 @@ const TreatmentSummary = (props: any) => {
               <i className="fas fa-print mr-2"></i> Print Treatment Summary
             </button>
             <button
-              onClick={(_) => props.setIsPrintMode(false)}
+              onClick={(_) => setIsPrintMode(false)}
               className="btn btn-default"
             >
               <i className="fas fa-times mr-2"></i> Close
@@ -89,7 +101,7 @@ const TreatmentSummary = (props: any) => {
 
           <div id="section-to-print" className="mx-5">
             <h2 className="text-center text-lg">
-              {props.consultationData.facility_name}
+              {consultationData.facility_name}
             </h2>
 
             <h2 className="text-center text-lg">INTERIM TREATMENT SUMMARY</h2>
@@ -115,8 +127,8 @@ const TreatmentSummary = (props: any) => {
                 <div className="col-span-1 py-2 px-3 border-r-2 border-gray-800">
                   <b>Date of admission :</b>
                   <span>
-                    {props.consultationData.admitted
-                      ? moment(props.consultationData.admission_date).format(
+                    {consultationData.admitted
+                      ? moment(consultationData.admission_date).format(
                           "DD/MM/YYYY"
                         )
                       : " ---"}
@@ -203,32 +215,30 @@ const TreatmentSummary = (props: any) => {
                 <div className="mx-5">
                   <div>
                     <b>History of present illness :</b>
-                    {props.consultationData.existing_medication
-                      ? props.consultationData.existing_medication
+                    {consultationData.existing_medication
+                      ? consultationData.existing_medication
                       : "    ---"}
                   </div>
 
                   <div>
                     <b>Examination details and clinical conditions :</b>
-                    {props.consultationData.examination_details
-                      ? props.consultationData.examination_details
+                    {consultationData.examination_details
+                      ? consultationData.examination_details
                       : "    ---"}
                   </div>
 
                   <div>
                     <b>Diagnosis :</b>
-                    {props.consultationData.diagnosis
-                      ? props.consultationData.diagnosis
+                    {consultationData.diagnosis
+                      ? consultationData.diagnosis
                       : "    ---"}
                   </div>
 
                   <div>
                     <b>Physical Examination info :</b>
-                    {props.dailyRoundsListData.length > 0 &&
-                    props.dailyRoundsListData["0"]["physical_examination_info"]
-                      ? props.dailyRoundsListData["0"][
-                          "physical_examination_info"
-                        ]
+                    {dailyRoundsListData.length > 0 &&
+                    dailyRoundsListData["0"]["physical_examination_info"]
+                      ? dailyRoundsListData["0"]["physical_examination_info"]
                       : "    ---"}
                   </div>
                 </div>
@@ -355,12 +365,12 @@ const TreatmentSummary = (props: any) => {
                           (rounds: DailyRoundsModel, index: number) => (
                             <tr key={index}>
                               <td className="border border-gray-800 text-center">
-                                {moment(rounds.created_date).format(
-                                  "DD/MM/YYYY"
+                                {moment(rounds.modified_date).format(
+                                  "DD/MM/YYYY (h:mm A)"
                                 )}
                               </td>
                               <td className="border border-gray-800 text-center">
-                                {rounds.spo2 || "-"}
+                                {rounds.ventilator_spo2 || "-"}
                               </td>
                               <td className="border border-gray-800 text-center">
                                 {rounds.temperature || "-"}
@@ -384,8 +394,8 @@ const TreatmentSummary = (props: any) => {
                     </tbody>
                   </table>
 
-                  {props.consultationData.prescribed_medication && (
-                    <p>{props.consultationData.prescribed_medication}</p>
+                  {consultationData.prescribed_medication && (
+                    <p>{consultationData.prescribed_medication}</p>
                   )}
                 </div>
               </div>
