@@ -232,105 +232,102 @@ const LiveFeed = (props: any) => {
       <PageTitle title="Live Feed" hideBack={true} />
       <div className="mt-4 flex flex-col">
         <div className="mt-4 relative flex flex-col md:flex-row">
-          {sourceUrl ? (
-            <>
-              <div>
-                <ReactPlayer
-                  url={sourceUrl}
-                  ref={liveFeedPlayerRef}
-                  playing={true}
-                  muted={true}
-                  onError={(
-                    e: any,
-                    data: any,
-                    hlsInstance: any,
-                    hlsGlobal: any
-                  ) => {
-                    // requestStream();
-                    console.log("Error", e);
-                    console.log("Data", data);
-                    console.log("HLS Instance", hlsInstance);
-                    console.log("HLS Global", hlsGlobal);
-                    if (e === "hlsError") {
-                      const recovered = hlsInstance.recoverMediaError();
-                      console.log(recovered);
-                    }
-                  }}
-                />
-                <div className="flex flex-row justify-between">
-                  <div className="mt-5 p-2 flex flex-row bg-green-100 border border-white rounded flex-1 justify-evenly">
-                    {cameraPTZ.map((option: any) => (
-                      <div
-                        key={option.action}
-                        onClick={(_) => {
-                          // console.log(option.action);
-                          requestPTZ(option.action);
-                        }}
-                      >
-                        <button className="bg-green-100 hover:bg-green-200 border border-green-100 rounded p-2">
-                          <span className="sr-only">{option.label}</span>
-                          <i className={`${option.icon} md:p-2`}></i>
-                        </button>
-                      </div>
-                    ))}
-                    <button
-                      className="bg-green-100 hover:bg-green-200 border border-green-100 rounded p-2"
-                      onClick={handleClickFullscreen}
-                    >
-                      <span className="sr-only">Full Screen</span>
-                      <i className="fas fa-expand hover:text-black"></i>
+          <div>
+            {sourceUrl ? (
+              <ReactPlayer
+                url={sourceUrl}
+                ref={liveFeedPlayerRef}
+                playing={true}
+                muted={true}
+                onError={(
+                  e: any,
+                  data: any,
+                  hlsInstance: any,
+                  hlsGlobal: any
+                ) => {
+                  // requestStream();
+                  console.log("Error", e);
+                  console.log("Data", data);
+                  console.log("HLS Instance", hlsInstance);
+                  console.log("HLS Global", hlsGlobal);
+                  if (e === "hlsError") {
+                    const recovered = hlsInstance.recoverMediaError();
+                    console.log(recovered);
+                  }
+                }}
+              />
+            ) : (
+              <div className="w-full max-w-xl bg-gray-500 flex flex-col justify-center items-center">
+                <p className="font-bold text-black">
+                  STATUS: <span className="text-red-600">OFFLINE</span>
+                </p>
+                <p className="font-semibold text-black">
+                  Feed is currently not live
+                </p>
+              </div>
+            )}
+            <div className="flex flex-row justify-between">
+              <div className="mt-5 p-2 flex flex-row bg-green-100 border border-white rounded flex-1 justify-evenly">
+                {cameraPTZ.map((option: any) => (
+                  <div
+                    key={option.action}
+                    onClick={(_) => {
+                      // console.log(option.action);
+                      requestPTZ(option.action);
+                    }}
+                  >
+                    <button className="bg-green-100 hover:bg-green-200 border border-green-100 rounded p-2">
+                      <span className="sr-only">{option.label}</span>
+                      <i className={`${option.icon} md:p-2`}></i>
                     </button>
                   </div>
-                  {/* <div className="flex flex-col justify-center mt-5 mr-4 md:mt-auto md:mr-0">
+                ))}
+                <button
+                  className="bg-green-100 hover:bg-green-200 border border-green-100 rounded p-2"
+                  onClick={handleClickFullscreen}
+                >
+                  <span className="sr-only">Full Screen</span>
+                  <i className="fas fa-expand hover:text-black"></i>
+                </button>
+              </div>
+              {/* <div className="flex flex-col justify-center mt-5 mr-4 md:mt-auto md:mr-0">
                     <button onClick={handleClickFullscreen}>
                     </button>
                   </div> */}
-                </div>
-              </div>
-              <div
-                className={
-                  (loading ? "absolute" : "hidden") +
-                  " bg-gray-500 bg-opacity-75 z-5 transition-opacity"
-                }
-                style={{ height: "360px", width: "640px" }}
-              >
-                {/* div with "Loading" at the center */}
-                <div className="flex justify-center items-center h-full">
-                  <svg
-                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      stroke-width="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
-                  <div className="text-white text-2xl">Moving Camera</div>
-                </div>
-              </div>
-            </>
-          ) : (
-            <div className="w-full max-w-xl bg-gray-500 flex flex-col justify-center items-center">
-              <p className="font-bold text-black">
-                STATUS: <span className="text-red-600">OFFLINE</span>
-              </p>
-              <p className="font-semibold text-black">
-                Feed is currently not live
-              </p>
             </div>
-          )}
-
+          </div>
+          <div
+            className={
+              (loading ? "absolute" : "hidden") +
+              " bg-gray-500 bg-opacity-75 z-5 transition-opacity"
+            }
+            style={{ height: "360px", width: "640px" }}
+          >
+            {/* div with "Loading" at the center */}
+            <div className="flex justify-center items-center h-full">
+              <svg
+                className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+              </svg>
+              <div className="text-white text-2xl">Moving Camera</div>
+            </div>
+          </div>
           <div className="grid grid-cols-2 md:ml-12 md:w-1/3 my-auto gap-4 mt-4 md:mt-0">
             {showDefaultPresets
               ? viewOptions.map((option: any) => (
