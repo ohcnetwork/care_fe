@@ -346,17 +346,25 @@ const LiveFeed = (props: any) => {
                   </div>
                 ))
               : bedPresets.map((preset: any, index: number) => (
-                  <div
-                    onClick={() => {
-                      setLoading(true);
-                      gotoBedPreset(preset);
-                    }}
-                    key={preset.id}
-                  >
-                    <button className="bg-green-100 border border-white rounded-md px-3 py-2 text-black font-semibold hover:bg-green-200 w-full">
+                  <div key={preset.id} className="flex">
+                    <button
+                      onClick={() => {
+                        setLoading(true);
+                        gotoBedPreset(preset);
+                      }}
+                      className="bg-green-100 rounded-tl-md rounded-bl-md  px-3 py-2 text-black font-semibold hover:bg-green-200 w-full"
+                    >
                       {preset.meta.preset_name
                         ? preset.meta.preset_name
                         : `Unnamed Preset ${index + 1}`}
+                    </button>
+                    <button
+                      onClick={() => {
+                        console.log(preset);
+                      }}
+                      className="bg-red-100 p-2 rounded-tr-md rounded-br-md hover:bg-red-200"
+                    >
+                      <i className="far fa-trash-alt"></i>
                     </button>
                   </div>
                 ))}
