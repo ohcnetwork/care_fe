@@ -144,6 +144,9 @@ export const DailyRounds = (props: any) => {
             admitted_to: res.data.admitted_to ? res.data.admitted_to : "Select",
           };
           dispatch({ type: "set_form", form: data });
+          if (res.data.bed) {
+            setIsTeleicu("true");
+          }
         }
         setIsLoading(false);
       }
