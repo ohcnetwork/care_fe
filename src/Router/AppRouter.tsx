@@ -50,7 +50,6 @@ import AssetCreate from "../Components/Facility/AssetCreate";
 import { withTranslation } from "react-i18next";
 import DeathReport from "../Components/DeathReport/DeathReport";
 import { make as CriticalCareRecording } from "../Components/CriticalCareRecording/CriticalCareRecording.gen";
-import { make as VentilatorParametersEditor } from "../Components/CriticalCareRecording/VentilatorParametersEditor/CriticalCare__VentilatorParametersEditor.bs";
 import ShowPushNotification from "../Components/Notifications/ShowPushNotification";
 import { NoticeBoard } from "../Components/Notifications/NoticeBoard";
 import { AddLocationForm } from "../Components/Facility/AddLocationForm";
@@ -61,15 +60,16 @@ import AssetsList from "../Components/Assets/AssetsList";
 import AssetManage from "../Components/Assets/AssetManage";
 import AssetConfigure from "../Components/Assets/AssetConfigure";
 import { DailyRoundListDetails } from "../Components/Patient/DailyRoundListDetails";
+import HubDashboard from "../Components/Dashboard/HubDashboard";
 
 const get = require("lodash.get");
 const img = process.env.REACT_APP_LIGHT_LOGO;
 const logoBlack = process.env.REACT_APP_BLACK_LOGO;
 
 const routes = {
-  "/critical_care_ventilator": () => (
+  "/hub": () => (
     <>
-      <VentilatorParametersEditor />
+      <HubDashboard />
     </>
   ),
   "/": () => <HospitalList />,

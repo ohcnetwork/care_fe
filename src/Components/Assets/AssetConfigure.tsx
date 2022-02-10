@@ -18,20 +18,11 @@ import LiveFeed from "../Facility/Consultations/LiveFeed";
 import { BedSelect } from "../Common/BedSelect";
 import { BedModel } from "../Facility/models";
 import axios from "axios";
+import { getCameraConfig } from "../../Utils/transformUtils";
 
 interface AssetConfigureProps {
   assetId: string;
 }
-const getCameraConfig = (asset: AssetData) => {
-  const { meta }: any = asset;
-  return {
-    id: asset.id,
-    hostname: meta.camera_address,
-    username: meta.camera_access_key.split(":")[0],
-    password: meta.camera_access_key.split(":")[1],
-    port: 80,
-  };
-};
 
 const AssetConfigure = (props: AssetConfigureProps) => {
   const { assetId } = props;
@@ -309,7 +300,7 @@ const AssetConfigure = (props: AssetConfigureProps) => {
         <CardContent>
           {asset?.meta?.asset_type === "CAMERA" && (
             <LiveFeed
-              middleWareHost={asset?.meta?.middleware_hostname}
+              middlewareHostname={asset?.meta?.middleware_hostname}
               asset={getCameraConfig(asset)}
               showRefreshButton={true}
             />

@@ -595,7 +595,7 @@ export const ConsultationDetails = (props: any) => {
           {tab === "FEED" && (
             <LiveFeed
               asset={cameraAsset}
-              middleWareHost={cameraMiddlewareHostname}
+              middlewareHostname={cameraMiddlewareHostname}
               config={cameraConfig}
             />
           )}

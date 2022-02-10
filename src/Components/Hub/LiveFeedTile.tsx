@@ -1,33 +1,43 @@
 import axios from "axios";
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
+import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
 import ReactPlayer from "react-player";
 import screenfull from "screenfull";
 import loadable from "@loadable/component";
-import { listAssetBeds } from "../../../Redux/actions";
-import RefreshIcon from "@material-ui/icons/Refresh";
-const PageTitle = loadable(() => import("../../Common/PageTitle"));
+import { getAsset, listAssetBeds } from "../../Redux/actions";
+import { statusType, useAbortableEffect } from "../../Common/utils";
 
-const LiveFeed = (props: any) => {
-  const middlewareHostname =
-    props.middlewareHostname || "dev_middleware.coronasafe.live";
-  const [asset, setAsset] = useState<any>(
-    props.asset ?? {
-      id: "",
-      hostname: "192.168.1.64",
-      port: "80",
-      username: "onvif_user",
-      password: "qwerty123",
-    }
-  );
-  const [sourceUrl, setSourceUrl] = useState<string>();
-  const [position, setPosition] = useState<any>();
-  const [presets, setPresets] = useState<any>([]);
-  const [bedPresets, setBedPresets] = useState<any>([]);
-  const [showDefaultPresets, setShowDefaultPresets] = useState<boolean>(false);
+interface LiveFeedTileProps {
+  assetId: string;
+}
 
-  const [loading, setLoading] = useState<boolean>(false);
+interface CameraPosition {
+  x: number;
+  y: number;
+  zoom: number;
+}
+
+// string:string dictionary
+interface CameraPreset {
+  [key: string]: string;
+}
+
+export default function LiveFeedTile(props: LiveFeedTileProps) {
   const dispatch: any = useDispatch();
+  const { assetId } = props;
+  const [sourceUrl, setSourceUrl] = useState<string>();
+  const [asset, setAsset] = useState<any>();
+  const [presets, setPresets] = useState<CameraPreset[]>([]);
+  const [bedPresets, setBedPresets] = useState<any>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [showControls, setShowControls] = useState<boolean>(false);
+  const [showDefaultPresets, setShowDefaultPresets] = useState<boolean>(false);
+  const [position, setPosition] = useState<CameraPosition>({
+    x: 0,
+    y: 0,
+    zoom: 0,
+  });
   useEffect(() => {
     let loadingTimeout: any;
     if (loading === true)
@@ -38,13 +48,41 @@ const LiveFeed = (props: any) => {
       if (loadingTimeout) clearTimeout(loadingTimeout);
     };
   }, [loading]);
+
+  const fetchData = useCallback(
+    async (status: statusType) => {
+      setLoading(true);
+      console.log("fetching asset");
+      const assetData: any = await dispatch(getAsset(assetId));
+      console.log("assetData", assetData);
+      if (!status.aborted) {
+        // setLoading(false);
+        if (!assetData.data)
+          Notification.Error({
+            msg: "Something went wrong..!",
+          });
+        else {
+          console.log("Asset Fetched", assetData.data);
+          setAsset(assetData.data);
+        }
+      }
+    },
+    [dispatch, assetId]
+  );
+
+  useAbortableEffect(
+    (status: statusType) => fetchData(status),
+    [dispatch, fetchData]
+  );
   const requestStream = () => {
     axios
-      .post(`https://${middlewareHostname}/start`, {
+      .post(`https://${asset.meta.middleware_hostname}/start`, {
         uri: "rtsp://remote:qwerty123@192.168.1.64:554/",
       })
       .then((resp: any) => {
-        setSourceUrl(`https://${middlewareHostname}${resp.data.uri}`);
+        setSourceUrl(
+          `https://${asset.meta.middleware_hostname}${resp.data.uri}`
+        );
       })
       .catch((ex: any) => {
         // console.error('Error while refreshing',ex);
@@ -54,10 +92,9 @@ const LiveFeed = (props: any) => {
     console.log("stop", url);
     if (url) {
       let urlSegments = url.split("/");
-      const x = urlSegments.pop();
       const id = urlSegments?.pop();
       axios
-        .post(`https://${middlewareHostname}/stop`, {
+        .post(`https://${asset.meta.middleware_hostname}/stop`, {
           id,
         })
         .then((resp: any) => {
@@ -72,7 +109,7 @@ const LiveFeed = (props: any) => {
   const getCameraStatus = (asset: any) => {
     axios
       .get(
-        `https://${middlewareHostname}/status?hostname=${asset.hostname}&port=${asset.port}&username=${asset.username}&password=${asset.password}`
+        `https://${asset.meta.middleware_hostname}/status?hostname=${asset.hostname}&port=${asset.port}&username=${asset.username}&password=${asset.password}`
       )
       .then((resp: any) => {
         setPosition(resp.data.position);
@@ -84,7 +121,7 @@ const LiveFeed = (props: any) => {
   const getPresets = (asset: any) => {
     axios
       .get(
-        `https://${middlewareHostname}/presets?hostname=${asset.hostname}&port=${asset.port}&username=${asset.username}&password=${asset.password}`
+        `https://${asset.meta.middleware_hostname}/presets?hostname=${asset.hostname}&port=${asset.port}&username=${asset.username}&password=${asset.password}`
       )
       .then((resp: any) => {
         setPresets(resp.data);
@@ -95,7 +132,7 @@ const LiveFeed = (props: any) => {
       });
   };
   const getBedPresets = async (asset: any) => {
-    const bedAssets = await dispatch(listAssetBeds({ asset: asset.id }));
+    const bedAssets = await dispatch(listAssetBeds({ asset: props.assetId }));
     setBedPresets(bedAssets.data.results);
   };
   const gotoBedPreset = (preset: any) => {
@@ -103,7 +140,7 @@ const LiveFeed = (props: any) => {
   };
   const gotoPreset = (preset: number) => {
     axios
-      .post(`https://${middlewareHostname}/gotoPreset`, {
+      .post(`https://${asset.meta.middleware_hostname}/gotoPreset`, {
         ...asset,
         preset,
       })
@@ -128,22 +165,22 @@ const LiveFeed = (props: any) => {
       // Relative X Y Coordinates
       switch (action) {
         case "up":
-          data.y = 0.1;
+          data.y = 0.05;
           break;
         case "down":
-          data.y = -0.1;
+          data.y = -0.05;
           break;
         case "left":
-          data.x = -0.1;
+          data.x = -0.05;
           break;
         case "right":
-          data.x = 0.1;
+          data.x = 0.05;
           break;
         case "zoomIn":
-          data.zoom = 0.1;
+          data.zoom = 0.05;
           break;
         case "zoomOut":
-          data.zoom = -0.1;
+          data.zoom = -0.05;
           break;
         case "stop":
           stopStream(sourceUrl);
@@ -157,7 +194,7 @@ const LiveFeed = (props: any) => {
           break;
       }
       axios
-        .post(`https://${middlewareHostname}/relativeMove`, {
+        .post(`https://${asset.meta.middleware_hostname}/relativeMove`, {
           ...data,
           ...asset,
         })
@@ -174,7 +211,7 @@ const LiveFeed = (props: any) => {
   const absoluteMove = (data: any) => {
     setLoading(true);
     axios
-      .post(`https://${middlewareHostname}/absoluteMove`, {
+      .post(`https://${asset.meta.middleware_hostname}/absoluteMove`, {
         ...data,
         ...asset,
       })
@@ -187,16 +224,16 @@ const LiveFeed = (props: any) => {
   };
 
   useEffect(() => {
-    requestStream();
-  }, []);
-
-  useEffect(() => {
-    getPresets(asset);
-    getBedPresets(asset);
-    if (props.config?.position) {
-      absoluteMove(props.config.position);
+    if (asset) {
+      getPresets(asset);
+      getBedPresets(asset);
+      requestStream();
     }
   }, [asset]);
+
+  useEffect(() => {
+    if (bedPresets.length > 0) absoluteMove(bedPresets[0].meta.position);
+  }, [bedPresets]);
 
   const liveFeedPlayerRef = useRef<any>(null);
   const handleClickFullscreen = () => {
@@ -229,36 +266,40 @@ const LiveFeed = (props: any) => {
 
   return (
     <div className="mt-4 px-6 mb-20">
-      <PageTitle title="Live Feed" hideBack={true} />
       <div className="mt-4 flex flex-col">
         <div className="mt-4 relative flex flex-col md:flex-row">
           <div>
             {sourceUrl ? (
-              <ReactPlayer
-                url={sourceUrl}
-                ref={liveFeedPlayerRef}
-                playing={true}
-                muted={true}
-                onError={(
-                  e: any,
-                  data: any,
-                  hlsInstance: any,
-                  hlsGlobal: any
-                ) => {
-                  // requestStream();
-                  console.log("Error", e);
-                  console.log("Data", data);
-                  console.log("HLS Instance", hlsInstance);
-                  console.log("HLS Global", hlsGlobal);
-                  if (e === "hlsError") {
-                    const recovered = hlsInstance.recoverMediaError();
-                    console.log(recovered);
-                  }
-                }}
-              />
+              <div
+                onMouseOver={(_) => setShowControls(true)}
+                onMouseLeave={(_) => setShowControls(false)}
+              >
+                <ReactPlayer
+                  url={sourceUrl}
+                  ref={liveFeedPlayerRef}
+                  playing={true}
+                  muted={true}
+                  onError={(
+                    e: any,
+                    data: any,
+                    hlsInstance: any,
+                    hlsGlobal: any
+                  ) => {
+                    // requestStream();
+                    console.log("Error", e);
+                    console.log("Data", data);
+                    console.log("HLS Instance", hlsInstance);
+                    console.log("HLS Global", hlsGlobal);
+                    if (e === "hlsError") {
+                      const recovered = hlsInstance.recoverMediaError();
+                      console.log(recovered);
+                    }
+                  }}
+                />
+              </div>
             ) : (
               <div
-                className="w-full max-w-xl bg-gray-500 flex flex-col justify-center items-center"
+                className="bg-gray-500 flex flex-col justify-center items-center"
                 style={{ height: "360px", width: "640px" }}
               >
                 <p className="font-bold text-black">
@@ -297,6 +338,17 @@ const LiveFeed = (props: any) => {
                     <button onClick={handleClickFullscreen}>
                     </button>
                   </div> */}
+            </div>
+          </div>
+          <div
+            className={
+              (showControls ? "absolute" : "hidden") +
+              " absolute bg-gray-500 bg-opacity-75 z-5 transition-opacity"
+            }
+            style={{ height: "360px", width: "640px" }}
+          >
+            <div className="flex justify-center items-center h-full">
+              <div className="bg-red-900 h-24 w-24"></div>
             </div>
           </div>
           <div
@@ -360,19 +412,6 @@ const LiveFeed = (props: any) => {
                     </button>
                   </div>
                 ))}
-            {props.showRefreshButton && (
-              <div
-                onClick={() => {
-                  setLoading(true);
-                  getBedPresets(asset);
-                  getPresets(asset);
-                }}
-              >
-                <button className="bg-green-200 border border-white rounded-md px-3 py-2 text-black font-semibold hover:bg-green-300 w-full">
-                  <RefreshIcon /> Refresh
-                </button>
-              </div>
-            )}
             <button
               className="bg-green-200 border border-white rounded-md px-3 py-2 text-black font-semibold hover:bg-green-300 w-full"
               onClick={() => {
@@ -388,6 +427,4 @@ const LiveFeed = (props: any) => {
       </div>
     </div>
   );
-};
-
-export default LiveFeed;
+}
