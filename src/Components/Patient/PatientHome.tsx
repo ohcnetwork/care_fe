@@ -24,6 +24,7 @@ import {
   patchPatient,
   dischargePatient,
   completeTransfer,
+  getDailyReport,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
 import AlertDialog from "../Common/AlertDialog";
@@ -50,6 +51,7 @@ import Modal from "@material-ui/core/Modal";
 import FormControl from "@material-ui/core/FormControl";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
+import { CovidPatientHome } from "./CovidPatientHome";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -101,6 +103,7 @@ export const PatientHome = (props: any) => {
   const [isShiftClicked, setIsShiftClicked] = useState(false);
   const [isShiftDataLoaded, setIsShiftDataLoaded] = useState(false);
   const [patientData, setPatientData] = useState<PatientModel>({});
+  const [vitals, setVitals] = useState<any>({});
   const [consultationListData, setConsultationListData] = useState<
     Array<ConsultationModel>
   >([]);
@@ -148,6 +151,45 @@ export const PatientHome = (props: any) => {
 
   const [dischargeSummaryState, setDischargeSummaryForm] = useState(
     initDischargeSummaryForm
+  );
+
+  const fetchVitals = useCallback(
+    async (status: statusType) => {
+      setIsLoading(true);
+      const res =
+        patientData?.last_consultation?.id &&
+        (await dispatch(
+          getDailyReport(
+            { limit: 1 },
+            { consultationId: patientData?.last_consultation?.id }
+          )
+        ));
+      if (!status.aborted) {
+        if (res && res.data) {
+          console.log(res.data.results[0]);
+          const { bp, pulse, resp, tempurature, spo2, rhythm, rhythm_detail } =
+            res.data.results[0] || {};
+          setVitals({
+            bp,
+            pulse,
+            resp,
+            tempurature,
+            spo2,
+            rhythm,
+            rhythm_detail,
+          });
+        }
+        setIsLoading(false);
+      }
+    },
+    [patientData?.last_consultation?.id, dispatch]
+  );
+
+  useAbortableEffect(
+    (status: statusType) => {
+      fetchVitals(status);
+    },
+    [patientData?.last_consultation?.id]
   );
 
   useEffect(() => {
@@ -595,7 +637,9 @@ export const PatientHome = (props: any) => {
     ));
   }
 
-  return (
+  return patientData?.disease_status === "POSITIVE" ? (
+    <CovidPatientHome facilityId={facilityId} id={id} />
+  ) : (
     <div className="px-2 pb-2">
       {showAlertMessage.show && (
         <AlertDialog
@@ -684,13 +728,17 @@ export const PatientHome = (props: any) => {
                 <i className="fas fa-hospital mr-2"></i>
                 {patientData.facility_object?.name || "-"}
               </h3>
-              <div className="grid grid-cols-1 gap-x-4 gap-y-2 md:gap-y-8 sm:grid-cols-3 mt-2">
+              <div className="grid grid-cols-1 gap-x-4 gap-y-2 md:gap-y-4 sm:grid-cols-3 mt-2">
                 <div className="sm:col-span-1">
                   <div className="text-sm leading-5 font-medium text-gray-500">
-                    Gender, Date of Birth
+                    Address
                   </div>
                   <div className="mt-1 text-sm leading-5 text-gray-900">
-                    {patientData?.date_of_birth}, {patientGender}
+                    {patientData.address}, {patientData.village}
+                  </div>
+                  <div className="mt-1 text-sm leading-5 text-gray-900">
+                    {patientData?.district_object?.name},{" "}
+                    {patientData?.state_object?.name} - {patientData.pincode}
                   </div>
                 </div>
                 <div className="sm:col-span-1">
@@ -733,6 +781,14 @@ export const PatientHome = (props: any) => {
                         <i className="fab fa-whatsapp"></i> Chat on WhatsApp
                       </a>
                     </div>
+                  </div>
+                </div>
+                <div className="sm:col-span-1">
+                  <div className="text-sm leading-5 font-medium text-gray-500">
+                    Gender, Date of Birth
+                  </div>
+                  <div className="mt-1 text-sm leading-5 text-gray-900">
+                    {patientData?.date_of_birth}, {patientGender}
                   </div>
                 </div>
                 <div className="sm:col-span-1">
@@ -813,6 +869,9 @@ export const PatientHome = (props: any) => {
                   <Badge color="yellow" icon="unlock" text="Transfer Allowed" />
                 ) : (
                   <Badge color="primary" icon="lock" text="Transfer Blocked" />
+                )}
+                {patientData.allergies && (
+                  <Badge color="red" icon="allergies" text="Has Allergies" />
                 )}
                 {patientData.is_antenatal && patientData.is_active && (
                   <Badge color="blue" icon="baby-carriage" text="Antenatal" />
@@ -1175,51 +1234,78 @@ export const PatientHome = (props: any) => {
           <div className="md:w-1/3 mx-2">
             <div className="bg-white rounded-lg shadow p-4 h-full space-y-2">
               <div className="border-b border-dashed text-gray-900 font-semibold text-center text-lg pb-2">
-                Location
+                Vitals
+              </div>
+
+              <div className="sm:col-span-1">
+                <div className="text-sm leading-5 font-medium text-gray-500">
+                  Blood Pressure
+                </div>
+                <div className="ml-2 mt-1 flex space-x-4">
+                  <div className="sm:col-span-1">
+                    <div className="text-sm leading-5 font-medium text-gray-700">
+                      Diastolic
+                    </div>
+                    <div className="mt-1 text-sm leading-5 whitespace-normal text-gray-900 break-words">
+                      {vitals?.bp?.diastolic || "-"}
+                    </div>
+                  </div>
+                  <div className="sm:col-span-1">
+                    <div className="text-sm leading-5 font-medium text-gray-700">
+                      Systolic
+                    </div>
+                    <div className="mt-1 text-sm leading-5 whitespace-normal text-gray-900 break-words">
+                      {vitals?.bp?.systolic || "-"}
+                    </div>
+                  </div>
+                  <div className="sm:col-span-1">
+                    <div className="text-sm leading-5 font-medium text-gray-700">
+                      Mean
+                    </div>
+                    <div className="mt-1 text-sm leading-5 whitespace-normal text-gray-900 break-words">
+                      {vitals?.bp?.mean || "-"}
+                    </div>
+                  </div>
+                </div>
               </div>
               <div className="sm:col-span-1">
                 <div className="text-sm leading-5 font-medium text-gray-500">
-                  Address
-                </div>
-                <div className="mt-1 text-sm leading-5 whitespace-normal text-gray-900 break-words">
-                  {patientData.address || "-"}
-                </div>
-              </div>
-              <div className="sm:col-span-1">
-                <div className="text-sm leading-5 font-medium text-gray-500">
-                  Village
+                  Pulse
                 </div>
                 <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {patientData.village || "-"}
+                  {vitals?.pulse || "-"}
                 </div>
               </div>
               <div className="sm:col-span-1">
                 <div className="text-sm leading-5 font-medium text-gray-500">
-                  Ward
+                  Respiratory Rate (bpm)
                 </div>
                 <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {(patientData.ward_object &&
-                    patientData.ward_object.number +
-                      ", " +
-                      patientData.ward_object.name) ||
-                    "-"}
+                  {vitals?.resp || "-"}
                 </div>
               </div>
               <div className="sm:col-span-1">
                 <div className="text-sm leading-5 font-medium text-gray-500">
-                  Local Body
+                  Tempurature
                 </div>
                 <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {patientData.local_body_object?.name || "-"}
+                  {vitals?.tempurature || "-"}
                 </div>
               </div>
               <div className="sm:col-span-1">
                 <div className="text-sm leading-5 font-medium text-gray-500">
-                  State, Country - Pincode
+                  Rhythm
                 </div>
                 <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {patientData?.state_object?.name},{" "}
-                  {patientData.nationality || "-"} - {patientData.pincode}
+                  {vitals?.rhythm || "-"}
+                </div>
+              </div>
+              <div className="sm:col-span-1">
+                <div className="text-sm leading-5 font-medium text-gray-500">
+                  Rhythm Details
+                </div>
+                <div className="mt-1 text-sm leading-5 text-gray-900">
+                  {vitals?.rhythm_detail || "-"}
                 </div>
               </div>
             </div>

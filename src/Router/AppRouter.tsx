@@ -12,7 +12,7 @@ import { TriageForm } from "../Components/Facility/TriageForm";
 import { DailyRounds } from "../Components/Patient/DailyRounds";
 import { PatientManager } from "../Components/Patient/ManagePatients";
 import PatientNotes from "../Components/Patient/PatientNotes";
-import { PatientHomeNonCovid } from "../Components/Patient/PatientHomeNonCovid";
+import { PatientHome } from "../Components/Patient/PatientHome";
 import { PatientRegister } from "../Components/Patient/PatientRegister";
 import { SampleDetails } from "../Components/Patient/SampleDetails";
 import SampleReport from "../Components/Patient/SamplePreview";
@@ -74,7 +74,7 @@ const routes = {
   "/user/add": () => <UserAdd />,
   "/user/profile": () => <UserProfile />,
   "/patients": () => <PatientManager />,
-  "/patient/:id": ({ id }: any) => <PatientHomeNonCovid id={id} />,
+  "/patient/:id": ({ id }: any) => <PatientHome id={id} />,
   "/patient/:id/investigation_reports": ({ id }: any) => (
     <InvestigationReports id={id} />
   ),
@@ -111,7 +111,7 @@ const routes = {
     <PatientRegister facilityId={facilityId} />
   ),
   "/facility/:facilityId/patient/:id": ({ facilityId, id }: any) => (
-    <PatientHomeNonCovid facilityId={facilityId} id={id} />
+    <PatientHome facilityId={facilityId} id={id} />
   ),
   "/facility/:facilityId/patient/:id/update": ({ facilityId, id }: any) => (
     <PatientRegister facilityId={facilityId} id={id} />
