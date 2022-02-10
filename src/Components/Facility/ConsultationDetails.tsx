@@ -363,15 +363,20 @@ export const ConsultationDetails = (props: any) => {
             <div className="sm:flex sm:items-baseline overflow-x-auto">
               <div className="mt-4 sm:mt-0">
                 <nav className="pl-2 flex space-x-6 overflow-x-auto pb-2 ">
-                  {CONSULTATION_TABS.map((p: OptionsType) => (
-                    <Link
-                      key={p.text}
-                      className={tabButtonClasses(tab === p.text)}
-                      href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/${p.text.toLocaleLowerCase()}`}
-                    >
-                      {p.desc}
-                    </Link>
-                  ))}
+                  {CONSULTATION_TABS.map((p: OptionsType) => {
+                    if (p.text === "FEED") {
+                      if (!consultationData?.last_daily_round?.bed) return null;
+                    }
+                    return (
+                      <Link
+                        key={p.text}
+                        className={tabButtonClasses(tab === p.text)}
+                        href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/${p.text.toLocaleLowerCase()}`}
+                      >
+                        {p.desc}
+                      </Link>
+                    );
+                  })}
                 </nav>
               </div>
             </div>

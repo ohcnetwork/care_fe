@@ -109,6 +109,7 @@ export interface ConsultationModel {
   ett_tt?: number;
   cuff_pressure?: number;
   lines?: any;
+  last_daily_round?: any;
 }
 export interface PatientStatsModel {
   id?: number;
