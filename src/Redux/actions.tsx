@@ -120,6 +120,88 @@ export const partialUpdateFacilityAssetLocation = (
     external_id,
   });
 
+// asset bed
+export const listAssetBeds = (params: object) =>
+  fireRequest("listAssetBeds", [], params, {});
+export const createAssetBed = (
+  params: object,
+  asset_id: string,
+  bed_id: string
+) =>
+  fireRequest(
+    "createAssetBed",
+    [],
+    { ...params, asset: asset_id, bed: bed_id },
+    {}
+  );
+
+export const getAssetBed = (
+  asset_external_id: string,
+  bed_id: string,
+  external_id: string
+) =>
+  fireRequest(
+    "getAssetBed",
+    [],
+    { asset: asset_external_id, bed: bed_id },
+    { external_id }
+  );
+export const updateAssetBed = (
+  params: object,
+  asset_external_id: string,
+  external_id: string,
+  bed_id: string
+) =>
+  fireRequest(
+    "updateAssetBed",
+    [],
+    { ...params, asset: asset_external_id, bed: bed_id },
+    {
+      external_id,
+    }
+  );
+
+// Facility Beds
+export const listFacilityBeds = (params: object) =>
+  fireRequest("listFacilityBeds", [], params, {});
+export const createFacilityBed = (
+  params: object,
+  facility_id: string,
+  location_id: string
+) =>
+  fireRequest(
+    "createFacilityBed",
+    [],
+    { ...params, facility: facility_id, location: location_id },
+    {}
+  );
+
+export const getFacilityBed = (
+  facility_external_id: string,
+  location_id: string,
+  external_id: string
+) =>
+  fireRequest(
+    "getFacilityBed",
+    [],
+    { facility: facility_external_id, location: location_id },
+    { external_id }
+  );
+export const updateFacilityBed = (
+  params: object,
+  facility_external_id: string,
+  external_id: string,
+  location_id: string
+) =>
+  fireRequest(
+    "updateFacilityBed",
+    [],
+    { ...params, facility: facility_external_id, location: location_id },
+    {
+      external_id,
+    }
+  );
+
 // Download Actions
 export const downloadFacility = () => {
   return fireRequest("downloadFacility");
@@ -563,8 +645,8 @@ export const getAsset = (id: string) =>
   fireRequest("getAsset", [], {}, { external_id: id });
 export const updateAsset = (id: string, params: object) =>
   fireRequest("updateAsset", [], params, { external_id: id });
-export const partialUpdateAsset = (id: string) =>
-  fireRequest("partialUpdateAsset", [], {}, { external_id: id });
+export const partialUpdateAsset = (id: string, params: object) =>
+  fireRequest("partialUpdateAsset", [], params, { external_id: id });
 
 export const listAssetTransaction = (params: object) =>
   fireRequest("listAssetTransaction", [], params);

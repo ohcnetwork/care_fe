@@ -339,7 +339,7 @@ export default function ResultList() {
                           r="10"
                           stroke="#f1edf7"
                           fill="white"
-                          stroke-width="4"
+                          strokeWidth="4"
                         />
                         <path
                           className=""
