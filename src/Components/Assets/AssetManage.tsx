@@ -178,33 +178,59 @@ const AssetManage = (props: AssetManageProps) => {
       <div className="bg-white rounded-lg md:p-6 p-3 shadow">
         <div className="md:flex justify-between">
           <div className="mb-2">
-            <div className="text-xl font-semibold">{asset?.name}</div>
-            <Typography>Location : {asset?.location_object.name}</Typography>
-            <Typography>
-              Facility : {asset?.location_object.facility.name}
-            </Typography>
-            <Typography>Serial Number : {asset?.serial_number}</Typography>
-            <Typography>Status : {status(asset?.status)}</Typography>
-            <Typography>
-              Warranty Details : {asset?.warranty_details}
-            </Typography>
-            <Typography>Type : {asset?.asset_type}</Typography>
-            <Typography>
-              Working status : {working_status(asset?.is_working)}
-            </Typography>
-            {!asset?.is_working && (
-              <Typography>
-                Not working reason : {asset?.not_working_reason}
+            <div className="text-2xl font-semibold mb-4">{asset?.name}</div>
+            <div className="grid grid-cols-3 gap-6">
+              <Typography className="flex flex-col">
+                <span className="font-bold">Location</span>
+                <span>{asset?.location_object.name || "--"}</span>
               </Typography>
-            )}
-            <Typography>Vendor Name : {asset?.vendor_name}</Typography>
-            <Typography>
-              Customer Support Name : {asset?.support_name}
-            </Typography>
-            <Typography>
-              Contact Phone Number : {asset?.support_phone}
-            </Typography>
-            <Typography>Contact Email : {asset?.support_email}</Typography>
+              <Typography className="flex flex-col">
+                <span className="font-bold">Facility</span>
+                <span>{asset?.location_object.facility.name || "--"}</span>
+              </Typography>
+              <Typography className="flex flex-col">
+                <span className="font-bold">Serial Number</span>
+                <span>{asset?.serial_number || "--"}</span>
+              </Typography>
+              <Typography className="flex flex-col">
+                <span className="font-bold">Warranty Details</span>
+                <span>{asset?.warranty_details || "--"}</span>
+              </Typography>
+              <Typography className="flex flex-col">
+                <span className="font-bold">Type</span>
+                <span>{asset?.asset_type || "--"}</span>
+              </Typography>
+              <Typography className="flex flex-col">
+                <span className="font-bold">Vendor Name</span>
+                <span>{asset?.vendor_name || "--"}</span>
+              </Typography>
+              <Typography className="flex flex-col">
+                <span className="font-bold">Customer Support Name</span>
+                <span>{asset?.support_name || "--"}</span>
+              </Typography>
+              <Typography className="flex flex-col">
+                <span className="font-bold">Contact Phone Number</span>
+                <span>{asset?.support_phone || "--"}</span>
+              </Typography>
+              <Typography className="flex flex-col">
+                <span className="font-bold">Contact Email</span>
+                <span>{asset?.support_email || "--"}</span>
+              </Typography>
+              <Typography className="flex flex-col">
+                <span className="font-bold">Status</span>
+                <span>{status(asset?.status)}</span>
+              </Typography>
+              <Typography className="flex flex-col">
+                <span className="font-bold">Working status</span>
+                <span>{working_status(asset?.is_working)}</span>
+              </Typography>
+              {!asset?.is_working && (
+                <Typography className="flex flex-col">
+                  <span className="font-bold">Not working reason</span>
+                  <span>{asset?.not_working_reason || "--"}</span>
+                </Typography>
+              )}
+            </div>
           </div>
           <div className="flex flex-col">
             <div className="mb-1">
