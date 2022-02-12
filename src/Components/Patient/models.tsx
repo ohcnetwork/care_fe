@@ -240,6 +240,7 @@ export interface SampleListModel {
 }
 
 export interface DailyRoundsModel {
+  ventilator_spo2?: number;
   spo2?: string;
   temperature?: string;
   temperature_measured_at?: string;

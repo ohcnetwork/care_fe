@@ -171,7 +171,7 @@ const initialState = {
   errors: { ...initError },
 };
 
-const initialStates = [{ id: 0, name: "Choose State *" }];
+const initialStates = [{ id: 0, name: "Choose State" }];
 const initialDistricts = [{ id: 0, name: "Choose District" }];
 const selectStates = [{ id: 0, name: "Please select your state" }];
 const initialLocalbodies = [{ id: 0, name: "Choose Localbody", number: 0 }];
@@ -1081,7 +1081,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
                         <div data-testid="phone-number" id="phone_number-div">
                           <PhoneNumberField
-                            label="Phone Number*"
+                            label="Phone Number *"
                             value={state.form.phone_number}
                             onChange={(value: any) => [
                               duplicateCheck(value),
@@ -1095,7 +1095,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           id="emergency_phone_number-div"
                         >
                           <PhoneNumberField
-                            label="Emergency contact number*"
+                            label="Emergency contact number *"
                             value={state.form.emergency_phone_number}
                             onChange={(value: any) => [
                               handleValueChange(
@@ -1607,7 +1607,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 <AutoCompleteMultiField
                                   id="countries-travelled"
                                   options={placesList}
-                                  label="Countries / Places Visited* (including transit stops)"
+                                  label="Countries / Places Visited (including transit stops) *"
                                   variant="outlined"
                                   placeholder="Select country or enter the place of visit"
                                   onChange={(e: object, value: any) =>
@@ -1869,6 +1869,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 <InputLabel
                                   id="last_vaccinated_date-label"
                                   htmlFor="last_vaccinated_date"
+                                  required
                                 >
                                   Last Date of Vaccination
                                 </InputLabel>

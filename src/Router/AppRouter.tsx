@@ -50,23 +50,26 @@ import AssetCreate from "../Components/Facility/AssetCreate";
 import { withTranslation } from "react-i18next";
 import DeathReport from "../Components/DeathReport/DeathReport";
 import { make as CriticalCareRecording } from "../Components/CriticalCareRecording/CriticalCareRecording.gen";
-import { make as VentilatorParametersEditor } from "../Components/CriticalCareRecording/VentilatorParametersEditor/CriticalCare__VentilatorParametersEditor.bs";
 import ShowPushNotification from "../Components/Notifications/ShowPushNotification";
 import { NoticeBoard } from "../Components/Notifications/NoticeBoard";
 import { AddLocationForm } from "../Components/Facility/AddLocationForm";
+import { AddBedForm } from "../Components/Facility/AddBedForm";
 import { LocationManagement } from "../Components/Facility/LocationManagement";
+import { BedManagement } from "../Components/Facility/BedManagement";
 import AssetsList from "../Components/Assets/AssetsList";
 import AssetManage from "../Components/Assets/AssetManage";
+import AssetConfigure from "../Components/Assets/AssetConfigure";
 import { DailyRoundListDetails } from "../Components/Patient/DailyRoundListDetails";
+import HubDashboard from "../Components/Dashboard/HubDashboard";
 
 const get = require("lodash.get");
 const img = process.env.REACT_APP_LIGHT_LOGO;
 const logoBlack = process.env.REACT_APP_BLACK_LOGO;
 
 const routes = {
-  "/critical_care_ventilator": () => (
+  "/hub": () => (
     <>
-      <VentilatorParametersEditor />
+      <HubDashboard />
     </>
   ),
   "/": () => <HospitalList />,
@@ -257,12 +260,20 @@ const routes = {
   "/facility/:facilityId/location": ({ facilityId }: any) => (
     <LocationManagement facilityId={facilityId} />
   ),
+  "/facility/:facilityId/location/:locationId/beds": ({
+    facilityId,
+    locationId,
+  }: any) => <BedManagement facilityId={facilityId} locationId={locationId} />,
   "/facility/:facilityId/inventory/add": ({ facilityId }: any) => (
     <AddInventoryForm facilityId={facilityId} />
   ),
   "/facility/:facilityId/location/add": ({ facilityId }: any) => (
     <AddLocationForm facilityId={facilityId} />
   ),
+  "/facility/:facilityId/location/:locationId/beds/add": ({
+    facilityId,
+    locationId,
+  }: any) => <AddBedForm facilityId={facilityId} locationId={locationId} />,
   "/facility/:facilityId/inventory/min_quantity/set": ({ facilityId }: any) => (
     <SetInventoryForm facilityId={facilityId} />
   ),
@@ -292,6 +303,9 @@ const routes = {
   ),
   "/assets": () => <AssetsList />,
   "/assets/:assetId": ({ assetId }: any) => <AssetManage assetId={assetId} />,
+  "/assets/:assetId/configure": ({ assetId }: any) => (
+    <AssetConfigure assetId={assetId} />
+  ),
 
   "/shifting": () =>
     localStorage.getItem("defaultShiftView") === "list" ? (
@@ -321,31 +335,27 @@ const routes = {
   "/death_report/:id": ({ id }: any) => <DeathReport id={id} />,
   "/notifications/:id": (id: any) => <ShowPushNotification external_id={id} />,
   "/notice_board/": () => <NoticeBoard />,
-  "/facility/:facilityId/patient/:patientId/consultation/:id": ({
+  "/facility/:facilityId/patient/:patientId/consultation/:consultationId": ({
     facilityId,
     patientId,
-    id,
+    consultationId,
   }: any) => (
     <ConsultationDetails
       facilityId={facilityId}
       patientId={patientId}
-      consultationId={id}
+      consultationId={consultationId}
       tab={"updates"}
     />
   ),
-  "/facility/:facilityId/patient/:patientId/consultation/:id/:tab": ({
-    facilityId,
-    patientId,
-    id,
-    tab,
-  }: any) => (
-    <ConsultationDetails
-      facilityId={facilityId}
-      patientId={patientId}
-      consultationId={id}
-      tab={tab}
-    />
-  ),
+  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/:tab":
+    ({ facilityId, patientId, consultationId, tab }: any) => (
+      <ConsultationDetails
+        facilityId={facilityId}
+        patientId={patientId}
+        consultationId={consultationId}
+        tab={tab}
+      />
+    ),
 };
 
 let menus = [

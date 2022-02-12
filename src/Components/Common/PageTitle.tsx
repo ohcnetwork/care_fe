@@ -14,13 +14,13 @@ interface PageTitleProps {
   };
 }
 
-const PageTitle = (props: PageTitleProps) => {
+export default function PageTitle(props: PageTitleProps) {
   const {
     title,
     hideBack,
     backUrl,
     className = "",
-    componentRight = () => <></>,
+    componentRight = <></>,
     breadcrumbs = true,
     crumbsReplacements = {},
   } = props;
@@ -50,6 +50,4 @@ const PageTitle = (props: PageTitleProps) => {
       </div>
     </div>
   );
-};
-
-export default PageTitle;
+}

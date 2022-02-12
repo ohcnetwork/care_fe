@@ -7,48 +7,65 @@ import {
   listFacilityAssetLocation,
   updateFacilityAssetLocation,
   getAnyFacility,
+  listFacilityBeds,
+  updateFacilityBed,
 } from "../../Redux/actions";
 import { navigate } from "raviger";
 import Pagination from "../Common/Pagination";
-import { LocationModel } from "./models";
+import { BedModel } from "./models";
 import { ReactElement } from "react";
 import {
   MultilineInputField,
+  SelectField,
   TextInputField,
 } from "../Common/HelperInputFields";
 import * as Notification from "../../Utils/Notifications.js";
 import classNames from "classnames";
+import { LOCATION_BED_TYPES } from "../../Common/constants";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
-interface LocationManagementProps {
+interface BedManagementProps {
   facilityId: string;
+  locationId: string;
 }
 
-interface LocationRowProps {
+interface BedRowProps {
   id: string;
   facilityId: string;
   name: string;
   description: string;
+  bedType: string;
   triggerRerender: () => void;
+  locationId: string;
 }
 
-const LocationRow = (props: LocationRowProps) => {
-  let { id, facilityId, name, description, triggerRerender } = props;
+const BedRow = (props: BedRowProps) => {
+  let {
+    id,
+    facilityId,
+    name,
+    description,
+    triggerRerender,
+    locationId,
+    bedType,
+  } = props;
 
   const dispatchAction: any = useDispatch();
   const [isEditable, setIsEditable] = useState(false);
   const [nameField, setNameField] = useState(name);
   const [descField, setDescField] = useState(description);
+  const [bedTypeField, setBedTypeField] = useState(bedType);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSave = async () => {
     setIsLoading(true);
     const res = await dispatchAction(
-      updateFacilityAssetLocation(
-        { name: nameField, description: descField },
+      updateFacilityBed(
+        { name: nameField, description: descField, bed_type: bedTypeField },
         facilityId,
-        id
+        id,
+        locationId
       )
     );
     setIsLoading(false);
@@ -70,6 +87,7 @@ const LocationRow = (props: LocationRowProps) => {
   const handleCancel = () => {
     setNameField(name);
     setDescField(description);
+    setBedTypeField(bedType);
     setIsEditable(false);
   };
 
@@ -105,7 +123,28 @@ const LocationRow = (props: LocationRowProps) => {
             errors=""
           />
         ) : (
-          <p className="text-gray-900 lowercase">{description}</p>
+          <p className="text-gray-900">{description}</p>
+        )}
+      </td>
+      <td className="px-5 py-5 border-b border-gray-200 text-sm">
+        {isEditable ? (
+          <SelectField
+            name="name"
+            variant="outlined"
+            margin="dense"
+            type="text"
+            value={bedTypeField}
+            onChange={(e) => setBedTypeField(e.target.value)}
+            options={LOCATION_BED_TYPES}
+            optionValue="name"
+          />
+        ) : (
+          <p className="text-gray-900">
+            {LOCATION_BED_TYPES.find((item) => item.id === bedType).name.slice(
+              0,
+              25
+            ) + (bedType.length > 25 ? "..." : "")}
+          </p>
         )}
       </td>
       <td className="px-5 py-5 border-b border-gray-200 text-sm">
@@ -153,37 +192,17 @@ const LocationRow = (props: LocationRowProps) => {
           </Button>
         )}
       </td>
-      <td>
-        {!isEditable && (
-          <Button
-            color="inherit"
-            variant="contained"
-            type="submit"
-            size="small"
-            style={{
-              marginLeft: "auto",
-              backgroundColor: "#4A2310",
-              color: "white",
-            }}
-            onClick={() =>
-              navigate(`/facility/${facilityId}/location/${id}/beds`)
-            }
-          >
-            Manage Beds
-          </Button>
-        )}
-      </td>
     </tr>
   );
 };
 
-export const LocationManagement = (props: LocationManagementProps) => {
-  const { facilityId } = props;
+export const BedManagement = (props: BedManagementProps) => {
+  const { facilityId, locationId } = props;
   const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
-  let location: ReactElement | null = null;
-  let locationsList: ReactElement[] | ReactElement = [];
-  const [locations, setLocations] = useState<LocationModel[]>([]);
+  let bed: ReactElement | null = null;
+  let BedList: ReactElement[] | ReactElement = [];
+  const [beds, setBeds] = useState<BedModel[]>([]);
   const [offset, setOffset] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
@@ -199,14 +218,16 @@ export const LocationManagement = (props: LocationManagementProps) => {
     async (status: statusType) => {
       setIsLoading(true);
       const res = await dispatchAction(
-        listFacilityAssetLocation(
-          { limit, offset },
-          { facility_external_id: facilityId }
-        )
+        listFacilityBeds({
+          limit,
+          offset,
+          facility: facilityId,
+          location: locationId,
+        })
       );
       if (!status.aborted) {
         if (res && res.data) {
-          setLocations(res.data.results);
+          setBeds(res.data.results);
           setTotalCount(res.data.count);
         }
         setIsLoading(false);
@@ -241,35 +262,38 @@ export const LocationManagement = (props: LocationManagementProps) => {
     setOffset(offset);
   };
 
-  if (locations && locations.length) {
-    locationsList = locations.map((locationItem: LocationModel) => (
-      <LocationRow
-        id={locationItem.id || ""}
+  if (beds && beds.length) {
+    BedList = beds.map((bedItem: BedModel) => (
+      <BedRow
+        id={bedItem.id || ""}
         facilityId={facilityId || ""}
-        name={locationItem.name || ""}
-        description={locationItem.description || ""}
+        name={bedItem.name || ""}
+        description={bedItem.description || ""}
+        bedType={bedItem.bed_type || ""}
         triggerRerender={triggerRerender}
+        key={locationId || ""}
+        locationId={locationId || ""}
       />
     ));
-  } else if (locations && locations.length === 0) {
-    locationsList = (
+  } else if (beds && beds.length === 0) {
+    BedList = (
       <tr className="bg-white">
         <td
           colSpan={3}
           className="px-5 py-5 border-b border-gray-200 text-center"
         >
           <p className="text-gray-500 whitespace-no-wrap">
-            No locations available
+            No beds available in this location
           </p>
         </td>
       </tr>
     );
   }
 
-  if (isLoading || !locations) {
-    location = <Loading />;
-  } else if (locations) {
-    location = (
+  if (isLoading || !beds) {
+    bed = <Loading />;
+  } else if (beds) {
+    bed = (
       <>
         <div className="-mx-4 sm:-mx-8 px-4 sm:px-8 py-4 overflow-x-auto">
           <table className="min-w-full leading-normal shadow rounded-lg overflow-hidden">
@@ -282,14 +306,14 @@ export const LocationManagement = (props: LocationManagementProps) => {
                   Description
                 </th>
                 <th className="px-5 py-3 border-b-2 border-gray-200 bg-primary-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
-                  Manage
+                  Bed Type
                 </th>
                 <th className="px-5 py-3 border-b-2 border-gray-200 bg-primary-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
-                  Beds
+                  Manage
                 </th>
               </tr>
             </thead>
-            <tbody>{locationsList}</tbody>
+            <tbody>{BedList}</tbody>
           </table>
         </div>
         {totalCount > limit && (
@@ -309,7 +333,7 @@ export const LocationManagement = (props: LocationManagementProps) => {
   return (
     <div>
       <PageTitle
-        title="Location Management"
+        title="Bed Management"
         hideBack={false}
         className="mx-3 md:mx-8"
         crumbsReplacements={{ [facilityId]: { name: facilityName } }}
@@ -319,11 +343,13 @@ export const LocationManagement = (props: LocationManagementProps) => {
           variant="contained"
           color="primary"
           size="small"
-          onClick={() => navigate(`/facility/${facilityId}/location/add`)}
+          onClick={() =>
+            navigate(`/facility/${facilityId}/location/${locationId}/beds/add`)
+          }
         >
-          Add Location
+          Add Bed
         </Button>
-        {location}
+        {bed}
       </div>
     </div>
   );
