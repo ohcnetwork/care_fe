@@ -11,15 +11,7 @@ const PageTitle = loadable(() => import("../../Common/PageTitle"));
 const LiveFeed = (props: any) => {
   const middlewareHostname =
     props.middlewareHostname || "dev_middleware.coronasafe.live";
-  const [asset, setAsset] = useState<any>(
-    props.asset ?? {
-      id: "",
-      hostname: "192.168.1.64",
-      port: "80",
-      username: "onvif_user",
-      password: "qwerty123",
-    }
-  );
+  const [asset, setAsset] = useState<any>(props.asset);
   const [sourceUrl, setSourceUrl] = useState<string>();
   const [position, setPosition] = useState<any>();
   const [presets, setPresets] = useState<any>([]);
@@ -41,7 +33,7 @@ const LiveFeed = (props: any) => {
   const requestStream = () => {
     axios
       .post(`https://${middlewareHostname}/start`, {
-        uri: "rtsp://remote:qwerty123@192.168.1.64:554/",
+        uri: `rtsp://${asset.username}:${asset.password}@${asset.hostname}:554/`,
       })
       .then((resp: any) => {
         setSourceUrl(`https://${middlewareHostname}${resp.data.uri}`);
