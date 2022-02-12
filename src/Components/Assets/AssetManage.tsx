@@ -232,7 +232,7 @@ const AssetManage = (props: AssetManageProps) => {
               )}
             </div>
           </div>
-          <div className="flex flex-col">
+          <div className="flex mt-2 flex-col">
             <div className="mb-1">
               <QRCode
                 bgColor="#FFFFFF"
