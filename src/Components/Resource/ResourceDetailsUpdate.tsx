@@ -77,7 +77,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [assignedQuantity, setAssignedQuantity] = useState(0);
   const [requestTitle, setRequestTitle] = useState("");
-
+  const [approvingFacility, SetApprovingFacility] = useState();
   const resourceFormReducer = (state = initialState, action: any) => {
     switch (action.type) {
       case "set_form": {
@@ -129,6 +129,9 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
   const setFacility = (selected: any, name: string) => {
     const form = { ...state.form };
     form[name] = selected;
+    if (selected && name == "approving_facility_object") {
+      SetApprovingFacility(selected.id);
+    }
     dispatch({ type: "set_form", form });
   };
 
@@ -179,6 +182,8 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
         if (res && res.data) {
           setRequestTitle(res.data.title);
           setAssignedQuantity(res.data.assigned_quantity);
+          SetApprovingFacility(res.data.approving_facility_object.id);
+
           dispatch({ type: "set_form", form: res.data });
         }
         setIsLoading(false);
