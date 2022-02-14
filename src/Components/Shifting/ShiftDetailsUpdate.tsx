@@ -112,23 +112,23 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
 
   const [state, dispatch] = useReducer(shiftFormReducer, initialState);
 
-  useEffect(() => {
-    async function fetchData() {
-      if (state.form.assigned_to) {
-        setAssignedUserLoading(true);
+  // useEffect(() => {
+  //   async function fetchData() {
+  //     if (state.form.assigned_to) {
+  //       setAssignedUserLoading(true);
 
-        const res = await dispatchAction(
-          getUserList({ id: state.form.assigned_to })
-        );
+  //       const res = await dispatchAction(
+  //         getUserList({ id: state.form.assigned_to })
+  //       );
 
-        if (res && res.data && res.data.count)
-          SetAssignedUser(res.data.results[0]);
+  //       if (res && res.data && res.data.count)
+  //         SetAssignedUser(res.data.results[0]);
 
-        setAssignedUserLoading(false);
-      }
-    }
-    fetchData();
-  }, [dispatchAction, state.form.assigned_to]);
+  //       setAssignedUserLoading(false);
+  //     }
+  //   }
+  //   fetchData();
+  // }, [dispatchAction, state.form.assigned_to]);
 
   const validateForm = () => {
     let errors = { ...initError };
