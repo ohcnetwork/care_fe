@@ -1,5 +1,5 @@
 import loadable from "@loadable/component";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import moment from "moment";
@@ -13,23 +13,35 @@ export const UserSelect = (props: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const fetchUsers = useCallback(
-    async (status: statusType) => {
+  // const fetchUsers = useCallback(
+  //   async (status: statusType) => {
+  //     setIsLoading(true);
+  //     const res = await dispatchAction(getFacilityUsers(facilityId));
+  //     if (!status.aborted) {
+  //       if (res && res.data) {
+  //         setUsers(res.data);
+  //       }
+  //       setIsLoading(false);
+  //     }
+  //   },
+  //   [facilityId, dispatchAction]
+  // );
+
+  useEffect(() => {
+    async function fetchUsers() {
       setIsLoading(true);
       const res = await dispatchAction(getFacilityUsers(facilityId));
-      if (!status.aborted) {
-        if (res && res.data) {
-          setUsers(res.data);
-        }
-        setIsLoading(false);
+      if (res && res.data) {
+        setUsers(res.data);
       }
-    },
-    [facilityId, dispatchAction]
-  );
+      setIsLoading(false);
+    }
 
-  useAbortableEffect((status: statusType) => {
-    fetchUsers(status);
-  }, []);
+    fetchUsers();
+  }, [dispatchAction, facilityId]);
+  // useAbortableEffect((status: statusType) => {
+  //   fetchUsers(status);
+  // }, []);
 
   const selectedUser = users.find((item: any) => item.id === userId);
 

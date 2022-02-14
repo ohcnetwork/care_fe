@@ -22,7 +22,7 @@ import {
   BREATHLESSNESS_LEVEL,
   KASP_FULL_STRING,
 } from "../../Common/constants";
-import { UserSelect } from "../Common/UserSelect2";
+import { UserSelect } from "../Common/UserSelect";
 import { CircularProgress } from "@material-ui/core";
 
 import {
@@ -90,7 +90,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [assignedUser, SetAssignedUser] = useState(null);
   const [assignedUserLoading, setAssignedUserLoading] = useState(false);
-
+  const [shiftingFacility, SetShiftingFacility] = useState();
   const shiftFormReducer = (state = initialState, action: any) => {
     switch (action.type) {
       case "set_form": {
@@ -151,16 +151,20 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     dispatch({ type: "set_form", form });
   };
 
-  const handleOnSelect = (user: any) => {
+  const handleOnSelect = (id: string) => {
     const form = { ...state.form };
-    form["assigned_to"] = user?.id;
-    SetAssignedUser(user);
+    form["assigned_to"] = id;
+    // SetAssignedUser(user);
     dispatch({ type: "set_form", form });
   };
 
   const setFacility = (selected: any, name: string) => {
     const form = { ...state.form };
     form[name] = selected;
+    if (selected && name === "shifting_approving_facility_object") {
+      SetShiftingFacility(selected.id);
+    }
+
     dispatch({ type: "set_form", form });
   };
 
@@ -216,6 +220,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
         if (res && res.data) {
           const d = res.data;
           d["initial_status"] = res.data.status;
+          SetShiftingFacility(res.data.shifting_approving_facility_object.id);
           dispatch({ type: "set_form", form: d });
         }
         setIsLoading(false);
@@ -258,18 +263,16 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                   className="bg-white h-14 w-1/3 mt-2 shadow-sm md:text-sm md:leading-5"
                 />
               </div>
-              <div className="w-64 flex-none">
-                <span className="text-sm font-semibold">Assigned To</span>
+              <div className=" flex-none">
                 <div className="">
                   {assignedUserLoading ? (
                     <CircularProgress size={20} />
                   ) : (
                     <UserSelect
-                      multiple={false}
-                      selected={assignedUser}
-                      setSelected={handleOnSelect}
-                      className="shifting-page-filter-dropdown"
-                      errors={""}
+                      userId={state.form.assigned_to}
+                      onSelect={handleOnSelect}
+                      facilityId={shiftingFacility}
+                      placeholder="Assign a Shifting Staff"
                     />
                   )}
                 </div>
