@@ -67,6 +67,7 @@ export const DailyRoundsList = (props: any) => {
     );
   } else if (dailyRoundsListData.length > 0) {
     roundsList = dailyRoundsListData.map((itemData, idx) => {
+      console.log(itemData);
       const telemedicine_doctor_update =
         itemData.created_by_telemedicine ||
         itemData.last_updated_by_telemedicine;
@@ -188,11 +189,17 @@ export const DailyRoundsList = (props: any) => {
                 </button>
                 <button
                   className="btn btn-default"
-                  onClick={(e) =>
-                    navigate(
-                      `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${itemData.id}/update`
-                    )
-                  }
+                  onClick={(e) => {
+                    if (itemData.rounds_type === "NORMAL") {
+                      navigate(
+                        `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${itemData.id}/update`
+                      );
+                    } else {
+                      navigate(
+                        `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${itemData.id}/update`
+                      );
+                    }
+                  }}
                 >
                   <i className="fas fa-pencil-alt mr-2" />
                   Update Log
