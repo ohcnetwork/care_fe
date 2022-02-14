@@ -277,16 +277,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                   )}
                 </div>
               </div>
-              {/* <div className="md:col-span-1">
-                <UserSelect
-                  userId={state.form.assigned_to}
-                  onSelect={handleOnSelect}
-                  facilityId={
-                    state.form?.shifting_approving_facility_object?.id
-                  }
-                  placeholder="Assign a Shifting Staff"
-                />
-              </div> */}
+
               <div>
                 <InputLabel>Name of shifting approving facility</InputLabel>
                 <FacilitySelect
@@ -390,19 +381,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                 </RadioGroup>
                 <ErrorHelperText error={state.errors.is_up_shift} />
               </div>
-              {/*
-                            <div>
-                                <InputLabel>Vehicle preference</InputLabel>
-                                <TextInputField
-                                    fullWidth
-                                    name="vehicle_preference"
-                                    variant="outlined"
-                                    margin="dense"
-                                    value={state.form.vehicle_preference}
-                                    onChange={handleChange}
-                                    errors={state.errors.vehicle_preference}
-                                />
-                            </div> */}
+
               <div className="md:col-span-1">
                 <InputLabel>Preferred Vehicle*</InputLabel>
                 <SelectField

@@ -12,21 +12,6 @@ export const UserSelect = (props: any) => {
   const [users, setUsers] = useState(new Array<any>());
   const [isLoading, setIsLoading] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
-
-  // const fetchUsers = useCallback(
-  //   async (status: statusType) => {
-  //     setIsLoading(true);
-  //     const res = await dispatchAction(getFacilityUsers(facilityId));
-  //     if (!status.aborted) {
-  //       if (res && res.data) {
-  //         setUsers(res.data);
-  //       }
-  //       setIsLoading(false);
-  //     }
-  //   },
-  //   [facilityId, dispatchAction]
-  // );
-
   useEffect(() => {
     async function fetchUsers() {
       setIsLoading(true);
@@ -39,9 +24,6 @@ export const UserSelect = (props: any) => {
 
     fetchUsers();
   }, [dispatchAction, facilityId]);
-  // useAbortableEffect((status: statusType) => {
-  //   fetchUsers(status);
-  // }, []);
 
   const selectedUser = users.find((item: any) => item.id === userId);
 
