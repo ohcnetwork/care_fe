@@ -1,3 +1,4 @@
+/* eslint-disable eqeqeq */
 import axios from "axios";
 import React, { useEffect, useState, useRef } from "react";
 import { useDispatch } from "react-redux";
@@ -20,6 +21,8 @@ const LiveFeed = (props: any) => {
 
   const [loading, setLoading] = useState<boolean>(false);
   const dispatch: any = useDispatch();
+  const liveFeedPlayerRef = useRef<any>(null);
+  const videRef = useRef<any>(null);
   useEffect(() => {
     let loadingTimeout: any;
     if (loading === true)
@@ -30,7 +33,8 @@ const LiveFeed = (props: any) => {
       if (loadingTimeout) clearTimeout(loadingTimeout);
     };
   }, [loading]);
-  const requestStream = () => {
+  const videoEl = videRef.current as HTMLVideoElement;
+  const requestStream = async () => {
     axios
       .post(`https://${middlewareHostname}/start`, {
         uri: `rtsp://${asset.username}:${asset.password}@${asset.hostname}:554/`,
@@ -39,8 +43,147 @@ const LiveFeed = (props: any) => {
         setSourceUrl(`https://${middlewareHostname}${resp.data.uri}`);
       })
       .catch((ex: any) => {
-        // console.error('Error while refreshing',ex);
+        // console.error('Error while refreshing',ex)
       });
+    // const videoEl = videRef.current as HTMLVideoElement;
+    let baseUrl = "";
+    // axios
+    //   .get("http://127.0.0.1:8084/streams", {
+    //     auth: {
+    //       username: "demo",
+    //       password: "demo",
+    //     },
+    //   })
+    //   .then((res) => {
+    //     baseUrl = res.data?.payload?.demo?.channels?.[0]?.url;
+    //     baseUrl = url.replace("rtsp", "ws");
+    let url = `ws://demo:demo@localhost:8084/stream/demo/channel/0/mse?uuid=demo&channel=0`;
+
+    console.log(url);
+    console.log(videoEl);
+    let mseQueue: any = [],
+      mseSourceBuffer: any,
+      mseStreamingStarted = false;
+    function Utf8ArrayToStr(array: string | any[] | Uint8Array) {
+      var out, i, len, c;
+      var char2, char3;
+      out = "";
+      len = array.length;
+      i = 0;
+      while (i < len) {
+        c = array[i++];
+        switch (c >> 4) {
+          case 7:
+            out += String.fromCharCode(c);
+            break;
+          case 13:
+            char2 = array[i++];
+            out += String.fromCharCode(((c & 0x1f) << 6) | (char2 & 0x3f));
+            break;
+          case 14:
+            char2 = array[i++];
+            char3 = array[i++];
+            out += String.fromCharCode(
+              ((c & 0x0f) << 12) | ((char2 & 0x3f) << 6) | ((char3 & 0x3f) << 0)
+            );
+            break;
+        }
+      }
+      return out;
+    }
+    function startPlay() {
+      // location.protocol == 'https:' ? protocol = 'wss' : protocol = 'ws';
+      let mse = new MediaSource();
+      if (videoEl) {
+        videoEl.src = window.URL.createObjectURL(mse);
+      }
+      mse.addEventListener(
+        "sourceopen",
+        function () {
+          let ws = new WebSocket(url);
+          ws.binaryType = "arraybuffer";
+          ws.onopen = function (event) {
+            console.log("Connect to ws");
+          };
+          ws.onmessage = function (event) {
+            let data = new Uint8Array(event.data);
+            if (data[0] == 9) {
+              let decoded_arr = data.slice(1);
+              let mimeCodec;
+              if (window.TextDecoder) {
+                mimeCodec = new TextDecoder("utf-8").decode(decoded_arr);
+              } else {
+                mimeCodec = Utf8ArrayToStr(decoded_arr);
+              }
+              mseSourceBuffer = mse.addSourceBuffer(
+                'video/mp4; codecs="' + mimeCodec + '"'
+              );
+              mseSourceBuffer.mode = "segments";
+              mseSourceBuffer.addEventListener("updateend", pushPacket);
+            } else {
+              readPacket(event.data);
+            }
+          };
+        },
+        false
+      );
+    }
+
+    function pushPacket() {
+      if (!mseSourceBuffer.updating) {
+        if (mseQueue.length > 0) {
+          let packet = mseQueue.shift();
+          mseSourceBuffer.appendBuffer(packet);
+        } else {
+          mseStreamingStarted = false;
+        }
+      }
+      if (videoEl.buffered.length > 0) {
+        if (typeof document.hidden !== "undefined" && document.hidden) {
+          //no sound, browser paused video without sound in background
+          videoEl.currentTime =
+            videoEl.buffered.end(videoEl.buffered.length - 1) - 0.5;
+        }
+      }
+    }
+
+    function readPacket(packet: any) {
+      if (!mseStreamingStarted) {
+        mseSourceBuffer.appendBuffer(packet);
+        mseStreamingStarted = true;
+        return;
+      }
+      mseQueue.push(packet);
+      if (!mseSourceBuffer.updating) {
+        pushPacket();
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      videoEl.addEventListener("loadeddata", () => {
+        videoEl.play();
+      });
+
+      //fix stalled video in safari
+      videoEl.addEventListener("pause", () => {
+        if (
+          videoEl.currentTime >
+          videoEl.buffered.end(videoEl.buffered.length - 1)
+        ) {
+          videoEl.currentTime =
+            videoEl.buffered.end(videoEl.buffered.length - 1) - 0.1;
+          videoEl.play();
+        }
+      });
+
+      videoEl.addEventListener("error", (e) => {
+        console.log("video_error", e);
+      });
+      startPlay();
+    });
+    startPlay();
+    // })
+    // .catch(console.error)
   };
   const stopStream = (url: string | undefined) => {
     console.log("stop", url);
@@ -180,7 +323,7 @@ const LiveFeed = (props: any) => {
 
   useEffect(() => {
     requestStream();
-  }, []);
+  }, [videoEl]);
 
   useEffect(() => {
     getPresets(asset);
@@ -190,7 +333,6 @@ const LiveFeed = (props: any) => {
     }
   }, [asset]);
 
-  const liveFeedPlayerRef = useRef<any>(null);
   const handleClickFullscreen = () => {
     if (screenfull.isEnabled) {
       if (liveFeedPlayerRef.current) {
@@ -222,32 +364,45 @@ const LiveFeed = (props: any) => {
   return (
     <div className="mt-4 px-6 mb-20">
       <PageTitle title="Live Feed" hideBack={true} />
+
       <div className="mt-4 flex flex-col">
-        <div className="mt-4 relative flex flex-col md:flex-row">
-          <div>
+        <div className="mt-4 relative">
+          <div className="grid grid-cols-2">
+            <video
+              id="mse-video"
+              autoPlay
+              muted
+              playsInline
+              width="100%"
+              ref={videRef}
+              controls
+            ></video>
             {sourceUrl ? (
-              <ReactPlayer
-                url={sourceUrl}
-                ref={liveFeedPlayerRef}
-                playing={true}
-                muted={true}
-                onError={(
-                  e: any,
-                  data: any,
-                  hlsInstance: any,
-                  hlsGlobal: any
-                ) => {
-                  // requestStream();
-                  console.log("Error", e);
-                  console.log("Data", data);
-                  console.log("HLS Instance", hlsInstance);
-                  console.log("HLS Global", hlsGlobal);
-                  if (e === "hlsError") {
-                    const recovered = hlsInstance.recoverMediaError();
-                    console.log(recovered);
-                  }
-                }}
-              />
+              <>
+                {" "}
+                <ReactPlayer
+                  url={sourceUrl}
+                  ref={liveFeedPlayerRef}
+                  playing={true}
+                  muted={true}
+                  onError={(
+                    e: any,
+                    data: any,
+                    hlsInstance: any,
+                    hlsGlobal: any
+                  ) => {
+                    // requestStream();
+                    console.log("Error", e);
+                    console.log("Data", data);
+                    console.log("HLS Instance", hlsInstance);
+                    console.log("HLS Global", hlsGlobal);
+                    if (e === "hlsError") {
+                      const recovered = hlsInstance.recoverMediaError();
+                      console.log(recovered);
+                    }
+                  }}
+                />
+              </>
             ) : (
               <div
                 className="w-full max-w-xl bg-gray-500 flex flex-col justify-center items-center"
