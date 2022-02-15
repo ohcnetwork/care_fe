@@ -206,7 +206,7 @@ export const FacilityHome = (props: any) => {
           </button>
         </DialogActions>
       </Dialog>
-      <div className="bg-white rounded-lg md:p-6 p-3 shadow">
+      <div className="bg-white rounded-lg md:p-6 shadow">
         <div className="md:flex justify-between gap-2">
           <div>
             <h1 className="text-4xl font-bold">{facilityData.name}</h1>
@@ -282,7 +282,7 @@ export const FacilityHome = (props: any) => {
               </button>
             </div>
           </div>
-          <div className="flex flex-col">
+          <div className="flex flex-col mt-4">
             <button
               id="update-facility"
               className="btn-primary btn"
@@ -340,7 +340,9 @@ export const FacilityHome = (props: any) => {
           </div>
         </div>
         <div className="mt-6">
-          <h1 className="text-xl font-semibold mb-4">Oxygen Capacity</h1>
+          <h1 className="text-xl font-semibold mb-6 pb-4 md:border-b">
+            Information on Oxygen
+          </h1>
 
           <div className="grid grid-cols-5 mb-6 max-w-2xl overflow-scroll">
             <div className="border p-2"></div>
@@ -361,7 +363,9 @@ export const FacilityHome = (props: any) => {
             <div className="border p-2 text-right ">
               {facilityData.type_d_cylinders}
             </div>
-            <div className="border p-2 font-semibold">Expected</div>
+            <div className="border p-2 font-semibold">
+              Daily Expected Consumption
+            </div>
             <div className="border p-2 text-right">
               {facilityData.expected_oxygen_requirement}
             </div>
