@@ -3,9 +3,11 @@ import Common from "./Common.json";
 import Entities from "./Entities.json";
 import Facility from "./Facility.json";
 
-export default {
+const malayalam = {
   ...Auth,
   ...Common,
   ...Entities,
   ...Facility,
 };
+
+export default malayalam;
