@@ -246,7 +246,7 @@ export const UserAdd = (props: UserProps) => {
       }
       setIsStateLoading(false);
     },
-    [dispatchAction]
+    [dispatchAction, username]
   );
 
   useAbortableEffect(

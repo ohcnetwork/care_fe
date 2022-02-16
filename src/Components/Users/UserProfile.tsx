@@ -12,7 +12,7 @@ import {
   TextInputField,
 } from "../Common/HelperInputFields";
 import { parsePhoneNumberFromString } from "libphonenumber-js/max";
-import { validateEmailAddress, phonePreg } from "../../Common/validation";
+import { validateEmailAddress } from "../../Common/validation";
 import * as Notification from "../../Utils/Notifications.js";
 import { checkIfLatestBundle } from "../../Utils/build-meta-info";
 import LanguageSelector from "../../Components/Common/LanguageSelector";

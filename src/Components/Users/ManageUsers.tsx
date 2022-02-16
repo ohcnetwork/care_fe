@@ -19,7 +19,6 @@ import { FacilityModel } from "../Facility/models";
 import DeleteForeverIcon from "@material-ui/icons/DeleteForever";
 import { IconButton } from "@material-ui/core";
 import LinkFacilityDialog from "./LinkFacilityDialog";
-import { SelectField } from "../Common/HelperInputFields";
 import UserDeleteDialog from "./UserDeleteDialog";
 import * as Notification from "../../Utils/Notifications.js";
 import classNames from "classnames";
