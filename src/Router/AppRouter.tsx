@@ -477,7 +477,7 @@ const AppRouter = (props: any) => {
                       ? "mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-white rounded-md bg-primary-900 focus:outline-none focus:bg-primary-900 transition ease-in-out duration-150"
                       : "mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-primary-300 rounded-md hover:text-white hover:bg-primary-700 focus:outline-none focus:bg-primary-900 transition ease-in-out duration-150";
                     return (
-                      <a
+                      <button
                         key={item.title}
                         onClick={() => navigate(item.link, true)}
                         className={selectedClasses}
@@ -492,7 +492,7 @@ const AppRouter = (props: any) => {
                           }
                         ></i>
                         {t(item.title)}
-                      </a>
+                      </button>
                     );
                   })}
                   <NotificationsList />
@@ -507,7 +507,7 @@ const AppRouter = (props: any) => {
                 </nav>
               </div>
               <div className="flex-shrink-0 flex border-t border-primary-700 p-4">
-                <a href="#" className="flex-shrink-0 w-full group block">
+                <div className="flex-shrink-0 w-full group block">
                   <div className="flex items-center">
                     <div>
                       <div className="rounded-full h-8 w-8 flex items-center bg-white justify-center">
@@ -534,7 +534,7 @@ const AppRouter = (props: any) => {
                       </p>
                     </div>
                   </div>
-                </a>
+                </div>
               </div>
             </div>
             <div className="flex-shrink-0 w-14"></div>
@@ -590,7 +590,7 @@ const AppRouter = (props: any) => {
             </nav>
           </div>
           <div className="flex-shrink-0 flex border-t border-primary-700 p-4">
-            <a href="#" className="flex-shrink-0 w-full group block">
+            <div className="flex-shrink-0 w-full group block">
               <div className="flex items-center">
                 <div>
                   <div className="rounded-full h-8 w-8 flex items-center bg-white justify-center">
@@ -617,7 +617,7 @@ const AppRouter = (props: any) => {
                   </p>
                 </div>
               </div>
-            </a>
+            </div>
           </div>
         </div>
       </div>
