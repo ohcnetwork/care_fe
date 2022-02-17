@@ -9,8 +9,11 @@ import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 import NotificationsList from "../Notifications/NotificationsList";
 import { Close } from "@material-ui/icons";
+import { PREFERENCE_SIDEBAR_KEY, SIDEBAR } from "../../Common/constants";
 
 const LOGO = process.env.REACT_APP_LIGHT_LOGO;
+const LOGO_COLLAPSE =
+  process.env.REACT_APP_LIGHT_COLLAPSE_LOGO || "/images/logo_collapsed.svg";
 
 let menus = [
   {
@@ -78,12 +81,14 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
     "data.last_name",
     ""
   )}`;
-
   const path = usePath();
   const url = path.split("/");
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down(768));
-  const [expanded, setExpanded] = useState(false);
+  const [enableCollapse, setEnableCollapse] = useState(
+    localStorage.getItem(PREFERENCE_SIDEBAR_KEY) === SIDEBAR.COLLAPSED
+  );
+  const [expanded, setExpanded] = useState(!enableCollapse);
   const { t } = useTranslation();
   const handleSignOut = () => {
     localStorage.removeItem("care_access_token");
@@ -96,6 +101,14 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
   };
 
   useEffect(() => {
+    window.addEventListener("storage", () => {
+      setEnableCollapse(
+        localStorage.getItem(PREFERENCE_SIDEBAR_KEY) === SIDEBAR.COLLAPSED
+      );
+    });
+  }, []);
+
+  useEffect(() => {
     setIsOpen(false);
     setExpanded(isMobile);
 
@@ -103,6 +116,10 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
       setIsOpen(false);
     };
   }, [isMobile, setIsOpen]);
+
+  useEffect(() => {
+    setExpanded(isMobile || !enableCollapse);
+  }, [isMobile, enableCollapse, setExpanded]);
 
   const open = isOpen || !isMobile;
 
@@ -119,8 +136,8 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
         className: "bg-primary-600",
       }}
       variant={isMobile ? "temporary" : "persistent"}
-      onMouseEnter={() => !isMobile && setExpanded(true)}
-      onMouseLeave={() => !isMobile && setExpanded(false)}
+      onMouseEnter={() => !isMobile && enableCollapse && setExpanded(true)}
+      onMouseLeave={() => !isMobile && enableCollapse && setExpanded(false)}
     >
       <div
         className={clsx(
@@ -130,7 +147,11 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
       >
         <div className="flex items-center justify-between">
           <Link href="/" className="block flex-shrink-0 w-28">
-            <img className="m-2 p-2 w-28 h-auto" src={LOGO} alt="care logo" />
+            <img
+              className="m-2 p-2 h-10 w-auto transition"
+              src={expanded ? LOGO : LOGO_COLLAPSE}
+              alt="care logo"
+            />
           </Link>
           <IconButton
             aria-label="Close Sidebar"
