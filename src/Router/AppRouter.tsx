@@ -61,6 +61,7 @@ import AssetManage from "../Components/Assets/AssetManage";
 import AssetConfigure from "../Components/Assets/AssetConfigure";
 import { DailyRoundListDetails } from "../Components/Patient/DailyRoundListDetails";
 import HubDashboard from "../Components/Dashboard/HubDashboard";
+import { Feed } from "../Components/Facility/Consultations/Feed";
 
 const get = require("lodash.get");
 const img = process.env.REACT_APP_LIGHT_LOGO;
@@ -347,6 +348,14 @@ const routes = {
       tab={"updates"}
     />
   ),
+  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/feed":
+    ({ facilityId, patientId, consultationId }: any) => (
+      <Feed
+        facilityId={facilityId}
+        patientId={patientId}
+        consultationId={consultationId}
+      />
+    ),
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/:tab":
     ({ facilityId, patientId, consultationId, tab }: any) => (
       <ConsultationDetails
