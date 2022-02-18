@@ -27,7 +27,7 @@ export default function BadgesList(props: any) {
       }
     }
     fetchData();
-  }, [dispatch, appliedFilters.assigned_to]);
+  }, [dispatch, appliedFilters.assigned_to, local.assigned_to]);
 
   useEffect(() => {
     async function fetchData() {
@@ -45,7 +45,7 @@ export default function BadgesList(props: any) {
       }
     }
     fetchData();
-  }, [dispatch, appliedFilters.orgin_facility]);
+  }, [dispatch, appliedFilters.orgin_facility, local.orgin_facility]);
 
   useEffect(() => {
     async function fetchData() {
@@ -67,7 +67,11 @@ export default function BadgesList(props: any) {
       }
     }
     fetchData();
-  }, [dispatch, appliedFilters.shifting_approving_facility]);
+  }, [
+    dispatch,
+    appliedFilters.shifting_approving_facility,
+    local.shifting_approving_facility,
+  ]);
 
   useEffect(() => {
     async function fetchData() {
@@ -85,7 +89,7 @@ export default function BadgesList(props: any) {
       }
     }
     fetchData();
-  }, [dispatch, appliedFilters.assigned_facility]);
+  }, [dispatch, appliedFilters.assigned_facility, local.assigned_facility]);
 
   const filtersExists = () => {
     let { limit, offset, ...rest } = filterParams;
@@ -139,7 +143,7 @@ export default function BadgesList(props: any) {
     <div className="flex items-center flex-wrap mt-4 ml-2">
       {badge(
         "status",
-        (appliedFilters.status != "--" && appliedFilters.status) ||
+        (appliedFilters.status !== "--" && appliedFilters.status) ||
           (local.status !== "--" && local.status),
         "status"
       )}

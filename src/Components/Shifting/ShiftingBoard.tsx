@@ -52,19 +52,6 @@ export default function ListView({
     loading: false,
   });
 
-  const fetchData = () => {
-    setIsLoading((loading) => reduceLoading("BOARD", loading));
-    dispatch(
-      listShiftRequests(formatFilter({ ...filterProp, status: board }), board)
-    ).then((res: any) => {
-      if (res && res.data) {
-        setData(res.data.results);
-        setTotalCount(res.data.count);
-        setCurrentPage(1);
-      }
-      setIsLoading((loading) => reduceLoading("COMPLETE", loading));
-    });
-  };
   const triggerDownload = async () => {
     const res = await dispatch(
       downloadShiftRequests({
@@ -77,10 +64,48 @@ export default function ListView({
   };
 
   useEffect(() => {
+    const fetchData = () => {
+      setIsLoading((loading) => reduceLoading("BOARD", loading));
+      dispatch(
+        listShiftRequests(
+          formatFilter({
+            facility: filterProp.facility,
+            orgin_facility: filterProp.orgin_facility,
+            shifting_approving_facility: filterProp.shifting_approving_facility,
+            assigned_facility: filterProp.assigned_facility,
+            emergency: filterProp.emergency,
+            is_up_shift: filterProp.is_up_shift,
+            patient_name: filterProp.patient_name,
+            created_date_before: filterProp.created_date_before,
+            created_date_after: filterProp.created_date_after,
+            modified_date_before: filterProp.modified_date_before,
+            modified_date_after: filterProp.modified_date_after,
+            patient_phone_number: filterProp.patient_phone_number,
+            ordering: filterProp.ordering,
+            is_kasp: filterProp.is_kasp,
+            assigned_to: filterProp.assigned_to,
+            disease_status: filterProp.disease_status,
+            is_antenatal: filterProp.is_antenatal,
+            breathlessness_level: filterProp.breathlessness_level,
+            status: board,
+          }),
+          board
+        )
+      ).then((res: any) => {
+        if (res && res.data) {
+          setData(res.data.results);
+          setTotalCount(res.data.count);
+          setCurrentPage(1);
+        }
+        setIsLoading((loading) => reduceLoading("COMPLETE", loading));
+      });
+    };
+
     fetchData();
   }, [
     board,
     dispatch,
+    formatFilter,
     filterProp.facility,
     filterProp.orgin_facility,
     filterProp.shifting_approving_facility,
@@ -137,7 +162,7 @@ export default function ListView({
             <div
               className={
                 "p-4 h-full flex flex-col justify-between " +
-                (shift.patient_object.disease_status == "POSITIVE"
+                (shift.patient_object.disease_status === "POSITIVE"
                   ? "bg-red-50"
                   : "")
               }

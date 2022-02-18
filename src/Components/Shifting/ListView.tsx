@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import loadable from "@loadable/component";
 import { InputSearchBox } from "../Common/SearchBox";
 import { navigate, useQueryParams } from "raviger";
@@ -17,7 +17,7 @@ import ListFilter from "./ListFilter";
 import Pagination from "../Common/Pagination";
 import { Modal, Button } from "@material-ui/core";
 
-import { limit, formatFilter, badge } from "./Commons";
+import { limit, formatFilter } from "./Commons";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -49,7 +49,7 @@ export default function ListView() {
 
   useEffect(() => {
     applyFilter(local);
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const triggerDownload = async () => {
     const res = await dispatch(
@@ -102,10 +102,34 @@ export default function ListView() {
     fetchData();
   };
 
-  const fetchData = () => {
+  const fetchData = useCallback(() => {
     setIsLoading(true);
     dispatch(
-      listShiftRequests(formatFilter({ ...qParams, offset }), "shift-list-call")
+      listShiftRequests(
+        formatFilter({
+          offset,
+          status: qParams.status,
+          facility: qParams.facility,
+          orgin_facility: qParams.orgin_facility,
+          shifting_approving_facility: qParams.shifting_approving_facility,
+          assigned_facility: qParams.assigned_facility,
+          emergency: qParams.emergency,
+          is_up_shift: qParams.is_up_shift,
+          patient_name: qParams.patient_name,
+          created_date_before: qParams.created_date_before,
+          created_date_after: qParams.created_date_after,
+          modified_date_before: qParams.modified_date_before,
+          modified_date_after: qParams.modified_date_after,
+          patient_phone_number: qParams.patient_phone_number,
+          ordering: qParams.ordering,
+          is_kasp: qParams.is_kasp,
+          assigned_to: qParams.assigned_to,
+          disease_status: qParams.disease_status,
+          is_antenatal: qParams.is_antenatal,
+          breathlessness_level: qParams.breathlessness_level,
+        }),
+        "shift-list-call"
+      )
     ).then((res: any) => {
       if (res && res.data) {
         setData(res.data.results);
@@ -113,11 +137,9 @@ export default function ListView() {
       }
       setIsLoading(false);
     });
-  };
-
-  useEffect(() => {
-    fetchData();
   }, [
+    dispatch,
+    offset,
     qParams.status,
     qParams.facility,
     qParams.orgin_facility,
@@ -137,8 +159,11 @@ export default function ListView() {
     qParams.disease_status,
     qParams.is_antenatal,
     qParams.breathlessness_level,
-    offset,
   ]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const updateFilter = (params: any, local: any) => {
     updateQuery(params);
@@ -160,7 +185,7 @@ export default function ListView() {
           <div
             className={
               "p-4 h-full flex flex-col justify-between " +
-              (shift.patient_object.disease_status == "POSITIVE"
+              (shift.patient_object.disease_status === "POSITIVE"
                 ? "bg-red-50"
                 : "")
             }

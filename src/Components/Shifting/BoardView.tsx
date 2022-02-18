@@ -13,9 +13,8 @@ import { useDispatch } from "react-redux";
 import moment from "moment";
 import GetAppIcon from "@material-ui/icons/GetApp";
 
-import { formatFilter, badge } from "./Commons";
+import { formatFilter } from "./Commons";
 
-const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 const shiftStatusOptions = SHIFTING_CHOICES.map((obj) => obj.text);
@@ -32,7 +31,6 @@ export default function BoardView() {
   const dispatch: any = useDispatch();
   const [boardFilter, setBoardFilter] = useState(ACTIVE);
   const [downloadFile, setDownloadFile] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const local = JSON.parse(localStorage.getItem("shift-filters") || "{}");
 
@@ -61,7 +59,7 @@ export default function BoardView() {
 
   useEffect(() => {
     applyFilter(local);
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const appliedFilters = formatFilter(qParams);
 
@@ -154,18 +152,14 @@ export default function BoardView() {
         updateFilter={updateFilter}
       />
       <div className="flex mt-4 pb-2 flex-1 items-start overflow-x-scroll px-4">
-        {isLoading ? (
-          <Loading />
-        ) : (
-          boardFilter.map((board) => (
-            <ShiftingBoard
-              key={board}
-              filterProp={qParams}
-              board={board}
-              formatFilter={formatFilter}
-            />
-          ))
-        )}
+        {boardFilter.map((board) => (
+          <ShiftingBoard
+            key={board}
+            filterProp={qParams}
+            board={board}
+            formatFilter={formatFilter}
+          />
+        ))}
       </div>
       <CSVLink
         data={downloadFile}

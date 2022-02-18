@@ -3,7 +3,6 @@ import loadable from "@loadable/component";
 
 import { FacilitySelect } from "../Common/FacilitySelect";
 import {
-  TextInputField,
   MultilineInputField,
   ErrorHelperText,
 } from "../Common/HelperInputFields";
@@ -195,7 +194,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
       const res = await dispatchAction(updateShift(props.id, data));
       setIsLoading(false);
 
-      if (res && res.status == 200 && res.data) {
+      if (res && res.status === 200 && res.data) {
         dispatch({ type: "set_form", form: res.data });
         Notification.Success({
           msg: "Shift request updated successfully",

@@ -18,7 +18,6 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import * as Notification from "../../Utils/Notifications.js";
-import ReactDOM from "react-dom";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import CommentSection from "./CommentsSection";
 
@@ -71,7 +70,7 @@ export default function ShiftDetails(props: { id: string }) {
 
   const showCopyToclipBoard = (data: any) => {
     return (
-      <a href="#">
+      <div>
         <CopyToClipboard
           text={copyContent(data)}
           onCopy={() => setIsCopied(true)}
@@ -84,7 +83,7 @@ export default function ShiftDetails(props: { id: string }) {
             </span>
           )}
         </CopyToClipboard>
-      </a>
+      </div>
     );
   };
 

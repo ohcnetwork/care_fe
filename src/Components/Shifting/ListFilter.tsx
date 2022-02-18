@@ -1,11 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { UserSelect } from "../Common/UserSelect2";
-import {
-  SelectField,
-  DateInputField,
-  TextInputField,
-} from "../Common/HelperInputFields";
+import { SelectField, TextInputField } from "../Common/HelperInputFields";
 import {
   SHIFTING_FILTER_ORDER,
   DISEASE_STATUS,
@@ -20,13 +16,6 @@ import { SHIFTING_CHOICES } from "../../Common/constants";
 import { Link } from "raviger";
 import { DateRangePicker, getDate } from "../Common/DateRangePicker";
 
-function useMergeState(initialState: any) {
-  const [state, setState] = useState(initialState);
-  const setMergedState = (newState: any) =>
-    setState((prevState: any) => Object.assign({}, prevState, newState));
-  return [state, setMergedState];
-}
-
 const shiftStatusOptions = SHIFTING_CHOICES.map((obj) => obj.text);
 
 export default function ListFilter(props: any) {
@@ -36,7 +25,7 @@ export default function ListFilter(props: any) {
   const [isAssignedLoading, setAssignedLoading] = useState(false);
   const [isAssignedUserLoading, setAssignedUserLoading] = useState(false);
 
-  const [filterState, setFilterState] = useMergeState({
+  const [filterState, setFilterState] = useState({
     orgin_facility: filter.orgin_facility || local.orgin_facility || "",
     orgin_facility_ref: null,
     shifting_approving_facility:
@@ -79,13 +68,16 @@ export default function ListFilter(props: any) {
           getAnyFacility(filter.orgin_facility, "orgin_facility")
         );
         if (res && res.data) {
-          setFilterState({ orgin_facility_ref: res.data });
+          setFilterState((prevState) => ({
+            ...prevState,
+            orgin_facility_ref: res.data,
+          }));
         }
         setOriginLoading(false);
       }
     }
     fetchData();
-  }, [dispatch]);
+  }, [dispatch, filter.orgin_facility]);
 
   useEffect(() => {
     async function fetchData() {
@@ -98,13 +90,16 @@ export default function ListFilter(props: any) {
           )
         );
         if (res && res.data) {
-          setFilterState({ shifting_approving_facility_ref: res.data });
+          setFilterState((prevState) => ({
+            ...prevState,
+            shifting_approving_facility_ref: res.data,
+          }));
         }
         setShiftingLoading(false);
       }
     }
     fetchData();
-  }, [dispatch]);
+  }, [dispatch, filter.shifting_approving_facility]);
 
   useEffect(() => {
     async function fetchData() {
@@ -114,13 +109,16 @@ export default function ListFilter(props: any) {
           getAnyFacility(filter.assigned_facility, "assigned_facility")
         );
         if (res && res.data) {
-          setFilterState({ assigned_facility_ref: res.data });
+          setFilterState((prevState) => ({
+            ...prevState,
+            assigned_facility_ref: res.data,
+          }));
         }
         setAssignedLoading(false);
       }
     }
     fetchData();
-  }, [dispatch]);
+  }, [dispatch, filter.assigned_facility]);
 
   useEffect(() => {
     async function fetchData() {
@@ -129,16 +127,16 @@ export default function ListFilter(props: any) {
         const res = await dispatch(getUserList({ id: filter.assigned_to }));
 
         if (res && res.data && res.data.count) {
-          setFilterState({
-            ...filterState,
+          setFilterState((prevState) => ({
+            ...prevState,
             assigned_user_ref: res.data.results[0],
-          });
+          }));
         }
         setAssignedUserLoading(false);
       }
     }
     fetchData();
-  }, [dispatch]);
+  }, [dispatch, filter.assigned_to]);
 
   const setFacility = (selected: any, name: string) => {
     const filterData: any = { ...filterState };
