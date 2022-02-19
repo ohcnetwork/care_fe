@@ -242,7 +242,7 @@ const AssetCreate = (props: AssetProps) => {
           [assetId || "????"]: { name },
         }}
       />
-      <Card className="mt-4 max-w-screen-lg mx-auto">
+      <Card className="mt-4 mx-auto">
         <CardContent>
           <form onSubmit={(e) => handleSubmit(e)}>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">

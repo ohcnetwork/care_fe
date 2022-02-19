@@ -1,4 +1,4 @@
-import { useRedirect, useRoutes, navigate, usePath } from "raviger";
+import { useRedirect, useRoutes, navigate, usePath, Link } from "raviger";
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { BedCapacityForm } from "../Components/Facility/BedCapacityForm";
@@ -429,11 +429,6 @@ const AppRouter = (props: any) => {
     window.scrollTo(0, 0);
   }, [path]);
 
-  const handleSidebarClick = (e: any, link: string) => {
-    e.preventDefault();
-    navigate(link);
-  };
-
   return (
     <div className="h-screen flex overflow-hidden bg-gray-100">
       {drawer && (
@@ -477,9 +472,9 @@ const AppRouter = (props: any) => {
                       ? "mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-white rounded-md bg-primary-900 focus:outline-none focus:bg-primary-900 transition ease-in-out duration-150"
                       : "mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-primary-300 rounded-md hover:text-white hover:bg-primary-700 focus:outline-none focus:bg-primary-900 transition ease-in-out duration-150";
                     return (
-                      <a
+                      <Link
                         key={item.title}
-                        onClick={() => navigate(item.link, true)}
+                        href={item.link}
                         className={selectedClasses}
                       >
                         <i
@@ -492,7 +487,7 @@ const AppRouter = (props: any) => {
                           }
                         ></i>
                         {t(item.title)}
-                      </a>
+                      </Link>
                     );
                   })}
                   <NotificationsList />
@@ -557,10 +552,9 @@ const AppRouter = (props: any) => {
                   ? "mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-white rounded-md bg-primary-900 focus:outline-none focus:bg-primary-900 transition ease-in-out duration-150"
                   : "mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-primary-300 rounded-md hover:text-white hover:bg-primary-700 focus:outline-none focus:bg-primary-900 transition ease-in-out duration-150";
                 return (
-                  <a
+                  <Link
                     key={item.title}
                     href={item.link}
-                    onClick={(e) => handleSidebarClick(e, item.link)}
                     className={selectedClasses}
                   >
                     <i
@@ -573,7 +567,7 @@ const AppRouter = (props: any) => {
                       }
                     ></i>
                     {t(item.title)}
-                  </a>
+                  </Link>
                 );
               })}
               <NotificationsList />
