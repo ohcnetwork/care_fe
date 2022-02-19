@@ -176,9 +176,9 @@ const AssetManage = (props: AssetManageProps) => {
         crumbsReplacements={{ [assetId]: { name: asset?.name } }}
       />
       <div className="bg-white rounded-lg md:p-6 p-3 shadow">
+        <div className="text-2xl font-semibold mb-4">{asset?.name}</div>
         <div className="md:flex justify-between">
           <div className="mb-2">
-            <div className="text-2xl font-semibold mb-4">{asset?.name}</div>
             <div className="grid grid-cols-3 gap-6">
               <Typography className="flex flex-col">
                 <span className="font-bold">Location</span>
@@ -232,7 +232,7 @@ const AssetManage = (props: AssetManageProps) => {
               )}
             </div>
           </div>
-          <div className="flex mt-2 flex-col gap-1 justify-center">
+          <div className="flex mt-2 flex-col gap-1">
             <div className="mb-3 flex justify-center">
               <QRCode
                 bgColor="#FFFFFF"
