@@ -254,7 +254,7 @@ const AssetCreate = (props: AssetProps) => {
             </div>
           </h1>
           <p className="text-gray-600">
-            You need at least a location to create a assest.
+            You need at least a location to create an assest.
           </p>
           <button
             className="btn-primary btn mt-5"
