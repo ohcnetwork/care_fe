@@ -484,7 +484,7 @@ export const DailyRounds = (props: any) => {
   }
 
   return (
-    <div className="px-2 pb-2 max-w-3xl mx-auto">
+    <div className="px-2 pb-2 mx-auto">
       <PageTitle
         title={headerText}
         crumbsReplacements={{
