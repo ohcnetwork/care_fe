@@ -61,6 +61,7 @@ import AssetManage from "../Components/Assets/AssetManage";
 import AssetConfigure from "../Components/Assets/AssetConfigure";
 import { DailyRoundListDetails } from "../Components/Patient/DailyRoundListDetails";
 import HubDashboard from "../Components/Dashboard/HubDashboard";
+import { TeleICUFacility } from "../Components/TeleIcu/Facility";
 
 const get = require("lodash.get");
 const img = process.env.REACT_APP_LIGHT_LOGO;
@@ -356,6 +357,7 @@ const routes = {
         tab={tab}
       />
     ),
+  "/teleicu/facility": () => <TeleICUFacility />,
 };
 
 let menus = [
@@ -400,6 +402,11 @@ let menus = [
     icon: "fas fa-user-friends",
   },
   {
+    title: "Tele ICU",
+    link: "/teleicu/facility",
+    icon: "fas fa-video",
+  },
+  {
     title: "Profile",
     link: "/user/profile",
     icon: "fas fa-user-secret",
@@ -413,6 +420,7 @@ let menus = [
 
 const AppRouter = (props: any) => {
   useRedirect("/", "/facility");
+  useRedirect("/teleicu", "/teleicu/facility");
   const pages = useRoutes(routes);
   const path = usePath();
   const { t } = props;
