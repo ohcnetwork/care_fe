@@ -118,32 +118,49 @@ export const TeleICUFacility = () => {
         </div>
       </div>
       <div className="grid grid-col-1 lg:grid-cols-2 gap-4">
-        {data.map((item, index) => {
-          return (
-            <div key={item.id}>
-              <div className="bg-white rounded-lg flex items-center gap-4 p-4">
-                <div className="w-32 self-stretch flex-shrink-0 bg-gray-300 flex items-center justify-center rounded">
-                  <i className="fas fa-hospital text-4xl block text-gray-600"></i>
-                </div>
-                <div className="flex-1">
-                  <h1 className="text-xl font-bold">{item.name}</h1>
-                  <p className="text-base font-normal">
-                    {item.district_object?.name}
-                  </p>
-                  <div className="flex items-start justify-between gap-2 my-4">
-                    <div className="text-center">
-                      <BedIcon className="h-8 text-primary-500 fill-current" />
-                      <p className="mt-2 text-sm font-medium">12 / 20</p>
-                    </div>
-                    <CCTVIcon className="h-12 text-primary-500 fill-current" />
-                    <WifiIcon className="h-8 text-primary-500 fill-current" />
-                    <AdminIcon className="h-8 text-primary-500 fill-current" />
+        {isLoading
+          ? Array.from({ length: 10 }, (_, index) => {
+              // add loading card
+
+              return (
+                <div
+                  key={index}
+                  className="bg-white p-4 flex items-stretch gap-4"
+                >
+                  <div className="w-32 h-32 bg-gray-300 animate-pulse" />
+                  <div>
+                    <div className="h-5 w-28 bg-gray-300 animate-pulse"></div>
+                    <div className="mt-2 h-2 w-12 bg-gray-300 animate-pulse"></div>
                   </div>
                 </div>
-              </div>
-            </div>
-          );
-        })}
+              );
+            })
+          : data.map((item, index) => {
+              return (
+                <div key={item.id}>
+                  <div className="bg-white rounded-lg flex items-center gap-4 p-4">
+                    <div className="w-32 self-stretch flex-shrink-0 bg-gray-300 flex items-center justify-center rounded">
+                      <i className="fas fa-hospital text-4xl block text-gray-600"></i>
+                    </div>
+                    <div className="flex-1">
+                      <h1 className="text-xl font-bold">{item.name}</h1>
+                      <p className="text-base font-normal">
+                        {item.district_object?.name}
+                      </p>
+                      <div className="flex items-start justify-between gap-2 my-4">
+                        <div className="text-center">
+                          <BedIcon className="h-8 text-primary-500 fill-current" />
+                          <p className="mt-2 text-sm font-medium">12 / 20</p>
+                        </div>
+                        <CCTVIcon className="h-12 text-primary-500 fill-current" />
+                        <WifiIcon className="h-8 text-primary-500 fill-current" />
+                        <AdminIcon className="h-8 text-primary-500 fill-current" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
       </div>
       <div>
         {!isLoading && totalCount > limit && (
