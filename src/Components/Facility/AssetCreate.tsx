@@ -30,6 +30,8 @@ import {
 } from "../Common/HelperInputFields";
 import { AssetData } from "../Assets/AssetTypes";
 import loadable from "@loadable/component";
+import { LocationOnOutlined } from "@material-ui/icons";
+import { navigate } from "raviger";
 const Loading = loadable(() => import("../Common/Loading"));
 
 const initError: any = {
@@ -90,7 +92,7 @@ const AssetCreate = (props: AssetProps) => {
   const [location, setLocation] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const dispatchAction: any = useDispatch();
-  const [locations, setLocations] = useState([{ id: "0", name: "Select" }]);
+  const [locations, setLocations] = useState([]);
   const [asset, setAsset] = useState<AssetData>();
   const [facilityName, setFacilityName] = useState("");
 
@@ -99,8 +101,10 @@ const AssetCreate = (props: AssetProps) => {
     dispatchAction(
       listFacilityAssetLocation({}, { facility_external_id: facilityId })
     ).then(({ data }: any) => {
-      setFacilityName(data.results[0].facility.name);
-      setLocations([...locations, ...data.results]);
+      if (data.count > 0) {
+        setFacilityName(data.results[0].facility?.name);
+        setLocations(data.results);
+      }
       setIsLoading(false);
     });
 
@@ -232,6 +236,38 @@ const AssetCreate = (props: AssetProps) => {
 
   if (isLoading) return <Loading />;
 
+  if (locations.length === 0) {
+    return (
+      <div className="px-6 pb-2">
+        <PageTitle
+          title={assetId ? "Update Asset" : "Create New Asset"}
+          crumbsReplacements={{
+            [facilityId]: { name: facilityName },
+            assets: { style: "text-gray-200 pointer-events-none" },
+            [assetId || "????"]: { name },
+          }}
+        />
+        <section className="text-center">
+          <h1 className="text-6xl flex items-center flex-col py-10">
+            <div className="p-5 rounded-full flex items-center justify-center bg-gray-200 w-40 h-40">
+              <LocationOnOutlined fontSize="inherit" color="primary" />
+            </div>
+          </h1>
+          <p className="text-gray-600">
+            You need at least a location to create a assest.
+          </p>
+          <button
+            className="btn-primary btn mt-5"
+            onClick={() => navigate(`/facility/${facilityId}/location/add`)}
+          >
+            <i className="fas fa-plus text-white mr-2"></i>
+            Add Location
+          </button>
+        </section>
+      </div>
+    );
+  }
+
   return (
     <div className="px-6 pb-2">
       <PageTitle
@@ -309,7 +345,7 @@ const AssetCreate = (props: AssetProps) => {
                   placeholder=""
                   variant="outlined"
                   margin="dense"
-                  options={locations}
+                  options={[{ id: "0", name: "Select" }, ...locations]}
                   optionValue="name"
                   value={location}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
