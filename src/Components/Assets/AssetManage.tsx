@@ -232,8 +232,8 @@ const AssetManage = (props: AssetManageProps) => {
               )}
             </div>
           </div>
-          <div className="flex mt-2 flex-col">
-            <div className="mb-1">
+          <div className="flex mt-2 flex-col gap-1 justify-center">
+            <div className="mb-3 flex justify-center">
               <QRCode
                 bgColor="#FFFFFF"
                 fgColor="#000000"
@@ -241,13 +241,13 @@ const AssetManage = (props: AssetManageProps) => {
                 size={128}
                 value={asset?.id || ""}
               />
-              <button
-                className="btn btn-primary mt-2 w-full"
-                onClick={() => setIsPrintMode(true)}
-              >
-                Print QR
-              </button>
             </div>
+            <button
+              className="btn btn-primary"
+              onClick={() => setIsPrintMode(true)}
+            >
+              Print QR
+            </button>
             <button
               onClick={() =>
                 navigate(
@@ -263,7 +263,7 @@ const AssetManage = (props: AssetManageProps) => {
             <button
               onClick={() => navigate(`/assets/${asset?.id}/configure`)}
               id="update-asset"
-              className="btn-primary btn mt-1"
+              className="btn-primary btn"
             >
               <i className="fas fa-cog text-white mr-2"></i>
               Configure Asset
