@@ -80,12 +80,13 @@ export const AddLocationForm = (props: LocationFormProps) => {
             <CardContent>
               <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
                 <div>
-                  <InputLabel id="name">Name</InputLabel>
+                  <InputLabel id="name">Name *</InputLabel>
                   <TextInputField
                     name="name"
                     variant="outlined"
                     margin="dense"
                     type="text"
+                    required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     errors=""
