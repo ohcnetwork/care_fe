@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import loadable from "@loadable/component";
-import { InputSearchBox } from "../Common/SearchBox";
 import { navigate, useQueryParams } from "raviger";
 import { useDispatch } from "react-redux";
 import moment from "moment";
@@ -13,7 +12,6 @@ import {
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import ListFilter from "./ListFilter";
 import Pagination from "../Common/Pagination";
-import { Modal, Button } from "@material-ui/core";
 
 import { limit, formatFilter } from "./Commons";
 import BadgesList from "./BadgesList";
@@ -33,10 +31,6 @@ export default function ListView() {
   const [currentPage, setCurrentPage] = useState(1);
   const [offset, setOffset] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const [modalFor, setModalFor] = useState({
-    externalId: undefined,
-    loading: false,
-  });
 
   const local = useMemo(
     () => JSON.parse(localStorage.getItem("resource-filters") || "{}"),
@@ -51,7 +45,7 @@ export default function ListView() {
 
   useEffect(() => {
     applyFilter(local);
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const triggerDownload = async () => {
     const res = await dispatch(
@@ -94,11 +88,24 @@ export default function ListView() {
     fetchData();
   };
 
-  const fetchData = () => {
+  const fetchData = useCallback(() => {
     setIsLoading(true);
     dispatch(
       listResourceRequests(
-        formatFilter({ ...qParams, offset }),
+        formatFilter({
+          status: qParams.status,
+          facility: qParams.facility,
+          orgin_facility: qParams.orgin_facility,
+          approving_facility: qParams.approving_facility,
+          assigned_facility: qParams.assigned_facility,
+          emergency: qParams.emergency,
+          created_date_before: qParams.created_date_before,
+          created_date_after: qParams.created_date_after,
+          modified_date_before: qParams.modified_date_before,
+          modified_date_after: qParams.modified_date_after,
+          ordering: qParams.ordering,
+          offset,
+        }),
         "resource-list-call"
       )
     ).then((res: any) => {
@@ -108,11 +115,9 @@ export default function ListView() {
       }
       setIsLoading(false);
     });
-  };
-
-  useEffect(() => {
-    fetchData();
   }, [
+    dispatch,
+    offset,
     qParams.status,
     qParams.facility,
     qParams.orgin_facility,
@@ -124,8 +129,11 @@ export default function ListView() {
     qParams.modified_date_before,
     qParams.modified_date_after,
     qParams.ordering,
-    offset,
   ]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   let showResourceCardList = (data: any) => {
     if (data && !data.length) {

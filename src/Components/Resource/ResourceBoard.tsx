@@ -4,10 +4,8 @@ import {
   listResourceRequests,
   downloadResourceRequests,
 } from "../../Redux/actions";
-import Button from "@material-ui/core/Button";
 import { navigate } from "raviger";
 import moment from "moment";
-import { Modal } from "@material-ui/core";
 import { CSVLink } from "react-csv";
 import GetAppIcon from "@material-ui/icons/GetApp";
 
@@ -46,22 +44,6 @@ export default function ResourceBoard({
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState({ board: false, more: false });
 
-  const fetchData = () => {
-    setIsLoading((loading) => reduceLoading("BOARD", loading));
-    dispatch(
-      listResourceRequests(
-        formatFilter({ ...filterProp, status: board }),
-        board
-      )
-    ).then((res: any) => {
-      if (res && res.data) {
-        setData(res.data.results);
-        setTotalCount(res.data.count);
-        setCurrentPage(1);
-      }
-      setIsLoading((loading) => reduceLoading("COMPLETE", loading));
-    });
-  };
   const triggerDownload = async () => {
     const res = await dispatch(
       downloadResourceRequests({
@@ -74,10 +56,40 @@ export default function ResourceBoard({
   };
 
   useEffect(() => {
+    const fetchData = () => {
+      setIsLoading((loading) => reduceLoading("BOARD", loading));
+      dispatch(
+        listResourceRequests(
+          formatFilter({
+            facility: filterProp.facility,
+            orgin_facility: filterProp.orgin_facility,
+            approving_facility: filterProp.approving_facility,
+            assigned_facility: filterProp.assigned_facility,
+            emergency: filterProp.emergency,
+            created_date_before: filterProp.created_date_before,
+            created_date_after: filterProp.created_date_after,
+            modified_date_before: filterProp.modified_date_before,
+            modified_date_after: filterProp.modified_date_after,
+            orderin: filterProp.ordering,
+            status: board,
+          }),
+          board
+        )
+      ).then((res: any) => {
+        if (res && res.data) {
+          setData(res.data.results);
+          setTotalCount(res.data.count);
+          setCurrentPage(1);
+        }
+        setIsLoading((loading) => reduceLoading("COMPLETE", loading));
+      });
+    };
+
     fetchData();
   }, [
     board,
     dispatch,
+    formatFilter,
     filterProp.facility,
     filterProp.orgin_facility,
     filterProp.approving_facility,

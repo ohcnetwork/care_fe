@@ -1,10 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { FacilitySelect } from "../Common/FacilitySelect";
-import {
-  SelectField,
-  DateInputField,
-  TextInputField,
-} from "../Common/HelperInputFields";
+import { SelectField } from "../Common/HelperInputFields";
 import { RESOURCE_FILTER_ORDER } from "../../Common/constants";
 import moment from "moment";
 import { getAnyFacility } from "../../Redux/actions";
@@ -14,13 +10,6 @@ import { RESOURCE_CHOICES } from "../../Common/constants";
 import { Link } from "raviger";
 import { DateRangePicker, getDate } from "../Common/DateRangePicker";
 
-function useMergeState(initialState: any) {
-  const [state, setState] = useState(initialState);
-  const setMergedState = (newState: any) =>
-    setState((prevState: any) => Object.assign({}, prevState, newState));
-  return [state, setMergedState];
-}
-
 const resourceStatusOptions = RESOURCE_CHOICES.map((obj) => obj.text);
 
 export default function ListFilter(props: any) {
@@ -28,7 +17,7 @@ export default function ListFilter(props: any) {
   const [isOriginLoading, setOriginLoading] = useState(false);
   const [isResourceLoading, setResourceLoading] = useState(false);
   const [isAssignedLoading, setAssignedLoading] = useState(false);
-  const [filterState, setFilterState] = useMergeState({
+  const [filterState, setFilterState] = useState({
     orgin_facility: filter.orgin_facility || local.origin_facility || "",
     orgin_facility_ref: null,
     approving_facility:
@@ -59,13 +48,16 @@ export default function ListFilter(props: any) {
           getAnyFacility(filter.orgin_facility, "orgin_facility")
         );
         if (res && res.data) {
-          setFilterState({ orgin_facility_ref: res.data });
+          setFilterState((prevState) => ({
+            ...prevState,
+            orgin_facility_ref: res.data,
+          }));
         }
         setOriginLoading(false);
       }
     }
     fetchData();
-  }, [dispatch]);
+  }, [dispatch, filter.orgin_facility]);
 
   useEffect(() => {
     async function fetchData() {
@@ -75,13 +67,16 @@ export default function ListFilter(props: any) {
           getAnyFacility(filter.approving_facility, "approving_facility")
         );
         if (res && res.data) {
-          setFilterState({ approving_facility_ref: res.data });
+          setFilterState((prevState) => ({
+            ...prevState,
+            approving_facility_ref: res.data,
+          }));
         }
         setResourceLoading(false);
       }
     }
     fetchData();
-  }, [dispatch]);
+  }, [dispatch, filter.approving_facility]);
 
   useEffect(() => {
     async function fetchData() {
@@ -91,13 +86,16 @@ export default function ListFilter(props: any) {
           getAnyFacility(filter.assigned_facility, "assigned_facility")
         );
         if (res && res.data) {
-          setFilterState({ assigned_facility_ref: res.data });
+          setFilterState((prevState) => ({
+            ...prevState,
+            assigned_facility_ref: res.data,
+          }));
         }
         setAssignedLoading(false);
       }
     }
     fetchData();
-  }, [dispatch]);
+  }, [dispatch, filter.assigned_facility]);
 
   const setFacility = (selected: any, name: string) => {
     const filterData: any = { ...filterState };

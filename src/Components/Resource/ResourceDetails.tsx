@@ -3,14 +3,9 @@ import loadable from "@loadable/component";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getResourceDetails, deleteResourceRecord } from "../../Redux/actions";
-import { navigate, Link } from "raviger";
+import { navigate } from "raviger";
 import Button from "@material-ui/core/Button";
-import QRCode from "qrcode.react";
-import {
-  GENDER_TYPES,
-  TEST_TYPE_CHOICES,
-  KeralaLogo,
-} from "../../Common/constants";
+import { KeralaLogo } from "../../Common/constants";
 import moment from "moment";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";

@@ -27,7 +27,7 @@ export default function BadgesList(props: any) {
       }
     }
     fetchData();
-  }, [dispatch, appliedFilters.orgin_facility]);
+  }, [dispatch, appliedFilters.orgin_facility, local.origin_facility]);
 
   useEffect(() => {
     async function fetchData() {
@@ -45,7 +45,7 @@ export default function BadgesList(props: any) {
       }
     }
     fetchData();
-  }, [dispatch, appliedFilters.approving_facility]);
+  }, [dispatch, appliedFilters.approving_facility, local.approving_facility]);
 
   useEffect(() => {
     async function fetchData() {
@@ -63,7 +63,7 @@ export default function BadgesList(props: any) {
       }
     }
     fetchData();
-  }, [dispatch, appliedFilters.assigned_facility]);
+  }, [dispatch, appliedFilters.assigned_facility, local.assigned_facility]);
 
   const filtersExists = () => {
     let { limit, offset, ...rest } = appliedFilters;
@@ -115,7 +115,7 @@ export default function BadgesList(props: any) {
       {badge("Ordering", appliedFilters.ordering || local.ordering, "ordering")}
       {badge(
         "status",
-        (appliedFilters.status != "--" && appliedFilters.status) ||
+        (appliedFilters.status !== "--" && appliedFilters.status) ||
           (local.status !== "--" && local.status),
         "status"
       )}

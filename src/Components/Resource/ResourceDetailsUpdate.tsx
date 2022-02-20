@@ -158,7 +158,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
       const res = await dispatchAction(updateResource(props.id, data));
       setIsLoading(false);
 
-      if (res && res.status == 200 && res.data) {
+      if (res && res.status === 200 && res.data) {
         dispatch({ type: "set_form", form: res.data });
         Notification.Success({
           msg: "Resource request updated successfully",

@@ -13,7 +13,6 @@ import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
 import { navigate } from "raviger";
 import {
-  FACILITY_TYPES,
   RESOURCE_CATEGORY_CHOICES,
   RESOURCE_SUBCATEGORIES,
 } from "../../Common/constants";
@@ -203,7 +202,7 @@ export default function ResourceCreate(props: resourceProps) {
       const res = await dispatchAction(createResource(data));
       setIsLoading(false);
 
-      if (res && res.data && (res.status == 201 || res.status == 200)) {
+      if (res && res.data && (res.status === 201 || res.status === 200)) {
         await dispatch({ type: "set_form", form: initForm });
         Notification.Success({
           msg: "Resource request created successfully",

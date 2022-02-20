@@ -4,7 +4,6 @@ import ListFilter from "./ListFilter";
 import ResourceBoard from "./ResourceBoard";
 import { RESOURCE_CHOICES } from "../../Common/constants";
 import { make as SlideOver } from "../Common/SlideOver.gen";
-import { InputSearchBox } from "../Common/SearchBox";
 import { downloadResourceRequests } from "../../Redux/actions";
 import loadable from "@loadable/component";
 import { CSVLink } from "react-csv";
@@ -15,7 +14,6 @@ import GetAppIcon from "@material-ui/icons/GetApp";
 import BadgesList from "./BadgesList";
 import { formatFilter } from "./Commons";
 
-const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 const resourceStatusOptions = RESOURCE_CHOICES.map((obj) => obj.text);
@@ -32,7 +30,6 @@ export default function BoardView() {
   const dispatch: any = useDispatch();
   const [boardFilter, setBoardFilter] = useState(ACTIVE);
   const [downloadFile, setDownloadFile] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
   const local = useMemo(
@@ -60,7 +57,7 @@ export default function BoardView() {
 
   useEffect(() => {
     applyFilter(local);
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const appliedFilters = formatFilter(qParams);
 
@@ -146,18 +143,14 @@ export default function BoardView() {
       />
 
       <div className="flex mt-4 pb-2 flex-1 items-start overflow-x-scroll px-4">
-        {isLoading ? (
-          <Loading />
-        ) : (
-          boardFilter.map((board) => (
-            <ResourceBoard
-              key={board}
-              filterProp={qParams}
-              board={board}
-              formatFilter={formatFilter}
-            />
-          ))
-        )}
+        {boardFilter.map((board) => (
+          <ResourceBoard
+            key={board}
+            filterProp={qParams}
+            board={board}
+            formatFilter={formatFilter}
+          />
+        ))}
       </div>
       <CSVLink
         data={downloadFile}
