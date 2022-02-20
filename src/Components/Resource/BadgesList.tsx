@@ -71,12 +71,26 @@ export default function BadgesList(props: any) {
     return Object.values(rest).some((value) => value);
   };
 
+  const clearFilters = () => {
+    localStorage.removeItem("resource-filters");
+  };
+
   const removeFilter = (paramKey: any) => {
     const localData: any = { ...local };
     const params = { ...appliedFilters };
 
     localData[paramKey] = "";
     params[paramKey] = "";
+
+    if (
+      paramKey === "assigned_facility" ||
+      paramKey === "orgin_facility" ||
+      paramKey === "approving_facility"
+    ) {
+      localData[`${paramKey}_ref`] = "";
+      // params[`${paramKey}_ref`] = "";
+    }
+
     updateFilter(params, localData);
   };
 
@@ -142,6 +156,7 @@ export default function BadgesList(props: any) {
         <Link
           href="/resource"
           className="inline-flex items-center px-3 py-1 mt-2 ml-2 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border cursor-pointer hover:border-gray-700 hover:text-gray-900"
+          onClick={clearFilters}
         >
           <i className="fas fa-minus-circle fa-lg mr-1.5"></i>
           <span>Clear All Filters</span>
