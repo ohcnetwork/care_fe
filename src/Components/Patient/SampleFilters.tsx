@@ -12,17 +12,10 @@ import { getAnyFacility } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { CircularProgress } from "@material-ui/core";
 
-const useMergeState = (initialState: any) => {
-  const [state, setState] = useState(initialState);
-  const setMergedState = (newState: any) =>
-    setState((prevState: any) => Object.assign({}, prevState, newState));
-  return [state, setMergedState];
-};
-
 export default function UserFilter(props: any) {
   let { filter, onChange, closeFilter } = props;
 
-  const [filterState, setFilterState] = useMergeState({
+  const [filterState, setFilterState] = useState({
     status: filter.status || "",
     result: filter.result || "",
     facility: filter.facility || "",
@@ -68,12 +61,15 @@ export default function UserFilter(props: any) {
         const { data: facilityData } = await dispatch(
           getAnyFacility(filter.facility, "facility")
         );
-        setFilterState({ ...filterState, facility_ref: facilityData });
+        setFilterState((prevFilters) => ({
+          ...prevFilters,
+          facility_ref: facilityData,
+        }));
         setFacilityLoading(false);
       }
     }
     fetchData();
-  }, [dispatch]);
+  }, [dispatch, filter.facility]);
 
   return (
     <div>

@@ -102,7 +102,7 @@ export default function SampleReport(props: samplePreviewProps) {
       }
       setIsLoading(false);
     },
-    [dispatch, id]
+    [dispatch, id, sampleId]
   );
 
   useAbortableEffect(

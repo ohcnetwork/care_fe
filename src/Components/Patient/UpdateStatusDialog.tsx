@@ -8,10 +8,9 @@ import {
 import CloudUploadOutlineIcon from "@material-ui/icons/CloudUpload";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { WithStyles, withStyles } from "@material-ui/styles";
-import React, { useEffect, useState, useReducer } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import {
-  ROLE_STATUS_MAP,
   SAMPLE_TEST_STATUS,
   SAMPLE_TEST_RESULT,
   SAMPLE_FLOW_RULES,
@@ -21,9 +20,6 @@ import { SampleTestModel } from "./models";
 import * as Notification from "../../Utils/Notifications.js";
 import { createUpload } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
-import LinearProgress from "@material-ui/core/LinearProgress";
-import Box from "@material-ui/core/Box";
-import Typography from "@material-ui/core/Typography";
 import { header_content_type, LinearProgressWithLabel } from "./FileUpload";
 
 interface Props {
@@ -40,8 +36,11 @@ const styles = {
   },
 };
 
-interface URLS {
-  [id: string]: string;
+interface Form {
+  confirm: boolean;
+  status: number;
+  result: number;
+  disabled: boolean;
 }
 
 const statusChoices = [...SAMPLE_TEST_STATUS];
@@ -56,35 +55,16 @@ const resultTypes = [
   ...SAMPLE_TEST_RESULT,
 ];
 
-const roleStatusMap = { ...ROLE_STATUS_MAP };
-
-const initForm: any = {
+const initForm: Form = {
   confirm: false,
   status: 0,
   result: 0,
   disabled: true,
 };
 
-const initialState = {
-  form: { ...initForm },
-};
-
-const updateStatusReducer = (state = initialState, action: any) => {
-  switch (action.type) {
-    case "set_form": {
-      return {
-        ...state,
-        form: action.form,
-      };
-    }
-    default:
-      return state;
-  }
-};
-
 const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
-  const { sample, handleOk, handleCancel, classes, userType } = props;
-  const [state, dispatch] = useReducer(updateStatusReducer, initialState);
+  const { sample, handleOk, handleCancel, classes } = props;
+  const [form, setForm] = useState<Form>(initForm);
   const [file, setfile] = useState<File>();
   const [contentType, setcontentType] = useState<string>("");
   const [uploadPercent, setUploadPercent] = useState(0);
@@ -103,10 +83,8 @@ const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
   // .filter(i => roleStatusMap[userType] && roleStatusMap[userType].includes(i.text))
 
   useEffect(() => {
-    const form = { ...state.form };
-    form.status = currentStatus?.id;
-    dispatch({ type: "set_form", form });
-  }, []);
+    setForm((prevForm) => ({ ...prevForm, status: currentStatus?.id || 0 }));
+  }, [currentStatus?.id]);
 
   const newStatusChoices = [
     {
@@ -117,21 +95,30 @@ const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
   ];
 
   const okClicked = () => {
-    handleOk(sample, state.form.status, state.form.result);
-    dispatch({ type: "set_form", form: initForm });
+    handleOk(sample, form.status, form.result);
+    setForm({ ...initForm });
   };
 
   const cancelClicked = () => {
     handleCancel();
-    dispatch({ type: "set_form", form: initForm });
+    setForm({ ...initForm });
   };
 
-  const handleChange = (name: string, value: any) => {
-    const form = { ...state.form };
-    form[name] = name === "status" || name === "result" ? Number(value) : value;
-    form.disabled =
-      !form.status || !form.confirm || (form.status === 7 && !form.result);
-    dispatch({ type: "set_form", form });
+  const handleChange = (
+    name: "status" | "result" | "confirm" | "disabled",
+    value: any
+  ) => {
+    const modifiedForm = { ...form };
+
+    name === "status" || name === "result"
+      ? (modifiedForm[name] = Number(value))
+      : (modifiedForm[name] = Boolean(value));
+
+    modifiedForm.disabled =
+      !modifiedForm.status ||
+      !modifiedForm.confirm ||
+      (modifiedForm.status === 7 && !modifiedForm.result);
+    setForm({ ...modifiedForm });
   };
 
   const uploadfile = (response: any) => {
@@ -222,12 +209,12 @@ const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
               name="status"
               variant="standard"
               optionValue="desc"
-              value={state.form.status}
+              value={form.status}
               options={newStatusChoices}
               onChange={(e: any) => handleChange(e.target.name, e.target.value)}
             />
           </div>
-          {Number(state.form.status) === 7 && (
+          {Number(form.status) === 7 && (
             <>
               <div className="font-semibold leading-relaxed text-right">
                 Result :
@@ -236,7 +223,7 @@ const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
                 <SelectField
                   name="result"
                   variant="standard"
-                  value={state.form.result}
+                  value={form.result}
                   options={resultTypes}
                   onChange={(e: any) =>
                     handleChange(e.target.name, e.target.value)
@@ -245,7 +232,7 @@ const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
               </div>
             </>
           )}
-          {Number(state.form.status) === 7 && (
+          {Number(form.status) === 7 && (
             <>
               <div className="font-semibold leading-relaxed text-right">
                 Upload Report :
@@ -276,7 +263,7 @@ const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
           )}
           <div className="md:col-span-3">
             <CheckboxField
-              checked={state.form.confirm}
+              checked={form.confirm}
               onChange={(e: any) =>
                 handleChange(e.target.name, e.target.checked)
               }
@@ -292,7 +279,7 @@ const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
           onClick={okClicked}
           color="primary"
           variant="contained"
-          disabled={state.form.disabled}
+          disabled={form.disabled}
           startIcon={<CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>}
         >
           Update Status

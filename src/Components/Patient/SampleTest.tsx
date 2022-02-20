@@ -114,7 +114,6 @@ export const SampleTest = (props: any) => {
         dispatch({
           type: "set_form",
           form: {
-            ...state.form,
             testing_facility: LabList.data.results[0]?.id,
           },
         });

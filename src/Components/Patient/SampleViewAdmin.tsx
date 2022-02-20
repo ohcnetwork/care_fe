@@ -1,5 +1,4 @@
 import { Grid } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
 import WarningRoundedIcon from "@material-ui/icons/WarningRounded";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import SampleFilter from "./SampleFilters";
@@ -11,7 +10,6 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   SAMPLE_TEST_STATUS,
   SAMPLE_TEST_RESULT,
-  ROLE_STATUS_MAP,
   SAMPLE_FLOW_RULES,
   SAMPLE_TYPE_CHOICES,
 } from "../../Common/constants";
@@ -31,12 +29,6 @@ import { CSVLink } from "react-csv";
 import GetAppIcon from "@material-ui/icons/GetApp";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
-
-const statusChoices = [...SAMPLE_TEST_STATUS];
-
-const statusFlow = { ...SAMPLE_FLOW_RULES };
-
-const roleStatusMap = { ...ROLE_STATUS_MAP };
 
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
@@ -212,11 +204,8 @@ export default function SampleViewAdmin(props: any) {
       const statusText = SAMPLE_TEST_STATUS.find(
         (i) => i.text === status
       )?.desc;
-      const validStatusChoices = statusChoices.filter(
-        (i) =>
-          status && statusFlow[status] && statusFlow[status].includes(i.text)
-      );
       // .filter(i => roleStatusMap[userType] && roleStatusMap[userType].includes(i.text))
+
       return (
         <div key={`usr_${item.id}`} className="w-full md:w-1/2 mt-6 md:px-4">
           <div
@@ -526,13 +515,13 @@ export default function SampleViewAdmin(props: any) {
           {badge(
             "Status",
             SAMPLE_TEST_STATUS.find(
-              (status) => status.id == qParams.status
+              (status) => status.id === qParams.status
             )?.text.replaceAll("_", " "),
             "status"
           )}
           {badge(
             "Result",
-            SAMPLE_TEST_RESULT.find((result) => result.id == qParams.result)
+            SAMPLE_TEST_RESULT.find((result) => result.id === qParams.result)
               ?.text,
             "result"
           )}

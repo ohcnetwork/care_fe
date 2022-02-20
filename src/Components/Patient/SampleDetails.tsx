@@ -1,4 +1,4 @@
-import { Card, CardContent, Box, Button } from "@material-ui/core";
+import { Card, CardContent, Button } from "@material-ui/core";
 import moment from "moment";
 import loadable from "@loadable/component";
 import { useCallback, useState } from "react";
@@ -18,7 +18,7 @@ interface SampleDetailsProps {
 }
 
 export const SampleDetails = (props: SampleDetailsProps) => {
-  const { id, patientId } = props;
+  const { id } = props;
   const dispatch: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [sampleDetails, setSampleDetails] = useState<SampleTestModel>({});
