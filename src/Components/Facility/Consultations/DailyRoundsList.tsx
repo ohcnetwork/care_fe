@@ -67,7 +67,6 @@ export const DailyRoundsList = (props: any) => {
     );
   } else if (dailyRoundsListData.length > 0) {
     roundsList = dailyRoundsListData.map((itemData, idx) => {
-      console.log(itemData);
       const telemedicine_doctor_update =
         itemData.created_by_telemedicine ||
         itemData.last_updated_by_telemedicine;
