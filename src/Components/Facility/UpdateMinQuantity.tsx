@@ -156,7 +156,7 @@ export const UpdateMinQuantity = (props: any) => {
                 </div>
 
                 <div>
-                  <InputLabel id="quantity">Item Min_Quantity</InputLabel>
+                  <InputLabel id="quantity">Item Min Quantity</InputLabel>
                   <TextInputField
                     name="quantity"
                     variant="outlined"
