@@ -110,21 +110,24 @@ export make = (
     <div>
       <div
         className="bg-white px-2 md:px-6 py-5 border-b border-gray-200 sm:px-6 max-w-5xl mx-auto border mt-4 shadow rounded-lg">
-        <div className="text-5xl"> {str("Consultation Update")} </div>
+        <h1 className="text-5xl"> {str("Consultation Update")} </h1>
         <div>
           <CriticalCare__PageTitle title="General" />
           <DailyRound__General others title renderOptionalDescription />
         </div>
+        <div className="flex-grow border-t border-gray-400 mt-4" />
         <div>
           <CriticalCare__PageTitle title="Neurological Monitoring" />
           <DailyRound__NeurologicalMonitoring
             neurologicalMonitoring title renderLine renderOptionalDescription renderOptionalInt
           />
         </div>
+        <div className="flex-grow border-t border-gray-400 mt-4" />
         <div>
           <CriticalCare__PageTitle title="Medicines" />
           <DailyRound__Medicines prescriptions={medicine} />
         </div>
+        <div className="flex-grow border-t border-gray-400 mt-4" />
         <div>
           <CriticalCare__PageTitle title="Arterial Blood Gas Analysis" />
           <DailyRound__ABG
@@ -133,16 +136,19 @@ export make = (
             renderOptionalFloatWithIndicators
           />
         </div>
+        <div className="flex-grow border-t border-gray-400 mt-4" />
         <div>
           <CriticalCare__PageTitle title="Blood Sugar" />
           <DailyRound__BloodSugar
             bloodSugar renderOptionalIntWithIndicators renderOptionalFloat renderLine
           />
         </div>
+        <div className="flex-grow border-t border-gray-400 mt-4" />
         <div>
           <CriticalCare__PageTitle title="Dialysis" />
           <DailyRound__Dialysis dialysis renderOptionalInt />
         </div>
+        <div className="flex-grow border-t border-gray-400 mt-4" />
         <div>
           <CriticalCare__PageTitle title="Hemodynamic Parameters" />
           <DailyRound__HemodynamicParameters
@@ -156,14 +162,17 @@ export make = (
             title
           />
         </div>
+        <div className="flex-grow border-t border-gray-400 mt-4" />
         <div>
           <CriticalCare__PageTitle title="I/O Balance" />
           <DailyRound__IOBalance ioBalance title renderOptionalDescription />
         </div>
+        <div className="flex-grow border-t border-gray-400 mt-4" />
         <div>
           <CriticalCare__PageTitle title="Nursing Care" />
           <DailyRound__NursingCare nursingCare renderLine />
         </div>
+        <div className="flex-grow border-t border-gray-400 mt-4" />
         <div>
           <CriticalCare__PageTitle title="Pressure Sore" />
           <DailyRound__PressureSore pressureSoreParameter />
@@ -171,13 +180,19 @@ export make = (
         <div>
           <CriticalCare__PageTitle title="Ventilator Parameters" />
           <DailyRound__VentilatorParameters
-            ventilatorParameters renderOptionalInt renderOptionalIntWithIndicators renderOptionalFloatWithIndicators renderLine
+            ventilatorParameters
+            renderOptionalInt
+            renderOptionalIntWithIndicators
+            renderOptionalFloatWithIndicators
+            renderLine
           />
         </div>
+        <div className="flex-grow border-t border-gray-400 mt-4" />
         <div>
           <CriticalCare__PageTitle title="Others" />
           <DailyRound__Others others renderOptionalIntWithIndicators renderOptionalBool />
         </div>
+        <div className="flex-grow border-t border-gray-400 mt-4" />
       </div>
     </div>
   </div>
