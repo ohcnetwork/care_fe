@@ -135,7 +135,16 @@ export const SetInventoryForm = (props: any) => {
     <div className="px-2 pb-2">
       <PageTitle
         title="Set Minimum Quantity"
-        crumbsReplacements={{ [facilityId]: { name: facilityName } }}
+        crumbsReplacements={{
+          [facilityId]: { name: facilityName },
+          min_quantity: {
+            name: "Min Quantity",
+            uri: `/facility/${facilityId}/inventory/min_quantity/list`,
+          },
+          set: {
+            style: "pointer-events-none",
+          },
+        }}
       />
       <div className="mt-4">
         <Card>
