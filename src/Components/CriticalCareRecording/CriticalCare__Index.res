@@ -160,6 +160,7 @@ export make = (
             renderLine
             renderOptionalDescription
             title
+            renderOptionalInt
           />
         </div>
         <div className="flex-grow border-t border-gray-400 mt-4" />
@@ -177,6 +178,7 @@ export make = (
           <CriticalCare__PageTitle title="Pressure Sore" />
           <DailyRound__PressureSore pressureSoreParameter />
         </div>
+        <div className="flex-grow border-t border-gray-400 mt-4" />
         <div>
           <CriticalCare__PageTitle title="Ventilator Parameters" />
           <DailyRound__VentilatorParameters
