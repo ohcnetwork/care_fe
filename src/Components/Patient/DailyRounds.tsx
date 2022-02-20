@@ -188,7 +188,7 @@ export const DailyRounds = (props: any) => {
     async function fetchPatientName() {
       if (patientId) {
         const res = await dispatchAction(getPatient({ id: patientId }));
-        if (res.data) {
+        if (res && res.data) {
           setPatientName(res.data.name);
           setFacilityName(res.data.facility_object.name);
         }
@@ -492,56 +492,205 @@ export const DailyRounds = (props: any) => {
           [patientId]: { name: patientName },
         }}
       />
-      <div className="mt-4">
-        <div className="bg-white rounded shadow">
-          <form onSubmit={(e) => handleSubmit(e)}>
-            <CardContent>
-              <div>
+      <form
+        className="bg-white rounded shadow"
+        onSubmit={(e) => handleSubmit(e)}
+      >
+        <CardContent>
+          <section>
+            <div className="my-2">
+              <DateTimeFiled
+                label="Measured At"
+                margin="dense"
+                value={state.form.taken_at}
+                disableFuture={true}
+                showTodayButton={true}
+                onChange={(date) => handleDateChange(date, "taken_at")}
+                errors={state.errors.taken_at}
+              />
+            </div>
+            <div className="my-2">
+              <InputLabel id="rounds_type">Round Type</InputLabel>
+              <SelectField
+                className="md:w-1/2"
+                name="rounds_type"
+                variant="standard"
+                margin="dense"
+                options={[
+                  {
+                    id: "NORMAL",
+                    name: "Normal",
+                  },
+                  {
+                    id: "VENTILATOR",
+                    name: "Critical Care",
+                  },
+                ]}
+                optionValue="name"
+                value={state.form.rounds_type}
+                onChange={handleChange}
+                errors={state.errors.rounds_type}
+              />
+            </div>
+          </section>
+
+          {!id && (
+            <div id="clone_last-div" className="mt-4">
+              <InputLabel id="clone_last">
+                Do you want to copy Values from Previous Log?
+              </InputLabel>
+              <RadioGroup
+                aria-label="clone_last"
+                name="clone_last"
+                value={state.form.clone_last}
+                onChange={handleChange}
+                style={{ padding: "0px 5px" }}
+              >
+                <Box display="flex" flexDirection="row">
+                  <FormControlLabel
+                    value="true"
+                    control={<Radio />}
+                    label="Yes"
+                  />
+                  <FormControlLabel
+                    value="false"
+                    control={<Radio />}
+                    label="No"
+                  />
+                </Box>
+              </RadioGroup>
+              <ErrorHelperText error={state.errors.clone_last} />
+            </div>
+          )}
+
+          {(state.form.clone_last === "false" || id) && (
+            <div>
+              <div className="md:grid gap-4 grid-cols-1 md:grid-cols-2 my-4">
                 <div>
-                  <DateTimeFiled
-                    label="Measured At"
+                  <InputLabel id="physical-examination-info-label">
+                    Physical Examination Info
+                  </InputLabel>
+                  <MultilineInputField
+                    rows={5}
+                    name="physical_examination_info"
+                    variant="outlined"
                     margin="dense"
-                    value={state.form.taken_at}
-                    disableFuture={true}
-                    showTodayButton={true}
-                    onChange={(date) => handleDateChange(date, "taken_at")}
-                    errors={state.errors.taken_at}
-                  />
-                </div>
-                <div className="mt-4">
-                  <InputLabel id="rounds_type">Round Type</InputLabel>
-                  <SelectField
-                    className="md:w-1/2"
-                    name="rounds_type"
-                    variant="standard"
-                    margin="dense"
-                    options={[
-                      {
-                        id: "NORMAL",
-                        name: "Normal",
-                      },
-                      {
-                        id: "VENTILATOR",
-                        name: "Critical Care",
-                      },
-                    ]}
-                    optionValue="name"
-                    value={state.form.rounds_type}
+                    type="text"
+                    InputLabelProps={{
+                      shrink: !!state.form.physical_examination_info,
+                    }}
+                    value={state.form.physical_examination_info}
                     onChange={handleChange}
-                    errors={state.errors.rounds_type}
+                    errors={state.errors.physical_examination_info}
                   />
                 </div>
-              </div>
-              {!id && (
-                <div id="clone_last-div" className="mt-4">
-                  <InputLabel id="clone_last">
-                    Do you want to copy Values from Previous Log?
+
+                <div>
+                  <InputLabel id="other-details-label">
+                    Other Details
+                  </InputLabel>
+                  <MultilineInputField
+                    rows={5}
+                    name="other_details"
+                    variant="outlined"
+                    margin="dense"
+                    type="text"
+                    InputLabelProps={{ shrink: !!state.form.other_details }}
+                    value={state.form.other_details}
+                    onChange={handleChange}
+                    errors={state.errors.other_details}
+                  />
+                </div>
+
+                <div className="md:col-span-2 my-2">
+                  <InputLabel id="symptoms-label">Symptoms</InputLabel>
+                  <MultiSelectField
+                    name="additional_symptoms"
+                    variant="outlined"
+                    value={state.form.additional_symptoms}
+                    options={symptomChoices}
+                    onChange={handleSymptomChange}
+                  />
+                  <ErrorHelperText error={state.errors.additional_symptoms} />
+                </div>
+
+                {state.form.otherSymptom && (
+                  <div className="md:col-span-2">
+                    <InputLabel id="other-symptoms-label" className="my-2">
+                      Other Symptom Details
+                    </InputLabel>
+                    <MultilineInputField
+                      rows={5}
+                      name="other_symptoms"
+                      variant="outlined"
+                      margin="dense"
+                      type="text"
+                      placeholder="Enter the other symptoms here"
+                      InputLabelProps={{
+                        shrink: !!state.form.other_symptoms,
+                      }}
+                      value={state.form.other_symptoms}
+                      onChange={handleChange}
+                      errors={state.errors.other_symptoms}
+                    />
+                  </div>
+                )}
+
+                <div className="my-4">
+                  <InputLabel id="category-label" className="my-2">
+                    Category
+                  </InputLabel>
+                  <SelectField
+                    name="category"
+                    variant="standard"
+                    value={state.form.patient_category}
+                    options={categoryChoices}
+                    onChange={handleChange}
+                    errors={state.errors.patient_category}
+                  />
+                </div>
+
+                <div className="my-4">
+                  <InputLabel id="current-health-label" className="my-2">
+                    Current Health
+                  </InputLabel>
+                  <SelectField
+                    name="current_health"
+                    variant="standard"
+                    value={state.form.current_health}
+                    options={currentHealthChoices}
+                    onChange={handleChange}
+                    optionKey="text"
+                    optionValue="desc"
+                    errors={state.errors.current_health}
+                  />
+                </div>
+
+                <div className="flex-1 my-4" id="admitted_to-div">
+                  <InputLabel id="admitted-to-label" className="my-2">
+                    Admitted To *
+                  </InputLabel>
+                  <SelectField
+                    optionArray={true}
+                    name="admitted_to"
+                    variant="standard"
+                    value={state.form.admitted_to}
+                    options={admittedToChoices}
+                    onChange={handleChange}
+                    errors={state.errors.admitted_to}
+                  />
+                </div>
+                <div className="flex-1 my-4" id="is_telemedicine-div">
+                  <InputLabel id="admitted-label" className="my-2">
+                    TeleICU
                   </InputLabel>
                   <RadioGroup
-                    aria-label="clone_last"
-                    name="clone_last"
-                    value={state.form.clone_last}
-                    onChange={handleChange}
+                    aria-label="covid"
+                    name="is_teleicu"
+                    value={isTeleicu}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      setIsTeleicu(e.target.value);
+                    }}
                     style={{ padding: "0px 5px" }}
                   >
                     <Box display="flex" flexDirection="row">
@@ -557,510 +706,327 @@ export const DailyRounds = (props: any) => {
                       />
                     </Box>
                   </RadioGroup>
-                  <ErrorHelperText error={state.errors.clone_last} />
+                  <ErrorHelperText error={state.errors.is_telemedicine} />
                 </div>
-              )}
-              {(state.form.clone_last === "false" || id) && (
+
+                <div className="flex-1">
+                  <InputLabel id="action-label">Action </InputLabel>
+                  <NativeSelectField
+                    name="action"
+                    variant="outlined"
+                    value={state.form.action}
+                    optionKey="text"
+                    optionValue="desc"
+                    options={TELEMEDICINE_ACTIONS}
+                    onChange={handleChange}
+                  />
+                  <ErrorHelperText error={state.errors.action} />
+                </div>
+                {isTeleicu === "true" && (
+                  <div className="">
+                    <InputLabel id="bed">Bed</InputLabel>
+                    <SelectField
+                      className=""
+                      name="bed"
+                      variant="standard"
+                      margin="dense"
+                      options={[
+                        { id: "", name: "Select Bed" },
+                        ...beds.map((bed: any) => {
+                          return {
+                            id: bed.id,
+                            name: `${bed.name} - ${bed.bed_type}`,
+                          };
+                        }),
+                      ]}
+                      optionValue="name"
+                      value={state.form.bed}
+                      onChange={handleChange}
+                      errors={state.errors.bed}
+                    />
+                  </div>
+                )}
+              </div>
+              <div className="md:grid gap-4 grid-cols-1 md:grid-cols-2">
+                <div className="flex-1">
+                  <InputLabel id="review_time-label">Review After </InputLabel>
+                  <SelectField
+                    name="review_time"
+                    variant="standard"
+                    value={state.form.review_time}
+                    options={[
+                      { id: "", text: "Select Review" },
+                      ...REVIEW_AT_CHOICES,
+                    ]}
+                    onChange={handleChange}
+                    errors={state.errors.review_time}
+                  />
+                </div>
                 <div>
-                  <div className="md:grid gap-4 grid-cols-1 md:grid-cols-2 my-4">
+                  <CheckboxField
+                    checked={state.form.recommend_discharge}
+                    onChange={handleCheckboxFieldChange}
+                    name="recommend_discharge"
+                    label="Recommend Discharge"
+                  />
+                </div>
+              </div>
+              {state.form.rounds_type === "NORMAL" && (
+                <div className="mt-4">
+                  <h3>Vitals</h3>
+                  <div className="md:grid gap-x-4 grid-cols-1 md:grid-cols-2 gap-y-2 items-end">
                     <div>
-                      <InputLabel id="physical-examination-info-label">
-                        Physical Examination Info
+                      <div className="flex flex-row justify-between">
+                        <h4>BP</h4>
+                        <p className="text-sm font-semibold">{`MAP: ${calculateMAP(
+                          state.form.systolic,
+                          state.form.diastolic
+                        )}`}</p>
+                      </div>
+                      <div className="md:grid gap-2 grid-cols-1 md:grid-cols-2">
+                        <div>
+                          <InputLabel className="flex flex-row justify-between">
+                            Systolic
+                            {getStatus(100, "Low", 140, "High", "systolic")}
+                          </InputLabel>
+                          <AutoCompleteAsyncField
+                            name="systolic"
+                            multiple={false}
+                            variant="standard"
+                            value={state.form.systolic}
+                            options={generateOptions(0, 250, 1, 0)}
+                            onChange={(e: any, value: any) =>
+                              handleAutoComplete("systolic", value)
+                            }
+                            placeholder="Enter value"
+                            noOptionsText={"Invalid value"}
+                            renderOption={(option: any) => <div>{option} </div>}
+                            freeSolo={false}
+                            getOptionSelected={(option: any, value: any) =>
+                              option == value
+                            }
+                            getOptionLabel={(option: any) => option.toString()}
+                            className="-mt-3"
+                          />
+                        </div>
+                        <div>
+                          <InputLabel className="flex flex-row justify-between">
+                            Diastolic{" "}
+                            {getStatus(50, "Low", 90, "High", "diastolic")}
+                          </InputLabel>
+                          <AutoCompleteAsyncField
+                            name="diastolic"
+                            multiple={false}
+                            variant="standard"
+                            value={state.form.diastolic}
+                            options={generateOptions(30, 180, 1, 0)}
+                            onChange={(e: any, value: any) =>
+                              handleAutoComplete("diastolic", value)
+                            }
+                            placeholder="Enter value"
+                            noOptionsText={"Invalid value"}
+                            renderOption={(option: any) => <div>{option}</div>}
+                            freeSolo={false}
+                            getOptionSelected={(option: any, value: any) =>
+                              option == value
+                            }
+                            getOptionLabel={(option: any) => option.toString()}
+                            className="-mt-3"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <InputLabel className="flex flex-row justify-between">
+                        {"Pulse (bpm)"}
+                        {getStatus(
+                          40,
+                          "Bradycardia",
+                          100,
+                          "Tachycardia",
+                          "pulse"
+                        )}
                       </InputLabel>
+                      <AutoCompleteAsyncField
+                        name="pulse"
+                        multiple={false}
+                        variant="standard"
+                        value={state.form.pulse}
+                        options={generateOptions(0, 200, 1, 0)}
+                        onChange={(e: any, value: any) =>
+                          handleAutoComplete("pulse", value)
+                        }
+                        placeholder="Enter value"
+                        noOptionsText={"Invalid value"}
+                        renderOption={(option: any) => <div>{option}</div>}
+                        freeSolo={false}
+                        getOptionSelected={(option: any, value: any) =>
+                          option == value
+                        }
+                        getOptionLabel={(option: any) => option.toString()}
+                        className="-mt-3"
+                      />
+                    </div>
+                    <div>
+                      <InputLabel className="flex flex-row justify-between">
+                        Temperature{" "}
+                        {state.form.tempInCelcius
+                          ? getStatus(36.4, "Low", 37.5, "High", "temperature")
+                          : getStatus(97.6, "Low", 99.6, "High", "temperature")}
+                      </InputLabel>
+                      <div className="flex flex-row">
+                        <div className="flex-grow mr-2">
+                          <AutoCompleteAsyncField
+                            name="temperature"
+                            multiple={false}
+                            variant="standard"
+                            value={state.form.temperature}
+                            options={
+                              state.form.tempInCelcius
+                                ? generateOptions(35, 41, 0.1, 1)
+                                : generateOptions(95, 106, 0.1, 1)
+                            }
+                            onChange={(e: any, value: any) =>
+                              handleAutoComplete("temperature", value)
+                            }
+                            placeholder="Enter value"
+                            noOptionsText={"Invalid value"}
+                            renderOption={(option: any) => <div>{option}</div>}
+                            freeSolo={false}
+                            getOptionSelected={(option: any, value: any) =>
+                              option == value
+                            }
+                            getOptionLabel={(option: any) => option.toString()}
+                            className="-mt-3"
+                          />
+                        </div>
+                        <div
+                          className="flex items-center ml-1 border border-gray-400 rounded px-4 h-10 cursor-pointer hover:bg-gray-200 max-w-min-content"
+                          onClick={toggleTemperature}
+                        >
+                          <span className="text-blue-700">
+                            {" "}
+                            {state.form.tempInCelcius ? "C" : "F"}{" "}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <InputLabel className="flex flex-row justify-between">
+                        {"Respiratory Rate (bpm) *"}
+                        {getStatus(12, "Low", 16, "High", "resp")}
+                      </InputLabel>
+                      <AutoCompleteAsyncField
+                        name="resp"
+                        multiple={false}
+                        variant="standard"
+                        value={state.form.resp}
+                        options={generateOptions(10, 50, 1, 0)}
+                        onChange={(e: any, value: any) =>
+                          handleAutoComplete("resp", value)
+                        }
+                        placeholder="Enter value"
+                        noOptionsText={"Invalid value"}
+                        renderOption={(option: any) => <div>{option}</div>}
+                        freeSolo={false}
+                        getOptionSelected={(option: any, value: any) =>
+                          option == value
+                        }
+                        getOptionLabel={(option: any) => option.toString()}
+                        className="-mt-3"
+                        errors={state.errors.resp}
+                      />
+                    </div>
+                    <div>
+                      <InputLabel className="flex flex-row justify-between">
+                        {"SPO2 (%)"}
+                        {getStatus(90, "Low", 100, "High", "ventilator_spo2")}
+                      </InputLabel>
+                      <AutoCompleteAsyncField
+                        name="ventilator_spo2"
+                        multiple={false}
+                        variant="standard"
+                        value={state.form.ventilator_spo2}
+                        options={generateOptions(0, 100, 1, 0)}
+                        onChange={(e: any, value: any) =>
+                          handleAutoComplete("ventilator_spo2", value)
+                        }
+                        placeholder="Enter value"
+                        noOptionsText={"Invalid value"}
+                        renderOption={(option: any) => <div>{option}</div>}
+                        freeSolo={false}
+                        getOptionSelected={(option: any, value: any) =>
+                          option == value
+                        }
+                        getOptionLabel={(option: any) => option.toString()}
+                        className="-mt-3"
+                      />
+                    </div>
+                    <div className="">
+                      <InputLabel className="flex flex-row justify-between">
+                        Rhythm
+                      </InputLabel>
+                      <SelectField
+                        name="rhythm"
+                        variant="standard"
+                        value={state.form.rhythm}
+                        options={RHYTHM_CHOICES}
+                        onChange={handleChange}
+                        errors={state.errors.rhythm}
+                        className="mb-2 mt-1"
+                      />
+                    </div>
+                    <div className="md:col-span-2 mt-2">
+                      <InputLabel>Rhythm Description</InputLabel>
                       <MultilineInputField
                         rows={5}
-                        name="physical_examination_info"
+                        name="rhythm_detail"
                         variant="outlined"
                         margin="dense"
                         type="text"
                         InputLabelProps={{
-                          shrink: !!state.form.physical_examination_info,
+                          shrink: !!state.form.rhythm_detail,
                         }}
-                        value={state.form.physical_examination_info}
+                        value={state.form.rhythm_detail}
                         onChange={handleChange}
-                        errors={state.errors.physical_examination_info}
-                      />
-                    </div>
-
-                    <div>
-                      <InputLabel id="other-details-label">
-                        Other Details
-                      </InputLabel>
-                      <MultilineInputField
-                        rows={5}
-                        name="other_details"
-                        variant="outlined"
-                        margin="dense"
-                        type="text"
-                        InputLabelProps={{ shrink: !!state.form.other_details }}
-                        value={state.form.other_details}
-                        onChange={handleChange}
-                        errors={state.errors.other_details}
-                      />
-                    </div>
-
-                    <div className="md:col-span-2">
-                      <InputLabel id="symptoms-label">Symptoms</InputLabel>
-                      <MultiSelectField
-                        name="additional_symptoms"
-                        variant="outlined"
-                        value={state.form.additional_symptoms}
-                        options={symptomChoices}
-                        onChange={handleSymptomChange}
-                      />
-                      <ErrorHelperText
-                        error={state.errors.additional_symptoms}
-                      />
-                    </div>
-
-                    {state.form.otherSymptom && (
-                      <div className="md:col-span-2">
-                        <InputLabel id="other-symptoms-label">
-                          Other Symptom Details
-                        </InputLabel>
-                        <MultilineInputField
-                          rows={5}
-                          name="other_symptoms"
-                          variant="outlined"
-                          margin="dense"
-                          type="text"
-                          placeholder="Enter the other symptoms here"
-                          InputLabelProps={{
-                            shrink: !!state.form.other_symptoms,
-                          }}
-                          value={state.form.other_symptoms}
-                          onChange={handleChange}
-                          errors={state.errors.other_symptoms}
-                        />
-                      </div>
-                    )}
-
-                    <div>
-                      <InputLabel id="category-label">Category</InputLabel>
-                      <SelectField
-                        name="category"
-                        variant="standard"
-                        value={state.form.patient_category}
-                        options={categoryChoices}
-                        onChange={handleChange}
-                        errors={state.errors.patient_category}
-                      />
-                    </div>
-
-                    <div>
-                      <InputLabel id="current-health-label">
-                        Current Health
-                      </InputLabel>
-                      <SelectField
-                        name="current_health"
-                        variant="standard"
-                        value={state.form.current_health}
-                        options={currentHealthChoices}
-                        onChange={handleChange}
-                        optionKey="text"
-                        optionValue="desc"
-                        errors={state.errors.current_health}
-                      />
-                    </div>
-
-                    <div className="flex-1" id="admitted_to-div">
-                      <InputLabel id="admitted-to-label">
-                        Admitted To *{" "}
-                      </InputLabel>
-                      <SelectField
-                        optionArray={true}
-                        name="admitted_to"
-                        variant="standard"
-                        value={state.form.admitted_to}
-                        options={admittedToChoices}
-                        onChange={handleChange}
-                        errors={state.errors.admitted_to}
-                      />
-                    </div>
-                    <div className="flex-1" id="is_telemedicine-div">
-                      <InputLabel id="admitted-label">TeleICU</InputLabel>
-                      <RadioGroup
-                        aria-label="covid"
-                        name="is_teleicu"
-                        value={isTeleicu}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                          setIsTeleicu(e.target.value);
-                        }}
-                        style={{ padding: "0px 5px" }}
-                      >
-                        <Box display="flex" flexDirection="row">
-                          <FormControlLabel
-                            value="true"
-                            control={<Radio />}
-                            label="Yes"
-                          />
-                          <FormControlLabel
-                            value="false"
-                            control={<Radio />}
-                            label="No"
-                          />
-                        </Box>
-                      </RadioGroup>
-                      <ErrorHelperText error={state.errors.is_telemedicine} />
-                    </div>
-
-                    <div className="flex-1">
-                      <InputLabel id="action-label">Action </InputLabel>
-                      <NativeSelectField
-                        name="action"
-                        variant="outlined"
-                        value={state.form.action}
-                        optionKey="text"
-                        optionValue="desc"
-                        options={TELEMEDICINE_ACTIONS}
-                        onChange={handleChange}
-                      />
-                      <ErrorHelperText error={state.errors.action} />
-                    </div>
-                    {isTeleicu === "true" && (
-                      <div className="">
-                        <InputLabel id="bed">Bed</InputLabel>
-                        <SelectField
-                          className=""
-                          name="bed"
-                          variant="standard"
-                          margin="dense"
-                          options={[
-                            { id: "", name: "Select Bed" },
-                            ...beds.map((bed: any) => {
-                              return {
-                                id: bed.id,
-                                name: `${bed.name} - ${bed.bed_type}`,
-                              };
-                            }),
-                          ]}
-                          optionValue="name"
-                          value={state.form.bed}
-                          onChange={handleChange}
-                          errors={state.errors.bed}
-                        />
-                      </div>
-                    )}
-                  </div>
-                  <div className="md:grid gap-4 grid-cols-1 md:grid-cols-2">
-                    <div className="flex-1">
-                      <InputLabel id="review_time-label">
-                        Review After{" "}
-                      </InputLabel>
-                      <SelectField
-                        name="review_time"
-                        variant="standard"
-                        value={state.form.review_time}
-                        options={[
-                          { id: "", text: "select" },
-                          ...REVIEW_AT_CHOICES,
-                        ]}
-                        onChange={handleChange}
-                        errors={state.errors.review_time}
-                      />
-                    </div>
-                    <div>
-                      <CheckboxField
-                        checked={state.form.recommend_discharge}
-                        onChange={handleCheckboxFieldChange}
-                        name="recommend_discharge"
-                        label="Recommend Discharge"
+                        errors={state.errors.rhythm_detail}
                       />
                     </div>
                   </div>
-                  {state.form.rounds_type === "NORMAL" && (
-                    <div className="mt-4">
-                      <h3>Vitals</h3>
-
-                      <div className="md:grid gap-x-4 grid-cols-1 md:grid-cols-2 gap-y-2 items-end">
-                        <div>
-                          <div className="flex flex-row justify-between">
-                            <h4>BP</h4>
-                            <p className="text-sm font-semibold">{`MAP: ${calculateMAP(
-                              state.form.systolic,
-                              state.form.diastolic
-                            )}`}</p>
-                          </div>
-                          <div className="md:grid gap-2 grid-cols-1 md:grid-cols-2">
-                            <div>
-                              <InputLabel className="flex flex-row justify-between">
-                                Systolic
-                                {getStatus(100, "Low", 140, "High", "systolic")}
-                              </InputLabel>
-                              <AutoCompleteAsyncField
-                                name="systolic"
-                                multiple={false}
-                                variant="standard"
-                                value={state.form.systolic}
-                                options={generateOptions(0, 250, 1, 0)}
-                                onChange={(e: any, value: any) =>
-                                  handleAutoComplete("systolic", value)
-                                }
-                                placeholder="Enter value"
-                                noOptionsText={"Invalid value"}
-                                renderOption={(option: any) => (
-                                  <div>{option} </div>
-                                )}
-                                freeSolo={false}
-                                getOptionSelected={(option: any, value: any) =>
-                                  option == value
-                                }
-                                getOptionLabel={(option: any) =>
-                                  option.toString()
-                                }
-                                className="-mt-3"
-                              />
-                            </div>
-                            <div>
-                              <InputLabel className="flex flex-row justify-between">
-                                Diastolic{" "}
-                                {getStatus(50, "Low", 90, "High", "diastolic")}
-                              </InputLabel>
-                              <AutoCompleteAsyncField
-                                name="diastolic"
-                                multiple={false}
-                                variant="standard"
-                                value={state.form.diastolic}
-                                options={generateOptions(30, 180, 1, 0)}
-                                onChange={(e: any, value: any) =>
-                                  handleAutoComplete("diastolic", value)
-                                }
-                                placeholder="Enter value"
-                                noOptionsText={"Invalid value"}
-                                renderOption={(option: any) => (
-                                  <div>{option}</div>
-                                )}
-                                freeSolo={false}
-                                getOptionSelected={(option: any, value: any) =>
-                                  option == value
-                                }
-                                getOptionLabel={(option: any) =>
-                                  option.toString()
-                                }
-                                className="-mt-3"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                        <div>
-                          <InputLabel className="flex flex-row justify-between">
-                            {"Pulse (bpm)"}
-                            {getStatus(
-                              40,
-                              "Bradycardia",
-                              100,
-                              "Tachycardia",
-                              "pulse"
-                            )}
-                          </InputLabel>
-                          <AutoCompleteAsyncField
-                            name="pulse"
-                            multiple={false}
-                            variant="standard"
-                            value={state.form.pulse}
-                            options={generateOptions(0, 200, 1, 0)}
-                            onChange={(e: any, value: any) =>
-                              handleAutoComplete("pulse", value)
-                            }
-                            placeholder="Enter value"
-                            noOptionsText={"Invalid value"}
-                            renderOption={(option: any) => <div>{option}</div>}
-                            freeSolo={false}
-                            getOptionSelected={(option: any, value: any) =>
-                              option == value
-                            }
-                            getOptionLabel={(option: any) => option.toString()}
-                            className="-mt-3"
-                          />
-                        </div>
-                        <div>
-                          <InputLabel className="flex flex-row justify-between">
-                            Temperature{" "}
-                            {state.form.tempInCelcius
-                              ? getStatus(
-                                  36.4,
-                                  "Low",
-                                  37.5,
-                                  "High",
-                                  "temperature"
-                                )
-                              : getStatus(
-                                  97.6,
-                                  "Low",
-                                  99.6,
-                                  "High",
-                                  "temperature"
-                                )}
-                          </InputLabel>
-                          <div className="flex flex-row">
-                            <div className="flex-grow mr-2">
-                              <AutoCompleteAsyncField
-                                name="temperature"
-                                multiple={false}
-                                variant="standard"
-                                value={state.form.temperature}
-                                options={
-                                  state.form.tempInCelcius
-                                    ? generateOptions(35, 41, 0.1, 1)
-                                    : generateOptions(95, 106, 0.1, 1)
-                                }
-                                onChange={(e: any, value: any) =>
-                                  handleAutoComplete("temperature", value)
-                                }
-                                placeholder="Enter value"
-                                noOptionsText={"Invalid value"}
-                                renderOption={(option: any) => (
-                                  <div>{option}</div>
-                                )}
-                                freeSolo={false}
-                                getOptionSelected={(option: any, value: any) =>
-                                  option == value
-                                }
-                                getOptionLabel={(option: any) =>
-                                  option.toString()
-                                }
-                                className="-mt-3"
-                              />
-                            </div>
-                            <div
-                              className="flex items-center ml-1 border border-gray-400 rounded px-4 h-10 cursor-pointer hover:bg-gray-200 max-w-min-content"
-                              onClick={toggleTemperature}
-                            >
-                              <span className="text-blue-700">
-                                {" "}
-                                {state.form.tempInCelcius ? "C" : "F"}{" "}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                        <div>
-                          <InputLabel className="flex flex-row justify-between">
-                            {"Respiratory Rate (bpm) *"}
-                            {getStatus(12, "Low", 16, "High", "resp")}
-                          </InputLabel>
-                          <AutoCompleteAsyncField
-                            name="resp"
-                            multiple={false}
-                            variant="standard"
-                            value={state.form.resp}
-                            options={generateOptions(10, 50, 1, 0)}
-                            onChange={(e: any, value: any) =>
-                              handleAutoComplete("resp", value)
-                            }
-                            placeholder="Enter value"
-                            noOptionsText={"Invalid value"}
-                            renderOption={(option: any) => <div>{option}</div>}
-                            freeSolo={false}
-                            getOptionSelected={(option: any, value: any) =>
-                              option == value
-                            }
-                            getOptionLabel={(option: any) => option.toString()}
-                            className="-mt-3"
-                            errors={state.errors.resp}
-                          />
-                        </div>
-                        <div>
-                          <InputLabel className="flex flex-row justify-between">
-                            {"SPO2 (%)"}
-                            {getStatus(
-                              90,
-                              "Low",
-                              100,
-                              "High",
-                              "ventilator_spo2"
-                            )}
-                          </InputLabel>
-                          <AutoCompleteAsyncField
-                            name="ventilator_spo2"
-                            multiple={false}
-                            variant="standard"
-                            value={state.form.ventilator_spo2}
-                            options={generateOptions(0, 100, 1, 0)}
-                            onChange={(e: any, value: any) =>
-                              handleAutoComplete("ventilator_spo2", value)
-                            }
-                            placeholder="Enter value"
-                            noOptionsText={"Invalid value"}
-                            renderOption={(option: any) => <div>{option}</div>}
-                            freeSolo={false}
-                            getOptionSelected={(option: any, value: any) =>
-                              option == value
-                            }
-                            getOptionLabel={(option: any) => option.toString()}
-                            className="-mt-3"
-                          />
-                        </div>
-                        <div className="">
-                          <InputLabel className="flex flex-row justify-between">
-                            Rhythm
-                          </InputLabel>
-                          <SelectField
-                            name="rhythm"
-                            variant="standard"
-                            value={state.form.rhythm}
-                            options={RHYTHM_CHOICES}
-                            onChange={handleChange}
-                            errors={state.errors.rhythm}
-                            className="mb-2 mt-1"
-                          />
-                        </div>
-                        <div className="md:col-span-2 mt-2">
-                          <InputLabel>Rhythm Description</InputLabel>
-                          <MultilineInputField
-                            rows={5}
-                            name="rhythm_detail"
-                            variant="outlined"
-                            margin="dense"
-                            type="text"
-                            InputLabelProps={{
-                              shrink: !!state.form.rhythm_detail,
-                            }}
-                            value={state.form.rhythm_detail}
-                            onChange={handleChange}
-                            errors={state.errors.rhythm_detail}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  )}
                 </div>
               )}
+            </div>
+          )}
 
-              <div className="mt-4 flex justify-between">
-                {id && (
-                  <Link
-                    className="btn btn-default bg-white mt-2"
-                    href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${id}/update`}
-                  >
-                    Back
-                  </Link>
-                )}
-                {!id && (
-                  <Link
-                    className="btn btn-default bg-white mt-2"
-                    href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/updates`}
-                  >
-                    Back
-                  </Link>
-                )}
-
-                <Button
-                  color="primary"
-                  variant="contained"
-                  type="submit"
-                  style={{ marginLeft: "auto" }}
-                  startIcon={
-                    <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
-                  }
-                  onClick={(e) => handleSubmit(e)}
-                >
-                  {buttonText}
-                </Button>
-              </div>
-            </CardContent>
-          </form>
-        </div>
-      </div>
+          {/* Footer Section */}
+          <div className="mt-4 flex justify-between">
+            {id ? (
+              <Link
+                className="btn btn-default bg-white mt-2"
+                href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${id}/update`}
+              >
+                Back
+              </Link>
+            ) : (
+              <Link
+                className="btn btn-default bg-white mt-2"
+                href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/updates`}
+              >
+                Back
+              </Link>
+            )}
+            <Button
+              color="primary"
+              variant="contained"
+              type="submit"
+              style={{ marginLeft: "auto" }}
+              startIcon={<CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>}
+            >
+              {buttonText}
+            </Button>
+          </div>
+        </CardContent>
+      </form>
     </div>
   );
 };
