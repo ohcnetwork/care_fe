@@ -221,7 +221,7 @@ export const FacilityHome = (props: any) => {
                 }
               </p>
               <div className="grid grid-cols-1  lg:grid-cols-2 gap-4 mb-6 w-full">
-                <div className="lg:flex-1 min-w-[300px]">
+                <div className="md:flex flex-col justify-between lg:flex-1 min-w-[300px]">
                   <div className="mb-4">
                     <h1 className="text-lg font-bold">Address</h1>
                     <p className="text-lg">{facilityData.address}</p>
@@ -239,7 +239,7 @@ export const FacilityHome = (props: any) => {
                     </div>
                   </div>
                 </div>
-                <div className="lg:flex-1 min-w-[300px]">
+                <div className="lg:flex-1 min-w-[300px] md:flex flex-col justify-between">
                   <div className="mb-4">
                     <h1 className="text-lg font-bold">Local Body</h1>
                     <p className="text-lg">
