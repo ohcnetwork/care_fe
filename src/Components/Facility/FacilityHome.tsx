@@ -344,7 +344,7 @@ export const FacilityHome = (props: any) => {
             Information on Oxygen
           </h1>
 
-          <div className="grid grid-cols-5 mb-6 max-w-2xl overflow-scroll">
+          <div className="grid grid-cols-5 mb-6 max-w-2xl p-0 bg-white break-all">
             <div className="border p-2"></div>
             <div className="border p-2 text-right font-semibold">Liquid</div>
             <div className="border p-2 text-right font-semibold">B</div>
