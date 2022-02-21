@@ -206,59 +206,61 @@ export const FacilityHome = (props: any) => {
           </button>
         </DialogActions>
       </Dialog>
-      <div className="bg-white rounded-lg md:p-6 shadow">
+      <div className="bg-white rounded-lg p-3 md:p-6 shadow">
         <div className="md:flex justify-between gap-2">
-          <div>
-            <h1 className="text-4xl font-bold">{facilityData.name}</h1>
-            <p className="text-xl text-gray-700 mb-4 ">
-              Last updated{" "}
-              {
-                // @ts-ignore
-                facilityData?.modified_date &&
+          <div className="md:flex flex-col justify-between">
+            <div>
+              <h1 className="text-4xl font-bold">{facilityData.name}</h1>
+              <p className="text-xl text-gray-700 mb-4 ">
+                Last updated{" "}
+                {
                   // @ts-ignore
-                  moment(facilityData?.modified_date).fromNow()
-              }
-            </p>
-            <div className="grid grid-cols-1  lg:grid-cols-2 gap-4 mb-6 w-full">
-              <div className="lg:flex-1 min-w-[300px]">
-                <div className="mb-4">
-                  <h1 className="text-lg font-bold">Address</h1>
-                  <p className="text-lg">{facilityData.address}</p>
-                </div>
+                  facilityData?.modified_date &&
+                    // @ts-ignore
+                    moment(facilityData?.modified_date).fromNow()
+                }
+              </p>
+              <div className="grid grid-cols-1  lg:grid-cols-2 gap-4 mb-6 w-full">
+                <div className="lg:flex-1 min-w-[300px]">
+                  <div className="mb-4">
+                    <h1 className="text-lg font-bold">Address</h1>
+                    <p className="text-lg">{facilityData.address}</p>
+                  </div>
 
-                <div className="flex items-center gap-3">
-                  <div>
-                    <h1 className="text-lg font-bold">Phone Number</h1>
-                    <a
-                      href={`tel:${facilityData.phone_number}`}
-                      className="block text-lg font-normal"
-                    >
-                      {facilityData.phone_number}
-                    </a>
+                  <div className="flex items-center gap-3">
+                    <div>
+                      <h1 className="text-lg font-bold">Phone Number</h1>
+                      <a
+                        href={`tel:${facilityData.phone_number}`}
+                        className="block text-lg font-normal"
+                      >
+                        {facilityData.phone_number}
+                      </a>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="lg:flex-1 min-w-[300px]">
-                <div className="mb-4">
-                  <h1 className="text-lg font-bold">Local Body</h1>
-                  <p className="text-lg">
-                    {facilityData?.local_body_object?.name}
-                  </p>
-                </div>
-                <div className="flex gap-4">
-                  <div>
-                    <h1 className="text-lg font-bold">Ward</h1>
+                <div className="lg:flex-1 min-w-[300px]">
+                  <div className="mb-4">
+                    <h1 className="text-lg font-bold">Local Body</h1>
                     <p className="text-lg">
-                      {facilityData?.ward_object?.number +
-                        ", " +
-                        facilityData?.ward_object?.name}
+                      {facilityData?.local_body_object?.name}
                     </p>
                   </div>
-                  <div>
-                    <h1 className="text-lg font-bold">District</h1>
-                    <p className="text-lg">
-                      {facilityData?.district_object?.name}
-                    </p>
+                  <div className="flex gap-4">
+                    <div>
+                      <h1 className="text-lg font-bold">Ward</h1>
+                      <p className="text-lg">
+                        {facilityData?.ward_object?.number +
+                          ", " +
+                          facilityData?.ward_object?.name}
+                      </p>
+                    </div>
+                    <div>
+                      <h1 className="text-lg font-bold">District</h1>
+                      <p className="text-lg">
+                        {facilityData?.district_object?.name}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -274,7 +276,7 @@ export const FacilityHome = (props: any) => {
               </button>
 
               <button
-                className="btn-primary btn my-2 mr-2 w-full md:w-auto"
+                className="btn-primary btn mt-2 mr-2 w-full md:w-auto"
                 onClick={() => navigate(`/facility/${facilityId}/patients`)}
               >
                 <i className="fas fa-user-injured text-white mr-2"></i>
@@ -282,7 +284,7 @@ export const FacilityHome = (props: any) => {
               </button>
             </div>
           </div>
-          <div className="flex flex-col mt-4">
+          <div className="flex flex-col mt-2 md:mt-4">
             <button
               id="update-facility"
               className="btn-primary btn"
