@@ -10,6 +10,7 @@ import ReCaptcha from "react-google-recaptcha";
 import VisibilityIcon from "@material-ui/icons/Visibility";
 import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
 import LanguageSelector from "../Common/LanguageSelector";
+import { RECAPTCHA_SITE_KEY } from "../../Common/env";
 const get = require("lodash.get");
 
 const LoginPage = (props: any) => {
@@ -23,7 +24,7 @@ const LoginPage = (props: any) => {
   const [errors, setErrors] = useState(initErr);
   const [isCaptchaEnabled, setCaptcha] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const captchaKey = "6LdvxuQUAAAAADDWVflgBqyHGfq-xmvNJaToM0pN";
+  const captchaKey = RECAPTCHA_SITE_KEY ?? "";
   const { t } = props;
 
   const handleChange = (e: any) => {
