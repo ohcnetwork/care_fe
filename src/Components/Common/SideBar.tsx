@@ -133,7 +133,7 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
         expanded ? "w-64" : "w-14"
       )}
       PaperProps={{
-        className: "bg-primary-600",
+        className: "bg-primary-800",
       }}
       variant={isMobile ? "temporary" : "persistent"}
       onMouseEnter={() => !isMobile && enableCollapse && setExpanded(true)}
@@ -170,14 +170,14 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
                 key={item.title}
                 href={item.link}
                 className={clsx(
-                  "flex justify-items-start items-center overflow-hidden w-10 text-white py-1 my-1 hover:bg-primary-700 rounded transition-all duration-300",
+                  "flex justify-items-start items-center overflow-hidden w-10 py-1 my-1 hover:bg-primary-700 hover:text-white rounded transition-all duration-300",
                   isActive
-                    ? "bg-primary-800 hover:bg-primary-800"
-                    : "bg-primary-600",
+                    ? "bg-primary-900 hover:bg-primary-900 text-white"
+                    : "bg-primary-800 text-primary-300",
                   expanded && "w-60"
                 )}
               >
-                <div className="flex-shrink-0 flex items-center justify-center w-10 h-9">
+                <div className="flex-shrink-0 flex items-center justify-center w-10 h-8">
                   <i className={clsx(item.icon, "text-lg")}></i>
                 </div>
                 {
@@ -201,7 +201,7 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
             target="_blank"
             rel="noreferrer"
             className={clsx(
-              "flex justify-items-start items-center overflow-hidden w-10 text-white py-1 my-1 hover:bg-primary-700 rounded transition-all duration-300",
+              "flex justify-items-start items-center overflow-hidden w-10 py-1 my-1 hover:bg-primary-700 hover:text-white rounded transition-all duration-300 text-primary-300",
               expanded && "w-60"
             )}
           >
@@ -222,15 +222,17 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
 
         <div
           className={clsx(
-            "fixed bottom-2 flex flex-no-wrap items-center ml-2 overflow-hidden transition-all duration-300 bg-primary-600",
+            "fixed bottom-0 flex flex-no-wrap items-center ml-2 overflow-hidden transition-all duration-300 py-4",
             expanded ? "w-60" : "w-10"
           )}
         >
-          <div className="flex-shrink-0 flex items-center justify-center bg-white rounded-full w-10 h-10">
-            <i className="block fas fa-user text-xl text-primary-500"></i>
+          <div className="flex-shrink-0 flex items-center justify-center w-10">
+            <div className="flex items-center justify-center bg-white rounded-full w-8 h-8">
+              <i className="block fas fa-user text-base text-primary-800"></i>
+            </div>
           </div>
           <div className="ml-3 overflow-hidden whitespace-no-wrap">
-            <p className="text-base leading-5 font-medium text-white mb-2">
+            <p className="text-base leading-5 font-medium text-white mb-1">
               {loginUser}
             </p>
             <p

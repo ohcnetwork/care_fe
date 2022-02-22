@@ -287,10 +287,10 @@ export default function ResultList({ expanded = false }) {
       <button
         onClick={() => setShowNotifications(!showNotifications)}
         className={clsx(
-          "flex justify-items-start items-center overflow-hidden w-10 text-white py-1 my-1 hover:bg-primary-700 rounded transition-all duration-300",
+          "flex justify-items-start items-center overflow-hidden w-10 text-primary-300 hover:text-white py-1 my-1 hover:bg-primary-700 rounded transition-all duration-300",
           showNotifications
-            ? "bg-primary-800 hover:bg-primary-800"
-            : "bg-primary-600",
+            ? "bg-primary-900 hover:bg-primary-900 text-white"
+            : "bg-primary-800",
           expanded && "w-60"
         )}
       >
