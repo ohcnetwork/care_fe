@@ -323,7 +323,7 @@ const LiveFeed = (props: any) => {
               <div className="text-white text-2xl">Moving Camera</div>
             </div>
           </div>
-          <div className="grid grid-cols-2 md:ml-12 md:w-1/3 my-auto gap-4 mt-4 md:mt-0">
+          {/* <div className="grid grid-cols-2 md:ml-12 md:w-1/3 my-auto gap-4 mt-4 md:mt-0">
             {showDefaultPresets
               ? viewOptions.map((option: any) => (
                   <div
@@ -375,6 +375,79 @@ const LiveFeed = (props: any) => {
                 ? "Show Patient Presets"
                 : "Show Default Presets"}
             </button>
+          </div> */}
+
+          <div className="flex flex-col w-full mx-4 ">
+            <nav className=" flex  ">
+              <button
+                className={`flex-1 overflow-hidden p-4  font-bold text-center  text-gray-700 hover:text-gray-800  ${
+                  showDefaultPresets
+                    ? "border-primary-500 text-primary-600 border-b-2"
+                    : ""
+                }`}
+                onClick={() => {
+                  setShowDefaultPresets(true);
+                }}
+              >
+                Default Presets
+              </button>
+              <button
+                className={`flex-1 overflow-hidden p-4  font-bold text-center  text-gray-700 hover:text-gray-800  ${
+                  !showDefaultPresets
+                    ? "border-primary-500 text-primary-600 border-b-2"
+                    : ""
+                }`}
+                onClick={() => {
+                  setShowDefaultPresets(false);
+                }}
+              >
+                Patient Presets
+              </button>
+            </nav>
+            <div className=" space-y-4 my-2">
+              <div className="grid grid-cols-2 my-auto gap-4 ">
+                {showDefaultPresets
+                  ? viewOptions.map((option: any) => (
+                      <div
+                        onClick={() => {
+                          gotoPreset(option.value);
+                        }}
+                      >
+                        <button className="bg-green-100 border border-white rounded-md p-3  text-black  hover:bg-green-200 w-full">
+                          {option.label}
+                        </button>
+                      </div>
+                    ))
+                  : bedPresets.map((preset: any, index: number) => (
+                      <div
+                        onClick={() => {
+                          setLoading(true);
+                          gotoBedPreset(preset);
+                        }}
+                        key={preset.id}
+                      >
+                        <button className="bg-green-100 border border-white rounded-md p-3 text-black  hover:bg-green-200 w-full">
+                          {preset.meta.preset_name
+                            ? preset.meta.preset_name
+                            : `Unnamed Preset ${index + 1}`}
+                        </button>
+                      </div>
+                    ))}
+              </div>
+              {props.showRefreshButton && (
+                <div
+                  onClick={() => {
+                    setLoading(true);
+                    getBedPresets(asset);
+                    getPresets(asset);
+                  }}
+                >
+                  <button className="bg-green-100 border border-white rounded-md px-3 py-2 text-black font-semibold hover:bg-green-300 w-full">
+                    <RefreshIcon /> Refresh
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
