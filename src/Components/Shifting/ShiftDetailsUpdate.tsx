@@ -267,7 +267,6 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                       multiple={false}
                       selected={assignedUser}
                       setSelected={handleOnSelect}
-                      className="shifting-page-filter-dropdown"
                       errors={""}
                       facilityId={
                         state.form?.shifting_approving_facility_object?.id
