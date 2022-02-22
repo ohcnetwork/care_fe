@@ -96,6 +96,7 @@ type FormDetails = {
   review_time: number;
   weight: string;
   height: string;
+  HBA1C: string;
 };
 
 type Action =
@@ -137,6 +138,7 @@ const initForm: FormDetails = {
   review_time: 0,
   weight: "",
   height: "",
+  HBA1C: "",
 };
 
 const initError = Object.assign(
@@ -266,6 +268,7 @@ export const ConsultationForm = (props: any) => {
             special_instruction: res.data.special_instruction || "",
             weight: res.data.weight ? res.data.weight : "",
             height: res.data.height ? res.data.height : "",
+            HBA1C: res.data.HBA1C ? res.data.HBA1C : "",
           };
           dispatch({ type: "set_form", form: formData });
         } else {
@@ -344,7 +347,7 @@ export const ConsultationForm = (props: any) => {
           }
           return;
         case "consultation_notes":
-          if (state.form.suggestion === "OP" || !state.form[field]) {
+          if (!state.form[field]) {
             errors[field] = "Required *";
             if (!error_div) error_div = field;
             invalidForm = true;
@@ -428,6 +431,7 @@ export const ConsultationForm = (props: any) => {
         special_instruction: state.form.special_instruction,
         weight: Number(state.form.weight),
         height: Number(state.form.height),
+        HBA1C: Number(state.form.HBA1C),
       };
       const res = await dispatchAction(
         id ? updateConsultation(id, data) : createConsultation(data)
@@ -598,7 +602,7 @@ export const ConsultationForm = (props: any) => {
                 {state.form.hasSymptom && (
                   <div id="symptoms_onset_date-div">
                     <DateInputField
-                      label="Date of onset of the symptoms*"
+                      label="Date of symptoms onset *"
                       value={state.form?.symptoms_onset_date}
                       onChange={(date) =>
                         handleDateChange(date, "symptoms_onset_date")
@@ -994,7 +998,7 @@ export const ConsultationForm = (props: any) => {
                 />
               </div>
 
-              <div className="flex flex-col md:flex-row justify-between md:gap-5">
+              <div className="flex flex-col md:flex-row justify-between md:gap-5 mt-2">
                 <div id="weight-div" className="flex-1">
                   <InputLabel id="refered-label">Weight (in Kg)</InputLabel>
                   <TextInputField
@@ -1031,16 +1035,16 @@ export const ConsultationForm = (props: any) => {
                 </div>
               </div>
 
-              <div id="hba1c-div" className="flex-1 w-1/2">
+              <div id="HBA1C-div" className="flex-1 md:w-1/3 mt-2">
                 <InputLabel id="refered-label">HBA1C parameter</InputLabel>
                 <TextInputField
-                  name="hba1c"
+                  name="HBA1C"
                   variant="outlined"
                   margin="dense"
                   type="number"
-                  value={state.form.weight}
+                  value={state.form.HBA1C}
                   onChange={handleChange}
-                  errors={state.errors.weight}
+                  errors={state.errors.HBA1C}
                 />
               </div>
               {/* End of Telemedicine fields */}
