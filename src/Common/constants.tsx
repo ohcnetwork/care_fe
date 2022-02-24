@@ -589,3 +589,9 @@ export const ASSET_META_TYPE = [{ id: "CAMERA", text: "Camera" }];
 export const CAMERA_TYPE = [
   { id: "HIKVISION", text: "ONVIF Camera (HIKVISION)" },
 ];
+
+export const PREFERENCE_SIDEBAR_KEY = "preferenceSidebar";
+export const SIDEBAR = {
+  COLLAPSED: "collapsed",
+  FULL: "full",
+};
