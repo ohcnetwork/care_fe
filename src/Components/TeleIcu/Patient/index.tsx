@@ -100,17 +100,19 @@ export default function TeleICUPatientPage({
                 </span>
               </div>
             </div>
-            {patient.medical_history?.map((history, id) => (
-              <div
-                key={id}
-                className="from-blue-100 to-purple-100 bg-gradient-to-l rounded-md p-3"
-              >
-                <h4 className="font-semibold">{history.disease}</h4>
-                <span className="font-medium text-gray-600 text-sm">
-                  {history.details}
-                </span>
-              </div>
-            ))}
+            {patient.medical_history
+              ?.filter((e) => e.disease !== "NO")
+              .map((history, id) => (
+                <div
+                  key={id}
+                  className="from-blue-100 to-purple-100 bg-gradient-to-l rounded-md p-3"
+                >
+                  <h4 className="font-semibold">{history.disease}</h4>
+                  <span className="font-medium text-gray-600 text-sm">
+                    {history.details}
+                  </span>
+                </div>
+              ))}
           </div>
         </div>
       </section>
