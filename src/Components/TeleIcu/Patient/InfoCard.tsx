@@ -67,7 +67,7 @@ export default function TeleICUPatientInfoCard({
         {patient.last_consultation?.id && (
           <Link
             href={`/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}`}
-            className="rounded-md border-2 border-gray-300  bg-white shadow-sm flex justify-between items-center p-2 px-4 sm:px-2 hover:bg-gray-200 cursor-pointer active:translate-y-1 transform"
+            className="rounded-md border-2 border-gray-300  bg-white shadow-sm text-primary-900 flex justify-between items-center p-2 px-4 sm:px-2 hover:bg-gray-200 cursor-pointer active:translate-y-1 transform"
           >
             <p className="text-sm sm:text-base pr-1">Consultation Details</p>
             <span>
@@ -77,7 +77,7 @@ export default function TeleICUPatientInfoCard({
         )}
         <Link
           href={`/patient/${patient.id}/investigation_reports`}
-          className="rounded-md border-2 border-gray-300  bg-white shadow-sm flex justify-between items-center p-2 px-4 sm:px-2 hover:bg-gray-200 cursor-pointer active:translate-y-1 transform"
+          className="rounded-md border-2 border-gray-300  bg-white shadow-sm text-primary-900 flex justify-between items-center p-2 px-4 sm:px-2 hover:bg-gray-200 cursor-pointer active:translate-y-1 transform"
         >
           <p className="text-sm sm:text-base pr-1">Investigation Summary</p>
           <span>
@@ -87,7 +87,7 @@ export default function TeleICUPatientInfoCard({
         {patient.last_consultation?.id && (
           <Link
             href={`/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/files`}
-            className="rounded-md border-2 border-gray-300  bg-white shadow-sm flex justify-between items-center p-2 px-4 sm:px-2 hover:bg-gray-200 cursor-pointer active:translate-y-1 transform"
+            className="rounded-md border-2 border-gray-300  bg-white shadow-sm text-primary-900 flex justify-between items-center p-2 px-4 sm:px-2 hover:bg-gray-200 cursor-pointer active:translate-y-1 transform"
           >
             <p className="text-sm sm:text-base pr-1">Scans &amp; Reports</p>
             <span>
@@ -98,7 +98,7 @@ export default function TeleICUPatientInfoCard({
         {patient.last_consultation?.id && (
           <Link
             href={`/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/feed`}
-            className="rounded-md border-2 border-gray-300  bg-white shadow-sm flex justify-between items-center p-2 px-4 sm:px-2 hover:bg-gray-200 cursor-pointer active:translate-y-1 transform"
+            className="rounded-md border-2 border-gray-300  bg-white shadow-sm text-primary-900 flex justify-between items-center p-2 px-4 sm:px-2 hover:bg-gray-200 cursor-pointer active:translate-y-1 transform"
           >
             <p className="text-sm sm:text-base pr-1">5 Para Monitor</p>
             <span>
