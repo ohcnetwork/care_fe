@@ -57,6 +57,9 @@ export interface PatientModel {
     assigned_to_object?: AssignedToObjectModel;
     is_telemedicine?: boolean;
     consultation_notes: string;
+    weight: number;
+    height: number;
+    last_daily_round?: DailyRoundsModel;
   };
   address?: string;
   village?: string;
@@ -242,6 +245,13 @@ export interface SampleListModel {
 export interface DailyRoundsModel {
   ventilator_spo2?: number;
   spo2?: string;
+  bp?: {
+    diastolic: number;
+    mean: number;
+    systolic: number;
+  };
+  pulse?: number;
+  resp?: number;
   temperature?: string;
   temperature_measured_at?: string;
   physical_examination_info?: string;
