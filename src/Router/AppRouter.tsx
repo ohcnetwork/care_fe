@@ -1,6 +1,5 @@
-import { useRedirect, useRoutes, navigate, usePath, Link } from "raviger";
+import { useRedirect, useRoutes, usePath } from "raviger";
 import { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
 import { BedCapacityForm } from "../Components/Facility/BedCapacityForm";
 import { ConsultationDetails } from "../Components/Facility/ConsultationDetails";
 import { ConsultationForm } from "../Components/Facility/ConsultationForm";
@@ -64,9 +63,6 @@ import { SideBar } from "../Components/Common/SideBar";
 import { Feed } from "../Components/Facility/Consultations/Feed";
 import { TeleICUFacility } from "../Components/TeleIcu/Facility";
 
-const get = require("lodash.get");
-
-const img = process.env.REACT_APP_LIGHT_LOGO;
 const logoBlack = process.env.REACT_APP_BLACK_LOGO;
 
 const routes = {
@@ -369,65 +365,7 @@ const routes = {
   "/teleicu/facility": () => <TeleICUFacility />,
 };
 
-let menus = [
-  {
-    title: "Facilities",
-    link: "/facility",
-    icon: "fas fa-hospital",
-  },
-  {
-    title: "Patients",
-    link: "/patients",
-    icon: "fas fa-user-injured",
-  },
-  {
-    title: "Assets",
-    link: "/assets",
-    icon: "fas fa-shopping-cart",
-  },
-  {
-    title: "Sample Test",
-    link: "/sample",
-    icon: "fas fa-medkit",
-  },
-  {
-    title: "Shifting",
-    link: "/shifting",
-    icon: "fas fa-ambulance",
-  },
-  {
-    title: "Resource",
-    link: "/resource",
-    icon: "fas fa-heartbeat",
-  },
-  {
-    title: "External Results",
-    link: "/external_results",
-    icon: "fas fa-vials",
-  },
-  {
-    title: "Users",
-    link: "/users",
-    icon: "fas fa-user-friends",
-  },
-  {
-    title: "Tele ICU",
-    link: "/teleicu/facility",
-    icon: "fas fa-video",
-  },
-  {
-    title: "Profile",
-    link: "/user/profile",
-    icon: "fas fa-user-secret",
-  },
-  {
-    title: "Notice Board",
-    link: "/notice_board/",
-    icon: "fas fa-comment-alt",
-  },
-];
-
-const AppRouter = (props: any) => {
+const AppRouter = () => {
   useRedirect("/", "/facility");
   useRedirect("/teleicu", "/teleicu/facility");
   const pages = useRoutes(routes);
