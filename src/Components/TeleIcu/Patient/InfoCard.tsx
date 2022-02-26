@@ -103,19 +103,14 @@ export default function TeleICUPatientInfoCard({
             </span>
           </Link>
         )}
-        {patient.last_consultation?.id && (
-          <Link
-            href={`/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/feed`}
-            className="rounded-md bg-white shadow-sm text-primary-900 flex justify-between items-center p-2 px-4 sm:px-2 hover:bg-gray-200 cursor-pointer active:translate-y-1 transform"
-          >
-            <p className="text-sm sm:text-base px-2 font-semibold">
-              5 Para Monitor
-            </p>
-            <span>
-              <RightArrowIcon />
-            </span>
-          </Link>
-        )}
+        <button className="rounded-md bg-white shadow-sm text-primary-900 flex justify-between items-center p-2 px-4 sm:px-2 hover:bg-gray-200 cursor-pointer active:translate-y-1 transform">
+          <p className="text-sm sm:text-base px-2 font-semibold">
+            5 Para Monitor
+          </p>
+          <span>
+            <RightArrowIcon />
+          </span>
+        </button>
       </div>
     </section>
   );

@@ -50,9 +50,14 @@ export default function TeleICUPatientPage({
             <Link href="/" className="btn m-1 btn-primary hover:text-white">
               Doctor Video
             </Link>
-            <Link href="/" className="btn m-1 btn-primary hover:text-white">
-              Camera Feed
-            </Link>
+            {patient.last_consultation?.id && (
+              <Link
+                href={`/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/feed`}
+                className="btn m-1 btn-primary hover:text-white"
+              >
+                Camera Feed
+              </Link>
+            )}
           </div>
           <div className="px-2">
             <Link href="/" className="btn m-1 btn-primary hover:text-white">
