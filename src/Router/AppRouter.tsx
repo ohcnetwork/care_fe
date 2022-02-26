@@ -70,7 +70,6 @@ import HubDashboard from "../Components/Dashboard/HubDashboard";
 import { SideBar } from "../Components/Common/SideBar";
 import { Feed } from "../Components/Facility/Consultations/Feed";
 import { TeleICUFacility } from "../Components/TeleIcu/Facility";
-import { Feed } from "../Components/Facility/Consultations/Feed";
 
 const get = require("lodash.get");
 
