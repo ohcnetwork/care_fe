@@ -40,12 +40,12 @@ const PatientNotes = (props: PatientNotesProps) => {
       );
       if (!status.aborted) {
         if (res && res.data) {
-          setState({
-            ...state,
+          setState((prevState: any) => ({
+            ...prevState,
             count: res.data?.count,
             notes: res.data?.results,
             cPage: page,
-          });
+          }));
         }
         setIsLoading(false);
       }

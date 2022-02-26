@@ -17,7 +17,6 @@ import {
   getDistrict,
   getLocalBody,
   getAnyFacility,
-
 } from "../../Redux/actions";
 import { PhoneNumberField } from "../Common/HelperInputFields";
 import NavTabs from "../Common/NavTabs";
@@ -34,7 +33,6 @@ import { make as SlideOver } from "../Common/SlideOver.gen";
 import PatientFilterV2 from "./PatientFilterV2";
 import { parseOptionId } from "../../Common/utils";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { every } from "lodash";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -256,8 +254,73 @@ export const PatientManager = (props: any) => {
   }, [dispatch, facilityId]);
 
   useEffect(() => {
+    console.log("useeffect");
     setIsLoading(true);
-    dispatch(getAllPatient(params, "listPatients"))
+    dispatch(
+      getAllPatient(
+        {
+          page: qParams.page || 1,
+          name: qParams.name || undefined,
+          is_active: qParams.is_active || "True",
+          disease_status: qParams.disease_status || undefined,
+          phone_number: qParams.phone_number
+            ? parsePhoneNumberFromString(qParams.phone_number)?.format("E.164")
+            : undefined,
+          emergency_phone_number: qParams.emergency_phone_number
+            ? parsePhoneNumberFromString(
+                qParams.emergency_phone_number
+              )?.format("E.164")
+            : undefined,
+          local_body: qParams.lsgBody || undefined,
+          facility: facilityId || qParams.facility,
+          facility_type: qParams.facility_type || undefined,
+          district: qParams.district || undefined,
+          offset: (qParams.page ? qParams.page - 1 : 0) * RESULT_LIMIT,
+          created_date_before: qParams.created_date_before || undefined,
+          created_date_after: qParams.created_date_after || undefined,
+          modified_date_before: qParams.modified_date_before || undefined,
+          modified_date_after: qParams.modified_date_after || undefined,
+          ordering: qParams.ordering || undefined,
+          category: qParams.category || undefined,
+          gender: qParams.gender || undefined,
+          age_min: qParams.age_min || undefined,
+          age_max: qParams.age_max || undefined,
+          date_declared_positive_before:
+            qParams.date_declared_positive_before || undefined,
+          date_declared_positive_after:
+            qParams.date_declared_positive_after || undefined,
+          date_of_result_before: qParams.date_of_result_before || undefined,
+          date_of_result_after: qParams.date_of_result_after || undefined,
+          last_consultation_admission_date_before:
+            qParams.last_consultation_admission_date_before || undefined,
+          last_consultation_admission_date_after:
+            qParams.last_consultation_admission_date_after || undefined,
+          last_consultation_discharge_date_before:
+            qParams.last_consultation_discharge_date_before || undefined,
+          last_consultation_discharge_date_after:
+            qParams.last_consultation_discharge_date_after || undefined,
+          last_consultation_admitted_to_list:
+            qParams.last_consultation_admitted_to_list || undefined,
+          srf_id: qParams.srf_id || undefined,
+          number_of_doses: qParams.number_of_doses || undefined,
+          covin_id: qParams.covin_id || undefined,
+          is_kasp: qParams.is_kasp || undefined,
+          is_declared_positive: qParams.is_declared_positive || undefined,
+          last_consultation_symptoms_onset_date_before:
+            qParams.last_consultation_symptoms_onset_date_before || undefined,
+          last_consultation_symptoms_onset_date_after:
+            qParams.last_consultation_symptoms_onset_date_after || undefined,
+          last_vaccinated_date_before:
+            qParams.last_vaccinated_date_before || undefined,
+          last_vaccinated_date_after:
+            qParams.last_vaccinated_date_after || undefined,
+          last_consultation_is_telemedicine:
+            qParams.last_consultation_is_telemedicine || undefined,
+          is_antenatal: qParams.is_antenatal || undefined,
+        },
+        "listPatients"
+      )
+    )
       .then((res: any) => {
         if (res && res.data) {
           setData(res.data.results);
@@ -352,9 +415,9 @@ export const PatientManager = (props: any) => {
 
   const fetchFacilityBadgeName = useCallback(
     async (status: statusType) => {
-      const res = qParams.facility &&
-        (await dispatch(getAnyFacility(qParams.facility)));
-      
+      const res =
+        qParams.facility && (await dispatch(getAnyFacility(qParams.facility)));
+
       if (!status.aborted) {
         setFacilityBadgeName(res?.data?.name);
       }
@@ -392,10 +455,6 @@ export const PatientManager = (props: any) => {
 
   const searchByPhone = (value: string, name: string) => {
     updateQuery({ [name]: value, page: 1 });
-  };
-
-  const handleFilter = (value: string) => {
-    updateQuery({ disease_status: value, page: 1 });
   };
 
   const applyFilter = (data: any) => {
@@ -439,7 +498,7 @@ export const PatientManager = (props: any) => {
               onClick={(_) => {
                 const lcat = qParams.last_consultation_admitted_to_list
                   .split(",")
-                  .filter((x: string) => x != id)
+                  .filter((x: string) => x !== id)
                   .join(",");
                 updateQuery({
                   ...qParams,
@@ -456,7 +515,7 @@ export const PatientManager = (props: any) => {
       .split(",")
       .map((id: string) => {
         const text = PATIENT_FILTER_ADMITTED_TO.find(
-          (obj) => obj.id == id
+          (obj) => obj.id === id
         )?.text;
         return badge("Bed Type", text, id);
       });
@@ -474,14 +533,14 @@ export const PatientManager = (props: any) => {
           onClick={() => navigate(patientUrl)}
           className={
             "w-full pb-2 cursor-pointer border-b md:flex justify-between items-center mb-3 " +
-            (patient.disease_status == "POSITIVE" ? "bg-red-50" : "")
+            (patient.disease_status === "POSITIVE" ? "bg-red-50" : "")
           }
         >
           <div className="px-4 md:w-1/2">
             <div className="md:flex justify-between w-full">
               <div className="text-xl font-normal capitalize">
                 {patient.name} - {patient.age}
-                {patient.action && patient.action != 10 && (
+                {patient.action && patient.action !== 10 && (
                   <span className="font-semibold ml-2">
                     -{" "}
                     {

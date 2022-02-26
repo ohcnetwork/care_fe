@@ -1,6 +1,5 @@
 import {
   Box,
-  Button,
   Card,
   CardContent,
   CircularProgress,
@@ -10,12 +9,11 @@ import {
   Radio,
   RadioGroup,
 } from "@material-ui/core";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { navigate, useQueryParams } from "raviger";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import moment from "moment";
 import loadable from "@loadable/component";
-import { useCallback, useReducer, useState, useEffect } from "react";
+import { useCallback, useReducer, useState, useEffect, useMemo } from "react";
 import { useDispatch } from "react-redux";
 import {
   BLOOD_GROUPS,
@@ -236,17 +234,31 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   const [patientName, setPatientName] = useState("");
   const [{ extId }, setQuery] = useQueryParams();
 
-  useEffect(() => {
-    if (extId) {
-      setCareExtId(extId);
-      fetchExtResultData(null);
-    }
-  }, [careExtId]);
-
-  const headerText = !id
-    ? "Add Details of Covid Suspect / Patient"
-    : "Update Covid Suspect / Patient Details";
-  const buttonText = !id ? "Add Covid Suspect / Patient" : "Save Details";
+  const duplicateCheck = useMemo(
+    () =>
+      debounce(async (phoneNo: string) => {
+        if (phoneNo && parsePhoneNumberFromString(phoneNo)?.isPossible()) {
+          const query = {
+            phone_number: parsePhoneNumberFromString(phoneNo)?.format("E.164"),
+          };
+          const res = await dispatchAction(searchPatient(query));
+          if (res && res.data && res.data.results) {
+            const duplicateList = !id
+              ? res.data.results
+              : res.data.results.filter(
+                  (item: DupPatientModel) => item.patient_id !== id
+                );
+            if (duplicateList.length) {
+              setStatusDialog({
+                show: true,
+                patientList: duplicateList,
+              });
+            }
+          }
+        }
+      }, 300),
+    [dispatchAction, id]
+  );
 
   const fetchDistricts = useCallback(
     async (id: string) => {
@@ -292,6 +304,91 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     [dispatchAction]
   );
 
+  const fetchExtResultData = useCallback(
+    async (e: any) => {
+      if (e) e.preventDefault();
+      setIsLoading(true);
+      if (!careExtId) return;
+      const res = await dispatchAction(externalResult({ id: careExtId }));
+
+      if (res && res.data) {
+        const form = { ...state.form };
+        form["name"] = res.data.name ? res.data.name : state.form.name;
+        form["address"] = res.data.address
+          ? res.data.address
+          : state.form.address;
+        form["permanent_address"] = res.data.permanent_address
+          ? res.data.permanent_address
+          : state.form.permanent_address;
+        form["gender"] = res.data.gender
+          ? parseGenderFromExt(res.data.gender, state.form.gender)
+          : state.form.gender;
+        form["srf_id"] = res.data.srf_id ? res.data.srf_id : state.form.srf_id;
+
+        form["state"] = res.data.district_object
+          ? res.data.district_object.state
+          : state.form.state;
+        form["district"] = res.data.district
+          ? res.data.district
+          : state.form.district;
+        form["local_body"] = res.data.local_body
+          ? res.data.local_body
+          : state.form.local_body;
+        form["ward"] = res.data.ward ? res.data.ward : state.form.ward;
+        form["village"] = res.data.village
+          ? res.data.village
+          : state.form.village;
+        form["disease_status"] = res.data.result
+          ? res.data.result.toUpperCase()
+          : state.form.disease_status;
+        form["test_type"] = res.data.test_type
+          ? res.data.test_type.toUpperCase()
+          : state.form.test_type;
+        form["date_of_test"] = res.data.sample_collection_date
+          ? moment(res.data.sample_collection_date)
+          : state.form.date_of_test;
+        form["date_of_result"] = res.data.result_date
+          ? moment(res.data.result_date)
+          : state.form.date_of_result;
+        form["phone_number"] = res.data.mobile_number
+          ? "+91" + res.data.mobile_number
+          : state.form.phone_number;
+
+        dispatch({ type: "set_form", form });
+        Promise.all([
+          fetchDistricts(res.data.district_object.state),
+          fetchLocalBody(res.data.district),
+          fetchWards(res.data.local_body),
+          duplicateCheck("+91" + res.data.mobile_number),
+        ]);
+
+        setShowImport(false);
+      }
+      setIsLoading(false);
+    },
+    [
+      dispatchAction,
+      careExtId,
+      duplicateCheck,
+      state.form,
+      fetchDistricts,
+      fetchLocalBody,
+      fetchWards,
+    ]
+  );
+
+  useEffect(() => {
+    if (extId) {
+      setCareExtId(extId);
+      fetchExtResultData(null);
+    }
+  }, [fetchExtResultData, extId]);
+
+  const headerText = !id
+    ? "Add Details of Covid Suspect / Patient"
+    : "Update Covid Suspect / Patient Details";
+  const buttonText = !id ? "Add Covid Suspect / Patient" : "Save Details";
+
   const parseGenderFromExt = (gender: any, defaultValue: any) => {
     switch (gender.toLowerCase()) {
       case "m":
@@ -303,68 +400,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       default:
         return defaultValue;
     }
-  };
-
-  const fetchExtResultData = async (e: any) => {
-    if (e) e.preventDefault();
-    setIsLoading(true);
-    if (!careExtId) return;
-    const res = await dispatchAction(externalResult({ id: careExtId }));
-
-    if (res && res.data) {
-      const form = { ...state.form };
-      form["name"] = res.data.name ? res.data.name : state.form.name;
-      form["address"] = res.data.address
-        ? res.data.address
-        : state.form.address;
-      form["permanent_address"] = res.data.permanent_address
-        ? res.data.permanent_address
-        : state.form.permanent_address;
-      form["gender"] = res.data.gender
-        ? parseGenderFromExt(res.data.gender, state.form.gender)
-        : state.form.gender;
-      form["srf_id"] = res.data.srf_id ? res.data.srf_id : state.form.srf_id;
-
-      form["state"] = res.data.district_object
-        ? res.data.district_object.state
-        : state.form.state;
-      form["district"] = res.data.district
-        ? res.data.district
-        : state.form.district;
-      form["local_body"] = res.data.local_body
-        ? res.data.local_body
-        : state.form.local_body;
-      form["ward"] = res.data.ward ? res.data.ward : state.form.ward;
-      form["village"] = res.data.village
-        ? res.data.village
-        : state.form.village;
-      form["disease_status"] = res.data.result
-        ? res.data.result.toUpperCase()
-        : state.form.disease_status;
-      form["test_type"] = res.data.test_type
-        ? res.data.test_type.toUpperCase()
-        : state.form.test_type;
-      form["date_of_test"] = res.data.sample_collection_date
-        ? moment(res.data.sample_collection_date)
-        : state.form.date_of_test;
-      form["date_of_result"] = res.data.result_date
-        ? moment(res.data.result_date)
-        : state.form.date_of_result;
-      form["phone_number"] = res.data.mobile_number
-        ? "+91" + res.data.mobile_number
-        : state.form.phone_number;
-
-      dispatch({ type: "set_form", form });
-      Promise.all([
-        fetchDistricts(res.data.district_object.state),
-        fetchLocalBody(res.data.district),
-        fetchWards(res.data.local_body),
-        duplicateCheck("+91" + res.data.mobile_number),
-      ]);
-
-      setShowImport(false);
-    }
-    setIsLoading(false);
   };
 
   const fetchData = useCallback(
@@ -516,7 +551,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       }
     }
     fetchFacilityName();
-  }, [dispatchAction, facilityId]);
+  }, [dispatchAction, facilityId, id]);
 
   const validateForm = () => {
     let errors = { ...initError };
@@ -847,7 +882,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           : createPatient({ ...data, facility: facilityId })
       );
       setIsLoading(false);
-      if (res && res.data && res.status != 400) {
+      if (res && res.data && res.status !== 400) {
         dispatch({ type: "set_form", form: initForm });
         if (!id) {
           setAlertMessage({
@@ -906,31 +941,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     form["medical_history"] = values;
     dispatch({ type: "set_form", form });
   };
-
-  const duplicateCheck = useCallback(
-    debounce(async (phoneNo: string) => {
-      if (phoneNo && parsePhoneNumberFromString(phoneNo)?.isPossible()) {
-        const query = {
-          phone_number: parsePhoneNumberFromString(phoneNo)?.format("E.164"),
-        };
-        const res = await dispatchAction(searchPatient(query));
-        if (res && res.data && res.data.results) {
-          const duplicateList = !id
-            ? res.data.results
-            : res.data.results.filter(
-                (item: DupPatientModel) => item.patient_id !== id
-              );
-          if (duplicateList.length) {
-            setStatusDialog({
-              show: true,
-              patientList: duplicateList,
-            });
-          }
-        }
-      }
-    }, 300),
-    []
-  );
 
   const handleDialogClose = (action: string) => {
     if (action === "transfer") {

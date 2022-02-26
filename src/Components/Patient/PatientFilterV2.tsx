@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import {
   SelectField,
@@ -25,20 +25,12 @@ import { useDispatch } from "react-redux";
 import { navigate } from "raviger";
 import { DateRangePicker, getDate } from "../Common/DateRangePicker";
 import DistrictSelect from "../Facility/FacilityFilter/DistrictSelect";
+import { useMemo } from "react";
 
 const debounce = require("lodash.debounce");
 
-const useMergeState = (initialState: any) => {
-  const [state, setState] = useState(initialState);
-  const setMergedState = (newState: any) =>
-    setState((prevState: any) => Object.assign({}, prevState, newState));
-  return [state, setMergedState];
-};
-
 export default function PatientFilterV2(props: any) {
   let { filter, onChange, closeFilter } = props;
-  const [isFacilityLoading, setFacilityLoading] = useState(false);
-  const [isDistrictLoading, setDistrictLoading] = useState(false);
 
   const [lsgBody, setLsgBody] = useState<any[]>([]);
   const [isLsgLoading, setLsgLoading] = useState(false);
@@ -53,7 +45,7 @@ export default function PatientFilterV2(props: any) {
     setFacility(current, "lsgBody");
   };
 
-  const [filterState, setFilterState] = useMergeState({
+  const [filterState, setFilterState] = useState({
     district: filter.district || "",
     facility: filter.facility || "",
     facility_type: filter.facility_type || "",
@@ -151,20 +143,22 @@ export default function PatientFilterV2(props: any) {
   useEffect(() => {
     async function fetchData() {
       if (filter.facility) {
-        setFacilityLoading(true);
         const { data: facilityData } = await dispatch(
           getAnyFacility(filter.facility, "facility")
         );
-        setFilterState({ facility_ref: facilityData });
-        setFacilityLoading(false);
+        setFilterState((prevState) => ({
+          ...prevState,
+          facility_ref: facilityData,
+        }));
       }
       if (filter.district) {
-        setDistrictLoading(true);
         const { data: districtData } = await dispatch(
           getDistrict(filter.district, "district")
         );
-        setFilterState({ district_ref: districtData });
-        setDistrictLoading(false);
+        setFilterState((prevState) => ({
+          ...prevState,
+          district_ref: districtData,
+        }));
       }
 
       if (filter.lsgBody) {
@@ -175,16 +169,17 @@ export default function PatientFilterV2(props: any) {
           name: obj.name,
         }));
         setLsgBody(lsgBodyData);
-        setFilterState({
+        setFilterState((prevState) => ({
+          ...prevState,
           lsgBody_ref: lsgBodyData.filter(
             (obj: any) => obj.id.toString() === filter.lsgBody.toString()
           )[0],
-        });
+        }));
         setLsgLoading(false);
       }
     }
     fetchData();
-  }, [dispatch]);
+  }, [dispatch, filter.district, filter.facility, filter.lsgBody]);
 
   const VACCINATED_FILTER = [
     { id: "", text: "Show All" },
@@ -237,20 +232,21 @@ export default function PatientFilterV2(props: any) {
     onLsgSearch(e.target.value);
   };
 
-  const onLsgSearch = useCallback(
-    debounce(async (text: string) => {
-      if (text) {
-        const {
-          data: { results: lsgBodies },
-        } = await dispatch(getAllLocalBody({ local_body_name: text }));
-        setLsgBody(lsgBodies);
-        setLsgLoading(false);
-      } else {
-        setLsgBody([]);
-        setLsgLoading(false);
-      }
-    }, 300),
-    []
+  const onLsgSearch = useMemo(
+    () =>
+      debounce(async (text: string) => {
+        if (text) {
+          const {
+            data: { results: lsgBodies },
+          } = await dispatch(getAllLocalBody({ local_body_name: text }));
+          setLsgBody(lsgBodies);
+          setLsgLoading(false);
+        } else {
+          setLsgBody([]);
+          setLsgLoading(false);
+        }
+      }, 300),
+    [dispatch]
   );
 
   const applyFilter = () => {
@@ -358,7 +354,7 @@ export default function PatientFilterV2(props: any) {
       category: category || "",
       gender: gender || "",
       disease_status:
-        (disease_status == "Show All" ? "" : disease_status) || "",
+        (disease_status === "Show All" ? "" : disease_status) || "",
       age_min: age_min || "",
       age_max: age_max || "",
       last_consultation_admitted_to_list:
@@ -483,7 +479,7 @@ export default function PatientFilterV2(props: any) {
           <DistrictSelect
             multiple={false}
             name="district"
-            selected={filterState.district_ref}
+            selected={filterState.district_ref || ""}
             setSelected={(obj: any) => setFacility(obj, "district")}
             className="shifting-page-filter-dropdown"
             errors={""}

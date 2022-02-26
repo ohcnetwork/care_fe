@@ -5,7 +5,6 @@ import {
   Select,
   MenuItem,
 } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
 import { navigate } from "raviger";
 import moment from "moment";
 import React, { Fragment, useCallback, useEffect, useState } from "react";
@@ -54,37 +53,6 @@ import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    flexGrow: 1,
-    padding: "8px",
-  },
-  margin: {
-    margin: theme.spacing(1),
-  },
-  displayFlex: {
-    display: "flex",
-  },
-  content: {
-    marginTop: "10px",
-    maxWidth: "560px",
-    background: "white",
-    padding: "20px 20px 5px",
-  },
-  title: {
-    padding: "5px",
-    marginBottom: "10px",
-  },
-  details: {
-    marginTop: "10px",
-    padding: "5px",
-    marginBottom: "10px",
-  },
-  paginateTopPadding: {
-    paddingTop: "50px",
-  },
-}));
-
 type donatePlasmaOptionType = null | "yes" | "no" | "not-fit";
 interface preDischargeFormInterface {
   donatePlasma: donatePlasmaOptionType;
@@ -95,7 +63,6 @@ interface preDischargeFormInterface {
 
 export const PatientHome = (props: any) => {
   const { facilityId, id } = props;
-  const classes = useStyles();
   const dispatch: any = useDispatch();
   const [showShifts, setShowShifts] = useState(false);
   const [isShiftClicked, setIsShiftClicked] = useState(false);
@@ -433,9 +400,9 @@ export const PatientHome = (props: any) => {
 
   const fetchActiveShiftingData = useCallback(
     async (status: statusType) => {
-      const shiftingRes = isShiftClicked
-        ? await dispatch(listShiftRequests({ patient: id }, "shift-list-call"))
-        : activeShiftingData;
+      const shiftingRes = await dispatch(
+        listShiftRequests({ patient: id }, "shift-list-call")
+      );
       setIsShiftDataLoaded(isShiftClicked);
       if (!status.aborted) {
         if (shiftingRes && shiftingRes.data && shiftingRes.data.results) {
@@ -549,7 +516,7 @@ export const PatientHome = (props: any) => {
     const medHis = patientData.medical_history;
     patientMedHis = medHis.map((item: any, idx: number) => (
       <div className="sm:col-span-1" key={`med_his_${idx}`}>
-        {item?.disease != "NO" && (
+        {item?.disease !== "NO" && (
           <>
             <div className="text-sm leading-5 font-medium text-gray-500">
               {item.disease}
@@ -642,7 +609,7 @@ export const PatientHome = (props: any) => {
             </div>
           </div>
         </div>
-        {patientData?.facility != patientData?.last_consultation?.facility && (
+        {patientData?.facility !== patientData?.last_consultation?.facility && (
           <div className="relative mt-2">
             <div className="max-w-screen-xl mx-auto py-3 px-3 sm:px-6 lg:px-8 rounded-lg shadow bg-red-200 ">
               <div className="text-center">
@@ -1479,7 +1446,7 @@ export const PatientHome = (props: any) => {
                     className="btn btn-primary w-full"
                     disabled={
                       !patientData.is_active ||
-                      !(patientData?.last_consultation?.facility == facilityId)
+                      !(patientData?.last_consultation?.facility === facilityId)
                     }
                     onClick={() =>
                       navigate(
@@ -1495,7 +1462,7 @@ export const PatientHome = (props: any) => {
                     className="btn btn-primary w-full"
                     disabled={
                       !patientData.is_active ||
-                      !(patientData?.last_consultation?.facility == facilityId)
+                      !(patientData?.last_consultation?.facility === facilityId)
                     }
                     onClick={() =>
                       navigate(
@@ -1532,7 +1499,7 @@ export const PatientHome = (props: any) => {
                     onClick={handleDischageClickOpen}
                     disabled={
                       !patientData.is_active ||
-                      !(patientData?.last_consultation?.facility == facilityId)
+                      !(patientData?.last_consultation?.facility === facilityId)
                     }
                   >
                     Discharge from CARE
@@ -1572,13 +1539,12 @@ export const PatientHome = (props: any) => {
             </div>
           </DialogContentText>
           <div className="flex justify-end">
-            <a
-              href="#"
-              className="text-xs"
+            <div
+              className="text-xs cursor-pointer text-blue-500"
               onClick={dischargeSummaryFormSetUserEmail}
             >
               Fill email input with my email.
-            </a>
+            </div>
           </div>
           <TextInputField
             type="email"

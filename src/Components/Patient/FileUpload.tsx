@@ -1,32 +1,18 @@
 import axios from "axios";
-import {
-  Button,
-  Card,
-  CardContent,
-  CircularProgress,
-  InputLabel,
-} from "@material-ui/core";
+import { Button, CircularProgress, InputLabel } from "@material-ui/core";
 import moment from "moment";
 import CloudUploadOutlineIcon from "@material-ui/icons/CloudUpload";
 import loadable from "@loadable/component";
-import React, {
-  useCallback,
-  useState,
-  useRef,
-  ChangeEvent,
-  useEffect,
-} from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   viewUpload,
   retrieveUpload,
-  retrieveUploadFilesURL,
   createUpload,
-  getUserList,
   getPatient,
 } from "../../Redux/actions";
-import { FlowModel, FileUploadModel } from "./models";
+import { FileUploadModel } from "./models";
 import { TextInputField } from "../Common/HelperInputFields";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import Typography from "@material-ui/core/Typography";
@@ -34,7 +20,6 @@ import Box from "@material-ui/core/Box";
 import GetAppIcon from "@material-ui/icons/GetApp";
 import * as Notification from "../../Utils/Notifications.js";
 import { VoiceRecorder } from "../../Utils/VoiceRecorder";
-import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
 import Modal from "@material-ui/core/Modal";
 import { Close, ZoomIn, ZoomOut } from "@material-ui/icons";
 
@@ -72,30 +57,6 @@ const ExtImage: URLS = {
   png: "1",
   svg: "1",
 };
-
-function getModalStyle() {
-  const top = 100;
-  const left = 100;
-
-  return {
-    top: `${top}%`,
-    left: `${left}%`,
-    transform: `translate(-${top}%, -${left}%)`,
-  };
-}
-
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    paper: {
-      position: "absolute",
-      width: "60%",
-      backgroundColor: theme.palette.background.paper,
-      border: "2px solid #000",
-      boxShadow: theme.shadows[5],
-      padding: theme.spacing(2, 4, 3),
-    },
-  })
-);
 
 export const LinearProgressWithLabel = (props: any) => {
   return (
@@ -155,15 +116,12 @@ export const FileUpload = (props: FileUploadProps) => {
     {},
   ]);
   const [uploadStarted, setUploadStarted] = useState<boolean>(false);
-  const [uploadSuccess, setUploadSuccess] = useState(false);
   const [reload, setReload] = useState<boolean>(false);
   const [uploadPercent, setUploadPercent] = useState(0);
   const [uploadFileName, setUploadFileName] = useState<string>("");
   const [url, seturl] = useState<URLS>({});
   const [fileUrl, setFileUrl] = useState("");
   const [contentType, setcontentType] = useState<string>("");
-  const classes = useStyles();
-  const [modalStyle] = React.useState(getModalStyle);
   const [downloadURL, setDownloadURL] = useState<string>();
   const initialState = {
     open: false,
@@ -270,7 +228,7 @@ export const FileUpload = (props: FileUploadProps) => {
     });
   };
 
-  const getAssociatedId = () => {
+  const getAssociatedId = useCallback(() => {
     switch (type) {
       case "PATIENT": {
         return patientId;
@@ -282,7 +240,32 @@ export const FileUpload = (props: FileUploadProps) => {
         return sampleId;
       }
     }
-  };
+  }, [type, patientId, consultationId, sampleId]);
+
+  // Store all audio urls for each audio file
+  const audio_urls = useCallback(
+    (files: any) => {
+      let audio_files = files || [];
+      audio_files = audio_files.filter(
+        (x: FileUploadModel) => x.file_category === "AUDIO"
+      );
+
+      const getURL = async (audio_files: any) => {
+        var data = { file_type: type, associating_id: getAssociatedId() };
+        let all_urls: any = {};
+
+        for (const x of audio_files) {
+          if (x.id) {
+            var responseData = await dispatch(retrieveUpload(data, x.id));
+            all_urls[`${x.id}`] = responseData.data.read_signed_url;
+          }
+        }
+        seturl(all_urls);
+      };
+      getURL(audio_files);
+    },
+    [dispatch, getAssociatedId, type]
+  );
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -303,30 +286,8 @@ export const FileUpload = (props: FileUploadProps) => {
         setIsLoading(false);
       }
     },
-    [dispatch, id, offset]
+    [dispatch, offset, getAssociatedId, audio_urls, limit, type]
   );
-
-  // Store all audio urls for each audio file
-  const audio_urls = (files: any) => {
-    let audio_files = files || [];
-    audio_files = audio_files.filter(
-      (x: FileUploadModel) => x.file_category === "AUDIO"
-    );
-
-    const getURL = async (audio_files: any) => {
-      var data = { file_type: type, associating_id: getAssociatedId() };
-      let all_urls: any = {};
-
-      for (const x of audio_files) {
-        if (x.id) {
-          var responseData = await dispatch(retrieveUpload(data, x.id));
-          all_urls[`${x.id}`] = responseData.data.read_signed_url;
-        }
-      }
-      seturl(all_urls);
-    };
-    getURL(audio_files);
-  };
 
   useAbortableEffect(
     (status: statusType) => {
@@ -454,7 +415,6 @@ export const FileUpload = (props: FileUploadProps) => {
       .put(url, newFile, config)
       .then((result) => {
         setUploadStarted(false);
-        setUploadSuccess(true);
         setUploadFileName("");
         setReload(!reload);
         Notification.Success({
@@ -473,7 +433,6 @@ export const FileUpload = (props: FileUploadProps) => {
     const filename = uploadFileName;
     let name = f.name;
     setUploadStarted(true);
-    setUploadSuccess(false);
     const requestData = {
       original_name: name,
       file_type: type,
@@ -512,7 +471,6 @@ export const FileUpload = (props: FileUploadProps) => {
       .put(url, newFile, config)
       .then((result) => {
         setUploadStarted(false);
-        setUploadSuccess(true);
         setUploadFileName("");
         setReload(!reload);
         Notification.Success({
@@ -531,7 +489,6 @@ export const FileUpload = (props: FileUploadProps) => {
     const filename = Date.now().toString();
     let name = "audio.mp3";
     setUploadStarted(true);
-    setUploadSuccess(false);
     const requestData = {
       original_name: name,
       file_type: type,

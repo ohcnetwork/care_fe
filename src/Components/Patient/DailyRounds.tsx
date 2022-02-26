@@ -113,10 +113,6 @@ const DailyRoundsFormReducer = (state = initialState, action: any) => {
   }
 };
 
-const goBack = () => {
-  window.history.go(-1);
-};
-
 export const DailyRounds = (props: any) => {
   const dispatchAction: any = useDispatch();
   const { facilityId, patientId, consultationId, id } = props;
@@ -174,7 +170,7 @@ export const DailyRounds = (props: any) => {
         }
       }
     },
-    [consultationId, facilityId, dispatchAction]
+    [facilityId, dispatchAction]
   );
 
   useAbortableEffect(
@@ -803,7 +799,7 @@ export const DailyRounds = (props: any) => {
                                 )}
                                 freeSolo={false}
                                 getOptionSelected={(option: any, value: any) =>
-                                  option == value
+                                  option === value
                                 }
                                 getOptionLabel={(option: any) =>
                                   option.toString()
@@ -832,7 +828,7 @@ export const DailyRounds = (props: any) => {
                                 )}
                                 freeSolo={false}
                                 getOptionSelected={(option: any, value: any) =>
-                                  option == value
+                                  option === value
                                 }
                                 getOptionLabel={(option: any) =>
                                   option.toString()
@@ -867,7 +863,7 @@ export const DailyRounds = (props: any) => {
                             renderOption={(option: any) => <div>{option}</div>}
                             freeSolo={false}
                             getOptionSelected={(option: any, value: any) =>
-                              option == value
+                              option === value
                             }
                             getOptionLabel={(option: any) => option.toString()}
                             className="-mt-3"
@@ -914,7 +910,7 @@ export const DailyRounds = (props: any) => {
                                 )}
                                 freeSolo={false}
                                 getOptionSelected={(option: any, value: any) =>
-                                  option == value
+                                  option === value
                                 }
                                 getOptionLabel={(option: any) =>
                                   option.toString()
@@ -952,7 +948,7 @@ export const DailyRounds = (props: any) => {
                             renderOption={(option: any) => <div>{option}</div>}
                             freeSolo={false}
                             getOptionSelected={(option: any, value: any) =>
-                              option == value
+                              option === value
                             }
                             getOptionLabel={(option: any) => option.toString()}
                             className="-mt-3"
@@ -984,7 +980,7 @@ export const DailyRounds = (props: any) => {
                             renderOption={(option: any) => <div>{option}</div>}
                             freeSolo={false}
                             getOptionSelected={(option: any, value: any) =>
-                              option == value
+                              option === value
                             }
                             getOptionLabel={(option: any) => option.toString()}
                             className="-mt-3"
