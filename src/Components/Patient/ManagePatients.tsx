@@ -12,6 +12,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { CSVLink } from "react-csv";
 import { useDispatch } from "react-redux";
 import SwipeableViews from "react-swipeable-views";
+import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue";
 import {
   getAllPatient,
   getDistrict,
@@ -33,6 +34,10 @@ import { make as SlideOver } from "../Common/SlideOver.gen";
 import PatientFilterV2 from "./PatientFilterV2";
 import { parseOptionId } from "../../Common/utils";
 import { statusType, useAbortableEffect } from "../../Common/utils";
+
+import { every } from "lodash";
+import { FacilityModel } from "../Facility/models";
+
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -113,6 +118,10 @@ export const PatientManager = (props: any) => {
   const [DownloadFile, setDownloadFile] = useState("");
   const [qParams, setQueryParams] = useQueryParams();
   const [showFilters, setShowFilters] = useState(false);
+  const [selectedFacility, setSelectedFacility] = useState<FacilityModel>({
+    name: "",
+  });
+  const [showDialog, setShowDialog] = useState(false);
 
   const [districtName, setDistrictName] = useState("");
   const [localbodyName, setLocalbodyName] = useState("");
@@ -675,6 +684,14 @@ export const PatientManager = (props: any) => {
 
   return (
     <div className="px-6">
+      {showDialog && (
+        <FacilitiesSelectDialogue
+          setSelected={(e) => setSelectedFacility(e)}
+          selectedFacility={selectedFacility}
+          handleOk={() => navigate(`facility/${selectedFacility.id}/patient`)}
+          handleCancel={() => setShowDialog(false)}
+        />
+      )}
       <PageTitle
         title="Patients"
         hideBack={!facilityId}
@@ -754,7 +771,7 @@ export const PatientManager = (props: any) => {
         </div>
         <div>
           <div>
-            <div className="flex items-start mb-2">
+            <div className="flex items-end gap-2 mb-2">
               <button
                 className="btn btn-primary-ghost md:mt-7 "
                 onClick={(_) => setShowFilters((show) => !show)}
@@ -789,6 +806,14 @@ export const PatientManager = (props: any) => {
                   </line>
                 </svg>
                 <span>Advanced Filters</span>
+              </button>
+              <button
+                className="btn-primary btn md:mt-7 w-full md:w-fit"
+                onClick={() => setShowDialog(true)}
+                data-testid="add-patient-button"
+              >
+                <i className="fas fa-plus mr-2 text-white"></i>
+                Add Details of a Patient
               </button>
             </div>
           </div>

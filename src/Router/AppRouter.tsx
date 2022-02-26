@@ -1,4 +1,4 @@
-import { useRedirect, useRoutes, navigate, usePath } from "raviger";
+import { useRedirect, useRoutes, navigate, usePath, Link } from "raviger";
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { BedCapacityForm } from "../Components/Facility/BedCapacityForm";
@@ -41,7 +41,6 @@ import ResultList from "../Components/ExternalResult/ResultList";
 import ResultItem from "../Components/ExternalResult/ResultItem";
 import ExternalResultUpload from "../Components/ExternalResult/ExternalResultUpload";
 import ResultUpdate from "../Components/ExternalResult/ResultUpdate";
-import NotificationsList from "../Components/Notifications/NotificationsList";
 import { FileUpload } from "../Components/Patient/FileUpload";
 import Investigation from "../Components/Facility/Investigations";
 import ShowInvestigation from "../Components/Facility/Investigations/ShowInvestigation";
@@ -61,8 +60,13 @@ import AssetManage from "../Components/Assets/AssetManage";
 import AssetConfigure from "../Components/Assets/AssetConfigure";
 import { DailyRoundListDetails } from "../Components/Patient/DailyRoundListDetails";
 import HubDashboard from "../Components/Dashboard/HubDashboard";
+import { SideBar } from "../Components/Common/SideBar";
+import { Feed } from "../Components/Facility/Consultations/Feed";
+import { TeleICUFacility } from "../Components/TeleIcu/Facility";
+import { Feed } from "../Components/Facility/Consultations/Feed";
 
 const get = require("lodash.get");
+
 const img = process.env.REACT_APP_LIGHT_LOGO;
 const logoBlack = process.env.REACT_APP_BLACK_LOGO;
 
@@ -252,7 +256,6 @@ const routes = {
   "/facility/:facilityId/patient/:patientId/shift/new": ({
     facilityId,
     patientId,
-    id,
   }: any) => <ShiftCreate facilityId={facilityId} patientId={patientId} />,
   "/facility/:facilityId/inventory": ({ facilityId }: any) => (
     <InventoryList facilityId={facilityId} />
@@ -347,6 +350,14 @@ const routes = {
       tab={"updates"}
     />
   ),
+  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/feed":
+    ({ facilityId, patientId, consultationId }: any) => (
+      <Feed
+        facilityId={facilityId}
+        patientId={patientId}
+        consultationId={consultationId}
+      />
+    ),
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/:tab":
     ({ facilityId, patientId, consultationId, tab }: any) => (
       <ConsultationDetails
@@ -356,6 +367,7 @@ const routes = {
         tab={tab}
       />
     ),
+  "/teleicu/facility": () => <TeleICUFacility />,
 };
 
 let menus = [
@@ -400,6 +412,11 @@ let menus = [
     icon: "fas fa-user-friends",
   },
   {
+    title: "Tele ICU",
+    link: "/teleicu/facility",
+    icon: "fas fa-video",
+  },
+  {
     title: "Profile",
     link: "/user/profile",
     icon: "fas fa-user-secret",
@@ -413,218 +430,24 @@ let menus = [
 
 const AppRouter = (props: any) => {
   useRedirect("/", "/facility");
+  useRedirect("/teleicu", "/teleicu/facility");
   const pages = useRoutes(routes);
   const path = usePath();
-  const { t } = props;
-  const url = path.split("/");
-  const state: any = useSelector((state) => state);
-  const { currentUser } = state;
-  const [drawer, setDrawer] = useState(false);
-  const loginUser = `${get(currentUser, "data.first_name", "")} ${get(
-    currentUser,
-    "data.last_name",
-    ""
-  )}`;
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [path]);
 
-  const handleSidebarClick = (e: any, link: string) => {
-    e.preventDefault();
-    navigate(link);
-  };
-
   return (
     <div className="h-screen flex overflow-hidden bg-gray-100">
-      {drawer && (
-        <div className="md:hidden">
-          <div className="fixed inset-0 flex z-40">
-            <div className="fixed inset-0">
-              <div className="absolute inset-0 bg-gray-600 opacity-75"></div>
-            </div>
-            <div className="relative flex-1 flex flex-col max-w-xs w-full pt-5 pb-4 bg-primary-800">
-              <div className="absolute top-0 right-0 -mr-14 p-1">
-                <button
-                  onClick={(_) => setDrawer(false)}
-                  className="flex items-center justify-center h-12 w-12 rounded-full focus:outline-none focus:bg-gray-600"
-                  aria-label="Close sidebar"
-                >
-                  <svg
-                    className="h-6 w-6 text-white"
-                    stroke="currentColor"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                </button>
-              </div>
-              <div className="flex-shrink-0 flex items-center px-4">
-                <a href="/">
-                  <img className="h-8 w-auto" src={img} alt="care logo" />
-                </a>
-              </div>
-              <div className="mt-5 flex-1 h-0 overflow-y-auto">
-                <nav className="px-2">
-                  {menus.map((item) => {
-                    const parts = item.link.split("/");
-                    const selectedClasses = url.includes(parts && parts[1])
-                      ? "mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-white rounded-md bg-primary-900 focus:outline-none focus:bg-primary-900 transition ease-in-out duration-150"
-                      : "mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-primary-300 rounded-md hover:text-white hover:bg-primary-700 focus:outline-none focus:bg-primary-900 transition ease-in-out duration-150";
-                    return (
-                      <button
-                        key={item.title}
-                        onClick={() => navigate(item.link, true)}
-                        className={selectedClasses}
-                      >
-                        <i
-                          className={
-                            item.icon +
-                            (url.includes(parts && parts[1])
-                              ? " text-white"
-                              : " text-primary-400") +
-                            " mr-3 text-md group-hover:text-primary-300 group-focus:text-primary-300 transition ease-in-out duration-150"
-                          }
-                        ></i>
-                        {t(item.title)}
-                      </button>
-                    );
-                  })}
-                  <NotificationsList />
-                  <a
-                    key="dashboard"
-                    href={process.env.REACT_APP_DASHBOARD_URL}
-                    className="mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-primary-300 rounded-md hover:text-white hover:bg-primary-700 focus:outline-none focus:bg-primary-900 transition ease-in-out duration-150"
-                  >
-                    <i className="fas fa-tachometer-alt text-primary-400 mr-3 text-md group-hover:text-primary-300 group-focus:text-primary-300 transition ease-in-out duration-150"></i>
-                    {t("Dashboard")}
-                  </a>
-                </nav>
-              </div>
-              <div className="flex-shrink-0 flex border-t border-primary-700 p-4">
-                <div className="flex-shrink-0 w-full group block">
-                  <div className="flex items-center">
-                    <div>
-                      <div className="rounded-full h-8 w-8 flex items-center bg-white justify-center">
-                        <i className="inline-block fas fa-user text-xl text-primary-700"></i>
-                      </div>
-                    </div>
-                    <div className="ml-3">
-                      <p className="text-sm leading-5 font-medium text-white">
-                        {loginUser}
-                      </p>
-                      <p
-                        onClick={() => {
-                          localStorage.removeItem("care_access_token");
-                          localStorage.removeItem("care_refresh_token");
-                          localStorage.removeItem("shift-filters");
-                          localStorage.removeItem("external-filters");
-                          localStorage.removeItem("lsg-ward-data");
-                          navigate("/login");
-                          window.location.reload();
-                        }}
-                        className="text-xs leading-4 font-medium text-primary-300 group-hover:text-primary-100 transition ease-in-out duration-150"
-                      >
-                        {t("sign_out")}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="flex-shrink-0 w-14"></div>
-          </div>
-        </div>
-      )}
+      
+      <SideBar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
 
-      <div className="hidden md:flex md:flex-shrink-0">
-        <div className="flex flex-col w-64 bg-primary-800 pt-5">
-          <div className="flex items-center flex-shrink-0 px-4">
-            <a href="/">
-              <img className="h-8 w-auto" src={img} alt="care logo" />
-            </a>
-          </div>
-          <div className="mt-5 h-0 flex-1 flex flex-col overflow-y-auto">
-            <nav className="flex-1 px-2 bg-primary-800">
-              {menus.map((item) => {
-                const parts = item.link.split("/");
-                const selectedClasses = url.includes(parts && parts[1])
-                  ? "mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-white rounded-md bg-primary-900 focus:outline-none focus:bg-primary-900 transition ease-in-out duration-150"
-                  : "mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-primary-300 rounded-md hover:text-white hover:bg-primary-700 focus:outline-none focus:bg-primary-900 transition ease-in-out duration-150";
-                return (
-                  <a
-                    key={item.title}
-                    href={item.link}
-                    onClick={(e) => handleSidebarClick(e, item.link)}
-                    className={selectedClasses}
-                  >
-                    <i
-                      className={
-                        item.icon +
-                        (url.includes(parts && parts[1])
-                          ? " text-white"
-                          : " text-primary-400") +
-                        " mr-3 text-lg group-hover:text-primary-300 group-focus:text-primary-300 transition ease-in-out duration-150"
-                      }
-                    ></i>
-                    {t(item.title)}
-                  </a>
-                );
-              })}
-              <NotificationsList />
-              <a
-                key="dashboard"
-                href={process.env.REACT_APP_DASHBOARD_URL}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-primary-300 rounded-md hover:text-white hover:bg-primary-700 focus:outline-none focus:bg-primary-900 transition ease-in-out duration-150"
-              >
-                <i className="fas fa-tachometer-alt text-primary-400 mr-3 text-md group-hover:text-primary-300 group-focus:text-primary-300 transition ease-in-out duration-150"></i>
-                {t("Dashboard")}
-              </a>
-            </nav>
-          </div>
-          <div className="flex-shrink-0 flex border-t border-primary-700 p-4">
-            <div className="flex-shrink-0 w-full group block">
-              <div className="flex items-center">
-                <div>
-                  <div className="rounded-full h-8 w-8 flex items-center bg-white justify-center">
-                    <i className="inline-block fas fa-user text-xl text-primary-700"></i>
-                  </div>
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm leading-5 font-medium text-white">
-                    {loginUser}
-                  </p>
-                  <p
-                    onClick={() => {
-                      localStorage.removeItem("care_access_token");
-                      localStorage.removeItem("care_refresh_token");
-                      localStorage.removeItem("shift-filters");
-                      localStorage.removeItem("external-filters");
-                      localStorage.removeItem("lsg-ward-data");
-                      navigate("/login");
-                      window.location.reload();
-                    }}
-                    className="text-xs leading-4 font-medium text-primary-300 group-hover:text-primary-100 transition ease-in-out duration-150"
-                  >
-                    {t("sign_out")}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
       <div className="flex flex-col w-full flex-1 overflow-hidden">
         <div className="flex md:hidden relative z-10 flex-shrink-0 h-16 bg-white shadow">
           <button
-            onClick={(_) => setDrawer(true)}
+            onClick={(_) => setIsSidebarOpen(true)}
             className="px-4 border-r border-gray-200 text-gray-500 focus:outline-none focus:bg-gray-100 focus:text-gray-600 md:hidden"
             aria-label="Open sidebar"
           >
