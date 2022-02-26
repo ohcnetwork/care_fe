@@ -17,6 +17,7 @@ export interface AssignedToObjectModel {
   first_name: string;
   last_name: string;
   last_login?: string;
+  alt_phone_number?: string;
   user_type: string;
 }
 
