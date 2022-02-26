@@ -18,9 +18,11 @@ export default function TeleICUPatientInfoCard({
           src="/images/empty_avatar.jpg"
           alt="Avatar"
         />
-        <div className="pl-4 font-medium">
-          <p className="text-lg ml-1">{patient.name}</p>
-          <p className="text-sm my-1 ml-1 text-gray-600">
+        <div className="pl-4">
+          <p className="sm:text-xl text-lg font-semibold ml-1">
+            {patient.name}
+          </p>
+          <p className="text-sm sm:text-base my-1 ml-1 text-primary-800">
             <span>{patient.age} years</span>
             <span className="mx-2">•</span>
             <span>{patient.gender && GENDER[patient.gender]}</span>
@@ -28,20 +30,20 @@ export default function TeleICUPatientInfoCard({
           <div className="text-sm flex flex-wrap">
             {patient.blood_group && (
               <div className="m-1">
-                <span className="font-light text-gray-600 text-sm mr-1">
+                <span className="font-light text-primary-600 text-xs mr-1">
                   Blood Group
                 </span>
-                <span className="sm:text-base text-sm mr-2">
+                <span className="sm:text-base font-semibold text-sm mr-2">
                   {patient.blood_group}
                 </span>
               </div>
             )}
             {patient.last_consultation?.weight ? (
               <div className="m-1">
-                <span className="font-light text-gray-600 text-sm mr-1">
+                <span className="font-light text-primary-600 text-sm mr-1">
                   Weight
                 </span>
-                <span className="sm:text-base text-sm mr-2">
+                <span className="sm:text-base font-semibold text-sm mr-2">
                   {patient.last_consultation?.weight}kg
                 </span>
               </div>
@@ -50,10 +52,10 @@ export default function TeleICUPatientInfoCard({
             )}
             {patient.last_consultation?.height ? (
               <div className="m-1">
-                <span className="font-light text-gray-600 text-sm mr-1">
+                <span className="font-light text-primary-600 text-sm mr-1">
                   Height
                 </span>
-                <span className="sm:text-base text-sm mr-2">
+                <span className="sm:text-base font-semibold text-sm mr-2">
                   {patient.last_consultation?.height}cm
                 </span>
               </div>
@@ -67,42 +69,50 @@ export default function TeleICUPatientInfoCard({
         {patient.last_consultation?.id && (
           <Link
             href={`/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}`}
-            className="rounded-md border-2 border-gray-300  bg-white shadow-sm text-primary-900 flex justify-between items-center p-2 px-4 sm:px-2 hover:bg-gray-200 cursor-pointer active:translate-y-1 transform"
+            className="rounded-md bg-white shadow-sm text-primary-900 flex justify-between items-center p-2 px-4 sm:px-2 hover:bg-gray-200 cursor-pointer active:translate-y-1 transform"
           >
-            <p className="text-sm sm:text-base pr-1">Consultation Details</p>
+            <p className="text-sm sm:text-base px-2 font-semibold">
+              Consultation Details
+            </p>
             <span>
-              <RightArrowIcon className="text-green-500" />
+              <RightArrowIcon />
             </span>
           </Link>
         )}
         <Link
           href={`/patient/${patient.id}/investigation_reports`}
-          className="rounded-md border-2 border-gray-300  bg-white shadow-sm text-primary-900 flex justify-between items-center p-2 px-4 sm:px-2 hover:bg-gray-200 cursor-pointer active:translate-y-1 transform"
+          className="rounded-md bg-white shadow-sm text-primary-900 flex justify-between items-center p-2 px-4 sm:px-2 hover:bg-gray-200 cursor-pointer active:translate-y-1 transform"
         >
-          <p className="text-sm sm:text-base pr-1">Investigation Summary</p>
+          <p className="text-sm sm:text-base px-2 font-semibold">
+            Investigation Summary
+          </p>
           <span>
-            <RightArrowIcon className="text-green-500" />
+            <RightArrowIcon />
           </span>
         </Link>
         {patient.last_consultation?.id && (
           <Link
             href={`/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/files`}
-            className="rounded-md border-2 border-gray-300  bg-white shadow-sm text-primary-900 flex justify-between items-center p-2 px-4 sm:px-2 hover:bg-gray-200 cursor-pointer active:translate-y-1 transform"
+            className="rounded-md bg-white shadow-sm text-primary-900 flex justify-between items-center p-2 px-4 sm:px-2 hover:bg-gray-200 cursor-pointer active:translate-y-1 transform"
           >
-            <p className="text-sm sm:text-base pr-1">Scans &amp; Reports</p>
+            <p className="text-sm sm:text-base px-2 font-semibold">
+              Scans &amp; Reports
+            </p>
             <span>
-              <RightArrowIcon className="text-green-500" />
+              <RightArrowIcon />
             </span>
           </Link>
         )}
         {patient.last_consultation?.id && (
           <Link
             href={`/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/feed`}
-            className="rounded-md border-2 border-gray-300  bg-white shadow-sm text-primary-900 flex justify-between items-center p-2 px-4 sm:px-2 hover:bg-gray-200 cursor-pointer active:translate-y-1 transform"
+            className="rounded-md bg-white shadow-sm text-primary-900 flex justify-between items-center p-2 px-4 sm:px-2 hover:bg-gray-200 cursor-pointer active:translate-y-1 transform"
           >
-            <p className="text-sm sm:text-base pr-1">5 Para Monitor</p>
+            <p className="text-sm sm:text-base px-2 font-semibold">
+              5 Para Monitor
+            </p>
             <span>
-              <RightArrowIcon className="text-green-500" />
+              <RightArrowIcon />
             </span>
           </Link>
         )}
