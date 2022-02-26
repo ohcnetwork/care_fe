@@ -1,4 +1,11 @@
-import { useRedirect, useRoutes, navigate, usePath, Link } from "raviger";
+import {
+  useRedirect,
+  useRoutes,
+  navigate,
+  usePath,
+  Link,
+  Redirect,
+} from "raviger";
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { BedCapacityForm } from "../Components/Facility/BedCapacityForm";
@@ -280,13 +287,16 @@ const routes = {
   "/facility/:facilityId/inventory/min_quantity/set": ({ facilityId }: any) => (
     <SetInventoryForm facilityId={facilityId} />
   ),
+  "/facility/:facilityId/inventory/min_quantity/list": ({
+    facilityId,
+  }: any) => <MinQuantityList facilityId={facilityId} />,
+  "/facility/:facilityId/inventory/min_quantity": ({ facilityId }: any) => (
+    <Redirect to={`/facility/${facilityId}/inventory/min_quantity/list`} />
+  ),
   "/facility/:facilityId/inventory/:inventoryId": ({
     facilityId,
     inventoryId,
   }: any) => <InventoryLog facilityId={facilityId} inventoryId={inventoryId} />,
-  "/facility/:facilityId/inventory/min_quantity/list": ({
-    facilityId,
-  }: any) => <MinQuantityList facilityId={facilityId} />,
   "/facility/:facilityId/inventory/:inventoryId/update/:itemId": ({
     facilityId,
     inventoryId,
