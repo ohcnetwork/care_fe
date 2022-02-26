@@ -70,6 +70,7 @@ import HubDashboard from "../Components/Dashboard/HubDashboard";
 import { SideBar } from "../Components/Common/SideBar";
 import { Feed } from "../Components/Facility/Consultations/Feed";
 import { TeleICUFacility } from "../Components/TeleIcu/Facility";
+import { TeleICUPatientsList } from "../Components/TeleIcu/PatientList";
 
 const get = require("lodash.get");
 
@@ -377,6 +378,9 @@ const routes = {
       />
     ),
   "/teleicu/facility": () => <TeleICUFacility />,
+  "/teleicu/facility/:facilityId": ({ facilityId }: any) => (
+    <TeleICUPatientsList facilityId={facilityId} />
+  ),
 };
 
 let menus = [
