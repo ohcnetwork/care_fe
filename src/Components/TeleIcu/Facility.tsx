@@ -90,32 +90,6 @@ export const TeleICUFacility = () => {
           className="sm:m-0 sm:p-0"
           breadcrumbs={false}
         />
-        <div className="flex items-center gap-2">
-          <h1 className="text-base font-medium">View Option</h1>
-
-          <div className="flex items-center">
-            <button
-              className={`px-4 py-2 border block ${
-                viewOption === "5-para"
-                  ? "bg-primary-500 border-primary-500 rounded text-white"
-                  : "bg-transparent border-primary-200"
-              } `}
-              onClick={() => setViewOption("5-para")}
-            >
-              5-Para
-            </button>
-            <button
-              className={`px-4 py-2 border block ${
-                viewOption === "personal"
-                  ? "bg-primary-500 border-primary-500 rounded text-white"
-                  : "bg-transparent border-primary-200"
-              } `}
-              onClick={() => setViewOption("personal")}
-            >
-              Personal
-            </button>
-          </div>
-        </div>
       </div>
       <div className="grid grid-col-1 lg:grid-cols-2 gap-4">
         {isLoading

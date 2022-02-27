@@ -47,9 +47,15 @@ export default function TeleICUPatientPage({
         />
         <div className="flex items-start justify-start sm:flex-row sm:items-center flex-col space-y-1 sm:space-y-0 sm:divide-x-2">
           <div className="px-2">
-            <Link href="/" className="btn m-1 btn-primary hover:text-white">
-              Doctor Video
-            </Link>
+            {patient?.last_consultation?.assigned_to_object
+              ?.alt_phone_number && (
+              <a
+                href={`https://wa.me/${patient?.last_consultation?.assigned_to_object.alt_phone_number}`}
+                className="btn m-1 btn-primary hover:text-white"
+              >
+                Doctor Video
+              </a>
+            )}
             {patient.last_consultation?.id && (
               <Link
                 href={`/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/feed`}
@@ -60,10 +66,16 @@ export default function TeleICUPatientPage({
             )}
           </div>
           <div className="px-2">
-            <Link href="/" className="btn m-1 btn-primary hover:text-white">
+            <Link
+              href={`/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/`}
+              className="btn m-1 btn-primary hover:text-white"
+            >
               Generate Treatment Summary
             </Link>
-            <Link href="/" className="btn m-1 btn-primary hover:text-white">
+            <Link
+              href={`/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/`}
+              className="btn m-1 btn-primary hover:text-white"
+            >
               Doctor's Notes
             </Link>
           </div>

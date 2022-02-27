@@ -1,4 +1,4 @@
-import { useQueryParams } from "raviger";
+import { Link, useQueryParams } from "raviger";
 import React, { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useDispatch } from "react-redux";
@@ -76,7 +76,9 @@ export const TeleICUPatientsList = (props: any) => {
     <div className="max-w-7xl mx-auto p-4">
       <div className="flex items-center gap-2 flex-wrap justify-between mb-4">
         <PageTitle
-          title={t(`${facilityData?.name} - Patient List`)}
+          title={t(
+            `${facilityData?.name ? facilityData.name + " - " : ""}Patient List`
+          )}
           hideBack={true}
           className="sm:m-0 sm:p-0"
           breadcrumbs={false}
@@ -128,10 +130,14 @@ export const TeleICUPatientsList = (props: any) => {
             })
           : data.map((item, index) => {
               return (
-                <div key={item.id}>
-                  <div className="bg-white rounded-lg flex items-center gap-4 p-4">
-                    <div className="w-32 self-stretch flex-shrink-0 bg-gray-300 flex items-center justify-center rounded">
-                      Bed No.
+                <Link
+                  key={item.id}
+                  href={`/teleicu/facility/${props.facilityId}/patient/${item.id}`}
+                >
+                  <div className="bg-white rounded-lg flex items-center gap-4 p-4 text-gray-800">
+                    <div className="w-32 self-stretch flex-shrink-0 bg-gray-300 text-lg flex flex-col items-center justify-center rounded">
+                      <span className="">Bed No</span>
+                      <span className="text-4xl font-bold">{index + 1}</span>
                     </div>
                     <div className="flex-1">
                       <h1 className="text-xl font-bold">{item.name}</h1>
@@ -160,7 +166,7 @@ export const TeleICUPatientsList = (props: any) => {
                       </div>
                     </div>
                   </div>
-                </div>
+                </Link>
               );
             })}
       </div>
