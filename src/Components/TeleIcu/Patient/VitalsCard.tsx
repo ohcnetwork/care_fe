@@ -49,7 +49,8 @@ export default function TeleICUPatientVitalsCard({
         </div>
         <div className="bg-white rounded-md p-3 text-center">
           <h2 className="text-2xl md:text-4xl font-bold">
-            {patient.last_consultation?.last_daily_round?.spo2 ?? "N/A"}
+            {patient.last_consultation?.last_daily_round?.ventilator_spo2 ??
+              "N/A"}
           </h2>
           <span className="font-medium text-primary-900 md:text-lg text-sm">
             SpO<sub>2</sub>
