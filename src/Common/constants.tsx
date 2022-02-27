@@ -595,3 +595,8 @@ export const SIDEBAR = {
   COLLAPSED: "collapsed",
   FULL: "full",
 };
+
+export const GENDER: { [key: number]: string } = GENDER_TYPES.reduce(
+  (acc, curr) => ({ ...acc, [curr.id]: curr.text }),
+  {}
+);

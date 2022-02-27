@@ -70,6 +70,7 @@ import HubDashboard from "../Components/Dashboard/HubDashboard";
 import { SideBar } from "../Components/Common/SideBar";
 import { Feed } from "../Components/Facility/Consultations/Feed";
 import { TeleICUFacility } from "../Components/TeleIcu/Facility";
+import TeleICUPatientPage from "../Components/TeleIcu/Patient";
 import { TeleICUPatientsList } from "../Components/TeleIcu/PatientList";
 
 const get = require("lodash.get");
@@ -377,6 +378,12 @@ const routes = {
         tab={tab}
       />
     ),
+  "/teleicu/facility/:facilityId/patient/:patientId": ({
+    patientId,
+    facilityId,
+  }: any) => (
+    <TeleICUPatientPage facilityId={facilityId} patientId={patientId} />
+  ),
   "/teleicu/facility": () => <TeleICUFacility />,
   "/teleicu/facility/:facilityId": ({ facilityId }: any) => (
     <TeleICUPatientsList facilityId={facilityId} />
@@ -489,7 +496,7 @@ const AppRouter = (props: any) => {
           id="pages"
           className="flex-1 overflow-y-auto pb-4 md:py-0 focus:outline-none"
         >
-          <div className="max-w-7xl mx-auto px-0">{pages}</div>
+          <div className="max-w-8xl mx-auto px-5 py-3">{pages}</div>
         </main>
       </div>
     </div>
