@@ -23,7 +23,7 @@ export const TeleICUPatientsList = (props: any) => {
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const { t } = useTranslation();
-  const [viewOption, setViewOption] = useState("5-para");
+  const [viewOption, setViewOption] = useState("personal");
   const [facilityData, setFacilityData] = useState<FacilityModel>();
   const [data, setPatientData] = useState<Array<PatientModel>>([]);
   const fetchData = useCallback(
