@@ -71,6 +71,7 @@ import { SideBar } from "../Components/Common/SideBar";
 import { Feed } from "../Components/Facility/Consultations/Feed";
 import { TeleICUFacility } from "../Components/TeleIcu/Facility";
 import TeleICUPatientPage from "../Components/TeleIcu/Patient";
+import { TeleICUPatientsList } from "../Components/TeleIcu/PatientList";
 
 const get = require("lodash.get");
 
@@ -384,6 +385,9 @@ const routes = {
     <TeleICUPatientPage facilityId={facilityId} patientId={patientId} />
   ),
   "/teleicu/facility": () => <TeleICUFacility />,
+  "/teleicu/facility/:facilityId": ({ facilityId }: any) => (
+    <TeleICUPatientsList facilityId={facilityId} />
+  ),
 };
 
 let menus = [

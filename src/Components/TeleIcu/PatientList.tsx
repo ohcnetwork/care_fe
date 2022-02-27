@@ -1,19 +1,21 @@
-import { Link, useQueryParams } from "raviger";
+import { useQueryParams } from "raviger";
 import React, { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useDispatch } from "react-redux";
+import { GENDER_TYPES } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getPermittedFacilities } from "../../Redux/actions";
+import { getPermittedFacility, getAllPatient } from "../../Redux/actions";
 import PageTitle from "../Common/PageTitle";
 import Pagination from "../Common/Pagination";
 import { FacilityModel } from "../Facility/models";
+import { PatientModel } from "../Patient/models";
 import { limit } from "../Shifting/Commons";
 import { AdminIcon } from "./Icons/AdminIcon";
 import { BedIcon } from "./Icons/BedIcon";
 import { CCTVIcon } from "./Icons/CCTVIcon";
 import { WifiIcon } from "./Icons/WifiIcon";
 
-export const TeleICUFacility = () => {
+export const TeleICUPatientsList = (props: any) => {
   const [qParams, setQueryParams] = useQueryParams();
   const [isLoading, setIsLoading] = useState(false);
   const [offset, setOffset] = useState(0);
@@ -22,7 +24,8 @@ export const TeleICUFacility = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const { t } = useTranslation();
   const [viewOption, setViewOption] = useState("5-para");
-  const [data, setData] = useState<Array<FacilityModel>>([]);
+  const [facilityData, setFacilityData] = useState<FacilityModel>();
+  const [data, setPatientData] = useState<Array<PatientModel>>([]);
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
@@ -31,41 +34,28 @@ export const TeleICUFacility = () => {
             limit,
             offset,
             search_text: qParams.search,
-            state: qParams.state,
-            district: qParams.district,
-            local_body: qParams.local_body,
-            facility_type: qParams.facility_type,
-            kasp_empanelled: qParams.kasp_empanelled,
+            facility: props.facilityId,
           }
         : {
             limit,
             offset,
-            state: qParams.state,
-            district: qParams.district,
-            local_body: qParams.local_body,
-            facility_type: qParams.facility_type,
-            kasp_empanelled: qParams.kasp_empanelled,
+            facility: props.facilityId,
           };
 
-      const res = await dispatchAction(getPermittedFacilities(params));
+      const [facilityResponse, patientsResponse] = await Promise.all([
+        dispatchAction(getPermittedFacility(props.facilityId)),
+        dispatchAction(getAllPatient(params, "Patient List")),
+      ]);
       if (!status.aborted) {
-        if (res && res.data) {
-          setData(res.data.results);
-          setTotalCount(res.data.count);
+        if (facilityResponse && facilityResponse.data) {
+          setFacilityData(facilityResponse.data);
+          setTotalCount(patientsResponse.data.count);
+          setPatientData(patientsResponse.data.results);
         }
         setIsLoading(false);
       }
     },
-    [
-      dispatchAction,
-      offset,
-      qParams.search,
-      qParams.kasp_empanelled,
-      qParams.state,
-      qParams.district,
-      qParams.local_body,
-      qParams.facility_type,
-    ]
+    [dispatchAction, offset, qParams.search, props.facilityId]
   );
 
   useAbortableEffect(
@@ -79,13 +69,14 @@ export const TeleICUFacility = () => {
     setCurrentPage(page);
     setOffset(offset);
   };
-  console.log(data);
+  const getPatientGender = (patientData: any) =>
+    GENDER_TYPES.find((i) => i.id === patientData.gender)?.text;
 
   return (
     <div className="max-w-7xl mx-auto p-4">
       <div className="flex items-center gap-2 flex-wrap justify-between mb-4">
         <PageTitle
-          title={t("Tele ICU Spoke Hospitals")}
+          title={t(`${facilityData?.name} - Patient List`)}
           hideBack={true}
           className="sm:m-0 sm:p-0"
           breadcrumbs={false}
@@ -138,29 +129,37 @@ export const TeleICUFacility = () => {
           : data.map((item, index) => {
               return (
                 <div key={item.id}>
-                  <Link
-                    href={`/teleicu/facility/${item.id}`}
-                    className="bg-white rounded-lg text-black flex items-center gap-4 p-4"
-                  >
+                  <div className="bg-white rounded-lg flex items-center gap-4 p-4">
                     <div className="w-32 self-stretch flex-shrink-0 bg-gray-300 flex items-center justify-center rounded">
-                      <i className="fas fa-hospital text-4xl block text-gray-600"></i>
+                      Bed No.
                     </div>
                     <div className="flex-1">
                       <h1 className="text-xl font-bold">{item.name}</h1>
-                      <p className="text-base font-normal">
-                        {item.district_object?.name}
+                      <p className="text-base gap-2 flex items-center text-gray-600 font-normal">
+                        {item?.age} years
+                        <div className="w-1 h-1 rounded-full bg-gray-600"></div>{" "}
+                        {getPatientGender(item)}
                       </p>
                       <div className="flex items-start justify-between gap-2 my-4">
-                        <div className="text-center">
-                          <BedIcon className="h-8 text-primary-500 fill-current" />
-                          <p className="mt-2 text-sm font-medium">12 / 20</p>
-                        </div>
-                        <CCTVIcon className="h-12 text-primary-500 fill-current" />
-                        <WifiIcon className="h-8 text-primary-500 fill-current" />
-                        <AdminIcon className="h-8 text-primary-500 fill-current" />
+                        <p>
+                          <span className="font-bold">Blood group:</span>{" "}
+                          <span>{item?.blood_group}</span>
+                        </p>
+                        {item?.last_consultation && (
+                          <>
+                            <p>
+                              <span className="font-bold">Weight:</span>{" "}
+                              <span>{item?.last_consultation?.weight} kg</span>
+                            </p>
+                            <p>
+                              <span className="font-bold">Height:</span>{" "}
+                              <span>{item?.last_consultation?.height} cm</span>
+                            </p>
+                          </>
+                        )}
                       </div>
                     </div>
-                  </Link>
+                  </div>
                 </div>
               );
             })}

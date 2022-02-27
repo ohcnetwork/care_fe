@@ -58,8 +58,8 @@ export interface PatientModel {
     assigned_to_object?: AssignedToObjectModel;
     is_telemedicine?: boolean;
     consultation_notes: string;
-    weight: number;
-    height: number;
+    height?: number;
+    weight?: number;
     last_daily_round?: DailyRoundsModel;
   };
   address?: string;
