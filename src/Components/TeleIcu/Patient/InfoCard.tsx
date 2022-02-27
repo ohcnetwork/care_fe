@@ -19,7 +19,7 @@ export default function TeleICUPatientInfoCard({
           alt="Avatar"
         />
         <div className="pl-4">
-          <p className="sm:text-xl text-lg font-semibold ml-1">
+          <p className="sm:text-xl md:text-4xl font-semibold ml-1">
             {patient.name}
           </p>
           <p className="text-sm sm:text-base my-1 ml-1 text-primary-800">

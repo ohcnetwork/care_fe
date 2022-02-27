@@ -137,10 +137,10 @@ export const TeleICUPatientsList = (props: any) => {
                   <div className="bg-white rounded-lg flex items-center gap-4 p-4 text-gray-800">
                     <div className="w-32 self-stretch flex-shrink-0 bg-gray-300 text-lg flex flex-col items-center justify-center rounded">
                       <span className="">Bed No</span>
-                      <span className="text-4xl font-bold">{index + 1}</span>
+                      <span className="text-4xl font-bold">{7 + index}</span>
                     </div>
                     <div className="flex-1">
-                      <h1 className="text-xl font-bold">{item.name}</h1>
+                      <h1 className="text-3xl font-bold">{item.name}</h1>
                       <p className="text-base gap-2 flex items-center text-gray-600 font-normal">
                         {item?.age} years
                         <div className="w-1 h-1 rounded-full bg-gray-600"></div>{" "}

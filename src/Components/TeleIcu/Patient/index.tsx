@@ -51,6 +51,8 @@ export default function TeleICUPatientPage({
               ?.alt_phone_number && (
               <a
                 href={`https://wa.me/${patient?.last_consultation?.assigned_to_object.alt_phone_number}`}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="btn m-1 btn-primary hover:text-white"
               >
                 Doctor Video
