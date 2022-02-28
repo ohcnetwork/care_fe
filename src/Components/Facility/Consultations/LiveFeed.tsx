@@ -413,7 +413,7 @@ const LiveFeed = (props: any) => {
                           gotoPreset(option.value);
                         }}
                       >
-                        <button className="bg-green-100 border border-white rounded-md p-3  text-black  hover:bg-green-200 w-full">
+                        <button className="bg-green-100 border border-white rounded-md p-3  text-black  hover:bg-green-500 hover:text-white w-full">
                           {option.label}
                         </button>
                       </div>
@@ -426,10 +426,15 @@ const LiveFeed = (props: any) => {
                         }}
                         key={preset.id}
                       >
-                        <button className="bg-green-100 border border-white rounded-md p-3 text-black  hover:bg-green-200 w-full">
-                          {preset.meta.preset_name
-                            ? preset.meta.preset_name
-                            : `Unnamed Preset ${index + 1}`}
+                        <button className="flex bg-green-100 border border-white rounded-md p-3 text-black  hover:bg-green-500 hover:text-white w-full">
+                          <span className="justify-start font-semibold">
+                            {preset.bed_object.name}
+                          </span>
+                          <span className="mx-auto">
+                            {preset.meta.preset_name
+                              ? preset.meta.preset_name
+                              : `Unnamed Preset ${index + 1}`}
+                          </span>
                         </button>
                       </div>
                     ))}
@@ -442,7 +447,7 @@ const LiveFeed = (props: any) => {
                     getPresets(asset);
                   }}
                 >
-                  <button className="bg-green-100 border border-white rounded-md px-3 py-2 text-black font-semibold hover:bg-green-300 w-full">
+                  <button className="bg-green-100 border border-white rounded-md px-3 py-2 text-black font-semibold hover:text-white hover:bg-green-500 w-full">
                     <RefreshIcon /> Refresh
                   </button>
                 </div>
