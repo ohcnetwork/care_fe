@@ -41,3 +41,10 @@ export const parseOptionId: (
     .map((option) => option.text);
   return textArray.join(", ");
 };
+
+// Utility Functions for Plotting
+export const yAxisData = (results: {}, name: string) => {
+  return Object.values(results)
+    .map((p: any) => p[name])
+    .reverse();
+};

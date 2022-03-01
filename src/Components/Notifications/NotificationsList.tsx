@@ -17,6 +17,8 @@ import { useSelector } from "react-redux";
 import { Button, CircularProgress } from "@material-ui/core";
 import { NOTIFICATION_EVENTS } from "../../Common/constants";
 import { Error } from "../../Utils/Notifications.js";
+import clsx from "clsx";
+import { useTranslation } from "react-i18next";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -24,10 +26,10 @@ const PageTitle = loadable(() => import("../Common/PageTitle"));
 const RESULT_LIMIT = 14;
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
-export default function ResultList() {
+export default function ResultList({ expanded = false }) {
   const rootState: any = useSelector((rootState) => rootState);
   const { currentUser } = rootState;
-
+  const { t } = useTranslation();
   const username = currentUser.data.username;
   const dispatch: any = useDispatch();
   const [data, setData] = useState<any[]>([]);
@@ -284,6 +286,29 @@ export default function ResultList() {
     <div>
       <button
         onClick={() => setShowNotifications(!showNotifications)}
+        className={clsx(
+          "flex justify-items-start items-center overflow-hidden w-10 text-primary-300 hover:text-white py-1 my-1 hover:bg-primary-700 rounded transition-all duration-300",
+          showNotifications
+            ? "bg-primary-900 hover:bg-primary-900 text-white"
+            : "bg-primary-800",
+          expanded && "w-60"
+        )}
+      >
+        <div className="flex-shrink-0 flex items-center justify-center w-10 h-9">
+          <i className={clsx("fas fa-bell", "text-lg")}></i>
+        </div>
+
+        <div
+          className={clsx(
+            "transition-all text-left duration-300 whitespace-no-wrap",
+            expanded ? "w-60" : "w-0"
+          )}
+        >
+          {t("Notifications")}
+        </div>
+      </button>
+      {/* <button
+        onClick={() => setShowNotifications(!showNotifications)}
         className="mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-primary-300 rounded-md hover:text-white hover:bg-primary-700 focus:outline-none focus:bg-primary-900 transition ease-in-out duration-150"
       >
         <i
@@ -292,7 +317,7 @@ export default function ResultList() {
           }
         ></i>
         Notifications
-      </button>
+      </button> */}
 
       <SlideOver show={showNotifications} setShow={setShowNotifications}>
         <div className="bg-white h-full">

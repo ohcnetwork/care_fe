@@ -619,15 +619,28 @@ export const PatientHome = (props: any) => {
           <div className="max-w-screen-xl mx-auto py-3 px-3 sm:px-6 lg:px-8">
             <div className="md:flex">
               {patientData?.last_consultation?.assigned_to_object && (
-                <p className="font-bold text-green-800 rounded-lg shadow bg-green-200 p-3 mx-3 flex-1 text-center">
+                <p className="font-bold text-green-800 rounded-lg shadow bg-green-200 p-3 mx-3 flex-1 text-center flex justify-center gap-2">
                   <span className="inline">
                     Assigned Doctor:{" "}
                     {
-                      patientData.last_consultation.assigned_to_object
+                      patientData?.last_consultation?.assigned_to_object
                         .first_name
                     }{" "}
-                    {patientData.last_consultation.assigned_to_object.last_name}
+                    {
+                      patientData?.last_consultation?.assigned_to_object
+                        .last_name
+                    }
                   </span>
+                  {patientData?.last_consultation?.assigned_to_object
+                    .alt_phone_number && (
+                    <a
+                      href={`https://wa.me/${patientData?.last_consultation?.assigned_to_object.alt_phone_number}`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <i className="fab fa-whatsapp"></i> Video Call
+                    </a>
+                  )}
                 </p>
               )}
               {patientData.assigned_to_object && (

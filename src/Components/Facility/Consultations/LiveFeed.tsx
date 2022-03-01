@@ -17,6 +17,7 @@ const LiveFeed = (props: any) => {
   const [presets, setPresets] = useState<any>([]);
   const [bedPresets, setBedPresets] = useState<any>([]);
   const [showDefaultPresets, setShowDefaultPresets] = useState<boolean>(false);
+  const [precision, setPrecision] = useState(1);
 
   const [loading, setLoading] = useState<boolean>(false);
   const dispatch: any = useDispatch();
@@ -116,26 +117,32 @@ const LiveFeed = (props: any) => {
         y: 0,
         zoom: 0,
       } as any;
-      console.log(action);
+      console.log("Relative Move");
+      console.log(position);
+      const delta = 0.01 / position.zoom;
+      console.log("delta", delta);
       // Relative X Y Coordinates
       switch (action) {
         case "up":
-          data.y = 0.1;
+          data.y = delta;
           break;
         case "down":
-          data.y = -0.1;
+          data.y = -delta;
           break;
         case "left":
-          data.x = -0.1;
+          data.x = -delta;
           break;
         case "right":
-          data.x = 0.1;
+          data.x = delta;
           break;
         case "zoomIn":
           data.zoom = 0.1;
           break;
         case "zoomOut":
           data.zoom = -0.1;
+          break;
+        case "precision":
+          setPrecision((precision) => (precision === 16 ? 1 : precision * 2));
           break;
         case "stop":
           stopStream(sourceUrl);
@@ -213,6 +220,7 @@ const LiveFeed = (props: any) => {
     { icon: "fa fa-arrow-down", label: "Down", action: "down" },
     { icon: "fa fa-arrow-left", label: "Left", action: "left" },
     { icon: "fa fa-arrow-right", label: "Right", action: "right" },
+    { value: precision, label: "Precision", action: "precision" },
     { icon: "fa fa-search-plus", label: "Zoom In", action: "zoomIn" },
     { icon: "fa fa-search-minus", label: "Zoom Out", action: "zoomOut" },
     { icon: "fa fa-stop", label: "Stop", action: "stop" },
@@ -250,7 +258,7 @@ const LiveFeed = (props: any) => {
               />
             ) : (
               <div
-                className="w-full max-w-xl bg-gray-500 flex flex-col justify-center items-center"
+                className="bg-gray-500 flex flex-col justify-center items-center"
                 style={{ height: "360px", width: "640px" }}
               >
                 <p className="font-bold text-black">
@@ -273,7 +281,13 @@ const LiveFeed = (props: any) => {
                   >
                     <button className="bg-green-100 hover:bg-green-200 border border-green-100 rounded p-2">
                       <span className="sr-only">{option.label}</span>
-                      <i className={`${option.icon} md:p-2`}></i>
+                      {option.icon ? (
+                        <i className={`${option.icon} md:p-2`}></i>
+                      ) : (
+                        <span className="px-2 font-bold h-full w-8 flex items-center justify-center">
+                          {option.value}x
+                        </span>
+                      )}
                     </button>
                   </div>
                 ))}
