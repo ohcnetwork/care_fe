@@ -126,7 +126,9 @@
     "test": "snyk test",
     "cypress:open": "cross-env NODE_ENV=development cypress open",
     "cypress:run": "cross-env NODE_ENV=development cypress run",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "lint": "eslint ./src",
+    "lint-fix": "eslint ./src --fix"
   },
   "browserslist": {
     "production": [
