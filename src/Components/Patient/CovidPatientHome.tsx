@@ -24,6 +24,7 @@ import {
   patchPatient,
   dischargePatient,
   completeTransfer,
+  getDailyReport,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
 import AlertDialog from "../Common/AlertDialog";
@@ -101,6 +102,7 @@ export const CovidPatientHome = (props: any) => {
   const [isShiftClicked, setIsShiftClicked] = useState(false);
   const [isShiftDataLoaded, setIsShiftDataLoaded] = useState(false);
   const [patientData, setPatientData] = useState<PatientModel>({});
+  const [vitals, setVitals] = useState<any>({});
   const [consultationListData, setConsultationListData] = useState<
     Array<ConsultationModel>
   >([]);
@@ -148,6 +150,45 @@ export const CovidPatientHome = (props: any) => {
 
   const [dischargeSummaryState, setDischargeSummaryForm] = useState(
     initDischargeSummaryForm
+  );
+
+  const fetchVitals = useCallback(
+    async (status: statusType) => {
+      setIsLoading(true);
+      const res =
+        patientData?.last_consultation?.id &&
+        (await dispatch(
+          getDailyReport(
+            { limit: 1 },
+            { consultationId: patientData?.last_consultation?.id }
+          )
+        ));
+      if (!status.aborted) {
+        if (res && res.data) {
+          console.log(res.data.results[0]);
+          const { bp, pulse, resp, tempurature, spo2, rhythm, rhythm_detail } =
+            res.data.results[0] || {};
+          setVitals({
+            bp,
+            pulse,
+            resp,
+            tempurature,
+            spo2,
+            rhythm,
+            rhythm_detail,
+          });
+        }
+        setIsLoading(false);
+      }
+    },
+    [patientData?.last_consultation?.id, dispatch]
+  );
+
+  useAbortableEffect(
+    (status: statusType) => {
+      fetchVitals(status);
+    },
+    [patientData?.last_consultation?.id]
   );
 
   useEffect(() => {
@@ -687,10 +728,14 @@ export const CovidPatientHome = (props: any) => {
               <div className="grid grid-cols-1 gap-x-4 gap-y-2 md:gap-y-8 sm:grid-cols-3 mt-2">
                 <div className="sm:col-span-1">
                   <div className="text-sm leading-5 font-medium text-gray-500">
-                    Gender, Date of Birth
+                    Address
                   </div>
                   <div className="mt-1 text-sm leading-5 text-gray-900">
-                    {patientData?.date_of_birth}, {patientGender}
+                    {patientData.address}, {patientData.village}
+                  </div>
+                  <div className="mt-1 text-sm leading-5 text-gray-900">
+                    {patientData?.district_object?.name},{" "}
+                    {patientData?.state_object?.name} - {patientData.pincode}
                   </div>
                 </div>
                 <div className="sm:col-span-1">
@@ -733,6 +778,14 @@ export const CovidPatientHome = (props: any) => {
                         <i className="fab fa-whatsapp"></i> Chat on WhatsApp
                       </a>
                     </div>
+                  </div>
+                </div>
+                <div className="sm:col-span-1">
+                  <div className="text-sm leading-5 font-medium text-gray-500">
+                    Gender, Date of Birth
+                  </div>
+                  <div className="mt-1 text-sm leading-5 text-gray-900">
+                    {patientData?.date_of_birth}, {patientGender}
                   </div>
                 </div>
                 <div className="sm:col-span-1">
@@ -968,7 +1021,250 @@ export const CovidPatientHome = (props: any) => {
             </div>
           </div>
         </section>
-        <section className=" bg-white rounded-lg shadow p-4 h-full space-y-2 text-gray-100 mt-4">
+
+        <section className="md:flex mt-4 space-y-2">
+          <div className="md:w-1/3 mx-2">
+            <div className="bg-white rounded-lg shadow p-4 h-full space-y-2">
+              <div className="border-b border-dashed text-gray-900 font-semibold text-center text-lg pb-2">
+                Vitals
+              </div>
+
+              <div className="sm:col-span-1">
+                <div className="text-sm leading-5 font-medium text-gray-500">
+                  Blood Pressure
+                </div>
+                <div className="ml-2 mt-1 flex space-x-4">
+                  <div className="sm:col-span-1">
+                    <div className="text-sm leading-5 font-medium text-gray-700">
+                      Diastolic
+                    </div>
+                    <div className="mt-1 text-sm leading-5 whitespace-normal text-gray-900 break-words">
+                      {vitals?.bp?.diastolic || "-"}
+                    </div>
+                  </div>
+                  <div className="sm:col-span-1">
+                    <div className="text-sm leading-5 font-medium text-gray-700">
+                      Systolic
+                    </div>
+                    <div className="mt-1 text-sm leading-5 whitespace-normal text-gray-900 break-words">
+                      {vitals?.bp?.systolic || "-"}
+                    </div>
+                  </div>
+                  <div className="sm:col-span-1">
+                    <div className="text-sm leading-5 font-medium text-gray-700">
+                      Mean
+                    </div>
+                    <div className="mt-1 text-sm leading-5 whitespace-normal text-gray-900 break-words">
+                      {vitals?.bp?.mean || "-"}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="sm:col-span-1">
+                <div className="text-sm leading-5 font-medium text-gray-500">
+                  Pulse
+                </div>
+                <div className="mt-1 text-sm leading-5 text-gray-900">
+                  {vitals?.pulse || "-"}
+                </div>
+              </div>
+              <div className="sm:col-span-1">
+                <div className="text-sm leading-5 font-medium text-gray-500">
+                  Respiratory Rate (bpm)
+                </div>
+                <div className="mt-1 text-sm leading-5 text-gray-900">
+                  {vitals?.resp || "-"}
+                </div>
+              </div>
+              <div className="sm:col-span-1">
+                <div className="text-sm leading-5 font-medium text-gray-500">
+                  Tempurature
+                </div>
+                <div className="mt-1 text-sm leading-5 text-gray-900">
+                  {vitals?.tempurature || "-"}
+                </div>
+              </div>
+              <div className="sm:col-span-1">
+                <div className="text-sm leading-5 font-medium text-gray-500">
+                  Rhythm
+                </div>
+                <div className="mt-1 text-sm leading-5 text-gray-900">
+                  {vitals?.rhythm || "-"}
+                </div>
+              </div>
+              <div className="sm:col-span-1">
+                <div className="text-sm leading-5 font-medium text-gray-500">
+                  Rhythm Details
+                </div>
+                <div className="mt-1 text-sm leading-5 text-gray-900">
+                  {vitals?.rhythm_detail || "-"}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="md:w-1/3 mx-2">
+            <div className="bg-white rounded-lg shadow p-4 h-full space-y-2">
+              <div className="border-b border-dashed text-gray-900 font-semibold text-center text-lg pb-2">
+                Tracing
+              </div>
+              <div className="sm:col-span-1">
+                <div className="text-sm leading-5 font-medium text-gray-500">
+                  Medical Worker
+                </div>
+                <div className="mt-1 text-sm leading-5 text-gray-900 break-all">
+                  {patientData.is_medical_worker
+                    ? "Yes" +
+                      (patientData.designation_of_health_care_worker
+                        ? ", " + patientData.designation_of_health_care_worker
+                        : "") +
+                      (patientData.instituion_of_health_care_worker
+                        ? ", " + patientData.instituion_of_health_care_worker
+                        : "")
+                    : "No"}
+                </div>
+              </div>
+              <div className="sm:col-span-1">
+                <div className="text-sm leading-5 font-medium text-gray-500">
+                  Frontline Worker
+                </div>
+                <div className="mt-1 text-sm leading-5 text-gray-900">
+                  {patientData.frontline_worker || "-"}
+                </div>
+              </div>
+              <div className="sm:col-span-1">
+                <div className="text-sm leading-5 font-medium text-gray-500">
+                  Guest worker
+                </div>
+                <div className="mt-1 text-sm leading-5 text-gray-900">
+                  {patientData.is_migrant_worker ? "Yes" : "No"}
+                </div>
+              </div>
+              <div className="sm:col-span-1">
+                <div className="text-sm leading-5 font-medium text-gray-500">
+                  Estimated Contact Date
+                </div>
+                <div className="mt-1 text-sm leading-5 text-gray-900">
+                  {patientData.estimated_contact_date
+                    ? moment(patientData.estimated_contact_date).format("LL")
+                    : ""}
+                </div>
+              </div>
+              <div className="sm:col-span-1">
+                <div className="text-sm leading-5 font-medium text-gray-500">
+                  Contact Name / Cluster
+                </div>
+                <div className="mt-1 text-sm leading-5 text-gray-900">
+                  {patientData.cluster_name}
+                </div>
+              </div>
+              <div className="sm:col-span-1">
+                <div className="text-sm leading-5 font-medium text-gray-500">
+                  Number of Contacts
+                </div>
+                <div className="mt-1 text-sm leading-5 text-gray-900">
+                  {"Primary: " +
+                    (patientData.number_of_primary_contacts || 0) +
+                    ", Secondary: " +
+                    (patientData.number_of_secondary_contacts || 0)}
+                </div>
+              </div>
+              <div className="sm:col-span-1">
+                <div className="text-sm leading-5 font-medium text-gray-500">
+                  Number of Dependents
+                </div>
+                <div className="mt-1 text-sm leading-5 text-gray-900">
+                  {"Above 60: " +
+                    (patientData.number_of_aged_dependents || 0) +
+                    ", Chronic Diseased: " +
+                    (patientData.number_of_chronic_diseased_dependents || 0)}
+                </div>
+              </div>
+              {patientData.transit_details && (
+                <div className="sm:col-span-1">
+                  <div className="text-sm leading-5 font-medium text-gray-500">
+                    Transit Details
+                  </div>
+                  <div className="mt-1 text-sm leading-5 text-gray-900">
+                    {patientData.transit_details}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="md:w-1/3 mx-2">
+            <div className="bg-white rounded-lg shadow p-4 h-full space-y-2">
+              <div className="border-b border-dashed text-gray-900 font-semibold text-center text-lg pb-2">
+                Testing
+              </div>
+              {patientData.covin_id && (
+                <div className="sm:col-span-1">
+                  <div className="text-sm leading-5 font-medium text-gray-500">
+                    Vaccinated (COWIN ID)
+                  </div>
+                  <div className="mt-1 text-sm leading-5 text-gray-900">
+                    {patientData?.covin_id || "-"}
+                  </div>
+                </div>
+              )}
+              <div className="sm:col-span-1">
+                <div className="text-sm leading-5 font-medium text-gray-500">
+                  SRF ID
+                </div>
+                <div className="mt-1 text-sm leading-5 text-gray-900">
+                  {patientData?.srf_id || "-"}
+                </div>
+              </div>
+              <div className="sm:col-span-1">
+                <div className="text-sm leading-5 font-medium text-gray-500">
+                  Test Type
+                </div>
+                <div className="mt-1 text-sm leading-5 text-gray-900">
+                  {patientData?.test_type || "-"}
+                </div>
+              </div>
+              <div className="sm:col-span-1">
+                <div className="text-sm leading-5 font-medium text-gray-500">
+                  Date of Test
+                </div>
+                <div className="mt-1 text-sm leading-5 text-gray-900">
+                  {(patientData.date_of_test &&
+                    moment(patientData.date_of_test).format("LL")) ||
+                    "-"}
+                </div>
+              </div>
+              <div className="sm:col-span-1">
+                <div className="text-sm leading-5 font-medium text-gray-500">
+                  Date of Result
+                </div>
+                <div className="mt-1 text-sm leading-5 text-gray-900">
+                  {(patientData.date_of_result &&
+                    moment(patientData.date_of_result).format("LL")) ||
+                    "-"}
+                </div>
+              </div>
+              <div className="sm:col-span-1">
+                <div className="text-sm leading-5 font-medium text-gray-500">
+                  Declared Positive
+                </div>
+                <div className="mt-1 text-sm leading-5 text-gray-900">
+                  {(patientData?.is_declared_positive ? "Yes" : "No") || "-"}
+                </div>
+              </div>
+              <div className="sm:col-span-1">
+                <div className="text-sm leading-5 font-medium text-gray-500">
+                  Declared on
+                </div>
+                <div className="mt-1 text-sm leading-5 text-gray-900">
+                  {(patientData.date_declared_positive &&
+                    moment(patientData.date_declared_positive).format("LL")) ||
+                    "-"}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className=" bg-white rounded-lg shadow p-4 mx-2 h-full space-y-2 text-gray-100 mt-4">
           <div
             className="flex justify-between border-b border-dashed text-gray-900 font-semibold text-left text-lg pb-2"
             onClick={() => {
@@ -1171,220 +1467,6 @@ export const CovidPatientHome = (props: any) => {
           </div>
         </section>
 
-        <section className="md:flex mt-4 space-y-2">
-          <div className="md:w-1/3 mx-2">
-            <div className="bg-white rounded-lg shadow p-4 h-full space-y-2">
-              <div className="border-b border-dashed text-gray-900 font-semibold text-center text-lg pb-2">
-                Location
-              </div>
-              <div className="sm:col-span-1">
-                <div className="text-sm leading-5 font-medium text-gray-500">
-                  Address
-                </div>
-                <div className="mt-1 text-sm leading-5 whitespace-normal text-gray-900 break-words">
-                  {patientData.address || "-"}
-                </div>
-              </div>
-              <div className="sm:col-span-1">
-                <div className="text-sm leading-5 font-medium text-gray-500">
-                  Village
-                </div>
-                <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {patientData.village || "-"}
-                </div>
-              </div>
-              <div className="sm:col-span-1">
-                <div className="text-sm leading-5 font-medium text-gray-500">
-                  Ward
-                </div>
-                <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {(patientData.ward_object &&
-                    patientData.ward_object.number +
-                      ", " +
-                      patientData.ward_object.name) ||
-                    "-"}
-                </div>
-              </div>
-              <div className="sm:col-span-1">
-                <div className="text-sm leading-5 font-medium text-gray-500">
-                  Local Body
-                </div>
-                <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {patientData.local_body_object?.name || "-"}
-                </div>
-              </div>
-              <div className="sm:col-span-1">
-                <div className="text-sm leading-5 font-medium text-gray-500">
-                  State, Country - Pincode
-                </div>
-                <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {patientData?.state_object?.name},{" "}
-                  {patientData.nationality || "-"} - {patientData.pincode}
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="md:w-1/3 mx-2">
-            <div className="bg-white rounded-lg shadow p-4 h-full space-y-2">
-              <div className="border-b border-dashed text-gray-900 font-semibold text-center text-lg pb-2">
-                Tracing
-              </div>
-              <div className="sm:col-span-1">
-                <div className="text-sm leading-5 font-medium text-gray-500">
-                  Medical Worker
-                </div>
-                <div className="mt-1 text-sm leading-5 text-gray-900 break-all">
-                  {patientData.is_medical_worker
-                    ? "Yes" +
-                      (patientData.designation_of_health_care_worker
-                        ? ", " + patientData.designation_of_health_care_worker
-                        : "") +
-                      (patientData.instituion_of_health_care_worker
-                        ? ", " + patientData.instituion_of_health_care_worker
-                        : "")
-                    : "No"}
-                </div>
-              </div>
-              <div className="sm:col-span-1">
-                <div className="text-sm leading-5 font-medium text-gray-500">
-                  Frontline Worker
-                </div>
-                <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {patientData.frontline_worker || "-"}
-                </div>
-              </div>
-              <div className="sm:col-span-1">
-                <div className="text-sm leading-5 font-medium text-gray-500">
-                  Guest worker
-                </div>
-                <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {patientData.is_migrant_worker ? "Yes" : "No"}
-                </div>
-              </div>
-              <div className="sm:col-span-1">
-                <div className="text-sm leading-5 font-medium text-gray-500">
-                  Estimated Contact Date
-                </div>
-                <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {patientData.estimated_contact_date
-                    ? moment(patientData.estimated_contact_date).format("LL")
-                    : ""}
-                </div>
-              </div>
-              <div className="sm:col-span-1">
-                <div className="text-sm leading-5 font-medium text-gray-500">
-                  Contact Name / Cluster
-                </div>
-                <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {patientData.cluster_name}
-                </div>
-              </div>
-              <div className="sm:col-span-1">
-                <div className="text-sm leading-5 font-medium text-gray-500">
-                  Number of Contacts
-                </div>
-                <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {"Primary: " +
-                    (patientData.number_of_primary_contacts || 0) +
-                    ", Secondary: " +
-                    (patientData.number_of_secondary_contacts || 0)}
-                </div>
-              </div>
-              <div className="sm:col-span-1">
-                <div className="text-sm leading-5 font-medium text-gray-500">
-                  Number of Dependents
-                </div>
-                <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {"Above 60: " +
-                    (patientData.number_of_aged_dependents || 0) +
-                    ", Chronic Diseased: " +
-                    (patientData.number_of_chronic_diseased_dependents || 0)}
-                </div>
-              </div>
-              {patientData.transit_details && (
-                <div className="sm:col-span-1">
-                  <div className="text-sm leading-5 font-medium text-gray-500">
-                    Transit Details
-                  </div>
-                  <div className="mt-1 text-sm leading-5 text-gray-900">
-                    {patientData.transit_details}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-          <div className="md:w-1/3 mx-2">
-            <div className="bg-white rounded-lg shadow p-4 h-full space-y-2">
-              <div className="border-b border-dashed text-gray-900 font-semibold text-center text-lg pb-2">
-                Testing
-              </div>
-              {patientData.covin_id && (
-                <div className="sm:col-span-1">
-                  <div className="text-sm leading-5 font-medium text-gray-500">
-                    Vaccinated (COWIN ID)
-                  </div>
-                  <div className="mt-1 text-sm leading-5 text-gray-900">
-                    {patientData?.covin_id || "-"}
-                  </div>
-                </div>
-              )}
-              <div className="sm:col-span-1">
-                <div className="text-sm leading-5 font-medium text-gray-500">
-                  SRF ID
-                </div>
-                <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {patientData?.srf_id || "-"}
-                </div>
-              </div>
-              <div className="sm:col-span-1">
-                <div className="text-sm leading-5 font-medium text-gray-500">
-                  Test Type
-                </div>
-                <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {patientData?.test_type || "-"}
-                </div>
-              </div>
-              <div className="sm:col-span-1">
-                <div className="text-sm leading-5 font-medium text-gray-500">
-                  Date of Test
-                </div>
-                <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {(patientData.date_of_test &&
-                    moment(patientData.date_of_test).format("LL")) ||
-                    "-"}
-                </div>
-              </div>
-              <div className="sm:col-span-1">
-                <div className="text-sm leading-5 font-medium text-gray-500">
-                  Date of Result
-                </div>
-                <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {(patientData.date_of_result &&
-                    moment(patientData.date_of_result).format("LL")) ||
-                    "-"}
-                </div>
-              </div>
-              <div className="sm:col-span-1">
-                <div className="text-sm leading-5 font-medium text-gray-500">
-                  Declared Positive
-                </div>
-                <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {(patientData?.is_declared_positive ? "Yes" : "No") || "-"}
-                </div>
-              </div>
-              <div className="sm:col-span-1">
-                <div className="text-sm leading-5 font-medium text-gray-500">
-                  Declared on
-                </div>
-                <div className="mt-1 text-sm leading-5 text-gray-900">
-                  {(patientData.date_declared_positive &&
-                    moment(patientData.date_declared_positive).format("LL")) ||
-                    "-"}
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
         <section className="md:flex mt-4 space-y-2">
           <div className="md:w-2/3 mx-2">
             <div className="bg-white rounded-lg shadow p-4 h-full space-y-2">
