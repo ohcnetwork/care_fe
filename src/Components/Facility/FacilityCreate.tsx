@@ -615,7 +615,7 @@ export const FacilityCreate = (props: FacilityProps) => {
               </div>
               <div>
                 <PhoneNumberField
-                  label="Emergency Contact Number"
+                  label="Emergency Contact Number*"
                   value={state.form.phone_number}
                   onChange={(value: any) =>
                     handleValueChange(value, "phone_number")

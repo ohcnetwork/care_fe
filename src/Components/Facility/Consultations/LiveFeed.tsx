@@ -18,6 +18,7 @@ const LiveFeed = (props: any) => {
   const [presets, setPresets] = useState<any>([]);
   const [bedPresets, setBedPresets] = useState<any>([]);
   const [showDefaultPresets, setShowDefaultPresets] = useState<boolean>(false);
+  const [precision, setPrecision] = useState(1);
 
   const [loading, setLoading] = useState<boolean>(false);
   const dispatch: any = useDispatch();
@@ -259,26 +260,32 @@ const LiveFeed = (props: any) => {
         y: 0,
         zoom: 0,
       } as any;
-      console.log(action);
+      console.log("Relative Move");
+      console.log(position);
+      const delta = 0.01 / position.zoom;
+      console.log("delta", delta);
       // Relative X Y Coordinates
       switch (action) {
         case "up":
-          data.y = 0.1;
+          data.y = delta;
           break;
         case "down":
-          data.y = -0.1;
+          data.y = -delta;
           break;
         case "left":
-          data.x = -0.1;
+          data.x = -delta;
           break;
         case "right":
-          data.x = 0.1;
+          data.x = delta;
           break;
         case "zoomIn":
           data.zoom = 0.1;
           break;
         case "zoomOut":
           data.zoom = -0.1;
+          break;
+        case "precision":
+          setPrecision((precision) => (precision === 16 ? 1 : precision * 2));
           break;
         case "stop":
           stopStream(sourceUrl);
@@ -355,6 +362,7 @@ const LiveFeed = (props: any) => {
     { icon: "fa fa-arrow-down", label: "Down", action: "down" },
     { icon: "fa fa-arrow-left", label: "Left", action: "left" },
     { icon: "fa fa-arrow-right", label: "Right", action: "right" },
+    { value: precision, label: "Precision", action: "precision" },
     { icon: "fa fa-search-plus", label: "Zoom In", action: "zoomIn" },
     { icon: "fa fa-search-minus", label: "Zoom Out", action: "zoomOut" },
     { icon: "fa fa-stop", label: "Stop", action: "stop" },
@@ -405,7 +413,7 @@ const LiveFeed = (props: any) => {
               </>
             ) : (
               <div
-                className="w-full max-w-xl bg-gray-500 flex flex-col justify-center items-center"
+                className="bg-gray-500 flex flex-col justify-center items-center"
                 style={{ height: "360px", width: "640px" }}
               >
                 <p className="font-bold text-black">
@@ -428,7 +436,13 @@ const LiveFeed = (props: any) => {
                   >
                     <button className="bg-green-100 hover:bg-green-200 border border-green-100 rounded p-2">
                       <span className="sr-only">{option.label}</span>
-                      <i className={`${option.icon} md:p-2`}></i>
+                      {option.icon ? (
+                        <i className={`${option.icon} md:p-2`}></i>
+                      ) : (
+                        <span className="px-2 font-bold h-full w-8 flex items-center justify-center">
+                          {option.value}x
+                        </span>
+                      )}
                     </button>
                   </div>
                 ))}
@@ -478,7 +492,7 @@ const LiveFeed = (props: any) => {
               <div className="text-white text-2xl">Moving Camera</div>
             </div>
           </div>
-          <div className="grid grid-cols-2 md:ml-12 md:w-1/3 my-auto gap-4 mt-4 md:mt-0">
+          {/* <div className="grid grid-cols-2 md:ml-12 md:w-1/3 my-auto gap-4 mt-4 md:mt-0">
             {showDefaultPresets
               ? viewOptions.map((option: any) => (
                   <div
@@ -530,6 +544,84 @@ const LiveFeed = (props: any) => {
                 ? "Show Patient Presets"
                 : "Show Default Presets"}
             </button>
+          </div> */}
+
+          <div className="flex flex-col w-full mx-4 ">
+            <nav className=" flex  ">
+              <button
+                className={`flex-1 overflow-hidden p-4  font-bold text-center  text-gray-700 hover:text-gray-800  ${
+                  showDefaultPresets
+                    ? "border-primary-500 text-primary-600 border-b-2"
+                    : ""
+                }`}
+                onClick={() => {
+                  setShowDefaultPresets(true);
+                }}
+              >
+                Default Presets
+              </button>
+              <button
+                className={`flex-1 overflow-hidden p-4  font-bold text-center  text-gray-700 hover:text-gray-800  ${
+                  !showDefaultPresets
+                    ? "border-primary-500 text-primary-600 border-b-2"
+                    : ""
+                }`}
+                onClick={() => {
+                  setShowDefaultPresets(false);
+                }}
+              >
+                Patient Presets
+              </button>
+            </nav>
+            <div className=" space-y-4 my-2">
+              <div className="grid grid-cols-2 my-auto gap-4 ">
+                {showDefaultPresets
+                  ? viewOptions.map((option: any) => (
+                      <div
+                        onClick={() => {
+                          gotoPreset(option.value);
+                        }}
+                      >
+                        <button className="bg-green-100 border border-white rounded-md p-3  text-black  hover:bg-green-500 hover:text-white w-full">
+                          {option.label}
+                        </button>
+                      </div>
+                    ))
+                  : bedPresets.map((preset: any, index: number) => (
+                      <div
+                        onClick={() => {
+                          setLoading(true);
+                          gotoBedPreset(preset);
+                        }}
+                        key={preset.id}
+                      >
+                        <button className="flex bg-green-100 border border-white rounded-md p-3 text-black  hover:bg-green-500 hover:text-white w-full">
+                          <span className="justify-start font-semibold">
+                            {preset.bed_object.name}
+                          </span>
+                          <span className="mx-auto">
+                            {preset.meta.preset_name
+                              ? preset.meta.preset_name
+                              : `Unnamed Preset ${index + 1}`}
+                          </span>
+                        </button>
+                      </div>
+                    ))}
+              </div>
+              {props.showRefreshButton && (
+                <div
+                  onClick={() => {
+                    setLoading(true);
+                    getBedPresets(asset);
+                    getPresets(asset);
+                  }}
+                >
+                  <button className="bg-green-100 border border-white rounded-md px-3 py-2 text-black font-semibold hover:text-white hover:bg-green-500 w-full">
+                    <RefreshIcon /> Refresh
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
