@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import ReactPlayer from "react-player";
 import { useDispatch } from "react-redux";
 import screenfull from "screenfull";
+import { useMSEMediaPlayer } from "../../../Common/hooks/useMSEplayer";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
 import {
   getConsultation,
@@ -30,19 +31,25 @@ interface ICameraAssetState {
 export const Feed: React.FC<IFeedProps> = ({
   consultationId,
   facilityId,
+
   patientId,
   ...props
 }) => {
   const dispatch: any = useDispatch();
-  const [cameraAsset, setCameraAsset] = useState<Partial<ICameraAssetState>>(
-    {}
-  );
-  const [cameraMiddlewareHostname, setCameraMiddlewareHostname] = useState({});
+  const [cameraAsset, setCameraAsset] = useState<ICameraAssetState>({
+    hostname: "",
+    id: "",
+    password: "",
+    port: 123,
+    username: "",
+  });
+  const [cameraMiddlewareHostname, setCameraMiddlewareHostname] = useState("");
   const [cameraConfig, setCameraConfig] = useState<any>({});
   const [isLoading, setIsLoading] = useState(true);
   const [bedPresets, setBedPresets] = useState<any>([]);
   const [precision, setPrecision] = useState(1);
 
+  const liveFeedPlayerRef = useRef<HTMLVideoElement | null>(null);
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
@@ -79,7 +86,6 @@ export const Feed: React.FC<IFeedProps> = ({
   const middlewareHostname =
     cameraMiddlewareHostname || "dev_middleware.coronasafe.live";
 
-  const [sourceUrl, setSourceUrl] = useState<string>();
   const [position, setPosition] = useState<any>();
   const [presets, setPresets] = useState<any>([]);
   const [currentPreset, setCurrentPreset] = useState<any>();
@@ -97,191 +103,39 @@ export const Feed: React.FC<IFeedProps> = ({
       if (loadingTimeout) clearTimeout(loadingTimeout);
     };
   }, [loading]);
-  const requestStream = () => {
-    axios
-      .post(`https://${middlewareHostname}/start`, {
-        uri: `rtsp://${cameraAsset.username}:${cameraAsset.password}@${cameraAsset.hostname}:554/`,
-      })
-      .then((resp: any) => {
-        setSourceUrl(`https://${middlewareHostname}${resp.data.uri}`);
-      })
-      .catch((ex: any) => {
-        // console.error('Error while refreshing',ex);
-      });
-  };
-  const stopStream = (url: string | undefined) => {
-    console.log("stop", url);
-    if (url) {
-      let urlSegments = url.split("/");
-      const x = urlSegments.pop();
-      const id = urlSegments?.pop();
-      axios
-        .post(`https://${middlewareHostname}/stop`, {
-          id,
-        })
-        .then((resp: any) => {
-          console.log(resp);
-          // setSourceUrl(`https://${middlewareHostname}${resp.data.uri}`);
-        })
-        .catch((ex: any) => {
-          // console.error('Error while refreshing',ex);
-        });
-    }
-  };
-  const getCameraStatus = useCallback(
-    (asset: any) => {
-      axios
-        .get(
-          `https://${middlewareHostname}/status?hostname=${asset.hostname}&port=${asset.port}&username=${asset.username}&password=${asset.password}`
-        )
-        .then((resp: any) => {
-          setPosition(resp.data.position);
-        })
-        .catch((ex: any) => {
-          // console.error('Error while refreshing',ex);
-        });
-    },
-    [middlewareHostname]
-  );
-  const getPresets = (asset: any) => {
-    axios
-      .get(
-        `https://${middlewareHostname}/presets?hostname=${asset.hostname}&port=${asset.port}&username=${asset.username}&password=${asset.password}`
-      )
-      .then((resp: any) => {
-        setPresets(resp.data);
-        console.log("PRESETS", resp.data);
-      })
-      .catch((ex: any) => {
-        // console.error('Error while refreshing',ex);
-      });
-  };
+
   const getBedPresets = async (asset: any) => {
     const bedAssets = await dispatch(listAssetBeds({ asset: asset.id }));
     setBedPresets(bedAssets?.data?.results);
   };
-  const gotoBedPreset = (preset: any) => {
-    absoluteMove(preset.meta.position);
-  };
-  const gotoPreset = (preset: number) => {
-    axios
-      .post(`https://${middlewareHostname}/gotoPreset`, {
-        ...cameraAsset,
-        preset,
-      })
-      .then((resp: any) => {
-        console.log(resp.data);
-      })
-      .catch((ex: any) => {
-        // console.error('Error while refreshing',ex);
-      });
-  };
-  const requestPTZ = (action: string) => {
-    setLoading(true);
-    if (!position) {
-      getCameraStatus(cameraAsset);
-    } else {
-      let data = {
-        x: 0,
-        y: 0,
-        zoom: 0,
-      } as any;
-      console.log(action);
-      const delta = 0.1 / precision;
-      console.log("delta", delta);
-      // Relative X Y Coordinates
-      switch (action) {
-        case "up":
-          data.y = delta;
-          break;
-        case "down":
-          data.y = -delta;
-          break;
-        case "left":
-          data.x = -delta;
-          break;
-        case "right":
-          data.x = delta;
-          break;
-        case "precision":
-          setPrecision((precision) => (precision === 16 ? 1 : precision * 2));
-          break;
-        case "zoomIn":
-          data.zoom = 0.1;
-          break;
-        case "zoomOut":
-          data.zoom = -0.1;
-          break;
-        case "stop":
-          stopStream(sourceUrl);
-          setSourceUrl(undefined);
-          return;
-        case "reset":
-          setSourceUrl(undefined);
-          requestStream();
-          return;
-        case "fullScreen":
-          if (screenfull?.isEnabled) {
-            if (liveFeedPlayerRef?.current) {
-              screenfull.request(liveFeedPlayerRef.current.wrapper);
-            }
-          }
-          return;
-        default:
-          break;
-      }
-      axios
-        .post(`https://${middlewareHostname}/relativeMove`, {
-          ...data,
-          ...cameraAsset,
-        })
-        .then((resp: any) => {
-          console.log(resp.data);
-          getCameraStatus(cameraAsset);
-        })
-        .catch((ex: any) => {
-          // console.error('Error while refreshing',ex);
-        });
-    }
-  };
 
-  const absoluteMove = (data: any) => {
-    setLoading(true);
-    axios
-      .post(`https://${middlewareHostname}/absoluteMove`, {
-        ...data,
-        ...cameraAsset,
-      })
-      .then((resp: any) => {
-        getCameraStatus(cameraAsset);
-      })
-      .catch((ex: any) => {
-        console.error("Error while absolute move", ex);
-      });
-  };
+  let url = `ws://demo:demo@localhost:8084/stream/demo/channel/0/mse?uuid=demo&channel=0`;
+  const {
+    absoluteMove,
+    getCameraStatus,
+    getPTZPayload,
+    getPresets,
+    gotoPreset,
+    relativeMove,
+    startStream,
+    stopStream,
+    // setVideoEl,
+  } = useMSEMediaPlayer({
+    config: {
+      middlewareHostname,
+      ...cameraAsset,
+    },
+    url,
+    videoEl: liveFeedPlayerRef.current,
+  });
 
   useEffect(() => {
-    requestStream();
-  }, []);
-
-  useEffect(() => {
-    getPresets(cameraAsset);
+    getPresets({ onSuccess: (resp) => setPresets(resp.data) });
     getBedPresets(cameraAsset);
-    if (cameraConfig?.position) {
-      absoluteMove(cameraConfig.position);
+    if (bedPresets?.[0]?.position) {
+      absoluteMove(bedPresets[0]?.position, {});
     }
   }, [cameraAsset]);
-
-  const liveFeedPlayerRef = useRef<any>(null);
-
-  const viewOptions = presets
-    ? Object.entries(presets)
-        .map(([key, value]) => ({ label: key, value }))
-        .slice(0, 10)
-    : Array.from(Array(10), (_, i) => ({
-        label: "Monitor " + (i + 1),
-        value: i + 1,
-      }));
 
   const cameraPTZ = [
     { icon: "fa fa-arrow-up", label: "Up", action: "up" },
@@ -299,17 +153,14 @@ export const Feed: React.FC<IFeedProps> = ({
   useAbortableEffect((status: statusType) => {
     fetchData(status);
   }, []);
-  useEffect(() => {
-    getCameraStatus(cameraAsset);
-  }, [cameraAsset, getCameraStatus]);
-
-  useEffect(() => {
-    requestStream();
-  }, [requestStream]);
 
   if (isLoading) {
     return <Loading />;
   }
+
+  const gotoBedPreset = (preset: any) => {
+    absoluteMove(preset.meta.position, {});
+  };
 
   return (
     <div className="p-2">
@@ -324,7 +175,7 @@ export const Feed: React.FC<IFeedProps> = ({
                 onClick={(_) => {
                   setLoading(true);
                   gotoBedPreset(preset);
-                  getCameraStatus(cameraAsset);
+                  getCameraStatus({});
                   setCurrentPreset(preset);
                 }}
                 className={clsx(
@@ -343,32 +194,15 @@ export const Feed: React.FC<IFeedProps> = ({
       <div className="px-3 mt-4">
         <div className="lg:flex items-start gap-8">
           <div className="mb-4 lg:mb-0 relative feed-aspect-ratio w-full bg-primary-100 rounded">
-            {sourceUrl ? (
-              <ReactPlayer
-                url={sourceUrl}
+            {true ? (
+              <video
+                id="mse-video"
+                autoPlay
+                muted
+                playsInline
+                className="h-full w-full"
                 ref={liveFeedPlayerRef}
-                playing={true}
-                muted={true}
-                onError={(
-                  e: any,
-                  data: any,
-                  hlsInstance: any,
-                  hlsGlobal: any
-                ) => {
-                  // requestStream();
-                  console.log("Error", e);
-                  console.log("Data", data);
-                  console.log("HLS Instance", hlsInstance);
-                  console.log("HLS Global", hlsGlobal);
-                  if (e === "hlsError") {
-                    const recovered = hlsInstance.recoverMediaError();
-                    console.log(recovered);
-                  }
-                }}
-                width="100%"
-                height="100%"
-                style={{ width: "100%", height: "100%" }}
-              />
+              ></video>
             ) : (
               <div className="w-full h-full flex flex-col justify-center items-center">
                 <p className="font-bold text-black">
@@ -394,7 +228,21 @@ export const Feed: React.FC<IFeedProps> = ({
                 className="bg-green-100 hover:bg-green-200 border border-green-100 rounded p-2"
                 key={option.action}
                 onClick={(_) => {
-                  requestPTZ(option.action);
+                  if (option.action === "precision") {
+                    setPrecision((precision) =>
+                      precision === 16 ? 1 : precision * 2
+                    );
+                  } else if (option.action === "reset") {
+                    startStream();
+                  } else if (option.action === "stop") {
+                    // NEED ID TO STOP STREAM
+                  } else if (option.action === "fullScreen") {
+                    if (screenfull.isEnabled && liveFeedPlayerRef.current) {
+                      screenfull.request(liveFeedPlayerRef.current);
+                    }
+                  } else {
+                    relativeMove(getPTZPayload(option.action), {});
+                  }
                 }}
               >
                 <span className="sr-only">{option.label}</span>
