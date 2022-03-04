@@ -1,5 +1,5 @@
 import { navigate, useQueryParams } from "raviger";
-import React, { useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
@@ -20,7 +20,7 @@ import {
 } from "../../Redux/actions";
 import loadable from "@loadable/component";
 import { SelectField } from "../Common/HelperInputFields";
-import { CircularProgress, InputLabel, TextField } from "@material-ui/core";
+import { InputLabel, TextField } from "@material-ui/core";
 import Pagination from "../Common/Pagination";
 import { FacilityModel } from "./models";
 import { InputSearchBox } from "../Common/SearchBox";
@@ -32,10 +32,8 @@ import AccordionSummary from "@material-ui/core/AccordionSummary";
 import AccordionDetails from "@material-ui/core/AccordionDetails";
 import Typography from "@material-ui/core/Typography";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import SwipeableViews from "react-swipeable-views";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import FacillityFilter from "./FacilityFilter";
-import { FacilitySelect } from "../Common/FacilitySelect";
 import { withTranslation } from "react-i18next";
 import * as Notification from "../../Utils/Notifications.js";
 import { Modal } from "@material-ui/core";
@@ -391,7 +389,13 @@ const HospitalListPage = (props: any) => {
                       className=""
                     >
                       <div className="h-screen w-full absolute flex items-center justify-center bg-modal">
-                        <div className="bg-white rounded shadow p-8 m-4 max-h-full text-center flex flex-col max-w-lg w-2/3 min-w-max-content">
+                        <form
+                          onSubmit={(event: any) => {
+                            event.preventDefault();
+                            handleNotifySubmit(modalFor);
+                          }}
+                          className="bg-white rounded shadow p-8 m-4 max-h-full text-center flex flex-col max-w-lg w-2/3 min-w-max-content"
+                        >
                           <div className="mb-4">
                             <h1 className="text-2xl">
                               Notify: {facility.name}
@@ -402,6 +406,7 @@ const HospitalListPage = (props: any) => {
                               id="NotifyModalMessageInput"
                               rows={6}
                               multiline
+                              required
                               className="w-full border p-2 max-h-64"
                               onChange={(e) => setNotifyMessage(e.target.value)}
                               placeholder="Type your message..."
@@ -410,19 +415,20 @@ const HospitalListPage = (props: any) => {
                           </div>
                           <div className="flex flex-row justify-end">
                             <button
+                              type="button"
                               className="btn-danger btn mt-4 mr-2 w-full md:w-auto"
                               onClick={(_) => setModalFor(undefined)}
                             >
                               Cancel
                             </button>
                             <button
+                              type="submit"
                               className="btn-primary btn mt-4 mr-2 w-full md:w-auto"
-                              onClick={(_) => handleNotifySubmit(modalFor)}
                             >
                               Send Notification
                             </button>
                           </div>
-                        </div>
+                        </form>
                       </div>
                     </Modal>
                     <button

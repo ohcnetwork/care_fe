@@ -27,6 +27,11 @@ let menus = [
     icon: "fas fa-user-injured",
   },
   {
+    title: "TeleICU",
+    link: "/teleicu",
+    icon: "fa-solid fa-bed-pulse",
+  },
+  {
     title: "Assets",
     link: "/assets",
     icon: "fas fa-shopping-cart",
