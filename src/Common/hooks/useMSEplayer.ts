@@ -29,7 +29,7 @@ interface UseMSEMediaPlayerReturnType {
   getPresets: (options: IOptions) => void;
   gotoPreset: (payload: IGotoPresetPayload, options: IOptions) => void;
   stopStream: (config: { id: string }, options: IOptions) => void;
-  startStream: () => void;
+  startStream: (options?: IOptions) => void;
   // setVideoEl: (ref: any) => void;
 }
 
@@ -248,7 +248,8 @@ export const useMSEMediaPlayer = ({
             let ws = wsRef.current;
             ws.binaryType = "arraybuffer";
             ws.onopen = function (_event) {
-              console.log("Connect to ws");
+              console.log("Connected to ws");
+              onSuccess && onSuccess(undefined);
             };
             ws.onmessage = function (event) {
               let data = new Uint8Array(event.data);
@@ -274,7 +275,6 @@ export const useMSEMediaPlayer = ({
           },
           false
         );
-        onSuccess && onSuccess(undefined);
       }
     } catch (e) {
       onError && onError(e);

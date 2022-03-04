@@ -28,12 +28,18 @@ interface ICameraAssetState {
   port: number;
 }
 
+enum StreamStatus {
+  Playing,
+  Stop,
+  Loading,
+  Offline,
+}
+
 export const Feed: React.FC<IFeedProps> = ({
   consultationId,
   facilityId,
 
   patientId,
-  ...props
 }) => {
   const dispatch: any = useDispatch();
   const [cameraAsset, setCameraAsset] = useState<ICameraAssetState>({
@@ -91,19 +97,10 @@ export const Feed: React.FC<IFeedProps> = ({
   const [currentPreset, setCurrentPreset] = useState<any>();
   // const [showDefaultPresets, setShowDefaultPresets] = useState<boolean>(false);
 
-  const [loading, setLoading] = useState<boolean>(false);
-
-  useEffect(() => {
-    let loadingTimeout: any;
-    if (loading === true)
-      loadingTimeout = setTimeout(() => {
-        setLoading(false);
-      }, 6000);
-    return () => {
-      if (loadingTimeout) clearTimeout(loadingTimeout);
-    };
-  }, [loading]);
-
+  const [loading, setLoading] = useState<string | undefined>(undefined);
+  const [streamStatus, setStreamStatus] = useState<StreamStatus>(
+    StreamStatus.Offline
+  );
   const getBedPresets = async (asset: any) => {
     const bedAssets = await dispatch(listAssetBeds({ asset: asset.id }));
     setBedPresets(bedAssets?.data?.results);
@@ -115,10 +112,8 @@ export const Feed: React.FC<IFeedProps> = ({
     getCameraStatus,
     getPTZPayload,
     getPresets,
-    gotoPreset,
     relativeMove,
     startStream,
-    stopStream,
     // setVideoEl,
   } = useMSEMediaPlayer({
     config: {
@@ -138,13 +133,48 @@ export const Feed: React.FC<IFeedProps> = ({
   }, [cameraAsset]);
 
   const cameraPTZ = [
-    { icon: "fa fa-arrow-up", label: "Up", action: "up" },
-    { icon: "fa fa-arrow-down", label: "Down", action: "down" },
-    { icon: "fa fa-arrow-left", label: "Left", action: "left" },
-    { icon: "fa fa-arrow-right", label: "Right", action: "right" },
-    { value: precision, label: "Precision", action: "precision" },
-    { icon: "fa fa-search-plus", label: "Zoom In", action: "zoomIn" },
-    { icon: "fa fa-search-minus", label: "Zoom Out", action: "zoomOut" },
+    {
+      icon: "fa fa-arrow-up",
+      label: "Up",
+      action: "up",
+      loadingLabel: "Moving Up",
+    },
+    {
+      icon: "fa fa-arrow-down",
+      label: "Down",
+      action: "down",
+      loadingLabel: "Moving Down",
+    },
+    {
+      icon: "fa fa-arrow-left",
+      label: "Left",
+      action: "left",
+      loadingLabel: "Moving Left",
+    },
+    {
+      icon: "fa fa-arrow-right",
+      label: "Right",
+      action: "right",
+      loadingLabel: "Moving Right",
+    },
+    {
+      value: precision,
+      label: "Precision",
+      action: "precision",
+      loadingLabel: "Setting Precision",
+    },
+    {
+      icon: "fa fa-search-plus",
+      label: "Zoom In",
+      action: "zoomIn",
+      loadingLabel: "Zooming In",
+    },
+    {
+      icon: "fa fa-search-minus",
+      label: "Zoom Out",
+      action: "zoomOut",
+      loadingLabel: "Zooming Out",
+    },
     { icon: "fa fa-stop", label: "Stop", action: "stop" },
     { icon: "fa fa-undo", label: "Reset", action: "reset" },
     { icon: "fas fa-expand", label: "Full Screen", action: "fullScreen" },
@@ -158,10 +188,6 @@ export const Feed: React.FC<IFeedProps> = ({
     return <Loading />;
   }
 
-  const gotoBedPreset = (preset: any) => {
-    absoluteMove(preset.meta.position, {});
-  };
-
   return (
     <div className="p-2">
       <div className="flex items-center flex-wrap justify-between gap-2">
@@ -173,10 +199,15 @@ export const Feed: React.FC<IFeedProps> = ({
               <button
                 key={preset.id}
                 onClick={(_) => {
-                  setLoading(true);
-                  gotoBedPreset(preset);
+                  setLoading("Moving");
+                  // gotoBedPreset(preset);
+                  absoluteMove(preset.meta.position, {
+                    onSuccess: () => {
+                      setLoading(undefined);
+                      setCurrentPreset(preset);
+                    },
+                  });
                   getCameraStatus({});
-                  setCurrentPreset(preset);
                 }}
                 className={clsx(
                   "px-4 py-2 border border-gray-500 block",
@@ -194,33 +225,61 @@ export const Feed: React.FC<IFeedProps> = ({
       <div className="px-3 mt-4">
         <div className="lg:flex items-start gap-8">
           <div className="mb-4 lg:mb-0 relative feed-aspect-ratio w-full bg-primary-100 rounded">
-            {true ? (
-              <video
-                id="mse-video"
-                autoPlay
-                muted
-                playsInline
-                className="h-full w-full"
-                ref={liveFeedPlayerRef}
-              ></video>
-            ) : (
-              <div className="w-full h-full flex flex-col justify-center items-center">
-                <p className="font-bold text-black">
-                  STATUS: <span className="text-red-600">OFFLINE</span>
-                </p>
-                <p className="font-semibold text-black">
-                  Feed is currently not live
-                </p>
-              </div>
-            )}
+            <video
+              id="mse-video"
+              autoPlay
+              muted
+              playsInline
+              className="h-full w-full z-10"
+              ref={liveFeedPlayerRef}
+            ></video>
+
             {loading && (
               <div className="absolute right-0 bottom-0 p-4 bg-white bg-opacity-75 rounded-tl">
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 border-2 border-b-0 border-primary-500 rounded-full animate-spin an" />
-                  <p className="text-base font-bold">Moving</p>
+                  <p className="text-base font-bold">{loading}</p>
                 </div>
               </div>
             )}
+            {/* { streamStatus > 0 && */}
+            <div className="absolute right-0 h-full w-full bottom-0 p-4 flex items-center justify-center">
+              {streamStatus === StreamStatus.Offline && (
+                <div className="text-center">
+                  <p className="font-bold text-black">
+                    STATUS: <span className="text-red-600">OFFLINE</span>
+                  </p>
+                  <p className="font-semibold text-black">
+                    Feed is currently not live.
+                  </p>
+                  <p className="font-semibold text-black">
+                    Click refresh button to try again.
+                  </p>
+                </div>
+              )}
+              {streamStatus === StreamStatus.Stop && (
+                <div className="text-center">
+                  <p className="font-bold text-black">
+                    STATUS: <span className="text-red-600">STOPPED</span>
+                  </p>
+                  <p className="font-semibold text-black">Feed is Stooped.</p>
+                  <p className="font-semibold text-black">
+                    Click refresh button to start feed.
+                  </p>
+                </div>
+              )}
+              {streamStatus === StreamStatus.Loading && (
+                <div className="text-center">
+                  <p className="font-bold text-black">
+                    STATUS: <span className="text-red-600"> LOADING</span>
+                  </p>
+                  <p className="font-semibold text-black">
+                    Fetching latest feed.
+                  </p>
+                </div>
+              )}
+            </div>
+            {/* } */}
           </div>
           <div className="lg:flex flex-col bg-green-100 ">
             {cameraPTZ.map((option: any) => (
@@ -233,7 +292,11 @@ export const Feed: React.FC<IFeedProps> = ({
                       precision === 16 ? 1 : precision * 2
                     );
                   } else if (option.action === "reset") {
-                    startStream();
+                    setStreamStatus(StreamStatus.Loading);
+                    startStream({
+                      onSuccess: () => setStreamStatus(StreamStatus.Playing),
+                      onError: () => setStreamStatus(StreamStatus.Offline),
+                    });
                   } else if (option.action === "stop") {
                     // NEED ID TO STOP STREAM
                   } else if (option.action === "fullScreen") {
@@ -241,7 +304,10 @@ export const Feed: React.FC<IFeedProps> = ({
                       screenfull.request(liveFeedPlayerRef.current);
                     }
                   } else {
-                    relativeMove(getPTZPayload(option.action), {});
+                    setLoading(option.loadingLabel);
+                    relativeMove(getPTZPayload(option.action), {
+                      onSuccess: () => setLoading(undefined),
+                    });
                   }
                 }}
               >
