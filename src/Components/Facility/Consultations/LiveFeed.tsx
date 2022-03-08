@@ -91,6 +91,7 @@ const LiveFeed = (props: any) => {
     const bedAssets = await dispatch(listAssetBeds({ asset: asset.id }));
     setBedPresets(bedAssets.data.results);
   };
+  console.log("bed", bedPresets);
   const gotoBedPreset = (preset: any) => {
     absoluteMove(preset.meta.position);
   };
@@ -440,7 +441,7 @@ const LiveFeed = (props: any) => {
                         }}
                         key={preset.id}
                       >
-                        <button className="flex bg-green-100 border border-white rounded-md p-3 text-black  hover:bg-green-500 hover:text-white w-full">
+                        <button className="flex flex-col md:flex-row bg-green-100 border border-white rounded-md p-3 text-black  hover:bg-green-500 hover:text-white w-full">
                           <span className="justify-start font-semibold">
                             {preset.bed_object.name}
                           </span>
