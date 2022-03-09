@@ -54,49 +54,54 @@ const CommentSection = (props: CommentSectionProps) => {
   };
 
   return (
-    <div className="w-full flex flex-col">
-      <div className=" w-full">
-        {isLoading ? (
-          <CircularProgress />
-        ) : (
-          comments.map((comment: any) => (
-            <div className="flex p-4 bg-white rounded-lg text-gray-800 mt-4 flex-col w-full border border-gray-300">
-              <div className="flex  w-full ">
-                <p className="text-justify">{comment.comment}</p>
-              </div>
-              <div className="mt-3">
-                <span className="text-xs text-gray-500">
-                  {moment(comment.modified_date).format("LLL") || "-"}
-                </span>
-              </div>
-              <div className=" flex mr-auto bg-gray-100 border items-center rounded-md py-1 pl-2 pr-3">
-                <div className="flex justify-center items-center w-8 h-8 rounded-full bg-primary-700 uppercase text-white p-1">
-                  {comment.created_by_object?.first_name?.charAt(0) || "U"}
+    <div className="w-full">
+      <div className="flex flex-col overflow-y-auto max-h-96">
+        <div className=" w-full mt-2">
+          {isLoading ? (
+            <CircularProgress />
+          ) : (
+            comments.map((comment: any) => (
+              <div className="flex p-4 bg-white rounded-lg text-gray-800 mt-2 flex-col w-full border border-gray-300">
+                <div className="flex  w-full ">
+                  <p className="text-justify">{comment.comment}</p>
                 </div>
-                <span className="text-gray-700 text-sm pl-2">
-                  {comment.created_by_object?.first_name || "Unknown"}{" "}
-                  {comment.created_by_object?.last_name}
-                </span>
+                <div className="mt-3">
+                  <span className="text-xs text-gray-500">
+                    {moment(comment.modified_date).format("LLL") || "-"}
+                  </span>
+                </div>
+                <div className=" flex mr-auto bg-gray-100 border items-center rounded-md py-1 pl-2 pr-3">
+                  <div className="flex justify-center items-center w-8 h-8 rounded-full bg-primary-700 uppercase text-white p-1">
+                    {comment.created_by_object?.first_name?.charAt(0) || "U"}
+                  </div>
+                  <span className="text-gray-700 text-sm pl-2">
+                    {comment.created_by_object?.first_name || "Unknown"}{" "}
+                    {comment.created_by_object?.last_name}
+                  </span>
+                </div>
               </div>
-            </div>
-          ))
-        )}
+            ))
+          )}
+        </div>
       </div>
-      <textarea
-        rows={3}
-        value={commentBox}
-        minLength={3}
-        placeholder="Type your comment"
-        className="mt-4 border border-gray-500 rounded-lg p-4"
-        onChange={(e) => setCommentBox(e.target.value)}
-      />
-      <div className="flex w-full justify-end">
-        <Button
-          onClick={onSubmitComment}
-          className="border border-solid border-primary-600 hover:border-primary-700 text-primary-600 hover:bg-white capitalize my-2 text-sm"
-        >
-          Post Your Comment
-        </Button>
+
+      <div className="w-full pr-3 bg-gray-100">
+        <textarea
+          rows={3}
+          value={commentBox}
+          minLength={3}
+          placeholder="Type your comment"
+          className="mt-2 border border-gray-500 rounded-lg p-4 w-full"
+          onChange={(e) => setCommentBox(e.target.value)}
+        />
+        <div className="flex w-full justify-end">
+          <Button
+            onClick={onSubmitComment}
+            className="border border-solid border-primary-600 hover:border-primary-700 text-primary-600 hover:bg-white capitalize my-2 text-sm"
+          >
+            Post Your Comment
+          </Button>
+        </div>
       </div>
     </div>
   );
