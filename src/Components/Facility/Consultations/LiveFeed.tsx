@@ -89,9 +89,26 @@ const LiveFeed = (props: any) => {
   };
   const getBedPresets = async (asset: any) => {
     const bedAssets = await dispatch(listAssetBeds({ asset: asset.id }));
-    setBedPresets(bedAssets.data.results);
+
+    let aggregatedPresets: any = [];
+    bedAssets.data.results?.map((res: any) => {
+      const bed = aggregatedPresets.find(
+        (bed: any) => bed.id === res.bed_object.id
+      );
+      if (bed) {
+        bed.preset.push(res);
+      } else {
+        aggregatedPresets.push({
+          id: res.bed_object.id,
+          bed_name: res.bed_object.name,
+          preset: [res],
+        });
+      }
+    });
+
+    setBedPresets(aggregatedPresets);
   };
-  console.log("bed", bedPresets);
+  console.log(bedPresets);
   const gotoBedPreset = (preset: any) => {
     absoluteMove(preset.meta.position);
   };
@@ -228,6 +245,7 @@ const LiveFeed = (props: any) => {
     { icon: "fa fa-undo", label: "Reset", action: "reset" },
   ];
 
+  console.log(bedPresets);
   return (
     <div className="mt-4 px-6 mb-20">
       <PageTitle title="Live Feed" hideBack={true} />
@@ -419,55 +437,60 @@ const LiveFeed = (props: any) => {
                 Patient Presets
               </button>
             </nav>
-            <div className=" space-y-4 my-2">
-              <div className="grid grid-cols-2 my-auto gap-4 ">
-                {showDefaultPresets
-                  ? viewOptions.map((option: any) => (
-                      <div
-                        onClick={() => {
-                          gotoPreset(option.value);
-                        }}
-                      >
-                        <button className="bg-green-100 border border-white rounded-md p-3  text-black  hover:bg-green-500 hover:text-white w-full">
-                          {option.label}
-                        </button>
-                      </div>
-                    ))
-                  : bedPresets.map((preset: any, index: number) => (
-                      <div
-                        onClick={() => {
-                          setLoading(true);
-                          gotoBedPreset(preset);
-                        }}
-                        key={preset.id}
-                      >
-                        <button className="flex flex-col md:flex-row bg-green-100 border border-white rounded-md p-3 text-black  hover:bg-green-500 hover:text-white w-full">
-                          <span className="justify-start font-semibold">
-                            {preset.bed_object.name}
-                          </span>
-                          <span className="mx-auto">
+            <div className=" space-y-4 m-2">
+              {showDefaultPresets ? (
+                <div className="grid grid-cols-2 my-auto gap-4 ">
+                  {viewOptions.map((option: any) => (
+                    <div
+                      onClick={() => {
+                        gotoPreset(option.value);
+                      }}
+                    >
+                      <button className="bg-green-100 border border-white rounded-md p-3  text-black  hover:bg-green-500 hover:text-white w-full">
+                        {option.label}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className=" ">
+                  {bedPresets.map((bed: any) => (
+                    <div className="space-y-4 m-2">
+                      <span className="font-semibold">{bed.bed_name}</span>
+                      <div className="grid grid-cols-2 my-auto gap-4">
+                        {bed.preset.map((preset: any, index: number) => (
+                          <button
+                            className="  bg-green-100 border border-white rounded-md p-3 text-black  hover:bg-green-500 hover:text-white "
+                            onClick={() => {
+                              setLoading(true);
+                              gotoBedPreset(preset);
+                            }}
+                            key={preset.id}
+                          >
                             {preset.meta.preset_name
                               ? preset.meta.preset_name
                               : `Unnamed Preset ${index + 1}`}
-                          </span>
-                        </button>
+                          </button>
+                        ))}
                       </div>
-                    ))}
-              </div>
-              {props.showRefreshButton && (
-                <div
-                  onClick={() => {
-                    setLoading(true);
-                    getBedPresets(asset);
-                    getPresets(asset);
-                  }}
-                >
-                  <button className="bg-green-100 border border-white rounded-md px-3 py-2 text-black font-semibold hover:text-white hover:bg-green-500 w-full">
-                    <RefreshIcon /> Refresh
-                  </button>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
+            {props.showRefreshButton && (
+              <div
+                onClick={() => {
+                  setLoading(true);
+                  getBedPresets(asset);
+                  getPresets(asset);
+                }}
+              >
+                <button className="bg-green-100 border border-white rounded-md px-3 py-2 text-black font-semibold hover:text-white hover:bg-green-500 w-full">
+                  <RefreshIcon /> Refresh
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
