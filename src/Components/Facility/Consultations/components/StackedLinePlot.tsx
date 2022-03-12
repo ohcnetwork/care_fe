@@ -5,8 +5,6 @@ const COLORS = ["#B13F3C", "#2F8B35", "#44327A", "#B19D3C"];
 export const StackedLinePlot = (props: any) => {
   const { title, xData, yData } = props;
 
-  console.log(yData);
-
   const series = yData.map((x: any) => ({
     name: x.name,
     type: "line",

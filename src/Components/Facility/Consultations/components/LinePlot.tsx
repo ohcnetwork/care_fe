@@ -103,6 +103,5 @@ export const LinePlot = (props: any) => {
     generalOptions = { ...generalOptions, ...visualMap };
   }
 
-  console.log(title, yData);
   return <ReactECharts option={generalOptions} />;
 };
