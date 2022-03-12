@@ -422,7 +422,7 @@ const LiveFeed = (props: any) => {
                   setShowDefaultPresets(true);
                 }}
               >
-                Default Presets
+                Device Presets
               </button>
               <button
                 className={`flex-1 overflow-hidden p-4  font-bold text-center  text-gray-700 hover:text-gray-800  ${
