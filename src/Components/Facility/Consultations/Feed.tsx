@@ -106,7 +106,7 @@ export const Feed: React.FC<IFeedProps> = ({
     setBedPresets(bedAssets?.data?.results);
   };
 
-  let url = `ws://demo:demo@localhost:8084/stream/demo/channel/0/mse?uuid=demo&channel=0`;
+  let url = `wss://demo:demo@mse_test.coronasafe.live/stream/demo/channel/0/mse?uuid=demo&channel=0`;
   const {
     absoluteMove,
     getCameraStatus,
