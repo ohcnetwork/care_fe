@@ -1,5 +1,4 @@
-import loadable from "@loadable/component";
-import { navigate, useQueryParams } from "raviger";
+import { navigate } from "raviger";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import {
@@ -8,10 +7,8 @@ import {
   updateUserPnconfig,
   getPublicKey,
 } from "../../Redux/actions";
-import Pagination from "../Common/Pagination";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import { SelectField } from "../Common/HelperInputFields";
-import { InputLabel } from "@material-ui/core";
 import moment from "moment";
 import { useSelector } from "react-redux";
 import { Button, CircularProgress } from "@material-ui/core";
@@ -20,11 +17,7 @@ import { Error } from "../../Utils/Notifications.js";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 
-const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
-
 const RESULT_LIMIT = 14;
-const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
 export default function ResultList({ expanded = false }) {
   const rootState: any = useSelector((rootState) => rootState);
@@ -42,25 +35,6 @@ export default function ResultList({ expanded = false }) {
 
   const [isSubscribed, setIsSubscribed] = useState("");
   const [isSubscribing, setIsSubscribing] = useState(false);
-
-  const intialSubscriptionState = async () => {
-    try {
-      const res = await dispatch(getUserPnconfig({ username: username }));
-      const reg = await navigator.serviceWorker.ready;
-      const subscription = await reg.pushManager.getSubscription();
-      if (!subscription && !res.data.pf_endpoint) {
-        setIsSubscribed("NotSubscribed");
-      } else if (subscription?.endpoint === res.data.pf_endpoint) {
-        setIsSubscribed("SubscribedOnThisDevice");
-      } else {
-        setIsSubscribed("SubscribedOnAnotherDevice");
-      }
-    } catch (error) {
-      Error({
-        msg: `Service Worker Error - ${error}`,
-      });
-    }
-  };
 
   const handleSubscribeClick = () => {
     const status = isSubscribed;
@@ -99,7 +73,7 @@ export default function ResultList({ expanded = false }) {
                   pf_p256dh: "",
                   pf_auth: "",
                 };
-                const res = await dispatch(
+                await dispatch(
                   updateUserPnconfig(data, { username: username })
                 );
 
@@ -183,12 +157,36 @@ export default function ResultList({ expanded = false }) {
           setOffset((prev) => prev - RESULT_LIMIT);
         });
     }
-    intialSubscriptionState();
-  }, [dispatch, reload, showNotifications, offset, eventFilter, isSubscribed]);
 
-  // const handlePagination = (page: number, limit: number) => {
-  //   updateQuery({ page, limit });
-  // };
+    const intialSubscriptionState = async () => {
+      try {
+        const res = await dispatch(getUserPnconfig({ username: username }));
+        const reg = await navigator.serviceWorker.ready;
+        const subscription = await reg.pushManager.getSubscription();
+        if (!subscription && !res.data.pf_endpoint) {
+          setIsSubscribed("NotSubscribed");
+        } else if (subscription?.endpoint === res.data.pf_endpoint) {
+          setIsSubscribed("SubscribedOnThisDevice");
+        } else {
+          setIsSubscribed("SubscribedOnAnotherDevice");
+        }
+      } catch (error) {
+        Error({
+          msg: `Service Worker Error - ${error}`,
+        });
+      }
+    };
+
+    intialSubscriptionState();
+  }, [
+    dispatch,
+    reload,
+    showNotifications,
+    offset,
+    eventFilter,
+    isSubscribed,
+    username,
+  ]);
 
   let resultUrl = (event: string, data: any) => {
     switch (event) {
@@ -234,10 +232,10 @@ export default function ResultList({ expanded = false }) {
           <div className="text-xs">
             {moment(result.created_date).format("lll")}
           </div>
-          <a className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0">
+          <div className="inline-flex items-center font-semibold mt-2 p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0">
             <i className="fas fa-eye mr-2 text-primary-500" />
             Visit Link
-          </a>
+          </div>
         </div>
       );
     });
@@ -307,17 +305,6 @@ export default function ResultList({ expanded = false }) {
           {t("Notifications")}
         </div>
       </button>
-      {/* <button
-        onClick={() => setShowNotifications(!showNotifications)}
-        className="mt-2 group flex w-full items-center px-2 py-2 text-base leading-5 font-medium text-primary-300 rounded-md hover:text-white hover:bg-primary-700 focus:outline-none focus:bg-primary-900 transition ease-in-out duration-150"
-      >
-        <i
-          className={
-            "fas fa-bell text-primary-400 mr-3 text-lg group-hover:text-primary-300 group-focus:text-primary-300 transition ease-in-out duration-150"
-          }
-        ></i>
-        Notifications
-      </button> */}
 
       <SlideOver show={showNotifications} setShow={setShowNotifications}>
         <div className="bg-white h-full">

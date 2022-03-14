@@ -7,11 +7,9 @@ import { Card, CardContent } from "@material-ui/core";
 
 export const NoticeBoard: any = () => {
   const dispatch: any = useDispatch();
-  const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useState<any[]>([]);
 
   useEffect(() => {
-    setIsLoading(true);
     dispatch(
       getNotifications({ offset: 0, event: "MESSAGE", medium_sent: "SYSTEM" })
     )
@@ -19,11 +17,8 @@ export const NoticeBoard: any = () => {
         if (res && res.data) {
           setData(res.data.results);
         }
-        setIsLoading(false);
       })
-      .catch(() => {
-        setIsLoading(false);
-      });
+      .catch(() => {});
   }, [dispatch]);
 
   let notices: any[] = [];
