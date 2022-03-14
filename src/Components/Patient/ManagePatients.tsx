@@ -34,10 +34,7 @@ import { make as SlideOver } from "../Common/SlideOver.gen";
 import PatientFilterV2 from "./PatientFilterV2";
 import { parseOptionId } from "../../Common/utils";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-
-import { every } from "lodash";
 import { FacilityModel } from "../Facility/models";
-
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -263,7 +260,6 @@ export const PatientManager = (props: any) => {
   }, [dispatch, facilityId]);
 
   useEffect(() => {
-    console.log("useeffect");
     setIsLoading(true);
     dispatch(
       getAllPatient(
