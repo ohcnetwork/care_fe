@@ -1,5 +1,4 @@
 import React from "react";
-import { SvgIcon, SvgIconProps } from "@material-ui/core";
 
 export const CCTVIcon = ({ ref, ...props }: React.SVGProps<SVGElement>) => {
   return (

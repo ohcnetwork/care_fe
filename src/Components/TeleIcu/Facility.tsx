@@ -14,7 +14,7 @@ import { CCTVIcon } from "./Icons/CCTVIcon";
 import { WifiIcon } from "./Icons/WifiIcon";
 
 export const TeleICUFacility = () => {
-  const [qParams, setQueryParams] = useQueryParams();
+  const [qParams, setQueryParams] = useQueryParams(); // eslint-disable-line @typescript-eslint/no-unused-vars
   const [isLoading, setIsLoading] = useState(false);
   const [offset, setOffset] = useState(0);
   const dispatchAction: any = useDispatch();

@@ -1,4 +1,3 @@
-import { Icon, SvgIcon, SvgIconProps } from "@material-ui/core";
 import React from "react";
 
 export const BedIcon = ({ ref, ...props }: React.SVGProps<SVGElement>) => {
