@@ -20,7 +20,7 @@ import {
 } from "../../Redux/actions";
 import loadable from "@loadable/component";
 import { SelectField } from "../Common/HelperInputFields";
-import { CircularProgress, InputLabel, TextField } from "@material-ui/core";
+import { InputLabel, TextField } from "@material-ui/core";
 import Pagination from "../Common/Pagination";
 import { FacilityModel } from "./models";
 import { InputSearchBox } from "../Common/SearchBox";
@@ -32,10 +32,8 @@ import AccordionSummary from "@material-ui/core/AccordionSummary";
 import AccordionDetails from "@material-ui/core/AccordionDetails";
 import Typography from "@material-ui/core/Typography";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import SwipeableViews from "react-swipeable-views";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import FacillityFilter from "./FacilityFilter";
-import { FacilitySelect } from "../Common/FacilitySelect";
 import { withTranslation } from "react-i18next";
 import * as Notification from "../../Utils/Notifications.js";
 import { Modal } from "@material-ui/core";
@@ -194,7 +192,7 @@ const HospitalListPage = (props: any) => {
   );
 
   const findFacilityTypeById = (id: number) => {
-    const facility_type = FACILITY_TYPES.find((type) => type.id == id);
+    const facility_type = FACILITY_TYPES.find((type) => type.id === id);
     return facility_type?.text;
   };
 
@@ -301,7 +299,7 @@ const HospitalListPage = (props: any) => {
       message: notifyMessage,
     };
     const res = await dispatchAction(sendNotificationMessages(data));
-    if (res && res.status == 204) {
+    if (res && Number(res.status) === 204) {
       Notification.Success({
         msg: "Facility Notified",
       });
@@ -310,12 +308,6 @@ const HospitalListPage = (props: any) => {
       Notification.Error({ msg: "Something went wrong..." });
     }
   };
-
-  const kaspOptionValues = [
-    { id: "", text: "Not Selected" },
-    { id: "true", text: "Yes" },
-    { id: "false", text: "No" },
-  ];
 
   let facilityList: any[] = [];
   if (data && data.length) {

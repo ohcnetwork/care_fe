@@ -4,8 +4,6 @@ import { useDispatch } from "react-redux";
 import { Button, CircularProgress } from "@material-ui/core";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
-  listFacilityAssetLocation,
-  updateFacilityAssetLocation,
   getAnyFacility,
   listFacilityBeds,
   updateFacilityBed,
@@ -233,7 +231,7 @@ export const BedManagement = (props: BedManagementProps) => {
         setIsLoading(false);
       }
     },
-    [dispatchAction, offset, rerender]
+    [dispatchAction, offset, rerender, facilityId, locationId] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   useAbortableEffect(

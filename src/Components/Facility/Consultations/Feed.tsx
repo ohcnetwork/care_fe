@@ -45,14 +45,14 @@ export const Feed: React.FC<IFeedProps> = ({
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const [res, dailyRounds] = await Promise.all([
+      const res = await Promise.all([
         dispatch(getConsultation(consultationId)),
         dispatch(getDailyReport({ limit: 1, offset: 0 }, { consultationId })),
       ]);
       if (!status.aborted) {
-        if (dailyRounds?.data?.results?.length) {
+        if (res[1]?.data?.results?.length) {
           const bedAssets = await dispatch(
-            listAssetBeds({ bed: dailyRounds.data.results[0].bed })
+            listAssetBeds({ bed: res[1].data.results[0].bed })
           );
           if (bedAssets?.data?.results?.length) {
             const { camera_address, camera_access_key, middleware_hostname } =
@@ -80,7 +80,7 @@ export const Feed: React.FC<IFeedProps> = ({
 
   const [sourceUrl, setSourceUrl] = useState<string>();
   const [position, setPosition] = useState<any>();
-  const [presets, setPresets] = useState<any>([]);
+  const [presets, setPresets] = useState<any>([]); // eslint-disable-line @typescript-eslint/no-unused-vars
   const [currentPreset, setCurrentPreset] = useState<any>();
   // const [showDefaultPresets, setShowDefaultPresets] = useState<boolean>(false);
 
@@ -96,7 +96,8 @@ export const Feed: React.FC<IFeedProps> = ({
       if (loadingTimeout) clearTimeout(loadingTimeout);
     };
   }, [loading]);
-  const requestStream = () => {
+
+  const requestStream = useCallback(() => {
     axios
       .post(`https://${middlewareHostname}/start`, {
         uri: `rtsp://${cameraAsset.username}:${cameraAsset.password}@${cameraAsset.hostname}:554/`,
@@ -107,12 +108,18 @@ export const Feed: React.FC<IFeedProps> = ({
       .catch((ex: any) => {
         // console.error('Error while refreshing',ex);
       });
-  };
+  }, [
+    cameraAsset.hostname,
+    cameraAsset.password,
+    cameraAsset.username,
+    middlewareHostname,
+  ]);
+
   const stopStream = (url: string | undefined) => {
     console.log("stop", url);
     if (url) {
       let urlSegments = url.split("/");
-      const x = urlSegments.pop();
+      urlSegments.pop();
       const id = urlSegments?.pop();
       axios
         .post(`https://${middlewareHostname}/stop`, {
@@ -127,6 +134,7 @@ export const Feed: React.FC<IFeedProps> = ({
         });
     }
   };
+
   const getCameraStatus = useCallback(
     (asset: any) => {
       axios
@@ -142,39 +150,36 @@ export const Feed: React.FC<IFeedProps> = ({
     },
     [middlewareHostname]
   );
-  const getPresets = (asset: any) => {
-    axios
-      .get(
-        `https://${middlewareHostname}/presets?hostname=${asset.hostname}&port=${asset.port}&username=${asset.username}&password=${asset.password}`
-      )
-      .then((resp: any) => {
-        setPresets(resp.data);
-        console.log("PRESETS", resp.data);
-      })
-      .catch((ex: any) => {
-        // console.error('Error while refreshing',ex);
-      });
-  };
-  const getBedPresets = async (asset: any) => {
-    const bedAssets = await dispatch(listAssetBeds({ asset: asset.id }));
-    setBedPresets(bedAssets?.data?.results);
-  };
+
+  const getPresets = useCallback(
+    (asset: any) => {
+      axios
+        .get(
+          `https://${middlewareHostname}/presets?hostname=${asset.hostname}&port=${asset.port}&username=${asset.username}&password=${asset.password}`
+        )
+        .then((resp: any) => {
+          setPresets(resp.data);
+          console.log("PRESETS", resp.data);
+        })
+        .catch((ex: any) => {
+          // console.error('Error while refreshing',ex);
+        });
+    },
+    [middlewareHostname]
+  );
+
+  const getBedPresets = useCallback(
+    async (asset: any) => {
+      const bedAssets = await dispatch(listAssetBeds({ asset: asset.id }));
+      setBedPresets(bedAssets?.data?.results);
+    },
+    [dispatch]
+  );
+
   const gotoBedPreset = (preset: any) => {
     absoluteMove(preset.meta.position);
   };
-  const gotoPreset = (preset: number) => {
-    axios
-      .post(`https://${middlewareHostname}/gotoPreset`, {
-        ...cameraAsset,
-        preset,
-      })
-      .then((resp: any) => {
-        console.log(resp.data);
-      })
-      .catch((ex: any) => {
-        // console.error('Error while refreshing',ex);
-      });
-  };
+
   const requestPTZ = (action: string) => {
     setLoading(true);
     if (!position) {
@@ -239,24 +244,27 @@ export const Feed: React.FC<IFeedProps> = ({
     }
   };
 
-  const absoluteMove = (data: any) => {
-    setLoading(true);
-    axios
-      .post(`https://${middlewareHostname}/absoluteMove`, {
-        ...data,
-        ...cameraAsset,
-      })
-      .then((resp: any) => {
-        getCameraStatus(cameraAsset);
-      })
-      .catch((ex: any) => {
-        console.error("Error while absolute move", ex);
-      });
-  };
+  const absoluteMove = useCallback(
+    (data: any) => {
+      setLoading(true);
+      axios
+        .post(`https://${middlewareHostname}/absoluteMove`, {
+          ...data,
+          ...cameraAsset,
+        })
+        .then((resp: any) => {
+          getCameraStatus(cameraAsset);
+        })
+        .catch((ex: any) => {
+          console.error("Error while absolute move", ex);
+        });
+    },
+    [cameraAsset, getCameraStatus, middlewareHostname]
+  );
 
   useEffect(() => {
     requestStream();
-  }, []);
+  }, [requestStream]);
 
   useEffect(() => {
     getPresets(cameraAsset);
@@ -264,18 +272,15 @@ export const Feed: React.FC<IFeedProps> = ({
     if (cameraConfig?.position) {
       absoluteMove(cameraConfig.position);
     }
-  }, [cameraAsset]);
+  }, [
+    cameraAsset,
+    getPresets,
+    getBedPresets,
+    absoluteMove,
+    cameraConfig?.position,
+  ]);
 
   const liveFeedPlayerRef = useRef<any>(null);
-
-  const viewOptions = presets
-    ? Object.entries(presets)
-        .map(([key, value]) => ({ label: key, value }))
-        .slice(0, 10)
-    : Array.from(Array(10), (_, i) => ({
-        label: "Monitor " + (i + 1),
-        value: i + 1,
-      }));
 
   const cameraPTZ = [
     { icon: "fa fa-arrow-up", label: "Up", action: "up" },

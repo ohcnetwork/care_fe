@@ -48,7 +48,7 @@ export default function InventoryLog(props: any) {
         setIsLoading(false);
       }
     },
-    [dispatchAction, offset, facilityId]
+    [dispatchAction, offset, facilityId, item]
   );
 
   useEffect(() => {

@@ -234,7 +234,7 @@ export const DoctorCapacityForm = (props: DoctorCapacityProps) => {
         crumbsReplacements={{
           [facilityId]: { name: facilityName },
           [id || "????"]: {
-            name: DOCTOR_SPECIALIZATION.find((type) => type.id == id)?.text,
+            name: DOCTOR_SPECIALIZATION.find((type) => type.id === id)?.text,
           },
         }}
       />

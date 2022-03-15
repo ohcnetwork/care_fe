@@ -11,9 +11,8 @@ import Pagination from "../../Common/Pagination";
 import { PAGINATION_LIMIT } from "../../../Common/constants";
 
 export const NutritionPlots = (props: any) => {
-  const { facilityId, patientId, consultationId } = props;
+  const { consultationId } = props;
   const dispatch: any = useDispatch();
-  const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState({});
   const [showIO, setShowIO] = useState(true);
   const [showIntake, setShowIntake] = useState(false);
@@ -23,7 +22,6 @@ export const NutritionPlots = (props: any) => {
 
   const fetchDailyRounds = useCallback(
     async (status: statusType) => {
-      setIsLoading(true);
       const res = await dispatch(
         dailyRoundsAnalyse(
           {
@@ -45,7 +43,6 @@ export const NutritionPlots = (props: any) => {
           setResults(res.data.results);
           setTotalCount(res.data.count);
         }
-        setIsLoading(false);
       }
     },
     [consultationId, dispatch, currentPage]
@@ -98,8 +95,8 @@ export const NutritionPlots = (props: any) => {
 
   Object.values(results)
     .reverse()
-    .map((p: any, i: any) => {
-      p.infusions.map((infusion: any) => {
+    .forEach((p: any, i: number) => {
+      p.infusions.forEach((infusion: any) => {
         const item = infusionsData[infusion.name];
         item.data[i] = infusion.quantity;
       });
@@ -124,8 +121,8 @@ export const NutritionPlots = (props: any) => {
 
   Object.values(results)
     .reverse()
-    .map((p: any, i: any) => {
-      p.iv_fluids.map((iv_fluid: any) => {
+    .forEach((p: any, i: any) => {
+      p.iv_fluids.forEach((iv_fluid: any) => {
         const item = IVFluidsData[iv_fluid.name];
         item.data[i] = iv_fluid.quantity;
       });
@@ -150,8 +147,8 @@ export const NutritionPlots = (props: any) => {
 
   Object.values(results)
     .reverse()
-    .map((p: any, i: any) => {
-      p.feeds.map((feed: any) => {
+    .forEach((p: any, i: any) => {
+      p.feeds.forEach((feed: any) => {
         const item = FeedsData[feed.name];
         item.data[i] = feed.quantity;
       });
@@ -176,8 +173,8 @@ export const NutritionPlots = (props: any) => {
 
   Object.values(results)
     .reverse()
-    .map((p: any, i: any) => {
-      p.output.map((x: any) => {
+    .forEach((p: any, i: any) => {
+      p.output.forEach((x: any) => {
         const item = OutputData[x.name];
         item.data[i] = x.quantity;
       });
@@ -251,22 +248,20 @@ export const NutritionPlots = (props: any) => {
             <h3 className="text-lg">Infusions:</h3>
             <div className="overflow-y-auto pb-2 h-72">
               {Object.entries(results).map((obj: any) => {
-                if (obj[1].infusions && obj[1].infusions.length > 0) {
-                  return (
-                    <div>
-                      <h4 className="text-sm">
-                        - {moment(obj[0]).format("LLL")}
-                      </h4>
-                      <div className="px-5 text-sm">
-                        {obj[1].infusions.map((o: any) => (
-                          <div>
-                            {o.name} - {o.quantity}
-                          </div>
-                        ))}
-                      </div>
+                return obj[1].infusions && obj[1].infusions.length > 0 ? (
+                  <div>
+                    <h4 className="text-sm">
+                      - {moment(obj[0]).format("LLL")}
+                    </h4>
+                    <div className="px-5 text-sm">
+                      {obj[1].infusions.map((o: any) => (
+                        <div>
+                          {o.name} - {o.quantity}
+                        </div>
+                      ))}
                     </div>
-                  );
-                }
+                  </div>
+                ) : null;
               })}
             </div>
           </div>
@@ -281,22 +276,20 @@ export const NutritionPlots = (props: any) => {
             <h3 className="text-lg">IV Fluids:</h3>
             <div className="overflow-y-auto pb-2 h-72">
               {Object.entries(results).map((obj: any) => {
-                if (obj[1].iv_fluids && obj[1].iv_fluids.length > 0) {
-                  return (
-                    <div>
-                      <h4 className="text-sm">
-                        - {moment(obj[0]).format("LLL")}
-                      </h4>
-                      <div className="px-5 text-sm">
-                        {obj[1].iv_fluids.map((o: any) => (
-                          <div>
-                            {o.name} - {o.quantity}
-                          </div>
-                        ))}
-                      </div>
+                return obj[1].iv_fluids && obj[1].iv_fluids.length > 0 ? (
+                  <div>
+                    <h4 className="text-sm">
+                      - {moment(obj[0]).format("LLL")}
+                    </h4>
+                    <div className="px-5 text-sm">
+                      {obj[1].iv_fluids.map((o: any) => (
+                        <div>
+                          {o.name} - {o.quantity}
+                        </div>
+                      ))}
                     </div>
-                  );
-                }
+                  </div>
+                ) : null;
               })}
             </div>
           </div>
@@ -311,22 +304,20 @@ export const NutritionPlots = (props: any) => {
             <h3 className="text-lg">Feeds:</h3>
             <div className="overflow-y-auto pb-2 h-72">
               {Object.entries(results).map((obj: any) => {
-                if (obj[1].feeds && obj[1].feeds.length > 0) {
-                  return (
-                    <div>
-                      <h4 className="text-sm">
-                        - {moment(obj[0]).format("LLL")}
-                      </h4>
-                      <div className="px-5 text-sm">
-                        {obj[1].feeds.map((o: any) => (
-                          <div>
-                            {o.name} - {o.quantity}
-                          </div>
-                        ))}
-                      </div>
+                return obj[1].feeds && obj[1].feeds.length > 0 ? (
+                  <div>
+                    <h4 className="text-sm">
+                      - {moment(obj[0]).format("LLL")}
+                    </h4>
+                    <div className="px-5 text-sm">
+                      {obj[1].feeds.map((o: any) => (
+                        <div>
+                          {o.name} - {o.quantity}
+                        </div>
+                      ))}
                     </div>
-                  );
-                }
+                  </div>
+                ) : null;
               })}
             </div>
           </div>
@@ -364,22 +355,20 @@ export const NutritionPlots = (props: any) => {
             <h3 className="text-lg">Output:</h3>
             <div className="overflow-y-auto pb-2 h-72">
               {Object.entries(results).map((obj: any) => {
-                if (obj[1].output && obj[1].output.length > 0) {
-                  return (
-                    <div>
-                      <h4 className="text-sm">
-                        - {moment(obj[0]).format("LLL")}
-                      </h4>
-                      <div className="px-5 text-sm">
-                        {obj[1].output.map((o: any) => (
-                          <div>
-                            {o.name} - {o.quantity}
-                          </div>
-                        ))}
-                      </div>
+                return obj[1].output && obj[1].output.length > 0 ? (
+                  <div>
+                    <h4 className="text-sm">
+                      - {moment(obj[0]).format("LLL")}
+                    </h4>
+                    <div className="px-5 text-sm">
+                      {obj[1].output.map((o: any) => (
+                        <div>
+                          {o.name} - {o.quantity}
+                        </div>
+                      ))}
                     </div>
-                  );
-                }
+                  </div>
+                ) : null;
               })}
             </div>
           </div>

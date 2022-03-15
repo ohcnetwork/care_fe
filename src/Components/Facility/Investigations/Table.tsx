@@ -13,7 +13,6 @@ import {
 } from "@material-ui/core";
 import { SelectField } from "../../Common/HelperInputFields";
 import { createStyles, makeStyles, withStyles } from "@material-ui/styles";
-import React from "react";
 import { useState } from "react";
 import { TextInputField } from "../../Common/HelperInputFields";
 import _ from "lodash";
@@ -86,8 +85,6 @@ const TestRow = ({ data, value, onChange }: any) => {
 };
 
 export const TestTable = ({ title, data, state, dispatch }: any) => {
-  const className = useStyle();
-
   const [searchFilter, setSearchFilter] = useState("");
 
   const filterTests = data.filter((i: any) => {

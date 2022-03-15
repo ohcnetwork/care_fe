@@ -19,6 +19,7 @@ const initForm = {
 };
 const initialState = {
   form: { ...initForm },
+  errors: {},
 };
 
 const inventoryFormReducer = (state = initialState, action: any) => {
@@ -26,13 +27,13 @@ const inventoryFormReducer = (state = initialState, action: any) => {
     case "set_form": {
       return {
         ...state,
-        form: action.form,
+        form: { ...state.form, ...action.form },
       };
     }
     case "set_error": {
       return {
         ...state,
-        errors: action.errors,
+        errors: { ...state.errors, ...action.errors },
       };
     }
     default:
@@ -49,7 +50,6 @@ export const AddInventoryForm = (props: any) => {
   const { facilityId } = props;
   const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
-  const [offset, setOffset] = useState(0);
   const [data, setData] = useState<Array<InventoryItemsModel>>([]);
   const [currentUnit, setCurrentUnit] = useState<any>();
   const [facilityName, setFacilityName] = useState("");
@@ -59,19 +59,19 @@ export const AddInventoryForm = (props: any) => {
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const res = await dispatchAction(getItems({ limit, offset }));
+      const res = await dispatchAction(getItems({ limit, offset: 0 }));
       if (!status.aborted) {
         if (res && res.data) {
           setData(res.data.results);
           dispatch({
             type: "set_form",
-            form: { ...state.form, id: res.data.results[0]?.id },
+            form: { id: res.data.results[0]?.id },
           });
         }
         setIsLoading(false);
       }
     },
-    [dispatchAction, offset]
+    [dispatchAction]
   );
   useAbortableEffect(
     (status: statusType) => {
@@ -99,11 +99,11 @@ export const AddInventoryForm = (props: any) => {
     if (item) {
       dispatch({
         type: "set_form",
-        form: { ...state.form, unit: item.default_unit?.id },
+        form: { unit: item.default_unit?.id },
       });
       setCurrentUnit(item.allowed_units);
     }
-  }, [state.form.id]);
+  }, [state.form.id, data]);
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();

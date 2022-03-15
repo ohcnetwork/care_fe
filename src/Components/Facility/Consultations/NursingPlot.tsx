@@ -8,16 +8,14 @@ import Pagination from "../../Common/Pagination";
 import { PAGINATION_LIMIT } from "../../../Common/constants";
 
 export const NursingPlot = (props: any) => {
-  const { facilityId, patientId, consultationId } = props;
+  const { consultationId } = props;
   const dispatch: any = useDispatch();
-  const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<any>({});
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
 
   const fetchDailyRounds = useCallback(
     async (status: statusType) => {
-      setIsLoading(true);
       const res = await dispatch(
         dailyRoundsAnalyse(
           {
@@ -32,7 +30,6 @@ export const NursingPlot = (props: any) => {
           setResults(res.data.results);
           setTotalCount(res.data.count);
         }
-        setIsLoading(false);
       }
     },
     [consultationId, dispatch, currentPage]

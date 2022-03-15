@@ -2,7 +2,6 @@ import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
 import { getInvestigationSessions } from "../../../Redux/actions";
-import PageTitle from "../../Common/PageTitle";
 import moment from "moment";
 import { navigate } from "raviger";
 import loadable from "@loadable/component";
@@ -31,7 +30,7 @@ export default function ViewInvestigations(props: any) {
         setIsLoading(false);
       }
     },
-    [dispatchAction]
+    [dispatchAction, consultationId]
   );
 
   useAbortableEffect(

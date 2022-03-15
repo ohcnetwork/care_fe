@@ -119,7 +119,7 @@ export const ConsultationDetails = (props: any) => {
               is_declared_positive: patientRes.data.is_declared_positive
                 ? "Yes"
                 : "No",
-              is_vaccinated: patientData.is_vaccinated ? "Yes" : "No",
+              is_vaccinated: patientRes.is_vaccinated ? "Yes" : "No",
             };
             setPatientData(data);
           }

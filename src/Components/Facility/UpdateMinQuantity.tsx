@@ -50,12 +50,8 @@ export const UpdateMinQuantity = (props: any) => {
   const { facilityId, inventoryId, itemId } = props;
   const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
-  const [offset, setOffset] = useState(0);
   const [data, setData] = useState(" ");
-  const [currentUnit, setCurrentUnit] = useState<any>();
   const [facilityName, setFacilityName] = useState("");
-
-  const limit = 14;
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -69,7 +65,7 @@ export const UpdateMinQuantity = (props: any) => {
         setIsLoading(false);
       }
     },
-    [dispatchAction, offset]
+    [dispatchAction, itemId]
   );
   useAbortableEffect(
     (status: statusType) => {

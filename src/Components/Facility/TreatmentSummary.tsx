@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from "react";
+import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import {
   getPatient,
@@ -161,7 +161,7 @@ const TreatmentSummary = (props: any) => {
                 <div className="col-span-1 py-2 px-3">
                   <b>Date of negative :</b>
                   <span>
-                    {patientData.disease_status == "NEGATIVE"
+                    {patientData.disease_status === "NEGATIVE"
                       ? moment(patientData.modified_date).format("DD/MM/YYYY")
                       : " ---"}
                   </span>

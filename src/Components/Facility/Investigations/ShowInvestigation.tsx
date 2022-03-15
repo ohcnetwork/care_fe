@@ -12,7 +12,6 @@ import loadable from "@loadable/component";
 import _ from "lodash";
 import { navigate } from "raviger";
 import * as Notification from "../../../Utils/Notifications.js";
-import { Console } from "console";
 
 const Loading = loadable(() => import("../../Common/Loading"));
 

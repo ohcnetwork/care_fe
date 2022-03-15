@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useDispatch } from "react-redux";
 import ReactPlayer from "react-player";
 import screenfull from "screenfull";
@@ -11,7 +11,7 @@ const PageTitle = loadable(() => import("../../Common/PageTitle"));
 const LiveFeed = (props: any) => {
   const middlewareHostname =
     props.middlewareHostname || "dev_middleware.coronasafe.live";
-  const [asset, setAsset] = useState<any>(props.asset);
+  const [asset, setAsset] = useState<any>(props.asset); // eslint-disable-line @typescript-eslint/no-unused-vars
   const [sourceUrl, setSourceUrl] = useState<string>();
   const [position, setPosition] = useState<any>();
   const [presets, setPresets] = useState<any>([]);
@@ -30,7 +30,8 @@ const LiveFeed = (props: any) => {
       if (loadingTimeout) clearTimeout(loadingTimeout);
     };
   }, [loading]);
-  const requestStream = () => {
+
+  const requestStream = useCallback(() => {
     axios
       .post(`https://${middlewareHostname}/start`, {
         uri: `rtsp://${asset.username}:${asset.password}@${asset.hostname}:554/`,
@@ -41,12 +42,13 @@ const LiveFeed = (props: any) => {
       .catch((ex: any) => {
         // console.error('Error while refreshing',ex);
       });
-  };
+  }, [asset.hostname, asset.password, asset.username, middlewareHostname]);
+
   const stopStream = (url: string | undefined) => {
     console.log("stop", url);
     if (url) {
       let urlSegments = url.split("/");
-      const x = urlSegments.pop();
+      urlSegments.pop();
       const id = urlSegments?.pop();
       axios
         .post(`https://${middlewareHostname}/stop`, {
@@ -61,38 +63,52 @@ const LiveFeed = (props: any) => {
         });
     }
   };
-  const getCameraStatus = (asset: any) => {
-    axios
-      .get(
-        `https://${middlewareHostname}/status?hostname=${asset.hostname}&port=${asset.port}&username=${asset.username}&password=${asset.password}`
-      )
-      .then((resp: any) => {
-        setPosition(resp.data.position);
-      })
-      .catch((ex: any) => {
-        // console.error('Error while refreshing',ex);
-      });
-  };
-  const getPresets = (asset: any) => {
-    axios
-      .get(
-        `https://${middlewareHostname}/presets?hostname=${asset.hostname}&port=${asset.port}&username=${asset.username}&password=${asset.password}`
-      )
-      .then((resp: any) => {
-        setPresets(resp.data);
-        console.log("PRESETS", resp.data);
-      })
-      .catch((ex: any) => {
-        // console.error('Error while refreshing',ex);
-      });
-  };
-  const getBedPresets = async (asset: any) => {
-    const bedAssets = await dispatch(listAssetBeds({ asset: asset.id }));
-    setBedPresets(bedAssets.data.results);
-  };
+
+  const getCameraStatus = useCallback(
+    (asset: any) => {
+      axios
+        .get(
+          `https://${middlewareHostname}/status?hostname=${asset.hostname}&port=${asset.port}&username=${asset.username}&password=${asset.password}`
+        )
+        .then((resp: any) => {
+          setPosition(resp.data.position);
+        })
+        .catch((ex: any) => {
+          // console.error('Error while refreshing',ex);
+        });
+    },
+    [middlewareHostname]
+  );
+
+  const getPresets = useCallback(
+    (asset: any) => {
+      axios
+        .get(
+          `https://${middlewareHostname}/presets?hostname=${asset.hostname}&port=${asset.port}&username=${asset.username}&password=${asset.password}`
+        )
+        .then((resp: any) => {
+          setPresets(resp.data);
+          console.log("PRESETS", resp.data);
+        })
+        .catch((ex: any) => {
+          // console.error('Error while refreshing',ex);
+        });
+    },
+    [middlewareHostname]
+  );
+
+  const getBedPresets = useCallback(
+    async (asset: any) => {
+      const bedAssets = await dispatch(listAssetBeds({ asset: asset.id }));
+      setBedPresets(bedAssets.data.results);
+    },
+    [dispatch]
+  );
+
   const gotoBedPreset = (preset: any) => {
     absoluteMove(preset.meta.position);
   };
+
   const gotoPreset = (preset: number) => {
     axios
       .post(`https://${middlewareHostname}/gotoPreset`, {
@@ -106,6 +122,7 @@ const LiveFeed = (props: any) => {
         // console.error('Error while refreshing',ex);
       });
   };
+
   const requestPTZ = (action: string) => {
     setLoading(true);
     if (!position) {
@@ -163,24 +180,27 @@ const LiveFeed = (props: any) => {
     }
   };
 
-  const absoluteMove = (data: any) => {
-    setLoading(true);
-    axios
-      .post(`https://${middlewareHostname}/absoluteMove`, {
-        ...data,
-        ...asset,
-      })
-      .then((resp: any) => {
-        getCameraStatus(asset);
-      })
-      .catch((ex: any) => {
-        console.error("Error while absolute move", ex);
-      });
-  };
+  const absoluteMove = useCallback(
+    (data: any) => {
+      setLoading(true);
+      axios
+        .post(`https://${middlewareHostname}/absoluteMove`, {
+          ...data,
+          ...asset,
+        })
+        .then((resp: any) => {
+          getCameraStatus(asset);
+        })
+        .catch((ex: any) => {
+          console.error("Error while absolute move", ex);
+        });
+    },
+    [asset, middlewareHostname, getCameraStatus]
+  );
 
   useEffect(() => {
     requestStream();
-  }, []);
+  }, [requestStream]);
 
   useEffect(() => {
     getPresets(asset);
@@ -188,7 +208,7 @@ const LiveFeed = (props: any) => {
     if (props.config?.position) {
       absoluteMove(props.config.position);
     }
-  }, [asset]);
+  }, [getPresets, getBedPresets, absoluteMove, asset, props.config?.position]);
 
   const liveFeedPlayerRef = useRef<any>(null);
   const handleClickFullscreen = () => {

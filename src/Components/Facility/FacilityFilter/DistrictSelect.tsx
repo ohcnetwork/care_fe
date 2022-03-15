@@ -1,6 +1,6 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useMemo } from "react";
 import { useDispatch } from "react-redux";
-import { getDistrictByName, getStates } from "../../../Redux/actions";
+import { getDistrictByName } from "../../../Redux/actions";
 import { AutoCompleteAsyncField } from "../../Common/HelperInputFields";
 const debounce = require("lodash.debounce");
 
@@ -16,16 +16,8 @@ interface DistrictSelectProps {
 }
 
 function DistrictSelect(props: DistrictSelectProps) {
-  const {
-    name,
-    errors,
-    className,
-    multiple,
-    selected,
-    searchAll,
-    setSelected,
-    margin,
-  } = props;
+  const { name, errors, className, multiple, selected, setSelected, margin } =
+    props;
   const [isdistrictLoading, setDistrictLoading] = useState(false);
   const [hasSearchText, setHasSearchText] = useState(false);
   const [districtList, setDistrictList] = useState([]);
@@ -46,21 +38,22 @@ function DistrictSelect(props: DistrictSelectProps) {
     onDistrictSearch(e.target.value);
   };
 
-  const onDistrictSearch = useCallback(
-    debounce(async (text: string) => {
-      if (text) {
-        const params = { limit: 50, offset: 0, district_name: text };
-        const res = await dispatchAction(getDistrictByName(params));
-        if (res && res.data) {
-          setDistrictList(res.data.results);
+  const onDistrictSearch = useMemo(
+    () =>
+      debounce(async (text: string) => {
+        if (text) {
+          const params = { limit: 50, offset: 0, district_name: text };
+          const res = await dispatchAction(getDistrictByName(params));
+          if (res && res.data) {
+            setDistrictList(res.data.results);
+          }
+          setDistrictLoading(false);
+        } else {
+          setDistrictList([]);
+          setDistrictLoading(false);
         }
-        setDistrictLoading(false);
-      } else {
-        setDistrictList([]);
-        setDistrictLoading(false);
-      }
-    }, 300),
-    []
+      }, 300),
+    [dispatchAction]
   );
 
   return (

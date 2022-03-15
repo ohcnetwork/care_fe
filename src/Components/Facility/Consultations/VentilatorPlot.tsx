@@ -7,35 +7,15 @@ import { LinePlot } from "./components/LinePlot";
 import Pagination from "../../Common/Pagination";
 import { PAGINATION_LIMIT } from "../../../Common/constants";
 
-interface ModalityType {
-  id: number;
-  type: string;
-  normal_rate_low: number;
-  normal_rate_high: number;
-}
-
-const modality: Array<ModalityType> = [
-  { id: 0, type: "UNKNOWN", normal_rate_low: 1, normal_rate_high: 4 },
-  { id: 5, type: "NASAL_PRONGS", normal_rate_low: 5, normal_rate_high: 10 },
-  {
-    id: 10,
-    type: "SIMPLE_FACE_MASK",
-    normal_rate_low: 11,
-    normal_rate_high: 15,
-  },
-];
-
 export const VentilatorPlot = (props: any) => {
-  const { facilityId, patientId, consultationId } = props;
+  const { consultationId } = props;
   const dispatch: any = useDispatch();
-  const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
 
   const fetchDailyRounds = useCallback(
     async (status: statusType) => {
-      setIsLoading(true);
       const res = await dispatch(
         dailyRoundsAnalyse(
           {
@@ -62,7 +42,6 @@ export const VentilatorPlot = (props: any) => {
           setResults(res.data.results);
           setTotalCount(res.data.count);
         }
-        setIsLoading(false);
       }
     },
     [consultationId, dispatch, currentPage]

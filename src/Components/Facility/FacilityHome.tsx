@@ -1,4 +1,4 @@
-import { Button, Card, CardContent, Grid, Typography } from "@material-ui/core";
+import { Typography } from "@material-ui/core";
 import { navigate } from "raviger";
 import React, { useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -94,7 +94,7 @@ export const FacilityHome = (props: any) => {
 
   const handleDeleteSubmit = async () => {
     const res = await dispatch(deleteFacility(facilityId));
-    if (res && res.status == 204) {
+    if (res && Number(res.status) === 204) {
       Notification.Success({
         msg: "Facility deleted successfully",
       });
@@ -117,11 +117,10 @@ export const FacilityHome = (props: any) => {
       let res = capacityData.find((data) => {
         return data.room_type === x.id;
       });
-      if (res) {
-        return (
-          <BedTypeCard facilityId={facilityId} key={`bed_${res.id}`} {...res} />
-        );
-      }
+
+      return res ? (
+        <BedTypeCard facilityId={facilityId} key={`bed_${res.id}`} {...res} />
+      ) : null;
     });
   }
 

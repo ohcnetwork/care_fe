@@ -115,7 +115,7 @@ const AssetCreate = (props: AssetProps) => {
         setIsLoading(false);
       });
     }
-  }, [assetId]);
+  }, [dispatchAction, assetId, facilityId]);
 
   useEffect(() => {
     if (asset) {
@@ -146,7 +146,7 @@ const AssetCreate = (props: AssetProps) => {
           }
           return;
         case "is_working":
-          if (is_working == "0") {
+          if (is_working === "0") {
             errors[field] = "Field is required";
             invalidForm = true;
           }

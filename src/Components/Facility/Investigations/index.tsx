@@ -1,9 +1,8 @@
 import React, { useEffect, useReducer, useState } from "react";
-import { MultiSelectField } from "../../Common/HelperInputFields";
 import { TestTable } from "./Table";
 import { useDispatch } from "react-redux";
 import Autocomplete from "@material-ui/lab/Autocomplete";
-import { Checkbox, TextField, InputLabel } from "@material-ui/core";
+import { Checkbox, TextField } from "@material-ui/core";
 import {
   createInvestigation,
   listInvestigationGroups,
@@ -75,7 +74,7 @@ const Investigation = (props: {
   patientId: string;
   facilityId: string;
 }) => {
-  const { consultationId, patientId, facilityId } = props;
+  const { patientId, facilityId } = props;
 
   const dispatch: any = useDispatch();
   const [selectedGroup, setSelectedGroup] = useState<string[]>([]);
@@ -97,26 +96,6 @@ const Investigation = (props: {
   const [patientName, setPatientName] = useState("");
   const searchOptions = [...investigationGroups, ...investigations];
 
-  const fetchInvestigations = () => {
-    setIsLoading({ ...isLoading, investigationLoading: true });
-    dispatch(listInvestigations({})).then((res: any) => {
-      if (res && res.data) {
-        setInvestigations(res.data.results);
-      }
-      setIsLoading({ ...isLoading, investigationLoading: false });
-    });
-  };
-
-  const fetchInvestigationGroups = () => {
-    setIsLoading({ ...isLoading, investigationGroupLoading: true });
-    dispatch(listInvestigationGroups({})).then((res: any) => {
-      if (res && res.data) {
-        setInvestigationGroups(res.data.results);
-      }
-      setIsLoading({ ...isLoading, investigationGroupLoading: false });
-    });
-  };
-
   useEffect(() => {
     async function fetchPatientName() {
       if (patientId) {
@@ -134,10 +113,42 @@ const Investigation = (props: {
   }, [dispatch, patientId]);
 
   useEffect(() => {
+    const fetchInvestigations = () => {
+      setIsLoading((prevLoadingState) => ({
+        ...prevLoadingState,
+        investigationLoading: false,
+      }));
+      dispatch(listInvestigations({})).then((res: any) => {
+        if (res && res.data) {
+          setInvestigations(res.data.results);
+        }
+        setIsLoading((prevLoadingState) => ({
+          ...prevLoadingState,
+          investigationLoading: false,
+        }));
+      });
+    };
+
+    const fetchInvestigationGroups = () => {
+      setIsLoading((prevLoadingState) => ({
+        ...prevLoadingState,
+        investigationGroupLoading: true,
+      }));
+      dispatch(listInvestigationGroups({})).then((res: any) => {
+        if (res && res.data) {
+          setInvestigationGroups(res.data.results);
+        }
+        setIsLoading((prevLoadingState) => ({
+          ...prevLoadingState,
+          investigationGroupLoading: false,
+        }));
+      });
+    };
+
     fetchInvestigationGroups();
     fetchInvestigations();
     setSession(new Date().toString());
-  }, [props.consultationId]);
+  }, [dispatch, props.consultationId]);
 
   const initialiseForm = () => {
     let investigationsArray = selectedGroup.map((group_id: string) => {
@@ -281,7 +292,7 @@ const Investigation = (props: {
                     ),
                   []
                 ),
-              ].filter((v, i, a) => a.indexOf(v) == i)
+              ].filter((v, i, a) => a.indexOf(v) === i)
             );
           }}
         />

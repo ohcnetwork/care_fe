@@ -14,7 +14,6 @@ import { BED_TYPES } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   createCapacity,
-  getCapacity,
   listCapacity,
   getCapacityBed,
   getAnyFacility,
@@ -252,7 +251,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
         crumbsReplacements={{
           [facilityId]: { name: facilityName },
           [id || "????"]: {
-            name: bedTypes.find((type) => type.id == id)?.text,
+            name: bedTypes.find((type) => type.id === id)?.text,
           },
         }}
       />

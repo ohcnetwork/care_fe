@@ -28,7 +28,6 @@ import {
   SYMPTOM_CHOICES,
   TELEMEDICINE_ACTIONS,
   REVIEW_AT_CHOICES,
-  LINES_CATHETER_CHOICES,
   KASP_STRING,
 } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -52,7 +51,6 @@ import {
 import { make as PrescriptionBuilder } from "../Common/PrescriptionBuilder.gen";
 import { FacilityModel } from "./models";
 import { OnlineUsersSelect } from "../Common/OnlineUsersSelect";
-import _ from "lodash";
 import { UserModel } from "../Users/models";
 import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 
@@ -233,7 +231,7 @@ export const ConsultationForm = (props: any) => {
         res &&
         res.data &&
         res.data.discharge_advice &&
-        Object.keys(res.data.discharge_advice).length != 0
+        Object.keys(res.data.discharge_advice).length !== 0
       ) {
         setDischargeAdvice(res && res.data && res.data.discharge_advice);
       }

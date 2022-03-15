@@ -9,20 +9,10 @@ import {
   InputLabel,
   Box,
   Button,
-  TableRowProps,
 } from "@material-ui/core";
-import { createStyles, makeStyles, withStyles } from "@material-ui/styles";
-import React from "react";
+import { createStyles, withStyles } from "@material-ui/styles";
 import { useState } from "react";
 import { SelectField, TextInputField } from "../../Common/HelperInputFields";
-import _ from "lodash";
-
-const useStyle = makeStyles(() => ({
-  tableCell: {
-    paddingTop: 0,
-    paddingBottom: 0,
-  },
-}));
 
 const StyledTableRow = withStyles(() =>
   createStyles({

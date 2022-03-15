@@ -212,7 +212,7 @@ export const LocationManagement = (props: LocationManagementProps) => {
         setIsLoading(false);
       }
     },
-    [dispatchAction, offset, rerender]
+    [dispatchAction, offset, facilityId]
   );
 
   useAbortableEffect(

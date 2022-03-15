@@ -1,4 +1,3 @@
-import { result } from "lodash";
 import moment from "moment";
 import { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -82,9 +81,8 @@ const DataDescription = (props: any) => {
 };
 
 export const NeurologicalTable = (props: any) => {
-  const { facilityId, patientId, consultationId } = props;
+  const { consultationId } = props;
   const dispatch: any = useDispatch();
-  const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
@@ -118,7 +116,6 @@ export const NeurologicalTable = (props: any) => {
 
   const fetchDailyRounds = useCallback(
     async (status: statusType) => {
-      setIsLoading(true);
       const res = await dispatch(
         dailyRoundsAnalyse(
           {
@@ -152,7 +149,6 @@ export const NeurologicalTable = (props: any) => {
           setResults(res.data.results);
           setTotalCount(res.data.count);
         }
-        setIsLoading(false);
       }
     },
     [consultationId, dispatch, currentPage]
@@ -178,7 +174,7 @@ export const NeurologicalTable = (props: any) => {
   const upperLimbData: any = [];
   const lowerLimbData: any = [];
   const glasgowData: any = [];
-  Object.entries(results).map((x: any) => {
+  Object.entries(results).forEach((x: any) => {
     let value: any = x[1];
     if (x[1].consciousness_level) {
       locData.push({

@@ -3,9 +3,7 @@ import { useCallback, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
 import { dailyRoundsAnalyse } from "../../../Redux/actions";
-import { make as CriticalCare__PressureScoreViewer } from "../../CriticalCareRecording/PressureSore/CriticalCare__PressureSoreViewer.gen";
-import Pagination from "../../Common/Pagination";
-import { PAGINATION_LIMIT } from "../../../Common/constants";
+import { make as CriticalCarePressureScoreViewer } from "../../CriticalCareRecording/PressureSore/CriticalCare__PressureSoreViewer.gen";
 
 export const PressureSoreDiagrams = (props: any) => {
   const { consultationId } = props;
@@ -16,9 +14,6 @@ export const PressureSoreDiagrams = (props: any) => {
     data: [],
     id: "",
   });
-  const [currentPart, setPart] = useState<any>();
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalCount, setTotalCount] = useState(0);
 
   const fetchDailyRounds = useCallback(
     async (status: statusType) => {
@@ -26,7 +21,7 @@ export const PressureSoreDiagrams = (props: any) => {
       const res = await dispatch(
         dailyRoundsAnalyse(
           {
-            page: currentPage,
+            page: 1,
             fields: ["pressure_sore"],
           },
           { consultationId }
@@ -48,7 +43,7 @@ export const PressureSoreDiagrams = (props: any) => {
         setIsLoading(false);
       }
     },
-    [consultationId, dispatch, currentPage]
+    [consultationId, dispatch]
   );
 
   useEffect(() => {
@@ -60,12 +55,8 @@ export const PressureSoreDiagrams = (props: any) => {
     (status: statusType) => {
       fetchDailyRounds(status);
     },
-    [consultationId, currentPage]
+    [consultationId]
   );
-
-  const handlePagination = (page: number, limit: number) => {
-    setCurrentPage(page);
-  };
 
   useEffect(() => {
     if (Object.keys(results).length > 0)
@@ -121,21 +112,11 @@ export const PressureSoreDiagrams = (props: any) => {
     <div>
       {dates && dropdown(dates)}
       {!isLoading && selectedData.data && (
-        <CriticalCare__PressureScoreViewer
+        <CriticalCarePressureScoreViewer
           pressureSoreParameter={selectedData.data}
           id={selectedData.id}
           consultationId={consultationId}
         />
-      )}
-      {totalCount > PAGINATION_LIMIT && (
-        <div className="mt-4 flex w-full justify-center">
-          <Pagination
-            cPage={currentPage}
-            defaultPerPage={PAGINATION_LIMIT}
-            data={{ totalCount }}
-            onChange={handlePagination}
-          />
-        </div>
       )}
     </div>
   );

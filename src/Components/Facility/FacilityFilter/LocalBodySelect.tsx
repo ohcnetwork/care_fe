@@ -23,7 +23,6 @@ function LocalBodySelect(props: LocalBodySelectProps) {
     className,
     multiple,
     selected,
-    searchAll,
     setSelected,
     margin,
     district,
@@ -65,7 +64,7 @@ function LocalBodySelect(props: LocalBodySelectProps) {
 
           if (selected) {
             setSelectedObject(
-              res.data.find((local_body: any) => local_body.id == selected) ||
+              res.data.find((local_body: any) => local_body.id === selected) ||
                 null
             );
           }
@@ -79,7 +78,7 @@ function LocalBodySelect(props: LocalBodySelectProps) {
     isLocalBodyLoading(true);
     fetchLocalbodies();
     isLocalBodyLoading(false);
-  }, [dispatchAction, district]);
+  }, [dispatchAction, district, selected]);
 
   return (
     <AutoCompleteAsyncField

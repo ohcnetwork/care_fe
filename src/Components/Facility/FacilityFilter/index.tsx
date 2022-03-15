@@ -19,7 +19,6 @@ function useMergeState(initialState: any) {
 const initialStates = [{ id: 0, name: "Choose State *" }];
 const initialDistricts = [{ id: 0, name: "Choose District" }];
 const selectStates = [{ id: 0, name: "Please select your state" }];
-const selectDistrict = [{ id: 0, name: "Please select your district" }];
 
 function FacillityFilter(props: any) {
   let { filter, onChange, closeFilter } = props;
