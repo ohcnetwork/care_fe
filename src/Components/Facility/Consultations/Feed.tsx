@@ -132,6 +132,24 @@ export const Feed: React.FC<IFeedProps> = ({
     }
   }, [cameraAsset]);
 
+  useEffect(() => {
+    if (streamStatus !== StreamStatus.Playing) {
+      setStreamStatus(StreamStatus.Loading);
+      startStream({
+        onSuccess: () => setStreamStatus(StreamStatus.Playing),
+        onError: () => setStreamStatus(StreamStatus.Offline),
+      });
+    }
+  }, [startStream, streamStatus]);
+
+  useAbortableEffect((status: statusType) => {
+    fetchData(status);
+  }, []);
+
+  if (isLoading) {
+    return <Loading />;
+  }
+
   const cameraPTZ = [
     {
       icon: "fa fa-arrow-up",
@@ -179,14 +197,6 @@ export const Feed: React.FC<IFeedProps> = ({
     { icon: "fa fa-undo", label: "Reset", action: "reset" },
     { icon: "fas fa-expand", label: "Full Screen", action: "fullScreen" },
   ];
-
-  useAbortableEffect((status: statusType) => {
-    fetchData(status);
-  }, []);
-
-  if (isLoading) {
-    return <Loading />;
-  }
 
   return (
     <div className="p-2">
