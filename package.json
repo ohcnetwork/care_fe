@@ -128,7 +128,8 @@
     "cypress:run": "cross-env NODE_ENV=development cypress run",
     "prepare": "husky install",
     "lint": "eslint ./src",
-    "lint-fix": "eslint ./src --fix"
+    "lint-fix": "eslint ./src --fix",
+    "format": "prettier ./src --write"
   },
   "browserslist": {
     "production": [

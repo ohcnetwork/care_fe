@@ -7,8 +7,7 @@
     "eslint:recommended",
     "plugin:react/recommended",
     "plugin:react-hooks/recommended",
-    "plugin:prettier/recommended",
-    "plugin:jsx-a11y/strict"
+    "plugin:prettier/recommended"
   ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
@@ -20,7 +19,9 @@
   },
   "plugins": ["react", "@typescript-eslint"],
   "rules": {
-    "quotes": ["error", "double"]
+    "quotes": ["error", "double"],
+    "no-unused-vars": "warn",
+    "react/react-in-jsx-scope": "off"
   },
   "ignorePatterns": ["dist", "public", "lib", "build", "*.bs.js"]
 }
