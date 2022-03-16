@@ -167,11 +167,15 @@
     "cssnano": "^5.0.5",
     "cypress": "^7.5.0",
     "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.5.0",
     "eslint-config-standard": "^16.0.3",
     "eslint-plugin-import": "^2.25.4",
+    "eslint-plugin-jsx-a11y": "^6.5.1",
     "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-promise": "^5.2.0",
-    "eslint-plugin-react": "^7.29.2",
+    "eslint-plugin-react": "^7.29.4",
+    "eslint-plugin-react-hooks": "^4.3.0",
     "gentype": "^4.1.0",
     "http-server": "^0.12.3",
     "husky": "^6.0.0",
@@ -244,7 +248,11 @@
     ]
   },
   "lint-staged": {
-    "**/*": "prettier --write --ignore-unknown"
+    "**/*": [
+      "prettier --write --ignore-unknown",
+      "eslint --fix",
+      "git add"
+    ]
   },
   "eslintConfig": {
     "extends": [
