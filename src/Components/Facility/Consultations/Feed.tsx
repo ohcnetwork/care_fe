@@ -382,7 +382,7 @@ export const Feed: React.FC<IFeedProps> = ({
               </div>
             )}
             {loading && (
-              <div className="absolute right-0 bottom-0 p-4 bg-white bg-opacity-75 rounded-tl">
+              <div className="absolute right-0 top-0 p-4 bg-white bg-opacity-75 rounded-bl">
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 border-2 border-b-0 border-primary-500 rounded-full animate-spin an" />
                   <p className="text-base font-bold">Moving</p>
@@ -390,7 +390,7 @@ export const Feed: React.FC<IFeedProps> = ({
               </div>
             )}
           </div>
-          <div className="mt-8 lg:mt-0 flex-shrink-0 lg:flex flex-col">
+          <div className="mt-8 lg:mt-0 flex-shrink-0 flex lg:flex-col items-stretch">
             {cameraPTZ.map((option: any) => (
               <button
                 className="bg-green-100 hover:bg-green-200 border border-green-100 rounded p-2"
