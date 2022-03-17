@@ -2,40 +2,21 @@ import loadable from "@loadable/component";
 import Grid from "@material-ui/core/Grid";
 import { Button } from "@material-ui/core";
 import { navigate, useQueryParams } from "raviger";
-import { parsePhoneNumberFromString } from "libphonenumber-js";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { externalResultList } from "../../Redux/actions";
-import { PhoneNumberField } from "../Common/HelperInputFields";
 import Pagination from "../Common/Pagination";
 import { InputSearchBox } from "../Common/SearchBox";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import ListFilter from "./ListFilter";
 import moment from "moment";
 import { CSVLink } from "react-csv";
-import { externalResultFormatter } from "./Commons";
 import GetAppIcon from "@material-ui/icons/GetApp";
 import FacilitiesSelectDialogue from "./FacilitiesSelectDialogue";
 import { FacilityModel } from "../Facility/models";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
-
-function Badge(props: { color: string; icon: string; text: string }) {
-  return (
-    <span
-      className="m-1 h-full inline-flex items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-gray-100 text-gray-700"
-      title={props.text}
-    >
-      <i
-        className={
-          "mr-2 text-md text-" + props.color + "-500 fas fa-" + props.icon
-        }
-      ></i>
-      {props.text}
-    </span>
-  );
-}
 
 const RESULT_LIMIT = 14;
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
@@ -135,10 +116,6 @@ export default function ResultList() {
     updateQuery({ ...qParams, mobile_number: value, page: 1 });
   };
 
-  const handleFilter = (value: string) => {
-    updateQuery({ disease_status: value, page: 1 });
-  };
-
   const applyFilter = (data: any) => {
     const filter = { ...qParams, ...data };
     updateQuery(filter);
@@ -148,7 +125,7 @@ export default function ResultList() {
   useEffect(() => {
     applyFilter(local);
     setDataList({ ...localLsgWard });
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const removeFilter = (paramKey: any) => {
     const localData: any = { ...local };
@@ -175,7 +152,7 @@ export default function ResultList() {
     updateQuery({
       ...qParams,
       [paramKey]: lsgParams,
-      ["wards"]: wardParams,
+      wards: wardParams,
     });
     localData[paramKey] = lsgParams.length ? lsgParams : "";
     localData["wards"] = wardParams.length ? wardParams : "";
@@ -271,14 +248,11 @@ export default function ResultList() {
             className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-cool-gray-900"
           >
             <div className="flex">
-              <a
-                href="#"
-                className="group inline-flex space-x-2 text-sm leading-5"
-              >
+              <div className="group inline-flex space-x-2 text-sm leading-5 cursor-pointer">
                 <p className="text-cool-gray-500 group-hover:text-cool-gray-900 transition ease-in-out duration-150">
                   {result.name} - {result.age} {result.age_in}
                 </p>
-              </a>
+              </div>
             </div>
           </td>
           <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-cool-gray-500">

@@ -168,7 +168,12 @@ export default function ListFilter(props: any) {
       setLoading(false);
     }
     getWardList();
-  }, []);
+  }, [
+    dispatch,
+    currentUser.data.district,
+    filter?.local_bodies,
+    filter?.wards,
+  ]);
 
   const filterWards = () => {
     let selectedLsgIds: any = selectedLsgs.map((e) => {

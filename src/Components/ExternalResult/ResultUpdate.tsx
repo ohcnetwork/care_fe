@@ -20,11 +20,7 @@ import {
   externalResult,
   partialUpdateExternalResult,
 } from "../../Redux/actions";
-import {
-  MultilineInputField,
-  SelectField,
-  TextInputField,
-} from "../Common/HelperInputFields";
+import { MultilineInputField, SelectField } from "../Common/HelperInputFields";
 import { navigate } from "raviger";
 
 const Loading = loadable(() => import("../Common/Loading"));
@@ -52,13 +48,13 @@ const FormReducer = (state = initialState, action: any) => {
     case "set_form": {
       return {
         ...state,
-        form: action.form,
+        form: { ...state.form, ...action.form },
       };
     }
     case "set_error": {
       return {
         ...state,
-        errors: action.errors,
+        errors: { ...state.errors, ...action.errors },
       };
     }
     default:
@@ -79,36 +75,6 @@ export default function UpdateResult(props: any) {
   const [isWardLoading, setIsWardLoading] = useState(false);
   const [localBody, setLocalBody] = useState(initialLocalbodies);
   const [ward, setWard] = useState(initialLocalbodies);
-
-  const fetchData = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const res = await dispatchAction(externalResult({ id: id }));
-      if (!status.aborted) {
-        if (res && res.data) {
-          const form = { ...state.form };
-          form["name"] = res.data.name;
-          form["age"] = res.data.age;
-          form["age_in"] = res.data.age_in;
-          form["srf_id"] = res.data.srf_id;
-          form["address"] = res.data.address;
-          form["district"] = res.data.district_object.name;
-          form["local_body"] = String(res.data.local_body);
-          form["ward"] = String(res.data.ward);
-          form["patient_created"] = String(res.data.patient_created);
-
-          dispatch({ type: "set_form", form });
-
-          Promise.all([
-            fetchLocalBody(res.data.district),
-            fetchWards(res.data.local_body),
-          ]);
-        }
-        setIsLoading(false);
-      }
-    },
-    [props.id, dispatchAction]
-  );
 
   const fetchLocalBody = useCallback(
     async (id: string) => {
@@ -138,6 +104,36 @@ export default function UpdateResult(props: any) {
       }
     },
     [dispatchAction]
+  );
+
+  const fetchData = useCallback(
+    async (status: statusType) => {
+      setIsLoading(true);
+      const res = await dispatchAction(externalResult({ id: id }));
+      if (!status.aborted) {
+        if (res && res.data) {
+          const form: any = {};
+          form["name"] = res.data.name;
+          form["age"] = res.data.age;
+          form["age_in"] = res.data.age_in;
+          form["srf_id"] = res.data.srf_id;
+          form["address"] = res.data.address;
+          form["district"] = res.data.district_object.name;
+          form["local_body"] = String(res.data.local_body);
+          form["ward"] = String(res.data.ward);
+          form["patient_created"] = String(res.data.patient_created);
+
+          dispatch({ type: "set_form", form });
+
+          Promise.all([
+            fetchLocalBody(res.data.district),
+            fetchWards(res.data.local_body),
+          ]);
+        }
+        setIsLoading(false);
+      }
+    },
+    [id, dispatchAction, fetchLocalBody, fetchWards]
   );
 
   useAbortableEffect(
