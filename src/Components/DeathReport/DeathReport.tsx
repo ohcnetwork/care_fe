@@ -2,7 +2,6 @@ import React, { useState, useCallback } from "react";
 import loadable from "@loadable/component";
 import { useDispatch } from "react-redux";
 import { getPatient } from "../../Redux/actions";
-import { PatientModel } from "../Patient/models";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { GENDER_TYPES } from "../../Common/constants";
 import {
@@ -42,7 +41,6 @@ export default function PrintDeathReport(props: { id: string }) {
 
   const [patientData, setPatientData] = useState(initialState);
   const [patientName, setPatientName] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
   const [isPrintMode, setIsPrintMode] = useState(false);
   const { id } = props;
   const dispatch: any = useDispatch();
@@ -68,7 +66,6 @@ export default function PrintDeathReport(props: { id: string }) {
 
   const fetchpatient = useCallback(
     async (status: statusType) => {
-      setIsLoading(true);
       const patientRes = await dispatch(getPatient({ id }));
       if (!status.aborted) {
         if (patientRes && patientRes.data) {
@@ -84,11 +81,10 @@ export default function PrintDeathReport(props: { id: string }) {
             is_declared_positive: patientRes.data.is_declared_positive
               ? "Yes"
               : "No",
-            is_vaccinated: patientData.is_vaccinated ? "Yes" : "No",
+            is_vaccinated: patientRes.is_vaccinated ? "Yes" : "No",
           };
           setPatientData(data);
         }
-        setIsLoading(false);
       }
     },
     [dispatch, id]
