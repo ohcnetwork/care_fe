@@ -291,9 +291,9 @@ export default function ManageUsers(props: any) {
       currentUserLevel >= STATE_ADMIN_LEVEL &&
       currentUserLevel < STATE_READ_ONLY_ADMIN_LEVEL
     )
-      return user.state_object.id === currentUser.data.state;
+      return user.state_object?.id === currentUser?.data?.state;
     if (currentUserLevel >= DISTRICT_ADMIN_LEVEL && currentUserLevel > level)
-      return user.district_object.id === currentUser.data.district;
+      return user?.district_object?.id === currentUser?.data?.district;
     return false;
   };
 
