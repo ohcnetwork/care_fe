@@ -4,10 +4,7 @@ import { navigate, useQueryParams } from "raviger";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FacilityModel } from "../Facility/models";
 import { useDispatch } from "react-redux";
-import {
-  getAnyFacility,
-  getFacilityAssetLocation,
-} from "../../Redux/actions";
+import { getAnyFacility, getFacilityAssetLocation } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { SelectField } from "../Common/HelperInputFields";
 import { LocationSelect } from "../Common/LocationSelect";
@@ -35,10 +32,9 @@ function AssetFilter(props: any) {
   const [asset_status, setAssetStatus] = useState<string>(filter.status || "");
   const [facilityId, setFacilityId] = useState<number | "">(filter.facility);
   const [locationId, setLocationId] = useState<string | "">(filter.location);
-  const [qParams, _] = useQueryParams();
+  const qParams = useQueryParams()[0];
 
   useEffect(() => {
-    console.log(facility);
     setFacilityId(facility?.id ? facility?.id : "");
     setLocationId(location?.id ? location?.id : "");
   }, [facility, location]);
@@ -48,7 +44,7 @@ function AssetFilter(props: any) {
     const searchQuery = qParams?.search && `?search=${qParams?.search}`;
     if (searchQuery) navigate(`/assets${searchQuery}`);
     else navigate(`/assets`);
-  }, [qParams]);
+  }, [qParams?.search, closeFilter]);
 
   const fetchFacility = useCallback(
     async (status: statusType) => {
@@ -67,7 +63,7 @@ function AssetFilter(props: any) {
         }
       }
     },
-    [filter.facility]
+    [dispatch, facilityId]
   );
 
   const fetchLocation = useCallback(
@@ -89,7 +85,7 @@ function AssetFilter(props: any) {
         }
       }
     },
-    [filter.location]
+    [dispatch, facilityId, locationId]
   );
 
   useAbortableEffect((status: statusType) => {

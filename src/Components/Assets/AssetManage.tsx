@@ -120,52 +120,55 @@ const AssetManage = (props: AssetManageProps) => {
     );
   };
 
-  const populateTableRows = (txns: AssetTransaction[]) => {
-    if (txns.length > 0) {
-      setTransactionDetails(
-        transactions.map((transaction: AssetTransaction) => (
+  const populateTableRows = useCallback(
+    (txns: AssetTransaction[]) => {
+      if (txns.length > 0) {
+        setTransactionDetails(
+          transactions.map((transaction: AssetTransaction) => (
+            <tr>
+              <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
+                <span className="text-cool-gray-900 font-medium">
+                  {transaction.from_location.name}
+                </span>
+              </td>
+              <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
+                <span className="text-cool-gray-900 font-medium">
+                  {transaction.to_location.name}
+                </span>
+              </td>
+              <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
+                <span className="text-cool-gray-900 font-medium">
+                  {transaction.performed_by.first_name}{" "}
+                  {transaction.performed_by.last_name}
+                </span>
+              </td>
+              <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
+                <span className="text-cool-gray-900 font-medium">
+                  {moment(transaction.modified_date).format("lll")}
+                </span>
+              </td>
+            </tr>
+          ))
+        );
+      } else {
+        setTransactionDetails(
           <tr>
-            <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
-              <span className="text-cool-gray-900 font-medium">
-                {transaction.from_location.name}
-              </span>
-            </td>
-            <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
-              <span className="text-cool-gray-900 font-medium">
-                {transaction.to_location.name}
-              </span>
-            </td>
-            <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
-              <span className="text-cool-gray-900 font-medium">
-                {transaction.performed_by.first_name}{" "}
-                {transaction.performed_by.last_name}
-              </span>
-            </td>
-            <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
-              <span className="text-cool-gray-900 font-medium">
-                {moment(transaction.modified_date).format("lll")}
-              </span>
+            <td
+              className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-cool-gray-500 text-center"
+              colSpan={4}
+            >
+              <h5>No Transactions Found</h5>
             </td>
           </tr>
-        ))
-      );
-    } else {
-      setTransactionDetails(
-        <tr>
-          <td
-            className="px-6 py-4 whitespace-no-wrap text-sm leading-5 text-cool-gray-500 text-center"
-            colSpan={4}
-          >
-            <h5>No Transactions Found</h5>
-          </td>
-        </tr>
-      );
-    }
-  };
+        );
+      }
+    },
+    [transactions]
+  );
 
   useEffect(() => {
     populateTableRows(transactions);
-  }, [transactions]);
+  }, [transactions, populateTableRows]);
 
   if (isLoading) return <Loading />;
   if (isPrintMode) return <PrintPreview />;

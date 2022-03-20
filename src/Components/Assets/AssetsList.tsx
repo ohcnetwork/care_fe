@@ -18,7 +18,6 @@ import Pagination from "../Common/Pagination";
 import { InputSearchBox } from "../Common/SearchBox";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import AssetFilter from "./AssetFilter";
-import { FacilityModel } from "../Facility/models";
 import AdvancedFilterButton from "../Common/AdvancedFilterButton";
 
 const Loading = loadable(() => import("../Common/Loading"));
@@ -106,7 +105,7 @@ const AssetsList = (props: any) => {
     async (status: statusType) => {
       if (qParams.facility) {
         setIsLoading(true);
-        
+
         const res = await dispatch(getAnyFacility(qParams.facility));
 
         if (!status.aborted) {
@@ -134,7 +133,7 @@ const AssetsList = (props: any) => {
         setLocationName("");
       }
     },
-    [dispatch, qParams.location]
+    [dispatch, qParams.location, qParams.facility]
   );
 
   useAbortableEffect(
