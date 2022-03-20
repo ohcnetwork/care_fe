@@ -1,10 +1,13 @@
-import axios from "axios";
 import clsx from "clsx";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import ReactPlayer from "react-player";
 import { useDispatch } from "react-redux";
 import screenfull from "screenfull";
-import { useMSEMediaPlayer } from "../../../Common/hooks/useMSEplayer";
+import { getCameraPTZ } from "../../../Common/constants";
+import {
+  ICameraAssetState,
+  StreamStatus,
+  useMSEMediaPlayer,
+} from "../../../Common/hooks/useMSEplayer";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
 import {
   getConsultation,
@@ -18,21 +21,6 @@ interface IFeedProps {
   facilityId: string;
   patientId: string;
   consultationId: any;
-}
-
-interface ICameraAssetState {
-  id: string;
-  username: string;
-  password: string;
-  hostname: string;
-  port: number;
-}
-
-enum StreamStatus {
-  Playing,
-  Stop,
-  Loading,
-  Offline,
 }
 
 export const Feed: React.FC<IFeedProps> = ({
@@ -114,6 +102,7 @@ export const Feed: React.FC<IFeedProps> = ({
     getPresets,
     relativeMove,
     startStream,
+
     // setVideoEl,
   } = useMSEMediaPlayer({
     config: {
@@ -150,53 +139,7 @@ export const Feed: React.FC<IFeedProps> = ({
     return <Loading />;
   }
 
-  const cameraPTZ = [
-    {
-      icon: "fa fa-arrow-up",
-      label: "Up",
-      action: "up",
-      loadingLabel: "Moving Up",
-    },
-    {
-      icon: "fa fa-arrow-down",
-      label: "Down",
-      action: "down",
-      loadingLabel: "Moving Down",
-    },
-    {
-      icon: "fa fa-arrow-left",
-      label: "Left",
-      action: "left",
-      loadingLabel: "Moving Left",
-    },
-    {
-      icon: "fa fa-arrow-right",
-      label: "Right",
-      action: "right",
-      loadingLabel: "Moving Right",
-    },
-    {
-      value: precision,
-      label: "Precision",
-      action: "precision",
-      loadingLabel: "Setting Precision",
-    },
-    {
-      icon: "fa fa-search-plus",
-      label: "Zoom In",
-      action: "zoomIn",
-      loadingLabel: "Zooming In",
-    },
-    {
-      icon: "fa fa-search-minus",
-      label: "Zoom Out",
-      action: "zoomOut",
-      loadingLabel: "Zooming Out",
-    },
-    { icon: "fa fa-stop", label: "Stop", action: "stop" },
-    { icon: "fa fa-undo", label: "Reset", action: "reset" },
-    { icon: "fas fa-expand", label: "Full Screen", action: "fullScreen" },
-  ];
+  const cameraPTZ = getCameraPTZ(precision);
 
   return (
     <div className="p-2">
@@ -289,7 +232,6 @@ export const Feed: React.FC<IFeedProps> = ({
                 </div>
               )}
             </div>
-            {/* } */}
           </div>
           <div className="lg:flex flex-col bg-green-100 ">
             {cameraPTZ.map((option: any) => (
