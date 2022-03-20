@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import { listFacilityAssetLocation } from "../../Redux/actions";
 import { AutoCompleteAsyncField } from "../Common/HelperInputFields";
@@ -28,7 +28,6 @@ export const LocationSelect = (props: LocationSelectProps) => {
     margin,
     errors,
     searchAll,
-    showAll = true,
     className = "",
     facilityId,
   } = props;
@@ -56,32 +55,33 @@ export const LocationSelect = (props: LocationSelectProps) => {
     onFacilitySearch(e.target.value);
   };
 
-  const onFacilitySearch = useCallback(
-    debounce(async (text: string) => {
-      if (text) {
-        const params = {
-          limit: 50,
-          offset: 0,
-          search_text: text,
-          all: searchAll,
-        };
+  const onFacilitySearch = useMemo(
+    () =>
+      debounce(async (text: string) => {
+        if (text) {
+          const params = {
+            limit: 50,
+            offset: 0,
+            search_text: text,
+            all: searchAll,
+          };
 
-        const res = await dispatchAction(
-          listFacilityAssetLocation(params, {
-            facility_external_id: facilityId,
-          })
-        );
+          const res = await dispatchAction(
+            listFacilityAssetLocation(params, {
+              facility_external_id: facilityId,
+            })
+          );
 
-        if (res && res.data) {
-          setLocationList(res.data.results);
+          if (res && res.data) {
+            setLocationList(res.data.results);
+          }
+          isFacilityLoading(false);
+        } else {
+          setLocationList([]);
+          isFacilityLoading(false);
         }
-        isFacilityLoading(false);
-      } else {
-        setLocationList([]);
-        isFacilityLoading(false);
-      }
-    }, 300),
-    []
+      }, 300),
+    [dispatchAction, facilityId, searchAll]
   );
 
   return (

@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import { getAllFacilities, getPermittedFacilities } from "../../Redux/actions";
 import { AutoCompleteAsyncField } from "../Common/HelperInputFields";
@@ -52,31 +52,32 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
     onFacilitySearch(e.target.value);
   };
 
-  const onFacilitySearch = useCallback(
-    debounce(async (text: string) => {
-      if (text) {
-        const params = {
-          limit: 50,
-          offset: 0,
-          search_text: text,
-          all: searchAll,
-          facility_type: facilityType,
-        };
+  const onFacilitySearch = useMemo(
+    () =>
+      debounce(async (text: string) => {
+        if (text) {
+          const params = {
+            limit: 50,
+            offset: 0,
+            search_text: text,
+            all: searchAll,
+            facility_type: facilityType,
+          };
 
-        const res = await dispatchAction(
-          showAll ? getAllFacilities(params) : getPermittedFacilities(params)
-        );
+          const res = await dispatchAction(
+            showAll ? getAllFacilities(params) : getPermittedFacilities(params)
+          );
 
-        if (res && res.data) {
-          setFacilityList(res.data.results);
+          if (res && res.data) {
+            setFacilityList(res.data.results);
+          }
+          isFacilityLoading(false);
+        } else {
+          setFacilityList([]);
+          isFacilityLoading(false);
         }
-        isFacilityLoading(false);
-      } else {
-        setFacilityList([]);
-        isFacilityLoading(false);
-      }
-    }, 300),
-    []
+      }, 300),
+    [dispatchAction, facilityType, searchAll, showAll]
   );
 
   return (

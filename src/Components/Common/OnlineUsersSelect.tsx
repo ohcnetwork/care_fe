@@ -37,7 +37,7 @@ export const OnlineUsersSelect = (props: Props) => {
 
   const fetchUsers = useCallback(
     async (status: statusType) => {
-      setState({ ...state, loading: true });
+      setState((prevState) => ({ ...prevState, loading: true }));
       const params = {
         user_type: user_type,
         ordering: "-last-login",
@@ -46,11 +46,15 @@ export const OnlineUsersSelect = (props: Props) => {
       const res = await dispatchAction(getUserList(params));
       if (!status.aborted) {
         if (res && res.data) {
-          setState({ ...state, loading: false, users: res.data.results });
+          setState((prevState) => ({
+            ...prevState,
+            loading: false,
+            users: res.data.results,
+          }));
         }
       }
     },
-    [dispatchAction, searchTerm]
+    [dispatchAction, searchTerm, user_type]
   );
 
   useAbortableEffect(
@@ -67,7 +71,7 @@ export const OnlineUsersSelect = (props: Props) => {
     if (isDropdownExpanded && searchFieldRef.current) {
       searchFieldRef.current.focus();
     }
-  }, [isDropdownExpanded]);
+  }, [isDropdownExpanded, searchFieldRef]);
 
   return (
     <div className="pb-2">
@@ -125,7 +129,7 @@ export const OnlineUsersSelect = (props: Props) => {
                     {selectedUser
                       ? selectedUser?.first_name + " " + selectedUser?.last_name
                       : `Assign a ${
-                          user_type == "Doctor" ? "Doctor" : "Volunteer"
+                          user_type === "Doctor" ? "Doctor" : "Volunteer"
                         }`}
                   </span>
                 </div>
@@ -159,6 +163,7 @@ export const OnlineUsersSelect = (props: Props) => {
               role="listbox"
               aria-labelledby="listbox-label"
               aria-activedescendant="listbox-item-3"
+              tabIndex={0}
               className="multiselect-dropdown__search-dropdown w-full border border-gray-400 bg-white mt-1 rounded-lg shadow-lg px-4 py-2 z-50"
             >
               {!loading ? (
@@ -176,6 +181,7 @@ export const OnlineUsersSelect = (props: Props) => {
                       }}
                       id="listbox-item-0"
                       role="option"
+                      aria-selected={user.id?.toString() === userId}
                       className="flex text-xs py-1 items-center justify-between w-full hover:bg-gray-200 focus:outline-none focus:bg-gray-200"
                     >
                       <div className="flex items-center space-x-3">
@@ -194,7 +200,7 @@ export const OnlineUsersSelect = (props: Props) => {
                           {user.first_name} {user.last_name}
                         </span>
                       </div>
-                      {user.id?.toString() == userId && (
+                      {user.id?.toString() === userId && (
                         <span className="flex items-center">
                           <svg
                             className="h-5 w-5"

@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import { getUserList } from "../../Redux/actions";
 import { AutoCompleteAsyncField } from "../Common/HelperInputFields";
@@ -48,27 +48,28 @@ export const UserSelect = (props: UserSelectProps) => {
     onUserSearch(e.target.value);
   };
 
-  const onUserSearch = useCallback(
-    debounce(async (text: string) => {
-      if (text) {
-        const params = {
-          limit: 50,
-          offset: 0,
-          search_text: text,
-        };
+  const onUserSearch = useMemo(
+    () =>
+      debounce(async (text: string) => {
+        if (text) {
+          const params = {
+            limit: 50,
+            offset: 0,
+            search_text: text,
+          };
 
-        const res = await dispatchAction(getUserList(params));
+          const res = await dispatchAction(getUserList(params));
 
-        if (res && res.data) {
-          setUserList(res.data.results);
+          if (res && res.data) {
+            setUserList(res.data.results);
+          }
+          isUserLoading(false);
+        } else {
+          setUserList([]);
+          isUserLoading(false);
         }
-        isUserLoading(false);
-      } else {
-        setUserList([]);
-        isUserLoading(false);
-      }
-    }, 300),
-    []
+      }, 300),
+    [dispatchAction]
   );
 
   return (

@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { TextFieldProps } from "@material-ui/core";
 import debounce from "lodash/debounce";
 
@@ -11,7 +11,7 @@ type TextFieldPropsExtended = TextFieldProps & {
 export const InputSearchBox = (props: TextFieldPropsExtended) => {
   const { search, placeholder, value } = props;
   const [searchValue, setSearchValue] = useState(value);
-  const handler = useCallback(debounce(search, 1200), [search]);
+  const handler = useMemo(() => debounce(search, 1200), [search]);
 
   const handleKeyDown = (event: any) => {
     const value = event.target.value;

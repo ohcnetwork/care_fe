@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import { listFacilityBeds } from "../../Redux/actions";
 import { AutoCompleteAsyncField } from "../Common/HelperInputFields";
@@ -52,31 +52,32 @@ export const BedSelect = (props: BedSelectProps) => {
     onBedSearch(e.target.value);
   };
 
-  const onBedSearch = useCallback(
-    debounce(async (text: string) => {
-      if (text) {
-        const params = {
-          limit: 50,
-          offset: 0,
-          search_text: text,
-          all: searchAll,
-          facility,
-          location,
-        };
+  const onBedSearch = useMemo(
+    () =>
+      debounce(async (text: string) => {
+        if (text) {
+          const params = {
+            limit: 50,
+            offset: 0,
+            search_text: text,
+            all: searchAll,
+            facility,
+            location,
+          };
 
-        const res = await dispatchAction(listFacilityBeds(params));
+          const res = await dispatchAction(listFacilityBeds(params));
 
-        if (res && res.data) {
-          setBedList(res.data.results);
-          console.log(res.data.results);
+          if (res && res.data) {
+            setBedList(res.data.results);
+            console.log(res.data.results);
+          }
+          isBedLoading(false);
+        } else {
+          setBedList([]);
+          isBedLoading(false);
         }
-        isBedLoading(false);
-      } else {
-        setBedList([]);
-        isBedLoading(false);
-      }
-    }, 300),
-    []
+      }, 300),
+    [dispatchAction, facility, location, searchAll]
   );
 
   return (

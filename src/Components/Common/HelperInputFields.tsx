@@ -73,17 +73,7 @@ export interface DefaultNativeSelectInputProps extends NativeSelectInputProps {
 
 // Type Declarations
 type TextFieldPropsExtended = TextFieldProps & { errors: string };
-type Option = { text: string; score: number };
-interface InputProps {
-  options: Array<Option>;
-  onChange: (
-    e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
-    index: number
-  ) => void;
-  handleDeleteOption: (index: number) => void;
-  errors: Array<Option>;
-  onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
-}
+
 interface DateInputFieldProps extends DatePickerProps {
   value: string;
   onChange: (
@@ -102,6 +92,7 @@ interface TimeInputFieldProps {
     date: MaterialUiPickersDate,
     value?: string | null | undefined
   ) => void;
+  label?: string;
 }
 
 interface CheckboxProps extends Omit<FormControlLabelProps, "control"> {
@@ -210,7 +201,7 @@ export const DateInputField = (props: DateInputFieldProps) => {
   );
 };
 
-export const TimeInputField = (props: any) => {
+export const TimeInputField = (props: TimeInputFieldProps) => {
   const { value, onChange, label } = props;
   return (
     <MuiPickersUtilsProvider utils={DateFnsUtils}>
@@ -238,7 +229,9 @@ export const ShowRadioOptions = (props: OptionsProps) => {
   return (
     <div>
       {options.map((opt: any, i: number) => {
-        const checked = values.findIndex((val: any) => val.answerId == opt.id);
+        const checked = values.findIndex(
+          (val: any) => String(val.answerId) === String(opt.id)
+        );
         return (
           <div key={i}>
             <Radio

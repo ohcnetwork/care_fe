@@ -1,4 +1,3 @@
-import loadable from "@loadable/component";
 import { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -10,18 +9,15 @@ export const UserSelect = (props: any) => {
   const dispatchAction: any = useDispatch();
   const { facilityId, userId, onSelect, placeholder = "Select a User" } = props;
   const [users, setUsers] = useState(new Array<any>());
-  const [isLoading, setIsLoading] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
   const fetchUsers = useCallback(
     async (status: statusType) => {
-      setIsLoading(true);
       const res = await dispatchAction(getFacilityUsers(facilityId));
       if (!status.aborted) {
         if (res && res.data) {
           setUsers(res.data);
         }
-        setIsLoading(false);
       }
     },
     [facilityId, dispatchAction]
@@ -135,7 +131,7 @@ export const UserSelect = (props: any) => {
                           )
                         </span>
                       </div>
-                      {user.id == userId && (
+                      {user.id === userId && (
                         <span className="absolute inset-y-0 right-0 flex items-center pr-4">
                           <svg
                             className="h-5 w-5"
