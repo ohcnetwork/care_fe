@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import axios from "axios";
 
-interface IAsset {
+export interface IAsset {
   username: string;
   password: string;
   hostname: string;
@@ -19,6 +19,21 @@ interface UseMSEMediaPlayerOption {
   config: IAsset;
   url?: string;
   videoEl: HTMLVideoElement | null;
+}
+
+export interface ICameraAssetState {
+  id: string;
+  username: string;
+  password: string;
+  hostname: string;
+  port: number;
+}
+
+export enum StreamStatus {
+  Playing,
+  Stop,
+  Loading,
+  Offline,
 }
 
 interface UseMSEMediaPlayerReturnType {
@@ -99,7 +114,10 @@ const gotoPreset =
   (payload: IGotoPresetPayload, options: IOptions = {}) => {
     const { middlewareHostname } = config;
     axios
-      .post(`https://${middlewareHostname}/gotoPreset`, payload)
+      .post(`https://${middlewareHostname}/gotoPreset`, {
+        ...payload,
+        ...config,
+      })
       .then((resp: any) => options?.onSuccess && options.onSuccess(resp))
       .catch((err: any) => options?.onError && options.onError(err));
   };
@@ -200,7 +218,6 @@ export const useMSEMediaPlayer = ({
   let wsRef = useRef<WebSocket>();
   let mseSourceBuffer: any;
 
-  console.log("useMSEMediaPlayer", { videoEl, wsRef });
   const pushPacket = () => {
     if (!mseSourceBuffer.updating) {
       if (mseQueue.length > 0) {
