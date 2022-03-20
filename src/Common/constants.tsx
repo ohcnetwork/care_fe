@@ -600,3 +600,51 @@ export const GENDER: { [key: number]: string } = GENDER_TYPES.reduce(
   (acc, curr) => ({ ...acc, [curr.id]: curr.text }),
   {}
 );
+
+export const getCameraPTZ = (precision: number) => [
+  {
+    icon: "fa fa-arrow-up",
+    label: "Up",
+    action: "up",
+    loadingLabel: "Moving Up",
+  },
+  {
+    icon: "fa fa-arrow-down",
+    label: "Down",
+    action: "down",
+    loadingLabel: "Moving Down",
+  },
+  {
+    icon: "fa fa-arrow-left",
+    label: "Left",
+    action: "left",
+    loadingLabel: "Moving Left",
+  },
+  {
+    icon: "fa fa-arrow-right",
+    label: "Right",
+    action: "right",
+    loadingLabel: "Moving Right",
+  },
+  {
+    value: precision,
+    label: "Precision",
+    action: "precision",
+    loadingLabel: "Setting Precision",
+  },
+  {
+    icon: "fa fa-search-plus",
+    label: "Zoom In",
+    action: "zoomIn",
+    loadingLabel: "Zooming In",
+  },
+  {
+    icon: "fa fa-search-minus",
+    label: "Zoom Out",
+    action: "zoomOut",
+    loadingLabel: "Zooming Out",
+  },
+  { icon: "fa fa-stop", label: "Stop", action: "stop" },
+  { icon: "fa fa-undo", label: "Reset", action: "reset" },
+  { icon: "fas fa-expand", label: "Full Screen", action: "fullScreen" },
+];
