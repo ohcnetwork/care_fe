@@ -10,6 +10,7 @@ import {
   StreamStatus,
   useMSEMediaPlayer,
 } from "../../../Common/hooks/useMSEplayer";
+import { useFeedPTZ } from "../../../Common/hooks/useFeedPTZ";
 const PageTitle = loadable(() => import("../../Common/PageTitle"));
 
 const LiveFeed = (props: any) => {
@@ -31,20 +32,27 @@ const LiveFeed = (props: any) => {
   const videoEl = videRef.current as HTMLVideoElement;
   let url = `wss://demo:demo@mse_test.coronasafe.live/stream/demo/channel/0/mse?uuid=demo&channel=0`;
 
-  const {
-    absoluteMove,
-    getPTZPayload,
-    getPresets,
-    relativeMove,
-    startStream,
-    gotoPreset, // setVideoEl,
-  } = useMSEMediaPlayer({
+  const { startStream } = useMSEMediaPlayer({
     config: {
       middlewareHostname,
       ...cameraAsset,
     },
     url,
     videoEl,
+  });
+
+  const {
+    absoluteMove,
+
+    getPTZPayload,
+    getPresets,
+    gotoPreset,
+    relativeMove,
+  } = useFeedPTZ({
+    config: {
+      middlewareHostname,
+      ...cameraAsset,
+    },
   });
 
   const getBedPresets = async (id: any) => {
@@ -93,7 +101,7 @@ const LiveFeed = (props: any) => {
       <PageTitle title="Live Feed" hideBack={true} />
 
       <div className="mt-4 flex flex-col">
-        <div className="flex flex-col md:flex-row gap-4 mt-4 relative">
+        <div className="flex flex-col lg:flex-row gap-4 mt-4 relative">
           <div className="flex-1">
             {/* ADD VIDEO PLAYER HERE */}
             <div className="mb-4 lg:mb-0 relative feed-aspect-ratio w-full bg-primary-100 rounded">
@@ -195,8 +203,8 @@ const LiveFeed = (props: any) => {
             </div>
           </div>
 
-          <div className="flex flex-col mx-4 ">
-            <nav className=" flex  ">
+          <div className="flex flex-col mx-4 max-w-sm">
+            <nav className="flex w-full">
               <button
                 className={`flex-1 p-4  font-bold text-center  text-gray-700 hover:text-gray-800  ${
                   showDefaultPresets
@@ -222,13 +230,13 @@ const LiveFeed = (props: any) => {
                 Patient Presets
               </button>
             </nav>
-            <div className="min-w-min-content space-y-4 my-2">
-              <div className="grid grid-cols-2 my-auto gap-4 ">
+            <div className="w-full space-y-4 my-2">
+              <div className="grid grid-cols-2 my-auto gap-2">
                 {showDefaultPresets
                   ? viewOptions?.map((option: any, i) => (
                       <button
                         key={i}
-                        className="flex gap-2 w-52 bg-green-100 border border-white rounded-md p-3 text-black  hover:bg-green-500 hover:text-white truncate"
+                        className="flex flex-wrap gap-2 w-full max- bg-green-100 border border-white rounded-md p-3 text-black  hover:bg-green-500 hover:text-white truncate"
                         onClick={() => {
                           setLoading(`Moving to Preset ${option.label}`);
                           gotoPreset(

@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import screenfull from "screenfull";
 import { getCameraPTZ } from "../../../Common/constants";
+import { useFeedPTZ } from "../../../Common/hooks/useFeedPTZ";
 import {
   ICameraAssetState,
   StreamStatus,
@@ -96,13 +97,7 @@ export const Feed: React.FC<IFeedProps> = ({
 
   let url = `wss://demo:demo@mse_test.coronasafe.live/stream/demo/channel/0/mse?uuid=demo&channel=0`;
   const {
-    absoluteMove,
-    getCameraStatus,
-    getPTZPayload,
-    getPresets,
-    relativeMove,
     startStream,
-
     // setVideoEl,
   } = useMSEMediaPlayer({
     config: {
@@ -111,6 +106,19 @@ export const Feed: React.FC<IFeedProps> = ({
     },
     url,
     videoEl: liveFeedPlayerRef.current,
+  });
+
+  const {
+    absoluteMove,
+    getCameraStatus,
+    getPTZPayload,
+    getPresets,
+    relativeMove,
+  } = useFeedPTZ({
+    config: {
+      middlewareHostname,
+      ...cameraAsset,
+    },
   });
 
   useEffect(() => {
