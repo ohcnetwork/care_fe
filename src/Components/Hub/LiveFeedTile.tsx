@@ -4,7 +4,6 @@ import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
 import ReactPlayer from "react-player";
 import screenfull from "screenfull";
-import loadable from "@loadable/component";
 import { getAsset, listAssetBeds } from "../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 
@@ -74,7 +73,7 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
     (status: statusType) => fetchData(status),
     [dispatch, fetchData]
   );
-  const requestStream = () => {
+  const requestStream = useCallback(() => {
     axios
       .post(`https://${asset.meta.middleware_hostname}/start`, {
         uri: "rtsp://remote:qwerty123@192.168.1.64:554/",
@@ -87,7 +86,7 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
       .catch((ex: any) => {
         // console.error('Error while refreshing',ex);
       });
-  };
+  }, [asset.meta.middleware_hostname]);
   const stopStream = (url: string | undefined) => {
     console.log("stop", url);
     if (url) {
@@ -131,10 +130,13 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
         // console.error('Error while refreshing',ex);
       });
   };
-  const getBedPresets = async (asset: any) => {
-    const bedAssets = await dispatch(listAssetBeds({ asset: props.assetId }));
-    setBedPresets(bedAssets.data.results);
-  };
+  const getBedPresets = useCallback(
+    async (asset: any) => {
+      const bedAssets = await dispatch(listAssetBeds({ asset: props.assetId }));
+      setBedPresets(bedAssets.data.results);
+    },
+    [dispatch, props.assetId]
+  );
   const gotoBedPreset = (preset: any) => {
     absoluteMove(preset.meta.position);
   };
@@ -208,20 +210,23 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
     }
   };
 
-  const absoluteMove = (data: any) => {
-    setLoading(true);
-    axios
-      .post(`https://${asset.meta.middleware_hostname}/absoluteMove`, {
-        ...data,
-        ...asset,
-      })
-      .then((resp: any) => {
-        getCameraStatus(asset);
-      })
-      .catch((ex: any) => {
-        console.error("Error while absolute move", ex);
-      });
-  };
+  const absoluteMove = useCallback(
+    (data: any) => {
+      setLoading(true);
+      axios
+        .post(`https://${asset.meta.middleware_hostname}/absoluteMove`, {
+          ...data,
+          ...asset,
+        })
+        .then((resp: any) => {
+          getCameraStatus(asset);
+        })
+        .catch((ex: any) => {
+          console.error("Error while absolute move", ex);
+        });
+    },
+    [asset]
+  );
 
   useEffect(() => {
     if (asset) {
@@ -229,11 +234,11 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
       getBedPresets(asset);
       requestStream();
     }
-  }, [asset]);
+  }, [asset, getBedPresets, requestStream]);
 
   useEffect(() => {
     if (bedPresets.length > 0) absoluteMove(bedPresets[0].meta.position);
-  }, [bedPresets]);
+  }, [bedPresets, absoluteMove]);
 
   const liveFeedPlayerRef = useRef<any>(null);
   const handleClickFullscreen = () => {
