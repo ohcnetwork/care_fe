@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import axios from "axios";
 
 export interface IAsset {
@@ -37,15 +37,8 @@ export enum StreamStatus {
 }
 
 interface UseMSEMediaPlayerReturnType {
-  absoluteMove: (payload: PTZPayload, options: IOptions) => void;
-  relativeMove: (payload: PTZPayload, options: IOptions) => void;
-  getPTZPayload: (action: PTZ) => PTZPayload;
-  getCameraStatus: (options: IOptions) => void;
-  getPresets: (options: IOptions) => void;
-  gotoPreset: (payload: IGotoPresetPayload, options: IOptions) => void;
   stopStream: (config: { id: string }, options: IOptions) => void;
   startStream: (options?: IOptions) => void;
-  // setVideoEl: (ref: any) => void;
 }
 
 interface IOptions {
@@ -79,73 +72,6 @@ const stopStream =
       })
       .then((res) => options?.onSuccess && options.onSuccess(res))
       .catch((err) => options.onError && options.onError(err));
-  };
-
-const getCameraStatus =
-  (config: IAsset) =>
-  (options: IOptions = {}) => {
-    const { hostname, middlewareHostname, password, port, username } = config;
-    axios
-      .get(
-        `https://${middlewareHostname}/status?hostname=${hostname}&port=${port}&username=${username}&password=${password}`
-      )
-      .then((resp: any) => options?.onSuccess && options.onSuccess(resp))
-      .catch((err: any) => options?.onError && options.onError(err));
-  };
-
-const getPresets =
-  (config: IAsset) =>
-  (options: IOptions = {}) => {
-    const { hostname, middlewareHostname, password, port, username } = config;
-    axios
-      .get(
-        `https://${middlewareHostname}/presets?hostname=${hostname}&port=${port}&username=${username}&password=${password}`
-      )
-      .then((resp: any) => options?.onSuccess && options.onSuccess(resp))
-      .catch((err: any) => options?.onError && options.onError(err));
-  };
-
-interface IGotoPresetPayload {
-  preset: string;
-}
-
-const gotoPreset =
-  (config: IAsset) =>
-  (payload: IGotoPresetPayload, options: IOptions = {}) => {
-    const { middlewareHostname } = config;
-    axios
-      .post(`https://${middlewareHostname}/gotoPreset`, {
-        ...payload,
-        ...config,
-      })
-      .then((resp: any) => options?.onSuccess && options.onSuccess(resp))
-      .catch((err: any) => options?.onError && options.onError(err));
-  };
-
-const absoluteMove =
-  (config: IAsset) =>
-  (payload: PTZPayload, options: IOptions = {}) => {
-    const { middlewareHostname } = config;
-    axios
-      .post(`https://${middlewareHostname}/absoluteMove`, {
-        ...config,
-        ...payload,
-      })
-      .then((resp: any) => options?.onSuccess && options.onSuccess(resp))
-      .catch((err: any) => options?.onError && options.onError(err));
-  };
-
-const relativeMove =
-  (config: IAsset) =>
-  (payload: PTZPayload, options: IOptions = {}) => {
-    const { middlewareHostname } = config;
-    axios
-      .post(`https://${middlewareHostname}/relativeMove`, {
-        ...payload,
-        ...config,
-      })
-      .then((resp: any) => options?.onSuccess && options.onSuccess(resp))
-      .catch((err: any) => options?.onError && options.onError(err));
   };
 
 export const getPTZPayload = (action: PTZ): PTZPayload => {
@@ -323,14 +249,14 @@ export const useMSEMediaPlayer = ({
     }
   });
 
+  useEffect(() => {
+    return () => {
+      wsRef.current?.close();
+    };
+  }, []);
+
   return {
-    absoluteMove: absoluteMove(config),
-    relativeMove: relativeMove(config),
-    getPTZPayload,
     startStream: startStream,
     stopStream: stopStream({ ...config, ws: wsRef.current }),
-    getCameraStatus: getCameraStatus(config),
-    getPresets: getPresets(config),
-    gotoPreset: gotoPreset(config),
   };
 };
