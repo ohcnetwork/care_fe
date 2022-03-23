@@ -35,7 +35,6 @@ const TreatmentSummary = (props: any) => {
   const [investigations, setInvestigations] = useState<Array<any>>([]);
   const [dailyRounds, setDailyRounds] = useState<any>({});
 
-  console.log(dailyRounds);
   const fetchPatientData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
@@ -43,6 +42,8 @@ const TreatmentSummary = (props: any) => {
       if (!status.aborted) {
         if (res && res.data) {
           setPatientData(res.data);
+        } else {
+          setPatientData({});
         }
       }
       setIsLoading(false);
@@ -62,6 +63,8 @@ const TreatmentSummary = (props: any) => {
             {}
           );
           setInvestigations(valueMap);
+        } else {
+          setInvestigations([]);
         }
       }
       setIsLoading(false);
@@ -78,9 +81,11 @@ const TreatmentSummary = (props: any) => {
       if (!status.aborted) {
         if (res && res.data) {
           setConsultationData(res.data);
-        }
-        if (res.data.last_daily_round) {
-          setDailyRounds(res.data.last_daily_round);
+          if (res.data.last_daily_round) {
+            setDailyRounds(res.data.last_daily_round);
+          }
+        } else {
+          setConsultationData({});
         }
       }
       setIsLoading(false);
