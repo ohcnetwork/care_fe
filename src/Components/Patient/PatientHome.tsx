@@ -1411,7 +1411,7 @@ export const PatientHome = (props: any) => {
                       Present Health
                     </div>
                     <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-pre-wrap">
-                      {patientData.present_health}
+                      {patientData.ongoing_medication}
                     </div>
                   </div>
                 )}

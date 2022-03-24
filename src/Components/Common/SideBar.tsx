@@ -172,7 +172,7 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
             <Close color="inherit" />
           </IconButton>
         </div>
-        <nav className="flex-1 px-2 pb-32 h-screen overflow-y-auto customized-scrollbar overflow-x-hidden">
+        <nav className="flex-1 px-2 overflow-x-hidden">
           {menus.map((item) => {
             return (
               <Link
@@ -231,7 +231,7 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
 
         <div
           className={clsx(
-            "fixed bottom-0 flex flex-no-wrap items-center ml-2 bg-primary-800 overflow-hidden transition-all duration-300 py-4",
+            "fixed bottom-0 flex flex-no-wrap items-center ml-2 overflow-hidden transition-all duration-300 py-4",
             expanded ? "w-60" : "w-10"
           )}
         >

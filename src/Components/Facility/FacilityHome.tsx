@@ -350,40 +350,38 @@ export const FacilityHome = (props: any) => {
             Information on Oxygen
           </h1>
 
-          <div className="grid grid-cols-5 lg:grid-cols-6 mb-6 max-w-3xl p-0 bg-white break-all hy">
-            <div className="border p-2 lg:col-span-2"></div>
-            <div className="border p-2 text-center font-semibold">Liquid</div>
-            <div className="border p-2 text-center font-semibold">B</div>
-            <div className="border p-2 text-center font-semibold">C</div>
-            <div className="border p-2 text-center font-semibold">D</div>
-            <div className="border p-2 font-semibold lg:col-span-2">
-              Capacity
-            </div>
-            <div className="border p-2 text-center">
+          <div className="grid grid-cols-5 mb-6 max-w-2xl p-0 bg-white break-all">
+            <div className="border p-2"></div>
+            <div className="border p-2 text-right font-semibold">Liquid</div>
+            <div className="border p-2 text-right font-semibold">B</div>
+            <div className="border p-2 text-right font-semibold">C</div>
+            <div className="border p-2 text-right font-semibold">D</div>
+            <div className="border p-2 font-semibold">Capacity</div>
+            <div className="border p-2 text-right ">
               {facilityData.oxygen_capacity}
             </div>
-            <div className="border p-2 text-center">
+            <div className="border p-2 text-right ">
               {facilityData.type_b_cylinders}
             </div>
-            <div className="border p-2 text-center">
+            <div className="border p-2 text-right ">
               {facilityData.type_c_cylinders}
             </div>
-            <div className="border p-2 text-center">
+            <div className="border p-2 text-right ">
               {facilityData.type_d_cylinders}
             </div>
-            <div className="border p-2 font-semibold lg:col-span-2">
+            <div className="border p-2 font-semibold">
               Daily Expected Consumption
             </div>
-            <div className="border p-2 text-center">
+            <div className="border p-2 text-right">
               {facilityData.expected_oxygen_requirement}
             </div>
-            <div className="border p-2 text-center">
+            <div className="border p-2 text-right">
               {facilityData.expected_type_b_cylinders}
             </div>
-            <div className="border p-2 text-center">
+            <div className="border p-2 text-right">
               {facilityData.expected_type_c_cylinders}
             </div>
-            <div className="border p-2 text-center">
+            <div className="border p-2 text-right">
               {facilityData.expected_type_d_cylinders}
             </div>
           </div>

@@ -365,13 +365,3 @@
     border: 3px solid theme(colors.gray.100);
   }
 }
-
-.customized-scrollbar::-webkit-scrollbar {
-  width: 6px;
-}
-.customized-scrollbar::-webkit-scrollbar-track {
-  background: #03543f;
-}
-.customized-scrollbar::-webkit-scrollbar-thumb {
-  border: none;
-}
