@@ -87,13 +87,20 @@ const LiveFeed = (props: any) => {
   const cameraPTZ = getCameraPTZ(precision);
 
   useEffect(() => {
+    let tId: any;
     if (streamStatus !== StreamStatus.Playing) {
       setStreamStatus(StreamStatus.Loading);
-      startStream({
-        onSuccess: () => setStreamStatus(StreamStatus.Playing),
-        onError: () => setStreamStatus(StreamStatus.Offline),
-      });
+      tId = setTimeout(() => {
+        startStream({
+          onSuccess: () => setStreamStatus(StreamStatus.Playing),
+          onError: () => setStreamStatus(StreamStatus.Offline),
+        });
+      }, 100);
     }
+
+    return () => {
+      clearTimeout(tId);
+    };
   }, [startStream, streamStatus]);
 
   return (

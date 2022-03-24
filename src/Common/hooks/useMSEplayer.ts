@@ -245,7 +245,6 @@ export const useMSEMediaPlayer = ({
       videoEl.addEventListener("error", (e) => {
         console.log("video_error", e);
       });
-      startStream();
     }
   });
 

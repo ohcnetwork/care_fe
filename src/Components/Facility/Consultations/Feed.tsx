@@ -130,13 +130,20 @@ export const Feed: React.FC<IFeedProps> = ({
   }, [cameraAsset]);
 
   useEffect(() => {
+    let tId: any;
     if (streamStatus !== StreamStatus.Playing) {
       setStreamStatus(StreamStatus.Loading);
-      startStream({
-        onSuccess: () => setStreamStatus(StreamStatus.Playing),
-        onError: () => setStreamStatus(StreamStatus.Offline),
-      });
+      tId = setTimeout(() => {
+        startStream({
+          onSuccess: () => setStreamStatus(StreamStatus.Playing),
+          onError: () => setStreamStatus(StreamStatus.Offline),
+        });
+      }, 100);
     }
+
+    return () => {
+      clearTimeout(tId);
+    };
   }, [startStream, streamStatus]);
 
   useAbortableEffect((status: statusType) => {
