@@ -4,14 +4,16 @@ export const LinePlot = (props: any) => {
   const { title, name, xData, yData, low = null, high = null } = props;
   let generalOptions = {
     title: {
-      text: title,
-      subtext: `current value: {0|${yData[yData.length - 1] || "NA"}}`,
-      padding: [0, 0, 10, 0],
-      subtextStyle: {
-        fontSize: 14,
-        fontWeight: "bold",
+      text: `${title} [ {0|${yData[yData.length - 1] || "NA"}} ]`,
+      textStyle: {
+        fontSize: 20,
         rich: {
-          0: { color: "#5470C6" },
+          0: {
+            fontSize: 14,
+            fontWeight: "bold",
+            padding: [0, 5],
+            color: "#5470C6",
+          },
         },
       },
     },

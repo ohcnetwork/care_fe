@@ -16,21 +16,25 @@ export const StackedLinePlot = (props: any) => {
   const generalOptions = {
     color: COLORS,
     title: {
-      text: title,
-      subtext:
-        "current value(s): " +
+      text:
+        title +
+        " [ " +
         yData
           .map(
             (x: any, i: number) => `{${i}|${x.data[x.data.length - 1] ?? "NA"}}`
           )
-          .join(" | "),
-      padding: [0, 0, 10, 0],
-      subtextStyle: {
-        fontSize: 14,
-        fontWeight: "bold",
+          .join(" | ") +
+        " ] ",
+      textStyle: {
+        fontSize: 20,
         rich: Object.assign(
           {},
-          COLORS.map((x: any) => ({ color: x }))
+          COLORS.map((x: any) => ({
+            fontSize: 14,
+            fontWeight: "bold",
+            padding: [0, 5],
+            color: x,
+          }))
         ),
       },
     },
