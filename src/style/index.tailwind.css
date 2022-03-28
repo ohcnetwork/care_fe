@@ -407,3 +407,20 @@ button:disabled,
     background-position: 1000px 0;
   }
 }
+
+.feed-aspect-ratio {
+  aspect-ratio: 16/9;
+}
+
+/* .player-wrapper {
+  width: auto;
+  height: auto;
+}
+.react-player {
+  aspect-ratio: 16/9;
+  position: relative;
+}
+
+.react-player > div {
+  position: absolute;
+} */

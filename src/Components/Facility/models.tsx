@@ -109,6 +109,7 @@ export interface ConsultationModel {
   ett_tt?: number;
   cuff_pressure?: number;
   lines?: any;
+  last_daily_round?: any;
 }
 export interface PatientStatsModel {
   id?: number;
@@ -155,4 +156,16 @@ export interface LocationModel {
   facility?: {
     name: string;
   };
+}
+
+export interface BedModel {
+  id?: string;
+  bed_type?: string;
+  description?: string;
+  name?: string;
+  facility?: string;
+  location_object?: {
+    name: string;
+  };
+  location?: string;
 }

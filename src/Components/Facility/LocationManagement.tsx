@@ -153,6 +153,26 @@ const LocationRow = (props: LocationRowProps) => {
           </Button>
         )}
       </td>
+      <td>
+        {!isEditable && (
+          <Button
+            color="inherit"
+            variant="contained"
+            type="submit"
+            size="small"
+            style={{
+              marginLeft: "auto",
+              backgroundColor: "#4A2310",
+              color: "white",
+            }}
+            onClick={() =>
+              navigate(`/facility/${facilityId}/location/${id}/beds`)
+            }
+          >
+            Manage Beds
+          </Button>
+        )}
+      </td>
     </tr>
   );
 };
@@ -263,6 +283,9 @@ export const LocationManagement = (props: LocationManagementProps) => {
                 </th>
                 <th className="px-5 py-3 border-b-2 border-gray-200 bg-primary-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
                   Manage
+                </th>
+                <th className="px-5 py-3 border-b-2 border-gray-200 bg-primary-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                  Beds
                 </th>
               </tr>
             </thead>

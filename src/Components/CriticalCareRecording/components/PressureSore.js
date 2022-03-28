@@ -199,6 +199,7 @@ export default function PressureSore() {
           const Path = part.path;
           return (
             <Path
+              key={renderIndex}
               className={
                 selected === renderIndex
                   ? "text-blue-500"

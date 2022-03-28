@@ -344,7 +344,7 @@ export const ConsultationForm = (props: any) => {
           }
           return;
         case "consultation_notes":
-          if (state.form.suggestion === "OP" || !state.form[field]) {
+          if (!state.form[field]) {
             errors[field] = "Required *";
             if (!error_div) error_div = field;
             invalidForm = true;

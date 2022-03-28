@@ -171,7 +171,7 @@ const initialState = {
   errors: { ...initError },
 };
 
-const initialStates = [{ id: 0, name: "Choose State *" }];
+const initialStates = [{ id: 0, name: "Choose State" }];
 const initialDistricts = [{ id: 0, name: "Choose District" }];
 const selectStates = [{ id: 0, name: "Please select your state" }];
 const initialLocalbodies = [{ id: 0, name: "Choose Localbody", number: 0 }];
@@ -725,9 +725,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         date_of_result: state.form.date_of_result
           ? state.form.date_of_result
           : undefined,
-        date_declared_positive: state.form.date_declared_positive
-          ? state.form.date_declared_positive
-          : undefined,
+        date_declared_positive:
+          JSON.parse(state.form.is_declared_positive) &&
+          state.form.date_declared_positive
+            ? state.form.date_declared_positive
+            : null,
         srf_id: state.form.srf_id,
         covin_id:
           state.form.is_vaccinated === "true" ? state.form.covin_id : undefined,
@@ -784,8 +786,18 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         contact_with_suspected_carrier: JSON.parse(
           state.form.contact_with_suspected_carrier
         ),
-        estimated_contact_date: state.form.estimated_contact_date,
-        cluster_name: state.form.cluster_name,
+        estimated_contact_date:
+          (JSON.parse(state.form.contact_with_confirmed_carrier) ||
+            JSON.parse(state.form.contact_with_suspected_carrier)) &&
+          state.form.estimated_contact_date
+            ? state.form.estimated_contact_date
+            : null,
+        cluster_name:
+          (JSON.parse(state.form.contact_with_confirmed_carrier) ||
+            JSON.parse(state.form.contact_with_suspected_carrier)) &&
+          state.form.cluster_name
+            ? state.form.cluster_name
+            : null,
         past_travel: state.form.past_travel,
         transit_details: state.form.transit_details,
         countries_travelled: state.form.past_travel
@@ -986,7 +998,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       )}
       <PageTitle
         title={headerText}
-        className="mb-11" 
+        className="mb-11"
         crumbsReplacements={{
           [facilityId]: { name: facilityName },
           [id || "????"]: { name: patientName },
@@ -1069,7 +1081,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
                         <div data-testid="phone-number" id="phone_number-div">
                           <PhoneNumberField
-                            label="Phone Number*"
+                            label="Phone Number *"
                             value={state.form.phone_number}
                             onChange={(value: any) => [
                               duplicateCheck(value),
@@ -1083,7 +1095,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           id="emergency_phone_number-div"
                         >
                           <PhoneNumberField
-                            label="Emergency contact number*"
+                            label="Emergency contact number *"
                             value={state.form.emergency_phone_number}
                             onChange={(value: any) => [
                               handleValueChange(
@@ -1577,7 +1589,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             checked={state.form.past_travel}
                             onChange={handleCheckboxFieldChange}
                             name="past_travel"
-                            label="Domestic/international Travel History (within last 28 days)"
+                            label="Domestic/international Travel History (within last 14 days)"
                           />
                         </div>
                         <Collapse
@@ -1595,7 +1607,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 <AutoCompleteMultiField
                                   id="countries-travelled"
                                   options={placesList}
-                                  label="Countries / Places Visited* (including transit stops)"
+                                  label="Countries / Places Visited (including transit stops) *"
                                   variant="outlined"
                                   placeholder="Select country or enter the place of visit"
                                   onChange={(e: object, value: any) =>
@@ -1857,6 +1869,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 <InputLabel
                                   id="last_vaccinated_date-label"
                                   htmlFor="last_vaccinated_date"
+                                  required
                                 >
                                   Last Date of Vaccination
                                 </InputLabel>

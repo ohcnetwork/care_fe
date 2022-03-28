@@ -551,6 +551,7 @@ export const MOTOR_RESPONSE_SCALE = [
 ];
 export const CONSULTATION_TABS: Array<OptionsType> = [
   { id: 1, text: "UPDATES", desc: "Updates" },
+  { id: 13, text: "FEED", desc: "Feed" },
   { id: 2, text: "SUMMARY", desc: "Summary" },
   { id: 3, text: "MEDICINES", desc: "Medicines" },
   { id: 4, text: "FILES", desc: "Files" },
@@ -569,3 +570,33 @@ export const RHYTHM_CHOICES: Array<OptionsType> = [
   { id: 5, text: "Regular" },
   { id: 10, text: "Irregular" },
 ];
+
+export const LOCATION_BED_TYPES: Array<any> = [
+  { id: "ISOLATION", name: "Isolation" },
+  { id: "ICU", name: "ICU" },
+  {
+    id: "ICU_WITH_NON_INVASIVE_VENTILATOR",
+    name: "ICU with non invasive ventilator",
+  },
+  { id: "ICU_WITH_OXYGEN_SUPPORT", name: "ICU with oxygen support" },
+  { id: "ICU_WITH_INVASIVE_VENTILATOR", name: "ICU with invasive ventilator" },
+  { id: "BED_WITH_OXYGEN_SUPPORT", name: "Bed with oxygen support" },
+  { id: "REGULAR", name: "Regular" },
+];
+
+export const ASSET_META_TYPE = [{ id: "CAMERA", text: "Camera" }];
+
+export const CAMERA_TYPE = [
+  { id: "HIKVISION", text: "ONVIF Camera (HIKVISION)" },
+];
+
+export const PREFERENCE_SIDEBAR_KEY = "preferenceSidebar";
+export const SIDEBAR = {
+  COLLAPSED: "collapsed",
+  FULL: "full",
+};
+
+export const GENDER: { [key: number]: string } = GENDER_TYPES.reduce(
+  (acc, curr) => ({ ...acc, [curr.id]: curr.text }),
+  {}
+);

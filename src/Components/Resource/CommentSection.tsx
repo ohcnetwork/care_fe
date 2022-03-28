@@ -6,7 +6,6 @@ import { Button } from "@material-ui/core";
 import * as Notification from "../../Utils/Notifications.js";
 import moment from "moment";
 import Pagination from "../Common/Pagination";
-import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 
 interface CommentSectionProps {
   id: string;
@@ -21,7 +20,7 @@ const CommentSection = (props: CommentSectionProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const [offset, setOffset] = useState(0);
-  const limit = RESULTS_PER_PAGE_LIMIT;
+  const limit = 8;
 
   const handlePagination = (page: number, limit: number) => {
     const offset = (page - 1) * limit;

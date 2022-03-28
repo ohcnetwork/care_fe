@@ -28,6 +28,9 @@ export interface AssetData {
   support_name: string;
   support_email: string;
   support_phone: string;
+  meta?: {
+    [key: string]: any;
+  };
 }
 
 export interface AssetsResponse {
