@@ -562,14 +562,15 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       switch (field) {
         case "address":
         case "name":
-        case "gender":
+        case "gender": {
           if (!state.form[field]) {
             errors[field] = "Field is required";
             if (!error_div) error_div = field;
             invalidForm = true;
           }
           return;
-        case "permanent_address":
+        }
+        case "permanent_address": {
           if (!sameAddress) {
             if (!state.form[field]) {
               errors[field] = "Field is required";
@@ -578,35 +579,40 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             }
           }
           return;
-        case "date_of_birth":
+        }
+        case "date_of_birth": {
           if (!state.form[field]) {
             errors[field] = "Please enter date in DD/MM/YYYY format";
             if (!error_div) error_div = field;
             invalidForm = true;
           }
           return;
-        case "local_body":
+        }
+        case "local_body": {
           if (state.form.nationality === "India" && !state.form[field]) {
             errors[field] = "Please select local body";
             if (!error_div) error_div = field;
             invalidForm = true;
           }
           return;
-        case "ward":
+        }
+        case "ward": {
           if (state.form.nationality === "India" && !state.form[field]) {
             errors[field] = "Please select ward";
             if (!error_div) error_div = field;
             invalidForm = true;
           }
           return;
-        case "district":
+        }
+        case "district": {
           if (state.form.nationality === "India" && !state.form[field]) {
             errors[field] = "Please select district";
             if (!error_div) error_div = field;
             invalidForm = true;
           }
           return;
-        case "state":
+        }
+        case "state": {
           if (
             state.form.nationality === "India" &&
             !Number(state.form[field])
@@ -616,21 +622,24 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             invalidForm = true;
           }
           return;
-        case "pincode":
+        }
+        case "pincode": {
           if (!validatePincode(state.form[field])) {
             errors[field] = "Please enter valid pincode";
             if (!error_div) error_div = field;
             invalidForm = true;
           }
           return;
-        case "passport_no":
+        }
+        case "passport_no": {
           if (state.form.nationality !== "India" && !state.form[field]) {
             errors[field] = "Please enter the passport number";
             if (!error_div) error_div = field;
             invalidForm = true;
           }
           return;
-        case "phone_number":
+        }
+        case "phone_number": {
           const phoneNumber = parsePhoneNumberFromString(state.form[field]);
           if (!state.form[field] || !phoneNumber?.isPossible()) {
             errors[field] = "Please enter valid phone number";
@@ -638,7 +647,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             invalidForm = true;
           }
           return;
-        case "emergency_phone_number":
+        }
+        case "emergency_phone_number": {
           const emergency_phone_number = parsePhoneNumberFromString(
             state.form[field]
           );
@@ -648,21 +658,24 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             invalidForm = true;
           }
           return;
-        case "countries_travelled":
+        }
+        case "countries_travelled": {
           if (state.form.past_travel && !state.form[field].length) {
             errors[field] = "Please enter the list of countries visited";
             if (!error_div) error_div = field;
             invalidForm = true;
           }
           return;
-        case "date_of_return":
+        }
+        case "date_of_return": {
           if (state.form.past_travel && !state.form[field]) {
             errors[field] = "Please enter the date of return from travel";
             if (!error_div) error_div = field;
             invalidForm = true;
           }
           return;
-        case "estimated_contact_date":
+        }
+        case "estimated_contact_date": {
           if (
             JSON.parse(state.form.contact_with_confirmed_carrier) ||
             JSON.parse(state.form.contact_with_suspected_carrier)
@@ -674,7 +687,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             }
           }
           return;
-        case "cluster_name":
+        }
+        case "cluster_name": {
           if (
             JSON.parse(state.form.contact_with_confirmed_carrier) ||
             JSON.parse(state.form.contact_with_suspected_carrier)
@@ -686,15 +700,16 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             }
           }
           return;
-        case "blood_group":
+        }
+        case "blood_group": {
           if (!state.form[field]) {
             errors[field] = "Please select a blood group";
             if (!error_div) error_div = field;
             invalidForm = true;
           }
           return;
-
-        case "is_vaccinated":
+        }
+        case "is_vaccinated": {
           if (state.form.is_vaccinated === "true") {
             if (
               state.form.vaccine_name === null ||
@@ -713,7 +728,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             }
           }
           return;
-
+        }
         default:
           return;
       }
