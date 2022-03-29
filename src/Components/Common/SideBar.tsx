@@ -27,6 +27,11 @@ let menus = [
     icon: "fas fa-user-injured",
   },
   {
+    title: "TeleICU",
+    link: "/teleicu",
+    icon: "fa-solid fa-bed-pulse",
+  },
+  {
     title: "Assets",
     link: "/assets",
     icon: "fas fa-shopping-cart",
@@ -83,6 +88,12 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
   )}`;
   const path = usePath();
   const url = path.split("/");
+
+  const active = menus.reduce((acc, menu) => {
+    const tag = menu.link.replaceAll("/", "");
+    return url.includes(tag) ? tag : acc;
+  }, "");
+
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down(768));
   const [enableCollapse, setEnableCollapse] = useState(
@@ -163,15 +174,13 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
         </div>
         <nav className="flex-1 px-2 overflow-x-hidden">
           {menus.map((item) => {
-            const parts = item.link.split("/");
-            const isActive = url.includes(parts && parts[1]);
             return (
               <Link
                 key={item.title}
                 href={item.link}
                 className={clsx(
                   "flex justify-items-start items-center overflow-hidden w-10 py-1 my-1 hover:bg-primary-700 hover:text-white rounded transition-all duration-300",
-                  isActive
+                  active === item.link.replaceAll("/", "")
                     ? "bg-primary-900 hover:bg-primary-900 text-white"
                     : "bg-primary-800 text-primary-300",
                   expanded && "w-60"

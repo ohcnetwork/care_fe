@@ -41,6 +41,7 @@ export const Feed: React.FC<IFeedProps> = ({
   const [cameraConfig, setCameraConfig] = useState<any>({});
   const [isLoading, setIsLoading] = useState(true);
   const [bedPresets, setBedPresets] = useState<any>([]);
+  const [precision, setPrecision] = useState(1);
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -191,19 +192,24 @@ export const Feed: React.FC<IFeedProps> = ({
         zoom: 0,
       } as any;
       console.log(action);
+      const delta = 0.1 / precision;
+      console.log("delta", delta);
       // Relative X Y Coordinates
       switch (action) {
         case "up":
-          data.y = 0.1;
+          data.y = delta;
           break;
         case "down":
-          data.y = -0.1;
+          data.y = -delta;
           break;
         case "left":
-          data.x = -0.1;
+          data.x = -delta;
           break;
         case "right":
-          data.x = 0.1;
+          data.x = delta;
+          break;
+        case "precision":
+          setPrecision((precision) => (precision === 16 ? 1 : precision * 2));
           break;
         case "zoomIn":
           data.zoom = 0.1;
@@ -287,6 +293,7 @@ export const Feed: React.FC<IFeedProps> = ({
     { icon: "fa fa-arrow-down", label: "Down", action: "down" },
     { icon: "fa fa-arrow-left", label: "Left", action: "left" },
     { icon: "fa fa-arrow-right", label: "Right", action: "right" },
+    { value: precision, label: "Precision", action: "precision" },
     { icon: "fa fa-search-plus", label: "Zoom In", action: "zoomIn" },
     { icon: "fa fa-search-minus", label: "Zoom Out", action: "zoomOut" },
     { icon: "fa fa-stop", label: "Stop", action: "stop" },
@@ -310,7 +317,10 @@ export const Feed: React.FC<IFeedProps> = ({
   }
 
   return (
-    <div className="p-2">
+    <div
+      className="px-2 flex flex-col gap-4 overflow-hidden w-full"
+      style={{ height: "90vh", maxHeight: "860px" }}
+    >
       <div className="flex items-center flex-wrap justify-between gap-2">
         <PageTitle title="Patient Details -  Camera Feed" breadcrumbs={false} />
         <div className="flex items-center gap-4 px-3">
@@ -338,9 +348,9 @@ export const Feed: React.FC<IFeedProps> = ({
           </div>
         </div>
       </div>
-      <div className="px-3 mt-4">
-        <div className="lg:flex items-start gap-8">
-          <div className="mb-4 lg:mb-0 relative feed-aspect-ratio w-full bg-primary-100 rounded">
+      <div className="px-3 h-full">
+        <div className="lg:flex items-start justify-center gap-8 h-full">
+          <div className="relative feed-aspect-ratio w-full lg:h-full lg:w-11/12 bg-primary-100 rounded">
             {sourceUrl ? (
               <ReactPlayer
                 url={sourceUrl}
@@ -365,10 +375,9 @@ export const Feed: React.FC<IFeedProps> = ({
                 }}
                 width="100%"
                 height="100%"
-                style={{ width: "100%", height: "100%" }}
               />
             ) : (
-              <div className="w-full h-full flex flex-col justify-center items-center">
+              <div className="h-full flex flex-col justify-center items-center">
                 <p className="font-bold text-black">
                   STATUS: <span className="text-red-600">OFFLINE</span>
                 </p>
@@ -378,7 +387,7 @@ export const Feed: React.FC<IFeedProps> = ({
               </div>
             )}
             {loading && (
-              <div className="absolute right-0 bottom-0 p-4 bg-white bg-opacity-75 rounded-tl">
+              <div className="absolute right-0 top-0 p-4 bg-white bg-opacity-75 rounded-bl">
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 border-2 border-b-0 border-primary-500 rounded-full animate-spin an" />
                   <p className="text-base font-bold">Moving</p>
@@ -386,7 +395,7 @@ export const Feed: React.FC<IFeedProps> = ({
               </div>
             )}
           </div>
-          <div className="lg:flex flex-col">
+          <div className="mt-8 lg:mt-0 flex-shrink-0 flex lg:flex-col items-stretch">
             {cameraPTZ.map((option: any) => (
               <button
                 className="bg-green-100 hover:bg-green-200 border border-green-100 rounded p-2"
@@ -396,7 +405,13 @@ export const Feed: React.FC<IFeedProps> = ({
                 }}
               >
                 <span className="sr-only">{option.label}</span>
-                <i className={`${option.icon} md:p-2`}></i>
+                {option.icon ? (
+                  <i className={`${option.icon} md:p-2`}></i>
+                ) : (
+                  <span className="px-2 font-bold h-full w-8 flex items-center justify-center">
+                    {option.value}x
+                  </span>
+                )}
               </button>
             ))}
           </div>

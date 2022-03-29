@@ -21,7 +21,7 @@ import {
   BREATHLESSNESS_LEVEL,
   KASP_FULL_STRING,
 } from "../../Common/constants";
-import { UserSelect } from "../Common/UserSelect2";
+import { UserSelect } from "../Common/UserSelect";
 import { CircularProgress } from "@material-ui/core";
 
 import {
@@ -257,8 +257,8 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                   className="bg-white h-14 w-1/3 mt-2 shadow-sm md:text-sm md:leading-5"
                 />
               </div>
-              <div className="w-64 flex-none">
-                <span className="text-sm font-semibold">Assigned To</span>
+              <div className="flex-none">
+                <InputLabel>Assigned To</InputLabel>
                 <div className="">
                   {assignedUserLoading ? (
                     <CircularProgress size={20} />
@@ -267,22 +267,14 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                       multiple={false}
                       selected={assignedUser}
                       setSelected={handleOnSelect}
-                      className="shifting-page-filter-dropdown"
                       errors={""}
+                      facilityId={
+                        state.form?.shifting_approving_facility_object?.id
+                      }
                     />
                   )}
                 </div>
               </div>
-              {/* <div className="md:col-span-1">
-                <UserSelect
-                  userId={state.form.assigned_to}
-                  onSelect={handleOnSelect}
-                  facilityId={
-                    state.form?.shifting_approving_facility_object?.id
-                  }
-                  placeholder="Assign a Shifting Staff"
-                />
-              </div> */}
               <div>
                 <InputLabel>Name of shifting approving facility</InputLabel>
                 <FacilitySelect

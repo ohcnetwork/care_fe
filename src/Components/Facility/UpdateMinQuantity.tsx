@@ -126,7 +126,7 @@ export const UpdateMinQuantity = (props: any) => {
           [facilityId]: { name: facilityName },
           [itemId]: { name: data },
           [inventoryId]: {
-            name: "min quantity",
+            name: "Min Quantity",
             uri: `/facility/${facilityId}/inventory/min_quantity/list`,
           },
           update: { style: "text-gray-100 pointer-events-none" },
@@ -152,7 +152,7 @@ export const UpdateMinQuantity = (props: any) => {
                 </div>
 
                 <div>
-                  <InputLabel id="quantity">Item Min_Quantity</InputLabel>
+                  <InputLabel id="quantity">Item Min Quantity</InputLabel>
                   <TextInputField
                     name="quantity"
                     variant="outlined"

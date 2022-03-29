@@ -158,8 +158,13 @@ export default function MinQuantityList(props: any) {
         className="mx-3 md:mx-8"
         crumbsReplacements={{
           [facilityId]: { name: facilityName },
-          min_quantity: { name: "" },
-          list: { name: "min quantity" },
+          min_quantity: {
+            name: "Min Quantity",
+            uri: `/facility/${facilityId}/inventory/min_quantity/list`,
+          },
+          list: {
+            style: "pointer-events-none",
+          },
         }}
       />
       <div className="container mx-auto px-4 sm:px-8">

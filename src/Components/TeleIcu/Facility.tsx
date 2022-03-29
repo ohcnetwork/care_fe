@@ -1,4 +1,4 @@
-import { useQueryParams } from "raviger";
+import { Link, useQueryParams } from "raviger";
 import React, { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useDispatch } from "react-redux";
@@ -90,32 +90,6 @@ export const TeleICUFacility = () => {
           className="sm:m-0 sm:p-0"
           breadcrumbs={false}
         />
-        <div className="flex items-center gap-2">
-          <h1 className="text-base font-medium">View Option</h1>
-
-          <div className="flex items-center">
-            <button
-              className={`px-4 py-2 border block ${
-                viewOption === "5-para"
-                  ? "bg-primary-500 border-primary-500 rounded text-white"
-                  : "bg-transparent border-primary-200"
-              } `}
-              onClick={() => setViewOption("5-para")}
-            >
-              5-Para
-            </button>
-            <button
-              className={`px-4 py-2 border block ${
-                viewOption === "personal"
-                  ? "bg-primary-500 border-primary-500 rounded text-white"
-                  : "bg-transparent border-primary-200"
-              } `}
-              onClick={() => setViewOption("personal")}
-            >
-              Personal
-            </button>
-          </div>
-        </div>
       </div>
       <div className="grid grid-col-1 lg:grid-cols-2 gap-4">
         {isLoading
@@ -138,7 +112,10 @@ export const TeleICUFacility = () => {
           : data.map((item, index) => {
               return (
                 <div key={item.id}>
-                  <div className="bg-white rounded-lg flex items-center gap-4 p-4">
+                  <Link
+                    href={`/teleicu/facility/${item.id}`}
+                    className="bg-white rounded-lg text-black flex items-center gap-4 p-4"
+                  >
                     <div className="w-32 self-stretch flex-shrink-0 bg-gray-300 flex items-center justify-center rounded">
                       <i className="fas fa-hospital text-4xl block text-gray-600"></i>
                     </div>
@@ -157,7 +134,7 @@ export const TeleICUFacility = () => {
                         <AdminIcon className="h-8 text-primary-500 fill-current" />
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 </div>
               );
             })}

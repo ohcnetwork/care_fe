@@ -1,11 +1,19 @@
+/* eslint-disable no-undef */
+
 const fs = require("fs");
 
 const DEFAULT_LOCALE = "en";
 
 const lng = process.argv[2]?.toLowerCase();
 
-if (!lng) return console.log("No Language Entered!");
-if (lng === DEFAULT_LOCALE) return console.log("It's Default Locale!");
+if (!lng) {
+  console.log("No Language Entered!");
+  process.exit(1);
+}
+if (lng === DEFAULT_LOCALE) {
+  console.log("It's Default Locale!");
+  process.exit(1);
+}
 
 const defaultEntryFile = readFile(`./${DEFAULT_LOCALE}/index.js`);
 const defaultAllJsonFiles = getAllJSONFiles(DEFAULT_LOCALE);
@@ -23,7 +31,7 @@ if (fs.existsSync(lng)) {
   }
 
   writeFile(`./${lng}/index.js`, defaultEntryFile);
-  console.log(`Create: index.js`);
+  console.log("Create: index.js");
 }
 
 function compareBothFiles(defaultFile, newFile) {
@@ -39,7 +47,7 @@ function compareBothFiles(defaultFile, newFile) {
     console.log(`Modified: ${file}`);
   }
   writeFile(`./${lng}/index.js`, defaultEntryFile);
-  console.log(`Modified: index.js`);
+  console.log("Modified: index.js");
 }
 
 function getAllJSONFiles(folderName) {

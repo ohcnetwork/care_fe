@@ -24,6 +24,7 @@ export const PrimaryParametersPlot = (props: any) => {
             page: currentPage,
             offset,
             fields: [
+              "pain",
               "bp",
               "pulse",
               "temperature",
@@ -183,6 +184,14 @@ export const PrimaryParametersPlot = (props: any) => {
             yData={yAxisData("ventilator_fi02")}
             low={21}
             high={60}
+          />
+        </div>
+        <div className="pt-4 px-4 bg-white border rounded-lg shadow">
+          <LinePlot
+            title="Pain Scale"
+            name="pain"
+            xData={dates}
+            yData={yAxisData("pain")}
           />
         </div>
       </div>

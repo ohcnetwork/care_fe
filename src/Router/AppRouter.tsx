@@ -1,4 +1,9 @@
-import { useRedirect, useRoutes, usePath } from "raviger";
+import {
+  useRedirect,
+  useRoutes,
+  usePath,
+  Redirect,
+} from "raviger";
 import { useState, useEffect } from "react";
 import { BedCapacityForm } from "../Components/Facility/BedCapacityForm";
 import { ConsultationDetails } from "../Components/Facility/ConsultationDetails";
@@ -62,6 +67,10 @@ import HubDashboard from "../Components/Dashboard/HubDashboard";
 import { SideBar } from "../Components/Common/SideBar";
 import { Feed } from "../Components/Facility/Consultations/Feed";
 import { TeleICUFacility } from "../Components/TeleIcu/Facility";
+import TeleICUPatientPage from "../Components/TeleIcu/Patient";
+import { TeleICUPatientsList } from "../Components/TeleIcu/PatientList";
+
+const get = require("lodash.get");
 
 const img = process.env.REACT_APP_LIGHT_LOGO;
 const logoBlack = process.env.REACT_APP_BLACK_LOGO;
@@ -276,13 +285,16 @@ const routes = {
   "/facility/:facilityId/inventory/min_quantity/set": ({ facilityId }: any) => (
     <SetInventoryForm facilityId={facilityId} />
   ),
+  "/facility/:facilityId/inventory/min_quantity/list": ({
+    facilityId,
+  }: any) => <MinQuantityList facilityId={facilityId} />,
+  "/facility/:facilityId/inventory/min_quantity": ({ facilityId }: any) => (
+    <Redirect to={`/facility/${facilityId}/inventory/min_quantity/list`} />
+  ),
   "/facility/:facilityId/inventory/:inventoryId": ({
     facilityId,
     inventoryId,
   }: any) => <InventoryLog facilityId={facilityId} inventoryId={inventoryId} />,
-  "/facility/:facilityId/inventory/min_quantity/list": ({
-    facilityId,
-  }: any) => <MinQuantityList facilityId={facilityId} />,
   "/facility/:facilityId/inventory/:inventoryId/update/:itemId": ({
     facilityId,
     inventoryId,
@@ -363,7 +375,16 @@ const routes = {
         tab={tab}
       />
     ),
+  "/teleicu/facility/:facilityId/patient/:patientId": ({
+    patientId,
+    facilityId,
+  }: any) => (
+    <TeleICUPatientPage facilityId={facilityId} patientId={patientId} />
+  ),
   "/teleicu/facility": () => <TeleICUFacility />,
+  "/teleicu/facility/:facilityId": ({ facilityId }: any) => (
+    <TeleICUPatientsList facilityId={facilityId} />
+  ),
 };
 
 const AppRouter = (props: any) => {
@@ -414,7 +435,7 @@ const AppRouter = (props: any) => {
           id="pages"
           className="flex-1 overflow-y-auto pb-4 md:py-0 focus:outline-none"
         >
-          <div className="max-w-7xl mx-auto px-0">{pages}</div>
+          <div className="max-w-8xl mx-auto px-5 py-3">{pages}</div>
         </main>
       </div>
     </div>

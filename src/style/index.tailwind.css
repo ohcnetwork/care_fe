@@ -412,7 +412,7 @@ button:disabled,
   aspect-ratio: 16/9;
 }
 
-.player-wrapper {
+/* .player-wrapper {
   width: auto;
   height: auto;
 }
@@ -423,4 +423,4 @@ button:disabled,
 
 .react-player > div {
   position: absolute;
-}
+} */

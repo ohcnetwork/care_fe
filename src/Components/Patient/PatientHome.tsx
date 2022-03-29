@@ -49,7 +49,6 @@ import Modal from "@material-ui/core/Modal";
 import FormControl from "@material-ui/core/FormControl";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
-import AssignedDoctor from "./AssignedDoctor";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -587,9 +586,29 @@ export const PatientHome = (props: any) => {
           <div className="max-w-screen-xl mx-auto py-3 px-3 sm:px-6 lg:px-8">
             <div className="md:flex">
               {patientData?.last_consultation?.assigned_to_object && (
-                <AssignedDoctor
-                  doctor={patientData?.last_consultation.assigned_to_object}
-                />
+                <p className="font-bold text-green-800 rounded-lg shadow bg-green-200 p-3 mx-3 flex-1 text-center flex justify-center gap-2">
+                  <span className="inline">
+                    Assigned Doctor:{" "}
+                    {
+                      patientData?.last_consultation?.assigned_to_object
+                        .first_name
+                    }{" "}
+                    {
+                      patientData?.last_consultation?.assigned_to_object
+                        .last_name
+                    }
+                  </span>
+                  {patientData?.last_consultation?.assigned_to_object
+                    .alt_phone_number && (
+                    <a
+                      href={`https://wa.me/${patientData?.last_consultation?.assigned_to_object.alt_phone_number}`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <i className="fab fa-whatsapp"></i> Video Call
+                    </a>
+                  )}
+                </p>
               )}
               {patientData.assigned_to_object && (
                 <p className="font-bold text-primary-800 rounded-lg shadow bg-primary-200 mx-2 p-3 flex-1 text-center">
