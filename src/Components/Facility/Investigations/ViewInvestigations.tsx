@@ -46,9 +46,12 @@ export default function ViewInvestigations(props: any) {
         <Loading />
       ) : (
         <div className="mt-4 space-y-2 ">
-          {investigationData.map((data: InvestigationType) => {
+          {investigationData.map((data: InvestigationType, i: number) => {
             return (
-              <div className="flex justify-between items-center bg-white hover:bg-gray-200 cursor-pointer p-4 border rounded-lg shadow">
+              <div
+                key={i}
+                className="flex justify-between items-center bg-white hover:bg-gray-200 cursor-pointer p-4 border rounded-lg shadow"
+              >
                 <div>{moment(data.session_created_date).format("lll")}</div>
                 <button
                   onClick={() =>

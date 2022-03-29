@@ -504,8 +504,8 @@ export const ConsultationDetails = (props: any) => {
                         Lines and Catheters
                       </h3>
                       <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
-                        {consultationData.lines?.map((line: any) => (
-                          <div className="mt-4">
+                        {consultationData.lines?.map((line: any, i: number) => (
+                          <div key={i} className="mt-4">
                             <h5>{line.type}</h5>
                             <p className="text-justify break-word">
                               Details:

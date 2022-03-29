@@ -254,8 +254,8 @@ export const NutritionPlots = (props: any) => {
                       - {moment(obj[0]).format("LLL")}
                     </h4>
                     <div className="px-5 text-sm">
-                      {obj[1].infusions.map((o: any) => (
-                        <div>
+                      {obj[1].infusions.map((o: any, i: number) => (
+                        <div key={i}>
                           {o.name} - {o.quantity}
                         </div>
                       ))}
@@ -282,8 +282,8 @@ export const NutritionPlots = (props: any) => {
                       - {moment(obj[0]).format("LLL")}
                     </h4>
                     <div className="px-5 text-sm">
-                      {obj[1].iv_fluids.map((o: any) => (
-                        <div>
+                      {obj[1].iv_fluids.map((o: any, i: number) => (
+                        <div key={i}>
                           {o.name} - {o.quantity}
                         </div>
                       ))}
@@ -310,8 +310,8 @@ export const NutritionPlots = (props: any) => {
                       - {moment(obj[0]).format("LLL")}
                     </h4>
                     <div className="px-5 text-sm">
-                      {obj[1].feeds.map((o: any) => (
-                        <div>
+                      {obj[1].feeds.map((o: any, i: number) => (
+                        <div key={i}>
                           {o.name} - {o.quantity}
                         </div>
                       ))}
@@ -361,8 +361,8 @@ export const NutritionPlots = (props: any) => {
                       - {moment(obj[0]).format("LLL")}
                     </h4>
                     <div className="px-5 text-sm">
-                      {obj[1].output.map((o: any) => (
-                        <div>
+                      {obj[1].output.map((o: any, i: number) => (
+                        <div key={i}>
                           {o.name} - {o.quantity}
                         </div>
                       ))}

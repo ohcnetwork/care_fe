@@ -302,30 +302,31 @@ export const FacilityCreate = (props: FacilityProps) => {
     Object.keys(state.form).forEach((field) => {
       switch (field) {
         case "name":
-        case "address":
+        case "address": {
           if (!state.form[field]) {
             errors[field] = "Field is required";
             invalidForm = true;
           }
           return;
-
+        }
         case "district":
         case "state":
         case "local_body":
-        case "ward":
+        case "ward": {
           if (!state.form[field]) {
             errors[field] = "Field is required";
             invalidForm = true;
           }
           return;
-
-        case "pincode":
+        }
+        case "pincode": {
           if (!validatePincode(state.form[field])) {
             errors[field] = "Please enter valid pincode";
             invalidForm = true;
           }
           return;
-        case "phone_number":
+        }
+        case "phone_number": {
           const phoneNumber = parsePhoneNumberFromString(state.form[field]);
           if (
             !state.form[field] ||
@@ -336,8 +337,9 @@ export const FacilityCreate = (props: FacilityProps) => {
             invalidForm = true;
           }
           return;
+        }
         case "latitude":
-        case "longitude":
+        case "longitude": {
           if (
             !!state.form.latitude &&
             !!state.form.longitude &&
@@ -347,7 +349,7 @@ export const FacilityCreate = (props: FacilityProps) => {
             invalidForm = true;
           }
           return;
-
+        }
         default:
           return;
       }

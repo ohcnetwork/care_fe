@@ -139,31 +139,35 @@ const AssetCreate = (props: AssetProps) => {
     let invalidForm = false;
     Object.keys(state.errors).forEach((field) => {
       switch (field) {
-        case "name":
+        case "name": {
           if (!name) {
             errors[field] = "Field is required";
             invalidForm = true;
           }
           return;
-        case "is_working":
+        }
+        case "is_working": {
           if (is_working === "0") {
             errors[field] = "Field is required";
             invalidForm = true;
           }
           return;
-        case "location":
+        }
+        case "location": {
           if (!location || location === "0" || location === "") {
             errors[field] = "Field is required";
             invalidForm = true;
           }
           return;
-        case "asset_type":
+        }
+        case "asset_type": {
           if (asset_type !== "INTERNAL" && asset_type !== "EXTERNAL") {
             errors[field] = "Field is required";
             invalidForm = true;
           }
           return;
-        case "support_phone":
+        }
+        case "support_phone": {
           if (!support_phone) {
             errors[field] = "Field is required";
             invalidForm = true;
@@ -174,12 +178,14 @@ const AssetCreate = (props: AssetProps) => {
             invalidForm = true;
           }
           return;
-        case "support_email":
+        }
+        case "support_email": {
           if (support_email && !validateEmailAddress(support_email)) {
             errors[field] = "Please enter valid email id";
             invalidForm = true;
           }
           return;
+        }
         default:
           return;
       }

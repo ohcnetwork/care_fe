@@ -52,8 +52,8 @@ export const MedicineTables = (props: any) => {
       {results && (
         <div>
           <div className="mt-4 text-lg font-bold">Consultation Updates</div>
-          {Object.keys(results).map((k: any) => (
-            <div>
+          {Object.keys(results).map((k: any, i: number) => (
+            <div key={i}>
               {Object.keys(results[k].medication_given).length !== 0 && (
                 <div className="grid md:grid-cols-full gap-4">
                   <div className="mt-4">

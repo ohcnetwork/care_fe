@@ -242,8 +242,9 @@ export const LocationManagement = (props: LocationManagementProps) => {
   };
 
   if (locations && locations.length) {
-    locationsList = locations.map((locationItem: LocationModel) => (
+    locationsList = locations.map((locationItem: LocationModel, i: number) => (
       <LocationRow
+        key={i}
         id={locationItem.id || ""}
         facilityId={facilityId || ""}
         name={locationItem.name || ""}

@@ -137,7 +137,7 @@ export default function ResourceCreate(props: resourceProps) {
     let isInvalidForm = false;
     Object.keys(requiredFields).forEach((field) => {
       switch (field) {
-        case "refering_facility_contact_number":
+        case "refering_facility_contact_number": {
           const phoneNumber = parsePhoneNumberFromString(state.form[field]);
           if (!state.form[field]) {
             errors[field] = requiredFields[field].errorText;
@@ -150,11 +150,13 @@ export default function ResourceCreate(props: resourceProps) {
             isInvalidForm = true;
           }
           return;
-        default:
+        }
+        default: {
           if (!state.form[field]) {
             errors[field] = requiredFields[field].errorText;
             isInvalidForm = true;
           }
+        }
       }
     });
 

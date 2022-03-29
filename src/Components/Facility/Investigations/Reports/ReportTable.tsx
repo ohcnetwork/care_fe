@@ -66,7 +66,7 @@ const ReportRow = ({ data, name, min, max }: any) => {
       <TableCell className={className.tableCell} align="right" size="medium">
         {name}
       </TableCell>
-      {data.map((d: any) => {
+      {data.map((d: any, i: number) => {
         const color = getColorIndex({
           min: d?.min,
           max: d?.max,
@@ -74,6 +74,7 @@ const ReportRow = ({ data, name, min, max }: any) => {
         });
         return (
           <TableCell
+            key={i}
             className={className.tableCell}
             align="center"
             style={{
