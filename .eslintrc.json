@@ -23,7 +23,8 @@
     "no-unused-vars": "warn",
     "react/react-in-jsx-scope": "off",
     "react/no-unescaped-entities": "off",
-    "prettier/prettier": "off"
+    "prettier/prettier": "off",
+    "react/prop-types": "off"
   },
   "ignorePatterns": ["dist", "public", "lib", "build", "*.bs.js", "*.gen.tsx"]
 }
