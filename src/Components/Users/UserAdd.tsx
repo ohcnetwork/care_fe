@@ -310,7 +310,7 @@ export const UserAdd = (props: UserProps) => {
     let invalidForm = false;
     Object.keys(state.form).forEach((field) => {
       switch (field) {
-        case "facilities":
+        case "facilities": {
           if (
             state.form[field].length === 0 &&
             (userType === "Staff" || userType === "StaffReadOnly") &&
@@ -322,19 +322,22 @@ export const UserAdd = (props: UserProps) => {
             invalidForm = true;
           }
           return;
-        case "user_type":
+        }
+        case "user_type": {
           if (!state.form[field]) {
             errors[field] = "Please select the User Type";
             invalidForm = true;
           }
           return;
-        case "gender":
+        }
+        case "gender": {
           if (!state.form[field]) {
             errors[field] = "Please select the Gender";
             invalidForm = true;
           }
           return;
-        case "username":
+        }
+        case "username": {
           if (!state.form[field]) {
             errors[field] = "Please enter the username";
             invalidForm = true;
@@ -344,7 +347,8 @@ export const UserAdd = (props: UserProps) => {
             invalidForm = true;
           }
           return;
-        case "password":
+        }
+        case "password": {
           if (!state.form[field]) {
             errors[field] = "Please enter the password";
             invalidForm = true;
@@ -354,7 +358,8 @@ export const UserAdd = (props: UserProps) => {
             invalidForm = true;
           }
           return;
-        case "c_password":
+        }
+        case "c_password": {
           if (!state.form.password) {
             errors.password = "Confirm password is required";
             invalidForm = true;
@@ -363,7 +368,8 @@ export const UserAdd = (props: UserProps) => {
             invalidForm = true;
           }
           return;
-        case "phone_number":
+        }
+        case "phone_number": {
           const phoneNumber = parsePhoneNumberFromString(
             state.form[field],
             "IN"
@@ -377,8 +383,8 @@ export const UserAdd = (props: UserProps) => {
             invalidForm = true;
           }
           return;
-
-        case "alt_phone_number":
+        }
+        case "alt_phone_number": {
           let alt_is_valid: boolean = false;
           if (state.form[field] && state.form[field] !== "+91") {
             const altPhoneNumber = parsePhoneNumberFromString(
@@ -398,7 +404,8 @@ export const UserAdd = (props: UserProps) => {
             invalidForm = true;
           }
           return;
-        case "email":
+        }
+        case "email": {
           if (
             state.form[field].length &&
             !validateEmailAddress(state.form[field])
@@ -407,25 +414,28 @@ export const UserAdd = (props: UserProps) => {
             invalidForm = true;
           }
           return;
-        case "date_of_birth":
+        }
+        case "date_of_birth": {
           if (!state.form[field]) {
             errors[field] = "Please enter date in DD/MM/YYYY format";
             invalidForm = true;
           }
           return;
-        case "state":
+        }
+        case "state": {
           if (!Number(state.form[field])) {
             errors[field] = "Please select the state";
             invalidForm = true;
           }
           return;
-        case "district":
+        }
+        case "district": {
           if (!Number(state.form[field]) || state.form[field] === "") {
             errors[field] = "Please select the district";
             invalidForm = true;
           }
           return;
-
+        }
         default:
           return;
       }

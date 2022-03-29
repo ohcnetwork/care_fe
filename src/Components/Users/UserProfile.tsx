@@ -145,13 +145,14 @@ export default function UserProfile() {
       switch (field) {
         case "firstName":
         case "lastName":
-        case "gender":
+        case "gender": {
           if (!states.form[field] || states.form[field] === "0") {
             errors[field] = "Field is required";
             invalidForm = true;
           }
           return;
-        case "age":
+        }
+        case "age": {
           if (!states.form[field]) {
             errors[field] = "This field is required";
             invalidForm = true;
@@ -163,7 +164,8 @@ export default function UserProfile() {
             invalidForm = true;
           }
           return;
-        case "phoneNumber":
+        }
+        case "phoneNumber": {
           const phoneNumber = parsePhoneNumberFromString(
             states.form[field],
             "IN"
@@ -179,7 +181,8 @@ export default function UserProfile() {
             invalidForm = true;
           }
           return;
-        case "altPhoneNumber":
+        }
+        case "altPhoneNumber": {
           let alt_is_valid: boolean = false;
           if (states.form[field] && states.form[field] !== "+91") {
             const altPhoneNumber = parsePhoneNumberFromString(
@@ -200,12 +203,14 @@ export default function UserProfile() {
             invalidForm = true;
           }
           return;
-        case "email":
+        }
+        case "email": {
           if (states.form[field] && !validateEmailAddress(states.form[field])) {
             errors[field] = "Enter a valid email address";
             invalidForm = true;
           }
           return;
+        }
       }
     });
     dispatch({ type: "set_error", errors });

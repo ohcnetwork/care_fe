@@ -1,4 +1,3 @@
-/* eslint-disable jsx-a11y/anchor-is-valid */
 import { useCallback, useState } from "react";
 import loadable from "@loadable/component";
 import { useDispatch, useSelector } from "react-redux";
