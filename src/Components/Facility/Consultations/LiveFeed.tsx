@@ -27,10 +27,10 @@ const LiveFeed = (props: any) => {
   const [loading, setLoading] = useState<string | undefined>();
   const dispatch: any = useDispatch();
   const liveFeedPlayerRef = useRef<any>(null);
-  const videRef = useRef<any>(null);
 
-  const videoEl = videRef.current as HTMLVideoElement;
-  let url = `wss://demo:demo@mse_test.coronasafe.live/stream/demo/channel/0/mse?uuid=demo&channel=0`;
+  const videoEl = liveFeedPlayerRef.current as HTMLVideoElement;
+
+  let url = `wss://${middlewareHostname}/stream/${cameraAsset?.accessKey}/channel/0/mse?uuid=${cameraAsset?.accessKey}&channel=0`;
 
   const { startStream } = useMSEMediaPlayer({
     config: {
@@ -72,7 +72,6 @@ const LiveFeed = (props: any) => {
     if (bedPresets?.[0]?.position) {
       absoluteMove(bedPresets[0]?.position, {});
     }
-    console.log(cameraAsset);
   }, [cameraAsset.id]);
 
   const viewOptions = presets
@@ -95,7 +94,7 @@ const LiveFeed = (props: any) => {
           onSuccess: () => setStreamStatus(StreamStatus.Playing),
           onError: () => setStreamStatus(StreamStatus.Offline),
         });
-      }, 100);
+      }, 500);
     }
 
     return () => {
@@ -118,7 +117,7 @@ const LiveFeed = (props: any) => {
                 muted
                 playsInline
                 className="h-full w-full z-10"
-                ref={videRef}
+                ref={liveFeedPlayerRef}
               ></video>
 
               {loading && (

@@ -37,6 +37,7 @@ export const Feed: React.FC<IFeedProps> = ({
     password: "",
     port: 123,
     username: "",
+    accessKey: "",
   });
   const [cameraMiddlewareHostname, setCameraMiddlewareHostname] = useState("");
   const [cameraConfig, setCameraConfig] = useState<any>({});
@@ -60,12 +61,14 @@ export const Feed: React.FC<IFeedProps> = ({
           if (bedAssets?.data?.results?.length) {
             const { camera_address, camera_access_key, middleware_hostname } =
               bedAssets.data.results[0].asset_object.meta;
+            const config = camera_access_key.split(":");
             setCameraAsset({
               id: bedAssets.data.results[0].asset_object.id,
               hostname: camera_address,
-              username: camera_access_key.split(":")[0],
-              password: camera_access_key.split(":")[1],
+              username: config[0] || "",
+              password: config[1] || "",
               port: 80,
+              accessKey: config[2] || "",
             });
             setCameraMiddlewareHostname(middleware_hostname);
             setCameraConfig(bedAssets.data.results[0].meta);
@@ -95,7 +98,7 @@ export const Feed: React.FC<IFeedProps> = ({
     setBedPresets(bedAssets?.data?.results);
   };
 
-  let url = `wss://demo:demo@mse_test.coronasafe.live/stream/demo/channel/0/mse?uuid=demo&channel=0`;
+  let url = `wss://${middlewareHostname}/stream/${cameraAsset?.accessKey}/channel/0/mse?uuid=${cameraAsset?.accessKey}&channel=0`;
   const {
     startStream,
     // setVideoEl,

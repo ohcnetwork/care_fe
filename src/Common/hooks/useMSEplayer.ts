@@ -27,6 +27,7 @@ export interface ICameraAssetState {
   password: string;
   hostname: string;
   port: number;
+  accessKey: string;
 }
 
 export enum StreamStatus {
