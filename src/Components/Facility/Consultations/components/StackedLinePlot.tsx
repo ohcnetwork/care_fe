@@ -1,5 +1,7 @@
 import ReactECharts from "echarts-for-react";
 
+const COLORS = ["#B13F3C", "#2F8B35", "#44327A", "#B19D3C"];
+
 export const StackedLinePlot = (props: any) => {
   const { title, xData, yData } = props;
 
@@ -12,8 +14,29 @@ export const StackedLinePlot = (props: any) => {
   }));
 
   const generalOptions = {
+    color: COLORS,
     title: {
-      text: title,
+      text:
+        title +
+        " [ " +
+        yData
+          .map(
+            (x: any, i: number) => `{${i}|${x.data[x.data.length - 1] ?? "NA"}}`
+          )
+          .join(" | ") +
+        " ] ",
+      textStyle: {
+        fontSize: 20,
+        rich: Object.assign(
+          {},
+          COLORS.map((x: any) => ({
+            fontSize: 14,
+            fontWeight: "bold",
+            padding: [0, 5],
+            color: x,
+          }))
+        ),
+      },
     },
 
     legend: {

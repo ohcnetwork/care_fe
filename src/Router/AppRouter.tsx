@@ -10,6 +10,7 @@ import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { BedCapacityForm } from "../Components/Facility/BedCapacityForm";
 import { ConsultationDetails } from "../Components/Facility/ConsultationDetails";
+import TreatmentSummary from "../Components/Facility/TreatmentSummary";
 import { ConsultationForm } from "../Components/Facility/ConsultationForm";
 import { DoctorCapacityForm } from "../Components/Facility/DoctorCapacityForm";
 import { FacilityCreate } from "../Components/Facility/FacilityCreate";
@@ -369,6 +370,14 @@ const routes = {
         consultationId={consultationId}
       />
     ),
+  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/treatment-summary":
+    ({ facilityId, patientId, consultationId }: any) => (
+      <TreatmentSummary
+        consultationId={consultationId}
+        patientId={patientId}
+        dailyRoundsListData={[]}
+      />
+    ),
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/:tab":
     ({ facilityId, patientId, consultationId, tab }: any) => (
       <ConsultationDetails
@@ -378,6 +387,7 @@ const routes = {
         tab={tab}
       />
     ),
+
   "/teleicu/facility/:facilityId/patient/:patientId": ({
     patientId,
     facilityId,

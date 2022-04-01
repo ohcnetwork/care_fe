@@ -160,7 +160,10 @@ export const Feed: React.FC<IFeedProps> = ({
   const cameraPTZ = getCameraPTZ(precision);
 
   return (
-    <div className="p-2">
+    <div
+      className="px-2 flex flex-col gap-4 overflow-hidden w-full"
+      style={{ height: "90vh", maxHeight: "860px" }}
+    >
       <div className="flex items-center flex-wrap justify-between gap-2">
         <PageTitle title="Patient Details -  Camera Feed" breadcrumbs={false} />
         <div className="flex items-center gap-4 px-3">
@@ -204,9 +207,8 @@ export const Feed: React.FC<IFeedProps> = ({
               className="h-full w-full z-10"
               ref={liveFeedPlayerRef}
             ></video>
-
             {loading && (
-              <div className="absolute right-0 bottom-0 p-4 bg-white bg-opacity-75 rounded-tl">
+              <div className="absolute right-0 top-0 p-4 bg-white bg-opacity-75 rounded-bl">
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 border-2 border-b-0 border-primary-500 rounded-full animate-spin an" />
                   <p className="text-base font-bold">{loading}</p>
@@ -251,7 +253,7 @@ export const Feed: React.FC<IFeedProps> = ({
               )}
             </div>
           </div>
-          <div className="lg:flex flex-col bg-green-100 ">
+          <div className="mt-8 lg:mt-0 flex-shrink-0 flex lg:flex-col items-stretch">
             {cameraPTZ.map((option: any) => (
               <button
                 className="bg-green-100 hover:bg-green-200 border border-green-100 rounded p-2"
