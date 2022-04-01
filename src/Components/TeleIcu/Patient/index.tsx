@@ -69,7 +69,7 @@ export default function TeleICUPatientPage({
           </div>
           <div className="px-2">
             <Link
-              href={`/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/`}
+              href={`/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/treatment-summary`}
               className="btn m-1 btn-primary hover:text-white"
             >
               Generate Treatment Summary
