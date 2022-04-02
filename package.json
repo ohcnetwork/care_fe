@@ -113,7 +113,7 @@
   },
   "scripts": {
     "prebuild": "npm run re:build && npm run generate-build-meta",
-    "build:react": "cross-env NODE_ENV=production react-scripts build",
+    "build:react": "DISABLE_ESLINT_PLUGIN='true' cross-env NODE_ENV=production react-scripts build",
     "build:tailwind": "cross-env NODE_ENV=production postcss src/style/index.tailwind.css -o src/style/index.css",
     "build": "npm run build:tailwind && INLINE_RUNTIME_CHUNK=false npm run build:react",
     "start:react": "cross-env PORT=4000 react-scripts start",
