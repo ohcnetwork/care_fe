@@ -136,10 +136,11 @@ export default function ResourceCreate(props: resourceProps) {
   const validateForm = () => {
     let errors = { ...initError };
     let isInvalidForm = false;
+    let phoneNumber;
     Object.keys(requiredFields).forEach((field) => {
       switch (field) {
         case "refering_facility_contact_number":
-          const phoneNumber = parsePhoneNumberFromString(state.form[field]);
+          phoneNumber = parsePhoneNumberFromString(state.form[field]);
           if (!state.form[field]) {
             errors[field] = requiredFields[field].errorText;
             isInvalidForm = true;

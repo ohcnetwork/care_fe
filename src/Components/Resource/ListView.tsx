@@ -58,7 +58,7 @@ export default function ListView() {
       downloadResourceRequests({ ...formatFilter(qParams), csv: 1 })
     );
     setDownloadFile(res.data);
-    document.getElementById(`resourceRequests-ALL`)?.click();
+    document.getElementById("resourceRequests-ALL")?.click();
   };
 
   const updateQuery = (filter: any) => {
@@ -322,7 +322,7 @@ export default function ListView() {
         filename={`resource-requests--${now}.csv`}
         target="_blank"
         className="hidden"
-        id={`resourceRequests-ALL`}
+        id={"resourceRequests-ALL"}
       />
       <SlideOver show={showFilters} setShow={setShowFilters}>
         <div className="bg-white min-h-screen p-4">

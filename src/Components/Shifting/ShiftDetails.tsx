@@ -66,7 +66,7 @@ export default function ShiftDetails(props: { id: string }) {
       });
     }
 
-    navigate(`/shifting`);
+    navigate("/shifting");
   };
 
   const showCopyToclipBoard = (data: any) => {

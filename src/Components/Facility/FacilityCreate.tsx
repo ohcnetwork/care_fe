@@ -300,6 +300,7 @@ export const FacilityCreate = (props: FacilityProps) => {
   const validateForm = () => {
     let errors = { ...initError };
     let invalidForm = false;
+    let phoneNumber;
     Object.keys(state.form).forEach((field) => {
       switch (field) {
         case "name":
@@ -327,7 +328,7 @@ export const FacilityCreate = (props: FacilityProps) => {
           }
           return;
         case "phone_number":
-          const phoneNumber = parsePhoneNumberFromString(state.form[field]);
+          phoneNumber = parsePhoneNumberFromString(state.form[field]);
           if (
             !state.form[field] ||
             !phoneNumber?.isPossible() ||

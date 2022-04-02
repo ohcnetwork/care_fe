@@ -385,8 +385,9 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
           </div>
           <div className="grid grid-cols-2 md:ml-12 md:w-1/3 my-auto gap-4 mt-4 md:mt-0">
             {showDefaultPresets
-              ? viewOptions.map((option: any) => (
+              ? viewOptions.map((option: any, index: number) => (
                   <div
+                    key={index}
                     onClick={() => {
                       setLoading(true);
                       gotoPreset(option.value);

@@ -308,6 +308,8 @@ export const UserAdd = (props: UserProps) => {
   const validateForm = () => {
     let errors = { ...initError };
     let invalidForm = false;
+
+    let phoneNumber, is_valid, alt_is_valid;
     Object.keys(state.form).forEach((field) => {
       switch (field) {
         case "facilities":
@@ -364,11 +366,8 @@ export const UserAdd = (props: UserProps) => {
           }
           return;
         case "phone_number":
-          const phoneNumber = parsePhoneNumberFromString(
-            state.form[field],
-            "IN"
-          );
-          let is_valid: boolean = false;
+          phoneNumber = parsePhoneNumberFromString(state.form[field], "IN");
+          is_valid = false;
           if (phoneNumber) {
             is_valid = phoneNumber.isValid();
           }
@@ -379,7 +378,7 @@ export const UserAdd = (props: UserProps) => {
           return;
 
         case "alt_phone_number":
-          let alt_is_valid: boolean = false;
+          alt_is_valid = false;
           if (state.form[field] && state.form[field] !== "+91") {
             const altPhoneNumber = parsePhoneNumberFromString(
               state.form[field],

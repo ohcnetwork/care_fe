@@ -122,8 +122,11 @@ const PatientNotes = (props: PatientNotesProps) => {
       <div className="px-10 py-5">
         <h3 className="text-lg">Added Notes</h3>
         <div className="w-full">
-          {state.notes.map((note: any) => (
-            <div className="flex p-4 bg-white rounded-lg text-gray-800 mt-4 flex-col w-full border border-gray-300">
+          {state.notes.map((note: any, index: number) => (
+            <div
+              key={index}
+              className="flex p-4 bg-white rounded-lg text-gray-800 mt-4 flex-col w-full border border-gray-300"
+            >
               <div className="flex  w-full ">
                 <p className="text-justify">{note.note}</p>
               </div>

@@ -123,8 +123,8 @@ const AssetManage = (props: AssetManageProps) => {
   const populateTableRows = (txns: AssetTransaction[]) => {
     if (txns.length > 0) {
       setTransactionDetails(
-        transactions.map((transaction: AssetTransaction) => (
-          <tr>
+        transactions.map((transaction: AssetTransaction, index) => (
+          <tr key={index}>
             <td className="px-6 py-4 text-left whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
               <span className="text-cool-gray-900 font-medium">
                 {transaction.from_location.name}

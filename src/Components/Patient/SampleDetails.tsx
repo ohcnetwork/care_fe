@@ -368,7 +368,7 @@ export const SampleDetails = (props: SampleDetailsProps) => {
             {sampleDetails.doctor_name && (
               <div className="md:col-span-2">
                 <span className="font-semibold leading-relaxed">
-                  Doctor's Name:{" "}
+                  Doctor&apos;s Name:{" "}
                 </span>
                 {sampleDetails.doctor_name}
               </div>

@@ -246,9 +246,12 @@ const Investigation = (props: {
               />
               {option.name} |{" "}
               {isInvestigation(option) &&
-                option.groups.map((e) => {
+                option.groups.map((e, index) => {
                   return (
-                    <div className="px-2 py-1 text-xs font-bold bg-gray-300 rounded-full">
+                    <div
+                      key={index}
+                      className="px-2 py-1 text-xs font-bold bg-gray-300 rounded-full"
+                    >
                       {e.name}
                     </div>
                   );

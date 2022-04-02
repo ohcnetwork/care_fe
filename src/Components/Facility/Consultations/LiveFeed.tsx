@@ -421,8 +421,9 @@ const LiveFeed = (props: any) => {
             <div className=" space-y-4 my-2">
               <div className="grid grid-cols-2 my-auto gap-4 ">
                 {showDefaultPresets
-                  ? viewOptions.map((option: any) => (
+                  ? viewOptions.map((option: any, index: number) => (
                       <div
+                        key={index}
                         onClick={() => {
                           gotoPreset(option.value);
                         }}

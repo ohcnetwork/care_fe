@@ -78,7 +78,7 @@ export default function TeleICUPatientPage({
               href={`/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/`}
               className="btn m-1 btn-primary hover:text-white"
             >
-              Doctor's Notes
+              Doctor&apos;s Notes
             </Link>
           </div>
         </div>

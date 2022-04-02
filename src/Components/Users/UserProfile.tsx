@@ -141,6 +141,7 @@ export default function UserProfile() {
   const validateForm = () => {
     let errors = { ...initError };
     let invalidForm = false;
+    let phoneNumber, is_valid, alt_is_valid;
     Object.keys(states.form).forEach((field, i) => {
       switch (field) {
         case "firstName":
@@ -164,12 +165,9 @@ export default function UserProfile() {
           }
           return;
         case "phoneNumber":
-          const phoneNumber = parsePhoneNumberFromString(
-            states.form[field],
-            "IN"
-          );
+          phoneNumber = parsePhoneNumberFromString(states.form[field], "IN");
 
-          let is_valid: boolean = false;
+          is_valid = false;
           if (phoneNumber) {
             is_valid = phoneNumber.isValid();
           }
@@ -180,7 +178,7 @@ export default function UserProfile() {
           }
           return;
         case "altPhoneNumber":
-          let alt_is_valid: boolean = false;
+          alt_is_valid = false;
           if (states.form[field] && states.form[field] !== "+91") {
             const altPhoneNumber = parsePhoneNumberFromString(
               states.form[field],
@@ -623,8 +621,8 @@ export default function UserProfile() {
           <div className="text-lg font-medium leading-6 text-gray-900">
             Check for software updates
             <p className="mt-1 text-sm leading-5 text-gray-600">
-              Click the update button to see if you have the latest "care"
-              version.
+              Click the update button to see if you have the latest
+              &quot;care&quot; version.
             </p>
           </div>
           <button

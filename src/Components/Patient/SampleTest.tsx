@@ -412,7 +412,7 @@ export const SampleTest = (props: any) => {
               </div>
               <div className="mt-4 grid gap-4 grid-cols-1 md:grid-cols-2">
                 <div>
-                  <InputLabel>Doctor's Name</InputLabel>
+                  <InputLabel>Doctor&apos;s Name</InputLabel>
                   <TextInputField
                     name="doctor_name"
                     variant="outlined"

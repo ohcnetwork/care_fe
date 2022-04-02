@@ -74,7 +74,7 @@ export default function BoardView() {
       downloadResourceRequests({ ...formatFilter(qParams), csv: 1 })
     );
     setDownloadFile(res.data);
-    document.getElementById(`resourceRequests-ALL`)?.click();
+    document.getElementById("resourceRequests-ALL")?.click();
   };
 
   const onListViewBtnClick = () => {
@@ -164,7 +164,7 @@ export default function BoardView() {
         filename={`resource-requests--${now}.csv`}
         target="_blank"
         className="hidden"
-        id={`resourceRequests-ALL`}
+        id={"resourceRequests-ALL"}
       />
       <SlideOver show={showFilters} setShow={setShowFilters}>
         <div className="bg-white min-h-screen p-4">

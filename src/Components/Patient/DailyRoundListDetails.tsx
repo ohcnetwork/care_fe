@@ -194,8 +194,8 @@ export const DailyRoundListDetails = (props: any) => {
                         </thead>
                         <tbody>
                           {dailyRoundListDetailsData?.medication_given?.map(
-                            (med) => (
-                              <tr className="bg-white">
+                            (med, index) => (
+                              <tr key={index} className="bg-white">
                                 <td className="px-6 py-4 whitespace-no-wrap text-sm leading-5 font-medium text-gray-900">
                                   {med.medicine}
                                 </td>

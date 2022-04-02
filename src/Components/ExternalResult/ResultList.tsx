@@ -61,7 +61,7 @@ export default function ResultList() {
   let manageResults: any = null;
   const local = JSON.parse(localStorage.getItem("external-filters") || "{}");
   const localLsgWard = JSON.parse(
-    localStorage.getItem("lsg-ward-data") || '{"lsgList": [], "wardList": []}'
+    localStorage.getItem("lsg-ward-data") || "{'lsgList': [], 'wardList': []}"
   );
 
   useEffect(() => {
@@ -216,7 +216,7 @@ export default function ResultList() {
       externalResultList({ ...qParams, csv: true }, "externalResultList")
     );
     setDownloadFile(res?.data);
-    document.getElementById(`downloadCSV`)?.click();
+    document.getElementById("downloadCSV")?.click();
   };
 
   const badge = (key: string, value: any, paramKey: string) => {
@@ -510,7 +510,7 @@ export default function ResultList() {
         filename={`external-result--${now}.csv`}
         target="_blank"
         className="hidden"
-        id={`downloadCSV`}
+        id={"downloadCSV"}
       />
       <SlideOver show={showFilters} setShow={setShowFilters}>
         <div className="bg-white min-h-screen p-4">

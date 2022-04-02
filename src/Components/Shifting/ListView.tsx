@@ -56,7 +56,7 @@ export default function ListView() {
       downloadShiftRequests({ ...formatFilter(qParams), csv: 1 })
     );
     setDownloadFile(res.data);
-    document.getElementById(`shiftRequests-ALL`)?.click();
+    document.getElementById("shiftRequests-ALL")?.click();
   };
 
   const updateQuery = (filter: any) => {
@@ -437,7 +437,7 @@ export default function ListView() {
         filename={`shift-requests--${now}.csv`}
         target="_blank"
         className="hidden"
-        id={`shiftRequests-ALL`}
+        id={"shiftRequests-ALL"}
       />
       <SlideOver show={showFilters} setShow={setShowFilters}>
         <div className="bg-white min-h-screen p-4">

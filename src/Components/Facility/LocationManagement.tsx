@@ -242,15 +242,18 @@ export const LocationManagement = (props: LocationManagementProps) => {
   };
 
   if (locations && locations.length) {
-    locationsList = locations.map((locationItem: LocationModel) => (
-      <LocationRow
-        id={locationItem.id || ""}
-        facilityId={facilityId || ""}
-        name={locationItem.name || ""}
-        description={locationItem.description || ""}
-        triggerRerender={triggerRerender}
-      />
-    ));
+    locationsList = locations.map(
+      (locationItem: LocationModel, index: number) => (
+        <LocationRow
+          key={index}
+          id={locationItem.id || ""}
+          facilityId={facilityId || ""}
+          name={locationItem.name || ""}
+          description={locationItem.description || ""}
+          triggerRerender={triggerRerender}
+        />
+      )
+    );
   } else if (locations && locations.length === 0) {
     locationsList = (
       <tr className="bg-white">

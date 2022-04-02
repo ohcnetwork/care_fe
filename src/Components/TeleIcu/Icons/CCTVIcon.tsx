@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import React from "react";
 import { SvgIcon, SvgIconProps } from "@material-ui/core";
 

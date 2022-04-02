@@ -559,7 +559,7 @@ export default function SampleViewAdmin(props: any) {
         filename={`shift-requests--${now}.csv`}
         target="_blank"
         className="hidden"
-        id={`download-sample-tests`}
+        id={"download-sample-tests"}
       />
     </div>
   );

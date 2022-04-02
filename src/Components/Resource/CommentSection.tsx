@@ -81,8 +81,11 @@ const CommentSection = (props: CommentSectionProps) => {
         </Button>
       </div>
       <div className=" w-full">
-        {comments.map((comment: any) => (
-          <div className="flex p-4 bg-white rounded-lg text-gray-800 mt-4 flex-col w-full border border-gray-300">
+        {comments.map((comment: any, index: number) => (
+          <div
+            key={index}
+            className="flex p-4 bg-white rounded-lg text-gray-800 mt-4 flex-col w-full border border-gray-300"
+          >
             <div className="flex  w-full ">
               <p className="text-justify">{comment.comment}</p>
             </div>

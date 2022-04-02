@@ -70,7 +70,7 @@ export default function BoardView() {
       downloadShiftRequests({ ...formatFilter(qParams), csv: 1 })
     );
     setDownloadFile(res.data);
-    document.getElementById(`shiftRequests-ALL`)?.click();
+    document.getElementById("shiftRequests-ALL")?.click();
   };
 
   const onListViewBtnClick = () => {
@@ -172,7 +172,7 @@ export default function BoardView() {
         filename={`shift-requests--${now}.csv`}
         target="_blank"
         className="hidden"
-        id={`shiftRequests-ALL`}
+        id={"shiftRequests-ALL"}
       />
       <SlideOver show={showFilters} setShow={setShowFilters}>
         <div className="bg-white min-h-screen p-4">

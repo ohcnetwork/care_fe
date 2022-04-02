@@ -1,6 +1,7 @@
 import React from "react";
 
-export const RightArrowIcon = ({ className }: React.SVGProps<SVGElement>) => {
+export const RightArrowIcon = (props: { className?: string }) => {
+  const { className } = props;
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"

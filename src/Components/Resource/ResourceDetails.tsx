@@ -63,7 +63,7 @@ export default function ResourceDetails(props: { id: string }) {
       });
     }
 
-    navigate(`/resource`);
+    navigate("/resource");
   };
 
   const showFacilityCard = (facilityData: any) => {

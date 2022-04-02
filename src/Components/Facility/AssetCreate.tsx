@@ -168,8 +168,8 @@ const AssetCreate = (props: AssetProps) => {
             errors[field] = "Field is required";
             invalidForm = true;
           }
-          const phoneNumber = parsePhoneNumberFromString(support_phone);
-          if (!phoneNumber?.isPossible()) {
+
+          if (!parsePhoneNumberFromString(support_phone)?.isPossible()) {
             errors[field] = "Please enter valid phone number";
             invalidForm = true;
           }

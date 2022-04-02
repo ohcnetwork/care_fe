@@ -504,28 +504,30 @@ export const ConsultationDetails = (props: any) => {
                         Lines and Catheters
                       </h3>
                       <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
-                        {consultationData.lines?.map((line: any) => (
-                          <div className="mt-4">
-                            <h5>{line.type}</h5>
-                            <p className="text-justify break-word">
-                              Details:
-                              <br />
-                              <span>{line.other_type}</span>
-                            </p>
-                            <p>
-                              Insertion Date:{" "}
-                              <span className="font-semibold">
-                                {moment(line.start_date).format("lll")}
-                              </span>
-                            </p>
-                            <p>
-                              Site/Level of Fixation: <br />
-                              <span className="text-justify break-word">
-                                {line.site}
-                              </span>
-                            </p>
-                          </div>
-                        ))}
+                        {consultationData.lines?.map(
+                          (line: any, index: number) => (
+                            <div key={index} className="mt-4">
+                              <h5>{line.type}</h5>
+                              <p className="text-justify break-word">
+                                Details:
+                                <br />
+                                <span>{line.other_type}</span>
+                              </p>
+                              <p>
+                                Insertion Date:{" "}
+                                <span className="font-semibold">
+                                  {moment(line.start_date).format("lll")}
+                                </span>
+                              </p>
+                              <p>
+                                Site/Level of Fixation: <br />
+                                <span className="text-justify break-word">
+                                  {line.site}
+                                </span>
+                              </p>
+                            </div>
+                          )
+                        )}
                       </div>
                     </div>
                   </div>

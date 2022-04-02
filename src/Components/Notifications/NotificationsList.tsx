@@ -26,7 +26,8 @@ const PageTitle = loadable(() => import("../Common/PageTitle"));
 const RESULT_LIMIT = 14;
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
-export default function ResultList({ expanded = false }) {
+export default function ResultList(props: { expanded: boolean }) {
+  const { expanded } = props;
   const rootState: any = useSelector((rootState) => rootState);
   const { currentUser } = rootState;
   const { t } = useTranslation();
@@ -114,13 +115,13 @@ export default function ResultList({ expanded = false }) {
           })
           .catch(function (e) {
             Error({
-              msg: `Subscription Error`,
+              msg: "Subscription Error",
             });
           });
       })
       .catch(function (e) {
         Error({
-          msg: `Service Worker Error`,
+          msg: "Service Worker Error",
         });
       });
   };
@@ -207,7 +208,7 @@ export default function ResultList({ expanded = false }) {
       case "INVESTIGATION_SESSION_CREATED":
         return `/facility/${data.facility}/patient/${data.patient}/consultation/${data.consultation}/investigation/${data.session}`;
       case "MESSAGE":
-        return `/notice_board/`;
+        return "/notice_board/";
       default:
         return "#";
     }
@@ -406,3 +407,5 @@ export default function ResultList({ expanded = false }) {
     </div>
   );
 }
+
+ResultList.defaultProps = { expanded: false };

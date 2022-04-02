@@ -596,18 +596,20 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           }
           return;
         case "phone_number":
-          const phoneNumber = parsePhoneNumberFromString(state.form[field]);
-          if (!state.form[field] || !phoneNumber?.isPossible()) {
+          if (
+            !state.form[field] ||
+            !parsePhoneNumberFromString(state.form[field])?.isPossible()
+          ) {
             errors[field] = "Please enter valid phone number";
             if (!error_div) error_div = field;
             invalidForm = true;
           }
           return;
         case "emergency_phone_number":
-          const emergency_phone_number = parsePhoneNumberFromString(
-            state.form[field]
-          );
-          if (!state.form[field] || !emergency_phone_number?.isPossible()) {
+          if (
+            !state.form[field] ||
+            !parsePhoneNumberFromString(state.form[field])?.isPossible()
+          ) {
             errors[field] = "Please enter valid phone number";
             if (!error_div) error_div = field;
             invalidForm = true;

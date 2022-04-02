@@ -75,7 +75,7 @@ const DuplicatePatientDialog = (props: Props & WithStyles<typeof styles>) => {
           <div>
             <p className="leading-relaxed text-sm">
               Please transfer / Admit the patient record to your facility by
-              selecting the patient from the following list of suspect's
+              selecting the patient from the following list of suspect&apos;s
               registered with{" "}
               <span className="font-bold">{patientList[0].phone_number}</span>{" "}
             </p>
