@@ -3,6 +3,11 @@
     "browser": true,
     "es2021": true
   },
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
+  },
   "extends": [
     "eslint:recommended",
     "plugin:react/recommended",
@@ -23,5 +28,5 @@
     "no-unused-vars": "warn",
     "react/react-in-jsx-scope": "off"
   },
-  "ignorePatterns": ["dist", "public", "lib", "build", "*.bs.js"]
+  "ignorePatterns": ["dist", "public", "lib", "build", "*.bs.js", "*.gen.tsx"]
 }
