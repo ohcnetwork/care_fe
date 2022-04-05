@@ -20,10 +20,8 @@
   "plugins": ["react", "@typescript-eslint"],
   "rules": {
     "quotes": ["error", "double"],
-    "no-unused-vars": "off",
-    "react/react-in-jsx-scope": "off",
-    "react-hooks/exhaustive-deps": "off",
-    "no-undef": "off"
+    "no-unused-vars": "warn",
+    "react/react-in-jsx-scope": "off"
   },
   "ignorePatterns": ["dist", "public", "lib", "build", "*.bs.js", "*.gen.tsx"]
 }
