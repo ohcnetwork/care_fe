@@ -60,7 +60,7 @@
     "@types/react-swipeable-views": "^0.13.0",
     "@types/react-virtualized": "^9.21.11",
     "@yaireo/ui-range": "^2.1.15",
-    "axios": "^0.21.1",
+    "axios": "^0.26.1",
     "bs-webapi": "^0.19.0",
     "clean-webpack-plugin": "^4.0.0-alpha.0",
     "clsx": "^1.1.1",
