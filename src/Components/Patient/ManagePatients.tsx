@@ -746,7 +746,13 @@ export const PatientManager = (props: any) => {
               </button>
               <button
                 className="btn-primary btn md:mt-7 w-full md:w-fit"
-                onClick={() => setShowDialog(true)}
+                onClick={() => {
+                  if (facilityId) {
+                    navigate(`/facility/${facilityId}/patient`);
+                  } else {
+                    setShowDialog(true);
+                  }
+                }}
                 data-testid="add-patient-button"
               >
                 <i className="fas fa-plus mr-2 text-white"></i>
