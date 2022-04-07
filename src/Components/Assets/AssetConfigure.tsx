@@ -14,11 +14,11 @@ import * as Notification from "../../Utils/Notifications.js";
 import { Card, CardContent, InputLabel, Button } from "@material-ui/core";
 import { SelectField, TextInputField } from "../Common/HelperInputFields";
 import { ASSET_META_TYPE, CAMERA_TYPE } from "../../Common/constants";
-import LiveFeed from "../Facility/Consultations/LiveFeed";
-import { BedSelect } from "../Common/BedSelect";
 import { BedModel } from "../Facility/models";
 import axios from "axios";
 import { getCameraConfig } from "../../Utils/transformUtils";
+import CameraConfigure from "./configure/CameraConfigure";
+import MonitorConfigure from "./configure/MonitorConfigure";
 
 interface AssetConfigureProps {
   assetId: string;
@@ -81,7 +81,7 @@ const AssetConfigure = (props: AssetConfigureProps) => {
         camera_access_key: cameraAccessKey,
       },
     };
-    let res: any = await Promise.resolve(
+    const res: any = await Promise.resolve(
       dispatch(partialUpdateAsset(assetId, data))
     );
     if (res?.status === 200) {
@@ -103,11 +103,11 @@ const AssetConfigure = (props: AssetConfigureProps) => {
       preset_name: newPreset,
     };
     try {
-      let presetData = await axios.get(
+      const presetData = await axios.get(
         `https://${asset?.meta?.middleware_hostname}/status?hostname=${config.hostname}&port=${config.port}&username=${config.username}&password=${config.password}`
       );
       console.log(presetData);
-      let res: any = await Promise.resolve(
+      const res: any = await Promise.resolve(
         dispatch(
           createAssetBed(
             { meta: { ...data, ...presetData.data } },
@@ -248,65 +248,18 @@ const AssetConfigure = (props: AssetConfigureProps) => {
           </form>
         </CardContent>
       </Card>
-      {asset?.meta?.asset_type === "CAMERA" && (
-        <Card>
-          <form onSubmit={addPreset}>
-            <CardContent>
-              <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
-                <div>
-                  <InputLabel id="asset-type">Bed</InputLabel>
-                  <BedSelect
-                    name="bed"
-                    setSelected={(selected) => setBed(selected as BedModel)}
-                    selected={bed}
-                    errors=""
-                    multiple={false}
-                    margin="dense"
-                    location={asset?.location_object?.id}
-                    facility={asset?.location_object?.facility?.id}
-                  />
-                </div>
-                <div>
-                  <InputLabel id="location">Preset Name</InputLabel>
-                  <TextInputField
-                    name="name"
-                    id="location"
-                    variant="outlined"
-                    margin="dense"
-                    type="text"
-                    value={newPreset}
-                    onChange={(e) => setNewPreset(e.target.value)}
-                    errors=""
-                  />
-                </div>
-              </div>
-              <div className="flex justify-between mt-4">
-                <Button
-                  color="primary"
-                  variant="contained"
-                  type="submit"
-                  style={{ marginLeft: "auto" }}
-                  startIcon={<CheckCircleOutlineIcon></CheckCircleOutlineIcon>}
-                  onClick={() => {}}
-                >
-                  Add Preset
-                </Button>
-              </div>
-            </CardContent>
-          </form>
-        </Card>
-      )}
-      <Card>
-        <CardContent>
-          {asset?.meta?.asset_type === "CAMERA" && (
-            <LiveFeed
-              middlewareHostname={asset?.meta?.middleware_hostname}
-              asset={getCameraConfig(asset)}
-              showRefreshButton={true}
-            />
-          )}
-        </CardContent>
-      </Card>
+      {asset?.meta?.asset_type === "CAMERA" ? (
+        <CameraConfigure
+          asset={asset as AssetData}
+          bed={bed}
+          setBed={setBed}
+          newPreset={newPreset}
+          setNewPreset={setNewPreset}
+          addPreset={addPreset}
+        />
+      ) : asset?.meta?.asset_type === "HL7MONITOR" ? (
+        <MonitorConfigure asset={asset as AssetData} />
+      ) : null}
     </div>
   );
 };

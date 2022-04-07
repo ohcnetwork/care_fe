@@ -12,7 +12,7 @@ export interface OptionsType {
 export const KASP_STRING = "KASP";
 export const KASP_FULL_STRING = "Karunya Arogya Suraksha Padhathi";
 
-export const USER_TYPES: Array<String> = [
+export const USER_TYPES: Array<string> = [
   "Volunteer",
   "Pharmacist",
   "StaffReadOnly",
@@ -28,7 +28,7 @@ export const USER_TYPES: Array<String> = [
   "StateReadOnlyAdmin",
 ];
 
-export const DOWNLOAD_TYPES: Array<String> = [
+export const DOWNLOAD_TYPES: Array<string> = [
   "Facility List",
   "Facility Capacity List",
   "Facility Doctors List",
@@ -584,7 +584,10 @@ export const LOCATION_BED_TYPES: Array<any> = [
   { id: "REGULAR", name: "Regular" },
 ];
 
-export const ASSET_META_TYPE = [{ id: "CAMERA", text: "Camera" }];
+export const ASSET_META_TYPE = [
+  { id: "CAMERA", text: "Camera(ONVIF)" },
+  { id: "HL7MONITOR", text: "Vitals Monitor(HL7)" },
+];
 
 export const CAMERA_TYPE = [
   { id: "HIKVISION", text: "ONVIF Camera (HIKVISION)" },
