@@ -55,21 +55,10 @@ export const Feed: React.FC<IFeedProps> = ({
       ]);
       if (!status.aborted) {
         if (dailyRounds?.data?.results?.length) {
-          let bedAssets = await dispatch(
+          const bedAssets = await dispatch(
             listAssetBeds({ bed: dailyRounds.data.results[0].bed })
           );
           console.log("Found " + bedAssets.data.results.length + "bedAssets:");
-          bedAssets = {
-            ...bedAssets,
-            data: {
-              ...bedAssets.data,
-              results: bedAssets.data.results.filter((assetBed: any) =>
-                assetBed.asset_object.meta?.asset_type.type === "camera"
-                  ? true
-                  : false
-              ),
-            },
-          };
           console.log("Found " + bedAssets.data.results.length + "bedAssets:");
           if (bedAssets?.data?.results?.length) {
             const { camera_address, camera_access_key, middleware_hostname } =
