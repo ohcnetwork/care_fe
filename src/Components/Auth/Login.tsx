@@ -80,7 +80,12 @@ const LoginPage = (props: any) => {
         } else if (res && statusCode === 200) {
           localStorage.setItem("care_access_token", res.access);
           localStorage.setItem("care_refresh_token", res.refresh);
-          navigate("/facility");
+
+          if (window.location.pathname === '/' || window.location.pathname === '/login') {
+            navigate('/facility');
+          } else {
+            navigate(window.location.pathname.toString());
+          }
           window.location.reload();
         }
       });
