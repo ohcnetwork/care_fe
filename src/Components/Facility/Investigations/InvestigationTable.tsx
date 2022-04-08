@@ -178,7 +178,7 @@ export const InvestigationTable = ({
       <br />
       <TableContainer
         component={Paper}
-        className="print:overflow-hidden"
+        className="overflow-hidden"
         id="section-to-print"
       >
         <Table aria-label="simple table overflow-hidden" size="small">
