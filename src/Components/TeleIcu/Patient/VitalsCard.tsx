@@ -1,5 +1,4 @@
-import axios from "axios";
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { useDispatch } from "react-redux";
 import { listAssetBeds } from "../../../Redux/actions";
 import { AssetData } from "../../Assets/AssetTypes";
@@ -10,12 +9,36 @@ export interface ITeleICUPatientVitalsCardProps {
   patient: PatientModel;
 }
 
+const getVital = (
+  patientObservations: any,
+  vital: string,
+  fallbackValue?: any
+) => {
+  if (patientObservations) {
+    const vitalValues = patientObservations[vital];
+    if (vitalValues) {
+      const returnValue = vitalValues?.value;
+
+      if (returnValue !== undefined && returnValue !== null) {
+        return returnValue;
+      }
+    }
+  }
+  if (fallbackValue) {
+    return fallbackValue;
+  }
+  return "";
+};
+
 export default function TeleICUPatientVitalsCard({
   patient,
 }: ITeleICUPatientVitalsCardProps) {
+  const wsClient = useRef<WebSocket>();
+
   const dispatch: any = useDispatch();
   const [hl7Asset, setHl7Asset] = React.useState<AssetData>();
   const [patientObservations, setPatientObservations] = React.useState<any>();
+
   const fetchData = async () => {
     if (patient?.last_consultation?.last_daily_round?.bed) {
       let bedAssets = await dispatch(
@@ -44,55 +67,40 @@ export default function TeleICUPatientVitalsCard({
     fetchData();
   }, [patient]);
 
-  const fetchVitals = async () => {
-    const url = hl7Asset?.meta?.middleware_hostname;
-    if (url !== undefined) {
-      const response = await axios.get(`https://${url}/get_observations`);
-      // Check if observations is an array
-      const observations = response.data;
-      if (observations.length > 0) {
-        if (Array.isArray(observations)) {
-          const newPatientObservations = observations.filter(
-            (observation: any) => {
-              return observation.device_id === hl7Asset?.meta?.camera_address;
-            }
-          );
-          if (newPatientObservations.length > 0) {
-            setPatientObservations(newPatientObservations[0].observations);
-          }
-          setTimeout(() => {
-            fetchVitals();
-          }, 2000);
-        }
+  const connectWs = (url: string) => {
+    wsClient.current = new WebSocket(url);
+    wsClient.current.addEventListener("message", (e) => {
+      const newObservations = JSON.parse(e.data || "{}");
+      if (newObservations.length > 0) {
+        const newObservationsMap = newObservations.reduce(
+          (acc: any, curr: { observation_id: any }) => ({
+            ...acc,
+            [curr.observation_id]: curr,
+          }),
+          {}
+        );
+        setPatientObservations(newObservationsMap);
       }
-    }
+    });
   };
 
   useEffect(() => {
-    // Get Observations for Asset Middleware
-    fetchVitals();
-  }, [hl7Asset]);
+    const url = hl7Asset?.meta?.camera_address
+      ? `wss://${hl7Asset?.meta?.middleware_hostname}/observations/${hl7Asset?.meta?.camera_address}`
+      : null;
 
-  const getVital = (
-    patientObservations: any,
-    vital: string,
-    fallbackValue?: any
-  ) => {
-    if (patientObservations) {
-      const vitalValues = patientObservations[vital];
-      if (vitalValues) {
-        const returnValue = vitalValues[vitalValues.length - 1].value;
-        console.log(vital, returnValue);
-        if (returnValue !== undefined && returnValue !== null) {
-          return returnValue;
-        }
-      }
-    }
-    if (fallbackValue) {
-      return fallbackValue;
-    }
-    return "";
-  };
+    if (url) connectWs(url);
+
+    return () => {
+      wsClient.current?.close();
+    };
+  }, [hl7Asset?.meta?.camera_address, hl7Asset?.meta?.middleware_hostname]);
+
+  useEffect(() => {
+    return () => {
+      wsClient.current?.close();
+    };
+  }, []);
 
   return (
     <div className="lg:w-6/12 w-full p-5 py-3">
