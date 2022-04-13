@@ -647,7 +647,11 @@ export const PatientHome = (props: any) => {
           </div>
         </div>
         {viewOption === "teleicu" ? (
-          <TeleICUPatient patientId={id} facilityId={facilityId} />
+          <TeleICUPatient
+            patientId={id}
+            facilityId={facilityId}
+            asComponent={true}
+          />
         ) : (
           <>
             <div className="relative mt-2">
