@@ -263,7 +263,7 @@ const HospitalListPage = (props: any) => {
           {value}
           <i
             className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
-            onClick={(e) => removeFilter(paramKey)}
+            onClick={() => removeFilter(paramKey)}
           ></i>
         </span>
       )
@@ -311,7 +311,7 @@ const HospitalListPage = (props: any) => {
 
   let facilityList: any[] = [];
   if (data && data.length) {
-    facilityList = data.map((facility: any, idx: number) => {
+    facilityList = data.map((facility: any) => {
       return (
         <div key={`usr_${facility.id}`} className="w-full">
           <div className="block rounded-lg bg-white shadow h-full hover:border-primary-500 overflow-hidden">
@@ -368,7 +368,7 @@ const HospitalListPage = (props: any) => {
                     {userType !== "Staff" ? (
                       <button
                         className="ml-2 md:ml-0 inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:shadow-outline-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow mr-5"
-                        onClick={(_) => setModalFor(facility.id)}
+                        onClick={() => setModalFor(facility.id)}
                       >
                         <i className="far fa-comment-dots mr-1"></i> Notify
                       </button>
@@ -377,7 +377,7 @@ const HospitalListPage = (props: any) => {
                     )}
                     <Modal
                       open={modalFor === facility.id}
-                      onClose={(_) => setModalFor(undefined)}
+                      onClose={() => setModalFor(undefined)}
                       aria-labelledby="Notify This Facility"
                       aria-describedby="Type a message and notify this facility"
                       className=""
@@ -411,7 +411,7 @@ const HospitalListPage = (props: any) => {
                             <button
                               type="button"
                               className="btn-danger btn mt-4 mr-2 w-full md:w-auto"
-                              onClick={(_) => setModalFor(undefined)}
+                              onClick={() => setModalFor(undefined)}
                             >
                               Cancel
                             </button>

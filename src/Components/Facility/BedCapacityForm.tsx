@@ -178,7 +178,7 @@ export const BedCapacityForm = (props: BedCapacityProps) => {
   const validateData = () => {
     let errors = { ...initForm };
     let invalidForm = false;
-    Object.keys(state.form).forEach((field, i) => {
+    Object.keys(state.form).forEach((field) => {
       if (!state.form[field]) {
         errors[field] = "Field is required";
         invalidForm = true;

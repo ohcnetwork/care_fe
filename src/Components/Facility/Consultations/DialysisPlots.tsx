@@ -42,7 +42,7 @@ export const DialysisPlots = (props: any) => {
     [consultationId, currentPage]
   );
 
-  const handlePagination = (page: number, limit: number) => {
+  const handlePagination = (page: number) => {
     setCurrentPage(page);
   };
 

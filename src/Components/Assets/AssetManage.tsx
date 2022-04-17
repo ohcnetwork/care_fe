@@ -72,14 +72,11 @@ const AssetManage = (props: AssetManageProps) => {
   const PrintPreview = () => (
     <div className="">
       <div className="my-4 flex justify-end ">
-        <button
-          onClick={(_) => window.print()}
-          className="btn btn-primary mr-2"
-        >
+        <button onClick={() => window.print()} className="btn btn-primary mr-2">
           <i className="fas fa-print mr-2"></i> Print QR Code
         </button>
         <button
-          onClick={(_) => setIsPrintMode(false)}
+          onClick={() => setIsPrintMode(false)}
           className="btn btn-default"
         >
           <i className="fas fa-times mr-2"></i> Close

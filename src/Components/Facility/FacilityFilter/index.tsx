@@ -118,7 +118,7 @@ function FacillityFilter(props: any) {
         </button>
         <button
           className="btn btn-default"
-          onClick={(_) => {
+          onClick={() => {
             closeFilter();
             navigate("/facility");
           }}

@@ -6,7 +6,6 @@ import {
   TableHead,
   TableRow,
   TableBody,
-  Theme,
   Typography,
   Box,
   Button,
@@ -17,7 +16,7 @@ import { getColorIndex, rowColor, transformData } from "./utils";
 import { InvestigationResponse } from "./types";
 import moment from "moment";
 
-const useStyle = makeStyles((theme: Theme) => ({
+const useStyle = makeStyles(() => ({
   tableCell: {
     fontSize: "1.1rem",
     maxWidth: 150,
@@ -45,7 +44,7 @@ const useStyle = makeStyles((theme: Theme) => ({
   },
 }));
 
-const StyledTableRow = withStyles((theme: Theme) =>
+const StyledTableRow = withStyles(() =>
   createStyles({
     root: {
       "&:nth-of-type(odd)": {
@@ -205,7 +204,7 @@ const ReportTable: React.FC<ReportTableProps> = ({
                       min={t.investigation_object.min_value}
                       max={t.investigation_object.max_value}
                       name={t.investigation_object.name}
-                      onChange={(e: { target: { value: any } }) => {}}
+                      onChange={() => {}}
                     />
                   );
                 })

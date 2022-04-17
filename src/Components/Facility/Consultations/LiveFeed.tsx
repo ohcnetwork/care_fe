@@ -40,7 +40,7 @@ const LiveFeed = (props: any) => {
       .then((resp: any) => {
         setSourceUrl(`https://${middlewareHostname}${resp.data.uri}`);
       })
-      .catch((ex: any) => {
+      .catch(() => {
         // console.error('Error while refreshing',ex);
       });
   }, [asset.hostname, asset.password, asset.username, middlewareHostname]);
@@ -59,7 +59,7 @@ const LiveFeed = (props: any) => {
           console.log(resp);
           // setSourceUrl(`https://${middlewareHostname}${resp.data.uri}`);
         })
-        .catch((ex: any) => {
+        .catch(() => {
           // console.error('Error while refreshing',ex);
         });
     }
@@ -74,7 +74,7 @@ const LiveFeed = (props: any) => {
         .then((resp: any) => {
           setPosition(resp.data.position);
         })
-        .catch((ex: any) => {
+        .catch(() => {
           // console.error('Error while refreshing',ex);
         });
     },
@@ -91,7 +91,7 @@ const LiveFeed = (props: any) => {
           setPresets(resp.data);
           console.log("PRESETS", resp.data);
         })
-        .catch((ex: any) => {
+        .catch(() => {
           // console.error('Error while refreshing',ex);
         });
     },
@@ -119,7 +119,7 @@ const LiveFeed = (props: any) => {
       .then((resp: any) => {
         console.log(resp.data);
       })
-      .catch((ex: any) => {
+      .catch(() => {
         // console.error('Error while refreshing',ex);
       });
   };
@@ -181,7 +181,7 @@ const LiveFeed = (props: any) => {
           console.log(resp.data);
           getCameraStatus(asset);
         })
-        .catch((ex: any) => {
+        .catch(() => {
           // console.error('Error while refreshing',ex);
         });
     }
@@ -195,7 +195,7 @@ const LiveFeed = (props: any) => {
           ...data,
           ...asset,
         })
-        .then((resp: any) => {
+        .then(() => {
           getCameraStatus(asset);
         })
         .catch((ex: any) => {
@@ -294,7 +294,7 @@ const LiveFeed = (props: any) => {
                 {cameraPTZ.map((option: any) => (
                   <div
                     key={option.action}
-                    onClick={(_) => {
+                    onClick={() => {
                       // console.log(option.action);
                       requestPTZ(option.action);
                     }}

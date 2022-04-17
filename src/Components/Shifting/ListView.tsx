@@ -56,7 +56,7 @@ export default function ListView() {
       downloadShiftRequests({ ...formatFilter(qParams), csv: 1 })
     );
     setDownloadFile(res.data);
-    document.getElementById(`shiftRequests-ALL`)?.click();
+    document.getElementById("shiftRequests-ALL")?.click();
   };
 
   const updateQuery = (filter: any) => {
@@ -297,7 +297,7 @@ export default function ListView() {
 
             <div className="mt-2 flex">
               <button
-                onClick={(_) => navigate(`/shifting/${shift.external_id}`)}
+                onClick={() => navigate(`/shifting/${shift.external_id}`)}
                 className="btn w-full btn-default bg-white mr-2"
               >
                 <i className="fas fa-eye mr-2" /> All Details
@@ -317,7 +317,7 @@ export default function ListView() {
 
                   <Modal
                     open={modalFor === shift.external_id}
-                    onClose={(_) =>
+                    onClose={() =>
                       setModalFor({ externalId: undefined, loading: false })
                     }
                   >
@@ -353,7 +353,7 @@ export default function ListView() {
                             size="small"
                             variant="outlined"
                             fullWidth
-                            onClick={(_) => handleTransferComplete(shift)}
+                            onClick={() => handleTransferComplete(shift)}
                           >
                             Confirm
                           </Button>
@@ -410,7 +410,7 @@ export default function ListView() {
         <div className="flex items-start gap-2">
           <button
             className="flex leading-none border-2 border-gray-200 bg-white rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 focus:text-primary-600 focus:border-gray-400 hover:border-gray-400 rounded-r-full px-4 py-2 text-sm"
-            onClick={(_) => setShowFilters((show) => !show)}
+            onClick={() => setShowFilters((show) => !show)}
           >
             <i className="fa fa-filter mr-1" aria-hidden="true"></i>
             <span>Filters</span>
@@ -462,7 +462,7 @@ export default function ListView() {
         filename={`shift-requests--${now}.csv`}
         target="_blank"
         className="hidden"
-        id={`shiftRequests-ALL`}
+        id="shiftRequests-ALL"
       />
       <SlideOver show={showFilters} setShow={setShowFilters}>
         <div className="bg-white min-h-screen p-4">

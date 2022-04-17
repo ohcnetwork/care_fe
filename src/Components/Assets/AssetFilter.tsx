@@ -44,7 +44,7 @@ function AssetFilter(props: any) {
     closeFilter();
     const searchQuery = qParams?.search && `?search=${qParams?.search}`;
     if (searchQuery) navigate(`/assets${searchQuery}`);
-    else navigate(`/assets`);
+    else navigate("/assets");
   }, [qParams?.search, closeFilter]);
 
   const fetchFacility = useCallback(

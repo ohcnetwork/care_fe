@@ -174,7 +174,7 @@ const Investigation = (props: {
     setState({ type: "set_form", form });
   };
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async () => {
     initialiseForm();
     if (!saving) {
       setSaving(true);

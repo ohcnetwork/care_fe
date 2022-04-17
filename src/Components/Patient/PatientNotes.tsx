@@ -84,7 +84,7 @@ const PatientNotes = (props: PatientNotesProps) => {
     const payload = {
       note: noteField,
     };
-    dispatch(addPatientNote(props.patientId, payload)).then((res: any) => {
+    dispatch(addPatientNote(props.patientId, payload)).then(() => {
       Notification.Success({ msg: "Note added successfully" });
       fetchData();
     });

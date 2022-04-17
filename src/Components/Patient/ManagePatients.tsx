@@ -91,7 +91,7 @@ const useStylesTab = makeStyles((theme: Theme) => ({
 
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
   paginateTopPadding: {
     paddingTop: "50px",
   },
@@ -223,7 +223,7 @@ export const PatientManager = (props: any) => {
     !durations.every((x) => x === 0);
 
   let managePatients: any = null;
-  const handleDownload = async (isFiltered: boolean) => {
+  const handleDownload = async () => {
     const res = await dispatch(
       getAllPatient(
         {
@@ -240,10 +240,10 @@ export const PatientManager = (props: any) => {
     }
   };
   const handleDownloadAll = async () => {
-    await handleDownload(false);
+    await handleDownload();
   };
   const handleDownloadFiltered = async () => {
-    await handleDownload(true);
+    await handleDownload();
   };
 
   useEffect(() => {
@@ -483,7 +483,7 @@ export const PatientManager = (props: any) => {
           {value}
           <i
             className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
-            onClick={(e) => removeFilter(paramKey)}
+            onClick={() => removeFilter(paramKey)}
           ></i>
         </span>
       )
@@ -500,7 +500,7 @@ export const PatientManager = (props: any) => {
             {value}
             <i
               className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
-              onClick={(_) => {
+              onClick={() => {
                 const lcat = qParams.last_consultation_admitted_to_list
                   .split(",")
                   .filter((x: string) => x !== id)
@@ -528,7 +528,7 @@ export const PatientManager = (props: any) => {
 
   let patientList: any[] = [];
   if (data && data.length) {
-    patientList = data.map((patient: any, idx: number) => {
+    patientList = data.map((patient: any) => {
       const patientUrl = patient.facility
         ? `/facility/${patient.facility}/patient/${patient.id}`
         : `/patient/${patient.id}`;
@@ -770,7 +770,7 @@ export const PatientManager = (props: any) => {
             <div className="flex items-end gap-2 mb-2">
               <button
                 className="btn btn-primary-ghost md:mt-7 "
-                onClick={(_) => setShowFilters((show) => !show)}
+                onClick={() => setShowFilters((show) => !show)}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"

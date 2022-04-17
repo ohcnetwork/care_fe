@@ -70,7 +70,7 @@ export default function UserFilter(props: any) {
         </button>
         <button
           className="btn btn-default"
-          onClick={(_) => {
+          onClick={() => {
             navigate("/users");
             setFilterState(clearFilterState);
           }}

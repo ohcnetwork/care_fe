@@ -147,7 +147,7 @@ export default function UpdateResult(props: any) {
     let errors = { ...initError };
     let invalidForm = false;
 
-    Object.keys(state.form).forEach((field, i) => {
+    Object.keys(state.form).forEach((field) => {
       switch (field) {
         case "address":
           if (!state.form[field]) {

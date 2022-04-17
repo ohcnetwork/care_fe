@@ -122,7 +122,7 @@ export const TriageForm = (props: triageFormProps) => {
   const validateForm = () => {
     let errors = { ...initForm };
     let invalidForm = false;
-    Object.keys(state.form).forEach((field, i) => {
+    Object.keys(state.form).forEach((field) => {
       switch (field) {
         case "entry_date":
           if (!state.form[field]) {

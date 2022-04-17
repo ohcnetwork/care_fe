@@ -59,7 +59,7 @@ const CommentSection = (props: CommentSectionProps) => {
     const payload = {
       comment: commentBox,
     };
-    dispatch(addResourceComments(props.id, payload)).then((res: any) => {
+    dispatch(addResourceComments(props.id, payload)).then(() => {
       Notification.Success({ msg: "Comment added successfully" });
       fetchData();
     });

@@ -289,7 +289,7 @@ export const ConsultationForm = (props: any) => {
     let invalidForm = false;
     let error_div = "";
 
-    Object.keys(state.form).forEach((field, i) => {
+    Object.keys(state.form).forEach((field) => {
       switch (field) {
         case "symptoms":
           if (!state.form[field] || !state.form[field].length) {
@@ -1033,7 +1033,7 @@ export const ConsultationForm = (props: any) => {
                   color="default"
                   variant="contained"
                   type="button"
-                  onClick={(_) =>
+                  onClick={() =>
                     navigate(`/facility/${facilityId}/patient/${patientId}`)
                   }
                 >

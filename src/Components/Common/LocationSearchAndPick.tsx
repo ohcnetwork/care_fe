@@ -10,7 +10,7 @@ const KEYS = {
   ENTER_KEY: 13,
 };
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
   locationItem: {
     border: "1px solid #C4C4CD",
     cursor: "pointer",

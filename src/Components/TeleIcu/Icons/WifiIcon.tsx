@@ -1,5 +1,6 @@
 import React, { SVGProps } from "react";
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const WifiIcon = ({ ref, ...props }: SVGProps<SVGElement>) => {
   return (
     <svg viewBox="0 0 68 48" fill="none" {...props}>

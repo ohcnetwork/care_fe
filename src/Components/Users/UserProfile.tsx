@@ -141,7 +141,7 @@ export default function UserProfile() {
   const validateForm = () => {
     let errors = { ...initError };
     let invalidForm = false;
-    Object.keys(states.form).forEach((field, i) => {
+    Object.keys(states.form).forEach((field) => {
       switch (field) {
         case "firstName":
         case "lastName":
@@ -316,7 +316,7 @@ export default function UserProfile() {
                 Local Body, District and State are Non Editable Settings.
               </p>
               <button
-                onClick={(_) => setShowEdit(!showEdit)}
+                onClick={() => setShowEdit(!showEdit)}
                 type="button"
                 className="relative inline-flex items-center px-4 py-2 border border-transparent text-sm leading-5 font-medium rounded-md text-white bg-primary-600 hover:bg-primary-500 focus:outline-none focus:shadow-outline-primary focus:border-primary-700 active:bg-primary-700 mt-4"
               >

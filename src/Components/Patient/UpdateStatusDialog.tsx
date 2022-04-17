@@ -142,14 +142,14 @@ const UpdateStatusDialog = (props: Props & WithStyles<typeof styles>) => {
     };
     axios
       .put(url, newFile, config)
-      .then((result) => {
+      .then(() => {
         setUploadStarted(false);
         setUploadDone(true);
         Notification.Success({
           msg: "File Uploaded Successfully",
         });
       })
-      .catch((error) => {
+      .catch(() => {
         setUploadStarted(false);
       });
   };

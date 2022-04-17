@@ -71,7 +71,7 @@ export default function BoardView() {
       downloadResourceRequests({ ...formatFilter(qParams), csv: 1 })
     );
     setDownloadFile(res.data);
-    document.getElementById(`resourceRequests-ALL`)?.click();
+    document.getElementById("resourceRequests-ALL")?.click();
   };
 
   const onListViewBtnClick = () => {
@@ -102,7 +102,7 @@ export default function BoardView() {
                 ? " bg-white text-gray-800"
                 : " bg-gray-200 text-sm text-gray-500")
             }
-            onClick={(_) => setBoardFilter(ACTIVE)}
+            onClick={() => setBoardFilter(ACTIVE)}
           >
             <span>Active</span>
           </button>
@@ -113,7 +113,7 @@ export default function BoardView() {
                 ? " bg-white text-gray-800"
                 : " bg-gray-200 text-sm text-gray-500")
             }
-            onClick={(_) => setBoardFilter(COMPLETED)}
+            onClick={() => setBoardFilter(COMPLETED)}
           >
             <span>Completed</span>
           </button>
@@ -128,7 +128,7 @@ export default function BoardView() {
         <div className="flex items-start gap-2">
           <button
             className="flex leading-none border-2 border-gray-200 bg-white rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 focus:text-primary-600 focus:border-gray-400 hover:border-gray-400 rounded-r-full px-4 py-2 text-sm"
-            onClick={(_) => setShowFilters((show) => !show)}
+            onClick={() => setShowFilters((show) => !show)}
           >
             <i className="fa fa-filter mr-1" aria-hidden="true"></i>
             <span>Filters</span>
@@ -157,7 +157,7 @@ export default function BoardView() {
         filename={`resource-requests--${now}.csv`}
         target="_blank"
         className="hidden"
-        id={`resourceRequests-ALL`}
+        id="resourceRequests-ALL"
       />
       <SlideOver show={showFilters} setShow={setShowFilters}>
         <div className="bg-white min-h-screen p-4">

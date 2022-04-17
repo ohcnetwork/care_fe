@@ -1,5 +1,6 @@
 import React from "react";
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const CCTVIcon = ({ ref, ...props }: React.SVGProps<SVGElement>) => {
   return (
     <svg viewBox="0 0 51 64" fill="none" {...props}>

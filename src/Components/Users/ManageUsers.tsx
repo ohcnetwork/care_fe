@@ -27,7 +27,7 @@ import { make as SlideOver } from "../Common/SlideOver.gen";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
-export default function ManageUsers(props: any) {
+export default function ManageUsers() {
   const [qParams, setQueryParams] = useQueryParams();
   const dispatch: any = useDispatch();
   const initialData: any[] = [];
@@ -184,7 +184,7 @@ export default function ManageUsers(props: any) {
           {value}
           <i
             className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
-            onClick={(e) => removeFilter(paramKey)}
+            onClick={() => removeFilter(paramKey)}
           ></i>
         </span>
       )
@@ -297,7 +297,7 @@ export default function ManageUsers(props: any) {
 
   let userList: any[] = [];
   if (users && users.length) {
-    userList = users.map((user: any, idx: number) => {
+    userList = users.map((user: any) => {
       return (
         <div key={`usr_${user.id}`} className="w-full md:w-1/2 mt-6 md:px-4">
           <div className="block rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 overflow-hidden">
@@ -494,7 +494,7 @@ export default function ManageUsers(props: any) {
             <div className="flex items-start mb-2">
               <button
                 className="btn btn-primary-ghost"
-                onClick={(_) => setShowFilters((show) => !show)}
+                onClick={() => setShowFilters((show) => !show)}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"

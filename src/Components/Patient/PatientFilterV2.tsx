@@ -416,7 +416,7 @@ export default function PatientFilterV2(props: any) {
         </button>
         <button
           className="btn btn-default"
-          onClick={(_) => {
+          onClick={() => {
             navigate("/patients");
             setFilterState(clearFilterState);
           }}
@@ -508,7 +508,7 @@ export default function PatientFilterV2(props: any) {
             value={filterState.facility_type}
             options={[
               { id: "", text: "Show All" },
-              ...FACILITY_TYPES.map(({ id, text }) => {
+              ...FACILITY_TYPES.map(({ text }) => {
                 return {
                   id: text,
                   text,
@@ -542,8 +542,8 @@ export default function PatientFilterV2(props: any) {
             value={filterState.is_antenatal}
             options={[
               { id: "", text: "Show All" },
-              { id: "true", text: `antenatal` },
-              { id: "false", text: `non antenatal` },
+              { id: "true", text: "antenatal" },
+              { id: "false", text: "non antenatal" },
             ]}
             onChange={handleChange}
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"

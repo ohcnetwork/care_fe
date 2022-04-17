@@ -30,7 +30,7 @@ interface qParamModel {
   status?: string;
 }
 
-const AssetsList = (props: any) => {
+const AssetsList = () => {
   const [qParams, setQueryParams] = useQueryParams();
   const [assets, setAssets] = useState<AssetData[]>([{}] as AssetData[]);
   const [isLoading, setIsLoading] = useState<boolean>(false);

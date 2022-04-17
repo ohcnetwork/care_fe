@@ -21,7 +21,6 @@ export const TeleICUFacility = () => {
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const { t } = useTranslation();
-  const [viewOption, setViewOption] = useState("5-para");
   const [data, setData] = useState<Array<FacilityModel>>([]);
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -109,7 +108,7 @@ export const TeleICUFacility = () => {
                 </div>
               );
             })
-          : data.map((item, index) => {
+          : data.map((item) => {
               return (
                 <div key={item.id}>
                   <Link
@@ -153,4 +152,4 @@ export const TeleICUFacility = () => {
       </div>
     </div>
   );
-};
+};;

@@ -413,7 +413,7 @@ export const FileUpload = (props: FileUploadProps) => {
     };
     axios
       .put(url, newFile, config)
-      .then((result) => {
+      .then(() => {
         setUploadStarted(false);
         setUploadFileName("");
         setReload(!reload);
@@ -421,12 +421,12 @@ export const FileUpload = (props: FileUploadProps) => {
           msg: "File Uploaded Successfully",
         });
       })
-      .catch((error) => {
+      .catch(() => {
         setUploadStarted(false);
       });
   };
 
-  const handleUpload = async (e: any) => {
+  const handleUpload = async () => {
     const f = file;
     if (f === undefined) return;
     const category = "UNSPECIFIED";
@@ -469,7 +469,7 @@ export const FileUpload = (props: FileUploadProps) => {
 
     axios
       .put(url, newFile, config)
-      .then((result) => {
+      .then(() => {
         setUploadStarted(false);
         setUploadFileName("");
         setReload(!reload);
@@ -477,12 +477,12 @@ export const FileUpload = (props: FileUploadProps) => {
           msg: "File Uploaded Successfully",
         });
       })
-      .catch((error) => {
+      .catch(() => {
         setUploadStarted(false);
       });
   };
 
-  const handleAudioUpload = async (e: any) => {
+  const handleAudioUpload = async () => {
     const f = audioBlob;
     if (f === undefined) return;
     const category = "AUDIO";
@@ -635,8 +635,8 @@ export const FileUpload = (props: FileUploadProps) => {
                   startIcon={
                     <CloudUploadOutlineIcon>save</CloudUploadOutlineIcon>
                   }
-                  onClick={(e: any) => {
-                    handleAudioUpload(e);
+                  onClick={() => {
+                    handleAudioUpload();
                   }}
                 >
                   Save Recording
@@ -683,8 +683,8 @@ export const FileUpload = (props: FileUploadProps) => {
                         startIcon={
                           <CloudUploadOutlineIcon>save</CloudUploadOutlineIcon>
                         }
-                        onClick={(e: any) => {
-                          handleUpload(e);
+                        onClick={() => {
+                          handleUpload();
                         }}
                       >
                         Upload

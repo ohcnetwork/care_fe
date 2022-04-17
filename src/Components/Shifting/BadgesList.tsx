@@ -92,7 +92,7 @@ export default function BadgesList(props: any) {
   }, [dispatch, appliedFilters.assigned_facility, local.assigned_facility]);
 
   const filtersExists = () => {
-    let { limit, offset, ...rest } = filterParams;
+    let { limit, offset, ...rest } = filterParams; // eslint-disable-line @typescript-eslint/no-unused-vars
 
     return Object.values(rest).some((value) => value);
   };
@@ -133,7 +133,7 @@ export default function BadgesList(props: any) {
           {value}
           <i
             className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
-            onClick={(e) => removeFilter(paramKey)}
+            onClick={() => removeFilter(paramKey)}
           ></i>
         </span>
       )

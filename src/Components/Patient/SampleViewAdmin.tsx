@@ -32,7 +32,7 @@ const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
-export default function SampleViewAdmin(props: any) {
+export default function SampleViewAdmin() {
   const [qParams, setQueryParams] = useQueryParams();
   const dispatch: any = useDispatch();
   const initialData: any[] = [];
@@ -318,7 +318,7 @@ export default function SampleViewAdmin(props: any) {
                 {item.result === "AWAITING" && (
                   <div className="mt-2">
                     <button
-                      onClick={(e) => showUpdateStatus(item)}
+                      onClick={() => showUpdateStatus(item)}
                       className="w-full text-sm bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-4 border border-gray-400 rounded shadow text-center"
                     >
                       UPDATE SAMPLE TEST STATUS
@@ -327,7 +327,7 @@ export default function SampleViewAdmin(props: any) {
                 )}
 
                 <button
-                  onClick={(e) => navigate(`/sample/${item.id}`)}
+                  onClick={() => navigate(`/sample/${item.id}`)}
                   className="mt-2 w-full text-sm bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow text-center"
                 >
                   Sample Details
@@ -385,7 +385,7 @@ export default function SampleViewAdmin(props: any) {
           {value}
           <i
             className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
-            onClick={(e) => removeFilter(paramKey)}
+            onClick={() => removeFilter(paramKey)}
           ></i>
         </span>
       )
@@ -455,7 +455,7 @@ export default function SampleViewAdmin(props: any) {
           <div className="flex items-start mb-2">
             <button
               className="btn btn-primary-ghost md:mt-7 "
-              onClick={(_) => setShowFilters((show) => !show)}
+              onClick={() => setShowFilters((show) => !show)}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -548,7 +548,7 @@ export default function SampleViewAdmin(props: any) {
         filename={`shift-requests--${now}.csv`}
         target="_blank"
         className="hidden"
-        id={`download-sample-tests`}
+        id="download-sample-tests"
       />
     </div>
   );

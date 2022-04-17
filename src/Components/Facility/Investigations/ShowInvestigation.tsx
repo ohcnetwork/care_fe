@@ -148,7 +148,7 @@ export default function ShowInvestigation(props: any) {
 
   const handleUpdateCancel = useCallback(() => {
     const changedValues = _.chain(state.initialValues)
-      .map((val: any, key: string) => ({
+      .map((val: any) => ({
         id: val?.id,
         initialValue: val?.notes || val?.value || null,
         value: val?.value || null,

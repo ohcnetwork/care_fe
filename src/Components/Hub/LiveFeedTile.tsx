@@ -83,7 +83,7 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
           `https://${asset.meta.middleware_hostname}${resp.data.uri}`
         );
       })
-      .catch((ex: any) => {
+      .catch(() => {
         // console.error('Error while refreshing',ex);
       });
   }, [asset.meta.middleware_hostname]);
@@ -100,7 +100,7 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
           console.log(resp);
           // setSourceUrl(`https://${middlewareHostname}${resp.data.uri}`);
         })
-        .catch((ex: any) => {
+        .catch(() => {
           // console.error('Error while refreshing',ex);
         });
     }
@@ -113,7 +113,7 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
       .then((resp: any) => {
         setPosition(resp.data.position);
       })
-      .catch((ex: any) => {
+      .catch(() => {
         // console.error('Error while refreshing',ex);
       });
   };
@@ -126,17 +126,14 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
         setPresets(resp.data);
         console.log("PRESETS", resp.data);
       })
-      .catch((ex: any) => {
+      .catch(() => {
         // console.error('Error while refreshing',ex);
       });
   };
-  const getBedPresets = useCallback(
-    async (asset: any) => {
-      const bedAssets = await dispatch(listAssetBeds({ asset: props.assetId }));
-      setBedPresets(bedAssets.data.results);
-    },
-    [dispatch, props.assetId]
-  );
+  const getBedPresets = useCallback(async () => {
+    const bedAssets = await dispatch(listAssetBeds({ asset: props.assetId }));
+    setBedPresets(bedAssets.data.results);
+  }, [dispatch, props.assetId]);
   const gotoBedPreset = (preset: any) => {
     absoluteMove(preset.meta.position);
   };
@@ -149,7 +146,7 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
       .then((resp: any) => {
         console.log(resp.data);
       })
-      .catch((ex: any) => {
+      .catch(() => {
         // console.error('Error while refreshing',ex);
       });
   };
@@ -204,7 +201,7 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
           console.log(resp.data);
           getCameraStatus(asset);
         })
-        .catch((ex: any) => {
+        .catch(() => {
           // console.error('Error while refreshing',ex);
         });
     }
@@ -218,7 +215,7 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
           ...data,
           ...asset,
         })
-        .then((resp: any) => {
+        .then(() => {
           getCameraStatus(asset);
         })
         .catch((ex: any) => {
@@ -231,7 +228,7 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
   useEffect(() => {
     if (asset) {
       getPresets(asset);
-      getBedPresets(asset);
+      getBedPresets();
       requestStream();
     }
   }, [asset, getBedPresets, requestStream]);
@@ -276,8 +273,8 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
           <div>
             {sourceUrl ? (
               <div
-                onMouseOver={(_) => setShowControls(true)}
-                onMouseLeave={(_) => setShowControls(false)}
+                onMouseOver={() => setShowControls(true)}
+                onMouseLeave={() => setShowControls(false)}
               >
                 <ReactPlayer
                   url={sourceUrl}
@@ -320,7 +317,7 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
                 {cameraPTZ.map((option: any) => (
                   <div
                     key={option.action}
-                    onClick={(_) => {
+                    onClick={() => {
                       // console.log(option.action);
                       requestPTZ(option.action);
                     }}

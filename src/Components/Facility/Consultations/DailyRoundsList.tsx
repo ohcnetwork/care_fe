@@ -177,7 +177,7 @@ export const DailyRoundsList = (props: any) => {
               <div className="mt-2 flex md:flex-row flex-col md:space-y-0 space-y-2 space-x-0 md:space-x-2">
                 <button
                   className="btn btn-default"
-                  onClick={(e) =>
+                  onClick={() =>
                     navigate(
                       `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${itemData.id}`
                     )
@@ -188,7 +188,7 @@ export const DailyRoundsList = (props: any) => {
                 </button>
                 <button
                   className="btn btn-default"
-                  onClick={(e) => {
+                  onClick={() => {
                     if (itemData.rounds_type === "NORMAL") {
                       navigate(
                         `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${itemData.id}/update`

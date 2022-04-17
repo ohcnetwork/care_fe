@@ -466,7 +466,7 @@ export const PatientHome = (props: any) => {
     setSelectedStatus({ status, sample });
     setAlertMessage({
       show: true,
-      message: `Are you sure you want to sent the sample to Collection Centre?`,
+      message: "Are you sure you want to sent the sample to Collection Centre?",
       title: "Confirm",
     });
   };
@@ -575,7 +575,7 @@ export const PatientHome = (props: any) => {
 
       <div id="revamp">
         <PageTitle
-          title={`Covid Suspect Details`}
+          title="Covid Suspect Details"
           backUrl="/patients"
           crumbsReplacements={{
             [facilityId]: { name: patientData?.facility_object?.name },
@@ -1066,7 +1066,7 @@ export const PatientHome = (props: any) => {
                       </div>
                       <div className="mt-2 flex">
                         <button
-                          onClick={(_) =>
+                          onClick={() =>
                             navigate(`/shifting/${shift.external_id}`)
                           }
                           className="btn w-full btn-default bg-white mr-2"
@@ -1088,7 +1088,7 @@ export const PatientHome = (props: any) => {
 
                             <Modal
                               open={modalFor === shift.external_id}
-                              onClose={(_) =>
+                              onClose={() =>
                                 setModalFor({
                                   externalId: undefined,
                                   loading: false,
@@ -1127,7 +1127,7 @@ export const PatientHome = (props: any) => {
                                       size="small"
                                       variant="outlined"
                                       fullWidth
-                                      onClick={(_) =>
+                                      onClick={() =>
                                         handleTransferComplete(shift)
                                       }
                                     >

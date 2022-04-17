@@ -171,16 +171,8 @@ export const DateTimeFiled = (props: DateInputFieldProps) => {
 };
 
 export const DateInputField = (props: DateInputFieldProps) => {
-  const {
-    value,
-    onChange,
-    label,
-    errors,
-    variant,
-    disabled,
-    margin,
-    ...restProps
-  } = props;
+  const { value, onChange, label, errors, disabled, margin, ...restProps } =
+    props;
   return (
     <MuiPickersUtilsProvider utils={DateFnsUtils}>
       <KeyboardDatePicker
@@ -562,7 +554,7 @@ export const PhoneNumberField = (props: any) => {
         />
         <div
           className="flex items-center ml-1 mt-1 border border-gray-400 rounded px-4 h-10 cursor-pointer hover:bg-gray-200"
-          onClick={(_) => onChange("+91")}
+          onClick={() => onChange("+91")}
         >
           <i className="fas fa-times text-red-600" />
         </div>

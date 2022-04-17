@@ -200,7 +200,7 @@ export const DailyRounds = (props: any) => {
     let errors = { ...initError };
     let invalidForm = false;
     let error_div = "";
-    Object.keys(state.form).forEach((field, i) => {
+    Object.keys(state.form).forEach((field) => {
       switch (field) {
         case "other_symptoms":
           if (state.form.otherSymptom && !state.form[field]) {

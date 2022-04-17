@@ -234,7 +234,7 @@ const InvestigationReports = ({ id }: any) => {
     fetchInvestigationGroups.current();
   }, []);
 
-  const handleLoadMore = (e: any) => {
+  const handleLoadMore = () => {
     const onSuccess = (data: any) => {
       dispatch({
         type: "set_investigation_table_data",

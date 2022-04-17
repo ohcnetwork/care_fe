@@ -4,7 +4,6 @@ import { useDispatch } from "react-redux";
 import { getPatient } from "../../../Redux/actions";
 import Loading from "../../Common/Loading";
 import PageTitle from "../../Common/PageTitle";
-import { FacilityModel } from "../../Facility/models";
 import { PatientModel } from "../../Patient/models";
 import { RightArrowIcon } from "../Icons/ArrowIcon";
 import TeleICUPatientInfoCard from "./InfoCard";
@@ -18,7 +17,6 @@ export interface ITeleICUPatientPageProps {
 
 export default function TeleICUPatientPage({
   patientId,
-  facilityId,
 }: ITeleICUPatientPageProps) {
   const [patient, setPatient] = useState<PatientModel>({});
   const [isLoading, setIsLoading] = useState(true);
@@ -31,7 +29,7 @@ export default function TeleICUPatientPage({
       }
       setIsLoading(false);
     });
-  }, []);
+  }, [dispatch, patientId]);
 
   console.log(patient);
 

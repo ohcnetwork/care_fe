@@ -123,7 +123,7 @@ export default function ResourceBoard({
   let boardFilter = (filter: string) => {
     return data
       .filter(({ status }) => status === filter)
-      .map((resource: any, idx: number) => (
+      .map((resource: any) => (
         <div key={`resource_${resource.id}`} className="w-full mt-2 ">
           <div className="overflow-hidden shadow rounded-lg bg-white h-full mx-2">
             <div className={"p-4 h-full flex flex-col justify-between"}>
@@ -217,7 +217,7 @@ export default function ResourceBoard({
 
               <div className="mt-2 flex">
                 <button
-                  onClick={(_) => navigate(`/resource/${resource.external_id}`)}
+                  onClick={() => navigate(`/resource/${resource.external_id}`)}
                   className="btn w-full btn-default bg-white mr-2"
                 >
                   <i className="fas fa-eye mr-2" /> All Details
@@ -269,7 +269,7 @@ export default function ResourceBoard({
             </div>
           ) : (
             <button
-              onClick={(_) => handlePagination(currentPage + 1, limit)}
+              onClick={() => handlePagination(currentPage + 1, limit)}
               className="mx-auto my-4 p-2 px-4 bg-gray-100 rounded-md hover:bg-white"
             >
               More...

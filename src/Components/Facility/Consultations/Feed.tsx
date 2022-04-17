@@ -27,12 +27,7 @@ interface ICameraAssetState {
   port: number;
 }
 
-export const Feed: React.FC<IFeedProps> = ({
-  consultationId,
-  facilityId,
-  patientId,
-  ...props
-}) => {
+export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   const dispatch: any = useDispatch();
   const [cameraAsset, setCameraAsset] = useState<Partial<ICameraAssetState>>(
     {}
@@ -106,7 +101,7 @@ export const Feed: React.FC<IFeedProps> = ({
       .then((resp: any) => {
         setSourceUrl(`https://${middlewareHostname}${resp.data.uri}`);
       })
-      .catch((ex: any) => {
+      .catch(() => {
         // console.error('Error while refreshing',ex);
       });
   }, [
@@ -130,7 +125,7 @@ export const Feed: React.FC<IFeedProps> = ({
           console.log(resp);
           // setSourceUrl(`https://${middlewareHostname}${resp.data.uri}`);
         })
-        .catch((ex: any) => {
+        .catch(() => {
           // console.error('Error while refreshing',ex);
         });
     }
@@ -145,7 +140,7 @@ export const Feed: React.FC<IFeedProps> = ({
         .then((resp: any) => {
           setPosition(resp.data.position);
         })
-        .catch((ex: any) => {
+        .catch(() => {
           // console.error('Error while refreshing',ex);
         });
     },
@@ -162,7 +157,7 @@ export const Feed: React.FC<IFeedProps> = ({
           setPresets(resp.data);
           console.log("PRESETS", resp.data);
         })
-        .catch((ex: any) => {
+        .catch(() => {
           // console.error('Error while refreshing',ex);
         });
     },
@@ -244,7 +239,7 @@ export const Feed: React.FC<IFeedProps> = ({
           console.log(resp.data);
           getCameraStatus(cameraAsset);
         })
-        .catch((ex: any) => {
+        .catch(() => {
           // console.error('Error while refreshing',ex);
         });
     }
@@ -258,7 +253,7 @@ export const Feed: React.FC<IFeedProps> = ({
           ...data,
           ...cameraAsset,
         })
-        .then((resp: any) => {
+        .then(() => {
           getCameraStatus(cameraAsset);
         })
         .catch((ex: any) => {
@@ -329,7 +324,7 @@ export const Feed: React.FC<IFeedProps> = ({
             {bedPresets?.map((preset: any, index: number) => (
               <button
                 key={preset.id}
-                onClick={(_) => {
+                onClick={() => {
                   setLoading(true);
                   gotoBedPreset(preset);
                   getCameraStatus(cameraAsset);
@@ -400,7 +395,7 @@ export const Feed: React.FC<IFeedProps> = ({
               <button
                 className="bg-green-100 hover:bg-green-200 border border-green-100 rounded p-2"
                 key={option.action}
-                onClick={(_) => {
+                onClick={() => {
                   requestPTZ(option.action);
                 }}
               >

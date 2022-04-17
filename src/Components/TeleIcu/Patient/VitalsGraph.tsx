@@ -9,7 +9,7 @@ export interface ITelePatientVitalsGraphCardProps {
 export default function TelePatientVitalsGraphCard({
   consultationId,
 }: ITelePatientVitalsGraphCardProps) {
-  const [analysis, setAnalysis] = useState({});
+  const [analysis, setAnalysis] = useState({}); // eslint-disable-line @typescript-eslint/no-unused-vars
   const [isLoading, setIsLoading] = useState(true);
   const dispatch: any = useDispatch();
 
@@ -22,7 +22,7 @@ export default function TelePatientVitalsGraphCard({
       }
       setIsLoading(false);
     });
-  }, [consultationId]);
+  }, [dispatch, consultationId]);
 
   if (isLoading) {
     return (

@@ -95,7 +95,7 @@ const TransferPatientDialog = (props: Props & WithStyles<typeof styles>) => {
   const validateForm = () => {
     let errors = { ...initError };
     let invalidForm = false;
-    Object.keys(state.form).forEach((field, i) => {
+    Object.keys(state.form).forEach((field) => {
       switch (field) {
         case "patient":
           if (!state.form[field]) {

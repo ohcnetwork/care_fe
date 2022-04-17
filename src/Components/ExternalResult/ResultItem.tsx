@@ -40,7 +40,7 @@ export default function ResultItem(props: any) {
     }
 
     setShowDeleteAlert(false);
-    navigate(`/external_results`);
+    navigate("/external_results");
   };
 
   useAbortableEffect(

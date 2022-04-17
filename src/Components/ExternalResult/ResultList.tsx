@@ -42,7 +42,7 @@ export default function ResultList() {
   let manageResults: any = null;
   const local = JSON.parse(localStorage.getItem("external-filters") || "{}");
   const localLsgWard = JSON.parse(
-    localStorage.getItem("lsg-ward-data") || '{"lsgList": [], "wardList": []}'
+    localStorage.getItem("lsg-ward-data") || "{'lsgList': [], 'wardList': []}"
   );
 
   useEffect(() => {
@@ -193,7 +193,7 @@ export default function ResultList() {
       externalResultList({ ...qParams, csv: true }, "externalResultList")
     );
     setDownloadFile(res?.data);
-    document.getElementById(`downloadCSV`)?.click();
+    document.getElementById("downloadCSV")?.click();
   };
 
   const badge = (key: string, value: any, paramKey: string) => {
@@ -205,7 +205,7 @@ export default function ResultList() {
           {value}
           <i
             className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
-            onClick={(e) => removeFilter(paramKey)}
+            onClick={() => removeFilter(paramKey)}
           ></i>
         </span>
       )
@@ -224,7 +224,7 @@ export default function ResultList() {
           {value.name}
           <i
             className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
-            onClick={(e) =>
+            onClick={() =>
               paramKey === "local_bodies"
                 ? removeLSGFilter(paramKey, value.id)
                 : paramKey === "wards"
@@ -239,7 +239,7 @@ export default function ResultList() {
 
   let resultList: any[] = [];
   if (data && data.length) {
-    resultList = data.map((result: any, idx: number) => {
+    resultList = data.map((result: any) => {
       const resultUrl = `/external_results/${result.id}`;
       return (
         <tr key={`usr_${result.id}`} className="bg-white">
@@ -381,7 +381,7 @@ export default function ResultList() {
           <div className="flex">
             <div
               className="btn mt-8 ml-auto btn-primary"
-              onClick={(_) => navigate("external_results/upload")}
+              onClick={() => navigate("external_results/upload")}
             >
               Upload List
             </div>
@@ -398,7 +398,7 @@ export default function ResultList() {
           <div className="flex ml-auto  gap-2">
             <button
               className="flex leading-none border-2 border-gray-200 bg-white rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 focus:text-primary-600 focus:border-gray-400 hover:border-gray-400 rounded-r-full px-4 py-2 text-sm"
-              onClick={(_) => setShowFilters((show) => !show)}
+              onClick={() => setShowFilters((show) => !show)}
             >
               <i className="fa fa-filter mr-1" aria-hidden="true"></i>
               <span>Filters</span>
@@ -484,7 +484,7 @@ export default function ResultList() {
         filename={`external-result--${now}.csv`}
         target="_blank"
         className="hidden"
-        id={`downloadCSV`}
+        id="downloadCSV"
       />
       <SlideOver show={showFilters} setShow={setShowFilters}>
         <div className="bg-white min-h-screen p-4">

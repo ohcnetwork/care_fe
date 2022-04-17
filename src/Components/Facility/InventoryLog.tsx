@@ -142,7 +142,7 @@ export default function InventoryLog(props: any) {
         </td>
         <td>
           <button
-            onClick={(_) => flagFacility(inventoryItem.external_id)}
+            onClick={() => flagFacility(inventoryItem.external_id)}
             disabled={saving}
             className="btn btn-default"
           >
@@ -234,7 +234,7 @@ export default function InventoryLog(props: any) {
             <h4>Item: {itemName}</h4>
             {current_stock > 0 && (
               <button
-                onClick={(_) =>
+                onClick={() =>
                   removeLastInventoryLog(inventory[0].item_object.id)
                 }
                 disabled={saving}

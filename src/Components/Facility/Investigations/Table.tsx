@@ -6,7 +6,6 @@ import {
   TableHead,
   TableRow,
   TableBody,
-  Theme,
   InputLabel,
   Typography,
   Box,
@@ -17,14 +16,14 @@ import { useState } from "react";
 import { TextInputField } from "../../Common/HelperInputFields";
 import _ from "lodash";
 
-const useStyle = makeStyles((theme: Theme) => ({
+const useStyle = makeStyles(() => ({
   tableCell: {
     paddingTop: 0,
     paddingBottom: 0,
   },
 }));
 
-const StyledTableRow = withStyles((theme: Theme) =>
+const StyledTableRow = withStyles(() =>
   createStyles({
     root: {
       "&:nth-of-type(odd)": {

@@ -156,7 +156,7 @@ export default function ListView({
   let patientFilter = (filter: string) => {
     return data
       .filter(({ status }) => status === filter)
-      .map((shift: any, idx: number) => (
+      .map((shift: any) => (
         <div key={`shift_${shift.id}`} className="w-full mt-2 ">
           <div className="overflow-hidden shadow rounded-lg bg-white h-full mx-2">
             <div
@@ -291,7 +291,7 @@ export default function ListView({
 
               <div className="mt-2 flex">
                 <button
-                  onClick={(_) => navigate(`/shifting/${shift.external_id}`)}
+                  onClick={() => navigate(`/shifting/${shift.external_id}`)}
                   className="btn w-full btn-default bg-white mr-2"
                 >
                   <i className="fas fa-eye mr-2" /> All Details
@@ -310,7 +310,7 @@ export default function ListView({
 
                   <Modal
                     open={modalFor === shift.external_id}
-                    onClose={(_) =>
+                    onClose={() =>
                       setModalFor({ externalId: undefined, loading: false })
                     }
                   >
@@ -351,7 +351,7 @@ export default function ListView({
                             size="small"
                             variant="outlined"
                             fullWidth
-                            onClick={(_) => handleTransferComplete(shift)}
+                            onClick={() => handleTransferComplete(shift)}
                           >
                             Confirm
                           </Button>
@@ -407,7 +407,7 @@ export default function ListView({
             </div>
           ) : (
             <button
-              onClick={(_) => handlePagination(currentPage + 1, limit)}
+              onClick={() => handlePagination(currentPage + 1, limit)}
               className="mx-auto my-4 p-2 px-4 bg-gray-100 rounded-md hover:bg-white"
             >
               More...

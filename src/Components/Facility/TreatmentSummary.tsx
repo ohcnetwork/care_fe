@@ -86,13 +86,13 @@ const TreatmentSummary = (props: any) => {
         <div className="my-4">
           <div className="my-4 flex justify-end ">
             <button
-              onClick={(_) => window.print()}
+              onClick={() => window.print()}
               className="btn btn-primary mr-2"
             >
               <i className="fas fa-print mr-2"></i> Print Treatment Summary
             </button>
             <button
-              onClick={(_) => setIsPrintMode(false)}
+              onClick={() => setIsPrintMode(false)}
               className="btn btn-default"
             >
               <i className="fas fa-times mr-2"></i> Close

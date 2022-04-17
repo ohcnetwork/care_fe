@@ -558,7 +558,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     let invalidForm = false;
     let error_div = "";
 
-    Object.keys(state.form).forEach((field, i) => {
+    Object.keys(state.form).forEach((field) => {
       switch (field) {
         case "address":
         case "name":
@@ -1078,7 +1078,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                 </button>{" "}
                 <button
                   className="btn border"
-                  onClick={(_) => setShowImport(false)}
+                  onClick={() => setShowImport(false)}
                 >
                   Cancel Import
                 </button>
@@ -1090,7 +1090,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                 <form onSubmit={(e) => handleSubmit(e)}>
                   <button
                     className="btn btn-primary mb-8 mx-4"
-                    onClick={(_) => {
+                    onClick={() => {
                       setShowImport(true);
                       setQuery({ extId: "" }, true);
                     }}

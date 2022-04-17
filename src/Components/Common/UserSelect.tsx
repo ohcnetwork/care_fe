@@ -46,7 +46,7 @@ export const UserSelect = (props: any) => {
       }
     };
     fetchUsers();
-  }, [dispatchAction, facilityId]);
+  }, [dispatchAction, facilityId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <AutoCompleteAsyncField
@@ -75,4 +75,4 @@ export const UserSelect = (props: any) => {
       className={className}
     />
   );
-};
+};;

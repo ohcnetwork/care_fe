@@ -67,7 +67,7 @@ export default function ResultList({ expanded = false }) {
           .then(function (subscription) {
             subscription
               ?.unsubscribe()
-              .then(async function (successful) {
+              .then(async function () {
                 const data = {
                   pf_endpoint: "",
                   pf_p256dh: "",
@@ -80,21 +80,21 @@ export default function ResultList({ expanded = false }) {
                 setIsSubscribed("NotSubscribed");
                 setIsSubscribing(false);
               })
-              .catch(function (e) {
+              .catch(function () {
                 Error({
                   msg: "Unsubscribe failed.",
                 });
               });
           })
-          .catch(function (e) {
+          .catch(function () {
             Error({
-              msg: `Subscription Error`,
+              msg: "Subscription Error",
             });
           });
       })
-      .catch(function (e) {
+      .catch(function () {
         Error({
-          msg: `Service Worker Error`,
+          msg: "Service Worker Error",
         });
       });
   };
@@ -205,7 +205,7 @@ export default function ResultList({ expanded = false }) {
       case "INVESTIGATION_SESSION_CREATED":
         return `/facility/${data.facility}/patient/${data.patient}/consultation/${data.consultation}/investigation/${data.session}`;
       case "MESSAGE":
-        return `/notice_board/`;
+        return "/notice_board/";
       default:
         return "#";
     }
@@ -216,7 +216,7 @@ export default function ResultList({ expanded = false }) {
 
   let resultList: any[] = [];
   if (data && data.length) {
-    resultList = data.map((result: any, idx: number) => {
+    resultList = data.map((result: any) => {
       return (
         <div
           key={`usr_${result.id}`}
@@ -313,7 +313,7 @@ export default function ResultList({ expanded = false }) {
               <div className="grid grid-cols-3">
                 <div>
                   <button
-                    onClick={(_) => {
+                    onClick={() => {
                       setReload(!reload);
                       setData([]);
                       setOffset(0);
@@ -326,7 +326,7 @@ export default function ResultList({ expanded = false }) {
                 </div>
                 <div>
                   <button
-                    onClick={(_) => setShowNotifications(false)}
+                    onClick={() => setShowNotifications(false)}
                     className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0"
                   >
                     <i className="fa-fw fas fa-times cursor-pointer mr-2" />{" "}

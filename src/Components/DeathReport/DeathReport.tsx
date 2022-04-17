@@ -100,14 +100,11 @@ export default function PrintDeathReport(props: { id: string }) {
   const previewData = () => (
     <div className="my-4">
       <div className="my-4 flex justify-end ">
-        <button
-          onClick={(_) => window.print()}
-          className="btn btn-primary mr-2"
-        >
+        <button onClick={() => window.print()} className="btn btn-primary mr-2">
           <i className="fas fa-print mr-2"></i> Print Death Report
         </button>
         <button
-          onClick={(_) => setIsPrintMode(false)}
+          onClick={() => setIsPrintMode(false)}
           className="btn btn-default"
         >
           <i className="fas fa-times mr-2"></i> Close
@@ -281,7 +278,7 @@ export default function PrintDeathReport(props: { id: string }) {
       ) : (
         <div className="m-5 p-5 bg-gray-100 border rounded-xl shadow">
           <PageTitle
-            title={`Covid-19 Death Reporting : Form 1`}
+            title={"Covid-19 Death Reporting : Form 1"}
             crumbsReplacements={{
               [props.id]: { name: patientName },
               death_report: { style: "pointer-events-none" },
@@ -644,7 +641,7 @@ export default function PrintDeathReport(props: { id: string }) {
           </div>
           <div className="mt-6 w-1/2 md:w-1/4">
             <button
-              onClick={(_) => setIsPrintMode(true)}
+              onClick={() => setIsPrintMode(true)}
               className="btn btn-primary"
             >
               Preview

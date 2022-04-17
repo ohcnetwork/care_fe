@@ -177,7 +177,7 @@ export default function ResourceCreate(props: resourceProps) {
     dispatch({ type: "set_form", form });
   };
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async () => {
     const validForm = validateForm();
 
     if (validForm) {
@@ -375,7 +375,7 @@ export default function ResourceCreate(props: resourceProps) {
                   variant="contained"
                   type="submit"
                   style={{ marginLeft: "auto" }}
-                  onClick={(e) => handleSubmit(e)}
+                  onClick={() => handleSubmit()}
                   startIcon={
                     <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
                   }

@@ -18,7 +18,7 @@ import { postResetPassword } from "../../Redux/actions";
 import { navigate } from "raviger";
 import { withTranslation } from "react-i18next";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
   formTop: {
     marginTop: "100px",
   },

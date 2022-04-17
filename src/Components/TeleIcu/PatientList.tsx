@@ -10,13 +10,9 @@ import Pagination from "../Common/Pagination";
 import { FacilityModel } from "../Facility/models";
 import { PatientModel } from "../Patient/models";
 import { limit } from "../Shifting/Commons";
-import { AdminIcon } from "./Icons/AdminIcon";
-import { BedIcon } from "./Icons/BedIcon";
-import { CCTVIcon } from "./Icons/CCTVIcon";
-import { WifiIcon } from "./Icons/WifiIcon";
 
 export const TeleICUPatientsList = (props: any) => {
-  const [qParams, setQueryParams] = useQueryParams();
+  const [qParams, setQueryParams] = useQueryParams(); // eslint-disable-line @typescript-eslint/no-unused-vars
   const [isLoading, setIsLoading] = useState(false);
   const [offset, setOffset] = useState(0);
   const dispatchAction: any = useDispatch();

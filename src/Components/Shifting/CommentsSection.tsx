@@ -46,7 +46,7 @@ const CommentSection = (props: CommentSectionProps) => {
       });
       return;
     }
-    dispatch(addShiftComments(props.id, payload)).then((res: any) => {
+    dispatch(addShiftComments(props.id, payload)).then(() => {
       Notification.Success({ msg: "Comment added successfully" });
       fetchData();
       setCommentBox("");

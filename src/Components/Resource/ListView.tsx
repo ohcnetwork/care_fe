@@ -52,7 +52,7 @@ export default function ListView() {
       downloadResourceRequests({ ...formatFilter(qParams), csv: 1 })
     );
     setDownloadFile(res.data);
-    document.getElementById(`resourceRequests-ALL`)?.click();
+    document.getElementById("resourceRequests-ALL")?.click();
   };
 
   const updateQuery = (filter: any) => {
@@ -232,7 +232,7 @@ export default function ListView() {
 
             <div className="mt-2 flex">
               <button
-                onClick={(_) => navigate(`/resource/${resource.external_id}`)}
+                onClick={() => navigate(`/resource/${resource.external_id}`)}
                 className="btn w-full btn-default bg-white mr-2"
               >
                 <i className="fas fa-eye mr-2" /> All Details
@@ -277,7 +277,7 @@ export default function ListView() {
         <div className="flex items-start gap-2">
           <button
             className="flex leading-none border-2 border-gray-200 bg-white rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 focus:text-primary-600 focus:border-gray-400 hover:border-gray-400 rounded-r-full px-4 py-2 text-sm"
-            onClick={(_) => setShowFilters((show) => !show)}
+            onClick={() => setShowFilters((show) => !show)}
           >
             <i className="fa fa-filter mr-1" aria-hidden="true"></i>
             <span>Filters</span>
@@ -330,7 +330,7 @@ export default function ListView() {
         filename={`resource-requests--${now}.csv`}
         target="_blank"
         className="hidden"
-        id={`resourceRequests-ALL`}
+        id="resourceRequests-ALL"
       />
       <SlideOver show={showFilters} setShow={setShowFilters}>
         <div className="bg-white min-h-screen p-4">

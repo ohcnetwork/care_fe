@@ -12,7 +12,7 @@ export default function ExternalResultUpload() {
   const [loading, setLoading] = useState(false);
   const [csvData, setCsvData] = useState(new Array<any>());
   const [errors, setErrors] = useState<any>({});
-  const handleForce = (data: any, fileInfo: any) => {
+  const handleForce = (data: any) => {
     setCsvData(data);
   };
 

@@ -85,7 +85,7 @@ export const OnlineUsersSelect = (props: Props) => {
         <div className="relative">
           <span className="inline-block w-full rounded-md shadow-sm">
             <button
-              onClick={(_) => setDropdownExpand(true)}
+              onClick={() => setDropdownExpand(true)}
               type="button"
               aria-haspopup="listbox"
               aria-expanded="true"
@@ -133,10 +133,7 @@ export const OnlineUsersSelect = (props: Props) => {
                         }`}
                   </span>
                 </div>
-                <div
-                  className="btn btn-default"
-                  onClick={(_) => onSelect(null)}
-                >
+                <div className="btn btn-default" onClick={() => onSelect(null)}>
                   {" "}
                   Clear
                 </div>
@@ -171,7 +168,7 @@ export const OnlineUsersSelect = (props: Props) => {
                   return (
                     <button
                       key={user.id}
-                      onClick={(_) => {
+                      onClick={() => {
                         setDropdownExpand(false);
                         onSelect(user);
                         setState({
