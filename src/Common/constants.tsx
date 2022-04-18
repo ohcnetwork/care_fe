@@ -648,3 +648,13 @@ export const getCameraPTZ = (precision: number) => [
   { icon: "fa fa-undo", label: "Reset", action: "reset" },
   { icon: "fas fa-expand", label: "Full Screen", action: "fullScreen" },
 ];
+
+export const OCCUPATIONS = [
+  "STUDENT",
+  "MEDICAL_WORKER",
+  "GOVT_EMPLOYEE",
+  "PRIVATE_EMPLOYEE",
+  "HOME_MAKER",
+  "WORKING_ABROAD",
+  "OTHERS",
+];
