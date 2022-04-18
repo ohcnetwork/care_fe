@@ -43,7 +43,6 @@ import {
 import * as Notification from "../../Utils/Notifications.js";
 import AlertDialog from "../Common/AlertDialog";
 import {
-  AutoCompleteMultiField,
   CheckboxField,
   DateInputField,
   MultilineInputField,
@@ -131,9 +130,7 @@ const initForm: any = {
 
   estimated_contact_date: null,
   date_of_return: null,
-  past_travel: false,
-  transit_details: "",
-  countries_travelled: [],
+
   number_of_primary_contacts: "",
   number_of_secondary_contacts: "",
   is_antenatal: "false",
@@ -390,10 +387,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             ongoing_medication: res.data.ongoing_medication
               ? res.data.ongoing_medication
               : "",
-            countries_travelled: res.data.countries_travelled,
-            transit_details: res.data.transit_details
-              ? res.data.transit_details
-              : "",
 
             is_declared_positive: res.data.is_declared_positive
               ? String(res.data.is_declared_positive)
@@ -603,20 +596,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             invalidForm = true;
           }
           return;
-        case "countries_travelled":
-          if (state.form.past_travel && !state.form[field].length) {
-            errors[field] = "Please enter the list of countries visited";
-            if (!error_div) error_div = field;
-            invalidForm = true;
-          }
-          return;
-        case "date_of_return":
-          if (state.form.past_travel && !state.form[field]) {
-            errors[field] = "Please enter the date of return from travel";
-            if (!error_div) error_div = field;
-            invalidForm = true;
-          }
-          return;
+
         case "estimated_contact_date":
           if (
             JSON.parse(state.form.contact_with_confirmed_carrier) ||
@@ -788,14 +768,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           state.form.cluster_name
             ? state.form.cluster_name
             : null,
-        past_travel: state.form.past_travel,
-        transit_details: state.form.transit_details,
-        countries_travelled: state.form.past_travel
-          ? state.form.countries_travelled
-          : [],
-        date_of_return: state.form.past_travel
-          ? state.form.date_of_return
-          : undefined,
 
         allergies: state.form.allergies,
         number_of_primary_contacts: Number(
@@ -1440,82 +1412,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             />
                           </div>
                         )}
-
-                        <div className="md:col-span-2" id="past_travel-div">
-                          <CheckboxField
-                            checked={state.form.past_travel}
-                            onChange={handleCheckboxFieldChange}
-                            name="past_travel"
-                            label="Domestic/international Travel History (within last 14 days)"
-                          />
-                        </div>
-                        <Collapse
-                          in={state.form.past_travel}
-                          timeout="auto"
-                          unmountOnExit
-                          className="col-span-2"
-                        >
-                          {
-                            <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
-                              <div
-                                className="md:col-span-2"
-                                id="countries_travelled-div"
-                              >
-                                <AutoCompleteMultiField
-                                  id="countries-travelled"
-                                  options={placesList}
-                                  label="Countries / Places Visited (including transit stops) *"
-                                  variant="outlined"
-                                  placeholder="Select country or enter the place of visit"
-                                  onChange={(e: object, value: any) =>
-                                    handleValueChange(
-                                      value,
-                                      "countries_travelled"
-                                    )
-                                  }
-                                  value={state.form.countries_travelled}
-                                  errors={state.errors.countries_travelled}
-                                />
-                              </div>
-                              <div id="transit_details-div">
-                                <InputLabel id="transit_details-label">
-                                  Transit_details
-                                </InputLabel>
-                                <TextInputField
-                                  name="transit_details"
-                                  variant="outlined"
-                                  margin="dense"
-                                  type="text"
-                                  placeholder="Flight No:/Train No:/Vehicle No: (with seat number)"
-                                  value={state.form.transit_details}
-                                  onChange={handleChange}
-                                  errors={state.errors.transit_details}
-                                />
-                              </div>
-                              <div id="date_of_return-div">
-                                <InputLabel
-                                  htmlFor="date_of_return"
-                                  id="date_of_return-label"
-                                  required
-                                >
-                                  Estimated date of Arrival
-                                </InputLabel>
-                                <DateInputField
-                                  id="date_of_return"
-                                  fullWidth={true}
-                                  value={state.form.date_of_return}
-                                  onChange={(date) =>
-                                    handleDateChange(date, "date_of_return")
-                                  }
-                                  errors={state.errors.date_of_return}
-                                  inputVariant="outlined"
-                                  margin="dense"
-                                  disableFuture={true}
-                                />
-                              </div>
-                            </div>
-                          }
-                        </Collapse>
                       </div>
                     </CardContent>
                   </Card>
