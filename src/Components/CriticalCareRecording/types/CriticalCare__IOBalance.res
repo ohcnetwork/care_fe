@@ -1,6 +1,9 @@
 type item = {
   name: string,
   quantity: float,
+  calories: float,
+  concentration: float,
+  conc_unit: string,
 }
 
 export type t = {
@@ -28,13 +31,26 @@ let make = (
   total_output_calculated: total_output_calculated,
 }
 
-let makeItem = (~name, ~quantity) => {
+let makeItem = (~name, ~quantity, ~calories, ~concentration, ~conc_unit) => {
   name: name,
   quantity: quantity,
+  calories: calories,
+  concentration: concentration,
+  conc_unit: conc_unit,
 }
 
 let makeItems = items => {
-  Js.Array.map(i => makeItem(~name=i["name"], ~quantity=i["quantity"]), items)
+  Js.Array.map(
+    i =>
+      makeItem(
+        ~name=i["name"],
+        ~quantity=i["quantity"],
+        ~calories=i["calories"],
+        ~concentration=i["concentration"],
+        ~conc_unit=i["conc_unit"],
+      ),
+    items,
+  )
 }
 
 let makeFromJs = dailyRound => {
@@ -50,6 +66,9 @@ let makeFromJs = dailyRound => {
 
 let name = item => item.name
 let quantity = item => item.quantity
+let calories = item => item.calories
+let concentration = item => item.concentration
+let conc_unit = item => item.conc_unit
 let infusions = t => t.infusions
 let ivFluid = t => t.ivFluid
 let feed = t => t.feed
@@ -67,6 +86,20 @@ let updateQuantity = (quantity, item) => {
   quantity: quantity,
 }
 
+let updateCalories = (calories, item) => {
+  ...item,
+  calories: calories,
+}
+
+let updateConcentration = (concentration, item) => {
+  ...item,
+  concentration: concentration,
+}
+
+let updateConcUnit = (conc_unit, item) => {
+  ...item,
+  conc_unit: conc_unit,
+}
 let makeDefaultItem = () => {
-  makeItem(~name="", ~quantity=0.0)
+  makeItem(~name="", ~quantity=0.0, ~calories=0.0, ~concentration=0.0, ~conc_unit="")
 }
