@@ -128,7 +128,7 @@ const initForm: any = {
   present_health: "",
   contact_with_confirmed_carrier: "false",
   contact_with_suspected_carrier: "false",
-  is_migrant_worker: "false",
+
   estimated_contact_date: null,
   date_of_return: null,
   past_travel: false,
@@ -143,7 +143,6 @@ const initForm: any = {
   test_type: testType[0],
   prescribed_medication: false,
   ongoing_medication: "",
-  is_medical_worker: "false",
   designation_of_health_care_worker: "",
   instituion_of_health_care_worker: "",
   number_of_aged_dependents: "",
@@ -395,9 +394,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             transit_details: res.data.transit_details
               ? res.data.transit_details
               : "",
-            is_medical_worker: res.data.is_medical_worker
-              ? String(res.data.is_medical_worker)
-              : "false",
+
             is_declared_positive: res.data.is_declared_positive
               ? String(res.data.is_declared_positive)
               : "false",
@@ -424,9 +421,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               .contact_with_suspected_carrier
               ? String(res.data.contact_with_suspected_carrier)
               : "false",
-            is_migrant_worker: res.data.is_migrant_worker
-              ? String(res.data.is_migrant_worker)
-              : "false",
+
             number_of_aged_dependents: Number(
               res.data.number_of_aged_dependents
             )
@@ -751,7 +746,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         gender: Number(state.form.gender),
         nationality: state.form.nationality,
         is_antenatal: state.form.is_antenatal,
-        is_migrant_worker: state.form.is_migrant_worker,
+
         passport_no:
           state.form.nationality !== "India"
             ? state.form.passport_no
@@ -814,7 +809,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           ? Number(state.form.number_of_secondary_contacts)
           : undefined,
         ongoing_medication: state.form.ongoing_medication,
-        is_medical_worker: JSON.parse(state.form.is_medical_worker),
+
         is_declared_positive: JSON.parse(state.form.is_declared_positive),
         designation_of_health_care_worker:
           state.form.designation_of_health_care_worker,
@@ -1445,121 +1440,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             />
                           </div>
                         )}
-                        <div className="grid grid-flow-col">
-                          <div id="is_medical_worker-div">
-                            <InputLabel
-                              htmlFor="is_medical_worker"
-                              id="is_medical_worker"
-                            >
-                              Is a Medical Worker?
-                            </InputLabel>
-                            <RadioGroup
-                              aria-label="is_medical_worker"
-                              id="is_medical_worker"
-                              name="is_medical_worker"
-                              value={state.form.is_medical_worker}
-                              onChange={handleChange}
-                              className="mt-2"
-                            >
-                              <Box display="flex" flexDirection="row">
-                                <FormControlLabel
-                                  value="true"
-                                  control={<Radio />}
-                                  label="Yes"
-                                />
-                                <FormControlLabel
-                                  value="false"
-                                  control={<Radio />}
-                                  label="No"
-                                />
-                              </Box>
-                            </RadioGroup>
-                          </div>
-                          <div id="is_migrant_worker-div">
-                            <InputLabel
-                              htmlFor="is_migrant_worker"
-                              id="is_migrant_worker"
-                            >
-                              Is a Guest workers?
-                            </InputLabel>
-                            <RadioGroup
-                              aria-label="is_migrant_worker"
-                              id="is_migrant_worker"
-                              name="is_migrant_worker"
-                              value={state.form.is_migrant_worker}
-                              onChange={handleChange}
-                              className="mt-2"
-                            >
-                              <Box display="flex" flexDirection="row">
-                                <FormControlLabel
-                                  value="true"
-                                  control={<Radio />}
-                                  label="Yes"
-                                />
-                                <FormControlLabel
-                                  value="false"
-                                  control={<Radio />}
-                                  label="No"
-                                />
-                              </Box>
-                            </RadioGroup>
-                          </div>
-                        </div>
-                        <Collapse
-                          in={String(state.form.is_medical_worker) === "true"}
-                          timeout="auto"
-                          unmountOnExit
-                          className="col-span-2"
-                        >
-                          {" "}
-                          <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
-                            <div id="designation_of_health_care_worker-div">
-                              <InputLabel
-                                id="designation_of_health_care_worker-label"
-                                htmlFor="designation_of_health_care_worker"
-                              >
-                                Designation of Medical Worker
-                              </InputLabel>
-                              <SelectField
-                                labelId="designation_of_health_care_worker"
-                                name="designation_of_health_care_worker"
-                                variant="outlined"
-                                margin="dense"
-                                optionArray={true}
-                                value={
-                                  state.form.designation_of_health_care_worker
-                                }
-                                options={designationOfHealthWorkers}
-                                onChange={handleChange}
-                                errors={
-                                  state.errors.designation_of_health_care_worker
-                                }
-                              />
-                            </div>
-                            <div id="instituion_of_health_care_worker-div">
-                              <InputLabel
-                                id="institution_of_health_care_worker-label"
-                                htmlFor="instituion_of_health_care_worker"
-                              >
-                                Institution of Medical Worker{" "}
-                              </InputLabel>
-                              <TextInputField
-                                id="instituion_of_health_care_worker"
-                                name="instituion_of_health_care_worker"
-                                variant="outlined"
-                                margin="dense"
-                                type="text"
-                                value={
-                                  state.form.instituion_of_health_care_worker
-                                }
-                                onChange={handleChange}
-                                errors={
-                                  state.errors.instituion_of_health_care_worker
-                                }
-                              />
-                            </div>
-                          </div>
-                        </Collapse>
 
                         <div className="md:col-span-2" id="past_travel-div">
                           <CheckboxField
