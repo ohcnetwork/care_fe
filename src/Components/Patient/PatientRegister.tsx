@@ -1,6 +1,5 @@
 import {
   Box,
-  Button,
   Card,
   CardContent,
   CircularProgress,
@@ -10,7 +9,7 @@ import {
   Radio,
   RadioGroup,
 } from "@material-ui/core";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
+
 import { navigate, useQueryParams } from "raviger";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import moment from "moment";
@@ -23,7 +22,6 @@ import {
   GENDER_TYPES,
   MEDICAL_HISTORY_CHOICES,
   TEST_TYPE,
-  FRONTLINE_WORKER,
   DESIGNATION_HEALTH_CARE_WORKER,
   VACCINES,
 } from "../../Common/constants";
@@ -102,7 +100,6 @@ const bloodGroups = [...BLOOD_GROUPS];
 
 const testType = [...TEST_TYPE];
 const designationOfHealthWorkers = [...DESIGNATION_HEALTH_CARE_WORKER];
-const frontlineWorkers = [...FRONTLINE_WORKER];
 const vaccines = ["Select", ...VACCINES];
 
 const initForm: any = {
@@ -149,7 +146,6 @@ const initForm: any = {
   is_medical_worker: "false",
   designation_of_health_care_worker: "",
   instituion_of_health_care_worker: "",
-  frontline_worker: frontlineWorkers[0],
   number_of_aged_dependents: "",
   number_of_chronic_diseased_dependents: "",
   cluster_name: "",
@@ -413,9 +409,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               .instituion_of_health_care_worker
               ? res.data.instituion_of_health_care_worker
               : "",
-            frontline_worker: res.data.frontline_worker
-              ? res.data.frontline_worker
-              : "",
+
             number_of_primary_contacts: res.data.number_of_primary_contacts
               ? res.data.number_of_primary_contacts
               : "",
@@ -524,6 +518,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     let error_div = "";
 
     Object.keys(state.form).forEach((field, i) => {
+      let phoneNumber, emergency_phone_number;
       switch (field) {
         case "address":
         case "name":
@@ -596,7 +591,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           }
           return;
         case "phone_number":
-          const phoneNumber = parsePhoneNumberFromString(state.form[field]);
+          phoneNumber = parsePhoneNumberFromString(state.form[field]);
           if (!state.form[field] || !phoneNumber?.isPossible()) {
             errors[field] = "Please enter valid phone number";
             if (!error_div) error_div = field;
@@ -604,7 +599,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           }
           return;
         case "emergency_phone_number":
-          const emergency_phone_number = parsePhoneNumberFromString(
+          emergency_phone_number = parsePhoneNumberFromString(
             state.form[field]
           );
           if (!state.form[field] || !emergency_phone_number?.isPossible()) {
@@ -825,7 +820,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           state.form.designation_of_health_care_worker,
         instituion_of_health_care_worker:
           state.form.instituion_of_health_care_worker,
-        frontline_worker: state.form.frontline_worker,
+
         blood_group: state.form.blood_group
           ? state.form.blood_group
           : undefined,
@@ -1163,25 +1158,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             errors={state.errors.gender}
                           />
                         </div>
-                        <div id="frontline_worker-div">
-                          <InputLabel
-                            htmlFor="frontline_worker"
-                            id="frontline_worker-label"
-                          >
-                            Frontline Worker
-                          </InputLabel>
-                          <SelectField
-                            labelId="frontline_worker"
-                            name="frontline_worker"
-                            variant="outlined"
-                            margin="dense"
-                            optionArray={true}
-                            value={state.form.frontline_worker}
-                            options={frontlineWorkers}
-                            onChange={handleChange}
-                            errors={state.errors.frontline_worker}
-                          />
-                        </div>
+
                         <Collapse
                           in={String(state.form.gender) === "2"}
                           timeout="auto"
