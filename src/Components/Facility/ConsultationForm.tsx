@@ -734,19 +734,6 @@ export const ConsultationForm = (props: any) => {
                 */}
                 {!id && (
                   <>
-                    <div>
-                      <InputLabel id="asset-type">Bed</InputLabel>
-                      <BedSelect
-                        name="bed"
-                        setSelected={setBed}
-                        selected={bed}
-                        errors=""
-                        multiple={false}
-                        margin="dense"
-                        // location={state.form.}
-                        facility={facilityId}
-                      />
-                    </div>
                     <div className="flex">
                       <div className="flex-1" id="admitted-div">
                         <InputLabel id="admitted-label">Admitted</InputLabel>
@@ -773,23 +760,38 @@ export const ConsultationForm = (props: any) => {
                         <ErrorHelperText error={state.errors.admitted} />
                       </div>
                     </div>
-                    {JSON.parse(state.form.admitted) && (
-                      <div className="flex">
-                        <div className="flex-1" id="admission_date-div">
-                          <DateInputField
-                            id="admission_date"
-                            label="Admission Date*"
+                    {!id && JSON.parse(state.form.admitted) ? (
+                      <>
+                        <div className="flex">
+                          <div className="flex-1" id="admission_date-div">
+                            <DateInputField
+                              id="admission_date"
+                              label="Admission Date*"
+                              margin="dense"
+                              value={state.form.admission_date}
+                              disableFuture={true}
+                              onChange={(date) =>
+                                handleDateChange(date, "admission_date")
+                              }
+                              errors={state.errors.admission_date}
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <InputLabel id="asset-type">Bed</InputLabel>
+                          <BedSelect
+                            name="bed"
+                            setSelected={setBed}
+                            selected={bed}
+                            errors=""
+                            multiple={false}
                             margin="dense"
-                            value={state.form.admission_date}
-                            disableFuture={true}
-                            onChange={(date) =>
-                              handleDateChange(date, "admission_date")
-                            }
-                            errors={state.errors.admission_date}
+                            // location={state.form.}
+                            facility={facilityId}
                           />
                         </div>
-                      </div>
-                    )}
+                      </>
+                    ) : null}
                   </>
                 )}
               </div>

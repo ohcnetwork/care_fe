@@ -71,7 +71,7 @@ const initForm: any = {
   rhythm: "0",
   rhythm_detail: "",
   ventilator_spo2: null,
-  bed: null,
+  // bed: null,
 };
 
 const initError = Object.assign(
@@ -146,9 +146,9 @@ export const DailyRounds = (props: any) => {
             admitted_to: res.data.admitted_to ? res.data.admitted_to : "Select",
           };
           dispatch({ type: "set_form", form: data });
-          if (res.data.bed) {
-            setIsTeleicu("true");
-          }
+          // if (res.data.bed) {
+          //   setIsTeleicu("true");
+          // }
         }
         setIsLoading(false);
       }
@@ -302,7 +302,7 @@ export const DailyRounds = (props: any) => {
           recommend_discharge: JSON.parse(state.form.recommend_discharge),
           action: state.form.action,
           review_time: state.form.review_time,
-          bed: isTeleicu === "true" ? state.form.bed : undefined,
+          // bed: isTeleicu === "true" ? state.form.bed : undefined,
         };
         if (state.form.rounds_type === "NORMAL") {
           data = {
