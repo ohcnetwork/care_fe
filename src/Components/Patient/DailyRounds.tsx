@@ -319,7 +319,7 @@ export const DailyRounds = (props: any) => {
             temperature: state.form.tempInCelcius
               ? celciusToFahrenheit(state.form.temperature)
               : state.form.temperature,
-            rhythm: Number(state.form.rhythm),
+            rhythm: Number(state.form.rhythm) || 0,
             rhythm_detail: state.form.rhythm_detail,
             ventilator_spo2: Number(state.form.ventilator_spo2),
           };
