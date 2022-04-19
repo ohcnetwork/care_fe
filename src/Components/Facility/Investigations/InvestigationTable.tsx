@@ -176,8 +176,12 @@ export const InvestigationTable = ({
         onChange={(e) => setSearchFilter(e.target.value)}
       />
       <br />
-      <TableContainer component={Paper} id="section-to-print">
-        <Table aria-label="simple table" size="small">
+      <TableContainer
+        component={Paper}
+        className="overflow-hidden"
+        id="section-to-print"
+      >
+        <Table aria-label="simple table overflow-hidden" size="small">
           <TableHead>
             <TableRow>
               <TableCell>Name</TableCell>
