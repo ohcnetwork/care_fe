@@ -499,7 +499,7 @@ export const PatientHome = (props: any) => {
     setSelectedStatus({ status, sample });
     setAlertMessage({
       show: true,
-      message: `Are you sure you want to sent the sample to Collection Centre?`,
+      message: "Are you sure you want to sent the sample to Collection Centre?",
       title: "Confirm",
     });
   };
@@ -608,7 +608,7 @@ export const PatientHome = (props: any) => {
 
       <div id="revamp">
         <PageTitle
-          title={`Covid Suspect Details`}
+          title={"Covid Suspect Details"}
           backUrl="/patients"
           crumbsReplacements={{
             [facilityId]: { name: patientData?.facility_object?.name },
@@ -1455,7 +1455,9 @@ export const PatientHome = (props: any) => {
                 <div>
                   <button
                     className="btn btn-primary w-full"
-                    disabled={!patientData.is_active}
+                    disabled={
+                      patientData.is_active && !!consultationListData.length
+                    }
                     onClick={() =>
                       navigate(
                         `/facility/${patientData?.facility}/patient/${id}/consultation`
@@ -1702,7 +1704,7 @@ export const PatientHome = (props: any) => {
                   id="covid-status-pre-form"
                   className="flex justify-center w-full text-gray-900 mb-2 mt-5"
                 >
-                  Has the patient's disease status changed? If so, to what?
+                  Has the patient&apos;s disease status changed? If so, to what?
                 </label>
                 <Select
                   className="h-10"
@@ -1712,14 +1714,17 @@ export const PatientHome = (props: any) => {
                     handlePreDischargeFormChange("disease_status", event)
                   }
                 >
-                  {DISEASE_STATUS.map((value) => (
-                    <MenuItem value={value}>{value}</MenuItem>
+                  {DISEASE_STATUS.map((value, i) => (
+                    <MenuItem key={i} value={value}>
+                      {value}
+                    </MenuItem>
                   ))}
                 </Select>
               </Fragment>
 
               <label className="flex justify-center w-full mt-5 text-gray-900">
-                Would you like to update the patient's SRF ID and Test date?
+                Would you like to update the patient&apos;s SRF ID and Test
+                date?
               </label>
 
               <div className="flex">
