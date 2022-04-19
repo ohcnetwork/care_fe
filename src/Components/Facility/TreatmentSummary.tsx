@@ -1,26 +1,13 @@
-import React, { useCallback, useState, useEffect } from "react";
-import { navigate } from "raviger";
+import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
-import {
-  getPatient,
-  getInvestigation,
-  getDailyReport,
-} from "../../Redux/actions";
+import { getPatient, getInvestigation } from "../../Redux/actions";
 import { ConsultationModel } from "./models";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { PatientModel, DailyRoundsModel } from "../Patient/models";
+import { PatientModel } from "../Patient/models";
 import loadable from "@loadable/component";
 import moment from "moment";
 import { getConsultation } from "../../Redux/actions";
-import {
-  PATIENT_CATEGORY,
-  SYMPTOM_CHOICES,
-  CONSULTATION_TABS,
-  OptionsType,
-  GENDER_TYPES,
-} from "../../Common/constants";
-const symptomChoices = [...SYMPTOM_CHOICES];
-const patientCategoryChoices = [...PATIENT_CATEGORY];
+import { GENDER_TYPES } from "../../Common/constants";
 const Loading = loadable(() => import("../Common/Loading"));
 
 const TreatmentSummary = (props: any) => {
@@ -114,7 +101,7 @@ const TreatmentSummary = (props: any) => {
               <i className="fas fa-print mr-2"></i> Print Treatment Summary
             </button>
             <button
-              onClick={(_) => window.history.go(-1)}
+              onClick={() => window.history.go(-1)}
               className="btn btn-default"
             >
               <i className="fas fa-times mr-2"></i> Close

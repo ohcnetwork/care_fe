@@ -191,7 +191,7 @@ export const useMSEMediaPlayer = ({
             wsRef.current = new WebSocket(url);
             let ws = wsRef.current;
             ws.binaryType = "arraybuffer";
-            ws.onopen = function (_event) {
+            ws.onopen = function () {
               console.log("Connected to ws");
               onSuccess && onSuccess(undefined);
             };
@@ -206,7 +206,7 @@ export const useMSEMediaPlayer = ({
                   mimeCodec = Utf8ArrayToStr(decoded_arr);
                 }
                 mseSourceBuffer = mse.addSourceBuffer(
-                  'video/mp4; codecs="' + mimeCodec + '"'
+                  `video/mp4; codecs="${mimeCodec}"`
                 );
                 mseSourceBuffer.mode = "segments";
                 if (mseQueue.length > 0 && !mseSourceBuffer.updating) {
