@@ -41,6 +41,8 @@ import {
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
 import { make as Link } from "../Common/components/Link.gen";
+import { BedModel } from "../Facility/models";
+import { BedSelect } from "../Common/BedSelect";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const admittedToChoices = ["Select", ...ADMITTED_TO];
@@ -126,7 +128,7 @@ export const DailyRounds = (props: any) => {
   const [patientName, setPatientName] = useState("");
   const [beds, setBeds] = useState<any>([]);
   const [isTeleicu, setIsTeleicu] = useState<string>("false");
-
+  const [bed, setBed] = useState<BedModel | BedModel[] | null>(null);
   const headerText = !id ? "Add Consultation Update" : "Info";
   const buttonText = !id ? "Save" : "Continue";
 
@@ -218,13 +220,13 @@ export const DailyRounds = (props: any) => {
             invalidForm = true;
           }
           return;
-        case "admitted_to":
-          if (!state.form.admitted_to && state.form.clone_last === "false") {
-            errors[field] = "Please select admitted to details";
-            if (!error_div) error_div = field;
-            invalidForm = true;
-          }
-          return;
+        // case "admitted_to":
+        //   if (!state.form.admitted_to && state.form.clone_last === "false") {
+        //     errors[field] = "Please select admitted to details";
+        //     if (!error_div) error_div = field;
+        //     invalidForm = true;
+        //   }
+        //   return;
         // case "resp":
         //   if (state.form.resp === null) {
         //     errors[field] = "Please enter a respiratory rate";
@@ -266,6 +268,7 @@ export const DailyRounds = (props: any) => {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     const [validForm, error_div] = validateForm();
+    console.log(validForm, error_div);
     if (!validForm) {
       scrollTo(error_div);
     } else {
@@ -662,8 +665,20 @@ export const DailyRounds = (props: any) => {
                         errors={state.errors.current_health}
                       />
                     </div>
-
-                    <div className="flex-1" id="admitted_to-div">
+                    {/* <div>
+                      <InputLabel id="asset-type">Bed</InputLabel>
+                      <BedSelect
+                        name="bed"
+                        setSelected={setBed}
+                        selected={bed}
+                        errors=""
+                        multiple={false}
+                        margin="dense"
+                        // location={state.form.}
+                        facility={facilityId}
+                      />
+                    </div> */}
+                    {/* <div className="flex-1" id="admitted_to-div">
                       <InputLabel id="admitted-to-label">
                         Admitted To *{" "}
                       </InputLabel>
@@ -676,8 +691,8 @@ export const DailyRounds = (props: any) => {
                         onChange={handleChange}
                         errors={state.errors.admitted_to}
                       />
-                    </div>
-                    <div className="flex-1" id="is_telemedicine-div">
+                    </div> */}
+                    {/* <div className="flex-1" id="is_telemedicine-div">
                       <InputLabel id="admitted-label">TeleICU</InputLabel>
                       <RadioGroup
                         aria-label="covid"
@@ -702,7 +717,7 @@ export const DailyRounds = (props: any) => {
                         </Box>
                       </RadioGroup>
                       <ErrorHelperText error={state.errors.is_telemedicine} />
-                    </div>
+                    </div> */}
 
                     <div className="flex-1">
                       <InputLabel id="action-label">Action </InputLabel>
@@ -717,7 +732,8 @@ export const DailyRounds = (props: any) => {
                       />
                       <ErrorHelperText error={state.errors.action} />
                     </div>
-                    {isTeleicu === "true" && (
+                    {/* {
+                       === "true" && (
                       <div className="">
                         <InputLabel id="bed">Bed</InputLabel>
                         <SelectField
@@ -740,7 +756,7 @@ export const DailyRounds = (props: any) => {
                           errors={state.errors.bed}
                         />
                       </div>
-                    )}
+                    )}*/}
                   </div>
                   <div className="md:grid gap-4 grid-cols-1 md:grid-cols-2">
                     <div className="flex-1">
