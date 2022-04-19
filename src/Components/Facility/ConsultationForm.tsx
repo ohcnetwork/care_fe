@@ -8,6 +8,9 @@ import {
   InputLabel,
   Radio,
   RadioGroup,
+  CircularProgress,
+  Collapse,
+  Card,
 } from "@material-ui/core";
 
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
@@ -55,6 +58,8 @@ import { OnlineUsersSelect } from "../Common/OnlineUsersSelect";
 import _ from "lodash";
 import { UserModel } from "../Users/models";
 import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
+
+import { PatientHealth } from "./PatientHealth";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -560,8 +565,12 @@ export const ConsultationForm = (props: any) => {
       />
       <div className="mt-4">
         <div className="bg-white rounded shadow">
+          <PatientHealth />
           <form onSubmit={(e) => handleSubmit(e)}>
             <CardContent>
+              <h1 className="font-bold text-left text-gray-800 text-xl mb-8 ">
+                Consultation Details
+              </h1>
               <div className="grid gap-4 grid-cols-1">
                 <div id="symptoms-div">
                   <InputLabel id="symptoms-label">Symptoms*</InputLabel>
