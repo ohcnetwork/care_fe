@@ -103,7 +103,7 @@ export const BedSelect = (props: BedSelectProps) => {
         })`}</div>
       )}
       getOptionSelected={(option: any, value: any) => option.id === value.id}
-      getOptionLabel={(option: any) => option?.name}
+      getOptionLabel={(option: any) => option?.name || ""}
       filterOptions={(options: BedModel[]) => options}
       errors={errors}
       className={className}

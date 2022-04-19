@@ -1,23 +1,36 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useEffect } from "react";
+import { navigate } from "raviger";
 import { useDispatch } from "react-redux";
 import {
   getPatient,
   getInvestigation,
   getDailyReport,
 } from "../../Redux/actions";
+import { ConsultationModel } from "./models";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { PatientModel, DailyRoundsModel } from "../Patient/models";
-import { GENDER_TYPES } from "../../Common/constants";
 import loadable from "@loadable/component";
 import moment from "moment";
+import { getConsultation } from "../../Redux/actions";
+import {
+  PATIENT_CATEGORY,
+  SYMPTOM_CHOICES,
+  CONSULTATION_TABS,
+  OptionsType,
+  GENDER_TYPES,
+} from "../../Common/constants";
+const symptomChoices = [...SYMPTOM_CHOICES];
+const patientCategoryChoices = [...PATIENT_CATEGORY];
 const Loading = loadable(() => import("../Common/Loading"));
 
 const TreatmentSummary = (props: any) => {
-  const { setIsPrintMode, consultationData, dailyRoundsListData, patientId } =
-    props;
+  const { consultationId, patientId, dailyRoundsListData } = props;
   const date = new Date();
   const dispatch: any = useDispatch();
   const [patientData, setPatientData] = useState<PatientModel>({});
+  const [consultationData, setConsultationData] = useState<ConsultationModel>(
+    {}
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [investigations, setInvestigations] = useState<Array<any>>([]);
   const [dailyRounds, setDailyRounds] = useState<any>({});
@@ -29,6 +42,8 @@ const TreatmentSummary = (props: any) => {
       if (!status.aborted) {
         if (res && res.data) {
           setPatientData(res.data);
+        } else {
+          setPatientData({});
         }
       }
       setIsLoading(false);
@@ -36,7 +51,6 @@ const TreatmentSummary = (props: any) => {
     [patientId, dispatch]
   );
 
-  let consultationId = consultationData.id;
   const fetchInvestigationData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
@@ -49,6 +63,8 @@ const TreatmentSummary = (props: any) => {
             {}
           );
           setInvestigations(valueMap);
+        } else {
+          setInvestigations([]);
         }
       }
       setIsLoading(false);
@@ -56,26 +72,32 @@ const TreatmentSummary = (props: any) => {
     [consultationId, dispatch]
   );
 
-  let limit = 1;
-
-  const fetchDailyRounds = useCallback(
+  const fetchConsultation = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const res = await dispatch(getDailyReport({ limit }, { consultationId }));
+      const [res] = await Promise.all([
+        dispatch(getConsultation(consultationId)),
+      ]);
       if (!status.aborted) {
         if (res && res.data) {
-          setDailyRounds(res.data.results);
+          setConsultationData(res.data);
+          if (res.data.last_daily_round) {
+            setDailyRounds(res.data.last_daily_round);
+          }
+        } else {
+          setConsultationData({});
         }
-        setIsLoading(false);
       }
+      setIsLoading(false);
     },
-    [consultationId, limit, dispatch]
+    [consultationId, dispatch]
   );
 
   useAbortableEffect((status: statusType) => {
     fetchPatientData(status);
     fetchInvestigationData(status);
-    fetchDailyRounds(status);
+
+    fetchConsultation(status);
   }, []);
 
   return (
@@ -92,7 +114,7 @@ const TreatmentSummary = (props: any) => {
               <i className="fas fa-print mr-2"></i> Print Treatment Summary
             </button>
             <button
-              onClick={() => setIsPrintMode(false)}
+              onClick={(_) => window.history.go(-1)}
               className="btn btn-default"
             >
               <i className="fas fa-times mr-2"></i> Close
@@ -360,24 +382,20 @@ const TreatmentSummary = (props: any) => {
                     </thead>
 
                     <tbody>
-                      {dailyRounds.length > 0 ? (
-                        dailyRounds.map(
-                          (rounds: DailyRoundsModel, index: number) => (
-                            <tr key={index}>
-                              <td className="border border-gray-800 text-center">
-                                {moment(rounds.modified_date).format(
-                                  "DD/MM/YYYY (h:mm A)"
-                                )}
-                              </td>
-                              <td className="border border-gray-800 text-center">
-                                {rounds.ventilator_spo2 || "-"}
-                              </td>
-                              <td className="border border-gray-800 text-center">
-                                {rounds.temperature || "-"}
-                              </td>
-                            </tr>
-                          )
-                        )
+                      {dailyRounds ? (
+                        <tr>
+                          <td className="border border-gray-800 text-center">
+                            {moment(dailyRounds.modified_date).format(
+                              "DD/MM/YYYY (h:mm A)"
+                            )}
+                          </td>
+                          <td className="border border-gray-800 text-center">
+                            {dailyRounds.ventilator_spo2 || "-"}
+                          </td>
+                          <td className="border border-gray-800 text-center">
+                            {dailyRounds.temperature || "-"}
+                          </td>
+                        </tr>
                       ) : (
                         <tr>
                           <td className="border border-gray-800 text-center">

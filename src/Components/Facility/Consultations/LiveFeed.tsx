@@ -1,230 +1,77 @@
-import axios from "axios";
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useDispatch } from "react-redux";
-import ReactPlayer from "react-player";
 import screenfull from "screenfull";
 import loadable from "@loadable/component";
 import { listAssetBeds } from "../../../Redux/actions";
 import RefreshIcon from "@material-ui/icons/Refresh";
+import { getCameraPTZ } from "../../../Common/constants";
+import {
+  StreamStatus,
+  useMSEMediaPlayer,
+} from "../../../Common/hooks/useMSEplayer";
+import { useFeedPTZ } from "../../../Common/hooks/useFeedPTZ";
 const PageTitle = loadable(() => import("../../Common/PageTitle"));
 
 const LiveFeed = (props: any) => {
   const middlewareHostname =
     props.middlewareHostname || "dev_middleware.coronasafe.live";
-  const [asset, setAsset] = useState<any>(props.asset); // eslint-disable-line @typescript-eslint/no-unused-vars
-  const [sourceUrl, setSourceUrl] = useState<string>();
-  const [position, setPosition] = useState<any>();
+  const cameraAsset = props.asset;
   const [presets, setPresets] = useState<any>([]);
   const [bedPresets, setBedPresets] = useState<any>([]);
   const [showDefaultPresets, setShowDefaultPresets] = useState<boolean>(false);
   const [precision, setPrecision] = useState(1);
-
-  const [loading, setLoading] = useState<boolean>(false);
+  const [streamStatus, setStreamStatus] = useState<StreamStatus>(
+    StreamStatus.Offline
+  );
+  const [loading, setLoading] = useState<string | undefined>();
   const dispatch: any = useDispatch();
-  useEffect(() => {
-    let loadingTimeout: any;
-    if (loading === true)
-      loadingTimeout = setTimeout(() => {
-        setLoading(false);
-      }, 6000);
-    return () => {
-      if (loadingTimeout) clearTimeout(loadingTimeout);
-    };
-  }, [loading]);
+  const liveFeedPlayerRef = useRef<any>(null);
 
-  const requestStream = useCallback(() => {
-    axios
-      .post(`https://${middlewareHostname}/start`, {
-        uri: `rtsp://${asset.username}:${asset.password}@${asset.hostname}:554/`,
-      })
-      .then((resp: any) => {
-        setSourceUrl(`https://${middlewareHostname}${resp.data.uri}`);
-      })
-      .catch(() => {
-        // console.error('Error while refreshing',ex);
-      });
-  }, [asset.hostname, asset.password, asset.username, middlewareHostname]);
+  const videoEl = liveFeedPlayerRef.current as HTMLVideoElement;
 
-  const stopStream = (url: string | undefined) => {
-    console.log("stop", url);
-    if (url) {
-      let urlSegments = url.split("/");
-      urlSegments.pop();
-      const id = urlSegments?.pop();
-      axios
-        .post(`https://${middlewareHostname}/stop`, {
-          id,
-        })
-        .then((resp: any) => {
-          console.log(resp);
-          // setSourceUrl(`https://${middlewareHostname}${resp.data.uri}`);
-        })
-        .catch(() => {
-          // console.error('Error while refreshing',ex);
-        });
-    }
+  let url = `wss://${middlewareHostname}/stream/${cameraAsset?.accessKey}/channel/0/mse?uuid=${cameraAsset?.accessKey}&channel=0`;
+
+  const { startStream } = useMSEMediaPlayer({
+    config: {
+      middlewareHostname,
+      ...cameraAsset,
+    },
+    url,
+    videoEl,
+  });
+
+  const {
+    absoluteMove,
+
+    getPTZPayload,
+    getPresets,
+    gotoPreset,
+    relativeMove,
+  } = useFeedPTZ({
+    config: {
+      middlewareHostname,
+      ...cameraAsset,
+    },
+  });
+
+  const getBedPresets = async (id: any) => {
+    const bedAssets = await dispatch(listAssetBeds({ asset: id }));
+    setBedPresets(bedAssets?.data?.results);
   };
-
-  const getCameraStatus = useCallback(
-    (asset: any) => {
-      axios
-        .get(
-          `https://${middlewareHostname}/status?hostname=${asset.hostname}&port=${asset.port}&username=${asset.username}&password=${asset.password}`
-        )
-        .then((resp: any) => {
-          setPosition(resp.data.position);
-        })
-        .catch(() => {
-          // console.error('Error while refreshing',ex);
-        });
-    },
-    [middlewareHostname]
-  );
-
-  const getPresets = useCallback(
-    (asset: any) => {
-      axios
-        .get(
-          `https://${middlewareHostname}/presets?hostname=${asset.hostname}&port=${asset.port}&username=${asset.username}&password=${asset.password}`
-        )
-        .then((resp: any) => {
-          setPresets(resp.data);
-          console.log("PRESETS", resp.data);
-        })
-        .catch(() => {
-          // console.error('Error while refreshing',ex);
-        });
-    },
-    [middlewareHostname]
-  );
-
-  const getBedPresets = useCallback(
-    async (asset: any) => {
-      const bedAssets = await dispatch(listAssetBeds({ asset: asset.id }));
-      setBedPresets(bedAssets.data.results);
-    },
-    [dispatch]
-  );
 
   const gotoBedPreset = (preset: any) => {
-    absoluteMove(preset.meta.position);
+    setLoading("Moving");
+    absoluteMove(preset.meta.position, {
+      onSuccess: () => setLoading(undefined),
+    });
   };
-
-  const gotoPreset = (preset: number) => {
-    axios
-      .post(`https://${middlewareHostname}/gotoPreset`, {
-        ...asset,
-        preset,
-      })
-      .then((resp: any) => {
-        console.log(resp.data);
-      })
-      .catch(() => {
-        // console.error('Error while refreshing',ex);
-      });
-  };
-
-  const requestPTZ = (action: string) => {
-    setLoading(true);
-    if (!position) {
-      getCameraStatus(asset);
-    } else {
-      let data = {
-        x: 0,
-        y: 0,
-        zoom: 0,
-      } as any;
-      console.log("Relative Move");
-      console.log(position);
-      const delta = 0.01 / position.zoom;
-      console.log("delta", delta);
-      // Relative X Y Coordinates
-      switch (action) {
-        case "up":
-          data.y = delta;
-          break;
-        case "down":
-          data.y = -delta;
-          break;
-        case "left":
-          data.x = -delta;
-          break;
-        case "right":
-          data.x = delta;
-          break;
-        case "zoomIn":
-          data.zoom = 0.1;
-          break;
-        case "zoomOut":
-          data.zoom = -0.1;
-          break;
-        case "precision":
-          setPrecision((precision) => (precision === 16 ? 1 : precision * 2));
-          break;
-        case "stop":
-          stopStream(sourceUrl);
-          setSourceUrl(undefined);
-          return;
-        case "reset":
-          setSourceUrl(undefined);
-          requestStream();
-          return;
-        default:
-          break;
-      }
-      axios
-        .post(`https://${middlewareHostname}/relativeMove`, {
-          ...data,
-          ...asset,
-        })
-        .then((resp: any) => {
-          console.log(resp.data);
-          getCameraStatus(asset);
-        })
-        .catch(() => {
-          // console.error('Error while refreshing',ex);
-        });
-    }
-  };
-
-  const absoluteMove = useCallback(
-    (data: any) => {
-      setLoading(true);
-      axios
-        .post(`https://${middlewareHostname}/absoluteMove`, {
-          ...data,
-          ...asset,
-        })
-        .then(() => {
-          getCameraStatus(asset);
-        })
-        .catch((ex: any) => {
-          console.error("Error while absolute move", ex);
-        });
-    },
-    [asset, middlewareHostname, getCameraStatus]
-  );
-
   useEffect(() => {
-    requestStream();
-  }, [requestStream]);
-
-  useEffect(() => {
-    getPresets(asset);
-    getBedPresets(asset);
-    if (props.config?.position) {
-      absoluteMove(props.config.position);
+    getPresets({ onSuccess: (resp) => setPresets(resp.data) });
+    getBedPresets(cameraAsset.id);
+    if (bedPresets?.[0]?.position) {
+      absoluteMove(bedPresets[0]?.position, {});
     }
-  }, [getPresets, getBedPresets, absoluteMove, asset, props.config?.position]);
-
-  const liveFeedPlayerRef = useRef<any>(null);
-  const handleClickFullscreen = () => {
-    if (screenfull.isEnabled) {
-      if (liveFeedPlayerRef.current) {
-        screenfull.request(liveFeedPlayerRef.current.wrapper);
-      }
-    }
-  };
+  }, [cameraAsset.id]);
 
   const viewOptions = presets
     ? Object.entries(presets)
@@ -235,186 +82,136 @@ const LiveFeed = (props: any) => {
         value: i + 1,
       }));
 
-  const cameraPTZ = [
-    { icon: "fa fa-arrow-up", label: "Up", action: "up" },
-    { icon: "fa fa-arrow-down", label: "Down", action: "down" },
-    { icon: "fa fa-arrow-left", label: "Left", action: "left" },
-    { icon: "fa fa-arrow-right", label: "Right", action: "right" },
-    { value: precision, label: "Precision", action: "precision" },
-    { icon: "fa fa-search-plus", label: "Zoom In", action: "zoomIn" },
-    { icon: "fa fa-search-minus", label: "Zoom Out", action: "zoomOut" },
-    { icon: "fa fa-stop", label: "Stop", action: "stop" },
-    { icon: "fa fa-undo", label: "Reset", action: "reset" },
-  ];
+  const cameraPTZ = getCameraPTZ(precision);
+
+  useEffect(() => {
+    let tId: any;
+    if (streamStatus !== StreamStatus.Playing) {
+      setStreamStatus(StreamStatus.Loading);
+      tId = setTimeout(() => {
+        startStream({
+          onSuccess: () => setStreamStatus(StreamStatus.Playing),
+          onError: () => setStreamStatus(StreamStatus.Offline),
+        });
+      }, 500);
+    }
+
+    return () => {
+      clearTimeout(tId);
+    };
+  }, [startStream, streamStatus]);
 
   return (
     <div className="mt-4 px-6 mb-20">
       <PageTitle title="Live Feed" hideBack={true} />
-      <div className="mt-4 flex flex-col">
-        <div className="mt-4 relative flex flex-col md:flex-row">
-          <div>
-            {sourceUrl ? (
-              <ReactPlayer
-                url={sourceUrl}
-                ref={liveFeedPlayerRef}
-                playing={true}
-                muted={true}
-                onError={(
-                  e: any,
-                  data: any,
-                  hlsInstance: any,
-                  hlsGlobal: any
-                ) => {
-                  // requestStream();
-                  console.log("Error", e);
-                  console.log("Data", data);
-                  console.log("HLS Instance", hlsInstance);
-                  console.log("HLS Global", hlsGlobal);
-                  if (e === "hlsError") {
-                    const recovered = hlsInstance.recoverMediaError();
-                    console.log(recovered);
-                  }
-                }}
-              />
-            ) : (
-              <div
-                className="bg-gray-500 flex flex-col justify-center items-center"
-                style={{ height: "360px", width: "640px" }}
-              >
-                <p className="font-bold text-black">
-                  STATUS: <span className="text-red-600">OFFLINE</span>
-                </p>
-                <p className="font-semibold text-black">
-                  Feed is currently not live
-                </p>
-              </div>
-            )}
-            <div className="flex flex-row justify-between">
-              <div className="mt-5 p-2 flex flex-row bg-green-100 border border-white rounded flex-1 justify-evenly">
-                {cameraPTZ.map((option: any) => (
-                  <div
-                    key={option.action}
-                    onClick={() => {
-                      // console.log(option.action);
-                      requestPTZ(option.action);
-                    }}
-                  >
-                    <button className="bg-green-100 hover:bg-green-200 border border-green-100 rounded p-2">
-                      <span className="sr-only">{option.label}</span>
-                      {option.icon ? (
-                        <i className={`${option.icon} md:p-2`}></i>
-                      ) : (
-                        <span className="px-2 font-bold h-full w-8 flex items-center justify-center">
-                          {option.value}x
-                        </span>
-                      )}
-                    </button>
-                  </div>
-                ))}
-                <button
-                  className="bg-green-100 hover:bg-green-200 border border-green-100 rounded p-2"
-                  onClick={handleClickFullscreen}
-                >
-                  <span className="sr-only">Full Screen</span>
-                  <i className="fas fa-expand hover:text-black"></i>
-                </button>
-              </div>
-              {/* <div className="flex flex-col justify-center mt-5 mr-4 md:mt-auto md:mr-0">
-                    <button onClick={handleClickFullscreen}>
-                    </button>
-                  </div> */}
-            </div>
-          </div>
-          <div
-            className={
-              (loading ? "absolute" : "hidden") +
-              " bg-gray-500 bg-opacity-75 z-5 transition-opacity"
-            }
-            style={{ height: "360px", width: "640px" }}
-          >
-            {/* div with "Loading" at the center */}
-            <div className="flex justify-center items-center h-full">
-              <svg
-                className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-              </svg>
-              <div className="text-white text-2xl">Moving Camera</div>
-            </div>
-          </div>
-          {/* <div className="grid grid-cols-2 md:ml-12 md:w-1/3 my-auto gap-4 mt-4 md:mt-0">
-            {showDefaultPresets
-              ? viewOptions.map((option: any) => (
-                  <div
-                    onClick={() => {
-                      setLoading(true);
-                      gotoPreset(option.value);
-                    }}
-                  >
-                    <button className="bg-green-100 border border-white rounded-md px-3 py-2 text-black font-semibold hover:bg-green-200 w-full">
-                      {option.label}
-                    </button>
-                  </div>
-                ))
-              : bedPresets.map((preset: any, index: number) => (
-                  <div
-                    onClick={() => {
-                      setLoading(true);
-                      gotoBedPreset(preset);
-                    }}
-                    key={preset.id}
-                  >
-                    <button className="bg-green-100 border border-white rounded-md px-3 py-2 text-black font-semibold hover:bg-green-200 w-full">
-                      {preset.meta.preset_name
-                        ? preset.meta.preset_name
-                        : `Unnamed Preset ${index + 1}`}
-                    </button>
-                  </div>
-                ))}
-            {props.showRefreshButton && (
-              <div
-                onClick={() => {
-                  setLoading(true);
-                  getBedPresets(asset);
-                  getPresets(asset);
-                }}
-              >
-                <button className="bg-green-200 border border-white rounded-md px-3 py-2 text-black font-semibold hover:bg-green-300 w-full">
-                  <RefreshIcon /> Refresh
-                </button>
-              </div>
-            )}
-            <button
-              className="bg-green-200 border border-white rounded-md px-3 py-2 text-black font-semibold hover:bg-green-300 w-full"
-              onClick={() => {
-                setShowDefaultPresets(!showDefaultPresets);
-              }}
-            >
-              {showDefaultPresets
-                ? "Show Patient Presets"
-                : "Show Default Presets"}
-            </button>
-          </div> */}
 
-          <div className="flex flex-col w-full mx-4 ">
-            <nav className=" flex  ">
+      <div className="mt-4 flex flex-col">
+        <div className="flex flex-col lg:flex-row gap-4 mt-4 relative">
+          <div className="flex-1">
+            {/* ADD VIDEO PLAYER HERE */}
+            <div className="mb-4 lg:mb-0 relative feed-aspect-ratio w-full bg-primary-100 rounded">
+              <video
+                id="mse-video"
+                autoPlay
+                muted
+                playsInline
+                className="h-full w-full z-10"
+                ref={liveFeedPlayerRef}
+              ></video>
+
+              {loading && (
+                <div className="absolute right-0 bottom-0 p-4 bg-white bg-opacity-75 rounded-tl">
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-b-0 border-primary-500 rounded-full animate-spin an" />
+                    <p className="text-base font-bold">{loading}</p>
+                  </div>
+                </div>
+              )}
+              {/* { streamStatus > 0 && */}
+              <div className="absolute right-0 h-full w-full bottom-0 p-4 flex items-center justify-center">
+                {streamStatus === StreamStatus.Offline && (
+                  <div className="text-center">
+                    <p className="font-bold text-black">
+                      STATUS: <span className="text-red-600">OFFLINE</span>
+                    </p>
+                    <p className="font-semibold text-black">
+                      Feed is currently not live.
+                    </p>
+                    <p className="font-semibold text-black">
+                      Click refresh button to try again.
+                    </p>
+                  </div>
+                )}
+                {streamStatus === StreamStatus.Stop && (
+                  <div className="text-center">
+                    <p className="font-bold text-black">
+                      STATUS: <span className="text-red-600">STOPPED</span>
+                    </p>
+                    <p className="font-semibold text-black">Feed is Stooped.</p>
+                    <p className="font-semibold text-black">
+                      Click refresh button to start feed.
+                    </p>
+                  </div>
+                )}
+                {streamStatus === StreamStatus.Loading && (
+                  <div className="text-center">
+                    <p className="font-bold text-black">
+                      STATUS: <span className="text-red-600"> LOADING</span>
+                    </p>
+                    <p className="font-semibold text-black">
+                      Fetching latest feed.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="flex max-w-lg mt-4">
+              {cameraPTZ.map((option: any) => (
+                <button
+                  className="bg-green-100 hover:bg-green-200 border border-green-100 p-2 flex-1"
+                  key={option.action}
+                  onClick={(_) => {
+                    if (option.action === "precision") {
+                      setPrecision((precision) =>
+                        precision === 16 ? 1 : precision * 2
+                      );
+                    } else if (option.action === "reset") {
+                      setStreamStatus(StreamStatus.Loading);
+                      startStream({
+                        onSuccess: () => setStreamStatus(StreamStatus.Playing),
+                        onError: () => setStreamStatus(StreamStatus.Offline),
+                      });
+                    } else if (option.action === "stop") {
+                      // NEED ID TO STOP STREAM
+                    } else if (option.action === "fullScreen") {
+                      if (screenfull.isEnabled && liveFeedPlayerRef.current) {
+                        screenfull.request(liveFeedPlayerRef.current);
+                      }
+                    } else {
+                      setLoading(option.loadingLabel);
+                      relativeMove(getPTZPayload(option.action), {
+                        onSuccess: () => setLoading(undefined),
+                      });
+                    }
+                  }}
+                >
+                  <span className="sr-only">{option.label}</span>
+                  {option.icon ? (
+                    <i className={`${option.icon} md:p-2`}></i>
+                  ) : (
+                    <span className="px-2 font-bold h-full w-8 flex items-center justify-center">
+                      {option.value}x
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex flex-col mx-4 max-w-sm">
+            <nav className="flex w-full">
               <button
-                className={`flex-1 overflow-hidden p-4  font-bold text-center  text-gray-700 hover:text-gray-800  ${
+                className={`flex-1 p-4  font-bold text-center  text-gray-700 hover:text-gray-800  ${
                   showDefaultPresets
                     ? "border-primary-500 text-primary-600 border-b-2"
                     : ""
@@ -426,7 +223,7 @@ const LiveFeed = (props: any) => {
                 Default Presets
               </button>
               <button
-                className={`flex-1 overflow-hidden p-4  font-bold text-center  text-gray-700 hover:text-gray-800  ${
+                className={`flex-1 p-4  font-bold text-center  text-gray-700 hover:text-gray-800  ${
                   !showDefaultPresets
                     ? "border-primary-500 text-primary-600 border-b-2"
                     : ""
@@ -438,54 +235,54 @@ const LiveFeed = (props: any) => {
                 Patient Presets
               </button>
             </nav>
-            <div className=" space-y-4 my-2">
-              <div className="grid grid-cols-2 my-auto gap-4 ">
+            <div className="w-full space-y-4 my-2">
+              <div className="grid grid-cols-2 my-auto gap-2">
                 {showDefaultPresets
-                  ? viewOptions.map((option: any, i: number) => (
-                      <div
+                  ? viewOptions?.map((option: any, i) => (
+                      <button
                         key={i}
+                        className="flex flex-wrap gap-2 w-full max- bg-green-100 border border-white rounded-md p-3 text-black  hover:bg-green-500 hover:text-white truncate"
                         onClick={() => {
-                          gotoPreset(option.value);
+                          setLoading(`Moving to Preset ${option.label}`);
+                          gotoPreset(
+                            { preset: option.value },
+                            { onSuccess: () => setLoading(undefined) }
+                          );
                         }}
                       >
-                        <button className="bg-green-100 border border-white rounded-md p-3  text-black  hover:bg-green-500 hover:text-white w-full">
-                          {option.label}
-                        </button>
-                      </div>
+                        {option.label}
+                      </button>
                     ))
-                  : bedPresets.map((preset: any, index: number) => (
-                      <div
+                  : bedPresets?.map((preset: any, index: number) => (
+                      <button
+                        key={preset.id}
+                        className="flex gap-2 w-52 bg-green-100 border border-white rounded-md p-3 text-black  hover:bg-green-500 hover:text-white truncate"
                         onClick={() => {
-                          setLoading(true);
+                          setLoading("Moving");
                           gotoBedPreset(preset);
                         }}
-                        key={preset.id}
                       >
-                        <button className="flex bg-green-100 border border-white rounded-md p-3 text-black  hover:bg-green-500 hover:text-white w-full">
-                          <span className="justify-start font-semibold">
-                            {preset.bed_object.name}
-                          </span>
-                          <span className="mx-auto">
-                            {preset.meta.preset_name
-                              ? preset.meta.preset_name
-                              : `Unnamed Preset ${index + 1}`}
-                          </span>
-                        </button>
-                      </div>
+                        <span className="justify-start font-semibold">
+                          {preset.bed_object.name}
+                        </span>
+                        <span className="mx-auto">
+                          {preset.meta.preset_name
+                            ? preset.meta.preset_name
+                            : `Unnamed Preset ${index + 1}`}
+                        </span>
+                      </button>
                     ))}
               </div>
-              {props.showRefreshButton && (
-                <div
+              {props?.showRefreshButton && (
+                <button
+                  className="bg-green-100 border border-white rounded-md px-3 py-2 text-black font-semibold hover:text-white hover:bg-green-500 w-full"
                   onClick={() => {
-                    setLoading(true);
-                    getBedPresets(asset);
-                    getPresets(asset);
+                    getBedPresets(cameraAsset?.id);
+                    getPresets({});
                   }}
                 >
-                  <button className="bg-green-100 border border-white rounded-md px-3 py-2 text-black font-semibold hover:text-white hover:bg-green-500 w-full">
-                    <RefreshIcon /> Refresh
-                  </button>
-                </div>
+                  <RefreshIcon /> Refresh
+                </button>
               )}
             </div>
           </div>

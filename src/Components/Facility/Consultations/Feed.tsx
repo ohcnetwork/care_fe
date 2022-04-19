@@ -1,9 +1,14 @@
-import axios from "axios";
 import clsx from "clsx";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import ReactPlayer from "react-player";
 import { useDispatch } from "react-redux";
 import screenfull from "screenfull";
+import { getCameraPTZ } from "../../../Common/constants";
+import { useFeedPTZ } from "../../../Common/hooks/useFeedPTZ";
+import {
+  ICameraAssetState,
+  StreamStatus,
+  useMSEMediaPlayer,
+} from "../../../Common/hooks/useMSEplayer";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
 import {
   getConsultation,
@@ -19,25 +24,25 @@ interface IFeedProps {
   consultationId: any;
 }
 
-interface ICameraAssetState {
-  id: string;
-  username: string;
-  password: string;
-  hostname: string;
-  port: number;
-}
-
-export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
+export const Feed: React.FC<IFeedProps> = ({
+  consultationId
+}) => {
   const dispatch: any = useDispatch();
-  const [cameraAsset, setCameraAsset] = useState<Partial<ICameraAssetState>>(
-    {}
-  );
-  const [cameraMiddlewareHostname, setCameraMiddlewareHostname] = useState({});
+  const [cameraAsset, setCameraAsset] = useState<ICameraAssetState>({
+    hostname: "",
+    id: "",
+    password: "",
+    port: 123,
+    username: "",
+    accessKey: "",
+  });
+  const [cameraMiddlewareHostname, setCameraMiddlewareHostname] = useState("");
   const [cameraConfig, setCameraConfig] = useState<any>({});
   const [isLoading, setIsLoading] = useState(true);
   const [bedPresets, setBedPresets] = useState<any>([]);
   const [precision, setPrecision] = useState(1);
 
+  const liveFeedPlayerRef = useRef<HTMLVideoElement | null>(null);
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
@@ -53,12 +58,14 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
           if (bedAssets?.data?.results?.length) {
             const { camera_address, camera_access_key, middleware_hostname } =
               bedAssets.data.results[0].asset_object.meta;
+            const config = camera_access_key.split(":");
             setCameraAsset({
               id: bedAssets.data.results[0].asset_object.id,
               hostname: camera_address,
-              username: camera_access_key.split(":")[0],
-              password: camera_access_key.split(":")[1],
+              username: config[0] || "",
+              password: config[1] || "",
               port: 80,
+              accessKey: config[2] || "",
             });
             setCameraMiddlewareHostname(middleware_hostname);
             setCameraConfig(bedAssets.data.results[0].meta);
@@ -74,204 +81,51 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   const middlewareHostname =
     cameraMiddlewareHostname || "dev_middleware.coronasafe.live";
 
-  const [sourceUrl, setSourceUrl] = useState<string>();
   const [position, setPosition] = useState<any>();
   const [presets, setPresets] = useState<any>([]); // eslint-disable-line @typescript-eslint/no-unused-vars
   const [currentPreset, setCurrentPreset] = useState<any>();
   // const [showDefaultPresets, setShowDefaultPresets] = useState<boolean>(false);
 
-  const [loading, setLoading] = useState<boolean>(false);
-
-  useEffect(() => {
-    let loadingTimeout: any;
-    if (loading === true)
-      loadingTimeout = setTimeout(() => {
-        setLoading(false);
-      }, 6000);
-    return () => {
-      if (loadingTimeout) clearTimeout(loadingTimeout);
-    };
-  }, [loading]);
-
-  const requestStream = useCallback(() => {
-    axios
-      .post(`https://${middlewareHostname}/start`, {
-        uri: `rtsp://${cameraAsset.username}:${cameraAsset.password}@${cameraAsset.hostname}:554/`,
-      })
-      .then((resp: any) => {
-        setSourceUrl(`https://${middlewareHostname}${resp.data.uri}`);
-      })
-      .catch(() => {
-        // console.error('Error while refreshing',ex);
-      });
-  }, [
-    cameraAsset.hostname,
-    cameraAsset.password,
-    cameraAsset.username,
-    middlewareHostname,
-  ]);
-
-  const stopStream = (url: string | undefined) => {
-    console.log("stop", url);
-    if (url) {
-      let urlSegments = url.split("/");
-      urlSegments.pop();
-      const id = urlSegments?.pop();
-      axios
-        .post(`https://${middlewareHostname}/stop`, {
-          id,
-        })
-        .then((resp: any) => {
-          console.log(resp);
-          // setSourceUrl(`https://${middlewareHostname}${resp.data.uri}`);
-        })
-        .catch(() => {
-          // console.error('Error while refreshing',ex);
-        });
-    }
+  const [loading, setLoading] = useState<string | undefined>(undefined);
+  const [streamStatus, setStreamStatus] = useState<StreamStatus>(
+    StreamStatus.Offline
+  );
+  const getBedPresets = async (asset: any) => {
+    const bedAssets = await dispatch(listAssetBeds({ asset: asset.id }));
+    setBedPresets(bedAssets?.data?.results);
   };
 
-  const getCameraStatus = useCallback(
-    (asset: any) => {
-      axios
-        .get(
-          `https://${middlewareHostname}/status?hostname=${asset.hostname}&port=${asset.port}&username=${asset.username}&password=${asset.password}`
-        )
-        .then((resp: any) => {
-          setPosition(resp.data.position);
-        })
-        .catch(() => {
-          // console.error('Error while refreshing',ex);
-        });
+  let url = `wss://${middlewareHostname}/stream/${cameraAsset?.accessKey}/channel/0/mse?uuid=${cameraAsset?.accessKey}&channel=0`;
+  const {
+    startStream,
+    // setVideoEl,
+  } = useMSEMediaPlayer({
+    config: {
+      middlewareHostname,
+      ...cameraAsset,
     },
-    [middlewareHostname]
-  );
+    url,
+    videoEl: liveFeedPlayerRef.current,
+  });
 
-  const getPresets = useCallback(
-    (asset: any) => {
-      axios
-        .get(
-          `https://${middlewareHostname}/presets?hostname=${asset.hostname}&port=${asset.port}&username=${asset.username}&password=${asset.password}`
-        )
-        .then((resp: any) => {
-          setPresets(resp.data);
-          console.log("PRESETS", resp.data);
-        })
-        .catch(() => {
-          // console.error('Error while refreshing',ex);
-        });
+  const {
+    absoluteMove,
+    getCameraStatus,
+    getPTZPayload,
+    getPresets,
+    relativeMove,
+  } = useFeedPTZ({
+    config: {
+      middlewareHostname,
+      ...cameraAsset,
     },
-    [middlewareHostname]
-  );
-
-  const getBedPresets = useCallback(
-    async (asset: any) => {
-      const bedAssets = await dispatch(listAssetBeds({ asset: asset.id }));
-      setBedPresets(bedAssets?.data?.results);
-    },
-    [dispatch]
-  );
-
-  const gotoBedPreset = (preset: any) => {
-    absoluteMove(preset.meta.position);
-  };
-
-  const requestPTZ = (action: string) => {
-    setLoading(true);
-    if (!position) {
-      getCameraStatus(cameraAsset);
-    } else {
-      let data = {
-        x: 0,
-        y: 0,
-        zoom: 0,
-      } as any;
-      console.log(action);
-      const delta = 0.1 / precision;
-      console.log("delta", delta);
-      // Relative X Y Coordinates
-      switch (action) {
-        case "up":
-          data.y = delta;
-          break;
-        case "down":
-          data.y = -delta;
-          break;
-        case "left":
-          data.x = -delta;
-          break;
-        case "right":
-          data.x = delta;
-          break;
-        case "precision":
-          setPrecision((precision) => (precision === 16 ? 1 : precision * 2));
-          break;
-        case "zoomIn":
-          data.zoom = 0.1;
-          break;
-        case "zoomOut":
-          data.zoom = -0.1;
-          break;
-        case "stop":
-          stopStream(sourceUrl);
-          setSourceUrl(undefined);
-          return;
-        case "reset":
-          setSourceUrl(undefined);
-          requestStream();
-          return;
-        case "fullScreen":
-          if (screenfull?.isEnabled) {
-            if (liveFeedPlayerRef?.current) {
-              screenfull.request(liveFeedPlayerRef.current.wrapper);
-            }
-          }
-          return;
-        default:
-          break;
-      }
-      axios
-        .post(`https://${middlewareHostname}/relativeMove`, {
-          ...data,
-          ...cameraAsset,
-        })
-        .then((resp: any) => {
-          console.log(resp.data);
-          getCameraStatus(cameraAsset);
-        })
-        .catch(() => {
-          // console.error('Error while refreshing',ex);
-        });
-    }
-  };
-
-  const absoluteMove = useCallback(
-    (data: any) => {
-      setLoading(true);
-      axios
-        .post(`https://${middlewareHostname}/absoluteMove`, {
-          ...data,
-          ...cameraAsset,
-        })
-        .then(() => {
-          getCameraStatus(cameraAsset);
-        })
-        .catch((ex: any) => {
-          console.error("Error while absolute move", ex);
-        });
-    },
-    [cameraAsset, getCameraStatus, middlewareHostname]
-  );
+  });
 
   useEffect(() => {
-    requestStream();
-  }, [requestStream]);
-
-  useEffect(() => {
-    getPresets(cameraAsset);
+    getPresets({ onSuccess: (resp) => setPresets(resp.data) });
     getBedPresets(cameraAsset);
-    if (cameraConfig?.position) {
-      absoluteMove(cameraConfig.position);
+    if (bedPresets?.[0]?.position) {
+      absoluteMove(bedPresets[0]?.position, {});
     }
   }, [
     cameraAsset,
@@ -281,35 +135,32 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
     cameraConfig?.position,
   ]);
 
-  const liveFeedPlayerRef = useRef<any>(null);
+  useEffect(() => {
+    let tId: any;
+    if (streamStatus !== StreamStatus.Playing) {
+      setStreamStatus(StreamStatus.Loading);
+      tId = setTimeout(() => {
+        startStream({
+          onSuccess: () => setStreamStatus(StreamStatus.Playing),
+          onError: () => setStreamStatus(StreamStatus.Offline),
+        });
+      }, 100);
+    }
 
-  const cameraPTZ = [
-    { icon: "fa fa-arrow-up", label: "Up", action: "up" },
-    { icon: "fa fa-arrow-down", label: "Down", action: "down" },
-    { icon: "fa fa-arrow-left", label: "Left", action: "left" },
-    { icon: "fa fa-arrow-right", label: "Right", action: "right" },
-    { value: precision, label: "Precision", action: "precision" },
-    { icon: "fa fa-search-plus", label: "Zoom In", action: "zoomIn" },
-    { icon: "fa fa-search-minus", label: "Zoom Out", action: "zoomOut" },
-    { icon: "fa fa-stop", label: "Stop", action: "stop" },
-    { icon: "fa fa-undo", label: "Reset", action: "reset" },
-    { icon: "fas fa-expand", label: "Full Screen", action: "fullScreen" },
-  ];
+    return () => {
+      clearTimeout(tId);
+    };
+  }, [startStream, streamStatus]);
 
   useAbortableEffect((status: statusType) => {
     fetchData(status);
   }, []);
-  useEffect(() => {
-    getCameraStatus(cameraAsset);
-  }, [cameraAsset, getCameraStatus]);
-
-  useEffect(() => {
-    requestStream();
-  }, [requestStream]);
 
   if (isLoading) {
     return <Loading />;
   }
+
+  const cameraPTZ = getCameraPTZ(precision);
 
   return (
     <div
@@ -324,11 +175,16 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
             {bedPresets?.map((preset: any, index: number) => (
               <button
                 key={preset.id}
-                onClick={() => {
-                  setLoading(true);
-                  gotoBedPreset(preset);
-                  getCameraStatus(cameraAsset);
-                  setCurrentPreset(preset);
+                onClick={(_) => {
+                  setLoading("Moving");
+                  // gotoBedPreset(preset);
+                  absoluteMove(preset.meta.position, {
+                    onSuccess: () => {
+                      setLoading(undefined);
+                      setCurrentPreset(preset);
+                    },
+                  });
+                  getCameraStatus({});
                 }}
                 className={clsx(
                   "px-4 py-2 border border-gray-500 block",
@@ -343,60 +199,91 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
           </div>
         </div>
       </div>
-      <div className="px-3 h-full">
-        <div className="lg:flex items-start justify-center gap-8 h-full">
-          <div className="relative feed-aspect-ratio w-full lg:h-full lg:w-11/12 bg-primary-100 rounded">
-            {sourceUrl ? (
-              <ReactPlayer
-                url={sourceUrl}
-                ref={liveFeedPlayerRef}
-                playing={true}
-                muted={true}
-                onError={(
-                  e: any,
-                  data: any,
-                  hlsInstance: any,
-                  hlsGlobal: any
-                ) => {
-                  // requestStream();
-                  console.log("Error", e);
-                  console.log("Data", data);
-                  console.log("HLS Instance", hlsInstance);
-                  console.log("HLS Global", hlsGlobal);
-                  if (e === "hlsError") {
-                    const recovered = hlsInstance.recoverMediaError();
-                    console.log(recovered);
-                  }
-                }}
-                width="100%"
-                height="100%"
-              />
-            ) : (
-              <div className="h-full flex flex-col justify-center items-center">
-                <p className="font-bold text-black">
-                  STATUS: <span className="text-red-600">OFFLINE</span>
-                </p>
-                <p className="font-semibold text-black">
-                  Feed is currently not live
-                </p>
-              </div>
-            )}
+      <div className="px-3 mt-4">
+        <div className="lg:flex items-start gap-8">
+          <div className="mb-4 lg:mb-0 relative feed-aspect-ratio w-full bg-primary-100 rounded">
+            <video
+              id="mse-video"
+              autoPlay
+              muted
+              playsInline
+              className="h-full w-full z-10"
+              ref={liveFeedPlayerRef}
+            ></video>
             {loading && (
               <div className="absolute right-0 top-0 p-4 bg-white bg-opacity-75 rounded-bl">
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 border-2 border-b-0 border-primary-500 rounded-full animate-spin an" />
-                  <p className="text-base font-bold">Moving</p>
+                  <p className="text-base font-bold">{loading}</p>
                 </div>
               </div>
             )}
+            {/* { streamStatus > 0 && */}
+            <div className="absolute right-0 h-full w-full bottom-0 p-4 flex items-center justify-center">
+              {streamStatus === StreamStatus.Offline && (
+                <div className="text-center">
+                  <p className="font-bold text-black">
+                    STATUS: <span className="text-red-600">OFFLINE</span>
+                  </p>
+                  <p className="font-semibold text-black">
+                    Feed is currently not live.
+                  </p>
+                  <p className="font-semibold text-black">
+                    Click refresh button to try again.
+                  </p>
+                </div>
+              )}
+              {streamStatus === StreamStatus.Stop && (
+                <div className="text-center">
+                  <p className="font-bold text-black">
+                    STATUS: <span className="text-red-600">STOPPED</span>
+                  </p>
+                  <p className="font-semibold text-black">Feed is Stooped.</p>
+                  <p className="font-semibold text-black">
+                    Click refresh button to start feed.
+                  </p>
+                </div>
+              )}
+              {streamStatus === StreamStatus.Loading && (
+                <div className="text-center">
+                  <p className="font-bold text-black">
+                    STATUS: <span className="text-red-600"> LOADING</span>
+                  </p>
+                  <p className="font-semibold text-black">
+                    Fetching latest feed.
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
           <div className="mt-8 lg:mt-0 flex-shrink-0 flex lg:flex-col items-stretch">
             {cameraPTZ.map((option: any) => (
               <button
                 className="bg-green-100 hover:bg-green-200 border border-green-100 rounded p-2"
                 key={option.action}
-                onClick={() => {
-                  requestPTZ(option.action);
+                onClick={(_) => {
+                  if (option.action === "precision") {
+                    setPrecision((precision) =>
+                      precision === 16 ? 1 : precision * 2
+                    );
+                  } else if (option.action === "reset") {
+                    setStreamStatus(StreamStatus.Loading);
+                    startStream({
+                      onSuccess: () => setStreamStatus(StreamStatus.Playing),
+                      onError: () => setStreamStatus(StreamStatus.Offline),
+                    });
+                  } else if (option.action === "stop") {
+                    // NEED ID TO STOP STREAM
+                  } else if (option.action === "fullScreen") {
+                    if (screenfull.isEnabled && liveFeedPlayerRef.current) {
+                      screenfull.request(liveFeedPlayerRef.current);
+                    }
+                  } else {
+                    setLoading(option.loadingLabel);
+                    relativeMove(getPTZPayload(option.action), {
+                      onSuccess: () => setLoading(undefined),
+                    });
+                  }
                 }}
               >
                 <span className="sr-only">{option.label}</span>
