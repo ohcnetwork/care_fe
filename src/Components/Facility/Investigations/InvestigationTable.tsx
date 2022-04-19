@@ -68,7 +68,7 @@ const TestRow = ({ data, onChange, showForm, value, isChanged }: any) => {
               variant="outlined"
               margin="dense"
               optionArray={true}
-              value={data?.notes}
+              value={testValue}
               options={[
                 "Unselected",
                 ...data?.investigation_object?.choices.split(","),
