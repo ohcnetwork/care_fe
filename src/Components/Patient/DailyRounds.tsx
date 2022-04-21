@@ -203,9 +203,9 @@ export const DailyRounds = (props: any) => {
   }, [dispatchAction, patientId]);
 
   const validateForm = () => {
-    let errors = { ...initError };
+    const errors = { ...initError };
     let invalidForm = false;
-    let error_div = "";
+    const error_div = "";
     Object.keys(state.form).forEach((field, i) => {
       switch (field) {
         case "other_symptoms":
@@ -273,7 +273,7 @@ export const DailyRounds = (props: any) => {
       scrollTo(error_div);
     } else {
       setIsLoading(true);
-      let baseData = {
+      const baseData = {
         clone_last: state.form.clone_last === "true" ? true : false,
         rounds_type: state.form.rounds_type,
         taken_at: state.form.taken_at
@@ -322,7 +322,7 @@ export const DailyRounds = (props: any) => {
             temperature: state.form.tempInCelcius
               ? celciusToFahrenheit(state.form.temperature)
               : state.form.temperature,
-            rhythm: Number(state.form.rhythm),
+            rhythm: Number(state.form.rhythm) || 0,
             rhythm_detail: state.form.rhythm_detail,
             ventilator_spo2: Number(state.form.ventilator_spo2),
           };
@@ -403,7 +403,7 @@ export const DailyRounds = (props: any) => {
   };
 
   const handleDateChange = (date: any, key: string) => {
-    let form = { ...state.form };
+    const form = { ...state.form };
     form[key] = date;
     dispatch({ type: "set_form", form });
   };

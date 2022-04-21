@@ -14,11 +14,13 @@ import TeleICUPatientVitalsGraphCard from "./VitalsGraph";
 export interface ITeleICUPatientPageProps {
   patientId: string;
   facilityId: string;
+  asComponent?: boolean;
 }
 
 export default function TeleICUPatientPage({
   patientId,
   facilityId,
+  asComponent = false,
 }: ITeleICUPatientPageProps) {
   const [patient, setPatient] = useState<PatientModel>({});
   const [isLoading, setIsLoading] = useState(true);
@@ -40,11 +42,15 @@ export default function TeleICUPatientPage({
   return (
     <main className="p-5 w-full">
       <nav className="flex justify-between flex-wrap">
-        <PageTitle
-          title="Patient Details"
-          className="sm:m-0 sm:p-0"
-          breadcrumbs={false}
-        />
+        {!asComponent ? (
+          <PageTitle
+            title="Patient Details"
+            className="sm:m-0 sm:p-0"
+            breadcrumbs={false}
+          />
+        ) : (
+          <div></div>
+        )}
         <div className="flex items-start justify-start sm:flex-row sm:items-center flex-col space-y-1 sm:space-y-0 sm:divide-x-2">
           <div className="px-2">
             {patient?.last_consultation?.assigned_to_object
@@ -78,7 +84,7 @@ export default function TeleICUPatientPage({
               href={`/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/`}
               className="btn m-1 btn-primary hover:text-white"
             >
-              Doctor's Notes
+              Doctor&apos;s Notes
             </Link>
           </div>
         </div>

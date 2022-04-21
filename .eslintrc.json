@@ -12,7 +12,9 @@
     "eslint:recommended",
     "plugin:react/recommended",
     "plugin:react-hooks/recommended",
-    "plugin:prettier/recommended"
+    "plugin:prettier/recommended",
+    "plugin:@typescript-eslint/eslint-recommended",
+    "plugin:@typescript-eslint/recommended"
   ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
@@ -28,5 +30,13 @@
     "no-unused-vars": "warn",
     "react/react-in-jsx-scope": "off"
   },
-  "ignorePatterns": ["dist", "public", "lib", "build", "*.bs.js", "*.gen.tsx"]
+  "ignorePatterns": [
+    "dist",
+    "public",
+    "lib",
+    "build",
+    "*.bs.js",
+    "*.gen.tsx",
+    "*.res"
+  ]
 }

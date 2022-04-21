@@ -15,6 +15,7 @@ import {
   getDailyReport,
   listAssetBeds,
 } from "../../../Redux/actions";
+import { AssetData } from "../../Assets/AssetTypes";
 import Loading from "../../Common/Loading";
 import PageTitle from "../../Common/PageTitle";
 
@@ -43,6 +44,7 @@ export const Feed: React.FC<IFeedProps> = ({
   const [cameraConfig, setCameraConfig] = useState<any>({});
   const [isLoading, setIsLoading] = useState(true);
   const [bedPresets, setBedPresets] = useState<any>([]);
+  const [bed, setBed] = useState<any>();
   const [precision, setPrecision] = useState(1);
 
   const liveFeedPlayerRef = useRef<HTMLVideoElement | null>(null);
@@ -55,9 +57,25 @@ export const Feed: React.FC<IFeedProps> = ({
       ]);
       if (!status.aborted) {
         if (dailyRounds?.data?.results?.length) {
-          const bedAssets = await dispatch(
+          let bedAssets = await dispatch(
             listAssetBeds({ bed: dailyRounds.data.results[0].bed })
           );
+          setBed(dailyRounds.data.results[0].bed);
+          console.log("Found " + bedAssets.data.results.length + "bedAssets:");
+          bedAssets = {
+            ...bedAssets,
+            data: {
+              ...bedAssets.data,
+              results: bedAssets.data.results.filter(
+                (asset: { asset_object: { meta: { asset_type: string } } }) => {
+                  return asset?.asset_object?.meta?.asset_type === "CAMERA"
+                    ? true
+                    : false;
+                }
+              ),
+            },
+          };
+          console.log("Found " + bedAssets.data.results.length + "bedAssets:");
           if (bedAssets?.data?.results?.length) {
             const { camera_address, camera_access_key, middleware_hostname } =
               bedAssets.data.results[0].asset_object.meta;
@@ -94,11 +112,13 @@ export const Feed: React.FC<IFeedProps> = ({
     StreamStatus.Offline
   );
   const getBedPresets = async (asset: any) => {
-    const bedAssets = await dispatch(listAssetBeds({ asset: asset.id }));
-    setBedPresets(bedAssets?.data?.results);
+    if (asset.id && bed) {
+      const bedAssets = await dispatch(listAssetBeds({ asset: asset.id, bed }));
+      setBedPresets(bedAssets?.data?.results);
+    }
   };
 
-  let url = `wss://${middlewareHostname}/stream/${cameraAsset?.accessKey}/channel/0/mse?uuid=${cameraAsset?.accessKey}&channel=0`;
+  const url = `wss://${middlewareHostname}/stream/${cameraAsset?.accessKey}/channel/0/mse?uuid=${cameraAsset?.accessKey}&channel=0`;
   const {
     startStream,
     // setVideoEl,
@@ -165,7 +185,14 @@ export const Feed: React.FC<IFeedProps> = ({
       style={{ height: "90vh", maxHeight: "860px" }}
     >
       <div className="flex items-center flex-wrap justify-between gap-2">
-        <PageTitle title="Patient Details -  Camera Feed" breadcrumbs={false} />
+        <PageTitle
+          title={
+            "Patient Details -  Camera Feed" +
+            " " +
+            bedPresets[0]?.asset_object?.name
+          }
+          breadcrumbs={false}
+        />
         <div className="flex items-center gap-4 px-3">
           <p className="block text-lg font-medium"> Camera Presets :</p>
           <div className="flex items-center">

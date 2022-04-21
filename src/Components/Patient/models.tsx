@@ -283,6 +283,7 @@ export interface DailyRoundsModel {
     last_name?: string;
     user_type?: string;
   };
+  bed?: string;
 }
 export interface FacilityNameModel {
   id?: string;
