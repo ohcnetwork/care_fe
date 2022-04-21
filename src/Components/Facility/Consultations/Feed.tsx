@@ -44,6 +44,7 @@ export const Feed: React.FC<IFeedProps> = ({
   const [cameraConfig, setCameraConfig] = useState<any>({});
   const [isLoading, setIsLoading] = useState(true);
   const [bedPresets, setBedPresets] = useState<any>([]);
+  const [bed, setBed] = useState<any>();
   const [precision, setPrecision] = useState(1);
 
   const liveFeedPlayerRef = useRef<HTMLVideoElement | null>(null);
@@ -59,6 +60,7 @@ export const Feed: React.FC<IFeedProps> = ({
           let bedAssets = await dispatch(
             listAssetBeds({ bed: dailyRounds.data.results[0].bed })
           );
+          setBed(dailyRounds.data.results[0].bed);
           console.log("Found " + bedAssets.data.results.length + "bedAssets:");
           bedAssets = {
             ...bedAssets,
@@ -110,8 +112,8 @@ export const Feed: React.FC<IFeedProps> = ({
     StreamStatus.Offline
   );
   const getBedPresets = async (asset: any) => {
-    if (asset.id) {
-      const bedAssets = await dispatch(listAssetBeds({ asset: asset.id }));
+    if (asset.id && bed) {
+      const bedAssets = await dispatch(listAssetBeds({ asset: asset.id, bed }));
       setBedPresets(bedAssets?.data?.results);
     }
   };
