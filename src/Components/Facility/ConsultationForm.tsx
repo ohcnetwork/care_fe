@@ -60,7 +60,7 @@ import { BedSelect } from "../Common/BedSelect";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
-type Boolean = "true" | "false";
+type BooleanStrings = "true" | "false";
 
 type FormDetails = {
   hasSymptom: boolean;
@@ -71,7 +71,7 @@ type FormDetails = {
   suggestion: string;
   patient: string;
   facility: string;
-  admitted: Boolean;
+  admitted: BooleanStrings;
   admitted_to: string;
   category: string;
   admission_date: string;
@@ -80,7 +80,7 @@ type FormDetails = {
   diagnosis: string;
   verified_by: string;
   test_id: string;
-  is_kasp: Boolean;
+  is_kasp: BooleanStrings;
   kasp_enabled_date: null;
   examination_details: string;
   existing_medication: string;
@@ -88,7 +88,7 @@ type FormDetails = {
   consultation_notes: string;
   ip_no: string;
   discharge_advice: Prescription_t[];
-  is_telemedicine: Boolean;
+  is_telemedicine: BooleanStrings;
   action: string;
   assigned_to: string;
   assigned_to_object: UserModel | null;
@@ -270,7 +270,7 @@ export const ConsultationForm = (props: any) => {
             special_instruction: res.data.special_instruction || "",
             weight: res.data.weight ? res.data.weight : "",
             height: res.data.height ? res.data.height : "",
-            bed: res.data?.bed?.id || null,
+            bed: res.data?.current_bed?.bed || null,
           };
           dispatch({ type: "set_form", form: formData });
         } else {
@@ -292,7 +292,7 @@ export const ConsultationForm = (props: any) => {
   );
 
   const validateForm = () => {
-    let errors = { ...initError };
+    const errors = { ...initError };
     let invalidForm = false;
     let error_div = "";
 

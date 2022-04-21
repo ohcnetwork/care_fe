@@ -20,7 +20,6 @@ import {
   GENDER_TYPES,
 } from "../../Common/constants";
 import { FileUpload } from "../Patient/FileUpload";
-import TreatmentSummary from "./TreatmentSummary";
 import { PrimaryParametersPlot } from "./Consultations/PrimaryParametersPlot";
 import { MedicineTables } from "./Consultations/MedicineTables";
 import { ABGPlots } from "./Consultations/ABGPlots";
@@ -124,10 +123,9 @@ export const ConsultationDetails = (props: any) => {
             setPatientData(data);
           }
         }
-        if (dailyRounds?.data?.results?.length) {
-          const bedAssets = await dispatch(
-            listAssetBeds({ bed: dailyRounds.data.results[0].bed })
-          );
+        const current_bed = (res as ConsultationModel)?.current_bed?.bed;
+        if (dailyRounds?.data?.results?.length && current_bed) {
+          const bedAssets = await dispatch(listAssetBeds({ bed: current_bed }));
           if (bedAssets?.data?.results?.length) {
             const { camera_address, camera_access_key, middleware_hostname } =
               bedAssets.data.results[0].asset_object.meta;
@@ -359,7 +357,7 @@ export const ConsultationDetails = (props: any) => {
               <nav className="pl-2 flex space-x-6 overflow-x-auto pb-2 ">
                 {CONSULTATION_TABS.map((p: OptionsType) => {
                   if (p.text === "FEED") {
-                    if (!consultationData?.last_daily_round?.bed) return null;
+                    if (!consultationData?.current_bed?.bed) return null;
                   }
                   return (
                     <Link
@@ -498,8 +496,8 @@ export const ConsultationDetails = (props: any) => {
                       Lines and Catheters
                     </h3>
                     <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
-                      {consultationData.lines?.map((line: any) => (
-                        <div className="mt-4">
+                      {consultationData.lines?.map((line: any, i: number) => (
+                        <div className="mt-4" key={i}>
                           <h5>{line.type}</h5>
                           <p className="text-justify break-word">
                             Details:
