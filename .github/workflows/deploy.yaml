@@ -32,7 +32,6 @@ jobs:
           fi
   build-dockerhub-staging:
     needs: test
-    environment: Staging-egov
     name: Build & Push to Dockerhub
     if: github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
@@ -69,7 +68,6 @@ jobs:
           docker push $IMAGE_ID --all-tags
   build-github-staging:
     needs: test
-    environment: Staging-egov
     if: github.ref == 'refs/heads/develop'
     name: Build and push to GitHub
     runs-on: ubuntu-latest
