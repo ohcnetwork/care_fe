@@ -8,6 +8,7 @@ import {
 import { useDispatch } from "react-redux";
 import * as Notification from "../../Utils/Notifications.js";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
+import CropFreeIcon from "@material-ui/icons/CropFree";
 import PageTitle from "../Common/PageTitle";
 import {
   Box,
@@ -22,6 +23,7 @@ import {
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import { validateEmailAddress } from "../../Common/validation";
 import {
+  ActionTextInputField,
   SelectField,
   TextInputField,
   MultilineInputField,
@@ -32,6 +34,7 @@ import { AssetData } from "../Assets/AssetTypes";
 import loadable from "@loadable/component";
 import { LocationOnOutlined } from "@material-ui/icons";
 import { navigate } from "raviger";
+import QrReader from "react-qr-reader";
 const Loading = loadable(() => import("../Common/Loading"));
 
 const initError: any = {
@@ -95,6 +98,8 @@ const AssetCreate = (props: AssetProps) => {
   const [locations, setLocations] = useState([]);
   const [asset, setAsset] = useState<AssetData>();
   const [facilityName, setFacilityName] = useState("");
+  const [qrCodeId, setQrCodeId] = useState("");
+  const [isScannerActive, setIsScannerActive] = useState<boolean>(false);
 
   useEffect(() => {
     setIsLoading(true);
@@ -131,6 +136,7 @@ const AssetCreate = (props: AssetProps) => {
       setSupportName(asset.support_name);
       setSupportEmail(asset.support_email);
       setSupportPhone(asset.support_phone);
+      setQrCodeId(asset.qr_code_id);
     }
   }, [asset]);
 
@@ -211,6 +217,7 @@ const AssetCreate = (props: AssetProps) => {
         support_email: support_email,
         support_phone:
           parsePhoneNumberFromString(support_phone)?.format("E.164"),
+        qr_code_id: qrCodeId,
       };
       if (!assetId) {
         const res = await dispatchAction(createAsset(data));
@@ -232,6 +239,24 @@ const AssetCreate = (props: AssetProps) => {
         setIsLoading(false);
       }
     }
+  };
+
+  const parseAssetId = (assetId: string) => {
+    try {
+      const params = Object.fromEntries(
+        new URLSearchParams(new URL(assetId).search).entries()
+      );
+      if (params.asset) {
+        setQrCodeId(params.asset);
+        setIsScannerActive(false);
+        return;
+      }
+    } catch (err) {
+      console.log(err);
+      Notification.Error({ msg: err });
+    }
+    Notification.Error({ msg: "Invalid Asset Id" });
+    setIsScannerActive(false);
   };
 
   if (isLoading) return <Loading />;
@@ -267,6 +292,29 @@ const AssetCreate = (props: AssetProps) => {
       </div>
     );
   }
+
+  if (isScannerActive)
+    return (
+      <div className="md:w-1/2 w-full my-2 mx-auto flex flex-col justify-start items-end">
+        <button
+          onClick={() => setIsScannerActive(false)}
+          className="btn btn-default mb-2"
+        >
+          <i className="fas fa-times mr-2"></i> Close Scanner
+        </button>
+        <QrReader
+          delay={300}
+          onScan={(assetId: any) => (assetId ? parseAssetId(assetId) : null)}
+          onError={(e: any) =>
+            Notification.Error({
+              msg: e.message,
+            })
+          }
+          style={{ width: "100%" }}
+        />
+        <h2 className="text-center text-lg self-center">Scan Asset QR!</h2>
+      </div>
+    );
 
   return (
     <div className="px-6 pb-2">
@@ -516,6 +564,26 @@ const AssetCreate = (props: AssetProps) => {
                     setSupportEmail(e.target.value)
                   }
                   errors={state.errors.support_email}
+                />
+              </div>
+              <div>
+                <InputLabel htmlFor="qr_code_id" id="name=label">
+                  Asset QR Code ID
+                </InputLabel>
+                <ActionTextInputField
+                  id="qr_code_id"
+                  fullWidth
+                  name="qr_code_id"
+                  placeholder=""
+                  variant="outlined"
+                  margin="dense"
+                  value={qrCodeId}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setQrCodeId(e.target.value)
+                  }
+                  actionIcon={<CropFreeIcon className="cursor-pointer" />}
+                  action={() => setIsScannerActive(true)}
+                  errors={state.errors.qr_code_id}
                 />
               </div>
             </div>
