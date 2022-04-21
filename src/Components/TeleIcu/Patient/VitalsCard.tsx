@@ -44,7 +44,7 @@ export default function TeleICUPatientVitalsCard({
       let bedAssets = await dispatch(
         listAssetBeds({ bed: patient.last_consultation?.last_daily_round.bed })
       );
-      console.log("Found " + bedAssets.data.results.length + "bedAssets:");
+      console.log("Found " + bedAssets?.data?.results?.length + "bedAssets:");
       bedAssets = {
         ...bedAssets,
         data: {
@@ -59,7 +59,7 @@ export default function TeleICUPatientVitalsCard({
       if (bedAssets.data.results.length > 0) {
         setHl7Asset(bedAssets.data.results[0].asset_object);
       }
-      console.log("Found " + bedAssets.data.results.length + "bedAssets:");
+      console.log("Found " + bedAssets.data?.results?.length + "bedAssets:");
     }
   };
 
