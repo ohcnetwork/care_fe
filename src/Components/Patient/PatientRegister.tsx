@@ -1,6 +1,5 @@
 import {
   Box,
-  Button,
   Card,
   CardContent,
   CircularProgress,
@@ -10,7 +9,7 @@ import {
   Radio,
   RadioGroup,
 } from "@material-ui/core";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
+
 import { navigate, useQueryParams } from "raviger";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import moment from "moment";
@@ -23,7 +22,6 @@ import {
   GENDER_TYPES,
   MEDICAL_HISTORY_CHOICES,
   TEST_TYPE,
-  FRONTLINE_WORKER,
   DESIGNATION_HEALTH_CARE_WORKER,
   VACCINES,
 } from "../../Common/constants";
@@ -45,7 +43,6 @@ import {
 import * as Notification from "../../Utils/Notifications.js";
 import AlertDialog from "../Common/AlertDialog";
 import {
-  AutoCompleteMultiField,
   CheckboxField,
   DateInputField,
   MultilineInputField,
@@ -102,7 +99,6 @@ const bloodGroups = [...BLOOD_GROUPS];
 
 const testType = [...TEST_TYPE];
 const designationOfHealthWorkers = [...DESIGNATION_HEALTH_CARE_WORKER];
-const frontlineWorkers = [...FRONTLINE_WORKER];
 const vaccines = ["Select", ...VACCINES];
 
 const initForm: any = {
@@ -131,12 +127,10 @@ const initForm: any = {
   present_health: "",
   contact_with_confirmed_carrier: "false",
   contact_with_suspected_carrier: "false",
-  is_migrant_worker: "false",
+
   estimated_contact_date: null,
   date_of_return: null,
-  past_travel: false,
-  transit_details: "",
-  countries_travelled: [],
+
   number_of_primary_contacts: "",
   number_of_secondary_contacts: "",
   is_antenatal: "false",
@@ -146,10 +140,8 @@ const initForm: any = {
   test_type: testType[0],
   prescribed_medication: false,
   ongoing_medication: "",
-  is_medical_worker: "false",
   designation_of_health_care_worker: "",
   instituion_of_health_care_worker: "",
-  frontline_worker: frontlineWorkers[0],
   number_of_aged_dependents: "",
   number_of_chronic_diseased_dependents: "",
   cluster_name: "",
@@ -395,13 +387,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             ongoing_medication: res.data.ongoing_medication
               ? res.data.ongoing_medication
               : "",
-            countries_travelled: res.data.countries_travelled,
-            transit_details: res.data.transit_details
-              ? res.data.transit_details
-              : "",
-            is_medical_worker: res.data.is_medical_worker
-              ? String(res.data.is_medical_worker)
-              : "false",
+
             is_declared_positive: res.data.is_declared_positive
               ? String(res.data.is_declared_positive)
               : "false",
@@ -413,9 +399,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               .instituion_of_health_care_worker
               ? res.data.instituion_of_health_care_worker
               : "",
-            frontline_worker: res.data.frontline_worker
-              ? res.data.frontline_worker
-              : "",
+
             number_of_primary_contacts: res.data.number_of_primary_contacts
               ? res.data.number_of_primary_contacts
               : "",
@@ -430,9 +414,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               .contact_with_suspected_carrier
               ? String(res.data.contact_with_suspected_carrier)
               : "false",
-            is_migrant_worker: res.data.is_migrant_worker
-              ? String(res.data.is_migrant_worker)
-              : "false",
+
             number_of_aged_dependents: Number(
               res.data.number_of_aged_dependents
             )
@@ -524,6 +506,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     let error_div = "";
 
     Object.keys(state.form).forEach((field, i) => {
+      let phoneNumber, emergency_phone_number;
       switch (field) {
         case "address":
         case "name":
@@ -596,7 +579,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           }
           return;
         case "phone_number":
-          const phoneNumber = parsePhoneNumberFromString(state.form[field]);
+          phoneNumber = parsePhoneNumberFromString(state.form[field]);
           if (!state.form[field] || !phoneNumber?.isPossible()) {
             errors[field] = "Please enter valid phone number";
             if (!error_div) error_div = field;
@@ -604,7 +587,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           }
           return;
         case "emergency_phone_number":
-          const emergency_phone_number = parsePhoneNumberFromString(
+          emergency_phone_number = parsePhoneNumberFromString(
             state.form[field]
           );
           if (!state.form[field] || !emergency_phone_number?.isPossible()) {
@@ -613,20 +596,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             invalidForm = true;
           }
           return;
-        case "countries_travelled":
-          if (state.form.past_travel && !state.form[field].length) {
-            errors[field] = "Please enter the list of countries visited";
-            if (!error_div) error_div = field;
-            invalidForm = true;
-          }
-          return;
-        case "date_of_return":
-          if (state.form.past_travel && !state.form[field]) {
-            errors[field] = "Please enter the date of return from travel";
-            if (!error_div) error_div = field;
-            invalidForm = true;
-          }
-          return;
+
         case "estimated_contact_date":
           if (
             JSON.parse(state.form.contact_with_confirmed_carrier) ||
@@ -756,7 +726,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         gender: Number(state.form.gender),
         nationality: state.form.nationality,
         is_antenatal: state.form.is_antenatal,
-        is_migrant_worker: state.form.is_migrant_worker,
+
         passport_no:
           state.form.nationality !== "India"
             ? state.form.passport_no
@@ -798,14 +768,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           state.form.cluster_name
             ? state.form.cluster_name
             : null,
-        past_travel: state.form.past_travel,
-        transit_details: state.form.transit_details,
-        countries_travelled: state.form.past_travel
-          ? state.form.countries_travelled
-          : [],
-        date_of_return: state.form.past_travel
-          ? state.form.date_of_return
-          : undefined,
 
         allergies: state.form.allergies,
         number_of_primary_contacts: Number(
@@ -819,13 +781,13 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           ? Number(state.form.number_of_secondary_contacts)
           : undefined,
         ongoing_medication: state.form.ongoing_medication,
-        is_medical_worker: JSON.parse(state.form.is_medical_worker),
+
         is_declared_positive: JSON.parse(state.form.is_declared_positive),
         designation_of_health_care_worker:
           state.form.designation_of_health_care_worker,
         instituion_of_health_care_worker:
           state.form.instituion_of_health_care_worker,
-        frontline_worker: state.form.frontline_worker,
+
         blood_group: state.form.blood_group
           ? state.form.blood_group
           : undefined,
@@ -1163,25 +1125,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             errors={state.errors.gender}
                           />
                         </div>
-                        <div id="frontline_worker-div">
-                          <InputLabel
-                            htmlFor="frontline_worker"
-                            id="frontline_worker-label"
-                          >
-                            Frontline Worker
-                          </InputLabel>
-                          <SelectField
-                            labelId="frontline_worker"
-                            name="frontline_worker"
-                            variant="outlined"
-                            margin="dense"
-                            optionArray={true}
-                            value={state.form.frontline_worker}
-                            options={frontlineWorkers}
-                            onChange={handleChange}
-                            errors={state.errors.frontline_worker}
-                          />
-                        </div>
+
                         <Collapse
                           in={String(state.form.gender) === "2"}
                           timeout="auto"
@@ -1468,197 +1412,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             />
                           </div>
                         )}
-                        <div className="grid grid-flow-col">
-                          <div id="is_medical_worker-div">
-                            <InputLabel
-                              htmlFor="is_medical_worker"
-                              id="is_medical_worker"
-                            >
-                              Is a Medical Worker?
-                            </InputLabel>
-                            <RadioGroup
-                              aria-label="is_medical_worker"
-                              id="is_medical_worker"
-                              name="is_medical_worker"
-                              value={state.form.is_medical_worker}
-                              onChange={handleChange}
-                              className="mt-2"
-                            >
-                              <Box display="flex" flexDirection="row">
-                                <FormControlLabel
-                                  value="true"
-                                  control={<Radio />}
-                                  label="Yes"
-                                />
-                                <FormControlLabel
-                                  value="false"
-                                  control={<Radio />}
-                                  label="No"
-                                />
-                              </Box>
-                            </RadioGroup>
-                          </div>
-                          <div id="is_migrant_worker-div">
-                            <InputLabel
-                              htmlFor="is_migrant_worker"
-                              id="is_migrant_worker"
-                            >
-                              Is a Guest workers?
-                            </InputLabel>
-                            <RadioGroup
-                              aria-label="is_migrant_worker"
-                              id="is_migrant_worker"
-                              name="is_migrant_worker"
-                              value={state.form.is_migrant_worker}
-                              onChange={handleChange}
-                              className="mt-2"
-                            >
-                              <Box display="flex" flexDirection="row">
-                                <FormControlLabel
-                                  value="true"
-                                  control={<Radio />}
-                                  label="Yes"
-                                />
-                                <FormControlLabel
-                                  value="false"
-                                  control={<Radio />}
-                                  label="No"
-                                />
-                              </Box>
-                            </RadioGroup>
-                          </div>
-                        </div>
-                        <Collapse
-                          in={String(state.form.is_medical_worker) === "true"}
-                          timeout="auto"
-                          unmountOnExit
-                          className="col-span-2"
-                        >
-                          {" "}
-                          <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
-                            <div id="designation_of_health_care_worker-div">
-                              <InputLabel
-                                id="designation_of_health_care_worker-label"
-                                htmlFor="designation_of_health_care_worker"
-                              >
-                                Designation of Medical Worker
-                              </InputLabel>
-                              <SelectField
-                                labelId="designation_of_health_care_worker"
-                                name="designation_of_health_care_worker"
-                                variant="outlined"
-                                margin="dense"
-                                optionArray={true}
-                                value={
-                                  state.form.designation_of_health_care_worker
-                                }
-                                options={designationOfHealthWorkers}
-                                onChange={handleChange}
-                                errors={
-                                  state.errors.designation_of_health_care_worker
-                                }
-                              />
-                            </div>
-                            <div id="instituion_of_health_care_worker-div">
-                              <InputLabel
-                                id="institution_of_health_care_worker-label"
-                                htmlFor="instituion_of_health_care_worker"
-                              >
-                                Institution of Medical Worker{" "}
-                              </InputLabel>
-                              <TextInputField
-                                id="instituion_of_health_care_worker"
-                                name="instituion_of_health_care_worker"
-                                variant="outlined"
-                                margin="dense"
-                                type="text"
-                                value={
-                                  state.form.instituion_of_health_care_worker
-                                }
-                                onChange={handleChange}
-                                errors={
-                                  state.errors.instituion_of_health_care_worker
-                                }
-                              />
-                            </div>
-                          </div>
-                        </Collapse>
-
-                        <div className="md:col-span-2" id="past_travel-div">
-                          <CheckboxField
-                            checked={state.form.past_travel}
-                            onChange={handleCheckboxFieldChange}
-                            name="past_travel"
-                            label="Domestic/international Travel History (within last 14 days)"
-                          />
-                        </div>
-                        <Collapse
-                          in={state.form.past_travel}
-                          timeout="auto"
-                          unmountOnExit
-                          className="col-span-2"
-                        >
-                          {
-                            <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
-                              <div
-                                className="md:col-span-2"
-                                id="countries_travelled-div"
-                              >
-                                <AutoCompleteMultiField
-                                  id="countries-travelled"
-                                  options={placesList}
-                                  label="Countries / Places Visited (including transit stops) *"
-                                  variant="outlined"
-                                  placeholder="Select country or enter the place of visit"
-                                  onChange={(e: object, value: any) =>
-                                    handleValueChange(
-                                      value,
-                                      "countries_travelled"
-                                    )
-                                  }
-                                  value={state.form.countries_travelled}
-                                  errors={state.errors.countries_travelled}
-                                />
-                              </div>
-                              <div id="transit_details-div">
-                                <InputLabel id="transit_details-label">
-                                  Transit_details
-                                </InputLabel>
-                                <TextInputField
-                                  name="transit_details"
-                                  variant="outlined"
-                                  margin="dense"
-                                  type="text"
-                                  placeholder="Flight No:/Train No:/Vehicle No: (with seat number)"
-                                  value={state.form.transit_details}
-                                  onChange={handleChange}
-                                  errors={state.errors.transit_details}
-                                />
-                              </div>
-                              <div id="date_of_return-div">
-                                <InputLabel
-                                  htmlFor="date_of_return"
-                                  id="date_of_return-label"
-                                  required
-                                >
-                                  Estimated date of Arrival
-                                </InputLabel>
-                                <DateInputField
-                                  id="date_of_return"
-                                  fullWidth={true}
-                                  value={state.form.date_of_return}
-                                  onChange={(date) =>
-                                    handleDateChange(date, "date_of_return")
-                                  }
-                                  errors={state.errors.date_of_return}
-                                  inputVariant="outlined"
-                                  margin="dense"
-                                  disableFuture={true}
-                                />
-                              </div>
-                            </div>
-                          }
-                        </Collapse>
                       </div>
                     </CardContent>
                   </Card>

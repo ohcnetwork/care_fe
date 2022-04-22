@@ -39,7 +39,7 @@ export default function TelePatientVitalsGraphCard({
     <div className="lg:w-6/12 w-full text-white flex items-center justify-center lg:h-auto h-96 rounded-b-md lg:rounded-b-none">
       <div className="flex items-center justify-center flex-col flex-1">
         {/* Image with gray overlay */}
-        {!analysis.noData ? (
+        {/* !analysis.noData ? (
           <img
             className="opacity-75 p-4"
             src={"/images/vitals_graph.png"}
@@ -49,11 +49,11 @@ export default function TelePatientVitalsGraphCard({
           <p className="text-sm text-primary-700 my-2">
             No Consulations available
           </p>
-        )}
-        {/* <i className="fas fa-chart-pie text-primary-700 text-3xl"></i>
+        ) */}}
+        <i className="fas fa-chart-pie text-primary-700 text-3xl"></i>
         <p className="text-sm text-primary-600 my-4">
           Data Not Enough for Analysis
-        </p> */}
+        </p>
       </div>
     </div>
   );
