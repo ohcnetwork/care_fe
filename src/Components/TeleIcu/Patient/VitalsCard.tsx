@@ -40,9 +40,11 @@ export default function TeleICUPatientVitalsCard({
   const [patientObservations, setPatientObservations] = React.useState<any>();
 
   const fetchData = async () => {
-    if (patient?.last_consultation?.current_bed?.bed) {
+    if (patient?.last_consultation?.current_bed?.bed_object?.id) {
       let bedAssets = await dispatch(
-        listAssetBeds({ bed: patient.last_consultation?.current_bed?.bed })
+        listAssetBeds({
+          bed: patient.last_consultation?.current_bed?.bed_object?.id,
+        })
       );
       console.log("Found " + bedAssets?.data?.results?.length + "bedAssets:");
       bedAssets = {

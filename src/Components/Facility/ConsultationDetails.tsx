@@ -123,7 +123,8 @@ export const ConsultationDetails = (props: any) => {
             setPatientData(data);
           }
         }
-        const current_bed = (res as ConsultationModel)?.current_bed?.bed;
+        const current_bed = (res as ConsultationModel)?.current_bed?.bed_object
+          ?.id;
         if (dailyRounds?.data?.results?.length && current_bed) {
           const bedAssets = await dispatch(listAssetBeds({ bed: current_bed }));
           if (bedAssets?.data?.results?.length) {
@@ -357,7 +358,8 @@ export const ConsultationDetails = (props: any) => {
               <nav className="pl-2 flex space-x-6 overflow-x-auto pb-2 ">
                 {CONSULTATION_TABS.map((p: OptionsType) => {
                   if (p.text === "FEED") {
-                    if (!consultationData?.current_bed?.bed) return null;
+                    if (!consultationData?.current_bed?.bed_object?.id)
+                      return null;
                   }
                   return (
                     <Link

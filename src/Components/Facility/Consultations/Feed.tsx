@@ -53,9 +53,9 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
       if (!status.aborted) {
         if (dailyRounds?.data?.results?.length) {
           let bedAssets = await dispatch(
-            listAssetBeds({ bed: res?.current_bed?.bed })
+            listAssetBeds({ bed: res?.current_bed?.bed_object?.id })
           );
-          setBed(res?.current_bed?.bed);
+          setBed(res?.current_bed?.bed_object?.id);
           console.log("Found " + bedAssets.data.results.length + "bedAssets:");
           bedAssets = {
             ...bedAssets,

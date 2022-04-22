@@ -270,7 +270,7 @@ export const ConsultationForm = (props: any) => {
             special_instruction: res.data.special_instruction || "",
             weight: res.data.weight ? res.data.weight : "",
             height: res.data.height ? res.data.height : "",
-            bed: res.data?.current_bed?.bed || null,
+            bed: res.data?.current_bed?.bed_object?.id || null,
           };
           dispatch({ type: "set_form", form: formData });
         } else {
