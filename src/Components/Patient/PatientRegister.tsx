@@ -24,7 +24,6 @@ import {
   TEST_TYPE,
   DESIGNATION_HEALTH_CARE_WORKER,
   VACCINES,
-  OCCUPATIONS,
 } from "../../Common/constants";
 import countryList from "../../Common/static/countries.json";
 import statesList from "../../Common/static/states.json";
@@ -98,8 +97,6 @@ const diseaseStatus = [...DISEASE_STATUS];
 
 const bloodGroups = [...BLOOD_GROUPS];
 
-const occupations = [...OCCUPATIONS];
-
 const testType = [...TEST_TYPE];
 const designationOfHealthWorkers = [...DESIGNATION_HEALTH_CARE_WORKER];
 const vaccines = ["Select", ...VACCINES];
@@ -112,8 +109,6 @@ const initForm: any = {
   emergency_phone_number: "",
   blood_group: "",
   disease_status: diseaseStatus[0],
-  occupation: occupations[0],
-  head_of_household: "false",
   is_declared_positive: "false",
   date_declared_positive: new Date(),
   date_of_birth: null,
@@ -338,12 +333,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       form["disease_status"] = res.data.result
         ? res.data.result.toUpperCase()
         : state.form.disease_status;
-      form["occupation"] = res.data.meta_info.occupation
-        ? res.data.meta_info.occupation
-        : state.form.occupation;
-      form["head_of_household"] = res.data.meta_info.head_of_household
-        ? res.data.meta_info.head_of_household
-        : state.form.head_of_household;
       form["test_type"] = res.data.test_type
         ? res.data.test_type.toUpperCase()
         : state.form.test_type;
@@ -386,12 +375,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             state: res.data.state ? res.data.state : "",
             district: res.data.district ? res.data.district : "",
             blood_group: res.data.blood_group ? res.data.blood_group : "",
-            occupation: res.data.meta_info.occupation
-              ? res.data.meta_info.occupation
-              : "",
-            head_of_household: res.data.meta_info.head_of_household
-              ? res.data.meta_info.head_of_household
-              : "false",
             local_body: res.data.local_body ? res.data.local_body : "",
             ward: res.data.ward_object ? res.data.ward_object.id : initialWard,
             village: res.data.village ? res.data.village : "",
@@ -705,10 +688,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         )?.format("E.164"),
         date_of_birth: moment(state.form.date_of_birth).format("YYYY-MM-DD"),
         disease_status: state.form.disease_status,
-        meta_info: {
-          occupation: state.form.occupation,
-          head_of_household: state.form.head_of_household,
-        },
         date_of_test: state.form.date_of_test
           ? state.form.date_of_test
           : undefined,
@@ -1433,54 +1412,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             />
                           </div>
                         )}
-                        <div data-testid="occupation" id="occupation-div">
-                          <InputLabel
-                            htmlFor="occupation"
-                            id="occupation-label"
-                          >
-                            Occupation
-                          </InputLabel>
-                          <SelectField
-                            labelId="occupation"
-                            name="occupation"
-                            variant="outlined"
-                            margin="dense"
-                            optionArray={true}
-                            value={state.form.occupation}
-                            options={occupations}
-                            onChange={handleChange}
-                            errors={state.errors.occupation}
-                          />
-                        </div>
-                        <div>
-                          <InputLabel
-                            id="head_of_household"
-                            htmlFor="head_of_household"
-                          >
-                            Is the patient the head of the household?
-                          </InputLabel>
-                          <RadioGroup
-                            aria-label="head_of_household"
-                            id="head_of_household"
-                            name="head_of_household"
-                            value={state.form.head_of_household}
-                            onChange={handleChange}
-                            style={{ padding: "0px 5px" }}
-                          >
-                            <Box display="flex" flexDirection="row">
-                              <FormControlLabel
-                                value="true"
-                                control={<Radio />}
-                                label="Yes"
-                              />
-                              <FormControlLabel
-                                value="false"
-                                control={<Radio />}
-                                label="No"
-                              />
-                            </Box>
-                          </RadioGroup>
-                        </div>
                       </div>
                     </CardContent>
                   </Card>
