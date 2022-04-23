@@ -46,17 +46,14 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const [res, dailyRounds] = await Promise.all([
-        dispatch(getConsultation(consultationId)) as ConsultationModel,
-        dispatch(getDailyReport({ limit: 1, offset: 0 }, { consultationId })),
-      ]);
+      const res = await dispatch(getConsultation(consultationId));
+      const consultation = res.data as ConsultationModel;
       if (!status.aborted) {
-        if (dailyRounds?.data?.results?.length) {
+        if (consultation?.current_bed?.bed_object?.id) {
           let bedAssets = await dispatch(
-            listAssetBeds({ bed: res?.current_bed?.bed_object?.id })
+            listAssetBeds({ bed: consultation?.current_bed?.bed_object?.id })
           );
-          setBed(res?.current_bed?.bed_object?.id);
-          console.log("Found " + bedAssets.data.results.length + "bedAssets:");
+          setBed(consultation?.current_bed?.bed_object?.id);
           bedAssets = {
             ...bedAssets,
             data: {
