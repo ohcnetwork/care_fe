@@ -141,7 +141,7 @@ const AssetCreate = (props: AssetProps) => {
   }, [asset]);
 
   const validateForm = () => {
-    let errors = { ...initError };
+    const errors = { ...initError };
     let invalidForm = false;
     Object.keys(state.errors).forEach((field) => {
       switch (field) {
@@ -174,6 +174,7 @@ const AssetCreate = (props: AssetProps) => {
             errors[field] = "Field is required";
             invalidForm = true;
           }
+          // eslint-disable-next-line no-case-declarations
           const phoneNumber = parsePhoneNumberFromString(support_phone);
           if (!phoneNumber?.isPossible()) {
             errors[field] = "Please enter valid phone number";
@@ -246,8 +247,14 @@ const AssetCreate = (props: AssetProps) => {
       const params = Object.fromEntries(
         new URLSearchParams(new URL(assetId).search).entries()
       );
+      // QR Maybe searchParams "asset" or "assetQR"
       if (params.asset) {
         setQrCodeId(params.asset);
+        setIsScannerActive(false);
+        return;
+      }
+      if (params.assetQR) {
+        setQrCodeId(params.assetQR);
         setIsScannerActive(false);
         return;
       }
