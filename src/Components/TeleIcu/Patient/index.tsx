@@ -81,7 +81,7 @@ export default function TeleICUPatientPage({
               Generate Treatment Summary
             </Link>
             <Link
-              href={`/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/`}
+              href={`/facility/${patient.facility}/patient/${patient.id}/notes/`}
               className="btn m-1 btn-primary hover:text-white"
             >
               Doctor&apos;s Notes
