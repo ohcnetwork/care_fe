@@ -15,9 +15,9 @@ import {
   getDailyReport,
   listAssetBeds,
 } from "../../../Redux/actions";
-import { AssetData } from "../../Assets/AssetTypes";
 import Loading from "../../Common/Loading";
 import PageTitle from "../../Common/PageTitle";
+import { ConsultationModel } from "../models";
 
 interface IFeedProps {
   facilityId: string;
@@ -25,12 +25,7 @@ interface IFeedProps {
   consultationId: any;
 }
 
-export const Feed: React.FC<IFeedProps> = ({
-  consultationId,
-  facilityId,
-
-  patientId,
-}) => {
+export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   const dispatch: any = useDispatch();
   const [cameraAsset, setCameraAsset] = useState<ICameraAssetState>({
     hostname: "",
@@ -52,15 +47,15 @@ export const Feed: React.FC<IFeedProps> = ({
     async (status: statusType) => {
       setIsLoading(true);
       const [res, dailyRounds] = await Promise.all([
-        dispatch(getConsultation(consultationId)),
+        dispatch(getConsultation(consultationId)) as ConsultationModel,
         dispatch(getDailyReport({ limit: 1, offset: 0 }, { consultationId })),
       ]);
       if (!status.aborted) {
         if (dailyRounds?.data?.results?.length) {
           let bedAssets = await dispatch(
-            listAssetBeds({ bed: dailyRounds.data.results[0].bed })
+            listAssetBeds({ bed: res?.current_bed?.bed_object?.id })
           );
-          setBed(dailyRounds.data.results[0].bed);
+          setBed(res?.current_bed?.bed_object?.id);
           console.log("Found " + bedAssets.data.results.length + "bedAssets:");
           bedAssets = {
             ...bedAssets,

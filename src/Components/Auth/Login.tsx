@@ -11,7 +11,7 @@ import VisibilityIcon from "@material-ui/icons/Visibility";
 import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
 import LanguageSelector from "../Common/LanguageSelector";
 import { RECAPTCHA_SITE_KEY } from "../../Common/env";
-const get = require("lodash.get");
+import get from "lodash.get";
 
 const LoginPage = (props: any) => {
   const dispatch: any = useDispatch();
@@ -81,8 +81,11 @@ const LoginPage = (props: any) => {
           localStorage.setItem("care_access_token", res.access);
           localStorage.setItem("care_refresh_token", res.refresh);
 
-          if (window.location.pathname === '/' || window.location.pathname === '/login') {
-            navigate('/facility');
+          if (
+            window.location.pathname === "/" ||
+            window.location.pathname === "/login"
+          ) {
+            navigate("/facility");
           } else {
             navigate(window.location.pathname.toString());
           }

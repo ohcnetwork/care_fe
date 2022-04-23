@@ -31,5 +31,13 @@
     "no-unused-vars": "warn",
     "react/react-in-jsx-scope": "off"
   },
-  "ignorePatterns": ["dist", "public", "lib", "build", "*.bs.js", "*.gen.tsx"]
+  "ignorePatterns": [
+    "dist",
+    "public",
+    "lib",
+    "build",
+    "*.bs.js",
+    "*.gen.tsx",
+    "*.res"
+  ]
 }
