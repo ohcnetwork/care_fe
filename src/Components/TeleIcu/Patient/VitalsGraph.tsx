@@ -49,7 +49,7 @@ export default function TelePatientVitalsGraphCard({
           <p className="text-sm text-primary-700 my-2">
             No Consulations available
           </p>
-        ) */}}
+        ) */}
         <i className="fas fa-chart-pie text-primary-700 text-3xl"></i>
         <p className="text-sm text-primary-600 my-4">
           Data Not Enough for Analysis
