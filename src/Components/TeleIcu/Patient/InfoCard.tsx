@@ -7,6 +7,13 @@ export interface ITeleICUPatientInfoCardProps {
   patient: PatientModel;
 }
 
+const getDimensionOrDash = (value: number, unit: string) => {
+  if (value === undefined || value === null || value === 0) {
+    return "-";
+  }
+  return value + unit;
+};
+
 export default function TeleICUPatientInfoCard({
   patient,
 }: ITeleICUPatientInfoCardProps) {
@@ -44,7 +51,7 @@ export default function TeleICUPatientInfoCard({
                   Weight
                 </span>
                 <span className="sm:text-base font-semibold text-sm mr-2">
-                  {patient.last_consultation?.weight}kg
+                  {getDimensionOrDash(patient.last_consultation.weight, " kg")}
                 </span>
               </div>
             ) : (
@@ -56,7 +63,7 @@ export default function TeleICUPatientInfoCard({
                   Height
                 </span>
                 <span className="sm:text-base font-semibold text-sm mr-2">
-                  {patient.last_consultation?.height}cm
+                  {getDimensionOrDash(patient.last_consultation?.height, "cm")}
                 </span>
               </div>
             ) : (
