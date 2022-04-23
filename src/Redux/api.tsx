@@ -234,7 +234,7 @@ const routes: Routes = {
     path: "/api/v1/consultation/{id}/",
   },
   updateConsultation: {
-    path: "/api/v1/consultation",
+    path: "/api/v1/consultation/{id}/",
     method: "PUT",
   },
   partialUpdateConsultation: {
