@@ -1,18 +1,12 @@
 import { Link } from "raviger";
 import { GENDER } from "../../../Common/constants";
+import { getDimensionOrDash } from "../../../Common/utils";
 import { PatientModel } from "../../Patient/models";
 import { RightArrowIcon } from "../Icons/ArrowIcon";
 
 export interface ITeleICUPatientInfoCardProps {
   patient: PatientModel;
 }
-
-const getDimensionOrDash = (value: number, unit: string) => {
-  if (value === undefined || value === null || value === 0) {
-    return "-";
-  }
-  return value + unit;
-};
 
 export default function TeleICUPatientInfoCard({
   patient,

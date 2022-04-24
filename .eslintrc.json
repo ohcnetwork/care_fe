@@ -28,7 +28,8 @@
   "plugins": ["react", "@typescript-eslint"],
   "rules": {
     "quotes": ["error", "double"],
-    "no-unused-vars": "warn",
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": ["error"],
     "react/react-in-jsx-scope": "off"
   },
   "ignorePatterns": [
