@@ -27,8 +27,7 @@ import { navigate } from "raviger";
 import { DateRangePicker, getDate } from "../Common/DateRangePicker";
 import DistrictSelect from "../Facility/FacilityFilter/DistrictSelect";
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const debounce = require("lodash.debounce");
+import { debounce } from "lodash";
 
 const useMergeState = (initialState: any) => {
   const [state, setState] = useState(initialState);
