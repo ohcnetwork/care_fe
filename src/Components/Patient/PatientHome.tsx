@@ -1,16 +1,9 @@
-import {
-  Button,
-  CircularProgress,
-  Typography,
-  Select,
-  MenuItem,
-} from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
+import { Button, CircularProgress, Typography } from "@material-ui/core";
 import { navigate } from "raviger";
 import moment from "moment";
 import React, { Fragment, useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { GENDER_TYPES, DISEASE_STATUS } from "../../Common/constants";
+import { GENDER_TYPES } from "../../Common/constants";
 import loadable from "@loadable/component";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { OnlineUsersSelect } from "../Common/OnlineUsersSelect";
@@ -37,53 +30,15 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import {
-  TextInputField,
-  DateInputField,
-  ErrorHelperText,
-} from "../Common/HelperInputFields";
+import { TextInputField, ErrorHelperText } from "../Common/HelperInputFields";
 import { validateEmailAddress } from "../../Common/validation";
-import Radio from "@material-ui/core/Radio";
-import RadioGroup from "@material-ui/core/RadioGroup";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Modal from "@material-ui/core/Modal";
-import FormControl from "@material-ui/core/FormControl";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
+import TeleICUPatient from "../TeleIcu/Patient";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
-
-const useStyles = makeStyles((theme) => ({
-  root: {
-    flexGrow: 1,
-    padding: "8px",
-  },
-  margin: {
-    margin: theme.spacing(1),
-  },
-  displayFlex: {
-    display: "flex",
-  },
-  content: {
-    marginTop: "10px",
-    maxWidth: "560px",
-    background: "white",
-    padding: "20px 20px 5px",
-  },
-  title: {
-    padding: "5px",
-    marginBottom: "10px",
-  },
-  details: {
-    marginTop: "10px",
-    padding: "5px",
-    marginBottom: "10px",
-  },
-  paginateTopPadding: {
-    paddingTop: "50px",
-  },
-}));
 
 type donatePlasmaOptionType = null | "yes" | "no" | "not-fit";
 interface preDischargeFormInterface {
@@ -95,7 +50,6 @@ interface preDischargeFormInterface {
 
 export const PatientHome = (props: any) => {
   const { facilityId, id } = props;
-  const classes = useStyles();
   const dispatch: any = useDispatch();
   const [showShifts, setShowShifts] = useState(false);
   const [isShiftClicked, setIsShiftClicked] = useState(false);
@@ -124,6 +78,7 @@ export const PatientHome = (props: any) => {
     status: number;
     sample: any;
   }>({ status: 0, sample: null });
+  const [viewOption, setViewOption] = useState("personal");
   const [showAlertMessage, setAlertMessage] = useState({
     show: false,
     message: "",
@@ -183,6 +138,7 @@ export const PatientHome = (props: any) => {
   const [preDischargeForm, setPreDischargeForm] =
     useState(initPreDischargeForm);
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handlePreDischargeFormChange = (key: string, event: any) => {
     if (key === "date_of_test") {
       setPreDischargeForm({
@@ -235,7 +191,7 @@ export const PatientHome = (props: any) => {
       )
     ).then((response: any) => {
       if ((response || {}).status === 200) {
-        let dummyPatientData = Object.assign({}, patientData);
+        const dummyPatientData = Object.assign({}, patientData);
         dummyPatientData["assigned_to"] = assignedVolunteerObject;
         setPatientData(dummyPatientData);
         if (assignedVolunteerObject)
@@ -254,14 +210,14 @@ export const PatientHome = (props: any) => {
   };
 
   const handlePatientTransfer = (value: boolean) => {
-    let dummyPatientData = Object.assign({}, patientData);
+    const dummyPatientData = Object.assign({}, patientData);
     dummyPatientData["allow_transfer"] = value;
 
     dispatch(
       patchPatient({ allow_transfer: value }, { id: patientData.id })
     ).then((response: any) => {
       if ((response || {}).status === 200) {
-        let dummyPatientData = Object.assign({}, patientData);
+        const dummyPatientData = Object.assign({}, patientData);
         dummyPatientData["allow_transfer"] = value;
         setPatientData(dummyPatientData);
 
@@ -274,13 +230,13 @@ export const PatientHome = (props: any) => {
 
   const handlePatientDischarge = async (value: boolean) => {
     setIsSendingDischargeApi(true);
-    let dischargeData = Object.assign({}, patientData);
+    const dischargeData = Object.assign({}, patientData);
     dischargeData["discharge"] = value;
 
     // calling patchPatient and dischargePatient together caused problems check https://github.com/coronasafe/care_fe/issues/758
 
     // using preDischargeForm form data to update patient data
-    let preDischargeFormData = formatPreDischargeFormData(preDischargeForm);
+    const preDischargeFormData = formatPreDischargeFormData(preDischargeForm);
 
     if (Object.keys(preDischargeFormData).length) {
       // skip calling patient update api if nothing to update
@@ -291,13 +247,13 @@ export const PatientHome = (props: any) => {
       );
     }
     // discharge call
-    let dischargeResponse = await dispatch(
+    const dischargeResponse = await dispatch(
       dischargePatient({ discharge: value }, { id: patientData.id })
     );
 
     setIsSendingDischargeApi(false);
     if (dischargeResponse?.status === 200) {
-      let dischargeData = Object.assign({}, patientData);
+      const dischargeData = Object.assign({}, patientData);
       dischargeData["discharge"] = value;
       setPatientData(dischargeData);
 
@@ -312,8 +268,8 @@ export const PatientHome = (props: any) => {
   const formatPreDischargeFormData = (
     preDischargeForm: preDischargeFormInterface
   ) => {
-    let data: any = { ...preDischargeForm };
-    let donatePlasma = preDischargeForm.donatePlasma;
+    const data: any = { ...preDischargeForm };
+    const donatePlasma = preDischargeForm.donatePlasma;
 
     if (donatePlasma) {
       if (donatePlasma === "yes") {
@@ -607,54 +563,93 @@ export const PatientHome = (props: any) => {
       )}
 
       <div id="revamp">
-        <PageTitle
-          title={"Covid Suspect Details"}
-          backUrl="/patients"
-          crumbsReplacements={{
-            [facilityId]: { name: patientData?.facility_object?.name },
-            [id]: { name: patientData?.name },
-          }}
-        />
-        <div className="relative mt-2">
-          <div className="max-w-screen-xl mx-auto py-3 px-3 sm:px-6 lg:px-8">
-            <div className="md:flex">
-              {patientData?.last_consultation?.assigned_to_object && (
-                <p className="font-bold text-green-800 rounded-lg shadow bg-green-200 p-3 mx-3 flex-1 text-center flex justify-center gap-2">
-                  <span className="inline">
-                    Assigned Doctor:{" "}
-                    {
-                      patientData?.last_consultation?.assigned_to_object
-                        .first_name
-                    }{" "}
-                    {
-                      patientData?.last_consultation?.assigned_to_object
-                        .last_name
-                    }
-                  </span>
-                  {patientData?.last_consultation?.assigned_to_object
-                    .alt_phone_number && (
-                    <a
-                      href={`https://wa.me/${patientData?.last_consultation?.assigned_to_object.alt_phone_number}`}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      <i className="fab fa-whatsapp"></i> Video Call
-                    </a>
-                  )}
-                </p>
-              )}
-              {patientData.assigned_to_object && (
-                <p className="font-bold text-primary-800 rounded-lg shadow bg-primary-200 mx-2 p-3 flex-1 text-center">
-                  <span className="inline">
-                    Assigned Volunteer:{" "}
-                    {patientData.assigned_to_object.first_name}{" "}
-                    {patientData.assigned_to_object.last_name}
-                  </span>
-                </p>
-              )}
+        <div className="flex items-center gap-2 flex-wrap justify-between mb-4">
+          <PageTitle
+            title={"Covid Suspect Details"}
+            backUrl="/patients"
+            crumbsReplacements={{
+              [facilityId]: { name: patientData?.facility_object?.name },
+              [id]: { name: patientData?.name },
+            }}
+          />
+          <div className="flex items-center gap-2">
+            <h1 className="text-base font-medium">View Option</h1>
+
+            <div className="flex items-center">
+              <button
+                className={`px-4 py-2 border block ${
+                  viewOption === "teleicu"
+                    ? "bg-primary-500 border-primary-500 rounded text-white"
+                    : "bg-transparent border-primary-200"
+                } `}
+                onClick={() => setViewOption("teleicu")}
+              >
+                TeleICU
+              </button>
+              <button
+                className={`px-4 py-2 border block ${
+                  viewOption === "personal"
+                    ? "bg-primary-500 border-primary-500 rounded text-white"
+                    : "bg-transparent border-primary-200"
+                } `}
+                onClick={() => setViewOption("personal")}
+              >
+                Personal
+              </button>
             </div>
           </div>
         </div>
+
+        {viewOption === "teleicu" ? (
+          <TeleICUPatient
+            patientId={id}
+            facilityId={facilityId}
+            asComponent={true}
+          />
+        ) : (
+          <>
+            <div className="relative mt-2">
+              <div className="max-w-screen-xl mx-auto py-3 px-3 sm:px-6 lg:px-8">
+                <div className="md:flex">
+                  {patientData?.last_consultation?.assigned_to_object && (
+                    <p className="font-bold text-green-800 rounded-lg shadow bg-green-200 p-3 mx-3 flex-1 text-center flex justify-center gap-2">
+                      <span className="inline">
+                        Assigned Doctor:{" "}
+                        {
+                          patientData?.last_consultation?.assigned_to_object
+                            .first_name
+                        }{" "}
+                        {
+                          patientData?.last_consultation?.assigned_to_object
+                            .last_name
+                        }
+                      </span>
+                      {patientData?.last_consultation?.assigned_to_object
+                        .alt_phone_number && (
+                        <a
+                          href={`https://wa.me/${patientData?.last_consultation?.assigned_to_object.alt_phone_number}`}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          <i className="fab fa-whatsapp"></i> Video Call
+                        </a>
+                      )}
+                    </p>
+                  )}
+                  {patientData.assigned_to_object && (
+                    <p className="font-bold text-primary-800 rounded-lg shadow bg-primary-200 mx-2 p-3 flex-1 text-center">
+                      <span className="inline">
+                        Assigned Volunteer:{" "}
+                        {patientData.assigned_to_object.first_name}{" "}
+                        {patientData.assigned_to_object.last_name}
+                      </span>
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </>
+        )}
         {patientData?.facility != patientData?.last_consultation?.facility && (
           <div className="relative mt-2">
             <div className="max-w-screen-xl mx-auto py-3 px-3 sm:px-6 lg:px-8 rounded-lg shadow bg-red-200 ">
@@ -1099,7 +1094,7 @@ export const PatientHome = (props: any) => {
                       </div>
                       <div className="mt-2 flex">
                         <button
-                          onClick={(_) =>
+                          onClick={() =>
                             navigate(`/shifting/${shift.external_id}`)
                           }
                           className="btn w-full btn-default bg-white mr-2"
@@ -1121,7 +1116,7 @@ export const PatientHome = (props: any) => {
 
                             <Modal
                               open={modalFor === shift.external_id}
-                              onClose={(_) =>
+                              onClose={() =>
                                 setModalFor({
                                   externalId: undefined,
                                   loading: false,
@@ -1160,7 +1155,7 @@ export const PatientHome = (props: any) => {
                                       size="small"
                                       variant="outlined"
                                       fullWidth
-                                      onClick={(_) =>
+                                      onClick={() =>
                                         handleTransferComplete(shift)
                                       }
                                     >
@@ -1662,11 +1657,16 @@ export const PatientHome = (props: any) => {
         open={openDischargeDialog}
         onClose={handleDischargeClose}
       >
-        <DialogTitle className="flex justify-center bg-primary-100">
+        {/* <DialogTitle className="flex justify-center bg-primary-100">
           Before we discharge {patientData.name}
-        </DialogTitle>
+        </DialogTitle> */}
         <DialogContent className="px-20">
-          <FormControl variant="outlined">
+          <div className="flex justify-center">
+            <span className="text-md text-black-800">
+              Are you sure you want to discharge {patientData.name}?
+            </span>
+          </div>
+          {/* <FormControl variant="outlined">
             <label className="flex justify-center w-full text-gray-900 mt-2">
               Is the patient willing to donate blood for Plasma?
             </label>
@@ -1757,7 +1757,7 @@ export const PatientHome = (props: any) => {
                 />
               </div>
             </div>
-          </FormControl>
+          </FormControl> */}
         </DialogContent>
         <DialogActions className="flex justify-between mt-5 px-5 border-t">
           <Button onClick={handleDischargeClose}>Cancel</Button>
@@ -1769,7 +1769,7 @@ export const PatientHome = (props: any) => {
               color="primary"
               onClick={() => handlePatientDischarge(false)}
               autoFocus
-              disabled={preDischargeForm.disease_status ? false : true}
+              // disabled={preDischargeForm.disease_status ? false : true}
             >
               Proceed with Discharge
             </Button>

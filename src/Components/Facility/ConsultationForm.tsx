@@ -30,6 +30,7 @@ import {
   REVIEW_AT_CHOICES,
   LINES_CATHETER_CHOICES,
   KASP_STRING,
+  KASP_ENABLED,
 } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
@@ -883,30 +884,32 @@ export const ConsultationForm = (props: any) => {
                 />
               </div>
 
-              <div className="flex-1" id="is_kasp-div">
-                <InputLabel id="admitted-label">{KASP_STRING}*</InputLabel>
-                <RadioGroup
-                  aria-label="covid"
-                  name="is_kasp"
-                  value={state.form.is_kasp}
-                  onChange={handleTelemedicineChange}
-                  style={{ padding: "0px 5px" }}
-                >
-                  <Box display="flex" flexDirection="row">
-                    <FormControlLabel
-                      value="true"
-                      control={<Radio />}
-                      label="Yes"
-                    />
-                    <FormControlLabel
-                      value="false"
-                      control={<Radio />}
-                      label="No"
-                    />
-                  </Box>
-                </RadioGroup>
-                <ErrorHelperText error={state.errors.is_kasp} />
-              </div>
+              {KASP_ENABLED && (
+                <div className="flex-1" id="is_kasp-div">
+                  <InputLabel id="admitted-label">{KASP_STRING}*</InputLabel>
+                  <RadioGroup
+                    aria-label="covid"
+                    name="is_kasp"
+                    value={state.form.is_kasp}
+                    onChange={handleTelemedicineChange}
+                    style={{ padding: "0px 5px" }}
+                  >
+                    <Box display="flex" flexDirection="row">
+                      <FormControlLabel
+                        value="true"
+                        control={<Radio />}
+                        label="Yes"
+                      />
+                      <FormControlLabel
+                        value="false"
+                        control={<Radio />}
+                        label="No"
+                      />
+                    </Box>
+                  </RadioGroup>
+                  <ErrorHelperText error={state.errors.is_kasp} />
+                </div>
+              )}
               {/* Telemedicine Fields */}
               <div className="flex">
                 <div className="flex-1" id="is_telemedicine-div">

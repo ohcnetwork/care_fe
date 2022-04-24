@@ -3,20 +3,20 @@ import React, { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useDispatch } from "react-redux";
 import { GENDER_TYPES } from "../../Common/constants";
-import { statusType, useAbortableEffect } from "../../Common/utils";
+import {
+  getDimensionOrDash,
+  statusType,
+  useAbortableEffect,
+} from "../../Common/utils";
 import { getPermittedFacility, getAllPatient } from "../../Redux/actions";
 import PageTitle from "../Common/PageTitle";
 import Pagination from "../Common/Pagination";
 import { FacilityModel } from "../Facility/models";
 import { PatientModel } from "../Patient/models";
 import { limit } from "../Shifting/Commons";
-import { AdminIcon } from "./Icons/AdminIcon";
-import { BedIcon } from "./Icons/BedIcon";
-import { CCTVIcon } from "./Icons/CCTVIcon";
-import { WifiIcon } from "./Icons/WifiIcon";
 
 export const TeleICUPatientsList = (props: any) => {
-  const [qParams, setQueryParams] = useQueryParams();
+  const [qParams] = useQueryParams();
   const [isLoading, setIsLoading] = useState(false);
   const [offset, setOffset] = useState(0);
   const dispatchAction: any = useDispatch();
@@ -156,13 +156,19 @@ export const TeleICUPatientsList = (props: any) => {
                             <p>
                               <span className="font-bold">Weight:</span>{" "}
                               <span>
-                                {item?.last_consultation?.weight ?? "-"} kg
+                                {getDimensionOrDash(
+                                  item?.last_consultation?.weight,
+                                  "kg"
+                                )}
                               </span>
                             </p>
                             <p>
                               <span className="font-bold">Height:</span>{" "}
                               <span>
-                                {item?.last_consultation?.height ?? "-"} cm
+                                {getDimensionOrDash(
+                                  item?.last_consultation?.height,
+                                  "cm"
+                                )}
                               </span>
                             </p>
                           </>
