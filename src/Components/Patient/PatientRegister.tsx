@@ -113,7 +113,7 @@ const initForm: any = {
   phone_number: "",
   emergency_phone_number: "",
   blood_group: "",
-  disease_status: diseaseStatus[0],
+  disease_status: diseaseStatus[2],
   is_declared_positive: "false",
   date_declared_positive: new Date(),
   date_of_birth: null,
