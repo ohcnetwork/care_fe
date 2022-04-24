@@ -36,6 +36,7 @@ import LiveFeed from "./Consultations/LiveFeed";
 import TeleICUPatientInfoCard from "../TeleIcu/Patient/InfoCard";
 import TeleICUPatientVitalsCard from "../TeleIcu/Patient/VitalsCard";
 import TeleICUPatientVitalsGraphCard from "../TeleIcu/Patient/VitalsGraph";
+import DoctorVideoSlideover from "../TeleIcu/DoctorVideoSlideover";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -47,6 +48,7 @@ export const ConsultationDetails = (props: any) => {
   const tab = props.tab.toUpperCase();
   const dispatch: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
+  const [showDoctors, setShowDoctors] = useState(false);
 
   const [consultationData, setConsultationData] = useState<ConsultationModel>(
     {}
@@ -176,17 +178,12 @@ export const ConsultationDetails = (props: any) => {
 
           <div className="flex items-start justify-start sm:flex-row sm:items-center flex-col space-y-1 sm:space-y-0 sm:divide-x-2">
             <div className="px-2">
-              {patientData?.last_consultation?.assigned_to_object
-                ?.alt_phone_number && (
-                <a
-                  href={`https://wa.me/${patientData?.last_consultation?.assigned_to_object.alt_phone_number}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn m-1 btn-primary hover:text-white"
-                >
-                  Doctor Video
-                </a>
-              )}
+              <button
+                onClick={() => setShowDoctors(true)}
+                className="btn m-1 btn-primary hover:text-white"
+              >
+                Doctor Video
+              </button>
               {patientData.last_consultation?.id && (
                 <Link
                   href={`/facility/${patientData.facility}/patient/${patientData.id}/consultation/${patientData.last_consultation?.id}/feed`}
@@ -802,6 +799,12 @@ export const ConsultationDetails = (props: any) => {
           </div>
         )}
       </div>
+
+      <DoctorVideoSlideover
+        facilityId={facilityId}
+        show={showDoctors}
+        setShow={setShowDoctors}
+      />
     </div>
   );
 };
