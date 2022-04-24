@@ -107,19 +107,19 @@ export default function TeleICUPatientPage({
               <div className="p-3">
                 <h4 className="font-bold text-lg">Present Health</h4>
                 <span className="font-normal text-primary-900 text-sm md:text-base">
-                  {patient.present_health || "N/A"}
+                  {patient.present_health || "-"}
                 </span>
               </div>
               <div className="p-3">
                 <h4 className="font-bold text-lg">Ongoing Meds.</h4>
                 <span className="font-normal text-primary-900 text-sm md:text-base">
-                  {patient.ongoing_medication || "N/A"}
+                  {patient.ongoing_medication || "-"}
                 </span>
               </div>
               <div className="p-3">
                 <h4 className="font-bold text-lg">Allergies</h4>
                 <span className="font-normal text-primary-900 text-sm md:text-base">
-                  {patient.allergies || "N/A"}
+                  {patient.allergies || "-"}
                 </span>
               </div>
             </div>

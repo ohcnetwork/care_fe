@@ -195,6 +195,12 @@ export const ConsultationDetails = (props: any) => {
             </div>
             <div className="px-2">
               <Link
+                href={`/facility/${patientData.facility}/patient/${patientData.id}`}
+                className="btn m-1 btn-primary hover:text-white"
+              >
+                Patient Details
+              </Link>
+              <Link
                 href={`/facility/${patientData.facility}/patient/${patientData.id}/notes/`}
                 className="btn m-1 btn-primary hover:text-white"
               >
@@ -565,7 +571,11 @@ export const ConsultationDetails = (props: any) => {
               </div>
             </div>
             <div className="md:w-1/3 pl-4">
-              <PageTitle title="Updates" hideBack={true} breadcrumbs={false} />
+              <PageTitle
+                title="Update Log"
+                hideBack={true}
+                breadcrumbs={false}
+              />
               <DailyRoundsList
                 facilityId={facilityId}
                 patientId={patientId}

@@ -116,7 +116,7 @@ export default function TeleICUPatientVitalsCard({
               "body-temperature1",
               patient.last_consultation?.last_daily_round?.temperature
                 ? `${patient.last_consultation?.last_daily_round?.temperature} F`
-                : "N/A"
+                : "-"
             )}
           </h2>
           <span className="font-medium text-primary-900 md:text-lg text-sm">
@@ -139,7 +139,7 @@ export default function TeleICUPatientVitalsCard({
               "pulse-rate",
               patient.last_consultation?.last_daily_round?.pulse
                 ? `${patient.last_consultation?.last_daily_round?.pulse}`
-                : "N/A"
+                : "-"
             )}
           </h2>
           <span className="font-medium text-primary-900 md:text-lg text-sm">
@@ -162,7 +162,7 @@ export default function TeleICUPatientVitalsCard({
             {getVital(
               patientObservations,
               "respiratory-rate",
-              patient.last_consultation?.last_daily_round?.resp ?? "N/A"
+              patient.last_consultation?.last_daily_round?.resp ?? "-"
             )}
           </h2>
           <span className="font-medium text-primary-900 md:text-lg text-sm">
@@ -184,7 +184,7 @@ export default function TeleICUPatientVitalsCard({
               patientObservations,
               "SpO2",
               patient.last_consultation?.last_daily_round?.ventilator_spo2 ??
-                "N/A"
+                "-"
             )}
           </h2>
           <span className="font-medium text-primary-900 md:text-lg text-sm">
@@ -205,7 +205,7 @@ export default function TeleICUPatientVitalsCard({
             {getVital(
               patientObservations,
               "heart-rate",
-              patient.last_consultation?.last_daily_round?.pulse ?? "N/A"
+              patient.last_consultation?.last_daily_round?.pulse ?? "-"
             )}
           </h2>
           <span className="font-medium text-primary-900 md:text-lg text-sm">
