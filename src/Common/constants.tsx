@@ -69,12 +69,12 @@ export const VEHICLE_TYPES: Array<OptionsType> = [
 ];
 
 export const FACILITY_TYPES: Array<OptionsType> = [
-  { id: 1, text: "Educational Inst" },
+  // { id: 1, text: "Educational Inst" },
   { id: 2, text: "Private Hospital" },
   { id: 3, text: "Other" },
-  { id: 4, text: "Hostel" },
-  { id: 5, text: "Hotel" },
-  { id: 6, text: "Lodge" },
+  // { id: 4, text: "Hostel" },
+  // { id: 5, text: "Hotel" },
+  // { id: 6, text: "Lodge" },
   { id: 7, text: "TeleMedicine" },
   { id: 8, text: "Govt Hospital" },
   { id: 9, text: "Labs" },
@@ -91,14 +91,14 @@ export const FACILITY_TYPES: Array<OptionsType> = [
   { id: 870, text: "Govt Medical College Hospitals" },
   { id: 950, text: "Corona Testing Labs" },
   { id: 1000, text: "Corona Care Centre" },
-  { id: 1010, text: "COVID-19 Domiciliary Care Center" },
-  { id: 1100, text: "First Line Treatment Centre" },
-  { id: 1200, text: "Second Line Treatment Center" },
+  // { id: 1010, text: "COVID-19 Domiciliary Care Center" },
+  // { id: 1100, text: "First Line Treatment Centre" },
+  // { id: 1200, text: "Second Line Treatment Center" },
   { id: 1300, text: "Shifting Centre" },
-  { id: 1400, text: "Covid Management Center" },
+  // { id: 1400, text: "Covid Management Center" },
   { id: 1500, text: "Request Approving Center" },
   { id: 1510, text: "Request Fulfilment Center" },
-  { id: 1600, text: "District War Room" },
+  // { id: 1600, text: "District War Room" },
 ];
 
 export const SHIFTING_CHOICES: Array<OptionsType> = [
