@@ -39,6 +39,7 @@
     "build",
     "*.bs.js",
     "*.gen.tsx",
-    "*.res"
+    "*.res",
+    "*.css"
   ]
 }
