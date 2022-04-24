@@ -33,6 +33,10 @@ import { PressureSoreDiagrams } from "./Consultations/PressureSoreDiagrams";
 import { DialysisPlots } from "./Consultations/DialysisPlots";
 import ViewInvestigations from "./Investigations/ViewInvestigations";
 import LiveFeed from "./Consultations/LiveFeed";
+import TeleICUPatientInfoCard from "../TeleIcu/Patient/InfoCard";
+import TeleICUPatientVitalsCard from "../TeleIcu/Patient/VitalsCard";
+import TeleICUPatientVitalsGraphCard from "../TeleIcu/Patient/VitalsGraph";
+import DoctorVideoSlideover from "../TeleIcu/DoctorVideoSlideover";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -44,7 +48,8 @@ export const ConsultationDetails = (props: any) => {
   const tab = props.tab.toUpperCase();
   const dispatch: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
-  const [isPrintMode, setIsPrintMode] = useState(false);
+  const [showDoctors, setShowDoctors] = useState(false);
+
   const [consultationData, setConsultationData] = useState<ConsultationModel>(
     {}
   );
@@ -164,49 +169,92 @@ export const ConsultationDetails = (props: any) => {
   return (
     <div>
       <div className="px-2 pb-2">
-        <Link
-          className="btn btn-default bg-white mt-2"
-          href={`/facility/${facilityId}/patient/${patientId}`}
-        >
-          <i className="fas fa-chevron-left  rounded-md p-2 hover:bg-gray-200 mr-1"></i>
-          {"Go back to Patient Page"}
-        </Link>
+        <nav className="flex justify-between flex-wrap">
+          <PageTitle
+            title="Patient Details"
+            className="sm:m-0 sm:p-0"
+            breadcrumbs={true}
+          />
+
+          <div className="flex items-start justify-start sm:flex-row sm:items-center flex-col space-y-1 sm:space-y-0 sm:divide-x-2">
+            <div className="px-2">
+              <button
+                onClick={() => setShowDoctors(true)}
+                className="btn m-1 btn-primary hover:text-white"
+              >
+                Doctor Video
+              </button>
+              {patientData.last_consultation?.id && (
+                <Link
+                  href={`/facility/${patientData.facility}/patient/${patientData.id}/consultation/${patientData.last_consultation?.id}/feed`}
+                  className="btn m-1 btn-primary hover:text-white"
+                >
+                  Camera Feed
+                </Link>
+              )}
+            </div>
+            <div className="px-2">
+              <Link
+                href={`/facility/${patientData.facility}/patient/${patientData.id}`}
+                className="btn m-1 btn-primary hover:text-white"
+              >
+                Patient Details
+              </Link>
+              <Link
+                href={`/facility/${patientData.facility}/patient/${patientData.id}/notes/`}
+                className="btn m-1 btn-primary hover:text-white"
+              >
+                Doctor&apos;s Notes
+              </Link>
+            </div>
+          </div>
+        </nav>
         <div className="flex md:flex-row flex-col w-full mt-2">
           <div className="border rounded-lg bg-white shadow h-full text-black p-4 w-full">
-            <div className="flex md:flex-row flex-col justify-between">
-              <div>
-                <div className="flex md:flex-row flex-col md:items-center">
-                  <div className="font-semibold text-3xl capitalize">
-                    {consultationData.suggestion_text?.toLocaleLowerCase()}
-                  </div>
-                  <div className="text-sm md:mt-2 md:pl-2">
-                    {` @${consultationData.facility_name}`}
-                  </div>
-                </div>
-                <div className="flex items-center">
-                  {consultationData.category && (
-                    <span className="badge badge-pill badge-warning">
-                      {consultationData.category}
-                    </span>
-                  )}{" "}
-                  {consultationData.ip_no && (
-                    <div className="md:col-span-2 capitalize pl-2">
-                      <span className="badge badge-pill badge-primary">
-                        {`IP: ${consultationData.ip_no}`}
-                      </span>
-                    </div>
-                  )}
-                </div>
-                <div className="mt-1 border p-2 bg-gray-100">
-                  <span className="font-semibold leading-relaxed text-gray-800 text-xs">
-                    Symptoms from{" "}
-                    {moment(consultationData.symptoms_onset_date).format("lll")}
-                  </span>
-                  <div className="capitalize">
-                    {consultationData.symptoms_text || "-"}
-                  </div>
+            <div>
+              <div className="flex md:flex-row flex-col md:items-center">
+                <div className="text-sm md:mt-2 md:pl-2">
+                  {consultationData.facility_name}
                 </div>
               </div>
+              <div className="flex items-center">
+                {consultationData.ip_no && (
+                  <div className="md:col-span-2 capitalize pl-2">
+                    <span className="badge badge-pill badge-primary">
+                      {`IP: ${consultationData.ip_no}`}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+            <TeleICUPatientInfoCard patient={patientData} />
+            <div className="flex md:flex-row flex-col mt-4 gap-2 justify-between">
+              <div className="flex flex-col text-xs text-gray-700 font-base leading-relaxed">
+                <div>
+                  <span className="text-gray-900">Created: </span>
+                  {moment(consultationData.created_date).format("lll")} |
+                </div>
+                {consultationData.created_by && (
+                  <div>
+                    {` ${consultationData.created_by?.first_name} ${consultationData.created_by?.last_name}  `}
+                    {`@${consultationData.created_by?.username} (${consultationData.created_by?.user_type})`}
+                  </div>
+                )}
+              </div>
+              <div className="flex flex-col text-xs md:text-right text-gray-700 font-base leading-relaxed">
+                <div>
+                  <span className="text-gray-900">Last Modified: </span>
+                  {moment(consultationData.modified_date).format("lll")} |
+                </div>
+                {consultationData.last_edited_by && (
+                  <div>
+                    {` ${consultationData.last_edited_by?.first_name} ${consultationData.last_edited_by?.last_name}  `}
+                    {`@${consultationData.last_edited_by?.username} (${consultationData.last_edited_by?.user_type})`}
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="flex md:flex-row flex-col justify-between">
               {consultationData.admitted_to && (
                 <div className="border rounded-lg bg-gray-100 p-2 md:mt-0 mt-2">
                   <div className="border-b-2 py-1">
@@ -268,87 +316,6 @@ export const ConsultationDetails = (props: any) => {
                 </div>
               )}
             </div>
-            <div className="flex md:flex-row flex-col mt-4 gap-2 justify-between">
-              <div className="flex flex-col text-xs text-gray-700 font-base leading-relaxed">
-                <div>
-                  <span className="text-gray-900">Created: </span>
-                  {moment(consultationData.created_date).format("lll")} |
-                </div>
-                {consultationData.created_by && (
-                  <div>
-                    {` ${consultationData.created_by?.first_name} ${consultationData.created_by?.last_name}  `}
-                    {`@${consultationData.created_by?.username} (${consultationData.created_by?.user_type})`}
-                  </div>
-                )}
-              </div>
-              <div className="flex flex-col text-xs md:text-right text-gray-700 font-base leading-relaxed">
-                <div>
-                  <span className="text-gray-900">Last Modified: </span>
-                  {moment(consultationData.modified_date).format("lll")} |
-                </div>
-                {consultationData.last_edited_by && (
-                  <div>
-                    {` ${consultationData.last_edited_by?.first_name} ${consultationData.last_edited_by?.last_name}  `}
-                    {`@${consultationData.last_edited_by?.username} (${consultationData.last_edited_by?.user_type})`}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-          <div className="md:px-2 px-0 md:py-0 py-2">
-            <div className="border rounded-lg bg-white shadow h-full p-4 w-full">
-              <div>
-                <button
-                  className="btn btn-primary w-full"
-                  onClick={() =>
-                    navigate(
-                      `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/update`
-                    )
-                  }
-                >
-                  Update Details
-                </button>
-              </div>
-              <div className="mt-2">
-                <button
-                  className="btn btn-primary w-full"
-                  onClick={() =>
-                    navigate(
-                      `/facility/${facilityId}/patient/${patientId}/shift/new`
-                    )
-                  }
-                >
-                  SHIFT PATIENT
-                </button>
-              </div>
-
-              {!consultationData.discharge_date && (
-                <div className="mt-2">
-                  <button
-                    className="btn btn-primary w-full"
-                    onClick={() =>
-                      navigate(
-                        `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/treatment-summary`
-                      )
-                    }
-                  >
-                    Treatment Summary
-                  </button>
-                </div>
-              )}
-              <div className="mt-2">
-                <button
-                  className="btn btn-primary w-full"
-                  onClick={() =>
-                    navigate(
-                      `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds`
-                    )
-                  }
-                >
-                  Log Update
-                </button>
-              </div>
-            </div>
           </div>
         </div>
 
@@ -379,6 +346,33 @@ export const ConsultationDetails = (props: any) => {
           <div className="flex md:flex-row flex-col">
             <div className="md:w-2/3">
               <PageTitle title="Info" hideBack={true} breadcrumbs={false} />
+              <section className="bg-white shadow-sm rounded-md flex items-stretch w-full flex-col lg:flex-row">
+                <TeleICUPatientVitalsCard patient={patientData} />
+                <TeleICUPatientVitalsGraphCard
+                  consultationId={patientData.last_consultation?.id}
+                />
+              </section>
+
+              {consultationData.symptoms_text && (
+                <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
+                  <div className="px-4 py-5 sm:p-6">
+                    <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                      Symptoms
+                    </h3>
+                    <div className="">
+                      <div className="capitalize">
+                        {consultationData.symptoms_text || "-"}
+                      </div>
+                      <span className="font-semibold leading-relaxed text-gray-800 text-xs">
+                        from{" "}
+                        {moment(consultationData.symptoms_onset_date).format(
+                          "lll"
+                        )}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
               {consultationData.examination_details && (
                 <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
                   <div className="px-4 py-5 sm:p-6">
@@ -577,7 +571,11 @@ export const ConsultationDetails = (props: any) => {
               </div>
             </div>
             <div className="md:w-1/3 pl-4">
-              <PageTitle title="Updates" hideBack={true} breadcrumbs={false} />
+              <PageTitle
+                title="Update Log"
+                hideBack={true}
+                breadcrumbs={false}
+              />
               <DailyRoundsList
                 facilityId={facilityId}
                 patientId={patientId}
@@ -811,6 +809,12 @@ export const ConsultationDetails = (props: any) => {
           </div>
         )}
       </div>
+
+      <DoctorVideoSlideover
+        facilityId={facilityId}
+        show={showDoctors}
+        setShow={setShowDoctors}
+      />
     </div>
   );
 };

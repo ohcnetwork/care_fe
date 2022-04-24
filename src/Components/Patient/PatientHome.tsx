@@ -35,7 +35,6 @@ import { validateEmailAddress } from "../../Common/validation";
 import Modal from "@material-ui/core/Modal";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
-import TeleICUPatient from "../TeleIcu/Patient";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -78,7 +77,6 @@ export const PatientHome = (props: any) => {
     status: number;
     sample: any;
   }>({ status: 0, sample: null });
-  const [viewOption, setViewOption] = useState("personal");
   const [showAlertMessage, setAlertMessage] = useState({
     show: false,
     message: "",
@@ -563,93 +561,55 @@ export const PatientHome = (props: any) => {
       )}
 
       <div id="revamp">
-        <div className="flex items-center gap-2 flex-wrap justify-between mb-4">
-          <PageTitle
-            title={"Covid Suspect Details"}
-            backUrl="/patients"
-            crumbsReplacements={{
-              [facilityId]: { name: patientData?.facility_object?.name },
-              [id]: { name: patientData?.name },
-            }}
-          />
-          <div className="flex items-center gap-2">
-            <h1 className="text-base font-medium">View Option</h1>
+        <PageTitle
+          title={"Covid Suspect Details"}
+          backUrl="/patients"
+          crumbsReplacements={{
+            [facilityId]: { name: patientData?.facility_object?.name },
+            [id]: { name: patientData?.name },
+          }}
+        />
 
-            <div className="flex items-center">
-              <button
-                className={`px-4 py-2 border block ${
-                  viewOption === "teleicu"
-                    ? "bg-primary-500 border-primary-500 rounded text-white"
-                    : "bg-transparent border-primary-200"
-                } `}
-                onClick={() => setViewOption("teleicu")}
-              >
-                TeleICU
-              </button>
-              <button
-                className={`px-4 py-2 border block ${
-                  viewOption === "personal"
-                    ? "bg-primary-500 border-primary-500 rounded text-white"
-                    : "bg-transparent border-primary-200"
-                } `}
-                onClick={() => setViewOption("personal")}
-              >
-                Personal
-              </button>
+        <div className="relative mt-2">
+          <div className="max-w-screen-xl mx-auto py-3 px-3 sm:px-6 lg:px-8">
+            <div className="md:flex">
+              {patientData?.last_consultation?.assigned_to_object && (
+                <p className="font-bold text-green-800 rounded-lg shadow bg-green-200 p-3 mx-3 flex-1 text-center flex justify-center gap-2">
+                  <span className="inline">
+                    Assigned Doctor:{" "}
+                    {
+                      patientData?.last_consultation?.assigned_to_object
+                        .first_name
+                    }{" "}
+                    {
+                      patientData?.last_consultation?.assigned_to_object
+                        .last_name
+                    }
+                  </span>
+                  {patientData?.last_consultation?.assigned_to_object
+                    .alt_phone_number && (
+                    <a
+                      href={`https://wa.me/${patientData?.last_consultation?.assigned_to_object.alt_phone_number}`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <i className="fab fa-whatsapp"></i> Video Call
+                    </a>
+                  )}
+                </p>
+              )}
+              {patientData.assigned_to_object && (
+                <p className="font-bold text-primary-800 rounded-lg shadow bg-primary-200 mx-2 p-3 flex-1 text-center">
+                  <span className="inline">
+                    Assigned Volunteer:{" "}
+                    {patientData.assigned_to_object.first_name}{" "}
+                    {patientData.assigned_to_object.last_name}
+                  </span>
+                </p>
+              )}
             </div>
           </div>
         </div>
-
-        {viewOption === "teleicu" ? (
-          <TeleICUPatient
-            patientId={id}
-            facilityId={facilityId}
-            asComponent={true}
-          />
-        ) : (
-          <>
-            <div className="relative mt-2">
-              <div className="max-w-screen-xl mx-auto py-3 px-3 sm:px-6 lg:px-8">
-                <div className="md:flex">
-                  {patientData?.last_consultation?.assigned_to_object && (
-                    <p className="font-bold text-green-800 rounded-lg shadow bg-green-200 p-3 mx-3 flex-1 text-center flex justify-center gap-2">
-                      <span className="inline">
-                        Assigned Doctor:{" "}
-                        {
-                          patientData?.last_consultation?.assigned_to_object
-                            .first_name
-                        }{" "}
-                        {
-                          patientData?.last_consultation?.assigned_to_object
-                            .last_name
-                        }
-                      </span>
-                      {patientData?.last_consultation?.assigned_to_object
-                        .alt_phone_number && (
-                        <a
-                          href={`https://wa.me/${patientData?.last_consultation?.assigned_to_object.alt_phone_number}`}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          <i className="fab fa-whatsapp"></i> Video Call
-                        </a>
-                      )}
-                    </p>
-                  )}
-                  {patientData.assigned_to_object && (
-                    <p className="font-bold text-primary-800 rounded-lg shadow bg-primary-200 mx-2 p-3 flex-1 text-center">
-                      <span className="inline">
-                        Assigned Volunteer:{" "}
-                        {patientData.assigned_to_object.first_name}{" "}
-                        {patientData.assigned_to_object.last_name}
-                      </span>
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-          </>
-        )}
         {patientData?.facility != patientData?.last_consultation?.facility && (
           <div className="relative mt-2">
             <div className="max-w-screen-xl mx-auto py-3 px-3 sm:px-6 lg:px-8 rounded-lg shadow bg-red-200 ">

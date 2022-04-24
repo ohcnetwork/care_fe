@@ -4,8 +4,8 @@ import { useDispatch } from "react-redux";
 import { getPatient } from "../../../Redux/actions";
 import Loading from "../../Common/Loading";
 import PageTitle from "../../Common/PageTitle";
-import { FacilityModel } from "../../Facility/models";
 import { PatientModel } from "../../Patient/models";
+import DoctorVideoSlideover from "../DoctorVideoSlideover";
 import { RightArrowIcon } from "../Icons/ArrowIcon";
 import TeleICUPatientInfoCard from "./InfoCard";
 import TeleICUPatientVitalsCard from "./VitalsCard";
@@ -19,11 +19,11 @@ export interface ITeleICUPatientPageProps {
 
 export default function TeleICUPatientPage({
   patientId,
-  facilityId,
   asComponent = false,
 }: ITeleICUPatientPageProps) {
   const [patient, setPatient] = useState<PatientModel>({});
   const [isLoading, setIsLoading] = useState(true);
+  const [showDoctors, setShowDoctors] = useState(false);
   const dispatch: any = useDispatch();
 
   useEffect(() => {
@@ -53,17 +53,15 @@ export default function TeleICUPatientPage({
         )}
         <div className="flex items-start justify-start sm:flex-row sm:items-center flex-col space-y-1 sm:space-y-0 sm:divide-x-2">
           <div className="px-2">
-            {patient?.last_consultation?.assigned_to_object
-              ?.alt_phone_number && (
-              <a
-                href={`https://wa.me/${patient?.last_consultation?.assigned_to_object.alt_phone_number}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn m-1 btn-primary hover:text-white"
-              >
-                Doctor Video
-              </a>
-            )}
+            <button
+              // href={`https://wa.me/${patient?.last_consultation?.assigned_to_object?.alt_phone_number}`}
+              // target="_blank"
+              // rel="noopener noreferrer"
+              onClick={() => setShowDoctors(true)}
+              className="btn m-1 btn-primary hover:text-white"
+            >
+              Doctor Video
+            </button>
             {patient.last_consultation?.id && (
               <Link
                 href={`/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/feed`}
@@ -109,19 +107,19 @@ export default function TeleICUPatientPage({
               <div className="p-3">
                 <h4 className="font-bold text-lg">Present Health</h4>
                 <span className="font-normal text-primary-900 text-sm md:text-base">
-                  {patient.present_health || "N/A"}
+                  {patient.present_health || "-"}
                 </span>
               </div>
               <div className="p-3">
                 <h4 className="font-bold text-lg">Ongoing Meds.</h4>
                 <span className="font-normal text-primary-900 text-sm md:text-base">
-                  {patient.ongoing_medication || "N/A"}
+                  {patient.ongoing_medication || "-"}
                 </span>
               </div>
               <div className="p-3">
                 <h4 className="font-bold text-lg">Allergies</h4>
                 <span className="font-normal text-primary-900 text-sm md:text-base">
-                  {patient.allergies || "N/A"}
+                  {patient.allergies || "-"}
                 </span>
               </div>
             </div>
@@ -138,6 +136,11 @@ export default function TeleICUPatientPage({
           </div>
         </div>
       </section>
+      <DoctorVideoSlideover
+        facilityId={patient.facility ?? ""}
+        show={showDoctors}
+        setShow={setShowDoctors}
+      />
     </main>
   );
 }
