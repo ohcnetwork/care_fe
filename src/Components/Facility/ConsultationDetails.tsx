@@ -33,6 +33,9 @@ import { PressureSoreDiagrams } from "./Consultations/PressureSoreDiagrams";
 import { DialysisPlots } from "./Consultations/DialysisPlots";
 import ViewInvestigations from "./Investigations/ViewInvestigations";
 import LiveFeed from "./Consultations/LiveFeed";
+import TeleICUPatientInfoCard from "../TeleIcu/Patient/InfoCard";
+import TeleICUPatientVitalsCard from "../TeleIcu/Patient/VitalsCard";
+import TeleICUPatientVitalsGraphCard from "../TeleIcu/Patient/VitalsGraph";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -44,7 +47,7 @@ export const ConsultationDetails = (props: any) => {
   const tab = props.tab.toUpperCase();
   const dispatch: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
-  const [isPrintMode, setIsPrintMode] = useState(false);
+
   const [consultationData, setConsultationData] = useState<ConsultationModel>(
     {}
   );
@@ -173,6 +176,7 @@ export const ConsultationDetails = (props: any) => {
         </Link>
         <div className="flex md:flex-row flex-col w-full mt-2">
           <div className="border rounded-lg bg-white shadow h-full text-black p-4 w-full">
+            <TeleICUPatientInfoCard patient={patientData} />
             <div className="flex md:flex-row flex-col justify-between">
               <div>
                 <div className="flex md:flex-row flex-col md:items-center">
@@ -379,6 +383,12 @@ export const ConsultationDetails = (props: any) => {
           <div className="flex md:flex-row flex-col">
             <div className="md:w-2/3">
               <PageTitle title="Info" hideBack={true} breadcrumbs={false} />
+              <section className="bg-white shadow-sm rounded-md flex items-stretch w-full flex-col lg:flex-row">
+                <TeleICUPatientVitalsCard patient={patientData} />
+                <TeleICUPatientVitalsGraphCard
+                  consultationId={patientData.last_consultation?.id}
+                />
+              </section>
               {consultationData.examination_details && (
                 <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
                   <div className="px-4 py-5 sm:p-6">
