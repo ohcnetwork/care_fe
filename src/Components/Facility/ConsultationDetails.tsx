@@ -167,13 +167,45 @@ export const ConsultationDetails = (props: any) => {
   return (
     <div>
       <div className="px-2 pb-2">
-        <Link
-          className="btn btn-default bg-white mt-2"
-          href={`/facility/${facilityId}/patient/${patientId}`}
-        >
-          <i className="fas fa-chevron-left  rounded-md p-2 hover:bg-gray-200 mr-1"></i>
-          {"Go back to Patient Page"}
-        </Link>
+        <nav className="flex justify-between flex-wrap">
+          <PageTitle
+            title="Patient Details"
+            className="sm:m-0 sm:p-0"
+            breadcrumbs={true}
+          />
+
+          <div className="flex items-start justify-start sm:flex-row sm:items-center flex-col space-y-1 sm:space-y-0 sm:divide-x-2">
+            <div className="px-2">
+              {patientData?.last_consultation?.assigned_to_object
+                ?.alt_phone_number && (
+                <a
+                  href={`https://wa.me/${patientData?.last_consultation?.assigned_to_object.alt_phone_number}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn m-1 btn-primary hover:text-white"
+                >
+                  Doctor Video
+                </a>
+              )}
+              {patientData.last_consultation?.id && (
+                <Link
+                  href={`/facility/${patientData.facility}/patient/${patientData.id}/consultation/${patientData.last_consultation?.id}/feed`}
+                  className="btn m-1 btn-primary hover:text-white"
+                >
+                  Camera Feed
+                </Link>
+              )}
+            </div>
+            <div className="px-2">
+              <Link
+                href={`/facility/${patientData.facility}/patient/${patientData.id}/notes/`}
+                className="btn m-1 btn-primary hover:text-white"
+              >
+                Doctor&apos;s Notes
+              </Link>
+            </div>
+          </div>
+        </nav>
         <div className="flex md:flex-row flex-col w-full mt-2">
           <div className="border rounded-lg bg-white shadow h-full text-black p-4 w-full">
             <div>
