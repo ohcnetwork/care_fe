@@ -9,6 +9,7 @@ export interface ITelePatientVitalsGraphCardProps {
 export default function TelePatientVitalsGraphCard({
   consultationId,
 }: ITelePatientVitalsGraphCardProps) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [analysis, setAnalysis] = useState({ noData: true });
   const [isLoading, setIsLoading] = useState(true);
   const dispatch: any = useDispatch();
@@ -36,7 +37,7 @@ export default function TelePatientVitalsGraphCard({
   }
 
   return (
-    <div className="lg:w-6/12 w-full text-white flex items-center justify-center lg:h-auto h-96 rounded-b-md lg:rounded-b-none">
+    <div className="lg:w-4/12 w-full text-white flex items-center justify-center lg:h-auto h-96 rounded-b-md lg:rounded-b-none">
       <div className="flex items-center justify-center flex-col flex-1">
         {/* Image with gray overlay */}
         {/* !analysis.noData ? (

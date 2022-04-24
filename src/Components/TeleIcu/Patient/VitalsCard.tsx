@@ -3,7 +3,6 @@ import { useDispatch } from "react-redux";
 import { listAssetBeds } from "../../../Redux/actions";
 import { AssetData } from "../../Assets/AssetTypes";
 import { PatientModel } from "../../Patient/models";
-import { RightArrowIcon } from "../Icons/ArrowIcon";
 
 export interface ITeleICUPatientVitalsCardProps {
   patient: PatientModel;
@@ -105,12 +104,9 @@ export default function TeleICUPatientVitalsCard({
   }, []);
 
   return (
-    <div className="lg:w-6/12 w-full p-5 py-3">
+    <div className="lg:w-8/12 w-full p-5 py-3">
       <h4 className="flex items-center mb-2">
         <span className="font-semibold text-xl">Vitals</span>
-        <span className="ml-2">
-          <RightArrowIcon className="text-gray-900" />
-        </span>
       </h4>
       <div className="grid grid-cols-2 gap-2 my-2">
         <div className="bg-white rounded-md p-3 text-center">
