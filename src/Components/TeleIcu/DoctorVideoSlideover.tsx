@@ -33,6 +33,25 @@ export default function DoctorVideoSlideover(props: {
   return (
     <SlideOver show={show} setShow={setShow}>
       <div className="bg-white min-h-screen p-4">
+        {/* Title and close button */}
+        <div className="flex justify-between items-center pb-4">
+          <div>
+            <h2 className="text-2xl font-bold">Doctor Connect</h2>
+            <p className="text-gray-600 text-sm">
+              Select a doctor to connect via video
+            </p>
+          </div>
+          <button
+            className="text-gray-600 hover:text-gray-800 border border-gray-600 py-2 px-4"
+            onClick={() => setShow(false)}
+          >
+            {/* Times Icon */}
+            <span>
+              <i className="fas fa-times mr-2"></i>
+              Cancel
+            </span>
+          </button>
+        </div>
         <ul
           className="max-h-96 scroll-py-3 overflow-y-auto p-3 list-none"
           id="options"
