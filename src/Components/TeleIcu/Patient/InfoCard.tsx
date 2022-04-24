@@ -50,8 +50,8 @@ export default function TeleICUPatientInfoCard({
                 <span className="font-light text-primary-600 text-sm mr-1">
                   Weight
                 </span>
-                <span className="sm:text-base font-semibold text-sm mr-2">
-                  {getDimensionOrDash(patient.last_consultation.weight, " kg")}
+                <span className="sm:text-base font-semibold text-sm mr-2 block">
+                  {getDimensionOrDash(patient.last_consultation.weight, " kxg")}
                 </span>
               </div>
             ) : (
@@ -62,7 +62,7 @@ export default function TeleICUPatientInfoCard({
                 <span className="font-light text-primary-600 text-sm mr-1">
                   Height
                 </span>
-                <span className="sm:text-base font-semibold text-sm mr-2">
+                <span className="sm:text-base font-semibold text-sm mr-2 block">
                   {getDimensionOrDash(patient.last_consultation?.height, "cm")}
                 </span>
               </div>

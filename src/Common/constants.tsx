@@ -574,16 +574,16 @@ export const RHYTHM_CHOICES: Array<OptionsType> = [
 export const LOCATION_BED_TYPES: Array<any> = [
   { id: "ISOLATION", name: "Isolation" },
   { id: "ICU", name: "ICU" },
-  {
-    id: "ICU_WITH_NON_INVASIVE_VENTILATOR",
-    name: "ICU with non invasive ventilator",
-  },
-  { id: "ICU_WITH_OXYGEN_SUPPORT", name: "ICU with oxygen support" },
-  { id: "ICU_WITH_INVASIVE_VENTILATOR", name: "ICU with invasive ventilator" },
   { id: "BED_WITH_OXYGEN_SUPPORT", name: "Bed with oxygen support" },
   { id: "REGULAR", name: "Regular" },
 ];
-
+// Deprecated Bed Types
+// {
+//   id: "ICU_WITH_NON_INVASIVE_VENTILATOR",
+//   name: "ICU with non invasive ventilator",
+// },
+// { id: "ICU_WITH_OXYGEN_SUPPORT", name: "ICU with oxygen support" },
+// { id: "ICU_WITH_INVASIVE_VENTILATOR", name: "ICU with invasive ventilator" }
 export const ASSET_META_TYPE = [
   { id: "CAMERA", text: "Camera(ONVIF)" },
   { id: "HL7MONITOR", text: "Vitals Monitor(HL7)" },
