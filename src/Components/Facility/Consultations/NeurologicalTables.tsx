@@ -59,23 +59,31 @@ const DataTable = (props: any) => {
 
 const DataDescription = (props: any) => {
   const { title, data } = props;
+  console.log("Data Description", title, data);
+
   return (
     <div>
       <div className="text-xl font-semibold">{title}</div>
       <div className="p-4 bg-white border rounded-lg shadow">
-        {data.map((x: any, i: any) => (
-          <div key={`${title}_${i}`} className="mb-2">
-            <div className="text-sm font-bold">{`- ${x.date}`}</div>
-            <div className="text-cool-gray-800 pl-2">
-              <span className="font-semibold">Left: </span>
-              {x.left}
+        {data.length ? (
+          data.map((x: any, i: any) => (
+            <div key={`${title}_${i}`} className="mb-2">
+              <div className="text-sm font-bold">{`- ${x.date}`}</div>
+              <div className="text-cool-gray-800 pl-2">
+                <span className="font-semibold">Left: </span>
+                {x.left}
+              </div>
+              <div className="text-cool-gray-800 pl-2">
+                <span className="font-semibold">Right: </span>
+                {x.right}
+              </div>
             </div>
-            <div className="text-cool-gray-800 pl-2">
-              <span className="font-semibold">Right: </span>
-              {x.right}
-            </div>
+          ))
+        ) : (
+          <div className="text-gray-500 text-sm text-center">
+            No Data Available!
           </div>
-        ))}
+        )}
       </div>
     </div>
   );
@@ -179,7 +187,7 @@ export const NeurologicalTable = (props: any) => {
   const lowerLimbData: any = [];
   const glasgowData: any = [];
   Object.entries(results).map((x: any) => {
-    let value: any = x[1];
+    const value: any = x[1];
     if (x[1].consciousness_level) {
       locData.push({
         date: moment(x[0]).format("LLL"),
@@ -285,6 +293,8 @@ export const NeurologicalTable = (props: any) => {
     }
   });
 
+  console.log("locDes", locDescription);
+
   return (
     <div className="mt-2">
       <div className="mb-6">
@@ -314,12 +324,18 @@ export const NeurologicalTable = (props: any) => {
             Level Of Consciousness Description
           </div>
           <div className="p-4 bg-white border rounded-lg shadow">
-            {locDescription.map((x: any, i: any) => (
-              <div key={`loc_desc_${i}`} className="mb-2">
-                <div className="text-sm font-semibold">{`- ${x.date}`}</div>
-                <div className="text-cool-gray-800 pl-2">{x.loc}</div>
+            {locDescription.length ? (
+              locDescription.map((x: any, i: any) => (
+                <div key={`loc_desc_${i}`} className="mb-2">
+                  <div className="text-sm font-semibold">{`- ${x.date}`}</div>
+                  <div className="text-cool-gray-800 pl-2">{x.loc}</div>
+                </div>
+              ))
+            ) : (
+              <div className="text-gray-500 text-sm text-center">
+                No Data Available!
               </div>
-            ))}
+            )}
           </div>
         </div>
       </div>
