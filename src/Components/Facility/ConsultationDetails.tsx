@@ -20,7 +20,6 @@ import {
   GENDER_TYPES,
 } from "../../Common/constants";
 import { FileUpload } from "../Patient/FileUpload";
-import TreatmentSummary from "./TreatmentSummary";
 import { PrimaryParametersPlot } from "./Consultations/PrimaryParametersPlot";
 import { MedicineTables } from "./Consultations/MedicineTables";
 import { ABGPlots } from "./Consultations/ABGPlots";
@@ -34,6 +33,7 @@ import { PressureSoreDiagrams } from "./Consultations/PressureSoreDiagrams";
 import { DialysisPlots } from "./Consultations/DialysisPlots";
 import ViewInvestigations from "./Investigations/ViewInvestigations";
 import LiveFeed from "./Consultations/LiveFeed";
+import Beds from "./Consultations/Beds";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -45,7 +45,6 @@ export const ConsultationDetails = (props: any) => {
   const tab = props.tab.toUpperCase();
   const dispatch: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
-  const [isPrintMode, setIsPrintMode] = useState(false);
   const [consultationData, setConsultationData] = useState<ConsultationModel>(
     {}
   );
@@ -146,7 +145,7 @@ export const ConsultationDetails = (props: any) => {
         setIsLoading(false);
       }
     },
-    [consultationId, dispatch]
+    [consultationId, dispatch, patientData.is_vaccinated]
   );
 
   useAbortableEffect((status: statusType) => {
@@ -498,8 +497,8 @@ export const ConsultationDetails = (props: any) => {
                       Lines and Catheters
                     </h3>
                     <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
-                      {consultationData.lines?.map((line: any) => (
-                        <div className="mt-4">
+                      {consultationData.lines?.map((line: any, idx: number) => (
+                        <div key={idx} className="mt-4">
                           <h5>{line.type}</h5>
                           <p className="text-justify break-word">
                             Details:
@@ -593,6 +592,20 @@ export const ConsultationDetails = (props: any) => {
             middlewareHostname={cameraMiddlewareHostname}
             config={cameraConfig}
           />
+        )}
+        {tab === "BEDS" && (
+          <div className="mt-4">
+            <PageTitle
+              title="Beds History"
+              hideBack={true}
+              breadcrumbs={false}
+            />
+            <Beds
+              facilityId={facilityId}
+              patientId={patientId}
+              consultationId={consultationId}
+            ></Beds>
+          </div>
         )}
         {tab === "SUMMARY" && (
           <div className="mt-4">

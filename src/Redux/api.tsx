@@ -195,6 +195,25 @@ const routes: Routes = {
     method: "PUT",
   },
 
+  // Consultation beds
+
+  listConsultationBeds: {
+    path: "/api/v1/consultationbed/",
+    method: "GET",
+  },
+  createConsultationBed: {
+    path: "/api/v1/consultationbed/",
+    method: "POST",
+  },
+  getConsultationBed: {
+    path: "/api/v1/consultationbed/{external_id}/",
+    method: "GET",
+  },
+  updateConsultationBed: {
+    path: "/api/v1/consultationbed/{external_id}/",
+    method: "PUT",
+  },
+
   // Download Api
   deleteFacility: {
     path: "/api/v1/facility",
