@@ -12,6 +12,7 @@ import {
   MultilineInputField,
   TextInputField,
 } from "../Common/HelperInputFields";
+import { navigate } from "raviger";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -57,11 +58,11 @@ export const AddLocationForm = (props: LocationFormProps) => {
     );
     setIsLoading(false);
     if (res && res.status === 201) {
+      navigate(`/facility/${facilityId}/location/${res.data.id}/beds/add`);
       Notification.Success({
         msg: "Location created successfully",
       });
     }
-    goBack();
   };
 
   if (isLoading) {

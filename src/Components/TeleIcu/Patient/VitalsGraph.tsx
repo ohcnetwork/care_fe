@@ -9,19 +9,22 @@ export interface ITelePatientVitalsGraphCardProps {
 export default function TelePatientVitalsGraphCard({
   consultationId,
 }: ITelePatientVitalsGraphCardProps) {
-  const [analysis, setAnalysis] = useState({});
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [analysis, setAnalysis] = useState({ noData: true });
   const [isLoading, setIsLoading] = useState(true);
   const dispatch: any = useDispatch();
 
   useEffect(() => {
-    dispatch(
-      dailyRoundsAnalyse({ fields: ["pulse"] }, { consultationId })
-    ).then((response: any) => {
-      if (response?.data) {
-        setAnalysis(response.data?.results || {});
-      }
-      setIsLoading(false);
-    });
+    if (consultationId)
+      dispatch(
+        dailyRoundsAnalyse({ fields: ["pulse"] }, { consultationId })
+      ).then((response: any) => {
+        if (response?.data) {
+          setAnalysis({ ...response.data?.results, noData: false } || {});
+        }
+        setIsLoading(false);
+      });
+    else setIsLoading(false);
   }, [consultationId]);
 
   if (isLoading) {
@@ -34,18 +37,24 @@ export default function TelePatientVitalsGraphCard({
   }
 
   return (
-    <div className="lg:w-6/12 w-full text-white flex items-center justify-center lg:h-auto h-96 rounded-b-md lg:rounded-b-none">
+    <div className="lg:w-4/12 w-full text-white flex items-center justify-center lg:h-auto h-96 rounded-b-md lg:rounded-b-none">
       <div className="flex items-center justify-center flex-col flex-1">
         {/* Image with gray overlay */}
-        <img
-          className="opacity-75 p-4"
-          src={"/images/vitals_graph.png"}
-          alt={"Vitals Graph"}
-        />
-        {/* <i className="fas fa-chart-pie text-primary-700 text-3xl"></i>
+        {/* !analysis.noData ? (
+          <img
+            className="opacity-75 p-4"
+            src={"/images/vitals_graph.png"}
+            alt={"Vitals Graph"}
+          />
+        ) : (
+          <p className="text-sm text-primary-700 my-2">
+            No Consulations available
+          </p>
+        ) */}
+        <i className="fas fa-chart-pie text-primary-700 text-3xl"></i>
         <p className="text-sm text-primary-600 my-4">
           Data Not Enough for Analysis
-        </p> */}
+        </p>
       </div>
     </div>
   );

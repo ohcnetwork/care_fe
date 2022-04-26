@@ -30,6 +30,7 @@ import {
   REVIEW_AT_CHOICES,
   LINES_CATHETER_CHOICES,
   KASP_STRING,
+  KASP_ENABLED,
 } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
@@ -50,16 +51,17 @@ import {
   TextInputField,
 } from "../Common/HelperInputFields";
 import { make as PrescriptionBuilder } from "../Common/PrescriptionBuilder.gen";
-import { FacilityModel } from "./models";
+import { BedModel, FacilityModel } from "./models";
 import { OnlineUsersSelect } from "../Common/OnlineUsersSelect";
 import _ from "lodash";
 import { UserModel } from "../Users/models";
 import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
+import { BedSelect } from "../Common/BedSelect";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
-type Boolean = "true" | "false";
+type BooleanStrings = "true" | "false";
 
 type FormDetails = {
   hasSymptom: boolean;
@@ -70,7 +72,7 @@ type FormDetails = {
   suggestion: string;
   patient: string;
   facility: string;
-  admitted: Boolean;
+  admitted: BooleanStrings;
   admitted_to: string;
   category: string;
   admission_date: string;
@@ -79,7 +81,7 @@ type FormDetails = {
   diagnosis: string;
   verified_by: string;
   test_id: string;
-  is_kasp: Boolean;
+  is_kasp: BooleanStrings;
   kasp_enabled_date: null;
   examination_details: string;
   existing_medication: string;
@@ -87,7 +89,7 @@ type FormDetails = {
   consultation_notes: string;
   ip_no: string;
   discharge_advice: Prescription_t[];
-  is_telemedicine: Boolean;
+  is_telemedicine: BooleanStrings;
   action: string;
   assigned_to: string;
   assigned_to_object: UserModel | null;
@@ -96,6 +98,7 @@ type FormDetails = {
   review_time: number;
   weight: string;
   height: string;
+  bed: string | null;
 };
 
 type Action =
@@ -137,6 +140,7 @@ const initForm: FormDetails = {
   review_time: 0,
   weight: "",
   height: "",
+  bed: null,
 };
 
 const initError = Object.assign(
@@ -199,6 +203,7 @@ export const ConsultationForm = (props: any) => {
   const dispatchAction: any = useDispatch();
   const { facilityId, patientId, id } = props;
   const [state, dispatch] = useReducer(consultationFormReducer, initialState);
+  const [bed, setBed] = useState<BedModel | BedModel[] | null>(null);
   const [dischargeAdvice, setDischargeAdvice] = useState<Prescription_t[]>([]);
   const [selectedFacility, setSelectedFacility] =
     useState<FacilityModel | null>(null);
@@ -266,6 +271,7 @@ export const ConsultationForm = (props: any) => {
             special_instruction: res.data.special_instruction || "",
             weight: res.data.weight ? res.data.weight : "",
             height: res.data.height ? res.data.height : "",
+            bed: res.data?.current_bed?.bed_object?.id || null,
           };
           dispatch({ type: "set_form", form: formData });
         } else {
@@ -287,7 +293,7 @@ export const ConsultationForm = (props: any) => {
   );
 
   const validateForm = () => {
-    let errors = { ...initError };
+    const errors = { ...initError };
     let invalidForm = false;
     let error_div = "";
 
@@ -328,7 +334,7 @@ export const ConsultationForm = (props: any) => {
             invalidForm = true;
           }
           return;
-        case "admitted_to":
+        // case "admitted_to":
         case "admission_date":
           if (JSON.parse(state.form.admitted) && !state.form[field]) {
             errors[field] = "Field is required as person is admitted";
@@ -396,9 +402,9 @@ export const ConsultationForm = (props: any) => {
           : undefined,
         suggestion: state.form.suggestion,
         admitted: JSON.parse(state.form.admitted),
-        admitted_to: JSON.parse(state.form.admitted)
-          ? state.form.admitted_to
-          : undefined,
+        // admitted_to: JSON.parse(state.form.admitted)
+        //   ? state.form.admitted_to
+        //   : undefined,
         admission_date: JSON.parse(state.form.admitted)
           ? state.form.admission_date
           : undefined,
@@ -428,6 +434,7 @@ export const ConsultationForm = (props: any) => {
         special_instruction: state.form.special_instruction,
         weight: Number(state.form.weight),
         height: Number(state.form.height),
+        bed: bed && bed instanceof Array ? bed[0]?.id : bed?.id,
       };
       const res = await dispatchAction(
         id ? updateConsultation(id, data) : createConsultation(data)
@@ -488,7 +495,7 @@ export const ConsultationForm = (props: any) => {
         form: {
           ...state.form,
           [e.target.name]: e.target.value,
-          admitted: e.target.value === "A" ? "true" : "false",
+          // admitted: e.target.value === "A" ? "true" : "false",
         },
       });
   };
@@ -709,33 +716,8 @@ export const ConsultationForm = (props: any) => {
                     />
                   </div>
                 )}
-                <div className="flex">
-                  <div className="flex-1" id="admitted-div">
-                    <InputLabel id="admitted-label">Admitted</InputLabel>
-                    <RadioGroup
-                      aria-label="covid"
-                      name="admitted"
-                      value={state.form.admitted}
-                      onChange={handleChange}
-                      style={{ padding: "0px 5px" }}
-                    >
-                      <Box display="flex" flexDirection="row">
-                        <FormControlLabel
-                          value="true"
-                          control={<Radio />}
-                          label="Yes"
-                        />
-                        <FormControlLabel
-                          value="false"
-                          control={<Radio />}
-                          label="No"
-                        />
-                      </Box>
-                    </RadioGroup>
-                    <ErrorHelperText error={state.errors.admitted} />
-                  </div>
 
-                  {JSON.parse(state.form.admitted) && (
+                {/* {JSON.parse(state.form.admitted) && (
                     <div className="flex-1" id="admitted_to-div">
                       <SelectField
                         optionArray={true}
@@ -749,24 +731,69 @@ export const ConsultationForm = (props: any) => {
                         errors={state.errors.admitted_to}
                       />
                     </div>
-                  )}
-                </div>
-                {JSON.parse(state.form.admitted) && (
-                  <div className="flex">
-                    <div className="flex-1" id="admission_date-div">
-                      <DateInputField
-                        id="admission_date"
-                        label="Admission Date*"
-                        margin="dense"
-                        value={state.form.admission_date}
-                        disableFuture={true}
-                        onChange={(date) =>
-                          handleDateChange(date, "admission_date")
-                        }
-                        errors={state.errors.admission_date}
-                      />
+                  )} 
+                */}
+                {!id && (
+                  <>
+                    <div className="flex">
+                      <div className="flex-1" id="admitted-div">
+                        <InputLabel id="admitted-label">Admitted</InputLabel>
+                        <RadioGroup
+                          aria-label="covid"
+                          name="admitted"
+                          value={state.form.admitted}
+                          onChange={handleChange}
+                          style={{ padding: "0px 5px" }}
+                        >
+                          <Box display="flex" flexDirection="row">
+                            <FormControlLabel
+                              value="true"
+                              control={<Radio />}
+                              label="Yes"
+                            />
+                            <FormControlLabel
+                              value="false"
+                              control={<Radio />}
+                              label="No"
+                            />
+                          </Box>
+                        </RadioGroup>
+                        <ErrorHelperText error={state.errors.admitted} />
+                      </div>
                     </div>
-                  </div>
+                    {!id && JSON.parse(state.form.admitted) ? (
+                      <>
+                        <div className="flex">
+                          <div className="flex-1" id="admission_date-div">
+                            <DateInputField
+                              id="admission_date"
+                              label="Admission Date*"
+                              margin="dense"
+                              value={state.form.admission_date}
+                              disableFuture={true}
+                              onChange={(date) =>
+                                handleDateChange(date, "admission_date")
+                              }
+                              errors={state.errors.admission_date}
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <InputLabel id="asset-type">Bed</InputLabel>
+                          <BedSelect
+                            name="bed"
+                            setSelected={setBed}
+                            selected={bed}
+                            errors=""
+                            multiple={false}
+                            margin="dense"
+                            // location={state.form.}
+                            facility={facilityId}
+                          />
+                        </div>
+                      </>
+                    ) : null}
+                  </>
                 )}
               </div>
 
@@ -857,30 +884,32 @@ export const ConsultationForm = (props: any) => {
                 />
               </div>
 
-              <div className="flex-1" id="is_kasp-div">
-                <InputLabel id="admitted-label">{KASP_STRING}*</InputLabel>
-                <RadioGroup
-                  aria-label="covid"
-                  name="is_kasp"
-                  value={state.form.is_kasp}
-                  onChange={handleTelemedicineChange}
-                  style={{ padding: "0px 5px" }}
-                >
-                  <Box display="flex" flexDirection="row">
-                    <FormControlLabel
-                      value="true"
-                      control={<Radio />}
-                      label="Yes"
-                    />
-                    <FormControlLabel
-                      value="false"
-                      control={<Radio />}
-                      label="No"
-                    />
-                  </Box>
-                </RadioGroup>
-                <ErrorHelperText error={state.errors.is_kasp} />
-              </div>
+              {KASP_ENABLED && (
+                <div className="flex-1" id="is_kasp-div">
+                  <InputLabel id="admitted-label">{KASP_STRING}*</InputLabel>
+                  <RadioGroup
+                    aria-label="covid"
+                    name="is_kasp"
+                    value={state.form.is_kasp}
+                    onChange={handleTelemedicineChange}
+                    style={{ padding: "0px 5px" }}
+                  >
+                    <Box display="flex" flexDirection="row">
+                      <FormControlLabel
+                        value="true"
+                        control={<Radio />}
+                        label="Yes"
+                      />
+                      <FormControlLabel
+                        value="false"
+                        control={<Radio />}
+                        label="No"
+                      />
+                    </Box>
+                  </RadioGroup>
+                  <ErrorHelperText error={state.errors.is_kasp} />
+                </div>
+              )}
               {/* Telemedicine Fields */}
               <div className="flex">
                 <div className="flex-1" id="is_telemedicine-div">

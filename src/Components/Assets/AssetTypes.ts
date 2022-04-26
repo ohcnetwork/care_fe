@@ -28,6 +28,7 @@ export interface AssetData {
   support_name: string;
   support_email: string;
   support_phone: string;
+  qr_code_id: string;
   meta?: {
     [key: string]: any;
   };

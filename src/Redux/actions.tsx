@@ -407,7 +407,7 @@ export const getConsultation = (id: number) => {
   return fireRequest("getConsultation", [], {}, { id: id });
 };
 export const updateConsultation = (id: number, params: object) => {
-  return fireRequest("updateConsultation", [id], params);
+  return fireRequest("updateConsultation", [], params, { id: id });
 };
 //Inventory
 export const getItems = (params: object) => {
@@ -473,7 +473,7 @@ export const deleteShiftRecord = (id: string) => {
   return fireRequest("deleteShiftRecord", [id], {});
 };
 export const listShiftRequests = (params: object, key: string) => {
-  return fireRequest(`listShiftRequests`, [], params, null, key);
+  return fireRequest("listShiftRequests", [], params, null, key);
 };
 export const getShiftDetails = (pathParam: object) => {
   return fireRequest("getShiftDetails", [], {}, pathParam);
@@ -618,7 +618,7 @@ export const deleteResourceRecord = (id: string) => {
   return fireRequest("deleteResourceRecord", [id], {});
 };
 export const listResourceRequests = (params: object, key: string) => {
-  return fireRequest(`listResourceRequests`, [], params, null, key);
+  return fireRequest("listResourceRequests", [], params, null, key);
 };
 export const getResourceDetails = (pathParam: object) => {
   return fireRequest("getResourceDetails", [], {}, pathParam);

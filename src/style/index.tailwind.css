@@ -84,11 +84,6 @@ a:hover {
   @apply text-blue-600;
 }
 
-a[href^="tel:"]:before {
-  content: "\260e";
-  @apply mr-1;
-}
-
 .bg-primary {
   background-image: linear-gradient(
     135deg,
@@ -412,7 +407,7 @@ button:disabled,
   aspect-ratio: 16/9;
 }
 
-.player-wrapper {
+/* .player-wrapper {
   width: auto;
   height: auto;
 }
@@ -423,4 +418,4 @@ button:disabled,
 
 .react-player > div {
   position: absolute;
-}
+} */

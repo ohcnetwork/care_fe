@@ -1,7 +1,16 @@
-import { useRedirect, useRoutes, usePath, Redirect } from "raviger";
+import {
+  useRedirect,
+  useRoutes,
+  navigate,
+  usePath,
+  Link,
+  Redirect,
+} from "raviger";
 import { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import { BedCapacityForm } from "../Components/Facility/BedCapacityForm";
 import { ConsultationDetails } from "../Components/Facility/ConsultationDetails";
+import TreatmentSummary from "../Components/Facility/TreatmentSummary";
 import { ConsultationForm } from "../Components/Facility/ConsultationForm";
 import { DoctorCapacityForm } from "../Components/Facility/DoctorCapacityForm";
 import { FacilityCreate } from "../Components/Facility/FacilityCreate";
@@ -67,6 +76,7 @@ import { TeleICUPatientsList } from "../Components/TeleIcu/PatientList";
 
 const get = require("lodash.get");
 
+const img = process.env.REACT_APP_LIGHT_LOGO;
 const logoBlack = process.env.REACT_APP_BLACK_LOGO;
 
 const routes = {
@@ -360,6 +370,14 @@ const routes = {
         consultationId={consultationId}
       />
     ),
+  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/treatment-summary":
+    ({ facilityId, patientId, consultationId }: any) => (
+      <TreatmentSummary
+        consultationId={consultationId}
+        patientId={patientId}
+        dailyRoundsListData={[]}
+      />
+    ),
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/:tab":
     ({ facilityId, patientId, consultationId, tab }: any) => (
       <ConsultationDetails
@@ -369,6 +387,7 @@ const routes = {
         tab={tab}
       />
     ),
+
   "/teleicu/facility/:facilityId/patient/:patientId": ({
     patientId,
     facilityId,
@@ -381,7 +400,70 @@ const routes = {
   ),
 };
 
-const AppRouter = () => {
+let menus = [
+  {
+    title: "Facilities",
+    link: "/facility",
+    icon: "fas fa-hospital",
+  },
+  {
+    title: "Patients",
+    link: "/patients",
+    icon: "fas fa-user-injured",
+  },
+  {
+    title: "TeleICU",
+    link: "/teleicu",
+    icon: "fas fa-bed-pulse",
+  },
+  {
+    title: "Assets",
+    link: "/assets",
+    icon: "fas fa-shopping-cart",
+  },
+  {
+    title: "Sample Test",
+    link: "/sample",
+    icon: "fas fa-medkit",
+  },
+  {
+    title: "Shifting",
+    link: "/shifting",
+    icon: "fas fa-ambulance",
+  },
+  {
+    title: "Resource",
+    link: "/resource",
+    icon: "fas fa-heartbeat",
+  },
+  {
+    title: "External Results",
+    link: "/external_results",
+    icon: "fas fa-vials",
+  },
+  {
+    title: "Users",
+    link: "/users",
+    icon: "fas fa-user-friends",
+  },
+  {
+    title: "Tele ICU",
+    link: "/teleicu/facility",
+    icon: "fas fa-video",
+  },
+  {
+    title: "Profile",
+    link: "/user/profile",
+    icon: "fas fa-user-secret",
+  },
+  {
+    title: "Notice Board",
+    link: "/notice_board/",
+    icon: "fas fa-comment-alt",
+  },
+];
+
+const AppRouter = (props: any) => {
   useRedirect("/", "/facility");
   useRedirect("/teleicu", "/teleicu/facility");
   const pages = useRoutes(routes);

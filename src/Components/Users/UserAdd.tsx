@@ -264,7 +264,7 @@ export const UserAdd = (props: UserProps) => {
 
   const handleChange = (e: any) => {
     const { value, name } = e.target;
-    let form = { ...state.form };
+    const form = { ...state.form };
     form[name] = value;
     if (name === "username") {
       form[name] = value.toLowerCase();
@@ -306,7 +306,7 @@ export const UserAdd = (props: UserProps) => {
   };
 
   const validateForm = () => {
-    let errors = { ...initError };
+    const errors = { ...initError };
     let invalidForm = false;
     Object.keys(state.form).forEach((field) => {
       switch (field) {
@@ -364,11 +364,13 @@ export const UserAdd = (props: UserProps) => {
           }
           return;
         case "phone_number":
+          // eslint-disable-next-line no-case-declarations
           const phoneNumber = parsePhoneNumberFromString(
             state.form[field],
             "IN"
           );
-          let is_valid: boolean = false;
+          // eslint-disable-next-line no-case-declarations
+          let is_valid = false;
           if (phoneNumber) {
             is_valid = phoneNumber.isValid();
           }
@@ -379,7 +381,8 @@ export const UserAdd = (props: UserProps) => {
           return;
 
         case "alt_phone_number":
-          let alt_is_valid: boolean = false;
+          // eslint-disable-next-line no-case-declarations
+          let alt_is_valid = false;
           if (state.form[field] && state.form[field] !== "+91") {
             const altPhoneNumber = parsePhoneNumberFromString(
               state.form[field],
@@ -570,6 +573,7 @@ export const UserAdd = (props: UserProps) => {
                   name="username"
                   variant="outlined"
                   margin="dense"
+                  autoComplete="off"
                   value={state.form.username}
                   onChange={handleChange}
                   errors={state.errors.username}
@@ -598,6 +602,7 @@ export const UserAdd = (props: UserProps) => {
                   type="password"
                   variant="outlined"
                   margin="dense"
+                  autoComplete="off"
                   value={state.form.password}
                   onChange={handleChange}
                   errors={state.errors.password}
@@ -612,6 +617,7 @@ export const UserAdd = (props: UserProps) => {
                   type="password"
                   variant="outlined"
                   margin="dense"
+                  autoComplete="off"
                   value={state.form.c_password}
                   onChange={handleChange}
                   errors={state.errors.c_password}
