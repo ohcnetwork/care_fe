@@ -574,8 +574,6 @@ export const UserAdd = (props: UserProps) => {
                   autoComplete="new-username"
                   variant="outlined"
                   margin="dense"
-                  autoComplete="off"
-                  value={state.form.username}
                   onChange={handleChange}
                   errors={state.errors.username}
                 />
@@ -604,7 +602,6 @@ export const UserAdd = (props: UserProps) => {
                   type="password"
                   variant="outlined"
                   margin="dense"
-                  autoComplete="off"
                   value={state.form.password}
                   onChange={handleChange}
                   errors={state.errors.password}
