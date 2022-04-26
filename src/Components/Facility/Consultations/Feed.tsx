@@ -10,7 +10,11 @@ import {
   useMSEMediaPlayer,
 } from "../../../Common/hooks/useMSEplayer";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
-import { getConsultation, listAssetBeds } from "../../../Redux/actions";
+import {
+  getConsultation,
+  listAssetBeds,
+  partialUpdateAssetBed,
+} from "../../../Redux/actions";
 import Loading from "../../Common/Loading";
 import PageTitle from "../../Common/PageTitle";
 import { ConsultationModel } from "../models";
@@ -20,6 +24,8 @@ interface IFeedProps {
   patientId: string;
   consultationId: any;
 }
+
+const PATIENT_DEFAULT_PRESET = "Patient View".trim().toLowerCase();
 
 export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   const dispatch: any = useDispatch();
@@ -166,7 +172,11 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   useEffect(() => {
     if (streamStatus === StreamStatus.Playing) {
       setLoading("Moving");
-      const preset = bedPresets?.[0];
+      const preset = bedPresets?.find(
+        (preset: any) =>
+          String(preset?.meta?.preset_name).trim().toLowerCase() ===
+          PATIENT_DEFAULT_PRESET
+      );
       absoluteMove(preset?.meta?.position, {
         onSuccess: () => {
           setLoading(undefined);
@@ -305,6 +315,23 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
                     if (screenfull.isEnabled && liveFeedPlayerRef.current) {
                       screenfull.request(liveFeedPlayerRef.current);
                     }
+                  } else if (option.action === "updatePreset") {
+                    getCameraStatus({
+                      onSuccess: async ({ data }: any) => {
+                        console.log({ currentPreset, data });
+                        if (currentPreset?.asset_object?.id && data?.position) {
+                          setLoading(option.loadingLabel);
+                          const response = await dispatch(
+                            partialUpdateAssetBed(
+                              { meta: { ...data?.position } },
+                              currentPreset?.id
+                            )
+                          );
+                          console.log(response);
+                          setLoading(undefined);
+                        }
+                      },
+                    });
                   } else {
                     setLoading(option.loadingLabel);
                     relativeMove(

@@ -176,6 +176,10 @@ const routes: Routes = {
     path: "/api/v1/assetbed/{external_id}/",
     method: "PUT",
   },
+  partialUpdateAssetBed: {
+    path: "/api/v1/assetbed/{external_id}/",
+    method: "PATCH",
+  },
 
   // Facility Beds
   listFacilityBeds: {
