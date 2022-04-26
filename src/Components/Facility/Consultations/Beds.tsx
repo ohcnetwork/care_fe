@@ -7,7 +7,7 @@ import {
 import { statusType, useAbortableEffect } from "../../../Common/utils";
 import * as Notification from "../../../Utils/Notifications.js";
 import Loading from "../../Common/Loading";
-import { BedModel, ConsultationBed } from "../models";
+import { BedModel, CurrentBed } from "../models";
 import { BedSelect } from "../../Common/BedSelect";
 import { Button, InputLabel } from "@material-ui/core";
 import { TextInputField } from "../../Common/HelperInputFields";
@@ -25,9 +25,9 @@ const Beds = (props: BedsProps) => {
   const { facilityId, consultationId } = props;
   const [bed, setBed] = React.useState<BedModel>({});
   const [startDate, setStartDate] = React.useState<string>("");
-  const [consultationBeds, setConsultationBeds] = React.useState<
-    ConsultationBed[]
-  >([]);
+  const [consultationBeds, setConsultationBeds] = React.useState<CurrentBed[]>(
+    []
+  );
   const [isLoading, setIsLoading] = React.useState(false);
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -125,7 +125,6 @@ const Beds = (props: BedsProps) => {
             type="submit"
             style={{ marginLeft: "auto" }}
             startIcon={<CheckCircleOutlineIcon></CheckCircleOutlineIcon>}
-            onClick={() => {}}
           >
             Move to bed
           </Button>
