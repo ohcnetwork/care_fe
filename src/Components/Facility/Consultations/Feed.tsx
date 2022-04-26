@@ -3,18 +3,14 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import screenfull from "screenfull";
 import { getCameraPTZ } from "../../../Common/constants";
-import { useFeedPTZ } from "../../../Common/hooks/useFeedPTZ";
+import { PTZ, useFeedPTZ } from "../../../Common/hooks/useFeedPTZ";
 import {
   ICameraAssetState,
   StreamStatus,
   useMSEMediaPlayer,
 } from "../../../Common/hooks/useMSEplayer";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
-import {
-  getConsultation,
-  getDailyReport,
-  listAssetBeds,
-} from "../../../Redux/actions";
+import { getConsultation, listAssetBeds } from "../../../Redux/actions";
 import Loading from "../../Common/Loading";
 import PageTitle from "../../Common/PageTitle";
 import { ConsultationModel } from "../models";
@@ -36,6 +32,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
     accessKey: "",
   });
   const [cameraMiddlewareHostname, setCameraMiddlewareHostname] = useState("");
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [cameraConfig, setCameraConfig] = useState<any>({});
   const [isLoading, setIsLoading] = useState(true);
   const [bedPresets, setBedPresets] = useState<any>([]);
@@ -94,7 +91,8 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   const middlewareHostname =
     cameraMiddlewareHostname || "dev_middleware.coronasafe.live";
 
-  const [position, setPosition] = useState<any>();
+  // const [position, setPosition] = useState<any>();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [presets, setPresets] = useState<any>([]);
   const [currentPreset, setCurrentPreset] = useState<any>();
   // const [showDefaultPresets, setShowDefaultPresets] = useState<boolean>(false);
@@ -103,12 +101,6 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   const [streamStatus, setStreamStatus] = useState<StreamStatus>(
     StreamStatus.Offline
   );
-  const getBedPresets = async (asset: any) => {
-    if (asset.id && bed) {
-      const bedAssets = await dispatch(listAssetBeds({ asset: asset.id, bed }));
-      setBedPresets(bedAssets?.data?.results);
-    }
-  };
 
   const url = `wss://${middlewareHostname}/stream/${cameraAsset?.accessKey}/channel/0/mse?uuid=${cameraAsset?.accessKey}&channel=0`;
   const {
@@ -136,11 +128,17 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
     },
   });
 
+  const getBedPresets = async (asset: any) => {
+    if (asset.id && bed) {
+      const bedAssets = await dispatch(listAssetBeds({ asset: asset.id, bed }));
+      setBedPresets(bedAssets?.data?.results);
+    }
+  };
+
   useEffect(() => {
-    getPresets({ onSuccess: (resp) => setPresets(resp.data) });
-    getBedPresets(cameraAsset);
-    if (bedPresets?.[0]?.position) {
-      absoluteMove(bedPresets[0]?.position, {});
+    if (cameraAsset.hostname) {
+      getPresets({ onSuccess: (resp) => setPresets(resp.data) });
+      getBedPresets(cameraAsset);
     }
   }, [cameraAsset]);
 
@@ -165,6 +163,19 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
     fetchData(status);
   }, []);
 
+  useEffect(() => {
+    if (streamStatus === StreamStatus.Playing) {
+      setLoading("Moving");
+      const preset = bedPresets?.[0];
+      absoluteMove(preset?.meta?.position, {
+        onSuccess: () => {
+          setLoading(undefined);
+          setCurrentPreset(preset);
+        },
+      });
+    }
+  }, [bedPresets, streamStatus]);
+
   if (isLoading) {
     return <Loading />;
   }
@@ -181,7 +192,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
           title={
             "Patient Details -  Camera Feed" +
             " " +
-            bedPresets[0]?.asset_object?.name
+            bedPresets?.[0]?.asset_object?.name
           }
           breadcrumbs={false}
         />
@@ -191,7 +202,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
             {bedPresets?.map((preset: any, index: number) => (
               <button
                 key={preset.id}
-                onClick={(_) => {
+                onClick={() => {
                   setLoading("Moving");
                   // gotoBedPreset(preset);
                   absoluteMove(preset.meta.position, {
@@ -273,11 +284,11 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
             </div>
           </div>
           <div className="mt-8 lg:mt-0 flex-shrink-0 flex lg:flex-col items-stretch">
-            {cameraPTZ.map((option: any) => (
+            {cameraPTZ.map((option) => (
               <button
-                className="bg-green-100 hover:bg-green-200 border border-green-100 rounded p-2"
                 key={option.action}
-                onClick={(_) => {
+                className="bg-green-100 hover:bg-green-200 border border-green-100 rounded p-2"
+                onClick={() => {
                   if (option.action === "precision") {
                     setPrecision((precision) =>
                       precision === 16 ? 1 : precision * 2
@@ -296,9 +307,12 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
                     }
                   } else {
                     setLoading(option.loadingLabel);
-                    relativeMove(getPTZPayload(option.action), {
-                      onSuccess: () => setLoading(undefined),
-                    });
+                    relativeMove(
+                      getPTZPayload(option.action as PTZ, precision),
+                      {
+                        onSuccess: () => setLoading(undefined),
+                      }
+                    );
                   }
                 }}
               >

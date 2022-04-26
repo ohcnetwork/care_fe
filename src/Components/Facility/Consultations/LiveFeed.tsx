@@ -30,7 +30,7 @@ const LiveFeed = (props: any) => {
 
   const videoEl = liveFeedPlayerRef.current as HTMLVideoElement;
 
-  let url = `wss://${middlewareHostname}/stream/${cameraAsset?.accessKey}/channel/0/mse?uuid=${cameraAsset?.accessKey}&channel=0`;
+  const url = `wss://${middlewareHostname}/stream/${cameraAsset?.accessKey}/channel/0/mse?uuid=${cameraAsset?.accessKey}&channel=0`;
 
   const { startStream } = useMSEMediaPlayer({
     config: {
@@ -171,7 +171,7 @@ const LiveFeed = (props: any) => {
                 <button
                   className="bg-green-100 hover:bg-green-200 border border-green-100 p-2 flex-1"
                   key={option.action}
-                  onClick={(_) => {
+                  onClick={() => {
                     if (option.action === "precision") {
                       setPrecision((precision) =>
                         precision === 16 ? 1 : precision * 2
@@ -190,7 +190,7 @@ const LiveFeed = (props: any) => {
                       }
                     } else {
                       setLoading(option.loadingLabel);
-                      relativeMove(getPTZPayload(option.action), {
+                      relativeMove(getPTZPayload(option.action, precision), {
                         onSuccess: () => setLoading(undefined),
                       });
                     }
