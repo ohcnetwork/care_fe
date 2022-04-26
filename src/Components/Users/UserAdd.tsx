@@ -571,6 +571,7 @@ export const UserAdd = (props: UserProps) => {
                 <TextInputField
                   fullWidth
                   name="username"
+                  autoComplete="new-username"
                   variant="outlined"
                   margin="dense"
                   autoComplete="off"
@@ -599,6 +600,7 @@ export const UserAdd = (props: UserProps) => {
                 <TextInputField
                   fullWidth
                   name="password"
+                  autoComplete="new-password"
                   type="password"
                   variant="outlined"
                   margin="dense"
