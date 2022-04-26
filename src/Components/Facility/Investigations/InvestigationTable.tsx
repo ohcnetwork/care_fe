@@ -38,7 +38,7 @@ const StyledTableRow = withStyles(() =>
 )(TableRow);
 
 const TestRow = ({ data, onChange, showForm, value, isChanged }: any) => {
-  const tableClass = `h-12 text-sm border-l border-r border-gray-400 px-2`;
+  const tableClass = "h-12 text-sm border-l border-r border-gray-400 px-2";
   const testValue = value;
 
   const inputType =
@@ -68,7 +68,7 @@ const TestRow = ({ data, onChange, showForm, value, isChanged }: any) => {
               variant="outlined"
               margin="dense"
               optionArray={true}
-              value={data?.notes}
+              value={testValue}
               options={[
                 "Unselected",
                 ...data?.investigation_object?.choices.split(","),
@@ -176,8 +176,12 @@ export const InvestigationTable = ({
         onChange={(e) => setSearchFilter(e.target.value)}
       />
       <br />
-      <TableContainer component={Paper} id="section-to-print">
-        <Table aria-label="simple table" size="small">
+      <TableContainer
+        component={Paper}
+        className="overflow-hidden"
+        id="section-to-print"
+      >
+        <Table aria-label="simple table overflow-hidden" size="small">
           <TableHead>
             <TableRow>
               <TableCell>Name</TableCell>

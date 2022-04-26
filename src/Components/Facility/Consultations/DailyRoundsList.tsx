@@ -72,7 +72,7 @@ export const DailyRoundsList = (props: any) => {
         itemData.last_updated_by_telemedicine;
 
       return (
-        <div key={`daily_round_${idx}`} className="w-full mt-4 px-2">
+        <div key={`daily_round_${idx}`} className="w-full">
           <div
             className={`block border rounded-lg ${
               telemedicine_doctor_update ? "bg-purple-200" : "bg-white"
@@ -188,11 +188,17 @@ export const DailyRoundsList = (props: any) => {
                 </button>
                 <button
                   className="btn btn-default"
-                  onClick={(e) =>
-                    navigate(
-                      `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${itemData.id}/update`
-                    )
-                  }
+                  onClick={(e) => {
+                    if (itemData.rounds_type === "NORMAL") {
+                      navigate(
+                        `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${itemData.id}/update`
+                      );
+                    } else {
+                      navigate(
+                        `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${itemData.id}/update`
+                      );
+                    }
+                  }}
                 >
                   <i className="fas fa-pencil-alt mr-2" />
                   Update Log
@@ -215,8 +221,8 @@ export const DailyRoundsList = (props: any) => {
             breadcrumbs={false}
           />
         </div>
-        <div className="flex flex-wrap overflow-y-auto min:h-screen">
-          {roundsList}
+        <div className="flex flex-wrap">
+          <div className="overflow-y-auto h-screen space-y-4">{roundsList}</div>
           {!isDailyRoundLoading && totalCount > limit && (
             <div className="mt-4 flex w-full justify-center">
               <Pagination

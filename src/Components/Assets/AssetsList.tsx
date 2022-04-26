@@ -106,7 +106,7 @@ const AssetsList = (props: any) => {
     async (status: statusType) => {
       if (qParams.facility) {
         setIsLoading(true);
-        
+
         const res = await dispatch(getAnyFacility(qParams.facility));
 
         if (!status.aborted) {

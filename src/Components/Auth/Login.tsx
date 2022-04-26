@@ -10,7 +10,8 @@ import ReCaptcha from "react-google-recaptcha";
 import VisibilityIcon from "@material-ui/icons/Visibility";
 import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
 import LanguageSelector from "../Common/LanguageSelector";
-const get = require("lodash.get");
+import { RECAPTCHA_SITE_KEY } from "../../Common/env";
+import get from "lodash.get";
 
 const LoginPage = (props: any) => {
   const dispatch: any = useDispatch();
@@ -23,7 +24,7 @@ const LoginPage = (props: any) => {
   const [errors, setErrors] = useState(initErr);
   const [isCaptchaEnabled, setCaptcha] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const captchaKey = "6LdvxuQUAAAAADDWVflgBqyHGfq-xmvNJaToM0pN";
+  const captchaKey = RECAPTCHA_SITE_KEY ?? "";
   const { t } = props;
 
   const handleChange = (e: any) => {
@@ -79,7 +80,15 @@ const LoginPage = (props: any) => {
         } else if (res && statusCode === 200) {
           localStorage.setItem("care_access_token", res.access);
           localStorage.setItem("care_refresh_token", res.refresh);
-          navigate("/facility");
+
+          if (
+            window.location.pathname === "/" ||
+            window.location.pathname === "/login"
+          ) {
+            navigate("/facility");
+          } else {
+            navigate(window.location.pathname.toString());
+          }
           window.location.reload();
         }
       });

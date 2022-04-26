@@ -12,6 +12,7 @@ import {
   MultilineInputField,
   TextInputField,
 } from "../Common/HelperInputFields";
+import { navigate } from "raviger";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -57,11 +58,11 @@ export const AddLocationForm = (props: LocationFormProps) => {
     );
     setIsLoading(false);
     if (res && res.status === 201) {
+      navigate(`/facility/${facilityId}/location/${res.data.id}/beds/add`);
       Notification.Success({
         msg: "Location created successfully",
       });
     }
-    goBack();
   };
 
   if (isLoading) {
@@ -80,12 +81,13 @@ export const AddLocationForm = (props: LocationFormProps) => {
             <CardContent>
               <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
                 <div>
-                  <InputLabel id="name">Name</InputLabel>
+                  <InputLabel id="name">Name *</InputLabel>
                   <TextInputField
                     name="name"
                     variant="outlined"
                     margin="dense"
                     type="text"
+                    required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     errors=""

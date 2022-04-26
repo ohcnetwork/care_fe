@@ -9,10 +9,11 @@ export interface OptionsType {
   disabled?: boolean;
 }
 
-export const KASP_STRING = "KASP";
-export const KASP_FULL_STRING = "Karunya Arogya Suraksha Padhathi";
+export const KASP_STRING = process.env.REACT_APP_KASP_STRING ?? "";
+export const KASP_FULL_STRING = process.env.REACT_APP_KASP_FULL_STRING ?? "";
+export const KASP_ENABLED = process.env.REACT_APP_KASP_ENABLED === "true";
 
-export const USER_TYPES: Array<String> = [
+export const USER_TYPES: Array<string> = [
   "Volunteer",
   "Pharmacist",
   "StaffReadOnly",
@@ -28,7 +29,7 @@ export const USER_TYPES: Array<String> = [
   "StateReadOnlyAdmin",
 ];
 
-export const DOWNLOAD_TYPES: Array<String> = [
+export const DOWNLOAD_TYPES: Array<string> = [
   "Facility List",
   "Facility Capacity List",
   "Facility Doctors List",
@@ -69,12 +70,12 @@ export const VEHICLE_TYPES: Array<OptionsType> = [
 ];
 
 export const FACILITY_TYPES: Array<OptionsType> = [
-  { id: 1, text: "Educational Inst" },
+  // { id: 1, text: "Educational Inst" },
   { id: 2, text: "Private Hospital" },
   { id: 3, text: "Other" },
-  { id: 4, text: "Hostel" },
-  { id: 5, text: "Hotel" },
-  { id: 6, text: "Lodge" },
+  // { id: 4, text: "Hostel" },
+  // { id: 5, text: "Hotel" },
+  // { id: 6, text: "Lodge" },
   { id: 7, text: "TeleMedicine" },
   { id: 8, text: "Govt Hospital" },
   { id: 9, text: "Labs" },
@@ -91,14 +92,14 @@ export const FACILITY_TYPES: Array<OptionsType> = [
   { id: 870, text: "Govt Medical College Hospitals" },
   { id: 950, text: "Corona Testing Labs" },
   { id: 1000, text: "Corona Care Centre" },
-  { id: 1010, text: "COVID-19 Domiciliary Care Center" },
-  { id: 1100, text: "First Line Treatment Centre" },
-  { id: 1200, text: "Second Line Treatment Center" },
+  // { id: 1010, text: "COVID-19 Domiciliary Care Center" },
+  // { id: 1100, text: "First Line Treatment Centre" },
+  // { id: 1200, text: "Second Line Treatment Center" },
   { id: 1300, text: "Shifting Centre" },
-  { id: 1400, text: "Covid Management Center" },
+  // { id: 1400, text: "Covid Management Center" },
   { id: 1500, text: "Request Approving Center" },
   { id: 1510, text: "Request Fulfilment Center" },
-  { id: 1600, text: "District War Room" },
+  // { id: 1600, text: "District War Room" },
 ];
 
 export const SHIFTING_CHOICES: Array<OptionsType> = [
@@ -138,6 +139,15 @@ export const PATIENT_FILTER_ORDER: Array<OptionsType> = [
   { id: 6, text: "-review_time", desc: "DESC Review Time" },
 ];
 
+const KASP_BED_TYPES = KASP_ENABLED
+  ? [
+      { id: 40, text: KASP_STRING + " Ordinary Beds" },
+      { id: 60, text: KASP_STRING + " Oxygen beds" },
+      { id: 50, text: KASP_STRING + " ICU (ICU without ventilator)" },
+      { id: 70, text: KASP_STRING + " ICU (ICU with ventilator)" },
+    ]
+  : [];
+
 export const BED_TYPES: Array<OptionsType> = [
   { id: 1, text: "Non-Covid Ordinary Beds" },
   { id: 150, text: "Non-Covid Oxygen beds" },
@@ -147,10 +157,7 @@ export const BED_TYPES: Array<OptionsType> = [
   { id: 120, text: "Covid Oxygen beds" },
   { id: 110, text: "Covid ICU (ICU without ventilator)" },
   { id: 100, text: "Covid Ventilators (ICU with ventilator)" },
-  { id: 40, text: KASP_STRING + " Ordinary Beds" },
-  { id: 60, text: KASP_STRING + " Oxygen beds" },
-  { id: 50, text: KASP_STRING + " ICU (ICU without ventilator)" },
-  { id: 70, text: KASP_STRING + " ICU (ICU with ventilator)" },
+  ...KASP_BED_TYPES,
   { id: 2, text: "Hostel" },
   { id: 3, text: "Single Room with Attached Bathroom" },
 ];
@@ -551,6 +558,7 @@ export const MOTOR_RESPONSE_SCALE = [
 ];
 export const CONSULTATION_TABS: Array<OptionsType> = [
   { id: 1, text: "UPDATES", desc: "Updates" },
+  { id: 13, text: "FEED", desc: "Feed" },
   { id: 2, text: "SUMMARY", desc: "Summary" },
   { id: 3, text: "MEDICINES", desc: "Medicines" },
   { id: 4, text: "FILES", desc: "Files" },
@@ -568,4 +576,85 @@ export const RHYTHM_CHOICES: Array<OptionsType> = [
   { id: 0, text: "Unknown" },
   { id: 5, text: "Regular" },
   { id: 10, text: "Irregular" },
+];
+
+export const LOCATION_BED_TYPES: Array<any> = [
+  { id: "ISOLATION", name: "Isolation" },
+  { id: "ICU", name: "ICU" },
+  { id: "BED_WITH_OXYGEN_SUPPORT", name: "Bed with oxygen support" },
+  { id: "REGULAR", name: "Regular" },
+];
+// Deprecated Bed Types
+// {
+//   id: "ICU_WITH_NON_INVASIVE_VENTILATOR",
+//   name: "ICU with non invasive ventilator",
+// },
+// { id: "ICU_WITH_OXYGEN_SUPPORT", name: "ICU with oxygen support" },
+// { id: "ICU_WITH_INVASIVE_VENTILATOR", name: "ICU with invasive ventilator" }
+export const ASSET_META_TYPE = [
+  { id: "CAMERA", text: "Camera(ONVIF)" },
+  { id: "HL7MONITOR", text: "Vitals Monitor(HL7)" },
+];
+
+export const CAMERA_TYPE = [
+  { id: "HIKVISION", text: "ONVIF Camera (HIKVISION)" },
+];
+
+export const PREFERENCE_SIDEBAR_KEY = "preferenceSidebar";
+export const SIDEBAR = {
+  COLLAPSED: "collapsed",
+  FULL: "full",
+};
+
+export const GENDER: { [key: number]: string } = GENDER_TYPES.reduce(
+  (acc, curr) => ({ ...acc, [curr.id]: curr.text }),
+  {}
+);
+
+export const getCameraPTZ = (precision: number) => [
+  {
+    icon: "fa fa-arrow-up",
+    label: "Up",
+    action: "up",
+    loadingLabel: "Moving Up",
+  },
+  {
+    icon: "fa fa-arrow-down",
+    label: "Down",
+    action: "down",
+    loadingLabel: "Moving Down",
+  },
+  {
+    icon: "fa fa-arrow-left",
+    label: "Left",
+    action: "left",
+    loadingLabel: "Moving Left",
+  },
+  {
+    icon: "fa fa-arrow-right",
+    label: "Right",
+    action: "right",
+    loadingLabel: "Moving Right",
+  },
+  {
+    value: precision,
+    label: "Precision",
+    action: "precision",
+    loadingLabel: "Setting Precision",
+  },
+  {
+    icon: "fa fa-search-plus",
+    label: "Zoom In",
+    action: "zoomIn",
+    loadingLabel: "Zooming In",
+  },
+  {
+    icon: "fa fa-search-minus",
+    label: "Zoom Out",
+    action: "zoomOut",
+    loadingLabel: "Zooming Out",
+  },
+  { icon: "fa fa-stop", label: "Stop", action: "stop" },
+  { icon: "fa fa-undo", label: "Reset", action: "reset" },
+  { icon: "fas fa-expand", label: "Full Screen", action: "fullScreen" },
 ];

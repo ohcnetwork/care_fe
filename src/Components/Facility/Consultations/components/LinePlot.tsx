@@ -4,7 +4,18 @@ export const LinePlot = (props: any) => {
   const { title, name, xData, yData, low = null, high = null } = props;
   let generalOptions = {
     title: {
-      text: title,
+      text: `${title} [ {0|${yData[yData.length - 1] || "NA"}} ]`,
+      textStyle: {
+        fontSize: 20,
+        rich: {
+          0: {
+            fontSize: 14,
+            fontWeight: "bold",
+            padding: [0, 5],
+            color: "#5470C6",
+          },
+        },
+      },
     },
     legend: {
       data: [name],
@@ -93,5 +104,6 @@ export const LinePlot = (props: any) => {
   if (high && low) {
     generalOptions = { ...generalOptions, ...visualMap };
   }
+
   return <ReactECharts option={generalOptions} />;
 };

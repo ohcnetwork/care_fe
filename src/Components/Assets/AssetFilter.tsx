@@ -1,13 +1,11 @@
+import React from "react";
 import { useState, useEffect, useCallback } from "react";
 import { useAbortableEffect, statusType } from "../../Common/utils";
 import { navigate, useQueryParams } from "raviger";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FacilityModel } from "../Facility/models";
 import { useDispatch } from "react-redux";
-import {
-  getAnyFacility,
-  getFacilityAssetLocation,
-} from "../../Redux/actions";
+import { getAnyFacility, getFacilityAssetLocation } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { SelectField } from "../Common/HelperInputFields";
 import { LocationSelect } from "../Common/LocationSelect";
@@ -47,7 +45,7 @@ function AssetFilter(props: any) {
     closeFilter();
     const searchQuery = qParams?.search && `?search=${qParams?.search}`;
     if (searchQuery) navigate(`/assets${searchQuery}`);
-    else navigate(`/assets`);
+    else navigate("/assets");
   }, [qParams]);
 
   const fetchFacility = useCallback(

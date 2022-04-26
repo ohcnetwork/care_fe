@@ -8,6 +8,7 @@ import {
 import { useDispatch } from "react-redux";
 import * as Notification from "../../Utils/Notifications.js";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
+import CropFreeIcon from "@material-ui/icons/CropFree";
 import PageTitle from "../Common/PageTitle";
 import {
   Box,
@@ -22,6 +23,7 @@ import {
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import { validateEmailAddress } from "../../Common/validation";
 import {
+  ActionTextInputField,
   SelectField,
   TextInputField,
   MultilineInputField,
@@ -30,6 +32,9 @@ import {
 } from "../Common/HelperInputFields";
 import { AssetData } from "../Assets/AssetTypes";
 import loadable from "@loadable/component";
+import { LocationOnOutlined } from "@material-ui/icons";
+import { navigate } from "raviger";
+import QrReader from "react-qr-reader";
 const Loading = loadable(() => import("../Common/Loading"));
 
 const initError: any = {
@@ -90,17 +95,21 @@ const AssetCreate = (props: AssetProps) => {
   const [location, setLocation] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const dispatchAction: any = useDispatch();
-  const [locations, setLocations] = useState([{ id: "0", name: "Select" }]);
+  const [locations, setLocations] = useState([]);
   const [asset, setAsset] = useState<AssetData>();
   const [facilityName, setFacilityName] = useState("");
+  const [qrCodeId, setQrCodeId] = useState("");
+  const [isScannerActive, setIsScannerActive] = useState<boolean>(false);
 
   useEffect(() => {
     setIsLoading(true);
     dispatchAction(
       listFacilityAssetLocation({}, { facility_external_id: facilityId })
     ).then(({ data }: any) => {
-      setFacilityName(data.results[0].facility.name);
-      setLocations([...locations, ...data.results]);
+      if (data.count > 0) {
+        setFacilityName(data.results[0].facility?.name);
+        setLocations(data.results);
+      }
       setIsLoading(false);
     });
 
@@ -127,11 +136,12 @@ const AssetCreate = (props: AssetProps) => {
       setSupportName(asset.support_name);
       setSupportEmail(asset.support_email);
       setSupportPhone(asset.support_phone);
+      setQrCodeId(asset.qr_code_id);
     }
   }, [asset]);
 
   const validateForm = () => {
-    let errors = { ...initError };
+    const errors = { ...initError };
     let invalidForm = false;
     Object.keys(state.errors).forEach((field) => {
       switch (field) {
@@ -164,6 +174,7 @@ const AssetCreate = (props: AssetProps) => {
             errors[field] = "Field is required";
             invalidForm = true;
           }
+          // eslint-disable-next-line no-case-declarations
           const phoneNumber = parsePhoneNumberFromString(support_phone);
           if (!phoneNumber?.isPossible()) {
             errors[field] = "Please enter valid phone number";
@@ -207,6 +218,7 @@ const AssetCreate = (props: AssetProps) => {
         support_email: support_email,
         support_phone:
           parsePhoneNumberFromString(support_phone)?.format("E.164"),
+        qr_code_id: qrCodeId,
       };
       if (!assetId) {
         const res = await dispatchAction(createAsset(data));
@@ -230,7 +242,86 @@ const AssetCreate = (props: AssetProps) => {
     }
   };
 
+  const parseAssetId = (assetId: string) => {
+    try {
+      const params = Object.fromEntries(
+        new URLSearchParams(new URL(assetId).search).entries()
+      );
+      // QR Maybe searchParams "asset" or "assetQR"
+      if (params.asset) {
+        setQrCodeId(params.asset);
+        setIsScannerActive(false);
+        return;
+      }
+      if (params.assetQR) {
+        setQrCodeId(params.assetQR);
+        setIsScannerActive(false);
+        return;
+      }
+    } catch (err) {
+      console.log(err);
+      Notification.Error({ msg: err });
+    }
+    Notification.Error({ msg: "Invalid Asset Id" });
+    setIsScannerActive(false);
+  };
+
   if (isLoading) return <Loading />;
+
+  if (locations.length === 0) {
+    return (
+      <div className="px-6 pb-2">
+        <PageTitle
+          title={assetId ? "Update Asset" : "Create New Asset"}
+          crumbsReplacements={{
+            [facilityId]: { name: facilityName },
+            assets: { style: "text-gray-200 pointer-events-none" },
+            [assetId || "????"]: { name },
+          }}
+        />
+        <section className="text-center">
+          <h1 className="text-6xl flex items-center flex-col py-10">
+            <div className="p-5 rounded-full flex items-center justify-center bg-gray-200 w-40 h-40">
+              <LocationOnOutlined fontSize="inherit" color="primary" />
+            </div>
+          </h1>
+          <p className="text-gray-600">
+            You need at least a location to create an assest.
+          </p>
+          <button
+            className="btn-primary btn mt-5"
+            onClick={() => navigate(`/facility/${facilityId}/location/add`)}
+          >
+            <i className="fas fa-plus text-white mr-2"></i>
+            Add Location
+          </button>
+        </section>
+      </div>
+    );
+  }
+
+  if (isScannerActive)
+    return (
+      <div className="md:w-1/2 w-full my-2 mx-auto flex flex-col justify-start items-end">
+        <button
+          onClick={() => setIsScannerActive(false)}
+          className="btn btn-default mb-2"
+        >
+          <i className="fas fa-times mr-2"></i> Close Scanner
+        </button>
+        <QrReader
+          delay={300}
+          onScan={(assetId: any) => (assetId ? parseAssetId(assetId) : null)}
+          onError={(e: any) =>
+            Notification.Error({
+              msg: e.message,
+            })
+          }
+          style={{ width: "100%" }}
+        />
+        <h2 className="text-center text-lg self-center">Scan Asset QR!</h2>
+      </div>
+    );
 
   return (
     <div className="px-6 pb-2">
@@ -242,7 +333,7 @@ const AssetCreate = (props: AssetProps) => {
           [assetId || "????"]: { name },
         }}
       />
-      <Card className="mt-4 max-w-screen-lg mx-auto">
+      <Card className="mt-4 mx-auto">
         <CardContent>
           <form onSubmit={(e) => handleSubmit(e)}>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
@@ -309,7 +400,7 @@ const AssetCreate = (props: AssetProps) => {
                   placeholder=""
                   variant="outlined"
                   margin="dense"
-                  options={locations}
+                  options={[{ id: "0", name: "Select" }, ...locations]}
                   optionValue="name"
                   value={location}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -480,6 +571,26 @@ const AssetCreate = (props: AssetProps) => {
                     setSupportEmail(e.target.value)
                   }
                   errors={state.errors.support_email}
+                />
+              </div>
+              <div>
+                <InputLabel htmlFor="qr_code_id" id="name=label">
+                  Asset QR Code ID
+                </InputLabel>
+                <ActionTextInputField
+                  id="qr_code_id"
+                  fullWidth
+                  name="qr_code_id"
+                  placeholder=""
+                  variant="outlined"
+                  margin="dense"
+                  value={qrCodeId}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setQrCodeId(e.target.value)
+                  }
+                  actionIcon={<CropFreeIcon className="cursor-pointer" />}
+                  action={() => setIsScannerActive(true)}
+                  errors={state.errors.qr_code_id}
                 />
               </div>
             </div>
