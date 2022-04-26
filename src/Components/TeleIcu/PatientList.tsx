@@ -155,11 +155,15 @@ export const TeleICUPatientsList = (props: any) => {
                           <>
                             <p>
                               <span className="font-bold">Weight:</span>{" "}
-                              <span>{item?.last_consultation?.weight} kg</span>
+                              <span>
+                                {item?.last_consultation?.weight ?? "-"} kg
+                              </span>
                             </p>
                             <p>
                               <span className="font-bold">Height:</span>{" "}
-                              <span>{item?.last_consultation?.height} cm</span>
+                              <span>
+                                {item?.last_consultation?.height ?? "-"} cm
+                              </span>
                             </p>
                           </>
                         )}

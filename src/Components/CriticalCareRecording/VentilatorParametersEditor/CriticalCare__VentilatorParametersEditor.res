@@ -111,7 +111,9 @@ let makePayload = (state: VentilatorParameters.state) => {
   )
   DictUtils.setOptionalNumber(
     "ventilator_fi02", 
-    state.ventilator_oxygen_modality === HIGH_FLOW_NASAL_CANNULA ? state.ventilator_fi02 : None, 
+    state.ventilator_oxygen_modality === HIGH_FLOW_NASAL_CANNULA || 
+    state.ventilator_interface === INVASIVE || 
+    state.ventilator_interface === NON_INVASIVE ? state.ventilator_fi02 : None, 
     payload
   )
   DictUtils.setOptionalNumber("ventilator_spo2", state.ventilator_spo2, payload)

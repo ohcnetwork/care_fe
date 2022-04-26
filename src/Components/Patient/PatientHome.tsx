@@ -235,7 +235,7 @@ export const PatientHome = (props: any) => {
       )
     ).then((response: any) => {
       if ((response || {}).status === 200) {
-        let dummyPatientData = Object.assign({}, patientData);
+        const dummyPatientData = Object.assign({}, patientData);
         dummyPatientData["assigned_to"] = assignedVolunteerObject;
         setPatientData(dummyPatientData);
         if (assignedVolunteerObject)
@@ -254,14 +254,14 @@ export const PatientHome = (props: any) => {
   };
 
   const handlePatientTransfer = (value: boolean) => {
-    let dummyPatientData = Object.assign({}, patientData);
+    const dummyPatientData = Object.assign({}, patientData);
     dummyPatientData["allow_transfer"] = value;
 
     dispatch(
       patchPatient({ allow_transfer: value }, { id: patientData.id })
     ).then((response: any) => {
       if ((response || {}).status === 200) {
-        let dummyPatientData = Object.assign({}, patientData);
+        const dummyPatientData = Object.assign({}, patientData);
         dummyPatientData["allow_transfer"] = value;
         setPatientData(dummyPatientData);
 
@@ -274,13 +274,13 @@ export const PatientHome = (props: any) => {
 
   const handlePatientDischarge = async (value: boolean) => {
     setIsSendingDischargeApi(true);
-    let dischargeData = Object.assign({}, patientData);
+    const dischargeData = Object.assign({}, patientData);
     dischargeData["discharge"] = value;
 
     // calling patchPatient and dischargePatient together caused problems check https://github.com/coronasafe/care_fe/issues/758
 
     // using preDischargeForm form data to update patient data
-    let preDischargeFormData = formatPreDischargeFormData(preDischargeForm);
+    const preDischargeFormData = formatPreDischargeFormData(preDischargeForm);
 
     if (Object.keys(preDischargeFormData).length) {
       // skip calling patient update api if nothing to update
@@ -291,13 +291,13 @@ export const PatientHome = (props: any) => {
       );
     }
     // discharge call
-    let dischargeResponse = await dispatch(
+    const dischargeResponse = await dispatch(
       dischargePatient({ discharge: value }, { id: patientData.id })
     );
 
     setIsSendingDischargeApi(false);
     if (dischargeResponse?.status === 200) {
-      let dischargeData = Object.assign({}, patientData);
+      const dischargeData = Object.assign({}, patientData);
       dischargeData["discharge"] = value;
       setPatientData(dischargeData);
 
@@ -312,8 +312,8 @@ export const PatientHome = (props: any) => {
   const formatPreDischargeFormData = (
     preDischargeForm: preDischargeFormInterface
   ) => {
-    let data: any = { ...preDischargeForm };
-    let donatePlasma = preDischargeForm.donatePlasma;
+    const data: any = { ...preDischargeForm };
+    const donatePlasma = preDischargeForm.donatePlasma;
 
     if (donatePlasma) {
       if (donatePlasma === "yes") {
@@ -499,7 +499,7 @@ export const PatientHome = (props: any) => {
     setSelectedStatus({ status, sample });
     setAlertMessage({
       show: true,
-      message: `Are you sure you want to sent the sample to Collection Centre?`,
+      message: "Are you sure you want to sent the sample to Collection Centre?",
       title: "Confirm",
     });
   };
@@ -608,7 +608,7 @@ export const PatientHome = (props: any) => {
 
       <div id="revamp">
         <PageTitle
-          title={`Covid Suspect Details`}
+          title={"Covid Suspect Details"}
           backUrl="/patients"
           crumbsReplacements={{
             [facilityId]: { name: patientData?.facility_object?.name },
@@ -1455,7 +1455,9 @@ export const PatientHome = (props: any) => {
                 <div>
                   <button
                     className="btn btn-primary w-full"
-                    disabled={!patientData.is_active}
+                    disabled={
+                      patientData.is_active && !!consultationListData.length
+                    }
                     onClick={() =>
                       navigate(
                         `/facility/${patientData?.facility}/patient/${id}/consultation`
@@ -1702,7 +1704,7 @@ export const PatientHome = (props: any) => {
                   id="covid-status-pre-form"
                   className="flex justify-center w-full text-gray-900 mb-2 mt-5"
                 >
-                  Has the patient's disease status changed? If so, to what?
+                  Has the patient&apos;s disease status changed? If so, to what?
                 </label>
                 <Select
                   className="h-10"
@@ -1712,14 +1714,17 @@ export const PatientHome = (props: any) => {
                     handlePreDischargeFormChange("disease_status", event)
                   }
                 >
-                  {DISEASE_STATUS.map((value) => (
-                    <MenuItem value={value}>{value}</MenuItem>
+                  {DISEASE_STATUS.map((value, i) => (
+                    <MenuItem key={i} value={value}>
+                      {value}
+                    </MenuItem>
                   ))}
                 </Select>
               </Fragment>
 
               <label className="flex justify-center w-full mt-5 text-gray-900">
-                Would you like to update the patient's SRF ID and Test date?
+                Would you like to update the patient&apos;s SRF ID and Test
+                date?
               </label>
 
               <div className="flex">
