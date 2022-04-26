@@ -169,3 +169,12 @@ export interface BedModel {
   };
   location?: string;
 }
+
+export interface ConsultationBed {
+  id?: string;
+  bed?: string;
+  bed_object?: BedModel;
+  start_date?: string;
+  end_date?: string;
+  consultation?: string;
+}
