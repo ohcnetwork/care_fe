@@ -139,6 +139,9 @@ export const UserAdd = (props: UserProps) => {
   const userType = currentUser.data.user_type;
 
   const userIndex = USER_TYPES.indexOf(userType);
+
+  const defaultAllowedUserTypes = USER_TYPES.slice(0, userIndex + 1);
+
   const userTypes = isSuperuser
     ? [...USER_TYPES]
     : userType === "StaffReadOnly"
@@ -149,7 +152,10 @@ export const UserAdd = (props: UserProps) => {
     ? ["StaffReadOnly", "DistrictReadOnlyAdmin", "StateReadOnlyAdmin"]
     : userType === "Pharmacist"
     ? ["Pharmacist"]
-    : USER_TYPES.slice(0, userIndex + 1);
+    : // Exception to allow Staff to Create Doctors
+    userType === "Staff"
+    ? ["Doctor", ...defaultAllowedUserTypes]
+    : defaultAllowedUserTypes;
 
   const headerText = !userId ? "Add User" : "Update User";
   const buttonText = !userId ? "Save User" : "Update Details";
