@@ -160,7 +160,9 @@ export const UserAdd = (props: UserProps) => {
   const headerText = !userId ? "Add User" : "Update User";
   const buttonText = !userId ? "Save User" : "Update Details";
   const showLocalbody = !(
-    state.form.user_type === "Staff" || state.form.user_type === "StaffReadOnly"
+    state.form.user_type === "Doctor" ||
+    state.form.user_type === "Staff" ||
+    state.form.user_type === "StaffReadOnly"
   );
 
   const fetchDistricts = useCallback(
