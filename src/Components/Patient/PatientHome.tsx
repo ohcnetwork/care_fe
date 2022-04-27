@@ -1793,7 +1793,7 @@ export const PatientHome = (props: any) => {
 
       <div>
         <PageTitle
-          title="Sample Test History"
+          title="Patient Details"
           hideBack={true}
           breadcrumbs={false}
         />
