@@ -18,6 +18,7 @@ import {
 import Loading from "../../Common/Loading";
 import PageTitle from "../../Common/PageTitle";
 import { ConsultationModel } from "../models";
+import * as Notification from "../../../Utils/Notifications.js";
 
 interface IFeedProps {
   facilityId: string;
@@ -181,6 +182,12 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
         onSuccess: () => {
           setLoading(undefined);
           setCurrentPreset(preset);
+          console.log("onSuccess: Set Preset to " + preset?.meta?.preset_name);
+        },
+        onError: () => {
+          setLoading(undefined);
+          setCurrentPreset(preset);
+          console.log("onError: Set Preset to " + preset?.meta?.preset_name);
         },
       });
     }
@@ -219,6 +226,16 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
                     onSuccess: () => {
                       setLoading(undefined);
                       setCurrentPreset(preset);
+                      console.log(
+                        "onSuccess: Set Preset to " + preset?.meta?.preset_name
+                      );
+                    },
+                    onError: () => {
+                      setLoading(undefined);
+                      setCurrentPreset(preset);
+                      console.log(
+                        "onError: Set Preset to " + preset?.meta?.preset_name
+                      );
                     },
                   });
                   getCameraStatus({});
@@ -321,13 +338,25 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
                         console.log({ currentPreset, data });
                         if (currentPreset?.asset_object?.id && data?.position) {
                           setLoading(option.loadingLabel);
+                          console.log("Updating Preset");
                           const response = await dispatch(
                             partialUpdateAssetBed(
-                              { meta: { ...data?.position } },
+                              {
+                                asset: currentPreset.asset_object.id,
+                                bed: currentPreset.bed_object.id,
+                                meta: {
+                                  ...currentPreset.meta,
+                                  position: data?.position,
+                                },
+                              },
                               currentPreset?.id
                             )
                           );
-                          console.log(response);
+                          if (response && response.status === 200) {
+                            Notification.Success({
+                              msg: "Preset Updated",
+                            });
+                          }
                           setLoading(undefined);
                         }
                       },
