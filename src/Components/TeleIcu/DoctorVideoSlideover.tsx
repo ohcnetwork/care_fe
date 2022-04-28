@@ -1,6 +1,7 @@
 import moment from "moment";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
+import { USER_TYPES } from "../../Common/constants";
 import { getFacilityUsers } from "../../Redux/actions";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import { UserModel } from "../Users/models";
@@ -63,10 +64,13 @@ export default function DoctorVideoSlideover(props: {
               return Number(a.last_login) - Number(b.last_login);
             })
             .map((doctor) => {
-              const icon =
-                doctor.user_type === "Doctor"
-                  ? "fa-user-doctor "
-                  : " fa-user-nurse";
+              let icon = " fa-user-nurse";
+              if (doctor.user_type) {
+                icon =
+                  USER_TYPES[doctor.user_type as number] === "Doctor"
+                    ? "fa-user-doctor "
+                    : " fa-user-nurse";
+              }
               return (
                 <li
                   key={doctor.id}
