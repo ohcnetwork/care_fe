@@ -42,7 +42,6 @@ const Beds = (props: BedsProps) => {
             msg: "Something went wrong..!",
           });
         else {
-          console.log(bedsData.data);
           setConsultationBeds(bedsData?.data?.results);
         }
       }
@@ -58,7 +57,7 @@ const Beds = (props: BedsProps) => {
 
   const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
-    if (!bed.id)
+    if (!bed?.id)
       return Notification.Error({
         msg: "Please select a bed first..!",
       });
@@ -146,16 +145,16 @@ const Beds = (props: BedsProps) => {
           </div>
           {consultationBeds.length > 0 ? (
             consultationBeds.map((bed) => (
-              <div className="grid grid-cols-3 gap-1" key={bed.id}>
+              <div className="grid grid-cols-3 gap-1" key={bed?.id}>
                 <div className="text-center bg-primary-100 py-2">
                   {bed?.bed_object?.name}
                 </div>
                 <div className="text-center bg-primary-100 py-2">
-                  {moment(bed.start_date).format("MMMM Do YYYY, h:mm:ss a")}
+                  {moment(bed?.start_date).format("MMMM Do YYYY, h:mm:ss a")}
                 </div>
-                {bed.end_date ? (
+                {bed?.end_date ? (
                   <div className="text-center bg-primary-100 py-2">
-                    {moment(bed.end_date).format("MMMM Do YYYY, h:mm:ss a")}
+                    {moment(bed?.end_date).format("MMMM Do YYYY, h:mm:ss a")}
                   </div>
                 ) : (
                   <div className="text-center bg-primary-100 py-2">
