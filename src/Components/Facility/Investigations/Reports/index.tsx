@@ -103,7 +103,11 @@ const InvestigationReports = ({ id }: any) => {
   const [sessionPage, setSessionPage] = useState(1);
   const [isNextSessionDisabled, setIsNextSessionDisabled] = useState(false);
   const [isLoadMoreDisabled, setIsLoadMoreDisabled] = useState(false);
-  const [patientName, setPatientName] = useState("");
+  const [patientDetails, setPatientDetails] = useState<{
+    name: string;
+    age: number;
+    hospitalName: string;
+  }>({ name: "", age: -1, hospitalName: "" });
   const [state, dispatch] = useReducer(
     investigationReportsReducer,
     initialState
@@ -119,6 +123,7 @@ const InvestigationReports = ({ id }: any) => {
   } = state as InitialState;
 
   const fetchInvestigationsData = useCallback(
+    // eslint-disable-next-line @typescript-eslint/ban-types
     (onSuccess: Function, curPage = 1, curSessionPage = 1) => {
       dispatch({
         type: "set_loading",
@@ -213,10 +218,18 @@ const InvestigationReports = ({ id }: any) => {
       if (id) {
         const res = await dispatchAction(getPatient({ id: id }));
         if (res.data) {
-          setPatientName(res.data.name);
+          setPatientDetails({
+            name: res.data.name,
+            age: res.data.age,
+            hospitalName: res.data.facility_object.name,
+          });
         }
       } else {
-        setPatientName("");
+        setPatientDetails({
+          name: "",
+          age: -1,
+          hospitalName: "",
+        });
       }
     }
     fetchPatientName();
@@ -234,7 +247,7 @@ const InvestigationReports = ({ id }: any) => {
     fetchInvestigationGroups.current();
   }, []);
 
-  const handleLoadMore = (e: any) => {
+  const handleLoadMore = () => {
     const onSuccess = (data: any) => {
       dispatch({
         type: "set_investigation_table_data",
@@ -313,7 +326,7 @@ const InvestigationReports = ({ id }: any) => {
         title={"Investigation Reports"}
         crumbsReplacements={{
           patient: { style: "pointer-events-none" },
-          [id]: { name: patientName },
+          [id]: { name: patientDetails.name },
         }}
       />
       {!isLoading.investigationGroupLoading ? (
@@ -431,6 +444,7 @@ const InvestigationReports = ({ id }: any) => {
                 <ReportTable
                   investigationData={investigationTableData}
                   title="Report"
+                  patientDetails={patientDetails}
                 />
 
                 {!!isLoading.tableData && (
