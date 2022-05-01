@@ -35,6 +35,7 @@ import loadable from "@loadable/component";
 import { LocationOnOutlined } from "@material-ui/icons";
 import { navigate } from "raviger";
 import QrReader from "react-qr-reader";
+import { parseQueryParams } from "../../Utils/primitives";
 const Loading = loadable(() => import("../Common/Loading"));
 
 const initError: any = {
@@ -242,19 +243,13 @@ const AssetCreate = (props: AssetProps) => {
     }
   };
 
-  const parseAssetId = (assetId: string) => {
+  const parseAssetId = (assetUrl: string) => {
     try {
-      const params = Object.fromEntries(
-        new URLSearchParams(new URL(assetId).search).entries()
-      );
+      const params = parseQueryParams(assetUrl);
       // QR Maybe searchParams "asset" or "assetQR"
-      if (params.asset) {
-        setQrCodeId(params.asset);
-        setIsScannerActive(false);
-        return;
-      }
-      if (params.assetQR) {
-        setQrCodeId(params.assetQR);
+      const assetId = params.asset || params.assetQR;
+      if (assetId) {
+        setQrCodeId(assetId);
         setIsScannerActive(false);
         return;
       }
