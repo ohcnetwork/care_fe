@@ -325,7 +325,15 @@ const HospitalListPage = (props: any) => {
           <div className="block rounded-lg bg-white shadow h-full hover:border-primary-500 overflow-hidden">
             <div className="flex ">
               <div className="md:flex hidden w-32 self-stretch flex-shrink-0 bg-gray-300 items-center justify-center">
-                <i className="fas fa-hospital text-4xl block text-gray-600"></i>
+                {facility.cover_image_url ? (
+                  <img
+                    src={facility.cover_image_url}
+                    alt="Facility"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <i className="fas fa-hospital text-4xl block text-gray-600"></i>
+                )}
               </div>
               <div className="h-full">
                 <div className="h-full flex flex-col justify-between">
