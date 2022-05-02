@@ -17,6 +17,7 @@ import * as Notification from "../../../Utils/Notifications.js";
 const LiveFeed = (props: any) => {
   const middlewareHostname =
     props.middlewareHostname || "dev_middleware.coronasafe.live";
+  const [presetsPage, setPresetsPage] = useState(0);
   const cameraAsset = props.asset;
   const [presets, setPresets] = useState<any>([]);
   const [bedPresets, setBedPresets] = useState<any>([]);
@@ -77,14 +78,15 @@ const LiveFeed = (props: any) => {
     }
   }, [cameraAsset.id]);
 
-  const viewOptions = presets
-    ? Object.entries(presets)
-        .map(([key, value]) => ({ label: key, value }))
-        .slice(0, 10)
-    : Array.from(Array(10), (_, i) => ({
-        label: "Monitor " + (i + 1),
-        value: i + 1,
-      }));
+  const viewOptions = (page: number) =>
+    presets
+      ? Object.entries(presets)
+          .map(([key, value]) => ({ label: key, value }))
+          .slice(page, page + 10)
+      : Array.from(Array(10), (_, i) => ({
+          label: "Monitor " + (i + 1),
+          value: i + 1,
+        }));
 
   const cameraPTZ = getCameraPTZ(precision);
 
@@ -273,8 +275,9 @@ const LiveFeed = (props: any) => {
             </nav>
             <div className="w-full space-y-4 my-2">
               <div className="grid grid-cols-2 my-auto gap-2">
-                {showDefaultPresets
-                  ? viewOptions?.map((option: any, i) => (
+                {showDefaultPresets ? (
+                  <>
+                    {viewOptions(presetsPage)?.map((option: any, i) => (
                       <button
                         key={i}
                         className="flex flex-wrap gap-2 w-full max- bg-green-100 border border-white rounded-md p-3 text-black  hover:bg-green-500 hover:text-white truncate"
@@ -293,30 +296,51 @@ const LiveFeed = (props: any) => {
                       >
                         {option.label}
                       </button>
-                    ))
-                  : bedPresets?.map((preset: any, index: number) => (
-                      <button
-                        key={preset.id}
-                        className="flex gap-2 w-52 bg-green-100 border border-white rounded-md p-3 text-black  hover:bg-green-500 hover:text-white truncate"
-                        onClick={() => {
-                          setLoading("Moving");
-                          gotoBedPreset(preset);
-                          setCurrentPreset(preset);
-                          // console.log("Preset Updated", preset);
-                          getBedPresets(cameraAsset?.id);
-                          getPresets({});
-                        }}
-                      >
-                        <span className="justify-start font-semibold">
-                          {preset.bed_object.name}
-                        </span>
-                        <span className="mx-auto">
-                          {preset.meta.preset_name
-                            ? preset.meta.preset_name
-                            : `Unnamed Preset ${index + 1}`}
-                        </span>
-                      </button>
                     ))}
+                    {/* Page Number Next and Prev buttons */}
+                    <button
+                      className="flex-1 p-4  font-bold text-center  text-gray-700 hover:text-gray-800 hover:bg-gray-300"
+                      disabled={presetsPage < 10}
+                      onClick={() => {
+                        setPresetsPage(presetsPage - 10);
+                      }}
+                    >
+                      <i className="fas fa-arrow-left"></i>
+                    </button>
+                    <button
+                      className="flex-1 p-4  font-bold text-center  text-gray-700 hover:text-gray-800 hover:bg-gray-300"
+                      disabled={presetsPage >= presets.length}
+                      onClick={() => {
+                        setPresetsPage(presetsPage + 10);
+                      }}
+                    >
+                      <i className="fas fa-arrow-right"></i>
+                    </button>
+                  </>
+                ) : (
+                  bedPresets?.map((preset: any, index: number) => (
+                    <button
+                      key={preset.id}
+                      className="flex flex-col bg-green-100 border border-white rounded-md p-2 text-black  hover:bg-green-500 hover:text-white truncate"
+                      onClick={() => {
+                        setLoading("Moving");
+                        gotoBedPreset(preset);
+                        setCurrentPreset(preset);
+                        getBedPresets(cameraAsset?.id);
+                        getPresets({});
+                      }}
+                    >
+                      <span className="justify-start text-xs font-semibold">
+                        {preset.bed_object.name}
+                      </span>
+                      <span className="mx-auto">
+                        {preset.meta.preset_name
+                          ? preset.meta.preset_name
+                          : `Unnamed Preset ${index + 1}`}
+                      </span>
+                    </button>
+                  ))
+                )}
               </div>
               {props?.showRefreshButton && (
                 <button
