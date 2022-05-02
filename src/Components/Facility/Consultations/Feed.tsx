@@ -207,9 +207,8 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
       <div className="flex items-center flex-wrap justify-between gap-2">
         <PageTitle
           title={
-            "Patient Details -  Camera Feed" +
-            " " +
-            bedPresets?.[0]?.asset_object?.name
+            "Patient Details | " +
+            (bedPresets?.[0]?.asset_object?.location_object?.name ?? "")
           }
           breadcrumbs={false}
         />
