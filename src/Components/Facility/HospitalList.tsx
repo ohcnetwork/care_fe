@@ -695,7 +695,7 @@ const HospitalListPage = (props: any) => {
             "kasp_empanelled"
           )}
       </div>
-      <div className="mt-4">
+      <div className="mt-4 pb-24">
         <div>{manageFacilities}</div>
       </div>
     </div>
