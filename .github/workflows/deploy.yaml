@@ -71,8 +71,8 @@ jobs:
   build-github-staging:
     needs: test
     if: github.ref == 'refs/heads/develop'
-    name: Build and push to GitHub
-    runs-on: ubuntu-latest
+    name: Build and push to GitHub Staging
+    runs-on: ubuntu-latest 
     steps:
       - uses: actions/checkout@v2
       - name: Set current date as ENV variable
@@ -189,6 +189,11 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID}}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-south-1
+      - name: install kubectl
+        uses: azure/setup-kubectl@v2.0
+        with:
+          version: 'v1.23.6'
+        id: install
       - name: Deploy Care Fe Staging
         run: |
           mkdir -p $HOME/.kube/
@@ -217,6 +222,11 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID}}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-south-1
+      - name: install kubectl
+        uses: azure/setup-kubectl@v2.0
+        with:
+          version: 'v1.23.6'
+        id: install
       - name: Deploy Care Fe Staging
         run: |
           mkdir -p $HOME/.kube/
@@ -246,6 +256,11 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID}}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-south-1
+      - name: install kubectl
+        uses: azure/setup-kubectl@v2.0
+        with:
+          version: 'v1.23.6'
+        id: install
       - name: Deploy Care Fe Production
         run: |
           mkdir -p $HOME/.kube/
