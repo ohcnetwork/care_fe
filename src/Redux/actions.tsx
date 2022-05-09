@@ -146,6 +146,16 @@ export const getAssetBed = (
     { asset: asset_external_id, bed: bed_id },
     { external_id }
   );
+export const partialUpdateAssetBed = (params: object, asset_id: string) =>
+  fireRequest(
+    "partialUpdateAssetBed",
+    [],
+    { ...params },
+    {
+      external_id: asset_id,
+    }
+  );
+
 export const updateAssetBed = (
   params: object,
   asset_external_id: string,

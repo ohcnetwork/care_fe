@@ -139,6 +139,9 @@ export const UserAdd = (props: UserProps) => {
   const userType = currentUser.data.user_type;
 
   const userIndex = USER_TYPES.indexOf(userType);
+
+  const defaultAllowedUserTypes = USER_TYPES.slice(0, userIndex + 1);
+
   const userTypes = isSuperuser
     ? [...USER_TYPES]
     : userType === "StaffReadOnly"
@@ -149,12 +152,19 @@ export const UserAdd = (props: UserProps) => {
     ? ["StaffReadOnly", "DistrictReadOnlyAdmin", "StateReadOnlyAdmin"]
     : userType === "Pharmacist"
     ? ["Pharmacist"]
-    : USER_TYPES.slice(0, userIndex + 1);
+    : // Exception to allow Staff to Create Doctors
+    userType === "Staff"
+    ? ["Doctor", ...defaultAllowedUserTypes]
+    : defaultAllowedUserTypes;
 
   const headerText = !userId ? "Add User" : "Update User";
   const buttonText = !userId ? "Save User" : "Update Details";
   const showLocalbody = !(
-    state.form.user_type === "Staff" || state.form.user_type === "StaffReadOnly"
+    state.form.user_type === "Pharmacist" ||
+    state.form.user_type === "Volunteer" ||
+    state.form.user_type === "Doctor" ||
+    state.form.user_type === "Staff" ||
+    state.form.user_type === "StaffReadOnly"
   );
 
   const fetchDistricts = useCallback(
@@ -571,10 +581,9 @@ export const UserAdd = (props: UserProps) => {
                 <TextInputField
                   fullWidth
                   name="username"
+                  autoComplete="new-username"
                   variant="outlined"
                   margin="dense"
-                  autoComplete="off"
-                  value={state.form.username}
                   onChange={handleChange}
                   errors={state.errors.username}
                 />
@@ -599,10 +608,10 @@ export const UserAdd = (props: UserProps) => {
                 <TextInputField
                   fullWidth
                   name="password"
+                  autoComplete="new-password"
                   type="password"
                   variant="outlined"
                   margin="dense"
-                  autoComplete="off"
                   value={state.form.password}
                   onChange={handleChange}
                   errors={state.errors.password}
