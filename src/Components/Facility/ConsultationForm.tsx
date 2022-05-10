@@ -553,7 +553,7 @@ export const ConsultationForm = (props: any) => {
   }
 
   return (
-    <div className="px-2 pb-2 max-w-3xl mx-auto">
+    <div className="px-2 pb-2 max-w-5xl mx-auto">
       <PageTitle
         title={headerText}
         crumbsReplacements={{
@@ -584,7 +584,7 @@ export const ConsultationForm = (props: any) => {
                       Other Symptom Details
                     </InputLabel>
                     <MultilineInputField
-                      rows={5}
+                      rows={3}
                       name="other_symptoms"
                       variant="outlined"
                       margin="dense"
@@ -617,7 +617,7 @@ export const ConsultationForm = (props: any) => {
                     History of present illness
                   </InputLabel>
                   <MultilineInputField
-                    rows={5}
+                    rows={3}
                     name="existing_medication"
                     variant="outlined"
                     margin="dense"
@@ -637,7 +637,7 @@ export const ConsultationForm = (props: any) => {
                     Examination details and Clinical conditions
                   </InputLabel>
                   <MultilineInputField
-                    rows={5}
+                    rows={3}
                     name="examination_details"
                     variant="outlined"
                     margin="dense"
@@ -657,7 +657,7 @@ export const ConsultationForm = (props: any) => {
                     Treatment Summary
                   </InputLabel>
                   <MultilineInputField
-                    rows={5}
+                    rows={3}
                     name="prescribed_medication"
                     variant="outlined"
                     margin="dense"
@@ -796,7 +796,7 @@ export const ConsultationForm = (props: any) => {
               <div className="mt-4" id="consultation_notes-div">
                 <InputLabel>Advice*</InputLabel>
                 <MultilineInputField
-                  rows={5}
+                  rows={3}
                   className="mt-2"
                   name="consultation_notes"
                   variant="outlined"
@@ -865,7 +865,7 @@ export const ConsultationForm = (props: any) => {
               <div id="diagnosis-div">
                 <InputLabel id="exam-details-label">Diagnosis</InputLabel>
                 <MultilineInputField
-                  rows={5}
+                  rows={3}
                   name="diagnosis"
                   variant="outlined"
                   margin="dense"
@@ -985,7 +985,7 @@ export const ConsultationForm = (props: any) => {
               <div id="operation-div" className="mt-2">
                 <InputLabel id="exam-details-label">Operation</InputLabel>
                 <MultilineInputField
-                  rows={5}
+                  rows={3}
                   name="operation"
                   variant="outlined"
                   margin="dense"
@@ -1004,7 +1004,7 @@ export const ConsultationForm = (props: any) => {
                   Special Instructions
                 </InputLabel>
                 <MultilineInputField
-                  rows={5}
+                  rows={3}
                   name="special_instruction"
                   variant="outlined"
                   margin="dense"
