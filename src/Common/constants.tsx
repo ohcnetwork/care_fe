@@ -559,6 +559,7 @@ export const MOTOR_RESPONSE_SCALE = [
 export const CONSULTATION_TABS: Array<OptionsType> = [
   { id: 1, text: "UPDATES", desc: "Updates" },
   { id: 13, text: "FEED", desc: "Feed" },
+  { id: 14, text: "BEDS", desc: "Beds" },
   { id: 2, text: "SUMMARY", desc: "Summary" },
   { id: 3, text: "MEDICINES", desc: "Medicines" },
   { id: 4, text: "FILES", desc: "Files" },

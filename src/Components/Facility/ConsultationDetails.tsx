@@ -37,6 +37,7 @@ import TeleICUPatientInfoCard from "../TeleIcu/Patient/InfoCard";
 import TeleICUPatientVitalsCard from "../TeleIcu/Patient/VitalsCard";
 import TeleICUPatientVitalsGraphCard from "../TeleIcu/Patient/VitalsGraph";
 import DoctorVideoSlideover from "../TeleIcu/DoctorVideoSlideover";
+import Beds from "./Consultations/Beds";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -150,7 +151,7 @@ export const ConsultationDetails = (props: any) => {
         setIsLoading(false);
       }
     },
-    [consultationId, dispatch]
+    [consultationId, dispatch, patientData.is_vaccinated]
   );
 
   useAbortableEffect((status: statusType) => {
@@ -492,8 +493,8 @@ export const ConsultationDetails = (props: any) => {
                       Lines and Catheters
                     </h3>
                     <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
-                      {consultationData.lines?.map((line: any, i: number) => (
-                        <div className="mt-4" key={i}>
+                      {consultationData.lines?.map((line: any, idx: number) => (
+                        <div key={idx} className="mt-4">
                           <h5>{line.type}</h5>
                           <p className="text-justify break-word">
                             Details:
@@ -591,6 +592,20 @@ export const ConsultationDetails = (props: any) => {
             middlewareHostname={cameraMiddlewareHostname}
             config={cameraConfig}
           />
+        )}
+        {tab === "BEDS" && (
+          <div className="mt-4">
+            <PageTitle
+              title="Beds History"
+              hideBack={true}
+              breadcrumbs={false}
+            />
+            <Beds
+              facilityId={facilityId}
+              patientId={patientId}
+              consultationId={consultationId}
+            ></Beds>
+          </div>
         )}
         {tab === "SUMMARY" && (
           <div className="mt-4">
