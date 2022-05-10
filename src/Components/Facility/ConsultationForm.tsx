@@ -727,7 +727,7 @@ export const ConsultationForm = (props: any) => {
                         errors={state.errors.admitted_to}
                       />
                     </div>
-                  )} 
+                  )}
                 */}
                 {!id && state.form.suggestion === "A" && (
                   <>
