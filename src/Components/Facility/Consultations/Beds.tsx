@@ -7,11 +7,12 @@ import {
 import { statusType, useAbortableEffect } from "../../../Common/utils";
 import * as Notification from "../../../Utils/Notifications.js";
 import Loading from "../../Common/Loading";
-import { BedModel } from "../models";
+import { BedModel, CurrentBed } from "../models";
 import { BedSelect } from "../../Common/BedSelect";
 import { Button, InputLabel } from "@material-ui/core";
 import { TextInputField } from "../../Common/HelperInputFields";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
+import moment from "moment";
 
 interface BedsProps {
   facilityId: string;
@@ -24,6 +25,9 @@ const Beds = (props: BedsProps) => {
   const { facilityId, consultationId } = props;
   const [bed, setBed] = React.useState<BedModel>({});
   const [startDate, setStartDate] = React.useState<string>("");
+  const [consultationBeds, setConsultationBeds] = React.useState<CurrentBed[]>(
+    []
+  );
   const [isLoading, setIsLoading] = React.useState(false);
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -33,13 +37,13 @@ const Beds = (props: BedsProps) => {
       ]);
       if (!status.aborted) {
         setIsLoading(false);
-        if (!bedsData.data)
+        if (!bedsData?.data)
           Notification.Error({
             msg: "Something went wrong..!",
           });
         else {
           console.log(bedsData.data);
-          // setBeds(bedsData.data);
+          setConsultationBeds(bedsData?.data?.results);
         }
       }
     },
@@ -67,10 +71,11 @@ const Beds = (props: BedsProps) => {
         )
       )
     );
-    if (res.status === 200) {
+    if (res && res.status === 201) {
       Notification.Success({
         msg: "Bed allocated successfully",
       });
+      window.location.reload();
     } else {
       Notification.Error({
         msg: "Something went wrong..!",
@@ -127,6 +132,46 @@ const Beds = (props: BedsProps) => {
       </form>
       <div>
         <h3 className="my-4 text-lg">Previous beds: </h3>
+        <div>
+          <div className="grid grid-cols-3 gap-1">
+            <div className="font-bold text-center bg-primary-500 text-white py-2">
+              Bed
+            </div>
+            <div className="font-bold text-center bg-primary-500 text-white py-2">
+              Start Date
+            </div>
+            <div className="font-bold text-center bg-primary-500 text-white py-2">
+              End Date
+            </div>
+          </div>
+          {consultationBeds.length > 0 ? (
+            consultationBeds.map((bed) => (
+              <div className="grid grid-cols-3 gap-1" key={bed.id}>
+                <div className="text-center bg-primary-100 py-2">
+                  {bed?.bed_object?.name}
+                </div>
+                <div className="text-center bg-primary-100 py-2">
+                  {moment(bed.start_date).format("MMMM Do YYYY, h:mm:ss a")}
+                </div>
+                {bed.end_date ? (
+                  <div className="text-center bg-primary-100 py-2">
+                    {moment(bed.end_date).format("MMMM Do YYYY, h:mm:ss a")}
+                  </div>
+                ) : (
+                  <div className="text-center bg-primary-100 py-2">
+                    <span className="border px-1 text-sm rounded-full bg-yellow-100 text-yellow-500 border-yellow-500 ">
+                      In Use
+                    </span>
+                  </div>
+                )}
+              </div>
+            ))
+          ) : (
+            <div className="text-center bg-primary-100 py-2">
+              No beds allocated yet
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
