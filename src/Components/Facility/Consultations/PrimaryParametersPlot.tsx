@@ -1,5 +1,5 @@
 import moment from "moment";
-import { useCallback, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
 import { dailyRoundsAnalyse } from "../../../Redux/actions";
@@ -198,48 +198,50 @@ export const PrimaryParametersPlot = (props: any) => {
       <div className="">
         <h3 className="text-lg py-2 px-3">Rhythm</h3>
         <table className="w-full bg-white rounded-lg p-2 shadow overflow-hidden">
-          <tr>
-            {["Time", "Rhythm", "Description"].map((heading, i) => (
-              <td className="font-bold p-2 bg-gray-300" key={i}>
-                {heading}
-              </td>
-            ))}
-          </tr>
-          {Object.entries(rhythmValues).map((obj: any) => {
-            if (obj[1].length > 0) {
-              return (
-                <>
-                  <tr>
-                    <td
-                      colSpan={3}
-                      className="font-bold italic text-sm text-center bg-gray-200 p-2 text-gray-800"
-                    >
-                      {obj[0]}
-                    </td>
-                  </tr>
-                  {obj[1].map((x: any, i: any) => (
-                    <tr
-                      key={`rhythm_${i}`}
-                      className="border-b-2 border-b-gray-100"
-                    >
-                      <td className="p-2 border-r-2 border-r-gray-100 font-bold">
-                        {x.time}
-                      </td>
+          <tbody>
+            <tr>
+              {["Time", "Rhythm", "Description"].map((heading, i) => (
+                <td className="font-bold p-2 bg-gray-300" key={i}>
+                  {heading}
+                </td>
+              ))}
+            </tr>
+            {Object.entries(rhythmValues).map((obj: any, i: number) => {
+              if (obj[1].length > 0) {
+                return (
+                  <React.Fragment key={i}>
+                    <tr>
                       <td
-                        className={
-                          "p-2 border-r-2 border-r-gray-100" +
-                          (x.rhythm === 5 ? "" : " text-red-400")
-                        }
+                        colSpan={3}
+                        className="font-bold italic text-sm text-center bg-gray-200 p-2 text-gray-800"
                       >
-                        {x.rhythm === 5 ? "Regular" : "Irregular"}
+                        {obj[0]}
                       </td>
-                      <td className="p-2">{x.rhythm_detail}</td>
                     </tr>
-                  ))}
-                </>
-              );
-            }
-          })}
+                    {obj[1].map((x: any, i: any) => (
+                      <tr
+                        key={`rhythm_${i}`}
+                        className="border-b-2 border-b-gray-100"
+                      >
+                        <td className="p-2 border-r-2 border-r-gray-100 font-bold">
+                          {x.time}
+                        </td>
+                        <td
+                          className={
+                            "p-2 border-r-2 border-r-gray-100" +
+                            (x.rhythm === 5 ? "" : " text-red-400")
+                          }
+                        >
+                          {x.rhythm === 5 ? "Regular" : "Irregular"}
+                        </td>
+                        <td className="p-2">{x.rhythm_detail}</td>
+                      </tr>
+                    ))}
+                  </React.Fragment>
+                );
+              }
+            })}
+          </tbody>
         </table>
       </div>
 
