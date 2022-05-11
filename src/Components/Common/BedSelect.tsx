@@ -4,7 +4,7 @@ import { listFacilityBeds } from "../../Redux/actions";
 import { AutoCompleteAsyncField } from "../Common/HelperInputFields";
 import { BedModel } from "../Facility/models";
 import { LOCATION_BED_TYPES } from "../../Common/constants";
-const debounce = require("lodash.debounce");
+import { debounce } from "lodash";
 interface BedSelectProps {
   name: string;
   margin?: string;
@@ -97,9 +97,13 @@ export const BedSelect = (props: BedSelectProps) => {
           : "Start typing to begin search"
       }
       renderOption={(option: any) => (
-        <div>{`${option.name} (${
-          LOCATION_BED_TYPES.find((x) => x.id === option.bed_type).name
-        })`}</div>
+        <div>
+          {`${option.name} (${
+            LOCATION_BED_TYPES.find((x) => x.id === option.bed_type)?.name ||
+            "Unknown"
+          })`}{" "}
+          | {option?.location_object?.name}
+        </div>
       )}
       getOptionSelected={(option: any, value: any) => option.id === value.id}
       getOptionLabel={(option: any) => option?.name || ""}

@@ -1,5 +1,6 @@
 import { Link } from "raviger";
 import { GENDER } from "../../../Common/constants";
+import { getDimensionOrDash } from "../../../Common/utils";
 import { PatientModel } from "../../Patient/models";
 import { RightArrowIcon } from "../Icons/ArrowIcon";
 
@@ -7,19 +8,12 @@ export interface ITeleICUPatientInfoCardProps {
   patient: PatientModel;
 }
 
-const getDimensionOrDash = (value: number, unit: string) => {
-  if (value === undefined || value === null || value === 0) {
-    return "-";
-  }
-  return value + unit;
-};
-
 export default function TeleICUPatientInfoCard({
   patient,
 }: ITeleICUPatientInfoCardProps) {
   return (
     <section className="flex items-stretch my-2 lg:flex-row flex-col space-y-3 lg:space-y-0 lg:space-x-2">
-      <div className="bg-white shadow-sm p-5 rounded-md flex items-center lg:w-7/12 w-full">
+      <div className="bg-white border-b p-5 flex items-center lg:w-7/12 w-full">
         <img
           className="w-16 h-16 sm:w-20 sm:h-20 rounded-full self-start object-cover"
           src="/images/empty_avatar.jpg"
@@ -75,14 +69,28 @@ export default function TeleICUPatientInfoCard({
       <div className="grid grid-cols-2 gap-x-4 flex-1 gap-y-2">
         {patient.last_consultation?.id && (
           <Link
-            href={`/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}`}
+            href={`/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/update`}
             className="rounded-md bg-white shadow-sm text-primary-900 flex justify-between items-center p-2 px-4 sm:px-2 hover:bg-gray-200 cursor-pointer active:translate-y-1 transform"
           >
             <p className="text-sm sm:text-base px-2 font-semibold">
-              Consultation Details
+              Edit Consultation Details
             </p>
             <span>
-              <RightArrowIcon />
+              <i className="fas fa-pencil-alt mr-2"></i>
+            </span>
+          </Link>
+        )}
+
+        {patient.last_consultation?.id && (
+          <Link
+            href={`/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/daily-rounds`}
+            className="rounded-md bg-white shadow-sm text-primary-900 flex justify-between items-center p-2 px-4 sm:px-2 hover:bg-gray-200 cursor-pointer active:translate-y-1 transform"
+          >
+            <p className="text-sm sm:text-base px-2 font-semibold">
+              Log Update
+            </p>
+            <span>
+              <i className="font-bold fas fa-plus mr-2"></i>
             </span>
           </Link>
         )}
@@ -99,25 +107,17 @@ export default function TeleICUPatientInfoCard({
         </Link>
         {patient.last_consultation?.id && (
           <Link
-            href={`/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/files`}
+            href={`/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/treatment-summary`}
             className="rounded-md bg-white shadow-sm text-primary-900 flex justify-between items-center p-2 px-4 sm:px-2 hover:bg-gray-200 cursor-pointer active:translate-y-1 transform"
           >
             <p className="text-sm sm:text-base px-2 font-semibold">
-              Scans &amp; Reports
+              Treatment Summary
             </p>
             <span>
               <RightArrowIcon />
             </span>
           </Link>
         )}
-        <button className="rounded-md bg-white shadow-sm text-primary-900 flex justify-between items-center p-2 px-4 sm:px-2 hover:bg-gray-200 cursor-pointer active:translate-y-1 transform">
-          <p className="text-sm sm:text-base px-2 font-semibold">
-            5 Para Monitor
-          </p>
-          <span>
-            <RightArrowIcon />
-          </span>
-        </button>
       </div>
     </section>
   );

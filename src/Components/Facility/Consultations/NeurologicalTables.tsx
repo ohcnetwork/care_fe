@@ -18,13 +18,13 @@ const DataTable = (props: any) => {
       <div className="text-xl font-semibold">{title}</div>
       <div className="flex flex-row shadow overflow-hidden sm:rounded-lg divide-y divide-cool-gray-200 mb-4 w-max-content max-w-full">
         <div className="flex flex-col justify-between">
-          <div className="px-2 py-8 bg-cool-gray-50 text-center text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
+          <div className="px-2 py-6 bg-cool-gray-50 text-center text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
             Time
           </div>
-          <div className="px-2 py-6 bg-cool-gray-50 text-center text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
+          <div className="px-2 py-5 bg-cool-gray-50 text-center text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
             Left
           </div>
-          <div className="px-2 py-6 bg-cool-gray-50 text-center text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
+          <div className="px-2 py-5 bg-cool-gray-50 text-center text-xs leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
             Right
           </div>
         </div>
@@ -169,7 +169,9 @@ export const NeurologicalTable = (props: any) => {
     [currentPage]
   );
 
-  const handlePagination = (page: number) => {
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handlePagination = (page: number, limit: number) => {
     setCurrentPage(page);
   };
 
@@ -359,7 +361,7 @@ export const NeurologicalTable = (props: any) => {
         <div className="mb-6 mt-2">
           <div className="flex flex-row shadow overflow-hidden sm:rounded-lg divide-y divide-cool-gray-200 mb-4 w-max-content max-w-full">
             <div className="flex flex-col ">
-              <div className="px-2 py-12 bg-cool-gray-50 text-center text-sm leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
+              <div className="px-2 py-7 bg-cool-gray-50 text-center text-sm leading-4 font-medium text-cool-gray-500 uppercase tracking-wider">
                 Time
               </div>
               <div className="px-2 py-4 bg-cool-gray-50 text-center text-sm leading-5 font-medium text-cool-gray-500 uppercase tracking-wider">
@@ -385,7 +387,7 @@ export const NeurologicalTable = (props: any) => {
                     key={`glascow_${i}`}
                     className="flex flex-col divide-x divide-cool-gray-200"
                   >
-                    <div className="px-6 py-3 bg-cool-gray-50 text-center text-xs leading-4 font-medium text-cool-gray-500">
+                    <div className="px-2 py-3 bg-cool-gray-50 text-center text-xs leading-4 font-medium text-cool-gray-500 w-20">
                       {x.date}
                     </div>
                     <div className="px-6 py-4 bg-white text-center whitespace-no-wrap text-sm leading-5 text-cool-gray-500">

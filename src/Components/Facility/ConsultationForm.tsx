@@ -22,14 +22,13 @@ import React, {
 } from "react";
 import { useDispatch } from "react-redux";
 import {
-  ADMITTED_TO,
   CONSULTATION_SUGGESTION,
   PATIENT_CATEGORY,
   SYMPTOM_CHOICES,
   TELEMEDICINE_ACTIONS,
   REVIEW_AT_CHOICES,
-  LINES_CATHETER_CHOICES,
   KASP_STRING,
+  KASP_ENABLED,
 } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
@@ -52,7 +51,6 @@ import {
 import { make as PrescriptionBuilder } from "../Common/PrescriptionBuilder.gen";
 import { BedModel, FacilityModel } from "./models";
 import { OnlineUsersSelect } from "../Common/OnlineUsersSelect";
-import _ from "lodash";
 import { UserModel } from "../Users/models";
 import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 import { BedSelect } from "../Common/BedSelect";
@@ -110,7 +108,7 @@ const initForm: FormDetails = {
   symptoms: [],
   other_symptoms: "",
   symptoms_onset_date: null,
-  suggestion: "",
+  suggestion: "A",
   patient: "",
   facility: "",
   admitted: "false",
@@ -179,8 +177,7 @@ const suggestionTypes = [
 
 const symptomChoices = [...SYMPTOM_CHOICES];
 
-const admittedToChoices = ["Select", ...ADMITTED_TO];
-
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const categoryChoices = [
   {
     id: 0,
@@ -296,7 +293,7 @@ export const ConsultationForm = (props: any) => {
     let invalidForm = false;
     let error_div = "";
 
-    Object.keys(state.form).forEach((field, i) => {
+    Object.keys(state.form).forEach((field) => {
       switch (field) {
         case "symptoms":
           if (!state.form[field] || !state.form[field].length) {
@@ -305,13 +302,13 @@ export const ConsultationForm = (props: any) => {
             invalidForm = true;
           }
           return;
-        case "category":
-          if (!state.form[field] || !state.form[field].length) {
-            errors[field] = "Please select the category";
-            if (!error_div) error_div = field;
-            invalidForm = true;
-          }
-          return;
+        // case "category":
+        //   if (!state.form[field] || !state.form[field].length) {
+        //     errors[field] = "Please select the category";
+        //     if (!error_div) error_div = field;
+        //     invalidForm = true;
+        //   }
+        //   return;
         case "suggestion":
           if (!state.form[field]) {
             errors[field] = "Please enter the decision";
@@ -674,7 +671,7 @@ export const ConsultationForm = (props: any) => {
                     errors={state.errors.prescribed_medication}
                   />
                 </div>
-                <div className="flex-1" id="category-div">
+                {/* <div className="flex-1" id="category-div">
                   <InputLabel id="category-label">Category*</InputLabel>
                   <SelectField
                     name="category"
@@ -684,7 +681,7 @@ export const ConsultationForm = (props: any) => {
                     onChange={handleChange}
                     errors={state.errors.category}
                   />
-                </div>
+                </div> */}
 
                 <div id="suggestion-div">
                   <InputLabel
@@ -732,7 +729,7 @@ export const ConsultationForm = (props: any) => {
                     </div>
                   )} 
                 */}
-                {!id && (
+                {!id && state.form.suggestion === "A" && (
                   <>
                     <div className="flex">
                       <div className="flex-1" id="admitted-div">
@@ -883,30 +880,32 @@ export const ConsultationForm = (props: any) => {
                 />
               </div>
 
-              <div className="flex-1" id="is_kasp-div">
-                <InputLabel id="admitted-label">{KASP_STRING}*</InputLabel>
-                <RadioGroup
-                  aria-label="covid"
-                  name="is_kasp"
-                  value={state.form.is_kasp}
-                  onChange={handleTelemedicineChange}
-                  style={{ padding: "0px 5px" }}
-                >
-                  <Box display="flex" flexDirection="row">
-                    <FormControlLabel
-                      value="true"
-                      control={<Radio />}
-                      label="Yes"
-                    />
-                    <FormControlLabel
-                      value="false"
-                      control={<Radio />}
-                      label="No"
-                    />
-                  </Box>
-                </RadioGroup>
-                <ErrorHelperText error={state.errors.is_kasp} />
-              </div>
+              {KASP_ENABLED && (
+                <div className="flex-1" id="is_kasp-div">
+                  <InputLabel id="admitted-label">{KASP_STRING}*</InputLabel>
+                  <RadioGroup
+                    aria-label="covid"
+                    name="is_kasp"
+                    value={state.form.is_kasp}
+                    onChange={handleTelemedicineChange}
+                    style={{ padding: "0px 5px" }}
+                  >
+                    <Box display="flex" flexDirection="row">
+                      <FormControlLabel
+                        value="true"
+                        control={<Radio />}
+                        label="Yes"
+                      />
+                      <FormControlLabel
+                        value="false"
+                        control={<Radio />}
+                        label="No"
+                      />
+                    </Box>
+                  </RadioGroup>
+                  <ErrorHelperText error={state.errors.is_kasp} />
+                </div>
+              )}
               {/* Telemedicine Fields */}
               <div className="flex">
                 <div className="flex-1" id="is_telemedicine-div">
@@ -1061,7 +1060,7 @@ export const ConsultationForm = (props: any) => {
                   color="default"
                   variant="contained"
                   type="button"
-                  onClick={(_) =>
+                  onClick={() =>
                     navigate(`/facility/${facilityId}/patient/${patientId}`)
                   }
                 >

@@ -9,8 +9,9 @@ export interface OptionsType {
   disabled?: boolean;
 }
 
-export const KASP_STRING = "KASP";
-export const KASP_FULL_STRING = "Karunya Arogya Suraksha Padhathi";
+export const KASP_STRING = process.env.REACT_APP_KASP_STRING ?? "";
+export const KASP_FULL_STRING = process.env.REACT_APP_KASP_FULL_STRING ?? "";
+export const KASP_ENABLED = process.env.REACT_APP_KASP_ENABLED === "true";
 
 export const USER_TYPES: Array<string> = [
   "Volunteer",
@@ -138,6 +139,15 @@ export const PATIENT_FILTER_ORDER: Array<OptionsType> = [
   { id: 6, text: "-review_time", desc: "DESC Review Time" },
 ];
 
+const KASP_BED_TYPES = KASP_ENABLED
+  ? [
+      { id: 40, text: KASP_STRING + " Ordinary Beds" },
+      { id: 60, text: KASP_STRING + " Oxygen beds" },
+      { id: 50, text: KASP_STRING + " ICU (ICU without ventilator)" },
+      { id: 70, text: KASP_STRING + " ICU (ICU with ventilator)" },
+    ]
+  : [];
+
 export const BED_TYPES: Array<OptionsType> = [
   { id: 1, text: "Non-Covid Ordinary Beds" },
   { id: 150, text: "Non-Covid Oxygen beds" },
@@ -147,10 +157,7 @@ export const BED_TYPES: Array<OptionsType> = [
   { id: 120, text: "Covid Oxygen beds" },
   { id: 110, text: "Covid ICU (ICU without ventilator)" },
   { id: 100, text: "Covid Ventilators (ICU with ventilator)" },
-  { id: 40, text: KASP_STRING + " Ordinary Beds" },
-  { id: 60, text: KASP_STRING + " Oxygen beds" },
-  { id: 50, text: KASP_STRING + " ICU (ICU without ventilator)" },
-  { id: 70, text: KASP_STRING + " ICU (ICU with ventilator)" },
+  ...KASP_BED_TYPES,
   { id: 2, text: "Hostel" },
   { id: 3, text: "Single Room with Attached Bathroom" },
 ];
@@ -646,6 +653,12 @@ export const getCameraPTZ = (precision: number) => [
     label: "Zoom Out",
     action: "zoomOut",
     loadingLabel: "Zooming Out",
+  },
+  {
+    icon: "fas fa-save",
+    label: "Update Preset",
+    action: "updatePreset",
+    loadingLabel: "Updating Preset",
   },
   { icon: "fa fa-stop", label: "Stop", action: "stop" },
   { icon: "fa fa-undo", label: "Reset", action: "reset" },

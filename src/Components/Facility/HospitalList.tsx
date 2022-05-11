@@ -1,7 +1,9 @@
-import { navigate, useQueryParams } from "raviger";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { Link, navigate, useQueryParams } from "raviger";
 import { useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
+
 import {
   DOWNLOAD_TYPES,
   FACILITY_TYPES,
@@ -321,48 +323,41 @@ const HospitalListPage = (props: any) => {
       return (
         <div key={`usr_${facility.id}`} className="w-full">
           <div className="block rounded-lg bg-white shadow h-full hover:border-primary-500 overflow-hidden">
-            <div className="h-full flex flex-col justify-between">
-              <div className="px-6 py-4">
-                {facility.kasp_empanelled && (
-                  <div className="mt-2 inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-yellow-100 text-yellow-800">
-                    {KASP_STRING}
-                  </div>
+            <div className="flex ">
+              <div className="md:flex hidden w-32 self-stretch flex-shrink-0 bg-gray-300 items-center justify-center">
+                {facility.cover_image_url ? (
+                  <img
+                    src={facility.cover_image_url}
+                    alt="Facility"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <i className="fas fa-hospital text-4xl block text-gray-600"></i>
                 )}
-                <div className="inline-flex float-right items-center px-2.5 py-0.5 mt-2 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800">
-                  {facility.facility_type}
-                </div>
-                <div className="font-black text-2xl capitalize mt-2">
-                  {facility.name}
-                </div>
-                <div className="mt-2 flex justify-between">
-                  <div className="flex flex-col">
-                    <div className="text-gray-500 leading-relaxed font-light">
-                      {t("Location")}:
-                    </div>
-                    <div className="font-semibold">
-                      {facility.local_body_object?.name}
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col">
-                    <div className="text-gray-500 leading-relaxed font-light">
-                      {t("Ward")}:
-                    </div>
-
-                    {facility.ward_object && (
-                      <div className="font-semibold">
-                        {facility.ward_object?.number +
-                          ", " +
-                          facility.ward_object?.name || "-"}
+              </div>
+              <div className="h-full">
+                <div className="h-full flex flex-col justify-between">
+                  <div className="pl-4 md:pl-2 pr-4 py-2">
+                    {facility.kasp_empanelled && (
+                      <div className="mt-2 inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-yellow-100 text-yellow-800">
+                        {KASP_STRING}
                       </div>
                     )}
-                  </div>
-                </div>
-              </div>
-              <div className="mt-2 bg-gray-50 border-t px-6 py-2">
-                <div className="flex py-4 justify-between">
-                  <div>
-                    <div className="text-gray-500 leading-relaxed">Phone:</div>
+                    <div className="font-black text-xl capitalize">
+                      {facility.name}
+                    </div>
+                    <div className="block">
+                      <div className="inline-flex items-center px-2.5 py-0.5 mt-2 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800">
+                        {facility.facility_type}
+                      </div>
+                    </div>
+                    <div className="mt-2 flex justify-between">
+                      <div className="flex flex-col">
+                        <div className="font-semibold">
+                          {facility.local_body_object?.name}
+                        </div>
+                      </div>
+                    </div>
                     <a
                       href={`tel:${facility.phone_number}`}
                       className="font-semibold"
@@ -370,13 +365,20 @@ const HospitalListPage = (props: any) => {
                       {facility.phone_number || "-"}
                     </a>
                   </div>
-                  <span className="inline-flex rounded-md shadow-sm">
+                </div>
+              </div>
+            </div>
+            <div className="bg-gray-50 border-t px-2 md:px-6 py-2">
+              <div className="flex py-4 justify-between">
+                <div className="flex justify-between w-full">
+                  <div>
                     {userType !== "Staff" ? (
                       <button
-                        className="ml-2 md:ml-0 inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:shadow-outline-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow mr-5"
+                        className="ml-2 md:ml-0 inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:shadow-outline-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
                         onClick={(_) => setModalFor(facility.id)}
                       >
-                        <i className="far fa-comment-dots mr-1"></i> Notify
+                        <i className="far fa-comment-dots mr-0 md:mr-1"></i>{" "}
+                        <span className="md:block hidden">Notify</span>
                       </button>
                     ) : (
                       <></>
@@ -431,14 +433,23 @@ const HospitalListPage = (props: any) => {
                         </form>
                       </div>
                     </Modal>
-                    <button
-                      type="button"
+                  </div>
+                  <div>
+                    <Link
+                      href={`/facility/${facility.id}`}
                       className="inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:shadow-outline-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
-                      onClick={() => navigate(`/facility/${facility.id}`)}
                     >
-                      {t("View Facility")}
-                    </button>
-                  </span>
+                      <i className="fas fa-hospital mr-2 text-primary-500"></i>
+                      {t("Facility")}
+                    </Link>
+                    <Link
+                      href={`/facility/${facility.id}/patients`}
+                      className="ml-2 inline-flex items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:shadow-outline-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                    >
+                      <i className="fas fa-user-injured text-primary-500 mr-2"></i>
+                      {t("Patients")}
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>
@@ -684,7 +695,7 @@ const HospitalListPage = (props: any) => {
             "kasp_empanelled"
           )}
       </div>
-      <div className="mt-4">
+      <div className="mt-4 pb-24">
         <div>{manageFacilities}</div>
       </div>
     </div>

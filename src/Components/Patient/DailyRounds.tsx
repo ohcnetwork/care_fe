@@ -638,7 +638,7 @@ export const DailyRounds = (props: any) => {
                       </div>
                     )}
 
-                    <div>
+                    {/* <div>
                       <InputLabel id="category-label">Category</InputLabel>
                       <SelectField
                         name="category"
@@ -648,7 +648,7 @@ export const DailyRounds = (props: any) => {
                         onChange={handleChange}
                         errors={state.errors.patient_category}
                       />
-                    </div>
+                    </div> */}
 
                     <div>
                       <InputLabel id="current-health-label">
