@@ -113,7 +113,7 @@ export const PrimaryParametersPlot = (props: any) => {
   ];
 
   const rhythmValues: any = {};
-  Object.entries(results).map((obj: any) => {
+  Object.entries(results).forEach((obj: any) => {
     if (obj[1].rhythm && obj[1].rhythm > 0) {
       const key: string = moment(obj[0]).format("LL");
       const lst: Array<any> = Object.prototype.hasOwnProperty.call(
