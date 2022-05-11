@@ -1,4 +1,3 @@
-import { navigate } from "raviger";
 import moment from "moment";
 import { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -10,17 +9,14 @@ import Pagination from "../../Common/Pagination";
 import { PAGINATION_LIMIT } from "../../../Common/constants";
 
 export const PrimaryParametersPlot = (props: any) => {
-  const { facilityId, patientId, consultationId } = props;
+  const { consultationId } = props;
   const dispatch: any = useDispatch();
-  const [isLoading, setIsLoading] = useState(false);
-  const [offset, setOffset] = useState(0);
   const [results, setResults] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
 
   const fetchDailyRounds = useCallback(
     async (status: statusType) => {
-      setIsLoading(true);
       const res = await dispatch(
         dailyRoundsAnalyse(
           {
@@ -48,7 +44,6 @@ export const PrimaryParametersPlot = (props: any) => {
           setResults(res.data.results);
           setTotalCount(res.data.count);
         }
-        setIsLoading(false);
       }
     },
     [consultationId, dispatch, currentPage]
@@ -61,10 +56,8 @@ export const PrimaryParametersPlot = (props: any) => {
     [consultationId, currentPage]
   );
 
-  const handlePagination = (page: number, limit: number) => {
-    const offset = (page - 1) * limit;
+  const handlePagination = (page: number) => {
     setCurrentPage(page);
-    setOffset(offset);
   };
 
   const dates = Object.keys(results)
@@ -119,16 +112,20 @@ export const PrimaryParametersPlot = (props: any) => {
     },
   ];
 
-  let rhythmValues: any = {};
+  const rhythmValues: any = {};
   Object.entries(results).map((obj: any) => {
     if (obj[1].rhythm && obj[1].rhythm > 0) {
       const key: string = moment(obj[0]).format("LL");
-      const lst: Array<any> = rhythmValues.hasOwnProperty(key)
+      const lst: Array<any> = Object.prototype.hasOwnProperty.call(
+        rhythmValues,
+        key
+      )
         ? rhythmValues[key]
         : [];
       const value: any = {};
       value["time"] = moment(obj[0]).format("LT");
       value["rhythm"] = obj[1].rhythm;
+      value["rhythm_detail"] = obj[1].rhythm_detail;
       lst.push(value);
       rhythmValues[key] = lst;
     }
@@ -198,52 +195,52 @@ export const PrimaryParametersPlot = (props: any) => {
           />
         </div>
       </div>
-      <div className="py-2 px-3">
-        <h3 className="text-lg">Rhythm</h3>
-        {Object.entries(rhythmValues).map((obj: any) => {
-          if (obj[1].length > 0) {
-            return (
-              <div>
-                <h4 className="text-base my-3">{obj[0]}</h4>
-                <div className="flex flex-row shadow overflow-hidden sm:rounded-lg divide-y divide-cool-gray-200 my-4 w-max-content max-w-full">
-                  <div className="flex flex-row overflow-x-auto">
-                    {obj[1].map((x: any, i: any) => (
-                      <div
-                        key={`rhythm_${i}`}
-                        className="flex flex-col  min-w-max-content divide-x divide-cool-gray-200"
-                      >
-                        <div className="px-2 border-r py-3 bg-cool-gray-50 text-center text-xs leading-4 font-medium text-cool-gray-500">
-                          {x.time}
-                        </div>
-                        <div className="px-6 py-4 bg-white text-center whitespace-no-wrap text-sm leading-5 text-cool-gray-500">
-                          {x.rhythm === 5 ? "Regular" : "Irregular"}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            );
-          }
-        })}
-      </div>
-
-      <div className="py-2 px-3">
-        <h3 className="text-lg">Rhythm description</h3>
-        <div className="mt-4 bg-white rounded-lg p-2 shadow">
-          {Object.entries(results).map((obj: any) => {
-            if (obj[1].rhythm_detail) {
+      <div className="">
+        <h3 className="text-lg py-2 px-3">Rhythm</h3>
+        <table className="w-full bg-white rounded-lg p-2 shadow overflow-hidden">
+          <tr>
+            {["Time", "Rhythm", "Description"].map((heading, i) => (
+              <td className="font-bold p-2 bg-gray-300" key={i}>
+                {heading}
+              </td>
+            ))}
+          </tr>
+          {Object.entries(rhythmValues).map((obj: any) => {
+            if (obj[1].length > 0) {
               return (
-                <div className="mx-2 my-1">
-                  <h4 className="text-sm">- {moment(obj[0]).format("LLL")}</h4>
-                  <div className="px-5 text-sm">
-                    <div>{obj[1].rhythm_detail}</div>
-                  </div>
-                </div>
+                <>
+                  <tr>
+                    <td
+                      colSpan={3}
+                      className="font-bold italic text-sm text-center bg-gray-200 p-2 text-gray-800"
+                    >
+                      {obj[0]}
+                    </td>
+                  </tr>
+                  {obj[1].map((x: any, i: any) => (
+                    <tr
+                      key={`rhythm_${i}`}
+                      className="border-b-2 border-b-gray-100"
+                    >
+                      <td className="p-2 border-r-2 border-r-gray-100 font-bold">
+                        {x.time}
+                      </td>
+                      <td
+                        className={
+                          "p-2 border-r-2 border-r-gray-100" +
+                          (x.rhythm === 5 ? "" : " text-red-400")
+                        }
+                      >
+                        {x.rhythm === 5 ? "Regular" : "Irregular"}
+                      </td>
+                      <td className="p-2">{x.rhythm_detail}</td>
+                    </tr>
+                  ))}
+                </>
               );
             }
           })}
-        </div>
+        </table>
       </div>
 
       {totalCount > PAGINATION_LIMIT && (
