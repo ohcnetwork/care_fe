@@ -1,8 +1,10 @@
 import { navigate } from "raviger";
+import { Button, CircularProgress } from "@material-ui/core";
 import moment from "moment";
-import { useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
+import React, { useCallback, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
+import * as Notification from "../../Utils/Notifications";
 import {
   getConsultation,
   getDailyReport,
@@ -37,6 +39,22 @@ import TeleICUPatientInfoCard from "../TeleIcu/Patient/InfoCard";
 import TeleICUPatientVitalsCard from "../TeleIcu/Patient/VitalsCard";
 import TeleICUPatientVitalsGraphCard from "../TeleIcu/Patient/VitalsGraph";
 import DoctorVideoSlideover from "../TeleIcu/DoctorVideoSlideover";
+import { validateEmailAddress } from "../../Common/validation";
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
+import { TextInputField } from "../Common/HelperInputFields";
+import { discharge, patchPatient, dischargePatient } from "../../Redux/actions";
+
+type donatePlasmaOptionType = null | "yes" | "no" | "not-fit";
+interface preDischargeFormInterface {
+  donatePlasma: donatePlasmaOptionType;
+  disease_status?: string;
+  srf_id?: string;
+  date_of_test: any;
+}
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -49,6 +67,8 @@ export const ConsultationDetails = (props: any) => {
   const dispatch: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [showDoctors, setShowDoctors] = useState(false);
+  const state: any = useSelector((state) => state);
+  const { currentUser } = state;
 
   const [consultationData, setConsultationData] = useState<ConsultationModel>(
     {}
@@ -57,6 +77,74 @@ export const ConsultationDetails = (props: any) => {
   const [cameraAsset, setCameraAsset] = useState({});
   const [cameraMiddlewareHostname, setCameraMiddlewareHostname] = useState({});
   const [cameraConfig, setCameraConfig] = useState({});
+
+  const [open, setOpen] = React.useState(false);
+  const [openDischargeDialog, setOpenDischargeDialog] = React.useState(false);
+  const [isSendingDischargeApi, setIsSendingDischargeApi] = useState(false);
+
+  const initDischargeSummaryForm: { email: string } = {
+    email: "",
+  };
+  const [dischargeSummaryState, setDischargeSummaryForm] = useState(
+    initDischargeSummaryForm
+  );
+
+  const initErr: any = {};
+  const [errors, setErrors] = useState(initErr);
+
+  const initPreDischargeForm: preDischargeFormInterface = {
+    donatePlasma: null,
+    date_of_test: null,
+  };
+
+  const preDischargeForm = initPreDischargeForm;
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleDischageClickOpen = () => {
+    setOpenDischargeDialog(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const handleDischargeClose = () => {
+    setOpenDischargeDialog(false);
+  };
+
+  const handleDischargeSummarySubmit = () => {
+    if (!dischargeSummaryState.email) {
+      const errorField = Object.assign({}, errors);
+      errorField["dischargeSummaryForm"] = "email field can not be blank.";
+      setErrors(errorField);
+    } else if (!validateEmailAddress(dischargeSummaryState.email)) {
+      const errorField = Object.assign({}, errors);
+      errorField["dischargeSummaryForm"] = "Please Enter a Valid Email Address";
+      setErrors(errorField);
+    } else {
+      dispatch(
+        discharge(
+          { email: dischargeSummaryState.email },
+          { external_id: patientData.id }
+        )
+      ).then((response: any) => {
+        if ((response || {}).status === 200) {
+          Notification.Success({
+            msg: "We will be sending an email shortly. Please check your inbox.",
+          });
+        }
+      });
+      setOpen(false);
+    }
+  };
+
+  const handleDischargeSummary = (e: any) => {
+    e.preventDefault();
+    setOpen(false);
+  };
 
   const getPatientGender = (patientData: any) =>
     GENDER_TYPES.find((i) => i.id === patientData.gender)?.text;
@@ -75,6 +163,83 @@ export const ConsultationDetails = (props: any) => {
     } else {
       return "None";
     }
+  };
+
+  const handlePatientDischarge = async (value: boolean) => {
+    setIsSendingDischargeApi(true);
+    const dischargeData = Object.assign({}, patientData);
+    dischargeData["discharge"] = value;
+
+    // calling patchPatient and dischargePatient together caused problems check https://github.com/coronasafe/care_fe/issues/758
+
+    // using preDischargeForm form data to update patient data
+    const preDischargeFormData = formatPreDischargeFormData(preDischargeForm);
+
+    if (Object.keys(preDischargeFormData).length) {
+      // skip calling patient update api if nothing to update
+      await dispatch(
+        patchPatient(preDischargeFormData, {
+          id: patientData.id,
+        })
+      );
+    }
+    // discharge call
+    const dischargeResponse = await dispatch(
+      dischargePatient({ discharge: value }, { id: patientData.id })
+    );
+
+    setIsSendingDischargeApi(false);
+    if (dischargeResponse?.status === 200) {
+      const dischargeData = Object.assign({}, patientData);
+      dischargeData["discharge"] = value;
+      setPatientData(dischargeData);
+
+      Notification.Success({
+        msg: "Patient Discharged",
+      });
+      setOpenDischargeDialog(false);
+      window.location.reload();
+    }
+  };
+
+  const formatPreDischargeFormData = (
+    preDischargeForm: preDischargeFormInterface
+  ) => {
+    const data: any = { ...preDischargeForm };
+    const donatePlasma = preDischargeForm.donatePlasma;
+
+    if (donatePlasma) {
+      if (donatePlasma === "yes") {
+        data["will_donate_blood"] = true;
+        data["fit_for_blood_donation"] = true;
+      } else if (donatePlasma === "no") {
+        data["will_donate_blood"] = false;
+      } else if (donatePlasma === "not-fit") {
+        data["will_donate_blood"] = true;
+        data["fit_for_blood_donation"] = false;
+      }
+    }
+
+    delete data.donatePlasma;
+    return data;
+  };
+
+  const handleDischargeSummaryFormChange = (e: any) => {
+    const { value } = e.target;
+
+    const errorField = Object.assign({}, errors);
+    errorField["dischargeSummaryForm"] = null;
+    setErrors(errorField);
+
+    setDischargeSummaryForm({ email: value });
+  };
+
+  const dischargeSummaryFormSetUserEmail = () => {
+    if (!currentUser.data.email.trim())
+      return Notification.Error({
+        msg: "Email not provided! Please update profile",
+      });
+    setDischargeSummaryForm({ email: currentUser.data.email });
   };
 
   const fetchData = useCallback(
@@ -168,6 +333,85 @@ export const ConsultationDetails = (props: any) => {
 
   return (
     <div>
+      <Dialog open={open} onClose={handleDischargeSummary}>
+        <DialogTitle id="form-dialog-title">
+          Download Discharge Summary
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Please enter your email id to receive the discharge summary.
+            Disclaimer: This is an automatically Generated email using your info
+            Captured in Care System.
+            <div
+              className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
+              role="alert"
+            >
+              <strong className="block sm:inline font-bold">
+                Please check your email id before continuing. We cannot deliver
+                the email if the email id is invalid
+              </strong>
+            </div>
+          </DialogContentText>
+          <div className="flex justify-end">
+            <a
+              href="#"
+              className="text-xs"
+              onClick={dischargeSummaryFormSetUserEmail}
+            >
+              Fill email input with my email.
+            </a>
+          </div>
+          <TextInputField
+            type="email"
+            name="email"
+            label="email"
+            variant="outlined"
+            margin="dense"
+            autoComplete="off"
+            value={dischargeSummaryState.email}
+            InputLabelProps={{ shrink: !!dischargeSummaryState.email }}
+            onChange={handleDischargeSummaryFormChange}
+            errors={errors.dischargeSummaryForm}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleDischargeSummarySubmit} color="primary">
+            Submit
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        maxWidth={"md"}
+        open={openDischargeDialog}
+        onClose={handleDischargeClose}
+      >
+        <DialogContent className="px-20">
+          <div className="flex justify-center">
+            <span className="text-md text-black-800">
+              Are you sure you want to discharge {patientData.name}?
+            </span>
+          </div>
+        </DialogContent>
+        <DialogActions className="flex justify-between mt-5 px-5 border-t">
+          <Button onClick={handleDischargeClose}>Cancel</Button>
+
+          {isSendingDischargeApi ? (
+            <CircularProgress size={20} />
+          ) : (
+            <Button
+              color="primary"
+              onClick={() => handlePatientDischarge(false)}
+              autoFocus
+              // disabled={preDischargeForm.disease_status ? false : true}
+            >
+              Proceed with Discharge
+            </Button>
+          )}
+        </DialogActions>
+      </Dialog>
       <div className="px-2 pb-2">
         <nav className="flex justify-between flex-wrap">
           <PageTitle
@@ -289,32 +533,56 @@ export const ConsultationDetails = (props: any) => {
             </div>
 
             <div className="mt-2">
-              {consultationData.other_symptoms && (
-                <div className="capitalize">
-                  <span className="font-semibold leading-relaxed">
-                    Other Symptoms:{" "}
-                  </span>
-                  {consultationData.other_symptoms}
-                </div>
-              )}
+              <div>
+                {consultationData.other_symptoms && (
+                  <div className="capitalize">
+                    <span className="font-semibold leading-relaxed">
+                      Other Symptoms:{" "}
+                    </span>
+                    {consultationData.other_symptoms}
+                  </div>
+                )}
 
-              {consultationData.diagnosis && (
-                <div className="text-sm w-full">
-                  <span className="font-semibold leading-relaxed">
-                    Diagnosis:{" "}
-                  </span>
-                  {consultationData.diagnosis}
+                {consultationData.diagnosis && (
+                  <div className="text-sm w-full">
+                    <span className="font-semibold leading-relaxed">
+                      Diagnosis:{" "}
+                    </span>
+                    {consultationData.diagnosis}
+                  </div>
+                )}
+                {consultationData.verified_by && (
+                  <div className="text-sm mt-2">
+                    <span className="font-semibold leading-relaxed">
+                      Verified By:{" "}
+                    </span>
+                    {consultationData.verified_by}
+                    <i className="fas fa-check-circle fill-current text-lg text-green-500 ml-2"></i>
+                  </div>
+                )}
+              </div>
+              <div>
+                <div>
+                  <button
+                    className="btn btn-primary w-full"
+                    onClick={handleClickOpen}
+                  >
+                    Discharge Summary
+                  </button>
                 </div>
-              )}
-              {consultationData.verified_by && (
-                <div className="text-sm mt-2">
-                  <span className="font-semibold leading-relaxed">
-                    Verified By:{" "}
-                  </span>
-                  {consultationData.verified_by}
-                  <i className="fas fa-check-circle fill-current text-lg text-green-500 ml-2"></i>
+                <div>
+                  <button
+                    className="btn btn-primary w-full"
+                    onClick={handleDischageClickOpen}
+                    disabled={
+                      !patientData.is_active ||
+                      !(patientData?.last_consultation?.facility == facilityId)
+                    }
+                  >
+                    Discharge from CARE
+                  </button>
                 </div>
-              )}
+              </div>
             </div>
           </div>
         </div>
