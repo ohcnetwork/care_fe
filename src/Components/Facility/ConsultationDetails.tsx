@@ -472,32 +472,7 @@ export const ConsultationDetails = (props: any) => {
               </div>
             </div>
             <TeleICUPatientInfoCard patient={patientData} />
-            <div className="flex md:flex-row flex-col mt-4 gap-2 justify-between">
-              <div className="flex flex-col text-xs text-gray-700 font-base leading-relaxed">
-                <div>
-                  <span className="text-gray-900">Created: </span>
-                  {moment(consultationData.created_date).format("lll")} |
-                </div>
-                {consultationData.created_by && (
-                  <div>
-                    {` ${consultationData.created_by?.first_name} ${consultationData.created_by?.last_name}  `}
-                    {`@${consultationData.created_by?.username} (${consultationData.created_by?.user_type})`}
-                  </div>
-                )}
-              </div>
-              <div className="flex flex-col text-xs md:text-right text-gray-700 font-base leading-relaxed">
-                <div>
-                  <span className="text-gray-900">Last Modified: </span>
-                  {moment(consultationData.modified_date).format("lll")} |
-                </div>
-                {consultationData.last_edited_by && (
-                  <div>
-                    {` ${consultationData.last_edited_by?.first_name} ${consultationData.last_edited_by?.last_name}  `}
-                    {`@${consultationData.last_edited_by?.username} (${consultationData.last_edited_by?.user_type})`}
-                  </div>
-                )}
-              </div>
-            </div>
+
             <div className="flex md:flex-row flex-col justify-between">
               {consultationData.admitted_to && (
                 <div className="border rounded-lg bg-gray-100 p-2 md:mt-0 mt-2">
@@ -532,16 +507,16 @@ export const ConsultationDetails = (props: any) => {
               )}
             </div>
 
-            <div className="mt-2">
-              <div>
-                {consultationData.other_symptoms && (
+            <div className="mt-2 flex">
+              <div className="flex-1">
+                {/*consultationData.other_symptoms && (
                   <div className="capitalize">
                     <span className="font-semibold leading-relaxed">
                       Other Symptoms:{" "}
                     </span>
                     {consultationData.other_symptoms}
                   </div>
-                )}
+                )*/}
 
                 {consultationData.diagnosis && (
                   <div className="text-sm w-full">
@@ -561,27 +536,47 @@ export const ConsultationDetails = (props: any) => {
                   </div>
                 )}
               </div>
-              <div>
+              <div className="flex-1 text-right">
+                <button className="btn btn-primary" onClick={handleClickOpen}>
+                  Discharge Summary
+                </button>
+
+                <button
+                  className="btn btn-primary ml-2"
+                  onClick={handleDischageClickOpen}
+                  disabled={
+                    !patientData.is_active ||
+                    !(patientData?.last_consultation?.facility == facilityId)
+                  }
+                >
+                  Discharge from CARE
+                </button>
+              </div>
+            </div>
+            <div className="flex md:flex-row flex-col mt-4 gap-2 justify-between">
+              <div className="flex flex-col text-xs text-gray-700 font-base leading-relaxed">
                 <div>
-                  <button
-                    className="btn btn-primary w-full"
-                    onClick={handleClickOpen}
-                  >
-                    Discharge Summary
-                  </button>
+                  <span className="text-gray-900">Created: </span>
+                  {moment(consultationData.created_date).format("lll")} |
                 </div>
+                {consultationData.created_by && (
+                  <div>
+                    {` ${consultationData.created_by?.first_name} ${consultationData.created_by?.last_name}  `}
+                    {`@${consultationData.created_by?.username} (${consultationData.created_by?.user_type})`}
+                  </div>
+                )}
+              </div>
+              <div className="flex flex-col text-xs md:text-right text-gray-700 font-base leading-relaxed">
                 <div>
-                  <button
-                    className="btn btn-primary w-full"
-                    onClick={handleDischageClickOpen}
-                    disabled={
-                      !patientData.is_active ||
-                      !(patientData?.last_consultation?.facility == facilityId)
-                    }
-                  >
-                    Discharge from CARE
-                  </button>
+                  <span className="text-gray-900">Last Modified: </span>
+                  {moment(consultationData.modified_date).format("lll")} |
                 </div>
+                {consultationData.last_edited_by && (
+                  <div>
+                    {` ${consultationData.last_edited_by?.first_name} ${consultationData.last_edited_by?.last_name}  `}
+                    {`@${consultationData.last_edited_by?.username} (${consultationData.last_edited_by?.user_type})`}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -631,6 +626,14 @@ export const ConsultationDetails = (props: any) => {
                       <div className="capitalize">
                         {consultationData.symptoms_text || "-"}
                       </div>
+                      {consultationData.other_symptoms && (
+                        <div>
+                          <div className="font-semibold">Other Symptoms:</div>
+                          <div className="capitalize">
+                            {consultationData.other_symptoms || "-"}
+                          </div>
+                        </div>
+                      )}
                       <span className="font-semibold leading-relaxed text-gray-800 text-xs">
                         from{" "}
                         {moment(consultationData.symptoms_onset_date).format(
@@ -641,6 +644,7 @@ export const ConsultationDetails = (props: any) => {
                   </div>
                 </div>
               )}
+
               {consultationData.examination_details && (
                 <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
                   <div className="px-4 py-5 sm:p-6">
