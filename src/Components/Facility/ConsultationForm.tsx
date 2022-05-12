@@ -60,6 +60,14 @@ const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 type BooleanStrings = "true" | "false";
 
+function ColInput(props: { children: React.ReactNode }) {
+  return (
+    <div className="md:grid gap-4 grid-cols-1 md:grid-cols-2 my-4">
+      {props.children}
+    </div>
+  );
+}
+
 type FormDetails = {
   hasSymptom: boolean;
   otherSymptom: boolean;
@@ -566,37 +574,33 @@ export const ConsultationForm = (props: any) => {
           <form onSubmit={(e) => handleSubmit(e)}>
             <CardContent>
               <div className="grid gap-4 grid-cols-1">
-                <div className="md:grid gap-4 grid-cols-1 md:grid-cols-2 my-4">
-                  <div>
-                    <div id="symptoms-div">
-                      <InputLabel id="symptoms-label">Symptoms*</InputLabel>
-                      <MultiSelectField
-                        name="symptoms"
-                        variant="outlined"
-                        value={state.form.symptoms}
-                        options={symptomChoices}
-                        onChange={handleSymptomChange}
+                <ColInput>
+                  <div id="symptoms-div">
+                    <InputLabel id="symptoms-label">Symptoms*</InputLabel>
+                    <MultiSelectField
+                      name="symptoms"
+                      variant="outlined"
+                      value={state.form.symptoms}
+                      options={symptomChoices}
+                      onChange={handleSymptomChange}
+                    />
+                    <ErrorHelperText error={state.errors.symptoms} />
+                  </div>
+                  {state.form.hasSymptom && (
+                    <div id="symptoms_onset_date-div">
+                      <DateInputField
+                        label="Date of onset of the symptoms*"
+                        value={state.form.symptoms_onset_date}
+                        onChange={(date) =>
+                          handleDateChange(date, "symptoms_onset_date")
+                        }
+                        disableFuture={true}
+                        errors={state.errors.symptoms_onset_date}
+                        InputLabelProps={{ shrink: true }}
                       />
-                      <ErrorHelperText error={state.errors.symptoms} />
                     </div>
-                  </div>
-                  <div>
-                    {state.form.hasSymptom && (
-                      <div id="symptoms_onset_date-div">
-                        <DateInputField
-                          label="Date of onset of the symptoms*"
-                          value={state.form.symptoms_onset_date}
-                          onChange={(date) =>
-                            handleDateChange(date, "symptoms_onset_date")
-                          }
-                          disableFuture={true}
-                          errors={state.errors.symptoms_onset_date}
-                          InputLabelProps={{ shrink: true }}
-                        />
-                      </div>
-                    )}
-                  </div>
-                </div>
+                  )}
+                </ColInput>
 
                 {state.form.otherSymptom && (
                   <div id="other_symptoms-div">
@@ -617,7 +621,7 @@ export const ConsultationForm = (props: any) => {
                     />
                   </div>
                 )}
-                <div className="md:grid gap-4 grid-cols-1 md:grid-cols-2 my-4">
+                <ColInput>
                   <div id="existing-medication-div">
                     <InputLabel id="existing-medication-label">
                       History of present illness
@@ -656,7 +660,7 @@ export const ConsultationForm = (props: any) => {
                       errors={state.errors.examination_details}
                     />
                   </div>
-                </div>
+                </ColInput>
 
                 <div id="prescribed_medication-div">
                   <InputLabel id="prescribed-medication-label">
@@ -824,7 +828,7 @@ export const ConsultationForm = (props: any) => {
                   setPrescriptions={setDischargeAdvice}
                 />
               </div>
-              <div className="md:grid gap-4 grid-cols-1 md:grid-cols-2 my-4">
+              <ColInput>
                 <div id="ip_no-div">
                   <InputLabel id="refered-label">IP number</InputLabel>
                   <TextInputField
@@ -851,8 +855,8 @@ export const ConsultationForm = (props: any) => {
                     errors={state.errors.test_id}
                   />
                 </div>
-              </div>
-              <div className="md:grid gap-4 grid-cols-1 md:grid-cols-2 my-4">
+              </ColInput>
+              <ColInput>
                 <div id="verified_by-div">
                   <InputLabel id="exam-details-label">Verified By</InputLabel>
                   <MultilineInputField
@@ -887,7 +891,7 @@ export const ConsultationForm = (props: any) => {
                     errors={state.errors.diagnosis}
                   />
                 </div>
-              </div>
+              </ColInput>
 
               {KASP_ENABLED && (
                 <div className="flex-1" id="is_kasp-div">
@@ -991,8 +995,8 @@ export const ConsultationForm = (props: any) => {
                   <ErrorHelperText error={state.errors.action} />
                 </div>
               )}
-              <div className="md:grid gap-4 grid-cols-1 md:grid-cols-2 my-4 mt-2">
-                <div id="operation-div">
+              <ColInput>
+                <div id="operation-div" className="mt-2">
                   <InputLabel id="exam-details-label">Operation</InputLabel>
                   <MultilineInputField
                     rows={5}
@@ -1009,7 +1013,7 @@ export const ConsultationForm = (props: any) => {
                     errors={state.errors.operation}
                   />
                 </div>
-                <div id="special_instruction-div">
+                <div id="special_instruction-div" className="mt-2">
                   <InputLabel id="special-instruction-label">
                     Special Instructions
                   </InputLabel>
@@ -1028,7 +1032,7 @@ export const ConsultationForm = (props: any) => {
                     errors={state.errors.special_instruction}
                   />
                 </div>
-              </div>
+              </ColInput>
               <div className="flex flex-col md:flex-row justify-between md:gap-5">
                 <div id="weight-div" className="flex-1">
                   <InputLabel id="refered-label">Weight (in Kg)</InputLabel>
