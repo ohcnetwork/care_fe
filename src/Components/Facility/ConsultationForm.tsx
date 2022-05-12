@@ -573,7 +573,7 @@ export const ConsultationForm = (props: any) => {
                       <MultiSelectField
                         name="symptoms"
                         variant="outlined"
-                        value={state.form?.symptoms}
+                        value={state.form.symptoms}
                         options={symptomChoices}
                         onChange={handleSymptomChange}
                       />
@@ -581,11 +581,11 @@ export const ConsultationForm = (props: any) => {
                     </div>
                   </div>
                   <div>
-                    {state.form?.hasSymptom && (
+                    {state.form.hasSymptom && (
                       <div id="symptoms_onset_date-div">
                         <DateInputField
                           label="Date of onset of the symptoms*"
-                          value={state.form?.symptoms_onset_date}
+                          value={state.form.symptoms_onset_date}
                           onChange={(date) =>
                             handleDateChange(date, "symptoms_onset_date")
                           }
