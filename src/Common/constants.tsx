@@ -654,6 +654,12 @@ export const getCameraPTZ = (precision: number) => [
     action: "zoomOut",
     loadingLabel: "Zooming Out",
   },
+  {
+    icon: "fas fa-save",
+    label: "Update Preset",
+    action: "updatePreset",
+    loadingLabel: "Updating Preset",
+  },
   { icon: "fa fa-stop", label: "Stop", action: "stop" },
   { icon: "fa fa-undo", label: "Reset", action: "reset" },
   { icon: "fas fa-expand", label: "Full Screen", action: "fullScreen" },

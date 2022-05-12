@@ -3,7 +3,7 @@ import { useEffect, useState, useRef } from "react";
 import { useDispatch } from "react-redux";
 import screenfull from "screenfull";
 import loadable from "@loadable/component";
-import { listAssetBeds } from "../../../Redux/actions";
+import { listAssetBeds, partialUpdateAssetBed } from "../../../Redux/actions";
 import RefreshIcon from "@material-ui/icons/Refresh";
 import { getCameraPTZ } from "../../../Common/constants";
 import {
@@ -12,6 +12,7 @@ import {
 } from "../../../Common/hooks/useMSEplayer";
 import { useFeedPTZ } from "../../../Common/hooks/useFeedPTZ";
 const PageTitle = loadable(() => import("../../Common/PageTitle"));
+import * as Notification from "../../../Utils/Notifications.js";
 
 const LiveFeed = (props: any) => {
   const middlewareHostname =
@@ -42,9 +43,11 @@ const LiveFeed = (props: any) => {
     videoEl,
   });
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [currentPreset, setCurrentPreset] = useState<any>();
   const {
     absoluteMove,
-
+    getCameraStatus,
     getPTZPayload,
     getPresets,
     gotoPreset,
@@ -190,9 +193,41 @@ const LiveFeed = (props: any) => {
                       if (screenfull.isEnabled && liveFeedPlayerRef.current) {
                         screenfull.request(liveFeedPlayerRef.current);
                       }
+                    } else if (option.action === "updatePreset") {
+                      getCameraStatus({
+                        onSuccess: async ({ data }: any) => {
+                          console.log({ currentPreset, data });
+                          if (
+                            currentPreset?.asset_object?.id &&
+                            data?.position
+                          ) {
+                            setLoading(option.loadingLabel);
+                            console.log("Updating Preset");
+                            const response = await dispatch(
+                              partialUpdateAssetBed(
+                                {
+                                  asset: currentPreset.asset_object.id,
+                                  bed: currentPreset.bed_object.id,
+                                  meta: {
+                                    ...currentPreset.meta,
+                                    position: data?.position,
+                                  },
+                                },
+                                currentPreset?.id
+                              )
+                            );
+                            if (response && response.status === 200) {
+                              Notification.Success({
+                                msg: "Preset Updated",
+                              });
+                            }
+                            setLoading(undefined);
+                          }
+                        },
+                      });
                     } else {
                       setLoading(option.loadingLabel);
-                      relativeMove(getPTZPayload(option.action), {
+                      relativeMove(getPTZPayload(option.action, precision), {
                         onSuccess: () => setLoading(undefined),
                       });
                     }
@@ -250,7 +285,12 @@ const LiveFeed = (props: any) => {
                           setLoading(`Moving to Preset ${option.label}`);
                           gotoPreset(
                             { preset: option.value },
-                            { onSuccess: () => setLoading(undefined) }
+                            {
+                              onSuccess: () => {
+                                setLoading(undefined);
+                                console.log("Preset Updated", option);
+                              },
+                            }
                           );
                         }}
                       >
@@ -285,6 +325,9 @@ const LiveFeed = (props: any) => {
                       onClick={() => {
                         setLoading("Moving");
                         gotoBedPreset(preset);
+                        setCurrentPreset(preset);
+                        getBedPresets(cameraAsset?.id);
+                        getPresets({});
                       }}
                     >
                       <span className="justify-start text-xs font-semibold">
