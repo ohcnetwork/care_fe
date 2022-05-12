@@ -1,8 +1,8 @@
 import { Button, CircularProgress, Typography } from "@material-ui/core";
 import { navigate } from "raviger";
 import moment from "moment";
-import React, { Fragment, useCallback, useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import React, { useCallback, useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 import { GENDER_TYPES } from "../../Common/constants";
 import loadable from "@loadable/component";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -13,9 +13,7 @@ import {
   getPatient,
   getSampleTestList,
   patchSample,
-  discharge,
   patchPatient,
-  dischargePatient,
   completeTransfer,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
@@ -27,25 +25,14 @@ import { PatientModel, SampleTestModel } from "./models";
 import { SampleTestCard } from "./SampleTestCard";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import { TextInputField, ErrorHelperText } from "../Common/HelperInputFields";
-import { validateEmailAddress } from "../../Common/validation";
+import { ErrorHelperText } from "../Common/HelperInputFields";
 import Modal from "@material-ui/core/Modal";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
-
-type donatePlasmaOptionType = null | "yes" | "no" | "not-fit";
-interface preDischargeFormInterface {
-  donatePlasma: donatePlasmaOptionType;
-  disease_status?: string;
-  srf_id?: string;
-  date_of_test: any;
-}
 
 export const PatientHome = (props: any) => {
   const { facilityId, id } = props;
@@ -86,36 +73,15 @@ export const PatientHome = (props: any) => {
     externalId: undefined,
     loading: false,
   });
-  const [open, setOpen] = React.useState(false);
-  const [openDischargeDialog, setOpenDischargeDialog] = React.useState(false);
   const [openAssignVolunteerDialog, setOpenAssignVolunteerDialog] =
     React.useState(false);
-  const state: any = useSelector((state) => state);
-  const { currentUser } = state;
 
   const initErr: any = {};
-  const [errors, setErrors] = useState(initErr);
-  const initDischargeSummaryForm: { email: string } = {
-    email: "",
-  };
-
-  const [dischargeSummaryState, setDischargeSummaryForm] = useState(
-    initDischargeSummaryForm
-  );
+  const errors = initErr;
 
   useEffect(() => {
     setAssignedVolunteerObject(patientData.assigned_to_object);
   }, [patientData.assigned_to_object]);
-
-  const handleDischargeSummaryFormChange = (e: any) => {
-    const { value } = e.target;
-
-    const errorField = Object.assign({}, errors);
-    errorField["dischargeSummaryForm"] = null;
-    setErrors(errorField);
-
-    setDischargeSummaryForm({ email: value });
-  };
 
   const handleTransferComplete = (shift: any) => {
     setModalFor({ ...modalFor, loading: true });
@@ -126,56 +92,7 @@ export const PatientHome = (props: any) => {
     });
   };
 
-  const initPreDischargeForm: preDischargeFormInterface = {
-    donatePlasma: null,
-    date_of_test: null,
-  };
-
-  const [isSendingDischargeApi, setIsSendingDischargeApi] = useState(false);
-
-  const [preDischargeForm, setPreDischargeForm] =
-    useState(initPreDischargeForm);
-
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const handlePreDischargeFormChange = (key: string, event: any) => {
-    if (key === "date_of_test") {
-      setPreDischargeForm({
-        ...preDischargeForm,
-        date_of_test: event,
-      });
-    } else {
-      setPreDischargeForm({
-        ...preDischargeForm,
-        [key]: event.target.value,
-      });
-    }
-  };
-
-  const handleDischargeSummarySubmit = () => {
-    if (!dischargeSummaryState.email) {
-      const errorField = Object.assign({}, errors);
-      errorField["dischargeSummaryForm"] = "email field can not be blank.";
-      setErrors(errorField);
-    } else if (!validateEmailAddress(dischargeSummaryState.email)) {
-      const errorField = Object.assign({}, errors);
-      errorField["dischargeSummaryForm"] = "Please Enter a Valid Email Address";
-      setErrors(errorField);
-    } else {
-      dispatch(
-        discharge(
-          { email: dischargeSummaryState.email },
-          { external_id: patientData.id }
-        )
-      ).then((response: any) => {
-        if ((response || {}).status === 200) {
-          Notification.Success({
-            msg: "We will be sending an email shortly. Please check your inbox.",
-          });
-        }
-      });
-      setOpen(false);
-    }
-  };
 
   const handleAssignedVolunteer = () => {
     dispatch(
@@ -226,65 +143,6 @@ export const PatientHome = (props: any) => {
     });
   };
 
-  const handlePatientDischarge = async (value: boolean) => {
-    setIsSendingDischargeApi(true);
-    const dischargeData = Object.assign({}, patientData);
-    dischargeData["discharge"] = value;
-
-    // calling patchPatient and dischargePatient together caused problems check https://github.com/coronasafe/care_fe/issues/758
-
-    // using preDischargeForm form data to update patient data
-    const preDischargeFormData = formatPreDischargeFormData(preDischargeForm);
-
-    if (Object.keys(preDischargeFormData).length) {
-      // skip calling patient update api if nothing to update
-      await dispatch(
-        patchPatient(preDischargeFormData, {
-          id: patientData.id,
-        })
-      );
-    }
-    // discharge call
-    const dischargeResponse = await dispatch(
-      dischargePatient({ discharge: value }, { id: patientData.id })
-    );
-
-    setIsSendingDischargeApi(false);
-    if (dischargeResponse?.status === 200) {
-      const dischargeData = Object.assign({}, patientData);
-      dischargeData["discharge"] = value;
-      setPatientData(dischargeData);
-
-      Notification.Success({
-        msg: "Patient Discharged",
-      });
-      setOpenDischargeDialog(false);
-      window.location.reload();
-    }
-  };
-
-  const formatPreDischargeFormData = (
-    preDischargeForm: preDischargeFormInterface
-  ) => {
-    const data: any = { ...preDischargeForm };
-    const donatePlasma = preDischargeForm.donatePlasma;
-
-    if (donatePlasma) {
-      if (donatePlasma === "yes") {
-        data["will_donate_blood"] = true;
-        data["fit_for_blood_donation"] = true;
-      } else if (donatePlasma === "no") {
-        data["will_donate_blood"] = false;
-      } else if (donatePlasma === "not-fit") {
-        data["will_donate_blood"] = true;
-        data["fit_for_blood_donation"] = false;
-      }
-    }
-
-    delete data.donatePlasma;
-    return data;
-  };
-
   function Badge(props: { color: string; icon: string; text: string }) {
     return (
       <span
@@ -301,24 +159,8 @@ export const PatientHome = (props: any) => {
     );
   }
 
-  const dischargeSummaryFormSetUserEmail = () => {
-    if (!currentUser.data.email.trim())
-      return Notification.Error({
-        msg: "Email not provided! Please update profile",
-      });
-    setDischargeSummaryForm({ email: currentUser.data.email });
-  };
-
   const handleVolunteerSelect = (volunteer: any) => {
     setAssignedVolunteerObject(volunteer);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
-
-  const handleDischargeClose = () => {
-    setOpenDischargeDialog(false);
   };
 
   const limit = 5;
@@ -449,11 +291,6 @@ export const PatientHome = (props: any) => {
       message: "Are you sure you want to sent the sample to Collection Centre?",
       title: "Confirm",
     });
-  };
-
-  const handleDischargeSummary = (e: any) => {
-    e.preventDefault();
-    setOpen(false);
   };
 
   const handleApproval = async () => {
@@ -1495,56 +1332,6 @@ export const PatientHome = (props: any) => {
           </div>
         </section>
       </div>
-      <Dialog open={open} onClose={handleDischargeSummary}>
-        <DialogTitle id="form-dialog-title">
-          Download Discharge Summary
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Please enter your email id to receive the discharge summary.
-            Disclaimer: This is an automatically Generated email using your info
-            Captured in Care System.
-            <div
-              className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
-              role="alert"
-            >
-              <strong className="block sm:inline font-bold">
-                Please check your email id before continuing. We cannot deliver
-                the email if the email id is invalid
-              </strong>
-            </div>
-          </DialogContentText>
-          <div className="flex justify-end">
-            <a
-              href="#"
-              className="text-xs"
-              onClick={dischargeSummaryFormSetUserEmail}
-            >
-              Fill email input with my email.
-            </a>
-          </div>
-          <TextInputField
-            type="email"
-            name="email"
-            label="email"
-            variant="outlined"
-            margin="dense"
-            autoComplete="off"
-            value={dischargeSummaryState.email}
-            InputLabelProps={{ shrink: !!dischargeSummaryState.email }}
-            onChange={handleDischargeSummaryFormChange}
-            errors={errors.dischargeSummaryForm}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleDischargeSummarySubmit} color="primary">
-            Submit
-          </Button>
-        </DialogActions>
-      </Dialog>
 
       <Dialog
         maxWidth={"md"}
@@ -1583,131 +1370,6 @@ export const PatientHome = (props: any) => {
             </Button>
           </DialogActions>
         </div>
-      </Dialog>
-
-      <Dialog
-        maxWidth={"md"}
-        open={openDischargeDialog}
-        onClose={handleDischargeClose}
-      >
-        {/* <DialogTitle className="flex justify-center bg-primary-100">
-          Before we discharge {patientData.name}
-        </DialogTitle> */}
-        <DialogContent className="px-20">
-          <div className="flex justify-center">
-            <span className="text-md text-black-800">
-              Are you sure you want to discharge {patientData.name}?
-            </span>
-          </div>
-          {/* <FormControl variant="outlined">
-            <label className="flex justify-center w-full text-gray-900 mt-2">
-              Is the patient willing to donate blood for Plasma?
-            </label>
-            <RadioGroup
-              className="flex-row justify-center gap-15 mt-2 ml-10"
-              name="blood-donate"
-              value={preDischargeForm.donatePlasma}
-              onChange={(event) =>
-                handlePreDischargeFormChange("donatePlasma", event)
-              }
-            >
-              <FormControlLabel
-                value="yes"
-                control={<Radio />}
-                label="Yes"
-                className="mr-0"
-              />
-              <FormControlLabel
-                value="no"
-                control={<Radio />}
-                label="No"
-                className="mr-0"
-              />
-              <FormControlLabel
-                value="not-fit"
-                control={<Radio />}
-                label="Not fit for donation currently"
-                className="w-48 mr-0"
-              />
-            </RadioGroup>
-
-            <div className="flex flex-col items-center">
-              <Fragment>
-                <label
-                  id="covid-status-pre-form"
-                  className="flex justify-center w-full text-gray-900 mb-2 mt-5"
-                >
-                  Has the patient&apos;s disease status changed? If so, to what?
-                </label>
-                <Select
-                  className="h-10"
-                  labelId="covid-status-pre-form"
-                  value={preDischargeForm.disease_status}
-                  onChange={(event) =>
-                    handlePreDischargeFormChange("disease_status", event)
-                  }
-                >
-                  {DISEASE_STATUS.map((value, i) => (
-                    <MenuItem key={i} value={value}>
-                      {value}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </Fragment>
-
-              <label className="flex justify-center w-full mt-5 text-gray-900">
-                Would you like to update the patient&apos;s SRF ID and Test
-                date?
-              </label>
-
-              <div className="flex">
-                <TextInputField
-                  className="flex flex-1 mr-10"
-                  name="srf_id"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  placeholder="SRF ID"
-                  value={preDischargeForm.srf_id}
-                  onChange={(event) =>
-                    handlePreDischargeFormChange("srf_id", event)
-                  }
-                  errors=""
-                />
-
-                <DateInputField
-                  className="flex flex-1 ml-5"
-                  fullWidth={true}
-                  label="Date of test"
-                  value={preDischargeForm.date_of_test}
-                  onChange={(event) =>
-                    handlePreDischargeFormChange("date_of_test", event)
-                  }
-                  inputVariant="outlined"
-                  margin="dense"
-                  disableFuture={true}
-                  errors={""}
-                />
-              </div>
-            </div>
-          </FormControl> */}
-        </DialogContent>
-        <DialogActions className="flex justify-between mt-5 px-5 border-t">
-          <Button onClick={handleDischargeClose}>Cancel</Button>
-
-          {isSendingDischargeApi ? (
-            <CircularProgress size={20} />
-          ) : (
-            <Button
-              color="primary"
-              onClick={() => handlePatientDischarge(false)}
-              autoFocus
-              // disabled={preDischargeForm.disease_status ? false : true}
-            >
-              Proceed with Discharge
-            </Button>
-          )}
-        </DialogActions>
       </Dialog>
 
       <div>
