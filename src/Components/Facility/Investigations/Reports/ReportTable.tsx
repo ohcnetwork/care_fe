@@ -69,7 +69,7 @@ const ReportRow = ({ data, name, min, max }: any) => {
       <TableCell className={className.tableCell} align="right" size="medium">
         {name}
       </TableCell>
-      {data.map((d: any, index: number) => {
+      {data.map((d: any) => {
         const color = getColorIndex({
           min: d?.min,
           max: d?.max,
@@ -77,7 +77,7 @@ const ReportRow = ({ data, name, min, max }: any) => {
         });
         return (
           <TableCell
-            key={index}
+            key={d.value}
             className={className.tableCell}
             align="center"
             style={{
@@ -146,23 +146,20 @@ const ReportTable: React.FC<ReportTableProps> = ({
       </Box>
 
       <Box padding="1rem" margin="1rem 0" id="section-to-print">
+        {title && (
+          <Typography component="h1" variant="h4">
+            {title}
+          </Typography>
+        )}
+        <br />
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6}>
-            <Typography component="h1" variant="h4">
-              Patient Details
-            </Typography>
             <p>Name: {patientDetails.name}</p>
 
             <p>Age: {patientDetails.age}</p>
             <p>Hospital: {patientDetails.hospitalName}</p>
           </Grid>
         </Grid>
-        <br />
-        {title && (
-          <Typography component="h1" variant="h4">
-            {title}
-          </Typography>
-        )}
         <br />
         <div className="my-4">
           <span className="inline-block  bg-yellow-200 py-1 m-1 px-6 rounded-full text-yellow-900 font-medium">
@@ -226,8 +223,6 @@ const ReportTable: React.FC<ReportTableProps> = ({
                       min={t.investigation_object.min_value}
                       max={t.investigation_object.max_value}
                       name={t.investigation_object.name}
-                      // eslint-disable-next-line @typescript-eslint/no-empty-function
-                      onChange={() => {}}
                     />
                   );
                 })
