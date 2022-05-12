@@ -553,7 +553,7 @@ export const UserAdd = (props: UserProps) => {
                 />
               </div>
 
-              <div className="col-span-2">
+              <div className="md:col-span-2">
                 <InputLabel>Facilities</InputLabel>
                 {userType === "Staff" || userType === "StaffReadOnly" ? (
                   <MultiSelectField

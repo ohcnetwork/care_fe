@@ -664,7 +664,7 @@ export const ConsultationForm = (props: any) => {
 
                 <div id="prescribed_medication-div">
                   <InputLabel id="prescribed-medication-label">
-                    Treatment Summary
+                    Treatment Plan / Treatment Summary
                   </InputLabel>
                   <MultilineInputField
                     rows={5}
