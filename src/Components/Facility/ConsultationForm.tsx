@@ -60,6 +60,14 @@ const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 type BooleanStrings = "true" | "false";
 
+function ColInput(props: { children: React.ReactNode }) {
+  return (
+    <div className="md:grid gap-4 grid-cols-1 md:grid-cols-2 my-4">
+      {props.children}
+    </div>
+  );
+}
+
 type FormDetails = {
   hasSymptom: boolean;
   otherSymptom: boolean;
@@ -566,17 +574,33 @@ export const ConsultationForm = (props: any) => {
           <form onSubmit={(e) => handleSubmit(e)}>
             <CardContent>
               <div className="grid gap-4 grid-cols-1">
-                <div id="symptoms-div">
-                  <InputLabel id="symptoms-label">Symptoms*</InputLabel>
-                  <MultiSelectField
-                    name="symptoms"
-                    variant="outlined"
-                    value={state.form.symptoms}
-                    options={symptomChoices}
-                    onChange={handleSymptomChange}
-                  />
-                  <ErrorHelperText error={state.errors.symptoms} />
-                </div>
+                <ColInput>
+                  <div id="symptoms-div">
+                    <InputLabel id="symptoms-label">Symptoms*</InputLabel>
+                    <MultiSelectField
+                      name="symptoms"
+                      variant="outlined"
+                      value={state.form.symptoms}
+                      options={symptomChoices}
+                      onChange={handleSymptomChange}
+                    />
+                    <ErrorHelperText error={state.errors.symptoms} />
+                  </div>
+                  {state.form.hasSymptom && (
+                    <div id="symptoms_onset_date-div">
+                      <DateInputField
+                        label="Date of onset of the symptoms*"
+                        value={state.form.symptoms_onset_date}
+                        onChange={(date) =>
+                          handleDateChange(date, "symptoms_onset_date")
+                        }
+                        disableFuture={true}
+                        errors={state.errors.symptoms_onset_date}
+                        InputLabelProps={{ shrink: true }}
+                      />
+                    </div>
+                  )}
+                </ColInput>
 
                 {state.form.otherSymptom && (
                   <div id="other_symptoms-div">
@@ -597,60 +621,46 @@ export const ConsultationForm = (props: any) => {
                     />
                   </div>
                 )}
-
-                {state.form.hasSymptom && (
-                  <div id="symptoms_onset_date-div">
-                    <DateInputField
-                      label="Date of onset of the symptoms*"
-                      value={state.form?.symptoms_onset_date}
-                      onChange={(date) =>
-                        handleDateChange(date, "symptoms_onset_date")
-                      }
-                      disableFuture={true}
-                      errors={state.errors.symptoms_onset_date}
-                      InputLabelProps={{ shrink: true }}
+                <ColInput>
+                  <div id="existing-medication-div">
+                    <InputLabel id="existing-medication-label">
+                      History of present illness
+                    </InputLabel>
+                    <MultilineInputField
+                      rows={5}
+                      name="existing_medication"
+                      variant="outlined"
+                      margin="dense"
+                      type="text"
+                      placeholder="Information optional"
+                      InputLabelProps={{
+                        shrink: !!state.form.existing_medication,
+                      }}
+                      value={state.form.existing_medication}
+                      onChange={handleChange}
+                      errors={state.errors.existing_medication}
                     />
                   </div>
-                )}
-                <div id="existing-medication-div">
-                  <InputLabel id="existing-medication-label">
-                    History of present illness
-                  </InputLabel>
-                  <MultilineInputField
-                    rows={5}
-                    name="existing_medication"
-                    variant="outlined"
-                    margin="dense"
-                    type="text"
-                    placeholder="Information optional"
-                    InputLabelProps={{
-                      shrink: !!state.form.existing_medication,
-                    }}
-                    value={state.form.existing_medication}
-                    onChange={handleChange}
-                    errors={state.errors.existing_medication}
-                  />
-                </div>
-
-                <div id="examination_details-div">
-                  <InputLabel id="exam-details-label">
-                    Examination details and Clinical conditions
-                  </InputLabel>
-                  <MultilineInputField
-                    rows={5}
-                    name="examination_details"
-                    variant="outlined"
-                    margin="dense"
-                    type="text"
-                    placeholder="Information optional"
-                    InputLabelProps={{
-                      shrink: !!state.form.examination_details,
-                    }}
-                    value={state.form.examination_details}
-                    onChange={handleChange}
-                    errors={state.errors.examination_details}
-                  />
-                </div>
+                  <div id="examination_details-div">
+                    <InputLabel id="exam-details-label">
+                      Examination details and Clinical conditions
+                    </InputLabel>
+                    <MultilineInputField
+                      rows={5}
+                      name="examination_details"
+                      variant="outlined"
+                      margin="dense"
+                      type="text"
+                      placeholder="Information optional"
+                      InputLabelProps={{
+                        shrink: !!state.form.examination_details,
+                      }}
+                      value={state.form.examination_details}
+                      onChange={handleChange}
+                      errors={state.errors.examination_details}
+                    />
+                  </div>
+                </ColInput>
 
                 <div id="prescribed_medication-div">
                   <InputLabel id="prescribed-medication-label">
@@ -818,67 +828,70 @@ export const ConsultationForm = (props: any) => {
                   setPrescriptions={setDischargeAdvice}
                 />
               </div>
-
-              <div id="ip_no-div">
-                <InputLabel id="refered-label">IP number</InputLabel>
-                <TextInputField
-                  name="ip_no"
-                  variant="outlined"
-                  margin="dense"
-                  type="string"
-                  InputLabelProps={{ shrink: !!state.form.ip_no }}
-                  value={state.form.ip_no}
-                  onChange={handleChange}
-                  errors={state.errors.ip_no}
-                />
-              </div>
-              <div id="test_id-div">
-                <InputLabel id="refered-label">State Test ID</InputLabel>
-                <TextInputField
-                  name="test_id"
-                  variant="outlined"
-                  margin="dense"
-                  type="string"
-                  InputLabelProps={{ shrink: !!state.form.test_id }}
-                  value={state.form.test_id}
-                  onChange={handleChange}
-                  errors={state.errors.test_id}
-                />
-              </div>
-              <div id="verified_by-div">
-                <InputLabel id="exam-details-label">Verified By</InputLabel>
-                <MultilineInputField
-                  rows={3}
-                  name="verified_by"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  placeholder="Attending Doctors Name and Designation"
-                  InputLabelProps={{
-                    shrink: !!state.form.verified_by,
-                  }}
-                  value={state.form.verified_by}
-                  onChange={handleChange}
-                  errors={state.errors.verified_by}
-                />
-              </div>
-              <div id="diagnosis-div">
-                <InputLabel id="exam-details-label">Diagnosis</InputLabel>
-                <MultilineInputField
-                  rows={5}
-                  name="diagnosis"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  placeholder="Information optional"
-                  InputLabelProps={{
-                    shrink: !!state.form.diagnosis,
-                  }}
-                  value={state.form.diagnosis}
-                  onChange={handleChange}
-                  errors={state.errors.diagnosis}
-                />
-              </div>
+              <ColInput>
+                <div id="ip_no-div">
+                  <InputLabel id="refered-label">IP number</InputLabel>
+                  <TextInputField
+                    name="ip_no"
+                    variant="outlined"
+                    margin="dense"
+                    type="string"
+                    InputLabelProps={{ shrink: !!state.form.ip_no }}
+                    value={state.form.ip_no}
+                    onChange={handleChange}
+                    errors={state.errors.ip_no}
+                  />
+                </div>
+                <div id="test_id-div">
+                  <InputLabel id="refered-label">State Test ID</InputLabel>
+                  <TextInputField
+                    name="test_id"
+                    variant="outlined"
+                    margin="dense"
+                    type="string"
+                    InputLabelProps={{ shrink: !!state.form.test_id }}
+                    value={state.form.test_id}
+                    onChange={handleChange}
+                    errors={state.errors.test_id}
+                  />
+                </div>
+              </ColInput>
+              <ColInput>
+                <div id="verified_by-div">
+                  <InputLabel id="exam-details-label">Verified By</InputLabel>
+                  <MultilineInputField
+                    rows={5}
+                    name="verified_by"
+                    variant="outlined"
+                    margin="dense"
+                    type="text"
+                    placeholder="Attending Doctors Name and Designation"
+                    InputLabelProps={{
+                      shrink: !!state.form.verified_by,
+                    }}
+                    value={state.form.verified_by}
+                    onChange={handleChange}
+                    errors={state.errors.verified_by}
+                  />
+                </div>
+                <div id="diagnosis-div">
+                  <InputLabel id="exam-details-label">Diagnosis</InputLabel>
+                  <MultilineInputField
+                    rows={5}
+                    name="diagnosis"
+                    variant="outlined"
+                    margin="dense"
+                    type="text"
+                    placeholder="Information optional"
+                    InputLabelProps={{
+                      shrink: !!state.form.diagnosis,
+                    }}
+                    value={state.form.diagnosis}
+                    onChange={handleChange}
+                    errors={state.errors.diagnosis}
+                  />
+                </div>
+              </ColInput>
 
               {KASP_ENABLED && (
                 <div className="flex-1" id="is_kasp-div">
@@ -982,43 +995,44 @@ export const ConsultationForm = (props: any) => {
                   <ErrorHelperText error={state.errors.action} />
                 </div>
               )}
-              <div id="operation-div" className="mt-2">
-                <InputLabel id="exam-details-label">Operation</InputLabel>
-                <MultilineInputField
-                  rows={5}
-                  name="operation"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  placeholder="Information optional"
-                  InputLabelProps={{
-                    shrink: !!state.form.operation,
-                  }}
-                  value={state.form.operation}
-                  onChange={handleChange}
-                  errors={state.errors.operation}
-                />
-              </div>
-              <div id="special_instruction-div" className="mt-2">
-                <InputLabel id="special-instruction-label">
-                  Special Instructions
-                </InputLabel>
-                <MultilineInputField
-                  rows={5}
-                  name="special_instruction"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  placeholder="Information optional"
-                  InputLabelProps={{
-                    shrink: !!state.form.special_instruction,
-                  }}
-                  value={state.form.special_instruction}
-                  onChange={handleChange}
-                  errors={state.errors.special_instruction}
-                />
-              </div>
-
+              <ColInput>
+                <div id="operation-div" className="mt-2">
+                  <InputLabel id="exam-details-label">Operation</InputLabel>
+                  <MultilineInputField
+                    rows={5}
+                    name="operation"
+                    variant="outlined"
+                    margin="dense"
+                    type="text"
+                    placeholder="Information optional"
+                    InputLabelProps={{
+                      shrink: !!state.form.operation,
+                    }}
+                    value={state.form.operation}
+                    onChange={handleChange}
+                    errors={state.errors.operation}
+                  />
+                </div>
+                <div id="special_instruction-div" className="mt-2">
+                  <InputLabel id="special-instruction-label">
+                    Special Instructions
+                  </InputLabel>
+                  <MultilineInputField
+                    rows={5}
+                    name="special_instruction"
+                    variant="outlined"
+                    margin="dense"
+                    type="text"
+                    placeholder="Information optional"
+                    InputLabelProps={{
+                      shrink: !!state.form.special_instruction,
+                    }}
+                    value={state.form.special_instruction}
+                    onChange={handleChange}
+                    errors={state.errors.special_instruction}
+                  />
+                </div>
+              </ColInput>
               <div className="flex flex-col md:flex-row justify-between md:gap-5">
                 <div id="weight-div" className="flex-1">
                   <InputLabel id="refered-label">Weight (in Kg)</InputLabel>
