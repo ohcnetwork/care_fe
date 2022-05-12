@@ -313,15 +313,8 @@ export const PatientHome = (props: any) => {
     setAssignedVolunteerObject(volunteer);
   };
 
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
   const handleClose = () => {
     setOpen(false);
-  };
-
-  const handleDischageClickOpen = () => {
-    setOpenDischargeDialog(true);
   };
 
   const handleDischargeClose = () => {
@@ -1486,26 +1479,6 @@ export const PatientHome = (props: any) => {
                     }
                   >
                     View Patient Notes
-                  </button>
-                </div>
-                <div>
-                  <button
-                    className="btn btn-primary w-full"
-                    onClick={handleClickOpen}
-                  >
-                    Discharge Summary
-                  </button>
-                </div>
-                <div>
-                  <button
-                    className="btn btn-primary w-full"
-                    onClick={handleDischageClickOpen}
-                    disabled={
-                      !patientData.is_active ||
-                      !(patientData?.last_consultation?.facility == facilityId)
-                    }
-                  >
-                    Discharge from CARE
                   </button>
                 </div>
                 <div>
