@@ -546,7 +546,7 @@ export const ConsultationDetails = (props: any) => {
                   onClick={handleDischageClickOpen}
                   disabled={
                     !patientData.is_active ||
-                    !(patientData?.last_consultation?.facility == facilityId)
+                    patientData.last_consultation?.facility !== facilityId
                   }
                 >
                   Discharge from CARE
@@ -561,8 +561,8 @@ export const ConsultationDetails = (props: any) => {
                 </div>
                 {consultationData.created_by && (
                   <div>
-                    {` ${consultationData.created_by?.first_name} ${consultationData.created_by?.last_name}  `}
-                    {`@${consultationData.created_by?.username} (${consultationData.created_by?.user_type})`}
+                    {` ${consultationData.created_by.first_name} ${consultationData.created_by.last_name}  `}
+                    {`@${consultationData.created_by.username} (${consultationData.created_by.user_type})`}
                   </div>
                 )}
               </div>
@@ -573,8 +573,8 @@ export const ConsultationDetails = (props: any) => {
                 </div>
                 {consultationData.last_edited_by && (
                   <div>
-                    {` ${consultationData.last_edited_by?.first_name} ${consultationData.last_edited_by?.last_name}  `}
-                    {`@${consultationData.last_edited_by?.username} (${consultationData.last_edited_by?.user_type})`}
+                    {` ${consultationData.last_edited_by.first_name} ${consultationData.last_edited_by.last_name}  `}
+                    {`@${consultationData.last_edited_by.username} (${consultationData.last_edited_by.user_type})`}
                   </div>
                 )}
               </div>
@@ -630,7 +630,7 @@ export const ConsultationDetails = (props: any) => {
                         <div>
                           <div className="font-semibold">Other Symptoms:</div>
                           <div className="capitalize">
-                            {consultationData.other_symptoms || "-"}
+                            {consultationData.other_symptoms}
                           </div>
                         </div>
                       )}
