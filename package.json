@@ -79,7 +79,7 @@
     "lodash.get": "^4.4.2",
     "lodash.isempty": "^4.4.0",
     "mini-css-extract-plugin": "^1.6.0",
-    "moment": "^2.29.1",
+    "moment": "^2.29.3",
     "moment-locales-webpack-plugin": "^1.2.0",
     "postcss-safe-parser": "^4.0.2",
     "qrcode.react": "^1.0.1",
