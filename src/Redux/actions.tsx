@@ -60,19 +60,19 @@ export const deleteUserFacility = (username: string, facility: string) => {
     { username }
   );
 };
-export const getFacilities = (params: object) => {
-  return fireRequest("listFacility", [], params);
+export const getPermittedFacilities = (params: object) => {
+  return fireRequest("getPermittedFacilities", [], params);
 };
-export const getFacilitiesV2 = (params: object) => {
-  return fireRequest("listFacilityV2", [], params);
-};
-
-export const getFacility = (id: number, key?: string) => {
-  return fireRequest("getFacility", [], {}, { id: id }, key);
+export const getAllFacilities = (params: object) => {
+  return fireRequest("getAllFacilities", [], params);
 };
 
-export const getFacilityV2 = (id: number, key?: string) => {
-  return fireRequest("getFacilityV2", [], {}, { id: id }, key);
+export const getPermittedFacility = (id: number, key?: string) => {
+  return fireRequest("getPermittedFacility", [], {}, { id: id }, key);
+};
+
+export const getAnyFacility = (id: number | string, key?: string) => {
+  return fireRequest("getAnyFacility", [], {}, { id: id }, key);
 };
 
 export const getFacilityUsers = (id: string) => {
@@ -119,6 +119,98 @@ export const partialUpdateFacilityAssetLocation = (
     facility_external_id,
     external_id,
   });
+
+// asset bed
+export const listAssetBeds = (params: object) =>
+  fireRequest("listAssetBeds", [], params, {});
+export const createAssetBed = (
+  params: object,
+  asset_id: string,
+  bed_id: string
+) =>
+  fireRequest(
+    "createAssetBed",
+    [],
+    { ...params, asset: asset_id, bed: bed_id },
+    {}
+  );
+
+export const getAssetBed = (
+  asset_external_id: string,
+  bed_id: string,
+  external_id: string
+) =>
+  fireRequest(
+    "getAssetBed",
+    [],
+    { asset: asset_external_id, bed: bed_id },
+    { external_id }
+  );
+export const partialUpdateAssetBed = (params: object, asset_id: string) =>
+  fireRequest(
+    "partialUpdateAssetBed",
+    [],
+    { ...params },
+    {
+      external_id: asset_id,
+    }
+  );
+
+export const updateAssetBed = (
+  params: object,
+  asset_external_id: string,
+  external_id: string,
+  bed_id: string
+) =>
+  fireRequest(
+    "updateAssetBed",
+    [],
+    { ...params, asset: asset_external_id, bed: bed_id },
+    {
+      external_id,
+    }
+  );
+
+// Facility Beds
+export const listFacilityBeds = (params: object) =>
+  fireRequest("listFacilityBeds", [], params, {});
+export const createFacilityBed = (
+  params: object,
+  facility_id: string,
+  location_id: string
+) =>
+  fireRequest(
+    "createFacilityBed",
+    [],
+    { ...params, facility: facility_id, location: location_id },
+    {}
+  );
+
+export const getFacilityBed = (
+  facility_external_id: string,
+  location_id: string,
+  external_id: string
+) =>
+  fireRequest(
+    "getFacilityBed",
+    [],
+    { facility: facility_external_id, location: location_id },
+    { external_id }
+  );
+export const updateFacilityBed = (
+  params: object,
+  facility_external_id: string,
+  external_id: string,
+  location_id: string
+) =>
+  fireRequest(
+    "updateFacilityBed",
+    [],
+    { ...params, facility: facility_external_id, location: location_id },
+    {
+      external_id,
+    }
+  );
 
 // Download Actions
 export const downloadFacility = () => {
@@ -292,6 +384,9 @@ export const getTestSample = (id: number) => {
 export const patchSample = (params: object, pathParam: object) => {
   return fireRequest("patchSample", [], params, pathParam);
 };
+export const downloadSampleTests = (params: object) => {
+  return fireRequest("getTestSampleList", [], { ...params, csv: 1 });
+};
 
 // Daily Rounds
 
@@ -322,7 +417,7 @@ export const getConsultation = (id: number) => {
   return fireRequest("getConsultation", [], {}, { id: id });
 };
 export const updateConsultation = (id: number, params: object) => {
-  return fireRequest("updateConsultation", [id], params);
+  return fireRequest("updateConsultation", [], params, { id: id });
 };
 //Inventory
 export const getItems = (params: object) => {
@@ -388,7 +483,7 @@ export const deleteShiftRecord = (id: string) => {
   return fireRequest("deleteShiftRecord", [id], {});
 };
 export const listShiftRequests = (params: object, key: string) => {
-  return fireRequest(`listShiftRequests`, [], params, null, key);
+  return fireRequest("listShiftRequests", [], params, null, key);
 };
 export const getShiftDetails = (pathParam: object) => {
   return fireRequest("getShiftDetails", [], {}, pathParam);
@@ -533,7 +628,7 @@ export const deleteResourceRecord = (id: string) => {
   return fireRequest("deleteResourceRecord", [id], {});
 };
 export const listResourceRequests = (params: object, key: string) => {
-  return fireRequest(`listResourceRequests`, [], params, null, key);
+  return fireRequest("listResourceRequests", [], params, null, key);
 };
 export const getResourceDetails = (pathParam: object) => {
   return fireRequest("getResourceDetails", [], {}, pathParam);
@@ -541,8 +636,8 @@ export const getResourceDetails = (pathParam: object) => {
 export const downloadResourceRequests = (params: object) => {
   return fireRequest("downloadResourceRequests", [], params);
 };
-export const getResourceComments = (id: string) => {
-  return fireRequest("getResourceComments", [], {}, { id });
+export const getResourceComments = (id: string, params: object) => {
+  return fireRequest("getResourceComments", [], params, { id });
 };
 export const addResourceComments = (id: string, params: object) => {
   return fireRequest("addResourceComments", [], params, { id });
@@ -560,8 +655,8 @@ export const getAsset = (id: string) =>
   fireRequest("getAsset", [], {}, { external_id: id });
 export const updateAsset = (id: string, params: object) =>
   fireRequest("updateAsset", [], params, { external_id: id });
-export const partialUpdateAsset = (id: string) =>
-  fireRequest("partialUpdateAsset", [], {}, { external_id: id });
+export const partialUpdateAsset = (id: string, params: object) =>
+  fireRequest("partialUpdateAsset", [], params, { external_id: id });
 
 export const listAssetTransaction = (params: object) =>
   fireRequest("listAssetTransaction", [], params);

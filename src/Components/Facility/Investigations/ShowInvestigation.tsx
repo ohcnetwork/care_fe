@@ -1,13 +1,18 @@
-import React, { useCallback, useReducer, useState } from "react";
+import React, { useCallback, useReducer, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
-import { editInvestigation, getInvestigation } from "../../../Redux/actions";
+import {
+  editInvestigation,
+  getInvestigation,
+  getPatient,
+} from "../../../Redux/actions";
 import PageTitle from "../../Common/PageTitle";
 import InvestigationTable from "./InvestigationTable";
 import loadable from "@loadable/component";
 import _ from "lodash";
 import { navigate } from "raviger";
 import * as Notification from "../../../Utils/Notifications.js";
+import { Console } from "console";
 
 const Loading = loadable(() => import("../../Common/Loading"));
 
@@ -36,11 +41,14 @@ const updateFormReducer = (state = initialState, action: any) => {
 };
 
 export default function ShowInvestigation(props: any) {
-  const [isLoading, setIsLoading] = useState(false);
-  const { consultationId, sessionId }: any = props;
+  const { consultationId, patientId, facilityId, sessionId } = props;
+
   const dispatchAction: any = useDispatch();
-  // const [investigationData, setInvestigationData] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [state, dispatch] = useReducer(updateFormReducer, initialState);
+  const [facilityName, setFacilityName] = useState("");
+  const [patientName, setPatientName] = useState("");
+
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
@@ -84,6 +92,23 @@ export default function ShowInvestigation(props: any) {
     },
     [fetchData]
   );
+
+  useEffect(() => {
+    async function fetchPatientName() {
+      if (patientId) {
+        const res = await dispatchAction(getPatient({ id: patientId }));
+        if (res.data) {
+          setPatientName(res.data.name);
+          setFacilityName(res.data.facility_object.name);
+        }
+      } else {
+        setPatientName("");
+        setFacilityName("");
+      }
+    }
+    fetchPatientName();
+  }, [dispatchAction, patientId]);
+
   const handleValueChange = (value: any, name: string) => {
     const changedFields = { ...state.changedFields };
     _.set(changedFields, name, value);
@@ -140,7 +165,11 @@ export default function ShowInvestigation(props: any) {
       <PageTitle
         title="Investigation"
         hideBack={false}
-        className="mx-3 md:mx-8"
+        className="mx-3 md:mx-4"
+        crumbsReplacements={{
+          [facilityId]: { name: facilityName },
+          [patientId]: { name: patientName },
+        }}
       />
       {isLoading ? (
         <Loading />

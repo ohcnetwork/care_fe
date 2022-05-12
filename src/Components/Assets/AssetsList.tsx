@@ -5,7 +5,7 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 import * as Notification from "../../Utils/Notifications.js";
 import PageTitle from "../Common/PageTitle";
 import {
-  getFacility,
+  getAnyFacility,
   listAssets,
   getFacilityAssetLocation,
 } from "../../Redux/actions";
@@ -19,6 +19,7 @@ import { InputSearchBox } from "../Common/SearchBox";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import AssetFilter from "./AssetFilter";
 import AdvancedFilterButton from "../Common/AdvancedFilterButton";
+import { parseQueryParams } from "../../Utils/primitives";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -110,7 +111,9 @@ const AssetsList = (props: any) => {
     async (status: statusType) => {
       if (qParams.facility) {
         setIsLoading(true);
-        const res = await dispatch(getFacility(qParams.facility));
+
+        const res = await dispatch(getAnyFacility(qParams.facility));
+
         if (!status.aborted) {
           setFacilityName(res?.data?.name);
           setIsLoading(false);
@@ -194,6 +197,24 @@ const AssetsList = (props: any) => {
     setShowFilters(false);
   };
 
+  const getAssetIdFromQR = async (assetUrl: string) => {
+    try {
+      setIsLoading(true);
+      setIsScannerActive(false);
+      const params = parseQueryParams(assetUrl);
+      // QR Maybe searchParams "asset" or "assetQR"
+      const assetId = params.asset || params.assetQR;
+      if (assetId) {
+        const { data }: any = await dispatch(
+          listAssets({ qr_code_id: assetId })
+        );
+        return data.results[0].id;
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   if (isLoading) return <Loading />;
   if (isScannerActive)
     return (
@@ -206,9 +227,13 @@ const AssetsList = (props: any) => {
         </button>
         <QrReader
           delay={300}
-          onScan={(assetId: any) =>
-            assetId ? navigate(`/assets/${assetId}`) : null
-          }
+          onScan={async (value: any) => {
+            if (value) {
+              const assetId = await getAssetIdFromQR(value);
+              setIsLoading(false);
+              navigate(`/assets/${assetId ?? value}`);
+            }
+          }}
           onError={(e: any) =>
             Notification.Error({
               msg: e.message,
@@ -222,7 +247,7 @@ const AssetsList = (props: any) => {
 
   return (
     <div className="px-4 pb-2">
-      <PageTitle title="Assets" hideBack={true} />
+      <PageTitle title="Assets" hideBack={true} breadcrumbs={false} />
       <div className="md:flex mt-5 space-y-2">
         <div className="bg-white overflow-hidden shadow rounded-lg flex-1 md:mr-2">
           <div className="px-4 py-5 sm:p-6">

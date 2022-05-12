@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import loadable from "@loadable/component";
 import Box from "@material-ui/core/Box";
 import Button from "@material-ui/core/Button";
@@ -12,11 +13,12 @@ import React, { useEffect, useState, useCallback } from "react";
 import { CSVLink } from "react-csv";
 import { useDispatch } from "react-redux";
 import SwipeableViews from "react-swipeable-views";
+import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue";
 import {
   getAllPatient,
   getDistrict,
   getLocalBody,
-  getFacility,
+  getAnyFacility,
 } from "../../Redux/actions";
 import { PhoneNumberField } from "../Common/HelperInputFields";
 import NavTabs from "../Common/NavTabs";
@@ -33,6 +35,7 @@ import { make as SlideOver } from "../Common/SlideOver.gen";
 import PatientFilterV2 from "./PatientFilterV2";
 import { parseOptionId } from "../../Common/utils";
 import { statusType, useAbortableEffect } from "../../Common/utils";
+import { FacilityModel } from "../Facility/models";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -113,10 +116,15 @@ export const PatientManager = (props: any) => {
   const [DownloadFile, setDownloadFile] = useState("");
   const [qParams, setQueryParams] = useQueryParams();
   const [showFilters, setShowFilters] = useState(false);
+  const [selectedFacility, setSelectedFacility] = useState<FacilityModel>({
+    name: "",
+  });
+  const [showDialog, setShowDialog] = useState(false);
 
   const [districtName, setDistrictName] = useState("");
   const [localbodyName, setLocalbodyName] = useState("");
-  const [facilityName, setFacilityName] = useState("");
+  const [facilityBadgeName, setFacilityBadgeName] = useState("");
+  const [facilityCrumbName, setFacilityCrumbName] = useState("");
 
   const tabValue = qParams.is_active === "False" ? 1 : 0;
 
@@ -180,6 +188,41 @@ export const PatientManager = (props: any) => {
     is_antenatal: qParams.is_antenatal || undefined,
   };
 
+  const date_range_fields = [
+    [params.created_date_before, params.created_date_after],
+    [params.modified_date_before, params.modified_date_after],
+    [params.date_declared_positive_before, params.date_declared_positive_after],
+    [params.date_of_result_before, params.date_of_result_after],
+    [params.last_vaccinated_date_before, params.last_vaccinated_date_after],
+    [
+      params.last_consultation_admission_date_before,
+      params.last_consultation_admission_date_after,
+    ],
+    [
+      params.last_consultation_discharge_date_before,
+      params.last_consultation_discharge_date_after,
+    ],
+    [
+      params.last_consultation_symptoms_onset_date_before,
+      params.last_consultation_symptoms_onset_date_after,
+    ],
+  ];
+
+  const durations = date_range_fields.map((field: string[]) => {
+    // XOR (checks if only one of the dates is set)
+    if (!field[0] !== !field[1]) {
+      return -1;
+    }
+    if (field[0] && field[1]) {
+      return moment(field[0]).diff(moment(field[1]), "days");
+    }
+    return 0;
+  });
+
+  const isDownloadAllowed =
+    durations.every((x) => x >= 0 && x <= 7) &&
+    !durations.every((x) => x === 0);
+
   let managePatients: any = null;
   const handleDownload = async (isFiltered: boolean) => {
     const res = await dispatch(
@@ -192,7 +235,7 @@ export const PatientManager = (props: any) => {
         "downloadPatients"
       )
     );
-    if (res && res.data) {
+    if (res && res.data && res.status === 200) {
       setDownloadFile(res.data);
       document.getElementById("downloadlink")?.click();
     }
@@ -203,6 +246,19 @@ export const PatientManager = (props: any) => {
   const handleDownloadFiltered = async () => {
     await handleDownload(true);
   };
+
+  useEffect(() => {
+    async function fetchFacilityName() {
+      if (facilityId) {
+        const res = await dispatch(getAnyFacility(facilityId));
+
+        setFacilityCrumbName(res?.data?.name || "");
+      } else {
+        setFacilityCrumbName("");
+      }
+    }
+    fetchFacilityName();
+  }, [dispatch, facilityId]);
 
   useEffect(() => {
     setIsLoading(true);
@@ -299,12 +355,13 @@ export const PatientManager = (props: any) => {
     [fetchLocalbodyName]
   );
 
-  const fetchFacilityName = useCallback(
+  const fetchFacilityBadgeName = useCallback(
     async (status: statusType) => {
       const res =
-        qParams.facility && (await dispatch(getFacility(qParams.facility)));
+        qParams.facility && (await dispatch(getAnyFacility(qParams.facility)));
+
       if (!status.aborted) {
-        setFacilityName(res?.data?.name);
+        setFacilityBadgeName(res?.data?.name);
       }
     },
     [dispatch, qParams.facility]
@@ -312,9 +369,9 @@ export const PatientManager = (props: any) => {
 
   useAbortableEffect(
     (status: statusType) => {
-      fetchFacilityName(status);
+      fetchFacilityBadgeName(status);
     },
-    [fetchFacilityName]
+    [fetchFacilityBadgeName]
   );
 
   const updateQuery = (params: any) => {
@@ -413,9 +470,14 @@ export const PatientManager = (props: any) => {
   let patientList: any[] = [];
   if (data && data.length) {
     patientList = data.map((patient: any, idx: number) => {
-      const patientUrl = patient.facility
-        ? `/facility/${patient.facility}/patient/${patient.id}`
-        : `/patient/${patient.id}`;
+      let patientUrl = "";
+      if (patient.last_consultation) {
+        patientUrl = `/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation.id}`;
+      } else if (patient.facility) {
+        patientUrl = `/facility/${patient.facility}/patient/${patient.id}`;
+      } else {
+        patientUrl = `/patient/${patient.id}`;
+      }
       return (
         <div
           key={`usr_${patient.id}`}
@@ -425,45 +487,62 @@ export const PatientManager = (props: any) => {
             (patient.disease_status == "POSITIVE" ? "bg-red-50" : "")
           }
         >
-          <div className="px-4 md:w-1/2">
-            <div className="md:flex justify-between w-full">
-              <div className="text-xl font-normal capitalize">
-                {patient.name} - {patient.age}
-                {patient.action && patient.action != 10 && (
-                  <span className="font-semibold ml-2">
-                    -{" "}
+          <div className="px-4  flex gap-2">
+            {patient?.last_consultation &&
+              patient?.last_consultation?.current_bed && (
+                <div className="w-32 self-stretch flex-shrink-0 bg-cool-gray-100 border border-cool-gray-400 text-lg flex flex-col items-center justify-center rounded-md">
+                  <span className="text-center text-gray-900 text-sm">
                     {
-                      TELEMEDICINE_ACTIONS.find((i) => i.id === patient.action)
-                        ?.desc
+                      patient?.last_consultation?.current_bed?.bed_object
+                        ?.location_object?.name
                     }
                   </span>
-                )}
+                  <span className="text-md font-bold">
+                    {patient?.last_consultation?.current_bed?.bed_object.name}
+                  </span>
+                </div>
+              )}
+            <div>
+              <div className="md:flex justify-between w-full">
+                <div className="text-xl font-normal capitalize">
+                  {patient.name} - {patient.age}
+                  {patient.action && patient.action != 10 && (
+                    <span className="font-semibold ml-2">
+                      -{" "}
+                      {
+                        TELEMEDICINE_ACTIONS.find(
+                          (i) => i.id === patient.action
+                        )?.desc
+                      }
+                    </span>
+                  )}
+                </div>
               </div>
+              {patient.facility_object && (
+                <div className="font-normal text-sm">
+                  {patient.facility_object.name},
+                  <span className="text-xs ml-2">
+                    Updated at: {moment(patient.modified_date).format("lll")}
+                  </span>
+                  {patient.review_time && (
+                    <span
+                      className={
+                        "m-1 inline-flex items-center px-3 py-1 rounded-full text-xs leading-4 font-semibold " +
+                        (moment().isBefore(patient.review_time)
+                          ? " bg-gray-100"
+                          : "rounded p-1 bg-red-400 text-white")
+                      }
+                    >
+                      <i className="mr-2 text-md fas fa-clock"></i>
+                      {(moment().isBefore(patient.review_time)
+                        ? "Review at: "
+                        : "Review Missed: ") +
+                        moment(patient.review_time).format("lll")}
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
-            {patient.facility_object && (
-              <div className="font-normal text-sm">
-                {patient.facility_object.name},
-                <span className="text-xs ml-2">
-                  Updated at: {moment(patient.modified_date).format("lll")}
-                </span>
-                {patient.review_time && (
-                  <span
-                    className={
-                      "m-1 inline-flex items-center px-3 py-1 rounded-full text-xs leading-4 font-semibold " +
-                      (moment().isBefore(patient.review_time)
-                        ? " bg-gray-100"
-                        : "rounded p-1 bg-red-400 text-white")
-                    }
-                  >
-                    <i className="mr-2 text-md fas fa-clock"></i>
-                    {(moment().isBefore(patient.review_time)
-                      ? "Review at: "
-                      : "Review Missed: ") +
-                      moment(patient.review_time).format("lll")}
-                  </span>
-                )}
-              </div>
-            )}
           </div>
           <div className="md:flex">
             <div className="md:flex flex-wrap justify-end">
@@ -564,7 +643,21 @@ export const PatientManager = (props: any) => {
 
   return (
     <div className="px-6">
-      <PageTitle title="Patients" hideBack={!facilityId} className="mt-4" />
+      {showDialog && (
+        <FacilitiesSelectDialogue
+          setSelected={(e) => setSelectedFacility(e)}
+          selectedFacility={selectedFacility}
+          handleOk={() => navigate(`facility/${selectedFacility.id}/patient`)}
+          handleCancel={() => setShowDialog(false)}
+        />
+      )}
+      <PageTitle
+        title="Patients"
+        hideBack={!facilityId}
+        className="mt-4"
+        breadcrumbs={!!facilityId}
+        crumbsReplacements={{ [facilityId]: { name: facilityCrumbName } }}
+      />
       <div className="mt-5 md:grid grid-cols-1 gap-5 sm:grid-cols-3 my-4 px-2 md:px-0 relative">
         <div className="title-text flex align-center">
           <div>
@@ -584,14 +677,22 @@ export const PatientManager = (props: any) => {
               target="_blank"
             ></CSVLink>
           </div>
-          <Button
-            color="primary"
-            onClick={handleDownloadAll}
-            size="small"
-            startIcon={<ArrowDownwardIcon>download</ArrowDownwardIcon>}
-          >
-            Download All Patients
-          </Button>
+          <div className="flex flex-col gap-2">
+            <Button
+              color="primary"
+              onClick={handleDownloadAll}
+              size="small"
+              startIcon={<ArrowDownwardIcon>download</ArrowDownwardIcon>}
+              disabled={!isDownloadAllowed}
+            >
+              Download All Patients
+            </Button>
+            {!isDownloadAllowed && (
+              <p className="self-end text-sm italic text-red-400">
+                * Select a 7 day period
+              </p>
+            )}
+          </div>
         </div>
         <div className="bg-white overflow-hidden shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">
@@ -629,7 +730,7 @@ export const PatientManager = (props: any) => {
         </div>
         <div>
           <div>
-            <div className="flex items-start mb-2">
+            <div className="flex items-end gap-2 mb-2">
               <button
                 className="btn btn-primary-ghost md:mt-7 "
                 onClick={(_) => setShowFilters((show) => !show)}
@@ -664,6 +765,20 @@ export const PatientManager = (props: any) => {
                   </line>
                 </svg>
                 <span>Advanced Filters</span>
+              </button>
+              <button
+                className="btn-primary btn md:mt-7 w-full md:w-fit"
+                onClick={() => {
+                  if (facilityId) {
+                    navigate(`/facility/${facilityId}/patient`);
+                  } else {
+                    setShowDialog(true);
+                  }
+                }}
+                data-testid="add-patient-button"
+              >
+                <i className="fas fa-plus mr-2 text-white"></i>
+                Add Details of a Patient
               </button>
             </div>
           </div>
@@ -749,7 +864,7 @@ export const PatientManager = (props: any) => {
             )}
           {badge("COWIN ID", qParams.covin_id, "covin_id")}
           {badge("Is Antenatal", qParams.is_antenatal, "is_antenatal")}
-          {badge("Facility", facilityName, "facility")}
+          {badge("Facility", facilityBadgeName, "facility")}
           {badge("Facility Type", qParams.facility_type, "facility_type")}
           {badge("District", districtName, "district")}
           {badge("Ordering", qParams.ordering, "ordering")}

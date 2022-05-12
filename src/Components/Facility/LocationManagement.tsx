@@ -6,6 +6,7 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   listFacilityAssetLocation,
   updateFacilityAssetLocation,
+  getAnyFacility,
 } from "../../Redux/actions";
 import { navigate } from "raviger";
 import Pagination from "../Common/Pagination";
@@ -26,14 +27,14 @@ interface LocationManagementProps {
 
 interface LocationRowProps {
   id: string;
-  facility_id: string;
+  facilityId: string;
   name: string;
   description: string;
   triggerRerender: () => void;
 }
 
 const LocationRow = (props: LocationRowProps) => {
-  let { id, facility_id, name, description, triggerRerender } = props;
+  let { id, facilityId, name, description, triggerRerender } = props;
 
   const dispatchAction: any = useDispatch();
   const [isEditable, setIsEditable] = useState(false);
@@ -46,7 +47,7 @@ const LocationRow = (props: LocationRowProps) => {
     const res = await dispatchAction(
       updateFacilityAssetLocation(
         { name: nameField, description: descField },
-        facility_id,
+        facilityId,
         id
       )
     );
@@ -152,6 +153,26 @@ const LocationRow = (props: LocationRowProps) => {
           </Button>
         )}
       </td>
+      <td>
+        {!isEditable && (
+          <Button
+            color="inherit"
+            variant="contained"
+            type="submit"
+            size="small"
+            style={{
+              marginLeft: "auto",
+              backgroundColor: "#4A2310",
+              color: "white",
+            }}
+            onClick={() =>
+              navigate(`/facility/${facilityId}/location/${id}/beds`)
+            }
+          >
+            Manage Beds
+          </Button>
+        )}
+      </td>
     </tr>
   );
 };
@@ -167,6 +188,7 @@ export const LocationManagement = (props: LocationManagementProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const [rerender, setRerender] = useState(false);
+  const [facilityName, setFacilityName] = useState("");
   const limit = 14;
 
   const triggerRerender = () => {
@@ -200,6 +222,19 @@ export const LocationManagement = (props: LocationManagementProps) => {
     [fetchData]
   );
 
+  useEffect(() => {
+    async function fetchFacilityName() {
+      if (facilityId) {
+        const res = await dispatchAction(getAnyFacility(facilityId));
+
+        setFacilityName(res?.data?.name || "");
+      } else {
+        setFacilityName("");
+      }
+    }
+    fetchFacilityName();
+  }, [dispatchAction, facilityId]);
+
   const handlePagination = (page: number, limit: number) => {
     const offset = (page - 1) * limit;
     setCurrentPage(page);
@@ -210,7 +245,7 @@ export const LocationManagement = (props: LocationManagementProps) => {
     locationsList = locations.map((locationItem: LocationModel) => (
       <LocationRow
         id={locationItem.id || ""}
-        facility_id={facilityId || ""}
+        facilityId={facilityId || ""}
         name={locationItem.name || ""}
         description={locationItem.description || ""}
         triggerRerender={triggerRerender}
@@ -249,6 +284,9 @@ export const LocationManagement = (props: LocationManagementProps) => {
                 <th className="px-5 py-3 border-b-2 border-gray-200 bg-primary-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
                   Manage
                 </th>
+                <th className="px-5 py-3 border-b-2 border-gray-200 bg-primary-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                  Beds
+                </th>
               </tr>
             </thead>
             <tbody>{locationsList}</tbody>
@@ -274,6 +312,7 @@ export const LocationManagement = (props: LocationManagementProps) => {
         title="Location Management"
         hideBack={false}
         className="mx-3 md:mx-8"
+        crumbsReplacements={{ [facilityId]: { name: facilityName } }}
       />
       <div className="container mx-auto px-4 py-4 md:my-8 sm:px-8">
         <Button

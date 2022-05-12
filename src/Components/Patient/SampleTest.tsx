@@ -2,10 +2,14 @@ import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { navigate } from "raviger";
 import loadable from "@loadable/component";
-import React, { useReducer, useCallback, useState } from "react";
+import React, { useReducer, useCallback, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { SAMPLE_TYPE_CHOICES, ICMR_CATEGORY } from "../../Common/constants";
-import { createSampleTest, getFacilitiesV2 } from "../../Redux/actions";
+import {
+  createSampleTest,
+  getAllFacilities,
+  getPatient,
+} from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
@@ -20,8 +24,8 @@ import Container from "@material-ui/core/Container";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
-const sampleTestTypes = [...SAMPLE_TYPE_CHOICES];
 const icmrCategories = [...ICMR_CATEGORY];
+const sampleTestTypes = [...SAMPLE_TYPE_CHOICES];
 
 const initForm: SampleTestModel = {
   isFastTrack: false,
@@ -37,7 +41,7 @@ const initForm: SampleTestModel = {
   has_sari: false,
   is_atypical_presentation: false,
   is_unusual_course: false,
-  sample_type: "UNKNOWN",
+  sample_type: "0",
   icmr_category: "Cat 0",
   sample_type_other: "",
 };
@@ -76,29 +80,34 @@ export const SampleTest = (props: any) => {
   const { facilityId, patientId } = props;
   const [state, dispatch] = useReducer(sampleTestFormReducer, initialState);
   const [isLoading, setIsLoading] = useState(false);
-  const [facilityName, setFacilityName] = useState<Array<FacilityNameModel>>(
+  const [facilityNames, setFacilityNames] = useState<Array<FacilityNameModel>>(
     []
   );
+  const [facilityName, setFacilityName] = useState("");
+  const [patientName, setPatientName] = useState("");
 
   const headerText = "Request Sample";
   const buttonText = "Confirm your request to send sample for testing";
 
-  const fetchFacilityName = useCallback(
+  const fetchFacilityNames = useCallback(
     async (status: statusType) => {
       const coronaLabType = 950;
       const labType = 9;
+      setIsLoading(true);
       const LabList = await dispatchAction(
-        getFacilitiesV2({ facility_type: labType })
+        getAllFacilities({ facility_type: labType })
       );
+
       const CoronaLabList = await dispatchAction(
-        getFacilitiesV2({ facility_type: coronaLabType })
+        getAllFacilities({ facility_type: coronaLabType })
       );
+
       if (
         !status.aborted &&
         LabList.data.results &&
         CoronaLabList.data.results
       ) {
-        setFacilityName([
+        setFacilityNames([
           ...LabList.data.results,
           ...CoronaLabList.data.results,
         ]);
@@ -110,15 +119,32 @@ export const SampleTest = (props: any) => {
           },
         });
       }
+      setIsLoading(false);
     },
     [dispatchAction]
   );
   useAbortableEffect(
     (status: statusType) => {
-      fetchFacilityName(status);
+      fetchFacilityNames(status);
     },
-    [dispatch, fetchFacilityName]
+    [dispatch, fetchFacilityNames]
   );
+
+  useEffect(() => {
+    async function fetchPatientName() {
+      if (patientId) {
+        const res = await dispatchAction(getPatient({ id: patientId }));
+        if (res.data) {
+          setPatientName(res.data.name);
+          setFacilityName(res.data.facility_object.name);
+        }
+      } else {
+        setPatientName("");
+        setFacilityName("");
+      }
+    }
+    fetchPatientName();
+  }, [dispatchAction, patientId]);
 
   const validateForm = () => {
     let errors = { ...initError };
@@ -144,7 +170,7 @@ export const SampleTest = (props: any) => {
           }
           break;
         case "sample_type_other":
-          if (state.form.sample_type === "OTHER TYPE" && !state.form[field]) {
+          if (state.form.sample_type === "9" && !state.form[field]) {
             errors[field] = "Please provide details of the sample type";
             invalidForm = true;
           }
@@ -205,7 +231,7 @@ export const SampleTest = (props: any) => {
         sample_type: state.form.sample_type,
         icmr_category: state.form.icmr_category,
         sample_type_other:
-          state.form.sample_type === "OTHER TYPE"
+          state.form.sample_type === "9"
             ? state.form.sample_type_other
             : undefined,
       };
@@ -243,7 +269,13 @@ export const SampleTest = (props: any) => {
   }
   return (
     <div className="px-2 pb-2">
-      <PageTitle title={headerText} />
+      <PageTitle
+        title={headerText}
+        crumbsReplacements={{
+          [facilityId]: { name: facilityName },
+          [patientId]: { name: patientName },
+        }}
+      />
       <div className="mt-4">
         <Card>
           <CardContent>
@@ -256,7 +288,7 @@ export const SampleTest = (props: any) => {
                       name="sample_type"
                       variant="outlined"
                       margin="dense"
-                      optionArray={true}
+                      optionArray={false}
                       value={state.form.sample_type}
                       options={sampleTestTypes}
                       onChange={handleChange}
@@ -341,7 +373,7 @@ export const SampleTest = (props: any) => {
                       variant="outlined"
                       margin="dense"
                       value={state.form.testing_facility || ""}
-                      options={facilityName.map((e) => {
+                      options={facilityNames.map((e) => {
                         return { id: e.id, name: e.name };
                       })}
                       optionValue="name"

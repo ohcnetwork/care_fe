@@ -103,11 +103,11 @@ const routes: Routes = {
 
   // Facility Endpoints
 
-  listFacility: {
+  getPermittedFacilities: {
     path: "/api/v1/facility/",
   },
 
-  listFacilityV2: {
+  getAllFacilities: {
     path: "/api/v1/getallfacilities",
   },
 
@@ -116,11 +116,11 @@ const routes: Routes = {
     method: "POST",
   },
 
-  getFacility: {
+  getPermittedFacility: {
     path: "/api/v1/facility/{id}/",
   },
 
-  getFacilityV2: {
+  getAnyFacility: {
     path: "/api/v1/getallfacilities/{id}/",
   },
 
@@ -157,6 +157,46 @@ const routes: Routes = {
   partialUpdateFacilityAssetLocation: {
     path: "/api/v1/facility/{facility_external_id}/asset_location/{external_id}/",
     method: "PATCH",
+  },
+
+  // Asset bed
+  listAssetBeds: {
+    path: "/api/v1/assetbed/",
+    method: "GET",
+  },
+  createAssetBed: {
+    path: "/api/v1/assetbed/",
+    method: "POST",
+  },
+  getAssetBed: {
+    path: "/api/v1/assetbed/{external_id}/",
+    method: "GET",
+  },
+  updateAssetBed: {
+    path: "/api/v1/assetbed/{external_id}/",
+    method: "PUT",
+  },
+  partialUpdateAssetBed: {
+    path: "/api/v1/assetbed/{external_id}/",
+    method: "PATCH",
+  },
+
+  // Facility Beds
+  listFacilityBeds: {
+    path: "/api/v1/bed/",
+    method: "GET",
+  },
+  createFacilityBed: {
+    path: "/api/v1/bed/",
+    method: "POST",
+  },
+  getFacilityBed: {
+    path: "/api/v1/bed/{external_id}/",
+    method: "GET",
+  },
+  updateFacilityBed: {
+    path: "/api/v1/bed/{external_id}/",
+    method: "PUT",
   },
 
   // Download Api
@@ -198,7 +238,7 @@ const routes: Routes = {
     path: "/api/v1/consultation/{id}/",
   },
   updateConsultation: {
-    path: "/api/v1/consultation",
+    path: "/api/v1/consultation/{id}/",
     method: "PUT",
   },
   partialUpdateConsultation: {

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { KASP_STRING } from "../../Common/constants";
-import { getUserList, getFacility } from "../../Redux/actions";
+import { getUserList, getAnyFacility } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
+import { Link } from "raviger";
 
 export default function BadgesList(props: any) {
   const { filterParams, appliedFilters, local, updateFilter } = props;
@@ -32,7 +33,7 @@ export default function BadgesList(props: any) {
     async function fetchData() {
       if (appliedFilters.orgin_facility || local.orgin_facility) {
         const res = await dispatch(
-          getFacility(
+          getAnyFacility(
             appliedFilters.orgin_facility || local.orgin_facility,
             "orgin_facility"
           )
@@ -53,7 +54,7 @@ export default function BadgesList(props: any) {
         local.shifting_approving_facility
       ) {
         const res = await dispatch(
-          getFacility(
+          getAnyFacility(
             appliedFilters.shifting_approving_facility ||
               local.shifting_approving_facility,
             "shifting_approving_facility"
@@ -72,7 +73,7 @@ export default function BadgesList(props: any) {
     async function fetchData() {
       if (appliedFilters.assigned_facility || local.assigned_facility) {
         const res = await dispatch(
-          getFacility(
+          getAnyFacility(
             appliedFilters.assigned_facility || local.assigned_facility,
             "assigned_facility"
           )
@@ -85,6 +86,16 @@ export default function BadgesList(props: any) {
     }
     fetchData();
   }, [dispatch, appliedFilters.assigned_facility]);
+
+  const filtersExists = () => {
+    let { limit, offset, ...rest } = filterParams;
+
+    return Object.values(rest).some((value) => value);
+  };
+
+  const clearFilters = () => {
+    localStorage.removeItem("shift-filters");
+  };
 
   const removeFilter = (paramKey: any) => {
     const localData: any = { ...local };
@@ -125,7 +136,7 @@ export default function BadgesList(props: any) {
     );
   };
   return (
-    <div className="flex flex-wrap mt-4 ml-2">
+    <div className="flex items-center flex-wrap mt-4 ml-2">
       {badge(
         "status",
         (appliedFilters.status != "--" && appliedFilters.status) ||
@@ -218,6 +229,16 @@ export default function BadgesList(props: any) {
         "Shifting Approving Facility",
         approvingFacilityName,
         "shifting_approving_facility"
+      )}
+      {filtersExists() && (
+        <Link
+          href="/shifting"
+          className="inline-flex items-center px-3 py-1 mt-2 ml-2 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border cursor-pointer hover:border-gray-700 hover:text-gray-900"
+          onClick={clearFilters}
+        >
+          <i className="fas fa-minus-circle fa-lg mr-1.5"></i>
+          <span>Clear All Filters</span>
+        </Link>
       )}
     </div>
   );

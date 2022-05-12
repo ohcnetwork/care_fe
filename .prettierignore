@@ -2,3 +2,6 @@ dist
 public
 lib
 build
+*.css
+*.gen.tsx
+*.bs.js

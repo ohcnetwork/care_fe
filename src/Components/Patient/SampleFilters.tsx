@@ -1,10 +1,14 @@
 import { useState, useEffect } from "react";
 import { SelectField } from "../Common/HelperInputFields";
-import { SAMPLE_TEST_STATUS, SAMPLE_TEST_RESULT } from "../../Common/constants";
+import {
+  SAMPLE_TEST_STATUS,
+  SAMPLE_TEST_RESULT,
+  SAMPLE_TYPE_CHOICES,
+} from "../../Common/constants";
 import { navigate } from "raviger";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FacilityModel } from "../Facility/models";
-import { getFacilityV2 as getFacility } from "../../Redux/actions";
+import { getAnyFacility } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { CircularProgress } from "@material-ui/core";
 
@@ -23,6 +27,7 @@ export default function UserFilter(props: any) {
     result: filter.result || "",
     facility: filter.facility || "",
     facility_ref: filter.facility_ref || null,
+    sample_type: filter.sample_type || "",
   });
 
   const [isFacilityLoading, setFacilityLoading] = useState(false);
@@ -33,6 +38,7 @@ export default function UserFilter(props: any) {
     result: "",
     facility: "",
     facility_ref: null,
+    sample_type: "",
   };
 
   const handleChange = (event: any) => {
@@ -45,11 +51,12 @@ export default function UserFilter(props: any) {
   };
 
   const applyFilter = () => {
-    const { status, result, facility } = filterState;
+    const { status, result, facility, sample_type } = filterState;
     const data = {
       status: status || "",
       result: result || "",
       facility: facility || "",
+      sample_type: sample_type || "",
     };
     onChange(data);
   };
@@ -59,7 +66,7 @@ export default function UserFilter(props: any) {
       if (filter.facility) {
         setFacilityLoading(true);
         const { data: facilityData } = await dispatch(
-          getFacility(filter.facility, "facility")
+          getAnyFacility(filter.facility, "facility")
         );
         setFilterState({ ...filterState, facility_ref: facilityData });
         setFacilityLoading(false);
@@ -119,6 +126,19 @@ export default function UserFilter(props: any) {
             margin="dense"
             value={filterState.result || 0}
             options={[{ id: "", text: "SELECT" }, ...SAMPLE_TEST_RESULT]}
+            onChange={handleChange}
+            errors=""
+          />
+        </div>
+
+        <div className="w-64 flex-none">
+          <div className="text-sm font-semibold">Sample Test Type</div>
+          <SelectField
+            name="sample_type"
+            variant="outlined"
+            margin="dense"
+            value={filterState.sample_type}
+            options={[{ id: "", text: "SELECT" }, ...SAMPLE_TYPE_CHOICES]}
             onChange={handleChange}
             errors=""
           />

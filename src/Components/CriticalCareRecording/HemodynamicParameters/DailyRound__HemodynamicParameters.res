@@ -11,6 +11,7 @@ let make = (
   ~renderOptionalIntWithIndicators,
   ~renderFloatWithIndicators,
   ~renderOptionalFloatWithIndicators,
+  ~renderOptionalInt,
 ) => {
   <div>
     <div>
@@ -50,6 +51,7 @@ let make = (
       "Low",
       "High",
     )}
+    {renderOptionalInt("Pain Scale", HemodynamicParameters.pain(hemodynamicParameter))}
     {renderLine(
       "Rhythm",
       HemodynamicParameters.rhythmToString(HemodynamicParameters.rhythm(hemodynamicParameter)),

@@ -1,10 +1,11 @@
+import React from "react";
 import { useState, useEffect, useCallback } from "react";
 import { useAbortableEffect, statusType } from "../../Common/utils";
 import { navigate, useQueryParams } from "raviger";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FacilityModel } from "../Facility/models";
 import { useDispatch } from "react-redux";
-import { getFacility, getFacilityAssetLocation } from "../../Redux/actions";
+import { getAnyFacility, getFacilityAssetLocation } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { SelectField } from "../Common/HelperInputFields";
 import { LocationSelect } from "../Common/LocationSelect";
@@ -44,14 +45,14 @@ function AssetFilter(props: any) {
     closeFilter();
     const searchQuery = qParams?.search && `?search=${qParams?.search}`;
     if (searchQuery) navigate(`/assets${searchQuery}`);
-    else navigate(`/assets`);
+    else navigate("/assets");
   }, [qParams]);
 
   const fetchFacility = useCallback(
     async (status: statusType) => {
       if (facilityId) {
         const [facilityData]: any = await Promise.all([
-          dispatch(getFacility(facilityId)),
+          dispatch(getAnyFacility(facilityId)),
         ]);
         if (!status.aborted) {
           if (!facilityData?.data)
@@ -138,7 +139,7 @@ function AssetFilter(props: any) {
             }
             selected={facility}
             errors=""
-            showAll={false}
+            showAll
             multiple={false}
           />
         </div>
@@ -209,7 +210,7 @@ function AssetFilter(props: any) {
               },
               {
                 id: "TRANSFER_IN_PROGRESS",
-                name: "TRANSFER_IN_PROGRESS",
+                name: "TRANSFER IN PROGRESS",
               },
             ]}
             optionValue="name"

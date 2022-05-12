@@ -1,3 +1,5 @@
+import { ConsultationModel } from "../Facility/models";
+
 export interface FlowModel {
   id?: number;
   status?: string;
@@ -17,6 +19,7 @@ export interface AssignedToObjectModel {
   first_name: string;
   last_name: string;
   last_login?: string;
+  alt_phone_number?: string;
   user_type: string;
 }
 
@@ -51,13 +54,7 @@ export interface PatientModel {
   district_object?: { id: number; name: string };
   state_object?: { id: number; name: string };
   tele_consultation_history?: Array<any>;
-  last_consultation?: {
-    id: number;
-    facility: string;
-    assigned_to_object?: AssignedToObjectModel;
-    is_telemedicine?: boolean;
-    consultation_notes: string;
-  };
+  last_consultation?: ConsultationModel;
   address?: string;
   village?: string;
   pincode?: number;
@@ -240,7 +237,15 @@ export interface SampleListModel {
 }
 
 export interface DailyRoundsModel {
+  ventilator_spo2?: number;
   spo2?: string;
+  bp?: {
+    diastolic: number;
+    mean: number;
+    systolic: number;
+  };
+  pulse?: number;
+  resp?: number;
   temperature?: string;
   temperature_measured_at?: string;
   physical_examination_info?: string;
@@ -271,6 +276,7 @@ export interface DailyRoundsModel {
     last_name?: string;
     user_type?: string;
   };
+  bed?: string;
 }
 export interface FacilityNameModel {
   id?: string;

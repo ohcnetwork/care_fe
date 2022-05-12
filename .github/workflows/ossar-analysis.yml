@@ -27,13 +27,7 @@ jobs:
       - run: git checkout HEAD^2
         if: ${{ github.event_name == 'pull_request' }}
 
-        # Install dotnet, used by OSSAR
-      - name: Install .NET
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: "3.1.201"
-
-        # Run open source static analysis tools
+      # Run open source static analysis tools
       - name: Run OSSAR
         uses: github/ossar-action@v1
         id: ossar

@@ -102,6 +102,15 @@ export interface ConsultationModel {
   last_edited_by?: any;
   weight?: number | null;
   height?: number | null;
+  operation?: string;
+  special_instruction?: string;
+  intubation_start_date?: string;
+  intubation_end_date?: string;
+  ett_tt?: number;
+  cuff_pressure?: number;
+  lines?: any;
+  last_daily_round?: any;
+  current_bed?: CurrentBed;
 }
 export interface PatientStatsModel {
   id?: number;
@@ -148,4 +157,28 @@ export interface LocationModel {
   facility?: {
     name: string;
   };
+}
+
+export interface BedModel {
+  id?: string;
+  bed_type?: string;
+  description?: string;
+  name?: string;
+  facility?: string;
+  location_object?: {
+    name: string;
+  };
+  location?: string;
+}
+
+export interface CurrentBed {
+  id: string;
+  consultation: string;
+  bed?: string;
+  bed_object: BedModel;
+  created_date: string;
+  modified_date: string;
+  start_date: string;
+  end_date: string;
+  meta: Record<string, any>;
 }

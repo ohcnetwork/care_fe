@@ -14,15 +14,20 @@ import {
   PATIENT_FILTER_CATEGORY,
   PATIENT_FILTER_ADMITTED_TO,
   KASP_STRING,
+  KASP_ENABLED,
 } from "../../Common/constants";
 import moment from "moment";
-import { getAllLocalBody, getFacility, getDistrict } from "../../Redux/actions";
+import {
+  getAllLocalBody,
+  getAnyFacility,
+  getDistrict,
+} from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { navigate } from "raviger";
 import { DateRangePicker, getDate } from "../Common/DateRangePicker";
 import DistrictSelect from "../Facility/FacilityFilter/DistrictSelect";
 
-const debounce = require("lodash.debounce");
+import { debounce } from "lodash";
 
 const useMergeState = (initialState: any) => {
   const [state, setState] = useState(initialState);
@@ -32,7 +37,7 @@ const useMergeState = (initialState: any) => {
 };
 
 export default function PatientFilterV2(props: any) {
-  let { filter, onChange, closeFilter } = props;
+  const { filter, onChange, closeFilter } = props;
   const [isFacilityLoading, setFacilityLoading] = useState(false);
   const [isDistrictLoading, setDistrictLoading] = useState(false);
 
@@ -149,7 +154,7 @@ export default function PatientFilterV2(props: any) {
       if (filter.facility) {
         setFacilityLoading(true);
         const { data: facilityData } = await dispatch(
-          getFacility(filter.facility, "facility")
+          getAnyFacility(filter.facility, "facility")
         );
         setFilterState({ facility_ref: facilityData });
         setFacilityLoading(false);
@@ -492,7 +497,7 @@ export default function PatientFilterV2(props: any) {
             multiple={false}
             name="facility"
             selected={filterState.facility_ref}
-            showAll={false}
+            showAll
             setSelected={(obj) => setFacility(obj, "facility")}
             className="shifting-page-filter-dropdown"
             errors={""}
@@ -542,30 +547,32 @@ export default function PatientFilterV2(props: any) {
             value={filterState.is_antenatal}
             options={[
               { id: "", text: "Show All" },
-              { id: "true", text: `antenatal` },
-              { id: "false", text: `non antenatal` },
+              { id: "true", text: "antenatal" },
+              { id: "false", text: "non antenatal" },
             ]}
             onChange={handleChange}
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
           />
         </div>
 
-        <div className="w-64 flex-none">
-          <span className="text-sm font-semibold">{KASP_STRING}</span>
-          <SelectField
-            name="is_kasp"
-            variant="outlined"
-            margin="dense"
-            value={filterState.is_kasp}
-            options={[
-              { id: "", text: "Show All" },
-              { id: "true", text: `Show ${KASP_STRING}` },
-              { id: "false", text: `Show Non ${KASP_STRING}` },
-            ]}
-            onChange={handleChange}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-          />
-        </div>
+        {KASP_ENABLED && (
+          <div className="w-64 flex-none">
+            <span className="text-sm font-semibold">{KASP_STRING}</span>
+            <SelectField
+              name="is_kasp"
+              variant="outlined"
+              margin="dense"
+              value={filterState.is_kasp}
+              options={[
+                { id: "", text: "Show All" },
+                { id: "true", text: `Show ${KASP_STRING}` },
+                { id: "false", text: `Show Non ${KASP_STRING}` },
+              ]}
+              onChange={handleChange}
+              className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+            />
+          </div>
+        )}
 
         <div className="w-64 flex-none">
           <span className="text-sm font-semibold">Category</span>

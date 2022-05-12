@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { getFacility } from "../../Redux/actions";
+import { getAnyFacility } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
+import { Link } from "raviger";
 
 export default function BadgesList(props: any) {
-  const { appliedFilters, updateFilter } = props;
+  const { appliedFilters, updateFilter, local } = props;
 
   const [orginFacilityName, setOrginFacilityName] = useState("");
   const [approvingFacilityName, setApprovingFacilityName] = useState("");
@@ -12,9 +13,12 @@ export default function BadgesList(props: any) {
 
   useEffect(() => {
     async function fetchData() {
-      if (appliedFilters.orgin_facility) {
+      if (appliedFilters.orgin_facility || local.origin_facility) {
         const res = await dispatch(
-          getFacility(appliedFilters.orgin_facility, "orgin_facility")
+          getAnyFacility(
+            appliedFilters.orgin_facility || local.origin_facility,
+            "orgin_facility"
+          )
         );
 
         setOrginFacilityName(res?.data?.name);
@@ -27,9 +31,12 @@ export default function BadgesList(props: any) {
 
   useEffect(() => {
     async function fetchData() {
-      if (appliedFilters.approving_facility) {
+      if (appliedFilters.approving_facility || local.approving_facility) {
         const res = await dispatch(
-          getFacility(appliedFilters.approving_facility, "approving_facility")
+          getAnyFacility(
+            appliedFilters.approving_facility || local.approving_facility,
+            "approving_facility"
+          )
         );
 
         setApprovingFacilityName(res?.data?.name);
@@ -42,9 +49,12 @@ export default function BadgesList(props: any) {
 
   useEffect(() => {
     async function fetchData() {
-      if (appliedFilters.assigned_facility) {
+      if (appliedFilters.assigned_facility || local.assigned_facility) {
         const res = await dispatch(
-          getFacility(appliedFilters.assigned_facility, "assigned_facility")
+          getAnyFacility(
+            appliedFilters.assigned_facility || local.assigned_facility,
+            "assigned_facility"
+          )
         );
 
         setAssignedFacilityName(res?.data?.name);
@@ -55,10 +65,19 @@ export default function BadgesList(props: any) {
     fetchData();
   }, [dispatch, appliedFilters.assigned_facility]);
 
+  const filtersExists = () => {
+    let { limit, offset, ...rest } = appliedFilters;
+
+    return Object.values(rest).some((value) => value);
+  };
+
   const removeFilter = (paramKey: any) => {
+    const localData: any = { ...local };
     const params = { ...appliedFilters };
+
+    localData[paramKey] = "";
     params[paramKey] = "";
-    updateFilter(params);
+    updateFilter(params, localData);
   };
 
   const badge = (key: string, value: any, paramKey: string) => {
@@ -79,44 +98,55 @@ export default function BadgesList(props: any) {
 
   return (
     <div className="flex flex-wrap mt-4 ml-2">
-      {badge("Ordering", appliedFilters.ordering, "ordering")}
+      {badge("Ordering", appliedFilters.ordering || local.ordering, "ordering")}
       {badge(
         "status",
-        appliedFilters.status != "--" && appliedFilters.status,
+        (appliedFilters.status != "--" && appliedFilters.status) ||
+          (local.status !== "--" && local.status),
         "status"
       )}
       {badge(
         "Emergency",
-        appliedFilters.emergency === "true"
+        local.emergency === "yes" || appliedFilters.emergency === "true"
           ? "yes"
-          : appliedFilters.emergency === "false"
+          : local.emergency === "no" || appliedFilters.emergency === "false"
           ? "no"
           : undefined,
         "emergency"
       )}
       {badge(
         "Modified After",
-        appliedFilters.modified_date_after,
+        appliedFilters.modified_date_after || local.modified_date_after,
         "modified_date_after"
       )}
       {badge(
         "Modified Before",
-        appliedFilters.modified_date_before,
+        appliedFilters.modified_date_before || local.modified_date_before,
         "modified_date_before"
       )}
       {badge(
         "Created Before",
-        appliedFilters.created_date_before,
+        appliedFilters.created_date_before || local.created_date_before,
         "created_date_before"
       )}
       {badge(
         "Created After",
-        appliedFilters.created_date_after,
+        appliedFilters.created_date_after || local.created_date_after,
         "created_date_after"
       )}
       {badge("Origin Facility", orginFacilityName, "orgin_facility")}
       {badge("Approving Facility", approvingFacilityName, "approving_facility")}
       {badge("Assigned Facility", assignedFacilityName, "assigned_facility")}
+
+      {filtersExists() && (
+        <Link
+          href="/resource"
+          className="inline-flex items-center px-3 py-1 mt-2 ml-2 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border cursor-pointer hover:border-gray-700 hover:text-gray-900"
+        >
+          <i className="fas fa-minus-circle fa-lg mr-1.5"></i>
+          <span>Clear All Filters</span>
+        </Link>
+      )}
     </div>
   );
 }

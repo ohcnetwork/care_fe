@@ -9,30 +9,33 @@ import {
   Radio,
   RadioGroup,
 } from "@material-ui/core";
+
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { navigate } from "raviger";
 import moment from "moment";
 import React, {
   ChangeEventHandler,
   useCallback,
+  useEffect,
   useReducer,
   useState,
 } from "react";
 import { useDispatch } from "react-redux";
 import {
-  ADMITTED_TO,
   CONSULTATION_SUGGESTION,
   PATIENT_CATEGORY,
   SYMPTOM_CHOICES,
   TELEMEDICINE_ACTIONS,
   REVIEW_AT_CHOICES,
   KASP_STRING,
+  KASP_ENABLED,
 } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   createConsultation,
   getConsultation,
   updateConsultation,
+  getPatient,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { FacilitySelect } from "../Common/FacilitySelect";
@@ -46,26 +49,27 @@ import {
   TextInputField,
 } from "../Common/HelperInputFields";
 import { make as PrescriptionBuilder } from "../Common/PrescriptionBuilder.gen";
-import { FacilityModel } from "./models";
+import { BedModel, FacilityModel } from "./models";
 import { OnlineUsersSelect } from "../Common/OnlineUsersSelect";
 import { UserModel } from "../Users/models";
 import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
+import { BedSelect } from "../Common/BedSelect";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
-type Boolean = "true" | "false";
+type BooleanStrings = "true" | "false";
 
 type FormDetails = {
   hasSymptom: boolean;
   otherSymptom: boolean;
   symptoms: number[];
   other_symptoms: string;
-  symptoms_onset_date: string;
+  symptoms_onset_date: any;
   suggestion: string;
   patient: string;
   facility: string;
-  admitted: Boolean;
+  admitted: BooleanStrings;
   admitted_to: string;
   category: string;
   admission_date: string;
@@ -74,7 +78,7 @@ type FormDetails = {
   diagnosis: string;
   verified_by: string;
   test_id: string;
-  is_kasp: Boolean;
+  is_kasp: BooleanStrings;
   kasp_enabled_date: null;
   examination_details: string;
   existing_medication: string;
@@ -82,13 +86,16 @@ type FormDetails = {
   consultation_notes: string;
   ip_no: string;
   discharge_advice: Prescription_t[];
-  is_telemedicine: Boolean;
+  is_telemedicine: BooleanStrings;
   action: string;
   assigned_to: string;
   assigned_to_object: UserModel | null;
+  operation: string;
+  special_instruction: string;
   review_time: number;
   weight: string;
   height: string;
+  bed: string | null;
 };
 
 type Action =
@@ -100,8 +107,8 @@ const initForm: FormDetails = {
   otherSymptom: false,
   symptoms: [],
   other_symptoms: "",
-  symptoms_onset_date: new Date().toISOString(),
-  suggestion: "",
+  symptoms_onset_date: null,
+  suggestion: "A",
   patient: "",
   facility: "",
   admitted: "false",
@@ -125,9 +132,12 @@ const initForm: FormDetails = {
   action: "PENDING",
   assigned_to: "",
   assigned_to_object: null,
+  operation: "",
+  special_instruction: "",
   review_time: 0,
   weight: "",
   height: "",
+  bed: null,
 };
 
 const initError = Object.assign(
@@ -167,8 +177,7 @@ const suggestionTypes = [
 
 const symptomChoices = [...SYMPTOM_CHOICES];
 
-const admittedToChoices = ["Select", ...ADMITTED_TO];
-
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const categoryChoices = [
   {
     id: 0,
@@ -190,13 +199,32 @@ export const ConsultationForm = (props: any) => {
   const dispatchAction: any = useDispatch();
   const { facilityId, patientId, id } = props;
   const [state, dispatch] = useReducer(consultationFormReducer, initialState);
+  const [bed, setBed] = useState<BedModel | BedModel[] | null>(null);
   const [dischargeAdvice, setDischargeAdvice] = useState<Prescription_t[]>([]);
   const [selectedFacility, setSelectedFacility] =
     useState<FacilityModel | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [patientName, setPatientName] = useState("");
+  const [facilityName, setFacilityName] = useState("");
 
   const headerText = !id ? "Consultation" : "Edit Consultation";
   const buttonText = !id ? "Add Consultation" : "Update Consultation";
+
+  useEffect(() => {
+    async function fetchPatientName() {
+      if (patientId) {
+        const res = await dispatchAction(getPatient({ id: patientId }));
+        if (res.data) {
+          setPatientName(res.data.name);
+          setFacilityName(res.data.facility_object.name);
+        }
+      } else {
+        setPatientName("");
+        setFacilityName("");
+      }
+    }
+    fetchPatientName();
+  }, [dispatchAction, patientId]);
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -234,8 +262,12 @@ export const ConsultationForm = (props: any) => {
             is_telemedicine: `${res.data.is_telemedicine}`,
             is_kasp: `${res.data.is_kasp}`,
             assigned_to: res.data.assigned_to || "",
+            operation: res.data.operation || "",
+            ett_tt: res.data.ett_tt ? Number(res.data.ett_tt) : 3,
+            special_instruction: res.data.special_instruction || "",
             weight: res.data.weight ? res.data.weight : "",
             height: res.data.height ? res.data.height : "",
+            bed: res.data?.current_bed?.bed_object?.id || null,
           };
           dispatch({ type: "set_form", form: formData });
         } else {
@@ -257,11 +289,11 @@ export const ConsultationForm = (props: any) => {
   );
 
   const validateForm = () => {
-    let errors = { ...initError };
+    const errors = { ...initError };
     let invalidForm = false;
     let error_div = "";
 
-    Object.keys(state.form).forEach((field, i) => {
+    Object.keys(state.form).forEach((field) => {
       switch (field) {
         case "symptoms":
           if (!state.form[field] || !state.form[field].length) {
@@ -270,13 +302,13 @@ export const ConsultationForm = (props: any) => {
             invalidForm = true;
           }
           return;
-        case "category":
-          if (!state.form[field] || !state.form[field].length) {
-            errors[field] = "Please select the category";
-            if (!error_div) error_div = field;
-            invalidForm = true;
-          }
-          return;
+        // case "category":
+        //   if (!state.form[field] || !state.form[field].length) {
+        //     errors[field] = "Please select the category";
+        //     if (!error_div) error_div = field;
+        //     invalidForm = true;
+        //   }
+        //   return;
         case "suggestion":
           if (!state.form[field]) {
             errors[field] = "Please enter the decision";
@@ -298,7 +330,7 @@ export const ConsultationForm = (props: any) => {
             invalidForm = true;
           }
           return;
-        case "admitted_to":
+        // case "admitted_to":
         case "admission_date":
           if (JSON.parse(state.form.admitted) && !state.form[field]) {
             errors[field] = "Field is required as person is admitted";
@@ -314,8 +346,8 @@ export const ConsultationForm = (props: any) => {
           }
           return;
         case "consultation_notes":
-          if (state.form.suggestion === "OP" && !state.form[field]) {
-            errors[field] = "Please enter OP consultation Details";
+          if (!state.form[field]) {
+            errors[field] = "Required *";
             if (!error_div) error_div = field;
             invalidForm = true;
           }
@@ -351,7 +383,7 @@ export const ConsultationForm = (props: any) => {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     const [validForm, error_div] = validateForm();
-    console.log(error_div);
+
     if (!validForm) {
       scrollTo(error_div);
     } else {
@@ -366,9 +398,9 @@ export const ConsultationForm = (props: any) => {
           : undefined,
         suggestion: state.form.suggestion,
         admitted: JSON.parse(state.form.admitted),
-        admitted_to: JSON.parse(state.form.admitted)
-          ? state.form.admitted_to
-          : undefined,
+        // admitted_to: JSON.parse(state.form.admitted)
+        //   ? state.form.admitted_to
+        //   : undefined,
         admission_date: JSON.parse(state.form.admitted)
           ? state.form.admission_date
           : undefined,
@@ -394,8 +426,11 @@ export const ConsultationForm = (props: any) => {
         review_time: state.form.review_time,
         assigned_to:
           state.form.is_telemedicine === "true" ? state.form.assigned_to : "",
+        operation: state.form.operation,
+        special_instruction: state.form.special_instruction,
         weight: Number(state.form.weight),
         height: Number(state.form.height),
+        bed: bed && bed instanceof Array ? bed[0]?.id : bed?.id,
       };
       const res = await dispatchAction(
         id ? updateConsultation(id, data) : createConsultation(data)
@@ -422,7 +457,9 @@ export const ConsultationForm = (props: any) => {
     }
   };
 
-  const handleChange: ChangeEventHandler<HTMLInputElement> = (e) => {
+  const handleChange:
+    | ChangeEventHandler<HTMLInputElement>
+    | ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement> = (e: any) => {
     e &&
       e.target &&
       dispatch({
@@ -454,7 +491,7 @@ export const ConsultationForm = (props: any) => {
         form: {
           ...state.form,
           [e.target.name]: e.target.value,
-          admitted: e.target.value === "A" ? "true" : "false",
+          // admitted: e.target.value === "A" ? "true" : "false",
         },
       });
   };
@@ -474,6 +511,14 @@ export const ConsultationForm = (props: any) => {
     form.otherSymptom = !!form.symptoms.filter((i: number) => i === 9).length;
     dispatch({ type: "set_form", form });
   };
+
+  // ------------- DEPRECATED -------------
+  // const handleDateChange = (date: any, key: string) => {
+  //   if (moment(date).isValid()) {
+  //     const form = { ...state.form };
+  //     form[key] = date;
+  //     dispatch({ type: "set_form", form });
+  //   }
 
   const handleDateChange = (date: MaterialUiPickersDate, key: string) => {
     moment(date).isValid() &&
@@ -509,7 +554,13 @@ export const ConsultationForm = (props: any) => {
 
   return (
     <div className="px-2 pb-2 max-w-3xl mx-auto">
-      <PageTitle title={headerText} />
+      <PageTitle
+        title={headerText}
+        crumbsReplacements={{
+          [facilityId]: { name: facilityName },
+          [patientId]: { name: patientName },
+        }}
+      />
       <div className="mt-4">
         <div className="bg-white rounded shadow">
           <form onSubmit={(e) => handleSubmit(e)}>
@@ -551,7 +602,7 @@ export const ConsultationForm = (props: any) => {
                   <div id="symptoms_onset_date-div">
                     <DateInputField
                       label="Date of onset of the symptoms*"
-                      value={state.form.symptoms_onset_date}
+                      value={state.form?.symptoms_onset_date}
                       onChange={(date) =>
                         handleDateChange(date, "symptoms_onset_date")
                       }
@@ -603,7 +654,7 @@ export const ConsultationForm = (props: any) => {
 
                 <div id="prescribed_medication-div">
                   <InputLabel id="prescribed-medication-label">
-                    Treatment Summary
+                    Treatment Plan / Treatment Summary
                   </InputLabel>
                   <MultilineInputField
                     rows={5}
@@ -620,7 +671,7 @@ export const ConsultationForm = (props: any) => {
                     errors={state.errors.prescribed_medication}
                   />
                 </div>
-                <div className="flex-1" id="category-div">
+                {/* <div className="flex-1" id="category-div">
                   <InputLabel id="category-label">Category*</InputLabel>
                   <SelectField
                     name="category"
@@ -630,7 +681,7 @@ export const ConsultationForm = (props: any) => {
                     onChange={handleChange}
                     errors={state.errors.category}
                   />
-                </div>
+                </div> */}
 
                 <div id="suggestion-div">
                   <InputLabel
@@ -661,33 +712,8 @@ export const ConsultationForm = (props: any) => {
                     />
                   </div>
                 )}
-                <div className="flex">
-                  <div className="flex-1" id="admitted-div">
-                    <InputLabel id="admitted-label">Admitted</InputLabel>
-                    <RadioGroup
-                      aria-label="covid"
-                      name="admitted"
-                      value={state.form.admitted}
-                      onChange={handleChange}
-                      style={{ padding: "0px 5px" }}
-                    >
-                      <Box display="flex" flexDirection="row">
-                        <FormControlLabel
-                          value="true"
-                          control={<Radio />}
-                          label="Yes"
-                        />
-                        <FormControlLabel
-                          value="false"
-                          control={<Radio />}
-                          label="No"
-                        />
-                      </Box>
-                    </RadioGroup>
-                    <ErrorHelperText error={state.errors.admitted} />
-                  </div>
 
-                  {JSON.parse(state.form.admitted) && (
+                {/* {JSON.parse(state.form.admitted) && (
                     <div className="flex-1" id="admitted_to-div">
                       <SelectField
                         optionArray={true}
@@ -701,28 +727,73 @@ export const ConsultationForm = (props: any) => {
                         errors={state.errors.admitted_to}
                       />
                     </div>
-                  )}
-                </div>
-                {JSON.parse(state.form.admitted) && (
-                  <div className="flex">
-                    <div className="flex-1" id="admission_date-div">
-                      <DateInputField
-                        id="admission_date"
-                        label="Admission Date*"
-                        margin="dense"
-                        value={state.form.admission_date}
-                        disableFuture={true}
-                        onChange={(date) =>
-                          handleDateChange(date, "admission_date")
-                        }
-                        errors={state.errors.admission_date}
-                      />
+                  )} 
+                */}
+                {!id && state.form.suggestion === "A" && (
+                  <>
+                    <div className="flex">
+                      <div className="flex-1" id="admitted-div">
+                        <InputLabel id="admitted-label">Admitted</InputLabel>
+                        <RadioGroup
+                          aria-label="covid"
+                          name="admitted"
+                          value={state.form.admitted}
+                          onChange={handleChange}
+                          style={{ padding: "0px 5px" }}
+                        >
+                          <Box display="flex" flexDirection="row">
+                            <FormControlLabel
+                              value="true"
+                              control={<Radio />}
+                              label="Yes"
+                            />
+                            <FormControlLabel
+                              value="false"
+                              control={<Radio />}
+                              label="No"
+                            />
+                          </Box>
+                        </RadioGroup>
+                        <ErrorHelperText error={state.errors.admitted} />
+                      </div>
                     </div>
-                  </div>
+                    {!id && JSON.parse(state.form.admitted) ? (
+                      <>
+                        <div className="flex">
+                          <div className="flex-1" id="admission_date-div">
+                            <DateInputField
+                              id="admission_date"
+                              label="Admission Date*"
+                              margin="dense"
+                              value={state.form.admission_date}
+                              disableFuture={true}
+                              onChange={(date) =>
+                                handleDateChange(date, "admission_date")
+                              }
+                              errors={state.errors.admission_date}
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <InputLabel id="asset-type">Bed</InputLabel>
+                          <BedSelect
+                            name="bed"
+                            setSelected={setBed}
+                            selected={bed}
+                            errors=""
+                            multiple={false}
+                            margin="dense"
+                            // location={state.form.}
+                            facility={facilityId}
+                          />
+                        </div>
+                      </>
+                    ) : null}
+                  </>
                 )}
               </div>
 
-              <div className="mt-4" id="OPconsultation-div">
+              <div className="mt-4" id="consultation_notes-div">
                 <InputLabel>Advice*</InputLabel>
                 <MultilineInputField
                   rows={5}
@@ -809,30 +880,32 @@ export const ConsultationForm = (props: any) => {
                 />
               </div>
 
-              <div className="flex-1" id="is_kasp-div">
-                <InputLabel id="admitted-label">{KASP_STRING}*</InputLabel>
-                <RadioGroup
-                  aria-label="covid"
-                  name="is_kasp"
-                  value={state.form.is_kasp}
-                  onChange={handleTelemedicineChange}
-                  style={{ padding: "0px 5px" }}
-                >
-                  <Box display="flex" flexDirection="row">
-                    <FormControlLabel
-                      value="true"
-                      control={<Radio />}
-                      label="Yes"
-                    />
-                    <FormControlLabel
-                      value="false"
-                      control={<Radio />}
-                      label="No"
-                    />
-                  </Box>
-                </RadioGroup>
-                <ErrorHelperText error={state.errors.is_kasp} />
-              </div>
+              {KASP_ENABLED && (
+                <div className="flex-1" id="is_kasp-div">
+                  <InputLabel id="admitted-label">{KASP_STRING}*</InputLabel>
+                  <RadioGroup
+                    aria-label="covid"
+                    name="is_kasp"
+                    value={state.form.is_kasp}
+                    onChange={handleTelemedicineChange}
+                    style={{ padding: "0px 5px" }}
+                  >
+                    <Box display="flex" flexDirection="row">
+                      <FormControlLabel
+                        value="true"
+                        control={<Radio />}
+                        label="Yes"
+                      />
+                      <FormControlLabel
+                        value="false"
+                        control={<Radio />}
+                        label="No"
+                      />
+                    </Box>
+                  </RadioGroup>
+                  <ErrorHelperText error={state.errors.is_kasp} />
+                </div>
+              )}
               {/* Telemedicine Fields */}
               <div className="flex">
                 <div className="flex-1" id="is_telemedicine-div">
@@ -909,6 +982,43 @@ export const ConsultationForm = (props: any) => {
                   <ErrorHelperText error={state.errors.action} />
                 </div>
               )}
+              <div id="operation-div" className="mt-2">
+                <InputLabel id="exam-details-label">Operation</InputLabel>
+                <MultilineInputField
+                  rows={5}
+                  name="operation"
+                  variant="outlined"
+                  margin="dense"
+                  type="text"
+                  placeholder="Information optional"
+                  InputLabelProps={{
+                    shrink: !!state.form.operation,
+                  }}
+                  value={state.form.operation}
+                  onChange={handleChange}
+                  errors={state.errors.operation}
+                />
+              </div>
+              <div id="special_instruction-div" className="mt-2">
+                <InputLabel id="special-instruction-label">
+                  Special Instructions
+                </InputLabel>
+                <MultilineInputField
+                  rows={5}
+                  name="special_instruction"
+                  variant="outlined"
+                  margin="dense"
+                  type="text"
+                  placeholder="Information optional"
+                  InputLabelProps={{
+                    shrink: !!state.form.special_instruction,
+                  }}
+                  value={state.form.special_instruction}
+                  onChange={handleChange}
+                  errors={state.errors.special_instruction}
+                />
+              </div>
+
               <div className="flex flex-col md:flex-row justify-between md:gap-5">
                 <div id="weight-div" className="flex-1">
                   <InputLabel id="refered-label">Weight (in Kg)</InputLabel>
@@ -950,7 +1060,7 @@ export const ConsultationForm = (props: any) => {
                   color="default"
                   variant="contained"
                   type="button"
-                  onClick={(_) =>
+                  onClick={() =>
                     navigate(`/facility/${facilityId}/patient/${patientId}`)
                   }
                 >

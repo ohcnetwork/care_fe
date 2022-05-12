@@ -1,14 +1,18 @@
 import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
 import loadable from "@loadable/component";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { createFacilityAssetLocation } from "../../Redux/actions";
+import {
+  createFacilityAssetLocation,
+  getAnyFacility,
+} from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import {
   MultilineInputField,
   TextInputField,
 } from "../Common/HelperInputFields";
+import { navigate } from "raviger";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -26,6 +30,20 @@ export const AddLocationForm = (props: LocationFormProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [name, setName] = useState<string>("");
   const [description, setDescription] = useState<string>("");
+  const [facilityName, setFacilityName] = useState("");
+
+  useEffect(() => {
+    async function fetchFacilityName() {
+      if (facilityId) {
+        const res = await dispatchAction(getAnyFacility(facilityId));
+
+        setFacilityName(res?.data?.name || "");
+      } else {
+        setFacilityName("");
+      }
+    }
+    fetchFacilityName();
+  }, [dispatchAction, facilityId]);
 
   const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
@@ -40,11 +58,11 @@ export const AddLocationForm = (props: LocationFormProps) => {
     );
     setIsLoading(false);
     if (res && res.status === 201) {
+      navigate(`/facility/${facilityId}/location/${res.data.id}/beds/add`);
       Notification.Success({
         msg: "Location created successfully",
       });
     }
-    goBack();
   };
 
   if (isLoading) {
@@ -53,19 +71,23 @@ export const AddLocationForm = (props: LocationFormProps) => {
 
   return (
     <div className="px-2">
-      <PageTitle title="Add Location" />
+      <PageTitle
+        title="Add Location"
+        crumbsReplacements={{ [facilityId]: { name: facilityName } }}
+      />
       <div className="mt-4">
         <Card>
           <form onSubmit={(e) => handleSubmit(e)}>
             <CardContent>
               <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
                 <div>
-                  <InputLabel id="name">Name</InputLabel>
+                  <InputLabel id="name">Name *</InputLabel>
                   <TextInputField
                     name="name"
                     variant="outlined"
                     margin="dense"
                     type="text"
+                    required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     errors=""

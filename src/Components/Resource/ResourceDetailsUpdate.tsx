@@ -1,4 +1,4 @@
-import React, { useReducer, useState, useCallback } from "react";
+import React, { useReducer, useEffect, useState, useCallback } from "react";
 import loadable from "@loadable/component";
 
 import { FacilitySelect } from "../Common/FacilitySelect";
@@ -13,11 +13,15 @@ import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
 import { navigate } from "raviger";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getResourceDetails, updateResource } from "../../Redux/actions";
+import {
+  getResourceDetails,
+  updateResource,
+  getUserList,
+} from "../../Redux/actions";
 import { SelectField } from "../Common/HelperInputFields";
 import { RESOURCE_CHOICES } from "../../Common/constants";
 import { UserSelect } from "../Common/UserSelect";
-
+import { CircularProgress } from "@material-ui/core";
 import {
   Card,
   CardContent,
@@ -76,7 +80,9 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
   const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState(true);
   const [assignedQuantity, setAssignedQuantity] = useState(0);
-
+  const [requestTitle, setRequestTitle] = useState("");
+  const [assignedUser, SetAssignedUser] = useState(null);
+  const [assignedUserLoading, setAssignedUserLoading] = useState(false);
   const resourceFormReducer = (state = initialState, action: any) => {
     switch (action.type) {
       case "set_form": {
@@ -97,6 +103,24 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
   };
 
   const [state, dispatch] = useReducer(resourceFormReducer, initialState);
+
+  useEffect(() => {
+    async function fetchData() {
+      if (state.form.assigned_to) {
+        setAssignedUserLoading(true);
+
+        const res = await dispatchAction(
+          getUserList({ id: state.form.assigned_to })
+        );
+
+        if (res && res.data && res.data.count)
+          SetAssignedUser(res.data.results[0]);
+
+        setAssignedUserLoading(false);
+      }
+    }
+    fetchData();
+  }, [dispatchAction, state.form.assigned_to]);
 
   const validateForm = () => {
     let errors = { ...initError };
@@ -119,9 +143,10 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
     dispatch({ type: "set_form", form });
   };
 
-  const handleOnSelect = (id: string) => {
+  const handleOnSelect = (user: any) => {
     const form = { ...state.form };
-    form["assigned_to"] = id;
+    form["assigned_to"] = user?.id;
+    SetAssignedUser(user);
     dispatch({ type: "set_form", form });
   };
 
@@ -176,6 +201,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
       const res = await dispatchAction(getResourceDetails({ id: props.id }));
       if (!status.aborted) {
         if (res && res.data) {
+          setRequestTitle(res.data.title);
           setAssignedQuantity(res.data.assigned_quantity);
           dispatch({ type: "set_form", form: res.data });
         }
@@ -198,7 +224,10 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
 
   return (
     <div className="px-2 pb-2">
-      <PageTitle title={"Update Resource Request"} />
+      <PageTitle
+        title={"Update Resource Request"}
+        crumbsReplacements={{ [props.id]: { name: requestTitle } }}
+      />
       <div className="mt-4">
         <Card>
           <CardContent>
@@ -217,11 +246,20 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
                 />
               </div>
               <div className="md:col-span-1">
-                <UserSelect
-                  userId={state.form.assigned_to}
-                  onSelect={handleOnSelect}
-                  facilityId={state.form?.approving_facility_object?.id}
-                />
+                <InputLabel>Assigned To</InputLabel>
+                <div className="">
+                  {assignedUserLoading ? (
+                    <CircularProgress size={20} />
+                  ) : (
+                    <UserSelect
+                      multiple={false}
+                      selected={assignedUser}
+                      setSelected={handleOnSelect}
+                      errors={""}
+                      facilityId={state.form?.approving_facility_object?.id}
+                    />
+                  )}
+                </div>
               </div>
               <div>
                 <InputLabel>Name of resource approving facility</InputLabel>

@@ -19,7 +19,11 @@ import loadable from "@loadable/component";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import React, { useCallback, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
-import { FACILITY_TYPES, KASP_STRING } from "../../Common/constants";
+import {
+  FACILITY_TYPES,
+  KASP_ENABLED,
+  KASP_STRING,
+} from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   validateLocationCoordinates,
@@ -29,7 +33,7 @@ import {
 import {
   createFacility,
   getDistrictByState,
-  getFacility,
+  getPermittedFacility,
   getLocalbodyByDistrict,
   getStates,
   updateFacility,
@@ -196,7 +200,7 @@ export const FacilityCreate = (props: FacilityProps) => {
     async (status: statusType) => {
       if (facilityId) {
         setIsLoading(true);
-        const res = await dispatchAction(getFacility(facilityId));
+        const res = await dispatchAction(getPermittedFacility(facilityId));
         if (!status.aborted && res.data) {
           const formData = {
             facility_type: res.data.facility_type,
@@ -265,7 +269,7 @@ export const FacilityCreate = (props: FacilityProps) => {
   );
 
   const handleChange = (e: any) => {
-    let form = { ...state.form };
+    const form = { ...state.form };
     form[e.target.name] = e.target.value;
     dispatch({ type: "set_form", form });
   };
@@ -298,7 +302,7 @@ export const FacilityCreate = (props: FacilityProps) => {
   };
 
   const validateForm = () => {
-    let errors = { ...initError };
+    const errors = { ...initError };
     let invalidForm = false;
     Object.keys(state.form).forEach((field) => {
       switch (field) {
@@ -327,6 +331,7 @@ export const FacilityCreate = (props: FacilityProps) => {
           }
           return;
         case "phone_number":
+          // eslint-disable-next-line no-case-declarations
           const phoneNumber = parsePhoneNumberFromString(state.form[field]);
           if (
             !state.form[field] ||
@@ -452,7 +457,12 @@ export const FacilityCreate = (props: FacilityProps) => {
   const id = open ? "map-popover" : undefined;
   return (
     <div className="px-2 pb-2">
-      <PageTitle title={headerText} />
+      <PageTitle
+        title={headerText}
+        crumbsReplacements={{
+          [facilityId || "????"]: { name: state.form.name },
+        }}
+      />
       <Card className="mt-4">
         <CardContent>
           <form onSubmit={(e) => handleSubmit(e)}>
@@ -610,7 +620,7 @@ export const FacilityCreate = (props: FacilityProps) => {
               </div>
               <div>
                 <PhoneNumberField
-                  label="Emergency Contact Number"
+                  label="Emergency Contact Number*"
                   value={state.form.phone_number}
                   onChange={(value: any) =>
                     handleValueChange(value, "phone_number")
@@ -776,38 +786,40 @@ export const FacilityCreate = (props: FacilityProps) => {
                 </div>
               </div>
 
-              <div>
-                <InputLabel
-                  htmlFor="facility-kasp-empanelled"
-                  id="kasp_empanelled"
-                >
-                  Is this facility {KASP_STRING} empanelled?
-                </InputLabel>
-                <RadioGroup
-                  aria-label="kasp_empanelled"
-                  name="kasp_empanelled"
-                  value={state.form.kasp_empanelled}
-                  onChange={handleChange}
-                  style={{ padding: "0px 5px" }}
-                >
-                  <Box
-                    display="flex"
-                    id="facility-kasp-empanelled"
-                    flexDirection="row"
+              {KASP_ENABLED && (
+                <div>
+                  <InputLabel
+                    htmlFor="facility-kasp-empanelled"
+                    id="kasp_empanelled"
                   >
-                    <FormControlLabel
-                      value="true"
-                      control={<Radio />}
-                      label="Yes"
-                    />
-                    <FormControlLabel
-                      value="false"
-                      control={<Radio />}
-                      label="No"
-                    />
-                  </Box>
-                </RadioGroup>
-              </div>
+                    Is this facility {KASP_STRING} empanelled?
+                  </InputLabel>
+                  <RadioGroup
+                    aria-label="kasp_empanelled"
+                    name="kasp_empanelled"
+                    value={state.form.kasp_empanelled}
+                    onChange={handleChange}
+                    style={{ padding: "0px 5px" }}
+                  >
+                    <Box
+                      display="flex"
+                      id="facility-kasp-empanelled"
+                      flexDirection="row"
+                    >
+                      <FormControlLabel
+                        value="true"
+                        control={<Radio />}
+                        label="Yes"
+                      />
+                      <FormControlLabel
+                        value="false"
+                        control={<Radio />}
+                        label="No"
+                      />
+                    </Box>
+                  </RadioGroup>
+                </div>
+              )}
             </div>
             <div className="flex items-center mt-4 -mx-2">
               <div className="flex-1 px-2">

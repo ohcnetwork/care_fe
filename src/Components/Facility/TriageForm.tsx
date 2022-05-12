@@ -2,10 +2,14 @@ import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
 import loadable from "@loadable/component";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import moment from "moment";
-import React, { useCallback, useReducer, useState } from "react";
+import React, { useCallback, useReducer, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { createTriageForm, getTriageDetails } from "../../Redux/actions";
+import {
+  createTriageForm,
+  getTriageDetails,
+  getAnyFacility,
+} from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { DateInputField, TextInputField } from "../Common/HelperInputFields";
 import { PatientStatsModel } from "./models";
@@ -59,6 +63,7 @@ export const TriageForm = (props: triageFormProps) => {
   const { facilityId, id } = props;
   const [state, dispatch] = useReducer(triageFormReducer, initialState);
   const [isLoading, setIsLoading] = useState(false);
+  const [facilityName, setFacilityName] = useState("");
 
   const headerText = !id ? "Add Triage" : "Edit Triage";
   const buttonText = !id ? "Save Triage" : "Update Triage";
@@ -100,6 +105,19 @@ export const TriageForm = (props: triageFormProps) => {
     },
     [dispatch, fetchData, id]
   );
+
+  useEffect(() => {
+    async function fetchFacilityName() {
+      if (facilityId) {
+        const res = await dispatchAction(getAnyFacility(facilityId));
+
+        setFacilityName(res?.data?.name || "");
+      } else {
+        setFacilityName("");
+      }
+    }
+    fetchFacilityName();
+  }, [dispatchAction, facilityId]);
 
   const validateForm = () => {
     let errors = { ...initForm };
@@ -180,7 +198,15 @@ export const TriageForm = (props: triageFormProps) => {
 
   return (
     <div className="px-2">
-      <PageTitle title={headerText} />
+      <PageTitle
+        title={headerText}
+        crumbsReplacements={{
+          [facilityId]: { name: facilityName },
+          [id || "????"]: {
+            name: moment(state.form.entry_date).format("YYYY-MM-DD"),
+          },
+        }}
+      />
       <div className="mt-4">
         <Card>
           <form onSubmit={(e) => handleSubmit(e)}>
