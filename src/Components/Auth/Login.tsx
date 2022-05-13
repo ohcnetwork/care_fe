@@ -1,8 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { postLogin } from "../../Redux/actions";
 import { navigate } from "raviger";
-import { CardActions, CardContent, Grid } from "@material-ui/core";
+import {
+  CardActions,
+  CardContent,
+  Grid,
+  CircularProgress,
+} from "@material-ui/core";
 import { TextInputField } from "../Common/HelperInputFields";
 import { PublicDashboard } from "../Dashboard/PublicDashboard";
 import { withTranslation } from "react-i18next";
@@ -26,6 +31,8 @@ const LoginPage = (props: any) => {
   const [showPassword, setShowPassword] = useState(false);
   const captchaKey = RECAPTCHA_SITE_KEY ?? "";
   const { t } = props;
+  // display spinner while login is under progress
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e: any) => {
     const { value, name } = e.target;
@@ -68,8 +75,17 @@ const LoginPage = (props: any) => {
     return form;
   };
 
+  // set loading to false when component is dismounted
+  useEffect(() => {
+    return () => {
+      setLoading(false);
+    };
+  }, []);
+
   const handleSubmit = (e: any) => {
     e.preventDefault();
+    setLoading(true);
+    // replaces button with spinner
     const valid = validateData();
     if (valid) {
       dispatch(postLogin(valid)).then((resp: any) => {
@@ -77,6 +93,8 @@ const LoginPage = (props: any) => {
         const statusCode = get(resp, "status", "");
         if (res && statusCode === 429) {
           setCaptcha(true);
+          // captcha displayed set back to login button
+          setLoading(false);
         } else if (res && statusCode === 200) {
           localStorage.setItem("care_access_token", res.access);
           localStorage.setItem("care_refresh_token", res.refresh);
@@ -90,8 +108,14 @@ const LoginPage = (props: any) => {
             navigate(window.location.pathname.toString());
           }
           window.location.reload();
+        } else {
+          // error from server set back to login button
+          setLoading(false);
         }
       });
+    } else {
+      // set back to login button if there is any field missing
+      setLoading(false);
     }
   };
 
@@ -189,12 +213,18 @@ const LoginPage = (props: any) => {
                   </a>
                 </div>
 
-                <button
-                  className="w-full bg-primary-500 btn text-white"
-                  onClick={(e) => handleSubmit(e)}
-                >
-                  {t("login")}
-                </button>
+                {loading ? (
+                  <div className="flex items-center justify-center">
+                    <CircularProgress className="text-primary-500" />
+                  </div>
+                ) : (
+                  <button
+                    type="submit"
+                    className="w-full bg-primary-500 btn text-white"
+                  >
+                    {t("login")}
+                  </button>
+                )}
               </Grid>
             </CardActions>
           </form>
