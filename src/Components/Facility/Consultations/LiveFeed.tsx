@@ -220,6 +220,8 @@ const LiveFeed = (props: any) => {
                               Notification.Success({
                                 msg: "Preset Updated",
                               });
+                              getBedPresets(cameraAsset?.id);
+                              getPresets({});
                             }
                             setLoading(undefined);
                           }
