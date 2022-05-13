@@ -85,8 +85,8 @@ export default function BoardView() {
 
   return (
     <div className="flex flex-col h-screen px-2 pb-2">
-      <div className="flex items-center justify-between px-4 ">
-        <div className="lg:w-1/3">
+      <div className="flex items-center justify-between px-4 space-x-4">
+        <div className="">
           <PageTitle
             title={"Shifting"}
             hideBack={true}
@@ -99,7 +99,7 @@ export default function BoardView() {
             breadcrumbs={false}
           />
         </div>
-        <div className="flex items-end pt-2 space-y-2 lg:items-center justify-between lg:w-2/3 flex-col lg:flex-row">
+        <div className="flex items-end pt-2 space-y-2 lg:space-x-4 lg:items-center justify-between flex-col lg:flex-row">
           <InputSearchBox
             value={qParams.patient_name || ""}
             search={searchByName}
@@ -130,7 +130,7 @@ export default function BoardView() {
               <span>Completed</span>
             </button>
           </div>
-          <div className="mt-1 w-full lg:w-2/5 flex justify-evenly">
+          <div className="mt-1 w-fit inline-flex lg:w-2/5 space-x-4 lg:space-x-4">
             <button
               className="px-4 py-2 rounded-full border-2 border-gray-200 text-sm bg-white text-gray-800 w-32 leading-none transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 hover:border-gray-400 focus:text-primary-600 focus:border-gray-400"
               onClick={onListViewBtnClick}
@@ -138,15 +138,13 @@ export default function BoardView() {
               <i className="fa fa-list-ul mr-1" aria-hidden="true"></i>
               List View
             </button>
-            <div className="flex items-start">
-              <button
-                className="flex leading-none border-2 border-gray-200 bg-white rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 focus:text-primary-600 focus:border-gray-400 hover:border-gray-400 rounded-r-full px-4 py-2 text-sm"
-                onClick={(_) => setShowFilters((show) => !show)}
-              >
-                <i className="fa fa-filter mr-1" aria-hidden="true"></i>
-                <span>Filters</span>
-              </button>
-            </div>
+            <button
+              className="px-4 py-2 rounded-full border-2 border-gray-200 text-sm bg-white text-gray-800 w-32 leading-none transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 hover:border-gray-400 focus:text-primary-600 focus:border-gray-400"
+              onClick={(_) => setShowFilters((show) => !show)}
+            >
+              <i className="fa fa-filter mr-1" aria-hidden="true"></i>
+              <span>Filters</span>
+            </button>
           </div>
         </div>
       </div>
