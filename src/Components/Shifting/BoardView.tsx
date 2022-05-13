@@ -13,7 +13,7 @@ import { useDispatch } from "react-redux";
 import moment from "moment";
 import GetAppIcon from "@material-ui/icons/GetApp";
 
-import { formatFilter, badge } from "./Commons";
+import { formatFilter } from "./Commons";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -32,7 +32,7 @@ export default function BoardView() {
   const dispatch: any = useDispatch();
   const [boardFilter, setBoardFilter] = useState(ACTIVE);
   const [downloadFile, setDownloadFile] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const local = JSON.parse(localStorage.getItem("shift-filters") || "{}");
 
@@ -70,7 +70,7 @@ export default function BoardView() {
       downloadShiftRequests({ ...formatFilter(qParams), csv: 1 })
     );
     setDownloadFile(res.data);
-    document.getElementById(`shiftRequests-ALL`)?.click();
+    document.getElementById("shiftRequests-ALL")?.click();
   };
 
   const onListViewBtnClick = () => {
@@ -85,8 +85,8 @@ export default function BoardView() {
 
   return (
     <div className="flex flex-col h-screen px-2 pb-2">
-      <div className="flex items-center justify-between px-4 space-x-4">
-        <div className="">
+      <div className="w-full flex items-center justify-between space-x-4">
+        <div className="w-1/3 lg:w-1/4">
           <PageTitle
             title={"Shifting"}
             hideBack={true}
@@ -99,7 +99,7 @@ export default function BoardView() {
             breadcrumbs={false}
           />
         </div>
-        <div className="flex items-end pt-2 space-y-2 lg:space-x-4 lg:items-center justify-between flex-col lg:flex-row">
+        <div className="w-2/3 md:w-full flex items-end pt-2 space-y-2 lg:space-x-4 lg:items-center flex-end flex-col lg:flex-row">
           <InputSearchBox
             value={qParams.patient_name || ""}
             search={searchByName}
@@ -114,7 +114,7 @@ export default function BoardView() {
                   ? " bg-white text-gray-800"
                   : " bg-gray-200 text-sm text-gray-500")
               }
-              onClick={(_) => setBoardFilter(ACTIVE)}
+              onClick={() => setBoardFilter(ACTIVE)}
             >
               <span>Active</span>
             </button>
@@ -125,22 +125,22 @@ export default function BoardView() {
                   ? " bg-white text-gray-800"
                   : " bg-gray-200 text-sm text-gray-500")
               }
-              onClick={(_) => setBoardFilter(COMPLETED)}
+              onClick={() => setBoardFilter(COMPLETED)}
             >
               <span>Completed</span>
             </button>
           </div>
-          <div className="mt-1 w-fit inline-flex lg:w-2/5 space-x-4 lg:space-x-4">
+          <div className="mt-1 w-fit inline-flex space-x-1 lg:space-x-4">
             <button
-              className="px-4 py-2 rounded-full border-2 border-gray-200 text-sm bg-white text-gray-800 w-32 leading-none transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 hover:border-gray-400 focus:text-primary-600 focus:border-gray-400"
+              className="px-4 py-2 rounded-full border-2 border-gray-200 text-sm bg-white text-gray-800 w-28 md:w-36 leading-none transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 hover:border-gray-400 focus:text-primary-600 focus:border-gray-400"
               onClick={onListViewBtnClick}
             >
               <i className="fa fa-list-ul mr-1" aria-hidden="true"></i>
               List View
             </button>
             <button
-              className="px-4 py-2 rounded-full border-2 border-gray-200 text-sm bg-white text-gray-800 w-32 leading-none transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 hover:border-gray-400 focus:text-primary-600 focus:border-gray-400"
-              onClick={(_) => setShowFilters((show) => !show)}
+              className="px-4 py-2 rounded-full border-2 border-gray-200 text-sm bg-white text-gray-800 w-28 md:w-36 leading-none transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 hover:border-gray-400 focus:text-primary-600 focus:border-gray-400"
+              onClick={() => setShowFilters((show) => !show)}
             >
               <i className="fa fa-filter mr-1" aria-hidden="true"></i>
               <span>Filters</span>
@@ -173,7 +173,7 @@ export default function BoardView() {
         filename={`shift-requests--${now}.csv`}
         target="_blank"
         className="hidden"
-        id={`shiftRequests-ALL`}
+        id={"shiftRequests-ALL"}
       />
       <SlideOver show={showFilters} setShow={setShowFilters}>
         <div className="bg-white min-h-screen p-4">
