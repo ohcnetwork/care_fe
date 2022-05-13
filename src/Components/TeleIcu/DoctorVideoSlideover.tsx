@@ -83,7 +83,9 @@ export default function DoctorVideoSlideover(props: {
                   <a
                     href={
                       doctor.alt_phone_number
-                        ? `https://api.whatsapp.com/send/?phone=${doctor.alt_phone_number}`
+                        ? `https://api.whatsapp.com/send/?phone=${encodeURIComponent(
+                            doctor.alt_phone_number
+                          )}`
                         : "#"
                     }
                     target="_blank"

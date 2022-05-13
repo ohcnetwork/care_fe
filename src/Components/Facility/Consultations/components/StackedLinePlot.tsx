@@ -21,7 +21,8 @@ export const StackedLinePlot = (props: any) => {
         " [ " +
         yData
           .map(
-            (x: any, i: number) => `{${i}|${x.data[x.data.length - 1] ?? "NA"}}`
+            (x: any, i: number) =>
+              `{${i}|${x.data[x.data.length - 1]?.toFixed(2) ?? "NA"}}`
           )
           .join(" | ") +
         " ] ",
