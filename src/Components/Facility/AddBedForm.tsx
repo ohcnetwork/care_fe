@@ -60,13 +60,6 @@ export const AddBedForm = (props: BedFormProps) => {
       isValid = false;
       setErrors((prev) => ({ ...prev, name: "Please enter a name" }));
     }
-    if (!data.description) {
-      isValid = false;
-      setErrors((prev) => ({
-        ...prev,
-        description: "Please enter a description",
-      }));
-    }
     if (!data.bed_type) {
       isValid = false;
       setErrors((prev) => ({ ...prev, bedType: "Please select a bed type" }));
@@ -128,7 +121,7 @@ export const AddBedForm = (props: BedFormProps) => {
                   />
                 </div>
                 <div>
-                  <InputLabel id="description">Description*</InputLabel>
+                  <InputLabel id="description">Description</InputLabel>
                   <MultilineInputField
                     rows={5}
                     name="description"
