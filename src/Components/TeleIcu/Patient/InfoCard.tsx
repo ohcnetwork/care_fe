@@ -23,6 +23,11 @@ export default function TeleICUPatientInfoCard({
           <p className="sm:text-xl md:text-4xl font-semibold ml-1">
             {patient.name}
           </p>
+          {!patient.is_active && (
+            <div className="bg-red-400 text-white inline-block rounded-lg px-2 py-1">
+              Discharged from care
+            </div>
+          )}
           <p className="text-sm sm:text-base my-1 ml-1 text-primary-800">
             <span>{patient.age} years</span>
             <span className="mx-2">•</span>
@@ -66,8 +71,12 @@ export default function TeleICUPatientInfoCard({
           </div>
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-x-4 flex-1 gap-y-2">
-        {patient.last_consultation?.id && (
+      <div
+        className={`grid grid-cols-${
+          patient.is_active ? "2" : "1"
+        } gap-x-4 flex-1 gap-y-2`}
+      >
+        {patient.is_active && patient.last_consultation?.id && (
           <Link
             href={`/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/update`}
             className="rounded-md bg-white shadow-sm text-primary-900 flex justify-between items-center p-2 px-4 sm:px-2 hover:bg-gray-200 cursor-pointer active:translate-y-1 transform"
@@ -81,7 +90,7 @@ export default function TeleICUPatientInfoCard({
           </Link>
         )}
 
-        {patient.last_consultation?.id && (
+        {patient.is_active && patient.last_consultation?.id && (
           <Link
             href={`/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/daily-rounds`}
             className="rounded-md bg-white shadow-sm text-primary-900 flex justify-between items-center p-2 px-4 sm:px-2 hover:bg-gray-200 cursor-pointer active:translate-y-1 transform"
