@@ -665,7 +665,7 @@ export const FileUpload = (props: FileUploadProps) => {
                   color="primary"
                   variant="contained"
                   type="submit"
-                  style={{ marginLeft: "auto", float: "left" }}
+                  style={{ marginLeft: "auto" }}
                   startIcon={
                     <CloudUploadOutlineIcon>save</CloudUploadOutlineIcon>
                   }
