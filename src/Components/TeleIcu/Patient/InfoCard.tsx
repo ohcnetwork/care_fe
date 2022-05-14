@@ -76,33 +76,25 @@ export default function TeleICUPatientInfoCard({
           patient.is_active ? "2" : "1"
         } gap-x-4 flex-1 gap-y-2`}
       >
-        {patient.is_active && patient.last_consultation?.id && (
-          <Link
-            href={`/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/update`}
-            className="rounded-md bg-white shadow-sm text-primary-900 flex justify-between items-center p-2 px-4 sm:px-2 hover:bg-gray-200 cursor-pointer active:translate-y-1 transform"
-          >
-            <p className="text-sm sm:text-base px-2 font-semibold">
-              Edit Consultation Details
-            </p>
-            <span>
-              <i className="fas fa-pencil-alt mr-2"></i>
-            </span>
-          </Link>
-        )}
-
-        {patient.is_active && patient.last_consultation?.id && (
-          <Link
-            href={`/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/daily-rounds`}
-            className="rounded-md bg-white shadow-sm text-primary-900 flex justify-between items-center p-2 px-4 sm:px-2 hover:bg-gray-200 cursor-pointer active:translate-y-1 transform"
-          >
-            <p className="text-sm sm:text-base px-2 font-semibold">
-              Log Update
-            </p>
-            <span>
-              <i className="font-bold fas fa-plus mr-2"></i>
-            </span>
-          </Link>
-        )}
+        {patient.is_active &&
+          patient.last_consultation?.id &&
+          [
+            ["update", "Edit Consultation Details", "pencil-alt"],
+            ["daily-rounds", "Log Update", "plus"],
+          ].map((action, i) => (
+            <Link
+              key={i}
+              href={`/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/${action[0]}`}
+              className="rounded-md bg-white shadow-sm text-primary-900 flex justify-between items-center p-2 px-4 sm:px-2 hover:bg-gray-200 cursor-pointer active:translate-y-1 transform"
+            >
+              <p className="text-sm sm:text-base px-2 font-semibold">
+                {action[1]}
+              </p>
+              <span>
+                <i className={`fas fa-${action[2]} mr-2`}></i>
+              </span>
+            </Link>
+          ))}
         <Link
           href={`/patient/${patient.id}/investigation_reports`}
           className="rounded-md bg-white shadow-sm text-primary-900 flex justify-between items-center p-2 px-4 sm:px-2 hover:bg-gray-200 cursor-pointer active:translate-y-1 transform"
