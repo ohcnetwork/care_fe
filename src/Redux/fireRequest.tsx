@@ -61,6 +61,10 @@ export const fireRequest = (
     if (path.length > 0) {
       request.path += "/" + path.join("/");
     }
+    // add trailing slash to path before query paramaters
+    if (request.path.slice(-1) !== "/" && request.path.indexOf("?") === -1) {
+      request.path += "/";
+    }
     if (request.method === undefined || request.method === "GET") {
       request.method = "GET";
       const qs = querystring.stringify(params);
@@ -160,8 +164,8 @@ export const fireRequestV2 = (
   key: string,
   path: any = [],
   params: any = {},
-  successCallback: any = () => {},
-  errorCallback: any = () => {},
+  successCallback: any = () => undefined,
+  errorCallback: any = () => undefined,
   pathParam?: any,
   altKey?: string
 ) => {
