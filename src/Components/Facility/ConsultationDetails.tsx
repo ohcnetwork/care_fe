@@ -370,6 +370,14 @@ export const ConsultationDetails = (props: any) => {
                         )}
                       </span>
                     </div>
+                    {consultationData.other_symptoms && (
+                      <div className="capitalize">
+                        <span className="font-semibold leading-relaxed">
+                          Other Symptoms:{" "}
+                        </span>
+                        {consultationData.other_symptoms}
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
