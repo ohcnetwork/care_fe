@@ -555,6 +555,7 @@ export const AutoCompleteAsyncField = (props: any) => {
         getOptionLabel={getOptionLabel}
         renderOption={renderOption}
         filterOptions={filterOptions}
+        openOnFocus={true}
         className={className}
         renderInput={(params: any) => (
           <TextField
