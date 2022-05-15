@@ -612,44 +612,46 @@ export const ConsultationForm = (props: any) => {
                     />
                   </div>
                 )}
-                <div id="existing-medication-div">
-                  <InputLabel id="existing-medication-label">
-                    History of present illness
-                  </InputLabel>
-                  <MultilineInputField
-                    rows={3}
-                    name="existing_medication"
-                    variant="outlined"
-                    margin="dense"
-                    type="text"
-                    placeholder="Information optional"
-                    InputLabelProps={{
-                      shrink: !!state.form.existing_medication,
-                    }}
-                    value={state.form.existing_medication}
-                    onChange={handleChange}
-                    errors={state.errors.existing_medication}
-                  />
-                </div>
+                <div className="flex gap-4 flex-nowrap flex-shrink-0">
+                  <div id="existing-medication-div" className="w-1/2">
+                    <InputLabel id="existing-medication-label">
+                      History of present illness
+                    </InputLabel>
+                    <MultilineInputField
+                      rows={3}
+                      name="existing_medication"
+                      variant="outlined"
+                      margin="dense"
+                      type="text"
+                      placeholder="Information optional"
+                      InputLabelProps={{
+                        shrink: !!state.form.existing_medication,
+                      }}
+                      value={state.form.existing_medication}
+                      onChange={handleChange}
+                      errors={state.errors.existing_medication}
+                    />
+                  </div>
 
-                <div id="examination_details-div">
-                  <InputLabel id="exam-details-label">
-                    Examination details and Clinical conditions
-                  </InputLabel>
-                  <MultilineInputField
-                    rows={3}
-                    name="examination_details"
-                    variant="outlined"
-                    margin="dense"
-                    type="text"
-                    placeholder="Information optional"
-                    InputLabelProps={{
-                      shrink: !!state.form.examination_details,
-                    }}
-                    value={state.form.examination_details}
-                    onChange={handleChange}
-                    errors={state.errors.examination_details}
-                  />
+                  <div id="examination_details-div" className="w-1/2">
+                    <InputLabel id="exam-details-label">
+                      Examination details and Clinical conditions
+                    </InputLabel>
+                    <MultilineInputField
+                      rows={3}
+                      name="examination_details"
+                      variant="outlined"
+                      margin="dense"
+                      type="text"
+                      placeholder="Information optional"
+                      InputLabelProps={{
+                        shrink: !!state.form.examination_details,
+                      }}
+                      value={state.form.examination_details}
+                      onChange={handleChange}
+                      errors={state.errors.examination_details}
+                    />
+                  </div>
                 </div>
 
                 <div id="prescribed_medication-div">
@@ -819,65 +821,69 @@ export const ConsultationForm = (props: any) => {
                 />
               </div>
 
-              <div id="ip_no-div">
-                <InputLabel id="refered-label">IP number</InputLabel>
-                <TextInputField
-                  name="ip_no"
-                  variant="outlined"
-                  margin="dense"
-                  type="string"
-                  InputLabelProps={{ shrink: !!state.form.ip_no }}
-                  value={state.form.ip_no}
-                  onChange={handleChange}
-                  errors={state.errors.ip_no}
-                />
+              <div className="flex gap-4 flex-nowrap flex-shrink-0">
+                <div id="ip_no-div" className="w-1/2">
+                  <InputLabel id="refered-label">IP number</InputLabel>
+                  <TextInputField
+                    name="ip_no"
+                    variant="outlined"
+                    margin="dense"
+                    type="string"
+                    InputLabelProps={{ shrink: !!state.form.ip_no }}
+                    value={state.form.ip_no}
+                    onChange={handleChange}
+                    errors={state.errors.ip_no}
+                  />
+                </div>
+                <div id="test_id-div" className="w-1/2">
+                  <InputLabel id="refered-label">State Test ID</InputLabel>
+                  <TextInputField
+                    name="test_id"
+                    variant="outlined"
+                    margin="dense"
+                    type="string"
+                    InputLabelProps={{ shrink: !!state.form.test_id }}
+                    value={state.form.test_id}
+                    onChange={handleChange}
+                    errors={state.errors.test_id}
+                  />
+                </div>
               </div>
-              <div id="test_id-div">
-                <InputLabel id="refered-label">State Test ID</InputLabel>
-                <TextInputField
-                  name="test_id"
-                  variant="outlined"
-                  margin="dense"
-                  type="string"
-                  InputLabelProps={{ shrink: !!state.form.test_id }}
-                  value={state.form.test_id}
-                  onChange={handleChange}
-                  errors={state.errors.test_id}
-                />
-              </div>
-              <div id="verified_by-div">
-                <InputLabel id="exam-details-label">Verified By</InputLabel>
-                <MultilineInputField
-                  rows={3}
-                  name="verified_by"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  placeholder="Attending Doctors Name and Designation"
-                  InputLabelProps={{
-                    shrink: !!state.form.verified_by,
-                  }}
-                  value={state.form.verified_by}
-                  onChange={handleChange}
-                  errors={state.errors.verified_by}
-                />
-              </div>
-              <div id="diagnosis-div">
-                <InputLabel id="exam-details-label">Diagnosis</InputLabel>
-                <MultilineInputField
-                  rows={3}
-                  name="diagnosis"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  placeholder="Information optional"
-                  InputLabelProps={{
-                    shrink: !!state.form.diagnosis,
-                  }}
-                  value={state.form.diagnosis}
-                  onChange={handleChange}
-                  errors={state.errors.diagnosis}
-                />
+              <div className="flex gap-4 flex-nowrap flex-shrink-0">
+                <div id="verified_by-div" className="w-1/2">
+                  <InputLabel id="exam-details-label">Verified By</InputLabel>
+                  <MultilineInputField
+                    rows={3}
+                    name="verified_by"
+                    variant="outlined"
+                    margin="dense"
+                    type="text"
+                    placeholder="Attending Doctors Name and Designation"
+                    InputLabelProps={{
+                      shrink: !!state.form.verified_by,
+                    }}
+                    value={state.form.verified_by}
+                    onChange={handleChange}
+                    errors={state.errors.verified_by}
+                  />
+                </div>
+                <div id="diagnosis-div" className="w-1/2">
+                  <InputLabel id="exam-details-label">Diagnosis</InputLabel>
+                  <MultilineInputField
+                    rows={3}
+                    name="diagnosis"
+                    variant="outlined"
+                    margin="dense"
+                    type="text"
+                    placeholder="Information optional"
+                    InputLabelProps={{
+                      shrink: !!state.form.diagnosis,
+                    }}
+                    value={state.form.diagnosis}
+                    onChange={handleChange}
+                    errors={state.errors.diagnosis}
+                  />
+                </div>
               </div>
 
               {KASP_ENABLED && (
@@ -982,41 +988,43 @@ export const ConsultationForm = (props: any) => {
                   <ErrorHelperText error={state.errors.action} />
                 </div>
               )}
-              <div id="operation-div" className="mt-2">
-                <InputLabel id="exam-details-label">Operation</InputLabel>
-                <MultilineInputField
-                  rows={3}
-                  name="operation"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  placeholder="Information optional"
-                  InputLabelProps={{
-                    shrink: !!state.form.operation,
-                  }}
-                  value={state.form.operation}
-                  onChange={handleChange}
-                  errors={state.errors.operation}
-                />
-              </div>
-              <div id="special_instruction-div" className="mt-2">
-                <InputLabel id="special-instruction-label">
-                  Special Instructions
-                </InputLabel>
-                <MultilineInputField
-                  rows={3}
-                  name="special_instruction"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  placeholder="Information optional"
-                  InputLabelProps={{
-                    shrink: !!state.form.special_instruction,
-                  }}
-                  value={state.form.special_instruction}
-                  onChange={handleChange}
-                  errors={state.errors.special_instruction}
-                />
+              <div className="flex gap-4 flex-nowrap flex-shrink-0">
+                <div id="operation-div" className="mt-2 w-1/2">
+                  <InputLabel id="exam-details-label">Operation</InputLabel>
+                  <MultilineInputField
+                    rows={3}
+                    name="operation"
+                    variant="outlined"
+                    margin="dense"
+                    type="text"
+                    placeholder="Information optional"
+                    InputLabelProps={{
+                      shrink: !!state.form.operation,
+                    }}
+                    value={state.form.operation}
+                    onChange={handleChange}
+                    errors={state.errors.operation}
+                  />
+                </div>
+                <div id="special_instruction-div" className="mt-2 w-1/2">
+                  <InputLabel id="special-instruction-label">
+                    Special Instructions
+                  </InputLabel>
+                  <MultilineInputField
+                    rows={3}
+                    name="special_instruction"
+                    variant="outlined"
+                    margin="dense"
+                    type="text"
+                    placeholder="Information optional"
+                    InputLabelProps={{
+                      shrink: !!state.form.special_instruction,
+                    }}
+                    value={state.form.special_instruction}
+                    onChange={handleChange}
+                    errors={state.errors.special_instruction}
+                  />
+                </div>
               </div>
 
               <div className="flex flex-col md:flex-row justify-between md:gap-5">
