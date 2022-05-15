@@ -654,26 +654,27 @@ export const ConsultationForm = (props: any) => {
                   </div>
                 </div>
 
-                <div id="prescribed_medication-div">
-                  <InputLabel id="prescribed-medication-label">
-                    Treatment Summary
-                  </InputLabel>
-                  <MultilineInputField
-                    rows={3}
-                    name="prescribed_medication"
-                    variant="outlined"
-                    margin="dense"
-                    type="text"
-                    placeholder="Information optional"
-                    InputLabelProps={{
-                      shrink: !!state.form.prescribed_medication,
-                    }}
-                    value={state.form.prescribed_medication}
-                    onChange={handleChange}
-                    errors={state.errors.prescribed_medication}
-                  />
-                </div>
-                {/* <div className="flex-1" id="category-div">
+                <div className="flex gap-4 flex-nowrap flex-shrink-0">
+                  <div id="prescribed_medication-div" className="w-1/2">
+                    <InputLabel id="prescribed-medication-label">
+                      Treatment Summary
+                    </InputLabel>
+                    <MultilineInputField
+                      rows={3}
+                      name="prescribed_medication"
+                      variant="outlined"
+                      margin="dense"
+                      type="text"
+                      placeholder="Information optional"
+                      InputLabelProps={{
+                        shrink: !!state.form.prescribed_medication,
+                      }}
+                      value={state.form.prescribed_medication}
+                      onChange={handleChange}
+                      errors={state.errors.prescribed_medication}
+                    />
+                  </div>
+                  {/* <div className="flex-1" id="category-div">
                   <InputLabel id="category-label">Category*</InputLabel>
                   <SelectField
                     name="category"
@@ -685,21 +686,22 @@ export const ConsultationForm = (props: any) => {
                   />
                 </div> */}
 
-                <div id="suggestion-div">
-                  <InputLabel
-                    id="suggestion-label"
-                    style={{ fontWeight: "bold", fontSize: "18px" }}
-                  >
-                    Decision after Consultation*
-                  </InputLabel>
-                  <NativeSelectField
-                    name="suggestion"
-                    variant="outlined"
-                    value={state.form.suggestion}
-                    options={suggestionTypes}
-                    onChange={handleDecisionChange}
-                  />
-                  <ErrorHelperText error={state.errors.suggestion} />
+                  <div id="suggestion-div" className="w-1/2">
+                    <InputLabel
+                      id="suggestion-label"
+                      style={{ fontWeight: "bold", fontSize: "18px" }}
+                    >
+                      Decision after Consultation*
+                    </InputLabel>
+                    <NativeSelectField
+                      name="suggestion"
+                      variant="outlined"
+                      value={state.form.suggestion}
+                      options={suggestionTypes}
+                      onChange={handleDecisionChange}
+                    />
+                    <ErrorHelperText error={state.errors.suggestion} />
+                  </div>
                 </div>
 
                 {state.form.suggestion === "R" && (
