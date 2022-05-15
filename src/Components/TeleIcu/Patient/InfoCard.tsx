@@ -25,7 +25,7 @@ export default function TeleICUPatientInfoCard({
           </p>
           {!patient.is_active && (
             <div className="bg-red-400 text-white inline-block rounded-lg px-2 py-1">
-              Discharged from care
+              Discharged from CARE
             </div>
           )}
           <p className="text-sm sm:text-base my-1 ml-1 text-primary-800">
@@ -44,7 +44,7 @@ export default function TeleICUPatientInfoCard({
                 </span>
               </div>
             )}
-            {patient.last_consultation?.weight ? (
+            {patient.last_consultation?.weight && (
               <div className="m-1">
                 <span className="font-light text-primary-600 text-sm mr-1">
                   Weight
@@ -53,10 +53,8 @@ export default function TeleICUPatientInfoCard({
                   {getDimensionOrDash(patient.last_consultation.weight, " kg")}
                 </span>
               </div>
-            ) : (
-              <></>
             )}
-            {patient.last_consultation?.height ? (
+            {patient.last_consultation?.height && (
               <div className="m-1">
                 <span className="font-light text-primary-600 text-sm mr-1">
                   Height
@@ -65,8 +63,6 @@ export default function TeleICUPatientInfoCard({
                   {getDimensionOrDash(patient.last_consultation?.height, "cm")}
                 </span>
               </div>
-            ) : (
-              <></>
             )}
           </div>
         </div>
