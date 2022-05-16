@@ -84,10 +84,11 @@ const LoginPage = (props: any) => {
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
-    setLoading(true);
-    // replaces button with spinner
     const valid = validateData();
     if (valid) {
+      // replaces button with spinner
+      setLoading(true);
+
       dispatch(postLogin(valid)).then((resp: any) => {
         const res = get(resp, "data", null);
         const statusCode = get(resp, "status", "");
@@ -113,9 +114,6 @@ const LoginPage = (props: any) => {
           setLoading(false);
         }
       });
-    } else {
-      // set back to login button if there is any field missing
-      setLoading(false);
     }
   };
 
