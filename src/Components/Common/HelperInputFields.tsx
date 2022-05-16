@@ -544,6 +544,8 @@ export const AutoCompleteAsyncField = (props: any) => {
   return (
     <>
       <Autocomplete
+        openOnFocus
+        autoSelect
         multiple={multiple}
         onOpen={onOpen}
         options={options}
@@ -555,7 +557,6 @@ export const AutoCompleteAsyncField = (props: any) => {
         getOptionLabel={getOptionLabel}
         renderOption={renderOption}
         filterOptions={filterOptions}
-        openOnFocus={true}
         className={className}
         renderInput={(params: any) => (
           <TextField
