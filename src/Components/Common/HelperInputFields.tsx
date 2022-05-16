@@ -73,17 +73,10 @@ export interface DefaultNativeSelectInputProps extends NativeSelectInputProps {
 
 // Type Declarations
 type TextFieldPropsExtended = TextFieldProps & { errors: string };
-type Option = { text: string; score: number };
-interface InputProps {
-  options: Array<Option>;
-  onChange: (
-    e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
-    index: number
-  ) => void;
-  handleDeleteOption: (index: number) => void;
-  errors: Array<Option>;
-  onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
-}
+type ActionTextFieldProps = TextFieldPropsExtended & {
+  actionIcon?: React.ReactElement;
+  action?: () => void;
+};
 interface DateInputFieldProps extends DatePickerProps {
   value: string;
   onChange: (
@@ -96,14 +89,6 @@ interface DateInputFieldProps extends DatePickerProps {
   disabled?: boolean;
   margin?: "none" | "dense" | "normal";
 }
-interface TimeInputFieldProps {
-  value: string;
-  onChange: (
-    date: MaterialUiPickersDate,
-    value?: string | null | undefined
-  ) => void;
-}
-
 interface CheckboxProps extends Omit<FormControlLabelProps, "control"> {
   label: string;
 }
@@ -149,6 +134,51 @@ export const TextInputField = (props: TextFieldPropsExtended) => {
   );
 };
 
+export const ActionTextInputField = (props: ActionTextFieldProps) => {
+  const { onChange, type, errors, onKeyDown } = props;
+  const inputType = type === "number" || type === "float" ? "text" : type;
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (typeof onChange !== "function") {
+      return;
+    }
+    if (type === "number" && event.target.value) {
+      event.target.value = event.target.value.replace(/\D/, "");
+    }
+    if (type === "float" && event.target.value) {
+      event.target.value = event.target.value.replace(/(?!\.)\D/, "");
+    }
+    onChange(event);
+  };
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (typeof onKeyDown !== "function") {
+      return;
+    }
+    onKeyDown(event);
+  };
+  return (
+    <div>
+      <div className="flex gap-2 items-center">
+        <TextField
+          {...props}
+          fullWidth
+          type={inputType}
+          onChange={handleChange}
+          onKeyDown={handleKeyDown}
+        />
+        {props.actionIcon && (
+          <div
+            className="flex items-center ml-1 mt-1 border border-gray-400 rounded px-4 h-10 cursor-pointer hover:bg-gray-200"
+            onClick={props.action ?? undefined}
+          >
+            {props.actionIcon}
+          </div>
+        )}
+      </div>
+      <ErrorHelperText error={errors} />
+    </div>
+  );
+};
+
 export const MultilineInputField = (props: TextFieldPropsExtended) => {
   const { errors } = props;
   return (
@@ -180,16 +210,8 @@ export const DateTimeFiled = (props: DateInputFieldProps) => {
 };
 
 export const DateInputField = (props: DateInputFieldProps) => {
-  const {
-    value,
-    onChange,
-    label,
-    errors,
-    variant,
-    disabled,
-    margin,
-    ...restProps
-  } = props;
+  const { value, onChange, label, errors, disabled, margin, ...restProps } =
+    props;
   return (
     <MuiPickersUtilsProvider utils={DateFnsUtils}>
       <KeyboardDatePicker
@@ -544,11 +566,11 @@ export const PhoneNumberField = (props: any) => {
     value,
     turnOffAutoFormat,
   } = props;
-  const countryRestriction = !!onlyIndia ? { onlyCountries: ["in"] } : {};
+  const countryRestriction = onlyIndia ? { onlyCountries: ["in"] } : {};
   const onChangeHandler = debounce(onChange, 500);
   const handleChange = (
     value: string,
-    data: ICountryData | {},
+    data: ICountryData | unknown,
     event: ChangeEvent<HTMLInputElement>,
     formattedValue: string
   ) => {

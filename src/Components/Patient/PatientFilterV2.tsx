@@ -14,6 +14,7 @@ import {
   PATIENT_FILTER_CATEGORY,
   PATIENT_FILTER_ADMITTED_TO,
   KASP_STRING,
+  KASP_ENABLED,
 } from "../../Common/constants";
 import moment from "moment";
 import {
@@ -26,7 +27,7 @@ import { navigate } from "raviger";
 import { DateRangePicker, getDate } from "../Common/DateRangePicker";
 import DistrictSelect from "../Facility/FacilityFilter/DistrictSelect";
 
-const debounce = require("lodash.debounce");
+import { debounce } from "lodash";
 
 const useMergeState = (initialState: any) => {
   const [state, setState] = useState(initialState);
@@ -36,9 +37,7 @@ const useMergeState = (initialState: any) => {
 };
 
 export default function PatientFilterV2(props: any) {
-  let { filter, onChange, closeFilter } = props;
-  const [isFacilityLoading, setFacilityLoading] = useState(false);
-  const [isDistrictLoading, setDistrictLoading] = useState(false);
+  const { filter, onChange, closeFilter } = props;
 
   const [lsgBody, setLsgBody] = useState<any[]>([]);
   const [isLsgLoading, setLsgLoading] = useState(false);
@@ -151,20 +150,16 @@ export default function PatientFilterV2(props: any) {
   useEffect(() => {
     async function fetchData() {
       if (filter.facility) {
-        setFacilityLoading(true);
         const { data: facilityData } = await dispatch(
           getAnyFacility(filter.facility, "facility")
         );
         setFilterState({ facility_ref: facilityData });
-        setFacilityLoading(false);
       }
       if (filter.district) {
-        setDistrictLoading(true);
         const { data: districtData } = await dispatch(
           getDistrict(filter.district, "district")
         );
         setFilterState({ district_ref: districtData });
-        setDistrictLoading(false);
       }
 
       if (filter.lsgBody) {
@@ -512,7 +507,7 @@ export default function PatientFilterV2(props: any) {
             value={filterState.facility_type}
             options={[
               { id: "", text: "Show All" },
-              ...FACILITY_TYPES.map(({ id, text }) => {
+              ...FACILITY_TYPES.map(({ text }) => {
                 return {
                   id: text,
                   text,
@@ -546,30 +541,32 @@ export default function PatientFilterV2(props: any) {
             value={filterState.is_antenatal}
             options={[
               { id: "", text: "Show All" },
-              { id: "true", text: `antenatal` },
-              { id: "false", text: `non antenatal` },
+              { id: "true", text: "antenatal" },
+              { id: "false", text: "non antenatal" },
             ]}
             onChange={handleChange}
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
           />
         </div>
 
-        <div className="w-64 flex-none">
-          <span className="text-sm font-semibold">{KASP_STRING}</span>
-          <SelectField
-            name="is_kasp"
-            variant="outlined"
-            margin="dense"
-            value={filterState.is_kasp}
-            options={[
-              { id: "", text: "Show All" },
-              { id: "true", text: `Show ${KASP_STRING}` },
-              { id: "false", text: `Show Non ${KASP_STRING}` },
-            ]}
-            onChange={handleChange}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-          />
-        </div>
+        {KASP_ENABLED && (
+          <div className="w-64 flex-none">
+            <span className="text-sm font-semibold">{KASP_STRING}</span>
+            <SelectField
+              name="is_kasp"
+              variant="outlined"
+              margin="dense"
+              value={filterState.is_kasp}
+              options={[
+                { id: "", text: "Show All" },
+                { id: "true", text: `Show ${KASP_STRING}` },
+                { id: "false", text: `Show Non ${KASP_STRING}` },
+              ]}
+              onChange={handleChange}
+              className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+            />
+          </div>
+        )}
 
         <div className="w-64 flex-none">
           <span className="text-sm font-semibold">Category</span>

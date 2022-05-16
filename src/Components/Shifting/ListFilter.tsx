@@ -1,16 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { UserSelect } from "../Common/UserSelect2";
-import {
-  SelectField,
-  DateInputField,
-  TextInputField,
-} from "../Common/HelperInputFields";
+import { SelectField, TextInputField } from "../Common/HelperInputFields";
 import {
   SHIFTING_FILTER_ORDER,
   DISEASE_STATUS,
   KASP_STRING,
   BREATHLESSNESS_LEVEL,
+  KASP_ENABLED,
 } from "../../Common/constants";
 import moment from "moment";
 import { getAnyFacility, getUserList } from "../../Redux/actions";
@@ -30,7 +27,7 @@ function useMergeState(initialState: any) {
 const shiftStatusOptions = SHIFTING_CHOICES.map((obj) => obj.text);
 
 export default function ListFilter(props: any) {
-  let { filter, onChange, closeFilter, local } = props;
+  const { filter, onChange, closeFilter, local } = props;
   const [isOriginLoading, setOriginLoading] = useState(false);
   const [isShiftingLoading, setShiftingLoading] = useState(false);
   const [isAssignedLoading, setAssignedLoading] = useState(false);
@@ -157,7 +154,8 @@ export default function ListFilter(props: any) {
   };
 
   const handleChange = (event: any) => {
-    let { name, value } = event.target;
+    const { name } = event.target;
+    let { value } = event.target;
 
     if (value === "--") {
       value = "";
@@ -394,19 +392,21 @@ export default function ListFilter(props: any) {
           />
         </div>
 
-        <div className="w-64 flex-none">
-          <span className="text-sm font-semibold">Is {KASP_STRING}</span>
-          <SelectField
-            name="is_kasp"
-            variant="outlined"
-            margin="dense"
-            optionArray={true}
-            value={filterState.is_kasp}
-            options={["--", "yes", "no"]}
-            onChange={handleChange}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-          />
-        </div>
+        {KASP_ENABLED && (
+          <div className="w-64 flex-none">
+            <span className="text-sm font-semibold">Is {KASP_STRING}</span>
+            <SelectField
+              name="is_kasp"
+              variant="outlined"
+              margin="dense"
+              optionArray={true}
+              value={filterState.is_kasp}
+              options={["--", "yes", "no"]}
+              onChange={handleChange}
+              className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+            />
+          </div>
+        )}
 
         <div className="w-64 flex-none">
           <span className="text-sm font-semibold">Is upshift case</span>

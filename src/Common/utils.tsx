@@ -6,8 +6,10 @@ export interface statusType {
   aborted?: boolean;
 }
 
+type AbortableFunction = (status: statusType) => any;
+
 export const useAbortableEffect = (
-  effect: Function,
+  effect: AbortableFunction,
   dependencies: Array<any>
 ) => {
   const status: statusType = {}; // mutable status object
@@ -42,9 +44,12 @@ export const parseOptionId: (
   return textArray.join(", ");
 };
 
-// Utility Functions for Plotting
-export const yAxisData = (results: {}, name: string) => {
-  return Object.values(results)
-    .map((p: any) => p[name])
-    .reverse();
+export const getDimensionOrDash = (
+  value: number | string | null | undefined,
+  unit: string
+) => {
+  if (value === undefined || value === null || value === 0 || value === "0") {
+    return "-";
+  }
+  return value + unit;
 };

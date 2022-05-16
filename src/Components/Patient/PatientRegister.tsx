@@ -1,6 +1,8 @@
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
   Box,
-  Button,
   Card,
   CardContent,
   CircularProgress,
@@ -10,7 +12,7 @@ import {
   Radio,
   RadioGroup,
 } from "@material-ui/core";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
+
 import { navigate, useQueryParams } from "raviger";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import moment from "moment";
@@ -23,12 +25,9 @@ import {
   GENDER_TYPES,
   MEDICAL_HISTORY_CHOICES,
   TEST_TYPE,
-  FRONTLINE_WORKER,
-  DESIGNATION_HEALTH_CARE_WORKER,
   VACCINES,
 } from "../../Common/constants";
 import countryList from "../../Common/static/countries.json";
-import statesList from "../../Common/static/states.json";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   createPatient,
@@ -45,7 +44,6 @@ import {
 import * as Notification from "../../Utils/Notifications.js";
 import AlertDialog from "../Common/AlertDialog";
 import {
-  AutoCompleteMultiField,
   CheckboxField,
   DateInputField,
   MultilineInputField,
@@ -59,14 +57,12 @@ import { PatientModel } from "./models";
 import TransferPatientDialog from "../Facility/TransferPatientDialog";
 import { validatePincode } from "../../Common/validation";
 import { InfoOutlined } from "@material-ui/icons";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const debounce = require("lodash.debounce");
-
-const placesList = countryList.concat(
-  statesList.filter((i: string) => i !== "Kerala")
-);
 
 interface PatientRegisterProps extends PatientModel {
   facilityId: number;
@@ -101,8 +97,6 @@ const diseaseStatus = [...DISEASE_STATUS];
 const bloodGroups = [...BLOOD_GROUPS];
 
 const testType = [...TEST_TYPE];
-const designationOfHealthWorkers = [...DESIGNATION_HEALTH_CARE_WORKER];
-const frontlineWorkers = [...FRONTLINE_WORKER];
 const vaccines = ["Select", ...VACCINES];
 
 const initForm: any = {
@@ -112,7 +106,7 @@ const initForm: any = {
   phone_number: "",
   emergency_phone_number: "",
   blood_group: "",
-  disease_status: diseaseStatus[0],
+  disease_status: diseaseStatus[2],
   is_declared_positive: "false",
   date_declared_positive: new Date(),
   date_of_birth: null,
@@ -131,12 +125,10 @@ const initForm: any = {
   present_health: "",
   contact_with_confirmed_carrier: "false",
   contact_with_suspected_carrier: "false",
-  is_migrant_worker: "false",
+
   estimated_contact_date: null,
   date_of_return: null,
-  past_travel: false,
-  transit_details: "",
-  countries_travelled: [],
+
   number_of_primary_contacts: "",
   number_of_secondary_contacts: "",
   is_antenatal: "false",
@@ -146,10 +138,8 @@ const initForm: any = {
   test_type: testType[0],
   prescribed_medication: false,
   ongoing_medication: "",
-  is_medical_worker: "false",
   designation_of_health_care_worker: "",
   instituion_of_health_care_worker: "",
-  frontline_worker: frontlineWorkers[0],
   number_of_aged_dependents: "",
   number_of_chronic_diseased_dependents: "",
   cluster_name: "",
@@ -395,13 +385,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             ongoing_medication: res.data.ongoing_medication
               ? res.data.ongoing_medication
               : "",
-            countries_travelled: res.data.countries_travelled,
-            transit_details: res.data.transit_details
-              ? res.data.transit_details
-              : "",
-            is_medical_worker: res.data.is_medical_worker
-              ? String(res.data.is_medical_worker)
-              : "false",
+
             is_declared_positive: res.data.is_declared_positive
               ? String(res.data.is_declared_positive)
               : "false",
@@ -413,9 +397,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               .instituion_of_health_care_worker
               ? res.data.instituion_of_health_care_worker
               : "",
-            frontline_worker: res.data.frontline_worker
-              ? res.data.frontline_worker
-              : "",
+
             number_of_primary_contacts: res.data.number_of_primary_contacts
               ? res.data.number_of_primary_contacts
               : "",
@@ -430,9 +412,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               .contact_with_suspected_carrier
               ? String(res.data.contact_with_suspected_carrier)
               : "false",
-            is_migrant_worker: res.data.is_migrant_worker
-              ? String(res.data.is_migrant_worker)
-              : "false",
+
             number_of_aged_dependents: Number(
               res.data.number_of_aged_dependents
             )
@@ -519,11 +499,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   }, [dispatchAction, facilityId]);
 
   const validateForm = () => {
-    let errors = { ...initError };
+    const errors = { ...initError };
     let invalidForm = false;
     let error_div = "";
 
-    Object.keys(state.form).forEach((field, i) => {
+    Object.keys(state.form).forEach((field, _) => {
+      let phoneNumber, emergency_phone_number;
       switch (field) {
         case "address":
         case "name":
@@ -596,7 +577,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           }
           return;
         case "phone_number":
-          const phoneNumber = parsePhoneNumberFromString(state.form[field]);
+          phoneNumber = parsePhoneNumberFromString(state.form[field]);
           if (!state.form[field] || !phoneNumber?.isPossible()) {
             errors[field] = "Please enter valid phone number";
             if (!error_div) error_div = field;
@@ -604,7 +585,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           }
           return;
         case "emergency_phone_number":
-          const emergency_phone_number = parsePhoneNumberFromString(
+          emergency_phone_number = parsePhoneNumberFromString(
             state.form[field]
           );
           if (!state.form[field] || !emergency_phone_number?.isPossible()) {
@@ -613,20 +594,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             invalidForm = true;
           }
           return;
-        case "countries_travelled":
-          if (state.form.past_travel && !state.form[field].length) {
-            errors[field] = "Please enter the list of countries visited";
-            if (!error_div) error_div = field;
-            invalidForm = true;
-          }
-          return;
-        case "date_of_return":
-          if (state.form.past_travel && !state.form[field]) {
-            errors[field] = "Please enter the date of return from travel";
-            if (!error_div) error_div = field;
-            invalidForm = true;
-          }
-          return;
+
         case "estimated_contact_date":
           if (
             JSON.parse(state.form.contact_with_confirmed_carrier) ||
@@ -695,7 +663,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       scrollTo(error_div);
     } else {
       setIsLoading(true);
-      let medical_history: Array<medicalHistoryModel> = [];
+      const medical_history: Array<medicalHistoryModel> = [];
       state.form.medical_history.forEach((id: number) => {
         const medData = medicalHistoryTypes.find((i) => i.id === id);
         if (medData) {
@@ -756,7 +724,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         gender: Number(state.form.gender),
         nationality: state.form.nationality,
         is_antenatal: state.form.is_antenatal,
-        is_migrant_worker: state.form.is_migrant_worker,
+
         passport_no:
           state.form.nationality !== "India"
             ? state.form.passport_no
@@ -798,14 +766,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           state.form.cluster_name
             ? state.form.cluster_name
             : null,
-        past_travel: state.form.past_travel,
-        transit_details: state.form.transit_details,
-        countries_travelled: state.form.past_travel
-          ? state.form.countries_travelled
-          : [],
-        date_of_return: state.form.past_travel
-          ? state.form.date_of_return
-          : undefined,
 
         allergies: state.form.allergies,
         number_of_primary_contacts: Number(
@@ -819,13 +779,13 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           ? Number(state.form.number_of_secondary_contacts)
           : undefined,
         ongoing_medication: state.form.ongoing_medication,
-        is_medical_worker: JSON.parse(state.form.is_medical_worker),
+
         is_declared_positive: JSON.parse(state.form.is_declared_positive),
         designation_of_health_care_worker:
           state.form.designation_of_health_care_worker,
         instituion_of_health_care_worker:
           state.form.instituion_of_health_care_worker,
-        frontline_worker: state.form.frontline_worker,
+
         blood_group: state.form.blood_group
           ? state.form.blood_group
           : undefined,
@@ -888,15 +848,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     }
   };
 
-  const handleCheckboxFieldChange = (e: any) => {
-    const form = { ...state.form };
-    const { checked, name } = e.target;
-    form[name] = checked;
-    dispatch({ type: "set_form", form });
-  };
-
   const handleMedicalCheckboxChange = (e: any, id: number) => {
-    let form = { ...state.form };
+    const form = { ...state.form };
     const values = state.form.medical_history;
     if (e.target.checked) {
       values.push(id);
@@ -1163,25 +1116,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             errors={state.errors.gender}
                           />
                         </div>
-                        <div id="frontline_worker-div">
-                          <InputLabel
-                            htmlFor="frontline_worker"
-                            id="frontline_worker-label"
-                          >
-                            Frontline Worker
-                          </InputLabel>
-                          <SelectField
-                            labelId="frontline_worker"
-                            name="frontline_worker"
-                            variant="outlined"
-                            margin="dense"
-                            optionArray={true}
-                            value={state.form.frontline_worker}
-                            options={frontlineWorkers}
-                            onChange={handleChange}
-                            errors={state.errors.frontline_worker}
-                          />
-                        </div>
+
                         <Collapse
                           in={String(state.form.gender) === "2"}
                           timeout="auto"
@@ -1468,669 +1403,509 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             />
                           </div>
                         )}
-                        <div className="grid grid-flow-col">
-                          <div id="is_medical_worker-div">
-                            <InputLabel
-                              htmlFor="is_medical_worker"
-                              id="is_medical_worker"
-                            >
-                              Is a Medical Worker?
-                            </InputLabel>
-                            <RadioGroup
-                              aria-label="is_medical_worker"
-                              id="is_medical_worker"
-                              name="is_medical_worker"
-                              value={state.form.is_medical_worker}
-                              onChange={handleChange}
-                              className="mt-2"
-                            >
-                              <Box display="flex" flexDirection="row">
-                                <FormControlLabel
-                                  value="true"
-                                  control={<Radio />}
-                                  label="Yes"
-                                />
-                                <FormControlLabel
-                                  value="false"
-                                  control={<Radio />}
-                                  label="No"
-                                />
-                              </Box>
-                            </RadioGroup>
-                          </div>
-                          <div id="is_migrant_worker-div">
-                            <InputLabel
-                              htmlFor="is_migrant_worker"
-                              id="is_migrant_worker"
-                            >
-                              Is a Guest workers?
-                            </InputLabel>
-                            <RadioGroup
-                              aria-label="is_migrant_worker"
-                              id="is_migrant_worker"
-                              name="is_migrant_worker"
-                              value={state.form.is_migrant_worker}
-                              onChange={handleChange}
-                              className="mt-2"
-                            >
-                              <Box display="flex" flexDirection="row">
-                                <FormControlLabel
-                                  value="true"
-                                  control={<Radio />}
-                                  label="Yes"
-                                />
-                                <FormControlLabel
-                                  value="false"
-                                  control={<Radio />}
-                                  label="No"
-                                />
-                              </Box>
-                            </RadioGroup>
-                          </div>
-                        </div>
-                        <Collapse
-                          in={String(state.form.is_medical_worker) === "true"}
-                          timeout="auto"
-                          unmountOnExit
-                          className="col-span-2"
-                        >
-                          {" "}
-                          <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
-                            <div id="designation_of_health_care_worker-div">
-                              <InputLabel
-                                id="designation_of_health_care_worker-label"
-                                htmlFor="designation_of_health_care_worker"
-                              >
-                                Designation of Medical Worker
-                              </InputLabel>
-                              <SelectField
-                                labelId="designation_of_health_care_worker"
-                                name="designation_of_health_care_worker"
-                                variant="outlined"
-                                margin="dense"
-                                optionArray={true}
-                                value={
-                                  state.form.designation_of_health_care_worker
-                                }
-                                options={designationOfHealthWorkers}
-                                onChange={handleChange}
-                                errors={
-                                  state.errors.designation_of_health_care_worker
-                                }
-                              />
-                            </div>
-                            <div id="instituion_of_health_care_worker-div">
-                              <InputLabel
-                                id="institution_of_health_care_worker-label"
-                                htmlFor="instituion_of_health_care_worker"
-                              >
-                                Institution of Medical Worker{" "}
-                              </InputLabel>
-                              <TextInputField
-                                id="instituion_of_health_care_worker"
-                                name="instituion_of_health_care_worker"
-                                variant="outlined"
-                                margin="dense"
-                                type="text"
-                                value={
-                                  state.form.instituion_of_health_care_worker
-                                }
-                                onChange={handleChange}
-                                errors={
-                                  state.errors.instituion_of_health_care_worker
-                                }
-                              />
-                            </div>
-                          </div>
-                        </Collapse>
-
-                        <div className="md:col-span-2" id="past_travel-div">
-                          <CheckboxField
-                            checked={state.form.past_travel}
-                            onChange={handleCheckboxFieldChange}
-                            name="past_travel"
-                            label="Domestic/international Travel History (within last 14 days)"
-                          />
-                        </div>
-                        <Collapse
-                          in={state.form.past_travel}
-                          timeout="auto"
-                          unmountOnExit
-                          className="col-span-2"
-                        >
-                          {
-                            <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
-                              <div
-                                className="md:col-span-2"
-                                id="countries_travelled-div"
-                              >
-                                <AutoCompleteMultiField
-                                  id="countries-travelled"
-                                  options={placesList}
-                                  label="Countries / Places Visited (including transit stops) *"
-                                  variant="outlined"
-                                  placeholder="Select country or enter the place of visit"
-                                  onChange={(e: object, value: any) =>
-                                    handleValueChange(
-                                      value,
-                                      "countries_travelled"
-                                    )
-                                  }
-                                  value={state.form.countries_travelled}
-                                  errors={state.errors.countries_travelled}
-                                />
-                              </div>
-                              <div id="transit_details-div">
-                                <InputLabel id="transit_details-label">
-                                  Transit_details
-                                </InputLabel>
-                                <TextInputField
-                                  name="transit_details"
-                                  variant="outlined"
-                                  margin="dense"
-                                  type="text"
-                                  placeholder="Flight No:/Train No:/Vehicle No: (with seat number)"
-                                  value={state.form.transit_details}
-                                  onChange={handleChange}
-                                  errors={state.errors.transit_details}
-                                />
-                              </div>
-                              <div id="date_of_return-div">
-                                <InputLabel
-                                  htmlFor="date_of_return"
-                                  id="date_of_return-label"
-                                  required
-                                >
-                                  Estimated date of Arrival
-                                </InputLabel>
-                                <DateInputField
-                                  id="date_of_return"
-                                  fullWidth={true}
-                                  value={state.form.date_of_return}
-                                  onChange={(date) =>
-                                    handleDateChange(date, "date_of_return")
-                                  }
-                                  errors={state.errors.date_of_return}
-                                  inputVariant="outlined"
-                                  margin="dense"
-                                  disableFuture={true}
-                                />
-                              </div>
-                            </div>
-                          }
-                        </Collapse>
                       </div>
                     </CardContent>
                   </Card>
                   <Card elevation={0} className="mb-8 rounded">
-                    <CardContent>
-                      <h1 className="font-bold text-purple-500 text-left text-xl mb-4">
-                        Health Details
-                      </h1>
-                      <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
-                        <div id="test_type-div">
-                          <InputLabel
-                            id="test_type-label"
-                            htmlFor="test_type"
-                            required
-                          >
-                            COVID Test Type
-                          </InputLabel>
-                          <SelectField
-                            labelId="test_type"
-                            name="test_type"
-                            variant="outlined"
-                            margin="dense"
-                            optionArray={true}
-                            value={state.form.test_type}
-                            options={testType}
-                            onChange={handleChange}
-                            errors={state.errors.test_type}
-                          />
-                        </div>
-                        <div id="srf_id-div">
-                          <InputLabel id="srf_id-label" htmlFor="srf_id">
-                            SRF Id for COVID Test
-                          </InputLabel>
-                          <TextInputField
-                            id="srf_id"
-                            name="srf_id"
-                            variant="outlined"
-                            margin="dense"
-                            type="text"
-                            value={state.form.srf_id}
-                            onChange={handleChange}
-                            errors={state.errors.name}
-                          />
-                        </div>
-                        <div id="is_declared_positive-div">
-                          <InputLabel
-                            id="is_declared_positive"
-                            htmlFor="is_declared_positive"
-                          >
-                            Is patient declared covid postive by state?
-                          </InputLabel>
-                          <RadioGroup
-                            aria-label="is_declared_positive"
-                            id="is_declared_positive"
-                            name="is_declared_positive"
-                            value={state.form.is_declared_positive}
-                            onChange={handleChange}
-                            style={{ padding: "0px 5px" }}
-                          >
-                            <Box display="flex" flexDirection="row">
-                              <FormControlLabel
-                                value="true"
-                                control={<Radio />}
-                                label="Yes"
-                              />
-                              <FormControlLabel
-                                value="false"
-                                control={<Radio />}
-                                label="No"
-                              />
-                            </Box>
-                          </RadioGroup>
-                          <Collapse
-                            in={
-                              String(state.form.is_declared_positive) === "true"
-                            }
-                            timeout="auto"
-                            unmountOnExit
-                            className="mt-4"
-                          >
-                            <div id="date_declared_positive-div">
-                              <InputLabel id="date_declared_positive-label">
-                                Date Patient is Declared Positive for COVID
-                              </InputLabel>
-                              <DateInputField
-                                fullWidth={true}
-                                value={state.form.date_declared_positive}
-                                onChange={(date) =>
-                                  handleDateChange(
-                                    date,
-                                    "date_declared_positive"
-                                  )
-                                }
-                                errors={state.errors.date_declared_positive}
-                                inputVariant="outlined"
-                                margin="dense"
-                                disableFuture={true}
-                              />
-                            </div>
-                          </Collapse>
-                        </div>
-
-                        <div id="is_vaccinated-div">
-                          <InputLabel
-                            id="is_vaccinated"
-                            htmlFor="is_vaccinated"
-                          >
-                            Is patient Vaccinated against COVID?
-                          </InputLabel>
-                          <RadioGroup
-                            aria-label="is_vaccinated"
-                            id="is_vaccinated"
-                            name="is_vaccinated"
-                            value={state.form.is_vaccinated}
-                            onChange={handleChange}
-                            style={{ padding: "0px 5px" }}
-                          >
-                            <Box display="flex" flexDirection="row">
-                              <FormControlLabel
-                                value="true"
-                                control={<Radio />}
-                                label="Yes"
-                              />
-                              <FormControlLabel
-                                value="false"
-                                control={<Radio />}
-                                label="No"
-                              />
-                            </Box>
-                          </RadioGroup>
-                        </div>
-                        <Collapse
-                          in={String(state.form.is_vaccinated) === "true"}
-                          timeout="auto"
-                          unmountOnExit
-                          className="col-span-2"
-                        >
-                          {
-                            <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
-                              <div id="covin_id-div">
-                                <InputLabel
-                                  id="covin_id-label"
-                                  htmlFor="covin_id"
-                                >
-                                  COWIN ID
-                                </InputLabel>
-                                <TextInputField
-                                  id="covin_id"
-                                  name="covin_id"
-                                  variant="outlined"
-                                  margin="dense"
-                                  type="text"
-                                  value={state.form.covin_id}
-                                  onChange={handleChange}
-                                  errors={state.errors.covin_id}
+                    <Accordion className="mt-2 lg:mt-0 md:mt-0">
+                      <AccordionSummary
+                        expandIcon={<ExpandMoreIcon />}
+                        aria-controls="panel1a-content"
+                        id="panel1a-header"
+                      >
+                        <h1 className="font-bold text-purple-500 text-left text-xl mb-4">
+                          Health Details
+                        </h1>
+                      </AccordionSummary>
+                      <AccordionDetails>
+                        <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2 w-full">
+                          <div id="test_type-div">
+                            <InputLabel
+                              id="test_type-label"
+                              htmlFor="test_type"
+                              required
+                            >
+                              COVID Test Type
+                            </InputLabel>
+                            <SelectField
+                              labelId="test_type"
+                              name="test_type"
+                              variant="outlined"
+                              margin="dense"
+                              optionArray={true}
+                              value={state.form.test_type}
+                              options={testType}
+                              onChange={handleChange}
+                              errors={state.errors.test_type}
+                            />
+                          </div>
+                          <div id="srf_id-div">
+                            <InputLabel id="srf_id-label" htmlFor="srf_id">
+                              SRF Id for COVID Test
+                            </InputLabel>
+                            <TextInputField
+                              id="srf_id"
+                              name="srf_id"
+                              variant="outlined"
+                              margin="dense"
+                              type="text"
+                              value={state.form.srf_id}
+                              onChange={handleChange}
+                              errors={state.errors.name}
+                            />
+                          </div>
+                          <div id="is_declared_positive-div">
+                            <InputLabel
+                              id="is_declared_positive"
+                              htmlFor="is_declared_positive"
+                            >
+                              Is patient declared covid postive by state?
+                            </InputLabel>
+                            <RadioGroup
+                              aria-label="is_declared_positive"
+                              id="is_declared_positive"
+                              name="is_declared_positive"
+                              value={state.form.is_declared_positive}
+                              onChange={handleChange}
+                              style={{ padding: "0px 5px" }}
+                            >
+                              <Box display="flex" flexDirection="row">
+                                <FormControlLabel
+                                  value="true"
+                                  control={<Radio />}
+                                  label="Yes"
                                 />
-                              </div>
-                              <div id="number_of_doses-div">
-                                <InputLabel
-                                  id="doses-label"
-                                  htmlFor="number_of_doses"
-                                >
-                                  Number of doses
-                                </InputLabel>
-                                <RadioGroup
-                                  aria-label="number_of_doses"
-                                  id="number_of_doses"
-                                  name="number_of_doses"
-                                  value={state.form.number_of_doses}
-                                  onChange={handleChange}
-                                  style={{ padding: "0px 5px" }}
-                                >
-                                  <Box display="flex" flexDirection="row">
-                                    <FormControlLabel
-                                      value="1"
-                                      control={<Radio />}
-                                      label="1"
-                                    />
-                                    <FormControlLabel
-                                      value="2"
-                                      control={<Radio />}
-                                      label="2"
-                                    />
-                                  </Box>
-                                </RadioGroup>
-                              </div>
-                              <div id="vaccine_name-div">
-                                <InputLabel
-                                  id="vaccine-name-label"
-                                  htmlFor="vaccine_name"
-                                  required
-                                >
-                                  Vaccine Name
-                                </InputLabel>
-                                <SelectField
-                                  labelId="vaccine_name"
-                                  name="vaccine_name"
-                                  variant="outlined"
-                                  margin="dense"
-                                  optionArray={true}
-                                  value={state.form.vaccine_name}
-                                  options={vaccines}
-                                  onChange={handleChange}
-                                  errors={state.errors.vaccine_name}
+                                <FormControlLabel
+                                  value="false"
+                                  control={<Radio />}
+                                  label="No"
                                 />
-                              </div>
-                              <div id="last_vaccinated_date-div">
-                                <InputLabel
-                                  id="last_vaccinated_date-label"
-                                  htmlFor="last_vaccinated_date"
-                                  required
-                                >
-                                  Last Date of Vaccination
+                              </Box>
+                            </RadioGroup>
+                            <Collapse
+                              in={
+                                String(state.form.is_declared_positive) ===
+                                "true"
+                              }
+                              timeout="auto"
+                              unmountOnExit
+                              className="mt-4"
+                            >
+                              <div id="date_declared_positive-div">
+                                <InputLabel id="date_declared_positive-label">
+                                  Date Patient is Declared Positive for COVID
                                 </InputLabel>
                                 <DateInputField
-                                  id="last_vaccinated_date"
                                   fullWidth={true}
-                                  value={state.form.last_vaccinated_date}
+                                  value={state.form.date_declared_positive}
                                   onChange={(date) =>
                                     handleDateChange(
                                       date,
-                                      "last_vaccinated_date"
+                                      "date_declared_positive"
                                     )
                                   }
-                                  errors={state.errors.last_vaccinated_date}
+                                  errors={state.errors.date_declared_positive}
                                   inputVariant="outlined"
                                   margin="dense"
-                                  openTo="year"
                                   disableFuture={true}
                                 />
                               </div>
-                            </div>
-                          }
-                        </Collapse>
-                        <div id="contact_with_confirmed_carrier-div">
-                          <InputLabel htmlFor="contact_with_confirmed_carrier">
-                            Contact with confirmed Covid patient?
-                          </InputLabel>
-                          <RadioGroup
-                            aria-label="contact_with_confirmed_carrier"
-                            id="contact_with_confirmed_carrier"
-                            name="contact_with_confirmed_carrier"
-                            value={state.form.contact_with_confirmed_carrier}
-                            onChange={handleChange}
-                            style={{ padding: "0px 5px" }}
-                          >
-                            <Box display="flex" flexDirection="row">
-                              <FormControlLabel
-                                value="true"
-                                control={<Radio />}
-                                label="Yes"
-                              />
-                              <FormControlLabel
-                                value="false"
-                                control={<Radio />}
-                                label="No"
-                              />
-                            </Box>
-                          </RadioGroup>
-                        </div>
-
-                        <div id="contact_with_suspected_carrier-div">
-                          <InputLabel htmlFor="contact_with_suspected_carrier">
-                            Contact with Covid suspect?
-                          </InputLabel>
-                          <RadioGroup
-                            aria-label="contact_with_suspected_carrier"
-                            id="contact_with_suspected_carrier"
-                            name="contact_with_suspected_carrier"
-                            value={state.form.contact_with_suspected_carrier}
-                            onChange={handleChange}
-                            style={{ padding: "0px 5px" }}
-                          >
-                            <Box display="flex" flexDirection="row">
-                              <FormControlLabel
-                                value="true"
-                                control={<Radio />}
-                                label="Yes"
-                              />
-                              <FormControlLabel
-                                value="false"
-                                control={<Radio />}
-                                label="No"
-                              />
-                            </Box>
-                          </RadioGroup>
-                        </div>
-                        <Collapse
-                          in={
-                            JSON.parse(
-                              state.form.contact_with_confirmed_carrier
-                            ) ||
-                            JSON.parse(
-                              state.form.contact_with_suspected_carrier
-                            )
-                          }
-                          timeout="auto"
-                          unmountOnExit
-                          className="col-span-2"
-                        >
-                          <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
-                            <div id="estimated_contact_date-div">
-                              <InputLabel
-                                id="estimated_contact_date-label"
-                                htmlFor="estimated_contact_date"
-                                required
-                              >
-                                Estimate date of contact
-                              </InputLabel>
-                              <DateInputField
-                                fullWidth={true}
-                                id="estimated_contact_date"
-                                label="Estimate date of contact"
-                                value={state.form.estimated_contact_date}
-                                onChange={(date) =>
-                                  handleDateChange(
-                                    date,
-                                    "estimated_contact_date"
-                                  )
-                                }
-                                errors={state.errors.estimated_contact_date}
-                                inputVariant="outlined"
-                                margin="dense"
-                                disableFuture={true}
-                              />
-                            </div>
-
-                            <div id="cluster_name-div">
-                              <InputLabel
-                                htmlFor="cluster_name"
-                                id="cluster_name-label"
-                                required
-                              >
-                                Name / Cluster of Contact
-                              </InputLabel>
-                              <TextInputField
-                                id="cluster_name"
-                                name="cluster_name"
-                                variant="outlined"
-                                margin="dense"
-                                type="text"
-                                placeholder="Name / Cluster of Contact"
-                                value={state.form.cluster_name}
-                                onChange={handleChange}
-                                errors={state.errors.cluster_name}
-                              />
-                            </div>
+                            </Collapse>
                           </div>
-                        </Collapse>
-                        <div
-                          data-testid="disease-status"
-                          id="disease_status-div"
-                        >
-                          <InputLabel
-                            htmlFor="disease_status"
-                            id="disease_status-label"
-                            required
-                          >
-                            COVID Disease Status
-                          </InputLabel>
-                          <SelectField
-                            labelId="disease_status"
-                            name="disease_status"
-                            variant="outlined"
-                            margin="dense"
-                            optionArray={true}
-                            value={state.form.disease_status}
-                            options={diseaseStatus}
-                            onChange={handleChange}
-                            errors={state.errors.disease_status}
-                          />
-                        </div>
-                        <div data-testid="blood-group" id="blood_group-div">
-                          <InputLabel
-                            id="blood_group-label"
-                            htmlFor="blood_group"
-                            required
-                          >
-                            Blood Group
-                          </InputLabel>
-                          <SelectField
-                            labelId="blood_group"
-                            name="blood_group"
-                            variant="outlined"
-                            margin="dense"
-                            showEmpty={true}
-                            optionArray={true}
-                            value={state.form.blood_group}
-                            options={bloodGroups}
-                            onChange={handleChange}
-                            errors={state.errors.blood_group}
-                          />
-                        </div>
-                        <div id="date_of_test-div">
-                          <InputLabel
-                            id="date_of_birth-label"
-                            htmlFor="date_of_test"
-                          >
-                            Date of Sample given for COVID Test
-                          </InputLabel>
-                          <DateInputField
-                            fullWidth={true}
-                            id="date_of_test"
-                            value={state.form.date_of_test}
-                            onChange={(date) =>
-                              handleDateChange(date, "date_of_test")
-                            }
-                            errors={state.errors.date_of_test}
-                            inputVariant="outlined"
-                            margin="dense"
-                            disableFuture={true}
-                          />
-                        </div>
-                        <div id="date_of_result-div">
-                          <InputLabel
-                            htmlFor="date_of_result"
-                            id="date_of_result-label"
-                          >
-                            Date of Result for COVID Test
-                          </InputLabel>
-                          <DateInputField
-                            fullWidth={true}
-                            id="date_of_result"
-                            value={state.form.date_of_result}
-                            onChange={(date) =>
-                              handleDateChange(date, "date_of_result")
-                            }
-                            errors={state.errors.date_of_result}
-                            inputVariant="outlined"
-                            margin="dense"
-                            disableFuture={true}
-                          />
-                        </div>
 
-                        <div id="number_of_primary_contacts-div">
-                          <InputLabel
-                            id="number_of_primary_contacts-label"
-                            htmlFor="number_of_primary_contacts"
+                          <div id="is_vaccinated-div">
+                            <InputLabel
+                              id="is_vaccinated"
+                              htmlFor="is_vaccinated"
+                            >
+                              Is patient Vaccinated against COVID?
+                            </InputLabel>
+                            <RadioGroup
+                              aria-label="is_vaccinated"
+                              id="is_vaccinated"
+                              name="is_vaccinated"
+                              value={state.form.is_vaccinated}
+                              onChange={handleChange}
+                              style={{ padding: "0px 5px" }}
+                            >
+                              <Box display="flex" flexDirection="row">
+                                <FormControlLabel
+                                  value="true"
+                                  control={<Radio />}
+                                  label="Yes"
+                                />
+                                <FormControlLabel
+                                  value="false"
+                                  control={<Radio />}
+                                  label="No"
+                                />
+                              </Box>
+                            </RadioGroup>
+                          </div>
+                          <Collapse
+                            in={String(state.form.is_vaccinated) === "true"}
+                            timeout="auto"
+                            unmountOnExit
+                            className="col-span-2"
                           >
-                            Number Of Primary Contacts for COVID
-                          </InputLabel>
-                          <TextInputField
-                            id="number_of_primary_contacts"
-                            name="number_of_primary_contacts"
-                            variant="outlined"
-                            margin="dense"
-                            type="number"
-                            value={state.form.number_of_primary_contacts}
-                            onChange={handleChange}
-                            errors={state.errors.number_of_primary_contacts}
-                          />
-                        </div>
-                        <div id="number_of_secondary_contacts-div">
-                          <InputLabel
-                            id="number_of_secondary_contacts-label"
-                            htmlFor="number_of_secondary_contacts"
+                            {
+                              <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
+                                <div id="covin_id-div">
+                                  <InputLabel
+                                    id="covin_id-label"
+                                    htmlFor="covin_id"
+                                  >
+                                    COWIN ID
+                                  </InputLabel>
+                                  <TextInputField
+                                    id="covin_id"
+                                    name="covin_id"
+                                    variant="outlined"
+                                    margin="dense"
+                                    type="text"
+                                    value={state.form.covin_id}
+                                    onChange={handleChange}
+                                    errors={state.errors.covin_id}
+                                  />
+                                </div>
+                                <div id="number_of_doses-div">
+                                  <InputLabel
+                                    id="doses-label"
+                                    htmlFor="number_of_doses"
+                                  >
+                                    Number of doses
+                                  </InputLabel>
+                                  <RadioGroup
+                                    aria-label="number_of_doses"
+                                    id="number_of_doses"
+                                    name="number_of_doses"
+                                    value={state.form.number_of_doses}
+                                    onChange={handleChange}
+                                    style={{ padding: "0px 5px" }}
+                                  >
+                                    <Box display="flex" flexDirection="row">
+                                      <FormControlLabel
+                                        value="1"
+                                        control={<Radio />}
+                                        label="1"
+                                      />
+                                      <FormControlLabel
+                                        value="2"
+                                        control={<Radio />}
+                                        label="2"
+                                      />
+                                    </Box>
+                                  </RadioGroup>
+                                </div>
+                                <div id="vaccine_name-div">
+                                  <InputLabel
+                                    id="vaccine-name-label"
+                                    htmlFor="vaccine_name"
+                                    required
+                                  >
+                                    Vaccine Name
+                                  </InputLabel>
+                                  <SelectField
+                                    labelId="vaccine_name"
+                                    name="vaccine_name"
+                                    variant="outlined"
+                                    margin="dense"
+                                    optionArray={true}
+                                    value={state.form.vaccine_name}
+                                    options={vaccines}
+                                    onChange={handleChange}
+                                    errors={state.errors.vaccine_name}
+                                  />
+                                </div>
+                                <div id="last_vaccinated_date-div">
+                                  <InputLabel
+                                    id="last_vaccinated_date-label"
+                                    htmlFor="last_vaccinated_date"
+                                    required
+                                  >
+                                    Last Date of Vaccination
+                                  </InputLabel>
+                                  <DateInputField
+                                    id="last_vaccinated_date"
+                                    fullWidth={true}
+                                    value={state.form.last_vaccinated_date}
+                                    onChange={(date) =>
+                                      handleDateChange(
+                                        date,
+                                        "last_vaccinated_date"
+                                      )
+                                    }
+                                    errors={state.errors.last_vaccinated_date}
+                                    inputVariant="outlined"
+                                    margin="dense"
+                                    openTo="year"
+                                    disableFuture={true}
+                                  />
+                                </div>
+                              </div>
+                            }
+                          </Collapse>
+                          <div id="contact_with_confirmed_carrier-div">
+                            <InputLabel htmlFor="contact_with_confirmed_carrier">
+                              Contact with confirmed Covid patient?
+                            </InputLabel>
+                            <RadioGroup
+                              aria-label="contact_with_confirmed_carrier"
+                              id="contact_with_confirmed_carrier"
+                              name="contact_with_confirmed_carrier"
+                              value={state.form.contact_with_confirmed_carrier}
+                              onChange={handleChange}
+                              style={{ padding: "0px 5px" }}
+                            >
+                              <Box display="flex" flexDirection="row">
+                                <FormControlLabel
+                                  value="true"
+                                  control={<Radio />}
+                                  label="Yes"
+                                />
+                                <FormControlLabel
+                                  value="false"
+                                  control={<Radio />}
+                                  label="No"
+                                />
+                              </Box>
+                            </RadioGroup>
+                          </div>
+
+                          <div id="contact_with_suspected_carrier-div">
+                            <InputLabel htmlFor="contact_with_suspected_carrier">
+                              Contact with Covid suspect?
+                            </InputLabel>
+                            <RadioGroup
+                              aria-label="contact_with_suspected_carrier"
+                              id="contact_with_suspected_carrier"
+                              name="contact_with_suspected_carrier"
+                              value={state.form.contact_with_suspected_carrier}
+                              onChange={handleChange}
+                              style={{ padding: "0px 5px" }}
+                            >
+                              <Box display="flex" flexDirection="row">
+                                <FormControlLabel
+                                  value="true"
+                                  control={<Radio />}
+                                  label="Yes"
+                                />
+                                <FormControlLabel
+                                  value="false"
+                                  control={<Radio />}
+                                  label="No"
+                                />
+                              </Box>
+                            </RadioGroup>
+                          </div>
+                          <Collapse
+                            in={
+                              JSON.parse(
+                                state.form.contact_with_confirmed_carrier
+                              ) ||
+                              JSON.parse(
+                                state.form.contact_with_suspected_carrier
+                              )
+                            }
+                            timeout="auto"
+                            unmountOnExit
+                            className="col-span-2"
                           >
-                            Number Of Secondary Contacts for COVID
-                          </InputLabel>
-                          <TextInputField
-                            id="number_of_secondary_contacts"
-                            name="number_of_secondary_contacts"
-                            variant="outlined"
-                            margin="dense"
-                            type="number"
-                            value={state.form.number_of_secondary_contacts}
-                            onChange={handleChange}
-                            errors={state.errors.number_of_secondary_contacts}
-                          />
+                            <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
+                              <div id="estimated_contact_date-div">
+                                <InputLabel
+                                  id="estimated_contact_date-label"
+                                  htmlFor="estimated_contact_date"
+                                  required
+                                >
+                                  Estimate date of contact
+                                </InputLabel>
+                                <DateInputField
+                                  fullWidth={true}
+                                  id="estimated_contact_date"
+                                  label="Estimate date of contact"
+                                  value={state.form.estimated_contact_date}
+                                  onChange={(date) =>
+                                    handleDateChange(
+                                      date,
+                                      "estimated_contact_date"
+                                    )
+                                  }
+                                  errors={state.errors.estimated_contact_date}
+                                  inputVariant="outlined"
+                                  margin="dense"
+                                  disableFuture={true}
+                                />
+                              </div>
+
+                              <div id="cluster_name-div">
+                                <InputLabel
+                                  htmlFor="cluster_name"
+                                  id="cluster_name-label"
+                                  required
+                                >
+                                  Name / Cluster of Contact
+                                </InputLabel>
+                                <TextInputField
+                                  id="cluster_name"
+                                  name="cluster_name"
+                                  variant="outlined"
+                                  margin="dense"
+                                  type="text"
+                                  placeholder="Name / Cluster of Contact"
+                                  value={state.form.cluster_name}
+                                  onChange={handleChange}
+                                  errors={state.errors.cluster_name}
+                                />
+                              </div>
+                            </div>
+                          </Collapse>
+                          <div
+                            data-testid="disease-status"
+                            id="disease_status-div"
+                          >
+                            <InputLabel
+                              htmlFor="disease_status"
+                              id="disease_status-label"
+                              required
+                            >
+                              COVID Disease Status
+                            </InputLabel>
+                            <SelectField
+                              labelId="disease_status"
+                              name="disease_status"
+                              variant="outlined"
+                              margin="dense"
+                              optionArray={true}
+                              value={state.form.disease_status}
+                              options={diseaseStatus}
+                              onChange={handleChange}
+                              errors={state.errors.disease_status}
+                            />
+                          </div>
+                          <div id="date_of_test-div">
+                            <InputLabel
+                              id="date_of_birth-label"
+                              htmlFor="date_of_test"
+                            >
+                              Date of Sample given for COVID Test
+                            </InputLabel>
+                            <DateInputField
+                              fullWidth={true}
+                              id="date_of_test"
+                              value={state.form.date_of_test}
+                              onChange={(date) =>
+                                handleDateChange(date, "date_of_test")
+                              }
+                              errors={state.errors.date_of_test}
+                              inputVariant="outlined"
+                              margin="dense"
+                              disableFuture={true}
+                            />
+                          </div>
+                          <div id="date_of_result-div">
+                            <InputLabel
+                              htmlFor="date_of_result"
+                              id="date_of_result-label"
+                            >
+                              Date of Result for COVID Test
+                            </InputLabel>
+                            <DateInputField
+                              fullWidth={true}
+                              id="date_of_result"
+                              value={state.form.date_of_result}
+                              onChange={(date) =>
+                                handleDateChange(date, "date_of_result")
+                              }
+                              errors={state.errors.date_of_result}
+                              inputVariant="outlined"
+                              margin="dense"
+                              disableFuture={true}
+                            />
+                          </div>
+
+                          <div id="number_of_primary_contacts-div">
+                            <InputLabel
+                              id="number_of_primary_contacts-label"
+                              htmlFor="number_of_primary_contacts"
+                            >
+                              Number Of Primary Contacts for COVID
+                            </InputLabel>
+                            <TextInputField
+                              id="number_of_primary_contacts"
+                              name="number_of_primary_contacts"
+                              variant="outlined"
+                              margin="dense"
+                              type="number"
+                              value={state.form.number_of_primary_contacts}
+                              onChange={handleChange}
+                              errors={state.errors.number_of_primary_contacts}
+                            />
+                          </div>
+                          <div id="number_of_secondary_contacts-div">
+                            <InputLabel
+                              id="number_of_secondary_contacts-label"
+                              htmlFor="number_of_secondary_contacts"
+                            >
+                              Number Of Secondary Contacts for COVID
+                            </InputLabel>
+                            <TextInputField
+                              id="number_of_secondary_contacts"
+                              name="number_of_secondary_contacts"
+                              variant="outlined"
+                              margin="dense"
+                              type="number"
+                              value={state.form.number_of_secondary_contacts}
+                              onChange={handleChange}
+                              errors={state.errors.number_of_secondary_contacts}
+                            />
+                          </div>
+
+                          <div id="number_of_aged_dependents-div">
+                            <InputLabel
+                              id="number_of_aged_dependents-label"
+                              htmlFor="number_of_aged_dependents"
+                            >
+                              Number Of Aged Dependents (Above 60)
+                            </InputLabel>
+                            <TextInputField
+                              id="number_of_aged_dependents"
+                              name="number_of_aged_dependents"
+                              variant="outlined"
+                              margin="dense"
+                              type="number"
+                              value={state.form.number_of_aged_dependents}
+                              onChange={handleChange}
+                              errors={state.errors.number_of_aged_dependents}
+                            />
+                          </div>
+
+                          <div id="number_of_chronic_diseased_dependents-div">
+                            <InputLabel
+                              htmlFor="number_of_chronic_diseased_dependents"
+                              id="number_of_chronic_diseased_dependents-label"
+                            >
+                              Number Of Chronic Diseased Dependents
+                            </InputLabel>
+                            <TextInputField
+                              id="number_of_chronic_diseased_dependents"
+                              name="number_of_chronic_diseased_dependents"
+                              variant="outlined"
+                              margin="dense"
+                              type="number"
+                              value={
+                                state.form.number_of_chronic_diseased_dependents
+                              }
+                              onChange={handleChange}
+                              errors={
+                                state.errors
+                                  .number_of_chronic_diseased_dependents
+                              }
+                            />
+                          </div>
                         </div>
-                      </div>
-                    </CardContent>
+                      </AccordionDetails>
+                    </Accordion>
                   </Card>
                   <Card elevation={0} className="mb-8 rounded">
                     <CardContent>
@@ -2190,47 +1965,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           </div>
                         </div>
 
-                        <div id="number_of_aged_dependents-div">
-                          <InputLabel
-                            id="number_of_aged_dependents-label"
-                            htmlFor="number_of_aged_dependents"
-                          >
-                            Number Of Aged Dependents (Above 60)
-                          </InputLabel>
-                          <TextInputField
-                            id="number_of_aged_dependents"
-                            name="number_of_aged_dependents"
-                            variant="outlined"
-                            margin="dense"
-                            type="number"
-                            value={state.form.number_of_aged_dependents}
-                            onChange={handleChange}
-                            errors={state.errors.number_of_aged_dependents}
-                          />
-                        </div>
-
-                        <div id="number_of_chronic_diseased_dependents-div">
-                          <InputLabel
-                            htmlFor="number_of_chronic_diseased_dependents"
-                            id="number_of_chronic_diseased_dependents-label"
-                          >
-                            Number Of Chronic Diseased Dependents
-                          </InputLabel>
-                          <TextInputField
-                            id="number_of_chronic_diseased_dependents"
-                            name="number_of_chronic_diseased_dependents"
-                            variant="outlined"
-                            margin="dense"
-                            type="number"
-                            value={
-                              state.form.number_of_chronic_diseased_dependents
-                            }
-                            onChange={handleChange}
-                            errors={
-                              state.errors.number_of_chronic_diseased_dependents
-                            }
-                          />
-                        </div>
                         <div id="allergies-div">
                           <InputLabel htmlFor="allergies" id="allergies_label">
                             Allergies
@@ -2246,6 +1980,28 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             value={state.form.allergies}
                             onChange={handleChange}
                             errors={state.errors.allergies}
+                          />
+                        </div>
+
+                        <div data-testid="blood-group" id="blood_group-div">
+                          <InputLabel
+                            id="blood_group-label"
+                            htmlFor="blood_group"
+                            required
+                          >
+                            Blood Group
+                          </InputLabel>
+                          <SelectField
+                            labelId="blood_group"
+                            name="blood_group"
+                            variant="outlined"
+                            margin="dense"
+                            showEmpty={true}
+                            optionArray={true}
+                            value={state.form.blood_group}
+                            options={bloodGroups}
+                            onChange={handleChange}
+                            errors={state.errors.blood_group}
                           />
                         </div>
                       </div>

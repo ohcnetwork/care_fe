@@ -18,8 +18,8 @@ import Pagination from "../Common/Pagination";
 import { InputSearchBox } from "../Common/SearchBox";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import AssetFilter from "./AssetFilter";
-import { FacilityModel } from "../Facility/models";
 import AdvancedFilterButton from "../Common/AdvancedFilterButton";
+import { parseQueryParams } from "../../Utils/primitives";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -31,7 +31,7 @@ interface qParamModel {
   status?: string;
 }
 
-const AssetsList = (props: any) => {
+const AssetsList = () => {
   const [qParams, setQueryParams] = useQueryParams();
   const [assets, setAssets] = useState<AssetData[]>([{}] as AssetData[]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -192,6 +192,24 @@ const AssetsList = (props: any) => {
     setShowFilters(false);
   };
 
+  const getAssetIdFromQR = async (assetUrl: string) => {
+    try {
+      setIsLoading(true);
+      setIsScannerActive(false);
+      const params = parseQueryParams(assetUrl);
+      // QR Maybe searchParams "asset" or "assetQR"
+      const assetId = params.asset || params.assetQR;
+      if (assetId) {
+        const { data }: any = await dispatch(
+          listAssets({ qr_code_id: assetId })
+        );
+        return data.results[0].id;
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   if (isLoading) return <Loading />;
   if (isScannerActive)
     return (
@@ -204,9 +222,13 @@ const AssetsList = (props: any) => {
         </button>
         <QrReader
           delay={300}
-          onScan={(assetId: any) =>
-            assetId ? navigate(`/assets/${assetId}`) : null
-          }
+          onScan={async (value: any) => {
+            if (value) {
+              const assetId = await getAssetIdFromQR(value);
+              setIsLoading(false);
+              navigate(`/assets/${assetId ?? value}`);
+            }
+          }}
           onError={(e: any) =>
             Notification.Error({
               msg: e.message,

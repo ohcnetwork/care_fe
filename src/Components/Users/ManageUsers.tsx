@@ -1,4 +1,3 @@
-/* eslint-disable jsx-a11y/anchor-is-valid */
 import { useCallback, useState } from "react";
 import loadable from "@loadable/component";
 import { useDispatch, useSelector } from "react-redux";
@@ -19,7 +18,6 @@ import { FacilityModel } from "../Facility/models";
 import DeleteForeverIcon from "@material-ui/icons/DeleteForever";
 import { IconButton } from "@material-ui/core";
 import LinkFacilityDialog from "./LinkFacilityDialog";
-import { SelectField } from "../Common/HelperInputFields";
 import UserDeleteDialog from "./UserDeleteDialog";
 import * as Notification from "../../Utils/Notifications.js";
 import classNames from "classnames";
@@ -29,7 +27,7 @@ import { make as SlideOver } from "../Common/SlideOver.gen";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
-export default function ManageUsers(props: any) {
+export default function ManageUsers() {
   const [qParams, setQueryParams] = useQueryParams();
   const dispatch: any = useDispatch();
   const initialData: any[] = [];
@@ -186,7 +184,7 @@ export default function ManageUsers(props: any) {
           {value}
           <i
             className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
-            onClick={(e) => removeFilter(paramKey)}
+            onClick={() => removeFilter(paramKey)}
           ></i>
         </span>
       )
@@ -205,8 +203,8 @@ export default function ManageUsers(props: any) {
   };
 
   const handleSubmit = async () => {
-    let username = userData.username;
-    let res = await dispatch(deleteUser(username));
+    const username = userData.username;
+    const res = await dispatch(deleteUser(username));
     if (res.status >= 200) {
       Notification.Success({
         msg: "User deleted successfully",
@@ -287,6 +285,7 @@ export default function ManageUsers(props: any) {
     const DISTRICT_ADMIN_LEVEL = USER_TYPES.indexOf("DistrictAdmin");
     const level = USER_TYPES.indexOf(user.user_type);
     const currentUserLevel = USER_TYPES.indexOf(currentUser.data.user_type);
+    if (user.is_superuser) return true;
     if (
       currentUserLevel >= STATE_ADMIN_LEVEL &&
       currentUserLevel < STATE_READ_ONLY_ADMIN_LEVEL
@@ -299,7 +298,7 @@ export default function ManageUsers(props: any) {
 
   let userList: any[] = [];
   if (users && users.length) {
-    userList = users.map((user: any, idx: number) => {
+    userList = users.map((user: any) => {
       return (
         <div key={`usr_${user.id}`} className="w-full md:w-1/2 mt-6 md:px-4">
           <div className="block rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 overflow-hidden">
@@ -496,7 +495,7 @@ export default function ManageUsers(props: any) {
             <div className="flex items-start mb-2">
               <button
                 className="btn btn-primary-ghost"
-                onClick={(_) => setShowFilters((show) => !show)}
+                onClick={() => setShowFilters((show) => !show)}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"

@@ -15,7 +15,7 @@ const LOGO = process.env.REACT_APP_LIGHT_LOGO;
 const LOGO_COLLAPSE =
   process.env.REACT_APP_LIGHT_COLLAPSE_LOGO || "/images/logo_collapsed.svg";
 
-let menus = [
+const menus = [
   {
     title: "Facilities",
     link: "/facility",
@@ -25,11 +25,6 @@ let menus = [
     title: "Patients",
     link: "/patients",
     icon: "fas fa-user-injured",
-  },
-  {
-    title: "TeleICU",
-    link: "/teleicu",
-    icon: "fa-solid fa-bed-pulse",
   },
   {
     title: "Assets",

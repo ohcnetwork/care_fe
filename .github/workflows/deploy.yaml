@@ -1,18 +1,22 @@
-name: Deploy Care
+name: Deploy Care Fe
 on:
   push:
     branches:
-      - '*'
-    tags:
-      - 'v*'
+      - develop
+      - master
   pull_request:
+    branches:
+      - develop
+      - master
   workflow_dispatch:
 env:
-  IMAGE_NAME: care_fe
+  IMAGE_NAME: care-fe
   AWS_DEFAULT_REGION: ap-south-1
   AWS_DEFAULT_OUTPUT: json
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID}}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  EKS_CLUSTER_NAME: ${{ secrets.AWS_EKS_CLUSTER_NAME }}
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -28,10 +32,8 @@ jobs:
           else
             docker build . --file Dockerfile
           fi
-
   build-dockerhub-staging:
     needs: test
-    environment: Staging
     name: Build & Push to Dockerhub
     if: github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
@@ -66,12 +68,10 @@ jobs:
           docker tag $IMAGE_NAME $IMAGE_ID:$VERSION-$GITHUB_RUN_NUMBER-$NOW-$SHORT_SHA
           docker tag $IMAGE_NAME $IMAGE_ID:latest
           docker push $IMAGE_ID --all-tags
-
   build-github-staging:
     needs: test
-    environment: Staging
     if: github.ref == 'refs/heads/develop'
-    name: Build and push to GitHub
+    name: Build and push to GitHub Staging
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -89,7 +89,7 @@ jobs:
 
       - name: Push image
         run: |
-          IMAGE_ID=ghcr.io/${{ github.repository }}/$IMAGE_NAME
+          IMAGE_ID=ghcr.io/${{ github.repository }}
           IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
           VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
           [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
@@ -100,41 +100,9 @@ jobs:
           docker tag $IMAGE_NAME $IMAGE_ID:$VERSION-$GITHUB_RUN_NUMBER-$NOW-$SHORT_SHA
           docker tag $IMAGE_NAME $IMAGE_ID:latest
           docker push $IMAGE_ID --all-tags
-
-  deploy-staging:
-    needs: build-dockerhub-staging
-    name: Deploy to EKS
-    runs-on: ubuntu-latest
-    environment:
-      name: Staging
-      url: https://care.coronasafe.in
-    steps:
-      - name: Checkout Kube Config
-        uses: actions/checkout@v2
-        with:
-          repository: coronasafe/care_infra
-          token: ${{ secrets.CORONASAFE_GITHUB_PAT }}
-          path: kube
-          ref: main
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ap-south-1
-
-      - name: Deploy Care Staging
-        run: |
-          mkdir -p $HOME/.kube/
-          echo "${{ secrets.CARE_STAGING_KUBECONFIG }}" | base64 -d > $HOME/.kube/config
-          cd kube/staging/care_fe
-          sed -i -e "s/_BUILD_NUMBER_/${GITHUB_RUN_NUMBER}/g" deployment.yml
-          kubectl apply -f deployment.yml
-
   build-dockerhub-production:
     needs: test
-    environment: Production
-    name: Build & Push to Dockerhub
+    name: Build & Push to Dockerhub prod
     if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     steps:
@@ -146,12 +114,12 @@ jobs:
 
       - name: Github Short SHA
         run: echo "SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-8`" >> $GITHUB_ENV
-
       - name: Login to Docker Hub
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
       - name: Build image
         run: docker build . --file Dockerfile --tag $IMAGE_NAME
 
@@ -168,11 +136,9 @@ jobs:
           docker tag $IMAGE_NAME $IMAGE_ID:$VERSION-$GITHUB_RUN_NUMBER-$NOW-$SHORT_SHA
           docker tag $IMAGE_NAME $IMAGE_ID:production-latest
           docker push $IMAGE_ID --all-tags
-
   build-github-production:
     needs: test
     if: github.ref == 'refs/heads/master'
-    environment: Production
     name: Build and push to GitHub
     runs-on: ubuntu-latest
     steps:
@@ -191,7 +157,7 @@ jobs:
 
       - name: Push image
         run: |
-          IMAGE_ID=ghcr.io/${{ github.repository }}/$IMAGE_NAME
+          IMAGE_ID=ghcr.io/${{ github.repository }}
           IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
           VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
           [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
@@ -200,38 +166,105 @@ jobs:
           echo VERSION=$VERSION
           docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
           docker tag $IMAGE_NAME $IMAGE_ID:$VERSION-$GITHUB_RUN_NUMBER-$NOW-$SHORT_SHA
-          docker tag $IMAGE_NAME $IMAGE_ID:latest
+          docker tag $IMAGE_NAME $IMAGE_ID:production-latest
           docker push $IMAGE_ID --all-tags
-
-  deploy-production:
-    needs: build-dockerhub-production
-    name: Deploy to EKS
+  deploy-staging-egov:
+    needs: build-github-staging
+    name: Deploy to EKS Egov
     runs-on: ubuntu-latest
     environment:
-      name: Production
-      url: https://care.coronasafe.network
+      name: Staging-egov
+      url: https://care.coronasafe.in
     steps:
       - name: Checkout Kube Config
         uses: actions/checkout@v2
         with:
-          repository: coronasafe/care_infra
-          token: ${{ secrets.CORONASAFE_GITHUB_PAT }}
+          repository: coronasafe/infra
+          token: ${{ secrets.GIT_ACCESS_TOKEN  }}
           path: kube
           ref: main
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID}}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-south-1
-      - name: Deploy Care Production
+      - name: install kubectl
+        uses: azure/setup-kubectl@v2.0
+        with:
+          version: "v1.23.6"
+        id: install
+      - name: Deploy Care Fe Staging
         run: |
           mkdir -p $HOME/.kube/
-          echo "${{ secrets.CARE_PRODUCTION_KUBECONFIG }}" | base64 -d > $HOME/.kube/config
-          cd kube/production/care_fe
-          aws configure set aws_access_key_id ${AWS_ACCESS_KEY_ID}
-          aws configure set aws_secret_access_key ${AWS_SECRET_ACCESS_KEY}
-          aws configure set region ${AWS_DEFAULT_REGION}
-          aws configure set output json
-          sed -i -e "s/_BUILD_NUMBER_/${GITHUB_RUN_NUMBER}/g" deployment.yml
-          kubectl apply -f deployment.yml
+          aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region ap-south-1
+          cd kube/deployments/
+          sed -i -e "s/_BUILD_NUMBER_/${GITHUB_RUN_NUMBER}/g" care-fe.yaml
+          kubectl apply -f care-fe.yaml
+  deploy-staging-gdc:
+    needs: build-github-staging
+    name: Deploy to EKS GDC
+    runs-on: ubuntu-latest
+    environment:
+      name: Staging-gdc
+      url: https://gdc.coronasafe.network
+    steps:
+      - name: Checkout Kube Config
+        uses: actions/checkout@v2
+        with:
+          repository: coronasafe/gdc_infra
+          token: ${{ secrets.GIT_ACCESS_TOKEN  }}
+          path: kube
+          ref: main
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID}}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1
+      - name: install kubectl
+        uses: azure/setup-kubectl@v2.0
+        with:
+          version: "v1.23.6"
+        id: install
+      - name: Deploy Care Fe Staging
+        run: |
+          mkdir -p $HOME/.kube/
+          aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region ap-south-1
+          cd kube/deployments/
+          sed -i -e "s/_BUILD_NUMBER_/${GITHUB_RUN_NUMBER}/g" care-fe.yaml
+          kubectl apply -f care-fe.yaml
+
+  deploy-production-futureace:
+    needs: build-github-production
+    name: Deploy to EKS Futureace
+    runs-on: ubuntu-latest
+    environment:
+      name: Production-futureace
+      url: https://care.plexusindia.in
+    steps:
+      - name: Checkout Kube Config
+        uses: actions/checkout@v2
+        with:
+          repository: coronasafe/future-hospitals-infra
+          token: ${{ secrets.GIT_ACCESS_TOKEN  }}
+          path: kube
+          ref: main
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID}}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1
+      - name: install kubectl
+        uses: azure/setup-kubectl@v2.0
+        with:
+          version: "v1.23.6"
+        id: install
+      - name: Deploy Care Fe Production
+        run: |
+          mkdir -p $HOME/.kube/
+          aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region ap-south-1
+          cd kube/deployments/
+          sed -i -e "s/_BUILD_NUMBER_/${GITHUB_RUN_NUMBER}/g" care-fe.yaml
+          kubectl apply -f care-fe.yaml

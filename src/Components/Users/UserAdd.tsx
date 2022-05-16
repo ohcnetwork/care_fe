@@ -139,6 +139,9 @@ export const UserAdd = (props: UserProps) => {
   const userType = currentUser.data.user_type;
 
   const userIndex = USER_TYPES.indexOf(userType);
+
+  const defaultAllowedUserTypes = USER_TYPES.slice(0, userIndex + 1);
+
   const userTypes = isSuperuser
     ? [...USER_TYPES]
     : userType === "StaffReadOnly"
@@ -149,12 +152,19 @@ export const UserAdd = (props: UserProps) => {
     ? ["StaffReadOnly", "DistrictReadOnlyAdmin", "StateReadOnlyAdmin"]
     : userType === "Pharmacist"
     ? ["Pharmacist"]
-    : USER_TYPES.slice(0, userIndex + 1);
+    : // Exception to allow Staff to Create Doctors
+    userType === "Staff"
+    ? ["Doctor", ...defaultAllowedUserTypes]
+    : defaultAllowedUserTypes;
 
   const headerText = !userId ? "Add User" : "Update User";
   const buttonText = !userId ? "Save User" : "Update Details";
   const showLocalbody = !(
-    state.form.user_type === "Staff" || state.form.user_type === "StaffReadOnly"
+    state.form.user_type === "Pharmacist" ||
+    state.form.user_type === "Volunteer" ||
+    state.form.user_type === "Doctor" ||
+    state.form.user_type === "Staff" ||
+    state.form.user_type === "StaffReadOnly"
   );
 
   const fetchDistricts = useCallback(
@@ -264,7 +274,7 @@ export const UserAdd = (props: UserProps) => {
 
   const handleChange = (e: any) => {
     const { value, name } = e.target;
-    let form = { ...state.form };
+    const form = { ...state.form };
     form[name] = value;
     if (name === "username") {
       form[name] = value.toLowerCase();
@@ -306,7 +316,7 @@ export const UserAdd = (props: UserProps) => {
   };
 
   const validateForm = () => {
-    let errors = { ...initError };
+    const errors = { ...initError };
     let invalidForm = false;
     Object.keys(state.form).forEach((field) => {
       switch (field) {
@@ -364,11 +374,13 @@ export const UserAdd = (props: UserProps) => {
           }
           return;
         case "phone_number":
+          // eslint-disable-next-line no-case-declarations
           const phoneNumber = parsePhoneNumberFromString(
             state.form[field],
             "IN"
           );
-          let is_valid: boolean = false;
+          // eslint-disable-next-line no-case-declarations
+          let is_valid = false;
           if (phoneNumber) {
             is_valid = phoneNumber.isValid();
           }
@@ -379,7 +391,8 @@ export const UserAdd = (props: UserProps) => {
           return;
 
         case "alt_phone_number":
-          let alt_is_valid: boolean = false;
+          // eslint-disable-next-line no-case-declarations
+          let alt_is_valid = false;
           if (state.form[field] && state.form[field] !== "+91") {
             const altPhoneNumber = parsePhoneNumberFromString(
               state.form[field],
@@ -540,7 +553,7 @@ export const UserAdd = (props: UserProps) => {
                 />
               </div>
 
-              <div className="col-span-2">
+              <div className="md:col-span-2">
                 <InputLabel>Facilities</InputLabel>
                 {userType === "Staff" || userType === "StaffReadOnly" ? (
                   <MultiSelectField
@@ -568,9 +581,9 @@ export const UserAdd = (props: UserProps) => {
                 <TextInputField
                   fullWidth
                   name="username"
+                  autoComplete="new-username"
                   variant="outlined"
                   margin="dense"
-                  value={state.form.username}
                   onChange={handleChange}
                   errors={state.errors.username}
                 />
@@ -595,6 +608,7 @@ export const UserAdd = (props: UserProps) => {
                 <TextInputField
                   fullWidth
                   name="password"
+                  autoComplete="new-password"
                   type="password"
                   variant="outlined"
                   margin="dense"
@@ -612,6 +626,7 @@ export const UserAdd = (props: UserProps) => {
                   type="password"
                   variant="outlined"
                   margin="dense"
+                  autoComplete="off"
                   value={state.form.c_password}
                   onChange={handleChange}
                   errors={state.errors.c_password}
