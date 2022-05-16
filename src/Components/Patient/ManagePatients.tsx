@@ -701,7 +701,7 @@ export const PatientManager = (props: any) => {
               <dt className="text-sm leading-5 font-medium text-gray-500 truncate">
                 Total Patients
               </dt>
-              {/* Show spinner until cound is fetched from server */}
+              {/* Show spinner until count is fetched from server */}
               {isLoading ? (
                 <dd className="mt-4 text-5xl leading-9">
                   <CircularProgress className="text-primary-500" />
