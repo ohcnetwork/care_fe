@@ -410,39 +410,43 @@ export const ConsultationDetails = (props: any) => {
                 </div>
               )}
 
-              <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
-                <div className="px-4 py-5 sm:p-6">
-                  <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-                    Notes
-                  </h3>
-                  <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
-                    {consultationData.diagnosis && (
-                      <div>
-                        <h5>Diagnosis</h5>
-                        <p className="text-justify break-words">
-                          {consultationData.diagnosis}
-                        </p>
-                      </div>
-                    )}
-                    {consultationData.operation && (
-                      <div className="mt-4">
-                        <h5>Operation</h5>
-                        <p className="text-justify break-words">
-                          {consultationData.operation}
-                        </p>
-                      </div>
-                    )}
-                    {consultationData.special_instruction && (
-                      <div className="mt-4">
-                        <h5>Special Instruction</h5>
-                        <p className="text-justify break-words">
-                          {consultationData.special_instruction}
-                        </p>
-                      </div>
-                    )}
+              {(consultationData.diagnosis ||
+                consultationData.operation ||
+                consultationData.special_instruction) && (
+                <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
+                  <div className="px-4 py-5 sm:p-6">
+                    <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                      Notes
+                    </h3>
+                    <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+                      {consultationData.diagnosis && (
+                        <div>
+                          <h5>Diagnosis</h5>
+                          <p className="text-justify break-words">
+                            {consultationData.diagnosis}
+                          </p>
+                        </div>
+                      )}
+                      {consultationData.operation && (
+                        <div className="mt-4">
+                          <h5>Operation</h5>
+                          <p className="text-justify break-words">
+                            {consultationData.operation}
+                          </p>
+                        </div>
+                      )}
+                      {consultationData.special_instruction && (
+                        <div className="mt-4">
+                          <h5>Special Instruction</h5>
+                          <p className="text-justify break-words">
+                            {consultationData.special_instruction}
+                          </p>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
 
               {consultationData.intubation_start_date && (
                 <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
