@@ -542,6 +542,22 @@ export const UserAdd = (props: UserProps) => {
               </div>
 
               <div>
+                <Button
+                  color="primary"
+                  variant="contained"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleValueChange(
+                      state.form.phone_number,
+                      "alt_phone_number"
+                    );
+                  }}
+                >
+                  WhatsApp Number is same as Phone
+                </Button>
+              </div>
+
+              <div>
                 <PhoneNumberField
                   label="Whatsapp Number"
                   value={state.form.alt_phone_number}
