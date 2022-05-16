@@ -201,10 +201,6 @@ let isInvalidInputInt = (min, max, val) => {
   }
 }
 
-let toFixedWithPrecisionOne = value => {
-  Js.Float.toFixedWithPrecision(value, ~digits=1)
-}
-
 @react.component
 let make = (~hemodynamicParameter, ~updateCB, ~id, ~consultationId) => {
   let (state, send) = React.useReducer(reducer, initialState(hemodynamicParameter))
@@ -266,7 +262,7 @@ let make = (~hemodynamicParameter, ~updateCB, ~id, ~consultationId) => {
         end={state.tempInCelcius ? "41" : "106"}
         interval={"10"}
         step={0.1}
-        value={Belt.Option.mapWithDefault(state.temperature, "", toFixedWithPrecisionOne)}
+        value={Belt.Option.mapWithDefault(state.temperature, "", Js.Float.toString)}
         setValue={s => send(SetTemperature(float_of_string(s)))}
         getLabel={state.tempInCelcius
           ? getStatus(36.4, "Low", 37.5, "High")

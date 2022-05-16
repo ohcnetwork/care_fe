@@ -44,11 +44,8 @@ export make = (
 ) => {
   let (textColor, setColor) = React.useState(() => "#2856ff")
   let (text, setText) = React.useState(() => "Normal")
-
-  let e = end->Belt.Int.fromString->Belt.Option.getWithDefault(0)
-  let i = interval->Belt.Int.fromString->Belt.Option.getWithDefault(0)
-
-  let iterations = Belt.Int.toFloat(i) /. Belt.Int.toFloat(e) *. 100.0
+  let (precision, setPrecision) = React.useState(() => 1)
+  let (displayValue, setDisplayValue) = React.useState(() => value)
 
   React.useEffect1(() => {
     let (text, color) = getLabel(value->Belt.Float.fromString->Belt.Option.getWithDefault(0.0))
@@ -57,6 +54,24 @@ export make = (
 
     None
   }, [value])
+
+  React.useEffect2(() => {
+    let digits = (value->Js.String2.split("."))[0]->Js.String.length
+    setDisplayValue(_ => value->Js.String2.slice(~from=0, ~to_=digits + 1 + precision))
+
+    None
+  }, (value, precision))
+
+  React.useEffect0(() => {
+    open Belt
+    let decimals = (step->Js.Float.toString->Js.String2.split("."))[1]
+    switch decimals {
+    | Some(x) => setPrecision(_ => Belt.Option.mapWithDefault(x->Belt.Int.fromString, 0, i => i))
+    | None => setPrecision(_ => 0)
+    }
+
+    None
+  })
 
   <>
     <section className={"slider-box " ++ className}>
@@ -76,8 +91,13 @@ export make = (
               step={step}
               max={end}
               min={start}
-              value={value}
-              onChange={event => setValue(ReactEvent.Form.target(event)["value"])}
+              value={displayValue}
+              onChange={event =>
+                setValue(
+                  ReactEvent.Form.target(event)["value"]
+                  ->Js.Float.fromString
+                  ->Js.Float.toFixedWithPrecision(~digits=precision),
+                )}
             />
           </label>
           <CriticalCare__InputGroupError
@@ -111,7 +131,7 @@ export make = (
             setValue(ReactEvent.Form.target(event)["value"])
           }}
         />
-        <output> {str(value)} </output>
+        <output> {str(displayValue)} </output>
         <div className="range-slider__progress" />
       </div>
     </section>
