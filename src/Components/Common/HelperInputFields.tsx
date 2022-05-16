@@ -546,6 +546,8 @@ export const AutoCompleteAsyncField = (props: any) => {
       <Autocomplete
         openOnFocus
         autoSelect
+        autoComplete
+        autoHighlight
         multiple={multiple}
         onOpen={onOpen}
         options={options}
