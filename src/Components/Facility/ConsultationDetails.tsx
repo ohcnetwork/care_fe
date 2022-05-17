@@ -289,15 +289,6 @@ export const ConsultationDetails = (props: any) => {
             </div>
 
             <div className="mt-2">
-              {consultationData.other_symptoms && (
-                <div className="capitalize">
-                  <span className="font-semibold leading-relaxed">
-                    Other Symptoms:{" "}
-                  </span>
-                  {consultationData.other_symptoms}
-                </div>
-              )}
-
               {consultationData.diagnosis && (
                 <div className="text-sm w-full">
                   <span className="font-semibold leading-relaxed">
