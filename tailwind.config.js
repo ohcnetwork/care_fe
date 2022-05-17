@@ -26,6 +26,9 @@ module.exports = {
           900: "#453C52",
         },
       },
+      padding: {
+        "1/5": "20%",
+      },
     },
   },
   content: [
