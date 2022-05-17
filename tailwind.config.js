@@ -28,18 +28,17 @@ module.exports = {
       },
     },
   },
-  variants: {},
-  plugins: [require("@tailwindcss/ui")],
-  purge: {
-    content: [
-      "./src/**/*.html",
-      "./src/**/*.tsx",
-      "./src/**/*.ts",
-      "./src/**/*.js",
-      "./src/**/*.res",
-    ],
-    options: {
-      whitelistPatterns: [/^bg-/, /^text-/, /^border-/, /^hover:/],
-    },
-  },
+  content: [
+    "./src/**/*.html",
+    "./src/**/*.tsx",
+    "./src/**/*.ts",
+    "./src/**/*.js",
+    "./src/**/*.res",
+  ],
+  safelist: [{ pattern: /^(bg|text|border)-/, variants: ["hover"] }],
+  plugins: [
+    require("@tailwindcss/forms"),
+    require("@tailwindcss/typography"),
+    require("@tailwindcss/aspect-ratio"),
+  ],
 };
