@@ -1,7 +1,8 @@
 /* eslint-disable eqeqeq */
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useDispatch } from "react-redux";
 import screenfull from "screenfull";
+import useKeyboardShortcut from "use-keyboard-shortcut";
 import loadable from "@loadable/component";
 import { listAssetBeds, partialUpdateAssetBed } from "../../../Redux/actions";
 import RefreshIcon from "@material-ui/icons/Refresh";
@@ -107,8 +108,84 @@ const LiveFeed = (props: any) => {
     };
   }, [startStream, streamStatus]);
 
+  const cameraPTZActionCBs: { [key: string]: (option: any) => void } = {
+    precision: () => {
+      setPrecision((precision: number) =>
+        precision === 16 ? 1 : precision * 2
+      );
+    },
+    reset: () => {
+      setStreamStatus(StreamStatus.Loading);
+      startStream({
+        onSuccess: () => setStreamStatus(StreamStatus.Playing),
+        onError: () => setStreamStatus(StreamStatus.Offline),
+      });
+    },
+    stop: () => {
+      // NEED ID TO STOP STREAM
+    },
+    fullScreen: () => {
+      if (!(screenfull.isEnabled && liveFeedPlayerRef.current)) return;
+      screenfull.request(liveFeedPlayerRef.current);
+    },
+    updatePreset: (option) => {
+      getCameraStatus({
+        onSuccess: async ({ data }) => {
+          console.log({ currentPreset, data });
+          if (currentPreset?.asset_object?.id && data?.position) {
+            setLoading(option.loadingLabel);
+            console.log("Updating Preset");
+            const response = await dispatch(
+              partialUpdateAssetBed(
+                {
+                  asset: currentPreset.asset_object.id,
+                  bed: currentPreset.bed_object.id,
+                  meta: {
+                    ...currentPreset.meta,
+                    position: data?.position,
+                  },
+                },
+                currentPreset?.id
+              )
+            );
+            if (response && response.status === 200) {
+              Notification.Success({
+                msg: "Preset Updated",
+              });
+            }
+            setLoading(undefined);
+          }
+        },
+      });
+    },
+    other: (option) => {
+      setLoading(option.loadingLabel);
+      relativeMove(getPTZPayload(option.action, precision), {
+        onSuccess: () => setLoading(undefined),
+      });
+    },
+  };
+
+  // Voluntarily disabling eslint, since length of `cameraPTZ` is constant and
+  // hence shall not cause issues. (https://news.ycombinator.com/item?id=24363703)
+  for (const option of cameraPTZ) {
+    if (!option.shortcutKey) continue;
+
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useKeyboardShortcut(
+      option.shortcutKey,
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      useCallback(() => {
+        console.log(`running ${option.action}`);
+        cameraPTZActionCBs[
+          cameraPTZActionCBs[option.action] ? option.action : "other"
+        ](option);
+      }, [cameraPTZActionCBs])
+    );
+  }
+
   return (
-    <div className="mt-4 px-6 mb-20">
+    <div className="mt-4 px-6 mb-2">
       <PageTitle title="Live Feed" hideBack={true} />
 
       <div className="mt-4 flex flex-col">
@@ -177,60 +254,11 @@ const LiveFeed = (props: any) => {
                   className="bg-green-100 hover:bg-green-200 border border-green-100 p-2 flex-1"
                   key={option.action}
                   onClick={() => {
-                    if (option.action === "precision") {
-                      setPrecision((precision) =>
-                        precision === 16 ? 1 : precision * 2
-                      );
-                    } else if (option.action === "reset") {
-                      setStreamStatus(StreamStatus.Loading);
-                      startStream({
-                        onSuccess: () => setStreamStatus(StreamStatus.Playing),
-                        onError: () => setStreamStatus(StreamStatus.Offline),
-                      });
-                    } else if (option.action === "stop") {
-                      // NEED ID TO STOP STREAM
-                    } else if (option.action === "fullScreen") {
-                      if (screenfull.isEnabled && liveFeedPlayerRef.current) {
-                        screenfull.request(liveFeedPlayerRef.current);
-                      }
-                    } else if (option.action === "updatePreset") {
-                      getCameraStatus({
-                        onSuccess: async ({ data }: any) => {
-                          console.log({ currentPreset, data });
-                          if (
-                            currentPreset?.asset_object?.id &&
-                            data?.position
-                          ) {
-                            setLoading(option.loadingLabel);
-                            console.log("Updating Preset");
-                            const response = await dispatch(
-                              partialUpdateAssetBed(
-                                {
-                                  asset: currentPreset.asset_object.id,
-                                  bed: currentPreset.bed_object.id,
-                                  meta: {
-                                    ...currentPreset.meta,
-                                    position: data?.position,
-                                  },
-                                },
-                                currentPreset?.id
-                              )
-                            );
-                            if (response && response.status === 200) {
-                              Notification.Success({
-                                msg: "Preset Updated",
-                              });
-                            }
-                            setLoading(undefined);
-                          }
-                        },
-                      });
-                    } else {
-                      setLoading(option.loadingLabel);
-                      relativeMove(getPTZPayload(option.action, precision), {
-                        onSuccess: () => setLoading(undefined),
-                      });
-                    }
+                    cameraPTZActionCBs[
+                      cameraPTZActionCBs[option.action]
+                        ? option.action
+                        : "other"
+                    ](option);
                   }}
                 >
                   <span className="sr-only">{option.label}</span>
