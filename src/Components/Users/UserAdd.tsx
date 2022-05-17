@@ -34,6 +34,7 @@ import {
   SelectField,
   TextInputField,
   MultiSelectField,
+  CheckboxField,
 } from "../Common/HelperInputFields";
 import { FacilityModel } from "../Facility/models";
 import HelpToolTip from "../Common/utils/HelpToolTip";
@@ -129,6 +130,7 @@ export const UserAdd = (props: UserProps) => {
   const [selectedFacility, setSelectedFacility] = useState<
     FacilityModel[] | null
   >([]);
+  const [phoneIsWhatsApp, setPhoneIsWhatsApp] = useState(true);
 
   const rootState: any = useSelector((rootState) => rootState);
   const { currentUser } = rootState;
@@ -539,31 +541,22 @@ export const UserAdd = (props: UserProps) => {
                   errors={state.errors.phone_number}
                   onlyIndia={true}
                 />
-              </div>
-
-              <div>
-                <Button
-                  color="primary"
-                  variant="contained"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleValueChange(
-                      state.form.phone_number,
-                      "alt_phone_number"
-                    );
-                  }}
-                >
-                  Set phone as WhatsApp number
-                </Button>
+                <CheckboxField
+                  checked={phoneIsWhatsApp}
+                  onChange={() => setPhoneIsWhatsApp(!phoneIsWhatsApp)}
+                  label="Is the phone number a WhatsApp number?"
+                  className="font-bold"
+                />
               </div>
 
               <div>
                 <PhoneNumberField
                   label="Whatsapp Number"
-                  value={state.form.alt_phone_number}
+                  value={phoneIsWhatsApp ? state.form.phone_number : "+91"}
                   onChange={(value: any) =>
                     handleValueChange(value, "alt_phone_number")
                   }
+                  disabled={phoneIsWhatsApp}
                   errors={state.errors.alt_phone_number}
                   onlyIndia={true}
                 />

@@ -592,6 +592,7 @@ export const PhoneNumberField = (props: any) => {
     onlyIndia,
     value,
     turnOffAutoFormat,
+    disabled,
   } = props;
   const countryRestriction = !!onlyIndia ? { onlyCountries: ["in"] } : {};
   const onChangeHandler = debounce(onChange, 500);
@@ -613,6 +614,7 @@ export const PhoneNumberField = (props: any) => {
           placeholder={placeholder}
           onChange={handleChange}
           country="in"
+          disabled={disabled}
           autoFormat={!turnOffAutoFormat}
           {...countryRestriction}
         />
