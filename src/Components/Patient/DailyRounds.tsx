@@ -426,7 +426,7 @@ export const DailyRounds = (props: any) => {
   const handleSymptomChange = (e: any, child?: any) => {
     const form = { ...state.form };
     const { value } = e?.target;
-    const otherSymptoms = value.filter((i: number) => i !== 1);
+    const otherSymptoms = value?.filter((i: number) => i !== 1);
     // prevent user from selecting asymptomatic along with other options
     form.additional_symptoms =
       child?.props?.value === 1
