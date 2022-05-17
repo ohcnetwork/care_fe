@@ -249,31 +249,37 @@ const LiveFeed = (props: any) => {
               </div>
             </div>
             <div className="flex max-w-lg mt-4">
-              {cameraPTZ.map((option: any) => (
-                <button
-                  className="bg-green-100 hover:bg-green-200 border border-green-100 p-2 flex-1"
-                  key={option.action}
-                  data-tip={`${option.label} (${option.shortcutKey
+              {cameraPTZ.map((option) => {
+                let tooltip = option.label;
+                if (option.shortcutKey)
+                  tooltip += ` (${option.shortcutKey
                     .join(" + ")
-                    .replace("Control", "Ctrl")})`}
-                  onClick={() => {
-                    cameraPTZActionCBs[
-                      cameraPTZActionCBs[option.action]
-                        ? option.action
-                        : "other"
-                    ](option);
-                  }}
-                >
-                  <span className="sr-only">{option.label}</span>
-                  {option.icon ? (
-                    <i className={`${option.icon} md:p-2`}></i>
-                  ) : (
-                    <span className="px-2 font-bold h-full w-8 flex items-center justify-center">
-                      {option.value}x
-                    </span>
-                  )}
-                </button>
-              ))}
+                    .replace("Control", "Ctrl")})`;
+
+                const onClick = () => {
+                  cameraPTZActionCBs[
+                    cameraPTZActionCBs[option.action] ? option.action : "other"
+                  ](option);
+                };
+
+                return (
+                  <button
+                    className="bg-green-100 hover:bg-green-200 border border-green-100 p-2 flex-1"
+                    key={option.action}
+                    data-tip={tooltip}
+                    onClick={onClick}
+                  >
+                    <span className="sr-only">{option.label}</span>
+                    {option.icon ? (
+                      <i className={`${option.icon} md:p-2`}></i>
+                    ) : (
+                      <span className="px-2 font-bold h-full w-8 flex items-center justify-center">
+                        {option.value}x
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
               <ReactTooltip />
             </div>
           </div>
