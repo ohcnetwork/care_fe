@@ -43,6 +43,8 @@ const LiveFeed = (props: any) => {
     videoEl,
   });
 
+  const refreshPresetsHash = props.refreshPresetsHash;
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [currentPreset, setCurrentPreset] = useState<any>();
   const {
@@ -76,7 +78,7 @@ const LiveFeed = (props: any) => {
     if (bedPresets?.[0]?.position) {
       absoluteMove(bedPresets[0]?.position, {});
     }
-  }, [cameraAsset.id]);
+  }, [cameraAsset.id, refreshPresetsHash]);
 
   const viewOptions = (page: number) =>
     presets
