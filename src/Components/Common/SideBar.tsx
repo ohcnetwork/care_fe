@@ -147,7 +147,7 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
     >
       <div
         className={clsx(
-          "overflow-hidden transition-all duration-300",
+          "flex flex-col overflow-hidden transition-all duration-300 h-full",
           expanded ? "w-64" : "w-14"
         )}
       >
@@ -226,7 +226,7 @@ export const SideBar: React.FC<SideBarProps> = ({ isOpen, setIsOpen }) => {
 
         <div
           className={clsx(
-            "fixed bottom-0 flex flex-no-wrap items-center ml-2 overflow-hidden transition-all duration-300 py-4",
+            "flex flex-no-wrap items-center ml-2 overflow-hidden transition-all duration-300 py-4",
             expanded ? "w-60" : "w-10"
           )}
         >
