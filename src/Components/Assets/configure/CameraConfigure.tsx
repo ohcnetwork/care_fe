@@ -75,8 +75,8 @@ export default function CameraConfigure(props: CameraConfigureProps) {
             middlewareHostname={asset?.meta?.middleware_hostname}
             asset={getCameraConfig(asset)}
             showRefreshButton={true}
-            getAsset={props.asset}
-            getBed={props.bed}
+            // getAsset={props.asset}
+            // getBed={props.bed}
           />
         </CardContent>
       </Card>

@@ -42,10 +42,10 @@ import {
 import * as Notification from "../../Utils/Notifications";
 import { make as Link } from "../Common/components/Link.gen";
 import { BedModel } from "../Facility/models";
-import { BedSelect } from "../Common/BedSelect";
+// import { BedSelect } from "../Common/BedSelect";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
-const admittedToChoices = ["Select", ...ADMITTED_TO];
+// const admittedToChoices = ["Select", ...ADMITTED_TO];
 
 const initForm: any = {
   otherSymptom: false,
@@ -79,13 +79,14 @@ const initError = Object.assign(
   ...Object.keys(initForm).map((k) => ({ [k]: "" }))
 );
 
-const categoryChoices = [
+/*const categoryChoices = [
   {
     id: 0,
     text: "Select suspect category",
   },
   ...PATIENT_CATEGORY,
 ];
+*/
 
 const initialState = {
   form: { ...initForm },
@@ -115,9 +116,9 @@ const DailyRoundsFormReducer = (state = initialState, action: any) => {
   }
 };
 
-const goBack = () => {
+/*const goBack = () => {
   window.history.go(-1);
-};
+};*/
 
 export const DailyRounds = (props: any) => {
   const dispatchAction: any = useDispatch();

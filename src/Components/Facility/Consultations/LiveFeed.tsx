@@ -61,14 +61,16 @@ const LiveFeed = (props: any) => {
 
   const getBedPresets = async (id: any) => {
     const bedAssets = await dispatch(listAssetBeds({ asset: id }));
-    console.log("bedAssets", bedAssets?.data?.results);
-    console.log("New Preset", props.getAsset);
-    console.log(props.getBed);
+    // console.log("bedAssets", bedAssets?.data?.results);
+    // console.log("New Preset");
+    // console.log(props.getAsset, props.getBed);
 
-    const getNewPreset = (props.getAsset, props.getBed); // this may need to be replaced with {}
-    getNewPreset
-      ? setBedPresets([{ ...bedAssets?.data?.results }, getNewPreset])
-      : setBedPresets(bedAssets?.data?.results); // update here
+    setBedPresets(bedAssets?.data?.results);
+
+    // const getNewPreset = (props.getAsset, props.getBed); // this may need to be replaced with {}
+    // getNewPreset
+    //   ? setBedPresets([{ ...bedAssets?.data?.results }, getNewPreset])
+    //   : setBedPresets(bedAssets?.data?.results); // update here
   };
 
   const gotoBedPreset = (preset: any) => {
