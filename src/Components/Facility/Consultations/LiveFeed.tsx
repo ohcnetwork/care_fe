@@ -176,7 +176,6 @@ const LiveFeed = (props: any) => {
       option.shortcutKey,
       // eslint-disable-next-line react-hooks/rules-of-hooks
       useCallback(() => {
-        console.log(`running ${option.action}`);
         cameraPTZActionCBs[
           cameraPTZActionCBs[option.action] ? option.action : "other"
         ](option);
