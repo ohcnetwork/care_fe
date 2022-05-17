@@ -126,7 +126,7 @@ export default function ManageUsers() {
 
   const addUser = (
     <button
-      className="px-4 py-1 rounded-md bg-primary-500 mt-4 text-white text-lg font-semibold rounded shadow"
+      className="px-4 py-1 rounded-md bg-primary-500 mt-4 text-white text-lg font-semibold shadow"
       onClick={() => navigate("/user/add")}
     >
       <i className="fas fa-plus mr-2"></i>
