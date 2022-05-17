@@ -837,6 +837,7 @@ export const ConsultationForm = (props: any) => {
                   value={state.form.ip_no}
                   onChange={handleChange}
                   errors={state.errors.ip_no}
+                  required
                 />
               </div>
               <div id="test_id-div">
