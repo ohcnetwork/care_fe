@@ -65,7 +65,7 @@ const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const debounce = require("lodash.debounce");
-
+// eslint-disable-next-line
 const placesList = countryList.concat(
   statesList.filter((i: string) => i !== "Kerala")
 );
@@ -103,6 +103,7 @@ const diseaseStatus = [...DISEASE_STATUS];
 const bloodGroups = [...BLOOD_GROUPS];
 
 const testType = [...TEST_TYPE];
+// eslint-disable-next-line
 const designationOfHealthWorkers = [...DESIGNATION_HEALTH_CARE_WORKER];
 const vaccines = ["Select", ...VACCINES];
 
@@ -243,7 +244,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   const headerText = !id
     ? "Add Details of Covid Suspect / Patient"
     : "Update Covid Suspect / Patient Details";
-  const buttonText = !id ? "Add Covid Suspect / Patient" : "Save Details";
+  const buttonText = !id ? "Add Patient" : "Save Details";
 
   const fetchDistricts = useCallback(
     async (id: string) => {
@@ -509,7 +510,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     const errors = { ...initError };
     let invalidForm = false;
     let error_div = "";
-
+    // eslint-disable-next-line
     Object.keys(state.form).forEach((field, i) => {
       let phoneNumber, emergency_phone_number;
       switch (field) {
@@ -854,7 +855,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       dispatch({ type: "set_form", form });
     }
   };
-
+  // eslint-disable-next-line
   const handleCheckboxFieldChange = (e: any) => {
     const form = { ...state.form };
     const { checked, name } = e.target;
