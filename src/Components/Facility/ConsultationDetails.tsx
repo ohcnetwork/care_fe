@@ -290,15 +290,6 @@ export const ConsultationDetails = (props: any) => {
             </div>
 
             <div className="mt-2">
-              {consultationData.other_symptoms && (
-                <div className="capitalize">
-                  <span className="font-semibold leading-relaxed">
-                    Other Symptoms:{" "}
-                  </span>
-                  {consultationData.other_symptoms}
-                </div>
-              )}
-
               {consultationData.diagnosis && (
                 <div className="text-sm w-full">
                   <span className="font-semibold leading-relaxed">
@@ -364,6 +355,14 @@ export const ConsultationDetails = (props: any) => {
                       <div className="capitalize">
                         {consultationData.symptoms_text || "-"}
                       </div>
+                      {consultationData.other_symptoms && (
+                        <div className="capitalize">
+                          <span className="font-semibold leading-relaxed">
+                            Other Symptoms:{" "}
+                          </span>
+                          {consultationData.other_symptoms}
+                        </div>
+                      )}
                       <span className="font-semibold leading-relaxed text-gray-800 text-xs">
                         from{" "}
                         {moment(consultationData.symptoms_onset_date).format(
