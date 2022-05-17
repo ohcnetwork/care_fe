@@ -1,6 +1,7 @@
 import { alert, Stack } from "@pnotify/core";
 import "@pnotify/core/dist/PNotify.css";
 import "@pnotify/core/dist/BrightTheme.css";
+import _ from "lodash";
 
 const notifyStack = new Stack({
   dir1: "down",
@@ -46,7 +47,7 @@ const notifyError = (error) => {
     errorMsg = error.detail;
   } else {
     for (let [key, value] of Object.entries(error)) {
-      let keyName = key.replace(/_/g, " ");
+      let keyName = _.startCase(_.camelCase(key));
       if (Array.isArray(value)) {
         const uniques = [...new Set(value)];
         errorMsg += `${keyName} - ${uniques.splice(0, 5).join(", ")}`;
