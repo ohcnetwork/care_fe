@@ -1,5 +1,5 @@
 /* eslint-disable eqeqeq */
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useDispatch } from "react-redux";
 import screenfull from "screenfull";
 import useKeyboardShortcut from "use-keyboard-shortcut";
@@ -150,9 +150,9 @@ const LiveFeed = (props: any) => {
               )
             );
             if (response && response.status === 200) {
-              Notification.Success({
-                msg: "Preset Updated",
-              });
+              Notification.Success({ msg: "Preset Updated" });
+              getBedPresets(cameraAsset?.id);
+              getPresets({});
             }
             setLoading(undefined);
           }
@@ -173,15 +173,11 @@ const LiveFeed = (props: any) => {
     if (!option.shortcutKey) continue;
 
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    useKeyboardShortcut(
-      option.shortcutKey,
-      // eslint-disable-next-line react-hooks/rules-of-hooks
-      useCallback(() => {
-        cameraPTZActionCBs[
-          cameraPTZActionCBs[option.action] ? option.action : "other"
-        ](option);
-      }, [])
-    );
+    useKeyboardShortcut(option.shortcutKey, () => {
+      cameraPTZActionCBs[
+        cameraPTZActionCBs[option.action] ? option.action : "other"
+      ](option);
+    });
   }
 
   return (
