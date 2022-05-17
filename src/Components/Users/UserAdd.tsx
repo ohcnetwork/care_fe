@@ -553,7 +553,7 @@ export const UserAdd = (props: UserProps) => {
                     );
                   }}
                 >
-                  WhatsApp Number is same as Phone
+                  Set phone as WhatsApp number
                 </Button>
               </div>
 
