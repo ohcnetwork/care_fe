@@ -180,7 +180,7 @@ const LiveFeed = (props: any) => {
         cameraPTZActionCBs[
           cameraPTZActionCBs[option.action] ? option.action : "other"
         ](option);
-      }, [cameraPTZActionCBs])
+      }, [])
     );
   }
 
