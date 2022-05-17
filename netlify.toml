@@ -1,5 +1,6 @@
 [build]
 publish = "build/"
+environment = { NPM_FLAGS = "--legacy-peer-deps" }
 
 [[redirects]]
 from = "/api/*"
