@@ -51,6 +51,9 @@ export default function CameraConfigure(props: CameraConfigureProps) {
                   errors=""
                 />
               </div>
+              {/* new bed details: bed select: {bed}, present name: {newPreset} */}
+
+              {/* localhost:4000/assets/3c84c599-f32d-4e74-bb58-c436274a6635/configure */}
             </div>
             <div className="flex justify-between mt-4">
               <Button
@@ -72,6 +75,8 @@ export default function CameraConfigure(props: CameraConfigureProps) {
             middlewareHostname={asset?.meta?.middleware_hostname}
             asset={getCameraConfig(asset)}
             showRefreshButton={true}
+            getAsset={props.asset}
+            getBed={props.bed}
           />
         </CardContent>
       </Card>
