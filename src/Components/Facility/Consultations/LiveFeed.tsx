@@ -2,7 +2,6 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useDispatch } from "react-redux";
 import screenfull from "screenfull";
-import ReactTooltip from "react-tooltip";
 import useKeyboardShortcut from "use-keyboard-shortcut";
 import loadable from "@loadable/component";
 import { listAssetBeds, partialUpdateAssetBed } from "../../../Redux/actions";
@@ -15,6 +14,7 @@ import {
 import { useFeedPTZ } from "../../../Common/hooks/useFeedPTZ";
 const PageTitle = loadable(() => import("../../Common/PageTitle"));
 import * as Notification from "../../../Utils/Notifications.js";
+import { Tooltip } from "@material-ui/core";
 
 const LiveFeed = (props: any) => {
   const middlewareHostname =
@@ -263,24 +263,23 @@ const LiveFeed = (props: any) => {
                 };
 
                 return (
-                  <button
-                    className="bg-green-100 hover:bg-green-200 border border-green-100 p-2 flex-1"
-                    key={option.action}
-                    data-tip={tooltip}
-                    onClick={onClick}
-                  >
-                    <span className="sr-only">{option.label}</span>
-                    {option.icon ? (
-                      <i className={`${option.icon} md:p-2`}></i>
-                    ) : (
-                      <span className="px-2 font-bold h-full w-8 flex items-center justify-center">
-                        {option.value}x
-                      </span>
-                    )}
-                  </button>
+                  <Tooltip title={tooltip} key={option.action}>
+                    <button
+                      className="bg-green-100 hover:bg-green-200 border border-green-100 p-2 flex-1"
+                      onClick={onClick}
+                    >
+                      <span className="sr-only">{option.label}</span>
+                      {option.icon ? (
+                        <i className={`${option.icon} md:p-2`}></i>
+                      ) : (
+                        <span className="px-2 font-bold h-full w-8 flex items-center justify-center">
+                          {option.value}x
+                        </span>
+                      )}
+                    </button>
+                  </Tooltip>
                 );
               })}
-              <ReactTooltip />
             </div>
           </div>
 
