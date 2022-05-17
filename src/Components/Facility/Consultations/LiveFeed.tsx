@@ -49,6 +49,8 @@ const LiveFeed = (props: any) => {
     videoEl,
   });
 
+  const refreshPresetsHash = props.refreshPresetsHash;
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [currentPreset, setCurrentPreset] = useState<any>();
   const {
@@ -95,7 +97,7 @@ const LiveFeed = (props: any) => {
     if (bedPresets?.[0]?.position) {
       absoluteMove(bedPresets[0]?.position, {});
     }
-  }, [page.offset, cameraAsset.id]);
+  }, [page.offset, cameraAsset.id, refreshPresetsHash]);
 
   const viewOptions = (page: number) =>
     presets
@@ -246,6 +248,8 @@ const LiveFeed = (props: any) => {
                               Notification.Success({
                                 msg: "Preset Updated",
                               });
+                              getBedPresets(cameraAsset?.id);
+                              getPresets({});
                             }
                             setLoading(undefined);
                           }
