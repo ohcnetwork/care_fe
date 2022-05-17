@@ -7,20 +7,20 @@ let setOptionalString = (key, value, payload) => {
 let setOptionalNumber = (key, value, payload) => {
   switch value {
   | Some(v) => Js.Dict.set(payload, key, Js.Json.number(float_of_int(v)))
-  | None => ()
+  | None => Js.Dict.set(payload, key, Js.Json.null)
   }
 }
 
 let setOptionalFloat = (key, value, payload) => {
   switch value {
   | Some(v) => Js.Dict.set(payload, key, Js.Json.number(v))
-  | None => ()
+  | None => Js.Dict.set(payload, key, Js.Json.null)
   }
 }
 
 let setOptionalBool = (key, value, payload) => {
   switch value {
   | Some(v) => Js.Dict.set(payload, key, Js.Json.boolean(v))
-  | None => ()
+  | None => Js.Dict.set(payload, key, Js.Json.null)
   }
 }
