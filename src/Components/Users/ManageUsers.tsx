@@ -297,8 +297,7 @@ export default function ManageUsers() {
   };
 
   let userList: any[] = [];
-  if (typeof users != "undefined") {
-    //users && users.length) {
+  if (users && users.length) {
     userList = users.map((user: any) => {
       return (
         <div key={`usr_${user.id}`} className="w-full md:w-1/2 mt-6 md:px-4">
