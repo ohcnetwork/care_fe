@@ -614,28 +614,28 @@ export const GENDER: { [key: number]: string } = GENDER_TYPES.reduce(
 export const getCameraPTZ = (precision: number) => [
   {
     icon: "fa fa-arrow-up",
-    label: "Up",
+    label: "Move Up",
     action: "up",
     loadingLabel: "Moving Up",
     shortcutKey: ["Control", "Shift", "ArrowUp"],
   },
   {
     icon: "fa fa-arrow-down",
-    label: "Down",
+    label: "Move Down",
     action: "down",
     loadingLabel: "Moving Down",
     shortcutKey: ["Control", "Shift", "ArrowDown"],
   },
   {
     icon: "fa fa-arrow-left",
-    label: "Left",
+    label: "Move Left",
     action: "left",
     loadingLabel: "Moving Left",
     shortcutKey: ["Control", "Shift", "ArrowLeft"],
   },
   {
     icon: "fa fa-arrow-right",
-    label: "Right",
+    label: "Move Right",
     action: "right",
     loadingLabel: "Moving Right",
     shortcutKey: ["Control", "Shift", "ArrowRight"],
