@@ -562,7 +562,7 @@ export const PatientHome = (props: any) => {
 
       <div id="revamp">
         <PageTitle
-          title={"Covid Suspect Details"}
+          title={"Patient Details"}
           backUrl="/patients"
           crumbsReplacements={{
             [facilityId]: { name: patientData?.facility_object?.name },
