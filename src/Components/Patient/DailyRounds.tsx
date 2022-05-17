@@ -265,7 +265,7 @@ export const DailyRounds = (props: any) => {
           data = {
             ...data,
             bp:
-              state.form.bp.systolic && state.form.bp.diastolic
+              state.form.bp && state.form.bp.systolic && state.form.bp.diastolic
                 ? {
                     systolic: Number(state.form.bp.systolic),
                     diastolic: Number(state.form.bp.diastolic),
