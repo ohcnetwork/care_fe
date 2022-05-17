@@ -2,6 +2,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useDispatch } from "react-redux";
 import screenfull from "screenfull";
+import ReactTooltip from "react-tooltip";
 import useKeyboardShortcut from "use-keyboard-shortcut";
 import loadable from "@loadable/component";
 import { listAssetBeds, partialUpdateAssetBed } from "../../../Redux/actions";
@@ -252,6 +253,9 @@ const LiveFeed = (props: any) => {
                 <button
                   className="bg-green-100 hover:bg-green-200 border border-green-100 p-2 flex-1"
                   key={option.action}
+                  data-tip={option.shortcutKey
+                    .join(" + ")
+                    .replace("Control", "Ctrl")}
                   onClick={() => {
                     cameraPTZActionCBs[
                       cameraPTZActionCBs[option.action]
@@ -270,6 +274,7 @@ const LiveFeed = (props: any) => {
                   )}
                 </button>
               ))}
+              <ReactTooltip />
             </div>
           </div>
 
