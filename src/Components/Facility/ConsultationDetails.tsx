@@ -201,7 +201,7 @@ export const ConsultationDetails = (props: any) => {
                 Patient Details
               </Link>
               <Link
-                href={`/facility/${patientData.facility}/patient/${patientData.id}/notes/`}
+                href={`/facility/${patientData.facility}/patient/${patientData.id}/notes`}
                 className="btn m-1 btn-primary hover:text-white"
               >
                 Doctor&apos;s Notes
