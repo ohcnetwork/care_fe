@@ -158,7 +158,7 @@ const LoginPage = (props: any) => {
                 variant="outlined"
                 margin="dense"
                 autoFocus={true}
-                InputLabelProps={{ shrink: !!form.username }}
+                InputLabelProps={{ shrink: true }}
                 value={form.username}
                 onChange={handleChange}
                 errors={errors.username}
@@ -172,7 +172,7 @@ const LoginPage = (props: any) => {
                   variant="outlined"
                   margin="dense"
                   autoComplete="off"
-                  InputLabelProps={{ shrink: !!form.password }}
+                  InputLabelProps={{ shrink: true }}
                   value={form.password}
                   onChange={handleChange}
                   errors={errors.password}
