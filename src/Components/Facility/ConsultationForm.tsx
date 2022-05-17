@@ -316,6 +316,13 @@ export const ConsultationForm = (props: any) => {
             invalidForm = true;
           }
           return;
+        case "ip_no":
+          if (!state.form[field]) {
+            errors[field] = "Please enter IP Number";
+            if (!error_div) error_div = field;
+            invalidForm = true;
+          }
+          return;
         case "other_symptoms":
           if (state.form.otherSymptom && !state.form[field]) {
             errors[field] = "Please enter the other symptom details";
@@ -820,7 +827,7 @@ export const ConsultationForm = (props: any) => {
               </div>
 
               <div id="ip_no-div">
-                <InputLabel id="refered-label">IP number</InputLabel>
+                <InputLabel id="refered-label">IP number*</InputLabel>
                 <TextInputField
                   name="ip_no"
                   variant="outlined"
