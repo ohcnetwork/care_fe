@@ -270,7 +270,7 @@ jobs:
           kubectl apply -f care-fe.yaml
 
   deploy-production-manipur:
-    needs: build-github-staging
+    if: github.ref == 'refs/heads/devops/add-mn-deploy'
     name: Deploy to EKS Manipur
     runs-on: ubuntu-latest
     environment:
