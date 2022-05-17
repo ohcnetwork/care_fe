@@ -348,6 +348,13 @@
   padding-left: 5px;
 }
 
+.error-page-wrap{
+  width: 400px;
+}
+.error-page-wrap img{
+  width: 100%;
+}
+
 @screen md {
   * {
     scrollbar-width: thin;
