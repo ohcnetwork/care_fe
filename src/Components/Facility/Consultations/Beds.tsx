@@ -16,8 +16,8 @@ import moment from "moment";
 
 interface BedsProps {
   facilityId: string;
-  patientId: string;
-  consultationId: string;
+  patientId: number;
+  consultationId: number;
 }
 
 const Beds = (props: BedsProps) => {

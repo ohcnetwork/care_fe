@@ -217,7 +217,7 @@ export const listConsultationBeds = (params: object) =>
   fireRequest("listConsultationBeds", [], params, {});
 export const createConsultationBed = (
   params: object,
-  consultation_id: string,
+  consultation_id: number,
   bed_id: string
 ) =>
   fireRequest(
