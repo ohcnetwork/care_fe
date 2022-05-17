@@ -14,11 +14,11 @@ import { useCallback, useReducer, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import {
   CURRENT_HEALTH_CHANGE,
-  PATIENT_CATEGORY,
+  // PATIENT_CATEGORY,
   SYMPTOM_CHOICES,
   TELEMEDICINE_ACTIONS,
   REVIEW_AT_CHOICES,
-  ADMITTED_TO,
+  // ADMITTED_TO,
   RHYTHM_CHOICES,
 } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
