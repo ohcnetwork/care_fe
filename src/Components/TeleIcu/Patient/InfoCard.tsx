@@ -34,24 +34,14 @@ export default function TeleICUPatientInfoCard({
         </div>
       </Modal>
       <div className="bg-white border-b p-5 flex items-center lg:w-7/12 w-full">
-        {!patient.last_consultation?.current_bed ? (
-          <button
-            className="text-sm text-primary-600 hover:bg-gray-300 p-2 rounded"
-            onClick={() => setOpen(true)}
-          >
-            Assign Bed
-          </button>
-        ) : (
+        {patient.blood_group && (
           <div className="flex flex-col items-center ">
-            <div className="text-lg border border-cool-gray-600 rounded p-2 m-2">
-              {patient.last_consultation?.current_bed?.bed_object?.name}
+            <div className="text-2xl border border-cool-gray-300 rounded-full font-semibold items-center m-2 h-20 w-20 flex justify-center">
+              {patient.blood_group}
             </div>
-            <button
-              className="text-sm text-primary-600 hover:bg-gray-300 p-2 rounded"
-              onClick={() => setOpen(true)}
-            >
-              Switch Bed
-            </button>
+            <span className="font-light text-primary-600 text-xs mr-1">
+              Blood Group
+            </span>
           </div>
         )}
         <div className="pl-4">
@@ -63,15 +53,25 @@ export default function TeleICUPatientInfoCard({
             <span className="mx-2">•</span>
             <span>{patient.gender && GENDER[patient.gender]}</span>
           </p>
-          <div className="text-sm flex flex-wrap">
-            {patient.blood_group && (
+          <div className="text-sm flex flex-wrap items-center">
+            {!patient.last_consultation?.current_bed ? (
+              <button
+                className="text-sm text-primary-600 hover:bg-gray-300 p-2 rounded"
+                onClick={() => setOpen(true)}
+              >
+                Assign Bed
+              </button>
+            ) : (
               <div className="m-1">
-                <span className="font-light text-primary-600 text-xs mr-1">
-                  Blood Group
-                </span>
                 <span className="sm:text-base font-semibold text-sm mr-2">
-                  {patient.blood_group}
+                  {patient.last_consultation?.current_bed?.bed_object?.name}
                 </span>
+                <button
+                  className="text-sm text-primary-600 hover:bg-gray-300 p-2 rounded"
+                  onClick={() => setOpen(true)}
+                >
+                  Switch Bed
+                </button>
               </div>
             )}
             {patient.last_consultation?.weight ? (
