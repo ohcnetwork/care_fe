@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { postLogin } from "../../Redux/actions";
 import { navigate } from "raviger";
@@ -102,6 +102,10 @@ const LoginPage = (props: any) => {
       setForm(formCaptcha);
     }
   };
+
+  useEffect(() => {
+    if (window.location.pathname === "/") location.href = "/login";
+  }, []);
 
   return (
     <div className="flex flex-col md:flex-row h-screen relative">
