@@ -4,6 +4,7 @@ on:
     branches:
       - develop
       - master
+      - devops/add-mn-deploy
   pull_request:
     branches:
       - develop
