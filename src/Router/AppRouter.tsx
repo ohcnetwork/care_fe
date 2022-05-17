@@ -139,7 +139,7 @@ const routes = {
   "/facility/:facilityId/patient/:patientId/sample/:id": ({ id }: any) => (
     <SampleDetails id={id} />
   ),
-  "/facility/:facilityId/patient/:patientId/notes/": ({
+  "/facility/:facilityId/patient/:patientId/notes": ({
     facilityId,
     patientId,
   }: any) => <PatientNotes patientId={patientId} facilityId={facilityId} />,
