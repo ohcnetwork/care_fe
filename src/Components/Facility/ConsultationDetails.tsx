@@ -37,7 +37,6 @@ import TeleICUPatientInfoCard from "../TeleIcu/Patient/InfoCard";
 import TeleICUPatientVitalsCard from "../TeleIcu/Patient/VitalsCard";
 import TeleICUPatientVitalsGraphCard from "../TeleIcu/Patient/VitalsGraph";
 import DoctorVideoSlideover from "../TeleIcu/DoctorVideoSlideover";
-import Beds from "./Consultations/Beds";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -592,20 +591,6 @@ export const ConsultationDetails = (props: any) => {
             middlewareHostname={cameraMiddlewareHostname}
             config={cameraConfig}
           />
-        )}
-        {tab === "BEDS" && (
-          <div className="mt-4">
-            <PageTitle
-              title="Beds History"
-              hideBack={true}
-              breadcrumbs={false}
-            />
-            <Beds
-              facilityId={facilityId}
-              patientId={patientId}
-              consultationId={consultationId}
-            ></Beds>
-          </div>
         )}
         {tab === "SUMMARY" && (
           <div className="mt-4">

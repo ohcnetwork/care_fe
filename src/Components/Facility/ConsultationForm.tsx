@@ -54,6 +54,7 @@ import { OnlineUsersSelect } from "../Common/OnlineUsersSelect";
 import { UserModel } from "../Users/models";
 import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 import { BedSelect } from "../Common/BedSelect";
+import Beds from "./Consultations/Beds";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -1083,6 +1084,18 @@ export const ConsultationForm = (props: any) => {
           </form>
         </div>
       </div>
+      {!id ? null : (
+        <div className="mt-4 bg-white rounded shadow p-4">
+          <h3>Update Bed</h3>
+          <CardContent>
+            <Beds
+              facilityId={facilityId}
+              patientId={patientId}
+              consultationId={id}
+            ></Beds>
+          </CardContent>
+        </div>
+      )}
     </div>
   );
 };
