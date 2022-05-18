@@ -171,7 +171,7 @@ export const ConsultationDetails = (props: any) => {
       <div className="px-2 pb-2">
         <nav className="flex justify-between flex-wrap">
           <PageTitle
-            title="Patient Dashboard"
+            title="Patient Details"
             className="sm:m-0 sm:p-0"
             breadcrumbs={true}
           />
