@@ -15,6 +15,7 @@ import { useFeedPTZ } from "../../../Common/hooks/useFeedPTZ";
 const PageTitle = loadable(() => import("../../Common/PageTitle"));
 import * as Notification from "../../../Utils/Notifications.js";
 import { Tooltip } from "@material-ui/core";
+import { FeedCameraPTZHelpButton } from "./Feed";
 
 const LiveFeed = (props: any) => {
   const middlewareHostname =
@@ -111,8 +112,6 @@ const LiveFeed = (props: any) => {
           value: i + 1,
         }));
 
-  const cameraPTZ = getCameraPTZ(precision);
-
   useEffect(() => {
     let tId: any;
     if (streamStatus !== StreamStatus.Playing) {
@@ -195,17 +194,20 @@ const LiveFeed = (props: any) => {
     },
   };
 
+  const cameraPTZ = getCameraPTZ(precision).map((option) => {
+    const cb =
+      cameraPTZActionCBs[
+        cameraPTZActionCBs[option.action] ? option.action : "other"
+      ];
+    return { ...option, callback: () => cb(option) };
+  });
+
   // Voluntarily disabling eslint, since length of `cameraPTZ` is constant and
   // hence shall not cause issues. (https://news.ycombinator.com/item?id=24363703)
   for (const option of cameraPTZ) {
     if (!option.shortcutKey) continue;
-
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    useKeyboardShortcut(option.shortcutKey, () => {
-      cameraPTZActionCBs[
-        cameraPTZActionCBs[option.action] ? option.action : "other"
-      ](option);
-    });
+    useKeyboardShortcut(option.shortcutKey, option.callback);
   }
 
   return (
@@ -274,23 +276,30 @@ const LiveFeed = (props: any) => {
             </div>
             <div className="flex max-w-lg mt-4">
               {cameraPTZ.map((option) => {
-                let tooltip = option.label;
-                if (option.shortcutKey)
-                  tooltip += ` (${option.shortcutKey
+                const shortcutKeyDescription =
+                  option.shortcutKey &&
+                  option.shortcutKey
                     .join(" + ")
-                    .replace("Control", "Ctrl")})`;
-
-                const onClick = () => {
-                  cameraPTZActionCBs[
-                    cameraPTZActionCBs[option.action] ? option.action : "other"
-                  ](option);
-                };
+                    .replace("Control", "Ctrl")
+                    .replace("ArrowUp", "↑")
+                    .replace("ArrowDown", "↓")
+                    .replace("ArrowLeft", "←")
+                    .replace("ArrowRight", "→");
 
                 return (
-                  <Tooltip title={tooltip} key={option.action}>
+                  <Tooltip
+                    placement="top"
+                    arrow={true}
+                    title={
+                      <span className="text-sm font-semibold">
+                        {`${option.label}  (${shortcutKeyDescription})`}
+                      </span>
+                    }
+                    key={option.action}
+                  >
                     <button
                       className="bg-green-100 hover:bg-green-200 border border-green-100 p-2 flex-1"
-                      onClick={onClick}
+                      onClick={option.callback}
                     >
                       <span className="sr-only">{option.label}</span>
                       {option.icon ? (
@@ -304,6 +313,12 @@ const LiveFeed = (props: any) => {
                   </Tooltip>
                 );
               })}
+              <div className="pl-3">
+                <FeedCameraPTZHelpButton
+                  cameraPTZ={cameraPTZ}
+                  tooltipPlacement="top"
+                />
+              </div>
             </div>
           </div>
 

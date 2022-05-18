@@ -2,7 +2,7 @@ import clsx from "clsx";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import screenfull from "screenfull";
-import { getCameraPTZ } from "../../../Common/constants";
+import { CameraPTZ, getCameraPTZ } from "../../../Common/constants";
 import { useFeedPTZ } from "../../../Common/hooks/useFeedPTZ";
 import {
   ICameraAssetState,
@@ -27,7 +27,6 @@ interface IFeedProps {
   patientId: string;
   consultationId: any;
 }
-
 const PATIENT_DEFAULT_PRESET = "Patient View".trim().toLowerCase();
 
 export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
@@ -382,23 +381,38 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
             </div>
           </div>
           <div className="mt-8 lg:mt-0 flex-shrink-0 flex lg:flex-col items-stretch">
+            <div className="pb-3">
+              <FeedCameraPTZHelpButton cameraPTZ={cameraPTZ} />
+            </div>
             {cameraPTZ.map((option) => {
-              let tooltip = option.label;
-              if (option.shortcutKey)
-                tooltip += ` (${option.shortcutKey
+              const shortcutKeyDescription =
+                option.shortcutKey &&
+                option.shortcutKey
                   .join(" + ")
-                  .replace("Control", "Ctrl")})`;
+                  .replace("Control", "Ctrl")
+                  .replace("ArrowUp", "↑")
+                  .replace("ArrowDown", "↓")
+                  .replace("ArrowLeft", "←")
+                  .replace("ArrowRight", "→");
 
               return (
-                <Tooltip title={tooltip} key={option.action}>
+                <Tooltip
+                  key={option.action}
+                  placement="left"
+                  arrow={true}
+                  title={
+                    <span className="text-sm font-semibold">
+                      {`${option.label}  (${shortcutKeyDescription})`}
+                    </span>
+                  }
+                >
                   <button
-                    key={option.action}
                     className="bg-green-100 hover:bg-green-200 border border-green-100 rounded p-2"
-                    onClick={() => option.callback()}
+                    onClick={option.callback}
                   >
                     <span className="sr-only">{option.label}</span>
                     {option.icon ? (
-                      <i className={`${option.icon} md:p-2`}></i>
+                      <i className={`${option.icon} md:p-2`} />
                     ) : (
                       <span className="px-2 font-bold h-full w-8 flex items-center justify-center">
                         {option.value}x
@@ -412,5 +426,81 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
         </div>
       </div>
     </div>
+  );
+};
+
+export const FeedCameraPTZHelpButton = (props: {
+  cameraPTZ: CameraPTZ[];
+  tooltipPlacement?:
+    | "bottom-end"
+    | "bottom-start"
+    | "bottom"
+    | "left-end"
+    | "left-start"
+    | "left"
+    | "right-end"
+    | "right-start"
+    | "right"
+    | "top-end"
+    | "top-start"
+    | "top";
+}) => {
+  const { cameraPTZ, tooltipPlacement } = props;
+  return (
+    <Tooltip
+      placement={tooltipPlacement ?? "left-start"}
+      arrow={true}
+      title={
+        <ul className="p-2 text-sm">
+          {cameraPTZ.map((option) => {
+            return (
+              <li key={option.action} className="py-2 flex gap-3 items-center">
+                <span className="font-semibold w-16">{option.label}</span>
+                <div className="flex gap-1">
+                  {option.shortcutKey.map((hotkey, index) => {
+                    const isArrowKey = hotkey.includes("Arrow");
+                    hotkey = hotkey.replace("Control", "Ctrl");
+
+                    const keyElement = (
+                      <div
+                        key={index}
+                        className="font-mono shadow-md border-gray-500 border rounded-md p-1.5"
+                      >
+                        {isArrowKey ? (
+                          <i className={`fa-sm ${option.icon}`} />
+                        ) : (
+                          hotkey
+                        )}
+                      </div>
+                    );
+
+                    // Skip wrapping with + for joining with next key
+                    if (index === option.shortcutKey.length - 1)
+                      return keyElement;
+
+                    return (
+                      <div key={index} className="flex gap-1 items-center">
+                        {keyElement}
+                        <span className="p-1">+</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      }
+    >
+      <button
+        key="option.action"
+        className="rounded p-2"
+        onClick={() => {
+          // TODO
+        }}
+      >
+        <i className={"fa fa-circle-question md:p-2"} />
+      </button>
+    </Tooltip>
   );
 };
