@@ -1,6 +1,5 @@
-import loadable from "@loadable/component";
-import { navigate, useQueryParams } from "raviger";
-import React, { useEffect, useState } from "react";
+import { navigate } from "raviger";
+import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import {
   getNotifications,
@@ -8,10 +7,8 @@ import {
   updateUserPnconfig,
   getPublicKey,
 } from "../../Redux/actions";
-import Pagination from "../Common/Pagination";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import { SelectField } from "../Common/HelperInputFields";
-import { InputLabel } from "@material-ui/core";
 import moment from "moment";
 import { useSelector } from "react-redux";
 import { Button, CircularProgress } from "@material-ui/core";
@@ -20,13 +17,17 @@ import { Error } from "../../Utils/Notifications.js";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 
-const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
-
 const RESULT_LIMIT = 14;
-const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
-export default function ResultList({ expanded = false }) {
+interface ResultListProps {
+  expanded?: boolean;
+  className?: string;
+}
+
+export default function ResultList({
+  expanded = false,
+  className = "",
+}: ResultListProps) {
   const rootState: any = useSelector((rootState) => rootState);
   const { currentUser } = rootState;
   const { t } = useTranslation();
@@ -43,7 +44,7 @@ export default function ResultList({ expanded = false }) {
   const [isSubscribed, setIsSubscribed] = useState("");
   const [isSubscribing, setIsSubscribing] = useState(false);
 
-  const intialSubscriptionState = async () => {
+  const intialSubscriptionState = useCallback(async () => {
     try {
       const res = await dispatch(getUserPnconfig({ username: username }));
       const reg = await navigator.serviceWorker.ready;
@@ -60,7 +61,7 @@ export default function ResultList({ expanded = false }) {
         msg: `Service Worker Error - ${error}`,
       });
     }
-  };
+  }, [dispatch, username]);
 
   const handleSubscribeClick = () => {
     const status = isSubscribed;
@@ -93,34 +94,34 @@ export default function ResultList({ expanded = false }) {
           .then(function (subscription) {
             subscription
               ?.unsubscribe()
-              .then(async function (successful) {
+              .then(async function () {
                 const data = {
                   pf_endpoint: "",
                   pf_p256dh: "",
                   pf_auth: "",
                 };
-                const res = await dispatch(
+                await dispatch(
                   updateUserPnconfig(data, { username: username })
                 );
 
                 setIsSubscribed("NotSubscribed");
                 setIsSubscribing(false);
               })
-              .catch(function (e) {
+              .catch(function (error) {
                 Error({
-                  msg: "Unsubscribe failed.",
+                  msg: `Unsubscribe failed, ${error.message}`,
                 });
               });
           })
-          .catch(function (e) {
+          .catch(function (error) {
             Error({
-              msg: `Subscription Error`,
+              msg: `Subscription Error, ${error.message}`,
             });
           });
       })
-      .catch(function (e) {
+      .catch(function (error) {
         Error({
-          msg: `Service Worker Error`,
+          msg: `Service Worker Error, ${error.message}`,
         });
       });
   };
@@ -184,13 +185,17 @@ export default function ResultList({ expanded = false }) {
         });
     }
     intialSubscriptionState();
-  }, [dispatch, reload, showNotifications, offset, eventFilter, isSubscribed]);
+  }, [
+    dispatch,
+    reload,
+    showNotifications,
+    offset,
+    eventFilter,
+    isSubscribed,
+    intialSubscriptionState,
+  ]);
 
-  // const handlePagination = (page: number, limit: number) => {
-  //   updateQuery({ page, limit });
-  // };
-
-  let resultUrl = (event: string, data: any) => {
+  const resultUrl = (event: string, data: any) => {
     switch (event) {
       case "PATIENT_CREATED":
         return `/facility/${data.facility}/patient/${data.patient}`;
@@ -207,18 +212,18 @@ export default function ResultList({ expanded = false }) {
       case "INVESTIGATION_SESSION_CREATED":
         return `/facility/${data.facility}/patient/${data.patient}/consultation/${data.consultation}/investigation/${data.session}`;
       case "MESSAGE":
-        return `/notice_board/`;
+        return "/notice_board/";
       default:
         return "#";
     }
   };
 
-  let getNotificationTitle = (id: string) =>
+  const getNotificationTitle = (id: string) =>
     NOTIFICATION_EVENTS.find((notification) => notification.id === id)?.text;
 
   let resultList: any[] = [];
   if (data && data.length) {
-    resultList = data.map((result: any, idx: number) => {
+    resultList = data.map((result: any) => {
       return (
         <div
           key={`usr_${result.id}`}
@@ -283,7 +288,7 @@ export default function ResultList({ expanded = false }) {
   }
 
   return (
-    <div>
+    <div className={className}>
       <button
         onClick={() => setShowNotifications(!showNotifications)}
         className={clsx(
@@ -326,7 +331,7 @@ export default function ResultList({ expanded = false }) {
               <div className="grid grid-cols-3">
                 <div>
                   <button
-                    onClick={(_) => {
+                    onClick={() => {
                       setReload(!reload);
                       setData([]);
                       setOffset(0);
@@ -339,7 +344,7 @@ export default function ResultList({ expanded = false }) {
                 </div>
                 <div>
                   <button
-                    onClick={(_) => setShowNotifications(false)}
+                    onClick={() => setShowNotifications(false)}
                     className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0"
                   >
                     <i className="fa-fw fas fa-times cursor-pointer mr-2" />{" "}
