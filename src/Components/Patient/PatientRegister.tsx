@@ -241,9 +241,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     }
   }, [careExtId]);
 
-  const headerText = !id
-    ? "Add Details of Covid Suspect / Patient"
-    : "Update Covid Suspect / Patient Details";
+  const headerText = !id ? "Add Details of Patient" : "Update Patient Details";
   const buttonText = !id ? "Add Patient" : "Save Details";
 
   const fetchDistricts = useCallback(
