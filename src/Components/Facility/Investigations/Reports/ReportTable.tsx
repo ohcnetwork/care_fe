@@ -77,7 +77,7 @@ const ReportRow = ({ data, name, min, max }: any) => {
         });
         return (
           <TableCell
-            key={d.value}
+            key={d?.value}
             className={className.tableCell}
             align="center"
             style={{
