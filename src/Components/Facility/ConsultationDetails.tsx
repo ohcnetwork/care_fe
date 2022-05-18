@@ -212,8 +212,8 @@ export const ConsultationDetails = (props: any) => {
         </nav>
         <div className="flex md:flex-row flex-col w-full mt-2">
           <div className="border rounded-lg bg-white shadow h-full text-black p-4 w-full">
-            <div className="pl-5">
-              <div className="flexmd:flex-row flex-col md:items-center">
+            <div>
+              <div className="flex md:flex-row flex-col md:items-center">
                 <div className="text-2xl md:mt-2 font-semibold">
                   <i
                     className="text-gray-500 fas fa-hospital text-2xl"
@@ -224,7 +224,7 @@ export const ConsultationDetails = (props: any) => {
               </div>
               <div className="flex items-center">
                 {consultationData.ip_no && (
-                  <div className="md:col-span-2 capitalize">
+                  <div className="md:col-span-2 capitalize pl-2">
                     <span className="badge badge-pill badge-primary">
                       {`IP: ${consultationData.ip_no}`}
                     </span>
@@ -233,7 +233,7 @@ export const ConsultationDetails = (props: any) => {
               </div>
             </div>
             <TeleICUPatientInfoCard patient={patientData} />
-            <div className="flex md:flex-row flex-col mt-4 gap-2 justify-between pl-5">
+            <div className="flex md:flex-row flex-col mt-4 gap-2 justify-between">
               <div className="flex flex-col text-xs text-gray-700 font-base leading-relaxed">
                 <div>
                   <span className="text-gray-900">Created: </span>
@@ -259,7 +259,7 @@ export const ConsultationDetails = (props: any) => {
                 )}
               </div>
             </div>
-            <div className="flex md:flex-row flex-col justify-between pl-5">
+            <div className="flex md:flex-row flex-col justify-between">
               {consultationData.admitted_to && (
                 <div className="border rounded-lg bg-gray-100 p-2 md:mt-0 mt-2">
                   <div className="border-b-2 py-1">
@@ -293,7 +293,7 @@ export const ConsultationDetails = (props: any) => {
               )}
             </div>
 
-            <div className="mt-2 pl-5">
+            <div className="mt-2">
               {consultationData.diagnosis && (
                 <div className="text-sm w-full">
                   <span className="font-semibold leading-relaxed">

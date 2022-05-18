@@ -12,7 +12,7 @@ export default function TeleICUPatientInfoCard({
   patient,
 }: ITeleICUPatientInfoCardProps) {
   return (
-    <section className="flex items-stretch my-2 lg:flex-row flex-col space-y-3 lg:space-y-0 lg:space-x-2 pl-5">
+    <section className="flex items-stretch my-2 lg:flex-row flex-col space-y-3 lg:space-y-0 lg:space-x-2">
       <div className="bg-white border-b py-5 flex items-center lg:w-7/12 w-full">
         <img
           className="w-16 h-16 sm:w-20 sm:h-20 rounded-full self-start object-cover"
