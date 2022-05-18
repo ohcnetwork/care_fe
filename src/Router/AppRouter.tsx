@@ -396,6 +396,7 @@ const AppRouter = () => {
   const pages = useRoutes(routes);
   const path = usePath();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -441,7 +442,15 @@ const AppRouter = () => {
           <div className="max-w-8xl mx-auto px-5 py-3">{pages}</div>
         </main>
       </div>
-      <NotificationsList className="absolute bottom-5 right-10 cursor-pointer" />
+      <div className="absolute bottom-5 right-10 cursor-pointer">
+        <span
+          style={{ height: "20px", width: "20px" }}
+          className="relative top-5 left-6 flex items-center justify-center text-xs text-white bg-red-400 rounded-full"
+        >
+          {unreadNotifications}
+        </span>
+        <NotificationsList setUnreadNotifications={setUnreadNotifications} />
+      </div>
     </div>
   );
 };

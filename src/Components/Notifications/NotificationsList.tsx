@@ -22,11 +22,13 @@ const RESULT_LIMIT = 14;
 interface ResultListProps {
   expanded?: boolean;
   className?: string;
+  setUnreadNotifications?: any;
 }
 
 export default function ResultList({
   expanded = false,
   className = "",
+  setUnreadNotifications,
 }: ResultListProps) {
   const rootState: any = useSelector((rootState) => rootState);
   const { currentUser } = rootState;
@@ -37,6 +39,7 @@ export default function ResultList({
   const [isLoading, setIsLoading] = useState(false);
   const [offset, setOffset] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
   const [reload, setReload] = useState(false);
   const [eventFilter, setEventFilter] = useState("");
@@ -167,23 +170,31 @@ export default function ResultList({
   }
 
   useEffect(() => {
+    if (setUnreadNotifications) setUnreadNotifications(unreadCount);
+  }, [unreadCount, setUnreadNotifications]);
+
+  useEffect(() => {
     setIsLoading(true);
-    if (showNotifications) {
-      dispatch(
-        getNotifications({ offset, event: eventFilter, medium_sent: "SYSTEM" })
-      )
-        .then((res: any) => {
-          if (res && res.data) {
-            setData(res.data.results);
-            setTotalCount(res.data.count);
-          }
-          setIsLoading(false);
-        })
-        .catch(() => {
-          setIsLoading(false);
-          setOffset((prev) => prev - RESULT_LIMIT);
-        });
-    }
+    dispatch(
+      getNotifications({ offset, event: eventFilter, medium_sent: "SYSTEM" })
+    )
+      .then((res: any) => {
+        if (res && res.data) {
+          setData(res.data.results);
+          setUnreadCount(
+            res.data.results?.reduce(
+              (acc: number, result: any) => acc + (result.read_at ? 0 : 1),
+              0
+            )
+          );
+          setTotalCount(res.data.count);
+        }
+        setIsLoading(false);
+      })
+      .catch(() => {
+        setIsLoading(false);
+        setOffset((prev) => prev - RESULT_LIMIT);
+      });
     intialSubscriptionState();
   }, [
     dispatch,
@@ -311,6 +322,12 @@ export default function ResultList({
         >
           {t("Notifications")}
         </div>
+
+        {/* {expanded && !!unreadCount && (
+          <div className="p-0.5 bg-red-500 text-white rounded-full">
+            <span>{unreadCount}</span>
+          </div>
+        )} */}
       </button>
       {/* <button
         onClick={() => setShowNotifications(!showNotifications)}
@@ -334,6 +351,7 @@ export default function ResultList({
                     onClick={() => {
                       setReload(!reload);
                       setData([]);
+                      setUnreadCount(0);
                       setOffset(0);
                     }}
                     className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0"
