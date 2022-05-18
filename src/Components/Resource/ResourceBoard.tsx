@@ -5,6 +5,8 @@ import {
   downloadResourceRequests,
 } from "../../Redux/actions";
 import Button from "@material-ui/core/Button";
+// drag and drop
+import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
 import { navigate } from "raviger";
 import moment from "moment";
 import { Modal } from "@material-ui/core";
@@ -108,114 +110,182 @@ export default function ResourceBoard({
     });
   };
 
-  let boardFilter = (filter: string) => {
-    return data
-      .filter(({ status }) => status === filter)
-      .map((resource: any, idx: number) => (
-        <div key={`resource_${resource.id}`} className="w-full mt-2 ">
-          <div className="overflow-hidden shadow rounded-lg bg-white h-full mx-2">
-            <div className={"p-4 h-full flex flex-col justify-between"}>
-              <div>
-                <div className="flex justify-between">
-                  <div className="font-semibold text-md capitalize mb-2 text-black">
-                    {resource.title}
-                  </div>
-                  <div>
-                    {resource.emergency && (
-                      <span className="flex-shrink-0 inline-block px-2 py-0.5 text-red-800 text-xs leading-4 font-medium bg-red-100 rounded-full">
-                        Emergency
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <dl className="grid grid-cols-1 col-gap-1 row-gap-2 sm:grid-cols-1">
-                  <div className="sm:col-span-1">
-                    <dt
-                      title=" Origin facility"
-                      className="text-sm leading-5 font-medium text-gray-500 flex items-center"
-                    >
-                      <i className="fas fa-plane-departure mr-2"></i>
-                      <dd className="font-bold text-sm leading-5 text-gray-900">
-                        {(resource.orgin_facility_object || {}).name}
-                      </dd>
-                    </dt>
-                  </div>
-                  <div className="sm:col-span-1">
-                    <dt
-                      title="Resource approving facility"
-                      className="text-sm leading-5 font-medium text-gray-500 flex items-center"
-                    >
-                      <i className="fas fa-user-check mr-2"></i>
-                      <dd className="font-bold text-sm leading-5 text-gray-900">
-                        {(resource.approving_facility_object || {}).name}
-                      </dd>
-                    </dt>
-                  </div>
-                  {resource.assigned_facility_object && (
-                    <div className="sm:col-span-1">
-                      <dt
-                        title=" Assigned facility"
-                        className="text-sm leading-5 font-medium text-gray-500 flex items-center"
-                      >
-                        <i className="fas fa-plane-arrival mr-2"></i>
-
-                        <dd className="font-bold text-sm leading-5 text-gray-900">
-                          {(resource.assigned_facility_object || {}).name ||
-                            "Yet to be decided"}
-                        </dd>
-                      </dt>
-                    </div>
-                  )}
-                  <div className="sm:col-span-1">
-                    <dt
-                      title="  Last Modified"
-                      className={
-                        "text-sm leading-5 font-medium flex items-center " +
-                        (moment()
-                          .subtract(2, "hours")
-                          .isBefore(resource.modified_date)
-                          ? "text-gray-900"
-                          : "rounded p-1 bg-red-400 text-white")
-                      }
-                    >
-                      <i className="fas fa-stopwatch mr-2"></i>
-                      <dd className="font-bold text-sm leading-5">
-                        {moment(resource.modified_date).format("LLL") || "--"}
-                      </dd>
-                    </dt>
-                  </div>
-
-                  {resource.assigned_to_object && (
-                    <div className="sm:col-span-1">
-                      <dt
-                        title="Assigned to"
-                        className="text-sm leading-5 font-medium text-gray-500 flex items-center"
-                      >
-                        <i className="fas fa-user mr-2"></i>
-                        <dd className="font-bold text-sm leading-5 text-gray-900">
-                          {resource.assigned_to_object.first_name}{" "}
-                          {resource.assigned_to_object.last_name} -{" "}
-                          {resource.assigned_to_object.user_type}
-                        </dd>
-                      </dt>
-                    </div>
-                  )}
-                </dl>
-              </div>
-
-              <div className="mt-2 flex">
-                <button
-                  onClick={(_) => navigate(`/resource/${resource.external_id}`)}
-                  className="btn w-full btn-default bg-white mr-2"
-                >
-                  <i className="fas fa-eye mr-2" /> All Details
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      ));
+  const updateResourceOrder = () => {
+    console.log("updateResourceOrder");
   };
+
+  let boardFilter = (filter: string) => {
+    return (
+      <div key={`resource_`} className="w-full mt-2 ">
+        <div className="overflow-hidden shadow rounded-lg bg-white h-full mx-2">
+          <DragDropContext onDragEnd={updateResourceOrder}>
+            <Droppable droppableId="fields">
+              {(provided) => (
+                <ul
+                  className="fields"
+                  {...provided.droppableProps}
+                  ref={provided.innerRef}
+                >
+                  {data
+                    .filter(({ status }) => status === filter)
+                    .map((resource: any, idx: number) => (
+                      <Draggable
+                        key={resource.id}
+                        draggableId={resource.label}
+                        index={idx}
+                      >
+                        {(provided) => (
+                          <li
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                            key={resource.id}
+                            className="rounded-lg p-2 border-1 flex justify-center"
+                            tabIndex={idx}
+                          >
+                            {/* Main code */}
+                            <div
+                              className={
+                                "p-4 h-full flex flex-col justify-between m-2"
+                              }
+                            >
+                              <div>
+                                <div className="flex justify-between">
+                                  <div className="font-semibold text-md capitalize mb-2 text-black">
+                                    {resource.title}
+                                  </div>
+                                  <div>
+                                    {resource.emergency && (
+                                      <span className="flex-shrink-0 inline-block px-2 py-0.5 text-red-800 text-xs leading-4 font-medium bg-red-100 rounded-full">
+                                        Emergency
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                                <dl className="grid grid-cols-1 col-gap-1 row-gap-2 sm:grid-cols-1">
+                                  <div className="sm:col-span-1">
+                                    <dt
+                                      title=" Origin facility"
+                                      className="text-sm leading-5 font-medium text-gray-500 flex items-center"
+                                    >
+                                      <i className="fas fa-plane-departure mr-2"></i>
+                                      <dd className="font-bold text-sm leading-5 text-gray-900">
+                                        {
+                                          (resource.orgin_facility_object || {})
+                                            .name
+                                        }
+                                      </dd>
+                                    </dt>
+                                  </div>
+                                  <div className="sm:col-span-1">
+                                    <dt
+                                      title="Resource approving facility"
+                                      className="text-sm leading-5 font-medium text-gray-500 flex items-center"
+                                    >
+                                      <i className="fas fa-user-check mr-2"></i>
+                                      <dd className="font-bold text-sm leading-5 text-gray-900">
+                                        {
+                                          (
+                                            resource.approving_facility_object ||
+                                            {}
+                                          ).name
+                                        }
+                                      </dd>
+                                    </dt>
+                                  </div>
+                                  {resource.assigned_facility_object && (
+                                    <div className="sm:col-span-1">
+                                      <dt
+                                        title=" Assigned facility"
+                                        className="text-sm leading-5 font-medium text-gray-500 flex items-center"
+                                      >
+                                        <i className="fas fa-plane-arrival mr-2"></i>
+
+                                        <dd className="font-bold text-sm leading-5 text-gray-900">
+                                          {(
+                                            resource.assigned_facility_object ||
+                                            {}
+                                          ).name || "Yet to be decided"}
+                                        </dd>
+                                      </dt>
+                                    </div>
+                                  )}
+                                  <div className="sm:col-span-1">
+                                    <dt
+                                      title="  Last Modified"
+                                      className={
+                                        "text-sm leading-5 font-medium flex items-center " +
+                                        (moment()
+                                          .subtract(2, "hours")
+                                          .isBefore(resource.modified_date)
+                                          ? "text-gray-900"
+                                          : "rounded p-1 bg-red-400 text-white")
+                                      }
+                                    >
+                                      <i className="fas fa-stopwatch mr-2"></i>
+                                      <dd className="font-bold text-sm leading-5">
+                                        {moment(resource.modified_date).format(
+                                          "LLL"
+                                        ) || "--"}
+                                      </dd>
+                                    </dt>
+                                  </div>
+
+                                  {resource.assigned_to_object && (
+                                    <div className="sm:col-span-1">
+                                      <dt
+                                        title="Assigned to"
+                                        className="text-sm leading-5 font-medium text-gray-500 flex items-center"
+                                      >
+                                        <i className="fas fa-user mr-2"></i>
+                                        <dd className="font-bold text-sm leading-5 text-gray-900">
+                                          {
+                                            resource.assigned_to_object
+                                              .first_name
+                                          }{" "}
+                                          {
+                                            resource.assigned_to_object
+                                              .last_name
+                                          }{" "}
+                                          -{" "}
+                                          {
+                                            resource.assigned_to_object
+                                              .user_type
+                                          }
+                                        </dd>
+                                      </dt>
+                                    </div>
+                                  )}
+                                </dl>
+                              </div>
+
+                              <div className="mt-2 flex">
+                                <button
+                                  onClick={(_) =>
+                                    navigate(
+                                      `/resource/${resource.external_id}`
+                                    )
+                                  }
+                                  className="btn w-full btn-default bg-white mr-2"
+                                >
+                                  <i className="fas fa-eye mr-2" /> All Details
+                                </button>
+                              </div>
+                            </div>
+                          </li>
+                        )}
+                      </Draggable>
+                    ))}
+                  {provided.placeholder}
+                </ul>
+              )}
+            </Droppable>
+          </DragDropContext>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="bg-gray-200 mr-2 flex-shrink-0 w-3/4 md:w-1/2 lg:w-1/3 xl:w-1/4 pb-4 h-full overflow-y-auto rounded-md">
       <div className="sticky top-0 pt-2 bg-gray-200 rounded">
