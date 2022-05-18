@@ -131,7 +131,7 @@ export const UserAdd = (props: UserProps) => {
   const [selectedFacility, setSelectedFacility] = useState<
     FacilityModel[] | null
   >([]);
-  const [phoneIsWhatsApp, setPhoneIsWhatsApp] = useState(false);
+  const [phoneIsWhatsApp, setPhoneIsWhatsApp] = useState(true);
   const [usernameInputInFocus, setUsernameInputInFocus] = useState(false);
 
   const rootState: any = useSelector((rootState) => rootState);
@@ -302,6 +302,14 @@ export const UserAdd = (props: UserProps) => {
     form[name] = value;
     dispatch({ type: "set_form", form });
   };
+
+  useAbortableEffect(() => {
+    if (phoneIsWhatsApp) {
+      handleValueChange(state.form.phone_number, "alt_phone_number");
+    } else {
+      handleValueChange("+91", "alt_phone_number"); // reset alt_phone_number
+    }
+  }, [phoneIsWhatsApp, state.form.phone_number, state.form.alt_phone_number]);
 
   const setFacility = (selected: FacilityModel | FacilityModel[] | null) => {
     setSelectedFacility(selected as FacilityModel[]);
@@ -545,18 +553,7 @@ export const UserAdd = (props: UserProps) => {
                 />
                 <CheckboxField
                   checked={phoneIsWhatsApp}
-                  onChange={(_, checked: boolean) => {
-                    if (checked) {
-                      setPhoneIsWhatsApp(true);
-                      handleValueChange(
-                        state.form.phone_number,
-                        "alt_phone_number"
-                      );
-                    } else {
-                      setPhoneIsWhatsApp(false);
-                      handleValueChange("+91", "alt_phone_number");
-                    }
-                  }}
+                  onChange={() => setPhoneIsWhatsApp(!phoneIsWhatsApp)}
                   label="Is the phone number a WhatsApp number?"
                   className="font-bold"
                 />
