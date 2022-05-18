@@ -30,6 +30,7 @@ import { CSVLink } from "react-csv";
 import moment from "moment";
 import { Theme, createStyles, makeStyles } from "@material-ui/core/styles";
 import Accordion from "@material-ui/core/Accordion";
+import CircularProgress from "@material-ui/core/CircularProgress";
 import AccordionSummary from "@material-ui/core/AccordionSummary";
 import AccordionDetails from "@material-ui/core/AccordionDetails";
 import Typography from "@material-ui/core/Typography";
@@ -607,9 +608,16 @@ const HospitalListPage = (props: any) => {
               <dt className="text-sm leading-5 font-medium text-gray-500 truncate">
                 Total Facilities
               </dt>
-              <dd className="mt-4 text-5xl leading-9 font-semibold text-gray-900">
-                {totalCount}
-              </dd>
+              {/* Show spinner until cound is fetched from server */}
+              {isLoading ? (
+                <dd className="mt-4 text-5xl leading-9">
+                  <CircularProgress className="text-primary-500" />
+                </dd>
+              ) : (
+                <dd className="mt-4 text-5xl leading-9 font-semibold text-gray-900">
+                  {totalCount}
+                </dd>
+              )}
             </dl>
           </div>
         </div>
