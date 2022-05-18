@@ -5,7 +5,7 @@ import MicIcon from "@material-ui/icons/Mic";
 import MicOffIcon from "@material-ui/icons/MicOff";
 export const VoiceRecorder = (props: any) => {
   const { createAudioBlob } = props;
-  let [audioURL, isRecording, startRecording, stopRecording, newBlob] =
+  const [audioURL, isRecording, startRecording, stopRecording, newBlob] =
     useRecorder();
 
   createAudioBlob(newBlob);
@@ -48,7 +48,11 @@ export const VoiceRecorder = (props: any) => {
       </div>
       {audioURL && (
         <div className="my-4">
-          <audio src={audioURL} controls />{" "}
+          <audio
+            className="max-h-full max-w-full m-auto object-contain"
+            src={audioURL}
+            controls
+          />{" "}
         </div>
       )}
     </div>

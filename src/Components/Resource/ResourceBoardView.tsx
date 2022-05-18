@@ -4,7 +4,7 @@ import ListFilter from "./ListFilter";
 import ResourceBoard from "./ResourceBoard";
 import { RESOURCE_CHOICES } from "../../Common/constants";
 import { make as SlideOver } from "../Common/SlideOver.gen";
-import { InputSearchBox } from "../Common/SearchBox";
+// import { InputSearchBox } from "../Common/SearchBox";
 import { downloadResourceRequests } from "../../Redux/actions";
 import loadable from "@loadable/component";
 import { CSVLink } from "react-csv";
@@ -32,6 +32,7 @@ export default function BoardView() {
   const dispatch: any = useDispatch();
   const [boardFilter, setBoardFilter] = useState(ACTIVE);
   const [downloadFile, setDownloadFile] = useState("");
+  // eslint-disable-next-line
   const [isLoading, setIsLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
@@ -74,7 +75,7 @@ export default function BoardView() {
       downloadResourceRequests({ ...formatFilter(qParams), csv: 1 })
     );
     setDownloadFile(res.data);
-    document.getElementById(`resourceRequests-ALL`)?.click();
+    document.getElementById("resourceRequests-ALL")?.click();
   };
 
   const onListViewBtnClick = () => {
@@ -84,7 +85,7 @@ export default function BoardView() {
 
   return (
     <div className="flex flex-col h-screen px-2 pb-2">
-      <div className="flex items-end justify-between px-4">
+      <div className="lg:grid lg:grid-cols-4 px-4">
         <PageTitle
           title={"Resource"}
           hideBack={true}
@@ -96,46 +97,49 @@ export default function BoardView() {
           }
           breadcrumbs={false}
         />
-
-        <div className="bg-gray-200 text-sm text-gray-500 leading-none border-2 border-gray-200 rounded-full inline-flex w-32">
-          <button
-            className={
-              "flex leading-none border-2 border-gray-200 rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-blue-400 focus:text-blue-400 rounded-r-full px-4 py-2" +
-              (boardFilter === ACTIVE
-                ? " bg-white text-gray-800"
-                : " bg-gray-200 text-sm text-gray-500")
-            }
-            onClick={(_) => setBoardFilter(ACTIVE)}
-          >
-            <span>Active</span>
-          </button>
-          <button
-            className={
-              "flex leading-none border-2 border-gray-200 rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-blue-400 focus:text-blue-400 rounded-r-full px-4 py-2" +
-              (boardFilter === COMPLETED
-                ? " bg-white text-gray-800"
-                : " bg-gray-200 text-sm text-gray-500")
-            }
-            onClick={(_) => setBoardFilter(COMPLETED)}
-          >
-            <span>Completed</span>
-          </button>
-        </div>
-        <button
-          className="px-4 py-2 rounded-full border-2 border-gray-200 text-sm bg-white text-gray-800 w-32 leading-none transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 hover:border-gray-400 focus:text-primary-600 focus:border-gray-400"
-          onClick={onListViewBtnClick}
-        >
-          <i className="fa fa-list-ul mr-1" aria-hidden="true"></i>
-          List View
-        </button>
-        <div className="flex items-start gap-2">
-          <button
-            className="flex leading-none border-2 border-gray-200 bg-white rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 focus:text-primary-600 focus:border-gray-400 hover:border-gray-400 rounded-r-full px-4 py-2 text-sm"
-            onClick={(_) => setShowFilters((show) => !show)}
-          >
-            <i className="fa fa-filter mr-1" aria-hidden="true"></i>
-            <span>Filters</span>
-          </button>
+        <div className="sm:flex sm:justify-between items-center sm:flex-wrap w-full col-span-3">
+          <div className="my-1 h-10 bg-gray-200 text-sm text-gray-500 leading-none border-2 border-gray-200 rounded-full inline-flex w-32">
+            <button
+              className={
+                "flex leading-none border-2 border-gray-200 rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-blue-400 focus:text-blue-400 rounded-r-full px-4 py-2" +
+                (boardFilter === ACTIVE
+                  ? " bg-white text-gray-800"
+                  : " bg-gray-200 text-sm text-gray-500")
+              }
+              onClick={(_) => setBoardFilter(ACTIVE)}
+            >
+              <span>Active</span>
+            </button>
+            <button
+              className={
+                "flex leading-none border-2 border-gray-200 rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-blue-400 focus:text-blue-400 rounded-r-full px-4 py-2" +
+                (boardFilter === COMPLETED
+                  ? " bg-white text-gray-800"
+                  : " bg-gray-200 text-sm text-gray-500")
+              }
+              onClick={(_) => setBoardFilter(COMPLETED)}
+            >
+              <span>Completed</span>
+            </button>
+          </div>
+          <div className="flex items-center my-2">
+            <button
+              className="h-fit px-4 py-2 rounded-full border-2 border-gray-200 text-sm bg-white text-gray-800 w-32 leading-none transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 hover:border-gray-400 focus:text-primary-600 focus:border-gray-400"
+              onClick={onListViewBtnClick}
+            >
+              <i className="fa fa-list-ul mr-1" aria-hidden="true"></i>
+              List View
+            </button>
+          </div>
+          <div className="flex items-center gap-2 my-3">
+            <button
+              className="flex leading-none border-2 border-gray-200 bg-white rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 focus:text-primary-600 focus:border-gray-400 hover:border-gray-400 rounded-r-full px-4 py-2 text-sm"
+              onClick={(_) => setShowFilters((show) => !show)}
+            >
+              <i className="fa fa-filter mr-1" aria-hidden="true"></i>
+              <span>Filters</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -164,7 +168,7 @@ export default function BoardView() {
         filename={`resource-requests--${now}.csv`}
         target="_blank"
         className="hidden"
-        id={`resourceRequests-ALL`}
+        id={"resourceRequests-ALL"}
       />
       <SlideOver show={showFilters} setShow={setShowFilters}>
         <div className="bg-white min-h-screen p-4">

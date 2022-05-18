@@ -1,5 +1,4 @@
-import { Grid } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
+import { Grid, CircularProgress } from "@material-ui/core";
 import WarningRoundedIcon from "@material-ui/icons/WarningRounded";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import SampleFilter from "./SampleFilters";
@@ -11,7 +10,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   SAMPLE_TEST_STATUS,
   SAMPLE_TEST_RESULT,
-  ROLE_STATUS_MAP,
+  // ROLE_STATUS_MAP,
   SAMPLE_FLOW_RULES,
   SAMPLE_TYPE_CHOICES,
 } from "../../Common/constants";
@@ -32,15 +31,15 @@ import GetAppIcon from "@material-ui/icons/GetApp";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
-const statusChoices = [...SAMPLE_TEST_STATUS];
+// const statusChoices = [...SAMPLE_TEST_STATUS];
 
-const statusFlow = { ...SAMPLE_FLOW_RULES };
+// const statusFlow = { ...SAMPLE_FLOW_RULES };
 
-const roleStatusMap = { ...ROLE_STATUS_MAP };
+// const roleStatusMap = { ...ROLE_STATUS_MAP };
 
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
-export default function SampleViewAdmin(props: any) {
+export default function SampleViewAdmin() {
   const [qParams, setQueryParams] = useQueryParams();
   const dispatch: any = useDispatch();
   const initialData: any[] = [];
@@ -171,7 +170,7 @@ export default function SampleViewAdmin(props: any) {
     status: number,
     result: number
   ) => {
-    let sampleData: any = {
+    const sampleData: any = {
       id: sample.id,
       status,
       consultation: sample.consultation,
@@ -212,10 +211,10 @@ export default function SampleViewAdmin(props: any) {
       const statusText = SAMPLE_TEST_STATUS.find(
         (i) => i.text === status
       )?.desc;
-      const validStatusChoices = statusChoices.filter(
-        (i) =>
-          status && statusFlow[status] && statusFlow[status].includes(i.text)
-      );
+      // const validStatusChoices = statusChoices.filter(
+      //   (i) =>
+      //     status && statusFlow[status] && statusFlow[status].includes(i.text)
+      // );
       // .filter(i => roleStatusMap[userType] && roleStatusMap[userType].includes(i.text))
       return (
         <div key={`usr_${item.id}`} className="w-full md:w-1/2 mt-6 md:px-4">
@@ -329,7 +328,7 @@ export default function SampleViewAdmin(props: any) {
                 {item.result === "AWAITING" && (
                   <div className="mt-2">
                     <button
-                      onClick={(e) => showUpdateStatus(item)}
+                      onClick={() => showUpdateStatus(item)}
                       className="w-full text-sm bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-4 border border-gray-400 rounded shadow text-center"
                     >
                       UPDATE SAMPLE TEST STATUS
@@ -338,7 +337,7 @@ export default function SampleViewAdmin(props: any) {
                 )}
 
                 <button
-                  onClick={(e) => navigate(`/sample/${item.id}`)}
+                  onClick={() => navigate(`/sample/${item.id}`)}
                   className="mt-2 w-full text-sm bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow text-center"
                 >
                   Sample Details
@@ -396,7 +395,7 @@ export default function SampleViewAdmin(props: any) {
           {value}
           <i
             className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
-            onClick={(e) => removeFilter(paramKey)}
+            onClick={() => removeFilter(paramKey)}
           ></i>
         </span>
       )
@@ -432,9 +431,16 @@ export default function SampleViewAdmin(props: any) {
               <dt className="text-sm leading-5 font-medium text-gray-500 truncate">
                 Total Samples Taken
               </dt>
-              <dd className="mt-4 text-5xl leading-9 font-semibold text-gray-900">
-                {totalCount}
-              </dd>
+              {/* Show spinner until count is fetched from server */}
+              {isLoading ? (
+                <dd className="mt-4 text-5xl leading-9">
+                  <CircularProgress className="text-primary-500" />
+                </dd>
+              ) : (
+                <dd className="mt-4 text-5xl leading-9 font-semibold text-gray-900">
+                  {totalCount}
+                </dd>
+              )}
             </dl>
           </div>
         </div>
@@ -466,7 +472,7 @@ export default function SampleViewAdmin(props: any) {
           <div className="flex items-start mb-2">
             <button
               className="btn btn-primary-ghost md:mt-7 "
-              onClick={(_) => setShowFilters((show) => !show)}
+              onClick={() => setShowFilters((show) => !show)}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -559,7 +565,7 @@ export default function SampleViewAdmin(props: any) {
         filename={`shift-requests--${now}.csv`}
         target="_blank"
         className="hidden"
-        id={`download-sample-tests`}
+        id={"download-sample-tests"}
       />
     </div>
   );

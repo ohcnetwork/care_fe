@@ -129,7 +129,7 @@ const routes = {
   "/facility/:facilityId/patient/:patientId/sample/:id": ({ id }: any) => (
     <SampleDetails id={id} />
   ),
-  "/facility/:facilityId/patient/:patientId/notes/": ({
+  "/facility/:facilityId/patient/:patientId/notes": ({
     facilityId,
     patientId,
   }: any) => <PatientNotes patientId={patientId} facilityId={facilityId} />,
@@ -399,7 +399,8 @@ const AppRouter = () => {
   const [unreadNotifications, setUnreadNotifications] = useState(0);
 
   useEffect(() => {
-    window.scrollTo(0, 0);
+    const pageContainer = window.document.getElementById("pages");
+    pageContainer?.scroll(0, 0);
   }, [path]);
 
   return (
