@@ -611,7 +611,16 @@ export const GENDER: { [key: number]: string } = GENDER_TYPES.reduce(
   {}
 );
 
-export const getCameraPTZ = (precision: number) => [
+export type CameraPTZ = {
+  icon?: string;
+  label: string;
+  action: string;
+  loadingLabel?: string;
+  shortcutKey: string[];
+  value?: number;
+};
+
+export const getCameraPTZ: (precision: number) => CameraPTZ[] = (precision) => [
   {
     icon: "fa fa-arrow-up",
     label: "Move Up",
