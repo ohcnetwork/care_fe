@@ -29,7 +29,7 @@ export default function Breadcrumbs(props: any) {
   const { replacements } = props;
   const path = usePath();
   const crumbs = path
-    .slice(1)
+    ?.slice(1)
     .split("/")
     .map((field, i) => {
       return {
@@ -68,7 +68,7 @@ export default function Breadcrumbs(props: any) {
               </Link>
             </div>
           </li>
-          {!showFullPath && crumbs.length > 2 && (
+          {!showFullPath && crumbs!.length > 2 && (
             <li>
               <div className="flex items-center cursor-pointer">
                 <svg
@@ -109,7 +109,7 @@ export default function Breadcrumbs(props: any) {
               </div>
             </li>
           )}
-          {crumbs.slice(showFullPath ? 0 : -2).map((crumb: any) => {
+          {crumbs?.slice(showFullPath ? 0 : -2).map((crumb: any) => {
             return (
               crumb.name && (
                 <li

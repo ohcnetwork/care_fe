@@ -131,7 +131,7 @@ export default function SampleViewAdmin() {
 
   const updateQuery = (params: any) => {
     const nParams = Object.assign({}, qParams, params);
-    setQueryParams(nParams, true);
+    setQueryParams(nParams, { replace: true });
   };
 
   const handlePagination = (page: number, limit: number) => {

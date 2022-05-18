@@ -77,7 +77,7 @@ export default function ListView() {
           : a,
       {}
     );
-    setQueryParams(nParams, true);
+    setQueryParams(nParams, { replace: true });
   };
 
   const handlePagination = (page: number, limit: number) => {
