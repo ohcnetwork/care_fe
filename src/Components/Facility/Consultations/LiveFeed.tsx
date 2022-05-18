@@ -30,6 +30,12 @@ const LiveFeed = (props: any) => {
   );
   const [loading, setLoading] = useState<string | undefined>();
   const dispatch: any = useDispatch();
+  const [page, setPage] = useState({
+    count: 0,
+    limit: 10,
+    offset: 0,
+  });
+
   const liveFeedPlayerRef = useRef<any>(null);
 
   const videoEl = liveFeedPlayerRef.current as HTMLVideoElement;
@@ -44,6 +50,8 @@ const LiveFeed = (props: any) => {
     url,
     videoEl,
   });
+
+  const refreshPresetsHash = props.refreshPresetsHash;
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [currentPreset, setCurrentPreset] = useState<any>();
@@ -62,8 +70,18 @@ const LiveFeed = (props: any) => {
   });
 
   const getBedPresets = async (id: any) => {
-    const bedAssets = await dispatch(listAssetBeds({ asset: id }));
+    const bedAssets = await dispatch(
+      listAssetBeds({
+        asset: id,
+        limit: page.limit,
+        offset: page.offset,
+      })
+    );
     setBedPresets(bedAssets?.data?.results);
+    setPage({
+      ...page,
+      count: bedAssets?.data?.count,
+    });
   };
 
   const gotoBedPreset = (preset: any) => {
@@ -74,11 +92,14 @@ const LiveFeed = (props: any) => {
   };
   useEffect(() => {
     getPresets({ onSuccess: (resp) => setPresets(resp.data) });
+  }, []);
+
+  useEffect(() => {
     getBedPresets(cameraAsset.id);
     if (bedPresets?.[0]?.position) {
       absoluteMove(bedPresets[0]?.position, {});
     }
-  }, [cameraAsset.id]);
+  }, [page.offset, cameraAsset.id, refreshPresetsHash]);
 
   const viewOptions = (page: number) =>
     presets
@@ -108,6 +129,13 @@ const LiveFeed = (props: any) => {
       clearTimeout(tId);
     };
   }, [startStream, streamStatus]);
+
+  const handlePagination = (cOffset: number) => {
+    setPage({
+      ...page,
+      offset: cOffset,
+    });
+  };
 
   const cameraPTZActionCBs: { [key: string]: (option: any) => void } = {
     precision: () => {
@@ -351,28 +379,48 @@ const LiveFeed = (props: any) => {
                     </button>
                   </>
                 ) : (
-                  bedPresets?.map((preset: any, index: number) => (
+                  <>
+                    {bedPresets?.map((preset: any, index: number) => (
+                      <button
+                        key={preset.id}
+                        className="flex flex-col bg-green-100 border border-white rounded-md p-2 text-black  hover:bg-green-500 hover:text-white truncate"
+                        onClick={() => {
+                          setLoading("Moving");
+                          gotoBedPreset(preset);
+                          setCurrentPreset(preset);
+                          getBedPresets(cameraAsset?.id);
+                          getPresets({});
+                        }}
+                      >
+                        <span className="justify-start text-xs font-semibold">
+                          {preset.bed_object.name}
+                        </span>
+                        <span className="mx-auto">
+                          {preset.meta.preset_name
+                            ? preset.meta.preset_name
+                            : `Unnamed Preset ${index + 1}`}
+                        </span>
+                      </button>
+                    ))}
                     <button
-                      key={preset.id}
-                      className="flex flex-col bg-green-100 border border-white rounded-md p-2 text-black  hover:bg-green-500 hover:text-white truncate"
+                      className="flex-1 p-4  font-bold text-center  text-gray-700 hover:text-gray-800 hover:bg-gray-300"
+                      disabled={page.offset === 0}
                       onClick={() => {
-                        setLoading("Moving");
-                        gotoBedPreset(preset);
-                        setCurrentPreset(preset);
-                        getBedPresets(cameraAsset?.id);
-                        getPresets({});
+                        handlePagination(page.offset - page.limit);
                       }}
                     >
-                      <span className="justify-start text-xs font-semibold">
-                        {preset.bed_object.name}
-                      </span>
-                      <span className="mx-auto">
-                        {preset.meta.preset_name
-                          ? preset.meta.preset_name
-                          : `Unnamed Preset ${index + 1}`}
-                      </span>
+                      <i className="fas fa-arrow-left"></i>
                     </button>
-                  ))
+                    <button
+                      className="flex-1 p-4  font-bold text-center  text-gray-700 hover:text-gray-800 hover:bg-gray-300"
+                      disabled={page.offset + page.limit >= page.count}
+                      onClick={() => {
+                        handlePagination(page.offset + page.limit);
+                      }}
+                    >
+                      <i className="fas fa-arrow-right"></i>
+                    </button>
+                  </>
                 )}
               </div>
               {props?.showRefreshButton && (

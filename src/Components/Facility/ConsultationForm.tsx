@@ -316,6 +316,13 @@ export const ConsultationForm = (props: any) => {
             invalidForm = true;
           }
           return;
+        case "ip_no":
+          if (!state.form[field]) {
+            errors[field] = "Please enter IP Number";
+            if (!error_div) error_div = field;
+            invalidForm = true;
+          }
+          return;
         case "other_symptoms":
           if (state.form.otherSymptom && !state.form[field]) {
             errors[field] = "Please enter the other symptom details";
@@ -332,7 +339,7 @@ export const ConsultationForm = (props: any) => {
           return;
         // case "admitted_to":
         case "admission_date":
-          if (JSON.parse(state.form.admitted) && !state.form[field]) {
+          if (state.form.suggestion === "A" && !state.form[field]) {
             errors[field] = "Field is required as person is admitted";
             if (!error_div) error_div = field;
             invalidForm = true;
@@ -397,13 +404,12 @@ export const ConsultationForm = (props: any) => {
           ? state.form.symptoms_onset_date
           : undefined,
         suggestion: state.form.suggestion,
-        admitted: JSON.parse(state.form.admitted),
+        admitted: state.form.suggestion === "A",
         // admitted_to: JSON.parse(state.form.admitted)
         //   ? state.form.admitted_to
         //   : undefined,
-        admission_date: JSON.parse(state.form.admitted)
-          ? state.form.admission_date
-          : undefined,
+        admission_date:
+          state.form.suggestion === "A" ? state.form.admission_date : undefined,
         category: state.form.category,
         is_kasp: state.form.is_kasp,
         kasp_enabled_date: JSON.parse(state.form.is_kasp) ? new Date() : null,
@@ -732,63 +738,33 @@ export const ConsultationForm = (props: any) => {
                 {!id && state.form.suggestion === "A" && (
                   <>
                     <div className="flex">
-                      <div className="flex-1" id="admitted-div">
-                        <InputLabel id="admitted-label">Admitted</InputLabel>
-                        <RadioGroup
-                          aria-label="covid"
-                          name="admitted"
-                          value={state.form.admitted}
-                          onChange={handleChange}
-                          style={{ padding: "0px 5px" }}
-                        >
-                          <Box display="flex" flexDirection="row">
-                            <FormControlLabel
-                              value="true"
-                              control={<Radio />}
-                              label="Yes"
-                            />
-                            <FormControlLabel
-                              value="false"
-                              control={<Radio />}
-                              label="No"
-                            />
-                          </Box>
-                        </RadioGroup>
-                        <ErrorHelperText error={state.errors.admitted} />
+                      <div className="flex-1" id="admission_date-div">
+                        <DateInputField
+                          id="admission_date"
+                          label="Admission Date*"
+                          margin="dense"
+                          value={state.form.admission_date}
+                          disableFuture={true}
+                          onChange={(date) =>
+                            handleDateChange(date, "admission_date")
+                          }
+                          errors={state.errors.admission_date}
+                        />
                       </div>
                     </div>
-                    {!id && JSON.parse(state.form.admitted) ? (
-                      <>
-                        <div className="flex">
-                          <div className="flex-1" id="admission_date-div">
-                            <DateInputField
-                              id="admission_date"
-                              label="Admission Date*"
-                              margin="dense"
-                              value={state.form.admission_date}
-                              disableFuture={true}
-                              onChange={(date) =>
-                                handleDateChange(date, "admission_date")
-                              }
-                              errors={state.errors.admission_date}
-                            />
-                          </div>
-                        </div>
-                        <div>
-                          <InputLabel id="asset-type">Bed</InputLabel>
-                          <BedSelect
-                            name="bed"
-                            setSelected={setBed}
-                            selected={bed}
-                            errors=""
-                            multiple={false}
-                            margin="dense"
-                            // location={state.form.}
-                            facility={facilityId}
-                          />
-                        </div>
-                      </>
-                    ) : null}
+                    <div>
+                      <InputLabel id="asset-type">Bed</InputLabel>
+                      <BedSelect
+                        name="bed"
+                        setSelected={setBed}
+                        selected={bed}
+                        errors=""
+                        multiple={false}
+                        margin="dense"
+                        // location={state.form.}
+                        facility={facilityId}
+                      />
+                    </div>
                   </>
                 )}
               </div>
@@ -820,7 +796,7 @@ export const ConsultationForm = (props: any) => {
               </div>
 
               <div id="ip_no-div">
-                <InputLabel id="refered-label">IP number</InputLabel>
+                <InputLabel id="refered-label">IP number*</InputLabel>
                 <TextInputField
                   name="ip_no"
                   variant="outlined"
@@ -830,6 +806,7 @@ export const ConsultationForm = (props: any) => {
                   value={state.form.ip_no}
                   onChange={handleChange}
                   errors={state.errors.ip_no}
+                  required
                 />
               </div>
               <div id="test_id-div">
