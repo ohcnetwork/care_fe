@@ -318,9 +318,14 @@ const AssetManage = (props: AssetManageProps) => {
           </div>
         </>
       ) : (
-        <div className="grid place-items-center mt-2">
-          <img src="/images/errorhappened.png" alt="Error Happened" />
-          <h1 className="text-xl text-center mt-2">
+        <div className="grid place-items-center mt-4">
+          <img
+            src="/images/errorhappened.png"
+            width={"400px"}
+            height={"600px"}
+            alt="Error Happened"
+          />
+          <h1 className="text-2xl text-center mt-2">
             The QR Code scanned was invalid. Please try again with a valid QR
             code.
           </h1>
