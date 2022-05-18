@@ -2,18 +2,15 @@ import loadable from "@loadable/component";
 import Grid from "@material-ui/core/Grid";
 import { Button } from "@material-ui/core";
 import { navigate, useQueryParams } from "raviger";
-import { parsePhoneNumberFromString } from "libphonenumber-js";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { externalResultList } from "../../Redux/actions";
-import { PhoneNumberField } from "../Common/HelperInputFields";
 import Pagination from "../Common/Pagination";
 import { InputSearchBox } from "../Common/SearchBox";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import ListFilter from "./ListFilter";
 import moment from "moment";
 import { CSVLink } from "react-csv";
-import { externalResultFormatter } from "./Commons";
 import GetAppIcon from "@material-ui/icons/GetApp";
 import FacilitiesSelectDialogue from "./FacilitiesSelectDialogue";
 import { FacilityModel } from "../Facility/models";
@@ -21,6 +18,7 @@ import { FacilityModel } from "../Facility/models";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function Badge(props: { color: string; icon: string; text: string }) {
   return (
     <span
@@ -61,6 +59,7 @@ export default function ResultList() {
   let manageResults: any = null;
   const local = JSON.parse(localStorage.getItem("external-filters") || "{}");
   const localLsgWard = JSON.parse(
+    // eslint-disable-next-line quotes
     localStorage.getItem("lsg-ward-data") || '{"lsgList": [], "wardList": []}'
   );
 
@@ -135,6 +134,7 @@ export default function ResultList() {
     updateQuery({ ...qParams, mobile_number: value, page: 1 });
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleFilter = (value: string) => {
     updateQuery({ disease_status: value, page: 1 });
   };
@@ -216,7 +216,7 @@ export default function ResultList() {
       externalResultList({ ...qParams, csv: true }, "externalResultList")
     );
     setDownloadFile(res?.data);
-    document.getElementById(`downloadCSV`)?.click();
+    document.getElementById("downloadCSV")?.click();
   };
 
   const badge = (key: string, value: any, paramKey: string) => {
@@ -228,7 +228,7 @@ export default function ResultList() {
           {value}
           <i
             className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
-            onClick={(e) => removeFilter(paramKey)}
+            onClick={(_) => removeFilter(paramKey)}
           ></i>
         </span>
       )
@@ -247,7 +247,7 @@ export default function ResultList() {
           {value.name}
           <i
             className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
-            onClick={(e) =>
+            onClick={(_) =>
               paramKey === "local_bodies"
                 ? removeLSGFilter(paramKey, value.id)
                 : paramKey === "wards"
@@ -262,7 +262,7 @@ export default function ResultList() {
 
   let resultList: any[] = [];
   if (data && data.length) {
-    resultList = data.map((result: any, idx: number) => {
+    resultList = data.map((result: any, _idx: number) => {
       const resultUrl = `/external_results/${result.id}`;
       return (
         <tr key={`usr_${result.id}`} className="bg-white">
@@ -367,7 +367,7 @@ export default function ResultList() {
       <PageTitle
         title="Results"
         hideBack={true}
-        className="mt-4"
+        className="-mt-2 md:mt-4"
         breadcrumbs={false}
       />
       <div className="mt-5 md:grid grid-cols-1 gap-5 sm:grid-cols-3 my-4 px-2 md:px-0 relative">
@@ -510,7 +510,7 @@ export default function ResultList() {
         filename={`external-result--${now}.csv`}
         target="_blank"
         className="hidden"
-        id={`downloadCSV`}
+        id={"downloadCSV"}
       />
       <SlideOver show={showFilters} setShow={setShowFilters}>
         <div className="bg-white min-h-screen p-4">
