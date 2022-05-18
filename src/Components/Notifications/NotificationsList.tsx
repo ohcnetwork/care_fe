@@ -1,5 +1,4 @@
-import loadable from "@loadable/component";
-import { navigate, useQueryParams } from "raviger";
+import { navigate } from "raviger";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import {
@@ -8,10 +7,8 @@ import {
   updateUserPnconfig,
   getPublicKey,
 } from "../../Redux/actions";
-import Pagination from "../Common/Pagination";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import { SelectField } from "../Common/HelperInputFields";
-import { InputLabel } from "@material-ui/core";
 import moment from "moment";
 import { useSelector } from "react-redux";
 import { Button, CircularProgress } from "@material-ui/core";
@@ -20,13 +17,17 @@ import { Error } from "../../Utils/Notifications.js";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 
-const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
+// const Loading = loadable(() => import("../Common/Loading"));
+// const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 const RESULT_LIMIT = 14;
-const now = moment().format("DD-MM-YYYY:hh:mm:ss");
+// const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
-export default function ResultList({ expanded = false }) {
+interface Props {
+  expanded: boolean;
+}
+
+export default function ResultList({ expanded = false }: Props) {
   const rootState: any = useSelector((rootState) => rootState);
   const { currentUser } = rootState;
   const { t } = useTranslation();
@@ -42,6 +43,17 @@ export default function ResultList({ expanded = false }) {
 
   const [isSubscribed, setIsSubscribed] = useState("");
   const [isSubscribing, setIsSubscribing] = useState(false);
+
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setShowNotifications(false);
+        console.log("esc");
+      }
+    }
+    if (showNotifications) document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [showNotifications]);
 
   const intialSubscriptionState = async () => {
     try {
@@ -93,34 +105,34 @@ export default function ResultList({ expanded = false }) {
           .then(function (subscription) {
             subscription
               ?.unsubscribe()
-              .then(async function (successful) {
+              .then(async function (_) {
                 const data = {
                   pf_endpoint: "",
                   pf_p256dh: "",
                   pf_auth: "",
                 };
-                const res = await dispatch(
+                await dispatch(
                   updateUserPnconfig(data, { username: username })
                 );
 
                 setIsSubscribed("NotSubscribed");
                 setIsSubscribing(false);
               })
-              .catch(function (e) {
+              .catch(function (_) {
                 Error({
                   msg: "Unsubscribe failed.",
                 });
               });
           })
-          .catch(function (e) {
+          .catch(function (_) {
             Error({
-              msg: `Subscription Error`,
+              msg: "Subscription Error",
             });
           });
       })
-      .catch(function (e) {
+      .catch(function (_) {
         Error({
-          msg: `Service Worker Error`,
+          msg: "Service Worker Error",
         });
       });
   };
@@ -190,7 +202,7 @@ export default function ResultList({ expanded = false }) {
   //   updateQuery({ page, limit });
   // };
 
-  let resultUrl = (event: string, data: any) => {
+  const resultUrl = (event: string, data: any) => {
     switch (event) {
       case "PATIENT_CREATED":
         return `/facility/${data.facility}/patient/${data.patient}`;
@@ -207,18 +219,18 @@ export default function ResultList({ expanded = false }) {
       case "INVESTIGATION_SESSION_CREATED":
         return `/facility/${data.facility}/patient/${data.patient}/consultation/${data.consultation}/investigation/${data.session}`;
       case "MESSAGE":
-        return `/notice_board/`;
+        return "/notice_board/";
       default:
         return "#";
     }
   };
 
-  let getNotificationTitle = (id: string) =>
+  const getNotificationTitle = (id: string) =>
     NOTIFICATION_EVENTS.find((notification) => notification.id === id)?.text;
 
   let resultList: any[] = [];
   if (data && data.length) {
-    resultList = data.map((result: any, idx: number) => {
+    resultList = data.map((result: any, _idx: number) => {
       return (
         <div
           key={`usr_${result.id}`}
