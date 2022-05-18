@@ -31,6 +31,11 @@ export const AddBedForm = (props: BedFormProps) => {
   const [description, setDescription] = useState<string>("");
   const [bedType, setBedType] = useState<string>("");
   const [facilityName, setFacilityName] = useState("");
+  const [errors, setErrors] = useState({
+    name: "",
+    description: "",
+    bedType: "",
+  });
 
   useEffect(() => {
     async function fetchFacilityName() {
@@ -45,15 +50,36 @@ export const AddBedForm = (props: BedFormProps) => {
     fetchFacilityName();
   }, [dispatchAction, facilityId]);
 
+  const validateInputs = (data: {
+    name: string;
+    description: string;
+    bed_type: string;
+  }) => {
+    let isValid = true;
+    if (!data.name) {
+      isValid = false;
+      setErrors((prev) => ({ ...prev, name: "Please enter a name" }));
+    }
+    if (!data.bed_type) {
+      isValid = false;
+      setErrors((prev) => ({ ...prev, bedType: "Please select a bed type" }));
+    }
+
+    return isValid;
+  };
+
   const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
-    console.log("handleSubmit");
-    setIsLoading(true);
+
     const data = {
       name,
       description,
       bed_type: bedType,
     };
+
+    if (!validateInputs(data)) return;
+
+    setIsLoading(true);
 
     const res = await dispatchAction(
       createFacilityBed(data, facilityId, locationId)
@@ -83,7 +109,7 @@ export const AddBedForm = (props: BedFormProps) => {
             <CardContent>
               <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
                 <div>
-                  <InputLabel id="name">Name</InputLabel>
+                  <InputLabel id="name">Name*</InputLabel>
                   <TextInputField
                     name="name"
                     variant="outlined"
@@ -91,7 +117,7 @@ export const AddBedForm = (props: BedFormProps) => {
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    errors=""
+                    errors={errors.name}
                   />
                 </div>
                 <div>
@@ -104,12 +130,12 @@ export const AddBedForm = (props: BedFormProps) => {
                     type="float"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    errors=""
+                    errors={errors.description}
                   />
                 </div>
               </div>
               <div>
-                <InputLabel id="bedType">Bed Type</InputLabel>
+                <InputLabel id="bedType">Bed Type*</InputLabel>
                 <SelectField
                   id="bed-type"
                   fullWidth
@@ -129,6 +155,7 @@ export const AddBedForm = (props: BedFormProps) => {
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                     setBedType(e.target.value)
                   }
+                  errors={errors.bedType}
                 />
               </div>
               <div className="flex justify-between mt-4">

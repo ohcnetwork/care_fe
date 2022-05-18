@@ -562,7 +562,7 @@ export const PatientHome = (props: any) => {
 
       <div id="revamp">
         <PageTitle
-          title={"Covid Suspect Details"}
+          title={"Patient Details"}
           backUrl="/patients"
           crumbsReplacements={{
             [facilityId]: { name: patientData?.facility_object?.name },
@@ -938,7 +938,7 @@ export const PatientHome = (props: any) => {
         </section>
         <section className=" bg-white rounded-lg shadow p-4 h-full space-y-2 text-gray-100 mt-4">
           <div
-            className="flex justify-between border-b border-dashed text-gray-900 font-semibold text-left text-lg pb-2"
+            className="flex justify-between border-b border-dashed text-gray-900 font-semibold text-left text-lg pb-2 cursor-pointer"
             onClick={() => {
               setShowShifts(!showShifts);
               setIsShiftClicked(true);
@@ -1758,7 +1758,7 @@ export const PatientHome = (props: any) => {
 
       <div>
         <PageTitle
-          title="Sample Test History"
+          title="Patient Details"
           hideBack={true}
           breadcrumbs={false}
         />
