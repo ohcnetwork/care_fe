@@ -131,7 +131,7 @@ export const UserAdd = (props: UserProps) => {
   const [selectedFacility, setSelectedFacility] = useState<
     FacilityModel[] | null
   >([]);
-  const [phoneIsWhatsApp, setPhoneIsWhatsApp] = useState(true);
+  const [phoneIsWhatsApp, setPhoneIsWhatsApp] = useState(false);
   const [usernameInputInFocus, setUsernameInputInFocus] = useState(false);
 
   const rootState: any = useSelector((rootState) => rootState);
@@ -545,7 +545,18 @@ export const UserAdd = (props: UserProps) => {
                 />
                 <CheckboxField
                   checked={phoneIsWhatsApp}
-                  onChange={() => setPhoneIsWhatsApp(!phoneIsWhatsApp)}
+                  onChange={(_, checked: boolean) => {
+                    if (checked) {
+                      setPhoneIsWhatsApp(true);
+                      handleValueChange(
+                        state.form.phone_number,
+                        "alt_phone_number"
+                      );
+                    } else {
+                      setPhoneIsWhatsApp(false);
+                      handleValueChange("+91", "alt_phone_number");
+                    }
+                  }}
                   label="Is the phone number a WhatsApp number?"
                   className="font-bold"
                 />
@@ -554,7 +565,7 @@ export const UserAdd = (props: UserProps) => {
               <div>
                 <PhoneNumberField
                   label="Whatsapp Number"
-                  value={phoneIsWhatsApp ? state.form.phone_number : "+91"}
+                  value={state.form.alt_phone_number}
                   onChange={(value: any) =>
                     handleValueChange(value, "alt_phone_number")
                   }
@@ -619,7 +630,7 @@ export const UserAdd = (props: UserProps) => {
                       ) : (
                         <CheckCircle fontSize="inherit" color="primary" />
                       )}{" "}
-                      username can't end with ^ . @ + _ -
+                      {"username can't end with ^ . @ + _ -"}
                     </div>
                   </div>
                 )}
