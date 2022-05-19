@@ -37,7 +37,7 @@ export default function TeleICUPatientInfoCard({
         {patient.blood_group && (
           <div className="flex flex-col items-center ">
             <div className="text-2xl border border-cool-gray-300 rounded-full font-semibold items-center m-2 h-20 w-20 flex justify-center">
-              {patient.blood_group}
+              {patient.blood_group === "UNKNOWN" ? "?" : patient.blood_group}
             </div>
             <span className="font-light text-primary-600 text-xs mr-1">
               Blood Group
