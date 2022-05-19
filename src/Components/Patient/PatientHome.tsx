@@ -453,7 +453,7 @@ export const PatientHome = (props: any) => {
     setSelectedStatus({ status, sample });
     setAlertMessage({
       show: true,
-      message: "Are you sure you want to sent the sample to Collection Centre?",
+      message: "Are you sure you want to send the sample to Collection Centre?",
       title: "Confirm",
     });
   };

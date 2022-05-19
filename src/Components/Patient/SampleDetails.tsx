@@ -9,6 +9,8 @@ import { FlowModel, SampleTestModel } from "./models";
 import { FileUpload } from "./FileUpload";
 import { navigate } from "raviger";
 import { GENDER_TYPES, TEST_TYPE_CHOICES } from "../../Common/constants";
+import _ from "lodash";
+
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -271,11 +273,11 @@ export const SampleDetails = (props: SampleDetailsProps) => {
           <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
             <div>
               <span className="font-semibold leading-relaxed">Status: </span>{" "}
-              {flow.status}
+              {_.startCase(_.camelCase(flow.status))}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">Label:</span>{" "}
-              {flow.notes}
+              {_.capitalize(flow.notes)}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">
@@ -327,11 +329,11 @@ export const SampleDetails = (props: SampleDetailsProps) => {
           <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
             <div>
               <span className="font-semibold leading-relaxed">Status: </span>
-              {sampleDetails.status}
+              {_.startCase(_.camelCase(sampleDetails.status))}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">Result: </span>
-              {sampleDetails.result}
+              {_.startCase(_.camelCase(sampleDetails.result))}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">Patient: </span>
@@ -370,7 +372,7 @@ export const SampleDetails = (props: SampleDetailsProps) => {
                 <span className="font-semibold leading-relaxed">
                   Doctor&apos;s Name:{" "}
                 </span>
-                {sampleDetails.doctor_name}
+                {_.startCase(_.camelCase(sampleDetails.doctor_name))}
               </div>
             )}
             {sampleDetails.diagnosis && (
@@ -465,20 +467,21 @@ export const SampleDetails = (props: SampleDetailsProps) => {
                 <span className="badge badge-pill badge-secondary">No</span>
               )}
             </div>
-            {sampleDetails.patient_travel_history && (
-              <div className="md:col-span-2">
-                <span className="font-semibold leading-relaxed">
-                  Countries travelled:{" "}
-                </span>
-                {sampleDetails.patient_travel_history}
-              </div>
-            )}
+            {sampleDetails.patient_travel_history &&
+              sampleDetails.patient_travel_history !== "[]" && (
+                <div className="md:col-span-2">
+                  <span className="font-semibold leading-relaxed">
+                    Countries travelled:{" "}
+                  </span>
+                  {JSON.parse(sampleDetails.patient_travel_history).join(", ")}
+                </div>
+              )}
             {sampleDetails.sample_type && (
               <div className="md:col-span-2">
                 <span className="font-semibold leading-relaxed">
                   Sample Type:{" "}
                 </span>
-                {sampleDetails.sample_type}
+                {_.startCase(_.camelCase(sampleDetails.sample_type))}
               </div>
             )}
           </div>

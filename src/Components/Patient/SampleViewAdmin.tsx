@@ -219,7 +219,7 @@ export default function SampleViewAdmin() {
       return (
         <div key={`usr_${item.id}`} className="w-full md:w-1/2 mt-6 md:px-4">
           <div
-            className={`block border rounded-lg bg-white shadow h-full hover:border-primary-500 text-black ${
+            className={`block border rounded-lg bg-white shadow h-full hover:border-black text-black ${
               item.result === "POSITIVE" ? "border-red-700 bg-red-100" : ""
             } ${
               item.result === "NEGATIVE"
@@ -236,7 +236,7 @@ export default function SampleViewAdmin() {
                   <div>
                     {item.sample_type && (
                       <span className="bg-blue-200 text-blue-800 text-sm rounded-md font-bold px-2 py-1 mx-1 text-wrap">
-                        type: {item.sample_type}
+                        Type: {item.sample_type}
                       </span>
                     )}
                   </div>

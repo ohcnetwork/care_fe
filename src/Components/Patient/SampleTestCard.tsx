@@ -8,6 +8,7 @@ import { SAMPLE_TEST_STATUS } from "../../Common/constants";
 import { patchSample } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
 import UpdateStatusDialog from "./UpdateStatusDialog";
+import _ from "lodash";
 
 interface SampleDetailsProps {
   facilityId: number;
@@ -81,11 +82,11 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
         >
           <div>
             <span className="text-gray-700">Status: </span>
-            {itemData.status}
+            {_.startCase(_.camelCase(itemData.status))}
           </div>
           <div>
             <span className="text-gray-700">Result: </span>
-            {itemData.result}
+            {_.startCase(_.camelCase(itemData.result))}
           </div>
           <div className="md:col-span-2">
             <span className="text-gray-700">Sample Type: </span>
