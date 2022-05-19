@@ -11,6 +11,7 @@ import {
 } from "../../Redux/actions";
 import { Badge } from "../Patient/ManagePatients";
 import { AssetData } from "./AssetTypes";
+import { getAsset } from "../../Redux/actions";
 import React, { useState, useCallback, useEffect } from "react";
 import { navigate, useQueryParams } from "raviger";
 import loadable from "@loadable/component";
@@ -211,6 +212,21 @@ const AssetsList = () => {
     }
   };
 
+  const checkValidAssetId = async (assetId: any) => {
+    const assetData: any = await dispatch(getAsset(assetId));
+    try {
+      if (assetData.data) {
+        navigate(`/assets/${assetId}`);
+      }
+    } catch (err) {
+      console.log(err);
+      setIsLoading(false);
+      Notification.Error({
+        msg: "Invalid QR code scanned !!!",
+      });
+    }
+  };
+
   if (isLoading) return <Loading />;
   if (isScannerActive)
     return (
@@ -226,8 +242,9 @@ const AssetsList = () => {
           onScan={async (value: any) => {
             if (value) {
               const assetId = await getAssetIdFromQR(value);
-              setIsLoading(false);
-              navigate(`/assets/${assetId ?? value}`);
+              checkValidAssetId(assetId ?? value);
+
+              // navigate(`/assets/${assetId ?? value}`);
             }
           }}
           onError={(e: any) =>
